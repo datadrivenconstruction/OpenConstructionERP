@@ -81,8 +81,11 @@ async function request<TResponse>(
   // Handle 401 – clear token and redirect to login page.
   if (response.status === 401) {
     localStorage.removeItem(TOKEN_KEY);
-    window.location.href = '/login';
-    // Throw so callers can still catch if needed (e.g. in tests).
+    localStorage.removeItem('oe_refresh_token');
+    // Don't redirect immediately — let the caller handle it or use the auth store
+    if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+      window.location.href = '/login';
+    }
     throw new ApiError(response.status, response.statusText, undefined);
   }
 
