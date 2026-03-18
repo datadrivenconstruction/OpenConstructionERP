@@ -2,8 +2,9 @@ import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
-import { Button, Input } from '@/shared/ui';
+import { Button, Input, Logo } from '@/shared/ui';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { AuthBackground } from './AuthBackground';
 
 export function RegisterPage() {
   const { t } = useTranslation();
@@ -71,49 +72,70 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface-secondary p-4">
-      <div className="w-full max-w-[400px] animate-scale-in">
-        {/* Logo */}
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[20px] bg-oe-blue shadow-lg">
-            <span className="text-2xl font-bold text-white">OE</span>
+    <div className="relative flex min-h-screen items-center justify-center bg-surface-secondary p-4 overflow-hidden">
+      {/* Animated gradient blobs */}
+      <AuthBackground />
+
+      <div className="relative z-10 w-full max-w-[400px]">
+        {/* Logo — glow entrance */}
+        <div className="mb-8 text-center animate-stagger-in" style={{ animationDelay: '0ms' }}>
+          <div className="mx-auto mb-4 animate-logo-glow rounded-[20px] w-fit">
+            <Logo size="xl" animate className="mx-auto shadow-xl" />
           </div>
-          <h1 className="text-2xl font-bold text-content-primary">{t('app.name')}</h1>
+          <h1 className="text-2xl font-bold text-content-primary">
+            Open<span className="gradient-text">Estimator</span>
+            <span className="text-content-tertiary">.io</span>
+          </h1>
         </div>
 
-        {/* Register Form */}
-        <div className="rounded-2xl border border-border-light bg-surface-elevated p-7 shadow-sm">
-          <h2 className="text-lg font-semibold text-content-primary mb-1">
-            {t('auth.create_account', 'Create account')}
-          </h2>
-          <p className="text-sm text-content-secondary mb-6">
-            {t('auth.register_subtitle', 'Get started with OpenEstimate')}
-          </p>
+        {/* Form card — glass morphism + scale-in entrance */}
+        <div
+          className="glass-strong rounded-2xl p-7 shadow-lg animate-form-scale-in"
+          style={{ animationDelay: '150ms' }}
+        >
+          <div className="animate-stagger-in" style={{ animationDelay: '200ms' }}>
+            <h2 className="text-lg font-semibold text-content-primary mb-1">
+              {t('auth.create_account', 'Create account')}
+            </h2>
+            <p className="text-sm text-content-secondary mb-6">
+              {t('auth.register_subtitle', 'Get started with OpenEstimate')}
+            </p>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              label={t('auth.full_name', 'Full Name')}
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="John Smith"
-              required
-              autoFocus
-              icon={<User size={16} />}
-            />
+            {/* Full Name — staggered */}
+            <div className="animate-stagger-in" style={{ animationDelay: '260ms' }}>
+              <Input
+                label={t('auth.full_name', 'Full Name')}
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="John Smith"
+                required
+                autoFocus
+                icon={<User size={16} />}
+              />
+            </div>
 
-            <Input
-              label={t('auth.email', 'Email')}
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@company.com"
-              autoComplete="email"
-              required
-              icon={<Mail size={16} />}
-            />
+            {/* Email — staggered */}
+            <div className="animate-stagger-in" style={{ animationDelay: '320ms' }}>
+              <Input
+                label={t('auth.email', 'Email')}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@company.com"
+                autoComplete="email"
+                required
+                icon={<Mail size={16} />}
+              />
+            </div>
 
-            <div className="flex flex-col gap-1.5">
+            {/* Password — staggered */}
+            <div
+              className="flex flex-col gap-1.5 animate-stagger-in"
+              style={{ animationDelay: '380ms' }}
+            >
               <label className="text-sm font-medium text-content-primary">
                 {t('auth.password', 'Password')}
               </label>
@@ -142,9 +164,9 @@ export function RegisterPage() {
               </div>
               {password && (
                 <div className="flex items-center gap-2 mt-1">
-                  <div className={`h-1 flex-1 rounded-full ${password.length >= 8 ? 'bg-semantic-success' : 'bg-border'}`} />
-                  <div className={`h-1 flex-1 rounded-full ${password.length >= 12 ? 'bg-semantic-success' : 'bg-border'}`} />
-                  <div className={`h-1 flex-1 rounded-full ${/[A-Z]/.test(password) && /[0-9]/.test(password) ? 'bg-semantic-success' : 'bg-border'}`} />
+                  <div className={`h-1 flex-1 rounded-full transition-colors duration-normal ${password.length >= 8 ? 'bg-semantic-success' : 'bg-border'}`} />
+                  <div className={`h-1 flex-1 rounded-full transition-colors duration-normal ${password.length >= 12 ? 'bg-semantic-success' : 'bg-border'}`} />
+                  <div className={`h-1 flex-1 rounded-full transition-colors duration-normal ${/[A-Z]/.test(password) && /[0-9]/.test(password) ? 'bg-semantic-success' : 'bg-border'}`} />
                   <span className="text-2xs text-content-tertiary ml-1">
                     {password.length < 8 ? 'Weak' : password.length < 12 ? 'Good' : 'Strong'}
                   </span>
@@ -152,38 +174,49 @@ export function RegisterPage() {
               )}
             </div>
 
-            <Input
-              label={t('auth.confirm_password', 'Confirm Password')}
-              type={showPassword ? 'text' : 'password'}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Repeat your password"
-              autoComplete="new-password"
-              required
-              error={confirmPassword && !passwordsMatch ? 'Passwords do not match' : undefined}
-              icon={<Lock size={16} />}
-            />
+            {/* Confirm Password — staggered */}
+            <div className="animate-stagger-in" style={{ animationDelay: '440ms' }}>
+              <Input
+                label={t('auth.confirm_password', 'Confirm Password')}
+                type={showPassword ? 'text' : 'password'}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Repeat your password"
+                autoComplete="new-password"
+                required
+                error={confirmPassword && !passwordsMatch ? 'Passwords do not match' : undefined}
+                icon={<Lock size={16} />}
+              />
+            </div>
 
+            {/* Error */}
             {error && (
-              <div className="flex items-start gap-2 rounded-lg bg-semantic-error-bg px-3.5 py-2.5 text-sm text-semantic-error">
+              <div className="flex items-start gap-2 rounded-lg bg-semantic-error-bg px-3.5 py-2.5 text-sm text-semantic-error animate-stagger-in">
                 <span className="shrink-0 mt-0.5">!</span>
                 <span>{error}</span>
               </div>
             )}
 
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              loading={loading}
-              disabled={!passwordsMatch || !passwordLongEnough}
-              className="w-full"
-            >
-              {t('auth.create_account', 'Create account')}
-            </Button>
+            {/* Submit — shimmer on hover */}
+            <div className="animate-stagger-in" style={{ animationDelay: '500ms' }}>
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                loading={loading}
+                disabled={!passwordsMatch || !passwordLongEnough}
+                className="w-full btn-shimmer"
+              >
+                {t('auth.create_account', 'Create account')}
+              </Button>
+            </div>
           </form>
 
-          <div className="mt-5 border-t border-border-light pt-5">
+          {/* Footer */}
+          <div
+            className="mt-5 border-t border-border-light pt-5 animate-stagger-in"
+            style={{ animationDelay: '560ms' }}
+          >
             <p className="text-center text-sm text-content-secondary">
               {t('auth.have_account', 'Already have an account?')}{' '}
               <Link

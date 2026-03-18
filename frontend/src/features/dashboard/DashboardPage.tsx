@@ -23,30 +23,39 @@ export function DashboardPage() {
   });
 
   return (
-    <div className="max-w-content mx-auto animate-fade-in">
-      {/* Hero */}
-      <div className="mb-8 flex items-center justify-between">
+    <div className="max-w-content mx-auto">
+      {/* Hero — gradient animated heading */}
+      <div
+        className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-card-in"
+        style={{ animationDelay: '0ms' }}
+      >
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-content-primary">
+          <h1 className="text-3xl font-bold tracking-tight gradient-text">
             {t('dashboard.welcome')}
           </h1>
-          <p className="mt-2 text-base text-content-secondary">
+          <p className="mt-2 text-base text-content-secondary animate-stagger-in" style={{ animationDelay: '100ms' }}>
             {t('dashboard.subtitle')}
           </p>
         </div>
-        <Button
-          variant="primary"
-          size="lg"
-          icon={<FolderPlus size={18} />}
-          onClick={() => navigate('/projects/new')}
-        >
-          {t('projects.new_project')}
-        </Button>
+        <div className="animate-stagger-in" style={{ animationDelay: '200ms' }}>
+          <Button
+            variant="primary"
+            size="lg"
+            icon={<FolderPlus size={18} />}
+            onClick={() => navigate('/projects/new')}
+            className="btn-shimmer"
+          >
+            {t('projects.new_project')}
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Recent Projects */}
-        <div className="lg:col-span-2">
+        {/* Recent Projects — staggered card entrance */}
+        <div
+          className="lg:col-span-2 animate-card-in"
+          style={{ animationDelay: '150ms' }}
+        >
           <Card padding="none">
             <div className="p-6 pb-0">
               <CardHeader
@@ -70,8 +79,11 @@ export function DashboardPage() {
           </Card>
         </div>
 
-        {/* System Status */}
-        <div>
+        {/* System Status — staggered card entrance */}
+        <div
+          className="animate-card-in"
+          style={{ animationDelay: '300ms' }}
+        >
           <Card>
             <CardHeader title={t('dashboard.system_status')} />
             <CardContent>
@@ -121,11 +133,12 @@ function ProjectsList({ projects }: { projects?: ProjectSummary[] }) {
 
   return (
     <div className="divide-y divide-border-light">
-      {projects.map((p) => (
+      {projects.map((p, index) => (
         <button
           key={p.id}
           onClick={() => navigate(`/projects/${p.id}`)}
-          className="flex w-full items-center gap-4 px-6 py-3.5 text-left transition-colors hover:bg-surface-secondary"
+          className="flex w-full items-center gap-4 px-6 py-3.5 text-left transition-all duration-normal ease-oe hover:bg-surface-secondary animate-stagger-in"
+          style={{ animationDelay: `${300 + index * 60}ms` }}
         >
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue text-xs font-bold">
             {p.name.charAt(0).toUpperCase()}
@@ -174,8 +187,15 @@ function SystemStatus() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <span className="text-sm text-content-secondary">API</span>
+      {/* API status with live dot */}
+      <div
+        className="flex items-center justify-between animate-stagger-in"
+        style={{ animationDelay: '400ms' }}
+      >
+        <span className="flex items-center gap-2 text-sm text-content-secondary">
+          API
+          {isHealthy && <span className="live-dot" aria-label="Live" />}
+        </span>
         {healthLoading ? (
           <Skeleton width={80} height={20} rounded="full" />
         ) : (
@@ -185,42 +205,66 @@ function SystemStatus() {
         )}
       </div>
 
+      {/* Version */}
       {health?.version && (
-        <div className="flex items-center justify-between">
+        <div
+          className="flex items-center justify-between animate-stagger-in"
+          style={{ animationDelay: '460ms' }}
+        >
           <span className="text-sm text-content-secondary">Version</span>
-          <span className="text-sm font-mono text-content-primary">{health.version}</span>
+          <span className="text-sm font-mono text-content-primary inline-block animate-count-up" style={{ animationDelay: '500ms' }}>
+            {health.version}
+          </span>
         </div>
       )}
 
-      <div className="flex items-center justify-between">
+      {/* Modules loaded */}
+      <div
+        className="flex items-center justify-between animate-stagger-in"
+        style={{ animationDelay: '520ms' }}
+      >
         <span className="flex items-center gap-2 text-sm text-content-secondary">
           <Layers size={14} strokeWidth={1.75} />
           {t('dashboard.modules_loaded')}
         </span>
-        <span className="text-sm font-semibold text-content-primary">
-          {modules?.modules?.length ?? '—'}
+        <span className="text-sm font-semibold text-content-primary inline-block animate-count-up" style={{ animationDelay: '600ms' }}>
+          {modules?.modules?.length ?? '\u2014'}
         </span>
       </div>
 
-      <div className="flex items-center justify-between">
+      {/* Validation rules */}
+      <div
+        className="flex items-center justify-between animate-stagger-in"
+        style={{ animationDelay: '580ms' }}
+      >
         <span className="flex items-center gap-2 text-sm text-content-secondary">
           <ShieldCheck size={14} strokeWidth={1.75} />
           {t('dashboard.validation_rules')}
         </span>
-        <span className="text-sm font-semibold text-content-primary">
-          {rules?.rules?.length ?? '—'}
+        <span className="text-sm font-semibold text-content-primary inline-block animate-count-up" style={{ animationDelay: '680ms' }}>
+          {rules?.rules?.length ?? '\u2014'}
         </span>
       </div>
 
-      <div className="flex items-center justify-between">
+      {/* Languages */}
+      <div
+        className="flex items-center justify-between animate-stagger-in"
+        style={{ animationDelay: '640ms' }}
+      >
         <span className="flex items-center gap-2 text-sm text-content-secondary">
           <Globe size={14} strokeWidth={1.75} />
           {t('dashboard.languages')}
         </span>
-        <span className="text-sm font-semibold text-content-primary">20</span>
+        <span className="text-sm font-semibold text-content-primary inline-block animate-count-up" style={{ animationDelay: '760ms' }}>
+          20
+        </span>
       </div>
 
-      <div className="border-t border-border-light pt-3">
+      {/* Phase indicator */}
+      <div
+        className="border-t border-border-light pt-3 animate-stagger-in"
+        style={{ animationDelay: '700ms' }}
+      >
         <div className="flex items-center gap-2 text-xs text-content-tertiary">
           <Zap size={12} />
           <span>Phase 1 — Core Estimation</span>

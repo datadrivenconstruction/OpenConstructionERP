@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { Button, Input, Logo } from '@/shared/ui';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { AuthBackground } from './AuthBackground';
 
 export function LoginPage() {
   const { t } = useTranslation();
@@ -45,50 +46,59 @@ export function LoginPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-surface-secondary p-4 overflow-hidden">
-      {/* Animated background blobs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-80 h-80 bg-oe-blue/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute top-1/3 -right-20 w-96 h-96 bg-[#5856d6]/8 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
-        <div className="absolute -bottom-20 left-1/3 w-72 h-72 bg-oe-blue/5 rounded-full blur-3xl animate-float" style={{ animationDelay: '4s' }} />
-      </div>
+      {/* Animated gradient blobs */}
+      <AuthBackground />
 
-      <div className="relative w-full max-w-[400px] animate-scale-in">
-        {/* Logo */}
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4">
+      <div className="relative z-10 w-full max-w-[400px]">
+        {/* Logo — glow entrance */}
+        <div className="mb-8 text-center animate-stagger-in" style={{ animationDelay: '0ms' }}>
+          <div className="mx-auto mb-4 animate-logo-glow rounded-[20px] w-fit">
             <Logo size="xl" animate className="mx-auto shadow-xl" />
           </div>
           <h1 className="text-2xl font-bold text-content-primary">
-            Open<span className="gradient-text">Estimator</span><span className="text-content-tertiary">.io</span>
+            Open<span className="gradient-text">Estimator</span>
+            <span className="text-content-tertiary">.io</span>
           </h1>
           <p className="mt-1.5 text-sm text-content-secondary">{t('app.tagline')}</p>
         </div>
 
-        {/* Login Form */}
-        <div className="rounded-2xl border border-border-light glass p-7 shadow-md">
-          <h2 className="text-lg font-semibold text-content-primary mb-1">
-            {t('auth.login', 'Sign in')}
-          </h2>
-          <p className="text-sm text-content-secondary mb-6">
-            {t('auth.login_subtitle', 'Enter your credentials to access your workspace')}
-          </p>
+        {/* Form card — glass morphism + scale-in entrance */}
+        <div
+          className="glass-strong rounded-2xl p-7 shadow-lg animate-form-scale-in"
+          style={{ animationDelay: '150ms' }}
+        >
+          <div className="animate-stagger-in" style={{ animationDelay: '200ms' }}>
+            <h2 className="text-lg font-semibold text-content-primary mb-1">
+              {t('auth.login', 'Sign in')}
+            </h2>
+            <p className="text-sm text-content-secondary mb-6">
+              {t('auth.login_subtitle', 'Enter your credentials to access your workspace')}
+            </p>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              label={t('auth.email', 'Email')}
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@company.com"
-              autoComplete="email"
-              required
-              autoFocus
-              icon={<Mail size={16} />}
-            />
+            {/* Email — staggered */}
+            <div className="animate-stagger-in" style={{ animationDelay: '280ms' }}>
+              <Input
+                label={t('auth.email', 'Email')}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@company.com"
+                autoComplete="email"
+                required
+                autoFocus
+                icon={<Mail size={16} />}
+              />
+            </div>
 
-            <div className="flex flex-col gap-1.5">
+            {/* Password — staggered */}
+            <div
+              className="flex flex-col gap-1.5 animate-stagger-in"
+              style={{ animationDelay: '360ms' }}
+            >
               <div className="flex items-center justify-between">
-                <label htmlFor="password" className="text-sm font-medium text-content-primary">
+                <label htmlFor="login-password" className="text-sm font-medium text-content-primary">
                   {t('auth.password', 'Password')}
                 </label>
                 <Link
@@ -103,7 +113,7 @@ export function LoginPage() {
                   <Lock size={16} />
                 </div>
                 <input
-                  id="password"
+                  id="login-password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -124,25 +134,33 @@ export function LoginPage() {
               </div>
             </div>
 
+            {/* Error */}
             {error && (
-              <div className="flex items-start gap-2 rounded-lg bg-semantic-error-bg px-3.5 py-2.5 text-sm text-semantic-error">
+              <div className="flex items-start gap-2 rounded-lg bg-semantic-error-bg px-3.5 py-2.5 text-sm text-semantic-error animate-stagger-in">
                 <span className="shrink-0 mt-0.5">!</span>
                 <span>{error}</span>
               </div>
             )}
 
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              loading={loading}
-              className="w-full"
-            >
-              {t('auth.login', 'Sign in')}
-            </Button>
+            {/* Submit — shimmer on hover */}
+            <div className="animate-stagger-in" style={{ animationDelay: '440ms' }}>
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                loading={loading}
+                className="w-full btn-shimmer"
+              >
+                {t('auth.login', 'Sign in')}
+              </Button>
+            </div>
           </form>
 
-          <div className="mt-5 border-t border-border-light pt-5">
+          {/* Footer */}
+          <div
+            className="mt-5 border-t border-border-light pt-5 animate-stagger-in"
+            style={{ animationDelay: '520ms' }}
+          >
             <p className="text-center text-sm text-content-secondary">
               {t('auth.no_account', "Don't have an account?")}{' '}
               <Link
@@ -155,7 +173,10 @@ export function LoginPage() {
           </div>
         </div>
 
-        <p className="mt-6 text-center text-xs text-content-tertiary">
+        <p
+          className="mt-6 text-center text-xs text-content-tertiary animate-stagger-in"
+          style={{ animationDelay: '600ms' }}
+        >
           OpenEstimator.io v0.1.0 — AGPL-3.0
         </p>
       </div>
