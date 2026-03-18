@@ -78,9 +78,9 @@
   --oe-transition-slow: 350ms cubic-bezier(0.25, 0.1, 0.25, 1);
 
   /* Layout */
-  --oe-sidebar-width: 260px;
-  --oe-header-height: 52px;
-  --oe-content-max-width: 1440px;
+  --oe-sidebar-width: 232px;
+  --oe-header-height: 56px;
+  --oe-content-max-width: 1120px;
 }
 
 /* ── Base ────────────────────────────────────────────────────────────────── */

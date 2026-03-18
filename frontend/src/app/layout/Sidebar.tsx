@@ -41,14 +41,13 @@ const bottomNav: NavItem[] = [
   { labelKey: 'nav.settings', to: '/settings', icon: Settings },
 ];
 
-export function Sidebar() {
+export function Sidebar({ onClose: _onClose }: { onClose?: () => void }) {
   const { t } = useTranslation();
 
   return (
     <aside
       className={clsx(
-        'fixed inset-y-0 left-0 z-30',
-        'flex w-sidebar flex-col',
+        'flex h-full w-sidebar flex-col',
         'border-r border-border-light bg-surface-primary',
       )}
     >
