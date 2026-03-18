@@ -20,7 +20,7 @@ class SnapshotCreate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    project_id: UUID
+    project_id: UUID | None = None  # Set from URL path
     period: str = Field(..., min_length=7, max_length=10, pattern=r"^\d{4}-\d{2}$")
     planned_cost: float = 0.0
     earned_value: float = 0.0
@@ -75,7 +75,7 @@ class BudgetLineCreate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    project_id: UUID
+    project_id: UUID | None = None  # Set from URL path
     boq_position_id: UUID | None = None
     activity_id: UUID | None = None
     category: str = Field(
@@ -145,7 +145,7 @@ class CashFlowCreate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    project_id: UUID
+    project_id: UUID | None = None  # Set from URL path
     period: str = Field(..., min_length=7, max_length=10, pattern=r"^\d{4}-\d{2}$")
     category: str = Field(default="total", max_length=100)
     planned_inflow: float = 0.0

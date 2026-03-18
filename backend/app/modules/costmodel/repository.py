@@ -147,11 +147,13 @@ class BudgetLineRepository:
             Dict with keys: total_planned, total_committed, total_actual, total_forecast
             (all as string sums from the database).
         """
+        from sqlalchemy import Float, cast
+
         stmt = select(
-            func.coalesce(func.sum(func.cast(BudgetLine.planned_amount, func.literal_column("REAL"))), 0),
-            func.coalesce(func.sum(func.cast(BudgetLine.committed_amount, func.literal_column("REAL"))), 0),
-            func.coalesce(func.sum(func.cast(BudgetLine.actual_amount, func.literal_column("REAL"))), 0),
-            func.coalesce(func.sum(func.cast(BudgetLine.forecast_amount, func.literal_column("REAL"))), 0),
+            func.coalesce(func.sum(cast(BudgetLine.planned_amount, Float)), 0),
+            func.coalesce(func.sum(cast(BudgetLine.committed_amount, Float)), 0),
+            func.coalesce(func.sum(cast(BudgetLine.actual_amount, Float)), 0),
+            func.coalesce(func.sum(cast(BudgetLine.forecast_amount, Float)), 0),
         ).where(BudgetLine.project_id == project_id)
 
         result = await self.session.execute(stmt)
@@ -172,21 +174,15 @@ class BudgetLineRepository:
         Returns:
             List of dicts with keys: category, planned, committed, actual, forecast.
         """
+        from sqlalchemy import Float, cast
+
         stmt = (
             select(
                 BudgetLine.category,
-                func.coalesce(
-                    func.sum(func.cast(BudgetLine.planned_amount, func.literal_column("REAL"))), 0
-                ),
-                func.coalesce(
-                    func.sum(func.cast(BudgetLine.committed_amount, func.literal_column("REAL"))), 0
-                ),
-                func.coalesce(
-                    func.sum(func.cast(BudgetLine.actual_amount, func.literal_column("REAL"))), 0
-                ),
-                func.coalesce(
-                    func.sum(func.cast(BudgetLine.forecast_amount, func.literal_column("REAL"))), 0
-                ),
+                func.coalesce(func.sum(cast(BudgetLine.planned_amount, Float)), 0),
+                func.coalesce(func.sum(cast(BudgetLine.committed_amount, Float)), 0),
+                func.coalesce(func.sum(cast(BudgetLine.actual_amount, Float)), 0),
+                func.coalesce(func.sum(cast(BudgetLine.forecast_amount, Float)), 0),
             )
             .where(BudgetLine.project_id == project_id)
             .group_by(BudgetLine.category)

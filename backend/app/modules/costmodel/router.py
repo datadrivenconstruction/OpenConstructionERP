@@ -240,10 +240,11 @@ async def delete_budget_line(
 async def generate_budget(
     project_id: uuid.UUID,
     _user_id: CurrentUserId,
-    boq_id: uuid.UUID = Query(..., description="BOQ to generate budget from"),
+    body: dict,
     service: CostModelService = Depends(_get_service),
 ) -> list[BudgetLineResponse]:
     """Auto-generate budget lines from BOQ positions."""
+    boq_id = uuid.UUID(str(body.get("boq_id", "")))
     lines = await service.generate_budget_from_boq(project_id, boq_id)
     return [_budget_line_to_response(line) for line in lines]
 
