@@ -40,8 +40,17 @@ function PlaceholderPage({ titleKey }: { titleKey: string }) {
   );
 }
 
+function RequireAuth({ children }: { children: React.ReactNode }) {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  return <>{children}</>;
+}
+
 export default function App() {
   const loadFromStorage = useAuthStore((s) => s.loadFromStorage);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   useEffect(() => {
     loadFromStorage();
@@ -51,84 +60,33 @@ export default function App() {
     <Suspense fallback={<LoadingScreen />}>
       <Routes>
         {/* Auth */}
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />} />
 
         {/* Dashboard */}
         <Route
           path="/"
           element={
-            <AppLayout title="Dashboard">
-              <DashboardPage />
-            </AppLayout>
+            <RequireAuth>
+              <AppLayout title="Dashboard">
+                <DashboardPage />
+              </AppLayout>
+            </RequireAuth>
           }
         />
 
-        {/* Projects */}
-        <Route
-          path="/projects"
-          element={
-            <AppLayout title="Projects">
-              <ProjectsPage />
-            </AppLayout>
-          }
-        />
-        <Route
-          path="/projects/new"
-          element={
-            <AppLayout title="New Project">
-              <CreateProjectPage />
-            </AppLayout>
-          }
-        />
-        <Route
-          path="/projects/:projectId"
-          element={
-            <AppLayout title="Project">
-              <ProjectDetailPage />
-            </AppLayout>
-          }
-        />
-        <Route
-          path="/projects/:projectId/boq/new"
-          element={
-            <AppLayout title="New BOQ">
-              <CreateBOQPage />
-            </AppLayout>
-          }
-        />
-
-        {/* BOQ Editor */}
-        <Route
-          path="/boq/:boqId"
-          element={
-            <AppLayout title="BOQ Editor">
-              <BOQEditorPage />
-            </AppLayout>
-          }
-        />
-
-        {/* Placeholder pages */}
-        <Route path="/boq" element={<PlaceholderPage titleKey="boq.title" />} />
-        <Route path="/takeoff" element={<PlaceholderPage titleKey="takeoff.title" />} />
-        <Route
-          path="/costs"
-          element={
-            <AppLayout title="Cost Database">
-              <CostsPage />
-            </AppLayout>
-          }
-        />
-        <Route
-          path="/validation"
-          element={
-            <AppLayout title="Validation">
-              <ValidationPage />
-            </AppLayout>
-          }
-        />
-        <Route path="/tendering" element={<PlaceholderPage titleKey="tendering.title" />} />
-        <Route path="/modules" element={<PlaceholderPage titleKey="modules.title" />} />
-        <Route path="/settings" element={<PlaceholderPage titleKey="nav.settings" />} />
+        {/* Protected routes */}
+        <Route path="/projects" element={<RequireAuth><AppLayout title="Projects"><ProjectsPage /></AppLayout></RequireAuth>} />
+        <Route path="/projects/new" element={<RequireAuth><AppLayout title="New Project"><CreateProjectPage /></AppLayout></RequireAuth>} />
+        <Route path="/projects/:projectId" element={<RequireAuth><AppLayout title="Project"><ProjectDetailPage /></AppLayout></RequireAuth>} />
+        <Route path="/projects/:projectId/boq/new" element={<RequireAuth><AppLayout title="New BOQ"><CreateBOQPage /></AppLayout></RequireAuth>} />
+        <Route path="/boq/:boqId" element={<RequireAuth><AppLayout title="BOQ Editor"><BOQEditorPage /></AppLayout></RequireAuth>} />
+        <Route path="/costs" element={<RequireAuth><AppLayout title="Cost Database"><CostsPage /></AppLayout></RequireAuth>} />
+        <Route path="/validation" element={<RequireAuth><AppLayout title="Validation"><ValidationPage /></AppLayout></RequireAuth>} />
+        <Route path="/boq" element={<RequireAuth><PlaceholderPage titleKey="boq.title" /></RequireAuth>} />
+        <Route path="/takeoff" element={<RequireAuth><PlaceholderPage titleKey="takeoff.title" /></RequireAuth>} />
+        <Route path="/tendering" element={<RequireAuth><PlaceholderPage titleKey="tendering.title" /></RequireAuth>} />
+        <Route path="/modules" element={<RequireAuth><PlaceholderPage titleKey="modules.title" /></RequireAuth>} />
+        <Route path="/settings" element={<RequireAuth><PlaceholderPage titleKey="nav.settings" /></RequireAuth>} />
 
         {/* Catch-all */}
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,9 +1,13 @@
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { Button, Input } from '@/shared/ui';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 export function LoginPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const setTokens = useAuthStore((s) => s.setTokens);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,9 +32,8 @@ export function LoginPage() {
       }
 
       const data = await res.json();
-      localStorage.setItem('oe_access_token', data.access_token);
-      localStorage.setItem('oe_refresh_token', data.refresh_token);
-      window.location.href = '/';
+      setTokens(data.access_token, data.refresh_token);
+      navigate('/');
     } catch {
       setError('Connection error');
     } finally {

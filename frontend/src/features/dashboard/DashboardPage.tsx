@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { apiGet } from '@/shared/lib/api';
 import {
   FolderPlus,
   ArrowRight,
@@ -17,7 +18,7 @@ export function DashboardPage() {
 
   const { data: projects } = useQuery({
     queryKey: ['projects'],
-    queryFn: () => fetch('/api/v1/projects/').then((r) => (r.ok ? r.json() : [])),
+    queryFn: () => apiGet<ProjectSummary[]>('/v1/projects/').catch(() => []),
     retry: false,
   });
 
