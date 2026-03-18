@@ -62,7 +62,7 @@ class PositionCreate(BaseModel):
     boq_id: UUID
     parent_id: UUID | None = None
     ordinal: str = Field(..., min_length=1, max_length=50)
-    description: str = Field(..., min_length=1)
+    description: str = Field(default='')
     unit: str = Field(..., min_length=1, max_length=20)
     quantity: float = Field(default=0.0, ge=0.0)
     unit_rate: float = Field(default=0.0, ge=0.0)
@@ -80,7 +80,7 @@ class PositionUpdate(BaseModel):
 
     parent_id: UUID | None = None
     ordinal: str | None = Field(default=None, min_length=1, max_length=50)
-    description: str | None = Field(default=None, min_length=1)
+    description: str | None = Field(default=None)
     unit: str | None = Field(default=None, min_length=1, max_length=20)
     quantity: float | None = Field(default=None, ge=0.0)
     unit_rate: float | None = Field(default=None, ge=0.0)
