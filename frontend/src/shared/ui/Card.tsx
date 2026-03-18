@@ -25,7 +25,13 @@ export function Card({
       className={clsx(
         'rounded-xl border border-border-light bg-surface-elevated',
         'shadow-xs',
-        hoverable && 'transition-all duration-normal ease-oe hover:shadow-md hover:border-border',
+        'transition-all duration-normal ease-oe transform-gpu',
+        hoverable && [
+          'hover:shadow-md hover:border-border',
+          'hover:-translate-y-0.5',
+          'active:translate-y-0 active:shadow-xs',
+          'focus-within:ring-2 focus-within:ring-oe-blue/20 focus-within:border-oe-blue/40',
+        ],
         paddingStyles[padding],
         className,
       )}

@@ -16,25 +16,29 @@ const variantStyles: Record<ButtonVariant, string> = {
   primary: clsx(
     'bg-oe-blue text-content-inverse',
     'hover:bg-oe-blue-hover active:bg-oe-blue-active',
-    'shadow-xs hover:shadow-sm',
+    'shadow-xs hover:shadow-md',
     'border border-transparent',
+    'hover:scale-[1.02] active:scale-[0.98]',
   ),
   secondary: clsx(
     'bg-surface-primary text-content-primary',
     'border border-border',
     'hover:bg-surface-secondary active:bg-surface-tertiary',
-    'shadow-xs',
+    'shadow-xs hover:shadow-sm',
+    'active:scale-[0.98]',
   ),
   ghost: clsx(
     'bg-transparent text-content-secondary',
     'hover:bg-surface-secondary active:bg-surface-tertiary',
     'border border-transparent',
+    'active:scale-[0.98]',
   ),
   danger: clsx(
     'bg-semantic-error text-content-inverse',
     'hover:opacity-90 active:opacity-80',
-    'shadow-xs hover:shadow-sm',
+    'shadow-xs hover:shadow-md',
     'border border-transparent',
+    'hover:scale-[1.02] active:scale-[0.98]',
   ),
 };
 
@@ -68,7 +72,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         className={clsx(
           'inline-flex items-center justify-center',
           'font-medium whitespace-nowrap select-none',
-          'transition-all duration-fast ease-oe',
+          'transition-all duration-normal ease-oe transform-gpu will-change-transform',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2',
           variantStyles[variant],
           sizeStyles[size],

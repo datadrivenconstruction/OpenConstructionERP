@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
-import { Button, Input } from '@/shared/ui';
+import { Button, Input, Logo } from '@/shared/ui';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 export function LoginPage() {
@@ -44,19 +44,28 @@ export function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface-secondary p-4">
-      <div className="w-full max-w-[400px] animate-scale-in">
+    <div className="relative flex min-h-screen items-center justify-center bg-surface-secondary p-4 overflow-hidden">
+      {/* Animated background blobs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -left-40 w-80 h-80 bg-oe-blue/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute top-1/3 -right-20 w-96 h-96 bg-[#5856d6]/8 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+        <div className="absolute -bottom-20 left-1/3 w-72 h-72 bg-oe-blue/5 rounded-full blur-3xl animate-float" style={{ animationDelay: '4s' }} />
+      </div>
+
+      <div className="relative w-full max-w-[400px] animate-scale-in">
         {/* Logo */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[20px] bg-oe-blue shadow-lg">
-            <span className="text-2xl font-bold text-white">OE</span>
+          <div className="mx-auto mb-4">
+            <Logo size="xl" animate className="mx-auto shadow-xl" />
           </div>
-          <h1 className="text-2xl font-bold text-content-primary">{t('app.name')}</h1>
+          <h1 className="text-2xl font-bold text-content-primary">
+            Open<span className="gradient-text">Estimator</span><span className="text-content-tertiary">.io</span>
+          </h1>
           <p className="mt-1.5 text-sm text-content-secondary">{t('app.tagline')}</p>
         </div>
 
         {/* Login Form */}
-        <div className="rounded-2xl border border-border-light bg-surface-elevated p-7 shadow-sm">
+        <div className="rounded-2xl border border-border-light glass p-7 shadow-md">
           <h2 className="text-lg font-semibold text-content-primary mb-1">
             {t('auth.login', 'Sign in')}
           </h2>
@@ -147,7 +156,7 @@ export function LoginPage() {
         </div>
 
         <p className="mt-6 text-center text-xs text-content-tertiary">
-          OpenEstimate v0.1.0 — AGPL-3.0
+          OpenEstimator.io v0.1.0 — AGPL-3.0
         </p>
       </div>
     </div>

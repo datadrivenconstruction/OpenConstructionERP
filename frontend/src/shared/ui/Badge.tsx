@@ -38,6 +38,8 @@ export function Badge({ variant = 'neutral', size = 'md', dot, children, classNa
     <span
       className={clsx(
         'inline-flex items-center rounded-full font-medium whitespace-nowrap',
+        'animate-scale-in',
+        'transition-colors duration-fast ease-oe',
         variantStyles[variant],
         sizeStyles[size],
         className,

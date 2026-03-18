@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { LogoWithText } from '@/shared/ui';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import {
@@ -52,14 +53,8 @@ export function Sidebar() {
       )}
     >
       {/* Logo */}
-      <div className="flex h-header items-center gap-3 px-5 border-b border-border-light">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-oe-blue">
-          <span className="text-sm font-bold text-white">OE</span>
-        </div>
-        <div className="min-w-0">
-          <span className="text-sm font-semibold text-content-primary">OpenEstimate</span>
-          <span className="ml-1.5 text-2xs text-content-tertiary">v0.1</span>
-        </div>
+      <div className="flex h-header items-center px-5 border-b border-border-light">
+        <LogoWithText size="sm" />
       </div>
 
       {/* Main navigation */}

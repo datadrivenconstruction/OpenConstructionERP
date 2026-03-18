@@ -13,3 +13,5 @@ export { EmptyState } from './EmptyState';
 export { Skeleton, SkeletonText } from './Skeleton';
 
 export { StatusDot } from './StatusDot';
+
+export { Logo, LogoWithText } from './Logo';
