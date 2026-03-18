@@ -25,6 +25,7 @@ from app.core.permissions import PermissionRegistry, Role
 
 _fake_database = ModuleType("app.database")
 _fake_database.Base = type("Base", (), {})  # type: ignore[attr-defined]
+_fake_database.GUID = MagicMock  # type: ignore[attr-defined]
 sys.modules.setdefault("app.database", _fake_database)
 
 # Also mock the repository module since it depends on the session.
