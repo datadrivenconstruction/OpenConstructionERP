@@ -1,6 +1,6 @@
 """BOQ data access layer.
 
-All database queries for BOQs and positions live here.
+All database queries for BOQs, positions, and markups live here.
 No business logic — pure data access.
 """
 
@@ -9,7 +9,7 @@ import uuid
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.boq.models import BOQ, Position
+from app.modules.boq.models import BOQ, BOQMarkup, Position
 
 
 class BOQRepository:
@@ -131,6 +131,62 @@ class PositionRepository:
         """Get the highest sort_order for positions in a BOQ."""
         stmt = select(func.coalesce(func.max(Position.sort_order), -1)).where(
             Position.boq_id == boq_id
+        )
+        result = (await self.session.execute(stmt)).scalar_one()
+        return int(result)
+
+
+class MarkupRepository:
+    """Data access for BOQMarkup model."""
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def get_by_id(self, markup_id: uuid.UUID) -> BOQMarkup | None:
+        """Get a markup by ID."""
+        return await self.session.get(BOQMarkup, markup_id)
+
+    async def list_for_boq(self, boq_id: uuid.UUID) -> list[BOQMarkup]:
+        """List all markups for a BOQ ordered by sort_order."""
+        stmt = (
+            select(BOQMarkup)
+            .where(BOQMarkup.boq_id == boq_id)
+            .order_by(BOQMarkup.sort_order, BOQMarkup.created_at)
+        )
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def create(self, markup: BOQMarkup) -> BOQMarkup:
+        """Insert a new markup."""
+        self.session.add(markup)
+        await self.session.flush()
+        return markup
+
+    async def bulk_create(self, markups: list[BOQMarkup]) -> list[BOQMarkup]:
+        """Insert multiple markups at once."""
+        self.session.add_all(markups)
+        await self.session.flush()
+        return markups
+
+    async def update_fields(self, markup_id: uuid.UUID, **fields: object) -> None:
+        """Update specific fields on a markup."""
+        stmt = update(BOQMarkup).where(BOQMarkup.id == markup_id).values(**fields)
+        await self.session.execute(stmt)
+
+    async def delete(self, markup_id: uuid.UUID) -> None:
+        """Delete a single markup."""
+        stmt = delete(BOQMarkup).where(BOQMarkup.id == markup_id)
+        await self.session.execute(stmt)
+
+    async def delete_all_for_boq(self, boq_id: uuid.UUID) -> None:
+        """Delete all markups for a BOQ (used before applying defaults)."""
+        stmt = delete(BOQMarkup).where(BOQMarkup.boq_id == boq_id)
+        await self.session.execute(stmt)
+
+    async def get_max_sort_order(self, boq_id: uuid.UUID) -> int:
+        """Get the highest sort_order for markups in a BOQ."""
+        stmt = select(func.coalesce(func.max(BOQMarkup.sort_order), -1)).where(
+            BOQMarkup.boq_id == boq_id
         )
         result = (await self.session.execute(stmt)).scalar_one()
         return int(result)

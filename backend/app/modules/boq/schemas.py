@@ -1,6 +1,8 @@
 """BOQ Pydantic schemas — request/response models.
 
-Defines create, update, and response schemas for BOQs and positions.
+Defines create, update, and response schemas for BOQs, positions, markups,
+and structured (sectioned) BOQ responses.
+
 Numeric values (quantity, unit_rate, total) are exposed as floats in the API
 but stored as strings in SQLite-compatible models.
 """
@@ -62,7 +64,7 @@ class PositionCreate(BaseModel):
     boq_id: UUID
     parent_id: UUID | None = None
     ordinal: str = Field(..., min_length=1, max_length=50)
-    description: str = Field(default='')
+    description: str = Field(default="")
     unit: str = Field(..., min_length=1, max_length=20)
     quantity: float = Field(default=0.0, ge=0.0)
     unit_rate: float = Field(default=0.0, ge=0.0)
@@ -70,6 +72,20 @@ class PositionCreate(BaseModel):
     source: str = "manual"
     confidence: float | None = Field(default=None, ge=0.0, le=1.0)
     cad_element_ids: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class SectionCreate(BaseModel):
+    """Create a BOQ section (header row without pricing).
+
+    Sections are top-level grouping rows.  They have an ordinal and
+    description but no unit, quantity, or unit_rate.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    ordinal: str = Field(..., min_length=1, max_length=50)
+    description: str = Field(default="")
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -118,6 +134,81 @@ class PositionResponse(BaseModel):
     updated_at: datetime
 
 
+# ── Markup schemas ────────────────────────────────────────────────────────────
+
+
+class MarkupCreate(BaseModel):
+    """Create a markup/overhead line on a BOQ."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: str = Field(..., min_length=1, max_length=255)
+    markup_type: str = Field(
+        default="percentage", pattern=r"^(percentage|fixed|per_unit)$"
+    )
+    category: str = Field(
+        default="overhead",
+        pattern=r"^(overhead|profit|tax|contingency|insurance|bond|other)$",
+    )
+    percentage: float = Field(default=0.0, ge=0.0, le=100.0)
+    fixed_amount: float = Field(default=0.0, ge=0.0)
+    apply_to: str = Field(
+        default="direct_cost", pattern=r"^(direct_cost|subtotal|cumulative)$"
+    )
+    sort_order: int = Field(default=0, ge=0)
+    is_active: bool = True
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class MarkupUpdate(BaseModel):
+    """Partial update for a BOQ markup."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    markup_type: str | None = Field(
+        default=None, pattern=r"^(percentage|fixed|per_unit)$"
+    )
+    category: str | None = Field(
+        default=None,
+        pattern=r"^(overhead|profit|tax|contingency|insurance|bond|other)$",
+    )
+    percentage: float | None = Field(default=None, ge=0.0, le=100.0)
+    fixed_amount: float | None = Field(default=None, ge=0.0)
+    apply_to: str | None = Field(
+        default=None, pattern=r"^(direct_cost|subtotal|cumulative)$"
+    )
+    sort_order: int | None = Field(default=None, ge=0)
+    is_active: bool | None = None
+    metadata: dict[str, Any] | None = None
+
+
+class MarkupResponse(BaseModel):
+    """Markup line returned from the API."""
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    boq_id: UUID
+    name: str
+    markup_type: str
+    category: str
+    percentage: float
+    fixed_amount: float
+    apply_to: str
+    sort_order: int
+    is_active: bool
+    metadata: dict[str, Any] = Field(default_factory=dict, alias="metadata_")
+    created_at: datetime
+    updated_at: datetime
+
+
+class MarkupCalculated(MarkupResponse):
+    """Markup response enriched with the computed amount."""
+
+    amount: float = 0.0
+
+
 # ── Composite schemas ─────────────────────────────────────────────────────────
 
 
@@ -125,4 +216,33 @@ class BOQWithPositions(BOQResponse):
     """BOQ with all its positions and computed grand total."""
 
     positions: list[PositionResponse] = Field(default_factory=list)
+    grand_total: float = 0.0
+
+
+class SectionResponse(BaseModel):
+    """A BOQ section (header) with its child positions and subtotal."""
+
+    id: UUID
+    ordinal: str
+    description: str
+    positions: list[PositionResponse] = Field(default_factory=list)
+    subtotal: float = 0.0
+
+
+class BOQWithSections(BOQResponse):
+    """BOQ with hierarchical sections, positions, subtotals, and markups.
+
+    ``sections`` — grouped positions under section headers.
+    ``positions`` — ungrouped positions that have no parent (and are not sections).
+    ``direct_cost`` — sum of all position totals (items only, not sections).
+    ``markups`` — ordered list of markup lines with computed amounts.
+    ``net_total`` — direct_cost + sum of markup amounts.
+    ``grand_total`` — alias for net_total (reserved for future tax logic).
+    """
+
+    sections: list[SectionResponse] = Field(default_factory=list)
+    positions: list[PositionResponse] = Field(default_factory=list)
+    direct_cost: float = 0.0
+    markups: list[MarkupCalculated] = Field(default_factory=list)
+    net_total: float = 0.0
     grand_total: float = 0.0

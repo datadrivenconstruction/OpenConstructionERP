@@ -1,17 +1,23 @@
 """BOQ API routes.
 
 Endpoints:
-    POST   /boqs/                    — Create a new BOQ
-    GET    /boqs/?project_id=xxx     — List BOQs for a project
-    GET    /boqs/{boq_id}            — Get BOQ with all positions
-    PATCH  /boqs/{boq_id}            — Update BOQ metadata
-    DELETE /boqs/{boq_id}            — Delete BOQ and all positions
-    POST   /boqs/{boq_id}/positions  — Add a position to a BOQ
-    PATCH  /positions/{position_id}  — Update a position
-    DELETE /positions/{position_id}  — Delete a position
-    POST   /boqs/{boq_id}/validate   — Validate a BOQ against configured rule sets
-    GET    /boqs/{boq_id}/export/csv — Export BOQ positions as CSV
-    GET    /boqs/{boq_id}/export/excel — Export BOQ positions as Excel (xlsx)
+    POST   /boqs/                              — Create a new BOQ
+    GET    /boqs/?project_id=xxx               — List BOQs for a project
+    GET    /boqs/{boq_id}                      — Get BOQ with all positions
+    PATCH  /boqs/{boq_id}                      — Update BOQ metadata
+    DELETE /boqs/{boq_id}                      — Delete BOQ and all positions
+    GET    /boqs/{boq_id}/structured           — Full BOQ with sections + markups
+    POST   /boqs/{boq_id}/positions            — Add a position to a BOQ
+    PATCH  /positions/{position_id}            — Update a position
+    DELETE /positions/{position_id}            — Delete a position
+    POST   /boqs/{boq_id}/sections             — Create a section header
+    POST   /boqs/{boq_id}/markups              — Add a markup line
+    PATCH  /boqs/{boq_id}/markups/{markup_id}  — Update a markup
+    DELETE /boqs/{boq_id}/markups/{markup_id}  — Delete a markup
+    POST   /boqs/{boq_id}/markups/apply-defaults — Apply regional default markups
+    POST   /boqs/{boq_id}/validate             — Validate a BOQ against rule sets
+    GET    /boqs/{boq_id}/export/csv           — Export BOQ as CSV
+    GET    /boqs/{boq_id}/export/excel         — Export BOQ as Excel (xlsx)
 """
 
 import csv
@@ -28,9 +34,14 @@ from app.modules.boq.schemas import (
     BOQResponse,
     BOQUpdate,
     BOQWithPositions,
+    BOQWithSections,
+    MarkupCreate,
+    MarkupResponse,
+    MarkupUpdate,
     PositionCreate,
     PositionResponse,
     PositionUpdate,
+    SectionCreate,
 )
 from app.modules.boq.service import BOQService
 
@@ -39,6 +50,51 @@ router = APIRouter()
 
 def _get_service(session: SessionDep) -> BOQService:
     return BOQService(session)
+
+
+def _position_to_response(position: object) -> PositionResponse:
+    """Build a PositionResponse from a Position ORM object."""
+    return PositionResponse(
+        id=position.id,  # type: ignore[attr-defined]
+        boq_id=position.boq_id,  # type: ignore[attr-defined]
+        parent_id=position.parent_id,  # type: ignore[attr-defined]
+        ordinal=position.ordinal,  # type: ignore[attr-defined]
+        description=position.description,  # type: ignore[attr-defined]
+        unit=position.unit,  # type: ignore[attr-defined]
+        quantity=float(position.quantity),  # type: ignore[attr-defined]
+        unit_rate=float(position.unit_rate),  # type: ignore[attr-defined]
+        total=float(position.total),  # type: ignore[attr-defined]
+        classification=position.classification,  # type: ignore[attr-defined]
+        source=position.source,  # type: ignore[attr-defined]
+        confidence=(
+            float(position.confidence) if position.confidence else None  # type: ignore[attr-defined]
+        ),
+        cad_element_ids=position.cad_element_ids,  # type: ignore[attr-defined]
+        validation_status=position.validation_status,  # type: ignore[attr-defined]
+        metadata_=position.metadata_,  # type: ignore[attr-defined]
+        sort_order=position.sort_order,  # type: ignore[attr-defined]
+        created_at=position.created_at,  # type: ignore[attr-defined]
+        updated_at=position.updated_at,  # type: ignore[attr-defined]
+    )
+
+
+def _markup_to_response(markup: object) -> MarkupResponse:
+    """Build a MarkupResponse from a BOQMarkup ORM object."""
+    return MarkupResponse(
+        id=markup.id,  # type: ignore[attr-defined]
+        boq_id=markup.boq_id,  # type: ignore[attr-defined]
+        name=markup.name,  # type: ignore[attr-defined]
+        markup_type=markup.markup_type,  # type: ignore[attr-defined]
+        category=markup.category,  # type: ignore[attr-defined]
+        percentage=float(markup.percentage),  # type: ignore[attr-defined]
+        fixed_amount=float(markup.fixed_amount),  # type: ignore[attr-defined]
+        apply_to=markup.apply_to,  # type: ignore[attr-defined]
+        sort_order=markup.sort_order,  # type: ignore[attr-defined]
+        is_active=markup.is_active,  # type: ignore[attr-defined]
+        metadata_=markup.metadata_,  # type: ignore[attr-defined]
+        created_at=markup.created_at,  # type: ignore[attr-defined]
+        updated_at=markup.updated_at,  # type: ignore[attr-defined]
+    )
 
 
 # ── BOQ CRUD ──────────────────────────────────────────────────────────────────
@@ -91,6 +147,28 @@ async def get_boq(
     return await service.get_boq_with_positions(boq_id)
 
 
+@router.get(
+    "/boqs/{boq_id}/structured",
+    response_model=BOQWithSections,
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def get_boq_structured(
+    boq_id: uuid.UUID,
+    service: BOQService = Depends(_get_service),
+) -> BOQWithSections:
+    """Get a BOQ with hierarchical sections, subtotals, markups, and totals.
+
+    Returns the full structured view that a professional estimator needs:
+    - Sections with grouped positions and subtotals
+    - Ungrouped positions (no parent section)
+    - Direct cost (sum of all item totals)
+    - Markup lines with computed amounts
+    - Net total (direct cost + markups)
+    - Grand total
+    """
+    return await service.get_boq_structured(boq_id)
+
+
 @router.patch(
     "/boqs/{boq_id}",
     response_model=BOQResponse,
@@ -140,27 +218,7 @@ async def add_position(
     # Override body boq_id with URL path parameter
     data.boq_id = boq_id
     position = await service.add_position(data)
-
-    return PositionResponse(
-        id=position.id,
-        boq_id=position.boq_id,
-        parent_id=position.parent_id,
-        ordinal=position.ordinal,
-        description=position.description,
-        unit=position.unit,
-        quantity=float(position.quantity),
-        unit_rate=float(position.unit_rate),
-        total=float(position.total),
-        classification=position.classification,
-        source=position.source,
-        confidence=float(position.confidence) if position.confidence else None,
-        cad_element_ids=position.cad_element_ids,
-        validation_status=position.validation_status,
-        metadata_=position.metadata_,
-        sort_order=position.sort_order,
-        created_at=position.created_at,
-        updated_at=position.updated_at,
-    )
+    return _position_to_response(position)
 
 
 @router.patch(
@@ -175,27 +233,7 @@ async def update_position(
 ) -> PositionResponse:
     """Update a BOQ position. Recalculates total if quantity or unit_rate changed."""
     position = await service.update_position(position_id, data)
-
-    return PositionResponse(
-        id=position.id,
-        boq_id=position.boq_id,
-        parent_id=position.parent_id,
-        ordinal=position.ordinal,
-        description=position.description,
-        unit=position.unit,
-        quantity=float(position.quantity),
-        unit_rate=float(position.unit_rate),
-        total=float(position.total),
-        classification=position.classification,
-        source=position.source,
-        confidence=float(position.confidence) if position.confidence else None,
-        cad_element_ids=position.cad_element_ids,
-        validation_status=position.validation_status,
-        metadata_=position.metadata_,
-        sort_order=position.sort_order,
-        created_at=position.created_at,
-        updated_at=position.updated_at,
-    )
+    return _position_to_response(position)
 
 
 @router.delete(
@@ -209,6 +247,107 @@ async def delete_position(
 ) -> None:
     """Delete a single position."""
     await service.delete_position(position_id)
+
+
+# ── Section CRUD ──────────────────────────────────────────────────────────────
+
+
+@router.post(
+    "/boqs/{boq_id}/sections",
+    response_model=PositionResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def create_section(
+    boq_id: uuid.UUID,
+    data: SectionCreate,
+    service: BOQService = Depends(_get_service),
+) -> PositionResponse:
+    """Create a section header row in a BOQ.
+
+    Sections are positions with unit="section", quantity=0, unit_rate=0.
+    They serve as grouping headers for estimating line items.
+    """
+    section = await service.create_section(boq_id, data)
+    return _position_to_response(section)
+
+
+# ── Markup CRUD ───────────────────────────────────────────────────────────────
+
+
+@router.post(
+    "/boqs/{boq_id}/markups",
+    response_model=MarkupResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def add_markup(
+    boq_id: uuid.UUID,
+    data: MarkupCreate,
+    service: BOQService = Depends(_get_service),
+) -> MarkupResponse:
+    """Add a markup/overhead line to a BOQ."""
+    markup = await service.add_markup(boq_id, data)
+    return _markup_to_response(markup)
+
+
+@router.patch(
+    "/boqs/{boq_id}/markups/{markup_id}",
+    response_model=MarkupResponse,
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def update_markup(
+    boq_id: uuid.UUID,
+    markup_id: uuid.UUID,
+    data: MarkupUpdate,
+    service: BOQService = Depends(_get_service),
+) -> MarkupResponse:
+    """Update a markup/overhead line on a BOQ."""
+    markup = await service.update_markup(markup_id, data)
+    return _markup_to_response(markup)
+
+
+@router.delete(
+    "/boqs/{boq_id}/markups/{markup_id}",
+    status_code=204,
+    dependencies=[Depends(RequirePermission("boq.delete"))],
+)
+async def delete_markup(
+    boq_id: uuid.UUID,
+    markup_id: uuid.UUID,
+    service: BOQService = Depends(_get_service),
+) -> None:
+    """Delete a markup/overhead line from a BOQ."""
+    await service.delete_markup(markup_id)
+
+
+@router.post(
+    "/boqs/{boq_id}/markups/apply-defaults",
+    response_model=list[MarkupResponse],
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def apply_default_markups(
+    boq_id: uuid.UUID,
+    region: str = Query(
+        default="DEFAULT",
+        description="Region code: DACH, UK, US, RU, GULF, or DEFAULT",
+    ),
+    service: BOQService = Depends(_get_service),
+) -> list[MarkupResponse]:
+    """Apply regional default markups to a BOQ.
+
+    Replaces any existing markups with the standard template for the region.
+
+    Supported regions:
+    - **DACH**: BGK 8%, AGK 5%, W&G 3%
+    - **UK**: Preliminaries 12%, OH&P 6%, Contingency 5%
+    - **US**: General Conditions 10%, OH&P 8%, Contingency 5%, Escalation 3%
+    - **RU**: Overhead 15%, Estimated Profit 8%, VAT 20%
+    - **GULF**: OH&P 10%, Contingency 5%, VAT 5%
+    - **DEFAULT**: Overhead 10%, Profit 5%, Contingency 5%
+    """
+    markups = await service.apply_default_markups(boq_id, region)
+    return [_markup_to_response(m) for m in markups]
 
 
 # ── Validation ────────────────────────────────────────────────────────────────
