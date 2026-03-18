@@ -1,45 +1,31 @@
 import { Suspense, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { AppLayout } from './layout';
 import { DashboardPage } from '@/features/dashboard';
 import { LoginPage, RegisterPage, ForgotPasswordPage } from '@/features/auth';
 import { ProjectsPage, CreateProjectPage, ProjectDetailPage } from '@/features/projects';
-import { BOQEditorPage, CreateBOQPage } from '@/features/boq';
+import { BOQListPage, BOQEditorPage, CreateBOQPage } from '@/features/boq';
 import { CostsPage } from '@/features/costs';
 import { AssembliesPage, AssemblyEditorPage, CreateAssemblyPage } from '@/features/assemblies';
 import { ValidationPage } from '@/features/validation';
 import { SchedulePage } from '@/features/schedule';
 import { CostModelPage } from '@/features/costmodel';
+import { TenderingPage } from '@/features/tendering';
+import { ModulesPage } from '@/features/modules';
+import { SettingsPage } from '@/features/settings';
+import { Logo } from '@/shared/ui';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 function LoadingScreen() {
   return (
     <div className="flex h-screen items-center justify-center bg-surface-secondary">
       <div className="flex flex-col items-center gap-3 animate-fade-in">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue shadow-md">
-          <span className="text-lg font-bold text-white">OE</span>
-        </div>
+        <Logo size="lg" animate />
         <div className="h-1 w-16 overflow-hidden rounded-full bg-surface-secondary">
           <div className="h-full w-8 animate-shimmer rounded-full bg-oe-blue opacity-60" />
         </div>
       </div>
     </div>
-  );
-}
-
-function PlaceholderPage({ titleKey }: { titleKey: string }) {
-  const { t } = useTranslation();
-  return (
-    <AppLayout title={t(titleKey)}>
-      <div className="flex flex-col items-center justify-center py-24 text-center animate-fade-in">
-        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-secondary">
-          <span className="text-xl text-content-tertiary">Soon</span>
-        </div>
-        <h2 className="text-xl font-semibold text-content-primary">{t(titleKey)}</h2>
-        <p className="mt-2 text-sm text-content-secondary">Coming soon</p>
-      </div>
-    </AppLayout>
   );
 }
 
@@ -49,6 +35,14 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" replace />;
   }
   return <>{children}</>;
+}
+
+function P({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <RequireAuth>
+      <AppLayout title={title}>{children}</AppLayout>
+    </RequireAuth>
+  );
 }
 
 export default function App() {
@@ -62,40 +56,39 @@ export default function App() {
   return (
     <Suspense fallback={<LoadingScreen />}>
       <Routes>
-        {/* Auth */}
+        {/* Auth — public */}
         <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />} />
         <Route path="/register" element={isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />} />
         <Route path="/forgot-password" element={isAuthenticated ? <Navigate to="/" replace /> : <ForgotPasswordPage />} />
 
-        {/* Dashboard */}
-        <Route
-          path="/"
-          element={
-            <RequireAuth>
-              <AppLayout title="Dashboard">
-                <DashboardPage />
-              </AppLayout>
-            </RequireAuth>
-          }
-        />
+        {/* App — all protected, all real pages */}
+        <Route path="/" element={<P title="Dashboard"><DashboardPage /></P>} />
 
-        {/* Protected routes */}
-        <Route path="/projects" element={<RequireAuth><AppLayout title="Projects"><ProjectsPage /></AppLayout></RequireAuth>} />
-        <Route path="/projects/new" element={<RequireAuth><AppLayout title="New Project"><CreateProjectPage /></AppLayout></RequireAuth>} />
-        <Route path="/projects/:projectId" element={<RequireAuth><AppLayout title="Project"><ProjectDetailPage /></AppLayout></RequireAuth>} />
-        <Route path="/projects/:projectId/boq/new" element={<RequireAuth><AppLayout title="New BOQ"><CreateBOQPage /></AppLayout></RequireAuth>} />
-        <Route path="/boq/:boqId" element={<RequireAuth><AppLayout title="BOQ Editor"><BOQEditorPage /></AppLayout></RequireAuth>} />
-        <Route path="/costs" element={<RequireAuth><AppLayout title="Cost Database"><CostsPage /></AppLayout></RequireAuth>} />
-        <Route path="/assemblies" element={<RequireAuth><AppLayout title="Assemblies"><AssembliesPage /></AppLayout></RequireAuth>} />
-        <Route path="/assemblies/new" element={<RequireAuth><AppLayout title="New Assembly"><CreateAssemblyPage /></AppLayout></RequireAuth>} />
-        <Route path="/assemblies/:assemblyId" element={<RequireAuth><AppLayout title="Assembly Editor"><AssemblyEditorPage /></AppLayout></RequireAuth>} />
-        <Route path="/validation" element={<RequireAuth><AppLayout title="Validation"><ValidationPage /></AppLayout></RequireAuth>} />
-        <Route path="/boq" element={<RequireAuth><PlaceholderPage titleKey="boq.title" /></RequireAuth>} />
-        <Route path="/schedule" element={<RequireAuth><AppLayout title="4D Schedule"><SchedulePage /></AppLayout></RequireAuth>} />
-        <Route path="/5d" element={<RequireAuth><AppLayout title="5D Cost Model"><CostModelPage /></AppLayout></RequireAuth>} />
-        <Route path="/tendering" element={<RequireAuth><PlaceholderPage titleKey="tendering.title" /></RequireAuth>} />
-        <Route path="/modules" element={<RequireAuth><PlaceholderPage titleKey="modules.title" /></RequireAuth>} />
-        <Route path="/settings" element={<RequireAuth><PlaceholderPage titleKey="nav.settings" /></RequireAuth>} />
+        <Route path="/projects" element={<P title="Projects"><ProjectsPage /></P>} />
+        <Route path="/projects/new" element={<P title="New Project"><CreateProjectPage /></P>} />
+        <Route path="/projects/:projectId" element={<P title="Project"><ProjectDetailPage /></P>} />
+        <Route path="/projects/:projectId/boq/new" element={<P title="New BOQ"><CreateBOQPage /></P>} />
+
+        <Route path="/boq" element={<P title="Bill of Quantities"><BOQListPage /></P>} />
+        <Route path="/boq/:boqId" element={<P title="BOQ Editor"><BOQEditorPage /></P>} />
+
+        <Route path="/costs" element={<P title="Cost Database"><CostsPage /></P>} />
+
+        <Route path="/assemblies" element={<P title="Assemblies"><AssembliesPage /></P>} />
+        <Route path="/assemblies/new" element={<P title="New Assembly"><CreateAssemblyPage /></P>} />
+        <Route path="/assemblies/:assemblyId" element={<P title="Assembly Editor"><AssemblyEditorPage /></P>} />
+
+        <Route path="/validation" element={<P title="Validation"><ValidationPage /></P>} />
+
+        <Route path="/schedule" element={<P title="4D Schedule"><SchedulePage /></P>} />
+
+        <Route path="/5d" element={<P title="5D Cost Model"><CostModelPage /></P>} />
+
+        <Route path="/tendering" element={<P title="Tendering"><TenderingPage /></P>} />
+
+        <Route path="/modules" element={<P title="Modules"><ModulesPage /></P>} />
+
+        <Route path="/settings" element={<P title="Settings"><SettingsPage /></P>} />
 
         {/* Catch-all */}
         <Route path="*" element={<Navigate to="/" replace />} />
