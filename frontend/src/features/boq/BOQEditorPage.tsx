@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Download, ShieldCheck } from 'lucide-react';
 import { Button, Badge, Card } from '@/shared/ui';
 import { boqApi, type Position, type CreatePositionData, type UpdatePositionData } from './api';
 
@@ -89,10 +89,51 @@ export function BOQEditorPage() {
             <p className="mt-1 text-sm text-content-secondary">{boq.description}</p>
           )}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Badge variant={boq.status === 'final' ? 'success' : 'blue'} size="md">
             {boq.status}
           </Badge>
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<ShieldCheck size={15} />}
+            onClick={() => {
+              const token = localStorage.getItem('oe_access_token');
+              fetch(`/api/v1/boq/boqs/${boqId}/validate`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+              })
+                .then((r) => r.json())
+                .then((data) => {
+                  const msg = `Score: ${Math.round((data.score ?? 0) * 100)}%\n${data.counts?.passed ?? 0} passed, ${data.counts?.warnings ?? 0} warnings, ${data.counts?.errors ?? 0} errors`;
+                  alert(msg);
+                });
+            }}
+          >
+            Validate
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<Download size={15} />}
+            onClick={() => {
+              const token = localStorage.getItem('oe_access_token');
+              window.open(`/api/v1/boq/boqs/${boqId}/export/excel?token=${token}`, '_blank');
+            }}
+          >
+            Excel
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<Download size={15} />}
+            onClick={() => {
+              const token = localStorage.getItem('oe_access_token');
+              window.open(`/api/v1/boq/boqs/${boqId}/export/csv?token=${token}`, '_blank');
+            }}
+          >
+            CSV
+          </Button>
           <Button variant="primary" icon={<Plus size={16} />} onClick={handleAddPosition}>
             {t('boq.add_position')}
           </Button>

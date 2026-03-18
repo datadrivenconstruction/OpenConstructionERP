@@ -6,6 +6,8 @@ import { DashboardPage } from '@/features/dashboard';
 import { LoginPage } from '@/features/auth';
 import { ProjectsPage, CreateProjectPage, ProjectDetailPage } from '@/features/projects';
 import { BOQEditorPage, CreateBOQPage } from '@/features/boq';
+import { CostsPage } from '@/features/costs';
+import { ValidationPage } from '@/features/validation';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 function LoadingScreen() {
@@ -108,8 +110,22 @@ export default function App() {
         {/* Placeholder pages */}
         <Route path="/boq" element={<PlaceholderPage titleKey="boq.title" />} />
         <Route path="/takeoff" element={<PlaceholderPage titleKey="takeoff.title" />} />
-        <Route path="/costs" element={<PlaceholderPage titleKey="costs.title" />} />
-        <Route path="/validation" element={<PlaceholderPage titleKey="validation.title" />} />
+        <Route
+          path="/costs"
+          element={
+            <AppLayout title="Cost Database">
+              <CostsPage />
+            </AppLayout>
+          }
+        />
+        <Route
+          path="/validation"
+          element={
+            <AppLayout title="Validation">
+              <ValidationPage />
+            </AppLayout>
+          }
+        />
         <Route path="/tendering" element={<PlaceholderPage titleKey="tendering.title" />} />
         <Route path="/modules" element={<PlaceholderPage titleKey="modules.title" />} />
         <Route path="/settings" element={<PlaceholderPage titleKey="nav.settings" />} />
