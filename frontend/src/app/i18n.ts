@@ -4,27 +4,33 @@ import HttpBackend from 'i18next-http-backend';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
 export const SUPPORTED_LANGUAGES = [
-  { code: 'en', name: 'English' },
-  { code: 'de', name: 'Deutsch' },
-  { code: 'ru', name: 'Русский' },
-  { code: 'fr', name: 'Français' },
-  { code: 'es', name: 'Español' },
-  { code: 'pt', name: 'Português' },
-  { code: 'it', name: 'Italiano' },
-  { code: 'nl', name: 'Nederlands' },
-  { code: 'pl', name: 'Polski' },
-  { code: 'cs', name: 'Čeština' },
-  { code: 'tr', name: 'Türkçe' },
-  { code: 'ar', name: 'العربية', dir: 'rtl' },
-  { code: 'zh', name: '简体中文' },
-  { code: 'ja', name: '日本語' },
-  { code: 'ko', name: '한국어' },
-  { code: 'hi', name: 'हिन्दी' },
-  { code: 'sv', name: 'Svenska' },
-  { code: 'no', name: 'Norsk' },
-  { code: 'da', name: 'Dansk' },
-  { code: 'fi', name: 'Suomi' },
+  { code: 'en', name: 'English', flag: '🇬🇧' },
+  { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+  { code: 'ru', name: 'Русский', flag: '🇷🇺' },
+  { code: 'fr', name: 'Français', flag: '🇫🇷' },
+  { code: 'es', name: 'Español', flag: '🇪🇸' },
+  { code: 'pt', name: 'Português', flag: '🇧🇷' },
+  { code: 'it', name: 'Italiano', flag: '🇮🇹' },
+  { code: 'nl', name: 'Nederlands', flag: '🇳🇱' },
+  { code: 'pl', name: 'Polski', flag: '🇵🇱' },
+  { code: 'cs', name: 'Čeština', flag: '🇨🇿' },
+  { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
+  { code: 'ar', name: 'العربية', flag: '🇸🇦', dir: 'rtl' },
+  { code: 'zh', name: '简体中文', flag: '🇨🇳' },
+  { code: 'ja', name: '日本語', flag: '🇯🇵' },
+  { code: 'ko', name: '한국어', flag: '🇰🇷' },
+  { code: 'hi', name: 'हिन्दी', flag: '🇮🇳' },
+  { code: 'sv', name: 'Svenska', flag: '🇸🇪' },
+  { code: 'no', name: 'Norsk', flag: '🇳🇴' },
+  { code: 'da', name: 'Dansk', flag: '🇩🇰' },
+  { code: 'fi', name: 'Suomi', flag: '🇫🇮' },
 ] as const;
+
+export type LanguageCode = (typeof SUPPORTED_LANGUAGES)[number]['code'];
+
+export function getLanguageByCode(code: string) {
+  return SUPPORTED_LANGUAGES.find((l) => l.code === code) ?? SUPPORTED_LANGUAGES[0];
+}
 
 // Inline fallback translations — ensures UI works even without backend
 const fallbackResources = {
@@ -49,7 +55,19 @@ const fallbackResources = {
       'projects.title': 'Projects',
       'projects.new_project': 'New Project',
       'projects.no_projects': 'No projects yet',
+      'projects.project_name': 'Project Name',
       'boq.title': 'Bill of Quantities',
+      'boq.position': 'Position',
+      'boq.ordinal': 'Pos.',
+      'boq.description': 'Description',
+      'boq.quantity': 'Quantity',
+      'boq.unit': 'Unit',
+      'boq.unit_rate': 'Unit Rate',
+      'boq.total': 'Total',
+      'boq.add_position': 'Add Position',
+      'boq.add_section': 'Add Section',
+      'boq.subtotal': 'Subtotal',
+      'boq.grand_total': 'Grand Total',
       'costs.title': 'Cost Database',
       'validation.title': 'Validation',
       'validation.passed': 'Passed',
@@ -86,7 +104,6 @@ i18n
     interpolation: {
       escapeValue: false,
     },
-    // Use inline resources as fallback, backend as primary
     partialBundledLanguages: true,
     resources: fallbackResources,
     backend: {

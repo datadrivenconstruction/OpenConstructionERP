@@ -1,7 +1,8 @@
+import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, Bell, Globe } from 'lucide-react';
+import { Search, Bell, ChevronDown } from 'lucide-react';
 import clsx from 'clsx';
-import { SUPPORTED_LANGUAGES } from '../i18n';
+import { SUPPORTED_LANGUAGES, getLanguageByCode } from '../i18n';
 
 interface HeaderProps {
   title?: string;
@@ -9,6 +10,7 @@ interface HeaderProps {
 
 export function Header({ title }: HeaderProps) {
   const { t, i18n } = useTranslation();
+  const currentLang = getLanguageByCode(i18n.language);
 
   return (
     <header
@@ -18,14 +20,12 @@ export function Header({ title }: HeaderProps) {
         'border-b border-border-light bg-surface-primary/80 backdrop-blur-xl',
       )}
     >
-      {/* Left: Page title or breadcrumb */}
       <div className="min-w-0">
         {title && (
           <h1 className="text-lg font-semibold text-content-primary truncate">{title}</h1>
         )}
       </div>
 
-      {/* Right: Search, language, notifications, avatar */}
       <div className="flex items-center gap-1">
         {/* Search */}
         <button
@@ -48,31 +48,10 @@ export function Header({ title }: HeaderProps) {
         <div className="w-px h-5 bg-border-light mx-2" />
 
         {/* Language switcher */}
-        <div className="relative">
-          <select
-            value={i18n.language}
-            onChange={(e) => i18n.changeLanguage(e.target.value)}
-            className={clsx(
-              'h-8 appearance-none rounded-lg pl-8 pr-3',
-              'border border-transparent bg-transparent',
-              'text-xs font-medium text-content-secondary',
-              'transition-all duration-fast ease-oe',
-              'hover:bg-surface-secondary cursor-pointer',
-              'focus:outline-none focus:ring-2 focus:ring-oe-blue',
-            )}
-          >
-            {SUPPORTED_LANGUAGES.map((lang) => (
-              <option key={lang.code} value={lang.code}>
-                {lang.name}
-              </option>
-            ))}
-          </select>
-          <Globe
-            size={14}
-            strokeWidth={1.75}
-            className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-content-tertiary"
-          />
-        </div>
+        <LanguageSwitcher
+          currentLang={currentLang}
+          onSelect={(code) => i18n.changeLanguage(code)}
+        />
 
         {/* Notifications */}
         <button
@@ -99,5 +78,85 @@ export function Header({ title }: HeaderProps) {
         </button>
       </div>
     </header>
+  );
+}
+
+/* ── Language Switcher Dropdown ─────────────────────────────────────────── */
+
+function LanguageSwitcher({
+  currentLang,
+  onSelect,
+}: {
+  currentLang: (typeof SUPPORTED_LANGUAGES)[number];
+  onSelect: (code: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(!open)}
+        className={clsx(
+          'flex h-8 items-center gap-1.5 rounded-lg px-2.5',
+          'text-xs font-medium text-content-secondary',
+          'transition-all duration-fast ease-oe',
+          'hover:bg-surface-secondary',
+          open && 'bg-surface-secondary',
+        )}
+      >
+        <span className="text-base leading-none">{currentLang.flag}</span>
+        <span className="hidden sm:inline">{currentLang.code.toUpperCase()}</span>
+        <ChevronDown
+          size={12}
+          className={clsx('transition-transform duration-fast', open && 'rotate-180')}
+        />
+      </button>
+
+      {open && (
+        <div
+          className={clsx(
+            'absolute right-0 top-full mt-1.5',
+            'w-52 max-h-80 overflow-y-auto',
+            'rounded-xl border border-border-light bg-surface-elevated',
+            'shadow-lg animate-scale-in',
+            'py-1.5',
+          )}
+        >
+          {SUPPORTED_LANGUAGES.map((lang) => (
+            <button
+              key={lang.code}
+              onClick={() => {
+                onSelect(lang.code);
+                setOpen(false);
+              }}
+              className={clsx(
+                'flex w-full items-center gap-3 px-3 py-2',
+                'text-sm transition-colors',
+                lang.code === currentLang.code
+                  ? 'bg-oe-blue-subtle text-oe-blue font-medium'
+                  : 'text-content-primary hover:bg-surface-secondary',
+              )}
+            >
+              <span className="text-base leading-none shrink-0">{lang.flag}</span>
+              <span className="truncate">{lang.name}</span>
+              <span className="ml-auto text-2xs text-content-tertiary uppercase">
+                {lang.code}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

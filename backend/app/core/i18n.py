@@ -153,7 +153,7 @@ def get_all_translations(locale: str) -> dict[str, str]:
     return _translations.get(locale, _translations.get("en", {}))
 
 
-def get_available_locales() -> list[dict[str, str]]:
+def get_available_locales() -> list[dict[str, object]]:
     """List available locales with their display names."""
     return [
         {"code": code, "name": LOCALE_NAMES.get(code, code), "loaded": code in _translations}

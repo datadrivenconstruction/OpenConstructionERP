@@ -13,7 +13,7 @@ router = APIRouter(prefix="/i18n", tags=["i18n"])
 
 
 @router.get("/locales")
-async def list_locales() -> dict[str, list[dict[str, str]]]:
+async def list_locales() -> dict:
     """List all available languages."""
     return {"locales": get_available_locales()}
 
