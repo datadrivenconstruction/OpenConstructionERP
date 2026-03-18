@@ -124,6 +124,15 @@ def create_app() -> FastAPI:
 
         register_core_permissions()
 
+        # Auto-create tables for SQLite dev mode (PostgreSQL uses Alembic)
+        if "sqlite" in settings.database_url:
+            from app.database import Base, engine
+            from app.modules.users import models as _users_models  # noqa: F401
+
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+            logger.info("SQLite tables created/verified")
+
         # Load all modules (triggers module on_startup hooks)
         await module_loader.load_all(app)
 

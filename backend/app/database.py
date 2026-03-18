@@ -1,15 +1,14 @@
 """Database engine, session, and base model.
 
-Uses SQLAlchemy 2.0 async engine with asyncpg driver.
-All modules extend the shared Base for auto-migration support.
+Supports both PostgreSQL (production) and SQLite (local dev without Docker).
+Set DATABASE_URL to 'sqlite+aiosqlite:///./openestimate.db' for SQLite mode.
 """
 
 import uuid
 from collections.abc import AsyncGenerator
 from datetime import datetime
 
-from sqlalchemy import DateTime, MetaData, func
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import DateTime, MetaData, String, TypeDecorator, func
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -25,6 +24,31 @@ convention = {
 }
 
 
+class GUID(TypeDecorator):
+    """Platform-independent UUID type.
+
+    Uses PostgreSQL UUID when available, otherwise stores as String(36).
+    This allows the same models to work with both PostgreSQL and SQLite.
+    """
+
+    impl = String(36)
+    cache_ok = True
+
+    def process_bind_param(self, value: uuid.UUID | str | None, dialect: object) -> str | None:
+        if value is None:
+            return None
+        if isinstance(value, uuid.UUID):
+            return str(value)
+        return value
+
+    def process_result_value(self, value: str | None, dialect: object) -> uuid.UUID | None:
+        if value is None:
+            return None
+        if isinstance(value, uuid.UUID):
+            return value
+        return uuid.UUID(value)
+
+
 class Base(DeclarativeBase):
     """Base class for all ORM models.
 
@@ -35,7 +59,7 @@ class Base(DeclarativeBase):
     metadata = MetaData(naming_convention=convention)
 
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        GUID(),
         primary_key=True,
         default=uuid.uuid4,
     )
@@ -52,16 +76,28 @@ class Base(DeclarativeBase):
     )
 
 
+def _is_sqlite(url: str) -> bool:
+    return "sqlite" in url
+
+
 def create_engine_from_settings():
     """Create async engine from application settings."""
     settings = get_settings()
-    return create_async_engine(
-        settings.database_url,
-        pool_size=settings.database_pool_size,
-        max_overflow=settings.database_max_overflow,
-        echo=settings.database_echo,
-        future=True,
-    )
+    url = settings.database_url
+
+    kwargs: dict = {
+        "echo": settings.database_echo,
+        "future": True,
+    }
+
+    if _is_sqlite(url):
+        # SQLite doesn't support pool_size/max_overflow
+        kwargs["connect_args"] = {"check_same_thread": False}
+    else:
+        kwargs["pool_size"] = settings.database_pool_size
+        kwargs["max_overflow"] = settings.database_max_overflow
+
+    return create_async_engine(url, **kwargs)
 
 
 engine = create_engine_from_settings()

@@ -8,11 +8,10 @@ Tables:
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.database import Base
+from app.database import GUID, Base
 
 
 class User(Base):
@@ -26,10 +25,12 @@ class User(Base):
     role: Mapped[str] = mapped_column(String(50), nullable=False, default="editor")
     locale: Mapped[str] = mapped_column(String(10), nullable=False, default="en")
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
-    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_login_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
-        JSONB,
+        JSON,
         nullable=False,
         default=dict,
         server_default="{}",
@@ -52,7 +53,7 @@ class APIKey(Base):
     __tablename__ = "oe_users_api_key"
 
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+        GUID(),
         ForeignKey("oe_users_user.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
@@ -64,10 +65,14 @@ class APIKey(Base):
     )  # First 8 chars for identification
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
-    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    last_used_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     permissions: Mapped[list] = mapped_column(  # type: ignore[assignment]
-        JSONB, nullable=False, default=list, server_default="[]"
+        JSON, nullable=False, default=list, server_default="[]"
     )
 
     # Relationships
