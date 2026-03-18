@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, Bell, ChevronDown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Bell, ChevronDown, LogOut, User, Settings } from 'lucide-react';
 import clsx from 'clsx';
 import { SUPPORTED_LANGUAGES, getLanguageByCode } from '../i18n';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 interface HeaderProps {
   title?: string;
@@ -65,17 +67,8 @@ export function Header({ title }: HeaderProps) {
           <Bell size={17} strokeWidth={1.75} />
         </button>
 
-        {/* User avatar */}
-        <button
-          className={clsx(
-            'flex h-8 w-8 items-center justify-center rounded-full',
-            'bg-oe-blue text-xs font-semibold text-white',
-            'transition-all duration-fast ease-oe',
-            'hover:opacity-80 ring-2 ring-transparent hover:ring-oe-blue-subtle',
-          )}
-        >
-          A
-        </button>
+        {/* User menu */}
+        <UserMenu />
       </div>
     </header>
   );
@@ -155,6 +148,76 @@ function LanguageSwitcher({
               </span>
             </button>
           ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── User Menu ─────────────────────────────────────────────────────────── */
+
+function UserMenu() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const logout = useAuthStore((s) => s.logout);
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(!open)}
+        className={clsx(
+          'flex h-8 w-8 items-center justify-center rounded-full',
+          'bg-oe-blue text-xs font-semibold text-white',
+          'transition-all duration-fast ease-oe',
+          'hover:opacity-80 ring-2 ring-transparent hover:ring-oe-blue-subtle',
+        )}
+      >
+        A
+      </button>
+
+      {open && (
+        <div
+          className={clsx(
+            'absolute right-0 top-full mt-1.5',
+            'w-48 rounded-xl border border-border-light bg-surface-elevated',
+            'shadow-lg animate-scale-in',
+            'py-1.5',
+          )}
+        >
+          <button
+            onClick={() => { setOpen(false); navigate('/settings'); }}
+            className="flex w-full items-center gap-3 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
+          >
+            <User size={15} className="text-content-tertiary" />
+            {t('auth.profile', 'Profile')}
+          </button>
+          <button
+            onClick={() => { setOpen(false); navigate('/settings'); }}
+            className="flex w-full items-center gap-3 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
+          >
+            <Settings size={15} className="text-content-tertiary" />
+            {t('nav.settings', 'Settings')}
+          </button>
+          <div className="my-1.5 border-t border-border-light" />
+          <button
+            onClick={() => { logout(); navigate('/login'); setOpen(false); }}
+            className="flex w-full items-center gap-3 px-3 py-2 text-sm text-semantic-error hover:bg-semantic-error-bg transition-colors"
+          >
+            <LogOut size={15} />
+            {t('auth.logout', 'Sign out')}
+          </button>
         </div>
       )}
     </div>
