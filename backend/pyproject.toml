@@ -22,9 +22,10 @@ dependencies = [
     # Validation & serialization
     "pydantic>=2.10.0",
     "pydantic-settings>=2.6.0",
+    "email-validator>=2.1.0",
     # Auth
     "python-jose[cryptography]>=3.3.0",
-    "passlib[bcrypt]>=1.7.4",
+    "bcrypt>=4.0.0",
     # Background tasks
     "celery[redis]>=5.4.0",
     # Storage
@@ -67,6 +68,9 @@ dev = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
 [tool.ruff]
 target-version = "py312"
 line-length = 100
@@ -89,10 +93,12 @@ select = [
     "ARG",              # unused arguments
 ]
 ignore = [
-    "ANN101",           # self type annotation
-    "ANN102",           # cls type annotation
-    "ANN401",           # Any type
+    "ANN101",           # self type annotation (removed in latest ruff)
+    "ANN102",           # cls type annotation (removed in latest ruff)
+    "ANN401",           # Any type — necessary for generic contexts
     "COM812",           # trailing comma (conflicts with formatter)
+    "B008",             # function calls in defaults — required by FastAPI Depends()
+    "ANN201",           # return type on public functions — FastAPI infers from response_model
 ]
 
 [tool.ruff.lint.isort]

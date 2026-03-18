@@ -25,8 +25,9 @@ import asyncio
 import inspect
 import logging
 from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 

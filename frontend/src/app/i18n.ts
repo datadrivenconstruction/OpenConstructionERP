@@ -26,6 +26,55 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'fi', name: 'Suomi' },
 ] as const;
 
+// Inline fallback translations — ensures UI works even without backend
+const fallbackResources = {
+  en: {
+    translation: {
+      'app.name': 'OpenEstimate',
+      'app.tagline': 'Open-source construction cost estimation',
+      'nav.dashboard': 'Dashboard',
+      'nav.settings': 'Settings',
+      'common.save': 'Save',
+      'common.cancel': 'Cancel',
+      'common.delete': 'Delete',
+      'common.edit': 'Edit',
+      'common.create': 'Create',
+      'common.search': 'Search',
+      'common.filter': 'Filter',
+      'common.export': 'Export',
+      'common.import': 'Import',
+      'common.loading': 'Loading...',
+      'common.error': 'Error',
+      'common.success': 'Success',
+      'projects.title': 'Projects',
+      'projects.new_project': 'New Project',
+      'projects.no_projects': 'No projects yet',
+      'boq.title': 'Bill of Quantities',
+      'costs.title': 'Cost Database',
+      'validation.title': 'Validation',
+      'validation.passed': 'Passed',
+      'validation.warnings': 'Warnings',
+      'validation.errors': 'Errors',
+      'validation.score': 'Quality Score',
+      'takeoff.title': 'Quantity Takeoff',
+      'tendering.title': 'Tendering',
+      'modules.title': 'Modules',
+      'dashboard.welcome': 'Welcome to OpenEstimate',
+      'dashboard.subtitle': 'Your construction estimation workspace',
+      'dashboard.quick_actions': 'Quick Actions',
+      'dashboard.recent_projects': 'Recent Projects',
+      'dashboard.system_status': 'System Status',
+      'dashboard.modules_loaded': 'Modules loaded',
+      'dashboard.validation_rules': 'Validation rules',
+      'dashboard.languages': 'Languages',
+      'auth.login': 'Log In',
+      'auth.logout': 'Log Out',
+      'auth.email': 'Email',
+      'auth.password': 'Password',
+    },
+  },
+};
+
 i18n
   .use(HttpBackend)
   .use(LanguageDetector)
@@ -33,12 +82,14 @@ i18n
   .init({
     fallbackLng: 'en',
     supportedLngs: SUPPORTED_LANGUAGES.map((l) => l.code),
-    debug: import.meta.env.DEV,
+    debug: false,
     interpolation: {
-      escapeValue: false, // React already escapes
+      escapeValue: false,
     },
+    // Use inline resources as fallback, backend as primary
+    partialBundledLanguages: true,
+    resources: fallbackResources,
     backend: {
-      // Load translations from backend API
       loadPath: '/api/v1/i18n/{{lng}}',
     },
     detection: {

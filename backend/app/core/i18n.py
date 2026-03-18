@@ -16,8 +16,8 @@ Usage:
 
 import json
 import logging
-from pathlib import Path
 from contextvars import ContextVar
+from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -30,26 +30,26 @@ _translations: dict[str, dict[str, str]] = {}
 
 # Built-in languages (ISO 639-1)
 SUPPORTED_LOCALES = [
-    "en",   # English
-    "de",   # German (Deutsch)
-    "ru",   # Russian (Русский)
-    "fr",   # French (Français)
-    "es",   # Spanish (Español)
-    "pt",   # Portuguese (Português)
-    "it",   # Italian (Italiano)
-    "nl",   # Dutch (Nederlands)
-    "pl",   # Polish (Polski)
-    "cs",   # Czech (Čeština)
-    "tr",   # Turkish (Türkçe)
-    "ar",   # Arabic (العربية)
-    "zh",   # Chinese Simplified (简体中文)
-    "ja",   # Japanese (日本語)
-    "ko",   # Korean (한국어)
-    "hi",   # Hindi (हिन्दी)
-    "sv",   # Swedish (Svenska)
-    "no",   # Norwegian (Norsk)
-    "da",   # Danish (Dansk)
-    "fi",   # Finnish (Suomi)
+    "en",  # English
+    "de",  # German (Deutsch)
+    "ru",  # Russian (Русский)
+    "fr",  # French (Français)
+    "es",  # Spanish (Español)
+    "pt",  # Portuguese (Português)
+    "it",  # Italian (Italiano)
+    "nl",  # Dutch (Nederlands)
+    "pl",  # Polish (Polski)
+    "cs",  # Czech (Čeština)
+    "tr",  # Turkish (Türkçe)
+    "ar",  # Arabic (العربية)
+    "zh",  # Chinese Simplified (简体中文)
+    "ja",  # Japanese (日本語)
+    "ko",  # Korean (한국어)
+    "hi",  # Hindi (हिन्दी)
+    "sv",  # Swedish (Svenska)
+    "no",  # Norwegian (Norsk)
+    "da",  # Danish (Dansk)
+    "fi",  # Finnish (Suomi)
 ]
 
 LOCALE_NAMES = {
@@ -137,11 +137,7 @@ def t(key: str, locale: str | None = None, **kwargs: Any) -> str:
     loc = locale or get_locale()
 
     # Try requested locale → English fallback → raw key
-    template = (
-        _translations.get(loc, {}).get(key)
-        or _translations.get("en", {}).get(key)
-        or key
-    )
+    template = _translations.get(loc, {}).get(key) or _translations.get("en", {}).get(key) or key
 
     if kwargs:
         try:

@@ -16,8 +16,8 @@ Architecture:
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 from typing import Any
 from uuid import uuid4
 
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 # ── Enums & Value Objects ───────────────────────────────────────────────────
 
 
-class Severity(str, Enum):
+class Severity(StrEnum):
     """Validation result severity."""
 
     ERROR = "error"  # Blocks workflow — must be resolved
@@ -35,7 +35,7 @@ class Severity(str, Enum):
     INFO = "info"  # Suggestion — informational only
 
 
-class ValidationStatus(str, Enum):
+class ValidationStatus(StrEnum):
     """Overall validation status."""
 
     PASSED = "passed"  # No errors, no warnings
@@ -44,7 +44,7 @@ class ValidationStatus(str, Enum):
     SKIPPED = "skipped"  # Validation was skipped (no applicable rules)
 
 
-class RuleCategory(str, Enum):
+class RuleCategory(StrEnum):
     """Categories of validation rules."""
 
     STRUCTURE = "structure"  # Format correctness, required fields
@@ -82,7 +82,7 @@ class ValidationReport:
     target_id: str = ""
     rule_sets_applied: list[str] = field(default_factory=list)
     results: list[RuleResult] = field(default_factory=list)
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
     duration_ms: float = 0.0
 
     @property
@@ -196,7 +196,7 @@ class ValidationRule(ABC):
                         severity=self.severity,
                         category=self.category,
                         passed=has_kg,
-                        message="OK" if has_kg else f"Position {position['ordinal']} missing DIN 276",
+                        message="OK" if has_kg else f"Pos {position['ordinal']} missing DIN 276",
                         element_ref=position.get("id"),
                     ))
                 return results

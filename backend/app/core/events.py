@@ -18,9 +18,10 @@ import asyncio
 import inspect
 import logging
 from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from typing import Any, Callable
+from datetime import UTC, datetime
+from typing import Any
 from uuid import uuid4
 
 logger = logging.getLogger(__name__)
@@ -35,7 +36,7 @@ class Event:
     name: str
     data: dict[str, Any]
     id: str = field(default_factory=lambda: str(uuid4()))
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
     source_module: str | None = None
 
 
@@ -125,21 +126,25 @@ class EventBus:
                     outcome = await handler(event)
                 else:
                     outcome = await asyncio.to_thread(handler, event)
-                result.handler_results.append({
-                    "handler": handler.__qualname__,
-                    "result": outcome,
-                })
+                result.handler_results.append(
+                    {
+                        "handler": handler.__qualname__,
+                        "result": outcome,
+                    }
+                )
             except Exception as exc:
                 logger.exception(
                     "Error in event handler %s for '%s'",
                     handler.__qualname__,
                     event_name,
                 )
-                result.errors.append({
-                    "handler": handler.__qualname__,
-                    "error": str(exc),
-                    "type": type(exc).__name__,
-                })
+                result.errors.append(
+                    {
+                        "handler": handler.__qualname__,
+                        "error": str(exc),
+                        "type": type(exc).__name__,
+                    }
+                )
 
         if result.errors:
             logger.warning(
@@ -156,8 +161,7 @@ class EventBus:
             handlers = self._handlers.get(event_name, [])
             return {event_name: [h.__qualname__ for h in handlers]}
         return {
-            name: [h.__qualname__ for h in handlers]
-            for name, handlers in self._handlers.items()
+            name: [h.__qualname__ for h in handlers] for name, handlers in self._handlers.items()
         }
 
     def clear(self) -> None:

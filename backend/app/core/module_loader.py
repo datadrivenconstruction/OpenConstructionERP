@@ -11,6 +11,7 @@ Module lifecycle:
     5. Startup: call module.on_startup() if defined
 """
 
+import contextlib
 import importlib
 import logging
 from dataclasses import dataclass, field
@@ -184,22 +185,16 @@ class ModuleLoader:
             pass
 
         # Load hooks
-        try:
+        with contextlib.suppress(ModuleNotFoundError):
             importlib.import_module(f"{package_path}.hooks")
-        except ModuleNotFoundError:
-            pass
 
         # Load events
-        try:
+        with contextlib.suppress(ModuleNotFoundError):
             importlib.import_module(f"{package_path}.events")
-        except ModuleNotFoundError:
-            pass
 
         # Load validators
-        try:
+        with contextlib.suppress(ModuleNotFoundError):
             importlib.import_module(f"{package_path}.validators")
-        except ModuleNotFoundError:
-            pass
 
         # Call on_startup if defined
         startup = getattr(package, "on_startup", None)

@@ -188,7 +188,8 @@ class TestHookRegistry:
 
     def test_list_filters_and_actions(self, hooks):
         @hooks.filter("f1", priority=5)
-        async def filt(data): return data
+        async def filt(data):
+            return data
 
         @hooks.action("a1", priority=10)
         async def act(): ...

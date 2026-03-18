@@ -35,16 +35,20 @@ class PositionHasQuantity(ValidationRule):
         for pos in _get_positions(context):
             qty = pos.get("quantity", 0)
             passed = qty is not None and float(qty) > 0
-            results.append(RuleResult(
-                rule_id=self.rule_id,
-                rule_name=self.name,
-                severity=self.severity,
-                category=self.category,
-                passed=passed,
-                message="OK" if passed else f"Position {pos.get('ordinal', '?')} has zero/missing quantity",
-                element_ref=pos.get("id"),
-                suggestion="Set a quantity greater than 0" if not passed else None,
-            ))
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Position {pos.get('ordinal', '?')} has zero/missing quantity",
+                    element_ref=pos.get("id"),
+                    suggestion="Set a quantity greater than 0" if not passed else None,
+                )
+            )
         return results
 
 
@@ -61,16 +65,20 @@ class PositionHasUnitRate(ValidationRule):
         for pos in _get_positions(context):
             rate = pos.get("unit_rate", 0)
             passed = rate is not None and float(rate) > 0
-            results.append(RuleResult(
-                rule_id=self.rule_id,
-                rule_name=self.name,
-                severity=self.severity,
-                category=self.category,
-                passed=passed,
-                message="OK" if passed else f"Position {pos.get('ordinal', '?')} has no unit rate",
-                element_ref=pos.get("id"),
-                suggestion="Assign a rate from the cost database" if not passed else None,
-            ))
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Position {pos.get('ordinal', '?')} has no unit rate",
+                    element_ref=pos.get("id"),
+                    suggestion="Assign a rate from the cost database" if not passed else None,
+                )
+            )
         return results
 
 
@@ -87,15 +95,19 @@ class PositionHasDescription(ValidationRule):
         for pos in _get_positions(context):
             desc = (pos.get("description") or "").strip()
             passed = len(desc) >= 3
-            results.append(RuleResult(
-                rule_id=self.rule_id,
-                rule_name=self.name,
-                severity=self.severity,
-                category=self.category,
-                passed=passed,
-                message="OK" if passed else f"Position {pos.get('ordinal', '?')} missing description",
-                element_ref=pos.get("id"),
-            ))
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Position {pos.get('ordinal', '?')} missing description",
+                    element_ref=pos.get("id"),
+                )
+            )
         return results
 
 
@@ -118,16 +130,20 @@ class NoDuplicateOrdinals(ValidationRule):
         results: list[RuleResult] = []
         for ordinal, ids in ordinals.items():
             passed = len(ids) == 1
-            results.append(RuleResult(
-                rule_id=self.rule_id,
-                rule_name=self.name,
-                severity=self.severity,
-                category=self.category,
-                passed=passed,
-                message="OK" if passed else f"Duplicate ordinal '{ordinal}' found in {len(ids)} positions",
-                element_ref=ids[0] if len(ids) == 1 else None,
-                details={"duplicate_ids": ids} if not passed else {},
-            ))
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Duplicate ordinal '{ordinal}' found in {len(ids)} positions",
+                    element_ref=ids[0] if len(ids) == 1 else None,
+                    details={"duplicate_ids": ids} if not passed else {},
+                )
+            )
         return results
 
 
@@ -155,20 +171,26 @@ class UnitRateInRange(ValidationRule):
             if rate <= 0:
                 continue
             passed = rate <= threshold
-            results.append(RuleResult(
-                rule_id=self.rule_id,
-                rule_name=self.name,
-                severity=self.severity,
-                category=self.category,
-                passed=passed,
-                message="OK" if passed else (
-                    f"Position {pos.get('ordinal', '?')}: rate {rate:.2f} "
-                    f"is >{threshold:.2f} (5x median)"
-                ),
-                element_ref=pos.get("id"),
-                details={"rate": rate, "median": median, "threshold": threshold},
-                suggestion="Verify this unit rate — it's unusually high" if not passed else None,
-            ))
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else (
+                        f"Position {pos.get('ordinal', '?')}: rate {rate:.2f} "
+                        f"is >{threshold:.2f} (5x median)"
+                    ),
+                    element_ref=pos.get("id"),
+                    details={"rate": rate, "median": median, "threshold": threshold},
+                    suggestion="Verify this unit rate — it's unusually high"
+                    if not passed
+                    else None,
+                )
+            )
         return results
 
 
@@ -188,16 +210,22 @@ class DIN276CostGroupRequired(ValidationRule):
         for pos in _get_positions(context):
             kg = (pos.get("classification") or {}).get("din276", "")
             passed = bool(kg) and len(str(kg)) >= 3
-            results.append(RuleResult(
-                rule_id=self.rule_id,
-                rule_name=self.name,
-                severity=self.severity,
-                category=self.category,
-                passed=passed,
-                message="OK" if passed else f"Position {pos.get('ordinal', '?')} missing DIN 276 KG",
-                element_ref=pos.get("id"),
-                suggestion="Assign a 3-digit DIN 276 Kostengruppe (e.g., 330 for walls)" if not passed else None,
-            ))
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Position {pos.get('ordinal', '?')} missing DIN 276 KG",
+                    element_ref=pos.get("id"),
+                    suggestion="Assign a 3-digit DIN 276 Kostengruppe (e.g., 330 for walls)"
+                    if not passed
+                    else None,
+                )
+            )
         return results
 
 
@@ -218,21 +246,21 @@ class DIN276ValidCostGroup(ValidationRule):
             kg = str((pos.get("classification") or {}).get("din276", ""))
             if not kg:
                 continue  # Handled by cost_group_required
-            passed = (
-                len(kg) == 3
-                and kg.isdigit()
-                and kg[0] in self.VALID_TOP_GROUPS
+            passed = len(kg) == 3 and kg.isdigit() and kg[0] in self.VALID_TOP_GROUPS
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Invalid DIN 276 code '{kg}' in position {pos.get('ordinal', '?')}",
+                    element_ref=pos.get("id"),
+                    details={"given_code": kg},
+                )
             )
-            results.append(RuleResult(
-                rule_id=self.rule_id,
-                rule_name=self.name,
-                severity=self.severity,
-                category=self.category,
-                passed=passed,
-                message="OK" if passed else f"Invalid DIN 276 code '{kg}' in position {pos.get('ordinal', '?')}",
-                element_ref=pos.get("id"),
-                details={"given_code": kg},
-            ))
         return results
 
 
@@ -249,6 +277,7 @@ class GAEBOrdinalFormat(ValidationRule):
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
         import re
+
         pattern = re.compile(r"^\d{2}\.\d{2}\.\d{4}$")  # XX.XX.XXXX
         results: list[RuleResult] = []
         for pos in _get_positions(context):
@@ -256,16 +285,20 @@ class GAEBOrdinalFormat(ValidationRule):
             if not ordinal:
                 continue
             passed = bool(pattern.match(ordinal))
-            results.append(RuleResult(
-                rule_id=self.rule_id,
-                rule_name=self.name,
-                severity=self.severity,
-                category=self.category,
-                passed=passed,
-                message="OK" if passed else f"Ordinal '{ordinal}' doesn't match GAEB format XX.XX.XXXX",
-                element_ref=pos.get("id"),
-                suggestion="Use format like 01.02.0030" if not passed else None,
-            ))
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Ordinal '{ordinal}' doesn't match GAEB format XX.XX.XXXX",
+                    element_ref=pos.get("id"),
+                    suggestion="Use format like 01.02.0030" if not passed else None,
+                )
+            )
         return results
 
 

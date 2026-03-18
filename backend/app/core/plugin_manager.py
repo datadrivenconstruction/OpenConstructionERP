@@ -24,7 +24,6 @@ Usage:
     available = await manager.list_available()
 """
 
-import json
 import logging
 import shutil
 import zipfile
@@ -208,7 +207,9 @@ class ModulePluginManager:
         return []
 
     async def _fetch_module_info(
-        self, module_name: str, version: str | None = None,
+        self,
+        module_name: str,
+        version: str | None = None,
     ) -> ModuleInfo | None:
         """Fetch module info from registry."""
         try:

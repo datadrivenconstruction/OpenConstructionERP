@@ -5,8 +5,8 @@ All modules extend the shared Base for auto-migration support.
 """
 
 import uuid
+from collections.abc import AsyncGenerator
 from datetime import datetime
-from typing import AsyncGenerator
 
 from sqlalchemy import DateTime, MetaData, func
 from sqlalchemy.dialects.postgresql import UUID

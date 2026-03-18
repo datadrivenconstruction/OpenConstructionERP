@@ -2,32 +2,196 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── OpenEstimate Design System ─────────────────────────────────────────── */
+/* Apple-inspired. Clean, spacious, precise. */
+
 :root {
-  --color-primary: #1a56db;
-  --color-primary-light: #3b82f6;
-  --color-success: #16a34a;
-  --color-warning: #d97706;
-  --color-error: #dc2626;
-  --color-bg: #ffffff;
-  --color-bg-subtle: #f8fafc;
-  --color-border: #e2e8f0;
-  --color-text: #0f172a;
-  --color-text-muted: #64748b;
-  --radius: 6px;
+  /* Brand */
+  --oe-blue: #0071e3;
+  --oe-blue-hover: #0077ed;
+  --oe-blue-active: #006edb;
+  --oe-blue-subtle: #e8f2fe;
+
+  /* Surfaces */
+  --oe-bg: #ffffff;
+  --oe-bg-secondary: #f5f5f7;
+  --oe-bg-tertiary: #fbfbfd;
+  --oe-bg-elevated: #ffffff;
+
+  /* Borders */
+  --oe-border: #d2d2d7;
+  --oe-border-light: #e8e8ed;
+  --oe-border-focus: var(--oe-blue);
+
+  /* Text */
+  --oe-text-primary: #1d1d1f;
+  --oe-text-secondary: #6e6e73;
+  --oe-text-tertiary: #86868b;
+  --oe-text-inverse: #ffffff;
+
+  /* Semantic */
+  --oe-success: #34c759;
+  --oe-success-bg: #ecfdf3;
+  --oe-warning: #ff9f0a;
+  --oe-warning-bg: #fff8ec;
+  --oe-error: #ff3b30;
+  --oe-error-bg: #fef2f2;
+  --oe-info: #5ac8fa;
+  --oe-info-bg: #eff9fe;
+
+  /* Shadows — Apple uses very subtle, layered shadows */
+  --oe-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --oe-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --oe-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --oe-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+  --oe-shadow-xl: 0 24px 80px rgba(0, 0, 0, 0.14), 0 8px 24px rgba(0, 0, 0, 0.08);
+
+  /* Radius */
+  --oe-radius-xs: 4px;
+  --oe-radius-sm: 8px;
+  --oe-radius-md: 12px;
+  --oe-radius-lg: 16px;
+  --oe-radius-xl: 20px;
+  --oe-radius-full: 9999px;
+
+  /* Spacing scale — 4px base */
+  --oe-space-1: 4px;
+  --oe-space-2: 8px;
+  --oe-space-3: 12px;
+  --oe-space-4: 16px;
+  --oe-space-5: 20px;
+  --oe-space-6: 24px;
+  --oe-space-8: 32px;
+  --oe-space-10: 40px;
+  --oe-space-12: 48px;
+  --oe-space-16: 64px;
+
+  /* Typography */
+  --oe-font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+    'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --oe-font-mono: 'SF Mono', SFMono-Regular, ui-monospace, 'Cascadia Code', Menlo, Monaco,
+    Consolas, monospace;
+
+  /* Transitions */
+  --oe-transition-fast: 120ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  --oe-transition-normal: 200ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  --oe-transition-slow: 350ms cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  /* Layout */
+  --oe-sidebar-width: 260px;
+  --oe-header-height: 52px;
+  --oe-content-max-width: 1440px;
 }
 
-[dir="rtl"] {
-  direction: rtl;
+/* ── Base ────────────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body {
-  font-family: system-ui, -apple-system, sans-serif;
+  margin: 0;
+  font-family: var(--oe-font-sans);
+  color: var(--oe-text-primary);
+  background: var(--oe-bg-secondary);
+  line-height: 1.47059;
+  letter-spacing: -0.022em;
 }
 
-/* AG Grid overrides for clean look */
+[dir='rtl'] {
+  direction: rtl;
+}
+
+/* ── Typography — Apple SF Pro scale ─────────────────────────────────────── */
+
+h1 {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.125;
+  letter-spacing: -0.04em;
+}
+
+h2 {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.16667;
+  letter-spacing: -0.03em;
+}
+
+h3 {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+h4 {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.29412;
+  letter-spacing: -0.015em;
+}
+
+/* ── Scrollbar — thin, subtle ──────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+  background-clip: content-box;
+}
+
+/* ── Focus — accessible, Apple-style ring ────────────────────────────────── */
+
+:focus-visible {
+  outline: 3px solid var(--oe-blue);
+  outline-offset: 2px;
+  border-radius: var(--oe-radius-xs);
+}
+
+/* ── Selection ─────────────────────────────────────────────────────────── */
+
+::selection {
+  background: var(--oe-blue);
+  color: white;
+}
+
+/* ── AG Grid premium overrides ─────────────────────────────────────────── */
+
 .ag-theme-alpine {
-  --ag-font-family: system-ui, -apple-system, sans-serif;
+  --ag-font-family: var(--oe-font-sans);
   --ag-font-size: 13px;
-  --ag-row-height: 36px;
-  --ag-header-height: 40px;
+  --ag-row-height: 40px;
+  --ag-header-height: 44px;
+  --ag-header-foreground-color: var(--oe-text-secondary);
+  --ag-header-background-color: var(--oe-bg-tertiary);
+  --ag-border-color: var(--oe-border-light);
+  --ag-row-border-color: var(--oe-border-light);
+  --ag-selected-row-background-color: var(--oe-blue-subtle);
+  --ag-range-selection-border-color: var(--oe-blue);
+  --ag-range-selection-background-color: rgba(0, 113, 227, 0.08);
+  --ag-cell-horizontal-padding: 16px;
 }

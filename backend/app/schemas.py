@@ -6,17 +6,16 @@ Used for API request/response, internal data passing, and validation.
 
 from datetime import datetime
 from decimal import Decimal
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-
 # ── Enums ───────────────────────────────────────────────────────────────────
 
 
-class MeasurementUnit(str, Enum):
+class MeasurementUnit(StrEnum):
     M = "m"
     M2 = "m2"
     M3 = "m3"
@@ -26,12 +25,12 @@ class MeasurementUnit(str, Enum):
     LSUM = "lsum"
     H = "h"
     SET = "set"
-    LM = "lm"       # linear meter (Laufmeter)
-    L = "l"          # liter
-    PA = "pa"        # pauschal (lump sum DE)
+    LM = "lm"  # linear meter (Laufmeter)
+    L = "l"  # liter
+    PA = "pa"  # pauschal (lump sum DE)
 
 
-class SourceType(str, Enum):
+class SourceType(StrEnum):
     MANUAL = "manual"
     CAD_IMPORT = "cad_import"
     AI_TAKEOFF = "ai_takeoff"
@@ -40,7 +39,7 @@ class SourceType(str, Enum):
     API = "api"
 
 
-class ValidationStatusEnum(str, Enum):
+class ValidationStatusEnum(StrEnum):
     PENDING = "pending"
     PASSED = "passed"
     WARNINGS = "warnings"
@@ -100,8 +99,8 @@ class ProjectResponse(OEResponse):
 class Classification(OEBase):
     """Multi-standard classification codes for a BOQ position."""
 
-    din276: str | None = None   # e.g., "330"
-    nrm: str | None = None      # e.g., "2.6.1"
+    din276: str | None = None  # e.g., "330"
+    nrm: str | None = None  # e.g., "2.6.1"
     masterformat: str | None = None  # e.g., "03 30 00"
     uniclass: str | None = None
     omniclass: str | None = None
@@ -157,13 +156,13 @@ class PositionUpdate(OEBase):
 
 class CostItemResponse(OEBase):
     id: UUID
-    code: str                    # CWICR code or external code
-    description: str             # Multi-language via i18n key or inline
+    code: str  # CWICR code or external code
+    description: str  # Multi-language via i18n key or inline
     descriptions: dict[str, str] = Field(default_factory=dict)  # {"en": "...", "de": "..."}
     unit: MeasurementUnit
     rate: Decimal
     currency: str = "EUR"
-    source: str = "cwicr"        # cwicr, rsmeans, bki, custom
+    source: str = "cwicr"  # cwicr, rsmeans, bki, custom
     classification: Classification = Field(default_factory=Classification)
     components: list[dict[str, Any]] = Field(default_factory=list)
     tags: list[str] = Field(default_factory=list)
@@ -173,17 +172,17 @@ class CostItemResponse(OEBase):
 
 
 class CostSearchQuery(OEBase):
-    q: str = ""                  # Text search
+    q: str = ""  # Text search
     unit: MeasurementUnit | None = None
     classification_code: str | None = None
     source: str | None = None
     region: str | None = None
     min_rate: Decimal | None = None
     max_rate: Decimal | None = None
-    locale: str = "en"           # Return descriptions in this language
+    locale: str = "en"  # Return descriptions in this language
     limit: int = Field(default=20, ge=1, le=100)
     offset: int = Field(default=0, ge=0)
-    semantic: bool = False       # Use vector search (Qdrant)
+    semantic: bool = False  # Use vector search (Qdrant)
 
 
 # ── CAD Canonical Format ────────────────────────────────────────────────────
@@ -193,7 +192,7 @@ class CADElement(OEBase):
     """Single element from CAD conversion — canonical format."""
 
     id: str
-    category: str                # wall, floor, roof, column, beam, door, window, ...
+    category: str  # wall, floor, roof, column, beam, door, window, ...
     classification: Classification = Field(default_factory=Classification)
     geometry: dict[str, Any] = Field(default_factory=dict)  # type, length, area, volume, etc.
     properties: dict[str, Any] = Field(default_factory=dict)  # material, fire_rating, etc.
@@ -205,7 +204,7 @@ class CADImportResult(OEBase):
     """Result of a CAD file conversion."""
 
     format_version: str = "1.0"
-    source_type: str             # dwg, dgn, rvt, ifc, pdf
+    source_type: str  # dwg, dgn, rvt, ifc, pdf
     source_filename: str
     converter_version: str
     elements: list[CADElement]
@@ -221,8 +220,8 @@ class CADImportResult(OEBase):
 class ValidationResultSchema(OEBase):
     rule_id: str
     rule_name: str
-    severity: str       # error, warning, info
-    category: str       # structure, completeness, consistency, compliance, quality
+    severity: str  # error, warning, info
+    category: str  # structure, completeness, consistency, compliance, quality
     passed: bool
     message: str
     element_ref: str | None = None
@@ -234,7 +233,7 @@ class ValidationReportSchema(OEBase):
     id: str
     target_type: str
     target_id: str
-    status: str         # passed, warnings, errors, skipped
+    status: str  # passed, warnings, errors, skipped
     score: float
     rule_sets_applied: list[str]
     results: list[ValidationResultSchema]

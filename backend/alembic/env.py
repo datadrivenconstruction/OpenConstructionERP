@@ -13,10 +13,10 @@ from sqlalchemy import create_engine
 from app.config import get_settings
 from app.database import Base
 
-# Import all module models so they're registered with Base.metadata
+# Import all module models so they're registered with Base.metadata.
 # This is done automatically by the module loader at runtime,
 # but we need it here for autogenerate to work.
-# Add new module model imports as modules are created:
+from app.modules.users import models as _users_models  # noqa: F401
 # from app.modules.projects import models  # noqa: F401
 # from app.modules.boq import models  # noqa: F401
 

@@ -5,18 +5,19 @@ Usage:
 """
 
 import logging
+from typing import Any
 
 import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.config import get_settings
+from app.config import Settings, get_settings
 from app.core.module_loader import module_loader
 
 logger = logging.getLogger(__name__)
 
 
-def configure_logging(settings) -> None:
+def configure_logging(settings: Settings) -> None:
     """Configure structured logging."""
     structlog.configure(
         processors=[
@@ -27,7 +28,9 @@ def configure_logging(settings) -> None:
             structlog.processors.TimeStamper(fmt="iso"),
             structlog.processors.StackInfoRenderer(),
             structlog.processors.format_exc_info,
-            structlog.dev.ConsoleRenderer() if settings.app_debug else structlog.processors.JSONRenderer(),
+            structlog.dev.ConsoleRenderer()
+            if settings.app_debug
+            else structlog.processors.JSONRenderer(),
         ],
         wrapper_class=structlog.stdlib.BoundLogger,
         context_class=dict,
@@ -71,10 +74,11 @@ def create_app() -> FastAPI:
 
     # ── System Routes ───────────────────────────────────────────────────
     from app.core.i18n_router import router as i18n_router
+
     app.include_router(i18n_router, prefix="/api/v1")
 
     @app.get("/api/health", tags=["System"])
-    async def health_check():
+    async def health_check() -> dict[str, Any]:
         return {
             "status": "healthy",
             "version": settings.app_version,
@@ -82,20 +86,22 @@ def create_app() -> FastAPI:
         }
 
     @app.get("/api/system/modules", tags=["System"])
-    async def list_modules():
+    async def list_modules() -> dict[str, Any]:
         return {"modules": module_loader.list_modules()}
 
     @app.get("/api/system/validation-rules", tags=["System"])
-    async def list_validation_rules():
+    async def list_validation_rules() -> dict[str, Any]:
         from app.core.validation.engine import rule_registry
+
         return {
             "rule_sets": rule_registry.list_rule_sets(),
             "rules": rule_registry.list_rules(),
         }
 
     @app.get("/api/system/hooks", tags=["System"])
-    async def list_hooks():
+    async def list_hooks() -> dict[str, Any]:
         from app.core.hooks import hooks
+
         return {
             "filters": hooks.list_filters(),
             "actions": hooks.list_actions(),
@@ -103,26 +109,36 @@ def create_app() -> FastAPI:
 
     # ── Lifecycle ───────────────────────────────────────────────────────
     @app.on_event("startup")
-    async def startup():
-        logger.info("Starting %s v%s (%s)", settings.app_name, settings.app_version, settings.app_env)
+    async def startup() -> None:
+        logger.info(
+            "Starting %s v%s (%s)", settings.app_name, settings.app_version, settings.app_env
+        )
 
         # Load translations (20 languages)
         from app.core.i18n import load_translations
+
         load_translations()
 
-        # Load all modules
+        # Register core permissions
+        from app.core.permissions import register_core_permissions
+
+        register_core_permissions()
+
+        # Load all modules (triggers module on_startup hooks)
         await module_loader.load_all(app)
 
         # Register built-in validation rules
         from app.core.validation.rules import register_builtin_rules
+
         register_builtin_rules()
 
         logger.info("Application started successfully")
 
     @app.on_event("shutdown")
-    async def shutdown():
+    async def shutdown() -> None:
         logger.info("Shutting down %s", settings.app_name)
         from app.database import engine
+
         await engine.dispose()
 
     return app
