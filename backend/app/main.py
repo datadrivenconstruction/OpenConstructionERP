@@ -128,6 +128,9 @@ def create_app() -> FastAPI:
         if "sqlite" in settings.database_url:
             from app.database import Base, engine
             from app.modules.users import models as _users_models  # noqa: F401
+            from app.modules.projects import models as _projects_models  # noqa: F401
+            from app.modules.boq import models as _boq_models  # noqa: F401
+            from app.modules.costs import models as _costs_models  # noqa: F401
 
             async with engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)

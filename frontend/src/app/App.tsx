@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { AppLayout } from './layout';
 import { DashboardPage } from '@/features/dashboard';
 import { LoginPage } from '@/features/auth';
+import { ProjectsPage, CreateProjectPage, ProjectDetailPage } from '@/features/projects';
+import { BOQEditorPage, CreateBOQPage } from '@/features/boq';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 function LoadingScreen() {
@@ -27,10 +29,10 @@ function PlaceholderPage({ titleKey }: { titleKey: string }) {
     <AppLayout title={t(titleKey)}>
       <div className="flex flex-col items-center justify-center py-24 text-center animate-fade-in">
         <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-secondary">
-          <span className="text-xl">🚧</span>
+          <span className="text-xl text-content-tertiary">Soon</span>
         </div>
         <h2 className="text-xl font-semibold text-content-primary">{t(titleKey)}</h2>
-        <p className="mt-2 text-sm text-content-secondary">Coming in Phase 1</p>
+        <p className="mt-2 text-sm text-content-secondary">Coming soon</p>
       </div>
     </AppLayout>
   );
@@ -49,7 +51,7 @@ export default function App() {
         {/* Auth */}
         <Route path="/login" element={<LoginPage />} />
 
-        {/* App */}
+        {/* Dashboard */}
         <Route
           path="/"
           element={
@@ -58,7 +60,52 @@ export default function App() {
             </AppLayout>
           }
         />
-        <Route path="/projects" element={<PlaceholderPage titleKey="projects.title" />} />
+
+        {/* Projects */}
+        <Route
+          path="/projects"
+          element={
+            <AppLayout title="Projects">
+              <ProjectsPage />
+            </AppLayout>
+          }
+        />
+        <Route
+          path="/projects/new"
+          element={
+            <AppLayout title="New Project">
+              <CreateProjectPage />
+            </AppLayout>
+          }
+        />
+        <Route
+          path="/projects/:projectId"
+          element={
+            <AppLayout title="Project">
+              <ProjectDetailPage />
+            </AppLayout>
+          }
+        />
+        <Route
+          path="/projects/:projectId/boq/new"
+          element={
+            <AppLayout title="New BOQ">
+              <CreateBOQPage />
+            </AppLayout>
+          }
+        />
+
+        {/* BOQ Editor */}
+        <Route
+          path="/boq/:boqId"
+          element={
+            <AppLayout title="BOQ Editor">
+              <BOQEditorPage />
+            </AppLayout>
+          }
+        />
+
+        {/* Placeholder pages */}
         <Route path="/boq" element={<PlaceholderPage titleKey="boq.title" />} />
         <Route path="/takeoff" element={<PlaceholderPage titleKey="takeoff.title" />} />
         <Route path="/costs" element={<PlaceholderPage titleKey="costs.title" />} />

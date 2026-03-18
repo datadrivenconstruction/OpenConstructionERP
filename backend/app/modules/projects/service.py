@@ -1,0 +1,149 @@
+"""Project service — business logic for project management.
+
+Stateless service layer. Handles:
+- Project CRUD with ownership enforcement
+- Soft-delete via status='archived'
+- Event publishing on create/update/delete
+"""
+
+import logging
+import uuid
+
+from fastapi import HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.config import Settings
+from app.core.events import event_bus
+from app.modules.projects.models import Project
+from app.modules.projects.repository import ProjectRepository
+from app.modules.projects.schemas import ProjectCreate, ProjectUpdate
+
+logger = logging.getLogger(__name__)
+
+
+class ProjectService:
+    """Business logic for project operations."""
+
+    def __init__(self, session: AsyncSession, settings: Settings) -> None:
+        self.session = session
+        self.settings = settings
+        self.repo = ProjectRepository(session)
+
+    # ── Create ────────────────────────────────────────────────────────────
+
+    async def create_project(
+        self,
+        data: ProjectCreate,
+        owner_id: uuid.UUID,
+    ) -> Project:
+        """Create a new project owned by the given user."""
+        project = Project(
+            name=data.name,
+            description=data.description,
+            region=data.region,
+            classification_standard=data.classification_standard,
+            currency=data.currency,
+            locale=data.locale,
+            validation_rule_sets=data.validation_rule_sets,
+            owner_id=owner_id,
+        )
+        project = await self.repo.create(project)
+
+        await event_bus.publish(
+            "projects.project.created",
+            {
+                "project_id": str(project.id),
+                "owner_id": str(owner_id),
+                "name": project.name,
+            },
+            source_module="oe_projects",
+        )
+
+        logger.info("Project created: %s (owner=%s)", project.name, owner_id)
+        return project
+
+    # ── Read ──────────────────────────────────────────────────────────────
+
+    async def get_project(self, project_id: uuid.UUID) -> Project:
+        """Get project by ID. Raises 404 if not found."""
+        project = await self.repo.get_by_id(project_id)
+        if project is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Project not found",
+            )
+        return project
+
+    async def list_projects(
+        self,
+        owner_id: uuid.UUID,
+        *,
+        offset: int = 0,
+        limit: int = 50,
+        status_filter: str | None = None,
+    ) -> tuple[list[Project], int]:
+        """List projects for a user with pagination."""
+        return await self.repo.list_for_user(
+            owner_id,
+            offset=offset,
+            limit=limit,
+            status=status_filter,
+        )
+
+    # ── Update ────────────────────────────────────────────────────────────
+
+    async def update_project(
+        self,
+        project_id: uuid.UUID,
+        data: ProjectUpdate,
+    ) -> Project:
+        """Update project fields. Raises 404 if not found."""
+        project = await self.get_project(project_id)
+
+        fields = data.model_dump(exclude_unset=True)
+
+        # Map schema field 'metadata' to model column 'metadata_'
+        if "metadata" in fields:
+            fields["metadata_"] = fields.pop("metadata")
+
+        if not fields:
+            return project
+
+        await self.repo.update_fields(project_id, **fields)
+
+        # Refresh the project object
+        await self.session.refresh(project)
+
+        await event_bus.publish(
+            "projects.project.updated",
+            {
+                "project_id": str(project_id),
+                "updated_fields": list(fields.keys()),
+            },
+            source_module="oe_projects",
+        )
+
+        logger.info("Project updated: %s (fields=%s)", project_id, list(fields.keys()))
+        return project
+
+    # ── Delete (soft) ─────────────────────────────────────────────────────
+
+    async def delete_project(self, project_id: uuid.UUID) -> None:
+        """Soft-delete a project by setting status to 'archived'.
+
+        Raises 404 if not found.
+        """
+        project = await self.get_project(project_id)
+
+        await self.repo.update_fields(project_id, status="archived")
+
+        await event_bus.publish(
+            "projects.project.deleted",
+            {
+                "project_id": str(project_id),
+                "owner_id": str(project.owner_id),
+            },
+            source_module="oe_projects",
+        )
+
+        logger.info("Project archived: %s", project_id)
