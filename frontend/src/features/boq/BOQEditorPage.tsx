@@ -97,17 +97,18 @@ export function BOQEditorPage() {
             variant="ghost"
             size="sm"
             icon={<ShieldCheck size={15} />}
-            onClick={() => {
+            onClick={async () => {
               const token = localStorage.getItem('oe_access_token');
-              fetch(`/api/v1/boq/boqs/${boqId}/validate`, {
-                method: 'POST',
-                headers: { Authorization: `Bearer ${token}` },
-              })
-                .then((r) => r.json())
-                .then((data) => {
-                  const msg = `Score: ${Math.round((data.score ?? 0) * 100)}%\n${data.counts?.passed ?? 0} passed, ${data.counts?.warnings ?? 0} warnings, ${data.counts?.errors ?? 0} errors`;
-                  alert(msg);
+              try {
+                const r = await fetch(`/api/v1/boq/boqs/${boqId}/validate`, {
+                  method: 'POST',
+                  headers: { Authorization: `Bearer ${token}` },
                 });
+                await r.json();
+                navigate(`/validation`);
+              } catch {
+                alert('Validation failed');
+              }
             }}
           >
             Validate
@@ -116,9 +117,20 @@ export function BOQEditorPage() {
             variant="ghost"
             size="sm"
             icon={<Download size={15} />}
-            onClick={() => {
+            onClick={async () => {
               const token = localStorage.getItem('oe_access_token');
-              window.open(`/api/v1/boq/boqs/${boqId}/export/excel?token=${token}`, '_blank');
+              const r = await fetch(`/api/v1/boq/boqs/${boqId}/export/excel`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              if (r.ok) {
+                const blob = await r.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${boq.name}.xlsx`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }
             }}
           >
             Excel
@@ -127,9 +139,20 @@ export function BOQEditorPage() {
             variant="ghost"
             size="sm"
             icon={<Download size={15} />}
-            onClick={() => {
+            onClick={async () => {
               const token = localStorage.getItem('oe_access_token');
-              window.open(`/api/v1/boq/boqs/${boqId}/export/csv?token=${token}`, '_blank');
+              const r = await fetch(`/api/v1/boq/boqs/${boqId}/export/csv`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              if (r.ok) {
+                const blob = await r.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${boq.name}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }
             }}
           >
             CSV
