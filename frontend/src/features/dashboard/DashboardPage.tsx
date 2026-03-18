@@ -6,12 +6,11 @@ import {
   Database,
   ShieldCheck,
   ArrowRight,
-  Activity,
   Layers,
   Globe,
   Zap,
 } from 'lucide-react';
-import { Card, CardHeader, CardContent, Button, Badge, StatusDot, Skeleton } from '@/shared/ui';
+import { Card, CardHeader, CardContent, Button, Badge, Skeleton } from '@/shared/ui';
 
 export function DashboardPage() {
   const { t } = useTranslation();
