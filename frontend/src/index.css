@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #1a56db;
+  --color-primary-light: #3b82f6;
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-error: #dc2626;
+  --color-bg: #ffffff;
+  --color-bg-subtle: #f8fafc;
+  --color-border: #e2e8f0;
+  --color-text: #0f172a;
+  --color-text-muted: #64748b;
+  --radius: 6px;
+}
+
+[dir="rtl"] {
+  direction: rtl;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* AG Grid overrides for clean look */
+.ag-theme-alpine {
+  --ag-font-family: system-ui, -apple-system, sans-serif;
+  --ag-font-size: 13px;
+  --ag-row-height: 36px;
+  --ag-header-height: 40px;
+}

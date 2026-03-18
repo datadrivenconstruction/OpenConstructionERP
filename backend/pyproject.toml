@@ -1,0 +1,129 @@
+[project]
+name = "openestimate"
+version = "0.1.0"
+description = "Open-source modular platform for construction cost estimation"
+license = "AGPL-3.0-or-later"
+requires-python = ">=3.12"
+authors = [
+    { name = "OpenEstimate Contributors" }
+]
+readme = "README.md"
+
+dependencies = [
+    # Web framework
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "python-multipart>=0.0.12",
+    # Database
+    "sqlalchemy[asyncio]>=2.0.36",
+    "asyncpg>=0.30.0",
+    "alembic>=1.14.0",
+    "psycopg2-binary>=2.9.10",
+    # Validation & serialization
+    "pydantic>=2.10.0",
+    "pydantic-settings>=2.6.0",
+    # Auth
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.4",
+    # Background tasks
+    "celery[redis]>=5.4.0",
+    # Storage
+    "boto3>=1.35.0",
+    # Utilities
+    "httpx>=0.28.0",
+    "orjson>=3.10.0",
+    "python-dateutil>=2.9.0",
+    "structlog>=24.4.0",
+    "tenacity>=9.0.0",
+]
+
+[project.optional-dependencies]
+ai = [
+    "qdrant-client>=1.12.0",
+    "sentence-transformers>=3.3.0",
+    "anthropic>=0.40.0",
+    "openai>=1.55.0",
+]
+cv = [
+    "paddleocr>=2.9.0",
+    "ultralytics>=8.3.0",
+    "opencv-python-headless>=4.10.0",
+    "pymupdf>=1.25.0",
+    "Pillow>=11.0.0",
+]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=6.0.0",
+    "pytest-xdist>=3.5.0",
+    "httpx>=0.28.0",
+    "factory-boy>=3.3.0",
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+    "pre-commit>=4.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["app", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E", "F", "W",     # pyflakes + pycodestyle
+    "I",                # isort
+    "N",                # pep8-naming
+    "UP",               # pyupgrade
+    "ANN",              # annotations
+    "B",                # bugbear
+    "A",                # builtins
+    "COM",              # commas
+    "C4",               # comprehensions
+    "PT",               # pytest
+    "RET",              # return
+    "SIM",              # simplify
+    "ARG",              # unused arguments
+]
+ignore = [
+    "ANN101",           # self type annotation
+    "ANN102",           # cls type annotation
+    "ANN401",           # Any type
+    "COM812",           # trailing comma (conflicts with formatter)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+markers = [
+    "unit: Unit tests (no database)",
+    "integration: Integration tests (requires database)",
+    "slow: Slow tests (>5s)",
+]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.coverage.run]
+source = ["app"]
+omit = ["app/migrations/*", "tests/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.",
+]
