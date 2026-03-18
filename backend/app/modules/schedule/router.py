@@ -1,0 +1,344 @@
+"""Schedule API routes.
+
+Endpoints:
+    POST   /schedules/                          — Create a new schedule
+    GET    /schedules/?project_id=xxx           — List schedules for a project
+    GET    /schedules/{id}                      — Get schedule detail
+    PATCH  /schedules/{id}                      — Update schedule
+    DELETE /schedules/{id}                      — Delete schedule
+    POST   /schedules/{id}/activities           — Add activity to schedule
+    GET    /schedules/{id}/activities           — List activities for schedule
+    GET    /schedules/{id}/gantt                — Get Gantt chart data
+    PATCH  /activities/{id}                     — Update activity
+    DELETE /activities/{id}                     — Delete activity
+    POST   /activities/{id}/link-position       — Link BOQ position to activity
+    PATCH  /activities/{id}/progress            — Update activity progress
+    POST   /activities/{activity_id}/work-orders — Create work order
+    GET    /work-orders/?schedule_id=xxx        — List work orders for schedule
+    PATCH  /work-orders/{id}                    — Update work order
+"""
+
+import uuid
+
+from fastapi import APIRouter, Depends, Query
+
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.modules.schedule.schemas import (
+    ActivityCreate,
+    ActivityResponse,
+    ActivityUpdate,
+    GanttData,
+    LinkPositionRequest,
+    ProgressUpdateRequest,
+    ScheduleCreate,
+    ScheduleResponse,
+    ScheduleUpdate,
+    WorkOrderCreate,
+    WorkOrderResponse,
+    WorkOrderUpdate,
+)
+from app.modules.schedule.service import ScheduleService, _str_to_float
+
+router = APIRouter()
+
+
+def _get_service(session: SessionDep) -> ScheduleService:
+    return ScheduleService(session)
+
+
+def _activity_to_response(activity: object) -> ActivityResponse:
+    """Convert an Activity ORM model to an ActivityResponse schema."""
+    return ActivityResponse(
+        id=activity.id,
+        schedule_id=activity.schedule_id,
+        parent_id=activity.parent_id,
+        name=activity.name,
+        description=activity.description,
+        wbs_code=activity.wbs_code,
+        start_date=activity.start_date,
+        end_date=activity.end_date,
+        duration_days=activity.duration_days,
+        progress_pct=_str_to_float(activity.progress_pct),
+        status=activity.status,
+        activity_type=activity.activity_type,
+        dependencies=activity.dependencies or [],
+        resources=activity.resources or [],
+        boq_position_ids=activity.boq_position_ids or [],
+        color=activity.color,
+        sort_order=activity.sort_order,
+        metadata_=activity.metadata_,
+        created_at=activity.created_at,
+        updated_at=activity.updated_at,
+    )
+
+
+def _work_order_to_response(wo: object) -> WorkOrderResponse:
+    """Convert a WorkOrder ORM model to a WorkOrderResponse schema."""
+    return WorkOrderResponse(
+        id=wo.id,
+        activity_id=wo.activity_id,
+        assembly_id=wo.assembly_id,
+        boq_position_id=wo.boq_position_id,
+        code=wo.code,
+        description=wo.description,
+        assigned_to=wo.assigned_to,
+        planned_start=wo.planned_start,
+        planned_end=wo.planned_end,
+        actual_start=wo.actual_start,
+        actual_end=wo.actual_end,
+        planned_cost=_str_to_float(wo.planned_cost),
+        actual_cost=_str_to_float(wo.actual_cost),
+        status=wo.status,
+        metadata_=wo.metadata_,
+        created_at=wo.created_at,
+        updated_at=wo.updated_at,
+    )
+
+
+# ── Schedule CRUD ────────────────────────────────────────────────────────────
+
+
+@router.post(
+    "/schedules/",
+    response_model=ScheduleResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("schedule.create"))],
+)
+async def create_schedule(
+    data: ScheduleCreate,
+    _user_id: CurrentUserId,
+    service: ScheduleService = Depends(_get_service),
+) -> ScheduleResponse:
+    """Create a new schedule."""
+    schedule = await service.create_schedule(data)
+    return ScheduleResponse.model_validate(schedule)
+
+
+@router.get(
+    "/schedules/",
+    response_model=list[ScheduleResponse],
+    dependencies=[Depends(RequirePermission("schedule.read"))],
+)
+async def list_schedules(
+    project_id: uuid.UUID = Query(..., description="Filter schedules by project"),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=100),
+    service: ScheduleService = Depends(_get_service),
+) -> list[ScheduleResponse]:
+    """List all schedules for a given project."""
+    schedules, _ = await service.list_schedules_for_project(
+        project_id, offset=offset, limit=limit
+    )
+    return [ScheduleResponse.model_validate(s) for s in schedules]
+
+
+@router.get(
+    "/schedules/{schedule_id}",
+    response_model=ScheduleResponse,
+    dependencies=[Depends(RequirePermission("schedule.read"))],
+)
+async def get_schedule(
+    schedule_id: uuid.UUID,
+    service: ScheduleService = Depends(_get_service),
+) -> ScheduleResponse:
+    """Get a schedule by ID."""
+    schedule = await service.get_schedule(schedule_id)
+    return ScheduleResponse.model_validate(schedule)
+
+
+@router.patch(
+    "/schedules/{schedule_id}",
+    response_model=ScheduleResponse,
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
+async def update_schedule(
+    schedule_id: uuid.UUID,
+    data: ScheduleUpdate,
+    service: ScheduleService = Depends(_get_service),
+) -> ScheduleResponse:
+    """Update schedule metadata (name, description, status, dates)."""
+    schedule = await service.update_schedule(schedule_id, data)
+    return ScheduleResponse.model_validate(schedule)
+
+
+@router.delete(
+    "/schedules/{schedule_id}",
+    status_code=204,
+    dependencies=[Depends(RequirePermission("schedule.delete"))],
+)
+async def delete_schedule(
+    schedule_id: uuid.UUID,
+    service: ScheduleService = Depends(_get_service),
+) -> None:
+    """Delete a schedule and all its activities and work orders."""
+    await service.delete_schedule(schedule_id)
+
+
+# ── Activity CRUD ────────────────────────────────────────────────────────────
+
+
+@router.post(
+    "/schedules/{schedule_id}/activities",
+    response_model=ActivityResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
+async def create_activity(
+    schedule_id: uuid.UUID,
+    data: ActivityCreate,
+    service: ScheduleService = Depends(_get_service),
+) -> ActivityResponse:
+    """Add a new activity to a schedule.
+
+    The schedule_id in the URL takes precedence over the body field.
+    """
+    # Override body schedule_id with URL path parameter
+    data.schedule_id = schedule_id
+    activity = await service.create_activity(data)
+    return _activity_to_response(activity)
+
+
+@router.get(
+    "/schedules/{schedule_id}/activities",
+    response_model=list[ActivityResponse],
+    dependencies=[Depends(RequirePermission("schedule.read"))],
+)
+async def list_activities(
+    schedule_id: uuid.UUID,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=1000, ge=1, le=5000),
+    service: ScheduleService = Depends(_get_service),
+) -> list[ActivityResponse]:
+    """List all activities for a schedule, ordered by sort_order."""
+    activities, _ = await service.list_activities_for_schedule(
+        schedule_id, offset=offset, limit=limit
+    )
+    return [_activity_to_response(a) for a in activities]
+
+
+@router.get(
+    "/schedules/{schedule_id}/gantt",
+    response_model=GanttData,
+    dependencies=[Depends(RequirePermission("schedule.read"))],
+)
+async def get_gantt_data(
+    schedule_id: uuid.UUID,
+    service: ScheduleService = Depends(_get_service),
+) -> GanttData:
+    """Get structured Gantt chart data for a schedule."""
+    return await service.get_gantt_data(schedule_id)
+
+
+@router.patch(
+    "/activities/{activity_id}",
+    response_model=ActivityResponse,
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
+async def update_activity(
+    activity_id: uuid.UUID,
+    data: ActivityUpdate,
+    service: ScheduleService = Depends(_get_service),
+) -> ActivityResponse:
+    """Update a schedule activity. Recalculates duration if dates changed."""
+    activity = await service.update_activity(activity_id, data)
+    return _activity_to_response(activity)
+
+
+@router.delete(
+    "/activities/{activity_id}",
+    status_code=204,
+    dependencies=[Depends(RequirePermission("schedule.delete"))],
+)
+async def delete_activity(
+    activity_id: uuid.UUID,
+    service: ScheduleService = Depends(_get_service),
+) -> None:
+    """Delete an activity and its work orders."""
+    await service.delete_activity(activity_id)
+
+
+@router.post(
+    "/activities/{activity_id}/link-position",
+    response_model=ActivityResponse,
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
+async def link_boq_position(
+    activity_id: uuid.UUID,
+    body: LinkPositionRequest,
+    service: ScheduleService = Depends(_get_service),
+) -> ActivityResponse:
+    """Link a BOQ position to an activity."""
+    activity = await service.link_boq_position(activity_id, body.boq_position_id)
+    return _activity_to_response(activity)
+
+
+@router.patch(
+    "/activities/{activity_id}/progress",
+    response_model=ActivityResponse,
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
+async def update_activity_progress(
+    activity_id: uuid.UUID,
+    body: ProgressUpdateRequest,
+    service: ScheduleService = Depends(_get_service),
+) -> ActivityResponse:
+    """Update activity progress percentage. Auto-adjusts status."""
+    activity = await service.update_progress(activity_id, body.progress_pct)
+    return _activity_to_response(activity)
+
+
+# ── Work Order CRUD ──────────────────────────────────────────────────────────
+
+
+@router.post(
+    "/activities/{activity_id}/work-orders",
+    response_model=WorkOrderResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("schedule.work_orders.manage"))],
+)
+async def create_work_order(
+    activity_id: uuid.UUID,
+    data: WorkOrderCreate,
+    service: ScheduleService = Depends(_get_service),
+) -> WorkOrderResponse:
+    """Create a new work order for an activity.
+
+    The activity_id in the URL takes precedence over the body field.
+    """
+    # Override body activity_id with URL path parameter
+    data.activity_id = activity_id
+    work_order = await service.create_work_order(data)
+    return _work_order_to_response(work_order)
+
+
+@router.get(
+    "/work-orders/",
+    response_model=list[WorkOrderResponse],
+    dependencies=[Depends(RequirePermission("schedule.read"))],
+)
+async def list_work_orders(
+    schedule_id: uuid.UUID = Query(..., description="Filter work orders by schedule"),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=500, ge=1, le=1000),
+    service: ScheduleService = Depends(_get_service),
+) -> list[WorkOrderResponse]:
+    """List all work orders for a schedule."""
+    work_orders, _ = await service.list_work_orders_for_schedule(
+        schedule_id, offset=offset, limit=limit
+    )
+    return [_work_order_to_response(wo) for wo in work_orders]
+
+
+@router.patch(
+    "/work-orders/{work_order_id}",
+    response_model=WorkOrderResponse,
+    dependencies=[Depends(RequirePermission("schedule.work_orders.manage"))],
+)
+async def update_work_order(
+    work_order_id: uuid.UUID,
+    data: WorkOrderUpdate,
+    service: ScheduleService = Depends(_get_service),
+) -> WorkOrderResponse:
+    """Update a work order."""
+    work_order = await service.update_work_order(work_order_id, data)
+    return _work_order_to_response(work_order)

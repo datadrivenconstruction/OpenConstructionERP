@@ -7,7 +7,10 @@ import { LoginPage } from '@/features/auth';
 import { ProjectsPage, CreateProjectPage, ProjectDetailPage } from '@/features/projects';
 import { BOQEditorPage, CreateBOQPage } from '@/features/boq';
 import { CostsPage } from '@/features/costs';
+import { AssembliesPage, AssemblyEditorPage, CreateAssemblyPage } from '@/features/assemblies';
 import { ValidationPage } from '@/features/validation';
+import { SchedulePage } from '@/features/schedule';
+import { CostModelPage } from '@/features/costmodel';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 function LoadingScreen() {
@@ -81,9 +84,13 @@ export default function App() {
         <Route path="/projects/:projectId/boq/new" element={<RequireAuth><AppLayout title="New BOQ"><CreateBOQPage /></AppLayout></RequireAuth>} />
         <Route path="/boq/:boqId" element={<RequireAuth><AppLayout title="BOQ Editor"><BOQEditorPage /></AppLayout></RequireAuth>} />
         <Route path="/costs" element={<RequireAuth><AppLayout title="Cost Database"><CostsPage /></AppLayout></RequireAuth>} />
+        <Route path="/assemblies" element={<RequireAuth><AppLayout title="Assemblies"><AssembliesPage /></AppLayout></RequireAuth>} />
+        <Route path="/assemblies/new" element={<RequireAuth><AppLayout title="New Assembly"><CreateAssemblyPage /></AppLayout></RequireAuth>} />
+        <Route path="/assemblies/:assemblyId" element={<RequireAuth><AppLayout title="Assembly Editor"><AssemblyEditorPage /></AppLayout></RequireAuth>} />
         <Route path="/validation" element={<RequireAuth><AppLayout title="Validation"><ValidationPage /></AppLayout></RequireAuth>} />
         <Route path="/boq" element={<RequireAuth><PlaceholderPage titleKey="boq.title" /></RequireAuth>} />
-        <Route path="/takeoff" element={<RequireAuth><PlaceholderPage titleKey="takeoff.title" /></RequireAuth>} />
+        <Route path="/schedule" element={<RequireAuth><AppLayout title="4D Schedule"><SchedulePage /></AppLayout></RequireAuth>} />
+        <Route path="/5d" element={<RequireAuth><AppLayout title="5D Cost Model"><CostModelPage /></AppLayout></RequireAuth>} />
         <Route path="/tendering" element={<RequireAuth><PlaceholderPage titleKey="tendering.title" /></RequireAuth>} />
         <Route path="/modules" element={<RequireAuth><PlaceholderPage titleKey="modules.title" /></RequireAuth>} />
         <Route path="/settings" element={<RequireAuth><PlaceholderPage titleKey="nav.settings" /></RequireAuth>} />

@@ -5,12 +5,14 @@ import {
   LayoutDashboard,
   FolderOpen,
   Table2,
-  Ruler,
+  CalendarDays,
   Database,
+  Layers,
   ShieldCheck,
   FileText,
   Package,
   Settings,
+  TrendingUp,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -25,9 +27,11 @@ const mainNav: NavItem[] = [
   { labelKey: 'nav.dashboard', to: '/', icon: LayoutDashboard },
   { labelKey: 'projects.title', to: '/projects', icon: FolderOpen },
   { labelKey: 'boq.title', to: '/boq', icon: Table2 },
-  { labelKey: 'takeoff.title', to: '/takeoff', icon: Ruler },
   { labelKey: 'costs.title', to: '/costs', icon: Database },
+  { labelKey: 'assemblies.title', to: '/assemblies', icon: Layers },
   { labelKey: 'validation.title', to: '/validation', icon: ShieldCheck },
+  { labelKey: 'schedule.title', to: '/schedule', icon: CalendarDays },
+  { labelKey: 'nav.5d_cost_model', to: '/5d', icon: TrendingUp },
   { labelKey: 'tendering.title', to: '/tendering', icon: FileText },
 ];
 

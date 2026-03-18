@@ -16,15 +16,21 @@ class ProjectCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     description: str = Field(default="", max_length=5000)
     region: str = Field(
-        default="DACH",
-        pattern=r"^(DACH|UK|US|INTL)$",
+        default="",
+        max_length=100,
+        description="Region/market identifier — user must choose, no default bias",
     )
     classification_standard: str = Field(
-        default="din276",
-        pattern=r"^(din276|nrm|masterformat)$",
+        default="",
+        max_length=100,
+        description="Classification standard — accepts any standard identifier",
     )
-    currency: str = Field(default="EUR", max_length=10)
-    locale: str = Field(default="de", max_length=10)
+    currency: str = Field(
+        default="",
+        max_length=10,
+        description="ISO 4217 currency code — user must choose, no default bias",
+    )
+    locale: str = Field(default="en", max_length=10)
     validation_rule_sets: list[str] = Field(default_factory=lambda: ["boq_quality"])
 
 
@@ -33,11 +39,8 @@ class ProjectUpdate(BaseModel):
 
     name: str | None = Field(default=None, min_length=1, max_length=255)
     description: str | None = Field(default=None, max_length=5000)
-    region: str | None = Field(default=None, pattern=r"^(DACH|UK|US|INTL)$")
-    classification_standard: str | None = Field(
-        default=None,
-        pattern=r"^(din276|nrm|masterformat)$",
-    )
+    region: str | None = Field(default=None, max_length=100)
+    classification_standard: str | None = Field(default=None, max_length=100)
     currency: str | None = Field(default=None, max_length=10)
     locale: str | None = Field(default=None, max_length=10)
     validation_rule_sets: list[str] | None = None
