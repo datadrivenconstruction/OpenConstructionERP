@@ -24,14 +24,15 @@ interface NavItem {
   to: string;
   icon: LucideIcon;
   badge?: string;
+  highlight?: boolean;
 }
 
 const mainNav: NavItem[] = [
   { labelKey: 'nav.dashboard', to: '/', icon: LayoutDashboard },
-  { labelKey: 'nav.ai_estimate', to: '/ai-estimate', icon: Sparkles },
+  { labelKey: 'nav.ai_estimate', to: '/ai-estimate', icon: Sparkles, highlight: true, badge: 'AI' },
   { labelKey: 'projects.title', to: '/projects', icon: FolderOpen },
   { labelKey: 'boq.title', to: '/boq', icon: Table2 },
-  { labelKey: 'boq.templates', to: '/templates', icon: ClipboardList },
+  { labelKey: 'nav.templates', to: '/templates', icon: ClipboardList },
   { labelKey: 'costs.title', to: '/costs', icon: Database },
   { labelKey: 'assemblies.title', to: '/assemblies', icon: Layers },
   { labelKey: 'validation.title', to: '/validation', icon: ShieldCheck },
@@ -93,16 +94,25 @@ function SidebarItem({ item, label }: { item: NavItem; label: string }) {
           clsx(
             'flex items-center gap-3 rounded-lg px-3 py-2',
             'text-sm font-medium transition-all duration-fast ease-oe',
-            isActive
-              ? 'bg-oe-blue-subtle text-oe-blue'
-              : 'text-content-secondary hover:bg-surface-secondary hover:text-content-primary',
+            item.highlight && !isActive
+              ? 'bg-gradient-to-r from-[#7c3aed]/10 to-[#0ea5e9]/10 text-[#6d28d9] hover:from-[#7c3aed]/15 hover:to-[#0ea5e9]/15'
+              : isActive
+                ? 'bg-oe-blue-subtle text-oe-blue'
+                : 'text-content-secondary hover:bg-surface-secondary hover:text-content-primary',
           )
         }
       >
         <Icon size={18} strokeWidth={1.75} className="shrink-0" />
         <span className="truncate">{label}</span>
         {item.badge && (
-          <span className="ml-auto text-2xs font-medium text-content-tertiary">
+          <span
+            className={clsx(
+              'ml-auto text-2xs font-semibold px-1.5 py-0.5 rounded-full',
+              item.highlight
+                ? 'bg-gradient-to-r from-[#7c3aed] to-[#0ea5e9] text-white'
+                : 'text-content-tertiary',
+            )}
+          >
             {item.badge}
           </span>
         )}
