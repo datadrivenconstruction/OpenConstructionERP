@@ -39,6 +39,7 @@ const fallbackResources = {
       'app.name': 'OpenEstimate',
       'app.tagline': 'Open-source construction cost estimation',
       'nav.dashboard': 'Dashboard',
+      'nav.ai_estimate': 'AI Estimate',
       'nav.settings': 'Settings',
       'common.save': 'Save',
       'common.cancel': 'Cancel',
