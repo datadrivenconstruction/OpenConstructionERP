@@ -92,6 +92,17 @@ def create_engine_from_settings():
 
     if _is_sqlite(url):
         # SQLite doesn't support pool_size/max_overflow
+        # Enable WAL mode for concurrent reads during writes
+        from sqlalchemy import event as sa_event
+        from sqlalchemy.engine import Engine
+
+        @sa_event.listens_for(Engine, "connect")
+        def _set_sqlite_pragma(dbapi_conn: object, _: object) -> None:
+            cursor = dbapi_conn.cursor()  # type: ignore[union-attr]
+            cursor.execute("PRAGMA journal_mode=WAL")
+            cursor.execute("PRAGMA busy_timeout=5000")
+            cursor.close()
+
         kwargs["connect_args"] = {"check_same_thread": False}
     else:
         kwargs["pool_size"] = settings.database_pool_size
