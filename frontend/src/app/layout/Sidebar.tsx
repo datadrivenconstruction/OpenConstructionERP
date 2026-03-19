@@ -14,6 +14,7 @@ import {
   Package,
   Settings,
   TrendingUp,
+  Sparkles,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -26,6 +27,7 @@ interface NavItem {
 
 const mainNav: NavItem[] = [
   { labelKey: 'nav.dashboard', to: '/', icon: LayoutDashboard },
+  { labelKey: 'nav.ai_estimate', to: '/ai-estimate', icon: Sparkles },
   { labelKey: 'projects.title', to: '/projects', icon: FolderOpen },
   { labelKey: 'boq.title', to: '/boq', icon: Table2 },
   { labelKey: 'costs.title', to: '/costs', icon: Database },
