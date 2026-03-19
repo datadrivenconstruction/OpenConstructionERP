@@ -817,6 +817,169 @@ class BOQService:
         )
         return created
 
+    # ── Duplicate operations ─────────────────────────────────────────────
+
+    async def duplicate_boq(self, boq_id: uuid.UUID) -> BOQ:
+        """Deep-copy a BOQ with all positions and markups.
+
+        Creates a new BOQ named ``<original> (Copy)`` under the same project.
+        All positions and markups receive fresh UUIDs; parent_id references
+        within positions are re-mapped to the corresponding new IDs.
+
+        Args:
+            boq_id: Source BOQ to duplicate.
+
+        Returns:
+            The newly created BOQ copy.
+
+        Raises:
+            HTTPException 404 if source BOQ not found.
+        """
+        source_boq = await self.get_boq(boq_id)
+
+        # Create the new BOQ shell
+        new_boq = BOQ(
+            project_id=source_boq.project_id,
+            name=f"{source_boq.name} (Copy)",
+            description=source_boq.description,
+            status="draft",
+            metadata_=dict(source_boq.metadata_) if source_boq.metadata_ else {},
+        )
+        new_boq = await self.boq_repo.create(new_boq)
+
+        # Copy positions — first pass: create all with old parent_id recorded
+        positions, _ = await self.position_repo.list_for_boq(boq_id)
+        old_to_new: dict[uuid.UUID, uuid.UUID] = {}
+
+        new_positions: list[Position] = []
+        for pos in positions:
+            new_pos = Position(
+                boq_id=new_boq.id,
+                parent_id=None,  # will be remapped after insert
+                ordinal=pos.ordinal,
+                description=pos.description,
+                unit=pos.unit,
+                quantity=pos.quantity,
+                unit_rate=pos.unit_rate,
+                total=pos.total,
+                classification=dict(pos.classification) if pos.classification else {},
+                source=pos.source,
+                confidence=pos.confidence,
+                cad_element_ids=list(pos.cad_element_ids) if pos.cad_element_ids else [],
+                validation_status="pending",
+                metadata_=dict(pos.metadata_) if pos.metadata_ else {},
+                sort_order=pos.sort_order,
+            )
+            new_positions.append(new_pos)
+
+        created_positions = await self.position_repo.bulk_create(new_positions)
+
+        # Build old→new ID mapping
+        for old_pos, new_pos in zip(positions, created_positions):
+            old_to_new[old_pos.id] = new_pos.id
+
+        # Second pass: remap parent_id references
+        for old_pos, new_pos in zip(positions, created_positions):
+            if old_pos.parent_id is not None and old_pos.parent_id in old_to_new:
+                await self.position_repo.update_fields(
+                    new_pos.id, parent_id=old_to_new[old_pos.parent_id]
+                )
+
+        # Copy markups
+        markups = await self.markup_repo.list_for_boq(boq_id)
+        new_markups: list[BOQMarkup] = []
+        for markup in markups:
+            new_markup = BOQMarkup(
+                boq_id=new_boq.id,
+                name=markup.name,
+                markup_type=markup.markup_type,
+                category=markup.category,
+                percentage=markup.percentage,
+                fixed_amount=markup.fixed_amount,
+                apply_to=markup.apply_to,
+                sort_order=markup.sort_order,
+                is_active=markup.is_active,
+                metadata_=dict(markup.metadata_) if markup.metadata_ else {},
+            )
+            new_markups.append(new_markup)
+
+        if new_markups:
+            await self.markup_repo.bulk_create(new_markups)
+
+        await event_bus.publish(
+            "boq.boq.duplicated",
+            {
+                "source_boq_id": str(boq_id),
+                "new_boq_id": str(new_boq.id),
+                "project_id": str(source_boq.project_id),
+            },
+            source_module="oe_boq",
+        )
+
+        logger.info("BOQ duplicated: %s → %s", boq_id, new_boq.id)
+        return new_boq
+
+    async def duplicate_position(self, position_id: uuid.UUID) -> Position:
+        """Duplicate a single position within the same BOQ.
+
+        The copy is placed immediately after the original (same parent_id,
+        ordinal appended with ``.1``).
+
+        Args:
+            position_id: Source position to duplicate.
+
+        Returns:
+            The newly created position copy.
+
+        Raises:
+            HTTPException 404 if source position not found.
+        """
+        source = await self.position_repo.get_by_id(position_id)
+        if source is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Position not found",
+            )
+
+        max_order = await self.position_repo.get_max_sort_order(source.boq_id)
+
+        new_position = Position(
+            boq_id=source.boq_id,
+            parent_id=source.parent_id,
+            ordinal=f"{source.ordinal}.1",
+            description=source.description,
+            unit=source.unit,
+            quantity=source.quantity,
+            unit_rate=source.unit_rate,
+            total=source.total,
+            classification=dict(source.classification) if source.classification else {},
+            source=source.source,
+            confidence=source.confidence,
+            cad_element_ids=list(source.cad_element_ids) if source.cad_element_ids else [],
+            validation_status="pending",
+            metadata_=dict(source.metadata_) if source.metadata_ else {},
+            sort_order=max_order + 1,
+        )
+        new_position = await self.position_repo.create(new_position)
+
+        await event_bus.publish(
+            "boq.position.duplicated",
+            {
+                "source_position_id": str(position_id),
+                "new_position_id": str(new_position.id),
+                "boq_id": str(source.boq_id),
+            },
+            source_module="oe_boq",
+        )
+
+        logger.info(
+            "Position duplicated: %s → %s in BOQ %s",
+            position_id,
+            new_position.id,
+            source.boq_id,
+        )
+        return new_position
+
     # ── Composite reads ───────────────────────────────────────────────────
 
     async def get_boq_with_positions(self, boq_id: uuid.UUID) -> BOQWithPositions:

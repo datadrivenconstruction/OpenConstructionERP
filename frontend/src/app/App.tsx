@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useState, useCallback } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AppLayout } from './layout';
 import { DashboardPage } from '@/features/dashboard';
@@ -13,8 +13,9 @@ import { CostModelPage } from '@/features/costmodel';
 import { TenderingPage } from '@/features/tendering';
 import { ModulesPage } from '@/features/modules';
 import { SettingsPage } from '@/features/settings';
-import { Logo } from '@/shared/ui';
+import { Logo, ShortcutsDialog, ToastContainer } from '@/shared/ui';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useKeyboardShortcuts } from '@/shared/hooks/useKeyboardShortcuts';
 
 function LoadingScreen() {
   return (
@@ -45,6 +46,26 @@ function P({ title, children }: { title: string; children: React.ReactNode }) {
   );
 }
 
+/** Mounts global keyboard shortcuts and the shortcuts help dialog. */
+function GlobalShortcuts() {
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+
+  const handleToggleShortcuts = useCallback(() => {
+    setShortcutsOpen((prev) => !prev);
+  }, []);
+
+  // The `/` shortcut for search is already handled by Header's own keydown
+  // listener, so we pass a no-op here to avoid duplicate triggers.
+  const noop = useCallback(() => {}, []);
+
+  useKeyboardShortcuts({
+    onOpenSearch: noop,
+    onToggleShortcutsDialog: handleToggleShortcuts,
+  });
+
+  return <ShortcutsDialog open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />;
+}
+
 export default function App() {
   const loadFromStorage = useAuthStore((s) => s.loadFromStorage);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -55,6 +76,7 @@ export default function App() {
 
   return (
     <Suspense fallback={<LoadingScreen />}>
+      {isAuthenticated && <GlobalShortcuts />}
       <Routes>
         {/* Auth — public */}
         <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />} />
@@ -93,6 +115,7 @@ export default function App() {
         {/* Catch-all */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <ToastContainer />
     </Suspense>
   );
 }
