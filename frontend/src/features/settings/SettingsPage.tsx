@@ -73,15 +73,15 @@ function maskApiKey(key: string | null | undefined): string {
   return key.slice(0, 8) + '\u2022'.repeat(Math.min(key.length - 8, 24));
 }
 
-function getKeyForProvider(settings: AISettings | undefined, provider: AIProvider): string | null {
-  if (!settings) return null;
+function isKeySetForProvider(settings: AISettings | undefined, provider: AIProvider): boolean {
+  if (!settings) return false;
   switch (provider) {
     case 'anthropic':
-      return settings.anthropic_api_key;
+      return settings.anthropic_api_key_set;
     case 'openai':
-      return settings.openai_api_key;
+      return settings.openai_api_key_set;
     case 'gemini':
-      return settings.gemini_api_key;
+      return settings.gemini_api_key_set;
   }
 }
 
@@ -166,7 +166,7 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
     }
   }, [settings?.provider]);
 
-  const currentKey = getKeyForProvider(settings, selectedProvider);
+  const hasKeySet = isKeySetForProvider(settings, selectedProvider);
 
   // Test connection mutation
   const testMutation = useMutation({
@@ -250,9 +250,9 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
       : apiKeyInput
         ? maskApiKey(apiKeyInput)
         : ''
-    : showKey
-      ? currentKey || ''
-      : maskApiKey(currentKey);
+    : hasKeySet
+      ? 'sk-••••••••••••••••'
+      : '';
 
   return (
     <Card className="animate-card-in" style={{ animationDelay }}>
@@ -272,8 +272,7 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {AI_PROVIDERS.map((provider) => {
                 const isSelected = selectedProvider === provider.id;
-                const providerKey = getKeyForProvider(settings, provider.id);
-                const hasKey = Boolean(providerKey);
+                const hasKey = isKeySetForProvider(settings, provider.id);
 
                 return (
                   <button
@@ -347,7 +346,7 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
                 value={hasUnsavedKey ? apiKeyInput : displayValue}
                 onChange={(e) => handleKeyChange(e.target.value)}
                 placeholder={
-                  currentKey
+                  hasKeySet
                     ? t('settings.ai_key_placeholder_existing', {
                         defaultValue: 'Enter new key to replace existing...',
                       })
@@ -388,7 +387,7 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
         <Button
           variant="secondary"
           onClick={() => testMutation.mutate()}
-          disabled={testMutation.isPending || (!currentKey && !hasUnsavedKey)}
+          disabled={testMutation.isPending || (!hasKeySet && !hasUnsavedKey)}
           icon={
             testMutation.isPending ? (
               <Loader2 size={14} className="animate-spin" />
