@@ -171,6 +171,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "name": "OpenEstimate",
             "tagline": "Open-source construction cost estimation",
         },
+        "nav": {
+            "dashboard": "Dashboard",
+            "ai_estimate": "AI Estimate",
+            "settings": "Settings",
+            "5d_cost_model": "5D Cost Model",
+            "templates": "Templates",
+        },
         "common": {
             "save": "Save",
             "cancel": "Cancel",
@@ -216,6 +223,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "assembly": "Assembly",
             "subtotal": "Subtotal",
             "grand_total": "Grand Total",
+            "direct_cost": "Direct Cost",
+            "net_total": "Net Total",
+            "gross_total": "Gross Total",
+            "vat": "VAT",
+            "add_markups": "Add Markups",
+            "validate": "Validate",
+            "export": "Export",
         },
         "costs": {
             "title": "Cost Database",
@@ -224,6 +238,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "labor": "Labor",
             "equipment": "Equipment",
             "search_costs": "Search cost items...",
+        },
+        "assemblies": {
+            "title": "Assemblies",
         },
         "validation": {
             "title": "Validation",
@@ -238,6 +255,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "missing_classification": "Position {position} needs a classification code",
             "duplicate_ordinal": "Duplicate ordinal number: {ordinal}",
             "rate_anomaly": "Unit rate {rate} exceeds threshold ({threshold})",
+        },
+        "schedule": {
+            "title": "4D Schedule",
         },
         "cad": {
             "title": "CAD Import",
@@ -266,6 +286,15 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "uninstall": "Uninstall",
             "update": "Update",
         },
+        "dashboard": {
+            "welcome": "Welcome to OpenEstimate",
+            "subtitle": "Open-source construction cost estimation platform",
+            "recent_projects": "Recent Projects",
+            "system_status": "System Status",
+            "modules_loaded": "Modules Loaded",
+            "validation_rules": "Validation Rules",
+            "languages": "Languages",
+        },
         "units": {
             "m": "m",
             "m2": "m\u00b2",
@@ -286,6 +315,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
         "app": {
             "name": "OpenEstimate",
             "tagline": "Open-Source Baukalkulation",
+        },
+        "nav": {
+            "dashboard": "\u00dcbersicht",
+            "ai_estimate": "KI-Sch\u00e4tzung",
+            "settings": "Einstellungen",
+            "5d_cost_model": "5D Kostenmodell",
+            "templates": "Vorlagen",
         },
         "common": {
             "save": "Speichern",
@@ -332,6 +368,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "assembly": "Baugruppe",
             "subtotal": "Zwischensumme",
             "grand_total": "Gesamtsumme",
+            "direct_cost": "Einzelkosten",
+            "net_total": "Nettosumme",
+            "gross_total": "Bruttosumme",
+            "vat": "MwSt",
+            "add_markups": "Zuschl\u00e4ge hinzuf\u00fcgen",
+            "validate": "Pr\u00fcfen",
+            "export": "Exportieren",
         },
         "costs": {
             "title": "Preisdatenbank",
@@ -340,6 +383,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "labor": "Lohn",
             "equipment": "Ger\u00e4t",
             "search_costs": "Preispositionen suchen...",
+        },
+        "assemblies": {
+            "title": "Kalkulationen",
         },
         "validation": {
             "title": "Validierung",
@@ -354,6 +400,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "missing_classification": "Position {position} ben\u00f6tigt eine Klassifizierung",
             "duplicate_ordinal": "Doppelte Ordnungszahl: {ordinal}",
             "rate_anomaly": "Einheitspreis {rate} \u00fcberschreitet Schwellenwert ({threshold})",
+        },
+        "schedule": {
+            "title": "4D Bauzeitenplan",
         },
         "cad": {
             "title": "CAD-Import",
@@ -382,6 +431,15 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "uninstall": "Deinstallieren",
             "update": "Aktualisieren",
         },
+        "dashboard": {
+            "welcome": "Willkommen bei OpenEstimate",
+            "subtitle": "Open-Source Baukalkulation-Plattform",
+            "recent_projects": "Aktuelle Projekte",
+            "system_status": "Systemstatus",
+            "modules_loaded": "Geladene Module",
+            "validation_rules": "Validierungsregeln",
+            "languages": "Sprachen",
+        },
         "units": {
             "m": "m",
             "m2": "m\u00b2",
@@ -402,6 +460,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
         "app": {
             "name": "OpenEstimate",
             "tagline": "Open-source \u0441\u043c\u0435\u0442\u043d\u043e\u0435 \u0434\u0435\u043b\u043e",
+        },
+        "nav": {
+            "dashboard": "\u041f\u0430\u043d\u0435\u043b\u044c \u0443\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u044f",
+            "ai_estimate": "\u0418\u0418 \u041e\u0446\u0435\u043d\u043a\u0430",
+            "settings": "\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438",
+            "5d_cost_model": "5D \u041c\u043e\u0434\u0435\u043b\u044c \u0441\u0442\u043e\u0438\u043c\u043e\u0441\u0442\u0438",
+            "templates": "\u0428\u0430\u0431\u043b\u043e\u043d\u044b",
         },
         "common": {
             "save": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c",
@@ -448,6 +513,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "assembly": "\u0421\u0431\u043e\u0440\u043d\u0430\u044f \u0440\u0430\u0441\u0446\u0435\u043d\u043a\u0430",
             "subtotal": "\u041f\u043e\u0434\u0438\u0442\u043e\u0433",
             "grand_total": "\u041e\u0431\u0449\u0438\u0439 \u0438\u0442\u043e\u0433",
+            "direct_cost": "\u041f\u0440\u044f\u043c\u044b\u0435 \u0437\u0430\u0442\u0440\u0430\u0442\u044b",
+            "net_total": "\u0418\u0442\u043e\u0433\u043e \u043d\u0435\u0442\u0442\u043e",
+            "gross_total": "\u0418\u0442\u043e\u0433\u043e \u0431\u0440\u0443\u0442\u0442\u043e",
+            "vat": "\u041d\u0414\u0421",
+            "add_markups": "\u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u043d\u0430\u0446\u0435\u043d\u043a\u0438",
+            "validate": "\u041f\u0440\u043e\u0432\u0435\u0440\u0438\u0442\u044c",
+            "export": "\u042d\u043a\u0441\u043f\u043e\u0440\u0442",
         },
         "costs": {
             "title": "\u0411\u0430\u0437\u0430 \u0440\u0430\u0441\u0446\u0435\u043d\u043e\u043a",
@@ -456,6 +528,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "labor": "\u0420\u0430\u0431\u043e\u0442\u0430",
             "equipment": "\u041c\u0435\u0445\u0430\u043d\u0438\u0437\u043c\u044b",
             "search_costs": "\u041f\u043e\u0438\u0441\u043a \u0440\u0430\u0441\u0446\u0435\u043d\u043e\u043a...",
+        },
+        "assemblies": {
+            "title": "\u041a\u0430\u043b\u044c\u043a\u0443\u043b\u044f\u0446\u0438\u0438",
         },
         "validation": {
             "title": "\u041f\u0440\u043e\u0432\u0435\u0440\u043a\u0430",
@@ -470,6 +545,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "missing_classification": "\u041f\u043e\u0437\u0438\u0446\u0438\u044f {position} \u0431\u0435\u0437 \u043a\u043b\u0430\u0441\u0441\u0438\u0444\u0438\u043a\u0430\u0446\u0438\u0438",
             "duplicate_ordinal": "\u0414\u0443\u0431\u043b\u0438\u0440\u0443\u044e\u0449\u0438\u0439\u0441\u044f \u043d\u043e\u043c\u0435\u0440: {ordinal}",
             "rate_anomaly": "\u0420\u0430\u0441\u0446\u0435\u043d\u043a\u0430 {rate} \u043f\u0440\u0435\u0432\u044b\u0448\u0430\u0435\u0442 \u043f\u043e\u0440\u043e\u0433 ({threshold})",
+        },
+        "schedule": {
+            "title": "4D \u0413\u0440\u0430\u0444\u0438\u043a",
         },
         "cad": {
             "title": "\u0418\u043c\u043f\u043e\u0440\u0442 CAD",
@@ -498,6 +576,15 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "uninstall": "\u0423\u0434\u0430\u043b\u0438\u0442\u044c",
             "update": "\u041e\u0431\u043d\u043e\u0432\u0438\u0442\u044c",
         },
+        "dashboard": {
+            "welcome": "\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u0432 OpenEstimate",
+            "subtitle": "Open-source \u043f\u043b\u0430\u0442\u0444\u043e\u0440\u043c\u0430 \u0441\u043c\u0435\u0442\u043d\u043e\u0433\u043e \u0434\u0435\u043b\u0430",
+            "recent_projects": "\u041f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0435 \u043f\u0440\u043e\u0435\u043a\u0442\u044b",
+            "system_status": "\u0421\u043e\u0441\u0442\u043e\u044f\u043d\u0438\u0435 \u0441\u0438\u0441\u0442\u0435\u043c\u044b",
+            "modules_loaded": "\u0417\u0430\u0433\u0440\u0443\u0436\u0435\u043d\u043e \u043c\u043e\u0434\u0443\u043b\u0435\u0439",
+            "validation_rules": "\u041f\u0440\u0430\u0432\u0438\u043b\u0430 \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438",
+            "languages": "\u042f\u0437\u044b\u043a\u0438",
+        },
         "units": {
             "m": "\u043c",
             "m2": "\u043c\u00b2",
@@ -518,6 +605,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
         "app": {
             "name": "OpenEstimate",
             "tagline": "Estimation des co\u00fbts de construction open-source",
+        },
+        "nav": {
+            "dashboard": "Tableau de bord",
+            "ai_estimate": "Estimation IA",
+            "settings": "Param\u00e8tres",
+            "5d_cost_model": "Mod\u00e8le de co\u00fbt 5D",
+            "templates": "Mod\u00e8les",
         },
         "common": {
             "save": "Enregistrer",
@@ -564,6 +658,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "assembly": "Ouvrage \u00e9l\u00e9mentaire",
             "subtotal": "Sous-total",
             "grand_total": "Total g\u00e9n\u00e9ral",
+            "direct_cost": "Co\u00fbt direct",
+            "net_total": "Total net",
+            "gross_total": "Total brut",
+            "vat": "TVA",
+            "add_markups": "Ajouter des majorations",
+            "validate": "Valider",
+            "export": "Exporter",
         },
         "costs": {
             "title": "Base de prix",
@@ -572,6 +673,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "labor": "Main-d\u2019\u0153uvre",
             "equipment": "Mat\u00e9riel",
             "search_costs": "Rechercher des prix...",
+        },
+        "assemblies": {
+            "title": "Ouvrages \u00e9l\u00e9mentaires",
         },
         "validation": {
             "title": "Validation",
@@ -586,6 +690,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "missing_classification": "Le poste {position} n\u00e9cessite un code de classification",
             "duplicate_ordinal": "Num\u00e9ro d\u2019ordre en double\u00a0: {ordinal}",
             "rate_anomaly": "Le prix unitaire {rate} d\u00e9passe le seuil ({threshold})",
+        },
+        "schedule": {
+            "title": "Planning 4D",
         },
         "cad": {
             "title": "Import CAO",
@@ -614,6 +721,15 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "uninstall": "D\u00e9sinstaller",
             "update": "Mettre \u00e0 jour",
         },
+        "dashboard": {
+            "welcome": "Bienvenue sur OpenEstimate",
+            "subtitle": "Plateforme d\u2019estimation des co\u00fbts de construction open-source",
+            "recent_projects": "Projets r\u00e9cents",
+            "system_status": "\u00c9tat du syst\u00e8me",
+            "modules_loaded": "Modules charg\u00e9s",
+            "validation_rules": "R\u00e8gles de validation",
+            "languages": "Langues",
+        },
         "units": {
             "m": "m",
             "m2": "m\u00b2",
@@ -634,6 +750,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
         "app": {
             "name": "OpenEstimate",
             "tagline": "Presupuesto de construcci\u00f3n de c\u00f3digo abierto",
+        },
+        "nav": {
+            "dashboard": "Panel de control",
+            "ai_estimate": "Estimaci\u00f3n IA",
+            "settings": "Configuraci\u00f3n",
+            "5d_cost_model": "Modelo de costes 5D",
+            "templates": "Plantillas",
         },
         "common": {
             "save": "Guardar",
@@ -680,6 +803,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "assembly": "Precio descompuesto",
             "subtotal": "Subtotal",
             "grand_total": "Total general",
+            "direct_cost": "Coste directo",
+            "net_total": "Total neto",
+            "gross_total": "Total bruto",
+            "vat": "IVA",
+            "add_markups": "A\u00f1adir recargos",
+            "validate": "Validar",
+            "export": "Exportar",
         },
         "costs": {
             "title": "Base de precios",
@@ -688,6 +818,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "labor": "Mano de obra",
             "equipment": "Maquinaria",
             "search_costs": "Buscar precios...",
+        },
+        "assemblies": {
+            "title": "Precios descompuestos",
         },
         "validation": {
             "title": "Validaci\u00f3n",
@@ -702,6 +835,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "missing_classification": "La partida {position} necesita un c\u00f3digo de clasificaci\u00f3n",
             "duplicate_ordinal": "N\u00famero de orden duplicado: {ordinal}",
             "rate_anomaly": "El precio unitario {rate} supera el umbral ({threshold})",
+        },
+        "schedule": {
+            "title": "Planificaci\u00f3n 4D",
         },
         "cad": {
             "title": "Importaci\u00f3n CAD",
@@ -730,6 +866,15 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "uninstall": "Desinstalar",
             "update": "Actualizar",
         },
+        "dashboard": {
+            "welcome": "Bienvenido a OpenEstimate",
+            "subtitle": "Plataforma de presupuestos de construcci\u00f3n de c\u00f3digo abierto",
+            "recent_projects": "Proyectos recientes",
+            "system_status": "Estado del sistema",
+            "modules_loaded": "M\u00f3dulos cargados",
+            "validation_rules": "Reglas de validaci\u00f3n",
+            "languages": "Idiomas",
+        },
         "units": {
             "m": "m",
             "m2": "m\u00b2",
@@ -750,6 +895,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
         "app": {
             "name": "OpenEstimate",
             "tagline": "Or\u00e7amento de constru\u00e7\u00e3o de c\u00f3digo aberto",
+        },
+        "nav": {
+            "dashboard": "Painel",
+            "ai_estimate": "Estimativa IA",
+            "settings": "Configura\u00e7\u00f5es",
+            "5d_cost_model": "Modelo de custos 5D",
+            "templates": "Modelos",
         },
         "common": {
             "save": "Guardar",
@@ -796,6 +948,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "assembly": "Pre\u00e7o composto",
             "subtotal": "Subtotal",
             "grand_total": "Total geral",
+            "direct_cost": "Custo direto",
+            "net_total": "Total l\u00edquido",
+            "gross_total": "Total bruto",
+            "vat": "IVA",
+            "add_markups": "Adicionar margens",
+            "validate": "Validar",
+            "export": "Exportar",
         },
         "costs": {
             "title": "Base de pre\u00e7os",
@@ -804,6 +963,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "labor": "M\u00e3o de obra",
             "equipment": "Equipamento",
             "search_costs": "Pesquisar pre\u00e7os...",
+        },
+        "assemblies": {
+            "title": "Pre\u00e7os compostos",
         },
         "validation": {
             "title": "Valida\u00e7\u00e3o",
@@ -818,6 +980,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "missing_classification": "O artigo {position} necessita de c\u00f3digo de classifica\u00e7\u00e3o",
             "duplicate_ordinal": "N\u00famero de ordem duplicado: {ordinal}",
             "rate_anomaly": "O pre\u00e7o unit\u00e1rio {rate} excede o limiar ({threshold})",
+        },
+        "schedule": {
+            "title": "Planeamento 4D",
         },
         "cad": {
             "title": "Importa\u00e7\u00e3o CAD",
@@ -846,6 +1011,15 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "uninstall": "Desinstalar",
             "update": "Atualizar",
         },
+        "dashboard": {
+            "welcome": "Bem-vindo ao OpenEstimate",
+            "subtitle": "Plataforma de or\u00e7amenta\u00e7\u00e3o de constru\u00e7\u00e3o open-source",
+            "recent_projects": "Projetos recentes",
+            "system_status": "Estado do sistema",
+            "modules_loaded": "M\u00f3dulos carregados",
+            "validation_rules": "Regras de valida\u00e7\u00e3o",
+            "languages": "Idiomas",
+        },
         "units": {
             "m": "m",
             "m2": "m\u00b2",
@@ -866,6 +1040,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
         "app": {
             "name": "OpenEstimate",
             "tagline": "Stima dei costi di costruzione open-source",
+        },
+        "nav": {
+            "dashboard": "Pannello di controllo",
+            "ai_estimate": "Stima IA",
+            "settings": "Impostazioni",
+            "5d_cost_model": "Modello costi 5D",
+            "templates": "Modelli",
         },
         "common": {
             "save": "Salva",
@@ -912,6 +1093,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "assembly": "Analisi prezzo",
             "subtotal": "Subtotale",
             "grand_total": "Totale generale",
+            "direct_cost": "Costo diretto",
+            "net_total": "Totale netto",
+            "gross_total": "Totale lordo",
+            "vat": "IVA",
+            "add_markups": "Aggiungi maggiorazioni",
+            "validate": "Validare",
+            "export": "Esporta",
         },
         "costs": {
             "title": "Prezzario",
@@ -920,6 +1108,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "labor": "Manodopera",
             "equipment": "Attrezzatura",
             "search_costs": "Cerca prezzi...",
+        },
+        "assemblies": {
+            "title": "Analisi prezzi",
         },
         "validation": {
             "title": "Validazione",
@@ -934,6 +1125,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "missing_classification": "La voce {position} necessita di un codice di classificazione",
             "duplicate_ordinal": "Numero d\u2019ordine duplicato: {ordinal}",
             "rate_anomaly": "Il prezzo unitario {rate} supera la soglia ({threshold})",
+        },
+        "schedule": {
+            "title": "Programma lavori 4D",
         },
         "cad": {
             "title": "Importazione CAD",
@@ -962,6 +1156,15 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "uninstall": "Disinstalla",
             "update": "Aggiorna",
         },
+        "dashboard": {
+            "welcome": "Benvenuto su OpenEstimate",
+            "subtitle": "Piattaforma open-source per la stima dei costi di costruzione",
+            "recent_projects": "Progetti recenti",
+            "system_status": "Stato del sistema",
+            "modules_loaded": "Moduli caricati",
+            "validation_rules": "Regole di validazione",
+            "languages": "Lingue",
+        },
         "units": {
             "m": "m",
             "m2": "m\u00b2",
@@ -982,6 +1185,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
         "app": {
             "name": "OpenEstimate",
             "tagline": "Open-source bouwkostencalculatie",
+        },
+        "nav": {
+            "dashboard": "Dashboard",
+            "ai_estimate": "AI-raming",
+            "settings": "Instellingen",
+            "5d_cost_model": "5D Kostenmodel",
+            "templates": "Sjablonen",
         },
         "common": {
             "save": "Opslaan",
@@ -1028,6 +1238,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "assembly": "Samengestelde prijs",
             "subtotal": "Subtotaal",
             "grand_total": "Eindtotaal",
+            "direct_cost": "Directe kosten",
+            "net_total": "Netto totaal",
+            "gross_total": "Bruto totaal",
+            "vat": "BTW",
+            "add_markups": "Opslagen toevoegen",
+            "validate": "Valideren",
+            "export": "Exporteren",
         },
         "costs": {
             "title": "Prijsdatabase",
@@ -1036,6 +1253,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "labor": "Arbeid",
             "equipment": "Materieel",
             "search_costs": "Prijzen zoeken...",
+        },
+        "assemblies": {
+            "title": "Samengestelde prijzen",
         },
         "validation": {
             "title": "Validatie",
@@ -1050,6 +1270,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "missing_classification": "Post {position} heeft een classificatiecode nodig",
             "duplicate_ordinal": "Dubbel volgnummer: {ordinal}",
             "rate_anomaly": "Eenheidsprijs {rate} overschrijdt drempelwaarde ({threshold})",
+        },
+        "schedule": {
+            "title": "4D Planning",
         },
         "cad": {
             "title": "CAD-import",
@@ -1078,6 +1301,15 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "uninstall": "De\u00efnstalleren",
             "update": "Bijwerken",
         },
+        "dashboard": {
+            "welcome": "Welkom bij OpenEstimate",
+            "subtitle": "Open-source bouwkostencalculatie-platform",
+            "recent_projects": "Recente projecten",
+            "system_status": "Systeemstatus",
+            "modules_loaded": "Geladen modules",
+            "validation_rules": "Validatieregels",
+            "languages": "Talen",
+        },
         "units": {
             "m": "m",
             "m2": "m\u00b2",
@@ -1098,6 +1330,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
         "app": {
             "name": "OpenEstimate",
             "tagline": "Kosztorysowanie budowlane open-source",
+        },
+        "nav": {
+            "dashboard": "Panel g\u0142\u00f3wny",
+            "ai_estimate": "Szacowanie AI",
+            "settings": "Ustawienia",
+            "5d_cost_model": "Model koszt\u00f3w 5D",
+            "templates": "Szablony",
         },
         "common": {
             "save": "Zapisz",
@@ -1144,6 +1383,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "assembly": "Kalkulacja szczeg\u00f3\u0142owa",
             "subtotal": "Suma cz\u0119\u015bciowa",
             "grand_total": "Suma og\u00f3lna",
+            "direct_cost": "Koszty bezpo\u015brednie",
+            "net_total": "Suma netto",
+            "gross_total": "Suma brutto",
+            "vat": "VAT",
+            "add_markups": "Dodaj narzuty",
+            "validate": "Waliduj",
+            "export": "Eksportuj",
         },
         "costs": {
             "title": "Baza cenowa",
@@ -1152,6 +1398,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "labor": "Robocizna",
             "equipment": "Sprz\u0119t",
             "search_costs": "Szukaj cen...",
+        },
+        "assemblies": {
+            "title": "Kalkulacje szczeg\u00f3\u0142owe",
         },
         "validation": {
             "title": "Walidacja",
@@ -1166,6 +1415,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "missing_classification": "Pozycja {position} wymaga kodu klasyfikacji",
             "duplicate_ordinal": "Zduplikowany numer porz\u0105dkowy: {ordinal}",
             "rate_anomaly": "Cena jednostkowa {rate} przekracza pr\u00f3g ({threshold})",
+        },
+        "schedule": {
+            "title": "Harmonogram 4D",
         },
         "cad": {
             "title": "Import CAD",
@@ -1194,6 +1446,15 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "uninstall": "Odinstaluj",
             "update": "Aktualizuj",
         },
+        "dashboard": {
+            "welcome": "Witaj w OpenEstimate",
+            "subtitle": "Platforma kosztorysowania budowlanego open-source",
+            "recent_projects": "Ostatnie projekty",
+            "system_status": "Stan systemu",
+            "modules_loaded": "Za\u0142adowane modu\u0142y",
+            "validation_rules": "Regu\u0142y walidacji",
+            "languages": "J\u0119zyki",
+        },
         "units": {
             "m": "m",
             "m2": "m\u00b2",
@@ -1214,6 +1475,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
         "app": {
             "name": "OpenEstimate",
             "tagline": "Open-source rozpo\u010dtov\u00e1n\u00ed staveb",
+        },
+        "nav": {
+            "dashboard": "P\u0159ehled",
+            "ai_estimate": "AI odhad",
+            "settings": "Nastaven\u00ed",
+            "5d_cost_model": "5D model n\u00e1klad\u016f",
+            "templates": "\u0160ablony",
         },
         "common": {
             "save": "Ulo\u017eit",
@@ -1260,6 +1528,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "assembly": "Kalkulace polo\u017eky",
             "subtotal": "Mezisou\u010det",
             "grand_total": "Celkov\u00e1 suma",
+            "direct_cost": "P\u0159\u00edm\u00e9 n\u00e1klady",
+            "net_total": "Celkem bez DPH",
+            "gross_total": "Celkem s DPH",
+            "vat": "DPH",
+            "add_markups": "P\u0159idat p\u0159ir\u00e1\u017eky",
+            "validate": "Validovat",
+            "export": "Exportovat",
         },
         "costs": {
             "title": "Cenov\u00e1 datab\u00e1ze",
@@ -1268,6 +1543,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "labor": "Pr\u00e1ce",
             "equipment": "Stroje",
             "search_costs": "Hledat ceny...",
+        },
+        "assemblies": {
+            "title": "Kalkulace polo\u017eek",
         },
         "validation": {
             "title": "Validace",
@@ -1282,6 +1560,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "missing_classification": "Polo\u017eka {position} pot\u0159ebuje klasifika\u010dn\u00ed k\u00f3d",
             "duplicate_ordinal": "Duplicitn\u00ed po\u0159adov\u00e9 \u010d\u00edslo: {ordinal}",
             "rate_anomaly": "Jednotkov\u00e1 cena {rate} p\u0159ekra\u010duje pr\u00e1h ({threshold})",
+        },
+        "schedule": {
+            "title": "4D Harmonogram",
         },
         "cad": {
             "title": "Import CAD",
@@ -1310,6 +1591,15 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "uninstall": "Odinstalovat",
             "update": "Aktualizovat",
         },
+        "dashboard": {
+            "welcome": "V\u00edtejte v OpenEstimate",
+            "subtitle": "Open-source platforma pro rozpo\u010dtov\u00e1n\u00ed staveb",
+            "recent_projects": "Ned\u00e1vn\u00e9 projekty",
+            "system_status": "Stav syst\u00e9mu",
+            "modules_loaded": "Na\u010dten\u00e9 moduly",
+            "validation_rules": "Valida\u010dn\u00ed pravidla",
+            "languages": "Jazyky",
+        },
         "units": {
             "m": "m",
             "m2": "m\u00b2",
@@ -1330,6 +1620,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
         "app": {
             "name": "OpenEstimate",
             "tagline": "A\u00e7\u0131k kaynak in\u015faat maliyet tahmini",
+        },
+        "nav": {
+            "dashboard": "G\u00f6sterge paneli",
+            "ai_estimate": "YZ Tahmin",
+            "settings": "Ayarlar",
+            "5d_cost_model": "5D Maliyet Modeli",
+            "templates": "\u015eablonlar",
         },
         "common": {
             "save": "Kaydet",
@@ -1376,6 +1673,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "assembly": "Analiz",
             "subtotal": "Ara toplam",
             "grand_total": "Genel toplam",
+            "direct_cost": "Do\u011frudan maliyet",
+            "net_total": "Net toplam",
+            "gross_total": "Br\u00fct toplam",
+            "vat": "KDV",
+            "add_markups": "K\u00e2r ve genel gider ekle",
+            "validate": "Do\u011frula",
+            "export": "D\u0131\u015fa aktar",
         },
         "costs": {
             "title": "Fiyat veritaban\u0131",
@@ -1384,6 +1688,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "labor": "\u0130\u015f\u00e7ilik",
             "equipment": "Makine",
             "search_costs": "Fiyat ara...",
+        },
+        "assemblies": {
+            "title": "Analizler",
         },
         "validation": {
             "title": "Do\u011frulama",
@@ -1398,6 +1705,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "missing_classification": "Pozisyon {position} s\u0131n\u0131fland\u0131rma kodu gerekli",
             "duplicate_ordinal": "Yinelenen s\u0131ra numaras\u0131: {ordinal}",
             "rate_anomaly": "Birim fiyat {rate} e\u015fik de\u011feri a\u015f\u0131yor ({threshold})",
+        },
+        "schedule": {
+            "title": "4D \u0130\u015f Program\u0131",
         },
         "cad": {
             "title": "CAD i\u00e7e aktarma",
@@ -1426,6 +1736,15 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "uninstall": "Kald\u0131r",
             "update": "G\u00fcncelle",
         },
+        "dashboard": {
+            "welcome": "OpenEstimate'e ho\u015f geldiniz",
+            "subtitle": "A\u00e7\u0131k kaynak in\u015faat maliyet tahmini platformu",
+            "recent_projects": "Son projeler",
+            "system_status": "Sistem durumu",
+            "modules_loaded": "Y\u00fckl\u00fc mod\u00fcller",
+            "validation_rules": "Do\u011frulama kurallar\u0131",
+            "languages": "Diller",
+        },
         "units": {
             "m": "m",
             "m2": "m\u00b2",
@@ -1446,6 +1765,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
         "app": {
             "name": "OpenEstimate",
             "tagline": "Byggkalkylering med \u00f6ppen k\u00e4llkod",
+        },
+        "nav": {
+            "dashboard": "\u00d6versikt",
+            "ai_estimate": "AI-kalkyl",
+            "settings": "Inst\u00e4llningar",
+            "5d_cost_model": "5D Kostnadsmodell",
+            "templates": "Mallar",
         },
         "common": {
             "save": "Spara",
@@ -1492,6 +1818,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "assembly": "Kalkylsammansatt",
             "subtotal": "Delsumma",
             "grand_total": "Totalsumma",
+            "direct_cost": "Direkt kostnad",
+            "net_total": "Nettosumma",
+            "gross_total": "Bruttosumma",
+            "vat": "Moms",
+            "add_markups": "L\u00e4gg till p\u00e5slag",
+            "validate": "Validera",
+            "export": "Exportera",
         },
         "costs": {
             "title": "Prisdatabas",
@@ -1500,6 +1833,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "labor": "Arbetskraft",
             "equipment": "Maskiner",
             "search_costs": "S\u00f6k priser...",
+        },
+        "assemblies": {
+            "title": "Sammansatta kalkyler",
         },
         "validation": {
             "title": "Validering",
@@ -1514,6 +1850,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "missing_classification": "Post {position} beh\u00f6ver en klassificeringskod",
             "duplicate_ordinal": "Dubblerat positionsnummer: {ordinal}",
             "rate_anomaly": "\u00c0-pris {rate} \u00f6verstiger gr\u00e4nsv\u00e4rde ({threshold})",
+        },
+        "schedule": {
+            "title": "4D Tidsplan",
         },
         "cad": {
             "title": "CAD-import",
@@ -1542,6 +1881,15 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "uninstall": "Avinstallera",
             "update": "Uppdatera",
         },
+        "dashboard": {
+            "welcome": "V\u00e4lkommen till OpenEstimate",
+            "subtitle": "Byggkalkylering med \u00f6ppen k\u00e4llkod",
+            "recent_projects": "Senaste projekt",
+            "system_status": "Systemstatus",
+            "modules_loaded": "Laddade moduler",
+            "validation_rules": "Valideringsregler",
+            "languages": "Spr\u00e5k",
+        },
         "units": {
             "m": "m",
             "m2": "m\u00b2",
@@ -1562,6 +1910,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
         "app": {
             "name": "OpenEstimate",
             "tagline": "Byggekalkyle med \u00e5pen kildekode",
+        },
+        "nav": {
+            "dashboard": "Oversikt",
+            "ai_estimate": "AI-kalkyle",
+            "settings": "Innstillinger",
+            "5d_cost_model": "5D Kostnadsmodell",
+            "templates": "Maler",
         },
         "common": {
             "save": "Lagre",
@@ -1608,6 +1963,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "assembly": "Sammensatt pris",
             "subtotal": "Delsum",
             "grand_total": "Totalsum",
+            "direct_cost": "Direkte kostnad",
+            "net_total": "Netto totalt",
+            "gross_total": "Brutto totalt",
+            "vat": "MVA",
+            "add_markups": "Legg til p\u00e5slag",
+            "validate": "Valider",
+            "export": "Eksporter",
         },
         "costs": {
             "title": "Prisdatabase",
@@ -1616,6 +1978,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "labor": "Arbeidskraft",
             "equipment": "Maskin",
             "search_costs": "S\u00f8k etter priser...",
+        },
+        "assemblies": {
+            "title": "Sammensatte priser",
         },
         "validation": {
             "title": "Validering",
@@ -1630,6 +1995,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "missing_classification": "Post {position} trenger en klassifiseringskode",
             "duplicate_ordinal": "Duplikat posisjonsnummer: {ordinal}",
             "rate_anomaly": "Enhetspris {rate} overskrider terskel ({threshold})",
+        },
+        "schedule": {
+            "title": "4D Fremdriftsplan",
         },
         "cad": {
             "title": "CAD-import",
@@ -1658,6 +2026,15 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "uninstall": "Avinstaller",
             "update": "Oppdater",
         },
+        "dashboard": {
+            "welcome": "Velkommen til OpenEstimate",
+            "subtitle": "Byggekalkyle med \u00e5pen kildekode",
+            "recent_projects": "Nylige prosjekter",
+            "system_status": "Systemstatus",
+            "modules_loaded": "Lastede moduler",
+            "validation_rules": "Valideringsregler",
+            "languages": "Spr\u00e5k",
+        },
         "units": {
             "m": "m",
             "m2": "m\u00b2",
@@ -1678,6 +2055,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
         "app": {
             "name": "OpenEstimate",
             "tagline": "Byggekalkulation med \u00e5ben kildekode",
+        },
+        "nav": {
+            "dashboard": "Oversigt",
+            "ai_estimate": "AI-kalkule",
+            "settings": "Indstillinger",
+            "5d_cost_model": "5D Omkostningsmodel",
+            "templates": "Skabeloner",
         },
         "common": {
             "save": "Gem",
@@ -1724,6 +2108,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "assembly": "Sammensat pris",
             "subtotal": "Subtotal",
             "grand_total": "Total",
+            "direct_cost": "Direkte omkostning",
+            "net_total": "Netto i alt",
+            "gross_total": "Brutto i alt",
+            "vat": "Moms",
+            "add_markups": "Tilf\u00f8j till\u00e6g",
+            "validate": "Validere",
+            "export": "Eksporter",
         },
         "costs": {
             "title": "Prisdatabase",
@@ -1732,6 +2123,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "labor": "Arbejdskraft",
             "equipment": "Maskinel",
             "search_costs": "S\u00f8g efter priser...",
+        },
+        "assemblies": {
+            "title": "Sammensatte priser",
         },
         "validation": {
             "title": "Validering",
@@ -1746,6 +2140,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "missing_classification": "Post {position} kr\u00e6ver en klassifikationskode",
             "duplicate_ordinal": "Duplikeret positionsnummer: {ordinal}",
             "rate_anomaly": "Enhedspris {rate} overskrider t\u00e6rskelv\u00e6rdi ({threshold})",
+        },
+        "schedule": {
+            "title": "4D Tidsplan",
         },
         "cad": {
             "title": "CAD-import",
@@ -1774,6 +2171,15 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "uninstall": "Afinstaller",
             "update": "Opdater",
         },
+        "dashboard": {
+            "welcome": "Velkommen til OpenEstimate",
+            "subtitle": "Byggekalkulation med \u00e5ben kildekode",
+            "recent_projects": "Seneste projekter",
+            "system_status": "Systemstatus",
+            "modules_loaded": "Indl\u00e6ste moduler",
+            "validation_rules": "Valideringsregler",
+            "languages": "Sprog",
+        },
         "units": {
             "m": "m",
             "m2": "m\u00b2",
@@ -1794,6 +2200,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
         "app": {
             "name": "OpenEstimate",
             "tagline": "Avoimen l\u00e4hdekoodin rakennuskustannuslaskenta",
+        },
+        "nav": {
+            "dashboard": "Yleiskatsaus",
+            "ai_estimate": "Teko\u00e4lylaskelma",
+            "settings": "Asetukset",
+            "5d_cost_model": "5D Kustannusmalli",
+            "templates": "Mallipohjat",
         },
         "common": {
             "save": "Tallenna",
@@ -1840,6 +2253,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "assembly": "Rakenneosa",
             "subtotal": "V\u00e4lisumma",
             "grand_total": "Loppusumma",
+            "direct_cost": "V\u00e4litt\u00f6m\u00e4t kustannukset",
+            "net_total": "Nettosumma",
+            "gross_total": "Bruttosumma",
+            "vat": "ALV",
+            "add_markups": "Lis\u00e4\u00e4 lis\u00e4t",
+            "validate": "Validoi",
+            "export": "Vie",
         },
         "costs": {
             "title": "Hintatietokanta",
@@ -1848,6 +2268,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "labor": "Ty\u00f6",
             "equipment": "Kalusto",
             "search_costs": "Hae hintoja...",
+        },
+        "assemblies": {
+            "title": "Rakenneosat",
         },
         "validation": {
             "title": "Validointi",
@@ -1862,6 +2285,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "missing_classification": "Nimike {position} tarvitsee luokituskoodin",
             "duplicate_ordinal": "J\u00e4rjestysnumeron kaksoiskappale: {ordinal}",
             "rate_anomaly": "Yksikk\u00f6hinta {rate} ylitt\u00e4\u00e4 kynnysarvon ({threshold})",
+        },
+        "schedule": {
+            "title": "4D Aikataulu",
         },
         "cad": {
             "title": "CAD-tuonti",
