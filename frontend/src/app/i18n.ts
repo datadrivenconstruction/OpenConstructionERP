@@ -124,10 +124,26 @@ i18n
     interpolation: {
       escapeValue: false,
     },
+    // Bundle English translations — always available as fallback
+    // Backend translations merge on top but English keys are always there
     partialBundledLanguages: true,
     resources: fallbackResources,
+    // Don't load English from backend (use bundled), load other languages from API
     backend: {
       loadPath: '/api/v1/i18n/{{lng}}',
+      // Skip loading English from backend — bundled version is more complete
+      request: (_options: Record<string, unknown>, url: string, _payload: unknown, callback: (err: unknown, data: { status: number; data: string }) => void) => {
+        if (typeof url === 'string' && url.endsWith('/en')) {
+          // Return empty for English — use bundled fallback
+          callback(null, { status: 200, data: '{}' });
+          return;
+        }
+        // For other languages, fetch from backend
+        fetch(url as string)
+          .then((r) => r.text())
+          .then((data) => callback(null, { status: 200, data }))
+          .catch((err) => callback(err, { status: 500, data: '' }));
+      },
     },
     detection: {
       order: ['localStorage', 'navigator', 'htmlTag'],
