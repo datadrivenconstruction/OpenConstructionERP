@@ -39,6 +39,8 @@ from fastapi.responses import StreamingResponse
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.boq.schemas import (
+    AIChatRequest,
+    AIChatResponse,
     ActivityLogList,
     BOQCreate,
     BOQFromTemplateRequest,
@@ -614,6 +616,148 @@ async def validate_boq(
     ]
 
     return summary
+
+
+# ── AI Chat ──────────────────────────────────────────────────────────────────
+
+
+BOQ_CHAT_SYSTEM_PROMPT = """\
+You are a professional construction cost estimator integrated into a BOQ editor. \
+You generate accurate, detailed BOQ positions with realistic market-rate pricing. \
+Always return valid JSON arrays. Never include explanatory text outside the JSON structure.\
+"""
+
+BOQ_CHAT_USER_PROMPT = """\
+You are a cost estimator assistant. The user is working on a BOQ for {project_name}.
+Current BOQ has {existing_positions_count} positions.
+Classification standard: {standard}.
+
+User request: {message}
+
+Generate additional BOQ positions as a JSON array:
+[
+  {{"ordinal": "...", "description": "...", "unit": "...", "quantity": N, "unit_rate": N}}
+]
+
+Rules:
+- Be specific and use realistic prices in {currency}
+- Each item must have: ordinal, description, unit, quantity, unit_rate
+- Use realistic market-rate unit prices
+- Return ONLY the JSON array, no other text
+"""
+
+
+@router.post(
+    "/boqs/{boq_id}/ai-chat",
+    response_model=AIChatResponse,
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def ai_chat_boq(
+    boq_id: uuid.UUID,
+    data: AIChatRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: BOQService = Depends(_get_service),
+) -> AIChatResponse:
+    """Chat with AI to generate additional BOQ positions.
+
+    Sends the user's message along with BOQ context to the AI and returns
+    suggested positions that can be added to the BOQ.
+
+    Requires the user to have an AI API key configured in their settings.
+    """
+    from app.modules.ai.ai_client import call_ai, extract_json, resolve_provider_and_key
+    from app.modules.ai.repository import AISettingsRepository
+
+    # Verify BOQ exists
+    await service.get_boq(boq_id)
+
+    # Resolve AI provider from user settings
+    uid = uuid.UUID(user_id)
+    settings_repo = AISettingsRepository(session)
+    settings = await settings_repo.get_by_user_id(uid)
+
+    try:
+        provider, api_key = resolve_provider_and_key(settings)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
+        ) from exc
+
+    # Build prompt
+    ctx = data.context
+    prompt = BOQ_CHAT_USER_PROMPT.format(
+        project_name=ctx.project_name or "Unnamed project",
+        existing_positions_count=ctx.existing_positions_count,
+        standard=ctx.standard or "din276",
+        currency=ctx.currency or "EUR",
+        message=data.message,
+    )
+
+    # Call AI
+    try:
+        raw_response, _tokens = await call_ai(
+            provider=provider,
+            api_key=api_key,
+            system=BOQ_CHAT_SYSTEM_PROMPT,
+            prompt=prompt,
+            max_tokens=4096,
+        )
+    except Exception as exc:
+        logger.exception("AI chat failed for BOQ %s: %s", boq_id, exc)
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"AI request failed: {exc}",
+        ) from exc
+
+    # Parse response
+    parsed = extract_json(raw_response)
+    if not isinstance(parsed, list):
+        return AIChatResponse(
+            items=[],
+            message="AI did not return valid items. Please try rephrasing your request.",
+        )
+
+    # Build response items
+    from app.modules.boq.schemas import AIChatItem
+
+    items: list[AIChatItem] = []
+    for raw_item in parsed:
+        if not isinstance(raw_item, dict):
+            continue
+
+        description = str(raw_item.get("description", "")).strip()
+        if len(description) < 3:
+            continue
+
+        try:
+            quantity = float(raw_item.get("quantity", 0))
+            unit_rate = float(raw_item.get("unit_rate", 0))
+        except (ValueError, TypeError):
+            continue
+
+        if quantity <= 0:
+            continue
+
+        total = round(quantity * unit_rate, 2)
+        items.append(
+            AIChatItem(
+                ordinal=str(raw_item.get("ordinal", "")),
+                description=description,
+                unit=str(raw_item.get("unit", "m2")),
+                quantity=round(quantity, 2),
+                unit_rate=round(unit_rate, 2),
+                total=total,
+            )
+        )
+
+    grand_total = sum(item.total for item in items)
+    summary = (
+        f"Generated {len(items)} position{'s' if len(items) != 1 else ''} "
+        f"totalling {grand_total:,.2f} {ctx.currency or 'EUR'}."
+    )
+
+    return AIChatResponse(items=items, message=summary)
 
 
 # ── Export (CSV / Excel) ──────────────────────────────────────────────────────
