@@ -36,15 +36,17 @@ interface TabDef {
   label: string;
   labelKey: string;
   icon: React.ReactNode;
+  description: string;
+  color: string;
 }
 
 const TABS: TabDef[] = [
-  { id: 'text', label: 'Text', labelKey: 'ai.tab_text', icon: <Pencil size={16} /> },
-  { id: 'photo', label: 'Photo', labelKey: 'ai.tab_photo', icon: <Camera size={16} /> },
-  { id: 'pdf', label: 'PDF', labelKey: 'ai.tab_pdf', icon: <FileText size={16} /> },
-  { id: 'excel', label: 'Excel', labelKey: 'ai.tab_excel', icon: <FileSpreadsheet size={16} /> },
-  { id: 'cad', label: 'CAD', labelKey: 'ai.tab_cad', icon: <HardHat size={16} /> },
-  { id: 'paste', label: 'Paste', labelKey: 'ai.tab_paste', icon: <ClipboardPaste size={16} /> },
+  { id: 'text', label: 'Text', labelKey: 'ai.tab_text', icon: <Pencil size={22} />, description: 'Describe your project in plain text', color: 'from-blue-500/10 to-cyan-500/10 text-blue-600' },
+  { id: 'photo', label: 'Photo / Scan', labelKey: 'ai.tab_photo', icon: <Camera size={22} />, description: 'Building photo or scanned document', color: 'from-violet-500/10 to-purple-500/10 text-violet-600' },
+  { id: 'pdf', label: 'PDF', labelKey: 'ai.tab_pdf', icon: <FileText size={22} />, description: 'BOQ sheets, specs, tender docs', color: 'from-red-500/10 to-orange-500/10 text-red-600' },
+  { id: 'excel', label: 'Excel / CSV', labelKey: 'ai.tab_excel', icon: <FileSpreadsheet size={22} />, description: 'Spreadsheet with BOQ data', color: 'from-green-500/10 to-emerald-500/10 text-green-600' },
+  { id: 'cad', label: 'CAD / BIM', labelKey: 'ai.tab_cad', icon: <HardHat size={22} />, description: 'Revit, IFC, DWG, DGN files', color: 'from-amber-500/10 to-yellow-500/10 text-amber-600' },
+  { id: 'paste', label: 'Paste', labelKey: 'ai.tab_paste', icon: <ClipboardPaste size={22} />, description: 'Copy-paste from any app', color: 'from-slate-500/10 to-gray-500/10 text-slate-600' },
 ];
 
 // ── Option data ──────────────────────────────────────────────────────────────
@@ -995,35 +997,47 @@ export function QuickEstimatePage() {
         </div>
       )}
 
-      {/* Input card with tabs */}
-      <Card className="animate-card-in" style={{ animationDelay: '100ms' }} padding="none">
-        {/* Tab bar */}
-        <div className="px-6 pt-5 pb-0">
-          <div className="flex flex-wrap gap-1.5 rounded-xl bg-surface-secondary p-1">
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                disabled={isPending}
-                className={`
-                  flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium
-                  transition-all duration-normal ease-oe
-                  ${
-                    activeTab === tab.id
-                      ? 'bg-oe-blue text-white shadow-sm'
-                      : 'text-content-secondary hover:text-content-primary hover:bg-surface-primary'
-                  }
-                  ${isPending ? 'opacity-60 pointer-events-none' : ''}
-                `}
-              >
-                <span className="shrink-0">{tab.icon}</span>
-                <span className="hidden sm:inline">
-                  {t(tab.labelKey, { defaultValue: tab.label })}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* Source type selector — 2×3 card grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 animate-card-in" style={{ animationDelay: '100ms' }}>
+        {TABS.map((tab, i) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => handleTabChange(tab.id)}
+              disabled={isPending}
+              className={`
+                relative flex flex-col items-center gap-2 rounded-2xl p-4 sm:p-5 text-center
+                border-2 transition-all duration-normal ease-oe
+                ${isActive
+                  ? 'border-oe-blue bg-oe-blue-subtle shadow-md scale-[1.02]'
+                  : 'border-border-light bg-surface-elevated hover:border-border hover:shadow-sm hover:-translate-y-0.5 active:scale-[0.98]'
+                }
+                ${isPending ? 'opacity-50 pointer-events-none' : ''}
+              `}
+              style={{ animationDelay: `${120 + i * 50}ms` }}
+            >
+              <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${isActive ? 'from-oe-blue/20 to-oe-blue/10 text-oe-blue' : tab.color}`}>
+                {tab.icon}
+              </div>
+              <div className="font-semibold text-sm text-content-primary">
+                {t(tab.labelKey, { defaultValue: tab.label })}
+              </div>
+              <div className="text-2xs text-content-tertiary leading-tight hidden sm:block">
+                {tab.description}
+              </div>
+              {isActive && (
+                <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue text-white shadow-sm">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5L4.5 7.5L8 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Input area for selected source */}
+      <Card className="animate-card-in" style={{ animationDelay: '200ms' }} padding="none">
 
         {/* Tab content */}
         <form
