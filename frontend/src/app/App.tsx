@@ -13,6 +13,7 @@ import { CostModelPage } from '@/features/costmodel';
 import { TenderingPage } from '@/features/tendering';
 import { ModulesPage } from '@/features/modules';
 import { SettingsPage } from '@/features/settings';
+import { QuickEstimatePage } from '@/features/ai';
 import { Logo, ShortcutsDialog, ToastContainer } from '@/shared/ui';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useKeyboardShortcuts } from '@/shared/hooks/useKeyboardShortcuts';
@@ -85,6 +86,8 @@ export default function App() {
 
         {/* App — all protected, all real pages */}
         <Route path="/" element={<P title="Dashboard"><DashboardPage /></P>} />
+
+        <Route path="/ai-estimate" element={<P title="AI Quick Estimate"><QuickEstimatePage /></P>} />
 
         <Route path="/projects" element={<P title="Projects"><ProjectsPage /></P>} />
         <Route path="/projects/new" element={<P title="New Project"><CreateProjectPage /></P>} />

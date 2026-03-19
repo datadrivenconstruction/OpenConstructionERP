@@ -134,6 +134,7 @@ def create_app() -> FastAPI:
             from app.modules.assemblies import models as _asm_models  # noqa: F401
             from app.modules.schedule import models as _sched_models  # noqa: F401
             from app.modules.costmodel import models as _cm_models  # noqa: F401
+            from app.modules.ai import models as _ai_models  # noqa: F401
 
             async with engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
