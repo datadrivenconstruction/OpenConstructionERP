@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Copy, Check, Database, ChevronDown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Copy, Check, Database, ChevronDown, Upload } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Skeleton } from '@/shared/ui';
 import { apiGet } from '@/shared/lib/api';
 
@@ -46,6 +47,7 @@ function buildSearchUrl(query: string, unit: string, source: string, offset: num
 
 export function CostsPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const [query, setQuery] = useState('');
   const [unit, setUnit] = useState('');
@@ -106,13 +108,22 @@ export function CostsPage() {
   return (
     <div className="max-w-content mx-auto animate-fade-in">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-content-primary">{t('costs.title')}</h1>
-        <p className="mt-1 text-sm text-content-secondary">
-          {total > 0
-            ? `${total.toLocaleString()} ${t('costs.results_found', 'results found')}`
-            : t('costs.search_hint', 'Search cost items by description or code')}
-        </p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-content-primary">{t('costs.title')}</h1>
+          <p className="mt-1 text-sm text-content-secondary">
+            {total > 0
+              ? `${total.toLocaleString()} ${t('costs.results_found', 'results found')}`
+              : t('costs.search_hint', 'Search cost items by description or code')}
+          </p>
+        </div>
+        <Button
+          variant="secondary"
+          icon={<Upload size={16} />}
+          onClick={() => navigate('/costs/import')}
+        >
+          {t('costs.import_database', { defaultValue: 'Import Database' })}
+        </Button>
       </div>
 
       {/* Search & Filters */}

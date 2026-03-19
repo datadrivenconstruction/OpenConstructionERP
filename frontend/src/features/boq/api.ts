@@ -179,6 +179,44 @@ export interface ActivityResponse {
   total: number;
 }
 
+/* ── Cost autocomplete types ─────────────────────────────────────────── */
+
+export interface CostAutocompleteItem {
+  code: string;
+  description: string;
+  unit: string;
+  rate: number;
+  classification: Record<string, string>;
+}
+
+/* ── AI Chat types ──────────────────────────────────────────────────── */
+
+export interface AIChatContext {
+  project_name: string;
+  currency: string;
+  standard: string;
+  existing_positions_count: number;
+}
+
+export interface AIChatRequest {
+  message: string;
+  context: AIChatContext;
+}
+
+export interface AIChatItem {
+  ordinal: string;
+  description: string;
+  unit: string;
+  quantity: number;
+  unit_rate: number;
+  total: number;
+}
+
+export interface AIChatResponse {
+  items: AIChatItem[];
+  message: string;
+}
+
 /* ── API client ──────────────────────────────────────────────────────── */
 
 export const boqApi = {
@@ -210,4 +248,12 @@ export const boqApi = {
   /* Activity */
   getActivity: (boqId: string) =>
     apiGet<ActivityResponse>(`/v1/boq/boqs/${boqId}/activity`),
+
+  /* Cost autocomplete */
+  autocomplete: (q: string, limit = 8) =>
+    apiGet<CostAutocompleteItem[]>(`/v1/costs/autocomplete?q=${encodeURIComponent(q)}&limit=${limit}`),
+
+  /* AI Chat */
+  aiChat: (boqId: string, data: AIChatRequest) =>
+    apiPost<AIChatResponse>(`/v1/boq/boqs/${boqId}/ai-chat`, data),
 };

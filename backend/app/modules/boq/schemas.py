@@ -299,6 +299,48 @@ class BOQFromTemplateRequest(BaseModel):
 # ── Activity log schemas ─────────────────────────────────────────────────────
 
 
+# ── AI Chat schemas ──────────────────────────────────────────────────────────
+
+
+class AIChatContext(BaseModel):
+    """Context about the current BOQ for AI chat prompts."""
+
+    project_name: str = ""
+    currency: str = "EUR"
+    standard: str = "din276"
+    existing_positions_count: int = 0
+
+
+class AIChatRequest(BaseModel):
+    """Request body for AI chat within the BOQ editor."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    message: str = Field(..., min_length=1, max_length=2000)
+    context: AIChatContext = Field(default_factory=AIChatContext)
+
+
+class AIChatItem(BaseModel):
+    """A single BOQ position suggested by AI chat."""
+
+    ordinal: str
+    description: str
+    unit: str
+    quantity: float
+    unit_rate: float
+    total: float
+
+
+class AIChatResponse(BaseModel):
+    """Response from AI chat with generated BOQ items."""
+
+    items: list[AIChatItem] = Field(default_factory=list)
+    message: str = ""
+
+
+# ── Activity log schemas ─────────────────────────────────────────────────────
+
+
 class ActivityLogResponse(BaseModel):
     """Activity log entry returned from the API."""
 
