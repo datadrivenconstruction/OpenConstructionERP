@@ -46,7 +46,7 @@ interface BOQTemplate {
 interface CreateFromTemplateData {
   template_id: string;
   project_id: string;
-  name: string;
+  boq_name?: string;
   area_m2: number;
 }
 
@@ -318,7 +318,7 @@ export function TemplatesPage() {
     createMutation.mutate({
       template_id: selected.id,
       project_id: projectId,
-      name: boqName || generatedName,
+      boq_name: boqName || generatedName || undefined,
       area_m2: area,
     });
   }, [selected, projectId, boqName, generatedName, area, createMutation]);
