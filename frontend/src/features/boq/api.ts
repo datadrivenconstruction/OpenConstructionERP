@@ -145,6 +145,40 @@ export function groupPositionsIntoSections(positions: Position[]): {
   return { sections, ungrouped };
 }
 
+/* ── Activity types ──────────────────────────────────────────────────── */
+
+export type ActivityAction =
+  | 'position_added'
+  | 'position_updated'
+  | 'position_deleted'
+  | 'quantity_updated'
+  | 'rate_updated'
+  | 'section_added'
+  | 'section_deleted'
+  | 'validation_run'
+  | 'excel_imported'
+  | 'csv_imported'
+  | 'boq_created'
+  | 'template_applied'
+  | 'markup_added'
+  | 'markup_updated'
+  | 'status_changed';
+
+export interface ActivityEntry {
+  id: string;
+  boq_id: string;
+  action: ActivityAction;
+  description: string;
+  details: Record<string, unknown>;
+  created_at: string;
+  user_name?: string;
+}
+
+export interface ActivityResponse {
+  activities: ActivityEntry[];
+  total: number;
+}
+
 /* ── API client ──────────────────────────────────────────────────────── */
 
 export const boqApi = {
@@ -172,4 +206,8 @@ export const boqApi = {
   updateMarkup: (markupId: string, data: UpdateMarkupData) =>
     apiPatch<Markup>(`/v1/boq/markups/${markupId}`, data),
   deleteMarkup: (markupId: string) => apiDelete(`/v1/boq/markups/${markupId}`),
+
+  /* Activity */
+  getActivity: (boqId: string) =>
+    apiGet<ActivityResponse>(`/v1/boq/boqs/${boqId}/activity`),
 };

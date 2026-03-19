@@ -4,6 +4,7 @@ Tables:
     oe_boq_boq — bill of quantities (one per project scope)
     oe_boq_position — individual line items within a BOQ
     oe_boq_markup — markup/overhead lines applied to a BOQ
+    oe_boq_activity_log — audit trail for BOQ mutations
 """
 
 import uuid
@@ -175,3 +176,63 @@ class BOQMarkup(Base):
 
     def __repr__(self) -> str:
         return f"<BOQMarkup {self.name} ({self.markup_type}: {self.percentage}%)>"
+
+
+class BOQActivityLog(Base):
+    """Audit trail entry for BOQ-related mutations.
+
+    Records every significant action (position created/updated/deleted,
+    markup added, BOQ exported, etc.) for traceability and undo support.
+
+    Columns:
+        project_id — optional project scope for project-wide queries
+        boq_id — optional BOQ scope
+        user_id — who performed the action
+        action — dot-notation action key, e.g. "position.created"
+        target_type — entity kind: "position", "boq", "markup", "section"
+        target_id — UUID of the affected entity (nullable for bulk ops)
+        description — human-readable summary, e.g. "Added position 01.01.0010"
+        changes — field-level diff, e.g. {"field": "quantity", "old": "100", "new": "150"}
+        metadata_ — additional context (module version, client IP, etc.)
+    """
+
+    __tablename__ = "oe_boq_activity_log"
+
+    project_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    boq_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_boq_boq.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_users_user.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    action: Mapped[str] = mapped_column(String(100), nullable=False)
+    target_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    target_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    description: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    changes: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
+    metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
+
+    def __repr__(self) -> str:
+        return f"<BOQActivityLog {self.action} target={self.target_type}:{self.target_id}>"

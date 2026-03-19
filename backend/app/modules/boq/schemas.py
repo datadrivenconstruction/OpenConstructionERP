@@ -1,7 +1,7 @@
 """BOQ Pydantic schemas — request/response models.
 
 Defines create, update, and response schemas for BOQs, positions, markups,
-and structured (sectioned) BOQ responses.
+structured (sectioned) BOQ responses, templates, and activity log entries.
 
 Numeric values (quantity, unit_rate, total) are exposed as floats in the API
 but stored as strings in SQLite-compatible models.
@@ -246,3 +246,81 @@ class BOQWithSections(BOQResponse):
     markups: list[MarkupCalculated] = Field(default_factory=list)
     net_total: float = 0.0
     grand_total: float = 0.0
+
+
+# ── Template schemas ─────────────────────────────────────────────────────────
+
+
+class TemplatePositionInfo(BaseModel):
+    """Summary of a single template position (used in template listing)."""
+
+    ordinal: str
+    description: str
+    unit: str
+    qty_factor: float
+    rate: float
+
+
+class TemplateSectionInfo(BaseModel):
+    """Summary of a single template section (used in template listing)."""
+
+    ordinal: str
+    description: str
+    position_count: int
+
+
+class TemplateInfo(BaseModel):
+    """Summary of a BOQ template returned by GET /boqs/templates."""
+
+    id: str
+    name: str
+    description: str
+    icon: str
+    section_count: int
+    position_count: int
+
+
+class BOQFromTemplateRequest(BaseModel):
+    """Request body for creating a BOQ from a template."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    project_id: UUID
+    template_id: str = Field(..., min_length=1, max_length=50)
+    area_m2: float = Field(..., gt=0.0, description="Gross floor area in m2")
+    boq_name: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=255,
+        description="Custom BOQ name. Defaults to template name if omitted.",
+    )
+
+
+# ── Activity log schemas ─────────────────────────────────────────────────────
+
+
+class ActivityLogResponse(BaseModel):
+    """Activity log entry returned from the API."""
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    project_id: UUID | None
+    boq_id: UUID | None
+    user_id: UUID
+    action: str
+    target_type: str
+    target_id: UUID | None
+    description: str
+    changes: dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict, alias="metadata_")
+    created_at: datetime
+
+
+class ActivityLogList(BaseModel):
+    """Paginated list of activity log entries."""
+
+    items: list[ActivityLogResponse] = Field(default_factory=list)
+    total: int = 0
+    offset: int = 0
+    limit: int = 50

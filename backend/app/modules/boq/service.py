@@ -9,6 +9,8 @@ Stateless service layer. Handles:
 - Default markup template application per region
 - Grand total computation
 - Event publishing for inter-module communication
+- BOQ creation from built-in templates
+- Activity log queries
 """
 
 import logging
@@ -19,10 +21,18 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
-from app.modules.boq.models import BOQ, BOQMarkup, Position
-from app.modules.boq.repository import BOQRepository, MarkupRepository, PositionRepository
+from app.modules.boq.models import BOQ, BOQActivityLog, BOQMarkup, Position
+from app.modules.boq.repository import (
+    ActivityLogRepository,
+    BOQRepository,
+    MarkupRepository,
+    PositionRepository,
+)
 from app.modules.boq.schemas import (
+    ActivityLogList,
+    ActivityLogResponse,
     BOQCreate,
+    BOQFromTemplateRequest,
     BOQUpdate,
     BOQWithPositions,
     BOQWithSections,
@@ -35,7 +45,9 @@ from app.modules.boq.schemas import (
     PositionUpdate,
     SectionCreate,
     SectionResponse,
+    TemplateInfo,
 )
+from app.modules.boq.templates import TEMPLATES
 
 logger = logging.getLogger(__name__)
 
@@ -310,6 +322,7 @@ class BOQService:
         self.boq_repo = BOQRepository(session)
         self.position_repo = PositionRepository(session)
         self.markup_repo = MarkupRepository(session)
+        self.activity_repo = ActivityLogRepository(session)
 
     # ── BOQ operations ────────────────────────────────────────────────────
 
@@ -1139,3 +1152,252 @@ class BOQService:
             net_total=float(net_total),
             grand_total=float(net_total),
         )
+
+    # ── Template operations ────────────────────────────────────────────────
+
+    def list_templates(self) -> list[TemplateInfo]:
+        """Return summary information for all available built-in templates."""
+        result: list[TemplateInfo] = []
+        for template_id, tpl in TEMPLATES.items():
+            section_count = len(tpl["sections"])
+            position_count = sum(
+                len(sec["positions"]) for sec in tpl["sections"]
+            )
+            result.append(
+                TemplateInfo(
+                    id=template_id,
+                    name=tpl["name"],
+                    description=tpl["description"],
+                    icon=tpl["icon"],
+                    section_count=section_count,
+                    position_count=position_count,
+                )
+            )
+        return result
+
+    async def create_boq_from_template(self, data: BOQFromTemplateRequest) -> BOQ:
+        """Create a complete BOQ from a built-in template.
+
+        Creates the BOQ, section headers, and all positions with quantities
+        derived from ``area_m2 * qty_factor``.
+
+        Args:
+            data: Template request with project_id, template_id, area_m2, and
+                  optional boq_name.
+
+        Returns:
+            The newly created BOQ.
+
+        Raises:
+            HTTPException 400 if template_id is unknown.
+        """
+        template = TEMPLATES.get(data.template_id)
+        if template is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unknown template: {data.template_id}. "
+                f"Available: {', '.join(TEMPLATES.keys())}",
+            )
+
+        boq_name = data.boq_name or template["name"]
+
+        # Create the BOQ shell
+        boq = BOQ(
+            project_id=data.project_id,
+            name=boq_name,
+            description=template["description"],
+            status="draft",
+            metadata_={"template_id": data.template_id, "area_m2": data.area_m2},
+        )
+        boq = await self.boq_repo.create(boq)
+
+        sort_order = 0
+
+        for section_def in template["sections"]:
+            # Create section header
+            section = Position(
+                boq_id=boq.id,
+                parent_id=None,
+                ordinal=section_def["ordinal"],
+                description=section_def["description"],
+                unit="section",
+                quantity="0",
+                unit_rate="0",
+                total="0",
+                classification={},
+                source="template",
+                confidence=None,
+                cad_element_ids=[],
+                metadata_={},
+                sort_order=sort_order,
+            )
+            section = await self.position_repo.create(section)
+            sort_order += 1
+
+            # Create positions under this section
+            for pos_def in section_def["positions"]:
+                quantity = Decimal(str(data.area_m2)) * Decimal(str(pos_def["qty_factor"]))
+                unit_rate = Decimal(str(pos_def["rate"]))
+                total = quantity * unit_rate
+
+                position = Position(
+                    boq_id=boq.id,
+                    parent_id=section.id,
+                    ordinal=pos_def["ordinal"],
+                    description=pos_def["description"],
+                    unit=pos_def["unit"],
+                    quantity=str(quantity),
+                    unit_rate=str(unit_rate),
+                    total=str(total),
+                    classification={},
+                    source="template",
+                    confidence=None,
+                    cad_element_ids=[],
+                    metadata_={"qty_factor": pos_def["qty_factor"]},
+                    sort_order=sort_order,
+                )
+                await self.position_repo.create(position)
+                sort_order += 1
+
+        await event_bus.publish(
+            "boq.boq.created_from_template",
+            {
+                "boq_id": str(boq.id),
+                "project_id": str(data.project_id),
+                "template_id": data.template_id,
+                "area_m2": data.area_m2,
+            },
+            source_module="oe_boq",
+        )
+
+        logger.info(
+            "BOQ created from template '%s': %s (project=%s, area=%.1f m2)",
+            data.template_id,
+            boq.name,
+            data.project_id,
+            data.area_m2,
+        )
+        return boq
+
+    # ── Activity log operations ────────────────────────────────────────────
+
+    async def log_activity(
+        self,
+        *,
+        user_id: uuid.UUID,
+        action: str,
+        target_type: str,
+        description: str,
+        project_id: uuid.UUID | None = None,
+        boq_id: uuid.UUID | None = None,
+        target_id: uuid.UUID | None = None,
+        changes: dict | None = None,
+        metadata_: dict | None = None,
+    ) -> BOQActivityLog:
+        """Create an activity log entry.
+
+        Args:
+            user_id: Who performed the action.
+            action: Dot-notation action, e.g. "position.created".
+            target_type: Entity kind, e.g. "position", "boq", "markup".
+            description: Human-readable summary.
+            project_id: Optional project scope.
+            boq_id: Optional BOQ scope.
+            target_id: Optional UUID of the affected entity.
+            changes: Optional field-level diff dict.
+            metadata_: Optional additional context.
+
+        Returns:
+            The created BOQActivityLog entry.
+        """
+        entry = BOQActivityLog(
+            project_id=project_id,
+            boq_id=boq_id,
+            user_id=user_id,
+            action=action,
+            target_type=target_type,
+            target_id=target_id,
+            description=description,
+            changes=changes or {},
+            metadata_=metadata_ or {},
+        )
+        return await self.activity_repo.create(entry)
+
+    async def get_activity_for_boq(
+        self,
+        boq_id: uuid.UUID,
+        *,
+        offset: int = 0,
+        limit: int = 50,
+    ) -> ActivityLogList:
+        """Retrieve paginated activity log for a BOQ.
+
+        Args:
+            boq_id: Target BOQ.
+            offset: Pagination offset.
+            limit: Max entries to return.
+
+        Returns:
+            ActivityLogList with items, total, offset, limit.
+        """
+        # Verify BOQ exists
+        await self.get_boq(boq_id)
+
+        entries, total = await self.activity_repo.list_for_boq(
+            boq_id, offset=offset, limit=limit
+        )
+        items = [
+            ActivityLogResponse(
+                id=e.id,
+                project_id=e.project_id,
+                boq_id=e.boq_id,
+                user_id=e.user_id,
+                action=e.action,
+                target_type=e.target_type,
+                target_id=e.target_id,
+                description=e.description,
+                changes=e.changes,
+                metadata_=e.metadata_,
+                created_at=e.created_at,
+            )
+            for e in entries
+        ]
+        return ActivityLogList(items=items, total=total, offset=offset, limit=limit)
+
+    async def get_activity_for_project(
+        self,
+        project_id: uuid.UUID,
+        *,
+        offset: int = 0,
+        limit: int = 50,
+    ) -> ActivityLogList:
+        """Retrieve paginated activity log for a project.
+
+        Args:
+            project_id: Target project.
+            offset: Pagination offset.
+            limit: Max entries to return.
+
+        Returns:
+            ActivityLogList with items, total, offset, limit.
+        """
+        entries, total = await self.activity_repo.list_for_project(
+            project_id, offset=offset, limit=limit
+        )
+        items = [
+            ActivityLogResponse(
+                id=e.id,
+                project_id=e.project_id,
+                boq_id=e.boq_id,
+                user_id=e.user_id,
+                action=e.action,
+                target_type=e.target_type,
+                target_id=e.target_id,
+                description=e.description,
+                changes=e.changes,
+                metadata_=e.metadata_,
+                created_at=e.created_at,
+            )
+            for e in entries
+        ]
+        return ActivityLogList(items=items, total=total, offset=offset, limit=limit)
