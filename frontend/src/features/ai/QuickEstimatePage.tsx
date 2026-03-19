@@ -997,8 +997,8 @@ export function QuickEstimatePage() {
         </div>
       )}
 
-      {/* Source type selector — 2×3 card grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 animate-card-in" style={{ animationDelay: '100ms' }}>
+      {/* Source type selector — 2×3 horizontal card grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 animate-card-in" style={{ animationDelay: '100ms' }}>
         {TABS.map((tab, i) => {
           const isActive = activeTab === tab.id;
           return (
@@ -1007,30 +1007,27 @@ export function QuickEstimatePage() {
               onClick={() => handleTabChange(tab.id)}
               disabled={isPending}
               className={`
-                relative flex flex-col items-center gap-2 rounded-2xl p-4 sm:p-5 text-center
-                border-2 transition-all duration-normal ease-oe
+                group relative flex items-center gap-3.5 rounded-xl px-4 py-3
+                border transition-all duration-normal ease-oe text-left
                 ${isActive
-                  ? 'border-oe-blue bg-oe-blue-subtle shadow-md scale-[1.02]'
-                  : 'border-border-light bg-surface-elevated hover:border-border hover:shadow-sm hover:-translate-y-0.5 active:scale-[0.98]'
+                  ? 'border-oe-blue bg-oe-blue-subtle/60 shadow-sm'
+                  : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary active:scale-[0.99]'
                 }
                 ${isPending ? 'opacity-50 pointer-events-none' : ''}
               `}
-              style={{ animationDelay: `${120 + i * 50}ms` }}
+              style={{ animationDelay: `${80 + i * 40}ms` }}
             >
-              <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${isActive ? 'from-oe-blue/20 to-oe-blue/10 text-oe-blue' : tab.color}`}>
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors ${isActive ? 'bg-oe-blue text-white' : 'bg-surface-secondary text-content-tertiary group-hover:text-content-secondary'}`}>
                 {tab.icon}
               </div>
-              <div className="font-semibold text-sm text-content-primary">
-                {t(tab.labelKey, { defaultValue: tab.label })}
-              </div>
-              <div className="text-2xs text-content-tertiary leading-tight hidden sm:block">
-                {tab.description}
-              </div>
-              {isActive && (
-                <div className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue text-white shadow-sm">
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5L4.5 7.5L8 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              <div className="min-w-0">
+                <div className={`text-sm font-semibold ${isActive ? 'text-oe-blue' : 'text-content-primary'}`}>
+                  {t(tab.labelKey, { defaultValue: tab.label })}
                 </div>
-              )}
+                <div className="text-2xs text-content-tertiary truncate">
+                  {tab.description}
+                </div>
+              </div>
             </button>
           );
         })}
