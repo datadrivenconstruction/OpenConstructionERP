@@ -432,6 +432,165 @@ tbody tr:nth-child(20) { animation-delay: 570ms; }
   will-change: transform;
 }
 
+/* ── Print styles — professional BOQ output ────────────────────────── */
+
+@media print {
+  /* Hide non-printable UI elements */
+  aside,
+  nav,
+  header,
+  .no-print,
+  button:not(.print-visible),
+  [data-no-print] {
+    display: none !important;
+  }
+
+  /* Full width for content — remove sidebar offset and padding */
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .pl-sidebar {
+    padding-left: 0 !important;
+  }
+
+  /* Professional table styling */
+  table {
+    width: 100% !important;
+    border-collapse: collapse;
+    font-size: 10pt;
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  /* Repeat table header on each printed page */
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+    font-weight: bold;
+    border-top: 2px solid #000;
+  }
+
+  th {
+    background: #f0f0f0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    border-bottom: 1.5px solid #333;
+    padding: 6pt 8pt;
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  td {
+    padding: 5pt 8pt;
+    border-bottom: 0.5pt solid #ddd;
+  }
+
+  /* Section header rows — bold background */
+  .section-row,
+  tr.group {
+    font-weight: bold;
+    background: #f0f0f0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Clean totals */
+  tfoot tr:last-child td {
+    border-top: 2pt solid #000;
+    padding-top: 8pt;
+    padding-bottom: 8pt;
+    font-size: 11pt;
+  }
+
+  /* Print header block — hidden on screen, visible on print */
+  .print-header {
+    display: block !important;
+    text-align: center;
+    margin-bottom: 16pt;
+    padding-bottom: 8pt;
+    border-bottom: 1pt solid #ccc;
+  }
+
+  .print-header h1 {
+    font-size: 16pt;
+    margin: 0 0 4pt;
+  }
+
+  .print-header p {
+    font-size: 9pt;
+    color: #666;
+    margin: 0;
+  }
+
+  /* Page setup */
+  @page {
+    margin: 15mm;
+    size: A4 landscape;
+  }
+
+  @page :first {
+    margin-top: 20mm;
+  }
+
+  /* Remove visual noise: animations, shadows, rounded corners */
+  * {
+    animation: none !important;
+    box-shadow: none !important;
+    transition: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Ensure links look like text */
+  a {
+    text-decoration: none !important;
+    color: black !important;
+  }
+
+  /* Remove background colors except where explicitly preserved */
+  *:not(th):not(.section-row):not(tr.group) {
+    background: transparent !important;
+  }
+
+  /* Badge — render as plain text in print */
+  [class*="badge"],
+  [class*="Badge"] {
+    border: 1px solid #999 !important;
+    background: transparent !important;
+    color: #333 !important;
+    font-size: 8pt;
+    padding: 1pt 4pt;
+    border-radius: 2pt;
+  }
+
+  /* Hide scrollbars */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Ensure overflow is visible so nothing gets clipped */
+  .overflow-x-auto,
+  .overflow-hidden,
+  .overflow-y-auto {
+    overflow: visible !important;
+  }
+}
+
 /* ── Accessibility — respect reduced motion ────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
