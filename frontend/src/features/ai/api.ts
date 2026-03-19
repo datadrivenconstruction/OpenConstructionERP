@@ -7,13 +7,19 @@ export type AIProvider = 'anthropic' | 'openai' | 'gemini';
 export type AIConnectionStatus = 'connected' | 'not_configured' | 'error';
 
 export interface AISettings {
-  provider: AIProvider;
-  anthropic_api_key: string | null;
-  openai_api_key: string | null;
-  gemini_api_key: string | null;
+  id: string;
+  user_id: string;
+  anthropic_api_key_set: boolean;
+  openai_api_key_set: boolean;
+  gemini_api_key_set: boolean;
   preferred_model: string;
-  status: AIConnectionStatus;
-  last_tested_at: string | null;
+  metadata_: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+  // Frontend-only computed fields (not from API)
+  provider?: AIProvider;
+  status?: AIConnectionStatus;
+  last_tested_at?: string | null;
 }
 
 export interface AISettingsUpdate {

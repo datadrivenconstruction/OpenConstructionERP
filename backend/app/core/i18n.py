@@ -2316,6 +2316,15 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "uninstall": "Poista asennus",
             "update": "P\u00e4ivit\u00e4",
         },
+        "dashboard": {
+            "welcome": "Tervetuloa OpenEstimateen",
+            "subtitle": "Avoimen l\u00e4hdekoodin rakennuskustannuslaskenta-alusta",
+            "recent_projects": "Viimeisimm\u00e4t projektit",
+            "system_status": "J\u00e4rjestelm\u00e4n tila",
+            "modules_loaded": "Ladatut moduulit",
+            "validation_rules": "Validointis\u00e4\u00e4nn\u00f6t",
+            "languages": "Kielet",
+        },
         "units": {
             "m": "m",
             "m2": "m\u00b2",
@@ -2336,6 +2345,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
         "app": {
             "name": "OpenEstimate",
             "tagline": "\u062a\u0642\u062f\u064a\u0631 \u062a\u0643\u0627\u0644\u064a\u0641 \u0627\u0644\u0628\u0646\u0627\u0621 \u0645\u0641\u062a\u0648\u062d \u0627\u0644\u0645\u0635\u062f\u0631",
+        },
+        "nav": {
+            "dashboard": "\u0644\u0648\u062d\u0629 \u0627\u0644\u0645\u0639\u0644\u0648\u0645\u0627\u062a",
+            "ai_estimate": "\u062a\u0642\u062f\u064a\u0631 \u0628\u0627\u0644\u0630\u0643\u0627\u0621 \u0627\u0644\u0627\u0635\u0637\u0646\u0627\u0639\u064a",
+            "settings": "\u0627\u0644\u0625\u0639\u062f\u0627\u062f\u0627\u062a",
+            "5d_cost_model": "\u0646\u0645\u0648\u0630\u062c \u0627\u0644\u062a\u0643\u0644\u0641\u0629 5D",
+            "templates": "\u0642\u0648\u0627\u0644\u0628",
         },
         "common": {
             "save": "\u062d\u0641\u0638",
@@ -2382,6 +2398,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "assembly": "\u062a\u062d\u0644\u064a\u0644 \u0633\u0639\u0631",
             "subtotal": "\u0627\u0644\u0645\u062c\u0645\u0648\u0639 \u0627\u0644\u0641\u0631\u0639\u064a",
             "grand_total": "\u0627\u0644\u0645\u062c\u0645\u0648\u0639 \u0627\u0644\u0643\u0644\u064a",
+            "direct_cost": "\u0627\u0644\u062a\u0643\u0644\u0641\u0629 \u0627\u0644\u0645\u0628\u0627\u0634\u0631\u0629",
+            "net_total": "\u0627\u0644\u0625\u062c\u0645\u0627\u0644\u064a \u0627\u0644\u0635\u0627\u0641\u064a",
+            "gross_total": "\u0627\u0644\u0625\u062c\u0645\u0627\u0644\u064a \u0627\u0644\u0643\u0644\u064a",
+            "vat": "\u0636\u0631\u064a\u0628\u0629 \u0627\u0644\u0642\u064a\u0645\u0629 \u0627\u0644\u0645\u0636\u0627\u0641\u0629",
+            "add_markups": "\u0625\u0636\u0627\u0641\u0629 \u0647\u0648\u0627\u0645\u0634",
+            "validate": "\u062a\u062d\u0642\u0642",
+            "export": "\u062a\u0635\u062f\u064a\u0631",
         },
         "costs": {
             "title": "\u0642\u0627\u0639\u062f\u0629 \u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u0623\u0633\u0639\u0627\u0631",
@@ -2390,6 +2413,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "labor": "\u0639\u0645\u0627\u0644\u0629",
             "equipment": "\u0645\u0639\u062f\u0627\u062a",
             "search_costs": "\u0628\u062d\u062b \u0641\u064a \u0627\u0644\u0623\u0633\u0639\u0627\u0631...",
+        },
+        "assemblies": {
+            "title": "\u062a\u062d\u0644\u064a\u0644\u0627\u062a \u0627\u0644\u0623\u0633\u0639\u0627\u0631",
         },
         "validation": {
             "title": "\u0627\u0644\u062a\u062d\u0642\u0642",
@@ -2404,6 +2430,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "missing_classification": "\u0627\u0644\u0628\u0646\u062f {position} \u064a\u062d\u062a\u0627\u062c \u0631\u0645\u0632 \u062a\u0635\u0646\u064a\u0641",
             "duplicate_ordinal": "\u0631\u0642\u0645 \u062a\u0633\u0644\u0633\u0644 \u0645\u0643\u0631\u0631: {ordinal}",
             "rate_anomaly": "\u0633\u0639\u0631 \u0627\u0644\u0648\u062d\u062f\u0629 {rate} \u064a\u062a\u062c\u0627\u0648\u0632 \u0627\u0644\u062d\u062f ({threshold})",
+        },
+        "schedule": {
+            "title": "\u062c\u062f\u0648\u0644 \u0632\u0645\u0646\u064a 4D",
         },
         "cad": {
             "title": "\u0627\u0633\u062a\u064a\u0631\u0627\u062f CAD",
@@ -2432,6 +2461,15 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "uninstall": "\u0625\u0632\u0627\u0644\u0629",
             "update": "\u062a\u062d\u062f\u064a\u062b",
         },
+        "dashboard": {
+            "welcome": "\u0645\u0631\u062d\u0628\u0627\u064b \u0628\u0643 \u0641\u064a OpenEstimate",
+            "subtitle": "\u0645\u0646\u0635\u0629 \u062a\u0642\u062f\u064a\u0631 \u062a\u0643\u0627\u0644\u064a\u0641 \u0627\u0644\u0628\u0646\u0627\u0621 \u0645\u0641\u062a\u0648\u062d\u0629 \u0627\u0644\u0645\u0635\u062f\u0631",
+            "recent_projects": "\u0627\u0644\u0645\u0634\u0627\u0631\u064a\u0639 \u0627\u0644\u0623\u062e\u064a\u0631\u0629",
+            "system_status": "\u062d\u0627\u0644\u0629 \u0627\u0644\u0646\u0638\u0627\u0645",
+            "modules_loaded": "\u0627\u0644\u0648\u062d\u062f\u0627\u062a \u0627\u0644\u0645\u062d\u0645\u0651\u0644\u0629",
+            "validation_rules": "\u0642\u0648\u0627\u0639\u062f \u0627\u0644\u062a\u062d\u0642\u0642",
+            "languages": "\u0627\u0644\u0644\u063a\u0627\u062a",
+        },
         "units": {
             "m": "\u0645",
             "m2": "\u0645\u00b2",
@@ -2452,6 +2490,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
         "app": {
             "name": "OpenEstimate",
             "tagline": "\u5f00\u6e90\u5efa\u7b51\u5de5\u7a0b\u9020\u4ef7",
+        },
+        "nav": {
+            "dashboard": "\u4eea\u8868\u76d8",
+            "ai_estimate": "AI \u4f30\u7b97",
+            "settings": "\u8bbe\u7f6e",
+            "5d_cost_model": "5D \u6210\u672c\u6a21\u578b",
+            "templates": "\u6a21\u677f",
         },
         "common": {
             "save": "\u4fdd\u5b58",
@@ -2498,6 +2543,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "assembly": "\u7ec4\u4ef7",
             "subtotal": "\u5c0f\u8ba1",
             "grand_total": "\u603b\u8ba1",
+            "direct_cost": "\u76f4\u63a5\u8d39",
+            "net_total": "\u7a0e\u524d\u603b\u8ba1",
+            "gross_total": "\u7a0e\u540e\u603b\u8ba1",
+            "vat": "\u589e\u503c\u7a0e",
+            "add_markups": "\u6dfb\u52a0\u53d6\u8d39",
+            "validate": "\u6821\u9a8c",
+            "export": "\u5bfc\u51fa",
         },
         "costs": {
             "title": "\u4ef7\u683c\u6570\u636e\u5e93",
@@ -2506,6 +2558,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "labor": "\u4eba\u5de5",
             "equipment": "\u673a\u68b0",
             "search_costs": "\u641c\u7d22\u4ef7\u683c...",
+        },
+        "assemblies": {
+            "title": "\u7ec4\u4ef7\u5206\u6790",
         },
         "validation": {
             "title": "\u6821\u9a8c",
@@ -2520,6 +2575,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "missing_classification": "\u6e05\u5355\u9879 {position} \u9700\u8981\u5206\u7c7b\u7f16\u7801",
             "duplicate_ordinal": "\u5e8f\u53f7\u91cd\u590d\uff1a{ordinal}",
             "rate_anomaly": "\u7efc\u5408\u5355\u4ef7 {rate} \u8d85\u51fa\u9608\u503c ({threshold})",
+        },
+        "schedule": {
+            "title": "4D \u8fdb\u5ea6\u8ba1\u5212",
         },
         "cad": {
             "title": "CAD \u5bfc\u5165",
@@ -2548,6 +2606,15 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "uninstall": "\u5378\u8f7d",
             "update": "\u66f4\u65b0",
         },
+        "dashboard": {
+            "welcome": "\u6b22\u8fce\u4f7f\u7528 OpenEstimate",
+            "subtitle": "\u5f00\u6e90\u5efa\u7b51\u5de5\u7a0b\u9020\u4ef7\u5e73\u53f0",
+            "recent_projects": "\u6700\u8fd1\u9879\u76ee",
+            "system_status": "\u7cfb\u7edf\u72b6\u6001",
+            "modules_loaded": "\u5df2\u52a0\u8f7d\u6a21\u5757",
+            "validation_rules": "\u6821\u9a8c\u89c4\u5219",
+            "languages": "\u8bed\u8a00",
+        },
         "units": {
             "m": "m",
             "m2": "m\u00b2",
@@ -2568,6 +2635,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
         "app": {
             "name": "OpenEstimate",
             "tagline": "\u30aa\u30fc\u30d7\u30f3\u30bd\u30fc\u30b9\u5efa\u8a2d\u30b3\u30b9\u30c8\u898b\u7a4d",
+        },
+        "nav": {
+            "dashboard": "\u30c0\u30c3\u30b7\u30e5\u30dc\u30fc\u30c9",
+            "ai_estimate": "AI \u898b\u7a4d",
+            "settings": "\u8a2d\u5b9a",
+            "5d_cost_model": "5D \u30b3\u30b9\u30c8\u30e2\u30c7\u30eb",
+            "templates": "\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8",
         },
         "common": {
             "save": "\u4fdd\u5b58",
@@ -2614,6 +2688,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "assembly": "\u8907\u5408\u5358\u4fa1",
             "subtotal": "\u5c0f\u8a08",
             "grand_total": "\u5408\u8a08",
+            "direct_cost": "\u76f4\u63a5\u8cbb",
+            "net_total": "\u7a0e\u629c\u5408\u8a08",
+            "gross_total": "\u7a0e\u8fbc\u5408\u8a08",
+            "vat": "\u6d88\u8cbb\u7a0e",
+            "add_markups": "\u8acb\u8ca0\u9ad8\u3092\u8ffd\u52a0",
+            "validate": "\u691c\u8a3c",
+            "export": "\u30a8\u30af\u30b9\u30dd\u30fc\u30c8",
         },
         "costs": {
             "title": "\u5358\u4fa1\u30c7\u30fc\u30bf\u30d9\u30fc\u30b9",
@@ -2622,6 +2703,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "labor": "\u52b4\u52d9",
             "equipment": "\u6a5f\u68b0",
             "search_costs": "\u5358\u4fa1\u3092\u691c\u7d22...",
+        },
+        "assemblies": {
+            "title": "\u8907\u5408\u5358\u4fa1\u4e00\u89a7",
         },
         "validation": {
             "title": "\u691c\u8a3c",
@@ -2636,6 +2720,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "missing_classification": "\u9805\u76ee {position} \u306b\u5206\u985e\u30b3\u30fc\u30c9\u304c\u5fc5\u8981\u3067\u3059",
             "duplicate_ordinal": "\u756a\u53f7\u304c\u91cd\u8907\u3057\u3066\u3044\u307e\u3059: {ordinal}",
             "rate_anomaly": "\u5358\u4fa1 {rate} \u304c\u3057\u304d\u3044\u5024\u3092\u8d85\u904e ({threshold})",
+        },
+        "schedule": {
+            "title": "4D \u5de5\u7a0b\u8868",
         },
         "cad": {
             "title": "CAD \u30a4\u30f3\u30dd\u30fc\u30c8",
@@ -2664,6 +2751,15 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "uninstall": "\u30a2\u30f3\u30a4\u30f3\u30b9\u30c8\u30fc\u30eb",
             "update": "\u66f4\u65b0",
         },
+        "dashboard": {
+            "welcome": "OpenEstimate \u3078\u3088\u3046\u3053\u305d",
+            "subtitle": "\u30aa\u30fc\u30d7\u30f3\u30bd\u30fc\u30b9\u5efa\u8a2d\u30b3\u30b9\u30c8\u898b\u7a4d\u30d7\u30e9\u30c3\u30c8\u30d5\u30a9\u30fc\u30e0",
+            "recent_projects": "\u6700\u8fd1\u306e\u30d7\u30ed\u30b8\u30a7\u30af\u30c8",
+            "system_status": "\u30b7\u30b9\u30c6\u30e0\u72b6\u614b",
+            "modules_loaded": "\u8aad\u307f\u8fbc\u307f\u6e08\u307f\u30e2\u30b8\u30e5\u30fc\u30eb",
+            "validation_rules": "\u691c\u8a3c\u30eb\u30fc\u30eb",
+            "languages": "\u8a00\u8a9e",
+        },
         "units": {
             "m": "m",
             "m2": "m\u00b2",
@@ -2684,6 +2780,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
         "app": {
             "name": "OpenEstimate",
             "tagline": "\uc624\ud508\uc18c\uc2a4 \uac74\uc124 \uc6d0\uac00 \uc0b0\uc815",
+        },
+        "nav": {
+            "dashboard": "\ub300\uc2dc\ubcf4\ub4dc",
+            "ai_estimate": "AI \uacac\uc801",
+            "settings": "\uc124\uc815",
+            "5d_cost_model": "5D \ube44\uc6a9 \ubaa8\ub378",
+            "templates": "\ud15c\ud50c\ub9bf",
         },
         "common": {
             "save": "\uc800\uc7a5",
@@ -2730,6 +2833,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "assembly": "\uc77c\uc704\ub300\uac00",
             "subtotal": "\uc18c\uacc4",
             "grand_total": "\ucd1d\uacc4",
+            "direct_cost": "\uc9c1\uc811\ube44",
+            "net_total": "\uc21c \ud569\uacc4",
+            "gross_total": "\ucd1d \ud569\uacc4",
+            "vat": "\ubd80\uac00\uc138",
+            "add_markups": "\ud560\uc99d \ucd94\uac00",
+            "validate": "\uac80\uc99d",
+            "export": "\ub0b4\ubcf4\ub0b4\uae30",
         },
         "costs": {
             "title": "\ub2e8\uac00 \ub370\uc774\ud130\ubca0\uc774\uc2a4",
@@ -2738,6 +2848,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "labor": "\ub178\ubb34\ube44",
             "equipment": "\uacbd\ube44",
             "search_costs": "\ub2e8\uac00 \uac80\uc0c9...",
+        },
+        "assemblies": {
+            "title": "\uc77c\uc704\ub300\uac00 \ubaa9\ub85d",
         },
         "validation": {
             "title": "\uac80\uc99d",
@@ -2752,6 +2865,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "missing_classification": "\ud56d\ubaa9 {position}\uc5d0 \ubd84\ub958 \ucf54\ub4dc\uac00 \ud544\uc694\ud569\ub2c8\ub2e4",
             "duplicate_ordinal": "\uc21c\ubc88 \uc911\ubcf5: {ordinal}",
             "rate_anomaly": "\ub2e8\uac00 {rate}\uc774(\uac00) \uc784\uacc4\uac12\uc744 \ucd08\uacfc ({threshold})",
+        },
+        "schedule": {
+            "title": "4D \uacf5\uc815\ud45c",
         },
         "cad": {
             "title": "CAD \uac00\uc838\uc624\uae30",
@@ -2780,6 +2896,15 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "uninstall": "\uc81c\uac70",
             "update": "\uc5c5\ub370\uc774\ud2b8",
         },
+        "dashboard": {
+            "welcome": "OpenEstimate\uc5d0 \uc624\uc2e0 \uac83\uc744 \ud658\uc601\ud569\ub2c8\ub2e4",
+            "subtitle": "\uc624\ud508\uc18c\uc2a4 \uac74\uc124 \uc6d0\uac00 \uc0b0\uc815 \ud50c\ub7ab\ud3fc",
+            "recent_projects": "\ucd5c\uadfc \ud504\ub85c\uc81d\ud2b8",
+            "system_status": "\uc2dc\uc2a4\ud15c \uc0c1\ud0dc",
+            "modules_loaded": "\ub85c\ub4dc\ub41c \ubaa8\ub4c8",
+            "validation_rules": "\uac80\uc99d \uaddc\uce59",
+            "languages": "\uc5b8\uc5b4",
+        },
         "units": {
             "m": "m",
             "m2": "m\u00b2",
@@ -2800,6 +2925,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
         "app": {
             "name": "OpenEstimate",
             "tagline": "\u0913\u092a\u0928 \u0938\u094b\u0930\u094d\u0938 \u0928\u093f\u0930\u094d\u092e\u093e\u0923 \u0932\u093e\u0917\u0924 \u0905\u0928\u0941\u092e\u093e\u0928",
+        },
+        "nav": {
+            "dashboard": "\u0921\u0948\u0936\u092c\u094b\u0930\u094d\u0921",
+            "ai_estimate": "AI \u0905\u0928\u0941\u092e\u093e\u0928",
+            "settings": "\u0938\u0947\u091f\u093f\u0902\u0917\u094d\u0938",
+            "5d_cost_model": "5D \u0932\u093e\u0917\u0924 \u092e\u0949\u0921\u0932",
+            "templates": "\u091f\u0947\u092e\u094d\u092a\u0932\u0947\u091f",
         },
         "common": {
             "save": "\u0938\u0939\u0947\u091c\u0947\u0902",
@@ -2846,6 +2978,13 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "assembly": "\u0938\u0902\u092f\u094b\u091c\u093f\u0924 \u0926\u0930",
             "subtotal": "\u0909\u092a-\u092f\u094b\u0917",
             "grand_total": "\u0915\u0941\u0932 \u092f\u094b\u0917",
+            "direct_cost": "\u092a\u094d\u0930\u0924\u094d\u092f\u0915\u094d\u0937 \u0932\u093e\u0917\u0924",
+            "net_total": "\u0928\u093f\u0935\u0932 \u0915\u0941\u0932",
+            "gross_total": "\u0938\u0915\u0932 \u0915\u0941\u0932",
+            "vat": "GST",
+            "add_markups": "\u092e\u093e\u0930\u094d\u0915\u0905\u092a \u091c\u094b\u0921\u093c\u0947\u0902",
+            "validate": "\u0938\u0924\u094d\u092f\u093e\u092a\u093f\u0924 \u0915\u0930\u0947\u0902",
+            "export": "\u0928\u093f\u0930\u094d\u092f\u093e\u0924 \u0915\u0930\u0947\u0902",
         },
         "costs": {
             "title": "\u0926\u0930 \u0921\u0947\u091f\u093e\u092c\u0947\u0938",
@@ -2854,6 +2993,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "labor": "\u0936\u094d\u0930\u092e",
             "equipment": "\u0909\u092a\u0915\u0930\u0923",
             "search_costs": "\u0926\u0930\u0947\u0902 \u0916\u094b\u091c\u0947\u0902...",
+        },
+        "assemblies": {
+            "title": "\u0938\u0902\u092f\u094b\u091c\u093f\u0924 \u0926\u0930\u0947\u0902",
         },
         "validation": {
             "title": "\u0938\u0924\u094d\u092f\u093e\u092a\u0928",
@@ -2868,6 +3010,9 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "missing_classification": "\u092e\u0926 {position} \u0915\u094b \u0935\u0930\u094d\u0917\u0940\u0915\u0930\u0923 \u0915\u094b\u0921 \u091a\u093e\u0939\u093f\u090f",
             "duplicate_ordinal": "\u0926\u094b\u0939\u0930\u093e\u092f\u093e \u0915\u094d\u0930\u092e \u0938\u0902\u0916\u094d\u092f\u093e: {ordinal}",
             "rate_anomaly": "\u0926\u0930 {rate} \u0938\u0940\u092e\u093e \u0938\u0947 \u0905\u0927\u093f\u0915 \u0939\u0948 ({threshold})",
+        },
+        "schedule": {
+            "title": "4D \u0905\u0928\u0941\u0938\u0942\u091a\u0940",
         },
         "cad": {
             "title": "CAD \u0906\u092f\u093e\u0924",
@@ -2895,6 +3040,15 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "install": "\u0938\u094d\u0925\u093e\u092a\u093f\u0924 \u0915\u0930\u0947\u0902",
             "uninstall": "\u0905\u0928\u0938\u094d\u0925\u093e\u092a\u093f\u0924 \u0915\u0930\u0947\u0902",
             "update": "\u0905\u092a\u0921\u0947\u091f \u0915\u0930\u0947\u0902",
+        },
+        "dashboard": {
+            "welcome": "OpenEstimate \u092e\u0947\u0902 \u0906\u092a\u0915\u093e \u0938\u094d\u0935\u093e\u0917\u0924 \u0939\u0948",
+            "subtitle": "\u0913\u092a\u0928 \u0938\u094b\u0930\u094d\u0938 \u0928\u093f\u0930\u094d\u092e\u093e\u0923 \u0932\u093e\u0917\u0924 \u0905\u0928\u0941\u092e\u093e\u0928 \u092e\u0902\u091a",
+            "recent_projects": "\u0939\u093e\u0932 \u0915\u0940 \u092a\u0930\u093f\u092f\u094b\u091c\u0928\u093e\u090f\u0902",
+            "system_status": "\u0938\u093f\u0938\u094d\u091f\u092e \u0938\u094d\u0925\u093f\u0924\u093f",
+            "modules_loaded": "\u0932\u094b\u0921 \u0915\u093f\u090f \u0917\u090f \u092e\u0949\u0921\u094d\u092f\u0942\u0932",
+            "validation_rules": "\u0938\u0924\u094d\u092f\u093e\u092a\u0928 \u0928\u093f\u092f\u092e",
+            "languages": "\u092d\u093e\u0937\u093e\u090f\u0902",
         },
         "units": {
             "m": "\u092e\u0940",

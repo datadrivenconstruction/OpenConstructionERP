@@ -669,7 +669,11 @@ export function QuickEstimatePage() {
     retry: false,
   });
 
-  const isConfigured = aiSettings?.status === 'connected';
+  const isConfigured = !!(
+    aiSettings?.anthropic_api_key_set ||
+    aiSettings?.openai_api_key_set ||
+    aiSettings?.gemini_api_key_set
+  );
 
   // ── File selection handler ────────────────────────────────────────────
 
@@ -968,34 +972,76 @@ export function QuickEstimatePage() {
         </div>
       </div>
 
-      {/* Not configured warning */}
-      {aiSettings && !isConfigured && (
+      {/* AI Status Banner */}
+      {aiSettings && !isConfigured ? (
+        /* ── NOT CONFIGURED — prominent setup card ─── */
         <div
-          className="animate-card-in flex items-center gap-3 rounded-xl border border-semantic-warning/30 bg-semantic-warning-bg px-4 py-3"
+          className="animate-card-in rounded-2xl border-2 border-dashed border-oe-blue/30 bg-gradient-to-br from-oe-blue-subtle/60 to-surface-elevated p-6 text-center"
           style={{ animationDelay: '50ms' }}
         >
-          <AlertCircle size={18} className="shrink-0 text-[#b45309]" />
-          <div className="flex-1">
-            <p className="text-sm font-medium text-[#b45309]">
-              {t('ai.not_configured_title', { defaultValue: 'AI provider not configured' })}
-            </p>
-            <p className="text-xs text-[#b45309]/80">
-              {t('ai.not_configured_msg', {
-                defaultValue: 'Set up your API key in Settings to use AI features.',
-              })}
-            </p>
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-oe-blue/10">
+            <Sparkles size={28} className="text-oe-blue" />
           </div>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => navigate('/settings')}
-            icon={<ArrowRight size={14} />}
-            iconPosition="right"
-          >
-            {t('ai.go_to_settings', { defaultValue: 'Settings' })}
-          </Button>
+          <h3 className="text-lg font-bold text-content-primary">
+            {t('ai.setup_required_title', { defaultValue: 'Connect your AI to get started' })}
+          </h3>
+          <p className="mt-2 text-sm text-content-secondary max-w-md mx-auto">
+            {t('ai.setup_required_desc', {
+              defaultValue: 'Add your API key for Anthropic Claude, OpenAI, or Google Gemini to generate estimates from text, photos, PDFs, and CAD files.',
+            })}
+          </p>
+          <div className="mt-5 flex items-center justify-center gap-3">
+            <Button
+              variant="primary"
+              size="lg"
+              onClick={() => navigate('/settings')}
+              icon={<ArrowRight size={16} />}
+              iconPosition="right"
+              className="btn-shimmer"
+            >
+              {t('ai.configure_ai', { defaultValue: 'Configure AI Provider' })}
+            </Button>
+          </div>
+          <div className="mt-4 flex items-center justify-center gap-4 text-xs text-content-tertiary">
+            <span className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-content-tertiary" />
+              Anthropic Claude
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-content-tertiary" />
+              OpenAI GPT-4
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-content-tertiary" />
+              Google Gemini
+            </span>
+          </div>
         </div>
-      )}
+      ) : aiSettings && isConfigured ? (
+        /* ── CONFIGURED — green status bar ─── */
+        <div
+          className="animate-card-in flex items-center gap-3 rounded-xl bg-semantic-success-bg/60 border border-semantic-success/20 px-4 py-2.5"
+          style={{ animationDelay: '50ms' }}
+        >
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-semantic-success/20">
+            <div className="h-2.5 w-2.5 rounded-full bg-semantic-success animate-pulse" />
+          </div>
+          <div className="flex-1 flex items-center gap-3">
+            <span className="text-sm font-medium text-[#15803d]">
+              {t('ai.connected', { defaultValue: 'AI Connected' })}
+            </span>
+            <span className="text-xs text-[#15803d]/70">
+              {aiSettings.preferred_model || 'Claude'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-2xs text-[#15803d]/60">
+            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-semantic-success" /> Text</span>
+            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-semantic-success" /> Photo</span>
+            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-semantic-success" /> PDF</span>
+            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-semantic-success" /> CAD</span>
+          </div>
+        </div>
+      ) : null}
 
       {/* Source type selector — 2×3 horizontal card grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 animate-card-in" style={{ animationDelay: '100ms' }}>
@@ -1330,7 +1376,7 @@ export function QuickEstimatePage() {
             {/* Submit button */}
             <div className="mt-5 flex items-center justify-between">
               <div className="text-xs text-content-tertiary">
-                {aiSettings?.status === 'connected' && aiSettings.preferred_model && (
+                {isConfigured && aiSettings?.preferred_model && (
                   <span className="flex items-center gap-1.5">
                     <Zap size={12} />
                     {t('ai.powered_by', {
