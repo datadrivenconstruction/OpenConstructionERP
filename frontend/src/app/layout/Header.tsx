@@ -130,6 +130,22 @@ export function Header({ title, onMenuClick }: HeaderProps) {
           </button>
         )}
 
+        {/* Keyboard shortcuts hint */}
+        <button
+          onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: '?' }))}
+          className={clsx(
+            'hidden sm:flex h-8 w-8 items-center justify-center rounded-lg',
+            'text-content-tertiary transition-colors',
+            'hover:bg-surface-secondary hover:text-content-secondary',
+          )}
+          title="Keyboard shortcuts (?)"
+          aria-label="Show keyboard shortcuts"
+        >
+          <kbd className="text-2xs font-mono font-medium bg-surface-primary border border-border-light rounded px-1.5 py-0.5">
+            ?
+          </kbd>
+        </button>
+
         <div className="w-px h-5 bg-border-light mx-1 hidden sm:block" />
 
         {/* Language */}

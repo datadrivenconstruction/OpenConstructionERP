@@ -15,6 +15,7 @@ import {
   MoreHorizontal,
 } from 'lucide-react';
 import { Button, Badge } from '@/shared/ui';
+import { useToastStore } from '@/stores/useToastStore';
 import {
   boqApi,
   groupPositionsIntoSections,
@@ -85,11 +86,16 @@ export function BOQEditorPage() {
 
   const markups: Markup[] = markupsData?.markups ?? [];
 
+  const addToast = useToastStore((s) => s.addToast);
+
   /* ── Mutations ─────────────────────────────────────────────────────── */
 
   const addMutation = useMutation({
     mutationFn: (data: CreatePositionData) => boqApi.addPosition(data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['boq', boqId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['boq', boqId] });
+      addToast({ type: 'success', title: t('boq.position_added', { defaultValue: 'Position added' }) });
+    },
   });
 
   const updateMutation = useMutation({
@@ -251,9 +257,10 @@ export function BOQEditorPage() {
         a.download = `${boq?.name ?? 'boq'}.${format === 'excel' ? 'xlsx' : 'csv'}`;
         a.click();
         URL.revokeObjectURL(url);
+        addToast({ type: 'success', title: t('boq.file_downloaded', { defaultValue: 'File downloaded' }) });
       }
     },
-    [boqId, boq?.name],
+    [boqId, boq?.name, addToast, t],
   );
 
   const handleValidate = useCallback(async () => {
@@ -263,12 +270,14 @@ export function BOQEditorPage() {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
-      await r.json();
+      const result = await r.json();
+      const score = typeof result?.score === 'number' ? `${Math.round(result.score * 100)}% score` : undefined;
+      addToast({ type: 'info', title: t('boq.validation_complete', { defaultValue: 'Validation complete' }), message: score });
       navigate('/validation');
     } catch {
       // Validation endpoint failed — silently handle
     }
-  }, [boqId, navigate]);
+  }, [boqId, navigate, addToast, t]);
 
   /* ── Loading state ─────────────────────────────────────────────────── */
 

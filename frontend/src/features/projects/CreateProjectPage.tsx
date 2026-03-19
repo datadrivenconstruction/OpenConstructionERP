@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button, Input, Card } from '@/shared/ui';
+import { useToastStore } from '@/stores/useToastStore';
 import { projectsApi, type CreateProjectData } from './api';
 
 // ── Regions (grouped by continent) ────────────────────────────────────────
@@ -226,6 +227,7 @@ export function CreateProjectPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
 
   const [form, setForm] = useState<CreateProjectData>({
     name: '',
@@ -245,6 +247,7 @@ export function CreateProjectPage() {
     mutationFn: projectsApi.create,
     onSuccess: (project) => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+      addToast({ type: 'success', title: t('projects.project_created', { defaultValue: 'Project created' }) });
       navigate(`/projects/${project.id}`);
     },
   });

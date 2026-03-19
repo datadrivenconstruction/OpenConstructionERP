@@ -153,6 +153,11 @@ export const boqApi = {
   get: (boqId: string) => apiGet<BOQWithPositions>(`/v1/boq/boqs/${boqId}`),
   create: (data: CreateBOQData) => apiPost<BOQ>('/v1/boq/boqs/', data),
 
+  /* Duplicate */
+  duplicateBoq: (boqId: string) => apiPost<BOQ>(`/v1/boq/boqs/${boqId}/duplicate`, {}),
+  duplicatePosition: (posId: string) =>
+    apiPost<Position>(`/v1/boq/positions/${posId}/duplicate`, {}),
+
   /* Position CRUD */
   addPosition: (data: CreatePositionData) =>
     apiPost<Position>(`/v1/boq/boqs/${data.boq_id}/positions`, data),

@@ -123,6 +123,9 @@ export default {
 
         /* Global — gradient background shift */
         gradient: 'gradientShift 6s ease infinite',
+
+        /* Toast — slide in from right */
+        'toast-in': 'toastIn 300ms cubic-bezier(0.22, 1, 0.36, 1) both',
       },
       keyframes: {
         fadeIn: {
@@ -238,6 +241,12 @@ export default {
           '0%': { backgroundPosition: '0% 50%' },
           '50%': { backgroundPosition: '100% 50%' },
           '100%': { backgroundPosition: '0% 50%' },
+        },
+
+        /* Toast — slide in from right */
+        toastIn: {
+          from: { opacity: '0', transform: 'translateX(100%)' },
+          to: { opacity: '1', transform: 'translateX(0)' },
         },
       },
     },

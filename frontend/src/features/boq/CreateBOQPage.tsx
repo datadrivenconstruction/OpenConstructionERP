@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button, Input, Card } from '@/shared/ui';
+import { useToastStore } from '@/stores/useToastStore';
 import { boqApi } from './api';
 
 export function CreateBOQPage() {
@@ -11,6 +12,7 @@ export function CreateBOQPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -19,6 +21,7 @@ export function CreateBOQPage() {
     mutationFn: () => boqApi.create({ project_id: projectId!, name, description }),
     onSuccess: (boq) => {
       queryClient.invalidateQueries({ queryKey: ['boqs', projectId] });
+      addToast({ type: 'success', title: t('boq.boq_created', { defaultValue: 'BOQ created' }) });
       navigate(`/boq/${boq.id}`);
     },
   });

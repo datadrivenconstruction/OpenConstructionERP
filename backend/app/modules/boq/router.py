@@ -15,17 +15,22 @@ Endpoints:
     PATCH  /boqs/{boq_id}/markups/{markup_id}  — Update a markup
     DELETE /boqs/{boq_id}/markups/{markup_id}  — Delete a markup
     POST   /boqs/{boq_id}/markups/apply-defaults — Apply regional default markups
+    POST   /boqs/{boq_id}/duplicate            — Duplicate a BOQ with all data
+    POST   /positions/{position_id}/duplicate  — Duplicate a single position
     POST   /boqs/{boq_id}/validate             — Validate a BOQ against rule sets
     GET    /boqs/{boq_id}/export/csv           — Export BOQ as CSV
     GET    /boqs/{boq_id}/export/excel         — Export BOQ as Excel (xlsx)
+    GET    /boqs/{boq_id}/export/pdf           — Export BOQ as PDF report
+    POST   /boqs/{boq_id}/import/excel         — Import positions from Excel/CSV
 """
 
 import csv
 import io
+import logging
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, status
 from fastapi.responses import StreamingResponse
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
@@ -195,6 +200,46 @@ async def delete_boq(
 ) -> None:
     """Delete a BOQ and all its positions."""
     await service.delete_boq(boq_id)
+
+
+# ── Duplicate ────────────────────────────────────────────────────────────────
+
+
+@router.post(
+    "/boqs/{boq_id}/duplicate",
+    response_model=BOQResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("boq.create"))],
+)
+async def duplicate_boq(
+    boq_id: uuid.UUID,
+    service: BOQService = Depends(_get_service),
+) -> BOQResponse:
+    """Duplicate an entire BOQ with all its positions and markups.
+
+    Creates a new BOQ named "<original> (Copy)" in the same project.
+    All positions (with hierarchy) and markups are deep-copied with new IDs.
+    """
+    new_boq = await service.duplicate_boq(boq_id)
+    return BOQResponse.model_validate(new_boq)
+
+
+@router.post(
+    "/positions/{position_id}/duplicate",
+    response_model=PositionResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def duplicate_position(
+    position_id: uuid.UUID,
+    service: BOQService = Depends(_get_service),
+) -> PositionResponse:
+    """Duplicate a single position within the same BOQ.
+
+    Creates a copy with ordinal "<original>.1" placed after the original.
+    """
+    new_position = await service.duplicate_position(position_id)
+    return _position_to_response(new_position)
 
 
 # ── Position CRUD ─────────────────────────────────────────────────────────────
@@ -659,3 +704,382 @@ async def export_boq_excel(
             "Content-Disposition": f'attachment; filename="{filename}"',
         },
     )
+
+
+@router.get(
+    "/boqs/{boq_id}/export/pdf",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def export_boq_pdf(
+    boq_id: uuid.UUID,
+    session: SessionDep,
+    service: BOQService = Depends(_get_service),
+) -> StreamingResponse:
+    """Export BOQ as a professional PDF cost estimate report.
+
+    Generates a multi-page PDF document with:
+    - Cover page: project name, BOQ title, cost summary, date, status
+    - BOQ table pages: sections, positions, subtotals, markups, totals
+    - Running headers/footers with page numbering
+    """
+    from app.modules.boq.pdf_export import generate_boq_pdf
+    from app.modules.projects.repository import ProjectRepository
+    from app.modules.users.models import User
+
+    boq_data = await service.get_boq_structured(boq_id)
+
+    # Load project for cover page info
+    project_repo = ProjectRepository(session)
+    project = await project_repo.get_by_id(boq_data.project_id)
+    if project is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found for this BOQ",
+        )
+
+    # Try to get the owner name for "Prepared by"
+    prepared_by = ""
+    owner = await session.get(User, project.owner_id)
+    if owner is not None:
+        prepared_by = owner.full_name or owner.email
+
+    pdf_bytes = generate_boq_pdf(
+        boq_data=boq_data,
+        project_name=project.name,
+        currency=project.currency or "EUR",
+        prepared_by=prepared_by,
+    )
+
+    safe_name = (
+        boq_data.name.encode("ascii", errors="replace")
+        .decode("ascii")
+        .replace('"', "'")
+    )
+    filename = f"{safe_name}.pdf"
+
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+        },
+    )
+
+
+# ── Import (CSV / Excel) ──────────────────────────────────────────────────────
+
+logger = logging.getLogger(__name__)
+
+# Column name aliases for flexible matching (all lowercased for comparison)
+_COLUMN_ALIASES: dict[str, list[str]] = {
+    "ordinal": ["pos", "pos.", "position", "ordinal", "nr.", "nr", "no.", "no", "#"],
+    "description": [
+        "description", "beschreibung", "desc", "text", "bezeichnung",
+        "item", "item description",
+    ],
+    "unit": ["unit", "einheit", "me", "uom", "unit of measure"],
+    "quantity": ["quantity", "qty", "menge", "amount", "qty.", "quantity (qty)"],
+    "unit_rate": [
+        "unit rate", "rate", "ep", "einheitspreis", "unit price",
+        "unit cost", "price", "rate (ep)",
+    ],
+    "total": ["total", "amount", "gesamtpreis", "gp", "sum", "total price"],
+    "classification": [
+        "classification", "din 276", "din276", "kg", "nrm", "code",
+        "masterformat", "cost code", "cost group", "class",
+    ],
+}
+
+
+def _match_column(header: str) -> str | None:
+    """Match a header string to a canonical column name using the alias map.
+
+    Args:
+        header: Raw column header text from the uploaded file.
+
+    Returns:
+        Canonical column key (e.g. "ordinal", "description") or None if unrecognised.
+    """
+    normalised = header.strip().lower()
+    for canonical, aliases in _COLUMN_ALIASES.items():
+        if normalised in aliases:
+            return canonical
+    return None
+
+
+def _safe_float(value: Any, default: float = 0.0) -> float:
+    """Parse a value to float, returning *default* on failure.
+
+    Handles strings with comma decimal separators (e.g. "1.234,56" → 1234.56).
+    """
+    if value is None:
+        return default
+    if isinstance(value, (int, float)):
+        return float(value)
+    text = str(value).strip()
+    if not text:
+        return default
+    # Handle European-style numbers: "1.234,56" → "1234.56"
+    if "," in text and "." in text:
+        # Determine which is the decimal separator (last one wins)
+        last_comma = text.rfind(",")
+        last_dot = text.rfind(".")
+        if last_comma > last_dot:
+            # Comma is decimal separator: "1.234,56"
+            text = text.replace(".", "").replace(",", ".")
+        else:
+            # Dot is decimal separator: "1,234.56"
+            text = text.replace(",", "")
+    elif "," in text:
+        # Only commas — assume comma is decimal separator: "234,56"
+        text = text.replace(",", ".")
+    try:
+        return float(text)
+    except (ValueError, TypeError):
+        return default
+
+
+def _parse_rows_from_csv(content_bytes: bytes) -> list[dict[str, Any]]:
+    """Parse rows from a CSV file.
+
+    Tries UTF-8 first, then Latin-1 as fallback (common for DACH region files).
+
+    Returns:
+        List of dicts mapping canonical column names to cell values.
+    """
+    for encoding in ("utf-8-sig", "utf-8", "latin-1"):
+        try:
+            text = content_bytes.decode(encoding)
+            break
+        except UnicodeDecodeError:
+            continue
+    else:
+        raise ValueError("Unable to decode CSV file — unsupported encoding")
+
+    # Detect delimiter by sniffing first 4KB
+    sniffer = csv.Sniffer()
+    try:
+        dialect = sniffer.sniff(text[:4096], delimiters=",;\t|")
+    except csv.Error:
+        dialect = csv.excel  # type: ignore[assignment]
+
+    reader = csv.reader(io.StringIO(text), dialect)
+    raw_headers = next(reader, None)
+    if not raw_headers:
+        raise ValueError("CSV file is empty or has no header row")
+
+    column_map: dict[int, str] = {}
+    for idx, hdr in enumerate(raw_headers):
+        canonical = _match_column(hdr)
+        if canonical:
+            column_map[idx] = canonical
+
+    rows: list[dict[str, Any]] = []
+    for raw_row in reader:
+        row: dict[str, Any] = {}
+        for idx, val in enumerate(raw_row):
+            canonical = column_map.get(idx)
+            if canonical:
+                row[canonical] = val.strip() if isinstance(val, str) else val
+        if row:
+            rows.append(row)
+
+    return rows
+
+
+def _parse_rows_from_excel(content_bytes: bytes) -> list[dict[str, Any]]:
+    """Parse rows from an Excel (.xlsx) file using openpyxl.
+
+    Reads the first (active) worksheet. The first row is treated as headers.
+
+    Returns:
+        List of dicts mapping canonical column names to cell values.
+    """
+    from openpyxl import load_workbook
+
+    wb = load_workbook(io.BytesIO(content_bytes), read_only=True, data_only=True)
+    ws = wb.active
+    if ws is None:
+        raise ValueError("Excel file has no worksheets")
+
+    rows_iter = ws.iter_rows(values_only=True)
+    raw_headers = next(rows_iter, None)
+    if not raw_headers:
+        raise ValueError("Excel file is empty or has no header row")
+
+    column_map: dict[int, str] = {}
+    for idx, hdr in enumerate(raw_headers):
+        if hdr is not None:
+            canonical = _match_column(str(hdr))
+            if canonical:
+                column_map[idx] = canonical
+
+    rows: list[dict[str, Any]] = []
+    for raw_row in rows_iter:
+        row: dict[str, Any] = {}
+        for idx, val in enumerate(raw_row):
+            canonical = column_map.get(idx)
+            if canonical and val is not None:
+                row[canonical] = val
+        if row:
+            rows.append(row)
+
+    wb.close()
+    return rows
+
+
+@router.post(
+    "/boqs/{boq_id}/import/excel",
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def import_boq_excel(
+    boq_id: uuid.UUID,
+    file: UploadFile = File(..., description="Excel (.xlsx) or CSV (.csv) file"),
+    service: BOQService = Depends(_get_service),
+) -> dict[str, Any]:
+    """Import BOQ positions from an Excel or CSV file.
+
+    Accepts a multipart file upload. The file must be .xlsx or .csv.
+
+    Expected columns (all optional except Description):
+    - **Pos / Position / Ordinal / Nr.** — position ordinal number
+    - **Description / Beschreibung / Text** — description (required)
+    - **Unit / Einheit / ME** — unit of measurement
+    - **Quantity / Qty / Menge** — quantity
+    - **Unit Rate / Rate / EP / Einheitspreis** — unit rate
+    - **Total** (ignored — auto-calculated from quantity x rate)
+    - **Classification / DIN 276 / KG / NRM / Code** — classification code
+
+    Returns:
+        Summary with counts of imported, skipped, and error details per row.
+    """
+    # Verify BOQ exists (raises 404 if not found)
+    await service.get_boq(boq_id)
+
+    # Validate file type
+    filename = (file.filename or "").lower()
+    if not filename.endswith((".xlsx", ".csv")):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unsupported file type. Please upload an Excel (.xlsx) or CSV (.csv) file.",
+        )
+
+    # Read file content
+    content = await file.read()
+    if not content:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Uploaded file is empty.",
+        )
+
+    # Limit file size (10 MB)
+    if len(content) > 10 * 1024 * 1024:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File too large. Maximum size is 10 MB.",
+        )
+
+    # Parse rows based on file type
+    try:
+        if filename.endswith(".xlsx"):
+            rows = _parse_rows_from_excel(content)
+        else:
+            rows = _parse_rows_from_csv(content)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to parse file: {exc}",
+        )
+    except Exception as exc:
+        logger.exception("Unexpected error parsing import file: %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to parse file. Please check the format and try again.",
+        )
+
+    if not rows:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No data rows found in file. Check that the first row contains column headers.",
+        )
+
+    # Import each row as a Position
+    imported = 0
+    skipped = 0
+    errors: list[dict[str, Any]] = []
+    auto_ordinal = 1
+
+    for row_idx, row in enumerate(rows, start=2):  # start=2 because row 1 is header
+        try:
+            description = str(row.get("description", "")).strip()
+
+            # Skip rows without a description (likely empty or total rows)
+            if not description:
+                skipped += 1
+                continue
+
+            # Skip rows that look like summary/total rows
+            desc_lower = description.lower()
+            if desc_lower in (
+                "grand total", "total", "summe", "gesamt", "gesamtsumme",
+                "subtotal", "zwischensumme",
+            ):
+                skipped += 1
+                continue
+
+            # Build ordinal: use from file or auto-generate
+            ordinal = str(row.get("ordinal", "")).strip()
+            if not ordinal:
+                ordinal = str(auto_ordinal)
+            auto_ordinal += 1
+
+            # Parse unit
+            unit = str(row.get("unit", "pcs")).strip()
+            if not unit:
+                unit = "pcs"
+
+            # Parse numeric fields
+            quantity = _safe_float(row.get("quantity"), default=0.0)
+            unit_rate = _safe_float(row.get("unit_rate"), default=0.0)
+
+            # Build classification from the classification column
+            classification: dict[str, Any] = {}
+            class_value = str(row.get("classification", "")).strip()
+            if class_value:
+                classification["code"] = class_value
+
+            # Create position via service
+            position_data = PositionCreate(
+                boq_id=boq_id,
+                ordinal=ordinal,
+                description=description,
+                unit=unit,
+                quantity=quantity,
+                unit_rate=unit_rate,
+                classification=classification,
+                source="excel_import",
+            )
+            await service.add_position(position_data)
+            imported += 1
+
+        except Exception as exc:
+            errors.append({
+                "row": row_idx,
+                "error": str(exc),
+                "data": {k: str(v)[:100] for k, v in row.items()},
+            })
+            logger.warning(
+                "Import error at row %d for BOQ %s: %s", row_idx, boq_id, exc
+            )
+
+    logger.info(
+        "BOQ import complete for %s: imported=%d, skipped=%d, errors=%d",
+        boq_id, imported, skipped, len(errors),
+    )
+
+    return {
+        "imported": imported,
+        "skipped": skipped,
+        "errors": errors,
+        "total_rows": len(rows),
+    }
