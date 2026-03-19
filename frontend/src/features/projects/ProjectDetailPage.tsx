@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Clock,
+  Sparkles,
 } from 'lucide-react';
 import { Button, Card, CardHeader, Badge, Skeleton, EmptyState } from '@/shared/ui';
 import { projectsApi } from './api';
@@ -53,9 +54,14 @@ interface PositionSummary {
 
 interface ImportResult {
   imported: number;
-  skipped: number;
-  errors: { row: number; error: string; data?: Record<string, string> }[];
-  total_rows: number;
+  skipped?: number;
+  errors: { row?: number; item?: string; error: string; data?: Record<string, string> }[];
+  total_rows?: number;
+  total_items?: number;
+  method?: 'direct' | 'ai' | 'cad_ai';
+  model_used?: string | null;
+  cad_format?: string;
+  cad_elements?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -85,10 +91,10 @@ async function fetchBoqDetail(boqId: string): Promise<BOQDetail> {
   return res.json();
 }
 
-async function importExcelFile(boqId: string, file: File): Promise<ImportResult> {
+async function smartImportFile(boqId: string, file: File): Promise<ImportResult> {
   const form = new FormData();
   form.append('file', file);
-  const res = await fetch(`/api/v1/boq/boqs/${boqId}/import/excel`, {
+  const res = await fetch(`/api/v1/boq/boqs/${boqId}/import/smart`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: form,
@@ -225,13 +231,13 @@ function DropZone({
           Drop your file here, or click to browse
         </p>
         <p className="mt-1 text-xs text-content-tertiary">
-          Supports .xlsx and .csv files (max 10 MB)
+          Supports Excel, CSV, PDF, photos, and CAD/BIM files (Revit, IFC, DWG, DGN)
         </p>
       </div>
       <input
         ref={inputRef}
         type="file"
-        accept=".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
+        accept=".xlsx,.csv,.pdf,.jpg,.jpeg,.png,.tiff,.rvt,.ifc,.dwg,.dgn"
         className="hidden"
         onChange={handleChange}
         disabled={disabled}
@@ -255,8 +261,13 @@ function ImportDialog({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [result, setResult] = useState<ImportResult | null>(null);
 
+  const SUPPORTED_EXTENSIONS = [
+    '.xlsx', '.csv', '.pdf', '.jpg', '.jpeg', '.png', '.tiff',
+    '.rvt', '.ifc', '.dwg', '.dgn',
+  ];
+
   const mutation = useMutation({
-    mutationFn: (file: File) => importExcelFile(boqId, file),
+    mutationFn: (file: File) => smartImportFile(boqId, file),
     onSuccess: (data) => {
       setResult(data);
       onSuccess();
@@ -266,7 +277,7 @@ function ImportDialog({
   const handleFileSelect = useCallback(
     (file: File) => {
       const name = file.name.toLowerCase();
-      if (!name.endsWith('.xlsx') && !name.endsWith('.csv')) {
+      if (!SUPPORTED_EXTENSIONS.some((ext) => name.endsWith(ext))) {
         return;
       }
       setSelectedFile(file);
@@ -295,9 +306,15 @@ function ImportDialog({
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-6 pb-2">
           <div>
-            <h2 className="text-lg font-semibold text-content-primary">
-              {t('common.import')} Excel / CSV
-            </h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-content-primary">
+                {t('common.import', { defaultValue: 'Import' })} Document
+              </h2>
+              <span className="inline-flex items-center gap-1 rounded-full bg-oe-blue-subtle px-2 py-0.5 text-2xs font-medium text-oe-blue">
+                <Sparkles size={10} />
+                AI-powered
+              </span>
+            </div>
             <p className="mt-0.5 text-sm text-content-secondary">
               Into: {boqName}
             </p>
@@ -348,11 +365,38 @@ function ImportDialog({
               {mutation.isError && (
                 <div className="mt-3 flex items-start gap-2 rounded-lg bg-semantic-error-bg px-4 py-3">
                   <AlertCircle size={16} className="shrink-0 mt-0.5 text-semantic-error" />
-                  <p className="text-sm text-semantic-error">
-                    {mutation.error instanceof Error
-                      ? mutation.error.message
-                      : 'Import failed. Please try again.'}
-                  </p>
+                  <div className="text-sm text-semantic-error">
+                    {(() => {
+                      const msg =
+                        mutation.error instanceof Error
+                          ? mutation.error.message
+                          : 'Import failed. Please try again.';
+                      // Show a link when DDC converter is not found
+                      if (msg.includes('DDC converter') || msg.includes('no DDC converter')) {
+                        return (
+                          <div className="space-y-1.5">
+                            <p>CAD converter not installed.</p>
+                            <p className="text-xs text-semantic-error/80">
+                              Download DDC converters from{' '}
+                              <a
+                                href="https://github.com/datadrivenconstructionIO/ddc-community-toolkit/releases"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline font-medium hover:text-semantic-error"
+                              >
+                                GitHub
+                              </a>{' '}
+                              and place .exe files in{' '}
+                              <code className="bg-semantic-error/10 px-1 rounded">
+                                ~/.openestimator/converters/
+                              </code>
+                            </p>
+                          </div>
+                        );
+                      }
+                      return <p>{msg}</p>;
+                    })()}
+                  </div>
                 </div>
               )}
             </>
@@ -365,10 +409,35 @@ function ImportDialog({
                   <p className="text-sm font-medium text-[#15803d]">Import complete</p>
                   <p className="text-xs text-[#15803d]/80">
                     {result.imported} positions imported
-                    {result.skipped > 0 && `, ${result.skipped} rows skipped`}
+                    {(result.skipped ?? 0) > 0 && `, ${result.skipped} rows skipped`}
                   </p>
                 </div>
+                {(result.method === 'ai' || result.method === 'cad_ai') && (
+                  <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-oe-blue-subtle px-2 py-0.5 text-2xs font-medium text-oe-blue">
+                    <Sparkles size={10} />
+                    {result.method === 'cad_ai'
+                      ? `CAD + ${result.model_used ?? 'AI'}`
+                      : (result.model_used ?? 'AI')}
+                  </span>
+                )}
+                {result.method === 'direct' && (
+                  <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-surface-secondary px-2 py-0.5 text-2xs font-medium text-content-tertiary">
+                    Direct
+                  </span>
+                )}
               </div>
+
+              {/* CAD info banner */}
+              {result.method === 'cad_ai' && result.cad_elements != null && (
+                <div className="flex items-center gap-2 rounded-lg bg-oe-blue-subtle/50 px-4 py-2.5 text-xs text-oe-blue">
+                  <span className="font-medium">
+                    {result.cad_elements} CAD elements
+                  </span>
+                  <span className="text-oe-blue/60">
+                    extracted from .{result.cad_format} file via DDC converter
+                  </span>
+                </div>
+              )}
 
               {/* Stats grid */}
               <div className="grid grid-cols-3 gap-3">
@@ -379,9 +448,11 @@ function ImportDialog({
                   </p>
                 </div>
                 <div className="rounded-lg bg-surface-secondary px-3 py-2 text-center">
-                  <p className="text-lg font-bold text-content-primary">{result.skipped}</p>
+                  <p className="text-lg font-bold text-content-primary">
+                    {result.total_items ?? result.total_rows ?? 0}
+                  </p>
                   <p className="text-2xs text-content-tertiary uppercase tracking-wide">
-                    Skipped
+                    Total items
                   </p>
                 </div>
                 <div className="rounded-lg bg-surface-secondary px-3 py-2 text-center">
@@ -397,7 +468,8 @@ function ImportDialog({
                   <div className="max-h-32 overflow-y-auto space-y-1">
                     {result.errors.map((err, i) => (
                       <p key={i} className="text-xs text-semantic-error/80">
-                        Row {err.row}: {err.error}
+                        {err.row ? `Row ${err.row}: ` : err.item ? `${err.item}: ` : ''}
+                        {err.error}
                       </p>
                     ))}
                   </div>
