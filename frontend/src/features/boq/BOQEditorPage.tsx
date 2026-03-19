@@ -7,6 +7,7 @@ import {
   Plus,
   Trash2,
   Download,
+  Upload,
   ShieldCheck,
   ChevronDown,
   ChevronRight,
@@ -333,6 +334,81 @@ export function BOQEditorPage() {
     }
   }, [boqId, navigate, addToast, t]);
 
+  /* ── Smart import ───────────────────────────────────────────────────── */
+
+  const importInputRef = useRef<HTMLInputElement>(null);
+  const [isImporting, setIsImporting] = useState(false);
+
+  const handleImportFile = useCallback(
+    async (file: File) => {
+      if (!boqId) return;
+      setIsImporting(true);
+      const token = localStorage.getItem('oe_access_token');
+      const form = new FormData();
+      form.append('file', file);
+
+      try {
+        const res = await fetch(`/api/v1/boq/boqs/${boqId}/import/smart`, {
+          method: 'POST',
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          body: form,
+        });
+
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({ detail: res.statusText }));
+          throw new Error(body.detail || 'Import failed');
+        }
+
+        const result: {
+          imported: number;
+          errors: { item?: string; error: string }[];
+          total_items: number;
+          method: string;
+          model_used: string | null;
+          cad_format?: string;
+          cad_elements?: number;
+        } = await res.json();
+
+        let methodLabel: string;
+        if (result.method === 'cad_ai') {
+          methodLabel = ` (CAD + ${result.model_used ?? 'AI'}, ${result.cad_elements ?? 0} elements)`;
+        } else if (result.method === 'ai') {
+          methodLabel = ` (AI: ${result.model_used ?? 'auto'})`;
+        } else {
+          methodLabel = ' (direct)';
+        }
+        addToast({
+          type: result.imported > 0 ? 'success' : 'warning',
+          title: `Imported ${result.imported} of ${result.total_items} items${methodLabel}`,
+          message:
+            result.errors.length > 0
+              ? `${result.errors.length} error(s) occurred`
+              : undefined,
+        });
+
+        queryClient.invalidateQueries({ queryKey: ['boq', boqId] });
+      } catch (err) {
+        addToast({
+          type: 'error',
+          title: t('boq.import_failed', { defaultValue: 'Import failed' }),
+          message: err instanceof Error ? err.message : 'Unknown error',
+        });
+      } finally {
+        setIsImporting(false);
+      }
+    },
+    [boqId, addToast, queryClient, t],
+  );
+
+  const handleImportInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) handleImportFile(file);
+      e.target.value = '';
+    },
+    [handleImportFile],
+  );
+
   /* ── Loading state ─────────────────────────────────────────────────── */
 
   if (isLoading) {
@@ -402,6 +478,25 @@ export function BOQEditorPage() {
           <Button variant="ghost" size="sm" icon={<ShieldCheck size={15} />} onClick={handleValidate}>
             {t('boq.validate')}
           </Button>
+
+          {/* Smart Import */}
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<Upload size={15} />}
+            onClick={() => importInputRef.current?.click()}
+            loading={isImporting}
+            disabled={isImporting}
+          >
+            {t('common.import', { defaultValue: 'Import' })}
+          </Button>
+          <input
+            ref={importInputRef}
+            type="file"
+            accept=".xlsx,.csv,.pdf,.jpg,.jpeg,.png,.tiff,.rvt,.ifc,.dwg,.dgn"
+            className="hidden"
+            onChange={handleImportInputChange}
+          />
 
           {/* Export dropdown */}
           <div ref={exportRef} className="relative">

@@ -25,14 +25,16 @@ Endpoints:
     GET    /boqs/{boq_id}/export/excel         — Export BOQ as Excel (xlsx)
     GET    /boqs/{boq_id}/export/pdf           — Export BOQ as PDF report
     POST   /boqs/{boq_id}/import/excel         — Import positions from Excel/CSV
-    POST   /boqs/{boq_id}/import/smart         — Smart import: any file via AI
+    POST   /boqs/{boq_id}/import/smart         — Smart import: any file via AI (incl. CAD/BIM)
     GET    /projects/{project_id}/activity     — Activity log for a project
 """
 
 import csv
 import io
 import logging
+import tempfile
 import uuid
+from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, status
@@ -1453,6 +1455,74 @@ def _extract_from_csv_for_smart(content: bytes) -> dict[str, Any]:
     return {"text": text, "structured": False}
 
 
+async def _extract_from_cad(content: bytes, ext: str, filename: str) -> dict[str, Any]:
+    """Extract data from a CAD/BIM file using DDC Community converters.
+
+    Saves the uploaded file to a temp directory, runs the appropriate DDC
+    converter (.exe) to produce an Excel file, then parses the Excel output
+    into an element summary for AI processing.
+
+    Args:
+        content: Raw CAD file bytes.
+        ext: Lowercase file extension without dot (e.g. ``"rvt"``).
+        filename: Original file name for temp file creation.
+
+    Returns:
+        Dict with ``text`` (element summary), ``structured`` flag, and metadata.
+        If no converter is installed, returns a helpful message with download link.
+    """
+    from app.modules.boq.cad_import import (
+        convert_cad_to_excel,
+        find_converter,
+        parse_cad_excel,
+        summarize_cad_elements,
+    )
+
+    converter = find_converter(ext)
+    if not converter:
+        return {
+            "text": (
+                f"CAD file detected (.{ext}) but no DDC converter found.\n"
+                f"Download DDC converters from:\n"
+                f"https://github.com/datadrivenconstructionIO/ddc-community-toolkit/releases\n"
+                f"Place .exe files in one of these locations:\n"
+                f"  - converters/bin/ (project root)\n"
+                f"  - ~/.openestimator/converters/\n"
+                f"  - Set OPENESTIMATOR_CONVERTERS_DIR environment variable"
+            ),
+            "structured": False,
+            "cad_no_converter": True,
+        }
+
+    # Save to temp dir, convert, parse
+    with tempfile.TemporaryDirectory() as tmpdir:
+        input_path = Path(tmpdir) / filename
+        input_path.write_bytes(content)
+
+        output_dir = Path(tmpdir) / "output"
+        output_dir.mkdir()
+
+        excel_path = await convert_cad_to_excel(input_path, output_dir, ext)
+        if not excel_path:
+            return {
+                "text": (
+                    f"CAD conversion failed for .{ext} file. "
+                    "Check that the converter is properly installed and the file is valid."
+                ),
+                "structured": False,
+            }
+
+        elements = parse_cad_excel(excel_path)
+        summary = summarize_cad_elements(elements)
+
+        return {
+            "text": summary,
+            "structured": False,
+            "cad_elements": len(elements),
+            "cad_format": ext,
+        }
+
+
 # ── Smart import endpoint ────────────────────────────────────────────────────
 
 
@@ -1463,15 +1533,20 @@ def _extract_from_csv_for_smart(content: bytes) -> dict[str, Any]:
 async def smart_import(
     boq_id: uuid.UUID,
     user_id: CurrentUserId,
-    file: UploadFile = File(..., description="Any document file (Excel, CSV, PDF, image)"),
+    file: UploadFile = File(
+        ...,
+        description="Any document file (Excel, CSV, PDF, image, or CAD/BIM: .rvt, .ifc, .dwg, .dgn)",
+    ),
     service: BOQService = Depends(_get_service),
     session: SessionDep = None,  # type: ignore[assignment]
 ) -> dict[str, Any]:
     """Smart import: parse ANY file into BOQ positions using AI.
 
-    Accepts Excel (.xlsx), CSV (.csv), PDF (.pdf), and image files
-    (.jpg, .jpeg, .png, .tiff, .bmp). For structured Excel/CSV with
-    recognisable column headers, performs a direct import. Otherwise,
+    Accepts Excel (.xlsx), CSV (.csv), PDF (.pdf), image files
+    (.jpg, .jpeg, .png, .tiff, .bmp), and CAD/BIM files
+    (.rvt, .ifc, .dwg, .dgn). For structured Excel/CSV with
+    recognisable column headers, performs a direct import. For CAD/BIM
+    files, runs a DDC converter to extract element data. Otherwise,
     sends the extracted text (or image) to the user's configured AI
     provider for intelligent parsing into BOQ positions.
 
@@ -1491,12 +1566,14 @@ async def smart_import(
             detail="Uploaded file is empty.",
         )
 
-    # Limit file size (15 MB — images/PDFs can be larger)
-    max_size = 15 * 1024 * 1024
+    # Limit file size — CAD files can be much larger than documents
+    is_cad = ext in ("rvt", "ifc", "dwg", "dgn")
+    max_size = 200 * 1024 * 1024 if is_cad else 15 * 1024 * 1024
     if len(content) > max_size:
+        limit_label = "200 MB" if is_cad else "15 MB"
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="File too large. Maximum size is 15 MB.",
+            detail=f"File too large. Maximum size is {limit_label}.",
         )
 
     # ── 1. Extract text/data based on file type ────────────────────────
@@ -1508,10 +1585,22 @@ async def smart_import(
         extracted = _extract_from_pdf(content)
     elif ext in ("jpg", "jpeg", "png", "tiff", "bmp"):
         extracted = _extract_from_image(content, ext)
+    elif ext in ("rvt", "ifc", "dwg", "dgn"):
+        extracted = await _extract_from_cad(content, ext, file.filename or f"model.{ext}")
     else:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Unsupported file type: .{ext}. Supported: xlsx, csv, pdf, jpg, png, tiff.",
+            detail=(
+                f"Unsupported file type: .{ext}. "
+                "Supported: xlsx, csv, pdf, jpg, png, tiff, rvt, ifc, dwg, dgn."
+            ),
+        )
+
+    # ── 1b. Handle missing CAD converter (return early) ────────────────
+    if extracted.get("cad_no_converter"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=extracted["text"],
         )
 
     # ── 2. Direct import for structured Excel/CSV ──────────────────────
@@ -1588,6 +1677,7 @@ async def smart_import(
     # ── 3. AI-powered import ───────────────────────────────────────────
     from app.modules.ai.ai_client import call_ai, extract_json, resolve_provider_and_key
     from app.modules.ai.prompts import (
+        CAD_IMPORT_PROMPT,
         SMART_IMPORT_PROMPT,
         SMART_IMPORT_VISION_PROMPT,
         SYSTEM_PROMPT,
@@ -1615,6 +1705,15 @@ async def smart_import(
         prompt = SMART_IMPORT_VISION_PROMPT.format(filename=file.filename or "image")
         image_b64 = extracted["image_base64"]
         image_mime = extracted.get("mime", "image/jpeg")
+    elif extracted.get("cad_format"):
+        # CAD/BIM data: use specialized CAD prompt with larger context
+        text_content = extracted.get("text", "")[:12000]
+        if not text_content.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="CAD conversion produced no element data. The file may be empty or corrupt.",
+            )
+        prompt = CAD_IMPORT_PROMPT.format(text=text_content, currency="EUR")
     else:
         # Text-based: use text prompt (truncate to 8000 chars for context window)
         text_content = extracted.get("text", "")[:8000]
@@ -1654,6 +1753,9 @@ async def smart_import(
         )
 
     # ── 4. Create positions from AI response ───────────────────────────
+    is_cad_import = bool(extracted.get("cad_format"))
+    import_source = "cad_import_ai" if is_cad_import else "smart_import_ai"
+
     imported = 0
     errors = []
     for idx, item in enumerate(items):
@@ -1666,7 +1768,8 @@ async def smart_import(
 
             ordinal = str(item.get("ordinal", "")).strip()
             if not ordinal:
-                ordinal = f"AI.{imported + 1:04d}"
+                prefix = "CAD" if is_cad_import else "AI"
+                ordinal = f"{prefix}.{imported + 1:04d}"
 
             unit = str(item.get("unit", "lsum")).strip() or "lsum"
 
@@ -1692,7 +1795,7 @@ async def smart_import(
                 quantity=max(quantity, 0.0),
                 unit_rate=max(unit_rate, 0.0),
                 classification=classification,
-                source="smart_import_ai",
+                source=import_source,
                 confidence=0.7,
             )
             await service.add_position(position_data)
@@ -1707,15 +1810,20 @@ async def smart_import(
                 idx, boq_id, exc,
             )
 
+    method = "cad_ai" if is_cad_import else "ai"
     logger.info(
-        "Smart import (AI) for BOQ %s: imported=%d, errors=%d, provider=%s",
-        boq_id, imported, len(errors), provider,
+        "Smart import (%s) for BOQ %s: imported=%d, errors=%d, provider=%s",
+        method, boq_id, imported, len(errors), provider,
     )
 
-    return {
+    result: dict[str, Any] = {
         "imported": imported,
         "errors": errors,
         "total_items": len(items),
-        "method": "ai",
+        "method": method,
         "model_used": provider,
     }
+    if is_cad_import:
+        result["cad_format"] = extracted.get("cad_format")
+        result["cad_elements"] = extracted.get("cad_elements", 0)
+    return result

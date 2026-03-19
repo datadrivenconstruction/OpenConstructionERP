@@ -150,6 +150,46 @@ Rules:
 - Return ONLY the JSON array, no other text
 """
 
+CAD_IMPORT_PROMPT = """\
+You are a professional construction cost estimator with 20+ years of experience.
+A BIM/CAD model has been converted to element data.
+Analyze the elements and create a complete BOQ (Bill of Quantities).
+
+CAD Data:
+{text}
+
+Generate BOQ positions that map each element type to construction work items.
+Group by trade/section. Include realistic unit rates.
+
+Return a JSON array:
+[
+  {{
+    "ordinal": "01.01.0010",
+    "description": "Reinforced concrete wall C30/37, d=24cm",
+    "unit": "m3",
+    "quantity": 45.0,
+    "unit_rate": 280.00,
+    "classification": {{"din276": "330"}},
+    "category": "Concrete"
+  }},
+  ...
+]
+
+Rules:
+- Map element categories to proper work descriptions
+- Sum quantities by element type (don't create one position per element)
+- Include related work (formwork for concrete, rebar for RC elements, etc.)
+- Add finishes and services proportionally if not in the model
+- Use realistic market-rate unit prices
+- Generate 15-40 line items covering all trades present in the model
+- Assign ordinals in format NN.NN.NNNN grouped by trade
+- Each item must have a category from: Earthworks, Foundations, Concrete, Steel, \
+Masonry, Roofing, Facades, Partitions, Floors, Windows & Doors, MEP, HVAC, \
+Plumbing, Electrical, Fire Protection, Finishing, Landscaping, General
+- Currency: {currency}
+- Return ONLY the JSON array, no other text
+"""
+
 SYSTEM_PROMPT = """\
 You are an expert construction cost estimator integrated into the OpenEstimate \
 platform. You generate accurate, detailed Bills of Quantities with realistic \
