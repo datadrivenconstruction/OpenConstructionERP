@@ -25,6 +25,7 @@ Endpoints:
     GET    /boqs/{boq_id}/export/excel         — Export BOQ as Excel (xlsx)
     GET    /boqs/{boq_id}/export/pdf           — Export BOQ as PDF report
     POST   /boqs/{boq_id}/import/excel         — Import positions from Excel/CSV
+    POST   /boqs/{boq_id}/import/smart         — Smart import: any file via AI
     GET    /projects/{project_id}/activity     — Activity log for a project
 """
 
@@ -1326,4 +1327,395 @@ async def import_boq_excel(
         "skipped": skipped,
         "errors": errors,
         "total_rows": len(rows),
+    }
+
+
+# ── Smart import helpers ─────────────────────────────────────────────────────
+
+
+def _extract_from_pdf(content: bytes) -> dict[str, Any]:
+    """Extract text and tables from a PDF file.
+
+    Uses pdfplumber to extract tabular data first, falling back to plain text.
+
+    Args:
+        content: Raw PDF file bytes.
+
+    Returns:
+        Dict with ``text`` (extracted content) and ``structured`` flag.
+    """
+    import pdfplumber
+
+    text_parts: list[str] = []
+    with pdfplumber.open(io.BytesIO(content)) as pdf:
+        for page in pdf.pages:
+            tables = page.extract_tables()
+            if tables:
+                for table in tables:
+                    for row in table:
+                        text_parts.append("\t".join(str(cell or "") for cell in row))
+            else:
+                page_text = page.extract_text()
+                if page_text:
+                    text_parts.append(page_text)
+
+    return {"text": "\n".join(text_parts), "structured": False}
+
+
+def _extract_from_image(content: bytes, ext: str) -> dict[str, Any]:
+    """Prepare an image for AI vision analysis.
+
+    Encodes the raw image bytes as base64 and determines the MIME type.
+
+    Args:
+        content: Raw image file bytes.
+        ext: File extension (e.g. ``jpg``, ``png``).
+
+    Returns:
+        Dict with ``image_base64``, ``mime``, empty ``text``, and ``structured`` flag.
+    """
+    import base64
+
+    mime = f"image/{'jpeg' if ext in ('jpg', 'jpeg') else ext}"
+    b64 = base64.b64encode(content).decode()
+    return {"text": "", "image_base64": b64, "mime": mime, "structured": False}
+
+
+def _extract_from_excel_for_smart(content: bytes) -> dict[str, Any]:
+    """Extract data from Excel for smart import.
+
+    Tries to parse as structured rows first. If columns can be detected, returns
+    structured data. Otherwise returns the raw cell text for AI processing.
+
+    Args:
+        content: Raw Excel file bytes.
+
+    Returns:
+        Dict with ``text``, ``structured`` flag, and optionally ``rows``.
+    """
+    try:
+        rows = _parse_rows_from_excel(content)
+        if rows:
+            # Check if we have enough structure for a direct import
+            has_description = any(r.get("description") for r in rows)
+            if has_description:
+                return {"text": "", "structured": True, "rows": rows}
+    except Exception:
+        pass
+
+    # Fall back to extracting raw text from all cells
+    from openpyxl import load_workbook
+
+    wb = load_workbook(io.BytesIO(content), read_only=True, data_only=True)
+    ws = wb.active
+    text_parts: list[str] = []
+    if ws is not None:
+        for row in ws.iter_rows(values_only=True):
+            cells = [str(cell or "") for cell in row]
+            line = "\t".join(cells).strip()
+            if line:
+                text_parts.append(line)
+    wb.close()
+    return {"text": "\n".join(text_parts), "structured": False}
+
+
+def _extract_from_csv_for_smart(content: bytes) -> dict[str, Any]:
+    """Extract data from CSV for smart import.
+
+    Tries structured parsing first. If column detection fails, falls back to
+    raw text extraction for AI processing.
+
+    Args:
+        content: Raw CSV file bytes.
+
+    Returns:
+        Dict with ``text``, ``structured`` flag, and optionally ``rows``.
+    """
+    try:
+        rows = _parse_rows_from_csv(content)
+        if rows:
+            has_description = any(r.get("description") for r in rows)
+            if has_description:
+                return {"text": "", "structured": True, "rows": rows}
+    except Exception:
+        pass
+
+    # Fall back to raw text
+    for encoding in ("utf-8-sig", "utf-8", "latin-1"):
+        try:
+            text = content.decode(encoding)
+            break
+        except UnicodeDecodeError:
+            continue
+    else:
+        text = content.decode("latin-1", errors="replace")
+
+    return {"text": text, "structured": False}
+
+
+# ── Smart import endpoint ────────────────────────────────────────────────────
+
+
+@router.post(
+    "/boqs/{boq_id}/import/smart",
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def smart_import(
+    boq_id: uuid.UUID,
+    user_id: CurrentUserId,
+    file: UploadFile = File(..., description="Any document file (Excel, CSV, PDF, image)"),
+    service: BOQService = Depends(_get_service),
+    session: SessionDep = None,  # type: ignore[assignment]
+) -> dict[str, Any]:
+    """Smart import: parse ANY file into BOQ positions using AI.
+
+    Accepts Excel (.xlsx), CSV (.csv), PDF (.pdf), and image files
+    (.jpg, .jpeg, .png, .tiff, .bmp). For structured Excel/CSV with
+    recognisable column headers, performs a direct import. Otherwise,
+    sends the extracted text (or image) to the user's configured AI
+    provider for intelligent parsing into BOQ positions.
+
+    Returns:
+        Summary with imported/error counts, method used, and AI model if applicable.
+    """
+    # Verify BOQ exists
+    await service.get_boq(boq_id)
+
+    filename = (file.filename or "unknown").lower()
+    ext = filename.rsplit(".", 1)[-1] if "." in filename else ""
+
+    content = await file.read()
+    if not content:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Uploaded file is empty.",
+        )
+
+    # Limit file size (15 MB — images/PDFs can be larger)
+    max_size = 15 * 1024 * 1024
+    if len(content) > max_size:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File too large. Maximum size is 15 MB.",
+        )
+
+    # ── 1. Extract text/data based on file type ────────────────────────
+    if ext in ("xlsx", "xls"):
+        extracted = _extract_from_excel_for_smart(content)
+    elif ext == "csv":
+        extracted = _extract_from_csv_for_smart(content)
+    elif ext == "pdf":
+        extracted = _extract_from_pdf(content)
+    elif ext in ("jpg", "jpeg", "png", "tiff", "bmp"):
+        extracted = _extract_from_image(content, ext)
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported file type: .{ext}. Supported: xlsx, csv, pdf, jpg, png, tiff.",
+        )
+
+    # ── 2. Direct import for structured Excel/CSV ──────────────────────
+    if extracted.get("structured") and extracted.get("rows"):
+        rows = extracted["rows"]
+        imported = 0
+        skipped = 0
+        errors: list[dict[str, Any]] = []
+        auto_ordinal = 1
+
+        for row_idx, row in enumerate(rows, start=2):
+            try:
+                description = str(row.get("description", "")).strip()
+                if not description:
+                    skipped += 1
+                    continue
+
+                desc_lower = description.lower()
+                if desc_lower in (
+                    "grand total", "total", "summe", "gesamt", "gesamtsumme",
+                    "subtotal", "zwischensumme",
+                ):
+                    skipped += 1
+                    continue
+
+                ordinal = str(row.get("ordinal", "")).strip()
+                if not ordinal:
+                    ordinal = str(auto_ordinal)
+                auto_ordinal += 1
+
+                unit = str(row.get("unit", "pcs")).strip() or "pcs"
+                quantity = _safe_float(row.get("quantity"), default=0.0)
+                unit_rate = _safe_float(row.get("unit_rate"), default=0.0)
+
+                classification: dict[str, Any] = {}
+                class_value = str(row.get("classification", "")).strip()
+                if class_value:
+                    classification["code"] = class_value
+
+                position_data = PositionCreate(
+                    boq_id=boq_id,
+                    ordinal=ordinal,
+                    description=description,
+                    unit=unit,
+                    quantity=quantity,
+                    unit_rate=unit_rate,
+                    classification=classification,
+                    source="smart_import",
+                )
+                await service.add_position(position_data)
+                imported += 1
+
+            except Exception as exc:
+                errors.append({
+                    "row": row_idx,
+                    "error": str(exc),
+                    "data": {k: str(v)[:100] for k, v in row.items()},
+                })
+
+        logger.info(
+            "Smart import (direct) for BOQ %s: imported=%d, skipped=%d, errors=%d",
+            boq_id, imported, skipped, len(errors),
+        )
+
+        return {
+            "imported": imported,
+            "skipped": skipped,
+            "errors": errors,
+            "total_items": len(rows),
+            "method": "direct",
+            "model_used": None,
+        }
+
+    # ── 3. AI-powered import ───────────────────────────────────────────
+    from app.modules.ai.ai_client import call_ai, extract_json, resolve_provider_and_key
+    from app.modules.ai.prompts import (
+        SMART_IMPORT_PROMPT,
+        SMART_IMPORT_VISION_PROMPT,
+        SYSTEM_PROMPT,
+    )
+    from app.modules.ai.repository import AISettingsRepository
+
+    settings_repo = AISettingsRepository(session)
+    user_uuid = uuid.UUID(user_id)
+    ai_settings = await settings_repo.get_by_user_id(user_uuid)
+
+    try:
+        provider, api_key = resolve_provider_and_key(ai_settings)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+
+    # Build prompt
+    image_b64: str | None = None
+    image_mime: str = "image/jpeg"
+
+    if extracted.get("image_base64"):
+        # Image-based: use vision prompt
+        prompt = SMART_IMPORT_VISION_PROMPT.format(filename=file.filename or "image")
+        image_b64 = extracted["image_base64"]
+        image_mime = extracted.get("mime", "image/jpeg")
+    else:
+        # Text-based: use text prompt (truncate to 8000 chars for context window)
+        text_content = extracted.get("text", "")[:8000]
+        if not text_content.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Could not extract any text from the file. Try a different format.",
+            )
+        prompt = SMART_IMPORT_PROMPT.format(
+            text=text_content,
+            filename=file.filename or "document",
+        )
+
+    # Call AI
+    try:
+        raw_response, _tokens = await call_ai(
+            provider=provider,
+            api_key=api_key,
+            system=SYSTEM_PROMPT,
+            prompt=prompt,
+            image_base64=image_b64,
+            image_media_type=image_mime,
+            max_tokens=4096,
+        )
+    except Exception as exc:
+        logger.exception("Smart import AI call failed for BOQ %s: %s", boq_id, exc)
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"AI service error: {exc}",
+        ) from exc
+
+    items = extract_json(raw_response)
+    if not isinstance(items, list):
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="AI did not return a valid list of items. Please try again.",
+        )
+
+    # ── 4. Create positions from AI response ───────────────────────────
+    imported = 0
+    errors = []
+    for idx, item in enumerate(items):
+        if not isinstance(item, dict):
+            continue
+        try:
+            description = str(item.get("description", "")).strip()
+            if len(description) < 2:
+                continue
+
+            ordinal = str(item.get("ordinal", "")).strip()
+            if not ordinal:
+                ordinal = f"AI.{imported + 1:04d}"
+
+            unit = str(item.get("unit", "lsum")).strip() or "lsum"
+
+            try:
+                quantity = float(item.get("quantity", 0))
+            except (ValueError, TypeError):
+                quantity = 0.0
+
+            try:
+                unit_rate = float(item.get("unit_rate", 0))
+            except (ValueError, TypeError):
+                unit_rate = 0.0
+
+            classification = item.get("classification", {})
+            if not isinstance(classification, dict):
+                classification = {}
+
+            position_data = PositionCreate(
+                boq_id=boq_id,
+                ordinal=ordinal,
+                description=description,
+                unit=unit,
+                quantity=max(quantity, 0.0),
+                unit_rate=max(unit_rate, 0.0),
+                classification=classification,
+                source="smart_import_ai",
+                confidence=0.7,
+            )
+            await service.add_position(position_data)
+            imported += 1
+        except Exception as exc:
+            errors.append({
+                "item": str(item.get("description", "?"))[:100],
+                "error": str(exc),
+            })
+            logger.warning(
+                "Smart import AI item error at index %d for BOQ %s: %s",
+                idx, boq_id, exc,
+            )
+
+    logger.info(
+        "Smart import (AI) for BOQ %s: imported=%d, errors=%d, provider=%s",
+        boq_id, imported, len(errors), provider,
+    )
+
+    return {
+        "imported": imported,
+        "errors": errors,
+        "total_items": len(items),
+        "method": "ai",
+        "model_used": provider,
     }
