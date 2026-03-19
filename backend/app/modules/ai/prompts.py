@@ -84,6 +84,72 @@ Rules:
 - Return ONLY the JSON array, no other text
 """
 
+SMART_IMPORT_PROMPT = """\
+You are a construction cost estimation expert.
+Analyze this document and extract ALL construction work items / BOQ positions.
+
+Document: {filename}
+Content:
+{text}
+
+Extract every line item you can find and return as a JSON array:
+[
+  {{
+    "ordinal": "01.01.0010",
+    "description": "Description of the work item",
+    "unit": "m2",
+    "quantity": 100.0,
+    "unit_rate": 45.00,
+    "classification": {{"din276": "330"}}
+  }}
+]
+
+Rules:
+- Extract ALL items, even if quantities or rates are missing (use 0)
+- Preserve original descriptions as closely as possible
+- Detect the unit from context (m2, m3, kg, pcs, lsum, m, t, h)
+- If rates are present, include them. If not, set to 0.
+- Auto-number ordinals sequentially if not present in the document
+- Include classification codes if visible (DIN 276, NRM, MasterFormat)
+- Handle multi-language documents (German, English, Russian, etc.)
+- Skip header/footer/summary rows
+- Be thorough — it is better to include too many items than too few
+- Return ONLY the JSON array, no other text
+"""
+
+SMART_IMPORT_VISION_PROMPT = """\
+You are a construction cost estimation expert.
+Analyze this photo/scan of a construction document and extract ALL work items / \
+BOQ positions visible in the image.
+
+Document: {filename}
+
+Extract every line item you can find and return as a JSON array:
+[
+  {{
+    "ordinal": "01.01.0010",
+    "description": "Description of the work item",
+    "unit": "m2",
+    "quantity": 100.0,
+    "unit_rate": 45.00,
+    "classification": {{"din276": "330"}}
+  }}
+]
+
+Rules:
+- Read ALL text in the image carefully — OCR every row
+- Extract ALL items, even if quantities or rates are missing (use 0)
+- Preserve original descriptions as closely as possible
+- Detect the unit from context (m2, m3, kg, pcs, lsum, m, t, h)
+- If rates are present, include them. If not, set to 0.
+- Auto-number ordinals sequentially if not present in the document
+- Include classification codes if visible (DIN 276, NRM, MasterFormat)
+- Handle multi-language documents (German, English, Russian, etc.)
+- Skip header/footer/summary rows
+- Be thorough — it is better to include too many items than too few
+- Return ONLY the JSON array, no other text
+"""
+
 SYSTEM_PROMPT = """\
 You are an expert construction cost estimator integrated into the OpenEstimate \
 platform. You generate accurate, detailed Bills of Quantities with realistic \
