@@ -218,9 +218,51 @@ export function ImportDatabasePage() {
         <p className="mt-1 text-sm text-content-secondary">
           {t('costs.import_subtitle', {
             defaultValue:
-              'Upload your pricing database to use for estimates.',
+              'Load a pricing database or upload your own file.',
           })}
         </p>
+      </div>
+
+      {/* DDC Community Database — download from GitHub */}
+      <Card className="mb-6 border-oe-blue/20 bg-gradient-to-r from-oe-blue-subtle/50 to-surface-elevated">
+        <div className="flex items-start gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-oe-blue text-white">
+            <Database size={22} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-sm font-semibold text-content-primary">
+              CWICR Cost Database — 55,000+ items
+            </h3>
+            <p className="mt-1 text-xs text-content-secondary leading-relaxed">
+              Professional construction cost database by Data Driven Construction.
+              9 languages, 85 fields per item. Includes labor, materials, equipment rates.
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <a
+                href="https://github.com/datadrivenconstructionIO/cwicr-database/releases"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-lg bg-oe-blue px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-oe-blue-hover hover:shadow-md active:scale-[0.98]"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                Download from GitHub
+              </a>
+              <Badge variant="blue" size="sm">55,719 items</Badge>
+              <Badge variant="neutral" size="sm">9 languages</Badge>
+              <Badge variant="neutral" size="sm">Excel / CSV</Badge>
+            </div>
+            <p className="mt-2 text-2xs text-content-tertiary">
+              Download the .xlsx or .csv file, then upload it below.
+            </p>
+          </div>
+        </div>
+      </Card>
+
+      {/* Divider */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="h-px flex-1 bg-border-light" />
+        <span className="text-xs font-medium text-content-tertiary uppercase tracking-wider">or upload your own file</span>
+        <div className="h-px flex-1 bg-border-light" />
       </div>
 
       {/* Import result summary */}
