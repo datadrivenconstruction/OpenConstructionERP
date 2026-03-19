@@ -74,6 +74,16 @@ class CostItemResponse(BaseModel):
 # ── Search ────────────────────────────────────────────────────────────────
 
 
+class CostAutocompleteItem(BaseModel):
+    """Compact cost item result for autocomplete dropdown."""
+
+    code: str
+    description: str
+    unit: str
+    rate: float
+    classification: dict[str, str]
+
+
 class CostSearchQuery(BaseModel):
     """Query parameters for cost item search."""
 

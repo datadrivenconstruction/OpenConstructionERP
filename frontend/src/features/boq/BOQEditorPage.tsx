@@ -21,6 +21,7 @@ import {
   FileDown,
   LayoutTemplate,
   Inbox,
+  Sparkles,
 } from 'lucide-react';
 import { Button, Badge } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
@@ -34,8 +35,11 @@ import {
   type Markup,
   type ActivityEntry,
   type ActivityAction,
+  type CostAutocompleteItem,
 } from './api';
 import { ApiError } from '@/shared/lib/api';
+import { AutocompleteInput } from './AutocompleteInput';
+import { AIChatPanel } from './AIChatPanel';
 
 /* ── Constants ───────────────────────────────────────────────────────── */
 
@@ -134,6 +138,29 @@ export function BOQEditorPage() {
       return next;
     });
   }, []);
+
+  /* ── AI Chat panel ────────────────────────────────────────────────── */
+
+  const [aiChatOpen, setAiChatOpen] = useState(false);
+
+  const aiChatContext = useMemo(
+    () => ({
+      project_name: boq?.name ?? 'Unnamed project',
+      currency: 'EUR',
+      standard: 'din276',
+      existing_positions_count: boq?.positions.length ?? 0,
+    }),
+    [boq?.name, boq?.positions.length],
+  );
+
+  const handleAIAddPositions = useCallback(
+    (items: CreatePositionData[]) => {
+      for (const item of items) {
+        addMutation.mutate(item);
+      }
+    },
+    [addMutation],
+  );
 
   /* ── Activity panel ───────────────────────────────────────────────── */
 
@@ -406,6 +433,16 @@ export function BOQEditorPage() {
             )}
           </div>
 
+          {/* AI Assistant toggle */}
+          <Button
+            variant={aiChatOpen ? 'primary' : 'ghost'}
+            size="sm"
+            icon={<Sparkles size={15} />}
+            onClick={() => setAiChatOpen((prev) => !prev)}
+          >
+            {t('boq.ai_assistant', { defaultValue: 'AI Assistant' })}
+          </Button>
+
           {/* Add Section */}
           <Button variant="secondary" size="sm" icon={<Plus size={15} />} onClick={handleAddSection}>
             {t('boq.add_section')}
@@ -609,6 +646,15 @@ export function BOQEditorPage() {
         isOpen={activityOpen}
         onToggle={() => setActivityOpen((prev) => !prev)}
         t={t}
+      />
+
+      {/* ── AI Chat Panel ──────────────────────────────────────────────── */}
+      <AIChatPanel
+        boqId={boqId!}
+        context={aiChatContext}
+        isOpen={aiChatOpen}
+        onClose={() => setAiChatOpen(false)}
+        onAddPositions={handleAIAddPositions}
       />
     </div>
   );
@@ -824,6 +870,18 @@ function PositionRow({
     [onUpdate],
   );
 
+  const handleSelectSuggestion = useCallback(
+    (item: CostAutocompleteItem) => {
+      setEditing(null);
+      onUpdate({
+        description: item.description,
+        unit: item.unit,
+        unit_rate: item.rate,
+      });
+    },
+    [onUpdate],
+  );
+
   const bgClass = isEven ? 'bg-surface-elevated' : 'bg-surface-primary/50';
 
   return (
@@ -842,17 +900,26 @@ function PositionRow({
         />
       </td>
 
-      {/* Description */}
+      {/* Description — with autocomplete */}
       <td className={`px-4 py-2.5 ${isChild ? 'pl-8' : ''}`}>
-        <EditableCell
-          value={position.description}
-          field="description"
-          editing={editing}
-          setEditing={setEditing}
-          onBlur={handleBlur}
-          displayClassName="text-sm text-content-primary"
-          placeholder="Enter description..."
-        />
+        {editing === 'description' ? (
+          <AutocompleteInput
+            value={position.description}
+            onCommit={(value) => handleBlur('description', value)}
+            onSelectSuggestion={handleSelectSuggestion}
+            onCancel={() => setEditing(null)}
+            placeholder="Enter description..."
+          />
+        ) : (
+          <span
+            onClick={() => setEditing('description')}
+            className={`block min-h-[20px] cursor-text rounded px-1.5 py-0.5 -mx-1.5 -my-0.5 hover:bg-surface-secondary/80 transition-colors text-sm text-content-primary ${
+              !position.description ? 'text-content-tertiary italic' : ''
+            }`}
+          >
+            {position.description || 'Enter description...'}
+          </span>
+        )}
       </td>
 
       {/* Unit */}

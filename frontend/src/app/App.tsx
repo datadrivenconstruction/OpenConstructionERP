@@ -5,7 +5,8 @@ import { DashboardPage } from '@/features/dashboard';
 import { LoginPage, RegisterPage, ForgotPasswordPage } from '@/features/auth';
 import { ProjectsPage, CreateProjectPage, ProjectDetailPage } from '@/features/projects';
 import { BOQListPage, BOQEditorPage, CreateBOQPage, TemplatesPage } from '@/features/boq';
-import { CostsPage } from '@/features/costs';
+import { CostsPage, ImportDatabasePage } from '@/features/costs';
+import { OnboardingWizard } from '@/features/onboarding';
 import { AssembliesPage, AssemblyEditorPage, CreateAssemblyPage } from '@/features/assemblies';
 import { ValidationPage } from '@/features/validation';
 import { SchedulePage } from '@/features/schedule';
@@ -84,6 +85,11 @@ export default function App() {
         <Route path="/register" element={isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />} />
         <Route path="/forgot-password" element={isAuthenticated ? <Navigate to="/" replace /> : <ForgotPasswordPage />} />
 
+        {/* Onboarding — full-screen, no layout */}
+        <Route path="/onboarding" element={
+          <RequireAuth><OnboardingWizard /></RequireAuth>
+        } />
+
         {/* App — all protected, all real pages */}
         <Route path="/" element={<P title="Dashboard"><DashboardPage /></P>} />
 
@@ -99,6 +105,7 @@ export default function App() {
         <Route path="/templates" element={<P title="BOQ Templates"><TemplatesPage /></P>} />
 
         <Route path="/costs" element={<P title="Cost Database"><CostsPage /></P>} />
+        <Route path="/costs/import" element={<P title="Import Cost Database"><ImportDatabasePage /></P>} />
 
         <Route path="/assemblies" element={<P title="Assemblies"><AssembliesPage /></P>} />
         <Route path="/assemblies/new" element={<P title="New Assembly"><CreateAssemblyPage /></P>} />
