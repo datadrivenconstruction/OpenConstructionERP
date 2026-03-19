@@ -4,7 +4,7 @@ import { AppLayout } from './layout';
 import { DashboardPage } from '@/features/dashboard';
 import { LoginPage, RegisterPage, ForgotPasswordPage } from '@/features/auth';
 import { ProjectsPage, CreateProjectPage, ProjectDetailPage } from '@/features/projects';
-import { BOQListPage, BOQEditorPage, CreateBOQPage } from '@/features/boq';
+import { BOQListPage, BOQEditorPage, CreateBOQPage, TemplatesPage } from '@/features/boq';
 import { CostsPage } from '@/features/costs';
 import { AssembliesPage, AssemblyEditorPage, CreateAssemblyPage } from '@/features/assemblies';
 import { ValidationPage } from '@/features/validation';
@@ -96,6 +96,7 @@ export default function App() {
 
         <Route path="/boq" element={<P title="Bill of Quantities"><BOQListPage /></P>} />
         <Route path="/boq/:boqId" element={<P title="BOQ Editor"><BOQEditorPage /></P>} />
+        <Route path="/templates" element={<P title="BOQ Templates"><TemplatesPage /></P>} />
 
         <Route path="/costs" element={<P title="Cost Database"><CostsPage /></P>} />
 

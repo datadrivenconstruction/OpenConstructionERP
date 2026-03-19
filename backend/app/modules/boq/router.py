@@ -3,10 +3,13 @@
 Endpoints:
     POST   /boqs/                              — Create a new BOQ
     GET    /boqs/?project_id=xxx               — List BOQs for a project
+    GET    /boqs/templates                     — List available BOQ templates
+    POST   /boqs/from-template                 — Create a BOQ from a template
     GET    /boqs/{boq_id}                      — Get BOQ with all positions
     PATCH  /boqs/{boq_id}                      — Update BOQ metadata
     DELETE /boqs/{boq_id}                      — Delete BOQ and all positions
     GET    /boqs/{boq_id}/structured           — Full BOQ with sections + markups
+    GET    /boqs/{boq_id}/activity             — Activity log for a BOQ
     POST   /boqs/{boq_id}/positions            — Add a position to a BOQ
     PATCH  /positions/{position_id}            — Update a position
     DELETE /positions/{position_id}            — Delete a position
@@ -22,6 +25,7 @@ Endpoints:
     GET    /boqs/{boq_id}/export/excel         — Export BOQ as Excel (xlsx)
     GET    /boqs/{boq_id}/export/pdf           — Export BOQ as PDF report
     POST   /boqs/{boq_id}/import/excel         — Import positions from Excel/CSV
+    GET    /projects/{project_id}/activity     — Activity log for a project
 """
 
 import csv
@@ -35,7 +39,9 @@ from fastapi.responses import StreamingResponse
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.boq.schemas import (
+    ActivityLogList,
     BOQCreate,
+    BOQFromTemplateRequest,
     BOQResponse,
     BOQUpdate,
     BOQWithPositions,
@@ -47,6 +53,7 @@ from app.modules.boq.schemas import (
     PositionResponse,
     PositionUpdate,
     SectionCreate,
+    TemplateInfo,
 )
 from app.modules.boq.service import BOQService
 
@@ -139,6 +146,60 @@ async def list_boqs(
     return [BOQResponse.model_validate(b) for b in boqs]
 
 
+# ── Templates ────────────────────────────────────────────────────────────────
+
+
+@router.get(
+    "/boqs/templates",
+    response_model=list[TemplateInfo],
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def list_templates(
+    service: BOQService = Depends(_get_service),
+) -> list[TemplateInfo]:
+    """List all available BOQ templates.
+
+    Returns summary information for each built-in template: name, description,
+    icon, section count, and total position count.
+
+    Templates cover common building types:
+    - **residential** — Multi-family apartments, 3-5 floors
+    - **office** — Commercial office, 4-8 floors
+    - **warehouse** — Logistics warehouse, single-story
+    - **school** — Primary/secondary school, 2-3 floors
+    - **hospital** — General hospital or clinic
+    - **hotel** — 3-5 star hotel with conference
+    - **retail** — Shopping mall, 1-3 floors
+    - **infrastructure** — Bridge / overpass
+    """
+    return service.list_templates()
+
+
+@router.post(
+    "/boqs/from-template",
+    response_model=BOQResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("boq.create"))],
+)
+async def create_boq_from_template(
+    data: BOQFromTemplateRequest,
+    _user_id: CurrentUserId,
+    service: BOQService = Depends(_get_service),
+) -> BOQResponse:
+    """Create a complete BOQ from a built-in template.
+
+    Provide the template ID, gross floor area (m2), and optionally a custom
+    name.  The endpoint creates:
+    - A new BOQ
+    - Section headers for each trade group
+    - All positions with quantities derived from ``area_m2 * qty_factor``
+
+    Use ``GET /boqs/templates`` to discover available template IDs.
+    """
+    boq = await service.create_boq_from_template(data)
+    return BOQResponse.model_validate(boq)
+
+
 @router.get(
     "/boqs/{boq_id}",
     response_model=BOQWithPositions,
@@ -172,6 +233,45 @@ async def get_boq_structured(
     - Grand total
     """
     return await service.get_boq_structured(boq_id)
+
+
+@router.get(
+    "/boqs/{boq_id}/activity",
+    response_model=ActivityLogList,
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def get_boq_activity(
+    boq_id: uuid.UUID,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=100),
+    service: BOQService = Depends(_get_service),
+) -> ActivityLogList:
+    """Get the activity log for a BOQ (paginated, newest first).
+
+    Returns a chronological audit trail of all mutations: position additions,
+    updates, deletions, markup changes, exports, etc.
+    """
+    return await service.get_activity_for_boq(boq_id, offset=offset, limit=limit)
+
+
+@router.get(
+    "/projects/{project_id}/activity",
+    response_model=ActivityLogList,
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def get_project_activity(
+    project_id: uuid.UUID,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=100),
+    service: BOQService = Depends(_get_service),
+) -> ActivityLogList:
+    """Get the activity log for a project (paginated, newest first).
+
+    Returns all BOQ-related activity across all BOQs in the project.
+    """
+    return await service.get_activity_for_project(
+        project_id, offset=offset, limit=limit
+    )
 
 
 @router.patch(

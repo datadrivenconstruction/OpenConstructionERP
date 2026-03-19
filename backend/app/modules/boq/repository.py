@@ -1,6 +1,6 @@
 """BOQ data access layer.
 
-All database queries for BOQs, positions, and markups live here.
+All database queries for BOQs, positions, markups, and activity logs live here.
 No business logic — pure data access.
 """
 
@@ -9,7 +9,7 @@ import uuid
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.boq.models import BOQ, BOQMarkup, Position
+from app.modules.boq.models import BOQ, BOQActivityLog, BOQMarkup, Position
 
 
 class BOQRepository:
@@ -190,3 +190,68 @@ class MarkupRepository:
         )
         result = (await self.session.execute(stmt)).scalar_one()
         return int(result)
+
+
+class ActivityLogRepository:
+    """Data access for BOQActivityLog model."""
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def create(self, entry: BOQActivityLog) -> BOQActivityLog:
+        """Insert a new activity log entry."""
+        self.session.add(entry)
+        await self.session.flush()
+        return entry
+
+    async def list_for_boq(
+        self,
+        boq_id: uuid.UUID,
+        *,
+        offset: int = 0,
+        limit: int = 50,
+    ) -> tuple[list[BOQActivityLog], int]:
+        """List activity log entries for a BOQ, newest first.
+
+        Returns (entries, total_count).
+        """
+        base = select(BOQActivityLog).where(BOQActivityLog.boq_id == boq_id)
+
+        count_stmt = select(func.count()).select_from(base.subquery())
+        total = (await self.session.execute(count_stmt)).scalar_one()
+
+        stmt = (
+            base.order_by(BOQActivityLog.created_at.desc())
+            .offset(offset)
+            .limit(limit)
+        )
+        result = await self.session.execute(stmt)
+        entries = list(result.scalars().all())
+
+        return entries, total
+
+    async def list_for_project(
+        self,
+        project_id: uuid.UUID,
+        *,
+        offset: int = 0,
+        limit: int = 50,
+    ) -> tuple[list[BOQActivityLog], int]:
+        """List activity log entries for a project, newest first.
+
+        Returns (entries, total_count).
+        """
+        base = select(BOQActivityLog).where(BOQActivityLog.project_id == project_id)
+
+        count_stmt = select(func.count()).select_from(base.subquery())
+        total = (await self.session.execute(count_stmt)).scalar_one()
+
+        stmt = (
+            base.order_by(BOQActivityLog.created_at.desc())
+            .offset(offset)
+            .limit(limit)
+        )
+        result = await self.session.execute(stmt)
+        entries = list(result.scalars().all())
+
+        return entries, total

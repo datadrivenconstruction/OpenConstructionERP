@@ -15,6 +15,7 @@ import {
   Settings,
   TrendingUp,
   Sparkles,
+  ClipboardList,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -30,6 +31,7 @@ const mainNav: NavItem[] = [
   { labelKey: 'nav.ai_estimate', to: '/ai-estimate', icon: Sparkles },
   { labelKey: 'projects.title', to: '/projects', icon: FolderOpen },
   { labelKey: 'boq.title', to: '/boq', icon: Table2 },
+  { labelKey: 'boq.templates', to: '/templates', icon: ClipboardList },
   { labelKey: 'costs.title', to: '/costs', icon: Database },
   { labelKey: 'assemblies.title', to: '/assemblies', icon: Layers },
   { labelKey: 'validation.title', to: '/validation', icon: ShieldCheck },
