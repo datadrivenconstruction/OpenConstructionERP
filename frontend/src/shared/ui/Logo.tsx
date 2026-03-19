@@ -13,13 +13,6 @@ const sizeMap = {
   xl: 'h-20 w-20',
 };
 
-const barScale = {
-  sm: { rx: '1', bars: [{ x: 7, y: 18, w: 5, h: 8 }, { x: 13.5, y: 13, w: 5, h: 13 }, { x: 20, y: 8, w: 5, h: 18 }] },
-  md: { rx: '1.5', bars: [{ x: 7, y: 18, w: 5, h: 8 }, { x: 13.5, y: 13, w: 5, h: 13 }, { x: 20, y: 8, w: 5, h: 18 }] },
-  lg: { rx: '1.5', bars: [{ x: 7, y: 18, w: 5, h: 8 }, { x: 13.5, y: 13, w: 5, h: 13 }, { x: 20, y: 8, w: 5, h: 18 }] },
-  xl: { rx: '2', bars: [{ x: 7, y: 18, w: 5, h: 8 }, { x: 13.5, y: 13, w: 5, h: 13 }, { x: 20, y: 8, w: 5, h: 18 }] },
-};
-
 export function Logo({ size = 'md', animate = false, className }: LogoProps) {
   return (
     <div
@@ -37,28 +30,60 @@ export function Logo({ size = 'md', animate = false, className }: LogoProps) {
             <stop offset="100%" stopColor="#5856d6" />
           </linearGradient>
         </defs>
+        {/* Background */}
         <rect width="32" height="32" rx="7" fill="url(#logoGrad)" />
-        {barScale[size].bars.map((bar, i) => (
+
+        {/* Calculator body */}
+        <rect
+          x="7" y="5" width="18" height="22" rx="2.5"
+          fill="white" opacity="0.95"
+          className={animate ? 'origin-center' : ''}
+          style={animate ? { animation: 'scaleIn 400ms cubic-bezier(0.34,1.56,0.64,1) both' } : undefined}
+        />
+
+        {/* Screen */}
+        <rect
+          x="9" y="7" width="14" height="5" rx="1.2"
+          fill="url(#logoGrad)" opacity="0.85"
+          className={animate ? 'origin-center' : ''}
+          style={animate ? { animation: 'scaleIn 450ms cubic-bezier(0.34,1.56,0.64,1) both', animationDelay: '80ms' } : undefined}
+        />
+
+        {/* Number on screen */}
+        <text x="20.5" y="11" textAnchor="end" fill="white" fontSize="4" fontWeight="700" fontFamily="system-ui">
+          1.2M
+        </text>
+
+        {/* Button grid 4x3 */}
+        {[
+          [9, 14], [13.5, 14], [18, 14],
+          [9, 17.5], [13.5, 17.5], [18, 17.5],
+          [9, 21], [13.5, 21], [18, 21],
+        ].map(([cx, cy], i) => (
           <rect
             key={i}
-            x={bar.x}
-            y={bar.y}
-            width={bar.w}
-            height={bar.h}
-            rx={barScale[size].rx}
-            fill="white"
-            opacity={i === 1 ? 1 : 0.85}
-            className={animate ? 'origin-bottom' : ''}
-            style={
-              animate
-                ? {
-                    animation: `scaleIn 500ms cubic-bezier(0.34, 1.56, 0.64, 1) both`,
-                    animationDelay: `${i * 120}ms`,
-                  }
-                : undefined
-            }
+            x={cx} y={cy}
+            width={3.5} height={2.5} rx="0.6"
+            fill={i === 8 ? '#0071e3' : '#e8e8ed'}
+            opacity={i === 8 ? 0.9 : 0.7}
+            className={animate ? 'origin-center' : ''}
+            style={animate ? {
+              animation: 'scaleIn 350ms cubic-bezier(0.34,1.56,0.64,1) both',
+              animationDelay: `${150 + i * 40}ms`,
+            } : undefined}
           />
         ))}
+
+        {/* Equals button (wider, bottom) */}
+        <rect
+          x="9" y="24" width="12.5" height="2.5" rx="0.6"
+          fill="#0071e3" opacity="0.8"
+          className={animate ? 'origin-center' : ''}
+          style={animate ? { animation: 'scaleIn 350ms cubic-bezier(0.34,1.56,0.64,1) both', animationDelay: '520ms' } : undefined}
+        />
+        <text x="15.25" y="26" textAnchor="middle" fill="white" fontSize="2" fontWeight="700" fontFamily="system-ui">
+          =
+        </text>
       </svg>
     </div>
   );
