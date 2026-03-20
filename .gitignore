@@ -53,3 +53,4 @@ logs/
 
 # Generated
 backend/locales/
+openestimate.db*
