@@ -97,14 +97,14 @@ interface CWICRDatabase {
 }
 
 const CWICR_DATABASES: CWICRDatabase[] = [
-  { id: 'ENG_TORONTO', name: 'English', city: 'Toronto', lang: 'English', currency: 'USD/CAD', flagId: 'gb' },
-  { id: 'DE_BERLIN', name: 'Germany / DACH', city: 'Berlin', lang: 'German', currency: 'EUR', flagId: 'de' },
-  { id: 'RU_STPETERSBURG', name: 'Russia / CIS', city: 'St. Petersburg', lang: 'Russian', currency: 'RUB', flagId: 'ru' },
-  { id: 'FR_PARIS', name: 'France', city: 'Paris', lang: 'French', currency: 'EUR', flagId: 'fr' },
-  { id: 'SP_BARCELONA', name: 'Spain / LatAm', city: 'Barcelona', lang: 'Spanish', currency: 'EUR', flagId: 'es' },
-  { id: 'PT_SAOPAULO', name: 'Brazil / Portugal', city: 'São Paulo', lang: 'Portuguese', currency: 'BRL', flagId: 'br' },
-  { id: 'AR_DUBAI', name: 'Middle East / Gulf', city: 'Dubai', lang: 'Arabic', currency: 'AED', flagId: 'ae' },
-  { id: 'ZH_SHANGHAI', name: 'China', city: 'Shanghai', lang: 'Chinese', currency: 'CNY', flagId: 'cn' },
+  { id: 'ENG_TORONTO', name: 'English (US / UK / Canada)', city: 'Toronto', lang: 'English', currency: 'USD', flagId: 'us' },
+  { id: 'DE_BERLIN', name: 'Germany / DACH', city: 'Berlin', lang: 'Deutsch', currency: 'EUR', flagId: 'de' },
+  { id: 'FR_PARIS', name: 'France', city: 'Paris', lang: 'Français', currency: 'EUR', flagId: 'fr' },
+  { id: 'SP_BARCELONA', name: 'Spain / Latin America', city: 'Barcelona', lang: 'Español', currency: 'EUR', flagId: 'es' },
+  { id: 'PT_SAOPAULO', name: 'Brazil / Portugal', city: 'São Paulo', lang: 'Português', currency: 'BRL', flagId: 'br' },
+  { id: 'RU_STPETERSBURG', name: 'Russia / CIS', city: 'St. Petersburg', lang: 'Русский', currency: 'RUB', flagId: 'ru' },
+  { id: 'AR_DUBAI', name: 'Middle East / Gulf', city: 'Dubai', lang: 'العربية', currency: 'AED', flagId: 'ae' },
+  { id: 'ZH_SHANGHAI', name: 'China', city: 'Shanghai', lang: '中文', currency: 'CNY', flagId: 'cn' },
   { id: 'HI_MUMBAI', name: 'India / South Asia', city: 'Mumbai', lang: 'Hindi', currency: 'INR', flagId: 'in' },
 ];
 
