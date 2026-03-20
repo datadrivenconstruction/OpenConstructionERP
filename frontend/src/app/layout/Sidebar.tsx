@@ -10,8 +10,10 @@ import {
   Database,
   Layers,
   ShieldCheck,
+  FileSearch,
   FileText,
   FileBarChart,
+  Leaf,
   Package,
   Settings,
   TrendingUp,
@@ -37,9 +39,11 @@ const mainNav: NavItem[] = [
   { labelKey: 'costs.title', to: '/costs', icon: Database },
   { labelKey: 'assemblies.title', to: '/assemblies', icon: Layers },
   { labelKey: 'validation.title', to: '/validation', icon: ShieldCheck },
+  { labelKey: 'takeoff.title', to: '/takeoff', icon: FileSearch },
   { labelKey: 'schedule.title', to: '/schedule', icon: CalendarDays },
   { labelKey: 'nav.5d_cost_model', to: '/5d', icon: TrendingUp },
   { labelKey: 'nav.reports', to: '/reports', icon: FileBarChart },
+  { labelKey: 'nav.sustainability', to: '/sustainability', icon: Leaf },
   { labelKey: 'tendering.title', to: '/tendering', icon: FileText },
 ];
 

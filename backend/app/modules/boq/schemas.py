@@ -366,3 +366,30 @@ class ActivityLogList(BaseModel):
     total: int = 0
     offset: int = 0
     limit: int = 50
+
+
+# ── Sustainability / CO2 schemas ─────────────────────────────────────────────
+
+
+class CO2MaterialBreakdown(BaseModel):
+    """CO2 breakdown for a single material type."""
+
+    material: str
+    quantity: float
+    unit: str
+    co2_kg: float
+    percentage: float
+
+
+class SustainabilityResponse(BaseModel):
+    """Sustainability / CO2 analysis result for a BOQ."""
+
+    total_co2_kg: float
+    total_co2_tons: float
+    breakdown: list[CO2MaterialBreakdown] = Field(default_factory=list)
+    benchmark_per_m2: float | None = None
+    rating: str = ""
+    rating_label: str = ""
+    project_area_m2: float | None = None
+    positions_analyzed: int = 0
+    positions_matched: int = 0
