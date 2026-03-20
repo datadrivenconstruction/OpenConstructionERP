@@ -19,7 +19,7 @@ class PackageCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     project_id: UUID
-    boq_id: UUID
+    boq_id: UUID | None = None
     name: str = Field(..., min_length=1, max_length=255)
     description: str = ""
     deadline: str | None = Field(default=None, max_length=20)
@@ -48,7 +48,7 @@ class PackageResponse(BaseModel):
 
     id: UUID
     project_id: UUID
-    boq_id: UUID
+    boq_id: UUID | None = None
     name: str
     description: str
     status: str

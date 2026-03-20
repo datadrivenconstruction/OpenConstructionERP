@@ -105,7 +105,9 @@ def _extract_project_id(data: dict) -> uuid.UUID | None:
 # ── Wildcard handler for all boq.* events ────────────────────────────────────
 
 
-@event_bus.on("*")
+# Disabled: wildcard handler causes MissingGreenlet with SQLite
+# Re-enable when using PostgreSQL
+# @event_bus.on("*")
 async def _log_boq_activity(event: Event) -> None:
     """Handle all events and log BOQ-related ones to the activity table.
 
