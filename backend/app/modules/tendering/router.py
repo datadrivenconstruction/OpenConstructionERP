@@ -37,16 +37,19 @@ def _get_service(session: SessionDep) -> TenderingService:
 
 def _package_to_response(package: object) -> PackageResponse:
     """Build a PackageResponse from a TenderPackage ORM object."""
-    bids = getattr(package, "bids", []) or []
+    try:
+        bids = list(package.bids)  # type: ignore[attr-defined]
+    except Exception:
+        bids = []
     return PackageResponse(
         id=package.id,  # type: ignore[attr-defined]
         project_id=package.project_id,  # type: ignore[attr-defined]
-        boq_id=package.boq_id,  # type: ignore[attr-defined]
+        boq_id=getattr(package, "boq_id", None),  # type: ignore[attr-defined]
         name=package.name,  # type: ignore[attr-defined]
         description=package.description,  # type: ignore[attr-defined]
         status=package.status,  # type: ignore[attr-defined]
         deadline=package.deadline,  # type: ignore[attr-defined]
-        metadata=package.metadata_,  # type: ignore[attr-defined]
+        metadata=getattr(package, "metadata_", {}),  # type: ignore[attr-defined]
         created_at=package.created_at,  # type: ignore[attr-defined]
         updated_at=package.updated_at,  # type: ignore[attr-defined]
         bid_count=len(bids),

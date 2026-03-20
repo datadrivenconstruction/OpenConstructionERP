@@ -20,14 +20,12 @@ class TenderPackage(Base):
 
     project_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
-        ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
-    boq_id: Mapped[uuid.UUID] = mapped_column(
+    boq_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
-        ForeignKey("oe_boq_boq.id", ondelete="CASCADE"),
-        nullable=False,
+        nullable=True,
         index=True,
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -48,7 +46,7 @@ class TenderPackage(Base):
     bids: Mapped[list["TenderBid"]] = relationship(
         back_populates="package",
         cascade="all, delete-orphan",
-        lazy="selectin",
+        lazy="raise",
     )
 
     def __repr__(self) -> str:
