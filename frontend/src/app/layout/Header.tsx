@@ -193,7 +193,7 @@ function LanguageSwitcher({
           open && 'bg-surface-secondary',
         )}
       >
-        <span className="text-base leading-none">{currentLang.flag}</span>
+        <img src={`https://flagcdn.com/w20/${currentLang.country}.png`} width="16" height="11" alt="" className="rounded-[2px]" loading="lazy" />
         <ChevronDown size={11} className={clsx('transition-transform duration-fast', open && 'rotate-180')} />
       </button>
 
@@ -210,7 +210,7 @@ function LanguageSwitcher({
                   : 'text-content-primary hover:bg-surface-secondary',
               )}
             >
-              <span className="text-sm leading-none">{lang.flag}</span>
+              <img src={`https://flagcdn.com/w20/${lang.country}.png`} width="16" height="11" alt="" className="rounded-[2px] shrink-0" loading="lazy" />
               <span className="truncate text-xs">{lang.name}</span>
             </button>
           ))}
