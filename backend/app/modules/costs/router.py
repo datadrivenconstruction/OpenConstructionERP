@@ -657,12 +657,11 @@ async def load_cwicr_database(
             "rate": str(rate),
             "currency": "",
             "source": "cwicr",
-            "classification": "{}",
-            "tags": "[]",
-            "components": "[]",
-            "descriptions": "{}",
+            "classification": {},
+            "tags": [],
+            "components": [],
+            "descriptions": {},
             "is_active": True,
-            "metadata": "{}",
             "region": db_id,
         })
 
@@ -753,7 +752,7 @@ async def _bulk_insert_costs(session: AsyncSession, items: list[dict]) -> int:
 
 
 @router.delete(
-    "/clear-database",
+    "/actions/clear-database",
     dependencies=[Depends(RequirePermission("costs.delete"))],
 )
 async def clear_cost_database(
@@ -781,7 +780,7 @@ async def clear_cost_database(
 
 
 @router.get(
-    "/export/excel",
+    "/actions/export-excel",
     dependencies=[Depends(RequirePermission("costs.list"))],
 )
 async def export_cost_database(
@@ -792,8 +791,11 @@ async def export_cost_database(
     from openpyxl import Workbook
     from openpyxl.styles import Font
 
-    service = CostItemService(session)
-    items, total = await service.search_costs(limit=100000, offset=0)
+    from app.modules.costs.models import CostItem
+    from sqlalchemy import select
+
+    result = await session.execute(select(CostItem).where(CostItem.is_active.is_(True)).limit(50000))
+    items = result.scalars().all()
 
     wb = Workbook()
     ws = wb.active
