@@ -96,6 +96,34 @@ const fallbackResources = {
       'nav.templates': 'Templates',
       'takeoff.title': 'Quantity Takeoff',
       'tendering.title': 'Tendering',
+      'nav.reports': 'Reports',
+      'reports.title': 'Reports',
+      'reports.subtitle': 'Generate professional reports for your projects',
+      'reports.boq_report': 'BOQ Report',
+      'reports.boq_report_desc':
+        'Full Bill of Quantities with sections, positions, markups, and totals. Available as PDF or Excel.',
+      'reports.cost_report': 'Cost Report',
+      'reports.cost_report_desc':
+        'Cost breakdown by category with summary charts and detailed cost analysis.',
+      'reports.gaeb_xml': 'GAEB XML',
+      'reports.gaeb_xml_desc':
+        'GAEB X83 tender export — the standard exchange format for the DACH construction market.',
+      'reports.validation_report': 'Validation Report',
+      'reports.validation_report_desc':
+        'Compliance check report against DIN 276, NRM, or MasterFormat standards.',
+      'reports.schedule_report': 'Schedule Report',
+      'reports.schedule_report_desc':
+        'Gantt chart with project timeline, milestones, and critical path.',
+      'reports.5d_report': '5D Cost Report',
+      'reports.5d_report_desc':
+        'Budget vs. actual analysis with S-curve and cost forecasting.',
+      'reports.coming_soon': 'Coming soon',
+      'reports.download_format': 'Download {{format}}',
+      'reports.download_success': 'Report downloaded successfully',
+      'reports.download_error': 'Failed to generate report',
+      'reports.select_boq_first': 'Please select a project and BOQ first',
+      'reports.no_projects': 'No projects available',
+      'reports.no_boqs': 'No BOQs in this project',
       'modules.title': 'Modules',
       'dashboard.welcome': 'Welcome to OpenEstimate',
       'dashboard.subtitle': 'Your construction estimation workspace',

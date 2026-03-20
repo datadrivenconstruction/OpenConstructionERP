@@ -24,6 +24,7 @@ Endpoints:
     GET    /boqs/{boq_id}/export/csv           — Export BOQ as CSV
     GET    /boqs/{boq_id}/export/excel         — Export BOQ as Excel (xlsx)
     GET    /boqs/{boq_id}/export/pdf           — Export BOQ as PDF report
+    GET    /boqs/{boq_id}/export/gaeb          — Export BOQ as GAEB XML 3.3 (X83)
     POST   /boqs/{boq_id}/import/excel         — Import positions from Excel/CSV
     POST   /boqs/{boq_id}/import/smart         — Smart import: any file via AI (incl. CAD/BIM)
     GET    /projects/{project_id}/activity     — Activity log for a project
@@ -1007,6 +1008,178 @@ async def export_boq_pdf(
     return StreamingResponse(
         io.BytesIO(pdf_bytes),
         media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+        },
+    )
+
+
+@router.get(
+    "/boqs/{boq_id}/export/gaeb",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def export_boq_gaeb(
+    boq_id: uuid.UUID,
+    session: SessionDep,
+    service: BOQService = Depends(_get_service),
+) -> StreamingResponse:
+    """Export BOQ as a GAEB XML 3.3 file (DP 83 — Angebotsabgabe / Bid Submission).
+
+    Generates a valid GAEB DA XML document containing:
+    - GAEBInfo header with version and program identification
+    - Award block with DP 83 (bid submission phase)
+    - BoQ with sections mapped to BoQCtgy elements
+    - Positions mapped to Item elements with quantities, units, rates, and totals
+    - Grand total in the trailing BoQInfo block
+    """
+    import xml.etree.ElementTree as ET
+    from datetime import date
+
+    from app.modules.projects.repository import ProjectRepository
+
+    boq_data = await service.get_boq_structured(boq_id)
+
+    # Load project for label text
+    project_repo = ProjectRepository(session)
+    project = await project_repo.get_by_id(boq_data.project_id)
+    project_name = project.name if project else "OpenEstimate Project"
+
+    today = date.today().isoformat()
+
+    # ── Build GAEB XML tree ────────────────────────────────────────────────
+    ns = "http://www.gaeb.de/GAEB_DA_XML/200407"
+    ET.register_namespace("", ns)
+
+    gaeb = ET.Element("GAEB", xmlns=ns)
+
+    # GAEBInfo
+    gaeb_info = ET.SubElement(gaeb, "GAEBInfo")
+    ET.SubElement(gaeb_info, "Version").text = "3.3"
+    ET.SubElement(gaeb_info, "VersDate").text = "2024-01"
+    ET.SubElement(gaeb_info, "Date").text = today
+    ET.SubElement(gaeb_info, "ProgSystem").text = "OpenEstimate.io"
+    ET.SubElement(gaeb_info, "ProgName").text = "OpenEstimate"
+
+    # Award
+    award = ET.SubElement(gaeb, "Award")
+    ET.SubElement(award, "DP").text = "83"
+
+    # BoQ
+    boq_el = ET.SubElement(award, "BoQ")
+
+    # BoQInfo (header)
+    boq_info = ET.SubElement(boq_el, "BoQInfo")
+    ET.SubElement(boq_info, "Name").text = boq_data.name
+    ET.SubElement(boq_info, "LblTx").text = project_name
+    ET.SubElement(boq_info, "Date").text = today
+    outl_compl = ET.SubElement(boq_info, "OutlCompl")
+    ET.SubElement(outl_compl, "OutlComplType").text = "OutlCompl"
+
+    # BoQBody (root level)
+    boq_body = ET.SubElement(boq_el, "BoQBody")
+
+    def _fmt(value: float) -> str:
+        """Format a numeric value with 2 decimal places for GAEB XML."""
+        return f"{value:.2f}"
+
+    # Map GAEB-compatible unit codes
+    _UNIT_MAP: dict[str, str] = {
+        "m": "m",
+        "m2": "m2",
+        "m3": "m3",
+        "kg": "kg",
+        "t": "t",
+        "pcs": "Stk",
+        "lsum": "psch",
+        "h": "h",
+        "l": "l",
+    }
+
+    def _gaeb_unit(unit: str) -> str:
+        """Convert internal unit to GAEB-compatible unit code."""
+        return _UNIT_MAP.get(unit.lower().strip(), unit)
+
+    # ── Sections → BoQCtgy ────────────────────────────────────────────────
+    for section in boq_data.sections:
+        ctgy = ET.SubElement(
+            boq_body,
+            "BoQCtgy",
+            RNoPart="1",
+            ID=str(section.ordinal),
+        )
+        ET.SubElement(ctgy, "LblTx").text = section.description
+
+        ctgy_body = ET.SubElement(ctgy, "BoQBody")
+        itemlist = ET.SubElement(ctgy_body, "Itemlist")
+
+        for pos in section.positions:
+            item = ET.SubElement(
+                itemlist,
+                "Item",
+                RNoPart="2",
+                ID=str(pos.ordinal),
+            )
+            ET.SubElement(item, "Qty").text = _fmt(pos.quantity)
+            ET.SubElement(item, "QU").text = _gaeb_unit(pos.unit)
+
+            desc = ET.SubElement(item, "Description")
+            complete_text = ET.SubElement(desc, "CompleteText")
+            detail_txt = ET.SubElement(complete_text, "DetailTxt")
+            ET.SubElement(detail_txt, "Text").text = pos.description
+
+            ET.SubElement(item, "UP").text = _fmt(pos.unit_rate)
+            ET.SubElement(item, "IT").text = _fmt(pos.total)
+
+    # ── Ungrouped positions → separate BoQCtgy ────────────────────────────
+    if boq_data.positions:
+        ctgy = ET.SubElement(
+            boq_body,
+            "BoQCtgy",
+            RNoPart="1",
+            ID="00",
+        )
+        ET.SubElement(ctgy, "LblTx").text = "Ungrouped Positions"
+
+        ctgy_body = ET.SubElement(ctgy, "BoQBody")
+        itemlist = ET.SubElement(ctgy_body, "Itemlist")
+
+        for pos in boq_data.positions:
+            item = ET.SubElement(
+                itemlist,
+                "Item",
+                RNoPart="2",
+                ID=str(pos.ordinal),
+            )
+            ET.SubElement(item, "Qty").text = _fmt(pos.quantity)
+            ET.SubElement(item, "QU").text = _gaeb_unit(pos.unit)
+
+            desc = ET.SubElement(item, "Description")
+            complete_text = ET.SubElement(desc, "CompleteText")
+            detail_txt = ET.SubElement(complete_text, "DetailTxt")
+            ET.SubElement(detail_txt, "Text").text = pos.description
+
+            ET.SubElement(item, "UP").text = _fmt(pos.unit_rate)
+            ET.SubElement(item, "IT").text = _fmt(pos.total)
+
+    # ── Trailing BoQInfo with grand total ─────────────────────────────────
+    boq_info_total = ET.SubElement(boq_el, "BoQInfo")
+    ET.SubElement(boq_info_total, "TotPr").text = _fmt(boq_data.grand_total)
+
+    # ── Serialize to XML string ───────────────────────────────────────────
+    xml_declaration = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    xml_body = ET.tostring(gaeb, encoding="unicode", xml_declaration=False)
+    xml_content = xml_declaration + xml_body
+
+    safe_name = (
+        boq_data.name.encode("ascii", errors="replace")
+        .decode("ascii")
+        .replace('"', "'")
+    )
+    filename = f"{safe_name}.X83"
+
+    return StreamingResponse(
+        iter([xml_content]),
+        media_type="application/xml; charset=utf-8",
         headers={
             "Content-Disposition": f'attachment; filename="{filename}"',
         },
