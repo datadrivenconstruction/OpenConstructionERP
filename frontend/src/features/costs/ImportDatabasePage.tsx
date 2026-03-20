@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, type DragEvent, type ChangeEvent } from 'react';
+import { useState, useCallback, useRef, useEffect, type DragEvent, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -88,26 +88,43 @@ function getFileType(name: string): 'excel' | 'csv' | null {
 // ── CWICR Regional Databases ─────────────────────────────────────────────────
 
 const CWICR_DATABASES = [
-  { id: 'DE_BERLIN', flag: '🇩🇪', name: 'Germany', city: 'Berlin', lang: 'German', currency: 'EUR' },
-  { id: 'ENG_TORONTO', flag: '🇨🇦', name: 'Canada', city: 'Toronto', lang: 'English', currency: 'CAD' },
+  { id: 'ENG_TORONTO', flag: '🇬🇧', name: 'English (International)', city: 'Toronto', lang: 'English', currency: 'USD', popular: true },
+  { id: 'DE_BERLIN', flag: '🇩🇪', name: 'Germany / DACH', city: 'Berlin', lang: 'German', currency: 'EUR', popular: true },
+  { id: 'RU_STPETERSBURG', flag: '🇷🇺', name: 'Russia / CIS', city: 'St. Petersburg', lang: 'Russian', currency: 'RUB' },
   { id: 'FR_PARIS', flag: '🇫🇷', name: 'France', city: 'Paris', lang: 'French', currency: 'EUR' },
-  { id: 'SP_BARCELONA', flag: '🇪🇸', name: 'Spain', city: 'Barcelona', lang: 'Spanish', currency: 'EUR' },
-  { id: 'PT_SAOPAULO', flag: '🇧🇷', name: 'Brazil', city: 'São Paulo', lang: 'Portuguese', currency: 'BRL' },
-  { id: 'RU_STPETERSBURG', flag: '🇷🇺', name: 'Russia', city: 'St. Petersburg', lang: 'Russian', currency: 'RUB' },
-  { id: 'AR_DUBAI', flag: '🇦🇪', name: 'UAE', city: 'Dubai', lang: 'Arabic', currency: 'AED' },
+  { id: 'SP_BARCELONA', flag: '🇪🇸', name: 'Spain / LatAm', city: 'Barcelona', lang: 'Spanish', currency: 'EUR' },
+  { id: 'PT_SAOPAULO', flag: '🇧🇷', name: 'Brazil / Portugal', city: 'São Paulo', lang: 'Portuguese', currency: 'BRL' },
+  { id: 'AR_DUBAI', flag: '🇦🇪', name: 'Middle East / Gulf', city: 'Dubai', lang: 'Arabic', currency: 'AED' },
   { id: 'ZH_SHANGHAI', flag: '🇨🇳', name: 'China', city: 'Shanghai', lang: 'Chinese', currency: 'CNY' },
-  { id: 'HI_MUMBAI', flag: '🇮🇳', name: 'India', city: 'Mumbai', lang: 'Hindi', currency: 'INR' },
+  { id: 'HI_MUMBAI', flag: '🇮🇳', name: 'India / South Asia', city: 'Mumbai', lang: 'Hindi', currency: 'INR' },
 ];
 
 function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
   const [loading, setLoading] = useState<string | null>(null);
   const [loaded, setLoaded] = useState<Set<string>>(new Set());
+  const [result, setResult] = useState<{ id: string; imported: number; skipped: number; file: string } | null>(null);
+  const [elapsed, setElapsed] = useState(0);
+  const [log, setLog] = useState<string[]>([]);
   const addToast = useToastStore((s) => s.addToast);
+
+  // Timer for elapsed time display
+  useEffect(() => {
+    if (!loading) { setElapsed(0); return; }
+    const start = Date.now();
+    const interval = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 1000);
+    return () => clearInterval(interval);
+  }, [loading]);
 
   const handleLoad = useCallback(async (db: typeof CWICR_DATABASES[number]) => {
     setLoading(db.id);
+    setResult(null);
+    setLog([
+      `Starting import: ${db.name} (${db.city})...`,
+      `Loading 55,000+ items from CWICR Parquet database...`,
+      `This may take 1-3 minutes. Please wait.`,
+    ]);
+
     try {
-      // Try to fetch from local DDC toolkit path first, then from GitHub
       const token = localStorage.getItem(TOKEN_KEY);
       const res = await fetch(`/api/v1/costs/load-cwicr/${db.id}`, {
         method: 'POST',
@@ -117,53 +134,67 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
       if (res.ok) {
         const data = await res.json();
         setLoaded((prev) => new Set(prev).add(db.id));
+        setResult({ id: db.id, imported: data.imported ?? 0, skipped: data.skipped ?? 0, file: data.source_file ?? '' });
+        setLog((prev) => [
+          ...prev,
+          `✅ Import complete!`,
+          `   ${data.imported ?? 0} items imported, ${data.skipped ?? 0} skipped`,
+          `   Source: ${data.source_file ?? 'unknown'}`,
+        ]);
         addToast({
           type: 'success',
           title: `${db.name} database loaded`,
-          message: `${data.imported ?? 0} cost items imported from CWICR ${db.city}`,
+          message: `${data.imported ?? 0} cost items imported`,
         });
       } else {
         const err = await res.json().catch(() => ({ detail: 'Failed to load database' }));
+        setLog((prev) => [...prev, `❌ Error: ${err.detail || 'Unknown error'}`]);
         addToast({
           type: 'error',
-          title: `Failed to load ${db.name} database`,
+          title: `Failed to load ${db.name}`,
           message: err.detail || 'Unknown error',
         });
       }
     } catch {
-      addToast({
-        type: 'error',
-        title: 'Connection error',
-        message: 'Could not connect to server',
-      });
+      setLog((prev) => [...prev, `❌ Connection error`]);
+      addToast({ type: 'error', title: 'Connection error' });
     } finally {
       setLoading(null);
     }
   }, [addToast]);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-      {CWICR_DATABASES.map((db) => {
-        const isLoading = loading === db.id;
-        const isLoaded = loaded.has(db.id);
+    <div>
+      {/* Database grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+        {CWICR_DATABASES.map((db) => {
+          const isLoading = loading === db.id;
+          const isLoaded = loaded.has(db.id);
+          const dbAny = db as typeof CWICR_DATABASES[number] & { popular?: boolean };
 
-        return (
-          <button
-            key={db.id}
-            onClick={() => handleLoad(db)}
-            disabled={isLoading || loading !== null}
-            className={`
-              flex items-center gap-3 rounded-xl px-3.5 py-3 text-left
-              border transition-all duration-normal ease-oe
-              ${isLoaded
-                ? 'border-semantic-success/30 bg-semantic-success-bg/40'
-                : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary active:scale-[0.98]'
-              }
-              ${isLoading ? 'opacity-70' : ''}
-              ${loading !== null && !isLoading ? 'opacity-40 pointer-events-none' : ''}
-            `}
-          >
-            <span className="text-2xl leading-none shrink-0">{db.flag}</span>
+          return (
+            <button
+              key={db.id}
+              onClick={() => handleLoad(db)}
+              disabled={isLoading || loading !== null}
+              className={`
+                relative flex items-center gap-3 rounded-xl px-3.5 py-3 text-left
+                border transition-all duration-normal ease-oe
+                ${isLoaded
+                  ? 'border-semantic-success/30 bg-semantic-success-bg/40'
+                  : isLoading
+                    ? 'border-oe-blue/40 bg-oe-blue-subtle/30'
+                    : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary active:scale-[0.98]'
+                }
+                ${loading !== null && !isLoading ? 'opacity-40 pointer-events-none' : ''}
+              `}
+            >
+              {dbAny.popular && !isLoaded && !isLoading && (
+                <span className="absolute -top-1.5 -right-1.5 text-2xs bg-oe-blue text-white px-1.5 py-0.5 rounded-full font-medium">
+                  Popular
+                </span>
+              )}
+              <span className="text-2xl leading-none shrink-0">{db.flag}</span>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold text-content-primary">{db.name}</span>
@@ -181,6 +212,64 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
           </button>
         );
       })}
+      </div>
+
+      {/* Progress & Log panel — shown during/after import */}
+      {(loading || result || log.length > 3) && (
+        <div className="mt-4 rounded-xl border border-border-light bg-surface-tertiary overflow-hidden">
+          {/* Progress bar */}
+          {loading && (
+            <div className="px-4 py-3 border-b border-border-light bg-surface-elevated">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Loader2 size={14} className="animate-spin text-oe-blue" />
+                  <span className="text-sm font-medium text-content-primary">
+                    Importing database...
+                  </span>
+                </div>
+                <span className="text-xs text-content-tertiary font-mono">
+                  {elapsed}s elapsed
+                </span>
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-secondary">
+                <div className="h-full animate-shimmer rounded-full bg-oe-blue opacity-70 bg-[length:200%_100%]" style={{ width: '100%' }} />
+              </div>
+              <p className="mt-2 text-xs text-content-tertiary">
+                Loading ~55,000 items. This takes 1-3 minutes depending on your hardware.
+              </p>
+            </div>
+          )}
+
+          {/* Result summary */}
+          {result && (
+            <div className="px-4 py-3 border-b border-border-light bg-semantic-success-bg/30">
+              <div className="flex items-center gap-2 mb-1">
+                <CheckCircle2 size={16} className="text-semantic-success" />
+                <span className="text-sm font-semibold text-[#15803d]">Import complete</span>
+              </div>
+              <div className="flex gap-4 text-xs text-[#15803d]/80">
+                <span>{result.imported.toLocaleString()} imported</span>
+                <span>{result.skipped.toLocaleString()} skipped</span>
+                <span className="text-content-tertiary">{result.file}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Log output */}
+          <div className="px-4 py-3 max-h-32 overflow-y-auto">
+            <div className="space-y-1 font-mono text-2xs text-content-tertiary">
+              {log.map((line, i) => (
+                <div key={i} className={line.startsWith('✅') ? 'text-semantic-success font-medium' : line.startsWith('❌') ? 'text-semantic-error' : ''}>
+                  {line}
+                </div>
+              ))}
+              {loading && (
+                <div className="animate-pulse">Processing items...</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
