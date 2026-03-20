@@ -12,7 +12,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """OpenEstimate application settings."""
+    """OpenEstimator.io application settings."""
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     )
 
     # ── App ──────────────────────────────────────────────────────────────
-    app_name: str = "OpenEstimate"
+    app_name: str = "OpenEstimator.io"
     app_version: str = "0.1.0"
     app_env: Literal["development", "staging", "production"] = "development"
     app_debug: bool = True
