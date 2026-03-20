@@ -15,6 +15,7 @@ import csv
 import io
 import logging
 import uuid
+from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, status
@@ -491,4 +492,184 @@ async def import_cost_file(
         "skipped": skipped + skipped_by_duplicate,
         "errors": errors,
         "total_rows": len(rows),
+    }
+
+
+# ── Load CWICR database from local DDC Toolkit ──────────────────────────────
+
+
+CWICR_SEARCH_PATHS = [
+    "../../DDC_Toolkit/pricing/data/excel",
+    "../DDC_Toolkit/pricing/data/excel",
+    str(Path.home() / "DDC_Toolkit" / "pricing" / "data" / "excel"),
+    str(Path.home() / "Desktop" / "CodeProjects" / "DDC_Toolkit" / "pricing" / "data" / "excel"),
+]
+
+
+def _find_cwicr_file(db_id: str) -> Path | None:
+    """Find a CWICR database file by database ID (e.g., DE_BERLIN).
+
+    Priority: Parquet (fastest, most reliable) > Excel SIMPLE > Excel any.
+    """
+    # Priority 1: Parquet files (fastest and most reliable)
+    for search_path in CWICR_SEARCH_PATHS:
+        parquet_path = Path(search_path).parent / "parquet"
+        if parquet_path.exists():
+            for f in parquet_path.iterdir():
+                if f.name.startswith(db_id) and f.suffix == ".parquet":
+                    return f
+
+    # Priority 2: Excel SIMPLE
+    for search_path in CWICR_SEARCH_PATHS:
+        p = Path(search_path)
+        if not p.exists():
+            continue
+        for f in p.iterdir():
+            if f.name.startswith(db_id) and "_SIMPLE" in f.name and f.suffix == ".xlsx":
+                return f
+
+    # Priority 3: Any Excel
+    for search_path in CWICR_SEARCH_PATHS:
+        p = Path(search_path)
+        if not p.exists():
+            continue
+        for f in p.iterdir():
+            if f.name.startswith(db_id) and f.suffix == ".xlsx":
+                return f
+
+    return None
+
+
+@router.post(
+    "/load-cwicr/{db_id}",
+    dependencies=[Depends(RequirePermission("costs.create"))],
+)
+async def load_cwicr_database(
+    db_id: str,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+) -> dict:
+    """Load a CWICR regional database from local DDC Toolkit files.
+
+    Searches for the Excel file in common DDC Toolkit paths,
+    parses it, and imports all cost items.
+    """
+    import logging
+
+    logger = logging.getLogger(__name__)
+
+    # Find the file
+    cwicr_path = _find_cwicr_file(db_id)
+    if not cwicr_path:
+        raise HTTPException(
+            status_code=404,
+            detail=f"CWICR database '{db_id}' not found. "
+            f"Make sure DDC_Toolkit is installed at ~/Desktop/CodeProjects/DDC_Toolkit",
+        )
+
+    logger.info("Loading CWICR database from %s", cwicr_path)
+
+    # Parse based on file type
+    if cwicr_path.suffix == ".parquet":
+        import pandas as pd
+
+        df = pd.read_parquet(cwicr_path)
+        logger.info("Parquet loaded: %d rows, columns: %s", len(df), list(df.columns)[:10])
+    elif cwicr_path.suffix in (".xlsx", ".xls"):
+        import pandas as pd
+
+        df = pd.read_excel(cwicr_path)
+    else:
+        raise HTTPException(status_code=400, detail=f"Unsupported file format: {cwicr_path.suffix}")
+
+    if df.empty:
+        raise HTTPException(status_code=400, detail="Empty database file")
+
+    # Normalize column names
+    df.columns = [str(c).strip().lower() for c in df.columns]
+
+    # Find key columns
+    desc_col = None
+    code_col = None
+    unit_col = None
+    rate_col = None
+
+    for c in df.columns:
+        cl = c.lower()
+        if desc_col is None and any(k in cl for k in ["description", "name", "text", "bezeichnung"]):
+            desc_col = c
+        if code_col is None and any(k in cl for k in ["code", "id", "nummer"]):
+            code_col = c
+        if unit_col is None and any(k in cl for k in ["unit", "einheit", "me"]):
+            unit_col = c
+        if rate_col is None and any(k in cl for k in ["cost", "price", "rate", "preis", "total"]):
+            rate_col = c
+
+    if desc_col is None:
+        # Try first string column
+        for c in df.columns:
+            if df[c].dtype == object:
+                desc_col = c
+                break
+
+    if desc_col is None:
+        raise HTTPException(status_code=400, detail=f"No description column found. Columns: {list(df.columns)[:15]}")
+
+    # Import items
+    from app.modules.costs.schemas import CostItemCreate
+
+    service = CostItemService(session)
+    imported = 0
+    skipped = 0
+
+    for idx, row in df.iterrows():
+        try:
+            desc = str(row.get(desc_col, "") or "").strip()
+            if not desc or len(desc) < 3:
+                skipped += 1
+                continue
+
+            code = str(row.get(code_col, "") or "").strip() if code_col else f"CWICR-{db_id}-{idx:06d}"
+            if not code:
+                code = f"CWICR-{db_id}-{idx:06d}"
+
+            unit = str(row.get(unit_col, "m2") or "m2").strip() if unit_col else "m2"
+
+            rate = 0.0
+            if rate_col:
+                rv = row.get(rate_col, 0)
+                try:
+                    rate = float(rv) if rv is not None and str(rv).strip() != "" else 0.0
+                except (ValueError, TypeError):
+                    rate = 0.0
+
+            item_data = CostItemCreate(
+                code=code[:100],
+                description=desc[:500],
+                unit=unit[:20] or "m2",
+                rate=rate,
+                source="cwicr",
+            )
+
+            try:
+                await service.create_cost_item(item_data)
+                imported += 1
+            except HTTPException:
+                skipped += 1
+        except Exception:
+            skipped += 1
+
+        if imported > 0 and imported % 500 == 0:
+            await session.commit()
+
+    if imported > 0:
+        await session.commit()
+
+    logger.info("CWICR %s: imported %d, skipped %d", db_id, imported, skipped)
+
+    return {
+        "imported": imported,
+        "skipped": skipped,
+        "database": db_id,
+        "source_file": cwicr_path.name,
     }
