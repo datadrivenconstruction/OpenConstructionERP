@@ -11,6 +11,7 @@ import {
   Layers,
   ShieldCheck,
   FileText,
+  FileBarChart,
   Package,
   Settings,
   TrendingUp,
@@ -38,6 +39,7 @@ const mainNav: NavItem[] = [
   { labelKey: 'validation.title', to: '/validation', icon: ShieldCheck },
   { labelKey: 'schedule.title', to: '/schedule', icon: CalendarDays },
   { labelKey: 'nav.5d_cost_model', to: '/5d', icon: TrendingUp },
+  { labelKey: 'nav.reports', to: '/reports', icon: FileBarChart },
   { labelKey: 'tendering.title', to: '/tendering', icon: FileText },
 ];
 

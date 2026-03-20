@@ -12,6 +12,7 @@ import { ValidationPage } from '@/features/validation';
 import { SchedulePage } from '@/features/schedule';
 import { CostModelPage } from '@/features/costmodel';
 import { TenderingPage } from '@/features/tendering';
+import { ReportsPage } from '@/features/reports';
 import { ModulesPage } from '@/features/modules';
 import { SettingsPage } from '@/features/settings';
 import { QuickEstimatePage } from '@/features/ai';
@@ -116,6 +117,8 @@ export default function App() {
         <Route path="/schedule" element={<P title="4D Schedule"><SchedulePage /></P>} />
 
         <Route path="/5d" element={<P title="5D Cost Model"><CostModelPage /></P>} />
+
+        <Route path="/reports" element={<P title="Reports"><ReportsPage /></P>} />
 
         <Route path="/tendering" element={<P title="Tendering"><TenderingPage /></P>} />
 
