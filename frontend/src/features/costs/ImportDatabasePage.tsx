@@ -87,17 +87,42 @@ function getFileType(name: string): 'excel' | 'csv' | null {
 
 // ── CWICR Regional Databases ─────────────────────────────────────────────────
 
-const CWICR_DATABASES = [
-  { id: 'ENG_TORONTO', flag: '🇬🇧', name: 'English (International)', city: 'Toronto', lang: 'English', currency: 'USD', popular: true },
-  { id: 'DE_BERLIN', flag: '🇩🇪', name: 'Germany / DACH', city: 'Berlin', lang: 'German', currency: 'EUR', popular: true },
-  { id: 'RU_STPETERSBURG', flag: '🇷🇺', name: 'Russia / CIS', city: 'St. Petersburg', lang: 'Russian', currency: 'RUB' },
-  { id: 'FR_PARIS', flag: '🇫🇷', name: 'France', city: 'Paris', lang: 'French', currency: 'EUR' },
-  { id: 'SP_BARCELONA', flag: '🇪🇸', name: 'Spain / LatAm', city: 'Barcelona', lang: 'Spanish', currency: 'EUR' },
-  { id: 'PT_SAOPAULO', flag: '🇧🇷', name: 'Brazil / Portugal', city: 'São Paulo', lang: 'Portuguese', currency: 'BRL' },
-  { id: 'AR_DUBAI', flag: '🇦🇪', name: 'Middle East / Gulf', city: 'Dubai', lang: 'Arabic', currency: 'AED' },
-  { id: 'ZH_SHANGHAI', flag: '🇨🇳', name: 'China', city: 'Shanghai', lang: 'Chinese', currency: 'CNY' },
-  { id: 'HI_MUMBAI', flag: '🇮🇳', name: 'India / South Asia', city: 'Mumbai', lang: 'Hindi', currency: 'INR' },
+interface CWICRDatabase {
+  id: string;
+  name: string;
+  city: string;
+  lang: string;
+  currency: string;
+  flagId: string; // country code for SVG flag
+}
+
+const CWICR_DATABASES: CWICRDatabase[] = [
+  { id: 'ENG_TORONTO', name: 'English', city: 'Toronto', lang: 'English', currency: 'USD/CAD', flagId: 'gb' },
+  { id: 'DE_BERLIN', name: 'Germany / DACH', city: 'Berlin', lang: 'German', currency: 'EUR', flagId: 'de' },
+  { id: 'RU_STPETERSBURG', name: 'Russia / CIS', city: 'St. Petersburg', lang: 'Russian', currency: 'RUB', flagId: 'ru' },
+  { id: 'FR_PARIS', name: 'France', city: 'Paris', lang: 'French', currency: 'EUR', flagId: 'fr' },
+  { id: 'SP_BARCELONA', name: 'Spain / LatAm', city: 'Barcelona', lang: 'Spanish', currency: 'EUR', flagId: 'es' },
+  { id: 'PT_SAOPAULO', name: 'Brazil / Portugal', city: 'São Paulo', lang: 'Portuguese', currency: 'BRL', flagId: 'br' },
+  { id: 'AR_DUBAI', name: 'Middle East / Gulf', city: 'Dubai', lang: 'Arabic', currency: 'AED', flagId: 'ae' },
+  { id: 'ZH_SHANGHAI', name: 'China', city: 'Shanghai', lang: 'Chinese', currency: 'CNY', flagId: 'cn' },
+  { id: 'HI_MUMBAI', name: 'India / South Asia', city: 'Mumbai', lang: 'Hindi', currency: 'INR', flagId: 'in' },
 ];
+
+/** Renders a real SVG flag using flagcdn.com (free, no API key) */
+function MiniFlag({ code }: { code: string }) {
+  return (
+    <img
+      src={`https://flagcdn.com/w40/${code}.png`}
+      srcSet={`https://flagcdn.com/w80/${code}.png 2x`}
+      width="32"
+      height="20"
+      alt={code}
+      className="rounded-sm shrink-0 shadow-xs border border-black/5 object-cover"
+      style={{ width: 32, height: 20 }}
+      loading="lazy"
+    />
+  );
+}
 
 function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
   const [loading, setLoading] = useState<string | null>(null);
@@ -170,8 +195,6 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
         {CWICR_DATABASES.map((db) => {
           const isLoading = loading === db.id;
           const isLoaded = loaded.has(db.id);
-          const dbAny = db as typeof CWICR_DATABASES[number] & { popular?: boolean };
-
           return (
             <button
               key={db.id}
@@ -189,12 +212,7 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
                 ${loading !== null && !isLoading ? 'opacity-40 pointer-events-none' : ''}
               `}
             >
-              {dbAny.popular && !isLoaded && !isLoading && (
-                <span className="absolute -top-1.5 -right-1.5 text-2xs bg-oe-blue text-white px-1.5 py-0.5 rounded-full font-medium">
-                  Popular
-                </span>
-              )}
-              <span className="text-2xl leading-none shrink-0">{db.flag}</span>
+              <MiniFlag code={db.flagId} />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold text-content-primary">{db.name}</span>
