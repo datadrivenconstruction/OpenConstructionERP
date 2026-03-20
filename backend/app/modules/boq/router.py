@@ -52,6 +52,7 @@ from app.modules.boq.schemas import (
     BOQUpdate,
     BOQWithPositions,
     BOQWithSections,
+    CO2MaterialBreakdown,
     MarkupCreate,
     MarkupResponse,
     MarkupUpdate,
@@ -59,6 +60,7 @@ from app.modules.boq.schemas import (
     PositionResponse,
     PositionUpdate,
     SectionCreate,
+    SustainabilityResponse,
     TemplateInfo,
 )
 from app.modules.boq.service import BOQService
@@ -2000,3 +2002,182 @@ async def smart_import(
         result["cad_format"] = extracted.get("cad_format")
         result["cad_elements"] = extracted.get("cad_elements", 0)
     return result
+
+
+# ── Sustainability / CO2 Calculator ──────────────────────────────────────────
+
+# Standard emission factors per material type (kg CO2e per unit)
+CO2_FACTORS: dict[str, dict[str, object]] = {
+    "concrete": {"factor": 250, "unit": "m3", "material": "Concrete C30/37"},
+    "steel": {"factor": 1800, "unit": "t", "material": "Structural Steel"},
+    "rebar": {"factor": 2.5, "unit": "kg", "material": "Reinforcement Steel"},
+    "masonry": {"factor": 120, "unit": "m3", "material": "Masonry (Brick/Block)"},
+    "timber": {"factor": -500, "unit": "m3", "material": "Timber (Carbon Sink)"},
+    "glass": {"factor": 1200, "unit": "t", "material": "Glass"},
+    "insulation": {"factor": 5, "unit": "m2", "material": "Insulation"},
+    "asphalt": {"factor": 50, "unit": "t", "material": "Asphalt"},
+    "aluminum": {"factor": 8700, "unit": "t", "material": "Aluminum"},
+    "copper": {"factor": 3500, "unit": "t", "material": "Copper"},
+}
+
+# Keywords to detect material type from position descriptions (lowercased)
+_MATERIAL_KEYWORDS: dict[str, list[str]] = {
+    "concrete": [
+        "concrete", "beton", "c20", "c25", "c30", "c35", "c40",
+        "reinforced concrete", "stahlbeton", "ortbeton", "fertigbeton",
+    ],
+    "steel": [
+        "steel", "stahl", "structural steel", "stahlbau", "steel beam",
+        "steel column", "steel frame", "stahltraeger",
+    ],
+    "rebar": [
+        "rebar", "reinforcement", "bewehrung", "bewehrungsstahl",
+        "reinforcing", "armierung", "betonstahl",
+    ],
+    "masonry": [
+        "masonry", "mauerwerk", "brick", "ziegel", "block", "blockwork",
+        "kalksandstein", "porenbeton", "poroton",
+    ],
+    "timber": [
+        "timber", "holz", "wood", "lumber", "glulam", "brettschichtholz",
+        "clt", "cross laminated", "brettsperrholz",
+    ],
+    "glass": [
+        "glass", "glas", "glazing", "verglasung", "fenster", "window",
+    ],
+    "insulation": [
+        "insulation", "daemmung", "isolierung", "waermedaemmung",
+        "mineral wool", "mineralwolle", "eps", "xps", "styropor",
+    ],
+    "asphalt": [
+        "asphalt", "bitumen", "tarmac", "schwarzdecke",
+    ],
+    "aluminum": [
+        "aluminum", "aluminium", "alu",
+    ],
+    "copper": [
+        "copper", "kupfer",
+    ],
+}
+
+
+def _detect_material(description: str) -> str | None:
+    """Detect material type from a position description using keyword matching.
+
+    Args:
+        description: BOQ position description text.
+
+    Returns:
+        Material key (e.g. "concrete", "steel") or None if no match found.
+    """
+    desc_lower = description.lower()
+    for material, keywords in _MATERIAL_KEYWORDS.items():
+        for keyword in keywords:
+            if keyword in desc_lower:
+                return material
+    return None
+
+
+def _co2_rating(benchmark_per_m2: float) -> tuple[str, str]:
+    """Determine CO2 rating based on benchmark per m2.
+
+    Args:
+        benchmark_per_m2: CO2 emissions in kg per m2.
+
+    Returns:
+        Tuple of (rating letter, rating label).
+    """
+    if benchmark_per_m2 < 80:
+        return "A", "Excellent"
+    if benchmark_per_m2 < 150:
+        return "B", "Good"
+    if benchmark_per_m2 < 250:
+        return "C", "Average"
+    return "D", "Poor"
+
+
+@router.get(
+    "/boqs/{boq_id}/sustainability",
+    response_model=SustainabilityResponse,
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def get_sustainability(
+    boq_id: uuid.UUID,
+    area_m2: float = Query(default=0.0, ge=0.0, description="Project gross floor area in m2"),
+    service: BOQService = Depends(_get_service),
+) -> SustainabilityResponse:
+    """Calculate estimated CO2 emissions for a BOQ based on material types.
+
+    Analyzes each BOQ position's description to detect material types and
+    calculates CO2 emissions using standard emission factors. Returns a
+    breakdown by material with totals and an optional benchmark per m2.
+
+    Args:
+        boq_id: Target BOQ identifier.
+        area_m2: Optional project area for benchmark calculation.
+
+    Returns:
+        SustainabilityResponse with total CO2, breakdown, and rating.
+    """
+    boq_data = await service.get_boq_with_positions(boq_id)
+
+    # Accumulate CO2 per material type
+    material_totals: dict[str, float] = {}
+    material_quantities: dict[str, float] = {}
+    positions_matched = 0
+
+    for pos in boq_data.positions:
+        material = _detect_material(pos.description)
+        if material is None:
+            continue
+
+        positions_matched += 1
+        factor_info = CO2_FACTORS[material]
+        factor = float(factor_info["factor"])
+
+        co2 = pos.quantity * factor
+        material_totals[material] = material_totals.get(material, 0.0) + co2
+        material_quantities[material] = (
+            material_quantities.get(material, 0.0) + pos.quantity
+        )
+
+    total_co2_kg = sum(material_totals.values())
+    total_co2_tons = total_co2_kg / 1000.0
+
+    # Build breakdown sorted by absolute CO2 descending
+    breakdown: list[CO2MaterialBreakdown] = []
+    abs_total = sum(abs(v) for v in material_totals.values()) or 1.0
+
+    for material, co2_kg in sorted(
+        material_totals.items(), key=lambda x: abs(x[1]), reverse=True
+    ):
+        factor_info = CO2_FACTORS[material]
+        breakdown.append(
+            CO2MaterialBreakdown(
+                material=str(factor_info["material"]),
+                quantity=round(material_quantities[material], 2),
+                unit=str(factor_info["unit"]),
+                co2_kg=round(co2_kg, 1),
+                percentage=round(abs(co2_kg) / abs_total * 100, 1),
+            )
+        )
+
+    # Benchmark per m2
+    benchmark: float | None = None
+    rating = ""
+    rating_label = ""
+    if area_m2 > 0:
+        benchmark = round(total_co2_kg / area_m2, 1)
+        rating, rating_label = _co2_rating(benchmark)
+
+    return SustainabilityResponse(
+        total_co2_kg=round(total_co2_kg, 1),
+        total_co2_tons=round(total_co2_tons, 2),
+        breakdown=breakdown,
+        benchmark_per_m2=benchmark,
+        rating=rating,
+        rating_label=rating_label,
+        project_area_m2=area_m2 if area_m2 > 0 else None,
+        positions_analyzed=len(boq_data.positions),
+        positions_matched=positions_matched,
+    )

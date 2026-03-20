@@ -11,8 +11,10 @@ import { AssembliesPage, AssemblyEditorPage, CreateAssemblyPage } from '@/featur
 import { ValidationPage } from '@/features/validation';
 import { SchedulePage } from '@/features/schedule';
 import { CostModelPage } from '@/features/costmodel';
+import { TakeoffPage } from '@/features/takeoff';
 import { TenderingPage } from '@/features/tendering';
 import { ReportsPage } from '@/features/reports';
+import { SustainabilityPage } from '@/features/sustainability';
 import { ModulesPage } from '@/features/modules';
 import { SettingsPage } from '@/features/settings';
 import { QuickEstimatePage } from '@/features/ai';
@@ -114,11 +116,15 @@ export default function App() {
 
         <Route path="/validation" element={<P title="Validation"><ValidationPage /></P>} />
 
+        <Route path="/takeoff" element={<P title="PDF Takeoff"><TakeoffPage /></P>} />
+
         <Route path="/schedule" element={<P title="4D Schedule"><SchedulePage /></P>} />
 
         <Route path="/5d" element={<P title="5D Cost Model"><CostModelPage /></P>} />
 
         <Route path="/reports" element={<P title="Reports"><ReportsPage /></P>} />
+
+        <Route path="/sustainability" element={<P title="Sustainability"><SustainabilityPage /></P>} />
 
         <Route path="/tendering" element={<P title="Tendering"><TenderingPage /></P>} />
 
