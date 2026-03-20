@@ -1,10 +1,11 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Search, Copy, Check, Database, ChevronDown, Upload } from 'lucide-react';
+import { Search, Copy, Check, Database, ChevronDown, Upload, Download, Loader2 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Skeleton } from '@/shared/ui';
 import { apiGet } from '@/shared/lib/api';
+import { useToastStore } from '@/stores/useToastStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -23,6 +24,42 @@ interface CostSearchResponse {
   total: number;
   limit: number;
   offset: number;
+}
+
+/* ── Export helper ─────────────────────────────────────────────────────── */
+
+const TOKEN_KEY = 'oe_access_token';
+
+async function downloadExcelExport(): Promise<void> {
+  const token = localStorage.getItem(TOKEN_KEY);
+  const headers: Record<string, string> = { Accept: 'application/octet-stream' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch('/api/v1/costs/export/excel', { method: 'GET', headers });
+  if (!response.ok) {
+    let detail = 'Export failed';
+    try {
+      const body = await response.json();
+      detail = body.detail || detail;
+    } catch {
+      // ignore parse error
+    }
+    throw new Error(detail);
+  }
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const disposition = response.headers.get('Content-Disposition');
+  const filename = disposition?.match(/filename="?(.+)"?/)?.[1] || 'cost_database_export.xlsx';
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 /* ── Constants ─────────────────────────────────────────────────────────── */
@@ -48,6 +85,7 @@ function buildSearchUrl(query: string, unit: string, source: string, offset: num
 export function CostsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const addToast = useToastStore((s) => s.addToast);
 
   const [query, setQuery] = useState('');
   const [unit, setUnit] = useState('');
@@ -61,6 +99,33 @@ export function CostsPage() {
     queryKey: ['costs', query, unit, source, offset],
     queryFn: () => apiGet<CostSearchResponse>(searchUrl),
     placeholderData: (prev) => prev,
+  });
+
+  // Query total items count (independent of current search filters)
+  const { data: totalData } = useQuery({
+    queryKey: ['costs', 'total-count'],
+    queryFn: () => apiGet<CostSearchResponse>('/v1/costs/?limit=1'),
+    retry: false,
+  });
+
+  const totalItemsInDb = totalData?.total ?? 0;
+
+  const exportMutation = useMutation({
+    mutationFn: downloadExcelExport,
+    onSuccess: () => {
+      addToast({
+        type: 'success',
+        title: t('costs.export_success', { defaultValue: 'Export complete' }),
+        message: t('costs.export_success_msg', { defaultValue: 'Excel file downloaded.' }),
+      });
+    },
+    onError: (err: Error) => {
+      addToast({
+        type: 'error',
+        title: t('costs.export_failed', { defaultValue: 'Export failed' }),
+        message: err.message,
+      });
+    },
   });
 
   const items = data?.items ?? [];
@@ -110,20 +175,39 @@ export function CostsPage() {
       {/* Header */}
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-content-primary">{t('costs.title')}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-content-primary">{t('costs.title')}</h1>
+            {totalItemsInDb > 0 && (
+              <Badge variant="blue" size="sm">
+                {totalItemsInDb.toLocaleString()} {t('costs.items', 'items')}
+              </Badge>
+            )}
+          </div>
           <p className="mt-1 text-sm text-content-secondary">
             {total > 0
               ? `${total.toLocaleString()} ${t('costs.results_found', 'results found')}`
               : t('costs.search_hint', 'Search cost items by description or code')}
           </p>
         </div>
-        <Button
-          variant="secondary"
-          icon={<Upload size={16} />}
-          onClick={() => navigate('/costs/import')}
-        >
-          {t('costs.import_database', { defaultValue: 'Import Database' })}
-        </Button>
+        <div className="flex items-center gap-2">
+          {totalItemsInDb > 0 && (
+            <Button
+              variant="secondary"
+              icon={exportMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+              onClick={() => exportMutation.mutate()}
+              disabled={exportMutation.isPending}
+            >
+              {t('costs.export', { defaultValue: 'Export' })}
+            </Button>
+          )}
+          <Button
+            variant="primary"
+            icon={<Upload size={16} />}
+            onClick={() => navigate('/costs/import')}
+          >
+            {t('costs.import_database', { defaultValue: 'Import' })}
+          </Button>
+        </div>
       </div>
 
       {/* Search & Filters */}
