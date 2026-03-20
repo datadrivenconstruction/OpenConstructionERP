@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect, type DragEvent, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -11,9 +11,12 @@ import {
   AlertTriangle,
   Loader2,
   Database,
+  Download,
+  Trash2,
 } from 'lucide-react';
 import { Button, Card, Badge } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
+import { apiGet, apiDelete } from '@/shared/lib/api';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -26,6 +29,45 @@ interface ImportResult {
     data: Record<string, string>;
   }>;
   total_rows: number;
+}
+
+interface CostSearchResponse {
+  items: unknown[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+// ── Loaded databases localStorage helper ────────────────────────────────────
+
+const LOADED_DBS_KEY = 'oe_loaded_databases';
+
+function getLoadedDatabases(): string[] {
+  try {
+    const raw = localStorage.getItem(LOADED_DBS_KEY);
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function addLoadedDatabase(dbId: string): void {
+  try {
+    const current = getLoadedDatabases();
+    if (!current.includes(dbId)) {
+      localStorage.setItem(LOADED_DBS_KEY, JSON.stringify([...current, dbId]));
+    }
+  } catch {
+    // Storage unavailable — ignore.
+  }
+}
+
+function clearLoadedDatabases(): void {
+  try {
+    localStorage.removeItem(LOADED_DBS_KEY);
+  } catch {
+    // Storage unavailable — ignore.
+  }
 }
 
 // ── API helper for file upload ───────────────────────────────────────────────
@@ -126,7 +168,7 @@ function MiniFlag({ code }: { code: string }) {
 
 function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
   const [loading, setLoading] = useState<string | null>(null);
-  const [loaded, setLoaded] = useState<Set<string>>(new Set());
+  const [loaded, setLoaded] = useState<Set<string>>(() => new Set(getLoadedDatabases()));
   const [result, setResult] = useState<{ id: string; imported: number; skipped: number; file: string } | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [log, setLog] = useState<string[]>([]);
@@ -159,6 +201,7 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
       if (res.ok) {
         const data = await res.json();
         setLoaded((prev) => new Set(prev).add(db.id));
+        addLoadedDatabase(db.id);
         setResult({ id: db.id, imported: data.imported ?? 0, skipped: data.skipped ?? 0, file: data.source_file ?? '' });
         setLog((prev) => [
           ...prev,
@@ -289,6 +332,201 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
         </div>
       )}
     </div>
+  );
+}
+
+// ── Export Excel helper ──────────────────────────────────────────────────────
+
+async function downloadExcelExport(): Promise<void> {
+  const token = localStorage.getItem(TOKEN_KEY);
+  const headers: Record<string, string> = { Accept: 'application/octet-stream' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch('/api/v1/costs/export/excel', { method: 'GET', headers });
+  if (!response.ok) {
+    let detail = 'Export failed';
+    try {
+      const body = await response.json();
+      detail = body.detail || detail;
+    } catch {
+      // ignore parse error
+    }
+    throw new Error(detail);
+  }
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const disposition = response.headers.get('Content-Disposition');
+  const filename = disposition?.match(/filename="?(.+)"?/)?.[1] || 'cost_database_export.xlsx';
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ── Loaded Databases Section ────────────────────────────────────────────────
+
+function LoadedDatabasesSection() {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+
+  // Check if database has any items
+  const { data: costData } = useQuery({
+    queryKey: ['costs', '', '', '', 0, 'check'],
+    queryFn: () => apiGet<CostSearchResponse>('/v1/costs/?limit=1'),
+    retry: false,
+  });
+
+  const totalItems = costData?.total ?? 0;
+  const loadedDbs = getLoadedDatabases();
+  const hasData = totalItems > 0;
+
+  // Export mutation
+  const exportMutation = useMutation({
+    mutationFn: downloadExcelExport,
+    onSuccess: () => {
+      addToast({
+        type: 'success',
+        title: t('costs.export_success', { defaultValue: 'Export complete' }),
+        message: t('costs.export_success_msg', { defaultValue: 'Excel file downloaded.' }),
+      });
+    },
+    onError: (err: Error) => {
+      addToast({
+        type: 'error',
+        title: t('costs.export_failed', { defaultValue: 'Export failed' }),
+        message: err.message,
+      });
+    },
+  });
+
+  // Clear mutation
+  const clearMutation = useMutation({
+    mutationFn: () => apiDelete<{ deleted: number }>('/v1/costs/clear-database?source=cwicr'),
+    onSuccess: () => {
+      clearLoadedDatabases();
+      queryClient.invalidateQueries({ queryKey: ['costs'] });
+      setShowClearConfirm(false);
+      addToast({
+        type: 'success',
+        title: t('costs.clear_success', { defaultValue: 'Database cleared' }),
+        message: t('costs.clear_success_msg', { defaultValue: 'All CWICR items have been removed.' }),
+      });
+    },
+    onError: (err: Error) => {
+      addToast({
+        type: 'error',
+        title: t('costs.clear_failed', { defaultValue: 'Clear failed' }),
+        message: err.message,
+      });
+    },
+  });
+
+  if (!hasData && loadedDbs.length === 0) {
+    return null;
+  }
+
+  return (
+    <Card className="mb-6 animate-card-in" padding="none">
+      <div className="px-6 py-5">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-sm font-semibold text-content-primary">
+              {t('costs.loaded_databases', { defaultValue: 'Loaded Databases' })}
+            </h3>
+            <p className="text-xs text-content-tertiary mt-0.5">
+              {totalItems > 0
+                ? `${totalItems.toLocaleString()} ${t('costs.items_in_database', { defaultValue: 'items in database' })}`
+                : t('costs.no_items', { defaultValue: 'No items loaded' })}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            {hasData && (
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<Download size={14} />}
+                onClick={() => exportMutation.mutate()}
+                loading={exportMutation.isPending}
+              >
+                {t('costs.export_database', { defaultValue: 'Export Excel' })}
+              </Button>
+            )}
+            {hasData && (
+              <Button
+                variant="danger"
+                size="sm"
+                icon={<Trash2 size={14} />}
+                onClick={() => setShowClearConfirm(true)}
+                loading={clearMutation.isPending}
+              >
+                {t('costs.clear_database', { defaultValue: 'Clear Database' })}
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Show which CWICR databases are loaded */}
+        {loadedDbs.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {loadedDbs.map((dbId) => {
+              const db = CWICR_DATABASES.find((d) => d.id === dbId);
+              if (!db) return null;
+              return (
+                <div
+                  key={dbId}
+                  className="flex items-center gap-2 rounded-lg border border-semantic-success/30 bg-semantic-success-bg/40 px-3 py-1.5"
+                >
+                  <MiniFlag code={db.flagId} />
+                  <span className="text-xs font-medium text-content-primary">{db.name}</span>
+                  <CheckCircle2 size={12} className="text-semantic-success" />
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Clear confirmation dialog */}
+        {showClearConfirm && (
+          <div className="mt-4 rounded-xl border border-semantic-error/20 bg-semantic-error-bg/30 p-4">
+            <p className="text-sm font-medium text-semantic-error mb-1">
+              {t('costs.clear_confirm_title', { defaultValue: 'Clear all CWICR data?' })}
+            </p>
+            <p className="text-xs text-content-secondary mb-3">
+              {t('costs.clear_confirm_msg', {
+                defaultValue:
+                  'This will permanently remove all CWICR cost items from the database. You can re-import them later.',
+              })}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => clearMutation.mutate()}
+                loading={clearMutation.isPending}
+              >
+                {t('costs.clear_confirm_btn', { defaultValue: 'Yes, Clear Database' })}
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowClearConfirm(false)}
+                disabled={clearMutation.isPending}
+              >
+                {t('common.cancel', { defaultValue: 'Cancel' })}
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    </Card>
   );
 }
 
@@ -454,6 +692,9 @@ export function ImportDatabasePage() {
           <CWICRDatabaseGrid onLoadDatabase={handleFile} />
         </div>
       </Card>
+
+      {/* Loaded Databases section */}
+      <LoadedDatabasesSection />
 
       {/* Divider */}
       <div className="flex items-center gap-3 mb-6">
