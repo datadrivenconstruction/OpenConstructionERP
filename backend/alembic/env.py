@@ -16,9 +16,15 @@ from app.database import Base
 # Import all module models so they're registered with Base.metadata.
 # This is done automatically by the module loader at runtime,
 # but we need it here for autogenerate to work.
-from app.modules.users import models as _users_models  # noqa: F401
-# from app.modules.projects import models  # noqa: F401
-# from app.modules.boq import models  # noqa: F401
+from app.modules.users import models as _users  # noqa: F401
+from app.modules.projects import models as _projects  # noqa: F401
+from app.modules.boq import models as _boq  # noqa: F401
+from app.modules.costs import models as _costs  # noqa: F401
+from app.modules.assemblies import models as _asm  # noqa: F401
+from app.modules.schedule import models as _sched  # noqa: F401
+from app.modules.costmodel import models as _cm  # noqa: F401
+from app.modules.ai import models as _ai  # noqa: F401
+from app.modules.tendering import models as _tender  # noqa: F401
 
 config = context.config
 settings = get_settings()

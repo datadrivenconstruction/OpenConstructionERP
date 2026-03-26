@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crane + Equals — Variations</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1a1a2e; padding: 40px 20px; }
+  h1 { text-align: center; font-size: 28px; margin-bottom: 8px; }
+  .subtitle { text-align: center; color: #666; margin-bottom: 48px; font-size: 15px; }
+  .category { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #888; margin: 40px 0 20px; padding-left: 8px; border-left: 3px solid #2563eb; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1200px; margin: 0 auto 40px; }
+  .card { background: #fff; border-radius: 16px; padding: 32px 24px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .card .num { font-size: 11px; color: #aaa; text-align: left; margin-bottom: 12px; }
+  .card .icon { display: flex; justify-content: center; margin-bottom: 20px; }
+  .card h3 { font-size: 15px; margin-bottom: 6px; }
+  .card p { font-size: 12px; color: #888; line-height: 1.5; margin-bottom: 16px; min-height: 36px; }
+  .previews { display: flex; justify-content: center; gap: 12px; margin-bottom: 16px; }
+  .preview { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; }
+  .preview.light { background: #f8f9fa; color: #1a1a2e; }
+  .preview.dark { background: #1a1a2e; color: #fff; }
+  .preview svg { flex-shrink: 0; }
+  .preview .brand { font-weight: 400; }
+  .preview .brand b { font-weight: 700; color: #2563eb; }
+  .preview.dark .brand b { color: #60a5fa; }
+  .sizes { display: flex; justify-content: center; gap: 16px; align-items: flex-end; margin-top: 12px; }
+  .sizes .sz { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .sizes .sz span { font-size: 9px; color: #aaa; }
+
+  .finalist { border: 2px solid #2563eb; position: relative; }
+  .finalist::after { content: '★ TOP'; position: absolute; top: 12px; right: 12px; background: #2563eb; color: white; font-size: 9px; padding: 2px 8px; border-radius: 4px; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+
+<h1>Crane + Equals — Variations</h1>
+<p class="subtitle">12 вариаций концепта: кран позиционирует/строит знак равенства</p>
+
+<div style="max-width:1200px;margin:0 auto;">
+
+<!-- === CATEGORY 1: Minimal / Line Art === -->
+<div class="category">Minimal / Line Art</div>
+<div class="grid">
+
+<!-- #1 - Minimal crane silhouette with = as load -->
+<div class="card">
+  <div class="num">#1</div>
+  <div class="icon">
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+      <!-- Tower -->
+      <rect x="18" y="20" width="4" height="42" rx="1" fill="#2563eb"/>
+      <!-- Jib (horizontal arm) -->
+      <rect x="18" y="18" width="36" height="3" rx="1.5" fill="#2563eb"/>
+      <!-- Counter-jib -->
+      <rect x="8" y="18" width="12" height="3" rx="1.5" fill="#2563eb"/>
+      <!-- Counter weight -->
+      <rect x="8" y="22" width="6" height="4" rx="1" fill="#1d4ed8"/>
+      <!-- Cable -->
+      <line x1="46" y1="21" x2="46" y2="34" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="2 2"/>
+      <!-- Equals sign as the load -->
+      <rect x="38" y="36" width="16" height="3" rx="1.5" fill="#f59e0b"/>
+      <rect x="38" y="42" width="16" height="3" rx="1.5" fill="#f59e0b"/>
+      <!-- Base -->
+      <rect x="12" y="60" width="16" height="3" rx="1.5" fill="#2563eb"/>
+    </svg>
+  </div>
+  <h3>Classic Crane + Load</h3>
+  <p>Кран поднимает знак "=" как груз на тросе. Чистая линейная графика.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <rect x="18" y="20" width="4" height="42" rx="1" fill="#2563eb"/>
+        <rect x="18" y="18" width="36" height="3" rx="1.5" fill="#2563eb"/>
+        <rect x="8" y="18" width="12" height="3" rx="1.5" fill="#2563eb"/>
+        <rect x="8" y="22" width="6" height="4" rx="1" fill="#1d4ed8"/>
+        <line x1="46" y1="21" x2="46" y2="34" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="2 2"/>
+        <rect x="38" y="36" width="16" height="3" rx="1.5" fill="#f59e0b"/>
+        <rect x="38" y="42" width="16" height="3" rx="1.5" fill="#f59e0b"/>
+        <rect x="12" y="60" width="16" height="3" rx="1.5" fill="#2563eb"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <rect x="18" y="20" width="4" height="42" rx="1" fill="#60a5fa"/>
+        <rect x="18" y="18" width="36" height="3" rx="1.5" fill="#60a5fa"/>
+        <rect x="8" y="18" width="12" height="3" rx="1.5" fill="#60a5fa"/>
+        <rect x="8" y="22" width="6" height="4" rx="1" fill="#3b82f6"/>
+        <line x1="46" y1="21" x2="46" y2="34" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="2 2"/>
+        <rect x="38" y="36" width="16" height="3" rx="1.5" fill="#fbbf24"/>
+        <rect x="38" y="42" width="16" height="3" rx="1.5" fill="#fbbf24"/>
+        <rect x="12" y="60" width="16" height="3" rx="1.5" fill="#60a5fa"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+</div>
+
+<!-- #2 - Geometric crane, = integrated into arm -->
+<div class="card">
+  <div class="num">#2</div>
+  <div class="icon">
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+      <!-- Tower vertical -->
+      <rect x="20" y="16" width="4" height="46" rx="1" fill="#2563eb"/>
+      <!-- Jib arm -->
+      <rect x="24" y="16" width="30" height="3" rx="1.5" fill="#2563eb"/>
+      <!-- Equals sign IS the jib - two horizontal bars -->
+      <rect x="24" y="16" width="30" height="2.5" rx="1" fill="#2563eb"/>
+      <rect x="24" y="22" width="26" height="2.5" rx="1" fill="#2563eb"/>
+      <!-- Diagonal support -->
+      <line x1="24" y1="24.5" x2="40" y2="16" stroke="#2563eb" stroke-width="2" stroke-linecap="round"/>
+      <!-- Hook cable -->
+      <line x1="50" y1="18.5" x2="50" y2="38" stroke="#2563eb" stroke-width="1.5"/>
+      <!-- Hook -->
+      <path d="M47 38 Q47 43 50 43 Q53 43 53 38" stroke="#f59e0b" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <!-- Base cross -->
+      <rect x="12" y="60" width="20" height="3" rx="1.5" fill="#2563eb"/>
+      <!-- Small = on the hook -->
+      <rect x="44" y="46" width="12" height="2" rx="1" fill="#f59e0b"/>
+      <rect x="44" y="50" width="12" height="2" rx="1" fill="#f59e0b"/>
+    </svg>
+  </div>
+  <h3>Crane Delivers =</h3>
+  <p>Кран с реалистичной стрелой и крюком доставляет "=". Больше деталей.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <rect x="20" y="16" width="4" height="46" rx="1" fill="#2563eb"/>
+        <rect x="24" y="16" width="30" height="2.5" rx="1" fill="#2563eb"/>
+        <rect x="24" y="22" width="26" height="2.5" rx="1" fill="#2563eb"/>
+        <line x1="24" y1="24.5" x2="40" y2="16" stroke="#2563eb" stroke-width="2" stroke-linecap="round"/>
+        <line x1="50" y1="18.5" x2="50" y2="38" stroke="#2563eb" stroke-width="1.5"/>
+        <path d="M47 38 Q47 43 50 43 Q53 43 53 38" stroke="#f59e0b" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <rect x="12" y="60" width="20" height="3" rx="1.5" fill="#2563eb"/>
+        <rect x="44" y="46" width="12" height="2" rx="1" fill="#f59e0b"/>
+        <rect x="44" y="50" width="12" height="2" rx="1" fill="#f59e0b"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <rect x="20" y="16" width="4" height="46" rx="1" fill="#60a5fa"/>
+        <rect x="24" y="16" width="30" height="2.5" rx="1" fill="#60a5fa"/>
+        <rect x="24" y="22" width="26" height="2.5" rx="1" fill="#60a5fa"/>
+        <line x1="24" y1="24.5" x2="40" y2="16" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"/>
+        <line x1="50" y1="18.5" x2="50" y2="38" stroke="#60a5fa" stroke-width="1.5"/>
+        <path d="M47 38 Q47 43 50 43 Q53 43 53 38" stroke="#fbbf24" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <rect x="12" y="60" width="20" height="3" rx="1.5" fill="#60a5fa"/>
+        <rect x="44" y="46" width="12" height="2" rx="1" fill="#fbbf24"/>
+        <rect x="44" y="50" width="12" height="2" rx="1" fill="#fbbf24"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+</div>
+
+<!-- #3 - Ultra minimal: crane as single stroke + = -->
+<div class="card">
+  <div class="num">#3</div>
+  <div class="icon">
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+      <!-- Single-stroke crane: L shape -->
+      <path d="M20 62 V16 H52" stroke="#2563eb" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- Cable down -->
+      <line x1="44" y1="16" x2="44" y2="32" stroke="#2563eb" stroke-width="2" stroke-linecap="round"/>
+      <!-- Big = sign -->
+      <rect x="34" y="36" width="20" height="3.5" rx="1.75" fill="#f59e0b"/>
+      <rect x="34" y="44" width="20" height="3.5" rx="1.75" fill="#f59e0b"/>
+    </svg>
+  </div>
+  <h3>One-Stroke Crane</h3>
+  <p>Кран одной линией (L-форма) + крупный "=" снизу. Максимальная простота.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <path d="M20 62 V16 H52" stroke="#2563eb" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <line x1="44" y1="16" x2="44" y2="32" stroke="#2563eb" stroke-width="2" stroke-linecap="round"/>
+        <rect x="34" y="36" width="20" height="3.5" rx="1.75" fill="#f59e0b"/>
+        <rect x="34" y="44" width="20" height="3.5" rx="1.75" fill="#f59e0b"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <path d="M20 62 V16 H52" stroke="#60a5fa" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <line x1="44" y1="16" x2="44" y2="32" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"/>
+        <rect x="34" y="36" width="20" height="3.5" rx="1.75" fill="#fbbf24"/>
+        <rect x="34" y="44" width="20" height="3.5" rx="1.75" fill="#fbbf24"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- === CATEGORY 2: Filled / Rounded === -->
+<div class="category">Filled / Rounded Icon</div>
+<div class="grid">
+
+<!-- #4 - Rounded rect bg with crane + = -->
+<div class="card finalist">
+  <div class="num">#4</div>
+  <div class="icon">
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+      <rect width="72" height="72" rx="16" fill="#2563eb"/>
+      <!-- White crane -->
+      <rect x="18" y="18" width="3.5" height="38" rx="1" fill="white"/>
+      <!-- Jib -->
+      <rect x="18" y="16" width="32" height="3" rx="1.5" fill="white"/>
+      <!-- Counter jib -->
+      <rect x="10" y="16" width="10" height="3" rx="1.5" fill="white"/>
+      <!-- Counter weight -->
+      <rect x="10" y="20" width="5" height="3.5" rx="1" fill="rgba(255,255,255,0.6)"/>
+      <!-- Diagonal brace -->
+      <line x1="21.5" y1="19" x2="34" y2="16" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+      <!-- Cable -->
+      <line x1="42" y1="19" x2="42" y2="33" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>
+      <!-- = sign (amber/gold) -->
+      <rect x="33" y="36" width="20" height="3.5" rx="1.75" fill="#fbbf24"/>
+      <rect x="33" y="43" width="20" height="3.5" rx="1.75" fill="#fbbf24"/>
+      <!-- Base -->
+      <rect x="13" y="56" width="14" height="3" rx="1.5" fill="rgba(255,255,255,0.6)"/>
+    </svg>
+  </div>
+  <h3>Filled Blue + Gold =</h3>
+  <p>Классический app-icon формат. Кран белый на синем, "=" золотом.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <rect width="72" height="72" rx="16" fill="#2563eb"/>
+        <rect x="18" y="18" width="3.5" height="38" rx="1" fill="white"/>
+        <rect x="18" y="16" width="32" height="3" rx="1.5" fill="white"/>
+        <rect x="10" y="16" width="10" height="3" rx="1.5" fill="white"/>
+        <line x1="42" y1="19" x2="42" y2="33" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>
+        <rect x="33" y="36" width="20" height="3.5" rx="1.75" fill="#fbbf24"/>
+        <rect x="33" y="43" width="20" height="3.5" rx="1.75" fill="#fbbf24"/>
+        <rect x="13" y="56" width="14" height="3" rx="1.5" fill="rgba(255,255,255,0.6)"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <rect width="72" height="72" rx="16" fill="#2563eb"/>
+        <rect x="18" y="18" width="3.5" height="38" rx="1" fill="white"/>
+        <rect x="18" y="16" width="32" height="3" rx="1.5" fill="white"/>
+        <rect x="10" y="16" width="10" height="3" rx="1.5" fill="white"/>
+        <line x1="42" y1="19" x2="42" y2="33" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/>
+        <rect x="33" y="36" width="20" height="3.5" rx="1.75" fill="#fbbf24"/>
+        <rect x="33" y="43" width="20" height="3.5" rx="1.75" fill="#fbbf24"/>
+        <rect x="13" y="56" width="14" height="3" rx="1.5" fill="rgba(255,255,255,0.6)"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+  <div class="sizes">
+    <div class="sz">
+      <svg width="16" height="16" viewBox="0 0 72 72"><rect width="72" height="72" rx="16" fill="#2563eb"/><rect x="18" y="18" width="3.5" height="38" rx="1" fill="white"/><rect x="18" y="16" width="32" height="3" rx="1.5" fill="white"/><rect x="10" y="16" width="10" height="3" rx="1.5" fill="white"/><rect x="33" y="36" width="20" height="3.5" rx="1.75" fill="#fbbf24"/><rect x="33" y="43" width="20" height="3.5" rx="1.75" fill="#fbbf24"/></svg>
+      <span>16</span>
+    </div>
+    <div class="sz">
+      <svg width="24" height="24" viewBox="0 0 72 72"><rect width="72" height="72" rx="16" fill="#2563eb"/><rect x="18" y="18" width="3.5" height="38" rx="1" fill="white"/><rect x="18" y="16" width="32" height="3" rx="1.5" fill="white"/><rect x="10" y="16" width="10" height="3" rx="1.5" fill="white"/><line x1="42" y1="19" x2="42" y2="33" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/><rect x="33" y="36" width="20" height="3.5" rx="1.75" fill="#fbbf24"/><rect x="33" y="43" width="20" height="3.5" rx="1.75" fill="#fbbf24"/></svg>
+      <span>24</span>
+    </div>
+    <div class="sz">
+      <svg width="32" height="32" viewBox="0 0 72 72"><rect width="72" height="72" rx="16" fill="#2563eb"/><rect x="18" y="18" width="3.5" height="38" rx="1" fill="white"/><rect x="18" y="16" width="32" height="3" rx="1.5" fill="white"/><rect x="10" y="16" width="10" height="3" rx="1.5" fill="white"/><line x1="42" y1="19" x2="42" y2="33" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/><rect x="33" y="36" width="20" height="3.5" rx="1.75" fill="#fbbf24"/><rect x="33" y="43" width="20" height="3.5" rx="1.75" fill="#fbbf24"/><rect x="13" y="56" width="14" height="3" rx="1.5" fill="rgba(255,255,255,0.6)"/></svg>
+      <span>32</span>
+    </div>
+    <div class="sz">
+      <svg width="48" height="48" viewBox="0 0 72 72"><rect width="72" height="72" rx="16" fill="#2563eb"/><rect x="18" y="18" width="3.5" height="38" rx="1" fill="white"/><rect x="18" y="16" width="32" height="3" rx="1.5" fill="white"/><rect x="10" y="16" width="10" height="3" rx="1.5" fill="white"/><rect x="10" y="20" width="5" height="3.5" rx="1" fill="rgba(255,255,255,0.6)"/><line x1="21.5" y1="19" x2="34" y2="16" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/><line x1="42" y1="19" x2="42" y2="33" stroke="rgba(255,255,255,0.7)" stroke-width="1.5"/><rect x="33" y="36" width="20" height="3.5" rx="1.75" fill="#fbbf24"/><rect x="33" y="43" width="20" height="3.5" rx="1.75" fill="#fbbf24"/><rect x="13" y="56" width="14" height="3" rx="1.5" fill="rgba(255,255,255,0.6)"/></svg>
+      <span>48</span>
+    </div>
+  </div>
+</div>
+
+<!-- #5 - Gradient fill, crane + = more integrated -->
+<div class="card">
+  <div class="num">#5</div>
+  <div class="icon">
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+      <defs>
+        <linearGradient id="g5" x1="0" y1="0" x2="72" y2="72">
+          <stop offset="0%" stop-color="#2563eb"/>
+          <stop offset="100%" stop-color="#7c3aed"/>
+        </linearGradient>
+      </defs>
+      <rect width="72" height="72" rx="16" fill="url(#g5)"/>
+      <!-- Crane as clean geometric shape -->
+      <path d="M22 58 V18 H48" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- Diagonal tension line -->
+      <line x1="22" y1="26" x2="38" y2="18" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+      <!-- Cable + hook -->
+      <line x1="42" y1="18" x2="42" y2="30" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"/>
+      <!-- = as the payload, slightly bigger -->
+      <rect x="32" y="34" width="22" height="4" rx="2" fill="white" opacity="0.95"/>
+      <rect x="32" y="42" width="22" height="4" rx="2" fill="white" opacity="0.95"/>
+      <!-- Base struts -->
+      <line x1="16" y1="58" x2="22" y2="58" stroke="rgba(255,255,255,0.5)" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="22" y1="58" x2="28" y2="58" stroke="rgba(255,255,255,0.5)" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <h3>Gradient + White =</h3>
+  <p>Blue-to-purple gradient. Кран одной линией, "=" белый и крупный.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <defs><linearGradient id="g5s" x1="0" y1="0" x2="72" y2="72"><stop offset="0%" stop-color="#2563eb"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient></defs>
+        <rect width="72" height="72" rx="16" fill="url(#g5s)"/>
+        <path d="M22 58 V18 H48" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <line x1="42" y1="18" x2="42" y2="30" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"/>
+        <rect x="32" y="34" width="22" height="4" rx="2" fill="white" opacity="0.95"/>
+        <rect x="32" y="42" width="22" height="4" rx="2" fill="white" opacity="0.95"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <defs><linearGradient id="g5d" x1="0" y1="0" x2="72" y2="72"><stop offset="0%" stop-color="#2563eb"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient></defs>
+        <rect width="72" height="72" rx="16" fill="url(#g5d)"/>
+        <path d="M22 58 V18 H48" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <line x1="42" y1="18" x2="42" y2="30" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"/>
+        <rect x="32" y="34" width="22" height="4" rx="2" fill="white" opacity="0.95"/>
+        <rect x="32" y="42" width="22" height="4" rx="2" fill="white" opacity="0.95"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+</div>
+
+<!-- #6 - Dark background, glowing = -->
+<div class="card">
+  <div class="num">#6</div>
+  <div class="icon">
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+      <rect width="72" height="72" rx="16" fill="#0f172a"/>
+      <defs>
+        <filter id="glow6">
+          <feGaussianBlur stdDeviation="2" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <!-- Crane in subtle blue -->
+      <rect x="18" y="18" width="3" height="38" rx="1" fill="#334155"/>
+      <rect x="18" y="16" width="30" height="2.5" rx="1" fill="#334155"/>
+      <rect x="10" y="16" width="10" height="2.5" rx="1" fill="#334155"/>
+      <line x1="42" y1="18.5" x2="42" y2="30" stroke="#475569" stroke-width="1"/>
+      <!-- Glowing = -->
+      <rect x="33" y="34" width="20" height="3.5" rx="1.75" fill="#3b82f6" filter="url(#glow6)"/>
+      <rect x="33" y="42" width="20" height="3.5" rx="1.75" fill="#3b82f6" filter="url(#glow6)"/>
+      <!-- Base -->
+      <rect x="13" y="56" width="14" height="2.5" rx="1" fill="#334155"/>
+    </svg>
+  </div>
+  <h3>Dark + Glow Equals</h3>
+  <p>Тёмный фон, кран в приглушённых тонах, "=" светится голубым.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <rect width="72" height="72" rx="16" fill="#0f172a"/>
+        <rect x="18" y="18" width="3" height="38" rx="1" fill="#334155"/><rect x="18" y="16" width="30" height="2.5" rx="1" fill="#334155"/><rect x="10" y="16" width="10" height="2.5" rx="1" fill="#334155"/>
+        <rect x="33" y="34" width="20" height="3.5" rx="1.75" fill="#3b82f6"/><rect x="33" y="42" width="20" height="3.5" rx="1.75" fill="#3b82f6"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <rect width="72" height="72" rx="16" fill="#0f172a"/>
+        <rect x="18" y="18" width="3" height="38" rx="1" fill="#334155"/><rect x="18" y="16" width="30" height="2.5" rx="1" fill="#334155"/><rect x="10" y="16" width="10" height="2.5" rx="1" fill="#334155"/>
+        <rect x="33" y="34" width="20" height="3.5" rx="1.75" fill="#60a5fa"/><rect x="33" y="42" width="20" height="3.5" rx="1.75" fill="#60a5fa"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- === CATEGORY 3: Stylized / Creative === -->
+<div class="category">Stylized / Creative</div>
+<div class="grid">
+
+<!-- #7 - Crane arm forms top bar of =, jib = second bar -->
+<div class="card finalist">
+  <div class="num">#7</div>
+  <div class="icon">
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+      <!-- The crane ARM itself is the top line of = -->
+      <!-- Tower -->
+      <rect x="14" y="14" width="4" height="48" rx="2" fill="#2563eb"/>
+      <!-- Top bar (= first line) = the jib arm, extends right and is thick -->
+      <rect x="14" y="14" width="44" height="5" rx="2.5" fill="#2563eb"/>
+      <!-- Second bar (= second line) shorter, like a lower boom -->
+      <rect x="14" y="26" width="36" height="5" rx="2.5" fill="#f59e0b"/>
+      <!-- Diagonal tie connecting the two bars -->
+      <line x1="18" y1="19" x2="40" y2="26" stroke="rgba(37,99,235,0.3)" stroke-width="1.5"/>
+      <!-- Cable from tip -->
+      <line x1="52" y1="19" x2="52" y2="42" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="3 2"/>
+      <!-- Small hook shape -->
+      <path d="M49 42 Q49 47 52 47 Q55 47 55 42" stroke="#2563eb" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <!-- Base -->
+      <rect x="8" y="60" width="16" height="4" rx="2" fill="#2563eb"/>
+    </svg>
+  </div>
+  <h3>Arm IS The Equals</h3>
+  <p>Стрела крана = верхняя линия "=", нижний бум = вторая. Двойное прочтение в самой конструкции.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <rect x="14" y="14" width="4" height="48" rx="2" fill="#2563eb"/>
+        <rect x="14" y="14" width="44" height="5" rx="2.5" fill="#2563eb"/>
+        <rect x="14" y="26" width="36" height="5" rx="2.5" fill="#f59e0b"/>
+        <line x1="52" y1="19" x2="52" y2="42" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="3 2"/>
+        <path d="M49 42 Q49 47 52 47 Q55 47 55 42" stroke="#2563eb" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <rect x="8" y="60" width="16" height="4" rx="2" fill="#2563eb"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <rect x="14" y="14" width="4" height="48" rx="2" fill="#60a5fa"/>
+        <rect x="14" y="14" width="44" height="5" rx="2.5" fill="#60a5fa"/>
+        <rect x="14" y="26" width="36" height="5" rx="2.5" fill="#fbbf24"/>
+        <line x1="52" y1="19" x2="52" y2="42" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="3 2"/>
+        <path d="M49 42 Q49 47 52 47 Q55 47 55 42" stroke="#60a5fa" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <rect x="8" y="60" width="16" height="4" rx="2" fill="#60a5fa"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+  <div class="sizes">
+    <div class="sz">
+      <svg width="16" height="16" viewBox="0 0 72 72"><rect x="14" y="14" width="4" height="48" rx="2" fill="#2563eb"/><rect x="14" y="14" width="44" height="5" rx="2.5" fill="#2563eb"/><rect x="14" y="26" width="36" height="5" rx="2.5" fill="#f59e0b"/><rect x="8" y="60" width="16" height="4" rx="2" fill="#2563eb"/></svg>
+      <span>16</span>
+    </div>
+    <div class="sz">
+      <svg width="24" height="24" viewBox="0 0 72 72"><rect x="14" y="14" width="4" height="48" rx="2" fill="#2563eb"/><rect x="14" y="14" width="44" height="5" rx="2.5" fill="#2563eb"/><rect x="14" y="26" width="36" height="5" rx="2.5" fill="#f59e0b"/><line x1="52" y1="19" x2="52" y2="42" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="3 2"/><rect x="8" y="60" width="16" height="4" rx="2" fill="#2563eb"/></svg>
+      <span>24</span>
+    </div>
+    <div class="sz">
+      <svg width="32" height="32" viewBox="0 0 72 72"><rect x="14" y="14" width="4" height="48" rx="2" fill="#2563eb"/><rect x="14" y="14" width="44" height="5" rx="2.5" fill="#2563eb"/><rect x="14" y="26" width="36" height="5" rx="2.5" fill="#f59e0b"/><line x1="52" y1="19" x2="52" y2="42" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="3 2"/><path d="M49 42 Q49 47 52 47 Q55 47 55 42" stroke="#2563eb" stroke-width="2" fill="none" stroke-linecap="round"/><rect x="8" y="60" width="16" height="4" rx="2" fill="#2563eb"/></svg>
+      <span>32</span>
+    </div>
+    <div class="sz">
+      <svg width="48" height="48" viewBox="0 0 72 72"><rect x="14" y="14" width="4" height="48" rx="2" fill="#2563eb"/><rect x="14" y="14" width="44" height="5" rx="2.5" fill="#2563eb"/><rect x="14" y="26" width="36" height="5" rx="2.5" fill="#f59e0b"/><line x1="18" y1="19" x2="40" y2="26" stroke="rgba(37,99,235,0.3)" stroke-width="1.5"/><line x1="52" y1="19" x2="52" y2="42" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="3 2"/><path d="M49 42 Q49 47 52 47 Q55 47 55 42" stroke="#2563eb" stroke-width="2" fill="none" stroke-linecap="round"/><rect x="8" y="60" width="16" height="4" rx="2" fill="#2563eb"/></svg>
+      <span>48</span>
+    </div>
+  </div>
+</div>
+
+<!-- #8 - Crane building a wall of = signs (stacking) -->
+<div class="card">
+  <div class="num">#8</div>
+  <div class="icon">
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+      <!-- Crane -->
+      <rect x="12" y="12" width="3" height="50" rx="1" fill="#2563eb"/>
+      <rect x="12" y="11" width="28" height="2.5" rx="1" fill="#2563eb"/>
+      <rect x="6" y="11" width="8" height="2.5" rx="1" fill="#2563eb"/>
+      <line x1="36" y1="13" x2="36" y2="24" stroke="#2563eb" stroke-width="1"/>
+      <!-- Stack of = signs like building blocks -->
+      <!-- Bottom = -->
+      <rect x="28" y="52" width="30" height="3" rx="1.5" fill="#2563eb"/>
+      <rect x="28" y="58" width="30" height="3" rx="1.5" fill="#2563eb"/>
+      <!-- Middle = -->
+      <rect x="32" y="38" width="24" height="3" rx="1.5" fill="#3b82f6"/>
+      <rect x="32" y="44" width="24" height="3" rx="1.5" fill="#3b82f6"/>
+      <!-- Top = (being placed, with crane) -->
+      <rect x="28" y="26" width="18" height="2.5" rx="1.25" fill="#f59e0b"/>
+      <rect x="28" y="31" width="18" height="2.5" rx="1.25" fill="#f59e0b"/>
+      <!-- Base -->
+      <rect x="6" y="60" width="14" height="3" rx="1.5" fill="#1d4ed8"/>
+    </svg>
+  </div>
+  <h3>Stacking Equals</h3>
+  <p>Кран укладывает "=" как строительные блоки. Стройка = подсчёт.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <rect x="12" y="12" width="3" height="50" rx="1" fill="#2563eb"/><rect x="12" y="11" width="28" height="2.5" rx="1" fill="#2563eb"/><rect x="6" y="11" width="8" height="2.5" rx="1" fill="#2563eb"/>
+        <rect x="28" y="52" width="30" height="3" rx="1.5" fill="#2563eb"/><rect x="28" y="58" width="30" height="3" rx="1.5" fill="#2563eb"/>
+        <rect x="32" y="38" width="24" height="3" rx="1.5" fill="#3b82f6"/><rect x="32" y="44" width="24" height="3" rx="1.5" fill="#3b82f6"/>
+        <rect x="28" y="26" width="18" height="2.5" rx="1.25" fill="#f59e0b"/><rect x="28" y="31" width="18" height="2.5" rx="1.25" fill="#f59e0b"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <rect x="12" y="12" width="3" height="50" rx="1" fill="#60a5fa"/><rect x="12" y="11" width="28" height="2.5" rx="1" fill="#60a5fa"/><rect x="6" y="11" width="8" height="2.5" rx="1" fill="#60a5fa"/>
+        <rect x="28" y="52" width="30" height="3" rx="1.5" fill="#60a5fa"/><rect x="28" y="58" width="30" height="3" rx="1.5" fill="#60a5fa"/>
+        <rect x="32" y="38" width="24" height="3" rx="1.5" fill="#3b82f6"/><rect x="32" y="44" width="24" height="3" rx="1.5" fill="#3b82f6"/>
+        <rect x="28" y="26" width="18" height="2.5" rx="1.25" fill="#fbbf24"/><rect x="28" y="31" width="18" height="2.5" rx="1.25" fill="#fbbf24"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+</div>
+
+<!-- #9 - Crane hook = bottom of equals, minimal -->
+<div class="card">
+  <div class="num">#9</div>
+  <div class="icon">
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+      <!-- Minimal T crane -->
+      <rect x="20" y="20" width="4" height="40" rx="2" fill="#2563eb"/>
+      <rect x="10" y="18" width="44" height="4" rx="2" fill="#2563eb"/>
+      <!-- Cable -->
+      <line x1="48" y1="22" x2="48" y2="34" stroke="#94a3b8" stroke-width="1.5"/>
+      <!-- = sign hanging, connected to cable -->
+      <rect x="36" y="36" width="24" height="4" rx="2" fill="#2563eb"/>
+      <rect x="36" y="44" width="24" height="4" rx="2" fill="#f59e0b"/>
+      <!-- Small triangle hook connector -->
+      <polygon points="46,34 48,36 50,34" fill="#94a3b8"/>
+    </svg>
+  </div>
+  <h3>T-Crane + Hanging =</h3>
+  <p>T-образный кран, "=" висит на тросе. Верхняя линия синяя, нижняя золотая.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <rect x="20" y="20" width="4" height="40" rx="2" fill="#2563eb"/><rect x="10" y="18" width="44" height="4" rx="2" fill="#2563eb"/>
+        <line x1="48" y1="22" x2="48" y2="34" stroke="#94a3b8" stroke-width="1.5"/>
+        <rect x="36" y="36" width="24" height="4" rx="2" fill="#2563eb"/><rect x="36" y="44" width="24" height="4" rx="2" fill="#f59e0b"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <rect x="20" y="20" width="4" height="40" rx="2" fill="#60a5fa"/><rect x="10" y="18" width="44" height="4" rx="2" fill="#60a5fa"/>
+        <line x1="48" y1="22" x2="48" y2="34" stroke="#64748b" stroke-width="1.5"/>
+        <rect x="36" y="36" width="24" height="4" rx="2" fill="#60a5fa"/><rect x="36" y="44" width="24" height="4" rx="2" fill="#fbbf24"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- === CATEGORY 4: Abstract / Symbolic === -->
+<div class="category">Abstract / Symbolic</div>
+<div class="grid">
+
+<!-- #10 - Crane silhouette in circle badge -->
+<div class="card">
+  <div class="num">#10</div>
+  <div class="icon">
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+      <!-- Circle -->
+      <circle cx="36" cy="36" r="32" fill="#2563eb"/>
+      <!-- Simplified crane white -->
+      <rect x="22" y="20" width="3" height="30" rx="1" fill="white"/>
+      <rect x="22" y="18" width="24" height="2.5" rx="1" fill="white"/>
+      <rect x="14" y="18" width="10" height="2.5" rx="1" fill="white"/>
+      <line x1="42" y1="20.5" x2="42" y2="30" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
+      <!-- = in white -->
+      <rect x="34" y="32" width="18" height="3" rx="1.5" fill="rgba(255,255,255,0.95)"/>
+      <rect x="34" y="38" width="18" height="3" rx="1.5" fill="#fbbf24"/>
+      <!-- Base -->
+      <rect x="17" y="50" width="12" height="2.5" rx="1" fill="rgba(255,255,255,0.5)"/>
+    </svg>
+  </div>
+  <h3>Circle Badge</h3>
+  <p>Круглый бейдж. Кран + "=" внутри. Работает как аватар/фавикон.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <circle cx="36" cy="36" r="32" fill="#2563eb"/>
+        <rect x="22" y="20" width="3" height="30" rx="1" fill="white"/><rect x="22" y="18" width="24" height="2.5" rx="1" fill="white"/><rect x="14" y="18" width="10" height="2.5" rx="1" fill="white"/>
+        <rect x="34" y="32" width="18" height="3" rx="1.5" fill="white"/><rect x="34" y="38" width="18" height="3" rx="1.5" fill="#fbbf24"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <circle cx="36" cy="36" r="32" fill="#2563eb"/>
+        <rect x="22" y="20" width="3" height="30" rx="1" fill="white"/><rect x="22" y="18" width="24" height="2.5" rx="1" fill="white"/><rect x="14" y="18" width="10" height="2.5" rx="1" fill="white"/>
+        <rect x="34" y="32" width="18" height="3" rx="1.5" fill="white"/><rect x="34" y="38" width="18" height="3" rx="1.5" fill="#fbbf24"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+</div>
+
+<!-- #11 - Perspective / isometric crane with = -->
+<div class="card">
+  <div class="num">#11</div>
+  <div class="icon">
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+      <!-- Isometric-ish crane -->
+      <path d="M24 58 L24 16 L20 20 L20 58 Z" fill="#1d4ed8"/>
+      <path d="M24 16 L54 16 L50 20 L20 20 Z" fill="#2563eb"/>
+      <!-- Cable -->
+      <line x1="48" y1="16" x2="48" y2="30" stroke="#93c5fd" stroke-width="1.5"/>
+      <!-- 3D-ish = sign -->
+      <path d="M36 34 L56 34 L54 37 L34 37 Z" fill="#2563eb"/>
+      <path d="M36 42 L56 42 L54 45 L34 45 Z" fill="#f59e0b"/>
+      <!-- Base -->
+      <path d="M16 58 L30 58 L28 61 L14 61 Z" fill="#1e40af"/>
+    </svg>
+  </div>
+  <h3>Isometric Crane</h3>
+  <p>Изометрическая проекция. 3D-эффект, = с перспективой.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <path d="M24 58 L24 16 L20 20 L20 58 Z" fill="#1d4ed8"/><path d="M24 16 L54 16 L50 20 L20 20 Z" fill="#2563eb"/>
+        <line x1="48" y1="16" x2="48" y2="30" stroke="#93c5fd" stroke-width="1.5"/>
+        <path d="M36 34 L56 34 L54 37 L34 37 Z" fill="#2563eb"/><path d="M36 42 L56 42 L54 45 L34 45 Z" fill="#f59e0b"/>
+        <path d="M16 58 L30 58 L28 61 L14 61 Z" fill="#1e40af"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <path d="M24 58 L24 16 L20 20 L20 58 Z" fill="#3b82f6"/><path d="M24 16 L54 16 L50 20 L20 20 Z" fill="#60a5fa"/>
+        <line x1="48" y1="16" x2="48" y2="30" stroke="#93c5fd" stroke-width="1.5"/>
+        <path d="M36 34 L56 34 L54 37 L34 37 Z" fill="#60a5fa"/><path d="M36 42 L56 42 L54 45 L34 45 Z" fill="#fbbf24"/>
+        <path d="M16 58 L30 58 L28 61 L14 61 Z" fill="#3b82f6"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+</div>
+
+<!-- #12 - Crane + = in rounded square, monoline -->
+<div class="card finalist">
+  <div class="num">#12</div>
+  <div class="icon">
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+      <rect x="2" y="2" width="68" height="68" rx="16" stroke="#2563eb" stroke-width="3" fill="none"/>
+      <!-- Clean crane -->
+      <rect x="18" y="18" width="3.5" height="36" rx="1.5" fill="#2563eb"/>
+      <!-- T-top -->
+      <rect x="10" y="16" width="40" height="3.5" rx="1.75" fill="#2563eb"/>
+      <!-- Diagonal brace -->
+      <line x1="21.5" y1="22" x2="35" y2="16" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- Cable -->
+      <line x1="44" y1="19.5" x2="44" y2="32" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="2 2"/>
+      <!-- Equals - the answer -->
+      <rect x="32" y="35" width="24" height="4" rx="2" fill="#2563eb"/>
+      <rect x="32" y="43" width="24" height="4" rx="2" fill="#f59e0b"/>
+      <!-- Base -->
+      <rect x="12" y="54" width="14" height="3.5" rx="1.5" fill="#93c5fd"/>
+    </svg>
+  </div>
+  <h3>Outlined Square Badge</h3>
+  <p>Контурный квадрат как рамка. Кран + двухцветный "=". Чистый и современный.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <rect x="2" y="2" width="68" height="68" rx="16" stroke="#2563eb" stroke-width="3" fill="none"/>
+        <rect x="18" y="18" width="3.5" height="36" rx="1.5" fill="#2563eb"/><rect x="10" y="16" width="40" height="3.5" rx="1.75" fill="#2563eb"/>
+        <line x1="44" y1="19.5" x2="44" y2="32" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="2 2"/>
+        <rect x="32" y="35" width="24" height="4" rx="2" fill="#2563eb"/><rect x="32" y="43" width="24" height="4" rx="2" fill="#f59e0b"/>
+        <rect x="12" y="54" width="14" height="3.5" rx="1.5" fill="#93c5fd"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="24" height="24" viewBox="0 0 72 72" fill="none">
+        <rect x="2" y="2" width="68" height="68" rx="16" stroke="#60a5fa" stroke-width="3" fill="none"/>
+        <rect x="18" y="18" width="3.5" height="36" rx="1.5" fill="#60a5fa"/><rect x="10" y="16" width="40" height="3.5" rx="1.75" fill="#60a5fa"/>
+        <line x1="44" y1="19.5" x2="44" y2="32" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="2 2"/>
+        <rect x="32" y="35" width="24" height="4" rx="2" fill="#60a5fa"/><rect x="32" y="43" width="24" height="4" rx="2" fill="#fbbf24"/>
+        <rect x="12" y="54" width="14" height="3.5" rx="1.5" fill="#3b82f6"/>
+      </svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+  <div class="sizes">
+    <div class="sz">
+      <svg width="16" height="16" viewBox="0 0 72 72"><rect x="2" y="2" width="68" height="68" rx="16" stroke="#2563eb" stroke-width="3" fill="none"/><rect x="18" y="18" width="3.5" height="36" rx="1.5" fill="#2563eb"/><rect x="10" y="16" width="40" height="3.5" rx="1.75" fill="#2563eb"/><rect x="32" y="35" width="24" height="4" rx="2" fill="#2563eb"/><rect x="32" y="43" width="24" height="4" rx="2" fill="#f59e0b"/></svg>
+      <span>16</span>
+    </div>
+    <div class="sz">
+      <svg width="24" height="24" viewBox="0 0 72 72"><rect x="2" y="2" width="68" height="68" rx="16" stroke="#2563eb" stroke-width="3" fill="none"/><rect x="18" y="18" width="3.5" height="36" rx="1.5" fill="#2563eb"/><rect x="10" y="16" width="40" height="3.5" rx="1.75" fill="#2563eb"/><line x1="44" y1="19.5" x2="44" y2="32" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="2 2"/><rect x="32" y="35" width="24" height="4" rx="2" fill="#2563eb"/><rect x="32" y="43" width="24" height="4" rx="2" fill="#f59e0b"/><rect x="12" y="54" width="14" height="3.5" rx="1.5" fill="#93c5fd"/></svg>
+      <span>24</span>
+    </div>
+    <div class="sz">
+      <svg width="32" height="32" viewBox="0 0 72 72"><rect x="2" y="2" width="68" height="68" rx="16" stroke="#2563eb" stroke-width="3" fill="none"/><rect x="18" y="18" width="3.5" height="36" rx="1.5" fill="#2563eb"/><rect x="10" y="16" width="40" height="3.5" rx="1.75" fill="#2563eb"/><line x1="21.5" y1="22" x2="35" y2="16" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/><line x1="44" y1="19.5" x2="44" y2="32" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="2 2"/><rect x="32" y="35" width="24" height="4" rx="2" fill="#2563eb"/><rect x="32" y="43" width="24" height="4" rx="2" fill="#f59e0b"/><rect x="12" y="54" width="14" height="3.5" rx="1.5" fill="#93c5fd"/></svg>
+      <span>32</span>
+    </div>
+    <div class="sz">
+      <svg width="48" height="48" viewBox="0 0 72 72"><rect x="2" y="2" width="68" height="68" rx="16" stroke="#2563eb" stroke-width="3" fill="none"/><rect x="18" y="18" width="3.5" height="36" rx="1.5" fill="#2563eb"/><rect x="10" y="16" width="40" height="3.5" rx="1.75" fill="#2563eb"/><line x1="21.5" y1="22" x2="35" y2="16" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round"/><line x1="44" y1="19.5" x2="44" y2="32" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="2 2"/><rect x="32" y="35" width="24" height="4" rx="2" fill="#2563eb"/><rect x="32" y="43" width="24" height="4" rx="2" fill="#f59e0b"/><rect x="12" y="54" width="14" height="3.5" rx="1.5" fill="#93c5fd"/></svg>
+      <span>48</span>
+    </div>
+  </div>
+</div>
+
+</div>
+
+</div><!-- max-width container -->
+
+</body>
+</html>

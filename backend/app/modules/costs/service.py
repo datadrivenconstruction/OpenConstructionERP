@@ -14,6 +14,14 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
+
+_logger_ev = __import__('logging').getLogger(__name__ + '.events')
+
+async def _safe_publish(name: str, data: dict, source_module: str = '') -> None:
+    try:
+        await event_bus.publish(name, data, source_module=source_module)
+    except Exception:
+        _logger_ev.debug('Event publish skipped: %s', name)
 from app.modules.costs.models import CostItem
 from app.modules.costs.repository import CostItemRepository
 from app.modules.costs.schemas import CostItemCreate, CostItemUpdate, CostSearchQuery
@@ -58,7 +66,7 @@ class CostItemService:
         )
         item = await self.repo.create(item)
 
-        await event_bus.publish(
+        await _safe_publish(
             "costs.item.created",
             {"item_id": str(item.id), "code": item.code},
             source_module="oe_costs",
@@ -79,6 +87,10 @@ class CostItemService:
             )
         return item
 
+    async def get_by_codes(self, codes: list[str]) -> list[CostItem]:
+        """Get multiple cost items by their codes."""
+        return await self.repo.get_by_codes(codes)
+
     async def search_costs(
         self, query: CostSearchQuery
     ) -> tuple[list[CostItem], int]:
@@ -87,6 +99,8 @@ class CostItemService:
             q=query.q,
             unit=query.unit,
             source=query.source,
+            region=query.region,
+            category=query.category,
             min_rate=query.min_rate,
             max_rate=query.max_rate,
             offset=query.offset,
@@ -135,7 +149,7 @@ class CostItemService:
                 detail="Cost item not found",
             )
 
-        await event_bus.publish(
+        await _safe_publish(
             "costs.item.updated",
             {"item_id": str(item_id), "code": updated.code, "fields": list(fields.keys())},
             source_module="oe_costs",
@@ -157,7 +171,7 @@ class CostItemService:
 
         await self.repo.update_fields(item_id, is_active=False)
 
-        await event_bus.publish(
+        await _safe_publish(
             "costs.item.deleted",
             {"item_id": str(item_id), "code": item.code},
             source_module="oe_costs",
@@ -200,7 +214,7 @@ class CostItemService:
         if created:
             created = await self.repo.bulk_create(created)
 
-        await event_bus.publish(
+        await _safe_publish(
             "costs.items.bulk_imported",
             {
                 "created_count": len(created),

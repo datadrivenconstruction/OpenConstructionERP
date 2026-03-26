@@ -79,8 +79,54 @@
 
   /* Layout */
   --oe-sidebar-width: 232px;
-  --oe-header-height: 56px;
+  --oe-header-height: 52px;
   --oe-content-max-width: 1120px;
+}
+
+/* ── Dark Mode ─────────────────────────────────────────────────────────── */
+
+.dark {
+  /* Brand — slightly brighter for dark backgrounds */
+  --oe-blue: #3b82f6;
+  --oe-blue-hover: #60a5fa;
+  --oe-blue-active: #2563eb;
+  --oe-blue-subtle: rgba(59, 130, 246, 0.15);
+
+  /* Surfaces — deep blue-gray palette */
+  --oe-bg: #0f1117;
+  --oe-bg-secondary: #161822;
+  --oe-bg-tertiary: #1a1d2b;
+  --oe-bg-elevated: #1e2130;
+
+  /* Borders — subtle, low-contrast */
+  --oe-border: #2a2d3e;
+  --oe-border-light: #232638;
+  --oe-border-focus: var(--oe-blue);
+
+  /* Text — high contrast on dark */
+  --oe-text-primary: #f0f0f5;
+  --oe-text-secondary: #a0a3b5;
+  --oe-text-tertiary: #6b6e80;
+  --oe-text-inverse: #0f1117;
+
+  /* Semantic — adjusted for dark backgrounds */
+  --oe-success: #22c55e;
+  --oe-success-bg: rgba(34, 197, 94, 0.12);
+  --oe-warning: #f59e0b;
+  --oe-warning-bg: rgba(245, 158, 11, 0.12);
+  --oe-error: #ef4444;
+  --oe-error-bg: rgba(239, 68, 68, 0.12);
+  --oe-info: #38bdf8;
+  --oe-info-bg: rgba(56, 189, 248, 0.12);
+
+  /* Shadows — darker, more spread for depth on dark surfaces */
+  --oe-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --oe-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --oe-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2);
+  --oe-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --oe-shadow-xl: 0 24px 80px rgba(0, 0, 0, 0.6), 0 8px 24px rgba(0, 0, 0, 0.4);
+
+  color-scheme: dark;
 }
 
 /* ── Base ────────────────────────────────────────────────────────────────── */
@@ -92,10 +138,20 @@
 }
 
 html {
-  font-size: 16px;
+  font-size: 15px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+
+/* Smooth background/color transition when toggling theme */
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition: background-color 300ms ease, color 200ms ease, border-color 200ms ease,
+    box-shadow 200ms ease !important;
+  transition-delay: 0s !important;
 }
 
 body {
@@ -109,35 +165,163 @@ body {
 
 [dir='rtl'] {
   direction: rtl;
+  text-align: right;
+}
+
+/* ── RTL Layout Mirroring ────────────────────────────────────────────────── */
+
+/* Sidebar: move from left edge to right edge in RTL */
+[dir='rtl'] .oe-sidebar {
+  left: auto;
+  right: 0;
+}
+
+/* Invert the off-screen slide animation for RTL */
+[dir='rtl'] .oe-sidebar.-translate-x-full,
+[dir='rtl'] .oe-sidebar.\-translate-x-full {
+  transform: translateX(100%);
+}
+
+/* Main content area: swap padding sides in RTL */
+[dir='rtl'] .lg\:pl-sidebar {
+  padding-left: 0;
+  padding-right: var(--oe-sidebar-width);
+}
+
+/* Print helper: swap padding side */
+[dir='rtl'] .pl-sidebar {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Form inputs: align text to right in RTL contexts */
+[dir='rtl'] input[type='text'],
+[dir='rtl'] input[type='email'],
+[dir='rtl'] input[type='password'],
+[dir='rtl'] input[type='search'],
+[dir='rtl'] input[type='number'],
+[dir='rtl'] input[type='tel'],
+[dir='rtl'] textarea,
+[dir='rtl'] select {
+  text-align: right;
+}
+
+/* Flex rows that use gap: they inherit direction naturally, but rows with
+   explicit margin helpers need logical equivalents below. */
+
+/* ml-auto → margin-inline-start: auto in RTL (already correct via logical props,
+   but when ml-auto is used for badge push, we need to ensure it works) */
+[dir='rtl'] .ml-auto {
+  margin-left: unset;
+  margin-right: auto;
+}
+
+/* Tailwind mr-auto → flip in RTL */
+[dir='rtl'] .mr-auto {
+  margin-right: unset;
+  margin-left: auto;
+}
+
+/* Icons and chevrons that indicate directionality */
+[dir='rtl'] .lucide-chevron-right,
+[dir='rtl'] .lucide-arrow-right,
+[dir='rtl'] .lucide-chevron-left,
+[dir='rtl'] .lucide-arrow-left {
+  transform: scaleX(-1);
+}
+
+/* RTL-aware border radius: pill/rounded-l and rounded-r swap sides */
+[dir='rtl'] .rounded-l-lg { border-radius: 0 var(--oe-radius-md) var(--oe-radius-md) 0; }
+[dir='rtl'] .rounded-r-lg { border-radius: var(--oe-radius-md) 0 0 var(--oe-radius-md); }
+[dir='rtl'] .rounded-l-full { border-radius: 0 var(--oe-radius-full) var(--oe-radius-full) 0; }
+[dir='rtl'] .rounded-r-full { border-radius: var(--oe-radius-full) 0 0 var(--oe-radius-full); }
+
+/* Border side swaps */
+[dir='rtl'] .border-l { border-left: none; border-right-width: 1px; }
+[dir='rtl'] .border-r { border-right: none; border-left-width: 1px; }
+[dir='rtl'] .border-l-2 { border-left: none; border-right-width: 2px; }
+[dir='rtl'] .border-r-2 { border-right: none; border-left-width: 2px; }
+
+/* Padding side swaps for common Tailwind utilities used in the codebase */
+[dir='rtl'] .pl-4 { padding-left: 0; padding-right: 1rem; }
+[dir='rtl'] .pr-4 { padding-right: 0; padding-left: 1rem; }
+[dir='rtl'] .pl-3 { padding-left: 0; padding-right: 0.75rem; }
+[dir='rtl'] .pr-3 { padding-right: 0; padding-left: 0.75rem; }
+[dir='rtl'] .pl-6 { padding-left: 0; padding-right: 1.5rem; }
+[dir='rtl'] .pr-6 { padding-right: 0; padding-left: 1.5rem; }
+[dir='rtl'] .pl-8 { padding-left: 0; padding-right: 2rem; }
+[dir='rtl'] .pr-8 { padding-right: 0; padding-left: 2rem; }
+[dir='rtl'] .pl-10 { padding-left: 0; padding-right: 2.5rem; }
+[dir='rtl'] .pr-10 { padding-right: 0; padding-left: 2.5rem; }
+
+/* Margin side swaps */
+[dir='rtl'] .ml-2 { margin-left: 0; margin-right: 0.5rem; }
+[dir='rtl'] .mr-2 { margin-right: 0; margin-left: 0.5rem; }
+[dir='rtl'] .ml-3 { margin-left: 0; margin-right: 0.75rem; }
+[dir='rtl'] .mr-3 { margin-right: 0; margin-left: 0.75rem; }
+[dir='rtl'] .ml-4 { margin-left: 0; margin-right: 1rem; }
+[dir='rtl'] .mr-4 { margin-right: 0; margin-left: 1rem; }
+
+/* Left/right positioned elements */
+[dir='rtl'] .left-0 { left: auto; right: 0; }
+[dir='rtl'] .right-0 { right: auto; left: 0; }
+[dir='rtl'] .left-4 { left: auto; right: 1rem; }
+[dir='rtl'] .right-4 { right: auto; left: 1rem; }
+[dir='rtl'] .left-3 { left: auto; right: 0.75rem; }
+[dir='rtl'] .right-3 { right: auto; left: 0.75rem; }
+
+/* Text alignment */
+[dir='rtl'] .text-left { text-align: right; }
+[dir='rtl'] .text-right { text-align: left; }
+
+/* AG Grid RTL support */
+[dir='rtl'] .ag-theme-alpine {
+  direction: rtl;
+}
+
+/* Arabic font: use a system font stack that includes Arabic-script fonts */
+[dir='rtl'] body,
+[dir='rtl'] html {
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    'SF Arabic',
+    'Geeza Pro',
+    'Arabic UI Text',
+    'Noto Sans Arabic',
+    'Segoe UI',
+    Tahoma,
+    Arial,
+    sans-serif;
 }
 
 /* ── Typography — Apple SF Pro scale ─────────────────────────────────────── */
 
 h1 {
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 700;
-  line-height: 1.125;
+  line-height: 1.13;
   letter-spacing: -0.04em;
 }
 
 h2 {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
-  line-height: 1.16667;
+  line-height: 1.18;
   letter-spacing: -0.03em;
 }
 
 h3 {
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.21;
   letter-spacing: -0.02em;
 }
 
 h4 {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 600;
-  line-height: 1.29412;
+  line-height: 1.31;
   letter-spacing: -0.015em;
 }
 
@@ -161,6 +345,16 @@ h4 {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.25);
+  background-clip: content-box;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  background-clip: content-box;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
   background-clip: content-box;
 }
 
@@ -196,6 +390,92 @@ h4 {
   --ag-cell-horizontal-padding: 16px;
 }
 
+.dark .ag-theme-alpine {
+  --ag-background-color: var(--oe-bg);
+  --ag-header-background-color: var(--oe-bg-tertiary);
+  --ag-header-foreground-color: var(--oe-text-secondary);
+  --ag-foreground-color: var(--oe-text-primary);
+  --ag-border-color: var(--oe-border-light);
+  --ag-row-border-color: var(--oe-border-light);
+  --ag-secondary-foreground-color: var(--oe-text-secondary);
+  --ag-selected-row-background-color: var(--oe-blue-subtle);
+  --ag-odd-row-background-color: var(--oe-bg-secondary);
+  --ag-range-selection-background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* ── AG Grid cell vertical alignment ─────────────────────────────────── */
+/* Ensure ALL cells vertically center their content, not just checkbox/actions.
+   The ag-cell-wrapper inside already uses flex, but the cell itself must also
+   be flex so the wrapper is centered within the full row-height cell. */
+.ag-theme-quartz .ag-cell {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Ensure ordinal/pos column text doesn't overflow into description column */
+.ag-theme-quartz .ag-cell .ag-cell-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── AG Grid drag handle column ───────────────────────────────────────── */
+
+.oe-drag-handle-cell {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+}
+
+/* Row drag handle icon — visible on hover only */
+.ag-theme-quartz .ag-row .ag-drag-handle {
+  opacity: 0;
+  cursor: grab;
+  transition: opacity 0.15s ease;
+}
+
+.ag-theme-quartz .ag-row:hover .ag-drag-handle {
+  opacity: 0.5;
+}
+
+.ag-theme-quartz .ag-row:hover .ag-drag-handle:hover {
+  opacity: 1;
+}
+
+/* Active dragging cursor */
+.ag-theme-quartz .ag-row-dragging .ag-drag-handle {
+  opacity: 1;
+  cursor: grabbing;
+}
+
+/* Highlight the drop target row */
+.ag-theme-quartz .ag-row-drag-over {
+  background-color: var(--ag-range-selection-background-color, rgba(0, 113, 227, 0.08));
+}
+
+/* ── AG Grid full-width section group rows ────────────────────────── */
+
+.ag-theme-quartz .ag-full-width-row.oe-section-group-row {
+  border-top: 2px solid var(--oe-border, #e0e0e0);
+  border-bottom: 1px solid var(--oe-border-light, #eee);
+  background: var(--oe-bg-secondary, #f8f9fa);
+}
+
+.dark .ag-theme-quartz .ag-full-width-row.oe-section-group-row {
+  background: var(--oe-bg-secondary, #1e293b);
+  border-top-color: var(--oe-border, #374151);
+}
+
+.ag-theme-quartz .ag-full-width-row.oe-section-group-row:hover {
+  background: var(--oe-bg-tertiary, #f0f2f5);
+}
+
+.dark .ag-theme-quartz .ag-full-width-row.oe-section-group-row:hover {
+  background: var(--oe-bg-tertiary, #273344);
+}
+
 /* ── Premium Visual Polish ──────────────────────────────────────────── */
 
 /* Smooth scroll behavior */
@@ -217,6 +497,16 @@ html {
   backdrop-filter: blur(40px) saturate(200%);
   -webkit-backdrop-filter: blur(40px) saturate(200%);
   border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.dark .glass {
+  background: rgba(15, 17, 23, 0.72);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.dark .glass-strong {
+  background: rgba(15, 17, 23, 0.85);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 /* ── Animated gradient text ────────────────────────────────────────── */
@@ -589,6 +879,58 @@ tbody tr:nth-child(20) { animation-delay: 570ms; }
   .overflow-y-auto {
     overflow: visible !important;
   }
+
+  /* AG Grid — flatten for print */
+  .ag-root-wrapper {
+    border: none !important;
+    overflow: visible !important;
+  }
+
+  .ag-header {
+    background: #f0f0f0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    border-bottom: 1.5px solid #333 !important;
+  }
+
+  .ag-header-cell {
+    font-size: 8pt !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4pt 6pt !important;
+  }
+
+  .ag-row {
+    border-bottom: 0.5pt solid #ddd !important;
+    page-break-inside: avoid;
+  }
+
+  .ag-row.ag-row-group {
+    font-weight: bold;
+    background: #f0f0f0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .ag-cell {
+    font-size: 10pt !important;
+    padding: 4pt 6pt !important;
+    line-height: 1.4 !important;
+  }
+
+  .ag-pinned-bottom-container .ag-row {
+    font-weight: bold;
+    border-top: 2pt solid #000 !important;
+  }
+
+  /* Hide AG Grid scrollbars and toolbars in print */
+  .ag-body-horizontal-scroll,
+  .ag-body-vertical-scroll,
+  .ag-side-bar,
+  .ag-status-bar,
+  .ag-paging-panel {
+    display: none !important;
+  }
 }
 
 /* ── Accessibility — respect reduced motion ────────────────────────── */
@@ -626,4 +968,14 @@ tbody tr:nth-child(20) { animation-delay: 570ms; }
     opacity: 1 !important;
     transform: scale(1) !important;
   }
+}
+
+/* ── Utility: hide scrollbar ──────────────────────────────────────── */
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }

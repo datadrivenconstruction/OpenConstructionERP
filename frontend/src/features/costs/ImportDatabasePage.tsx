@@ -13,10 +13,13 @@ import {
   Database,
   Download,
   Trash2,
+  Star,
+  Sparkles,
 } from 'lucide-react';
-import { Button, Card, Badge } from '@/shared/ui';
+import { Button, Card, Badge, Breadcrumb, CountryFlag } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
-import { apiGet, apiDelete } from '@/shared/lib/api';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { apiGet, apiPost, apiDelete, triggerDownload } from '@/shared/lib/api';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -31,16 +34,10 @@ interface ImportResult {
   total_rows: number;
 }
 
-interface CostSearchResponse {
-  items: unknown[];
-  total: number;
-  limit: number;
-  offset: number;
-}
-
 // ── Loaded databases localStorage helper ────────────────────────────────────
 
 const LOADED_DBS_KEY = 'oe_loaded_databases';
+const ACTIVE_DB_KEY = 'oe_active_database';
 
 function getLoadedDatabases(): string[] {
   try {
@@ -58,27 +55,61 @@ function addLoadedDatabase(dbId: string): void {
       localStorage.setItem(LOADED_DBS_KEY, JSON.stringify([...current, dbId]));
     }
   } catch {
-    // Storage unavailable — ignore.
+    // Storage unavailable -- ignore.
+  }
+}
+
+function removeLoadedDatabase(dbId: string): void {
+  try {
+    const current = getLoadedDatabases();
+    localStorage.setItem(LOADED_DBS_KEY, JSON.stringify(current.filter((d) => d !== dbId)));
+    // If removed the active one, clear it
+    if (localStorage.getItem(ACTIVE_DB_KEY) === dbId) {
+      const remaining = current.filter((d) => d !== dbId);
+      localStorage.setItem(ACTIVE_DB_KEY, remaining[0] ?? '');
+    }
+  } catch {
+    // Storage unavailable -- ignore.
   }
 }
 
 function clearLoadedDatabases(): void {
   try {
     localStorage.removeItem(LOADED_DBS_KEY);
+    localStorage.removeItem(ACTIVE_DB_KEY);
   } catch {
-    // Storage unavailable — ignore.
+    // Storage unavailable -- ignore.
+  }
+}
+
+interface RegionStat {
+  region: string;
+  count: number;
+}
+
+function getActiveDatabase(): string | null {
+  try {
+    return localStorage.getItem(ACTIVE_DB_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function setActiveDatabase(dbId: string): void {
+  try {
+    localStorage.setItem(ACTIVE_DB_KEY, dbId);
+  } catch {
+    // Storage unavailable -- ignore.
   }
 }
 
 // ── API helper for file upload ───────────────────────────────────────────────
 
-const TOKEN_KEY = 'oe_access_token';
-
 async function uploadCostFile(file: File): Promise<ImportResult> {
   const formData = new FormData();
   formData.append('file', file);
 
-  const token = localStorage.getItem(TOKEN_KEY);
+  const token = useAuthStore.getState().accessToken;
   const headers: Record<string, string> = {
     Accept: 'application/json',
   };
@@ -135,101 +166,127 @@ interface CWICRDatabase {
   city: string;
   lang: string;
   currency: string;
-  flagId: string; // country code for SVG flag
+  flagId: string;
+  parquetName: string;
 }
 
 const CWICR_DATABASES: CWICRDatabase[] = [
-  { id: 'ENG_TORONTO', name: 'English (US / UK / Canada)', city: 'Toronto', lang: 'English', currency: 'USD', flagId: 'us' },
-  { id: 'DE_BERLIN', name: 'Germany / DACH', city: 'Berlin', lang: 'Deutsch', currency: 'EUR', flagId: 'de' },
-  { id: 'FR_PARIS', name: 'France', city: 'Paris', lang: 'Français', currency: 'EUR', flagId: 'fr' },
-  { id: 'SP_BARCELONA', name: 'Spain / Latin America', city: 'Barcelona', lang: 'Español', currency: 'EUR', flagId: 'es' },
-  { id: 'PT_SAOPAULO', name: 'Brazil / Portugal', city: 'São Paulo', lang: 'Português', currency: 'BRL', flagId: 'br' },
-  { id: 'RU_STPETERSBURG', name: 'Russia / CIS', city: 'St. Petersburg', lang: 'Русский', currency: 'RUB', flagId: 'ru' },
-  { id: 'AR_DUBAI', name: 'Middle East / Gulf', city: 'Dubai', lang: 'العربية', currency: 'AED', flagId: 'ae' },
-  { id: 'ZH_SHANGHAI', name: 'China', city: 'Shanghai', lang: '中文', currency: 'CNY', flagId: 'cn' },
-  { id: 'HI_MUMBAI', name: 'India / South Asia', city: 'Mumbai', lang: 'Hindi', currency: 'INR', flagId: 'in' },
+  { id: 'USA_USD', name: 'United States', city: 'New York', lang: 'English', currency: 'USD', flagId: 'us', parquetName: 'USA_USD' },
+  { id: 'UK_GBP', name: 'United Kingdom', city: 'London', lang: 'English', currency: 'GBP', flagId: 'gb', parquetName: 'UK_GBP' },
+  { id: 'DE_BERLIN', name: 'Germany / DACH', city: 'Berlin', lang: 'Deutsch', currency: 'EUR', flagId: 'de', parquetName: 'DE_BERLIN' },
+  { id: 'ENG_TORONTO', name: 'Canada / International', city: 'Toronto', lang: 'English', currency: 'CAD', flagId: 'ca', parquetName: 'ENG_TORONTO' },
+  { id: 'FR_PARIS', name: 'France', city: 'Paris', lang: 'Francais', currency: 'EUR', flagId: 'fr', parquetName: 'FR_PARIS' },
+  { id: 'SP_BARCELONA', name: 'Spain / Latin America', city: 'Barcelona', lang: 'Espanol', currency: 'EUR', flagId: 'es', parquetName: 'SP_BARCELONA' },
+  { id: 'PT_SAOPAULO', name: 'Brazil / Portugal', city: 'Sao Paulo', lang: 'Portugues', currency: 'BRL', flagId: 'br', parquetName: 'PT_SAOPAULO' },
+  { id: 'RU_STPETERSBURG', name: 'Russia / CIS', city: 'St. Petersburg', lang: 'Russian', currency: 'RUB', flagId: 'ru', parquetName: 'RU_STPETERSBURG' },
+  { id: 'AR_DUBAI', name: 'Middle East / Gulf', city: 'Dubai', lang: 'Arabic', currency: 'AED', flagId: 'ae', parquetName: 'AR_DUBAI' },
+  { id: 'ZH_SHANGHAI', name: 'China', city: 'Shanghai', lang: 'Chinese', currency: 'CNY', flagId: 'cn', parquetName: 'ZH_SHANGHAI' },
+  { id: 'HI_MUMBAI', name: 'India / South Asia', city: 'Mumbai', lang: 'Hindi', currency: 'INR', flagId: 'in', parquetName: 'HI_MUMBAI' },
 ];
 
-/** Renders a real SVG flag using flagcdn.com (free, no API key) */
+// Databases that may only be available via GitHub download (not in local DDC_Toolkit)
+const GITHUB_ONLY_DBS = new Set(['UK_GBP', 'USA_USD']);
+
+/** Mini flag component — uses bundled inline SVGs */
 function MiniFlag({ code }: { code: string }) {
-  return (
-    <img
-      src={`https://flagcdn.com/w40/${code}.png`}
-      srcSet={`https://flagcdn.com/w80/${code}.png 2x`}
-      width="32"
-      height="20"
-      alt={code}
-      className="rounded-sm shrink-0 shadow-xs border border-black/5 object-cover"
-      style={{ width: 32, height: 20 }}
-      loading="lazy"
-    />
-  );
+  return <CountryFlag code={code} size={32} className="shadow-xs border border-black/5" />;
 }
 
 function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
   const [loading, setLoading] = useState<string | null>(null);
   const [loaded, setLoaded] = useState<Set<string>>(() => new Set(getLoadedDatabases()));
-  const [result, setResult] = useState<{ id: string; imported: number; skipped: number; file: string } | null>(null);
+  const [result, setResult] = useState<{
+    id: string;
+    imported: number;
+    skipped: number;
+    file: string;
+  } | null>(null);
+  const [lastLoadedDb, setLastLoadedDb] = useState<CWICRDatabase | null>(null);
   const [elapsed, setElapsed] = useState(0);
-  const [log, setLog] = useState<string[]>([]);
+  const [activeDb, setActiveDb] = useState<string | null>(() => getActiveDatabase());
   const addToast = useToastStore((s) => s.addToast);
 
   // Timer for elapsed time display
   useEffect(() => {
-    if (!loading) { setElapsed(0); return; }
+    if (!loading) {
+      setElapsed(0);
+      return;
+    }
     const start = Date.now();
-    const interval = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 1000);
+    const interval = setInterval(
+      () => setElapsed(Math.floor((Date.now() - start) / 1000)),
+      1000,
+    );
     return () => clearInterval(interval);
   }, [loading]);
 
-  const handleLoad = useCallback(async (db: typeof CWICR_DATABASES[number]) => {
-    setLoading(db.id);
-    setResult(null);
-    setLog([
-      `Starting import: ${db.name} (${db.city})...`,
-      `Loading 55,000+ items from CWICR Parquet database...`,
-      `This may take 1-3 minutes. Please wait.`,
-    ]);
-
-    try {
-      const token = localStorage.getItem(TOKEN_KEY);
-      const res = await fetch(`/api/v1/costs/load-cwicr/${db.id}`, {
-        method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+  const handleSetActive = useCallback(
+    (dbId: string) => {
+      setActiveDatabase(dbId);
+      setActiveDb(dbId);
+      addToast({
+        type: 'success',
+        title: 'Active database changed',
+        message: `${CWICR_DATABASES.find((d) => d.id === dbId)?.name ?? dbId} is now the active database`,
       });
+    },
+    [addToast],
+  );
 
-      if (res.ok) {
-        const data = await res.json();
+  const handleLoad = useCallback(
+    async (db: CWICRDatabase) => {
+      setLoading(db.id);
+      setResult(null);
+      setLastLoadedDb(db);
+
+      void GITHUB_ONLY_DBS; // Referenced in JSX badge
+
+      try {
+        const data = await apiPost<Record<string, unknown>>(`/v1/costs/load-cwicr/${db.id}`);
+
         setLoaded((prev) => new Set(prev).add(db.id));
         addLoadedDatabase(db.id);
-        setResult({ id: db.id, imported: data.imported ?? 0, skipped: data.skipped ?? 0, file: data.source_file ?? '' });
-        setLog((prev) => [
-          ...prev,
-          `✅ Import complete!`,
-          `   ${data.imported ?? 0} items imported, ${data.skipped ?? 0} skipped`,
-          `   Source: ${data.source_file ?? 'unknown'}`,
-        ]);
+
+        // Auto-set as active if it is the first loaded database
+        const allLoaded = getLoadedDatabases();
+        if (allLoaded.length === 1 || !getActiveDatabase()) {
+          setActiveDatabase(db.id);
+          setActiveDb(db.id);
+        }
+
+        setResult({
+          id: db.id,
+          imported: (data.imported as number) ?? 0,
+          skipped: (data.skipped as number) ?? 0,
+          file: (data.source_file as string) ?? '',
+        });
+        // Log captured in result state
         addToast({
           type: 'success',
           title: `${db.name} database loaded`,
-          message: `${data.imported ?? 0} cost items imported`,
+          message: `${(data.imported as number) ?? 0} cost items imported`,
         });
-      } else {
-        const err = await res.json().catch(() => ({ detail: 'Failed to load database' }));
-        setLog((prev) => [...prev, `❌ Error: ${err.detail || 'Unknown error'}`]);
+
+        // After import success, auto-index vectors
+        try {
+          await apiPost('/v1/costs/vector/index');
+        } catch {
+          /* non-critical — vector indexing is best-effort */
+        }
+      } catch (err: unknown) {
+        const detail =
+          err instanceof Error ? err.message : 'Failed to load database';
         addToast({
           type: 'error',
           title: `Failed to load ${db.name}`,
-          message: err.detail || 'Unknown error',
+          message: detail,
         });
+      } finally {
+        setLoading(null);
       }
-    } catch {
-      setLog((prev) => [...prev, `❌ Connection error`]);
-      addToast({ type: 'error', title: 'Connection error' });
-    } finally {
-      setLoading(null);
-    }
-  }, [addToast]);
+    },
+    [addToast],
+  );
 
   return (
     <div>
@@ -238,99 +295,232 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
         {CWICR_DATABASES.map((db) => {
           const isLoading = loading === db.id;
           const isLoaded = loaded.has(db.id);
+          const isActive = activeDb === db.id;
+          const isGithub = GITHUB_ONLY_DBS.has(db.id);
+
           return (
-            <button
+            <div
               key={db.id}
-              onClick={() => handleLoad(db)}
-              disabled={isLoading || loading !== null}
               className={`
-                relative flex items-center gap-3 rounded-xl px-3.5 py-3 text-left
+                relative flex flex-col rounded-xl
                 border transition-all duration-normal ease-oe
-                ${isLoaded
-                  ? 'border-semantic-success/30 bg-semantic-success-bg/40'
-                  : isLoading
-                    ? 'border-oe-blue/40 bg-oe-blue-subtle/30'
-                    : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary active:scale-[0.98]'
+                ${
+                  isLoaded
+                    ? isActive
+                      ? 'border-oe-blue/40 bg-oe-blue-subtle/20'
+                      : 'border-semantic-success/30 bg-semantic-success-bg/40'
+                    : isLoading
+                      ? 'border-oe-blue/40 bg-oe-blue-subtle/30'
+                      : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary'
                 }
                 ${loading !== null && !isLoading ? 'opacity-40 pointer-events-none' : ''}
               `}
             >
-              <MiniFlag code={db.flagId} />
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-content-primary">{db.name}</span>
-                {isLoaded && (
-                  <CheckCircle2 size={14} className="text-semantic-success shrink-0" />
+              <button
+                onClick={() => handleLoad(db)}
+                disabled={isLoading || loading !== null}
+                className="flex items-center gap-3 px-3.5 py-3 text-left active:scale-[0.98] transition-transform"
+              >
+                <MiniFlag code={db.flagId} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-content-primary">
+                      {db.name}
+                    </span>
+                    {isLoaded && (
+                      <CheckCircle2
+                        size={14}
+                        className="text-semantic-success shrink-0"
+                      />
+                    )}
+                  </div>
+                  <div className="text-2xs text-content-tertiary">
+                    {db.city} &middot; {db.lang} &middot; {db.currency}
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className="text-2xs text-content-quaternary">55,719 items</span>
+                    {isGithub && !isLoaded && (
+                      <Badge variant="blue" size="sm" className="text-2xs px-1.5 py-0">
+                        GitHub
+                      </Badge>
+                    )}
+                    {!isGithub && !isLoaded && (
+                      <Badge variant="neutral" size="sm" className="text-2xs px-1.5 py-0">
+                        Local
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                {isLoading && (
+                  <Loader2 size={16} className="animate-spin text-oe-blue shrink-0" />
                 )}
-              </div>
-              <div className="text-2xs text-content-tertiary">
-                {db.city} · {db.lang} · {db.currency}
-              </div>
-            </div>
-            {isLoading && (
-              <Loader2 size={16} className="animate-spin text-oe-blue shrink-0" />
-            )}
-          </button>
-        );
-      })}
-      </div>
+              </button>
 
-      {/* Progress & Log panel — shown during/after import */}
-      {(loading || result || log.length > 3) && (
-        <div className="mt-4 rounded-xl border border-border-light bg-surface-tertiary overflow-hidden">
-          {/* Progress bar */}
-          {loading && (
-            <div className="px-4 py-3 border-b border-border-light bg-surface-elevated">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <Loader2 size={14} className="animate-spin text-oe-blue" />
-                  <span className="text-sm font-medium text-content-primary">
-                    Importing database...
-                  </span>
+              {/* Action row for loaded databases */}
+              {isLoaded && (
+                <div className="flex items-center gap-1.5 px-3.5 pb-2.5 -mt-1">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSetActive(db.id);
+                    }}
+                    className={`
+                      flex items-center gap-1 rounded-md px-2 py-1 text-2xs font-medium transition-colors
+                      ${
+                        isActive
+                          ? 'bg-oe-blue text-white'
+                          : 'bg-surface-secondary text-content-secondary hover:bg-surface-tertiary hover:text-content-primary'
+                      }
+                    `}
+                  >
+                    <Star size={10} className={isActive ? 'fill-current' : ''} />
+                    {isActive ? 'Active' : 'Set as Active'}
+                  </button>
                 </div>
-                <span className="text-xs text-content-tertiary font-mono">
-                  {elapsed}s elapsed
-                </span>
-              </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-secondary">
-                <div className="h-full animate-shimmer rounded-full bg-oe-blue opacity-70 bg-[length:200%_100%]" style={{ width: '100%' }} />
-              </div>
-              <p className="mt-2 text-xs text-content-tertiary">
-                Loading ~55,000 items. This takes 1-3 minutes depending on your hardware.
-              </p>
-            </div>
-          )}
-
-          {/* Result summary */}
-          {result && (
-            <div className="px-4 py-3 border-b border-border-light bg-semantic-success-bg/30">
-              <div className="flex items-center gap-2 mb-1">
-                <CheckCircle2 size={16} className="text-semantic-success" />
-                <span className="text-sm font-semibold text-[#15803d]">Import complete</span>
-              </div>
-              <div className="flex gap-4 text-xs text-[#15803d]/80">
-                <span>{result.imported.toLocaleString()} imported</span>
-                <span>{result.skipped.toLocaleString()} skipped</span>
-                <span className="text-content-tertiary">{result.file}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Log output */}
-          <div className="px-4 py-3 max-h-32 overflow-y-auto">
-            <div className="space-y-1 font-mono text-2xs text-content-tertiary">
-              {log.map((line, i) => (
-                <div key={i} className={line.startsWith('✅') ? 'text-semantic-success font-medium' : line.startsWith('❌') ? 'text-semantic-error' : ''}>
-                  {line}
-                </div>
-              ))}
-              {loading && (
-                <div className="animate-pulse">Processing items...</div>
               )}
             </div>
+          );
+        })}
+      </div>
+
+      {/* ── Import Progress Panel ─────────────────────────────────────── */}
+      {(loading || result) && (() => {
+        const loadingDb = loading ? CWICR_DATABASES.find((d) => d.id === loading) : lastLoadedDb;
+        // Simulate phased progress: 0-15s = reading file, 15-30s = parsing, 30+ = writing
+        const phase = elapsed < 15 ? 0 : elapsed < 30 ? 1 : elapsed < 120 ? 2 : 3;
+        const phaseLabels = [
+          'Reading Parquet file...',
+          'Extracting resources & cost breakdown...',
+          'Writing to local database...',
+          'Finalizing...',
+        ];
+        // Smooth estimated progress (never reaches 100% until done)
+        const progressPct = result
+          ? 100
+          : Math.min(95, phase === 0 ? elapsed * 3 : phase === 1 ? 45 + (elapsed - 15) * 2 : 75 + (elapsed - 30) * 0.2);
+
+        return (
+          <div className="mt-5 rounded-2xl border border-border-light bg-surface-elevated overflow-hidden shadow-sm">
+            {/* Header with database info */}
+            <div className="px-5 pt-5 pb-4">
+              <div className="flex items-center gap-3 mb-4">
+                {result ? (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-semantic-success-bg">
+                    <CheckCircle2 size={22} className="text-semantic-success" />
+                  </div>
+                ) : (
+                  <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle">
+                    <Database size={20} className="text-oe-blue" />
+                    <div className="absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full bg-oe-blue animate-ping" />
+                    <div className="absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full bg-oe-blue" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-semibold text-content-primary">
+                      {result ? 'Database installed successfully' : `Installing ${loadingDb?.name ?? 'database'}...`}
+                    </h3>
+                    {!result && (
+                      <span className="text-xs text-oe-blue font-mono tabular-nums">
+                        {Math.floor(elapsed / 60)}:{String(elapsed % 60).padStart(2, '0')}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-content-tertiary mt-0.5">
+                    {result
+                      ? 'Cost items are saved locally and available offline.'
+                      : 'Downloading and indexing cost items with full resource breakdown. This is a one-time setup.'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Progress bar — prominent, with percentage */}
+              <div className="mb-3">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-medium text-content-secondary">
+                    {result ? 'Complete' : phaseLabels[phase]}
+                  </span>
+                  <span className="text-xs font-semibold text-oe-blue tabular-nums">
+                    {Math.round(progressPct)}%
+                  </span>
+                </div>
+                <div className="h-2.5 w-full overflow-hidden rounded-full bg-surface-secondary">
+                  <div
+                    className={`h-full rounded-full transition-all duration-1000 ease-out ${
+                      result
+                        ? 'bg-semantic-success'
+                        : 'bg-gradient-to-r from-oe-blue via-blue-400 to-oe-blue bg-[length:200%_100%] animate-shimmer'
+                    }`}
+                    style={{ width: `${progressPct}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Phase steps */}
+              {!result && (
+                <div className="flex items-center gap-1 text-2xs">
+                  {['Read', 'Parse', 'Write', 'Done'].map((label, i) => (
+                    <div key={label} className="flex items-center gap-1">
+                      <div className={`h-1.5 w-1.5 rounded-full ${
+                        i < phase ? 'bg-semantic-success' : i === phase ? 'bg-oe-blue animate-pulse' : 'bg-surface-tertiary'
+                      }`} />
+                      <span className={i <= phase ? 'text-content-secondary font-medium' : 'text-content-quaternary'}>
+                        {label}
+                      </span>
+                      {i < 3 && <span className="text-content-quaternary mx-0.5">&middot;</span>}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Success result details */}
+              {result && (
+                <div className="mt-3 grid grid-cols-3 gap-2">
+                  <div className="rounded-lg bg-semantic-success-bg/50 px-3 py-2 text-center">
+                    <div className="text-lg font-bold text-[#15803d] tabular-nums">
+                      {result.imported.toLocaleString()}
+                    </div>
+                    <div className="text-2xs text-[#15803d]/70">items installed</div>
+                  </div>
+                  <div className="rounded-lg bg-surface-secondary px-3 py-2 text-center">
+                    <div className="text-lg font-bold text-content-secondary tabular-nums">
+                      {result.skipped.toLocaleString()}
+                    </div>
+                    <div className="text-2xs text-content-tertiary">duplicates skipped</div>
+                  </div>
+                  <div className="rounded-lg bg-surface-secondary px-3 py-2 text-center">
+                    <div className="text-lg font-bold text-content-secondary tabular-nums">
+                      {loadingDb?.currency ?? '—'}
+                    </div>
+                    <div className="text-2xs text-content-tertiary">currency</div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* What's included — always visible info strip */}
+            <div className="px-5 py-3 bg-surface-secondary/50 border-t border-border-light">
+              <div className="flex items-center gap-4 text-2xs text-content-tertiary">
+                <span className="flex items-center gap-1">
+                  <Database size={10} /> 55,000+ cost items
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-400" /> Labor rates
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-blue-400" /> Equipment
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-green-400" /> Materials
+                </span>
+                <span className="ml-auto font-medium text-content-secondary">
+                  {result ? 'Available offline' : 'One-time download'}
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
@@ -338,13 +528,13 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
 // ── Export Excel helper ──────────────────────────────────────────────────────
 
 async function downloadExcelExport(): Promise<void> {
-  const token = localStorage.getItem(TOKEN_KEY);
+  const token = useAuthStore.getState().accessToken;
   const headers: Record<string, string> = { Accept: 'application/octet-stream' };
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch('/api/v1/costs/export/excel', { method: 'GET', headers });
+  const response = await fetch('/api/v1/costs/actions/export-excel', { method: 'GET', headers });
   if (!response.ok) {
     let detail = 'Export failed';
     try {
@@ -357,16 +547,9 @@ async function downloadExcelExport(): Promise<void> {
   }
 
   const blob = await response.blob();
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
   const disposition = response.headers.get('Content-Disposition');
   const filename = disposition?.match(/filename="?(.+)"?/)?.[1] || 'cost_database_export.xlsx';
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  triggerDownload(blob, filename);
 }
 
 // ── Loaded Databases Section ────────────────────────────────────────────────
@@ -376,17 +559,18 @@ function LoadedDatabasesSection() {
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [deletingRegion, setDeletingRegion] = useState<string | null>(null);
 
-  // Check if database has any items
-  const { data: costData } = useQuery({
-    queryKey: ['costs', '', '', '', 0, 'check'],
-    queryFn: () => apiGet<CostSearchResponse>('/v1/costs/?limit=1'),
+  // Fetch real per-region stats from backend
+  const { data: regionStats } = useQuery({
+    queryKey: ['costs', 'regions', 'stats'],
+    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats'),
     retry: false,
+    refetchOnWindowFocus: true,
   });
 
-  const totalItems = costData?.total ?? 0;
-  const loadedDbs = getLoadedDatabases();
-  const hasData = totalItems > 0;
+  const totalItems = regionStats?.reduce((s, r) => s + r.count, 0) ?? 0;
+  const hasData = regionStats && regionStats.length > 0;
 
   // Export mutation
   const exportMutation = useMutation({
@@ -407,9 +591,29 @@ function LoadedDatabasesSection() {
     },
   });
 
-  // Clear mutation
+  // Delete single region
+  const deleteRegionMutation = useMutation({
+    mutationFn: (region: string) =>
+      apiDelete<{ deleted: number; region: string }>(`/v1/costs/actions/clear-region/${region}`),
+    onSuccess: (_data, region) => {
+      removeLoadedDatabase(region);
+      queryClient.invalidateQueries({ queryKey: ['costs'] });
+      setDeletingRegion(null);
+      addToast({
+        type: 'success',
+        title: t('costs.region_cleared', { defaultValue: 'Region cleared' }),
+        message: `${CWICR_DATABASES.find((d) => d.id === region)?.name ?? region} removed`,
+      });
+    },
+    onError: (err: Error) => {
+      setDeletingRegion(null);
+      addToast({ type: 'error', title: t('costs.delete_failed', { defaultValue: 'Delete failed' }), message: err.message });
+    },
+  });
+
+  // Clear all mutation
   const clearMutation = useMutation({
-    mutationFn: () => apiDelete<{ deleted: number }>('/v1/costs/clear-database?source=cwicr'),
+    mutationFn: () => apiDelete<{ deleted: number }>('/v1/costs/actions/clear-database?source=cwicr'),
     onSuccess: () => {
       clearLoadedDatabases();
       queryClient.invalidateQueries({ queryKey: ['costs'] });
@@ -417,7 +621,9 @@ function LoadedDatabasesSection() {
       addToast({
         type: 'success',
         title: t('costs.clear_success', { defaultValue: 'Database cleared' }),
-        message: t('costs.clear_success_msg', { defaultValue: 'All CWICR items have been removed.' }),
+        message: t('costs.clear_success_msg', {
+          defaultValue: 'All CWICR items have been removed.',
+        }),
       });
     },
     onError: (err: Error) => {
@@ -429,37 +635,37 @@ function LoadedDatabasesSection() {
     },
   });
 
-  if (!hasData && loadedDbs.length === 0) {
+  if (!hasData) {
     return null;
   }
+
+  const activeDbId = getActiveDatabase();
 
   return (
     <Card className="mb-6 animate-card-in" padding="none">
       <div className="px-6 py-5">
+        {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-sm font-semibold text-content-primary">
               {t('costs.loaded_databases', { defaultValue: 'Loaded Databases' })}
             </h3>
             <p className="text-xs text-content-tertiary mt-0.5">
-              {totalItems > 0
-                ? `${totalItems.toLocaleString()} ${t('costs.items_in_database', { defaultValue: 'items in database' })}`
-                : t('costs.no_items', { defaultValue: 'No items loaded' })}
+              {regionStats.length} {regionStats.length === 1 ? 'region' : 'regions'} &middot;{' '}
+              {totalItems.toLocaleString()} items total
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {hasData && (
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={<Download size={14} />}
-                onClick={() => exportMutation.mutate()}
-                loading={exportMutation.isPending}
-              >
-                {t('costs.export_database', { defaultValue: 'Export Excel' })}
-              </Button>
-            )}
-            {hasData && (
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Download size={14} />}
+              onClick={() => exportMutation.mutate()}
+              loading={exportMutation.isPending}
+            >
+              {t('costs.export_excel', { defaultValue: 'Export Excel' })}
+            </Button>
+            {regionStats.length > 1 && (
               <Button
                 variant="danger"
                 size="sm"
@@ -467,43 +673,102 @@ function LoadedDatabasesSection() {
                 onClick={() => setShowClearConfirm(true)}
                 loading={clearMutation.isPending}
               >
-                {t('costs.clear_database', { defaultValue: 'Clear Database' })}
+                {t('costs.clear_all', { defaultValue: 'Clear All' })}
               </Button>
             )}
           </div>
         </div>
 
-        {/* Show which CWICR databases are loaded */}
-        {loadedDbs.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {loadedDbs.map((dbId) => {
-              const db = CWICR_DATABASES.find((d) => d.id === dbId);
-              if (!db) return null;
-              return (
-                <div
-                  key={dbId}
-                  className="flex items-center gap-2 rounded-lg border border-semantic-success/30 bg-semantic-success-bg/40 px-3 py-1.5"
-                >
-                  <MiniFlag code={db.flagId} />
-                  <span className="text-xs font-medium text-content-primary">{db.name}</span>
-                  <CheckCircle2 size={12} className="text-semantic-success" />
-                </div>
-              );
-            })}
-          </div>
-        )}
+        {/* Per-region table */}
+        <div className="rounded-lg border border-border-light overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-surface-tertiary text-left">
+                <th className="px-3 py-2 text-xs font-medium text-content-secondary">{t('costs.col_region', { defaultValue: 'Region' })}</th>
+                <th className="px-3 py-2 text-xs font-medium text-content-secondary text-right">{t('costs.col_items', { defaultValue: 'Items' })}</th>
+                <th className="px-3 py-2 text-xs font-medium text-content-secondary text-center">{t('costs.col_status', { defaultValue: 'Status' })}</th>
+                <th className="px-3 py-2 text-xs font-medium text-content-secondary text-center">{t('costs.col_vector', { defaultValue: 'Vector' })}</th>
+                <th className="px-3 py-2 w-10" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border-light">
+              {regionStats.map((rs) => {
+                const db = CWICR_DATABASES.find((d) => d.id === rs.region);
+                const isActive = activeDbId === rs.region;
+                const isDeleting = deletingRegion === rs.region;
+                // Fallback labels for non-CWICR regions
+                const regionLabel = db?.name ?? (rs.region === 'CUSTOM' ? 'My Database' : rs.region === 'DACH' ? 'DACH Region' : rs.region);
+                const regionFlag = db?.flagId ?? (rs.region === 'DACH' ? 'de' : undefined);
+                return (
+                  <tr key={rs.region} className="hover:bg-surface-secondary/50 transition-colors">
+                    <td className="px-3 py-2.5">
+                      <div className="flex items-center gap-2">
+                        {regionFlag ? <MiniFlag code={regionFlag} /> : (
+                          <span className="flex h-5 w-8 items-center justify-center rounded-sm bg-surface-tertiary text-2xs font-medium text-content-tertiary">
+                            {rs.region.slice(0, 2)}
+                          </span>
+                        )}
+                        <div>
+                          <span className="text-sm font-medium text-content-primary">
+                            {regionLabel}
+                          </span>
+                          {db && (
+                            <span className="text-2xs text-content-tertiary ml-1.5">
+                              {db.currency}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-3 py-2.5 text-right tabular-nums text-sm font-semibold text-content-primary">
+                      {rs.count.toLocaleString()}
+                    </td>
+                    <td className="px-3 py-2.5 text-center">
+                      {isActive ? (
+                        <Badge variant="blue" size="sm">
+                          <Star size={10} className="fill-current mr-0.5" /> Active
+                        </Badge>
+                      ) : (
+                        <Badge variant="success" size="sm">
+                          <CheckCircle2 size={10} className="mr-0.5" /> Loaded
+                        </Badge>
+                      )}
+                    </td>
+                    <td className="px-3 py-2.5 text-center">
+                      <span className="text-2xs text-content-quaternary">--</span>
+                    </td>
+                    <td className="px-2 py-2.5">
+                      {isDeleting ? (
+                        <Loader2 size={14} className="animate-spin text-semantic-error mx-auto" />
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setDeletingRegion(rs.region);
+                            deleteRegionMutation.mutate(rs.region);
+                          }}
+                          title={`Delete ${db?.name ?? rs.region}`}
+                          className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-colors mx-auto"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
 
-        {/* Clear confirmation dialog */}
+        {/* Clear all confirmation */}
         {showClearConfirm && (
           <div className="mt-4 rounded-xl border border-semantic-error/20 bg-semantic-error-bg/30 p-4">
             <p className="text-sm font-medium text-semantic-error mb-1">
-              {t('costs.clear_confirm_title', { defaultValue: 'Clear all CWICR data?' })}
+              Clear all {regionStats.length} databases?
             </p>
             <p className="text-xs text-content-secondary mb-3">
-              {t('costs.clear_confirm_msg', {
-                defaultValue:
-                  'This will permanently remove all CWICR cost items from the database. You can re-import them later.',
-              })}
+              This will permanently remove all {totalItems.toLocaleString()} CWICR cost items. You
+              can re-import them later.
             </p>
             <div className="flex items-center gap-2">
               <Button
@@ -512,7 +777,7 @@ function LoadedDatabasesSection() {
                 onClick={() => clearMutation.mutate()}
                 loading={clearMutation.isPending}
               >
-                {t('costs.clear_confirm_btn', { defaultValue: 'Yes, Clear Database' })}
+                {t('costs.yes_clear_all', { defaultValue: 'Yes, Clear All' })}
               </Button>
               <Button
                 variant="secondary"
@@ -525,6 +790,350 @@ function LoadedDatabasesSection() {
             </div>
           </div>
         )}
+      </div>
+    </Card>
+  );
+}
+
+// ── Vector Database Import Section ───────────────────────────────────────────
+
+interface VectorStatus {
+  connected: boolean;
+  engine?: string;
+  url?: string;
+  error?: string;
+  collections?: string[];
+  cost_collection?: { vectors_count: number; points_count: number; status: string } | null;
+}
+
+interface VectorRegionStat {
+  region: string;
+  count: number;
+}
+
+function VectorDatabaseSection() {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+  const queryClient = useQueryClient();
+  const [loadingRegion, setLoadingRegion] = useState<string | null>(null);
+  const [isIndexingAll, setIsIndexingAll] = useState(false);
+  const [lastResult, setLastResult] = useState<{ region: string; indexed: number; duration: number } | null>(null);
+
+  // Check vector DB status (LanceDB embedded or Qdrant)
+  const { data: vectorStatus, refetch: refetchStatus } = useQuery({
+    queryKey: ['costs', 'vector', 'status'],
+    queryFn: () => apiGet<VectorStatus>('/v1/costs/vector/status'),
+    retry: false,
+    refetchInterval: (loadingRegion || isIndexingAll) ? 5000 : false,
+  });
+
+  const isConnected = vectorStatus?.connected ?? false;
+
+  // Per-region vector counts — only fetch when vector DB is connected
+  const { data: vectorRegionStats, refetch: refetchVectorRegions } = useQuery({
+    queryKey: ['costs', 'vector', 'regions'],
+    queryFn: () => apiGet<VectorRegionStat[]>('/v1/costs/vector/regions').catch(() => [] as VectorRegionStat[]),
+    retry: false,
+    enabled: isConnected,
+  });
+
+  // Region stats for cost item counts
+  const { data: regionStats } = useQuery({
+    queryKey: ['costs', 'regions', 'stats'],
+    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats'),
+    retry: false,
+  });
+
+  const hasRegions = regionStats && regionStats.length > 0;
+  const totalItems = regionStats?.reduce((s, r) => s + r.count, 0) ?? 0;
+  const indexedCount = vectorStatus?.cost_collection?.vectors_count ?? 0;
+  const isFullyIndexed = indexedCount > 0 && indexedCount >= totalItems * 0.9;
+
+  // Build a set of regions that already have vectors
+  const vectorizedRegions = new Set(
+    (vectorRegionStats ?? []).filter((r) => r.count > 0).map((r) => r.region),
+  );
+  const vectorCountByRegion = Object.fromEntries(
+    (vectorRegionStats ?? []).map((r) => [r.region, r.count]),
+  );
+
+  // Load vectors for a specific region: try GitHub first, fallback to local generation
+  const handleLoadVectors = useCallback(
+    async (db: CWICRDatabase) => {
+      setLoadingRegion(db.id);
+      setLastResult(null);
+      try {
+        // Try pre-built vectors from GitHub first
+        const data = await apiPost<Record<string, unknown>>(`/v1/costs/vector/load-github/${db.id}`);
+        const indexed = (data.indexed as number) ?? 0;
+        const duration = (data.duration_seconds as number) ?? 0;
+        setLastResult({ region: db.id, indexed, duration });
+        addToast({
+          type: 'success',
+          title: `${db.name} vectors loaded`,
+          message: `${indexed.toLocaleString()} vectors indexed in ${duration}s`,
+        });
+      } catch {
+        // GitHub vectors not available — generate locally for this region
+        try {
+          const token = useAuthStore.getState().accessToken;
+          const res = await fetch(`/api/v1/costs/vector/index?region=${encodeURIComponent(db.id)}`, {
+            method: 'POST',
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const indexed = (data.indexed as number) ?? 0;
+            const duration = (data.duration_seconds as number) ?? 0;
+            setLastResult({ region: db.id, indexed, duration });
+            addToast({
+              type: 'success',
+              title: `${db.name} vectors generated`,
+              message: `${indexed.toLocaleString()} vectors indexed locally in ${duration}s`,
+            });
+          } else {
+            const err = await res.json().catch(() => ({ detail: 'Indexing failed' }));
+            addToast({
+              type: 'error',
+              title: `Failed to index ${db.name} vectors`,
+              message: err.detail ?? 'Vector generation failed',
+            });
+          }
+        } catch {
+          addToast({
+            type: 'error',
+            title: `Failed to index ${db.name} vectors`,
+            message: t('common.connection_error', { defaultValue: 'Connection error' }),
+          });
+        }
+      } finally {
+        refetchStatus();
+        refetchVectorRegions();
+        queryClient.invalidateQueries({ queryKey: ['costs', 'vector'] });
+        setLoadingRegion(null);
+      }
+    },
+    [addToast, refetchStatus, refetchVectorRegions, queryClient, t],
+  );
+
+  // Generate vectors locally for all regions
+  const handleVectorizeAll = useCallback(async () => {
+    setIsIndexingAll(true);
+    setLastResult(null);
+    try {
+      const token = useAuthStore.getState().accessToken;
+      const res = await fetch('/api/v1/costs/vector/index', {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setLastResult({ region: 'all', indexed: data.indexed, duration: data.duration_seconds });
+        addToast({
+          type: 'success',
+          title: 'Vector index created',
+          message: `${data.indexed.toLocaleString()} items indexed in ${data.duration_seconds}s`,
+        });
+        refetchStatus();
+        refetchVectorRegions();
+        queryClient.invalidateQueries({ queryKey: ['costs', 'vector'] });
+      } else {
+        const err = await res.json().catch(() => ({ detail: 'Indexing failed' }));
+        addToast({ type: 'error', title: t('costs.indexing_failed', { defaultValue: 'Indexing failed' }), message: err.detail });
+      }
+    } catch {
+      addToast({ type: 'error', title: t('common.connection_error', { defaultValue: 'Connection error' }) });
+    } finally {
+      setIsIndexingAll(false);
+    }
+  }, [addToast, refetchStatus, refetchVectorRegions, queryClient, t]);
+
+  const isLoading = loadingRegion !== null || isIndexingAll;
+
+  return (
+    <Card className="mb-6" padding="none">
+      <div className="px-6 py-5">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 text-white">
+            <Sparkles size={18} />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-content-primary">
+                CWICR Vector Database — AI Semantic Search
+              </h3>
+              {isConnected ? (
+                <span className="flex items-center gap-1 text-2xs font-medium text-semantic-success">
+                  <span className="h-1.5 w-1.5 rounded-full bg-semantic-success" />
+                  Ready
+                </span>
+              ) : (
+                <span className="flex items-center gap-1 text-2xs font-medium text-content-quaternary">
+                  <span className="h-1.5 w-1.5 rounded-full bg-content-quaternary" />
+                  Offline
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-content-tertiary">
+              55,719 vectors per region &middot; 384d embeddings &middot; by Data Driven Construction
+            </p>
+          </div>
+        </div>
+
+        <p className="text-xs text-content-secondary mb-4">
+          Select your region to generate AI vector embeddings. Enables semantic
+          search — find cost items by meaning, not just keywords. E.g. &quot;concrete wall&quot; finds
+          &quot;reinforced partition C30/37&quot;.
+        </p>
+
+        {/* Not connected state */}
+        {!isConnected ? (
+          <div className="rounded-xl border border-amber-200/40 bg-amber-50/30 dark:bg-amber-500/5 dark:border-amber-500/10 p-4">
+            <p className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-1">
+              Vector search not available
+            </p>
+            <p className="text-xs text-content-tertiary">
+              Install <code className="text-2xs bg-surface-secondary px-1 py-0.5 rounded">pip install lancedb sentence-transformers</code> to enable AI semantic search. No Docker required.
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Region grid — same style as CWICR */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 mb-5">
+              {CWICR_DATABASES.map((db) => {
+                const isLoadingThis = loadingRegion === db.id;
+                const isVectorized = vectorizedRegions.has(db.id);
+                const vecCount = vectorCountByRegion[db.id] ?? 0;
+
+                return (
+                  <div
+                    key={db.id}
+                    className={`
+                      relative flex flex-col rounded-xl
+                      border transition-all duration-normal ease-oe
+                      ${
+                        isVectorized
+                          ? 'border-purple-400/40 bg-purple-50/20 dark:bg-purple-500/5'
+                          : isLoadingThis
+                            ? 'border-purple-400/40 bg-purple-50/30 dark:bg-purple-500/10'
+                            : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary'
+                      }
+                      ${isLoading && !isLoadingThis ? 'opacity-40 pointer-events-none' : ''}
+                    `}
+                  >
+                    <button
+                      onClick={() => handleLoadVectors(db)}
+                      disabled={isLoading}
+                      className="flex items-center gap-3 px-3.5 py-3 text-left active:scale-[0.98] transition-transform"
+                    >
+                      <MiniFlag code={db.flagId} />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-content-primary">
+                            {db.name}
+                          </span>
+                          {isVectorized && (
+                            <CheckCircle2
+                              size={14}
+                              className="text-purple-500 shrink-0"
+                            />
+                          )}
+                        </div>
+                        <div className="text-2xs text-content-tertiary">
+                          {db.city} &middot; {db.lang} &middot; {db.currency}
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          {isVectorized ? (
+                            <span className="text-2xs text-purple-600 font-medium">
+                              {vecCount.toLocaleString()} vectors
+                            </span>
+                          ) : (
+                            <span className="text-2xs text-content-quaternary">55,719 vectors</span>
+                          )}
+                          <Badge variant="blue" size="sm" className="text-2xs px-1.5 py-0">
+                            AI
+                          </Badge>
+                        </div>
+                      </div>
+                      {isLoadingThis && (
+                        <Loader2 size={16} className="animate-spin text-purple-500 shrink-0" />
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Summary stats */}
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              <div className="rounded-lg bg-surface-secondary p-3 text-center">
+                <div className="text-lg font-bold tabular-nums text-content-primary">
+                  {totalItems.toLocaleString()}
+                </div>
+                <div className="text-2xs text-content-tertiary">Cost items</div>
+              </div>
+              <div className="rounded-lg bg-surface-secondary p-3 text-center">
+                <div className={`text-lg font-bold tabular-nums ${indexedCount > 0 ? 'text-purple-600' : 'text-content-tertiary'}`}>
+                  {indexedCount.toLocaleString()}
+                </div>
+                <div className="text-2xs text-content-tertiary">Vectors indexed</div>
+              </div>
+              <div className="rounded-lg bg-surface-secondary p-3 text-center">
+                <div className={`text-lg font-bold ${isFullyIndexed ? 'text-semantic-success' : 'text-content-tertiary'}`}>
+                  {isFullyIndexed ? '100%' : indexedCount > 0 ? `${Math.round((indexedCount / Math.max(totalItems, 1)) * 100)}%` : '0%'}
+                </div>
+                <div className="text-2xs text-content-tertiary">Coverage</div>
+              </div>
+            </div>
+
+            {/* Last result */}
+            {lastResult && (
+              <div className="rounded-lg bg-semantic-success-bg/40 border border-semantic-success/20 px-4 py-3 mb-4">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 size={14} className="text-semantic-success" />
+                  <span className="text-xs font-medium text-[#15803d]">
+                    {lastResult.indexed.toLocaleString()} vectors indexed in {lastResult.duration}s
+                    {lastResult.region !== 'all' && ` (${CWICR_DATABASES.find((d) => d.id === lastResult.region)?.name ?? lastResult.region})`}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Generate locally fallback */}
+            <div className="flex items-center gap-3">
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={isIndexingAll ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                onClick={handleVectorizeAll}
+                disabled={!hasRegions || isLoading}
+              >
+                {isIndexingAll
+                  ? 'Generating Embeddings...'
+                  : isFullyIndexed
+                    ? 'Re-index All Regions'
+                    : 'Generate All Regions'}
+              </Button>
+              <span className="text-2xs text-content-tertiary">
+                Model: all-MiniLM-L6-v2 (384d) &middot; Runs on your machine &middot; No API key
+              </span>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Tech info strip */}
+      <div className="px-6 py-2.5 bg-surface-secondary/50 border-t border-border-light">
+        <div className="flex items-center gap-4 text-2xs text-content-quaternary">
+          <span>LanceDB embedded</span>
+          <span>&middot;</span>
+          <span>FastEmbed ONNX</span>
+          <span>&middot;</span>
+          <span>384d cosine similarity</span>
+          <span>&middot;</span>
+          <span>No Docker required</span>
+        </div>
       </div>
     </Card>
   );
@@ -543,6 +1152,9 @@ export function ImportDatabasePage() {
   const [preview, setPreview] = useState<FilePreview | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
+
+  // Suppress unused-variable warnings for items injected by the outer context
+  void queryClient;
 
   const handleFile = useCallback(
     (file: File) => {
@@ -616,7 +1228,6 @@ export function ImportDatabasePage() {
     },
     onSuccess: (data) => {
       setResult(data);
-      queryClient.invalidateQueries({ queryKey: ['costs'] });
       if (data.imported > 0) {
         addToast({
           type: 'success',
@@ -647,14 +1258,14 @@ export function ImportDatabasePage() {
 
   return (
     <div className="max-w-2xl mx-auto animate-fade-in">
-      {/* Back navigation */}
-      <button
-        onClick={() => navigate('/costs')}
-        className="mb-4 flex items-center gap-1.5 text-sm text-content-secondary hover:text-content-primary transition-colors"
-      >
-        <ArrowLeft size={14} />
-        {t('costs.title', { defaultValue: 'Cost Database' })}
-      </button>
+      {/* Breadcrumb */}
+      <Breadcrumb
+        className="mb-4"
+        items={[
+          { label: t('costs.title', 'Cost Database'), to: '/costs' },
+          { label: t('costs.import_title', 'Import Cost Database') },
+        ]}
+      />
 
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-content-primary">
@@ -662,13 +1273,12 @@ export function ImportDatabasePage() {
         </h1>
         <p className="mt-1 text-sm text-content-secondary">
           {t('costs.import_subtitle', {
-            defaultValue:
-              'Load a pricing database or upload your own file.',
+            defaultValue: 'Load a pricing database or upload your own file.',
           })}
         </p>
       </div>
 
-      {/* DDC CWICR Database — 9 regional databases */}
+      {/* DDC CWICR Database -- 11 regional databases */}
       <Card className="mb-6" padding="none">
         <div className="px-6 pt-5 pb-2">
           <div className="flex items-center gap-3 mb-1">
@@ -680,14 +1290,17 @@ export function ImportDatabasePage() {
                 CWICR Construction Cost Database
               </h3>
               <p className="text-xs text-content-tertiary">
-                55,719 items per region · 85 fields · by Data Driven Construction
+                55,719 items per region &middot; 85 fields &middot; 11 databases &middot; by
+                Data Driven Construction
               </p>
             </div>
           </div>
         </div>
         <div className="px-6 pb-5">
           <p className="text-xs text-content-secondary mb-4">
-            Select your region to load the professional pricing database. One click — instant access to 55,000+ construction cost items with labor, materials, and equipment rates.
+            Select your region to load the professional pricing database. One click -- instant
+            access to 55,000+ construction cost items with labor, materials, and equipment rates.
+            USA and UK databases are downloaded from GitHub if not available locally.
           </p>
           <CWICRDatabaseGrid onLoadDatabase={handleFile} />
         </div>
@@ -696,10 +1309,15 @@ export function ImportDatabasePage() {
       {/* Loaded Databases section */}
       <LoadedDatabasesSection />
 
+      {/* Vector Database section */}
+      <VectorDatabaseSection />
+
       {/* Divider */}
       <div className="flex items-center gap-3 mb-6">
         <div className="h-px flex-1 bg-border-light" />
-        <span className="text-xs font-medium text-content-tertiary uppercase tracking-wider">or upload your own file</span>
+        <span className="text-xs font-medium text-content-tertiary uppercase tracking-wider">
+          {t('costs.or_upload_own', { defaultValue: 'or upload your own file' })}
+        </span>
         <div className="h-px flex-1 bg-border-light" />
       </div>
 
@@ -746,7 +1364,9 @@ export function ImportDatabasePage() {
                 </div>
               </div>
               <div className="rounded-xl bg-semantic-error-bg/50 px-4 py-3 text-center">
-                <div className="text-2xl font-bold text-semantic-error">{result.errors.length}</div>
+                <div className="text-2xl font-bold text-semantic-error">
+                  {result.errors.length}
+                </div>
                 <div className="text-xs text-content-secondary mt-0.5">
                   {t('costs.import_errors', { defaultValue: 'Errors' })}
                 </div>
@@ -770,7 +1390,8 @@ export function ImportDatabasePage() {
                   ))}
                   {result.errors.length > 5 && (
                     <p className="text-xs text-content-tertiary">
-                      ...{t('costs.import_and_more', {
+                      ...
+                      {t('costs.import_and_more', {
                         defaultValue: 'and {{count}} more errors',
                         count: result.errors.length - 5,
                       })}

@@ -2,8 +2,11 @@ import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2, Send, X } from 'lucide-react';
-import { Button, Badge, Card, Input } from '@/shared/ui';
+import { ArrowLeft, Plus, Trash2, Send, X, Database, Search, Loader2, Check } from 'lucide-react';
+import { Button, Badge, Card, Input, Breadcrumb } from '@/shared/ui';
+import { apiGet } from '@/shared/lib/api';
+import { getIntlLocale } from '@/shared/lib/formatters';
+import { useToastStore } from '@/stores/useToastStore';
 import {
   assembliesApi,
   type AssemblyComponent,
@@ -23,6 +26,8 @@ export function AssemblyEditorPage() {
   const queryClient = useQueryClient();
 
   const [applyModalOpen, setApplyModalOpen] = useState(false);
+  const [costDbModalOpen, setCostDbModalOpen] = useState(false);
+  const addToast = useToastStore((s) => s.addToast);
 
   const { data: assembly, isLoading } = useQuery({
     queryKey: ['assembly', assemblyId],
@@ -33,33 +38,50 @@ export function AssemblyEditorPage() {
   const addComponentMutation = useMutation({
     mutationFn: (data: CreateComponentData) =>
       assembliesApi.addComponent(assemblyId!, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['assembly', assemblyId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assembly', assemblyId] });
+      addToast({ type: 'success', title: t('toasts.component_added', { defaultValue: 'Component added' }) });
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+    },
   });
 
   const updateComponentMutation = useMutation({
     mutationFn: ({ componentId, data }: { componentId: string; data: Partial<CreateComponentData> }) =>
       assembliesApi.updateComponent(assemblyId!, componentId, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['assembly', assemblyId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assembly', assemblyId] });
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.update_failed', { defaultValue: 'Update failed' }), message: error.message });
+    },
   });
 
   const deleteComponentMutation = useMutation({
     mutationFn: (componentId: string) =>
       assembliesApi.deleteComponent(assemblyId!, componentId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['assembly', assemblyId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assembly', assemblyId] });
+      addToast({ type: 'success', title: t('toasts.component_deleted', { defaultValue: 'Component deleted' }) });
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+    },
   });
 
   const handleAddComponent = useCallback(() => {
     addComponentMutation.mutate({
-      description: '',
+      description: 'New component',
       factor: 1,
-      quantity: 0,
-      unit: 'm2',
+      quantity: 1,
+      unit: assembly?.unit || 'm2',
       unit_cost: 0,
     });
-  }, [addComponentMutation]);
+  }, [addComponentMutation, assembly?.unit]);
 
   const fmt = (n: number) =>
-    new Intl.NumberFormat('de-DE', {
+    new Intl.NumberFormat(getIntlLocale(), {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(n);
@@ -67,7 +89,7 @@ export function AssemblyEditorPage() {
   if (isLoading) {
     return (
       <div className="max-w-content mx-auto py-8 text-center text-content-secondary animate-fade-in">
-        Loading assembly...
+        {t('assemblies.loading', { defaultValue: 'Loading assembly...' })}
       </div>
     );
   }
@@ -75,7 +97,7 @@ export function AssemblyEditorPage() {
   if (!assembly) {
     return (
       <div className="max-w-content mx-auto py-16 text-center">
-        <p className="text-content-secondary">Assembly not found</p>
+        <p className="text-content-secondary">{t('assemblies.not_found', { defaultValue: 'Assembly not found' })}</p>
       </div>
     );
   }
@@ -86,14 +108,14 @@ export function AssemblyEditorPage() {
 
   return (
     <div className="max-w-content mx-auto animate-fade-in">
-      {/* Back link */}
-      <button
-        onClick={() => navigate('/assemblies')}
-        className="mb-4 flex items-center gap-1.5 text-sm text-content-secondary hover:text-content-primary transition-colors"
-      >
-        <ArrowLeft size={14} />
-        {t('assemblies.title', 'Assemblies')}
-      </button>
+      {/* Breadcrumb */}
+      <Breadcrumb
+        className="mb-4"
+        items={[
+          { label: t('assemblies.title', 'Assemblies'), to: '/assemblies' },
+          { label: assembly.name },
+        ]}
+      />
 
       {/* Header */}
       <div className="mb-6 flex items-start justify-between gap-4">
@@ -118,7 +140,7 @@ export function AssemblyEditorPage() {
               <>
                 <span className="text-content-tertiary">/</span>
                 <span>
-                  Bid Factor:{' '}
+                  {t('assemblies.bid_factor', { defaultValue: 'Bid Factor' })}:{' '}
                   <strong className="text-content-primary">{assembly.bid_factor}</strong>
                 </span>
               </>
@@ -132,14 +154,23 @@ export function AssemblyEditorPage() {
             icon={<Send size={15} />}
             onClick={() => setApplyModalOpen(true)}
           >
-            Apply to BOQ
+            {t('assemblies.apply_to_boq', { defaultValue: 'Apply to BOQ' })}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<Database size={15} />}
+            onClick={() => setCostDbModalOpen(true)}
+            className="border-purple-300/30 text-purple-600 hover:bg-purple-50"
+          >
+            {t('assemblies.from_database', { defaultValue: 'From Database' })}
           </Button>
           <Button
             variant="primary"
             icon={<Plus size={16} />}
             onClick={handleAddComponent}
           >
-            Add Component
+            {t('assemblies.add_component', { defaultValue: 'Add Component' })}
           </Button>
         </div>
       </div>
@@ -151,22 +182,22 @@ export function AssemblyEditorPage() {
             <thead>
               <tr className="border-b border-border-light bg-surface-tertiary text-left">
                 <th className="px-4 py-3 font-medium text-content-secondary min-w-[280px]">
-                  Description
+                  {t('boq.description')}
                 </th>
                 <th className="px-4 py-3 font-medium text-content-secondary w-24 text-right">
-                  Factor
+                  {t('assemblies.factor', { defaultValue: 'Factor' })}
                 </th>
                 <th className="px-4 py-3 font-medium text-content-secondary w-24 text-right">
-                  Qty
+                  {t('boq.quantity', { defaultValue: 'Qty' })}
                 </th>
                 <th className="px-4 py-3 font-medium text-content-secondary w-20 text-center">
-                  Unit
+                  {t('boq.unit')}
                 </th>
                 <th className="px-4 py-3 font-medium text-content-secondary w-28 text-right">
-                  Unit Cost
+                  {t('assemblies.unit_cost', { defaultValue: 'Unit Cost' })}
                 </th>
                 <th className="px-4 py-3 font-medium text-content-secondary w-32 text-right">
-                  Total
+                  {t('boq.total', { defaultValue: 'Total' })}
                 </th>
                 <th className="px-4 py-3 w-10" />
               </tr>
@@ -189,7 +220,7 @@ export function AssemblyEditorPage() {
               {components.length === 0 && (
                 <tr>
                   <td colSpan={7} className="px-4 py-10 text-center text-content-tertiary">
-                    No components yet. Click "Add Component" to start building this assembly.
+                    {t('assemblies.no_components_hint', { defaultValue: 'No components yet. Click "Add Component" to start building this assembly.' })}
                   </td>
                 </tr>
               )}
@@ -199,7 +230,7 @@ export function AssemblyEditorPage() {
                 {assembly.bid_factor !== 1.0 && (
                   <tr className="border-t border-border-light bg-surface-tertiary/50">
                     <td colSpan={5} className="px-4 py-2.5 text-right text-sm text-content-secondary">
-                      Subtotal
+                      {t('assemblies.subtotal', { defaultValue: 'Subtotal' })}
                     </td>
                     <td className="px-4 py-2.5 text-right text-sm text-content-secondary tabular-nums">
                       {fmt(computedTotal)}
@@ -210,7 +241,7 @@ export function AssemblyEditorPage() {
                 {assembly.bid_factor !== 1.0 && (
                   <tr className="border-t border-border-light bg-surface-tertiary/50">
                     <td colSpan={5} className="px-4 py-2.5 text-right text-sm text-content-secondary">
-                      Bid Factor ({assembly.bid_factor})
+                      {t('assemblies.bid_factor', { defaultValue: 'Bid Factor' })} ({assembly.bid_factor})
                     </td>
                     <td className="px-4 py-2.5 text-right text-sm text-content-secondary tabular-nums">
                       x {assembly.bid_factor}
@@ -220,7 +251,7 @@ export function AssemblyEditorPage() {
                 )}
                 <tr className="border-t-2 border-border bg-surface-tertiary font-semibold">
                   <td colSpan={5} className="px-4 py-3 text-right text-content-primary">
-                    Total Rate
+                    {t('assemblies.total_rate', { defaultValue: 'Total Rate' })}
                   </td>
                   <td className="px-4 py-3 text-right text-content-primary text-base tabular-nums">
                     {fmt(adjustedTotal)}
@@ -244,9 +275,179 @@ export function AssemblyEditorPage() {
           onClose={() => setApplyModalOpen(false)}
         />
       )}
+
+      {/* Cost Database Search Modal */}
+      {costDbModalOpen && assemblyId && (
+        <CostDbSearchForAssembly
+          assemblyId={assemblyId}
+          onClose={() => setCostDbModalOpen(false)}
+          onAdded={() => {
+            setCostDbModalOpen(false);
+            queryClient.invalidateQueries({ queryKey: ['assembly', assemblyId] });
+            addToast({ type: 'success', title: t('assemblies.components_added_from_db', { defaultValue: 'Components added from cost database' }) });
+          }}
+        />
+      )}
     </div>
   );
 }
+
+/* -- Cost DB Search for Assembly ------------------------------------------ */
+
+interface CostSearchItem {
+  id: string;
+  code: string;
+  description: string;
+  unit: string;
+  rate: number;
+}
+
+function CostDbSearchForAssembly({
+  assemblyId,
+  onClose,
+  onAdded,
+}: {
+  assemblyId: string;
+  onClose: () => void;
+  onAdded: () => void;
+}) {
+  const { t } = useTranslation();
+  const [search, setSearch] = useState('');
+  const [adding, setAdding] = useState<Set<string>>(new Set());
+  const [added, setAdded] = useState<Set<string>>(new Set());
+  const addToast = useToastStore((s) => s.addToast);
+
+  const { data: items, isLoading } = useQuery({
+    queryKey: ['cost-search-assembly', search],
+    queryFn: () => {
+      const params = search.length >= 2 ? `q=${encodeURIComponent(search)}&limit=20` : 'limit=20';
+      return apiGet<{ items: CostSearchItem[] }>(`/v1/costs/?${params}`).then((r) => r.items);
+    },
+    retry: false,
+  });
+
+  const handleAdd = useCallback(
+    async (item: CostSearchItem) => {
+      setAdding((prev) => new Set(prev).add(item.id));
+      try {
+        await assembliesApi.addComponent(assemblyId, {
+          cost_item_id: item.id,
+          description: item.description,
+          unit: item.unit,
+          unit_cost: item.rate,
+          quantity: 1,
+          factor: 1.0,
+        });
+        setAdded((prev) => new Set(prev).add(item.id));
+        addToast({ type: 'success', title: t('common.added', { defaultValue: 'Added' }), message: (item.description || item.code).slice(0, 60) });
+      } catch {
+        addToast({ type: 'error', title: t('assemblies.add_failed', { defaultValue: 'Failed to add' }) });
+      } finally {
+        setAdding((prev) => {
+          const next = new Set(prev);
+          next.delete(item.id);
+          return next;
+        });
+      }
+    },
+    [assemblyId, addToast],
+  );
+
+  const fmt = (n: number) =>
+    new Intl.NumberFormat(getIntlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
+      <div
+        className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/30">
+              <Database size={18} />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-content-primary">{t('assemblies.add_from_cost_db', { defaultValue: 'Add from Cost Database' })}</h2>
+              <p className="text-xs text-content-tertiary">{t('assemblies.add_from_cost_db_desc', { defaultValue: 'Search and add cost items as assembly components' })}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="primary" size="sm" onClick={onAdded}>
+              {t('common.done', { defaultValue: 'Done' })}
+            </Button>
+            <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors">
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+
+        {/* Search */}
+        <div className="px-6 py-3 border-b border-border-light shrink-0">
+          <div className="relative">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-content-quaternary" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t('assemblies.search_cost_placeholder', { defaultValue: 'Search cost items by description or code...' })}
+              className="w-full h-9 pl-9 pr-3 rounded-lg border border-border-light bg-surface-primary text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400"
+              autoFocus
+            />
+          </div>
+        </div>
+
+        {/* Results */}
+        <div className="flex-1 overflow-y-auto px-6 py-3">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12 text-xs text-content-tertiary">
+              <Loader2 size={16} className="animate-spin mr-2" /> {t('common.searching', { defaultValue: 'Searching...' })}
+            </div>
+          ) : !items || items.length === 0 ? (
+            <div className="flex items-center justify-center py-12 text-xs text-content-tertiary">
+              {t('assemblies.no_cost_items_found', { defaultValue: 'No cost items found for' })} &quot;{search}&quot;
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {items.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-border-light px-3 py-2.5 hover:bg-surface-secondary/50 transition-colors"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-content-primary truncate">{item.description || item.code}</p>
+                    {item.description && <p className="text-2xs text-content-tertiary font-mono">{item.code}</p>}
+                  </div>
+                  <span className="text-xs text-content-secondary font-mono uppercase shrink-0">{item.unit}</span>
+                  <span className="text-sm font-semibold text-content-primary tabular-nums shrink-0 w-20 text-right">
+                    {fmt(item.rate)}
+                  </span>
+                  {added.has(item.id) ? (
+                    <span className="flex items-center gap-1 text-xs font-medium text-green-600 px-2">
+                      <Check size={14} /> {t('common.added', { defaultValue: 'Added' })}
+                    </span>
+                  ) : (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleAdd(item)}
+                      loading={adding.has(item.id)}
+                      disabled={adding.size > 0}
+                    >
+                      + {t('common.add', { defaultValue: 'Add' })}
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 /* -- Component Row (inline editable) -------------------------------------- */
 
@@ -261,6 +462,7 @@ function ComponentRow({
   onDelete: () => void;
   fmt: (n: number) => string;
 }) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState<string | null>(null);
 
   const handleBlur = (field: string, value: string) => {
@@ -288,7 +490,7 @@ function ComponentRow({
           setEditing={setEditing}
           onBlur={handleBlur}
           className={inputClass}
-          placeholder="Enter description..."
+          placeholder={t('assemblies.enter_description', { defaultValue: 'Enter description...' })}
         />
       </td>
 
@@ -423,6 +625,8 @@ function ApplyToBOQModal({
   assemblyName: string;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
   const [boqId, setBoqId] = useState('');
   const [quantity, setQuantity] = useState('1');
 
@@ -430,7 +634,11 @@ function ApplyToBOQModal({
     mutationFn: () =>
       assembliesApi.applyToBoq(assemblyId, boqId, parseFloat(quantity) || 1),
     onSuccess: () => {
+      addToast({ type: 'success', title: t('toasts.assembly_applied', { defaultValue: 'Assembly applied to BOQ' }) });
       onClose();
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
     },
   });
 
@@ -453,7 +661,7 @@ function ApplyToBOQModal({
         <Card>
           <div className="flex items-start justify-between mb-5">
             <div>
-              <h2 className="text-lg font-semibold text-content-primary">Apply to BOQ</h2>
+              <h2 className="text-lg font-semibold text-content-primary">{t('assemblies.apply_to_boq', { defaultValue: 'Apply to BOQ' })}</h2>
               <p className="mt-0.5 text-sm text-content-secondary line-clamp-1">
                 {assemblyName}
               </p>
@@ -468,32 +676,32 @@ function ApplyToBOQModal({
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
-              label="BOQ ID"
+              label={t('assemblies.boq_id_label', { defaultValue: 'BOQ ID' })}
               value={boqId}
               onChange={(e) => setBoqId(e.target.value)}
-              placeholder="Enter the BOQ identifier..."
+              placeholder={t('assemblies.boq_id_placeholder', { defaultValue: 'Enter the BOQ identifier...' })}
               required
               autoFocus
             />
 
             <Input
-              label="Quantity"
+              label={t('boq.quantity', { defaultValue: 'Quantity' })}
               type="number"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               placeholder="1"
-              hint="Number of times to apply this assembly"
+              hint={t('assemblies.quantity_hint', { defaultValue: 'Number of times to apply this assembly' })}
             />
 
             {applyMutation.error && (
               <div className="rounded-lg bg-semantic-error-bg px-3 py-2 text-sm text-semantic-error">
-                {(applyMutation.error as Error).message || 'Failed to apply assembly to BOQ'}
+                {(applyMutation.error as Error).message || t('assemblies.apply_failed', { defaultValue: 'Failed to apply assembly to BOQ' })}
               </div>
             )}
 
             <div className="flex items-center justify-end gap-3 pt-1">
               <Button variant="secondary" type="button" onClick={onClose}>
-                Cancel
+                {t('common.cancel', { defaultValue: 'Cancel' })}
               </Button>
               <Button
                 variant="primary"
@@ -501,7 +709,7 @@ function ApplyToBOQModal({
                 loading={applyMutation.isPending}
                 icon={<Send size={15} />}
               >
-                Apply
+                {t('common.apply', { defaultValue: 'Apply' })}
               </Button>
             </div>
           </form>

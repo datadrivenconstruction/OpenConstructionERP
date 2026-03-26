@@ -15,15 +15,15 @@ import {
   CheckCircle2,
   Database,
 } from 'lucide-react';
-import { Logo, Button, Input } from '@/shared/ui';
+import { Logo, Button, Input, CountryFlag } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { projectsApi, type CreateProjectData } from '@/features/projects/api';
 import { aiApi, type AIProvider } from '@/features/ai/api';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
 const TOTAL_STEPS = 4;
-const TOKEN_KEY = 'oe_access_token';
 
 interface RegionPreset {
   id: string;
@@ -125,20 +125,9 @@ export function isOnboardingCompleted(): boolean {
   }
 }
 
-/** Mini flag component using flagcdn.com */
+/** Mini flag component — uses bundled inline SVGs */
 function MiniFlag({ code }: { code: string }) {
-  return (
-    <img
-      src={`https://flagcdn.com/w40/${code}.png`}
-      srcSet={`https://flagcdn.com/w80/${code}.png 2x`}
-      width="32"
-      height="20"
-      alt={code}
-      className="rounded-sm shrink-0 shadow-xs border border-black/5 object-cover"
-      style={{ width: 32, height: 20 }}
-      loading="lazy"
-    />
-  );
+  return <CountryFlag code={code} size={32} className="shadow-xs border border-black/5" />;
 }
 
 // ── Progress Bar ─────────────────────────────────────────────────────────────
@@ -262,7 +251,7 @@ function StepCostDatabase({
       setLoading(db.id);
 
       try {
-        const token = localStorage.getItem(TOKEN_KEY);
+        const token = useAuthStore.getState().accessToken;
         const res = await fetch(`/api/v1/costs/load-cwicr/${db.id}`, {
           method: 'POST',
           headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -297,7 +286,7 @@ function StepCostDatabase({
           });
         }
       } catch {
-        addToast({ type: 'error', title: 'Connection error' });
+        addToast({ type: 'error', title: t('common.connection_error', { defaultValue: 'Connection error' }) });
       } finally {
         setLoading(null);
       }

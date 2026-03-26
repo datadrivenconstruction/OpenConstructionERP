@@ -12,7 +12,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, Query
 
-from app.dependencies import CurrentUserId, SessionDep, SettingsDep
+from app.dependencies import CurrentUserId, CurrentUserPayload, SessionDep, SettingsDep
 from app.modules.projects.schemas import ProjectCreate, ProjectResponse, ProjectUpdate
 from app.modules.projects.service import ProjectService
 
@@ -43,17 +43,20 @@ async def create_project(
 @router.get("/", response_model=list[ProjectResponse])
 async def list_projects(
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
     service: ProjectService = Depends(_get_service),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
     status: str | None = Query(default=None, pattern=r"^(active|archived|template)$"),
 ) -> list[ProjectResponse]:
-    """List projects for the current user."""
+    """List projects. Admins see all, others see only own projects."""
+    is_admin = payload.get("role") == "admin"
     projects, _ = await service.list_projects(
         uuid.UUID(user_id),
         offset=offset,
         limit=limit,
         status_filter=status,
+        is_admin=is_admin,
     )
     return [ProjectResponse.model_validate(p) for p in projects]
 

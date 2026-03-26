@@ -17,6 +17,14 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
+
+_logger_ev = __import__('logging').getLogger(__name__ + '.events')
+
+async def _safe_publish(name: str, data: dict, source_module: str = '') -> None:
+    try:
+        await event_bus.publish(name, data, source_module=source_module)
+    except Exception:
+        _logger_ev.debug('Event publish skipped: %s', name)
 from app.modules.assemblies.models import Assembly, Component
 from app.modules.assemblies.repository import AssemblyRepository, ComponentRepository
 from app.modules.assemblies.schemas import (
@@ -126,7 +134,7 @@ class AssemblyService:
         )
         assembly = await self.assembly_repo.create(assembly)
 
-        await event_bus.publish(
+        await _safe_publish(
             "assemblies.assembly.created",
             {"assembly_id": str(assembly.id), "code": data.code},
             source_module="oe_assemblies",
@@ -211,7 +219,7 @@ class AssemblyService:
             if "bid_factor" in fields:
                 await self._recalculate_total(assembly_id)
 
-            await event_bus.publish(
+            await _safe_publish(
                 "assemblies.assembly.updated",
                 {"assembly_id": str(assembly_id), "fields": list(fields.keys())},
                 source_module="oe_assemblies",
@@ -228,7 +236,7 @@ class AssemblyService:
 
         await self.assembly_repo.delete(assembly_id)
 
-        await event_bus.publish(
+        await _safe_publish(
             "assemblies.assembly.deleted",
             {"assembly_id": str(assembly_id), "code": assembly.code},
             source_module="oe_assemblies",
@@ -277,7 +285,7 @@ class AssemblyService:
         # Recalculate assembly total
         await self._recalculate_total(assembly_id)
 
-        await event_bus.publish(
+        await _safe_publish(
             "assemblies.component.created",
             {
                 "component_id": str(component.id),
@@ -341,7 +349,7 @@ class AssemblyService:
         if fields:
             await self.component_repo.update_fields(component_id, **fields)
 
-            await event_bus.publish(
+            await _safe_publish(
                 "assemblies.component.updated",
                 {
                     "component_id": str(component_id),
@@ -381,7 +389,7 @@ class AssemblyService:
         # Recalculate assembly total after removal
         await self._recalculate_total(assembly_id)
 
-        await event_bus.publish(
+        await _safe_publish(
             "assemblies.component.deleted",
             {
                 "component_id": str(component_id),
@@ -513,6 +521,28 @@ class AssemblyService:
 
         ordinal = data.ordinal if data.ordinal else f"ASM-{assembly.code}"
 
+        # Build resource list from assembly components
+        resources = []
+        for comp in assembly.components:
+            res_type = "material"  # default
+            desc_lower = (comp.description or "").lower()
+            if any(w in desc_lower for w in ("labor", "worker", "crew", "работ", "труд")):
+                res_type = "labor"
+            elif any(w in desc_lower for w in ("equip", "machine", "crane", "техник", "механ")):
+                res_type = "equipment"
+            elif any(w in desc_lower for w in ("operator", "оператор", "машинист")):
+                res_type = "operator"
+
+            resources.append({
+                "name": comp.description or "",
+                "code": "",
+                "type": res_type,
+                "unit": comp.unit or "",
+                "quantity": _str_to_float(comp.quantity),
+                "unit_rate": _str_to_float(comp.unit_cost),
+                "total": _str_to_float(comp.total),
+            })
+
         position_data = PositionCreate(
             boq_id=data.boq_id,
             ordinal=ordinal,
@@ -528,13 +558,14 @@ class AssemblyService:
                 "bid_factor": assembly.bid_factor,
                 "region": data.region,
                 "currency": assembly.currency,
+                "resources": resources,
             },
         )
 
         boq_service = BOQService(self.session)
         position = await boq_service.add_position(position_data)
 
-        await event_bus.publish(
+        await _safe_publish(
             "assemblies.applied_to_boq",
             {
                 "assembly_id": str(assembly_id),
@@ -625,7 +656,7 @@ class AssemblyService:
         if cloned_components:
             await self.component_repo.bulk_create(cloned_components)
 
-        await event_bus.publish(
+        await _safe_publish(
             "assemblies.assembly.cloned",
             {
                 "source_id": str(assembly_id),

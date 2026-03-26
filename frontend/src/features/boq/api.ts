@@ -27,7 +27,9 @@ export interface Position {
   confidence: number | null;
   validation_status: string;
   sort_order: number;
+  /** Backend returns `metadata_` (aliased) — normalize to `metadata` in fetch layer */
   metadata: Record<string, unknown>;
+  metadata_?: Record<string, unknown>;
 }
 
 export interface BOQWithPositions extends BOQ {
@@ -41,8 +43,16 @@ export interface Markup {
   id: string;
   boq_id: string;
   name: string;
+  markup_type: 'percentage' | 'fixed' | 'per_unit';
+  category: 'overhead' | 'profit' | 'tax' | 'contingency' | 'insurance' | 'bond' | 'other';
   percentage: number;
+  fixed_amount: number;
+  apply_to: 'direct_cost' | 'subtotal' | 'cumulative';
   sort_order: number;
+  is_active: boolean;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface MarkupsResponse {
@@ -51,12 +61,24 @@ export interface MarkupsResponse {
 
 export interface CreateMarkupData {
   name: string;
-  percentage: number;
+  markup_type?: string;
+  category?: string;
+  percentage?: number;
+  fixed_amount?: number;
+  apply_to?: string;
+  sort_order?: number;
+  is_active?: boolean;
 }
 
 export interface UpdateMarkupData {
   name?: string;
+  markup_type?: string;
+  category?: string;
   percentage?: number;
+  fixed_amount?: number;
+  apply_to?: string;
+  sort_order?: number;
+  is_active?: boolean;
 }
 
 /* ── Create / Update payloads ────────────────────────────────────────── */
@@ -86,13 +108,33 @@ export interface UpdatePositionData {
   unit_rate?: number;
   classification?: Record<string, string>;
   parent_id?: string | null;
+  source?: string;
+  metadata?: Record<string, unknown>;
+  sort_order?: number;
+}
+
+/* ── Normalize backend metadata_ → metadata ─────────────────────── */
+
+/** Backend returns `metadata_` due to SQLAlchemy naming. Normalize to `metadata`. */
+export function normalizePosition(p: Position): Position {
+  if (!p.metadata && p.metadata_) {
+    return { ...p, metadata: p.metadata_ };
+  }
+  if (!p.metadata) {
+    return { ...p, metadata: {} };
+  }
+  return p;
+}
+
+export function normalizePositions(positions: Position[]): Position[] {
+  return positions.map(normalizePosition);
 }
 
 /* ── Section helpers (used on the frontend to group positions) ────── */
 
 /** A section is a position with no unit (acts as a group header). */
 export function isSection(pos: Position): boolean {
-  return !pos.unit || pos.unit.trim() === '';
+  return !pos.unit || pos.unit.trim() === '' || pos.unit.trim().toLowerCase() === 'section';
 }
 
 /**
@@ -179,7 +221,31 @@ export interface ActivityResponse {
   total: number;
 }
 
+export interface ProjectActivityEntry {
+  id: string;
+  project_id: string | null;
+  boq_id: string | null;
+  user_id: string;
+  action: string;
+  target_type: string;
+  target_id: string | null;
+  description: string;
+  changes: Record<string, unknown>;
+  metadata: Record<string, unknown>;
+  created_at: string;
+}
+
 /* ── Cost autocomplete types ─────────────────────────────────────────── */
+
+export interface CostItemComponent {
+  name: string;
+  code?: string;
+  unit: string;
+  quantity: number;
+  unit_rate: number;
+  cost: number;
+  type: string;
+}
 
 export interface CostAutocompleteItem {
   code: string;
@@ -187,6 +253,7 @@ export interface CostAutocompleteItem {
   unit: string;
   rate: number;
   classification: Record<string, string>;
+  components: CostItemComponent[];
 }
 
 /* ── AI Chat types ──────────────────────────────────────────────────── */
@@ -201,6 +268,7 @@ export interface AIChatContext {
 export interface AIChatRequest {
   message: string;
   context: AIChatContext;
+  locale?: string;
 }
 
 export interface AIChatItem {
@@ -217,6 +285,215 @@ export interface AIChatResponse {
   message: string;
 }
 
+/* ── Cost Breakdown types ─────────────────────────────────────────── */
+
+export interface CostBreakdownCategory {
+  type: string;
+  amount: number;
+  percentage: number;
+  item_count: number;
+}
+
+export interface CostBreakdownMarkup {
+  name: string;
+  percentage: number;
+  amount: number;
+}
+
+export interface CostBreakdownResource {
+  name: string;
+  type: string;
+  total_cost: number;
+  positions_count: number;
+}
+
+export interface CostBreakdownResponse {
+  boq_id: string;
+  grand_total: number;
+  direct_cost: number;
+  categories: CostBreakdownCategory[];
+  markups: CostBreakdownMarkup[];
+  top_resources: CostBreakdownResource[];
+}
+
+/* ── Resource Summary types ────────────────────────────────────────── */
+
+export interface ResourceSummaryItem {
+  name: string;
+  type: string;
+  unit: string;
+  total_quantity: number;
+  avg_unit_rate: number;
+  total_cost: number;
+  positions_used: number;
+}
+
+export interface ResourceTypeSummary {
+  count: number;
+  total_cost: number;
+}
+
+export interface ResourceSummaryResponse {
+  total_resources: number;
+  by_type: Record<string, ResourceTypeSummary>;
+  resources: ResourceSummaryItem[];
+}
+
+/* ── Sensitivity Analysis types ───────────────────────────────────────── */
+
+export interface SensitivityItem {
+  ordinal: string;
+  description: string;
+  total: number;
+  share_pct: number;
+  impact_low: number;
+  impact_high: number;
+}
+
+export interface SensitivityResponse {
+  base_total: number;
+  variation_pct: number;
+  items: SensitivityItem[];
+}
+
+/* ── BOQ Snapshot / Version History types ─────────────────────────────── */
+
+export interface BOQSnapshot {
+  id: string;
+  boq_id: string;
+  name: string;
+  position_count?: number;
+  grand_total?: number;
+  created_at: string;
+  created_by: string | null;
+}
+
+/* ── AACE Estimate Classification types ──────────────────────────────── */
+
+export interface EstimateClassificationMetrics {
+  total_positions: number;
+  positions_with_rates: number;
+  positions_with_resources: number;
+  positions_with_classification: number;
+  rate_completeness_pct: number;
+  resource_completeness_pct: number;
+  classification_completeness_pct: number;
+}
+
+export interface EstimateClassificationResponse {
+  estimate_class: number;
+  class_label: string;
+  accuracy_low: string;
+  accuracy_high: string;
+  definition_level_low: number;
+  definition_level_high: number;
+  methodology: string;
+  metrics: EstimateClassificationMetrics;
+}
+
+/* ── Monte Carlo Cost Risk types ─────────────────────────────────────── */
+
+export interface CostRiskHistogramBin {
+  bin_start: number;
+  bin_end: number;
+  count: number;
+}
+
+export interface CostRiskDriver {
+  ordinal: string;
+  description: string;
+  contribution_pct: number;
+}
+
+export interface CostRiskPercentiles {
+  p10: number;
+  p25: number;
+  p50: number;
+  p75: number;
+  p80: number;
+  p90: number;
+}
+
+export interface CostRiskResponse {
+  iterations: number;
+  base_total: number;
+  percentiles: CostRiskPercentiles;
+  contingency_p80: number;
+  contingency_pct: number;
+  recommended_budget: number;
+  histogram: CostRiskHistogramBin[];
+  risk_drivers: CostRiskDriver[];
+}
+
+/* ── AI Classification types ─────────────────────────────────────────── */
+
+export interface ClassificationSuggestion {
+  standard: string;
+  code: string;
+  label: string;
+  confidence: number;
+}
+
+export interface ClassifyResponse {
+  suggestions: ClassificationSuggestion[];
+}
+
+/* ── AI Rate Suggestion types ────────────────────────────────────────── */
+
+export interface RateMatch {
+  code: string;
+  description: string;
+  rate: number;
+  region: string;
+  score: number;
+}
+
+export interface SuggestRateResponse {
+  suggested_rate: number;
+  confidence: number;
+  source: string;
+  matches: RateMatch[];
+}
+
+/* ── Anomaly Detection types ─────────────────────────────────────────── */
+
+export interface PricingAnomaly {
+  position_id: string;
+  field: string;
+  current_value: number;
+  market_range: { p25: number; median: number; p75: number };
+  severity: 'warning' | 'error';
+  message: string;
+  suggestion: number;
+}
+
+export interface AnomalyCheckResponse {
+  anomalies: PricingAnomaly[];
+  positions_checked: number;
+}
+
+/* ── AI Cost Finder types ─────────────────────────────────────────── */
+
+export interface CostItemSearchResult {
+  id: string;
+  code: string;
+  description: string;
+  unit: string;
+  rate: number;
+  region: string;
+  score: number;
+  classification: Record<string, string>;
+  components: { description: string; unit: string; rate: number }[];
+  currency: string;
+}
+
+export interface CostItemSearchResponse {
+  results: CostItemSearchResult[];
+  total_found: number;
+  query_embedding_ms: number;
+  search_ms: number;
+}
+
 /* ── API client ──────────────────────────────────────────────────────── */
 
 export const boqApi = {
@@ -224,11 +501,16 @@ export const boqApi = {
   list: (projectId: string) => apiGet<BOQ[]>(`/v1/boq/boqs/?project_id=${projectId}`),
   get: (boqId: string) => apiGet<BOQWithPositions>(`/v1/boq/boqs/${boqId}`),
   create: (data: CreateBOQData) => apiPost<BOQ>('/v1/boq/boqs/', data),
+  deleteBoq: (boqId: string) => apiDelete(`/v1/boq/boqs/${boqId}`),
 
   /* Duplicate */
   duplicateBoq: (boqId: string) => apiPost<BOQ>(`/v1/boq/boqs/${boqId}/duplicate`, {}),
   duplicatePosition: (posId: string) =>
     apiPost<Position>(`/v1/boq/positions/${posId}/duplicate`, {}),
+
+  /* Section */
+  addSection: (boqId: string, data: { ordinal: string; description: string }) =>
+    apiPost<Position>(`/v1/boq/boqs/${boqId}/sections`, { boq_id: boqId, ...data }),
 
   /* Position CRUD */
   addPosition: (data: CreatePositionData) =>
@@ -241,19 +523,218 @@ export const boqApi = {
   getMarkups: (boqId: string) => apiGet<MarkupsResponse>(`/v1/boq/boqs/${boqId}/markups`),
   addMarkup: (boqId: string, data: CreateMarkupData) =>
     apiPost<Markup>(`/v1/boq/boqs/${boqId}/markups`, data),
-  updateMarkup: (markupId: string, data: UpdateMarkupData) =>
-    apiPatch<Markup>(`/v1/boq/markups/${markupId}`, data),
-  deleteMarkup: (markupId: string) => apiDelete(`/v1/boq/markups/${markupId}`),
+  updateMarkup: (boqId: string, markupId: string, data: UpdateMarkupData) =>
+    apiPatch<Markup>(`/v1/boq/boqs/${boqId}/markups/${markupId}`, data),
+  deleteMarkup: (boqId: string, markupId: string) =>
+    apiDelete(`/v1/boq/boqs/${boqId}/markups/${markupId}`),
+  applyDefaults: (boqId: string, region: string) =>
+    apiPost<Markup[]>(`/v1/boq/boqs/${boqId}/markups/apply-defaults?region=${encodeURIComponent(region)}`, {}),
 
   /* Activity */
-  getActivity: (boqId: string) =>
-    apiGet<ActivityResponse>(`/v1/boq/boqs/${boqId}/activity`),
+  getActivity: async (boqId: string): Promise<ActivityResponse> => {
+    const raw = await apiGet<{
+      items: Array<{
+        id: string;
+        boq_id: string;
+        user_id: string;
+        action: string;
+        description: string;
+        changes?: Record<string, unknown>;
+        metadata_?: Record<string, unknown>;
+        metadata?: Record<string, unknown>;
+        created_at: string;
+      }>;
+      total: number;
+    }>(`/v1/boq/boqs/${boqId}/activity`);
+    return {
+      activities: (raw.items ?? []).map((item) => ({
+        id: item.id,
+        boq_id: item.boq_id ?? boqId,
+        action: item.action as ActivityAction,
+        description: item.description,
+        details: item.changes ?? item.metadata_ ?? item.metadata ?? {},
+        created_at: item.created_at,
+        user_name: undefined,
+      })),
+      total: raw.total ?? 0,
+    };
+  },
+  getProjectActivity: (projectId: string, limit = 10) =>
+    apiGet<{ items: ProjectActivityEntry[]; total: number }>(
+      `/v1/boq/projects/${projectId}/activity?limit=${limit}`,
+    ),
 
-  /* Cost autocomplete */
-  autocomplete: (q: string, limit = 8) =>
-    apiGet<CostAutocompleteItem[]>(`/v1/costs/autocomplete?q=${encodeURIComponent(q)}&limit=${limit}`),
+  /* Cost autocomplete — uses vector semantic search when available */
+  autocomplete: (q: string, limit = 8, region?: string) => {
+    const params = new URLSearchParams({ q, limit: String(limit), semantic: 'true' });
+    if (region) params.set('region', region);
+    return apiGet<CostAutocompleteItem[]>(`/v1/costs/autocomplete?${params.toString()}`);
+  },
 
   /* AI Chat */
   aiChat: (boqId: string, data: AIChatRequest) =>
     apiPost<AIChatResponse>(`/v1/boq/boqs/${boqId}/ai-chat`, data),
+
+  /* Recalculate rates from resource breakdowns */
+  recalculateRates: (boqId: string) =>
+    apiPost<{ updated: number; skipped: number; total: number }>(
+      `/v1/boq/boqs/${boqId}/recalculate-rates`,
+      {},
+    ),
+
+  /* Resource Summary */
+  getResourceSummary: (boqId: string) =>
+    apiGet<ResourceSummaryResponse>(`/v1/boq/boqs/${boqId}/resource-summary`),
+
+  /* Cost Breakdown */
+  getCostBreakdown: (boqId: string) =>
+    apiGet<CostBreakdownResponse>(`/v1/boq/boqs/${boqId}/cost-breakdown`),
+
+  /* AACE Estimate Classification */
+  getClassification: (boqId: string) =>
+    apiGet<EstimateClassificationResponse>(`/v1/boq/boqs/${boqId}/classification`),
+
+  /* Sensitivity Analysis */
+  getSensitivity: (boqId: string, variationPct = 10) =>
+    apiGet<SensitivityResponse>(
+      `/v1/boq/boqs/${boqId}/sensitivity?variation_pct=${variationPct}`,
+    ),
+
+  /* Monte Carlo Cost Risk */
+  getCostRisk: (boqId: string, iterations = 1000) =>
+    apiGet<CostRiskResponse>(
+      `/v1/boq/boqs/${boqId}/cost-risk?iterations=${iterations}`,
+    ),
+
+  /* Snapshot / Version History */
+  getSnapshots: (boqId: string) =>
+    apiGet<BOQSnapshot[]>(`/v1/boq/boqs/${boqId}/snapshots`),
+  createSnapshot: (boqId: string, label?: string) =>
+    apiPost<BOQSnapshot>(`/v1/boq/boqs/${boqId}/snapshots`, { name: label ?? '' }),
+  restoreSnapshot: (boqId: string, snapshotId: string) =>
+    apiPost<{ ok: boolean }>(`/v1/boq/boqs/${boqId}/restore/${snapshotId}`, {}),
+
+  /* Enrich positions with resources from cost database */
+  enrichResources: (boqId: string) =>
+    apiPost<{ enriched_count: number; total_positions: number }>(
+      `/v1/boq/boqs/${boqId}/enrich-resources`,
+      {},
+    ),
+
+  /* AI: Classify position */
+  classify: (data: { description: string; unit?: string; project_standard?: string }) =>
+    apiPost<ClassifyResponse>('/v1/boq/boqs/classify', data),
+
+  /* AI: Suggest rate */
+  suggestRate: (data: { description: string; unit?: string; classification?: Record<string, string>; region?: string }) =>
+    apiPost<SuggestRateResponse>('/v1/boq/boqs/suggest-rate', data),
+
+  /* AI: Check anomalies */
+  checkAnomalies: (boqId: string) =>
+    apiPost<AnomalyCheckResponse>(`/v1/boq/boqs/${boqId}/check-anomalies`, {}),
+
+  /* AI: Search cost items (vector similarity) */
+  searchCostItems: (data: {
+    query: string;
+    unit?: string;
+    region?: string;
+    limit?: number;
+    min_score?: number;
+  }) => apiPost<CostItemSearchResponse>('/v1/boq/boqs/search-cost-items', data),
+
+  /* AI: Enhance description via LLM */
+  enhanceDescription: (data: {
+    description: string;
+    unit?: string;
+    classification?: Record<string, string>;
+    locale?: string;
+  }) => apiPost<EnhanceDescriptionResponse>('/v1/boq/boqs/enhance-description', data),
+
+  /* AI: Suggest prerequisites via LLM */
+  suggestPrerequisites: (data: {
+    description: string;
+    unit?: string;
+    classification?: Record<string, string>;
+    existing_descriptions?: string[];
+    locale?: string;
+  }) => apiPost<SuggestPrerequisitesResponse>('/v1/boq/boqs/suggest-prerequisites', data),
+
+  /* AI: Check scope completeness via LLM */
+  checkScope: (boqId: string, data: {
+    project_type?: string;
+    region?: string;
+    currency?: string;
+    locale?: string;
+  }) => apiPost<CheckScopeResponse>(`/v1/boq/boqs/${boqId}/check-scope`, data),
+
+  /* AI: Escalate rate via LLM */
+  escalateRate: (data: {
+    description: string;
+    unit: string;
+    rate: number;
+    currency?: string;
+    base_year?: number;
+    target_year?: number;
+    region?: string;
+  }) => apiPost<EscalateRateResponse>('/v1/boq/boqs/escalate-rate', data),
 };
+
+/* ── LLM AI feature types ───────────────────────────────────────────── */
+
+export interface EnhanceDescriptionResponse {
+  enhanced_description: string;
+  specifications: string[];
+  standards: string[];
+  confidence: number;
+  model_used: string;
+  tokens_used: number;
+}
+
+export interface PrerequisiteItem {
+  description: string;
+  unit: string;
+  typical_rate_eur: number;
+  relationship: 'prerequisite' | 'companion' | 'successor';
+  reason: string;
+}
+
+export interface SuggestPrerequisitesResponse {
+  suggestions: PrerequisiteItem[];
+  model_used: string;
+  tokens_used: number;
+}
+
+export interface ScopeMissingItem {
+  description: string;
+  category: string;
+  priority: 'high' | 'medium' | 'low';
+  reason: string;
+  estimated_rate: number;
+  unit: string;
+}
+
+export interface CheckScopeResponse {
+  completeness_score: number;
+  missing_items: ScopeMissingItem[];
+  warnings: string[];
+  summary: string;
+  model_used: string;
+  tokens_used: number;
+}
+
+export interface EscalationFactors {
+  material_inflation: number;
+  labor_cost_change: number;
+  regional_adjustment: number;
+}
+
+export interface EscalateRateResponse {
+  original_rate: number;
+  escalated_rate: number;
+  escalation_percent: number;
+  factors: EscalationFactors;
+  confidence: 'high' | 'medium' | 'low';
+  reasoning: string;
+  model_used: string;
+  tokens_used: number;
+}

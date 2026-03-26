@@ -70,6 +70,43 @@ export interface Snapshot {
   created_at: string;
 }
 
+export interface EVMData {
+  bac: number;
+  pv: number;
+  ev: number;
+  ac: number;
+  sv: number;
+  cv: number;
+  spi: number;
+  cpi: number;
+  eac: number;
+  etc: number;
+  vac: number;
+  tcpi: number;
+  time_elapsed_pct: number;
+  schedule_progress_pct: number;
+  status: string;
+}
+
+export interface WhatIfAdjustments {
+  name: string;
+  material_cost_pct: number;
+  labor_cost_pct: number;
+  duration_pct: number;
+}
+
+export interface WhatIfResult {
+  scenario_name: string;
+  original_bac: number;
+  adjusted_bac: number;
+  original_eac: number;
+  adjusted_eac: number;
+  delta: number;
+  delta_pct: number;
+  adjustments_applied: Record<string, number>;
+  snapshot_id: string | null;
+}
+
 export const costModelApi = {
   getDashboard: (projectId: string) =>
     apiGet<DashboardData>(`/v1/costmodel/projects/${projectId}/5d/dashboard`),
@@ -93,4 +130,8 @@ export const costModelApi = {
     apiGet<Snapshot[]>(`/v1/costmodel/projects/${projectId}/5d/snapshots`),
   generateCashFlow: (projectId: string) =>
     apiPost(`/v1/costmodel/projects/${projectId}/5d/generate-cash-flow`, {}),
+  getEVM: (projectId: string) =>
+    apiGet<EVMData>(`/v1/costmodel/projects/${projectId}/5d/evm`),
+  createWhatIfScenario: (projectId: string, data: WhatIfAdjustments) =>
+    apiPost<WhatIfResult>(`/v1/costmodel/projects/${projectId}/5d/what-if`, data),
 };

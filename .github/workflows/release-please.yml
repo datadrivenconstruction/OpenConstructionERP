@@ -1,0 +1,28 @@
+# OpenEstimate — Automated Release Management
+#
+# Uses release-please to:
+# 1. Watch Conventional Commits on main
+# 2. Create/update a "Release PR" with bumped version + CHANGELOG
+# 3. On merge of Release PR -> creates git tag -> triggers release.yml
+
+name: Release Please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

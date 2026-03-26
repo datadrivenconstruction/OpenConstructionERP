@@ -85,6 +85,13 @@ class Component(Base):
         nullable=True,
         index=True,
     )
+    catalog_resource_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_catalog_resource.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+        doc="Link to catalog resource (material, equipment, labor)",
+    )
     description: Mapped[str] = mapped_column(String(500), nullable=False)
     factor: Mapped[str] = mapped_column(String(50), nullable=False, default="1.0")
     quantity: Mapped[str] = mapped_column(String(50), nullable=False, default="1.0")

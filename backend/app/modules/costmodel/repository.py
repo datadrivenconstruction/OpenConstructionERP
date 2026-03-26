@@ -85,6 +85,9 @@ class SnapshotRepository:
         """Update specific fields on a snapshot."""
         stmt = update(CostSnapshot).where(CostSnapshot.id == snapshot_id).values(**fields)
         await self.session.execute(stmt)
+        await self.session.flush()
+        # Expire cached ORM instances so the next get_by_id re-reads from DB
+        self.session.expire_all()
 
     async def delete(self, snapshot_id: uuid.UUID) -> None:
         """Delete a snapshot."""
@@ -219,6 +222,9 @@ class BudgetLineRepository:
         """Update specific fields on a budget line."""
         stmt = update(BudgetLine).where(BudgetLine.id == line_id).values(**fields)
         await self.session.execute(stmt)
+        await self.session.flush()
+        # Expire cached ORM instances so the next get_by_id re-reads from DB
+        self.session.expire_all()
 
     async def delete(self, line_id: uuid.UUID) -> None:
         """Delete a budget line."""
@@ -297,6 +303,9 @@ class CashFlowRepository:
         """Update specific fields on a cash flow entry."""
         stmt = update(CashFlow).where(CashFlow.id == entry_id).values(**fields)
         await self.session.execute(stmt)
+        await self.session.flush()
+        # Expire cached ORM instances so the next get_by_id re-reads from DB
+        self.session.expire_all()
 
     async def delete(self, entry_id: uuid.UUID) -> None:
         """Delete a cash flow entry."""

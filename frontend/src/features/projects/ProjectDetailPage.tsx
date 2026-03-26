@@ -1,5 +1,7 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { Component, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ErrorInfo, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from '@/app/i18n';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -13,11 +15,24 @@ import {
   X,
   CheckCircle2,
   AlertCircle,
+  AlertTriangle,
   Clock,
   Sparkles,
+  CalendarClock,
+  Wallet,
+  Gavel,
+  RefreshCw,
+  Plus,
+  ExternalLink,
+  Pencil,
+  Save,
 } from 'lucide-react';
-import { Button, Card, CardHeader, Badge, Skeleton, EmptyState } from '@/shared/ui';
+import { Button, Card, CardHeader, Badge, Skeleton, EmptyState, Breadcrumb } from '@/shared/ui';
+import { apiGet } from '@/shared/lib/api';
 import { projectsApi } from './api';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { useToastStore } from '@/stores/useToastStore';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -65,30 +80,61 @@ interface ImportResult {
 }
 
 // ---------------------------------------------------------------------------
+// Tab types
+// ---------------------------------------------------------------------------
+
+type ProjectTab = 'overview' | 'schedule' | 'budget' | 'tendering';
+
+interface ScheduleItem {
+  id: string;
+  name: string;
+  status: string;
+  created_at: string;
+}
+
+interface BudgetDashboard {
+  total_budget: number;
+  total_committed: number;
+  total_actual: number;
+  total_forecast: number;
+  variance: number;
+  variance_pct: number;
+  spi: number;
+  cpi: number;
+  status: string;
+  currency: string;
+  // Legacy fields (may be absent depending on API version)
+  total_spent?: number;
+  remaining?: number;
+  items?: { name: string; planned: number; actual: number }[];
+}
+
+interface TenderPackage {
+  id: string;
+  name: string;
+  status: string;
+  created_at: string;
+}
+
+// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-const TOKEN_KEY = 'oe_access_token';
-
 function getAuthHeaders(): Record<string, string> {
-  const token = localStorage.getItem(TOKEN_KEY);
+  const token = useAuthStore.getState().accessToken;
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 async function fetchBoqs(projectId: string): Promise<BOQSummary[]> {
-  const res = await fetch(`/api/v1/boq/boqs/?project_id=${projectId}`, {
-    headers: { ...getAuthHeaders(), Accept: 'application/json' },
-  });
-  if (!res.ok) return [];
-  return res.json();
+  try {
+    return await apiGet<BOQSummary[]>(`/v1/boq/boqs/?project_id=${projectId}`);
+  } catch {
+    return [];
+  }
 }
 
 async function fetchBoqDetail(boqId: string): Promise<BOQDetail> {
-  const res = await fetch(`/api/v1/boq/boqs/${boqId}`, {
-    headers: { ...getAuthHeaders(), Accept: 'application/json' },
-  });
-  if (!res.ok) throw new Error(`Failed to fetch BOQ ${boqId}`);
-  return res.json();
+  return apiGet<BOQDetail>(`/v1/boq/boqs/${boqId}`);
 }
 
 async function smartImportFile(boqId: string, file: File): Promise<ImportResult> {
@@ -107,16 +153,22 @@ async function smartImportFile(boqId: string, file: File): Promise<ImportResult>
 }
 
 function formatCurrency(value: number, currency = 'EUR'): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
+  // Validate currency code — must be 3 uppercase ASCII letters (ISO 4217)
+  const safeCurrency = /^[A-Z]{3}$/.test(currency) ? currency : 'EUR';
+  try {
+    return new Intl.NumberFormat(i18n.language, {
+      style: 'currency',
+      currency: safeCurrency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  } catch {
+    return `${value.toFixed(2)} ${safeCurrency}`;
+  }
 }
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', {
+function formatDate(iso: string, locale = 'en-US'): string {
+  return new Date(iso).toLocaleDateString(locale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -145,11 +197,13 @@ function SummaryCard({
   value,
   icon,
   variant = 'default',
+  subtitle,
 }: {
   label: string;
   value: string;
   icon: React.ReactNode;
   variant?: 'default' | 'success' | 'blue';
+  subtitle?: string;
 }) {
   const bgMap = {
     default: 'bg-surface-secondary text-content-tertiary',
@@ -165,6 +219,9 @@ function SummaryCard({
             {label}
           </p>
           <p className="mt-1.5 text-2xl font-bold text-content-primary tabular-nums">{value}</p>
+          {subtitle && (
+            <p className="text-xs text-content-secondary mt-1 tabular-nums">{subtitle}</p>
+          )}
         </div>
         <div
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${bgMap[variant]}`}
@@ -258,6 +315,7 @@ function ImportDialog({
   onSuccess: () => void;
 }) {
   const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [result, setResult] = useState<ImportResult | null>(null);
 
@@ -271,6 +329,10 @@ function ImportDialog({
     onSuccess: (data) => {
       setResult(data);
       onSuccess();
+      addToast({ type: 'success', title: t('toasts.import_success', { defaultValue: 'Import completed' }) });
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.import_failed', { defaultValue: 'Import failed' }), message: error.message });
     },
   });
 
@@ -379,7 +441,7 @@ function ImportDialog({
                             <p className="text-xs text-semantic-error/80">
                               Download DDC converters from{' '}
                               <a
-                                href="https://github.com/datadrivenconstructionIO/ddc-community-toolkit/releases"
+                                href="https://github.com/datadrivenconstruction/ddc-community-toolkit/releases"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="underline font-medium hover:text-semantic-error"
@@ -388,7 +450,7 @@ function ImportDialog({
                               </a>{' '}
                               and place .exe files in{' '}
                               <code className="bg-semantic-error/10 px-1 rounded">
-                                ~/.openestimator/converters/
+                                {navigator.platform?.startsWith('Win') ? '%USERPROFILE%\\.openestimator\\converters\\' : '~/.openestimator/converters/'}
                               </code>
                             </p>
                           </div>
@@ -508,6 +570,65 @@ function ImportDialog({
 }
 
 // ---------------------------------------------------------------------------
+// Error Boundary
+// ---------------------------------------------------------------------------
+
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  fallbackTitle?: string;
+  fallbackDescription?: string;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+}
+
+class TabErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(): ErrorBoundaryState {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo): void {
+    if (import.meta.env.DEV) console.error('[TabErrorBoundary] Caught error:', error, info);
+  }
+
+  private handleRetry = (): void => {
+    this.setState({ hasError: false });
+  };
+
+  render(): ReactNode {
+    if (this.state.hasError) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <AlertTriangle className="text-semantic-warning mb-3" size={32} />
+          <h3 className="text-base font-semibold text-content-primary">
+            {this.props.fallbackTitle || 'Something went wrong'}
+          </h3>
+          <p className="mt-1 text-sm text-content-secondary max-w-md">
+            {this.props.fallbackDescription ||
+              'Unable to load this section. Please try again.'}
+          </p>
+          <button
+            onClick={this.handleRetry}
+            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-surface-secondary px-4 py-2 text-sm font-medium text-content-primary hover:bg-surface-tertiary transition-colors"
+          >
+            <RefreshCw size={14} />
+            Retry
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Main Page
 // ---------------------------------------------------------------------------
 
@@ -516,11 +637,33 @@ export function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
 
   const [importTarget, setImportTarget] = useState<{
     boqId: string;
     boqName: string;
   } | null>(null);
+
+  const [activeTab, setActiveTab] = useState<ProjectTab>('overview');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ name: '', description: '', region: '', currency: '' });
+
+  const setActiveProject = useProjectContextStore((s) => s.setActiveProject);
+
+  const updateMutation = useMutation({
+    mutationFn: (data: { name: string; description?: string; region?: string; currency?: string }) =>
+      projectsApi.update(projectId!, data),
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: ['project', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      setActiveProject(projectId!, updated.name);
+      setIsEditing(false);
+      addToast({ type: 'success', title: t('toasts.project_updated', { defaultValue: 'Project updated' }) });
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+    },
+  });
 
   // Fetch project
   const { data: project, isLoading: projectLoading } = useQuery({
@@ -528,6 +671,13 @@ export function ProjectDetailPage() {
     queryFn: () => projectsApi.get(projectId!),
     enabled: !!projectId,
   });
+
+  // Set as active project in global context
+  useEffect(() => {
+    if (project && projectId) {
+      setActiveProject(projectId, project.name);
+    }
+  }, [project, projectId, setActiveProject]);
 
   // Fetch BOQ list
   const { data: boqs, isLoading: boqsLoading } = useQuery({
@@ -604,6 +754,26 @@ export function ProjectDetailPage() {
     queryClient.invalidateQueries({ queryKey: ['boqDetails', projectId] });
   }, [queryClient, projectId]);
 
+  // ── Tab data queries ──────────────────────────────────────────────────
+
+  const { data: schedules, isLoading: schedulesLoading } = useQuery({
+    queryKey: ['schedules', projectId],
+    queryFn: () => apiGet<ScheduleItem[]>(`/v1/schedule/schedules/?project_id=${projectId}`),
+    enabled: !!projectId && activeTab === 'schedule',
+  });
+
+  const { data: budgetDashboard, isLoading: budgetLoading } = useQuery({
+    queryKey: ['budget', projectId],
+    queryFn: () => apiGet<BudgetDashboard>(`/v1/costmodel/projects/${projectId}/5d/dashboard`),
+    enabled: !!projectId && activeTab === 'budget',
+  });
+
+  const { data: tenderPackages, isLoading: tenderingLoading } = useQuery({
+    queryKey: ['tenderPackages', projectId],
+    queryFn: () => apiGet<TenderPackage[]>(`/v1/tendering/packages/?project_id=${projectId}`),
+    enabled: !!projectId && activeTab === 'tendering',
+  });
+
   // ── Loading state ──────────────────────────────────────────────────────
   if (projectLoading) {
     return (
@@ -625,8 +795,8 @@ export function ProjectDetailPage() {
     return (
       <div className="max-w-content mx-auto">
         <EmptyState
-          title="Project not found"
-          description="The project you are looking for does not exist or has been deleted."
+          title={t('projects.not_found', { defaultValue: 'Project not found' })}
+          description={t('projects.not_found_desc', { defaultValue: 'The project you are looking for does not exist or has been deleted.' })}
           action={
             <Button variant="secondary" onClick={() => navigate('/projects')}>
               {t('projects.title')}
@@ -641,64 +811,148 @@ export function ProjectDetailPage() {
 
   return (
     <div className="max-w-content mx-auto animate-fade-in">
-      {/* Back link */}
-      <button
-        onClick={() => navigate('/projects')}
-        className="mb-4 flex items-center gap-1.5 text-sm text-content-secondary hover:text-content-primary transition-colors"
-      >
-        <ArrowLeft size={14} />
-        {t('projects.title')}
-      </button>
+      {/* Breadcrumb */}
+      <Breadcrumb
+        className="mb-4"
+        items={[
+          { label: t('projects.title', 'Projects'), to: '/projects' },
+          { label: project.name },
+        ]}
+      />
 
       {/* ── Project Info Card ───────────────────────────────────────────── */}
       <Card padding="lg" className="mb-6">
         <div className="flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-content-primary">{project.name}</h1>
-              <Badge variant={statusVariant[project.status] ?? 'neutral'} size="md" dot>
-                {project.status}
-              </Badge>
-            </div>
-            {project.description && (
-              <p className="mt-2 text-sm text-content-secondary max-w-2xl leading-relaxed">
-                {project.description}
-              </p>
+          <div className="flex-1 min-w-0">
+            {isEditing ? (
+              <div className="space-y-3">
+                <input
+                  value={editForm.name}
+                  onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
+                  className="w-full text-2xl font-bold text-content-primary bg-transparent border-b-2 border-oe-blue focus:outline-none pb-1"
+                  placeholder={t('projects.project_name', 'Project name')}
+                  autoFocus
+                />
+                <textarea
+                  value={editForm.description}
+                  onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
+                  className="w-full text-sm text-content-secondary bg-surface-secondary rounded-lg p-2 border border-border-light focus:outline-none focus:ring-2 focus:ring-oe-blue/30 resize-none"
+                  rows={2}
+                  placeholder={t('projects.description', 'Description')}
+                />
+                <div className="flex items-center gap-3">
+                  <input
+                    value={editForm.region}
+                    onChange={(e) => setEditForm((f) => ({ ...f, region: e.target.value }))}
+                    className="text-sm bg-surface-secondary rounded-lg px-3 py-1.5 border border-border-light focus:outline-none focus:ring-2 focus:ring-oe-blue/30 w-40"
+                    placeholder={t('projects.region', 'Region')}
+                  />
+                  <input
+                    value={editForm.currency}
+                    onChange={(e) => setEditForm((f) => ({ ...f, currency: e.target.value.toUpperCase() }))}
+                    className="text-sm bg-surface-secondary rounded-lg px-3 py-1.5 border border-border-light focus:outline-none focus:ring-2 focus:ring-oe-blue/30 w-24 uppercase"
+                    placeholder="EUR"
+                    maxLength={3}
+                  />
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      updateMutation.mutate({
+                        name: editForm.name,
+                        description: editForm.description,
+                        region: editForm.region,
+                        currency: editForm.currency,
+                      })
+                    }
+                    disabled={!editForm.name.trim() || updateMutation.isPending}
+                  >
+                    <Save size={14} className="mr-1" />
+                    {t('common.save')}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setIsEditing(false)}
+                  >
+                    {t('common.cancel')}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-3">
+                  <h1 className="text-2xl font-bold text-content-primary">{project.name}</h1>
+                  <Badge variant={statusVariant[project.status] ?? 'neutral'} size="md" dot>
+                    {t(`projects.${project.status}`, { defaultValue: project.status })}
+                  </Badge>
+                  <button
+                    onClick={() => {
+                      setEditForm({
+                        name: project.name,
+                        description: project.description || '',
+                        region: project.region || '',
+                        currency: project.currency || 'EUR',
+                      });
+                      setIsEditing(true);
+                    }}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-secondary transition-colors"
+                    title={t('common.edit')}
+                  >
+                    <Pencil size={14} />
+                  </button>
+                </div>
+                {project.description && (
+                  <p className="mt-2 text-sm text-content-secondary max-w-2xl leading-relaxed">
+                    {project.description}
+                  </p>
+                )}
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <Badge variant="blue" size="sm">
+                    {standardLabels[project.classification_standard] ??
+                      project.classification_standard}
+                  </Badge>
+                  <Badge variant="neutral" size="sm">
+                    {currency}
+                  </Badge>
+                  <Badge variant="neutral" size="sm">
+                    {project.region}
+                  </Badge>
+                  <span className="text-xs text-content-tertiary ml-2">
+                    {t('projects.created', { date: formatDate(project.created_at, i18n.language) })}
+                  </span>
+                </div>
+              </>
             )}
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <Badge variant="blue" size="sm">
-                {standardLabels[project.classification_standard] ??
-                  project.classification_standard}
-              </Badge>
-              <Badge variant="neutral" size="sm">
-                {currency}
-              </Badge>
-              <Badge variant="neutral" size="sm">
-                {project.region}
-              </Badge>
-              <span className="text-xs text-content-tertiary ml-2">
-                Created {formatDate(project.created_at)}
-              </span>
-            </div>
           </div>
         </div>
       </Card>
 
       {/* ── Summary Cards ───────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <SummaryCard
-          label={t('boq.grand_total')}
-          value={formatCurrency(stats.totalBudget, currency)}
-          icon={<DollarSign size={20} strokeWidth={1.75} />}
-          variant="blue"
-        />
+        {(() => {
+          const areaMatch = project.description?.match(/(\d[\d.,]*)\s*m[²2]/i);
+          const area = areaMatch ? parseFloat(areaMatch[1].replace(',', '')) : null;
+          const costPerM2 = area && stats.totalBudget > 0 ? stats.totalBudget / area : null;
+          const costPerM2Str = costPerM2
+            ? `${formatCurrency(costPerM2, currency)}/m\u00b2`
+            : undefined;
+          return (
+            <SummaryCard
+              label={t('boq.grand_total')}
+              value={formatCurrency(stats.totalBudget, currency)}
+              icon={<DollarSign size={20} strokeWidth={1.75} />}
+              variant="blue"
+              subtitle={costPerM2Str}
+            />
+          );
+        })()}
         <SummaryCard
           label="BOQs"
           value={String(stats.boqCount)}
           icon={<Table2 size={20} strokeWidth={1.75} />}
         />
         <SummaryCard
-          label="Positions"
+          label={t('projects.positions')}
           value={String(stats.totalPositions)}
           icon={<Layers size={20} strokeWidth={1.75} />}
         />
@@ -707,132 +961,352 @@ export function ProjectDetailPage() {
           value={
             stats.avgValidationScore > 0
               ? `${(stats.avgValidationScore * 100).toFixed(0)}%`
-              : '--'
+              : 'N/A'
           }
           icon={<ShieldCheck size={20} strokeWidth={1.75} />}
           variant={stats.avgValidationScore >= 0.8 ? 'success' : 'default'}
         />
       </div>
 
-      {/* ── BOQ List ────────────────────────────────────────────────────── */}
-      <Card padding="none">
-        <div className="px-6 pt-6 pb-2">
-          <CardHeader
-            title={t('boq.title')}
-            subtitle="Bills of Quantities for this project"
-            action={
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="primary"
-                  size="sm"
-                  icon={<Table2 size={14} />}
-                  onClick={() => navigate(`/projects/${projectId}/boq/new`)}
-                >
-                  New BOQ
-                </Button>
-              </div>
-            }
-          />
-        </div>
+      {/* ── Tab Bar ──────────────────────────────────────────────────────── */}
+      <div className="flex items-center gap-1 mb-6 border-b border-border-light">
+        {([
+          { key: 'overview' as ProjectTab, label: t('projects.overview'), icon: <Table2 size={15} /> },
+          { key: 'schedule' as ProjectTab, label: t('projects.4d_schedule'), icon: <CalendarClock size={15} /> },
+          { key: 'budget' as ProjectTab, label: t('projects.5d_budget'), icon: <Wallet size={15} /> },
+          { key: 'tendering' as ProjectTab, label: t('projects.tendering'), icon: <Gavel size={15} /> },
+        ]).map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`
+              flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-all
+              ${
+                activeTab === tab.key
+                  ? 'border-oe-blue text-oe-blue'
+                  : 'border-transparent text-content-tertiary hover:text-content-primary hover:bg-surface-secondary'
+              }
+            `}
+          >
+            {tab.icon}
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
-        <div className="mt-2">
-          {boqsLoading ? (
-            <div className="px-6 pb-6 space-y-3">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} height={72} className="w-full" />
-              ))}
-            </div>
-          ) : !boqs || boqs.length === 0 ? (
-            <div className="px-6 pb-6">
-              <EmptyState
-                icon={<Table2 size={24} strokeWidth={1.5} />}
-                title="No BOQs yet"
-                description="Create a Bill of Quantities to start estimating costs for this project."
-                action={
+      {/* ── Tab Content ──────────────────────────────────────────────────── */}
+
+      {/* Overview Tab — BOQ List */}
+      {activeTab === 'overview' && (
+        <Card padding="none">
+          <div className="px-6 pt-6 pb-2">
+            <CardHeader
+              title={t('boq.title')}
+              subtitle={t('projects.boqs_for_project')}
+              action={
+                <div className="flex items-center gap-2">
                   <Button
                     variant="primary"
                     size="sm"
                     icon={<Table2 size={14} />}
                     onClick={() => navigate(`/projects/${projectId}/boq/new`)}
                   >
-                    Create BOQ
+                    {t('projects.new_boq')}
+                  </Button>
+                </div>
+              }
+            />
+          </div>
+
+          <div className="mt-2">
+            {boqsLoading ? (
+              <div className="px-6 pb-6 space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} height={72} className="w-full" />
+                ))}
+              </div>
+            ) : !boqs || boqs.length === 0 ? (
+              <div className="px-6 pb-6">
+                <EmptyState
+                  icon={<Table2 size={24} strokeWidth={1.5} />}
+                  title={t('projects.no_boqs')}
+                  description={t('projects.no_boqs_desc')}
+                  action={
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      icon={<Table2 size={14} />}
+                      onClick={() => navigate(`/projects/${projectId}/boq/new`)}
+                    >
+                      {t('projects.create_boq')}
+                    </Button>
+                  }
+                />
+              </div>
+            ) : (
+              <div className="divide-y divide-border-light">
+                {boqs.map((boq) => {
+                  const detail = detailMap.get(boq.id);
+                  const posCount = detail?.positions.length ?? 0;
+                  const grandTotal = detail?.grand_total ?? 0;
+
+                  return (
+                    <div
+                      key={boq.id}
+                      className="flex items-center gap-4 px-6 py-4 transition-colors hover:bg-surface-secondary group"
+                    >
+                      {/* Icon */}
+                      <button
+                        onClick={() => navigate(`/boq/${boq.id}`)}
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-105"
+                      >
+                        <Table2 size={18} strokeWidth={1.75} />
+                      </button>
+
+                      {/* Info */}
+                      <button
+                        onClick={() => navigate(`/boq/${boq.id}`)}
+                        className="min-w-0 flex-1 text-left"
+                      >
+                        <div className="text-sm font-medium text-content-primary truncate">
+                          {boq.name}
+                        </div>
+                        <div className="mt-0.5 flex items-center gap-3 text-xs text-content-tertiary">
+                          <span>{posCount} {t('projects.positions').toLowerCase()}</span>
+                          <span className="text-border">|</span>
+                          <span className="font-medium tabular-nums">
+                            {formatCurrency(grandTotal, currency)}
+                          </span>
+                          {boq.updated_at && (
+                            <>
+                              <span className="text-border">|</span>
+                              <span className="flex items-center gap-1">
+                                <Clock size={11} />
+                                {formatDate(boq.updated_at, i18n.language)}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </button>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-2">
+                        <Badge variant={statusVariant[boq.status] ?? 'neutral'} size="sm">
+                          {boq.status}
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          icon={<Upload size={14} />}
+                          title={t('boq.import_tooltip', { defaultValue: 'Import GAEB, Excel, or CSV into this BOQ' })}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setImportTarget({ boqId: boq.id, boqName: boq.name });
+                          }}
+                        >
+                          {t('boq.import_file', { defaultValue: 'Import File' })}
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
+
+      {/* 4D Schedule Tab */}
+      {activeTab === 'schedule' && (
+        <TabErrorBoundary fallbackTitle="Schedule data failed to load">
+        <Card padding="lg">
+          <CardHeader title={t('projects.4d_schedule')} subtitle={t('projects.schedule_subtitle', { defaultValue: 'Project schedules and timeline' })} />
+          <div className="mt-4">
+            {schedulesLoading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} height={56} className="w-full" />
+                ))}
+              </div>
+            ) : !schedules || schedules.length === 0 ? (
+              <EmptyState
+                icon={<CalendarClock size={24} strokeWidth={1.5} />}
+                title={t('projects.no_schedules', { defaultValue: 'No schedules yet' })}
+                description={t('projects.no_schedules_desc', { defaultValue: 'Create a schedule to manage project timelines.' })}
+              />
+            ) : (
+              <div className="divide-y divide-border-light rounded-lg border border-border-light">
+                {schedules.map((sched) => (
+                  <div key={sched.id} className="flex items-center gap-4 px-5 py-3.5">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-secondary">
+                      <CalendarClock size={16} className="text-content-tertiary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-content-primary truncate">
+                        {sched.name}
+                      </p>
+                      <p className="text-xs text-content-tertiary">{formatDate(sched.created_at, i18n.language)}</p>
+                    </div>
+                    <Badge variant={statusVariant[sched.status] ?? 'neutral'} size="sm">
+                      {sched.status}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </Card>
+        </TabErrorBoundary>
+      )}
+
+      {/* 5D Budget Tab */}
+      {activeTab === 'budget' && (
+        <TabErrorBoundary fallbackTitle="Budget data failed to load">
+        <Card padding="lg">
+          <CardHeader title={t('projects.5d_budget')} subtitle={t('projects.budget_subtitle', { defaultValue: 'Cost model and budget tracking' })} />
+          <div className="mt-4">
+            {budgetLoading ? (
+              <div className="space-y-3">
+                <Skeleton height={88} className="w-full" />
+                <Skeleton height={200} className="w-full" />
+              </div>
+            ) : !budgetDashboard ? (
+              <EmptyState
+                icon={<Wallet size={24} strokeWidth={1.5} />}
+                title={t('projects.no_budget', { defaultValue: 'No budget data' })}
+                description={t('projects.no_budget_desc', { defaultValue: 'Set up a 5D cost model to track planned vs actual costs.' })}
+              />
+            ) : (
+              <div className="space-y-5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <SummaryCard
+                    label={t('projects.total_budget', { defaultValue: 'Total Budget' })}
+                    value={formatCurrency(budgetDashboard.total_budget ?? 0, currency)}
+                    icon={<DollarSign size={18} strokeWidth={1.75} />}
+                    variant="blue"
+                  />
+                  <SummaryCard
+                    label={t('projects.total_spent', { defaultValue: 'Total Spent' })}
+                    value={formatCurrency(budgetDashboard.total_actual ?? budgetDashboard.total_spent ?? 0, currency)}
+                    icon={<DollarSign size={18} strokeWidth={1.75} />}
+                  />
+                  <SummaryCard
+                    label={t('projects.remaining', { defaultValue: 'Remaining' })}
+                    value={formatCurrency(
+                      budgetDashboard.remaining ?? (budgetDashboard.total_budget ?? 0) - (budgetDashboard.total_actual ?? 0),
+                      currency,
+                    )}
+                    icon={<DollarSign size={18} strokeWidth={1.75} />}
+                    variant={
+                      (budgetDashboard.remaining ?? (budgetDashboard.total_budget ?? 0) - (budgetDashboard.total_actual ?? 0)) >= 0
+                        ? 'success'
+                        : 'default'
+                    }
+                  />
+                </div>
+                {(budgetDashboard.items?.length ?? 0) > 0 && (
+                  <div className="rounded-lg border border-border-light overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border-light bg-surface-tertiary text-left">
+                          <th className="px-4 py-2.5 font-medium text-content-secondary">{t('common.item', { defaultValue: 'Item' })}</th>
+                          <th className="px-4 py-2.5 font-medium text-content-secondary text-right">
+                            {t('projects.planned', { defaultValue: 'Planned' })}
+                          </th>
+                          <th className="px-4 py-2.5 font-medium text-content-secondary text-right">
+                            {t('projects.actual', { defaultValue: 'Actual' })}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border-light">
+                        {budgetDashboard.items!.map((item, idx) => (
+                          <tr key={idx} className="hover:bg-surface-secondary transition-colors">
+                            <td className="px-4 py-2.5 text-content-primary">{item.name}</td>
+                            <td className="px-4 py-2.5 text-right tabular-nums text-content-secondary">
+                              {formatCurrency(item.planned ?? 0, currency)}
+                            </td>
+                            <td className="px-4 py-2.5 text-right tabular-nums text-content-primary">
+                              {formatCurrency(item.actual ?? 0, currency)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </Card>
+        </TabErrorBoundary>
+      )}
+
+      {/* Tendering Tab */}
+      {activeTab === 'tendering' && (
+        <TabErrorBoundary fallbackTitle="Tendering data failed to load">
+        <Card padding="lg">
+          <CardHeader
+            title={t('projects.tendering')}
+            subtitle={t('projects.tendering_subtitle', { defaultValue: 'Tender packages and bid management' })}
+            action={
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={<ExternalLink size={14} />}
+                iconPosition="right"
+                onClick={() => navigate('/tendering')}
+              >
+                {t('projects.open_tendering', { defaultValue: 'Open Tendering' })}
+              </Button>
+            }
+          />
+          <div className="mt-4">
+            {tenderingLoading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} height={56} className="w-full" />
+                ))}
+              </div>
+            ) : !tenderPackages || tenderPackages.length === 0 ? (
+              <EmptyState
+                icon={<Gavel size={24} strokeWidth={1.5} />}
+                title={t('projects.no_tenders', { defaultValue: 'No tender packages' })}
+                description={t('projects.no_tenders_desc', { defaultValue: 'Create tender packages to manage bidding for this project.' })}
+                action={
+                  <Button
+                    variant="primary"
+                    size="md"
+                    icon={<Plus size={16} />}
+                    onClick={() => navigate('/tendering')}
+                  >
+                    {t('tendering.new_package', { defaultValue: 'New Tender Package' })}
                   </Button>
                 }
               />
-            </div>
-          ) : (
-            <div className="divide-y divide-border-light">
-              {boqs.map((boq) => {
-                const detail = detailMap.get(boq.id);
-                const posCount = detail?.positions.length ?? 0;
-                const grandTotal = detail?.grand_total ?? 0;
-
-                return (
-                  <div
-                    key={boq.id}
-                    className="flex items-center gap-4 px-6 py-4 transition-colors hover:bg-surface-secondary group"
-                  >
-                    {/* Icon */}
-                    <button
-                      onClick={() => navigate(`/boq/${boq.id}`)}
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-105"
-                    >
-                      <Table2 size={18} strokeWidth={1.75} />
-                    </button>
-
-                    {/* Info */}
-                    <button
-                      onClick={() => navigate(`/boq/${boq.id}`)}
-                      className="min-w-0 flex-1 text-left"
-                    >
-                      <div className="text-sm font-medium text-content-primary truncate">
-                        {boq.name}
-                      </div>
-                      <div className="mt-0.5 flex items-center gap-3 text-xs text-content-tertiary">
-                        <span>{posCount} positions</span>
-                        <span className="text-border">|</span>
-                        <span className="font-medium tabular-nums">
-                          {formatCurrency(grandTotal, currency)}
-                        </span>
-                        {boq.updated_at && (
-                          <>
-                            <span className="text-border">|</span>
-                            <span className="flex items-center gap-1">
-                              <Clock size={11} />
-                              {formatDate(boq.updated_at)}
-                            </span>
-                          </>
-                        )}
-                      </div>
-                    </button>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        variant={statusVariant[boq.status] ?? 'neutral'}
-                        size="sm"
-                      >
-                        {boq.status}
-                      </Badge>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        icon={<Upload size={14} />}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setImportTarget({ boqId: boq.id, boqName: boq.name });
-                        }}
-                      >
-                        {t('common.import')}
-                      </Button>
+            ) : (
+              <div className="divide-y divide-border-light rounded-lg border border-border-light">
+                {tenderPackages.map((pkg) => (
+                  <div key={pkg.id} className="flex items-center gap-4 px-5 py-3.5">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-secondary">
+                      <Gavel size={16} className="text-content-tertiary" />
                     </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-content-primary truncate">
+                        {pkg.name}
+                      </p>
+                      <p className="text-xs text-content-tertiary">{formatDate(pkg.created_at, i18n.language)}</p>
+                    </div>
+                    <Badge variant={statusVariant[pkg.status] ?? 'neutral'} size="sm">
+                      {pkg.status}
+                    </Badge>
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        </Card>
+        </TabErrorBoundary>
+      )}
 
       {/* ── Import Dialog ───────────────────────────────────────────────── */}
       {importTarget && (

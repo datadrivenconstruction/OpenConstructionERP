@@ -16,6 +16,14 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
+
+_logger_ev = __import__('logging').getLogger(__name__ + '.events')
+
+async def _safe_publish(name: str, data: dict, source_module: str = '') -> None:
+    try:
+        await event_bus.publish(name, data, source_module=source_module)
+    except Exception:
+        _logger_ev.debug('Event publish skipped: %s', name)
 from app.modules.costmodel.models import BudgetLine, CashFlow, CostSnapshot
 from app.modules.costmodel.repository import (
     BudgetLineRepository,
@@ -31,11 +39,14 @@ from app.modules.costmodel.schemas import (
     CashFlowData,
     CashFlowPeriod,
     DashboardResponse,
+    EVMResponse,
     SCurveData,
     SCurvePeriod,
     SnapshotCreate,
     SnapshotResponse,
     SnapshotUpdate,
+    WhatIfAdjustments,
+    WhatIfResult,
 )
 
 logger = logging.getLogger(__name__)
@@ -113,7 +124,7 @@ class CostModelService:
         )
         snapshot = await self.snapshot_repo.create(snapshot)
 
-        await event_bus.publish(
+        await _safe_publish(
             "costmodel.snapshot.created",
             {
                 "snapshot_id": str(snapshot.id),
@@ -232,15 +243,19 @@ class CostModelService:
 
         budget_status = "on_budget" if variance >= 0 else "over_budget"
 
+        variance_pct = _variance_pct(total_budget, total_forecast) if total_budget > 0 else 0.0
+
         return DashboardResponse(
             total_budget=round(total_budget, 2),
             total_committed=round(total_committed, 2),
             total_actual=round(total_actual, 2),
             total_forecast=round(total_forecast, 2),
             variance=round(variance, 2),
+            variance_pct=round(variance_pct, 2),
             spi=round(spi, 4),
             cpi=round(cpi, 4),
             status=budget_status,
+            currency="EUR",
         )
 
     # ── S-Curve ────────────────────────────────────────────────────────────
@@ -279,6 +294,23 @@ class CostModelService:
                     actual=round(cumulative_actual, 2),
                 )
             )
+
+        # Fallback: if no snapshots, build S-curve from cash flow data
+        if not periods:
+            cash_flows, _ = await self.cashflow_repo.list_for_project(project_id)
+            seen: set[str] = set()
+            for cf in cash_flows:
+                if cf.period in seen:
+                    continue
+                seen.add(cf.period)
+                periods.append(
+                    SCurvePeriod(
+                        period=cf.period,
+                        planned=round(_str_to_float(cf.cumulative_planned), 2),
+                        earned=0.0,
+                        actual=round(_str_to_float(cf.cumulative_actual), 2),
+                    )
+                )
 
         return SCurveData(periods=periods)
 
@@ -347,7 +379,7 @@ class CostModelService:
         )
         entry = await self.cashflow_repo.create(entry)
 
-        await event_bus.publish(
+        await _safe_publish(
             "costmodel.cashflow.created",
             {
                 "entry_id": str(entry.id),
@@ -397,7 +429,7 @@ class CostModelService:
                 )
             )
 
-        return BudgetSummary(by_category=categories)
+        return BudgetSummary(categories=categories)
 
     async def list_budget_lines(
         self,
@@ -440,7 +472,7 @@ class CostModelService:
         )
         line = await self.budget_repo.create(line)
 
-        await event_bus.publish(
+        await _safe_publish(
             "costmodel.budget_line.created",
             {
                 "line_id": str(line.id),
@@ -494,7 +526,7 @@ class CostModelService:
         if fields:
             await self.budget_repo.update_fields(line_id, **fields)
 
-            await event_bus.publish(
+            await _safe_publish(
                 "costmodel.budget_line.updated",
                 {
                     "line_id": str(line_id),
@@ -524,13 +556,312 @@ class CostModelService:
         project_id = str(line.project_id)
         await self.budget_repo.delete(line_id)
 
-        await event_bus.publish(
+        await _safe_publish(
             "costmodel.budget_line.deleted",
             {"line_id": str(line_id), "project_id": project_id},
             source_module="oe_costmodel",
         )
 
         logger.info("Budget line deleted: %s", line_id)
+
+    # ── EVM Calculations ──────────────────────────────────────────────────
+
+    async def calculate_evm(self, project_id: uuid.UUID) -> EVMResponse:
+        """Calculate real Earned Value Management metrics from schedule progress and budget.
+
+        Reads schedule activities for progress percentage and budget lines for planned
+        and actual values.  Computes all standard EVM indices.
+
+        Algorithm:
+            1. BAC = sum of planned_amount across all budget lines
+            2. AC  = sum of actual_amount across all budget lines
+            3. time_elapsed% = computed from project schedule start/end vs today
+            4. schedule_progress% = weighted average of activity progress_pct
+               (weighted by planned_amount of linked budget lines)
+            5. PV  = BAC * time_elapsed%
+            6. EV  = BAC * schedule_progress%
+            7. Derived indices: SV, CV, SPI, CPI, EAC, ETC, VAC, TCPI
+
+        Args:
+            project_id: Target project.
+
+        Returns:
+            EVMResponse with all computed EVM metrics.
+        """
+        from datetime import date
+
+        from app.modules.schedule.repository import ActivityRepository, ScheduleRepository
+
+        # ── Step 1: Aggregate budget totals ────────────────────────────────
+        aggregates = await self.budget_repo.aggregate_by_project(project_id)
+        bac = _str_to_float(aggregates["total_planned"])
+        ac = _str_to_float(aggregates["total_actual"])
+
+        if bac == 0.0:
+            return EVMResponse(
+                bac=0.0,
+                ac=ac,
+                status="unknown",
+            )
+
+        # ── Step 2: Read schedule activities for progress ──────────────────
+        schedule_repo = ScheduleRepository(self.session)
+        schedules, _ = await schedule_repo.list_for_project(project_id, limit=50)
+
+        time_elapsed_pct = 0.0
+        schedule_progress_pct = 0.0
+
+        if schedules:
+            # Use the first (primary) schedule for time elapsed calculation
+            primary_schedule = schedules[0]
+            today = date.today()
+
+            # Compute time_elapsed_pct from schedule dates
+            if primary_schedule.start_date and primary_schedule.end_date:
+                try:
+                    start = date.fromisoformat(primary_schedule.start_date[:10])
+                    end = date.fromisoformat(primary_schedule.end_date[:10])
+                    total_days = (end - start).days
+                    if total_days > 0:
+                        elapsed_days = (today - start).days
+                        time_elapsed_pct = max(
+                            0.0, min(100.0, (elapsed_days / total_days) * 100.0)
+                        )
+                except (ValueError, TypeError):
+                    pass
+
+            # Compute weighted schedule progress from all activities
+            activity_repo = ActivityRepository(self.session)
+            total_weighted_progress = 0.0
+            total_weight = 0.0
+
+            for schedule in schedules:
+                activities, _ = await activity_repo.list_for_schedule(
+                    schedule.id, limit=10000
+                )
+
+                # Build lookup: budget lines keyed by activity_id
+                budget_lines, _ = await self.budget_repo.list_for_project(
+                    project_id, limit=10000
+                )
+                activity_budget: dict[str, float] = {}
+                for bl in budget_lines:
+                    if bl.activity_id is not None:
+                        aid = str(bl.activity_id)
+                        activity_budget[aid] = activity_budget.get(aid, 0.0) + _str_to_float(
+                            bl.planned_amount
+                        )
+
+                for act in activities:
+                    act_id = str(act.id)
+                    progress = _str_to_float(act.progress_pct)
+
+                    # Weight by the planned budget linked to this activity,
+                    # fallback to equal weight if no budget link exists
+                    weight = activity_budget.get(act_id, 0.0)
+                    if weight == 0.0:
+                        # Use equal weight for unlinked activities
+                        weight = 1.0
+
+                    total_weighted_progress += weight * progress
+                    total_weight += weight
+
+            if total_weight > 0.0:
+                schedule_progress_pct = total_weighted_progress / total_weight
+        else:
+            # No schedule — fall back to using time from latest snapshot period
+            latest = await self.snapshot_repo.get_latest_for_project(project_id)
+            if latest is not None:
+                time_elapsed_pct = 50.0  # conservative fallback
+                # Use latest snapshot EV/PV as approximation
+                pv_snap = _str_to_float(latest.planned_cost)
+                ev_snap = _str_to_float(latest.earned_value)
+                if pv_snap > 0.0:
+                    schedule_progress_pct = (ev_snap / bac) * 100.0
+
+        # ── Step 3: Compute EVM values ─────────────────────────────────────
+        pv = bac * (time_elapsed_pct / 100.0)
+        ev = bac * (schedule_progress_pct / 100.0)
+
+        sv = ev - pv
+        cv = ev - ac
+        spi = _safe_divide(ev, pv)
+        cpi = _safe_divide(ev, ac)
+        eac = _safe_divide(bac, cpi) if cpi != 0.0 else bac
+        etc = max(0.0, eac - ac)
+        vac = bac - eac
+        tcpi = _safe_divide(bac - ev, bac - ac)
+
+        # ── Step 4: Determine project health status ────────────────────────
+        if spi >= 0.95 and cpi >= 0.95:
+            evm_status = "on_track"
+        elif spi >= 0.85 and cpi >= 0.85:
+            evm_status = "at_risk"
+        elif spi > 0.0 or cpi > 0.0:
+            evm_status = "critical"
+        else:
+            evm_status = "unknown"
+
+        logger.info(
+            "EVM calculated: project=%s BAC=%.2f PV=%.2f EV=%.2f AC=%.2f SPI=%.4f CPI=%.4f",
+            project_id,
+            bac,
+            pv,
+            ev,
+            ac,
+            spi,
+            cpi,
+        )
+
+        return EVMResponse(
+            bac=round(bac, 2),
+            pv=round(pv, 2),
+            ev=round(ev, 2),
+            ac=round(ac, 2),
+            sv=round(sv, 2),
+            cv=round(cv, 2),
+            spi=round(spi, 4),
+            cpi=round(cpi, 4),
+            eac=round(eac, 2),
+            etc=round(etc, 2),
+            vac=round(vac, 2),
+            tcpi=round(tcpi, 4),
+            time_elapsed_pct=round(time_elapsed_pct, 2),
+            schedule_progress_pct=round(schedule_progress_pct, 2),
+            status=evm_status,
+        )
+
+    # ── What-If Scenarios ─────────────────────────────────────────────────
+
+    async def create_what_if_scenario(
+        self,
+        project_id: uuid.UUID,
+        adjustments: WhatIfAdjustments,
+    ) -> WhatIfResult:
+        """Create a what-if scenario by cloning the current budget as a snapshot.
+
+        Applies percentage-based adjustments to material and labor cost categories,
+        and optionally adjusts duration impact on forecast.
+
+        Algorithm:
+            1. Calculate current EVM as baseline
+            2. Compute adjusted BAC by applying category-level adjustments
+            3. Compute adjusted EAC using the current CPI against adjusted BAC
+            4. Create a snapshot recording the scenario
+            5. Return comparison of original vs adjusted values
+
+        Args:
+            project_id: Target project.
+            adjustments: Scenario name and percentage adjustments.
+
+        Returns:
+            WhatIfResult with original and adjusted values plus snapshot reference.
+        """
+        # ── Step 1: Get current EVM baseline ───────────────────────────────
+        evm = await self.calculate_evm(project_id)
+
+        # ── Step 2: Get budget breakdown by category ───────────────────────
+        budget_rows = await self.budget_repo.aggregate_by_category(project_id)
+
+        original_bac = evm.bac
+        adjusted_bac = 0.0
+
+        for row in budget_rows:
+            category = row["category"]
+            planned = _str_to_float(row["planned"])
+
+            # Apply category-specific adjustment
+            if category == "material":
+                factor = 1.0 + (adjustments.material_cost_pct / 100.0)
+            elif category == "labor":
+                factor = 1.0 + (adjustments.labor_cost_pct / 100.0)
+            else:
+                factor = 1.0
+
+            adjusted_bac += planned * factor
+
+        # ── Step 3: Apply duration adjustment to indirect/time-dependent costs
+        # Duration change affects overhead proportionally
+        if adjustments.duration_pct != 0.0:
+            duration_factor = 1.0 + (adjustments.duration_pct / 100.0)
+            for row in budget_rows:
+                if row["category"] in ("overhead", "contingency"):
+                    planned = _str_to_float(row["planned"])
+                    # Add the delta from duration change (already counted at 1x above)
+                    adjusted_bac += planned * (duration_factor - 1.0)
+
+        # ── Step 4: Compute adjusted EAC using current CPI ────────────────
+        cpi = evm.cpi if evm.cpi > 0.0 else 1.0
+        adjusted_eac = _safe_divide(adjusted_bac, cpi)
+        original_eac = evm.eac if evm.eac > 0.0 else original_bac
+        delta = adjusted_eac - original_eac
+        delta_pct = _variance_pct(original_eac, adjusted_eac) * -1.0 if original_eac > 0.0 else 0.0
+
+        # ── Step 5: Create a snapshot recording the scenario ───────────────
+        from datetime import date
+
+        today = date.today()
+        period = f"{today.year:04d}-{today.month:02d}"
+
+        snapshot = CostSnapshot(
+            project_id=project_id,
+            period=period,
+            planned_cost=str(round(adjusted_bac, 2)),
+            earned_value=str(round(evm.ev, 2)),
+            actual_cost=str(round(evm.ac, 2)),
+            forecast_eac=str(round(adjusted_eac, 2)),
+            spi=str(round(evm.spi, 4)),
+            cpi=str(round(evm.cpi, 4)),
+            notes=f"What-if scenario: {adjustments.name}",
+            metadata_={
+                "scenario": True,
+                "scenario_name": adjustments.name,
+                "adjustments": {
+                    "material_cost_pct": adjustments.material_cost_pct,
+                    "labor_cost_pct": adjustments.labor_cost_pct,
+                    "duration_pct": adjustments.duration_pct,
+                },
+                "original_bac": round(original_bac, 2),
+                "adjusted_bac": round(adjusted_bac, 2),
+            },
+        )
+        snapshot = await self.snapshot_repo.create(snapshot)
+
+        await _safe_publish(
+            "costmodel.whatif.created",
+            {
+                "snapshot_id": str(snapshot.id),
+                "project_id": str(project_id),
+                "scenario_name": adjustments.name,
+            },
+            source_module="oe_costmodel",
+        )
+
+        logger.info(
+            "What-if scenario created: project=%s name='%s' BAC=%.2f→%.2f EAC=%.2f→%.2f",
+            project_id,
+            adjustments.name,
+            original_bac,
+            adjusted_bac,
+            original_eac,
+            adjusted_eac,
+        )
+
+        return WhatIfResult(
+            scenario_name=adjustments.name,
+            original_bac=round(original_bac, 2),
+            adjusted_bac=round(adjusted_bac, 2),
+            original_eac=round(original_eac, 2),
+            adjusted_eac=round(adjusted_eac, 2),
+            delta=round(delta, 2),
+            delta_pct=round(delta_pct, 2),
+            adjustments_applied={
+                "material_cost_pct": adjustments.material_cost_pct,
+                "labor_cost_pct": adjustments.labor_cost_pct,
+                "duration_pct": adjustments.duration_pct,
+            },
+            snapshot_id=snapshot.id,
+        )
 
     # ── Generation helpers ─────────────────────────────────────────────────
 
@@ -578,7 +909,7 @@ class CostModelService:
 
         created = await self.budget_repo.bulk_create(lines)
 
-        await event_bus.publish(
+        await _safe_publish(
             "costmodel.budget.generated",
             {
                 "project_id": str(project_id),
@@ -672,7 +1003,7 @@ class CostModelService:
 
         created = await self.cashflow_repo.bulk_create(entries)
 
-        await event_bus.publish(
+        await _safe_publish(
             "costmodel.cashflow.generated",
             {
                 "project_id": str(project_id),

@@ -1,21 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <defs>
-    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0071e3"/>
-      <stop offset="100%" stop-color="#5856d6"/>
-    </linearGradient>
-  </defs>
-  <rect width="32" height="32" rx="7" fill="url(#g)"/>
-  <rect x="7" y="5" width="18" height="22" rx="2.5" fill="white" opacity=".95"/>
-  <rect x="9" y="7" width="14" height="5" rx="1.2" fill="url(#g)" opacity=".85"/>
-  <rect x="9" y="14" width="3.5" height="2.5" rx=".6" fill="#e8e8ed" opacity=".7"/>
-  <rect x="13.5" y="14" width="3.5" height="2.5" rx=".6" fill="#e8e8ed" opacity=".7"/>
-  <rect x="18" y="14" width="3.5" height="2.5" rx=".6" fill="#e8e8ed" opacity=".7"/>
-  <rect x="9" y="17.5" width="3.5" height="2.5" rx=".6" fill="#e8e8ed" opacity=".7"/>
-  <rect x="13.5" y="17.5" width="3.5" height="2.5" rx=".6" fill="#e8e8ed" opacity=".7"/>
-  <rect x="18" y="17.5" width="3.5" height="2.5" rx=".6" fill="#e8e8ed" opacity=".7"/>
-  <rect x="9" y="21" width="3.5" height="2.5" rx=".6" fill="#e8e8ed" opacity=".7"/>
-  <rect x="13.5" y="21" width="3.5" height="2.5" rx=".6" fill="#e8e8ed" opacity=".7"/>
-  <rect x="18" y="21" width="3.5" height="2.5" rx=".6" fill="#0071e3" opacity=".9"/>
-  <rect x="9" y="24" width="12.5" height="2.5" rx=".6" fill="#0071e3" opacity=".8"/>
+  <!-- Calculator body -->
+  <rect x="1" y="5" width="22" height="25" rx="5" fill="#2563eb"/>
+  <!-- Screen -->
+  <rect x="4.5" y="7.5" width="15.5" height="5.5" rx="2" fill="white" opacity=".95"/>
+  <!-- Button dots 3x2 -->
+  <circle cx="7.5" cy="17" r="1.2" fill="white" opacity=".3"/>
+  <circle cx="12" cy="17" r="1.2" fill="white" opacity=".3"/>
+  <circle cx="16.5" cy="17" r="1.2" fill="white" opacity=".3"/>
+  <circle cx="7.5" cy="21" r="1.2" fill="white" opacity=".3"/>
+  <circle cx="12" cy="21" r="1.2" fill="white" opacity=".3"/>
+  <circle cx="16.5" cy="21" r="1.2" fill="white" opacity=".3"/>
+  <!-- Gold equals bar -->
+  <rect x="5" y="25" width="14.5" height="2" rx="1" fill="#f59e0b" opacity=".9"/>
+  <!-- Gold badge circle -->
+  <circle cx="24.5" cy="7" r="6.5" fill="#f59e0b"/>
+  <!-- House roof -->
+  <path d="M24.5 2.5 L29 6 L20 6 Z" fill="white" opacity=".95"/>
+  <!-- House body -->
+  <rect x="21.5" y="6" width="6" height="4.5" rx=".6" fill="white" opacity=".95"/>
+  <!-- House door -->
+  <rect x="23" y="7.5" width="3" height="3" rx=".4" fill="#f59e0b" opacity=".5"/>
 </svg>

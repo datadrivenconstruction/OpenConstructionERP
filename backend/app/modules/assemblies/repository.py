@@ -96,6 +96,9 @@ class AssemblyRepository:
         """Update specific fields on an assembly."""
         stmt = update(Assembly).where(Assembly.id == assembly_id).values(**fields)
         await self.session.execute(stmt)
+        await self.session.flush()
+        # Expire cached ORM instances so the next get_by_id re-reads from DB
+        self.session.expire_all()
 
     async def delete(self, assembly_id: uuid.UUID) -> None:
         """Delete an assembly and all its components (via CASCADE)."""
@@ -156,6 +159,9 @@ class ComponentRepository:
         """Update specific fields on a component."""
         stmt = update(Component).where(Component.id == component_id).values(**fields)
         await self.session.execute(stmt)
+        await self.session.flush()
+        # Expire cached ORM instances so the next get_by_id re-reads from DB
+        self.session.expire_all()
 
     async def delete(self, component_id: uuid.UUID) -> None:
         """Delete a single component."""

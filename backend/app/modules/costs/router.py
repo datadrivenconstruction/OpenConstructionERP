@@ -1,14 +1,15 @@
 """Cost database API routes.
 
 Endpoints:
-    GET  /autocomplete    — Fast text autocomplete for cost items (public)
-    POST /                — Create a cost item (auth required)
-    GET  /                — Search cost items (public, query params)
-    GET  /{item_id}       — Get cost item by ID
-    PATCH /{item_id}      — Update cost item (auth required)
-    DELETE /{item_id}     — Delete cost item (auth required)
-    POST /bulk            — Bulk import cost items (auth required)
-    POST /import/file     — Import cost items from Excel/CSV file (auth required)
+    GET  /autocomplete    -- Fast text autocomplete for cost items (public)
+    POST /                -- Create a cost item (auth required)
+    GET  /                -- Search cost items (public, query params)
+    GET  /{item_id}       -- Get cost item by ID
+    PATCH /{item_id}      -- Update cost item (auth required)
+    DELETE /{item_id}     -- Delete cost item (auth required)
+    POST /bulk            -- Bulk import cost items (auth required)
+    POST /import/file     -- Import cost items from Excel/CSV file (auth required)
+    POST /load-cwicr/{db_id} -- Load CWICR regional database (auth required)
 """
 
 import csv
@@ -29,10 +30,12 @@ from app.modules.costs.schemas import (
     CostItemResponse,
     CostItemUpdate,
     CostSearchQuery,
+    CostSearchResponse,
 )
 from app.modules.costs.service import CostItemService
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 def _get_service(session: SessionDep) -> CostItemService:
@@ -46,15 +49,79 @@ def _get_service(session: SessionDep) -> CostItemService:
 async def autocomplete_cost_items(
     service: CostItemService = Depends(_get_service),
     q: str = Query(..., min_length=2, max_length=200, description="Search text (min 2 chars)"),
+    region: str | None = Query(default=None, description="Filter by region (e.g. DE_BERLIN)"),
     limit: int = Query(default=8, ge=1, le=20, description="Max results to return"),
+    semantic: bool = Query(default=False, description="Use vector semantic search if available"),
 ) -> list[CostAutocompleteItem]:
-    """Fast text autocomplete for cost items. Public endpoint — no auth required.
+    """Fast autocomplete for cost items. Uses vector semantic search when available.
 
-    Searches cost items by description and code (case-insensitive LIKE).
-    Returns compact results suitable for an autocomplete dropdown.
+    When ``semantic=true`` and a vector index exists, uses AI embeddings
+    to find semantically similar items (e.g. "concrete wall" finds
+    "reinforced partition C30/37"). Falls back to text search otherwise.
     """
-    query = CostSearchQuery(q=q, limit=limit, offset=0)
+    # Try vector search first if requested
+    if semantic:
+        try:
+            from app.core.vector import encode_texts, vector_search, vector_status
+            status = vector_status()
+            if status.get("connected") and status.get("cost_collection"):
+                query_vec = encode_texts([q])[0]
+                results = vector_search(query_vec, region=region, limit=limit)
+                if results:
+                    # Vector results may not have components — look them up from DB
+                    codes = [r.get("code", "") for r in results]
+                    components_map: dict[str, list[dict[str, Any]]] = {}
+                    try:
+                        items_from_db = await service.get_by_codes(codes)
+                        for db_item in items_from_db:
+                            components_map[db_item.code] = db_item.components or []
+                    except Exception:
+                        pass  # Graceful fallback — return without components
+
+                    return [
+                        CostAutocompleteItem(
+                            code=r.get("code", ""),
+                            description=r.get("description", ""),
+                            unit=r.get("unit", ""),
+                            rate=float(r.get("rate", 0)),
+                            classification=r.get("classification", {}),
+                            components=components_map.get(r.get("code", ""), []),
+                        )
+                        for r in results
+                    ]
+        except Exception:
+            pass  # Fall back to text search
+
+    # Standard text search — fetch extra to prioritize items with components
+    query = CostSearchQuery(q=q, region=region, limit=limit * 3, offset=0)
     items, _ = await service.search_costs(query)
+
+    # Sort: items WITH components first (richer data for estimators)
+    import json as _json
+
+    def _has_components(it: object) -> bool:
+        comps = it.components  # type: ignore[attr-defined]
+        if isinstance(comps, str):
+            try:
+                comps = _json.loads(comps)
+            except Exception:
+                return False
+        return isinstance(comps, list) and len(comps) > 0
+
+    sorted_items = sorted(
+        items,
+        key=lambda it: (0 if _has_components(it) else 1, it.code),
+    )
+
+    def _parse_components(raw: object) -> list[dict[str, Any]]:
+        if isinstance(raw, str):
+            try:
+                parsed = _json.loads(raw)
+                return parsed if isinstance(parsed, list) else []
+            except Exception:
+                return []
+        return raw if isinstance(raw, list) else []
+
     return [
         CostAutocompleteItem(
             code=item.code,
@@ -62,8 +129,9 @@ async def autocomplete_cost_items(
             unit=item.unit,
             rate=float(item.rate),
             classification=item.classification or {},
+            components=_parse_components(item.components),
         )
-        for item in items
+        for item in sorted_items[:limit]
     ]
 
 
@@ -89,29 +157,402 @@ async def create_cost_item(
 # ── Search / List ─────────────────────────────────────────────────────────
 
 
-@router.get("/", response_model=list[CostItemResponse])
+@router.get("/", response_model=CostSearchResponse)
 async def search_cost_items(
     service: CostItemService = Depends(_get_service),
     q: str | None = Query(default=None, description="Text search on code and description"),
     unit: str | None = Query(default=None, description="Filter by unit"),
     source: str | None = Query(default=None, description="Filter by source"),
+    region: str | None = Query(default=None, description="Filter by region (e.g. DE_BERLIN)"),
+    category: str | None = Query(
+        default=None, description="Filter by classification.collection (construction category)"
+    ),
     min_rate: float | None = Query(default=None, ge=0, description="Minimum rate"),
     max_rate: float | None = Query(default=None, ge=0, description="Maximum rate"),
     limit: int = Query(default=50, ge=1, le=500),
     offset: int = Query(default=0, ge=0),
-) -> list[CostItemResponse]:
-    """Search cost items with optional filters. Public endpoint."""
+) -> CostSearchResponse:
+    """Search cost items with optional filters. Public endpoint.
+
+    Returns a paginated response with items, total count, limit and offset.
+    """
     query = CostSearchQuery(
         q=q,
         unit=unit,
         source=source,
+        region=region,
+        category=category,
         min_rate=min_rate,
         max_rate=max_rate,
         limit=limit,
         offset=offset,
     )
-    items, _ = await service.search_costs(query)
-    return [CostItemResponse.model_validate(i) for i in items]
+    items, total = await service.search_costs(query)
+    return CostSearchResponse(
+        items=[CostItemResponse.model_validate(i) for i in items],
+        total=total,
+        limit=limit,
+        offset=offset,
+    )
+
+
+# ── Regions ───────────────────────────────────────────────────────────────
+
+
+@router.get("/regions", response_model=list[str])
+async def list_loaded_regions(
+    session: SessionDep,
+) -> list[str]:
+    """List distinct regions that have cost items loaded.
+
+    Returns a list of region identifiers (e.g. ["DE_BERLIN", "FR_PARIS"]).
+    Useful for populating the region filter dropdown on the frontend.
+    """
+    from sqlalchemy import select, distinct
+    from app.modules.costs.models import CostItem
+
+    result = await session.execute(
+        select(distinct(CostItem.region))
+        .where(CostItem.is_active.is_(True))
+        .where(CostItem.region.isnot(None))
+        .where(CostItem.region != "")
+    )
+    regions = [row[0] for row in result.all()]
+    regions.sort()
+    return regions
+
+
+@router.get("/regions/stats")
+async def region_stats(
+    session: SessionDep,
+) -> list[dict]:
+    """Return item count per loaded region.
+
+    Response: ``[{"region": "DE_BERLIN", "count": 55719}, ...]``
+    """
+    from sqlalchemy import select, func
+    from app.modules.costs.models import CostItem
+
+    result = await session.execute(
+        select(CostItem.region, func.count(CostItem.id).label("cnt"))
+        .where(CostItem.is_active.is_(True))
+        .where(CostItem.region.isnot(None))
+        .where(CostItem.region != "")
+        .group_by(CostItem.region)
+        .order_by(func.count(CostItem.id).desc())
+    )
+    return [{"region": row[0], "count": row[1]} for row in result.all()]
+
+
+@router.delete(
+    "/actions/clear-region/{region}",
+    dependencies=[Depends(RequirePermission("costs.update"))],
+)
+async def clear_region_database(
+    region: str,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+) -> dict:
+    """Delete all cost items for a specific region.
+
+    E.g. ``DELETE /actions/clear-region/DE_BERLIN`` removes all DE_BERLIN items.
+    """
+    from sqlalchemy import delete as sql_delete
+    from app.modules.costs.models import CostItem
+
+    stmt = sql_delete(CostItem).where(CostItem.region == region)
+    result = await session.execute(stmt)
+    await session.commit()
+    count = result.rowcount  # type: ignore[union-attr]
+
+    logger.info("Cleared region %s: %d items deleted", region, count)
+    return {"deleted": count, "region": region}
+
+
+# ── Vector database (LanceDB embedded / Qdrant server) ──────────────────────
+
+
+@router.get("/vector/status")
+async def get_vector_status() -> dict:
+    """Check vector DB status (LanceDB embedded or Qdrant server)."""
+    from app.core.vector import vector_status as vs
+
+    return vs()
+
+
+@router.get("/vector/regions")
+async def vector_region_stats() -> list[dict]:
+    """Return per-region vector counts from the vector DB.
+
+    Response: ``[{"region": "DE_BERLIN", "count": 55719}, ...]``
+    """
+    from app.core.vector import vector_status as vs
+
+    status = vs()
+    if not status.get("connected"):
+        return []
+
+    # LanceDB: query the table directly for per-region counts
+    try:
+        from app.core.vector import _get_lancedb, COST_TABLE, _backend
+        if _backend() != "qdrant":
+            db = _get_lancedb()
+            if db is None:
+                return []
+            try:
+                tbl = db.open_table(COST_TABLE)
+            except Exception:
+                return []
+            import pandas as pd
+            df = tbl.to_pandas()
+            if "region" not in df.columns:
+                return []
+            counts = df.groupby("region").size().reset_index(name="count")
+            return [{"region": r, "count": int(c)} for r, c in zip(counts["region"], counts["count"]) if r]
+        else:
+            # For Qdrant, return total count only (per-region requires scroll)
+            col = status.get("cost_collection")
+            if col and col.get("vectors_count", 0) > 0:
+                return [{"region": "all", "count": col["vectors_count"]}]
+            return []
+    except Exception:
+        return []
+
+
+@router.post(
+    "/vector/index",
+    dependencies=[Depends(RequirePermission("costs.create"))],
+)
+async def vectorize_cost_items(
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    region: str | None = Query(default=None, description="Only index items from this region"),
+    batch_size: int = Query(default=256, ge=32, le=1024),
+) -> dict:
+    """Generate embeddings and index cost items into vector DB.
+
+    Uses FastEmbed/ONNX (all-MiniLM-L6-v2, 384d) locally — no API key needed.
+    Default backend: LanceDB (embedded, no Docker required).
+    """
+    import time
+    from sqlalchemy import select
+    from app.modules.costs.models import CostItem
+    from app.core.vector import encode_texts, vector_index
+
+    start = time.monotonic()
+
+    # Fetch cost items
+    stmt = select(CostItem).where(CostItem.is_active.is_(True))
+    if region:
+        stmt = stmt.where(CostItem.region == region)
+
+    result = await session.execute(stmt)
+    items = result.scalars().all()
+
+    if not items:
+        return {"indexed": 0, "message": "No cost items found to index"}
+
+    logger.info("Vectorizing %d cost items (region=%s)...", len(items), region or "all")
+
+    indexed = 0
+    for i in range(0, len(items), batch_size):
+        batch = items[i : i + batch_size]
+
+        # Build text for embedding
+        texts = []
+        for item in batch:
+            cls = item.classification or {}
+            parts = [
+                item.description or "",
+                item.unit or "",
+                cls.get("collection", ""),
+                cls.get("department", ""),
+                cls.get("section", ""),
+            ]
+            texts.append(" ".join(p for p in parts if p))
+
+        vectors = encode_texts(texts)
+
+        # Build records for vector DB
+        records = []
+        for j, item in enumerate(batch):
+            records.append({
+                "id": str(item.id),
+                "vector": vectors[j],
+                "code": item.code,
+                "description": (item.description or "")[:200],
+                "unit": item.unit or "",
+                "rate": float(item.rate) if item.rate else 0.0,
+                "region": item.region or "",
+            })
+
+        indexed += vector_index(records)
+
+    duration = round(time.monotonic() - start, 1)
+    logger.info("Indexed %d cost items in %.1fs", indexed, duration)
+
+    return {
+        "indexed": indexed,
+        "region": region or "all",
+        "duration_seconds": duration,
+    }
+
+
+@router.post(
+    "/vector/load-github/{db_id}",
+    dependencies=[Depends(RequirePermission("costs.create"))],
+)
+async def load_vector_from_github(
+    db_id: str,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+) -> dict:
+    """Download pre-built vector embeddings from GitHub and index into LanceDB.
+
+    Downloads a parquet file with pre-computed 384d embeddings (all-MiniLM-L6-v2)
+    for the given region, so users don't need to run the embedding model locally.
+    """
+    import time
+    import urllib.request
+
+    import pandas as pd
+
+    from app.core.vector import vector_index
+
+    start = time.monotonic()
+
+    github_path = _GITHUB_CWICR_FILES.get(db_id)
+    if not github_path:
+        raise HTTPException(404, f"Unknown database ID: {db_id}")
+
+    # Vector parquet is stored alongside the regular parquet in the same repo
+    vector_filename = f"{db_id}_vectors.parquet"
+    vector_github_path = f"{db_id}/{vector_filename}"
+    url = f"{_GITHUB_CWICR_BASE_URL}/{vector_github_path}"
+
+    # Cache locally
+    cache_dir = _CWICR_CACHE_DIR / "vectors"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    local_path = cache_dir / vector_filename
+
+    # Download if not cached
+    if not local_path.exists() or local_path.stat().st_size < 1000:
+        logger.info("Downloading vector data for %s from GitHub: %s", db_id, url)
+        try:
+            urllib.request.urlretrieve(url, str(local_path))
+        except Exception as exc:
+            local_path.unlink(missing_ok=True)
+            raise HTTPException(
+                404,
+                f"Vector data for '{db_id}' not available on GitHub yet. "
+                f"Use 'Generate Vector Index' to build locally. Error: {exc}",
+            )
+
+        if not local_path.exists() or local_path.stat().st_size < 1000:
+            local_path.unlink(missing_ok=True)
+            raise HTTPException(404, f"Downloaded vector file for '{db_id}' is invalid or empty.")
+
+    logger.info("Loading vector data from %s", local_path)
+
+    # Read parquet: columns = id, vector, code, description, unit, rate, region
+    df = pd.read_parquet(local_path)
+    total = len(df)
+
+    if total == 0:
+        return {"indexed": 0, "database": db_id, "message": "Empty vector file"}
+
+    # Index in batches
+    batch_size = 256
+    indexed = 0
+    for i in range(0, total, batch_size):
+        batch = df.iloc[i : i + batch_size]
+        records = []
+        for _, row in batch.iterrows():
+            vec = row.get("vector")
+            if vec is None:
+                continue
+            # Convert numpy array to list if needed
+            if hasattr(vec, "tolist"):
+                vec = vec.tolist()
+            elif isinstance(vec, str):
+                import json
+                vec = json.loads(vec)
+
+            records.append({
+                "id": str(row.get("id", "")),
+                "vector": vec,
+                "code": str(row.get("code", "")),
+                "description": str(row.get("description", ""))[:200],
+                "unit": str(row.get("unit", "")),
+                "rate": float(row.get("rate", 0)),
+                "region": str(row.get("region", db_id)),
+            })
+
+        if records:
+            indexed += vector_index(records)
+
+    duration = round(time.monotonic() - start, 1)
+    logger.info("Loaded %d vectors for %s from GitHub in %.1fs", indexed, db_id, duration)
+
+    return {
+        "indexed": indexed,
+        "database": db_id,
+        "source": "github",
+        "duration_seconds": duration,
+    }
+
+
+@router.get("/vector/search")
+async def semantic_search(
+    q: str = Query(..., min_length=2, max_length=500, description="Natural language query"),
+    region: str | None = Query(default=None, description="Filter by region"),
+    limit: int = Query(default=10, ge=1, le=50),
+) -> list[dict]:
+    """Semantic search using vector similarity.
+
+    Finds cost items whose descriptions are semantically similar
+    to the query, even if the exact words don't match.
+    E.g. "concrete wall" finds "reinforced partition C30/37".
+    """
+    from app.core.vector import encode_texts, vector_search
+
+    query_vector = encode_texts([q])[0]
+    return vector_search(query_vector, region=region, limit=limit)
+
+
+# ── Categories (distinct classification.collection values) ───────────────
+
+
+@router.get("/categories", response_model=list[str])
+async def list_categories(
+    session: SessionDep,
+    region: str | None = Query(default=None, description="Filter by region"),
+) -> list[str]:
+    """Return distinct classification.collection values from cost items.
+
+    Useful for populating a category filter dropdown on the frontend.
+    Works with both SQLite (json_extract) and PostgreSQL (JSON operator).
+    """
+    from sqlalchemy import select, distinct, func, text
+    from app.modules.costs.models import CostItem
+
+    # json_extract works on both SQLite and PostgreSQL (via SQLAlchemy's func)
+    collection_expr = func.json_extract(CostItem.classification, "$.collection")
+
+    stmt = (
+        select(distinct(collection_expr))
+        .where(CostItem.is_active.is_(True))
+        .where(collection_expr.isnot(None))
+        .where(collection_expr != "")
+    )
+
+    if region:
+        stmt = stmt.where(CostItem.region == region)
+
+    stmt = stmt.order_by(collection_expr)
+
+    result = await session.execute(stmt)
+    return [row[0] for row in result.all() if row[0]]
 
 
 # ── Get by ID ─────────────────────────────────────────────────────────────
@@ -183,8 +624,6 @@ async def bulk_import_cost_items(
 
 
 # ── File import (CSV / Excel) ────────────────────────────────────────────
-
-logger = logging.getLogger(__name__)
 
 # Column name aliases for flexible matching (all lowercased)
 _COST_COLUMN_ALIASES: dict[str, list[str]] = {
@@ -269,7 +708,7 @@ def _parse_cost_rows_from_csv(content_bytes: bytes) -> list[dict[str, Any]]:
         except UnicodeDecodeError:
             continue
     else:
-        raise ValueError("Unable to decode CSV file — unsupported encoding")
+        raise ValueError("Unable to decode CSV file -- unsupported encoding")
 
     sniffer = csv.Sniffer()
     try:
@@ -350,12 +789,12 @@ async def import_cost_file(
     Accepts a multipart file upload. The file must be .xlsx or .csv.
 
     Expected columns (flexible auto-detection):
-    - **Code / Item Code / Nr.** — unique cost item code (required)
-    - **Description / Beschreibung / Text** — description (required)
-    - **Unit / Einheit / ME** — unit of measurement
-    - **Rate / Price / Cost / EP** — unit rate or price
-    - **Currency / Währung** — currency code (defaults to EUR)
-    - **Classification / DIN 276 / KG** — classification code
+    - **Code / Item Code / Nr.** -- unique cost item code (required)
+    - **Description / Beschreibung / Text** -- description (required)
+    - **Unit / Einheit / ME** -- unit of measurement
+    - **Rate / Price / Cost / EP** -- unit rate or price
+    - **Currency / Wahrung** -- currency code (defaults to EUR)
+    - **Classification / DIN 276 / KG** -- classification code
 
     Returns:
         Summary with counts of imported, skipped, and error details per row.
@@ -499,6 +938,26 @@ async def import_cost_file(
 
 # ── Load CWICR database from local DDC Toolkit ──────────────────────────────
 
+# GitHub repository info for downloading CWICR parquet files
+_GITHUB_CWICR_BASE_URL = (
+    "https://github.com/datadrivenconstruction/"
+    "OpenConstructionEstimate-DDC-CWICR/raw/main"
+)
+
+# Mapping from db_id to the GitHub folder/filename structure
+_GITHUB_CWICR_FILES: dict[str, str] = {
+    "USA_USD": "USA_USD/USA_USD.parquet",
+    "UK_GBP": "UK_GBP/UK_GBP.parquet",
+    "DE_BERLIN": "DE_BERLIN/DE_BERLIN.parquet",
+    "ENG_TORONTO": "ENG_TORONTO/ENG_TORONTO.parquet",
+    "FR_PARIS": "FR_PARIS/FR_PARIS.parquet",
+    "SP_BARCELONA": "SP_BARCELONA/SP_BARCELONA.parquet",
+    "PT_SAOPAULO": "PT_SAOPAULO/PT_SAOPAULO.parquet",
+    "RU_STPETERSBURG": "RU_STPETERSBURG/RU_STPETERSBURG.parquet",
+    "AR_DUBAI": "AR_DUBAI/AR_DUBAI.parquet",
+    "ZH_SHANGHAI": "ZH_SHANGHAI/ZH_SHANGHAI.parquet",
+    "HI_MUMBAI": "HI_MUMBAI/HI_MUMBAI.parquet",
+}
 
 CWICR_SEARCH_PATHS = [
     "../../DDC_Toolkit/pricing/data/excel",
@@ -507,13 +966,54 @@ CWICR_SEARCH_PATHS = [
     str(Path.home() / "Desktop" / "CodeProjects" / "DDC_Toolkit" / "pricing" / "data" / "excel"),
 ]
 
+# Local cache directory for downloaded parquet files
+_CWICR_CACHE_DIR = Path.home() / ".openestimator" / "cache"
+
+
+def _download_cwicr_from_github(db_id: str) -> Path | None:
+    """Download a CWICR parquet file from GitHub if available.
+
+    Downloads to ~/.openestimator/cache/{db_id}.parquet.
+    Returns the local path on success, None on failure.
+    """
+    import urllib.request
+
+    github_path = _GITHUB_CWICR_FILES.get(db_id)
+    if not github_path:
+        return None
+
+    url = f"{_GITHUB_CWICR_BASE_URL}/{github_path}"
+    cache_dir = _CWICR_CACHE_DIR
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    local_path = cache_dir / f"{db_id}.parquet"
+
+    # If already cached, return it
+    if local_path.exists() and local_path.stat().st_size > 1000:
+        logger.info("Using cached CWICR file: %s", local_path)
+        return local_path
+
+    logger.info("Downloading CWICR %s from GitHub: %s", db_id, url)
+    try:
+        urllib.request.urlretrieve(url, str(local_path))
+        if local_path.exists() and local_path.stat().st_size > 1000:
+            logger.info("Downloaded CWICR %s: %d bytes", db_id, local_path.stat().st_size)
+            return local_path
+        else:
+            logger.warning("Downloaded file too small or missing: %s", local_path)
+            local_path.unlink(missing_ok=True)
+            return None
+    except Exception as exc:
+        logger.warning("Failed to download CWICR %s from GitHub: %s", db_id, exc)
+        local_path.unlink(missing_ok=True)
+        return None
+
 
 def _find_cwicr_file(db_id: str) -> Path | None:
     """Find a CWICR database file by database ID (e.g., DE_BERLIN).
 
-    Priority: Parquet (fastest, most reliable) > Excel SIMPLE > Excel any.
+    Priority: Local Parquet > Local Excel SIMPLE > Local Excel any > GitHub download.
     """
-    # Priority 1: Parquet files (fastest and most reliable)
+    # Priority 1: Parquet files in local DDC_Toolkit (fastest and most reliable)
     for search_path in CWICR_SEARCH_PATHS:
         parquet_path = Path(search_path).parent / "parquet"
         if parquet_path.exists():
@@ -521,7 +1021,12 @@ def _find_cwicr_file(db_id: str) -> Path | None:
                 if f.name.startswith(db_id) and f.suffix == ".parquet":
                     return f
 
-    # Priority 2: Excel SIMPLE
+    # Priority 2: Cached parquet from previous GitHub download
+    cached = _CWICR_CACHE_DIR / f"{db_id}.parquet"
+    if cached.exists() and cached.stat().st_size > 1000:
+        return cached
+
+    # Priority 3: Excel SIMPLE
     for search_path in CWICR_SEARCH_PATHS:
         p = Path(search_path)
         if not p.exists():
@@ -530,7 +1035,7 @@ def _find_cwicr_file(db_id: str) -> Path | None:
             if f.name.startswith(db_id) and "_SIMPLE" in f.name and f.suffix == ".xlsx":
                 return f
 
-    # Priority 3: Any Excel
+    # Priority 4: Any Excel
     for search_path in CWICR_SEARCH_PATHS:
         p = Path(search_path)
         if not p.exists():
@@ -538,6 +1043,11 @@ def _find_cwicr_file(db_id: str) -> Path | None:
         for f in p.iterdir():
             if f.name.startswith(db_id) and f.suffix == ".xlsx":
                 return f
+
+    # Priority 5: Download from GitHub (fallback for UK_GBP, USA_USD, etc.)
+    downloaded = _download_cwicr_from_github(db_id)
+    if downloaded:
+        return downloaded
 
     return None
 
@@ -556,14 +1066,14 @@ async def load_cwicr_database(
     Optimized: reads Parquet, deduplicates by rate_code (55K unique items
     from 900K total rows), then bulk-inserts into SQLite.
     Typical time: 10-30 seconds.
+
+    For databases not available locally (e.g. UK_GBP, USA_USD), automatically
+    downloads from GitHub and caches at ~/.openestimator/cache/.
     """
-    import logging
     import time
 
     import pandas as pd
-    from sqlalchemy import text
 
-    logger = logging.getLogger(__name__)
     start = time.monotonic()
 
     # Find the file
@@ -572,7 +1082,8 @@ async def load_cwicr_database(
         raise HTTPException(
             status_code=404,
             detail=f"CWICR database '{db_id}' not found. "
-            f"Install DDC_Toolkit at ~/Desktop/CodeProjects/DDC_Toolkit",
+            f"Install DDC_Toolkit at ~/Desktop/CodeProjects/DDC_Toolkit "
+            f"or check your internet connection for GitHub download.",
         )
 
     logger.info("Loading CWICR from %s", cwicr_path)
@@ -589,80 +1100,160 @@ async def load_cwicr_database(
     # Normalize column names
     df.columns = [str(c).strip().lower() for c in df.columns]
 
-    # CWICR-specific: deduplicate by rate_code to get unique work items
-    if "rate_code" in df.columns:
-        df = df.drop_duplicates(subset="rate_code", keep="first")
-        logger.info("After dedup by rate_code: %d unique items", len(df))
+    # ── Helper: safely read a float value from a row ──────────────────────
+    def _safe(val: Any) -> float:
+        if val is None:
+            return 0.0
+        try:
+            import math
+            f = float(val)
+            return 0.0 if math.isnan(f) else f
+        except (ValueError, TypeError):
+            return 0.0
 
-    # Map CWICR columns to our schema
-    col_map = {
-        "code": next((c for c in df.columns if c in ("rate_code", "code", "id")), None),
-        "description": next((c for c in df.columns if c in (
-            "rate_original_name", "rate_final_name", "description", "name",
-            "subsection_name", "section_name",
-        )), None),
-        "unit": next((c for c in df.columns if c in ("rate_unit", "unit")), None),
-        "rate": next((c for c in df.columns if c in (
-            "total_cost_per_position", "total_resource_cost_per_position",
-            "cost", "price", "rate",
-        )), None),
-        "category": next((c for c in df.columns if c in ("collection_name", "department_name", "category")), None),
-    }
+    def _str(val: Any) -> str:
+        if val is None or (isinstance(val, float) and pd.isna(val)):
+            return ""
+        return str(val).strip()
 
-    desc_col = col_map["description"]
-    if not desc_col:
-        raise HTTPException(400, f"No description column. Columns: {list(df.columns)[:15]}")
-
-    # Build description: combine original_name + final_name for richer text
+    # ── Build description column ──────────────────────────────────────────
     if "rate_original_name" in df.columns and "rate_final_name" in df.columns:
         df["_full_desc"] = (
             df["rate_original_name"].fillna("").astype(str) + " " +
             df["rate_final_name"].fillna("").astype(str)
         ).str.strip()
-        desc_col = "_full_desc"
 
-    # Filter: must have description
-    df = df[df[desc_col].astype(str).str.len() >= 3]
-    logger.info("After filtering: %d items with valid descriptions", len(df))
+    # ── Group by rate_code to collect resources per work item ─────────────
+    has_rate_code = "rate_code" in df.columns
+    if not has_rate_code:
+        raise HTTPException(400, f"No rate_code column. Columns: {list(df.columns)[:15]}")
 
-    # Bulk insert using raw SQL for speed (10-30 seconds vs 41 minutes)
+    grouped = df.groupby("rate_code", sort=False)
+    unique_count = len(grouped)
+    logger.info("Grouped into %d unique rate_codes from %d rows", unique_count, total_rows)
+
+    # ── Build items with resource components ──────────────────────────────
     imported = 0
     skipped = 0
     batch_size = 500
-    items_to_insert = []
+    items_to_insert: list[dict[str, Any]] = []
 
-    for _, row in df.iterrows():
-        desc = str(row.get(desc_col, ""))[:500].strip()
-        code = str(row.get(col_map["code"], ""))[:100].strip() if col_map["code"] else ""
-        if not code:
-            code = f"CWICR-{db_id}-{imported:06d}"
-        unit = str(row.get(col_map["unit"], "m2"))[:20].strip() or "m2"
+    for rate_code, group in grouped:
+        first = group.iloc[0]
 
-        rate = 0.0
-        if col_map["rate"]:
-            try:
-                rv = row.get(col_map["rate"], 0)
-                rate = float(rv) if rv is not None and pd.notna(rv) else 0.0
-            except (ValueError, TypeError):
-                rate = 0.0
+        # Description
+        desc = _str(first.get("_full_desc", "")) if "_full_desc" in first.index else ""
+        if len(desc) < 3:
+            desc = _str(first.get("rate_original_name", ""))
+        if len(desc) < 3:
+            desc = _str(first.get("subsection_name", ""))
+        if len(desc) < 3:
+            skipped += 1
+            continue
 
-        category = ""
-        if col_map["category"]:
-            category = str(row.get(col_map["category"], ""))[:100]
+        code = _str(rate_code)[:100] or f"CWICR-{db_id}-{imported:06d}"
+        unit = _str(first.get("rate_unit", "m2"))[:20] or "m2"
+        rate = _safe(first.get("total_cost_per_position", 0))
+
+        # Hierarchy / classification
+        classification: dict[str, str] = {}
+        for key in ("collection_name", "department_name", "section_name", "subsection_name"):
+            val = _str(first.get(key, ""))
+            if val:
+                classification[key.replace("_name", "")] = val
+        cat_type = _str(first.get("category_type", ""))
+        if cat_type:
+            classification["category"] = cat_type
+
+        # Labor summary from first row
+        labor_total = _safe(first.get("cost_of_working_hours", 0))
+        equipment_total = _safe(first.get("total_value_machinery_equipment", 0))
+        material_total = _safe(first.get("total_material_cost_per_position", 0))
+        labor_hours = _safe(first.get("total_labor_hours_all_personnel", 0))
+
+        # Build resource components from ALL rows in the group.
+        # Classification logic:
+        #   row_type="Scope of work" → skip (empty rows)
+        #   is_machine=True → "equipment" (includes Machinist, Electricity)
+        #   is_material=True + unit in (hrs, person-hour) → "labor"
+        #   is_material=True + unit NOT hrs → "material"
+        #   row_type="Abstract resource" → "material" (special priced materials)
+        #   Otherwise → "other"
+        _LABOR_UNITS = {"hrs", "h", "person-hour", "person-hours", "man-hours"}
+        components: list[dict[str, Any]] = []
+        for _, res_row in group.iterrows():
+            row_type = _str(res_row.get("row_type", ""))
+            if row_type == "Scope of work":
+                continue  # empty rows
+            res_name = _str(res_row.get("resource_name", ""))
+            if not res_name:
+                continue
+            res_unit = _str(res_row.get("resource_unit", ""))
+            cost = round(_safe(res_row.get("resource_cost_eur", 0)), 2)
+            if cost == 0:
+                continue  # skip zero-cost rows
+
+            is_mach = bool(res_row.get("is_machine", False))
+            is_mat_flag = bool(res_row.get("is_material", False))
+
+            # Determine real type
+            if is_mach:
+                if row_type == "Machinist":
+                    res_type = "operator"
+                elif row_type == "Electricity":
+                    res_type = "electricity"
+                else:
+                    res_type = "equipment"
+            elif is_mat_flag:
+                if res_unit.lower() in _LABOR_UNITS:
+                    res_type = "labor"
+                else:
+                    res_type = "material"
+            elif row_type == "Abstract resource":
+                res_type = "material"
+            elif row_type == "Mass":
+                res_type = "other"
+            else:
+                res_type = "other"
+
+            components.append({
+                "name": res_name[:200],
+                "code": _str(res_row.get("resource_code", ""))[:50],
+                "unit": res_unit[:20],
+                "quantity": round(_safe(res_row.get("resource_quantity", 0)), 4),
+                "unit_rate": round(_safe(res_row.get("resource_price_per_unit_eur_current", 0)), 2),
+                "cost": cost,
+                "type": res_type,  # labor | material | equipment | operator | electricity | other
+            })
+
+        # Metadata: cost breakdown + labor info
+        metadata: dict[str, Any] = {}
+        if labor_total > 0:
+            metadata["labor_cost"] = round(labor_total, 2)
+        if equipment_total > 0:
+            metadata["equipment_cost"] = round(equipment_total, 2)
+        if material_total > 0:
+            metadata["material_cost"] = round(material_total, 2)
+        if labor_hours > 0:
+            metadata["labor_hours"] = round(labor_hours, 2)
+        workers = _safe(first.get("count_total_people_per_unit", 0))
+        if workers > 0:
+            metadata["workers_per_unit"] = round(workers, 1)
 
         items_to_insert.append({
             "code": code,
-            "description": desc,
+            "description": desc[:500],
             "unit": unit,
-            "rate": str(rate),
+            "rate": str(round(rate, 2)),
             "currency": "",
             "source": "cwicr",
-            "classification": {},
+            "classification": classification,
             "tags": [],
-            "components": [],
+            "components": components,
             "descriptions": {},
             "is_active": True,
             "region": db_id,
+            "metadata": metadata,
         })
 
         if len(items_to_insert) >= batch_size:
@@ -684,7 +1275,7 @@ async def load_cwicr_database(
         "imported": imported,
         "skipped": skipped,
         "total_rows": total_rows,
-        "unique_items": len(df),
+        "unique_items": unique_count,
         "database": db_id,
         "source_file": cwicr_path.name,
         "duration_seconds": duration,
@@ -694,8 +1285,6 @@ async def load_cwicr_database(
 async def _bulk_insert_costs(session: AsyncSession, items: list[dict]) -> int:
     """Bulk insert cost items, skipping duplicates by code."""
     from app.modules.costs.models import CostItem
-    import uuid
-    from datetime import datetime, UTC
 
     inserted = 0
     for item in items:
@@ -714,6 +1303,7 @@ async def _bulk_insert_costs(session: AsyncSession, items: list[dict]) -> int:
                 descriptions=item.get("descriptions", {}),
                 is_active=True,
                 region=item.get("region", ""),
+                metadata_=item.get("metadata", {}),
             )
             session.add(obj)
             inserted += 1
@@ -753,12 +1343,14 @@ async def _bulk_insert_costs(session: AsyncSession, items: list[dict]) -> int:
 
 @router.delete(
     "/actions/clear-database",
-    dependencies=[Depends(RequirePermission("costs.delete"))],
+    dependencies=[Depends(RequirePermission("costs.update"))],
 )
 async def clear_cost_database(
     session: SessionDep,
     _user_id: CurrentUserId,
-    source: str = Query(default="", description="Filter by source (e.g. 'cwicr'). Empty = delete ALL."),
+    source: str = Query(
+        default="", description="Filter by source (e.g. 'cwicr'). Empty = delete ALL.",
+    ),
 ) -> dict:
     """Delete cost items. Optionally filter by source."""
     from sqlalchemy import delete as sql_delete
@@ -794,7 +1386,9 @@ async def export_cost_database(
     from app.modules.costs.models import CostItem
     from sqlalchemy import select
 
-    result = await session.execute(select(CostItem).where(CostItem.is_active.is_(True)).limit(50000))
+    result = await session.execute(
+        select(CostItem).where(CostItem.is_active.is_(True)).limit(50000)
+    )
     items = result.scalars().all()
 
     wb = Workbook()
@@ -827,3 +1421,7 @@ async def export_cost_database(
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": 'attachment; filename="cost_database.xlsx"'},
     )
+
+
+
+

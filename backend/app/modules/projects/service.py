@@ -14,6 +14,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import Settings
 from app.core.events import event_bus
+
+_logger_ev = __import__('logging').getLogger(__name__ + '.events')
+
+async def _safe_publish(name: str, data: dict, source_module: str = '') -> None:
+    try:
+        await event_bus.publish(name, data, source_module=source_module)
+    except Exception:
+        _logger_ev.debug('Event publish skipped: %s', name)
 from app.modules.projects.models import Project
 from app.modules.projects.repository import ProjectRepository
 from app.modules.projects.schemas import ProjectCreate, ProjectUpdate
@@ -49,7 +57,7 @@ class ProjectService:
         )
         project = await self.repo.create(project)
 
-        await event_bus.publish(
+        await _safe_publish(
             "projects.project.created",
             {
                 "project_id": str(project.id),
@@ -81,13 +89,15 @@ class ProjectService:
         offset: int = 0,
         limit: int = 50,
         status_filter: str | None = None,
+        is_admin: bool = False,
     ) -> tuple[list[Project], int]:
-        """List projects for a user with pagination."""
+        """List projects for a user with pagination. Admins see all."""
         return await self.repo.list_for_user(
             owner_id,
             offset=offset,
             limit=limit,
             status=status_filter,
+            is_admin=is_admin,
         )
 
     # ── Update ────────────────────────────────────────────────────────────
@@ -114,7 +124,7 @@ class ProjectService:
         # Refresh the project object
         await self.session.refresh(project)
 
-        await event_bus.publish(
+        await _safe_publish(
             "projects.project.updated",
             {
                 "project_id": str(project_id),
@@ -137,7 +147,7 @@ class ProjectService:
 
         await self.repo.update_fields(project_id, status="archived")
 
-        await event_bus.publish(
+        await _safe_publish(
             "projects.project.deleted",
             {
                 "project_id": str(project_id),

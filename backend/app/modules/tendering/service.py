@@ -13,6 +13,14 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
+
+_logger_ev = __import__('logging').getLogger(__name__ + '.events')
+
+async def _safe_publish(name: str, data: dict, source_module: str = '') -> None:
+    try:
+        await event_bus.publish(name, data, source_module=source_module)
+    except Exception:
+        _logger_ev.debug('Event publish skipped: %s', name)
 from app.modules.tendering.models import TenderBid, TenderPackage
 from app.modules.tendering.repository import TenderingRepository
 from app.modules.tendering.schemas import (
@@ -47,25 +55,17 @@ class TenderingService:
             metadata_=data.metadata,
         )
         package = await self.repo.create_package(package)
+        logger.info("Tender package created: %s", package.name)
+        return package
 
-        # Event publishing disabled (SQLite greenlet conflict)
-        # await event_bus.publish(
-        # #     "tendering.package.created",
-        # #     {"package_id": str(package.id), "project_id": str(data.project_id)},
-        # #     source_module="oe_tendering",
-        # # )
-# 
-        # logger.info("Tender package created: %s", package.name)
-        # return package
-# 
-    # async def get_package(self, package_id: uuid.UUID) -> TenderPackage:
-        # """Get a package by ID. Raises 404 if not found."""
-        # package = await self.repo.get_package_by_id(package_id)
-        # if package is None:
-            # raise HTTPException(
-                # status_code=status.HTTP_404_NOT_FOUND,
-                # detail="Tender package not found",
-            # )
+    async def get_package(self, package_id: uuid.UUID) -> TenderPackage:
+        """Get a package by ID. Raises 404 if not found."""
+        package = await self.repo.get_package_by_id(package_id)
+        if package is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Tender package not found",
+            )
         return package
 
     async def list_packages(
@@ -97,7 +97,7 @@ class TenderingService:
 
         await self.repo.update_package_fields(package_id, **fields)
 
-        # await event_bus.publish(
+        # await _safe_publish(
             # "tendering.package.updated",
             # {
                 # "package_id": str(package_id),
@@ -136,7 +136,7 @@ class TenderingService:
         )
         bid = await self.repo.create_bid(bid)
 
-        # await event_bus.publish(
+        # await _safe_publish(
             # "tendering.bid.created",
             # {
                 # "bid_id": str(bid.id),
@@ -188,7 +188,7 @@ class TenderingService:
 
         await self.repo.update_bid_fields(bid_id, **fields)
 
-        # await event_bus.publish(
+        # await _safe_publish(
             # "tendering.bid.updated",
             # {
                 # "bid_id": str(bid_id),

@@ -1,12 +1,28 @@
 import clsx from 'clsx';
-import type { ReactNode } from 'react';
+import { isValidElement, type ReactNode } from 'react';
+import { Button } from './Button';
 
-interface EmptyStateProps {
+interface ActionObject {
+  label: string;
+  onClick: () => void;
+}
+
+export interface EmptyStateProps {
   icon?: ReactNode;
   title: string;
   description?: string;
-  action?: ReactNode;
+  action?: ActionObject | ReactNode;
   className?: string;
+}
+
+function isActionObject(action: unknown): action is ActionObject {
+  return (
+    typeof action === 'object' &&
+    action !== null &&
+    !isValidElement(action) &&
+    'label' in action &&
+    'onClick' in action
+  );
 }
 
 export function EmptyState({ icon, title, description, action, className }: EmptyStateProps) {
@@ -26,7 +42,17 @@ export function EmptyState({ icon, title, description, action, className }: Empt
       {description && (
         <p className="mt-1.5 max-w-sm text-sm text-content-secondary">{description}</p>
       )}
-      {action && <div className="mt-5">{action}</div>}
+      {action && (
+        <div className="mt-5">
+          {isActionObject(action) ? (
+            <Button variant="primary" onClick={action.onClick}>
+              {action.label}
+            </Button>
+          ) : (
+            action
+          )}
+        </div>
+      )}
     </div>
   );
 }

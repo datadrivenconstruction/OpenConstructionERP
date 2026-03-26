@@ -1,7 +1,8 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
+  Calendar,
   CalendarDays,
   ChevronRight,
   ArrowLeft,
@@ -13,11 +14,23 @@ import {
   Minus,
   Diamond,
   BarChart3,
+  Zap,
+  FileBarChart,
+  ShieldAlert,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Skeleton, Input } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Skeleton, Input, InfoHint, SkeletonTable } from '@/shared/ui';
 import { apiGet } from '@/shared/lib/api';
+import { getIntlLocale } from '@/shared/lib/formatters';
+import { useToastStore } from '@/stores/useToastStore';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { scheduleApi } from './api';
-import type { Schedule, Activity, GanttData } from './api';
+import type {
+  Schedule,
+  Activity,
+  GanttData,
+  CriticalPathResponse,
+  RiskAnalysisResponse,
+} from './api';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -26,6 +39,14 @@ interface Project {
   name: string;
   description: string;
   classification_standard: string;
+}
+
+interface BOQListItem {
+  id: string;
+  project_id: string;
+  name: string;
+  description: string;
+  status: string;
 }
 
 interface CreateScheduleForm {
@@ -46,7 +67,7 @@ interface CreateActivityForm {
 /* ── Helpers ───────────────────────────────────────────────────────────── */
 
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-GB', {
+  return new Date(dateStr).toLocaleDateString(getIntlLocale(), {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
@@ -192,16 +213,173 @@ function SummaryStats({
   );
 }
 
+/* ── Dependency Arrow Types ────────────────────────────────────────────── */
+
+interface DependencyLink {
+  fromId: string;
+  toId: string;
+  type: string; // "FS", "SS", "FF", "SF"
+}
+
+interface ArrowPath {
+  key: string;
+  d: string;
+  markerEnd: string;
+}
+
+/**
+ * Compute SVG path data for dependency arrows between activity bars.
+ * All coordinates are in pixels relative to the gantt body container.
+ *
+ * @param links - dependency links to draw
+ * @param activityIndex - map of activity ID to its row index
+ * @param barPositions - map of activity ID to { leftPct, widthPct }
+ * @param rowHeight - measured height of each row in pixels
+ * @param containerWidth - pixel width of the gantt right panel area
+ */
+function computeArrowPaths(
+  links: DependencyLink[],
+  activityIndex: Map<string, number>,
+  barPositions: Map<string, { leftPct: number; widthPct: number }>,
+  rowHeight: number,
+  containerWidth: number,
+): ArrowPath[] {
+  const paths: ArrowPath[] = [];
+  const ARROW_OFFSET = 6; // horizontal offset from bar edge
+  const VERTICAL_GAP = 4; // vertical gap from row center
+
+  for (const link of links) {
+    const fromIdx = activityIndex.get(link.fromId);
+    const toIdx = activityIndex.get(link.toId);
+    const fromBar = barPositions.get(link.fromId);
+    const toBar = barPositions.get(link.toId);
+
+    if (fromIdx == null || toIdx == null || !fromBar || !toBar) continue;
+
+    const fromCenterY = fromIdx * rowHeight + rowHeight / 2;
+    const toCenterY = toIdx * rowHeight + rowHeight / 2;
+
+    let startX: number;
+    let endX: number;
+
+    const depType = (link.type || 'FS').toUpperCase();
+
+    if (depType === 'SS') {
+      // Start-to-Start: arrow from start of predecessor to start of successor
+      startX = (fromBar.leftPct / 100) * containerWidth;
+      endX = (toBar.leftPct / 100) * containerWidth;
+    } else if (depType === 'FF') {
+      // Finish-to-Finish
+      startX = ((fromBar.leftPct + fromBar.widthPct) / 100) * containerWidth;
+      endX = ((toBar.leftPct + toBar.widthPct) / 100) * containerWidth;
+    } else if (depType === 'SF') {
+      // Start-to-Finish
+      startX = (fromBar.leftPct / 100) * containerWidth;
+      endX = ((toBar.leftPct + toBar.widthPct) / 100) * containerWidth;
+    } else {
+      // FS (Finish-to-Start) — default
+      startX = ((fromBar.leftPct + fromBar.widthPct) / 100) * containerWidth;
+      endX = (toBar.leftPct / 100) * containerWidth;
+    }
+
+    // Build an L-shaped (or S-shaped) connector path
+    // The path goes: horizontal from source bar edge, then vertical, then horizontal to target
+    const goingDown = toCenterY > fromCenterY;
+    const startY = fromCenterY + (goingDown ? VERTICAL_GAP : -VERTICAL_GAP);
+    const endY = toCenterY + (goingDown ? -VERTICAL_GAP : VERTICAL_GAP);
+
+    // Determine the corner X for the L-shaped route
+    let cornerX: number;
+
+    if (depType === 'FS' || depType === 'SF') {
+      // Route through a point offset from the source bar end
+      if (startX < endX) {
+        // Simple L-shape: go right from source, then turn down/up to target
+        cornerX = startX + ARROW_OFFSET;
+      } else {
+        // Source bar ends after target starts — route around
+        cornerX = Math.min(startX, endX) - ARROW_OFFSET;
+      }
+    } else {
+      // SS or FF — route through a point offset from the aligned edges
+      cornerX = Math.min(startX, endX) - ARROW_OFFSET;
+    }
+
+    // Build path: start → horizontal to corner → vertical to target row → horizontal to target
+    const d =
+      `M ${startX} ${startY} ` +
+      `L ${cornerX} ${startY} ` +
+      `L ${cornerX} ${endY} ` +
+      `L ${endX} ${endY}`;
+
+    paths.push({
+      key: `${link.fromId}-${link.toId}-${depType}`,
+      d,
+      markerEnd: 'url(#gantt-arrowhead)',
+    });
+  }
+
+  return paths;
+}
+
 /* ── Gantt Chart ───────────────────────────────────────────────────────── */
+
+type ZoomLevel = 'day' | 'week' | 'month';
+
+const PIXELS_PER_DAY: Record<ZoomLevel, number> = {
+  day: 40,
+  week: 8,
+  month: 2,
+};
 
 function GanttChart({
   activities,
   onUpdateProgress,
+  criticalActivityIds,
+  zoomLevel = 'week',
 }: {
   activities: Activity[];
   onUpdateProgress: (activityId: string, progress: number) => void;
+  criticalActivityIds?: Set<string>;
+  zoomLevel?: ZoomLevel;
 }) {
   const { t } = useTranslation();
+  const ganttBodyRef = useRef<HTMLDivElement>(null);
+  const [bodyMetrics, setBodyMetrics] = useState<{
+    rowHeight: number;
+    containerWidth: number;
+  } | null>(null);
+
+  // Measure the gantt body for SVG overlay dimensions
+  useEffect(() => {
+    const container = ganttBodyRef.current;
+    if (!container || activities.length === 0) return;
+
+    const measure = () => {
+      const firstRow = container.querySelector<HTMLElement>('[data-gantt-row]');
+      if (!firstRow) return;
+
+      // Find the first right-panel element to get its width
+      const rightPanel = firstRow.querySelector<HTMLElement>('[data-gantt-bar-area]');
+      if (!rightPanel) return;
+
+      const firstRowRect = firstRow.getBoundingClientRect();
+      const containerRect = rightPanel.getBoundingClientRect();
+
+      setBodyMetrics({
+        rowHeight: firstRowRect.height,
+        containerWidth: containerRect.width,
+      });
+    };
+
+    // Measure after paint
+    requestAnimationFrame(measure);
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(container);
+
+    return () => observer.disconnect();
+  }, [activities]);
 
   // Compute timeline bounds
   const { timelineStart, timelineEnd, totalDays } = useMemo(() => {
@@ -236,26 +414,66 @@ function GanttChart({
     };
   }, [activities]);
 
-  // Generate month/week markers
-  const monthMarkers = useMemo(() => {
+  // Compute total pixel width based on zoom level
+  const timelineWidthPx = totalDays * PIXELS_PER_DAY[zoomLevel];
+
+  // Generate timeline markers based on zoom level
+  const timelineMarkers = useMemo(() => {
     const markers: Array<{ label: string; offsetPct: number }> = [];
     const current = new Date(timelineStart);
-    current.setDate(1);
-    current.setMonth(current.getMonth() + 1);
 
-    while (current <= timelineEnd) {
-      const dayOffset = daysBetween(timelineStart.toISOString(), current.toISOString());
-      const pct = (dayOffset / totalDays) * 100;
-      if (pct >= 0 && pct <= 100) {
-        markers.push({
-          label: current.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' }),
-          offsetPct: pct,
-        });
+    if (zoomLevel === 'day') {
+      // One marker per day
+      current.setDate(current.getDate() + 1);
+      while (current <= timelineEnd) {
+        const dayOffset = daysBetween(timelineStart.toISOString(), current.toISOString());
+        const pct = (dayOffset / totalDays) * 100;
+        if (pct >= 0 && pct <= 100) {
+          markers.push({
+            label: current.toLocaleDateString(getIntlLocale(), { day: '2-digit', month: 'short' }),
+            offsetPct: pct,
+          });
+        }
+        current.setDate(current.getDate() + 1);
       }
+    } else if (zoomLevel === 'week') {
+      // One marker per week (advance to next Monday)
+      const dayOfWeek = current.getDay();
+      const daysUntilMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
+      current.setDate(current.getDate() + daysUntilMonday);
+      while (current <= timelineEnd) {
+        const dayOffset = daysBetween(timelineStart.toISOString(), current.toISOString());
+        const pct = (dayOffset / totalDays) * 100;
+        if (pct >= 0 && pct <= 100) {
+          markers.push({
+            label: current.toLocaleDateString(getIntlLocale(), {
+              day: '2-digit',
+              month: 'short',
+            }),
+            offsetPct: pct,
+          });
+        }
+        current.setDate(current.getDate() + 7);
+      }
+    } else {
+      // Month view — one marker per month
+      current.setDate(1);
       current.setMonth(current.getMonth() + 1);
+      while (current <= timelineEnd) {
+        const dayOffset = daysBetween(timelineStart.toISOString(), current.toISOString());
+        const pct = (dayOffset / totalDays) * 100;
+        if (pct >= 0 && pct <= 100) {
+          markers.push({
+            label: current.toLocaleDateString(getIntlLocale(), { month: 'short', year: '2-digit' }),
+            offsetPct: pct,
+          });
+        }
+        current.setMonth(current.getMonth() + 1);
+      }
     }
+
     return markers;
-  }, [timelineStart, timelineEnd, totalDays]);
+  }, [timelineStart, timelineEnd, totalDays, zoomLevel]);
 
   // Compute bar positions
   const getBarStyle = useCallback(
@@ -276,15 +494,62 @@ function GanttChart({
     [timelineStart, totalDays],
   );
 
+  // Build activity index map and bar position map for dependency arrows
+  const activityIndex = useMemo(() => {
+    const map = new Map<string, number>();
+    activities.forEach((a, i) => map.set(a.id, i));
+    return map;
+  }, [activities]);
+
+  const barPositions = useMemo(() => {
+    const map = new Map<string, { leftPct: number; widthPct: number }>();
+    for (const activity of activities) {
+      const startOffset = daysBetween(timelineStart.toISOString(), activity.start_date);
+      const duration = daysBetween(activity.start_date, activity.end_date);
+      const leftPct = Math.max(0, (startOffset / totalDays) * 100);
+      const widthPct = Math.max(0.5, (duration / totalDays) * 100);
+      map.set(activity.id, { leftPct, widthPct });
+    }
+    return map;
+  }, [activities, timelineStart, totalDays]);
+
+  // Collect all dependency links from activities
+  const dependencyLinks = useMemo<DependencyLink[]>(() => {
+    const links: DependencyLink[] = [];
+    for (const activity of activities) {
+      if (activity.dependencies && activity.dependencies.length > 0) {
+        for (const dep of activity.dependencies) {
+          links.push({
+            fromId: dep.activity_id,
+            toId: activity.id,
+            type: dep.type || 'FS',
+          });
+        }
+      }
+    }
+    return links;
+  }, [activities]);
+
+  // Compute SVG arrow paths when metrics are available
+  const arrowPaths = useMemo(() => {
+    if (!bodyMetrics || dependencyLinks.length === 0) return [];
+    return computeArrowPaths(
+      dependencyLinks,
+      activityIndex,
+      barPositions,
+      bodyMetrics.rowHeight,
+      bodyMetrics.containerWidth,
+    );
+  }, [dependencyLinks, activityIndex, barPositions, bodyMetrics]);
+
   if (activities.length === 0) {
     return (
       <EmptyState
-        icon={<CalendarDays size={24} strokeWidth={1.5} />}
-        title={t('schedule.no_activities', 'No activities yet')}
-        description={t(
-          'schedule.no_activities_hint',
-          'Add activities to build your project schedule',
-        )}
+        icon={<Calendar size={24} strokeWidth={1.5} />}
+        title={t('schedule.no_activities', { defaultValue: 'No activities yet' })}
+        description={t('schedule.no_activities_hint', {
+          defaultValue: 'Add activities to build your project schedule',
+        })}
       />
     );
   }
@@ -302,24 +567,45 @@ function GanttChart({
             <span className="text-right">%</span>
           </div>
         </div>
-        {/* Right panel header — month markers */}
-        <div className="relative min-w-0 flex-1 px-2 py-2.5">
-          {monthMarkers.map((marker) => (
-            <span
-              key={marker.label}
-              className="absolute top-2.5 text-2xs font-medium text-content-tertiary"
-              style={{ left: `${marker.offsetPct}%` }}
-            >
-              {marker.label}
-            </span>
-          ))}
+        {/* Right panel header — timeline markers */}
+        <div className="min-w-0 flex-1 overflow-x-auto">
+          <div
+            className="relative px-2 py-2.5"
+            style={{ minWidth: timelineWidthPx }}
+          >
+            {timelineMarkers.map((marker) => (
+              <span
+                key={marker.label + marker.offsetPct}
+                className="absolute top-2.5 text-2xs font-medium text-content-tertiary"
+                style={{ left: `${marker.offsetPct}%` }}
+              >
+                {marker.label}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Body rows */}
-      <div className="divide-y divide-border-light">
+      <div ref={ganttBodyRef} className="relative divide-y divide-border-light">
         {activities.map((activity) => {
-          const sc = statusColor(activity.status);
+          const cpActive = criticalActivityIds != null && criticalActivityIds.size > 0;
+          const isCritical = criticalActivityIds?.has(activity.id) ?? false;
+          const sc = isCritical
+            ? {
+                bg: 'bg-[#ef4444]/20',
+                fill: 'bg-[#ef4444]',
+                text: 'text-[#ef4444]',
+                variant: 'error' as const,
+              }
+            : cpActive
+              ? {
+                  bg: 'bg-[#93c5fd]/30',
+                  fill: 'bg-[#93c5fd]',
+                  text: 'text-[#93c5fd]',
+                  variant: 'neutral' as const,
+                }
+              : statusColor(activity.status);
           const barStyle = getBarStyle(activity);
           const isMilestone = activity.activity_type === 'milestone';
           const isSummary = activity.activity_type === 'summary';
@@ -327,6 +613,7 @@ function GanttChart({
           return (
             <div
               key={activity.id}
+              data-gantt-row
               className="flex transition-colors hover:bg-surface-secondary/30"
             >
               {/* Left panel — activity info */}
@@ -335,6 +622,11 @@ function GanttChart({
                   {/* Name + WBS */}
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
+                      {isCritical && (
+                        <span className="shrink-0 rounded bg-[#ef4444] px-1 py-0.5 text-[9px] font-bold leading-none text-white">
+                          CP
+                        </span>
+                      )}
                       {isMilestone && (
                         <Diamond size={12} className={`shrink-0 ${sc.text}`} fill="currentColor" />
                       )}
@@ -381,11 +673,16 @@ function GanttChart({
               </div>
 
               {/* Right panel — gantt bar */}
-              <div className="relative min-w-0 flex-1 px-2 py-2.5">
-                {/* Vertical grid lines for month markers */}
-                {monthMarkers.map((marker) => (
+              <div className="min-w-0 flex-1 overflow-x-auto">
+                <div
+                  data-gantt-bar-area
+                  className="relative px-2 py-2.5"
+                  style={{ minWidth: timelineWidthPx }}
+                >
+                {/* Vertical grid lines for timeline markers */}
+                {timelineMarkers.map((marker) => (
                   <div
-                    key={`grid-${marker.label}`}
+                    key={`grid-${marker.label}-${marker.offsetPct}`}
                     className="absolute top-0 bottom-0 w-px bg-border-light/50"
                     style={{ left: `${marker.offsetPct}%` }}
                   />
@@ -403,11 +700,16 @@ function GanttChart({
                       fill="currentColor"
                       strokeWidth={1.5}
                     />
+                    {isCritical && (
+                      <span className="absolute -top-3 left-1/2 -translate-x-1/2 flex h-4 items-center rounded bg-[#ef4444] px-1 text-[9px] font-bold leading-none text-white shadow-sm">
+                        CP
+                      </span>
+                    )}
                   </div>
                 ) : (
                   /* Standard bar */
                   <div
-                    className={`absolute top-1/2 -translate-y-1/2 h-7 rounded-md ${sc.bg} transition-all duration-200`}
+                    className={`absolute top-1/2 -translate-y-1/2 h-7 rounded-md ${sc.bg} transition-all duration-200${isCritical ? ' ring-2 ring-[#ef4444]/60' : ''}`}
                     style={barStyle}
                   >
                     {/* Progress fill */}
@@ -415,6 +717,12 @@ function GanttChart({
                       className={`h-full rounded-md ${sc.fill} transition-all duration-300`}
                       style={{ width: `${activity.progress_pct}%` }}
                     />
+                    {/* CP badge for critical path activities */}
+                    {isCritical && (
+                      <span className="absolute -top-2.5 -right-1 flex h-4 items-center rounded bg-[#ef4444] px-1 text-[9px] font-bold leading-none text-white shadow-sm">
+                        CP
+                      </span>
+                    )}
                     {/* Label overlay */}
                     {parseFloat(barStyle.width) > 4 && (
                       <span className="absolute inset-0 flex items-center px-2 text-2xs font-medium text-content-primary truncate">
@@ -424,10 +732,111 @@ function GanttChart({
                   </div>
                 )}
               </div>
+              </div>
             </div>
           );
         })}
+
+        {/* Dependency arrow SVG overlay */}
+        {arrowPaths.length > 0 && bodyMetrics && (
+          <svg
+            className="pointer-events-none absolute top-0 right-0 bottom-0"
+            style={{ width: bodyMetrics.containerWidth, left: 420 + 8 }}
+            overflow="visible"
+          >
+            <defs>
+              <marker
+                id="gantt-arrowhead"
+                markerWidth="8"
+                markerHeight="6"
+                refX="7"
+                refY="3"
+                orient="auto"
+                markerUnits="userSpaceOnUse"
+              >
+                <path d="M 0 0 L 8 3 L 0 6 Z" fill="#94a3b8" />
+              </marker>
+            </defs>
+            {arrowPaths.map((arrow) => (
+              <path
+                key={arrow.key}
+                d={arrow.d}
+                fill="none"
+                stroke="#94a3b8"
+                strokeWidth={1.5}
+                markerEnd={arrow.markerEnd}
+              />
+            ))}
+          </svg>
+        )}
       </div>
+    </Card>
+  );
+}
+
+/* ── Risk Analysis Card ────────────────────────────────────────────────── */
+
+function RiskAnalysisCard({ data }: { data: RiskAnalysisResponse }) {
+  const { t } = useTranslation();
+
+  const items = [
+    {
+      label: t('schedule.deterministic', 'Deterministic'),
+      value: `${data.deterministic_days}d`,
+      sub: t('schedule.planned_duration', 'Planned duration'),
+      color: 'text-content-primary',
+    },
+    {
+      label: 'P50',
+      value: `${data.p50_days}d`,
+      sub: t('schedule.fifty_pct_confidence', '50% confidence'),
+      color: 'text-oe-blue',
+    },
+    {
+      label: 'P80',
+      value: `${data.p80_days}d`,
+      sub: t('schedule.eighty_pct_confidence', '80% confidence'),
+      color: 'text-semantic-warning',
+    },
+    {
+      label: 'P95',
+      value: `${data.p95_days}d`,
+      sub: t('schedule.ninetyfive_pct_confidence', '95% confidence'),
+      color: 'text-semantic-error',
+    },
+  ];
+
+  return (
+    <Card padding="md" className="mt-4">
+      <div className="mb-3 flex items-center gap-2">
+        <ShieldAlert size={16} className="text-content-secondary" />
+        <h3 className="text-sm font-semibold text-content-primary">
+          {t('schedule.risk_analysis', 'Risk Analysis (PERT)')}
+        </h3>
+        <Badge variant="neutral" size="sm">
+          {t('schedule.buffer', 'Buffer')}: +{data.risk_buffer_days}d
+        </Badge>
+      </div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {items.map((item) => (
+          <div
+            key={item.label}
+            className="rounded-xl border border-border-light bg-surface-secondary/50 px-3 py-2.5"
+          >
+            <p className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+              {item.label}
+            </p>
+            <p className={`text-xl font-bold tabular-nums ${item.color}`}>{item.value}</p>
+            <p className="text-2xs text-content-tertiary">{item.sub}</p>
+          </div>
+        ))}
+      </div>
+      {data.std_dev_days > 0 && (
+        <p className="mt-2 text-xs text-content-tertiary">
+          {t('schedule.std_dev_label', 'Std. deviation')}: {data.std_dev_days}d &middot;{' '}
+          {t('schedule.mean_label', 'Mean (critical path)')}: {data.mean_days}d
+        </p>
+      )}
     </Card>
   );
 }
@@ -436,14 +845,20 @@ function GanttChart({
 
 function ScheduleDetail({
   schedule,
+  projectId,
   onBack,
 }: {
   schedule: Schedule;
+  projectId: string;
   onBack: () => void;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
+  const [zoomLevel, setZoomLevel] = useState<ZoomLevel>('week');
   const [showAddActivity, setShowAddActivity] = useState(false);
+  const [showGenerateBOQ, setShowGenerateBOQ] = useState(false);
+  const [selectedBOQId, setSelectedBOQId] = useState('');
   const [activityForm, setActivityForm] = useState<CreateActivityForm>({
     name: '',
     wbs_code: '',
@@ -456,6 +871,22 @@ function ScheduleDetail({
     queryKey: ['gantt', schedule.id],
     queryFn: () => scheduleApi.getGantt(schedule.id),
   });
+
+  // Fetch BOQs for the project (for Generate from BOQ dialog)
+  const { data: boqs } = useQuery({
+    queryKey: ['boqs', projectId],
+    queryFn: () => apiGet<BOQListItem[]>(`/v1/boq/boqs/?project_id=${projectId}`),
+    enabled: showGenerateBOQ,
+  });
+
+  // CPM state
+  const [cpmResult, setCpmResult] = useState<CriticalPathResponse | null>(null);
+  const [riskResult, setRiskResult] = useState<RiskAnalysisResponse | null>(null);
+
+  const criticalActivityIds = useMemo(() => {
+    if (!cpmResult) return undefined;
+    return new Set(cpmResult.critical_path.map((a) => a.activity_id));
+  }, [cpmResult]);
 
   const addActivity = useMutation({
     mutationFn: (data: CreateActivityForm) =>
@@ -476,6 +907,52 @@ function ScheduleDetail({
         end_date: '',
         activity_type: 'task',
       });
+      addToast({ type: 'success', title: t('toasts.activity_created', { defaultValue: 'Activity created' }) });
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+    },
+  });
+
+  const generateFromBOQ = useMutation({
+    mutationFn: (boqId: string) => scheduleApi.generateFromBOQ(schedule.id, boqId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['gantt', schedule.id] });
+      setShowGenerateBOQ(false);
+      setSelectedBOQId('');
+      // Reset CPM/risk results since activities changed
+      setCpmResult(null);
+      setRiskResult(null);
+      addToast({ type: 'success', title: t('toasts.schedule_generated', { defaultValue: 'Schedule generated from BOQ' }) });
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+    },
+  });
+
+  const calculateCPM = useMutation({
+    mutationFn: () => scheduleApi.calculateCPM(schedule.id),
+    onSuccess: (data) => {
+      setCpmResult(data);
+      // Refresh gantt to show updated colors
+      queryClient.invalidateQueries({ queryKey: ['gantt', schedule.id] });
+      addToast({ type: 'success', title: t('toasts.cpm_calculated', { defaultValue: 'Critical path calculated' }) });
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+    },
+  });
+
+  const fetchRiskAnalysis = useMutation({
+    mutationFn: () => scheduleApi.getRiskAnalysis(schedule.id),
+    onSuccess: (data) => {
+      setRiskResult(data);
+      // Risk analysis also recalculates CPM internally
+      queryClient.invalidateQueries({ queryKey: ['gantt', schedule.id] });
+      addToast({ type: 'success', title: t('toasts.risk_analysis_complete', { defaultValue: 'Risk analysis complete' }) });
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
     },
   });
 
@@ -485,6 +962,9 @@ function ScheduleDetail({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gantt', schedule.id] });
     },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.update_failed', { defaultValue: 'Update failed' }), message: error.message });
+    },
   });
 
   const handleUpdateProgress = useCallback(
@@ -493,6 +973,8 @@ function ScheduleDetail({
     },
     [updateProgress],
   );
+
+  const hasActivities = (ganttData?.summary.total_activities ?? 0) > 0;
 
   return (
     <div className="animate-fade-in">
@@ -514,7 +996,7 @@ function ScheduleDetail({
           )}
           <div className="mt-3 flex items-center gap-2">
             <Badge variant="blue" size="sm">
-              {schedule.status}
+              {t(`schedule.status_${schedule.status}`, schedule.status)}
             </Badge>
             {schedule.start_date && (
               <Badge variant="neutral" size="sm">
@@ -522,33 +1004,101 @@ function ScheduleDetail({
                 {schedule.end_date ? formatDate(schedule.end_date) : '...'}
               </Badge>
             )}
+            {cpmResult && (
+              <Badge variant="error" size="sm">
+                {t('schedule.critical_path_count', 'Critical: {{count}}', {
+                  count: cpmResult.critical_path.length,
+                })}
+              </Badge>
+            )}
           </div>
         </div>
-        <Button
-          variant="primary"
-          icon={<Plus size={16} />}
-          onClick={() => setShowAddActivity(true)}
-        >
-          {t('schedule.add_activity', 'Add Activity')}
-        </Button>
+        <div className="flex items-center gap-2">
+          {!hasActivities && (
+            <Button
+              variant="secondary"
+              icon={<FileBarChart size={16} />}
+              onClick={() => setShowGenerateBOQ(true)}
+            >
+              {t('schedule.generate_from_boq', 'Generate from BOQ')}
+            </Button>
+          )}
+          {hasActivities && (
+            <>
+              <div className="flex items-center gap-1 rounded-lg border border-border-light p-0.5">
+                {(['day', 'week', 'month'] as const).map((level) => (
+                  <button
+                    key={level}
+                    onClick={() => setZoomLevel(level)}
+                    className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                      zoomLevel === level
+                        ? 'bg-oe-blue text-white'
+                        : 'text-content-secondary hover:bg-surface-secondary'
+                    }`}
+                  >
+                    {t(`schedule.zoom_${level}`, level.charAt(0).toUpperCase() + level.slice(1))}
+                  </button>
+                ))}
+              </div>
+              <Button
+                variant="secondary"
+                icon={<Zap size={16} />}
+                onClick={() => calculateCPM.mutate()}
+                loading={calculateCPM.isPending}
+              >
+                {t('schedule.calculate_cpm', 'Critical Path')}
+              </Button>
+              <Button
+                variant="secondary"
+                icon={<ShieldAlert size={16} />}
+                onClick={() => fetchRiskAnalysis.mutate()}
+                loading={fetchRiskAnalysis.isPending}
+              >
+                {t('schedule.risk_analysis_btn', 'Risk Analysis')}
+              </Button>
+            </>
+          )}
+          <Button
+            variant="primary"
+            icon={<Plus size={16} />}
+            onClick={() => setShowAddActivity(true)}
+          >
+            {t('schedule.add_activity', 'Add Activity')}
+          </Button>
+        </div>
       </div>
 
       {/* Summary stats */}
       {ganttData && <SummaryStats summary={ganttData.summary} />}
 
+      {/* Risk analysis card */}
+      {riskResult && <RiskAnalysisCard data={riskResult} />}
+
+      {/* CPM summary (when calculated but risk not yet requested) */}
+      {cpmResult && !riskResult && (
+        <Card padding="sm" className="mt-4">
+          <div className="flex items-center gap-3">
+            <Zap size={16} className="text-semantic-error" />
+            <span className="text-sm font-medium text-content-primary">
+              {t('schedule.cpm_result', 'Critical Path: {{duration}} days, {{count}} critical activities', {
+                duration: cpmResult.project_duration_days,
+                count: cpmResult.critical_path.length,
+              })}
+            </span>
+          </div>
+        </Card>
+      )}
+
       {/* Gantt chart */}
       <div className="mt-6">
         {isLoading ? (
-          <div className="space-y-3">
-            <Skeleton height={40} className="w-full" rounded="lg" />
-            {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} height={56} className="w-full" rounded="lg" />
-            ))}
-          </div>
+          <SkeletonTable rows={4} columns={4} />
         ) : ganttData ? (
           <GanttChart
             activities={ganttData.activities}
             onUpdateProgress={handleUpdateProgress}
+            criticalActivityIds={criticalActivityIds}
+            zoomLevel={zoomLevel}
           />
         ) : null}
       </div>
@@ -626,6 +1176,73 @@ function ScheduleDetail({
           </div>
         </form>
       </Modal>
+
+      {/* Generate from BOQ Modal */}
+      <Modal
+        open={showGenerateBOQ}
+        onClose={() => setShowGenerateBOQ(false)}
+        title={t('schedule.generate_from_boq', 'Generate from BOQ')}
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-content-secondary">
+            {t(
+              'schedule.generate_from_boq_description',
+              'Select a BOQ to auto-generate schedule activities. One activity will be created per BOQ section with cost-proportional durations.',
+            )}
+          </p>
+          {!boqs || boqs.length === 0 ? (
+            <p className="text-sm text-content-tertiary">
+              {t('schedule.no_boqs_available', 'No BOQs available for this project.')}
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {boqs.map((boq) => (
+                <button
+                  key={boq.id}
+                  type="button"
+                  onClick={() => setSelectedBOQId(boq.id)}
+                  className={`w-full rounded-lg border px-4 py-3 text-left transition-all ${
+                    selectedBOQId === boq.id
+                      ? 'border-oe-blue bg-oe-blue-subtle'
+                      : 'border-border bg-surface-primary hover:bg-surface-secondary'
+                  }`}
+                >
+                  <p className="text-sm font-medium text-content-primary">{boq.name}</p>
+                  {boq.description && (
+                    <p className="mt-0.5 text-xs text-content-secondary truncate">
+                      {boq.description}
+                    </p>
+                  )}
+                  <Badge
+                    variant={boq.status === 'approved' ? 'success' : 'neutral'}
+                    size="sm"
+                    className="mt-1"
+                  >
+                    {t(`boq.${boq.status}`, boq.status)}
+                  </Badge>
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <Button variant="ghost" onClick={() => setShowGenerateBOQ(false)}>
+              {t('common.cancel', 'Cancel')}
+            </Button>
+            <Button
+              variant="primary"
+              disabled={!selectedBOQId}
+              loading={generateFromBOQ.isPending}
+              onClick={() => {
+                if (selectedBOQId) {
+                  generateFromBOQ.mutate(selectedBOQId);
+                }
+              }}
+            >
+              {t('schedule.generate', 'Generate')}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
@@ -641,6 +1258,7 @@ function ProjectSchedules({
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState<CreateScheduleForm>({
@@ -668,6 +1286,10 @@ function ProjectSchedules({
       queryClient.invalidateQueries({ queryKey: ['schedules', project.id] });
       setShowCreate(false);
       setForm({ name: '', description: '', start_date: '', end_date: '' });
+      addToast({ type: 'success', title: t('toasts.schedule_created', { defaultValue: 'Schedule created' }) });
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
     },
   });
 
@@ -676,6 +1298,7 @@ function ProjectSchedules({
     return (
       <ScheduleDetail
         schedule={selectedSchedule}
+        projectId={project.id}
         onBack={() => setSelectedSchedule(null)}
       />
     );
@@ -711,24 +1334,18 @@ function ProjectSchedules({
 
       {/* Schedule list */}
       {isLoading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} height={72} className="w-full" rounded="lg" />
-          ))}
-        </div>
+        <SkeletonTable rows={3} columns={4} />
       ) : !schedules || schedules.length === 0 ? (
         <EmptyState
-          icon={<CalendarDays size={24} strokeWidth={1.5} />}
-          title={t('schedule.no_schedules', 'No schedules yet')}
-          description={t(
-            'schedule.no_schedules_hint',
-            'Create a schedule to start planning your project timeline',
-          )}
-          action={
-            <Button variant="primary" size="sm" onClick={() => setShowCreate(true)}>
-              {t('schedule.create_schedule', 'Create Schedule')}
-            </Button>
-          }
+          icon={<Calendar size={24} strokeWidth={1.5} />}
+          title={t('schedule.no_schedules', { defaultValue: 'No schedules yet' })}
+          description={t('schedule.no_schedules_hint', {
+            defaultValue: 'Create a schedule to start planning your project timeline',
+          })}
+          action={{
+            label: t('schedule.create_schedule', { defaultValue: 'Create Schedule' }),
+            onClick: () => setShowCreate(true),
+          }}
         />
       ) : (
         <div className="space-y-3">
@@ -756,7 +1373,7 @@ function ProjectSchedules({
                   </p>
                 </div>
                 <Badge variant={schedule.status === 'active' ? 'blue' : 'neutral'} size="sm">
-                  {schedule.status}
+                  {t(`schedule.status_${schedule.status}`, schedule.status)}
                 </Badge>
                 <ChevronRight size={16} className="shrink-0 text-content-tertiary" />
               </div>
@@ -823,12 +1440,17 @@ function ProjectSchedules({
 
 export function SchedulePage() {
   const { t } = useTranslation();
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const { activeProjectId, setActiveProject } = useProjectContextStore();
 
   const { data: projects, isLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<Project[]>('/v1/projects/'),
   });
+
+  const selectedProject = useMemo(
+    () => projects?.find((p) => p.id === activeProjectId) ?? null,
+    [projects, activeProjectId],
+  );
 
   // Project schedule detail view
   if (selectedProject) {
@@ -836,7 +1458,7 @@ export function SchedulePage() {
       <div className="max-w-content mx-auto animate-fade-in">
         <ProjectSchedules
           project={selectedProject}
-          onBack={() => setSelectedProject(null)}
+          onBack={() => useProjectContextStore.getState().clearProject()}
         />
       </div>
     );
@@ -857,20 +1479,18 @@ export function SchedulePage() {
         </p>
       </div>
 
+      {/* 4D explanation */}
+      <InfoHint className="mb-6" text={t('schedule.what_is_4d', { defaultValue: '4D scheduling links your BOQ positions to a project timeline. Create activities, set dependencies, and visualize progress on a Gantt chart. The critical path analysis highlights activities that directly affect the project end date. Activity types: Task = work item, Milestone = checkpoint with zero duration, Summary = grouping header.' })} />
+
       {isLoading ? (
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} height={72} className="w-full" rounded="lg" />
-          ))}
-        </div>
+        <SkeletonTable rows={3} columns={3} />
       ) : !projects || projects.length === 0 ? (
         <EmptyState
-          icon={<CalendarDays size={24} strokeWidth={1.5} />}
-          title={t('schedule.no_projects', 'No projects available')}
-          description={t(
-            'schedule.no_projects_hint',
-            'Create a project first, then add schedules to it',
-          )}
+          icon={<Calendar size={24} strokeWidth={1.5} />}
+          title={t('schedule.no_schedule_items', { defaultValue: 'No schedule items' })}
+          description={t('schedule.no_projects_hint', {
+            defaultValue: 'Create a project first to start building your schedule',
+          })}
         />
       ) : (
         <div className="space-y-3">
@@ -880,7 +1500,7 @@ export function SchedulePage() {
               hoverable
               padding="none"
               className="cursor-pointer"
-              onClick={() => setSelectedProject(project)}
+              onClick={() => setActiveProject(project.id, project.name)}
             >
               <div className="flex items-center gap-3 px-5 py-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue font-bold">
@@ -897,7 +1517,7 @@ export function SchedulePage() {
                   )}
                 </div>
                 <Badge variant="blue" size="sm">
-                  {project.classification_standard}
+                  {project.classification_standard === 'din276' ? 'DIN 276' : project.classification_standard?.toUpperCase() || '—'}
                 </Badge>
                 <ChevronRight size={16} className="shrink-0 text-content-tertiary" />
               </div>

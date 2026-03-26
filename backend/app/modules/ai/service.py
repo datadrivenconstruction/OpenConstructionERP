@@ -18,9 +18,24 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
+
+_logger_ev = __import__('logging').getLogger(__name__ + '.events')
+
+async def _safe_publish(name: str, data: dict, source_module: str = '') -> None:
+    try:
+        await event_bus.publish(name, data, source_module=source_module)
+    except Exception:
+        _logger_ev.debug('Event publish skipped: %s', name)
 from app.modules.ai.ai_client import call_ai, extract_json, resolve_provider_and_key
 from app.modules.ai.models import AIEstimateJob, AISettings
-from app.modules.ai.prompts import PHOTO_ESTIMATE_PROMPT, SYSTEM_PROMPT, TEXT_ESTIMATE_PROMPT
+from app.modules.ai.prompts import (
+    CAD_IMPORT_PROMPT,
+    PHOTO_ESTIMATE_PROMPT,
+    SMART_IMPORT_PROMPT,
+    SMART_IMPORT_VISION_PROMPT,
+    SYSTEM_PROMPT,
+    TEXT_ESTIMATE_PROMPT,
+)
 from app.modules.ai.repository import AIEstimateJobRepository, AISettingsRepository
 from app.modules.ai.schemas import (
     AISettingsResponse,
@@ -244,7 +259,7 @@ class AIService:
             msg = "Settings not found after update"
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=msg)
 
-        await event_bus.publish(
+        await _safe_publish(
             "ai.settings.updated",
             {"user_id": user_id},
             source_module="oe_ai",
@@ -286,6 +301,7 @@ class AIService:
             status="processing",
         )
         job = await self.job_repo.create(job)
+        job_id = job.id  # Save before expire_all() in update_fields
 
         # Build prompt with context
         extra_parts: list[str] = []
@@ -324,14 +340,15 @@ class AIService:
 
             if not items:
                 await self.job_repo.update_fields(
-                    job.id,
+                    job_id,
                     status="failed",
                     error_message="AI returned no valid work items. Please try a more detailed description.",
                     model_used=provider,
                     tokens_used=tokens,
                     duration_ms=duration_ms,
                 )
-                job = await self.job_repo.get_by_id(job.id)
+                self.session.expunge(job)
+                job = await self.job_repo.get_by_id(job_id)
                 if job is None:
                     msg = "Job not found after update"
                     raise HTTPException(
@@ -342,7 +359,7 @@ class AIService:
 
             # Update job with results
             await self.job_repo.update_fields(
-                job.id,
+                job_id,
                 status="completed",
                 result=items,
                 model_used=provider,
@@ -352,13 +369,29 @@ class AIService:
 
         except HTTPException:
             raise
+        except ValueError as exc:
+            duration_ms = int((time.monotonic() - start_time) * 1000)
+            error_msg = str(exc)
+            logger.warning("Quick estimate user error for %s: %s", user_id, exc)
+
+            await self.job_repo.update_fields(
+                job_id,
+                status="failed",
+                error_message=error_msg,
+                model_used=provider,
+                duration_ms=duration_ms,
+            )
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=error_msg,
+            ) from exc
         except Exception as exc:
             duration_ms = int((time.monotonic() - start_time) * 1000)
             error_msg = f"AI estimation failed: {exc}"
             logger.exception("Quick estimate failed for user %s: %s", user_id, exc)
 
             await self.job_repo.update_fields(
-                job.id,
+                job_id,
                 status="failed",
                 error_message=error_msg,
                 model_used=provider,
@@ -370,14 +403,15 @@ class AIService:
             ) from exc
 
         # Re-fetch the completed job
-        job = await self.job_repo.get_by_id(job.id)
+        self.session.expunge(job)
+        job = await self.job_repo.get_by_id(job_id)
         if job is None:
             msg = "Job not found after completion"
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=msg
             )
 
-        await event_bus.publish(
+        await _safe_publish(
             "ai.estimate.completed",
             {
                 "job_id": str(job.id),
@@ -445,6 +479,7 @@ class AIService:
             status="processing",
         )
         job = await self.job_repo.create(job)
+        job_id = job.id  # Save before expire_all() in update_fields
 
         # Build prompt
         currency_val = currency or "EUR"
@@ -478,14 +513,15 @@ class AIService:
 
             if not items:
                 await self.job_repo.update_fields(
-                    job.id,
+                    job_id,
                     status="failed",
                     error_message="AI could not extract work items from this photo. Please try a clearer image.",
                     model_used=provider,
                     tokens_used=tokens,
                     duration_ms=duration_ms,
                 )
-                job = await self.job_repo.get_by_id(job.id)
+                self.session.expunge(job)
+                job = await self.job_repo.get_by_id(job_id)
                 if job is None:
                     msg = "Job not found after update"
                     raise HTTPException(
@@ -495,7 +531,7 @@ class AIService:
                 return _build_job_response(job)
 
             await self.job_repo.update_fields(
-                job.id,
+                job_id,
                 status="completed",
                 result=items,
                 model_used=provider,
@@ -505,13 +541,29 @@ class AIService:
 
         except HTTPException:
             raise
+        except ValueError as exc:
+            duration_ms = int((time.monotonic() - start_time) * 1000)
+            error_msg = str(exc)
+            logger.warning("Photo estimate user error for %s: %s", user_id, exc)
+
+            await self.job_repo.update_fields(
+                job_id,
+                status="failed",
+                error_message=error_msg,
+                model_used=provider,
+                duration_ms=duration_ms,
+            )
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=error_msg,
+            ) from exc
         except Exception as exc:
             duration_ms = int((time.monotonic() - start_time) * 1000)
             error_msg = f"AI photo analysis failed: {exc}"
             logger.exception("Photo estimate failed for user %s: %s", user_id, exc)
 
             await self.job_repo.update_fields(
-                job.id,
+                job_id,
                 status="failed",
                 error_message=error_msg,
                 model_used=provider,
@@ -522,14 +574,15 @@ class AIService:
                 detail=error_msg,
             ) from exc
 
-        job = await self.job_repo.get_by_id(job.id)
+        self.session.expunge(job)
+        job = await self.job_repo.get_by_id(job_id)
         if job is None:
             msg = "Job not found after completion"
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=msg
             )
 
-        await event_bus.publish(
+        await _safe_publish(
             "ai.estimate.completed",
             {
                 "job_id": str(job.id),
@@ -546,6 +599,284 @@ class AIService:
             len(items),
             tokens,
             duration_ms,
+        )
+
+        return _build_job_response(job)
+
+    # ── Universal file estimate ──────────────────────────────────────────
+
+    async def file_estimate(
+        self,
+        user_id: str,
+        content: bytes,
+        filename: str,
+        ext: str,
+        category: str,
+        location: str | None = None,
+        currency: str | None = None,
+        standard: str | None = None,
+        project_id: uuid.UUID | None = None,
+    ) -> EstimateJobResponse:
+        """Generate a BOQ estimate from any file type using AI.
+
+        Routes to the appropriate extraction method based on file category,
+        then sends extracted data to the AI for BOQ generation.
+
+        Args:
+            user_id: Current user's ID.
+            content: Raw file bytes.
+            filename: Original filename.
+            ext: Lowercase extension (e.g. "pdf", "rvt").
+            category: File category ("pdf", "excel", "csv", "cad", "image").
+            location: Optional location for pricing context.
+            currency: Optional currency code.
+            standard: Optional classification standard.
+            project_id: Optional project to link to.
+
+        Returns:
+            EstimateJobResponse with generated items.
+        """
+        uid = uuid.UUID(user_id)
+        settings = await self.settings_repo.get_by_user_id(uid)
+
+        try:
+            provider, api_key = resolve_provider_and_key(settings)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)
+            ) from exc
+
+        # Create job record
+        job = AIEstimateJob(
+            user_id=uid,
+            project_id=project_id,
+            input_type=category,
+            input_filename=filename,
+            status="processing",
+        )
+        job = await self.job_repo.create(job)
+        job_id = job.id  # Save before expire_all() in update_fields
+
+        currency_val = currency or "EUR"
+        standard_val = standard or "din276"
+        location_val = location or "Europe"
+
+        # ── Extract content based on file category ──
+        extracted_text = ""
+        image_b64: str | None = None
+        image_mime: str | None = None
+        cad_elements: int | None = None
+        cad_format: str | None = None
+
+        try:
+            if category == "pdf":
+                from app.modules.boq.router import _extract_from_pdf
+                result = _extract_from_pdf(content)
+                extracted_text = result.get("text", "")
+
+            elif category == "excel":
+                from app.modules.boq.router import _extract_from_excel_for_smart
+                result = _extract_from_excel_for_smart(content)
+                if result.get("structured") and result.get("rows"):
+                    # Format structured rows as text for AI
+                    rows = result["rows"]
+                    lines = []
+                    for r in rows:
+                        parts = [
+                            r.get("ordinal", ""),
+                            r.get("description", ""),
+                            r.get("unit", ""),
+                            str(r.get("quantity", "")),
+                            str(r.get("unit_rate", "")),
+                        ]
+                        lines.append("\t".join(parts))
+                    extracted_text = "Pos\tDescription\tUnit\tQty\tRate\n" + "\n".join(lines)
+                else:
+                    extracted_text = result.get("text", "")
+
+            elif category == "csv":
+                from app.modules.boq.router import _extract_from_csv_for_smart
+                result = _extract_from_csv_for_smart(content)
+                if result.get("structured") and result.get("rows"):
+                    rows = result["rows"]
+                    lines = []
+                    for r in rows:
+                        parts = [
+                            r.get("ordinal", ""),
+                            r.get("description", ""),
+                            r.get("unit", ""),
+                            str(r.get("quantity", "")),
+                            str(r.get("unit_rate", "")),
+                        ]
+                        lines.append("\t".join(parts))
+                    extracted_text = "Pos\tDescription\tUnit\tQty\tRate\n" + "\n".join(lines)
+                else:
+                    extracted_text = result.get("text", "")
+
+            elif category == "cad":
+                from app.modules.boq.router import _extract_from_cad
+                result = await _extract_from_cad(content, ext, filename)
+                extracted_text = result.get("text", "")
+                cad_elements = result.get("cad_elements")
+                cad_format = result.get("cad_format", ext)
+
+                if result.get("cad_no_converter"):
+                    # No converter installed — return helpful error
+                    await self.job_repo.update_fields(
+                        job_id,
+                        status="failed",
+                        error_message=(
+                            f"DDC converter for .{ext} files is not installed. "
+                            f"Go to Quantities page to install the converter module."
+                        ),
+                        model_used=provider,
+                        duration_ms=0,
+                    )
+                    self.session.expunge(job)
+                    job = await self.job_repo.get_by_id(job_id)
+                    if job is None:
+                        raise HTTPException(status_code=500, detail="Job not found")
+                    return _build_job_response(job)
+
+            elif category == "image":
+                from app.modules.boq.router import _extract_from_image
+                result = _extract_from_image(content, ext)
+                image_b64 = result.get("image_base64")
+                image_mime = result.get("mime", "image/jpeg")
+
+        except Exception as exc:
+            logger.warning("File extraction failed for %s: %s", filename, exc)
+            await self.job_repo.update_fields(
+                job_id,
+                status="failed",
+                error_message=f"Failed to extract content from {filename}: {exc}",
+                model_used=provider,
+                duration_ms=0,
+            )
+            self.session.expunge(job)
+            job = await self.job_repo.get_by_id(job_id)
+            if job is None:
+                raise HTTPException(status_code=500, detail="Job not found")
+            return _build_job_response(job)
+
+        # ── Choose prompt and call AI ──
+        start_time = time.monotonic()
+        try:
+            if category == "cad":
+                prompt = CAD_IMPORT_PROMPT.format(text=extracted_text, currency=currency_val)
+                raw_response, tokens = await call_ai(
+                    provider=provider,
+                    api_key=api_key,
+                    system=SYSTEM_PROMPT,
+                    prompt=prompt,
+                )
+            elif image_b64:
+                prompt = SMART_IMPORT_VISION_PROMPT.format(filename=filename)
+                raw_response, tokens = await call_ai(
+                    provider=provider,
+                    api_key=api_key,
+                    system=SYSTEM_PROMPT,
+                    prompt=prompt,
+                    image_base64=image_b64,
+                    image_media_type=image_mime or "image/jpeg",
+                )
+            else:
+                prompt = SMART_IMPORT_PROMPT.format(filename=filename, text=extracted_text[:15000])
+                raw_response, tokens = await call_ai(
+                    provider=provider,
+                    api_key=api_key,
+                    system=SYSTEM_PROMPT,
+                    prompt=prompt,
+                )
+
+            duration_ms = int((time.monotonic() - start_time) * 1000)
+
+            parsed = extract_json(raw_response)
+            items = _validate_items(parsed)
+
+            if not items:
+                await self.job_repo.update_fields(
+                    job_id,
+                    status="failed",
+                    error_message="AI returned no valid work items from this file. Try a different file or add more detail.",
+                    model_used=provider,
+                    tokens_used=tokens,
+                    duration_ms=duration_ms,
+                )
+                self.session.expunge(job)
+                job = await self.job_repo.get_by_id(job_id)
+                if job is None:
+                    raise HTTPException(status_code=500, detail="Job not found")
+                return _build_job_response(job)
+
+            # Store metadata about the file
+            meta: dict[str, Any] = {}
+            if cad_elements is not None:
+                meta["cad_elements"] = cad_elements
+            if cad_format:
+                meta["cad_format"] = cad_format
+
+            await self.job_repo.update_fields(
+                job_id,
+                status="completed",
+                result=items,
+                model_used=provider,
+                tokens_used=tokens,
+                duration_ms=duration_ms,
+            )
+
+        except HTTPException:
+            raise
+        except ValueError as exc:
+            duration_ms = int((time.monotonic() - start_time) * 1000)
+            error_msg = str(exc)
+            logger.warning("File estimate user error for %s: %s", user_id, exc)
+
+            await self.job_repo.update_fields(
+                job_id,
+                status="failed",
+                error_message=error_msg,
+                model_used=provider,
+                duration_ms=duration_ms,
+            )
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=error_msg,
+            ) from exc
+        except Exception as exc:
+            duration_ms = int((time.monotonic() - start_time) * 1000)
+            error_msg = f"AI file analysis failed: {exc}"
+            logger.exception("File estimate failed for user %s: %s", user_id, exc)
+
+            await self.job_repo.update_fields(
+                job_id,
+                status="failed",
+                error_message=error_msg,
+                model_used=provider,
+                duration_ms=duration_ms,
+            )
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY, detail=error_msg,
+            ) from exc
+
+        self.session.expunge(job)
+        job = await self.job_repo.get_by_id(job_id)
+        if job is None:
+            raise HTTPException(status_code=500, detail="Job not found after completion")
+
+        await _safe_publish(
+            "ai.estimate.completed",
+            {
+                "job_id": str(job.id),
+                "user_id": user_id,
+                "input_type": category,
+                "items_count": len(items),
+            },
+            source_module="oe_ai",
+        )
+
+        logger.info(
+            "File estimate completed: job=%s, category=%s, items=%d, tokens=%d, duration=%dms",
+            job.id, category, len(items), tokens, duration_ms,
         )
 
         return _build_job_response(job)
@@ -659,7 +990,7 @@ class AIService:
             await position_repo.create(position)
             positions_created += 1
 
-        await event_bus.publish(
+        await _safe_publish(
             "ai.boq.created",
             {
                 "boq_id": str(boq.id),

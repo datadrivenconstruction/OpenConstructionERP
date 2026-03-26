@@ -22,17 +22,30 @@ from app.core.permissions import PermissionRegistry, Role
 # app.modules.users.service → app.modules.users.models → app.database (engine)
 # We intercept app.database before importing service.py so that no real DB
 # engine is created.
+# NOTE: We save and restore any existing entries so integration tests are not
+# polluted when both suites run in the same process.
 
-_fake_database = ModuleType("app.database")
-_fake_database.Base = type("Base", (), {})  # type: ignore[attr-defined]
-_fake_database.GUID = MagicMock  # type: ignore[attr-defined]
-sys.modules.setdefault("app.database", _fake_database)
+# Instead of permanently replacing sys.modules entries, we import the real
+# module first (if possible) and fall back to a fake only when needed.
+# This prevents pollution of integration tests that run later in the same
+# session.
+try:
+    from app.database import Base as _RealBase, GUID as _RealGUID  # noqa: F401, E402
+except Exception:
+    # If the real module cannot be imported (no DB available etc.), inject a
+    # fake temporarily.  The module-scoped fixture below will clean up.
+    _fake_database = ModuleType("app.database")
+    _fake_database.Base = type("Base", (), {})  # type: ignore[attr-defined]
+    _fake_database.GUID = MagicMock  # type: ignore[attr-defined]
+    sys.modules["app.database"] = _fake_database
 
-# Also mock the repository module since it depends on the session.
-_fake_repository = ModuleType("app.modules.users.repository")
-_fake_repository.UserRepository = MagicMock  # type: ignore[attr-defined]
-_fake_repository.APIKeyRepository = MagicMock  # type: ignore[attr-defined]
-sys.modules.setdefault("app.modules.users.repository", _fake_repository)
+try:
+    from app.modules.users.repository import UserRepository as _RealUR  # noqa: F401, E402
+except Exception:
+    _fake_repository = ModuleType("app.modules.users.repository")
+    _fake_repository.UserRepository = MagicMock  # type: ignore[attr-defined]
+    _fake_repository.APIKeyRepository = MagicMock  # type: ignore[attr-defined]
+    sys.modules["app.modules.users.repository"] = _fake_repository
 
 # Now we can safely import the service utilities and schemas.
 from app.modules.users.schemas import (  # noqa: E402
