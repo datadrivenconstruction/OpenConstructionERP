@@ -8,6 +8,7 @@ import uuid
 
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import noload
 
 from app.modules.boq.models import BOQ, BOQActivityLog, BOQMarkup, Position
 
@@ -29,19 +30,86 @@ class BOQRepository:
         offset: int = 0,
         limit: int = 50,
     ) -> tuple[list[BOQ], int]:
-        """List BOQs for a project with pagination. Returns (boqs, total_count)."""
+        """List BOQs for a project with pagination. Returns (boqs, total_count).
+
+        Positions and markups are NOT eagerly loaded here — use
+        ``grand_totals_for_boqs`` to compute totals via a single aggregate query.
+        """
         base = select(BOQ).where(BOQ.project_id == project_id)
 
         # Count
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        # Fetch
-        stmt = base.order_by(BOQ.created_at.desc()).offset(offset).limit(limit)
+        # Fetch — skip eager loading of positions/markups for list queries
+        stmt = (
+            base.options(noload(BOQ.positions), noload(BOQ.markups))
+            .order_by(BOQ.created_at.desc())
+            .offset(offset)
+            .limit(limit)
+        )
         result = await self.session.execute(stmt)
         boqs = list(result.scalars().all())
 
         return boqs, total
+
+    async def grand_totals_for_boqs(
+        self,
+        boq_ids: list[uuid.UUID],
+    ) -> dict[uuid.UUID, float]:
+        """Compute grand total (direct cost + markups) for each BOQ by ID.
+
+        First aggregates position totals per BOQ, then applies active markups
+        (percentage or fixed) in sort_order to arrive at the final grand total.
+        Returns a mapping of boq_id -> grand_total.
+        """
+        if not boq_ids:
+            return {}
+
+        from decimal import Decimal
+
+        from sqlalchemy import cast, Float
+
+        # Step 1: sum direct cost (position totals) per BOQ
+        pos_stmt = (
+            select(
+                Position.boq_id,
+                func.sum(cast(Position.total, Float)).label("direct_cost"),
+            )
+            .where(Position.boq_id.in_(boq_ids))
+            .group_by(Position.boq_id)
+        )
+        pos_result = await self.session.execute(pos_stmt)
+        direct_costs: dict[uuid.UUID, float] = {
+            row.boq_id: float(row.direct_cost or 0) for row in pos_result
+        }
+
+        # Step 2: fetch active markups for all requested BOQs
+        markup_stmt = (
+            select(BOQMarkup)
+            .where(BOQMarkup.boq_id.in_(boq_ids), BOQMarkup.is_active.is_(True))
+            .order_by(BOQMarkup.sort_order)
+        )
+        markup_result = await self.session.execute(markup_stmt)
+        markups_by_boq: dict[uuid.UUID, list[BOQMarkup]] = {}
+        for markup in markup_result.scalars().all():
+            markups_by_boq.setdefault(markup.boq_id, []).append(markup)
+
+        # Step 3: apply markups to compute grand total per BOQ
+        totals: dict[uuid.UUID, float] = {}
+        for boq_id in boq_ids:
+            dc = Decimal(str(direct_costs.get(boq_id, 0)))
+            running = dc
+            for m in markups_by_boq.get(boq_id, []):
+                if m.markup_type == "percentage":
+                    pct = Decimal(m.percentage or "0")
+                    base = running if m.apply_to == "cumulative" else dc
+                    running += base * pct / Decimal("100")
+                elif m.markup_type == "fixed":
+                    running += Decimal(m.fixed_amount or "0")
+            totals[boq_id] = round(float(running), 2)
+
+        return totals
 
     async def create(self, boq: BOQ) -> BOQ:
         """Insert a new BOQ."""
@@ -53,6 +121,9 @@ class BOQRepository:
         """Update specific fields on a BOQ."""
         stmt = update(BOQ).where(BOQ.id == boq_id).values(**fields)
         await self.session.execute(stmt)
+        await self.session.flush()
+        # Expire cached ORM instances so the next get_by_id re-reads from DB
+        self.session.expire_all()
 
     async def delete(self, boq_id: uuid.UUID) -> None:
         """Delete a BOQ and all its positions (via CASCADE)."""
@@ -99,18 +170,24 @@ class PositionRepository:
         """Insert a new position."""
         self.session.add(position)
         await self.session.flush()
+        await self.session.refresh(position)
         return position
 
     async def bulk_create(self, positions: list[Position]) -> list[Position]:
         """Insert multiple positions at once."""
         self.session.add_all(positions)
         await self.session.flush()
+        for pos in positions:
+            await self.session.refresh(pos)
         return positions
 
     async def update_fields(self, position_id: uuid.UUID, **fields: object) -> None:
         """Update specific fields on a position."""
         stmt = update(Position).where(Position.id == position_id).values(**fields)
         await self.session.execute(stmt)
+        await self.session.flush()
+        # Expire cached ORM instances so the next get_by_id re-reads from DB
+        self.session.expire_all()
 
     async def delete(self, position_id: uuid.UUID) -> None:
         """Delete a single position."""
@@ -172,6 +249,9 @@ class MarkupRepository:
         """Update specific fields on a markup."""
         stmt = update(BOQMarkup).where(BOQMarkup.id == markup_id).values(**fields)
         await self.session.execute(stmt)
+        await self.session.flush()
+        # Expire cached ORM instances so the next get_by_id re-reads from DB
+        self.session.expire_all()
 
     async def delete(self, markup_id: uuid.UUID) -> None:
         """Delete a single markup."""

@@ -21,6 +21,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import Settings
 from app.core.events import event_bus
+
+_logger_ev = __import__('logging').getLogger(__name__ + '.events')
+
+async def _safe_publish(name: str, data: dict, source_module: str = '') -> None:
+    try:
+        await event_bus.publish(name, data, source_module=source_module)
+    except Exception:
+        _logger_ev.debug('Event publish skipped: %s', name)
 from app.core.permissions import permission_registry
 from app.modules.users.models import APIKey, User
 from app.modules.users.repository import APIKeyRepository, UserRepository
@@ -28,7 +36,11 @@ from app.modules.users.schemas import (
     APIKeyCreate,
     APIKeyCreatedResponse,
     ChangePasswordRequest,
+    ForgotPasswordRequest,
+    ForgotPasswordResponse,
     LoginRequest,
+    ResetPasswordRequest,
+    ResetPasswordResponse,
     TokenResponse,
     UserCreate,
 )
@@ -83,6 +95,19 @@ def create_refresh_token(user: User, settings: Settings) -> str:
         "iat": now,
         "exp": now + timedelta(days=settings.jwt_refresh_expire_days),
         "type": "refresh",
+    }
+    return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+
+
+def create_reset_token(user: User, settings: Settings) -> str:
+    """Create a JWT password-reset token (15 min expiry)."""
+    now = datetime.now(UTC)
+    payload = {
+        "sub": str(user.id),
+        "email": user.email,
+        "iat": now,
+        "exp": now + timedelta(minutes=15),
+        "type": "reset",
     }
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
@@ -142,7 +167,7 @@ class UserService:
         )
         user = await self.user_repo.create(user)
 
-        await event_bus.publish(
+        await _safe_publish(
             "users.user.created",
             {"user_id": str(user.id), "email": user.email, "role": role},
             source_module="oe_users",
@@ -172,16 +197,25 @@ class UserService:
                 detail="Account is deactivated",
             )
 
+        # Eagerly read fields before update_fields (which calls expire_all)
+        user_id = user.id
+        user_email = user.email
+        user_role = user.role
+        user_full_name = user.full_name
+
         # Update last login
         await self.user_repo.update_fields(
-            user.id,
+            user_id,
             last_login_at=datetime.now(UTC),
         )
+
+        # Re-fetch user to avoid MissingGreenlet on expired attributes
+        user = await self.user_repo.get_by_id(user_id)
 
         access_token = create_access_token(user, self.settings)
         refresh_token = create_refresh_token(user, self.settings)
 
-        await event_bus.publish(
+        await _safe_publish(
             "users.user.logged_in",
             {"user_id": str(user.id)},
             source_module="oe_users",
@@ -240,6 +274,93 @@ class UserService:
             refresh_token=new_refresh,
             expires_in=self.settings.jwt_expire_minutes * 60,
         )
+
+    # ── Password reset ──────────────────────────────────────────────────
+
+    async def forgot_password(self, data: ForgotPasswordRequest) -> ForgotPasswordResponse:
+        """Generate a password-reset token if the email exists.
+
+        Always returns a generic success message to prevent email enumeration.
+        In dev mode, the reset token is included in the response for testing.
+        """
+        user = await self.user_repo.get_by_email(data.email)
+
+        # Generic message regardless of whether the email exists
+        message = "If this email exists, a reset link has been sent"
+
+        if user is None or not user.is_active:
+            logger.info("Password reset requested for unknown/inactive email: %s", data.email)
+            return ForgotPasswordResponse(message=message, token=None)
+
+        token = create_reset_token(user, self.settings)
+
+        await _safe_publish(
+            "users.password_reset.requested",
+            {"user_id": str(user.id), "email": user.email},
+            source_module="oe_users",
+        )
+
+        logger.info("Password reset token generated for user %s", user.email)
+
+        # Include token in response only in dev mode (no email service yet)
+        include_token = not self.settings.is_production
+        return ForgotPasswordResponse(
+            message=message,
+            token=token if include_token else None,
+        )
+
+    async def reset_password(self, data: ResetPasswordRequest) -> ResetPasswordResponse:
+        """Reset user password using a valid reset token.
+
+        Raises HTTPException 400 on invalid/expired token.
+        """
+        from jose import JWTError
+
+        try:
+            payload = jwt.decode(
+                data.token,
+                self.settings.jwt_secret,
+                algorithms=[self.settings.jwt_algorithm],
+            )
+        except JWTError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or expired reset token",
+            ) from exc
+
+        if payload.get("type") != "reset":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid token type",
+            )
+
+        user_id = payload.get("sub")
+        if not user_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid reset token",
+            )
+
+        user = await self.user_repo.get_by_id(uuid.UUID(user_id))
+        if user is None or not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User not found or inactive",
+            )
+
+        await self.user_repo.update_fields(
+            user.id,
+            hashed_password=hash_password(data.new_password),
+        )
+
+        await _safe_publish(
+            "users.password_reset.completed",
+            {"user_id": str(user.id), "email": user.email},
+            source_module="oe_users",
+        )
+
+        logger.info("Password reset completed for user %s", user.email)
+        return ResetPasswordResponse(message="Password updated successfully")
 
     # ── User management ────────────────────────────────────────────────
 

@@ -28,6 +28,14 @@ class CostItemRepository:
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
+    async def get_by_codes(self, codes: list[str]) -> list[CostItem]:
+        """Get multiple cost items by their codes."""
+        if not codes:
+            return []
+        stmt = select(CostItem).where(CostItem.code.in_(codes))
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
     async def list_all(
         self,
         *,
@@ -74,6 +82,9 @@ class CostItemRepository:
         """Update specific fields on a cost item."""
         stmt = update(CostItem).where(CostItem.id == item_id).values(**fields)
         await self.session.execute(stmt)
+        await self.session.flush()
+        # Expire cached ORM instances so the next get_by_id re-reads from DB
+        self.session.expire_all()
 
     async def bulk_create(self, items: list[CostItem]) -> list[CostItem]:
         """Insert multiple cost items at once."""
@@ -94,6 +105,8 @@ class CostItemRepository:
         q: str | None = None,
         unit: str | None = None,
         source: str | None = None,
+        region: str | None = None,
+        category: str | None = None,
         min_rate: float | None = None,
         max_rate: float | None = None,
         offset: int = 0,
@@ -105,6 +118,8 @@ class CostItemRepository:
             q: Text search on code and description.
             unit: Filter by unit (exact match).
             source: Filter by source (exact match).
+            region: Filter by region (exact match, e.g. "DE_BERLIN").
+            category: Filter by classification.collection value (exact match).
             min_rate: Minimum rate (inclusive). Compares as float via CAST.
             max_rate: Maximum rate (inclusive). Compares as float via CAST.
             offset: Number of items to skip.
@@ -128,6 +143,13 @@ class CostItemRepository:
 
         if source:
             base = base.where(CostItem.source == source)
+
+        if region:
+            base = base.where(CostItem.region == region)
+
+        if category:
+            collection_expr = func.json_extract(CostItem.classification, "$.collection")
+            base = base.where(collection_expr == category)
 
         if min_rate is not None:
             base = base.where(cast(CostItem.rate, Float) >= min_rate)

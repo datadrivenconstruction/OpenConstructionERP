@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   postgres:
     image: pgduckdb/pgduckdb:16-main
@@ -47,8 +45,12 @@ services:
       - "6334:6334"
     volumes:
       - qdrant_data:/qdrant/storage
-    profiles:
-      - ai  # Only start with: docker compose --profile ai up
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:6333/readyz || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
 volumes:
   pg_data:

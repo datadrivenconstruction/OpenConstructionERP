@@ -1,8 +1,9 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { apiGet } from '@/shared/lib/api';
+import { apiGet, apiPost } from '@/shared/lib/api';
+import { getIntlLocale } from '@/shared/lib/formatters';
 import {
   FolderPlus,
   ArrowRight,
@@ -11,8 +12,20 @@ import {
   Zap,
   ShieldCheck,
   BarChart3,
+  Database,
+  Sparkles,
+  Cpu,
+  FileSpreadsheet,
+  CheckCircle2,
+  Download,
+  X,
+  Building2,
+  Loader2,
+  DollarSign,
+  FileText,
+  Calendar,
 } from 'lucide-react';
-import { Card, CardHeader, CardContent, Button, Badge, Skeleton } from '@/shared/ui';
+import { Card, CardHeader, CardContent, Button, Badge, Skeleton, InfoHint } from '@/shared/ui';
 
 /* ── Types ────────────────────────────────────────────────────────────── */
 
@@ -35,6 +48,64 @@ interface BOQWithTotal {
   positions: { total: number }[];
 }
 
+interface RegionStat {
+  region: string;
+  count: number;
+}
+
+interface OnboardingStep {
+  id: number;
+  icon: React.ReactNode;
+  titleKey: string;
+  titleDefault: string;
+  descKey: string;
+  descDefault: string;
+  buttonKey: string;
+  buttonDefault: string;
+  done: boolean;
+  disabled: boolean;
+  onClick: () => void;
+}
+
+interface DemoCatalogEntry {
+  demo_id: string;
+  name: string;
+  description: string;
+  country: string;
+  currency: string;
+  budget: string;
+  type: string;
+  sections: number;
+  positions: number;
+}
+
+interface DemoInstallResult {
+  project_id: string;
+  project_name: string;
+  demo_id: string;
+  sections: number;
+  positions: number;
+  markups: number;
+  grand_total: number;
+  currency: string;
+  schedule_months: number;
+}
+
+const COUNTRY_FLAGS: Record<string, string> = {
+  DE: '\uD83C\uDDE9\uD83C\uDDEA',
+  GB: '\uD83C\uDDEC\uD83C\uDDE7',
+  AE: '\uD83C\uDDE6\uD83C\uDDEA',
+  FR: '\uD83C\uDDEB\uD83C\uDDF7',
+};
+
+const DEMO_TYPE_COLORS: Record<string, string> = {
+  Residential: '#2563eb',
+  Commercial: '#7c3aed',
+  Healthcare: '#dc2626',
+  Industrial: '#ca8a04',
+  Education: '#16a34a',
+};
+
 /* ── Constants ─────────────────────────────────────────────────────────── */
 
 const STATUS_COLORS: Record<string, string> = {
@@ -44,6 +115,555 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const BAR_COLORS = ['#2563eb', '#7c3aed', '#0891b2', '#dc2626', '#ca8a04', '#16a34a'];
+
+/* ── Import Demo Modal ─────────────────────────────────────────────────── */
+
+function ImportDemoModal({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [installingId, setInstallingId] = useState<string | null>(null);
+
+  const { data: catalog } = useQuery({
+    queryKey: ['demo-catalog'],
+    queryFn: () => apiGet<DemoCatalogEntry[]>('/demo/catalog'),
+    enabled: open,
+    retry: false,
+  });
+
+  const installMutation = useMutation({
+    mutationFn: (demoId: string) =>
+      apiPost<DemoInstallResult>(`/demo/install/${demoId}`),
+    onSuccess: (result) => {
+      void queryClient.invalidateQueries({ queryKey: ['projects'] });
+      onClose();
+      navigate(`/projects/${result.project_id}`);
+    },
+    onSettled: () => {
+      setInstallingId(null);
+    },
+  });
+
+  const handleInstall = useCallback(
+    (demoId: string) => {
+      setInstallingId(demoId);
+      installMutation.mutate(demoId);
+    },
+    [installMutation],
+  );
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div className="relative z-10 w-full max-w-2xl mx-4 rounded-xl bg-surface-primary shadow-2xl border border-border-light animate-card-in">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-oe-blue-subtle">
+              <Download size={16} className="text-oe-blue" strokeWidth={2} />
+            </div>
+            <div>
+              <h3 className="text-base font-semibold text-content-primary">
+                {t('demo.modal_title', 'Import Demo Project')}
+              </h3>
+              <p className="text-xs text-content-tertiary">
+                {t('demo.modal_subtitle', 'Install a complete project with BOQ, schedule, budget, and tendering')}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary transition-colors"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Demo cards */}
+        <div className="p-6 space-y-3 max-h-[60vh] overflow-y-auto">
+          {!catalog ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} height={80} className="w-full" rounded="lg" />
+              ))}
+            </div>
+          ) : (
+            catalog.map((demo) => {
+              const isInstalling = installingId === demo.demo_id;
+              const typeColor = DEMO_TYPE_COLORS[demo.type] || '#6b7280';
+              return (
+                <div
+                  key={demo.demo_id}
+                  className="flex items-center gap-4 rounded-lg border border-border-light p-4 transition-all hover:border-oe-blue/30 hover:bg-surface-secondary/50"
+                >
+                  {/* Icon + flag */}
+                  <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-surface-secondary">
+                    <Building2
+                      size={20}
+                      strokeWidth={1.5}
+                      style={{ color: typeColor }}
+                    />
+                    <span className="absolute -bottom-1 -right-1 text-sm leading-none">
+                      {COUNTRY_FLAGS[demo.country] || ''}
+                    </span>
+                  </div>
+
+                  {/* Info */}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-content-primary truncate">
+                        {demo.name}
+                      </span>
+                      <Badge variant="blue" size="sm">
+                        {demo.budget}
+                      </Badge>
+                    </div>
+                    <p className="mt-0.5 text-xs text-content-tertiary line-clamp-1">
+                      {demo.description}
+                    </p>
+                    <div className="mt-1 flex items-center gap-3 text-2xs text-content-quaternary">
+                      <span>{demo.type}</span>
+                      <span>{demo.sections} sections</span>
+                      <span>{demo.positions} positions</span>
+                      <span>{demo.currency}</span>
+                    </div>
+                  </div>
+
+                  {/* Install button */}
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    disabled={installingId !== null}
+                    onClick={() => handleInstall(demo.demo_id)}
+                    icon={
+                      isInstalling ? (
+                        <Loader2 size={13} className="animate-spin" />
+                      ) : (
+                        <Download size={13} />
+                      )
+                    }
+                  >
+                    {isInstalling
+                      ? t('demo.installing', 'Installing...')
+                      : t('demo.install', 'Install')}
+                  </Button>
+                </div>
+              );
+            })
+          )}
+
+          {installMutation.isError && (
+            <div className="rounded-lg bg-red-50 p-3 text-xs text-red-700">
+              {t('demo.install_error', 'Failed to install demo project. Please try again.')}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Onboarding Steps ──────────────────────────────────────────────────── */
+
+function OnboardingSteps({
+  projects,
+  regionStats,
+  boqs,
+}: {
+  projects?: ProjectSummary[];
+  regionStats?: RegionStat[];
+  boqs?: BOQWithTotal[];
+}) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [demoModalOpen, setDemoModalOpen] = useState(false);
+
+  const hasDatabase = Boolean(regionStats && regionStats.length > 0);
+  const hasProjects = Boolean(projects && projects.length > 0);
+  const hasBoqs = Boolean(boqs && boqs.length > 0);
+
+  const aiConfigured = (() => {
+    try {
+      return Boolean(localStorage.getItem('oe_ai_provider'));
+    } catch {
+      return false;
+    }
+  })();
+
+  const completedCount = [hasDatabase, hasDatabase, aiConfigured, hasProjects, hasBoqs].filter(
+    Boolean,
+  ).length;
+
+  const steps: OnboardingStep[] = [
+    {
+      id: 1,
+      icon: <Database size={22} strokeWidth={1.5} />,
+      titleKey: 'dashboard.step_load_db',
+      titleDefault: 'Load Cost Database',
+      descKey: 'dashboard.step_load_db_desc',
+      descDefault: 'Import regional pricing data with 55,000+ items',
+      buttonKey: 'dashboard.import_database',
+      buttonDefault: 'Import Database',
+      done: hasDatabase,
+      disabled: false,
+      onClick: () => navigate('/costs/import'),
+    },
+    {
+      id: 2,
+      icon: <Sparkles size={22} strokeWidth={1.5} />,
+      titleKey: 'dashboard.step_ai_search',
+      titleDefault: 'Enable AI Search',
+      descKey: 'dashboard.step_ai_search_desc',
+      descDefault: 'Generate vector embeddings for semantic cost matching',
+      buttonKey: 'dashboard.configure',
+      buttonDefault: 'Configure',
+      done: hasDatabase,
+      disabled: !hasDatabase,
+      onClick: () => navigate('/costs/import'),
+    },
+    {
+      id: 3,
+      icon: <Cpu size={22} strokeWidth={1.5} />,
+      titleKey: 'dashboard.step_connect_ai',
+      titleDefault: 'Connect AI',
+      descKey: 'dashboard.step_connect_ai_desc',
+      descDefault: 'Add your API keys for AI-powered estimation',
+      buttonKey: 'dashboard.add_api_keys',
+      buttonDefault: 'Add API Keys',
+      done: aiConfigured,
+      disabled: false,
+      onClick: () => navigate('/settings'),
+    },
+    {
+      id: 4,
+      icon: <FolderPlus size={22} strokeWidth={1.5} />,
+      titleKey: 'dashboard.step_create_project',
+      titleDefault: 'Create Project',
+      descKey: 'dashboard.step_create_project_desc',
+      descDefault: 'Start your first construction estimation project',
+      buttonKey: 'dashboard.new_project',
+      buttonDefault: 'New Project',
+      done: hasProjects,
+      disabled: false,
+      onClick: () => navigate('/projects/new'),
+    },
+    {
+      id: 5,
+      icon: <FileSpreadsheet size={22} strokeWidth={1.5} />,
+      titleKey: 'dashboard.step_build_boq',
+      titleDefault: 'Build Your BOQ',
+      descKey: 'dashboard.step_build_boq_desc',
+      descDefault: 'Create a Bill of Quantities with AI assistance',
+      buttonKey: 'dashboard.create_boq',
+      buttonDefault: 'Create BOQ',
+      done: hasBoqs,
+      disabled: !hasProjects,
+      onClick: () => navigate(hasProjects ? '/projects' : '/projects/new'),
+    },
+  ];
+
+  return (
+    <div className="mb-8">
+      {/* Section header */}
+      <div
+        className="mb-5 flex items-center justify-between animate-card-in"
+        style={{ animationDelay: '80ms' }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-oe-blue-subtle">
+            <Zap size={14} className="text-oe-blue" strokeWidth={2} />
+          </div>
+          <h2 className="text-lg font-semibold text-content-primary">
+            {t('dashboard.getting_started', { defaultValue: 'Getting Started' })}
+          </h2>
+          <Badge variant="blue" size="sm">
+            {completedCount}/5
+          </Badge>
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div
+        className="mb-5 animate-card-in"
+        style={{ animationDelay: '100ms' }}
+      >
+        <div className="h-1.5 w-full rounded-full bg-surface-secondary overflow-hidden">
+          <div
+            className="h-full rounded-full transition-all duration-slow ease-oe"
+            style={{
+              width: `${(completedCount / 5) * 100}%`,
+              background: 'linear-gradient(90deg, var(--oe-blue), #5856d6)',
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Step cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        {steps.map((step, index) => (
+          <div
+            key={step.id}
+            className="animate-card-in"
+            style={{ animationDelay: `${120 + index * 60}ms` }}
+          >
+            <Card
+              padding="none"
+              hoverable={!step.disabled}
+              className={`relative overflow-hidden h-full flex flex-col ${step.done ? 'opacity-75' : ''} ${step.disabled ? 'opacity-50' : ''}`}
+            >
+              {/* Completed overlay checkmark */}
+              {step.done && (
+                <div className="absolute top-3 right-3 z-10">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-semantic-success">
+                    <CheckCircle2 size={14} className="text-content-inverse" strokeWidth={2.5} />
+                  </div>
+                </div>
+              )}
+
+              <div className="flex flex-1 flex-col p-5">
+                {/* Step number + icon row */}
+                <div className="mb-4 flex items-center gap-3">
+                  <div
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                      step.done
+                        ? 'bg-semantic-success-bg text-[#15803d]'
+                        : 'bg-oe-blue-subtle text-oe-blue'
+                    }`}
+                  >
+                    {step.id}
+                  </div>
+                  <div
+                    className={`${step.done ? 'text-[#15803d]' : 'text-content-tertiary'}`}
+                  >
+                    {step.icon}
+                  </div>
+                </div>
+
+                {/* Title */}
+                <h4 className="text-sm font-semibold text-content-primary leading-snug">
+                  {t(step.titleKey, { defaultValue: step.titleDefault })}
+                </h4>
+
+                {/* Description */}
+                <p className="mt-1.5 flex-1 text-xs leading-relaxed text-content-tertiary">
+                  {t(step.descKey, { defaultValue: step.descDefault })}
+                </p>
+
+                {/* CTA button(s) */}
+                <div className="mt-4">
+                  {step.id === 4 && !step.done ? (
+                    <div className="flex gap-1.5">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={step.onClick}
+                        className="flex-[3]"
+                        icon={<ArrowRight size={13} strokeWidth={2} />}
+                        iconPosition="right"
+                      >
+                        {t(step.buttonKey, { defaultValue: step.buttonDefault })}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setDemoModalOpen(true)}
+                        className="flex-1 !px-2"
+                        title={t('demo.import_demo', 'Import Demo')}
+                        icon={<Download size={13} strokeWidth={2} />}
+                      >
+                        {t('dashboard.demo', { defaultValue: 'Demo' })}
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      variant={step.done ? 'ghost' : 'secondary'}
+                      size="sm"
+                      disabled={step.disabled}
+                      onClick={step.onClick}
+                      className="w-full"
+                      icon={
+                        step.done ? (
+                          <CheckCircle2 size={13} strokeWidth={2} />
+                        ) : (
+                          <ArrowRight size={13} strokeWidth={2} />
+                        )
+                      }
+                      iconPosition="right"
+                    >
+                      {step.done
+                        ? t('dashboard.completed', { defaultValue: 'Completed' })
+                        : t(step.buttonKey, { defaultValue: step.buttonDefault })}
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* Bottom accent line */}
+              <div
+                className="h-0.5 w-full"
+                style={{
+                  background: step.done
+                    ? 'var(--oe-success)'
+                    : step.disabled
+                      ? 'var(--oe-border-light)'
+                      : 'linear-gradient(90deg, var(--oe-blue), #5856d6)',
+                  opacity: step.done ? 1 : step.disabled ? 0.3 : 0.6,
+                }}
+              />
+            </Card>
+          </div>
+        ))}
+      </div>
+
+      {/* Demo import modal */}
+      <ImportDemoModal open={demoModalOpen} onClose={() => setDemoModalOpen(false)} />
+    </div>
+  );
+}
+
+/* ── KPI Ribbon ────────────────────────────────────────────────────────── */
+
+interface ScheduleSummary {
+  id: string;
+  project_id: string;
+  name: string;
+  status: string;
+}
+
+function KpiRibbon({
+  boqs,
+  schedules,
+  projects,
+}: {
+  boqs?: BOQWithTotal[];
+  schedules?: ScheduleSummary[];
+  projects?: ProjectSummary[];
+}) {
+  const { t } = useTranslation();
+
+  const totalValue = useMemo(() => {
+    if (!boqs || boqs.length === 0) return 0;
+    return boqs.reduce((sum, b) => sum + (b.grand_total ?? 0), 0);
+  }, [boqs]);
+
+  const activeEstimates = useMemo(() => {
+    if (!boqs) return 0;
+    return boqs.filter((b) => b.status === 'draft').length;
+  }, [boqs]);
+
+  const scheduleCount = schedules?.length ?? 0;
+
+  const qualityScore = useMemo(() => {
+    if (!boqs || boqs.length === 0) return null;
+    // Compute average validation "completeness" from positions that have totals > 0
+    const withPositions = boqs.filter((b) => b.positions && b.positions.length > 0);
+    if (withPositions.length === 0) return null;
+    const totalPositions = withPositions.reduce((s, b) => s + b.positions.length, 0);
+    const positionsWithPrice = withPositions.reduce(
+      (s, b) => s + b.positions.filter((p) => p.total > 0).length,
+      0,
+    );
+    if (totalPositions === 0) return null;
+    return Math.round((positionsWithPrice / totalPositions) * 100);
+  }, [boqs]);
+
+  const currency = projects?.[0]?.currency ?? 'EUR';
+
+  const formatCurrency = (value: number) => {
+    if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+    if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
+    return new Intl.NumberFormat(getIntlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+  };
+
+  const cards = [
+    {
+      icon: <DollarSign size={20} strokeWidth={1.75} />,
+      value: boqs ? `${currency === 'EUR' ? '\u20AC' : currency === 'GBP' ? '\u00A3' : currency === 'USD' ? '$' : currency === 'AED' ? 'AED ' : ''}${formatCurrency(totalValue)}` : null,
+      label: t('dashboard.kpi_total_value', { defaultValue: 'Total Value' }),
+      color: 'text-oe-blue',
+      bg: 'bg-oe-blue-subtle',
+    },
+    {
+      icon: <FileText size={20} strokeWidth={1.75} />,
+      value: boqs ? `${activeEstimates}` : null,
+      sublabel: boqs
+        ? t('dashboard.kpi_estimates_unit', {
+            defaultValue: 'estimate{{s}}',
+            s: activeEstimates === 1 ? '' : 's',
+          }).replace('{{s}}', activeEstimates === 1 ? '' : 's')
+        : '',
+      label: t('dashboard.kpi_active_estimates', { defaultValue: 'Active Estimates' }),
+      color: 'text-[#7c3aed]',
+      bg: 'bg-[#7c3aed]/10',
+    },
+    {
+      icon: <Calendar size={20} strokeWidth={1.75} />,
+      value: schedules ? `${scheduleCount}` : null,
+      sublabel: schedules
+        ? scheduleCount > 0
+          ? t('dashboard.kpi_schedule_active', { defaultValue: 'active' })
+          : t('dashboard.kpi_no_schedules', { defaultValue: 'No schedules' })
+        : '',
+      label: t('dashboard.kpi_schedule', { defaultValue: 'Schedule Status' }),
+      color: 'text-[#0891b2]',
+      bg: 'bg-[#0891b2]/10',
+    },
+    {
+      icon: <ShieldCheck size={20} strokeWidth={1.75} />,
+      value: qualityScore !== null ? `${qualityScore}%` : t('dashboard.kpi_not_validated', { defaultValue: 'N/A' }),
+      sublabel: qualityScore !== null
+        ? t('dashboard.kpi_quality_score_label', { defaultValue: 'score' })
+        : t('dashboard.kpi_run_validation', { defaultValue: 'run validation' }),
+      label: t('dashboard.kpi_quality', { defaultValue: 'Quality Score' }),
+      color: qualityScore !== null && qualityScore >= 80 ? 'text-[#16a34a]' : qualityScore !== null && qualityScore >= 50 ? 'text-[#ca8a04]' : 'text-content-tertiary',
+      bg: qualityScore !== null && qualityScore >= 80 ? 'bg-[#16a34a]/10' : qualityScore !== null && qualityScore >= 50 ? 'bg-[#ca8a04]/10' : 'bg-surface-secondary',
+    },
+  ];
+
+  return (
+    <div
+      className="mb-8 grid grid-cols-2 gap-3 lg:grid-cols-4 animate-card-in"
+      style={{ animationDelay: '50ms' }}
+    >
+      {cards.map((card, i) => (
+        <div
+          key={card.label}
+          className="group flex items-center gap-3 rounded-xl border border-border-light bg-surface-primary p-4 transition-all duration-normal ease-oe hover:border-oe-blue/20 hover:shadow-sm animate-stagger-in"
+          style={{ animationDelay: `${80 + i * 50}ms` }}
+        >
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${card.bg} ${card.color} transition-transform duration-normal ease-oe group-hover:scale-105`}>
+            {card.icon}
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-lg font-bold tabular-nums text-content-primary leading-tight truncate">
+                {card.value ?? <span className="inline-block h-5 w-14 animate-pulse rounded bg-surface-tertiary" />}
+              </span>
+              {'sublabel' in card && card.sublabel && (
+                <span className="text-xs text-content-tertiary">{card.sublabel}</span>
+              )}
+            </div>
+            <div className="text-xs text-content-tertiary mt-0.5 truncate">{card.label}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 /* ── Main Page ─────────────────────────────────────────────────────────── */
 
@@ -56,6 +676,62 @@ export function DashboardPage() {
     queryFn: () => apiGet<ProjectSummary[]>('/v1/projects/').catch(() => []),
     retry: false,
   });
+
+  const { data: regionStats } = useQuery({
+    queryKey: ['costs', 'regions', 'stats'],
+    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats').catch(() => []),
+    retry: false,
+  });
+
+  // Fetch all BOQs across projects for KPI ribbon + analytics
+  const { data: allBoqs } = useQuery({
+    queryKey: ['dashboard-all-boqs', projects?.map((p) => p.id).join(',')],
+    queryFn: async () => {
+      const results: BOQWithTotal[] = [];
+      for (const project of projects ?? []) {
+        try {
+          const boqs = await apiGet<BOQWithTotal[]>(
+            `/v1/boq/boqs/?project_id=${project.id}`,
+          );
+          results.push(...boqs);
+        } catch {
+          // Skip projects with no BOQs
+        }
+      }
+      return results;
+    },
+    enabled: Boolean(projects && projects.length > 0),
+    retry: false,
+  });
+
+  // Fetch schedules across projects for KPI ribbon
+  const { data: allSchedules } = useQuery({
+    queryKey: ['dashboard-all-schedules', projects?.map((p) => p.id).join(',')],
+    queryFn: async () => {
+      const results: ScheduleSummary[] = [];
+      for (const project of projects ?? []) {
+        try {
+          const schedules = await apiGet<ScheduleSummary[]>(
+            `/v1/schedule/schedules/?project_id=${project.id}`,
+          );
+          results.push(...schedules);
+        } catch {
+          // Skip
+        }
+      }
+      return results;
+    },
+    enabled: Boolean(projects && projects.length > 0),
+    retry: false,
+  });
+
+  // Determine the most recently updated BOQ for "Continue last estimate"
+  const lastBoqId = useMemo(() => {
+    if (!allBoqs || allBoqs.length === 0) return null;
+    // BOQs are returned from API in order; pick the first draft, or just the first
+    const drafts = allBoqs.filter((b) => b.status === 'draft');
+    return drafts.length > 0 ? drafts[0].id : allBoqs[0].id;
+  }, [allBoqs]);
 
   return (
     <div className="max-w-content mx-auto">
@@ -75,7 +751,18 @@ export function DashboardPage() {
             {t('dashboard.subtitle')}
           </p>
         </div>
-        <div className="animate-stagger-in" style={{ animationDelay: '200ms' }}>
+        <div className="flex items-center gap-2 animate-stagger-in" style={{ animationDelay: '200ms' }}>
+          {lastBoqId && (
+            <Button
+              variant="outline"
+              size="lg"
+              icon={<ArrowRight size={16} />}
+              iconPosition="right"
+              onClick={() => navigate(`/boq/${lastBoqId}`)}
+            >
+              {t('dashboard.continue_estimate', { defaultValue: 'Continue last estimate' })}
+            </Button>
+          )}
           <Button
             variant="primary"
             size="lg"
@@ -87,6 +774,56 @@ export function DashboardPage() {
           </Button>
         </div>
       </div>
+
+      {/* KPI hint */}
+      <InfoHint text={t('dashboard.kpi_hint', { defaultValue: 'Summary across all projects. Values update as you add estimates and schedule activities.' })} />
+
+      {/* KPI Ribbon */}
+      <KpiRibbon boqs={allBoqs} schedules={allSchedules} projects={projects} />
+
+      {/* Quick Actions */}
+      {projects && projects.length > 0 && (
+        <div className="flex flex-wrap sm:flex-nowrap sm:overflow-x-auto sm:scrollbar-none items-center gap-2 rounded-lg border border-border-light/60 bg-surface-primary/60 px-3 py-2 animate-card-in" style={{ animationDelay: '80ms' }}>
+          <span className="text-xs font-medium text-content-tertiary mr-1">
+            {t('dashboard.quick_actions', { defaultValue: 'Quick Actions' })}:
+          </span>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<FolderPlus size={14} />}
+            onClick={() => navigate('/projects/new')}
+          >
+            {t('dashboard.new_project', { defaultValue: 'New Project' })}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<FileText size={14} />}
+            onClick={() => navigate('/boq/new')}
+          >
+            {t('dashboard.create_boq', { defaultValue: 'New BOQ' })}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<ShieldCheck size={14} />}
+            onClick={() => navigate('/validation')}
+          >
+            {t('nav.validation', { defaultValue: 'Validate' })}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<Download size={14} />}
+            onClick={() => navigate('/costs/import')}
+          >
+            {t('costs.import_title', { defaultValue: 'Import Database' })}
+          </Button>
+        </div>
+      )}
+
+      {/* Onboarding Steps */}
+      <OnboardingSteps projects={projects} regionStats={regionStats} boqs={allBoqs} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Recent Projects — staggered card entrance */}
@@ -114,14 +851,24 @@ export function DashboardPage() {
           </Card>
         </div>
 
-        {/* System Status — staggered card entrance */}
-        <div className="animate-card-in" style={{ animationDelay: '300ms' }}>
+        {/* System Status + Activity — staggered card entrance */}
+        <div className="space-y-6 animate-card-in" style={{ animationDelay: '300ms' }}>
           <Card>
             <CardHeader title={t('dashboard.system_status')} />
             <CardContent>
               <SystemStatus />
             </CardContent>
           </Card>
+
+          {/* Activity Feed */}
+          {projects && projects.length > 0 && (
+            <Card>
+              <CardHeader title={t('dashboard.activity', { defaultValue: 'Recent Activity' })} />
+              <CardContent>
+                <ActivityFeed projects={projects} />
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
 
@@ -131,7 +878,7 @@ export function DashboardPage() {
           <div className="mb-4 flex items-center gap-2">
             <BarChart3 size={18} className="text-content-tertiary" strokeWidth={1.75} />
             <h2 className="text-lg font-semibold text-content-primary">
-              {t('dashboard.analytics', 'Analytics')}
+              {t('dashboard.analytics', { defaultValue: 'Analytics' })}
             </h2>
           </div>
           <AnalyticsSection projects={projects} />
@@ -144,7 +891,7 @@ export function DashboardPage() {
 /* ── Projects List ────────────────────────────────────────────────────── */
 
 function ProjectsList({ projects }: { projects?: ProjectSummary[] }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
 
   if (!projects || projects.length === 0) {
@@ -153,9 +900,9 @@ function ProjectsList({ projects }: { projects?: ProjectSummary[] }) {
         <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-secondary">
           <FolderPlus size={22} className="text-content-tertiary" strokeWidth={1.5} />
         </div>
-        <p className="text-sm font-medium text-content-primary">{t('projects.no_projects')}</p>
+        <p className="text-sm font-medium text-content-primary">{t('dashboard.no_projects', { defaultValue: 'No projects yet' })}</p>
         <p className="mt-1 text-xs text-content-tertiary">
-          Create your first project to get started
+          {t('dashboard.no_projects_desc', { defaultValue: 'Create your first project to get started' })}
         </p>
         <div className="mt-4">
           <Button variant="primary" size="sm" onClick={() => navigate('/projects/new')}>
@@ -185,7 +932,7 @@ function ProjectsList({ projects }: { projects?: ProjectSummary[] }) {
             </div>
           </div>
           <div className="text-xs text-content-tertiary">
-            {new Date(p.created_at).toLocaleDateString()}
+            {new Date(p.created_at).toLocaleDateString(i18n.language)}
           </div>
           <ArrowRight size={14} className="text-content-tertiary" />
         </button>
@@ -224,7 +971,7 @@ function AnalyticsSection({ projects }: { projects: ProjectSummary[] }) {
     if (!allBoqs) return null;
 
     const totalBoqs = allBoqs.length;
-    const totalValue = allBoqs.reduce((sum, b) => sum + (b.grand_total || 0), 0);
+    const totalValue = allBoqs.reduce((sum, b) => sum + (b.grand_total ?? 0), 0);
 
     // Value per project
     const projectValues: { name: string; value: number }[] = projects
@@ -232,7 +979,7 @@ function AnalyticsSection({ projects }: { projects: ProjectSummary[] }) {
         name: p.name,
         value: allBoqs
           .filter((b) => b.project_id === p.id)
-          .reduce((sum, b) => sum + (b.grand_total || 0), 0),
+          .reduce((sum, b) => sum + (b.grand_total ?? 0), 0),
       }))
       .sort((a, b) => b.value - a.value);
 
@@ -269,13 +1016,13 @@ function AnalyticsSection({ projects }: { projects: ProjectSummary[] }) {
 
   return (
     <Card>
-      <CardHeader title={t('dashboard.project_overview', 'Project Overview')} />
+      <CardHeader title={t('dashboard.project_overview', { defaultValue: 'Project Overview' })} />
       <CardContent>
         {/* Aggregate Stats */}
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 mb-6">
           <div className="rounded-lg bg-surface-secondary p-3">
             <div className="text-xs font-medium uppercase tracking-wider text-content-tertiary">
-              {t('dashboard.total_projects', 'Total Projects')}
+              {t('dashboard.total_projects', { defaultValue: 'Total Projects' })}
             </div>
             <div className="mt-1 text-xl font-bold tabular-nums text-content-primary">
               {stats.totalProjects}
@@ -283,7 +1030,7 @@ function AnalyticsSection({ projects }: { projects: ProjectSummary[] }) {
           </div>
           <div className="rounded-lg bg-surface-secondary p-3">
             <div className="text-xs font-medium uppercase tracking-wider text-content-tertiary">
-              {t('dashboard.total_boqs', 'Total BOQs')}
+              {t('dashboard.total_boqs', { defaultValue: 'Total BOQs' })}
             </div>
             <div className="mt-1 text-xl font-bold tabular-nums text-content-primary">
               {stats.totalBoqs}
@@ -291,14 +1038,14 @@ function AnalyticsSection({ projects }: { projects: ProjectSummary[] }) {
           </div>
           <div className="rounded-lg bg-surface-secondary p-3 sm:col-span-2">
             <div className="text-xs font-medium uppercase tracking-wider text-content-tertiary">
-              {t('dashboard.total_value', 'Total Value')}
+              {t('dashboard.total_value', { defaultValue: 'Total Value' })}
             </div>
             <div className="mt-1 text-xl font-bold tabular-nums text-content-primary">
               {stats.totalValue >= 1_000_000
                 ? `${(stats.totalValue / 1_000_000).toFixed(1)}M`
                 : stats.totalValue >= 1_000
                   ? `${(stats.totalValue / 1_000).toFixed(0)}K`
-                  : stats.totalValue.toLocaleString('en-US', {
+                  : stats.totalValue.toLocaleString('de-DE', {
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0,
                     })}
@@ -323,7 +1070,7 @@ function AnalyticsSection({ projects }: { projects: ProjectSummary[] }) {
                       ? `${(pv.value / 1_000).toFixed(0)}K`
                       : pv.value.toLocaleString();
                 return (
-                  <div key={pv.name} className="flex items-center gap-3">
+                  <div key={`${pv.name}-${i}`} className="flex items-center gap-3">
                     <div className="w-24 shrink-0 text-xs text-content-secondary truncate text-right">
                       {pv.name}
                     </div>
@@ -450,14 +1197,37 @@ function StatusDonut({
 
 /* ── System Status ────────────────────────────────────────────────────── */
 
+interface SystemStatusData {
+  api: { status: string; version: string };
+  database: { status: string; engine?: string; error?: string };
+  vector_db: { status: string; engine: string; collections?: number; vectors?: number };
+  ai: { providers: { name: string; configured: boolean }[]; configured: boolean };
+}
+
+function StatusDot({ status }: { status: 'connected' | 'healthy' | 'offline' | 'error' | string }) {
+  const color =
+    status === 'connected' || status === 'healthy'
+      ? 'bg-semantic-success'
+      : status === 'offline'
+        ? 'bg-content-quaternary'
+        : 'bg-semantic-error';
+  const pulse = status === 'connected' || status === 'healthy';
+  return (
+    <span className="relative flex h-2 w-2">
+      {pulse && <span className={`absolute inset-0 rounded-full ${color} opacity-50 animate-ping`} />}
+      <span className={`relative inline-flex h-2 w-2 rounded-full ${color}`} />
+    </span>
+  );
+}
+
 function SystemStatus() {
   const { t } = useTranslation();
 
-  const { data: health, isLoading: healthLoading } = useQuery({
-    queryKey: ['health'],
-    queryFn: () => fetch('/api/health').then((r) => r.json()),
+  const { data: status } = useQuery({
+    queryKey: ['system-status'],
+    queryFn: () => fetch('/api/system/status').then((r) => r.json()) as Promise<SystemStatusData>,
     retry: false,
-    refetchInterval: 30000,
+    refetchInterval: 15000,
   });
 
   const { data: modules } = useQuery({
@@ -472,105 +1242,209 @@ function SystemStatus() {
     retry: false,
   });
 
-  const isHealthy = health?.status === 'healthy';
+  // Check user AI keys from localStorage
+  const hasUserAiKey = typeof window !== 'undefined' && (
+    !!localStorage.getItem('oe_ai_provider') ||
+    !!localStorage.getItem('oe_openai_key') ||
+    !!localStorage.getItem('oe_anthropic_key')
+  );
+
+  const apiStatus = status?.api?.status ?? 'offline';
+  const dbStatus = status?.database?.status ?? 'offline';
+  const vectorStatus = status?.vector_db?.status ?? 'offline';
+  const vectorVectors = status?.vector_db?.vectors ?? 0;
+  const aiConfigured = status?.ai?.configured || hasUserAiKey;
+
+  const services = [
+    {
+      name: t('dashboard.api_server', { defaultValue: 'API Server' }),
+      status: apiStatus,
+      detail: status?.api?.version ? `v${status.api.version}` : '',
+      icon: <Zap size={13} />,
+      delay: 400,
+    },
+    {
+      name: t('dashboard.database', { defaultValue: 'Database' }),
+      status: dbStatus,
+      detail: status?.database?.engine === 'sqlite' ? 'SQLite' : status?.database?.engine ?? '',
+      icon: <Layers size={13} />,
+      delay: 460,
+    },
+    {
+      name: t('dashboard.vector_db', { defaultValue: 'Vector DB' }),
+      status: vectorStatus,
+      detail: vectorVectors > 0 ? `${vectorVectors.toLocaleString()} vectors` : '',
+      icon: <Globe size={13} />,
+      delay: 520,
+    },
+    {
+      name: t('dashboard.ai_providers', { defaultValue: 'AI Providers' }),
+      status: aiConfigured ? 'connected' : 'offline',
+      detail: status?.ai?.providers?.map((p) => p.name).join(', ') || (hasUserAiKey ? 'User keys' : t('dashboard.not_configured', { defaultValue: 'Not configured' })),
+      icon: <ShieldCheck size={13} />,
+      delay: 580,
+    },
+  ];
 
   return (
-    <div className="space-y-4">
-      {/* API status with live dot */}
-      <div
-        className="flex items-center justify-between animate-stagger-in"
-        style={{ animationDelay: '400ms' }}
-      >
-        <span className="flex items-center gap-2 text-sm text-content-secondary">
-          API
-          {isHealthy && <span className="live-dot" aria-label="Live" />}
-        </span>
-        {healthLoading ? (
-          <Skeleton width={80} height={20} rounded="full" />
-        ) : (
-          <Badge variant={isHealthy ? 'success' : 'error'} dot size="sm">
-            {isHealthy ? 'Healthy' : 'Offline'}
-          </Badge>
-        )}
-      </div>
-
-      {/* Version */}
-      {health?.version && (
+    <div className="space-y-3">
+      {/* Service indicators */}
+      {services.map((svc) => (
         <div
+          key={svc.name}
           className="flex items-center justify-between animate-stagger-in"
-          style={{ animationDelay: '460ms' }}
+          style={{ animationDelay: `${svc.delay}ms` }}
         >
-          <span className="text-sm text-content-secondary">Version</span>
-          <span
-            className="text-sm font-mono text-content-primary inline-block animate-count-up"
-            style={{ animationDelay: '500ms' }}
-          >
-            {health.version}
+          <span className="flex items-center gap-2 text-sm text-content-secondary">
+            {svc.icon}
+            {svc.name}
           </span>
+          <div className="flex items-center gap-2">
+            {svc.detail && (
+              <span className="text-2xs text-content-quaternary">{svc.detail}</span>
+            )}
+            <StatusDot status={svc.status} />
+          </div>
         </div>
-      )}
+      ))}
 
-      {/* Modules loaded */}
-      <div
-        className="flex items-center justify-between animate-stagger-in"
-        style={{ animationDelay: '520ms' }}
-      >
-        <span className="flex items-center gap-2 text-sm text-content-secondary">
-          <Layers size={14} strokeWidth={1.75} />
-          {t('dashboard.modules_loaded')}
-        </span>
-        <span
-          className="text-sm font-semibold text-content-primary inline-block animate-count-up"
-          style={{ animationDelay: '600ms' }}
-        >
-          {modules?.modules?.length ?? '\u2014'}
-        </span>
-      </div>
+      {/* Divider */}
+      <div className="h-px bg-border-light" />
 
-      {/* Validation rules */}
-      <div
-        className="flex items-center justify-between animate-stagger-in"
-        style={{ animationDelay: '580ms' }}
-      >
-        <span className="flex items-center gap-2 text-sm text-content-secondary">
-          <ShieldCheck size={14} strokeWidth={1.75} />
-          {t('dashboard.validation_rules')}
-        </span>
-        <span
-          className="text-sm font-semibold text-content-primary inline-block animate-count-up"
-          style={{ animationDelay: '680ms' }}
-        >
-          {rules?.rules?.length ?? '\u2014'}
-        </span>
-      </div>
-
-      {/* Languages */}
+      {/* Modules & Rules */}
       <div
         className="flex items-center justify-between animate-stagger-in"
         style={{ animationDelay: '640ms' }}
       >
-        <span className="flex items-center gap-2 text-sm text-content-secondary">
-          <Globe size={14} strokeWidth={1.75} />
-          {t('dashboard.languages')}
-        </span>
-        <span
-          className="text-sm font-semibold text-content-primary inline-block animate-count-up"
-          style={{ animationDelay: '760ms' }}
-        >
-          20
+        <span className="text-sm text-content-secondary">{t('dashboard.modules_loaded')}</span>
+        <span className="text-sm font-semibold text-content-primary tabular-nums">
+          {modules?.modules?.length ?? '\u2014'}
         </span>
       </div>
-
-      {/* Phase indicator */}
       <div
-        className="border-t border-border-light pt-3 animate-stagger-in"
+        className="flex items-center justify-between animate-stagger-in"
         style={{ animationDelay: '700ms' }}
       >
-        <div className="flex items-center gap-2 text-xs text-content-tertiary">
-          <Zap size={12} />
-          <span>Phase 1 — Core Estimation</span>
-        </div>
+        <span className="text-sm text-content-secondary">{t('dashboard.validation_rules')}</span>
+        <span className="text-sm font-semibold text-content-primary tabular-nums">
+          {rules?.rules?.length ?? '\u2014'}
+        </span>
+      </div>
+      <div
+        className="flex items-center justify-between animate-stagger-in"
+        style={{ animationDelay: '760ms' }}
+      >
+        <span className="text-sm text-content-secondary">{t('dashboard.languages')}</span>
+        <span className="text-sm font-semibold text-content-primary tabular-nums">20</span>
       </div>
     </div>
   );
+}
+
+/* ── Activity Feed ───────────────────────────────────────────────────── */
+
+function ActivityFeed({ projects }: { projects: ProjectSummary[] }) {
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+
+  // Fetch real activity from all projects (up to 3 projects, 5 entries each)
+  const projectIds = useMemo(() => projects.slice(0, 3).map((p) => p.id), [projects]);
+  const projectMap = useMemo(
+    () => Object.fromEntries(projects.map((p) => [p.id, p.name])),
+    [projects],
+  );
+
+  const { data: activityData } = useQuery({
+    queryKey: ['dashboard-activity', projectIds],
+    queryFn: async () => {
+      const results = await Promise.all(
+        projectIds.map((id) =>
+          apiGet<{ items: Array<{ id: string; project_id: string | null; action: string; description: string; created_at: string }>; total: number }>(
+            `/v1/boq/projects/${id}/activity?limit=5`,
+          ).catch(() => ({ items: [], total: 0 })),
+        ),
+      );
+      const all = results.flatMap((r) => r.items);
+      all.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      return all.slice(0, 8);
+    },
+    enabled: projectIds.length > 0,
+    staleTime: 30_000,
+  });
+
+  const activities = activityData ?? [];
+
+  // Icon + color by action type
+  const actionMeta = useCallback((action: string) => {
+    if (action.includes('added') || action.includes('created'))
+      return { icon: <FolderPlus size={12} />, bg: 'bg-emerald-100 dark:bg-emerald-900/30', fg: 'text-emerald-600 dark:text-emerald-400' };
+    if (action.includes('updated') || action.includes('changed'))
+      return { icon: <FileText size={12} />, bg: 'bg-oe-blue-subtle', fg: 'text-oe-blue' };
+    if (action.includes('deleted'))
+      return { icon: <X size={12} />, bg: 'bg-red-100 dark:bg-red-900/30', fg: 'text-red-500' };
+    if (action.includes('import'))
+      return { icon: <Download size={12} />, bg: 'bg-amber-100 dark:bg-amber-900/30', fg: 'text-amber-600 dark:text-amber-400' };
+    if (action.includes('validation'))
+      return { icon: <CheckCircle2 size={12} />, bg: 'bg-purple-100 dark:bg-purple-900/30', fg: 'text-purple-600 dark:text-purple-400' };
+    return { icon: <Zap size={12} />, bg: 'bg-oe-blue-subtle', fg: 'text-oe-blue' };
+  }, []);
+
+  if (activities.length === 0) {
+    return (
+      <p className="text-xs text-content-tertiary text-center py-4">
+        {t('dashboard.no_activity', { defaultValue: 'No recent activity' })}
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-1">
+      {activities.map((a, i) => {
+        const meta = actionMeta(a.action);
+        const projName = a.project_id ? projectMap[a.project_id] : null;
+        return (
+          <button
+            key={`${a.id}-${i}`}
+            onClick={() => a.project_id ? navigate(`/projects/${a.project_id}`) : undefined}
+            className="flex items-center gap-3 w-full text-left px-2 py-1.5 rounded-lg hover:bg-surface-secondary transition-colors group"
+          >
+            <div className={`flex h-6 w-6 items-center justify-center rounded-md shrink-0 ${meta.bg} ${meta.fg}`}>
+              {meta.icon}
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="text-xs font-medium text-content-primary truncate block group-hover:text-oe-blue transition-colors">
+                {a.description}
+              </span>
+              <span className="text-2xs text-content-tertiary">
+                {projName && <>{projName} · </>}
+                {formatRelativeTime(a.created_at, i18n.language)}
+              </span>
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Format a date as relative time (e.g. "2 hours ago") */
+function formatRelativeTime(dateStr: string, locale: string): string {
+  const now = Date.now();
+  const date = new Date(dateStr).getTime();
+  const diffMs = now - date;
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHr = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHr / 24);
+
+  try {
+    const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+    if (diffMin < 1) return rtf.format(0, 'second');
+    if (diffMin < 60) return rtf.format(-diffMin, 'minute');
+    if (diffHr < 24) return rtf.format(-diffHr, 'hour');
+    if (diffDay < 30) return rtf.format(-diffDay, 'day');
+    return new Date(dateStr).toLocaleDateString(locale);
+  } catch {
+    return new Date(dateStr).toLocaleDateString(locale);
+  }
 }

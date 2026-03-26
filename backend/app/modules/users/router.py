@@ -1,18 +1,20 @@
 """Users & authentication API routes.
 
 Endpoints:
-    POST /auth/register     — Register new user
-    POST /auth/login        — Login, get JWT tokens
-    POST /auth/refresh      — Refresh access token
-    GET  /me                — Current user profile
-    PATCH /me               — Update own profile
-    POST /me/change-password — Change own password
-    GET  /me/api-keys       — List own API keys
-    POST /me/api-keys       — Create API key
-    DELETE /me/api-keys/{id} — Revoke API key
-    GET  /                  — List users (admin/manager)
-    GET  /{id}              — Get user by ID (admin/manager)
-    PATCH /{id}             — Update user (admin only)
+    POST /auth/register         — Register new user
+    POST /auth/login            — Login, get JWT tokens
+    POST /auth/refresh          — Refresh access token
+    POST /auth/forgot-password  — Request password reset token
+    POST /auth/reset-password   — Reset password with token
+    GET  /me                    — Current user profile
+    PATCH /me                   — Update own profile
+    POST /me/change-password    — Change own password
+    GET  /me/api-keys           — List own API keys
+    POST /me/api-keys           — Create API key
+    DELETE /me/api-keys/{id}    — Revoke API key
+    GET  /                      — List users (admin/manager)
+    GET  /{id}                  — Get user by ID (admin/manager)
+    PATCH /{id}                 — Update user (admin only)
 """
 
 import uuid
@@ -30,8 +32,12 @@ from app.modules.users.schemas import (
     APIKeyCreatedResponse,
     APIKeyResponse,
     ChangePasswordRequest,
+    ForgotPasswordRequest,
+    ForgotPasswordResponse,
     LoginRequest,
     RefreshRequest,
+    ResetPasswordRequest,
+    ResetPasswordResponse,
     TokenResponse,
     UserAdminUpdate,
     UserCreate,
@@ -71,6 +77,28 @@ async def refresh(
 ) -> TokenResponse:
     """Refresh access token using a refresh token."""
     return await service.refresh_tokens(data.refresh_token)
+
+
+@router.post("/auth/forgot-password", response_model=ForgotPasswordResponse)
+async def forgot_password(
+    data: ForgotPasswordRequest,
+    service: UserService = Depends(_get_service),
+) -> ForgotPasswordResponse:
+    """Request a password reset token.
+
+    Always returns a success message to prevent email enumeration.
+    In dev mode, the reset token is included in the response for testing.
+    """
+    return await service.forgot_password(data)
+
+
+@router.post("/auth/reset-password", response_model=ResetPasswordResponse)
+async def reset_password(
+    data: ResetPasswordRequest,
+    service: UserService = Depends(_get_service),
+) -> ResetPasswordResponse:
+    """Reset password using a valid reset token."""
+    return await service.reset_password(data)
 
 
 # ── Current user ───────────────────────────────────────────────────────────

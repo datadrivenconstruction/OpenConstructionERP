@@ -13,6 +13,7 @@ Module lifecycle:
 
 import contextlib
 import importlib
+import sys
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -167,7 +168,13 @@ class ModuleLoader:
 
         # Load router if exists
         try:
-            router_mod = importlib.import_module(f"{package_path}.router")
+            router_module_name = f"{package_path}.router"
+            # Clear stale import cache entry (handles hot-reload after new files added)
+            if router_module_name in sys.modules:
+                importlib.reload(sys.modules[router_module_name])
+                router_mod = sys.modules[router_module_name]
+            else:
+                router_mod = importlib.import_module(router_module_name)
             router = getattr(router_mod, "router", None)
             if router:
                 prefix = f"/api/v1/{dir_name}"

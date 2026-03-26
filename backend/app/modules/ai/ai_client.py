@@ -253,23 +253,42 @@ async def call_ai(
         ValueError: If provider is unknown.
         httpx.HTTPStatusError: On API errors.
     """
-    if provider == "anthropic":
-        return await call_anthropic(
+    callers = {
+        "anthropic": call_anthropic,
+        "openai": call_openai,
+        "gemini": call_gemini,
+    }
+    caller = callers.get(provider)
+    if caller is None:
+        msg = f"Unknown AI provider: {provider}"
+        raise ValueError(msg)
+
+    try:
+        return await caller(
             api_key, system, prompt, image_base64, image_media_type,
             max_tokens=max_tokens,
         )
-    if provider == "openai":
-        return await call_openai(
-            api_key, system, prompt, image_base64, image_media_type,
-            max_tokens=max_tokens,
-        )
-    if provider == "gemini":
-        return await call_gemini(
-            api_key, system, prompt, image_base64, image_media_type,
-            max_tokens=max_tokens,
-        )
-    msg = f"Unknown AI provider: {provider}"
-    raise ValueError(msg)
+    except httpx.HTTPStatusError as exc:
+        status_code = exc.response.status_code
+        # Try to extract error detail from response body
+        try:
+            body = exc.response.json()
+            detail = body.get("error", {}).get("message", "") or str(body)
+        except Exception:
+            detail = exc.response.text[:200]
+
+        if status_code == 400 and image_base64:
+            msg = "The image could not be processed by the AI. Please upload a clearer building photo (JPEG/PNG, at least 200x200 pixels)."
+            raise ValueError(msg) from exc
+        if status_code == 401:
+            msg = f"AI API key is invalid or expired ({provider}). Please update your API key in Settings."
+            raise ValueError(msg) from exc
+        if status_code == 429:
+            msg = f"AI rate limit exceeded ({provider}). Please wait a moment and try again."
+            raise ValueError(msg) from exc
+
+        msg = f"AI provider error ({provider}, HTTP {status_code}): {detail[:200]}"
+        raise ValueError(msg) from exc
 
 
 # ── JSON extraction ──────────────────────────────────────────────────────────

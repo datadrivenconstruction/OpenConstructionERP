@@ -9,11 +9,15 @@ Endpoints:
     GET    /packages/{package_id}/bids      — List bids
     PATCH  /bids/{bid_id}                   — Update a bid
     GET    /packages/{package_id}/comparison — Compare all bids side-by-side
+    GET    /packages/{package_id}/export/pdf — Export tender package as PDF
 """
 
+import io
 import uuid
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, Query
+from fastapi.responses import StreamingResponse
 
 from app.dependencies import CurrentUserId, SessionDep
 from app.modules.tendering.schemas import (
@@ -200,3 +204,133 @@ async def compare_bids(
 ) -> BidComparisonResponse:
     """Compare all bids for a package side-by-side."""
     return await service.compare_bids(package_id)
+
+
+# ── Export Endpoints ──────────────────────────────────────────────────────────
+
+
+@router.get("/packages/{package_id}/export/pdf")
+async def export_tender_pdf(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    service: TenderingService = Depends(_get_service),
+) -> StreamingResponse:
+    """Export tender package with bid comparison as a PDF report.
+
+    Generates a simple text-based PDF using only the Python standard library
+    so that no extra dependencies (reportlab, etc.) are required.
+    """
+    package = await service.get_package(package_id)
+    comparison = await service.compare_bids(package_id)
+
+    # ── Build a minimal valid PDF in memory ──────────────────────────────
+    buf = io.BytesIO()
+
+    def _w(s: str) -> None:
+        buf.write(s.encode("latin-1", errors="replace"))
+
+    offsets: list[int] = []
+
+    def _obj() -> int:
+        idx = len(offsets) + 1
+        offsets.append(buf.tell())
+        _w(f"{idx} 0 obj\n")
+        return idx
+
+    # Header
+    _w("%PDF-1.4\n")
+
+    # Catalog (obj 1)
+    _obj()
+    _w("<< /Type /Catalog /Pages 2 0 R >>\nendobj\n")
+
+    # Pages (obj 2)
+    _obj()
+    _w("<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n")
+
+    # Build page content lines
+    lines: list[str] = []
+    lines.append(f"Tender Package: {package.name}")
+    lines.append(f"Status: {package.status}")
+    lines.append(f"Deadline: {package.deadline or 'N/A'}")
+    lines.append(f"Generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}")
+    lines.append("")
+    lines.append(f"Budget Total: {comparison.budget_total:,.2f}")
+    lines.append(f"Number of Bids: {comparison.bid_count}")
+    lines.append("")
+
+    if comparison.bid_totals:
+        lines.append("--- Bid Summary ---")
+        for bt in comparison.bid_totals:
+            company = bt.get("company_name", "Unknown")
+            total = bt.get("total", 0)
+            currency = bt.get("currency", "EUR")
+            dev = bt.get("deviation_pct", 0)
+            sign = "+" if dev >= 0 else ""
+            lines.append(f"  {company}: {total:,.2f} {currency} ({sign}{dev}%)")
+        lines.append("")
+
+    if comparison.rows:
+        lines.append("--- Position Comparison ---")
+        for row in comparison.rows[:50]:  # Limit to first 50 rows for PDF size
+            lines.append(
+                f"  {row.description[:60]:<60s}  "
+                f"{row.budget_quantity:>10.2f} {row.unit:<5s}  "
+                f"Budget: {row.budget_total:>12,.2f}"
+            )
+
+    # Encode content stream
+    y = 750
+    stream_lines: list[str] = []
+    stream_lines.append("BT")
+    stream_lines.append("/F1 10 Tf")
+    for line in lines:
+        safe = line.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+        stream_lines.append(f"1 0 0 1 50 {y} Tm")
+        stream_lines.append(f"({safe}) Tj")
+        y -= 14
+        if y < 50:
+            break
+    stream_lines.append("ET")
+    stream_content = "\n".join(stream_lines)
+
+    # Stream (obj 4)
+    _obj()
+    _w(f"<< /Length {len(stream_content)} >>\nstream\n{stream_content}\nendstream\nendobj\n")
+
+    # Font (obj 5)
+    _obj()
+    _w("<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>\nendobj\n")
+
+    # Page (obj 3) — must reference stream (4) and font (5)
+    _obj()
+    _w(
+        "<< /Type /Page /Parent 2 0 R "
+        "/MediaBox [0 0 612 792] "
+        "/Contents 4 0 R "
+        "/Resources << /Font << /F1 5 0 R >> >> "
+        ">>\nendobj\n"
+    )
+
+    # Cross-reference table
+    xref_offset = buf.tell()
+    _w("xref\n")
+    _w(f"0 {len(offsets) + 1}\n")
+    _w("0000000000 65535 f \n")
+    for off in offsets:
+        _w(f"{off:010d} 00000 n \n")
+
+    _w("trailer\n")
+    _w(f"<< /Size {len(offsets) + 1} /Root 1 0 R >>\n")
+    _w("startxref\n")
+    _w(f"{xref_offset}\n")
+    _w("%%EOF\n")
+
+    buf.seek(0)
+    filename = f"tender_{package.name.replace(' ', '_')}_{package_id.hex[:8]}.pdf"
+
+    return StreamingResponse(
+        buf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )

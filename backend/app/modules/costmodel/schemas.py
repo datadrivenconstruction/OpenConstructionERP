@@ -203,9 +203,11 @@ class DashboardResponse(BaseModel):
     total_actual: float = 0.0
     total_forecast: float = 0.0
     variance: float = 0.0
+    variance_pct: float = 0.0
     spi: float = 0.0
     cpi: float = 0.0
     status: str = "on_budget"
+    currency: str = "EUR"
 
 
 class SCurvePeriod(BaseModel):
@@ -253,4 +255,79 @@ class BudgetCategoryRow(BaseModel):
 class BudgetSummary(BaseModel):
     """Budget summary grouped by cost category."""
 
-    by_category: list[BudgetCategoryRow] = Field(default_factory=list)
+    categories: list[BudgetCategoryRow] = Field(default_factory=list)
+
+
+# ── EVM (Earned Value Management) schemas ────────────────────────────────────
+
+
+class EVMResponse(BaseModel):
+    """Full Earned Value Management calculation result.
+
+    All standard EVM metrics computed from budget lines and schedule progress.
+    """
+
+    bac: float = Field(0.0, description="Budget At Completion — total planned budget")
+    pv: float = Field(0.0, description="Planned Value — budget x time_elapsed%")
+    ev: float = Field(0.0, description="Earned Value — budget x schedule_progress%")
+    ac: float = Field(0.0, description="Actual Cost — sum of actual costs")
+    sv: float = Field(0.0, description="Schedule Variance — EV - PV")
+    cv: float = Field(0.0, description="Cost Variance — EV - AC")
+    spi: float = Field(0.0, description="Schedule Performance Index — EV / PV")
+    cpi: float = Field(0.0, description="Cost Performance Index — EV / AC")
+    eac: float = Field(0.0, description="Estimate At Completion — BAC / CPI")
+    etc: float = Field(0.0, description="Estimate To Complete — EAC - AC")
+    vac: float = Field(0.0, description="Variance At Completion — BAC - EAC")
+    tcpi: float = Field(0.0, description="To-Complete Performance Index — (BAC - EV) / (BAC - AC)")
+    time_elapsed_pct: float = Field(
+        0.0, description="Percentage of project duration elapsed (0.0 - 100.0)"
+    )
+    schedule_progress_pct: float = Field(
+        0.0, description="Weighted average schedule progress (0.0 - 100.0)"
+    )
+    status: str = Field(
+        "unknown",
+        description="Overall project health: on_track, at_risk, critical, unknown",
+    )
+
+
+class WhatIfAdjustments(BaseModel):
+    """Adjustments to apply for a what-if scenario.
+
+    Each value is a percentage change relative to current values.
+    Positive values increase costs/duration, negative values decrease.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: str = Field(
+        ..., min_length=1, max_length=200, description="Scenario display name"
+    )
+    material_cost_pct: float = Field(
+        0.0, ge=-100.0, le=100.0, description="Material cost adjustment (-100% to +100%)"
+    )
+    labor_cost_pct: float = Field(
+        0.0, ge=-100.0, le=100.0, description="Labor cost adjustment (-100% to +100%)"
+    )
+    duration_pct: float = Field(
+        0.0, ge=-100.0, le=100.0, description="Duration adjustment (-100% to +100%)"
+    )
+
+
+class WhatIfResult(BaseModel):
+    """Result of a what-if scenario calculation.
+
+    Contains the original and adjusted EAC values plus the created snapshot.
+    """
+
+    scenario_name: str
+    original_bac: float = 0.0
+    adjusted_bac: float = 0.0
+    original_eac: float = 0.0
+    adjusted_eac: float = 0.0
+    delta: float = Field(0.0, description="adjusted_eac - original_eac")
+    delta_pct: float = Field(0.0, description="Percentage change in EAC")
+    adjustments_applied: dict[str, float] = Field(default_factory=dict)
+    snapshot_id: UUID | None = Field(
+        None, description="ID of the snapshot created for this scenario"
+    )

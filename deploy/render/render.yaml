@@ -1,0 +1,32 @@
+# OpenEstimate — Render Blueprint
+#
+# Deploy: click "Deploy to Render" button in README, or:
+#   render blueprint apply
+
+services:
+  - type: web
+    name: openestimate
+    runtime: docker
+    dockerfilePath: deploy/docker/Dockerfile.unified
+    dockerContext: .
+    plan: starter
+    healthCheckPath: /api/health
+    envVars:
+      - key: SERVE_FRONTEND
+        value: "true"
+      - key: APP_ENV
+        value: production
+      - key: VECTOR_BACKEND
+        value: lancedb
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: openestimate-db
+          property: connectionString
+
+databases:
+  - name: openestimate-db
+    plan: starter
+    databaseName: openestimate
+    user: oe

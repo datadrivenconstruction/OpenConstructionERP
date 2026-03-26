@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { Button, Input, Card } from '@/shared/ui';
+import { Button, Input, Card, InfoHint, Breadcrumb } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { projectsApi, type CreateProjectData } from './api';
 
@@ -242,13 +242,17 @@ export function CreateProjectPage() {
   const [customRegion, setCustomRegion] = useState('');
   const [customStandard, setCustomStandard] = useState('');
   const [customCurrency, setCustomCurrency] = useState('');
+  const [regionalFactor, setRegionalFactor] = useState<number>(1.0);
 
   const mutation = useMutation({
     mutationFn: projectsApi.create,
     onSuccess: (project) => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
-      addToast({ type: 'success', title: t('projects.project_created', { defaultValue: 'Project created' }) });
+      addToast({ type: 'success', title: t('toasts.project_created', { defaultValue: 'Project created' }) });
       navigate(`/projects/${project.id}`);
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
     },
   });
 
@@ -265,6 +269,7 @@ export function CreateProjectPage() {
           ? customStandard
           : form.classification_standard,
       currency: form.currency === '__custom__' ? customCurrency : form.currency,
+      regional_factor: regionalFactor,
     };
 
     mutation.mutate(data);
@@ -275,17 +280,20 @@ export function CreateProjectPage() {
 
   return (
     <div className="max-w-2xl mx-auto animate-fade-in">
-      <button
-        onClick={() => navigate('/projects')}
-        className="mb-4 flex items-center gap-1.5 text-sm text-content-secondary hover:text-content-primary transition-colors"
-      >
-        <ArrowLeft size={14} />
-        {t('projects.title')}
-      </button>
+      <Breadcrumb
+        className="mb-4"
+        items={[
+          { label: t('projects.title', 'Projects'), to: '/projects' },
+          { label: t('projects.new_project', 'New Project') },
+        ]}
+      />
 
-      <h1 className="text-2xl font-bold text-content-primary mb-6">
+      <h1 className="text-2xl font-bold text-content-primary mb-4">
         {t('projects.new_project')}
       </h1>
+
+      {/* Field-level hints */}
+      <InfoHint className="mb-6" text={t('projects.create_hint', { defaultValue: 'Region determines available cost databases and VAT rates. Classification standard defines the cost structure: DIN 276 for DACH countries, NRM for UK, MasterFormat for US/Canada, UniFormat for Oceania. Currency sets all pricing in the BOQ.' })} />
 
       <Card>
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -394,6 +402,26 @@ export function CreateProjectPage() {
             />
           </div>
 
+          {/* Regional price coefficient */}
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-content-secondary">
+              {t('projects.regional_factor', { defaultValue: 'Regional Factor' })}
+            </label>
+            <input
+              type="number"
+              min="0.5"
+              max="2.0"
+              step="0.01"
+              value={regionalFactor}
+              onChange={(e) => setRegionalFactor(parseFloat(e.target.value) || 1.0)}
+              placeholder="1.00"
+              className="h-10 w-full max-w-[200px] rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary tabular-nums placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+            />
+            <p className="mt-1 text-xs text-content-tertiary">
+              {t('projects.regional_factor_hint', { defaultValue: 'Multiply all rates by this factor (e.g. Munich = 1.12, Berlin = 1.05)' })}
+            </p>
+          </div>
+
           {mutation.error && (
             <div className="rounded-lg bg-semantic-error-bg px-3 py-2 text-sm text-semantic-error">
               {(mutation.error as Error).message || t('projects.create_error', { defaultValue: 'Failed to create project' })}
@@ -429,6 +457,7 @@ function GroupedSelectField({
   placeholder?: string;
   onChange: (v: string) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-1.5">
       <label className="text-sm font-medium text-content-primary">{label}</label>
@@ -443,7 +472,7 @@ function GroupedSelectField({
           </option>
         )}
         {groups.map((g) => (
-          <optgroup key={g.group} label={g.group}>
+          <optgroup key={g.group} label={t(`projects.group_${g.group.toLowerCase().replace(/[^a-z0-9]/g, '_')}`, { defaultValue: g.group })}>
             {g.options.map((o) => (
               <option key={o.value} value={o.value}>
                 {o.label}

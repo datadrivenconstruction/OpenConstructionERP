@@ -1,13 +1,54 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Search, Copy, Check, Database, ChevronDown, Upload, Download, Loader2 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Skeleton } from '@/shared/ui';
-import { apiGet } from '@/shared/lib/api';
+import {
+  Search,
+  Copy,
+  Check,
+  Database,
+  ChevronDown,
+  Upload,
+  Download,
+  Loader2,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  Hammer,
+  HardHat,
+  Package,
+  Sparkles,
+  Table2,
+  FolderOpen,
+  X,
+  CheckSquare,
+  Square,
+  House,
+  Star,
+  Clock,
+  Layers,
+  TrendingUp,
+} from 'lucide-react';
+import { Button, Card, Badge, EmptyState, Skeleton, InfoHint, SkeletonTable, CountryFlag } from '@/shared/ui';
+import { apiGet, apiPost, triggerDownload } from '@/shared/lib/api';
+import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
+import { useCostDatabaseStore, REGION_MAP } from '@/stores/useCostDatabaseStore';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { EscalationCalculator } from './EscalationCalculator';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
+
+interface CostComponent {
+  name: string;
+  code: string;
+  unit: string;
+  quantity: number;
+  unit_rate: number;
+  cost: number;
+  type: 'labor' | 'material' | 'equipment' | 'operator' | 'electricity' | 'other';
+}
 
 interface CostItem {
   id: string;
@@ -15,7 +56,10 @@ interface CostItem {
   description: string;
   unit: string;
   rate: number;
-  din276_code: string;
+  region: string | null;
+  classification: Record<string, string>;
+  components: CostComponent[];
+  metadata_: Record<string, number>;
   source: string;
 }
 
@@ -26,18 +70,41 @@ interface CostSearchResponse {
   offset: number;
 }
 
+interface RegionStat {
+  region: string;
+  count: number;
+}
+
+interface Project {
+  id: string;
+  name: string;
+  currency: string;
+}
+
+interface BOQ {
+  id: string;
+  project_id: string;
+  name: string;
+  status: string;
+}
+
+interface BOQSection {
+  id: string;
+  ordinal: string;
+  description: string;
+  unit: string;
+}
+
 /* ── Export helper ─────────────────────────────────────────────────────── */
 
-const TOKEN_KEY = 'oe_access_token';
-
 async function downloadExcelExport(): Promise<void> {
-  const token = localStorage.getItem(TOKEN_KEY);
+  const token = useAuthStore.getState().accessToken;
   const headers: Record<string, string> = { Accept: 'application/octet-stream' };
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch('/api/v1/costs/export/excel', { method: 'GET', headers });
+  const response = await fetch('/api/v1/costs/actions/export-excel', { method: 'GET', headers });
   if (!response.ok) {
     let detail = 'Export failed';
     try {
@@ -50,16 +117,243 @@ async function downloadExcelExport(): Promise<void> {
   }
 
   const blob = await response.blob();
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
   const disposition = response.headers.get('Content-Disposition');
   const filename = disposition?.match(/filename="?(.+)"?/)?.[1] || 'cost_database_export.xlsx';
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  triggerDownload(blob, filename);
+}
+
+/* ── Favourites & Recently Used (localStorage) ────────────────────────── */
+
+const FAVOURITES_KEY = 'oe_cost_favourites';
+const RECENT_KEY = 'oe_cost_recent';
+const MAX_RECENT = 20;
+
+interface RecentItem {
+  id: string;
+  name: string;
+  usedAt: string;
+}
+
+function loadFavourites(): Set<string> {
+  try {
+    const raw = localStorage.getItem(FAVOURITES_KEY);
+    if (raw) return new Set(JSON.parse(raw) as string[]);
+  } catch {
+    // ignore
+  }
+  return new Set();
+}
+
+function saveFavourites(ids: Set<string>): void {
+  localStorage.setItem(FAVOURITES_KEY, JSON.stringify([...ids]));
+}
+
+function loadRecent(): RecentItem[] {
+  try {
+    const raw = localStorage.getItem(RECENT_KEY);
+    if (raw) return JSON.parse(raw) as RecentItem[];
+  } catch {
+    // ignore
+  }
+  return [];
+}
+
+function addRecentItem(item: { id: string; description: string }): void {
+  const list = loadRecent().filter((r) => r.id !== item.id);
+  list.unshift({ id: item.id, name: item.description, usedAt: new Date().toISOString() });
+  if (list.length > MAX_RECENT) list.length = MAX_RECENT;
+  localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+}
+
+/* ── Mini flag ─────────────────────────────────────────────────────────── */
+
+function MiniFlag({ code, size = 14 }: { code: string; size?: number }) {
+  if (!code || code === 'custom') {
+    return <House size={size} className="shrink-0 text-oe-blue" />;
+  }
+  return <CountryFlag code={code} size={Math.round(size * 1.6)} className="shadow-xs border border-black/5" />;
+}
+
+/* ── Region Tab Bar ───────────────────────────────────────────────────── */
+
+function RegionTabBar({
+  regions,
+  regionStats,
+  activeRegion,
+  onChangeRegion,
+  totalItemCount,
+}: {
+  regions: string[];
+  regionStats: RegionStat[];
+  activeRegion: string;
+  onChangeRegion: (region: string) => void;
+  totalItemCount: number;
+}) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const totalItems = regionStats.reduce((s, r) => s + r.count, 0);
+  const statsMap = new Map(regionStats.map((r) => [r.region, r.count]));
+
+  // Check scroll overflow
+  const checkScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    checkScroll();
+    const el = scrollRef.current;
+    if (!el) return;
+    el.addEventListener('scroll', checkScroll, { passive: true });
+    const ro = new ResizeObserver(checkScroll);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener('scroll', checkScroll);
+      ro.disconnect();
+    };
+  }, [checkScroll, regions]);
+
+  const scroll = useCallback((dir: 'left' | 'right') => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir === 'left' ? -200 : 200, behavior: 'smooth' });
+  }, []);
+
+  if (regions.length === 0 && totalItemCount === 0) {
+    return (
+      <div className="mb-6 rounded-xl border-2 border-dashed border-border-light bg-surface-secondary/50 p-6 text-center">
+        <Database size={28} className="mx-auto mb-2 text-content-tertiary" strokeWidth={1.5} />
+        <p className="text-sm font-medium text-content-primary mb-1">
+          {t('costs.no_database_loaded', { defaultValue: 'No database loaded' })}
+        </p>
+        <p className="text-xs text-content-tertiary mb-3">
+          {t('costs.import_first_hint', {
+            defaultValue: 'Import a regional cost database to start searching 55,000+ items.',
+          })}
+        </p>
+        <Button
+          variant="primary"
+          size="sm"
+          icon={<Upload size={14} />}
+          onClick={() => navigate('/costs/import')}
+        >
+          {t('costs.import_database', { defaultValue: 'Import Database' })}
+        </Button>
+      </div>
+    );
+  }
+
+  if (regions.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mb-5 relative">
+      {/* Scroll shadow + arrow (left) */}
+      {canScrollLeft && (
+        <button
+          onClick={() => scroll('left')}
+          className="absolute left-0 top-0 bottom-0 z-10 flex items-center pl-0.5 pr-3 bg-gradient-to-r from-surface-primary via-surface-primary/90 to-transparent"
+        >
+          <ChevronLeft size={16} className="text-content-tertiary" />
+        </button>
+      )}
+
+      {/* Scroll shadow + arrow (right) */}
+      {canScrollRight && (
+        <button
+          onClick={() => scroll('right')}
+          className="absolute right-0 top-0 bottom-0 z-10 flex items-center pr-0.5 pl-3 bg-gradient-to-l from-surface-primary via-surface-primary/90 to-transparent"
+        >
+          <ChevronRight size={16} className="text-content-tertiary" />
+        </button>
+      )}
+
+      <div
+        ref={scrollRef}
+        className="flex items-stretch gap-1 overflow-x-auto scrollbar-none scroll-smooth"
+      >
+        {/* All tab */}
+        <button
+          onClick={() => onChangeRegion('')}
+          className={`
+            group relative flex items-center gap-2 shrink-0 rounded-t-lg px-4 py-2.5
+            border-b-2 transition-all duration-fast ease-oe
+            ${
+              activeRegion === ''
+                ? 'border-oe-blue bg-oe-blue-subtle/20 text-content-primary'
+                : 'border-transparent hover:bg-surface-secondary text-content-secondary hover:text-content-primary'
+            }
+          `}
+        >
+          <Database size={14} className={activeRegion === '' ? 'text-oe-blue' : 'text-content-tertiary'} />
+          <span className="text-sm font-medium whitespace-nowrap">
+            {t('costs.all_regions', { defaultValue: 'All' })}
+          </span>
+          <span className={`text-2xs tabular-nums ${activeRegion === '' ? 'text-oe-blue' : 'text-content-quaternary'}`}>
+            {totalItems > 0 ? totalItems.toLocaleString() : ''}
+          </span>
+        </button>
+
+        {/* Separator */}
+        <div className="w-px shrink-0 bg-border-light my-2" />
+
+        {/* Region tabs */}
+        {regions.map((regionId) => {
+          const info = REGION_MAP[regionId];
+          if (!info) return null;
+          const isActive = activeRegion === regionId;
+          const count = statsMap.get(regionId) ?? 0;
+
+          return (
+            <button
+              key={regionId}
+              onClick={() => onChangeRegion(regionId)}
+              className={`
+                group relative flex items-center gap-2 shrink-0 rounded-t-lg px-3.5 py-2.5
+                border-b-2 transition-all duration-fast ease-oe
+                ${
+                  isActive
+                    ? 'border-oe-blue bg-oe-blue-subtle/20 text-content-primary'
+                    : 'border-transparent hover:bg-surface-secondary text-content-secondary hover:text-content-primary'
+                }
+              `}
+            >
+              <MiniFlag code={info.flag} size={13} />
+              <span className="text-sm font-medium whitespace-nowrap">{info.name}</span>
+              <span className={`text-2xs tabular-nums ${isActive ? 'text-oe-blue' : 'text-content-quaternary'}`}>
+                {count > 0 ? count.toLocaleString() : ''}
+              </span>
+            </button>
+          );
+        })}
+
+        {/* Separator */}
+        <div className="w-px shrink-0 bg-border-light my-2" />
+
+        {/* Add database button */}
+        <button
+          onClick={() => navigate('/costs/import')}
+          className="flex items-center gap-1.5 shrink-0 rounded-t-lg px-3 py-2.5 border-b-2 border-transparent text-content-tertiary hover:text-oe-blue hover:bg-oe-blue-subtle/10 transition-all duration-fast ease-oe"
+          title={t('costs.import_database', { defaultValue: 'Import database' })}
+        >
+          <Plus size={14} />
+          <span className="text-sm font-medium whitespace-nowrap">
+            {t('costs.add_database', { defaultValue: 'Import' })}
+          </span>
+        </button>
+      </div>
+
+      {/* Bottom border line */}
+      <div className="h-px bg-border-light -mt-px" />
+    </div>
+  );
 }
 
 /* ── Constants ─────────────────────────────────────────────────────────── */
@@ -70,11 +364,20 @@ const PAGE_SIZE = 20;
 
 /* ── API ───────────────────────────────────────────────────────────────── */
 
-function buildSearchUrl(query: string, unit: string, source: string, offset: number): string {
+function buildSearchUrl(
+  query: string,
+  unit: string,
+  source: string,
+  region: string,
+  offset: number,
+  category?: string,
+): string {
   const params = new URLSearchParams();
   if (query) params.set('q', query);
   if (unit) params.set('unit', unit);
   if (source) params.set('source', source);
+  if (region) params.set('region', region);
+  if (category) params.set('category', category);
   params.set('limit', String(PAGE_SIZE));
   params.set('offset', String(offset));
   return `/v1/costs/?${params.toString()}`;
@@ -86,29 +389,94 @@ export function CostsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const addToast = useToastStore((s) => s.addToast);
+  const queryClient = useQueryClient();
+
+  // Global active region from Zustand store
+  const activeRegion = useCostDatabaseStore((s) => s.activeRegion);
+  const setActiveRegion = useCostDatabaseStore((s) => s.setActiveRegion);
 
   const [query, setQuery] = useState('');
   const [unit, setUnit] = useState('');
   const [source, setSource] = useState('');
+  const [category, setCategory] = useState('');
+  const [region, setRegion] = useState<string>(activeRegion);
   const [offset, setOffset] = useState(0);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showAddToBOQ, setShowAddToBOQ] = useState(false);
+  const [showCreateAssembly, setShowCreateAssembly] = useState(false);
+  const [showCreateItem, setShowCreateItem] = useState(false);
+  const [showEscalation, setShowEscalation] = useState(false);
+  const [semanticSearch, setSemanticSearch] = useState(false);
 
-  const searchUrl = buildSearchUrl(query, unit, source, offset);
+  // Favourites & Recently Used
+  const [favourites, setFavourites] = useState<Set<string>>(() => loadFavourites());
+  const [recentItems, setRecentItems] = useState<RecentItem[]>(() => loadRecent());
+  const [specialTab, setSpecialTab] = useState<'' | 'favourites' | 'recent'>('');
 
-  const { data, isLoading, isFetching } = useQuery({
-    queryKey: ['costs', query, unit, source, offset],
-    queryFn: () => apiGet<CostSearchResponse>(searchUrl),
-    placeholderData: (prev) => prev,
-  });
-
-  // Query total items count (independent of current search filters)
-  const { data: totalData } = useQuery({
-    queryKey: ['costs', 'total-count'],
-    queryFn: () => apiGet<CostSearchResponse>('/v1/costs/?limit=1'),
+  // Fetch loaded regions list
+  const { data: loadedRegions } = useQuery({
+    queryKey: ['costs', 'regions'],
+    queryFn: () => apiGet<string[]>('/v1/costs/regions'),
     retry: false,
   });
 
-  const totalItemsInDb = totalData?.total ?? 0;
+  // Fetch per-region stats (for item counts in tabs)
+  const { data: regionStats } = useQuery({
+    queryKey: ['costs', 'regions', 'stats'],
+    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats'),
+    retry: false,
+  });
+
+  // Fetch distinct categories (classification.collection values)
+  const { data: categories } = useQuery({
+    queryKey: ['costs', 'categories', region],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (region) params.set('region', region);
+      return apiGet<string[]>(`/v1/costs/categories?${params.toString()}`);
+    },
+    retry: false,
+  });
+
+  const searchUrl = buildSearchUrl(query, unit, source, region, offset, category);
+
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: ['costs', query, unit, source, category, region, offset, semanticSearch],
+    queryFn: async () => {
+      // Use vector semantic search when toggled and query is present
+      if (semanticSearch && query.length >= 2) {
+        try {
+          const params = new URLSearchParams({ q: query, limit: String(PAGE_SIZE) });
+          if (region) params.set('region', region);
+          const results = await apiGet<Array<Record<string, unknown>>>(`/v1/costs/vector/search?${params}`);
+          // Wrap in CostSearchResponse format
+          return {
+            items: results.map((r) => ({
+              id: String(r.id ?? ''),
+              code: String(r.code ?? ''),
+              description: String(r.description ?? ''),
+              unit: String(r.unit ?? ''),
+              rate: Number(r.rate ?? 0),
+              region: String(r.region ?? ''),
+              classification: (r.classification ?? {}) as Record<string, string>,
+              components: [],
+              metadata_: {},
+              source: 'cwicr',
+            })),
+            total: results.length,
+            limit: PAGE_SIZE,
+            offset: 0,
+          } as CostSearchResponse;
+        } catch {
+          // Fall back to regular search
+        }
+      }
+      return apiGet<CostSearchResponse>(searchUrl);
+    },
+    placeholderData: (prev) => prev,
+  });
 
   const exportMutation = useMutation({
     mutationFn: downloadExcelExport,
@@ -128,17 +496,22 @@ export function CostsPage() {
     },
   });
 
-  const items = data?.items ?? [];
-  const total = data?.total ?? 0;
-  const hasMore = offset + PAGE_SIZE < total;
+  const rawItems = data?.items ?? [];
+  const rawTotal = data?.total ?? 0;
 
-  const handleSearch = useCallback(
-    (value: string) => {
-      setQuery(value);
-      setOffset(0);
-    },
-    [],
-  );
+  // Apply favourites / recent filter on top of API results
+  const items = specialTab === 'favourites'
+    ? rawItems.filter((i) => favourites.has(i.id))
+    : specialTab === 'recent'
+      ? rawItems.filter((i) => recentItems.some((r) => r.id === i.id))
+      : rawItems;
+  const total = specialTab ? items.length : rawTotal;
+  const hasMore = specialTab ? false : offset + PAGE_SIZE < rawTotal;
+
+  const handleSearch = useCallback((value: string) => {
+    setQuery(value);
+    setOffset(0);
+  }, []);
 
   const handleUnitChange = useCallback((value: string) => {
     setUnit(value);
@@ -150,13 +523,27 @@ export function CostsPage() {
     setOffset(0);
   }, []);
 
+  const handleCategoryChange = useCallback((value: string) => {
+    setCategory(value);
+    setOffset(0);
+  }, []);
+
+  const handleRegionChange = useCallback(
+    (value: string) => {
+      setRegion(value);
+      setOffset(0);
+      setActiveRegion(value);
+    },
+    [setActiveRegion],
+  );
+
   const handleCopyRate = useCallback(async (item: CostItem) => {
     try {
       await navigator.clipboard.writeText(String(item.rate));
       setCopiedId(item.id);
       setTimeout(() => setCopiedId(null), 2000);
     } catch {
-      // Clipboard API unavailable — silently ignore.
+      // Clipboard API unavailable -- silently ignore.
     }
   }, []);
 
@@ -164,36 +551,76 @@ export function CostsPage() {
     setOffset((prev) => prev + PAGE_SIZE);
   }, []);
 
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const toggleSelectAll = useCallback(() => {
+    if (selectedIds.size === items.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(items.map((i) => i.id)));
+    }
+  }, [items, selectedIds.size]);
+
+  const toggleFavourite = useCallback((id: string) => {
+    setFavourites((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      saveFavourites(next);
+      return next;
+    });
+  }, []);
+
+  const trackRecentUsage = useCallback((item: CostItem) => {
+    addRecentItem({ id: item.id, description: item.description });
+    setRecentItems(loadRecent());
+  }, []);
+
+  const selectedItems = items.filter((i) => selectedIds.has(i.id));
+
   const fmt = (n: number) =>
-    new Intl.NumberFormat('de-DE', {
+    new Intl.NumberFormat(getIntlLocale(), {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(n);
 
+  // Current region info for subtitle
+  const regionInfo = region ? REGION_MAP[region] : null;
+
   return (
     <div className="max-w-content mx-auto animate-fade-in">
       {/* Header */}
-      <div className="mb-6 flex items-start justify-between">
+      <div className="mb-5 flex items-start justify-between">
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-content-primary">{t('costs.title')}</h1>
-            {totalItemsInDb > 0 && (
-              <Badge variant="blue" size="sm">
-                {totalItemsInDb.toLocaleString()} {t('costs.items', 'items')}
-              </Badge>
-            )}
-          </div>
+          <h1 className="text-2xl font-bold text-content-primary">{t('costs.title')}</h1>
           <p className="mt-1 text-sm text-content-secondary">
-            {total > 0
-              ? `${total.toLocaleString()} ${t('costs.results_found', 'results found')}`
-              : t('costs.search_hint', 'Search cost items by description or code')}
+            {regionInfo
+              ? `${regionInfo.name} — ${total.toLocaleString()} ${t('costs.items', 'items')}`
+              : total > 0
+                ? `${total.toLocaleString()} ${t('costs.results_found', 'results found')}`
+                : t('costs.search_hint', 'Search cost items by description or code')}
           </p>
+          <InfoHint inline className="ml-1" text={t('costs.what_is_cost_db', { defaultValue: 'Unit rates and composite prices for materials, labor, and equipment. Import regional databases (CWICR, BKI, RSMeans) from Modules or add custom rates. Toggle AI Semantic Search for natural-language queries.' })} />
         </div>
         <div className="flex items-center gap-2">
-          {totalItemsInDb > 0 && (
+          {total > 0 && (
             <Button
               variant="secondary"
-              icon={exportMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+              size="sm"
+              icon={
+                exportMutation.isPending ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <Download size={14} />
+                )
+              }
               onClick={() => exportMutation.mutate()}
               disabled={exportMutation.isPending}
             >
@@ -201,8 +628,26 @@ export function CostsPage() {
             </Button>
           )}
           <Button
+            variant="secondary"
+            size="sm"
+            icon={<TrendingUp size={14} />}
+            onClick={() => setShowEscalation((p) => !p)}
+            className={showEscalation ? 'border-amber-300 text-amber-600 bg-amber-50 dark:bg-amber-900/20' : ''}
+          >
+            {t('costs.escalation', { defaultValue: 'Escalation' })}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<Plus size={14} />}
+            onClick={() => setShowCreateItem(true)}
+          >
+            {t('costs.add_item', { defaultValue: 'Add Item' })}
+          </Button>
+          <Button
             variant="primary"
-            icon={<Upload size={16} />}
+            size="sm"
+            icon={<Upload size={14} />}
             onClick={() => navigate('/costs/import')}
           >
             {t('costs.import_database', { defaultValue: 'Import' })}
@@ -210,21 +655,88 @@ export function CostsPage() {
         </div>
       </div>
 
+      {/* Escalation Calculator (collapsible) */}
+      {showEscalation && (
+        <EscalationCalculator className="mb-5 animate-fade-in" />
+      )}
+
+      {/* Region Tabs */}
+      <RegionTabBar
+        regions={loadedRegions ?? []}
+        regionStats={regionStats ?? []}
+        activeRegion={region}
+        onChangeRegion={handleRegionChange}
+        totalItemCount={total}
+      />
+
+      {/* Favourites & Recent Quick Filters */}
+      <div className="mb-4 flex items-center gap-2">
+        <button
+          onClick={() => setSpecialTab(specialTab === 'favourites' ? '' : 'favourites')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors ${
+            specialTab === 'favourites'
+              ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+              : 'text-content-secondary hover:bg-surface-secondary border border-transparent'
+          }`}
+        >
+          <Star size={14} className={specialTab === 'favourites' ? 'fill-yellow-400' : ''} />
+          {t('costs.favourites', { defaultValue: 'Favourites' })}
+          {favourites.size > 0 && (
+            <span className="text-xs tabular-nums">{favourites.size}</span>
+          )}
+        </button>
+        <button
+          onClick={() => setSpecialTab(specialTab === 'recent' ? '' : 'recent')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-lg transition-colors ${
+            specialTab === 'recent'
+              ? 'bg-blue-50 text-blue-700 border border-blue-200'
+              : 'text-content-secondary hover:bg-surface-secondary border border-transparent'
+          }`}
+        >
+          <Clock size={14} />
+          {t('costs.recently_used', { defaultValue: 'Recently Used' })}
+          {recentItems.length > 0 && (
+            <span className="text-xs tabular-nums">{recentItems.length}</span>
+          )}
+        </button>
+      </div>
+
       {/* Search & Filters */}
       <Card padding="none" className="mb-6">
         <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-end">
-          {/* Search input */}
-          <div className="relative flex-1">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-content-tertiary">
-              <Search size={16} />
+          {/* Search input + AI toggle */}
+          <div className="relative flex-1 flex gap-2">
+            <div className="relative flex-1">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-content-tertiary">
+                <Search size={16} />
+              </div>
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => handleSearch(e.target.value)}
+                placeholder={
+                  semanticSearch
+                    ? t('costs.semantic_placeholder', 'Describe what you need (AI finds similar)...')
+                    : regionInfo
+                      ? t('costs.search_in_region', { defaultValue: 'Search in {{name}}...', name: regionInfo.name })
+                      : t('costs.search_placeholder', 'Search by description or code...')
+                }
+                className={`h-10 w-full rounded-lg border bg-surface-primary pl-10 pr-3 text-sm text-content-primary placeholder:text-content-tertiary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:border-transparent hover:border-content-tertiary ${
+                  semanticSearch ? 'border-purple-400 focus:ring-purple-400/30' : 'border-border focus:ring-oe-blue'
+                }`}
+              />
             </div>
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => handleSearch(e.target.value)}
-              placeholder={t('costs.search_placeholder', 'Search by description or code...')}
-              className="h-10 w-full rounded-lg border border-border bg-surface-primary pl-10 pr-3 text-sm text-content-primary placeholder:text-content-tertiary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary"
-            />
+            <button
+              onClick={() => setSemanticSearch(!semanticSearch)}
+              title={semanticSearch ? t('costs.switch_to_text_search', { defaultValue: 'Switch to text search' }) : t('costs.switch_to_ai_search', { defaultValue: 'Switch to AI semantic search' })}
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border transition-all ${
+                semanticSearch
+                  ? 'border-purple-400 bg-purple-500/10 text-purple-500'
+                  : 'border-border bg-surface-primary text-content-tertiary hover:text-purple-500 hover:border-purple-300'
+              }`}
+            >
+              <Sparkles size={16} />
+            </button>
           </div>
 
           {/* Unit filter */}
@@ -264,25 +776,35 @@ export function CostsPage() {
               <ChevronDown size={14} />
             </div>
           </div>
+
+          {/* Category filter */}
+          {categories && categories.length > 0 && (
+            <div className="relative">
+              <select
+                value={category}
+                onChange={(e) => handleCategoryChange(e.target.value)}
+                className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary pl-3 pr-9 text-sm text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary sm:w-48"
+              >
+                <option value="">
+                  {t('costs.all_categories', 'All categories')}
+                </option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-content-tertiary">
+                <ChevronDown size={14} />
+              </div>
+            </div>
+          )}
         </div>
       </Card>
 
       {/* Results Table */}
       {isLoading ? (
-        <Card padding="none" className="overflow-hidden">
-          <div className="space-y-0 divide-y divide-border-light">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-4 px-4 py-3.5">
-                <Skeleton width={72} height={14} />
-                <Skeleton className="flex-1" height={14} />
-                <Skeleton width={40} height={14} />
-                <Skeleton width={80} height={14} />
-                <Skeleton width={60} height={14} />
-                <Skeleton width={28} height={28} rounded="md" />
-              </div>
-            ))}
-          </div>
-        </Card>
+        <SkeletonTable rows={6} columns={6} />
       ) : items.length === 0 ? (
         <EmptyState
           icon={<Database size={24} strokeWidth={1.5} />}
@@ -300,10 +822,25 @@ export function CostsPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border-light bg-surface-tertiary text-left">
+                    <th className="px-2 py-3 w-16">
+                      <div className="flex items-center gap-0.5">
+                        <Star size={14} className="text-content-quaternary ml-1" />
+                        <button
+                          onClick={toggleSelectAll}
+                          className="flex h-5 w-5 items-center justify-center rounded text-content-tertiary hover:text-oe-blue transition-colors"
+                        >
+                          {selectedIds.size > 0 && selectedIds.size === items.length ? (
+                            <CheckSquare size={16} className="text-oe-blue" />
+                          ) : (
+                            <Square size={16} />
+                          )}
+                        </button>
+                      </div>
+                    </th>
                     <th className="px-4 py-3 font-medium text-content-secondary w-28">
                       {t('costs.code', 'Code')}
                     </th>
-                    <th className="px-4 py-3 font-medium text-content-secondary min-w-[300px]">
+                    <th className="px-4 py-3 font-medium text-content-secondary">
                       {t('boq.description')}
                     </th>
                     <th className="px-4 py-3 font-medium text-content-secondary w-20 text-center">
@@ -313,53 +850,33 @@ export function CostsPage() {
                       {t('costs.rate', 'Rate')}
                     </th>
                     <th className="px-4 py-3 font-medium text-content-secondary w-28 text-center">
-                      {t('costs.din276', 'DIN 276')}
+                      {t('costs.classification', 'Class.')}
                     </th>
-                    <th className="px-4 py-3 w-12" />
+                    <th className="px-2 py-3 w-20" />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border-light">
-                  {items.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="group hover:bg-surface-secondary/50 transition-colors"
-                    >
-                      <td className="px-4 py-3 font-mono text-xs text-content-secondary">
-                        {item.code}
-                      </td>
-                      <td className="px-4 py-3 text-content-primary">{item.description}</td>
-                      <td className="px-4 py-3 text-center">
-                        <Badge variant="neutral" size="sm">
-                          {item.unit}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-3 text-right font-semibold text-content-primary tabular-nums">
-                        {fmt(item.rate)}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {item.din276_code ? (
-                          <Badge variant="blue" size="sm">
-                            {item.din276_code}
-                          </Badge>
-                        ) : (
-                          <span className="text-content-tertiary">-</span>
-                        )}
-                      </td>
-                      <td className="px-2 py-3">
-                        <button
-                          onClick={() => handleCopyRate(item)}
-                          title={t('costs.copy_rate', 'Copy rate to clipboard')}
-                          className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary opacity-0 transition-all group-hover:opacity-100 hover:bg-surface-tertiary hover:text-content-primary"
-                        >
-                          {copiedId === item.id ? (
-                            <Check size={14} className="text-semantic-success" />
-                          ) : (
-                            <Copy size={14} />
-                          )}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {items.map((item) => {
+                    const isExpanded = expandedId === item.id;
+                    const hasComponents = item.components && item.components.length > 0;
+                    return (
+                      <CostItemRow
+                        key={item.id}
+                        item={item}
+                        isExpanded={isExpanded}
+                        hasComponents={hasComponents}
+                        copiedId={copiedId}
+                        isSelected={selectedIds.has(item.id)}
+                        isFavourite={favourites.has(item.id)}
+                        onSelect={() => toggleSelect(item.id)}
+                        onToggle={() => setExpandedId(isExpanded ? null : item.id)}
+                        onCopy={() => handleCopyRate(item)}
+                        onToggleFavourite={() => toggleFavourite(item.id)}
+                        fmt={fmt}
+                        t={t}
+                      />
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -369,8 +886,7 @@ export function CostsPage() {
           <div className="mt-6 flex flex-col items-center gap-3">
             <p className="text-xs text-content-tertiary">
               {t('costs.showing', 'Showing')} {Math.min(offset + PAGE_SIZE, total)}{' '}
-              {t('costs.of', 'of')} {total.toLocaleString()}{' '}
-              {t('costs.items', 'items')}
+              {t('costs.of', 'of')} {total.toLocaleString()} {t('costs.items', 'items')}
             </p>
             {hasMore && (
               <Button
@@ -385,6 +901,1003 @@ export function CostsPage() {
           </div>
         </>
       )}
+
+      {/* ── Floating Selection Bar ───────────────────────────────────────── */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 animate-fade-in">
+          <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface-elevated px-5 py-3 shadow-xl">
+            <span className="text-sm font-semibold text-content-primary tabular-nums">
+              {t('costs.n_selected', { defaultValue: '{{count}} selected', count: selectedIds.size })}
+            </span>
+            <div className="w-px h-6 bg-border-light" />
+            <Button
+              variant="primary"
+              size="sm"
+              icon={<Table2 size={14} />}
+              onClick={() => setShowAddToBOQ(true)}
+            >
+              {t('costs.add_to_boq', { defaultValue: 'Add to BOQ' })}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Layers size={14} />}
+              onClick={() => setShowCreateAssembly(true)}
+            >
+              {t('assemblies.create_assembly', { defaultValue: 'Create Assembly' })}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Copy size={14} />}
+              onClick={() => {
+                const text = selectedItems.map((i) => `${i.code}\t${i.description}\t${i.unit}\t${i.rate}`).join('\n');
+                navigator.clipboard.writeText(text).catch(() => {});
+                addToast({ type: 'success', title: t('common.copied', { defaultValue: 'Copied' }), message: t('costs.items_copied', { defaultValue: '{{count}} items copied to clipboard', count: selectedIds.size }) });
+              }}
+            >
+              {t('common.copy', { defaultValue: 'Copy' })}
+            </Button>
+            <button
+              onClick={() => setSelectedIds(new Set())}
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Add to BOQ Modal ──────────────────────────────────────────── */}
+      {showAddToBOQ && (
+        <AddToBOQModal
+          items={selectedItems}
+          onClose={() => setShowAddToBOQ(false)}
+          onSuccess={() => {
+            // Track all added items as recently used
+            selectedItems.forEach((si) => trackRecentUsage(si));
+            setShowAddToBOQ(false);
+            setSelectedIds(new Set());
+          }}
+        />
+      )}
+
+      {/* ── Create Assembly from selected items ────────────────────── */}
+      {showCreateAssembly && (
+        <CreateAssemblyFromCostsModal
+          items={selectedItems}
+          onClose={() => setShowCreateAssembly(false)}
+          onSuccess={() => {
+            setShowCreateAssembly(false);
+            setSelectedIds(new Set());
+          }}
+        />
+      )}
+
+      {/* Create Custom Item Modal */}
+      {showCreateItem && (
+        <CreateCostItemModal
+          onClose={() => setShowCreateItem(false)}
+          onCreated={() => {
+            setShowCreateItem(false);
+            queryClient.invalidateQueries({ queryKey: ['costs'] });
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+/* ── Add to BOQ Modal ──────────────────────────────────────────────────── */
+
+function AddToBOQModal({
+  items,
+  onClose,
+  onSuccess,
+}: {
+  items: CostItem[];
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const addToast = useToastStore((s) => s.addToast);
+
+  const [projectId, setProjectId] = useState('');
+  const [boqId, setBoqId] = useState('');
+  const [isAdding, setIsAdding] = useState(false);
+
+  // Fetch projects
+  const { data: projects } = useQuery({
+    queryKey: ['projects'],
+    queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    retry: false,
+  });
+
+  // Fetch BOQs for selected project
+  const { data: boqs } = useQuery({
+    queryKey: ['boqs', projectId],
+    queryFn: () => apiGet<BOQ[]>(`/v1/boq/boqs/?project_id=${projectId}`),
+    enabled: !!projectId,
+    retry: false,
+  });
+
+  // Fetch sections for selected BOQ
+  const { data: sections } = useQuery({
+    queryKey: ['boq-sections', boqId],
+    queryFn: async () => {
+      const positions = await apiGet<BOQSection[]>(`/v1/boq/boqs/${boqId}/positions`);
+      // Sections are positions with empty unit
+      return positions.filter((p) => !p.unit || p.unit.trim() === '');
+    },
+    enabled: !!boqId,
+    retry: false,
+  });
+
+  const [sectionId, setSectionId] = useState('');
+
+  const handleAdd = useCallback(async () => {
+    if (!boqId) return;
+    setIsAdding(true);
+
+    try {
+      let nextOrdinal = 1;
+      // Get existing positions count for ordinal numbering
+      try {
+        const existing = await apiGet<unknown[]>(`/v1/boq/boqs/${boqId}/positions`);
+        nextOrdinal = existing.length + 1;
+      } catch {
+        // ignore
+      }
+
+      for (const item of items) {
+        const ordinal = String(nextOrdinal).padStart(3, '0');
+        await apiPost(`/v1/boq/boqs/${boqId}/positions`, {
+          boq_id: boqId,
+          ordinal,
+          description: item.description,
+          unit: item.unit,
+          quantity: 1,
+          unit_rate: item.rate,
+          classification: item.classification || {},
+          parent_id: sectionId || undefined,
+          source: 'cost_database',
+          metadata: {
+            cost_item_id: item.id,
+            cost_item_code: item.code,
+            cost_item_region: item.region,
+          },
+        });
+        nextOrdinal++;
+      }
+
+      addToast({
+        type: 'success',
+        title: t('costs.items_added_to_boq', { defaultValue: '{{count}} items added to BOQ', count: items.length }),
+        message: t('costs.positions_created_hint', { defaultValue: 'Positions created with unit rates from cost database' }),
+      });
+      onSuccess();
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: t('costs.add_items_failed', { defaultValue: 'Failed to add items' }),
+        message: err instanceof Error ? err.message : t('common.unknown_error', { defaultValue: 'Unknown error' }),
+      });
+    } finally {
+      setIsAdding(false);
+    }
+  }, [boqId, sectionId, items, addToast, onSuccess]);
+
+  const fmt = (n: number) =>
+    new Intl.NumberFormat(getIntlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
+      <div
+        className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue">
+              <Table2 size={18} />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-content-primary">{t('costs.add_to_boq', { defaultValue: 'Add to BOQ' })}</h2>
+              <p className="text-xs text-content-tertiary">
+                {t('costs.n_items_selected', { defaultValue: '{{count}} items selected', count: items.length })}
+              </p>
+            </div>
+          </div>
+          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors">
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 py-4 space-y-4">
+          {/* Project selector */}
+          <div>
+            <label className="text-xs font-medium text-content-secondary mb-1.5 flex items-center gap-1.5">
+              <FolderOpen size={12} />
+              {t('projects.project', { defaultValue: 'Project' })}
+            </label>
+            {projects && projects.length > 0 ? (
+              <select
+                value={projectId}
+                onChange={(e) => { setProjectId(e.target.value); setBoqId(''); setSectionId(''); }}
+                className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+              >
+                <option value="">{t('projects.select_project', { defaultValue: 'Select project...' })}</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-content-tertiary">{t('projects.no_projects', 'No projects yet')}</span>
+                <Button variant="primary" size="sm" onClick={() => { onClose(); navigate('/projects/new'); }}>
+                  {t('projects.create_project', { defaultValue: 'Create Project' })}
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* BOQ selector */}
+          {projectId && (
+            <div>
+              <label className="text-xs font-medium text-content-secondary mb-1.5 flex items-center gap-1.5">
+                <Table2 size={12} />
+                {t('boq.title', { defaultValue: 'Bill of Quantities' })}
+              </label>
+              {boqs && boqs.length > 0 ? (
+                <select
+                  value={boqId}
+                  onChange={(e) => { setBoqId(e.target.value); setSectionId(''); }}
+                  className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                >
+                  <option value="">{t('boq.select_boq', { defaultValue: 'Select BOQ...' })}</option>
+                  {boqs.map((b) => (
+                    <option key={b.id} value={b.id}>{b.name} ({b.status})</option>
+                  ))}
+                </select>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-content-tertiary">{t('boq.no_boqs_in_project', { defaultValue: 'No BOQs in this project.' })}</span>
+                  <Button variant="primary" size="sm" onClick={() => { onClose(); navigate('/boq'); }}>
+                    {t('boq.create_boq', { defaultValue: 'Create BOQ' })}
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Section selector (optional) */}
+          {boqId && sections && sections.length > 0 && (
+            <div>
+              <label className="text-xs font-medium text-content-secondary mb-1.5 block">
+                {t('boq.section_optional', { defaultValue: 'Section (optional)' })}
+              </label>
+              <select
+                value={sectionId}
+                onChange={(e) => setSectionId(e.target.value)}
+                className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+              >
+                <option value="">{t('boq.no_section', 'No section (top level)')}</option>
+                {sections.map((s) => (
+                  <option key={s.id} value={s.id}>{s.ordinal} — {s.description || t('boq.untitled_section', { defaultValue: 'Untitled section' })}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Preview */}
+          {items.length > 0 && (
+            <div className="rounded-lg border border-border-light bg-surface-secondary/50 overflow-hidden max-h-40 overflow-y-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="bg-surface-tertiary text-content-secondary">
+                    <th className="px-3 py-1.5 text-left font-medium">{t('boq.description')}</th>
+                    <th className="px-3 py-1.5 text-center font-medium w-14">{t('boq.unit')}</th>
+                    <th className="px-3 py-1.5 text-right font-medium w-20">{t('costs.rate', 'Rate')}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border-light">
+                  {items.slice(0, 10).map((item) => (
+                    <tr key={item.id}>
+                      <td className="px-3 py-1.5 text-content-primary truncate max-w-[250px]">{item.description}</td>
+                      <td className="px-3 py-1.5 text-center text-content-tertiary">{item.unit}</td>
+                      <td className="px-3 py-1.5 text-right tabular-nums font-medium text-content-primary">{fmt(item.rate)}</td>
+                    </tr>
+                  ))}
+                  {items.length > 10 && (
+                    <tr>
+                      <td colSpan={3} className="px-3 py-1.5 text-center text-content-quaternary">
+                        {t('costs.and_n_more', { defaultValue: '...and {{count}} more', count: items.length - 10 })}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between px-6 py-4 border-t border-border-light bg-surface-secondary/30">
+          <span className="text-xs text-content-tertiary">
+            {t('costs.n_positions_will_be_created', { defaultValue: '{{count}} positions will be created', count: items.length })}
+          </span>
+          <div className="flex items-center gap-2">
+            <Button variant="secondary" size="sm" onClick={onClose}>
+              {t('common.cancel', 'Cancel')}
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              icon={isAdding ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+              onClick={handleAdd}
+              disabled={!boqId || isAdding}
+            >
+              {isAdding
+                ? t('costs.adding', { defaultValue: 'Adding...' })
+                : t('costs.add_n_to_boq', { defaultValue: 'Add {{count}} to BOQ', count: items.length })}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Create Cost Item Modal ────────────────────────────────────────────── */
+
+/* ── Create Assembly from Cost Items ──────────────────────────────────── */
+
+function CreateAssemblyFromCostsModal({
+  items,
+  onClose,
+  onSuccess,
+}: {
+  items: CostItem[];
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const addToast = useToastStore((s) => s.addToast);
+  const [name, setName] = useState('');
+  const [unit, setUnit] = useState('m2');
+  const [isCreating, setIsCreating] = useState(false);
+
+  const fmt = (n: number) =>
+    new Intl.NumberFormat(getIntlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+
+  const totalRate = items.reduce((s, i) => s + (i.rate || 0), 0);
+
+  const handleCreate = useCallback(async () => {
+    if (!name.trim()) return;
+    setIsCreating(true);
+    try {
+      const code = `ASM-${Date.now().toString(36).toUpperCase()}`;
+      const assembly = await apiPost<{ id: string }>('/v1/assemblies/', {
+        code,
+        name: name.trim(),
+        unit,
+        category: 'General',
+        currency: 'EUR',
+      });
+
+      // Add each cost item as a component
+      for (const item of items) {
+        await apiPost(`/v1/assemblies/${assembly.id}/components`, {
+          cost_item_id: item.id,
+          description: item.description,
+          unit: item.unit,
+          unit_cost: item.rate,
+          quantity: 1,
+          factor: 1.0,
+        });
+      }
+
+      addToast({
+        type: 'success',
+        title: t('assemblies.assembly_created', { defaultValue: 'Assembly created' }),
+        message: `"${name.trim()}" ${t('assemblies.with_n_components', { defaultValue: 'with {{count}} components', count: items.length })}`,
+      });
+      onSuccess();
+      navigate(`/assemblies/${assembly.id}`);
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: t('assemblies.create_failed', { defaultValue: 'Failed to create assembly' }),
+        message: err instanceof Error ? err.message : t('common.unknown_error', { defaultValue: 'Unknown error' }),
+      });
+    } finally {
+      setIsCreating(false);
+    }
+  }, [name, unit, items, addToast, t, onSuccess, navigate]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
+      <div
+        className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-900/30">
+              <Layers size={18} />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-content-primary">{t('assemblies.create_assembly', { defaultValue: 'Create Assembly' })}</h2>
+              <p className="text-xs text-content-tertiary">
+                {t('costs.n_cost_items_to_recipe', { defaultValue: '{{count}} cost items → reusable recipe', count: items.length })}
+              </p>
+            </div>
+          </div>
+          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors">
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="px-6 py-4 space-y-4">
+          <div>
+            <label className="text-xs font-medium text-content-secondary mb-1.5 block">{t('assemblies.assembly_name', { defaultValue: 'Assembly Name' })}</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder={t('assemblies.assembly_name_placeholder', { defaultValue: 'e.g. Reinforced Concrete Wall C30/37 24cm' })}
+              className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400"
+              autoFocus
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-content-secondary mb-1.5 block">{t('boq.unit')}</label>
+            <select
+              value={unit}
+              onChange={(e) => setUnit(e.target.value)}
+              className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-purple-500/30"
+            >
+              {['m', 'm2', 'm3', 'kg', 't', 'pcs', 'lsum', 'h', 'set', 'lm'].map((u) => (
+                <option key={u} value={u}>{u}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Preview components */}
+          <div>
+            <label className="text-xs font-medium text-content-secondary mb-1.5 block">{t('assemblies.components_count', { defaultValue: 'Components ({{count}})', count: items.length })}</label>
+            <div className="rounded-lg border border-border-light overflow-hidden max-h-40 overflow-y-auto">
+              {items.map((item) => (
+                <div key={item.id} className="flex items-center justify-between px-3 py-2 text-xs border-b border-border-light/50 last:border-0">
+                  <span className="text-content-primary truncate flex-1 mr-2">{item.description || item.code}</span>
+                  <span className="text-content-secondary shrink-0 tabular-nums">{fmt(item.rate)} / {item.unit}</span>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center justify-between mt-2 text-xs">
+              <span className="text-content-tertiary">{t('assemblies.total_rate_sum', { defaultValue: 'Total rate (sum of components)' })}</span>
+              <span className="font-semibold text-content-primary tabular-nums">{fmt(totalRate)} EUR</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-border-light bg-surface-secondary/30">
+          <Button variant="secondary" size="sm" onClick={onClose}>{t('common.cancel', { defaultValue: 'Cancel' })}</Button>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleCreate}
+            loading={isCreating}
+            disabled={!name.trim() || isCreating}
+          >
+            {t('assemblies.create_assembly', { defaultValue: 'Create Assembly' })}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+function CreateCostItemModal({
+  onClose,
+  onCreated,
+}: {
+  onClose: () => void;
+  onCreated: () => void;
+}) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    code: '',
+    description: '',
+    unit: 'm2',
+    rate: '',
+    currency: 'EUR',
+  });
+
+  const UNITS = ['m', 'm2', 'm3', 'kg', 't', 'pcs', 'lsum', 'h', 'set', 'lm'];
+
+  const handleSubmit = useCallback(async () => {
+    if (!form.description.trim()) return;
+    setIsSubmitting(true);
+    try {
+      const code = form.code.trim() || `CUSTOM-${Date.now().toString(36).toUpperCase()}`;
+      await apiPost('/v1/costs/', {
+        code,
+        description: form.description.trim(),
+        unit: form.unit,
+        rate: parseFloat(form.rate) || 0,
+        currency: form.currency,
+        source: 'custom',
+        region: 'CUSTOM',
+        classification: {},
+      });
+      addToast({ type: 'success', title: t('costs.item_created', { defaultValue: 'Cost item created' }) });
+      onCreated();
+    } catch (err) {
+      addToast({ type: 'error', title: t('common.error'), message: err instanceof Error ? err.message : 'Failed' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [form, addToast, t, onCreated]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+      <div
+        className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-fade-in"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
+          <div>
+            <h2 className="text-base font-semibold text-content-primary">
+              {t('costs.create_item', { defaultValue: 'Add Custom Cost Item' })}
+            </h2>
+            <p className="text-xs text-content-tertiary">
+              {t('costs.create_item_desc', { defaultValue: 'Create your own cost item for this project' })}
+            </p>
+          </div>
+          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary">
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="px-6 py-4 space-y-3">
+          <div>
+            <label className="text-xs font-medium text-content-secondary mb-1 block">
+              {t('costs.code', 'Code')}
+              <span className="text-content-quaternary ml-1">({t('costs.optional', 'optional')})</span>
+            </label>
+            <input
+              type="text"
+              value={form.code}
+              onChange={(e) => setForm({ ...form, code: e.target.value })}
+              placeholder="e.g. WALL-001"
+              className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-content-secondary mb-1 block">
+              {t('boq.description')} *
+            </label>
+            <input
+              autoFocus
+              type="text"
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder="e.g. Reinforced concrete wall C30/37, 25cm"
+              className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+            />
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="text-xs font-medium text-content-secondary mb-1 block">{t('boq.unit')}</label>
+              <select
+                value={form.unit}
+                onChange={(e) => setForm({ ...form, unit: e.target.value })}
+                className="h-9 w-full rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+              >
+                {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-content-secondary mb-1 block">{t('costs.rate', 'Rate')}</label>
+              <input
+                type="number"
+                step="0.01"
+                value={form.rate}
+                onChange={(e) => setForm({ ...form, rate: e.target.value })}
+                placeholder="0.00"
+                className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-right focus:outline-none focus:ring-2 focus:ring-oe-blue"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-content-secondary mb-1 block">{t('costs.currency', 'Currency')}</label>
+              <select
+                value={form.currency}
+                onChange={(e) => setForm({ ...form, currency: e.target.value })}
+                className="h-9 w-full rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+              >
+                {['EUR', 'USD', 'GBP', 'CHF', 'CAD', 'AUD', 'AED', 'RUB', 'CNY', 'INR', 'BRL'].map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end gap-2 px-6 py-3 border-t border-border-light bg-surface-secondary/30">
+          <Button variant="secondary" size="sm" onClick={onClose}>
+            {t('common.cancel', 'Cancel')}
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            disabled={!form.description.trim() || isSubmitting}
+            icon={isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+            onClick={handleSubmit}
+          >
+            {isSubmitting ? t('costs.creating', { defaultValue: 'Creating...' }) : t('costs.create', { defaultValue: 'Create Item' })}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Cost Item Row with expand ─────────────────────────────────────────── */
+
+function CostItemRow({
+  item,
+  isExpanded,
+  hasComponents,
+  copiedId,
+  isSelected,
+  isFavourite,
+  onSelect,
+  onToggle,
+  onCopy,
+  onToggleFavourite,
+  fmt,
+  t,
+}: {
+  item: CostItem;
+  isExpanded: boolean;
+  hasComponents: boolean;
+  copiedId: string | null;
+  isSelected: boolean;
+  isFavourite: boolean;
+  onSelect: () => void;
+  onToggle: () => void;
+  onCopy: () => void;
+  onToggleFavourite: () => void;
+  fmt: (n: number) => string;
+  t: ReturnType<typeof import('react-i18next').useTranslation>['t'];
+}) {
+  const meta = item.metadata_ ?? {};
+  const laborCost = meta.labor_cost ?? 0;
+  const equipmentCost = meta.equipment_cost ?? 0;
+  const materialCost = meta.material_cost ?? 0;
+  const laborHours = meta.labor_hours ?? 0;
+  const workers = meta.workers_per_unit ?? 0;
+
+  // Classify components by type
+  const materials = (item.components ?? []).filter((c) => c.type === 'material');
+  const machines = (item.components ?? []).filter((c) => c.type === 'equipment' || c.type === 'operator' || c.type === 'electricity');
+
+  // Classification breadcrumb
+  const cls = item.classification ?? {};
+  const breadcrumb = [cls.category, cls.collection, cls.department, cls.section, cls.subsection]
+    .filter(Boolean)
+    .join(' > ');
+
+  return (
+    <>
+      <tr
+        onClick={hasComponents ? onToggle : undefined}
+        className={`group transition-colors ${
+          hasComponents ? 'cursor-pointer' : ''
+        } ${isExpanded ? 'bg-oe-blue-subtle/10' : isSelected ? 'bg-oe-blue-subtle/5' : 'hover:bg-surface-secondary/50'}`}
+      >
+        <td className="px-2 py-3 w-10">
+          <div className="flex items-center gap-0.5">
+            <button
+              onClick={(e) => { e.stopPropagation(); onToggleFavourite(); }}
+              className="p-1 hover:bg-surface-secondary rounded transition-colors"
+              title={isFavourite ? t('costs.remove_from_favourites', { defaultValue: 'Remove from favourites' }) : t('costs.add_to_favourites', { defaultValue: 'Add to favourites' })}
+            >
+              <Star
+                size={14}
+                className={isFavourite ? 'fill-yellow-400 text-yellow-400' : 'text-content-tertiary'}
+              />
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); onSelect(); }}
+              className="flex h-5 w-5 items-center justify-center rounded text-content-tertiary hover:text-oe-blue transition-colors"
+            >
+              {isSelected ? (
+                <CheckSquare size={16} className="text-oe-blue" />
+              ) : (
+                <Square size={16} />
+              )}
+            </button>
+          </div>
+        </td>
+        <td className="px-4 py-3 font-mono text-xs text-content-secondary">
+          {item.code}
+        </td>
+        <td className="px-4 py-3 text-content-primary max-w-[400px]">
+          <div className="flex items-center gap-2">
+            {hasComponents && (
+              isExpanded
+                ? <ChevronUp size={14} className="text-oe-blue shrink-0" />
+                : <ChevronDown size={14} className="text-content-quaternary shrink-0" />
+            )}
+            <span className="truncate" title={item.description}>{item.description}</span>
+            {hasComponents && (
+              <span className="text-2xs text-content-quaternary shrink-0">
+                {item.components.length} res.
+              </span>
+            )}
+          </div>
+        </td>
+        <td className="px-4 py-3 text-center">
+          <Badge variant="neutral" size="sm">{item.unit}</Badge>
+        </td>
+        <td className="px-4 py-3 text-right font-semibold text-content-primary tabular-nums">
+          {fmt(item.rate)}
+        </td>
+        <td className="px-4 py-3 text-center">
+          {cls.collection || cls.code || cls.din276 ? (
+            <Badge variant="blue" size="sm">
+              {cls.collection || cls.code || cls.din276}
+            </Badge>
+          ) : (
+            <span className="text-content-tertiary">-</span>
+          )}
+        </td>
+        <td className="px-2 py-3">
+          <div className="flex items-center gap-0.5">
+            <button
+              onClick={(e) => { e.stopPropagation(); onSelect(); }}
+              title={t('costs.add_to_boq', 'Select for BOQ')}
+              className={`flex h-7 w-7 items-center justify-center rounded-md transition-all ${
+                isSelected
+                  ? 'bg-oe-blue text-white'
+                  : 'text-content-tertiary opacity-0 group-hover:opacity-100 hover:bg-oe-blue-subtle hover:text-oe-blue'
+              }`}
+            >
+              <Plus size={14} />
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); onCopy(); }}
+              title={t('costs.copy_rate', 'Copy rate')}
+              className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary opacity-0 transition-all group-hover:opacity-100 hover:bg-surface-tertiary hover:text-content-primary"
+            >
+              {copiedId === item.id ? (
+                <Check size={13} className="text-semantic-success" />
+              ) : (
+                <Copy size={13} />
+              )}
+            </button>
+          </div>
+        </td>
+      </tr>
+
+      {/* Expanded detail */}
+      {isExpanded && hasComponents && (
+        <tr>
+          <td colSpan={7} className="p-0">
+            <div className="bg-surface-secondary/30 border-t border-b border-border-light px-6 py-4 animate-fade-in">
+              {/* Breadcrumb — wraps instead of overflowing */}
+              {breadcrumb && (
+                <div className="mb-3 flex flex-wrap items-center gap-x-1 gap-y-0.5">
+                  {[cls.category, cls.collection, cls.department, cls.section, cls.subsection]
+                    .filter(Boolean)
+                    .map((part, i, arr) => (
+                      <span key={i} className="flex items-center gap-1">
+                        <span className="text-2xs text-content-quaternary">{String(part)}</span>
+                        {i < arr.length - 1 && <span className="text-2xs text-content-quaternary/50">&rsaquo;</span>}
+                      </span>
+                    ))}
+                </div>
+              )}
+
+              {/* Cost breakdown summary cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                <div className="rounded-lg bg-surface-primary border border-border-light p-3">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <HardHat size={12} className="text-amber-500" />
+                    <span className="text-2xs font-medium text-content-secondary uppercase tracking-wider">Labor</span>
+                  </div>
+                  <div className="text-sm font-bold tabular-nums text-content-primary">
+                    {laborCost > 0 ? fmt(laborCost) : '—'}
+                  </div>
+                  {laborHours > 0 && (
+                    <div className="text-2xs text-content-tertiary mt-0.5">{laborHours.toFixed(1)} hrs</div>
+                  )}
+                  {workers > 0 && (
+                    <div className="text-2xs text-content-tertiary">{workers} workers/unit</div>
+                  )}
+                </div>
+                <div className="rounded-lg bg-surface-primary border border-border-light p-3">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Hammer size={12} className="text-blue-500" />
+                    <span className="text-2xs font-medium text-content-secondary uppercase tracking-wider">Equipment</span>
+                  </div>
+                  <div className="text-sm font-bold tabular-nums text-content-primary">
+                    {equipmentCost > 0 ? fmt(equipmentCost) : '—'}
+                  </div>
+                  {machines.length > 0 && (
+                    <div className="text-2xs text-content-tertiary mt-0.5">{machines.length} items</div>
+                  )}
+                </div>
+                <div className="rounded-lg bg-surface-primary border border-border-light p-3">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Package size={12} className="text-green-600" />
+                    <span className="text-2xs font-medium text-content-secondary uppercase tracking-wider">Materials</span>
+                  </div>
+                  <div className="text-sm font-bold tabular-nums text-content-primary">
+                    {materialCost > 0 ? fmt(materialCost) : '—'}
+                  </div>
+                  {materials.length > 0 && (
+                    <div className="text-2xs text-content-tertiary mt-0.5">{materials.length} items</div>
+                  )}
+                </div>
+                <div className="rounded-lg bg-surface-primary border border-border-light p-3">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="text-2xs font-medium text-content-secondary uppercase tracking-wider">Total</span>
+                  </div>
+                  <div className="text-sm font-bold tabular-nums text-content-primary">{fmt(item.rate)}</div>
+                  <div className="text-2xs text-content-tertiary mt-0.5">per {item.unit}</div>
+                </div>
+              </div>
+
+              {/* Cost breakdown bar */}
+              {(laborCost > 0 || equipmentCost > 0 || materialCost > 0) && (
+                <div className="mb-4">
+                  <div className="h-2 w-full rounded-full overflow-hidden flex bg-surface-tertiary">
+                    {laborCost > 0 && (
+                      <div
+                        className="h-full bg-amber-400"
+                        style={{ width: `${(laborCost / item.rate) * 100}%` }}
+                        title={`Labor: ${fmt(laborCost)}`}
+                      />
+                    )}
+                    {equipmentCost > 0 && (
+                      <div
+                        className="h-full bg-blue-400"
+                        style={{ width: `${(equipmentCost / item.rate) * 100}%` }}
+                        title={`Equipment: ${fmt(equipmentCost)}`}
+                      />
+                    )}
+                    {materialCost > 0 && (
+                      <div
+                        className="h-full bg-green-400"
+                        style={{ width: `${(materialCost / item.rate) * 100}%` }}
+                        title={`Materials: ${fmt(materialCost)}`}
+                      />
+                    )}
+                  </div>
+                  <div className="flex gap-4 mt-1.5 text-2xs text-content-tertiary">
+                    {laborCost > 0 && (
+                      <span className="flex items-center gap-1">
+                        <span className="h-2 w-2 rounded-full bg-amber-400" />
+                        Labor {((laborCost / item.rate) * 100).toFixed(0)}%
+                      </span>
+                    )}
+                    {equipmentCost > 0 && (
+                      <span className="flex items-center gap-1">
+                        <span className="h-2 w-2 rounded-full bg-blue-400" />
+                        Equipment {((equipmentCost / item.rate) * 100).toFixed(0)}%
+                      </span>
+                    )}
+                    {materialCost > 0 && (
+                      <span className="flex items-center gap-1">
+                        <span className="h-2 w-2 rounded-full bg-green-400" />
+                        Materials {((materialCost / item.rate) * 100).toFixed(0)}%
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Resource table */}
+              <div className="rounded-lg border border-border-light overflow-hidden">
+                <table className="w-full text-xs table-fixed">
+                  <thead>
+                    <tr className="bg-surface-tertiary">
+                      <th className="px-3 py-2 text-left font-medium text-content-secondary truncate">Resource</th>
+                      <th className="px-3 py-2 text-left font-medium text-content-secondary w-16">Type</th>
+                      <th className="px-3 py-2 text-left font-medium text-content-secondary w-16">Unit</th>
+                      <th className="px-3 py-2 text-right font-medium text-content-secondary w-20">Qty</th>
+                      <th className="px-3 py-2 text-right font-medium text-content-secondary w-24">Unit Rate</th>
+                      <th className="px-3 py-2 text-right font-medium text-content-secondary w-24">Cost</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border-light">
+                    {item.components.map((comp, i) => {
+                      const TYPE_MAP: Record<string, { label: string; color: string }> = {
+                        labor: { label: 'Labor', color: 'text-amber-700 bg-amber-50' },
+                        material: { label: 'Material', color: 'text-green-700 bg-green-50' },
+                        equipment: { label: 'Equip.', color: 'text-blue-600 bg-blue-50' },
+                        operator: { label: 'Operator', color: 'text-violet-600 bg-violet-50' },
+                        electricity: { label: 'Electric', color: 'text-cyan-600 bg-cyan-50' },
+                        other: { label: 'Other', color: 'text-gray-600 bg-gray-50' },
+                      };
+                      const typeInfo = TYPE_MAP[comp.type] || { label: 'Other', color: 'text-gray-600 bg-gray-50' };
+                      const typeLabel = typeInfo.label;
+                      const typeColor = typeInfo.color;
+                      return (
+                        <tr key={i} className="hover:bg-surface-secondary/30">
+                          <td className="px-3 py-2 text-content-primary truncate" title={comp.name}>{comp.name}</td>
+                          <td className="px-3 py-2">
+                            <span className={`inline-block text-2xs font-medium px-1.5 py-0.5 rounded ${typeColor}`}>
+                              {typeLabel}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2 text-content-tertiary">{comp.unit}</td>
+                          <td className="px-3 py-2 text-right tabular-nums text-content-secondary">
+                            {comp.quantity > 0 ? comp.quantity.toFixed(2) : '—'}
+                          </td>
+                          <td className="px-3 py-2 text-right tabular-nums text-content-secondary">
+                            {comp.unit_rate > 0 ? fmt(comp.unit_rate) : '—'}
+                          </td>
+                          <td className="px-3 py-2 text-right tabular-nums font-medium text-content-primary">
+                            {comp.cost > 0 ? fmt(comp.cost) : '—'}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* All Properties */}
+              <details className="mt-4">
+                <summary className="text-2xs font-medium text-content-tertiary cursor-pointer hover:text-content-secondary transition-colors select-none">
+                  All properties ({Object.keys(cls).length + Object.keys(meta).length + 5} fields)
+                </summary>
+                <div className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1.5 text-2xs">
+                  {/* Basic fields */}
+                  <div className="flex justify-between"><span className="text-content-quaternary">Code</span><span className="text-content-secondary font-mono">{item.code}</span></div>
+                  <div className="flex justify-between"><span className="text-content-quaternary">Unit</span><span className="text-content-secondary">{item.unit}</span></div>
+                  <div className="flex justify-between"><span className="text-content-quaternary">Rate</span><span className="text-content-secondary font-semibold">{fmt(item.rate)}</span></div>
+                  <div className="flex justify-between"><span className="text-content-quaternary">Region</span><span className="text-content-secondary">{item.region || '—'}</span></div>
+                  <div className="flex justify-between"><span className="text-content-quaternary">Source</span><span className="text-content-secondary">{item.source}</span></div>
+
+                  {/* Classification */}
+                  {Object.entries(cls).map(([k, v]) => (
+                    <div key={k} className="flex justify-between">
+                      <span className="text-content-quaternary capitalize">{k}</span>
+                      <span className="text-content-secondary truncate ml-2 max-w-[200px]" title={String(v)}>{String(v)}</span>
+                    </div>
+                  ))}
+
+                  {/* Metadata (cost breakdown) */}
+                  {Object.entries(meta).map(([k, v]) => (
+                    <div key={k} className="flex justify-between">
+                      <span className="text-content-quaternary">{k.replace(/_/g, ' ')}</span>
+                      <span className="text-content-secondary tabular-nums">
+                        {typeof v === 'number' ? fmt(v) : String(v)}
+                      </span>
+                    </div>
+                  ))}
+
+                  <div className="flex justify-between"><span className="text-content-quaternary">Components</span><span className="text-content-secondary">{item.components?.length || 0} resources</span></div>
+                </div>
+              </details>
+            </div>
+          </td>
+        </tr>
+      )}
+    </>
   );
 }

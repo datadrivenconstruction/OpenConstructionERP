@@ -90,6 +90,36 @@ class ChangePasswordRequest(BaseModel):
     new_password: str = Field(..., min_length=8, max_length=128)
 
 
+class ForgotPasswordRequest(BaseModel):
+    """Forgot password request — triggers reset token generation."""
+
+    email: EmailStr
+
+
+class ForgotPasswordResponse(BaseModel):
+    """Forgot password response.
+
+    Always returns a success message to prevent email enumeration.
+    Token is included only in dev mode for testing.
+    """
+
+    message: str
+    token: str | None = None
+
+
+class ResetPasswordRequest(BaseModel):
+    """Reset password using a previously issued reset token."""
+
+    token: str
+    new_password: str = Field(..., min_length=8, max_length=128)
+
+
+class ResetPasswordResponse(BaseModel):
+    """Reset password response."""
+
+    message: str
+
+
 # ── API Keys ───────────────────────────────────────────────────────────────
 
 

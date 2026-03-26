@@ -7,7 +7,7 @@ Tables:
 
 import uuid
 
-from sqlalchemy import ForeignKey, Integer, JSON, String, Text
+from sqlalchemy import Integer, JSON, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -20,7 +20,6 @@ class AISettings(Base):
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
-        ForeignKey("oe_users_user.id", ondelete="CASCADE"),
         nullable=False,
         unique=True,
         index=True,
@@ -56,13 +55,11 @@ class AIEstimateJob(Base):
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
-        ForeignKey("oe_users_user.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
     project_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),
-        ForeignKey("oe_projects_project.id", ondelete="SET NULL"),
         nullable=True,
         index=True,
     )

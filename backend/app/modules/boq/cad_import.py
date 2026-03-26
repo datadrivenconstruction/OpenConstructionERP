@@ -223,3 +223,122 @@ def summarize_cad_elements(elements: list[dict]) -> str:
         lines.append(f"\n... and {len(elements) - 200} more elements (truncated)")
 
     return "\n".join(lines)
+
+
+def _to_float(val: object) -> float:
+    """Safely convert a value to float, returning 0.0 on failure."""
+    if val is None:
+        return 0.0
+    try:
+        return float(val)
+    except (ValueError, TypeError):
+        return 0.0
+
+
+def group_cad_elements(elements: list[dict]) -> dict:
+    """Group CAD elements by category and type, summing numeric quantities.
+
+    Produces a structured dict of quantity tables suitable for direct display
+    without AI processing. Each category contains type-level rows with summed
+    count, volume (m3), area (m2), and length (m).
+
+    Handles DDC column name variations:
+    - ``category`` / ``element type`` -> category
+    - ``type name`` / ``family`` / ``type`` -> type
+    - ``volume`` / ``volume (m3)`` -> volume
+    - ``area`` / ``area (m2)`` -> area
+    - ``count`` defaults to 1
+
+    Args:
+        elements: List of element dicts from ``parse_cad_excel``.
+
+    Returns:
+        Dict with ``groups`` (list), ``grand_totals``, and ``total_elements``.
+    """
+    from collections import OrderedDict
+
+    # category -> type -> aggregated values
+    cat_types: dict[str, dict[str, dict]] = OrderedDict()
+
+    for el in elements:
+        category = str(
+            el.get("category", el.get("element type", "Other"))
+        ).strip() or "Other"
+        type_name = str(
+            el.get("type name", el.get("family", el.get("type", "Unknown")))
+        ).strip() or "Unknown"
+        count = _to_float(el.get("count", 1))
+        volume = _to_float(el.get("volume", el.get("volume (m3)", 0)))
+        area = _to_float(el.get("area", el.get("area (m2)", 0)))
+        length = _to_float(el.get("length", 0))
+        material = str(el.get("material", "")).strip()
+
+        if category not in cat_types:
+            cat_types[category] = OrderedDict()
+
+        if type_name not in cat_types[category]:
+            cat_types[category][type_name] = {
+                "type": type_name,
+                "material": "",
+                "count": 0.0,
+                "volume_m3": 0.0,
+                "area_m2": 0.0,
+                "length_m": 0.0,
+            }
+
+        entry = cat_types[category][type_name]
+        entry["count"] += count
+        entry["volume_m3"] += volume
+        entry["area_m2"] += area
+        entry["length_m"] += length
+        if material and not entry["material"]:
+            entry["material"] = material
+
+    # Build structured output
+    groups: list[dict] = []
+    grand_count = 0.0
+    grand_volume = 0.0
+    grand_area = 0.0
+    grand_length = 0.0
+
+    for cat_name, types in cat_types.items():
+        items = list(types.values())
+
+        cat_count = sum(it["count"] for it in items)
+        cat_volume = sum(it["volume_m3"] for it in items)
+        cat_area = sum(it["area_m2"] for it in items)
+        cat_length = sum(it["length_m"] for it in items)
+
+        # Round item values
+        for it in items:
+            it["count"] = round(it["count"], 1)
+            it["volume_m3"] = round(it["volume_m3"], 3)
+            it["area_m2"] = round(it["area_m2"], 2)
+            it["length_m"] = round(it["length_m"], 2)
+
+        groups.append({
+            "category": cat_name,
+            "items": items,
+            "totals": {
+                "count": round(cat_count, 1),
+                "volume_m3": round(cat_volume, 3),
+                "area_m2": round(cat_area, 2),
+                "length_m": round(cat_length, 2),
+            },
+        })
+
+        grand_count += cat_count
+        grand_volume += cat_volume
+        grand_area += cat_area
+        grand_length += cat_length
+
+    return {
+        "total_elements": len(elements),
+        "groups": groups,
+        "grand_totals": {
+            "count": round(grand_count, 1),
+            "volume_m3": round(grand_volume, 3),
+            "area_m2": round(grand_area, 2),
+            "length_m": round(grand_length, 2),
+        },
+    }

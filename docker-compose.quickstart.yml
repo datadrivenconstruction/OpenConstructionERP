@@ -1,0 +1,69 @@
+# OpenEstimate — Quickstart Docker Compose
+#
+# Zero-config, all-in-one deployment. Just run:
+#   docker compose -f docker-compose.quickstart.yml up --build
+#
+# This starts:
+#   - PostgreSQL 16 (data persisted in Docker volume)
+#   - Backend (FastAPI, serves API + frontend)
+#   - Accessible at http://localhost:8080
+#
+# For evaluation with SQLite (no PostgreSQL):
+#   docker run -d -p 8080:8080 -v oe_data:/data openestimate
+#   (Build first: docker build -t openestimate -f deploy/docker/Dockerfile.unified .)
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: oe
+      POSTGRES_PASSWORD: oe-quickstart-2024
+      POSTGRES_DB: openestimate
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U oe -d openestimate"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    # Not exposed to host — only accessible by backend
+
+  app:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile.unified
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      # Override SQLite default with PostgreSQL
+      DATABASE_URL: postgresql+asyncpg://oe:oe-quickstart-2024@postgres:5432/openestimate
+      DATABASE_SYNC_URL: postgresql://oe:oe-quickstart-2024@postgres:5432/openestimate
+      # Security
+      JWT_SECRET: oe-quickstart-change-me-in-production
+      # Frontend serving
+      SERVE_FRONTEND: "true"
+      ALLOWED_ORIGINS: "http://localhost:8080,http://localhost"
+      # Defaults
+      APP_ENV: production
+      APP_DEBUG: "false"
+      VECTOR_BACKEND: lancedb
+    volumes:
+      - app_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  pg_data:
+    driver: local
+  app_data:
+    driver: local

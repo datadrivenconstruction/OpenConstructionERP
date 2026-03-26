@@ -64,6 +64,9 @@ class UserRepository:
         """Update specific fields on a user."""
         stmt = update(User).where(User.id == user_id).values(**fields)
         await self.session.execute(stmt)
+        await self.session.flush()
+        # Expire cached ORM instances so the next get_by_id re-reads from DB
+        self.session.expire_all()
 
     async def email_exists(self, email: str) -> bool:
         """Check if an email is already registered."""
