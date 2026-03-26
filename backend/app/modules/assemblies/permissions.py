@@ -11,6 +11,6 @@ def register_assemblies_permissions() -> None:
             "assemblies.create": Role.EDITOR,
             "assemblies.read": Role.VIEWER,
             "assemblies.update": Role.EDITOR,
-            "assemblies.delete": Role.MANAGER,
+            "assemblies.delete": Role.EDITOR,
         },
     )

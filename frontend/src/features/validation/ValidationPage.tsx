@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ShieldCheck,
@@ -13,9 +14,11 @@ import {
   Download,
   Wand2,
   Filter,
+  ExternalLink,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Skeleton } from '@/shared/ui';
 import { apiGet, apiPost } from '@/shared/lib/api';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -218,10 +221,14 @@ function ResultRow({
   result,
   expanded,
   onToggle,
+  boqId,
+  onNavigateToPosition,
 }: {
   result: ValidationResultItem;
   expanded: boolean;
   onToggle: () => void;
+  boqId?: string;
+  onNavigateToPosition?: (boqId: string, positionId: string) => void;
 }) {
   const { t } = useTranslation();
 
@@ -293,7 +300,18 @@ function ResultRow({
           {result.element_ref && (
             <p className="mt-2 flex items-center gap-1.5 text-xs text-content-tertiary">
               <Info size={12} />
-              {t('validation.element_ref', 'Element')}: {result.element_ref}
+              {t('validation.element_ref', 'Element')}:{' '}
+              {boqId && onNavigateToPosition ? (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onNavigateToPosition(boqId, result.element_ref!); }}
+                  className="inline-flex items-center gap-1 text-oe-blue hover:underline font-mono"
+                >
+                  {result.element_ref.substring(0, 8)}...
+                  <ExternalLink size={10} />
+                </button>
+              ) : (
+                <span className="font-mono">{result.element_ref}</span>
+              )}
             </p>
           )}
           {tooltip && (
@@ -388,9 +406,11 @@ function SelectDropdown({
 
 export function ValidationPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { activeProjectId, setActiveProject } = useProjectContextStore();
 
-  const [selectedProjectId, setSelectedProjectId] = useState('');
+  const selectedProjectId = activeProjectId ?? '';
   const [selectedBoqId, setSelectedBoqId] = useState('');
   const [filter, setFilter] = useState<FilterMode>('all');
   const [expandedResults, setExpandedResults] = useState<Set<number>>(new Set());
@@ -426,11 +446,16 @@ export function ValidationPage() {
   // Reset BOQ selection when project changes
   const handleProjectChange = useCallback(
     (projectId: string) => {
-      setSelectedProjectId(projectId);
+      const name = projects?.find((p) => p.id === projectId)?.name ?? '';
+      if (projectId) {
+        setActiveProject(projectId, name);
+      } else {
+        useProjectContextStore.getState().clearProject();
+      }
       setSelectedBoqId('');
       setReport(null);
     },
-    [],
+    [projects, setActiveProject],
   );
 
   const handleBoqChange = useCallback((boqId: string) => {
@@ -540,16 +565,18 @@ export function ValidationPage() {
             )}
           </div>
           <div className="shrink-0">
-            <Button
-              variant="primary"
-              size="md"
-              icon={<Play size={16} />}
-              loading={runValidation.isPending}
-              disabled={!selectedBoqId}
-              onClick={() => runValidation.mutate()}
-            >
-              {t('validation.run', 'Run Validation')}
-            </Button>
+            <span title={!selectedBoqId ? t('validation.select_boq_first', { defaultValue: 'Select a project and BOQ first' }) : undefined}>
+              <Button
+                variant="primary"
+                size="md"
+                icon={<Play size={16} />}
+                loading={runValidation.isPending}
+                disabled={!selectedBoqId}
+                onClick={() => runValidation.mutate()}
+              >
+                {t('validation.run', 'Run Validation')}
+              </Button>
+            </span>
           </div>
         </div>
       </Card>
@@ -653,6 +680,8 @@ export function ValidationPage() {
                   result={result}
                   expanded={expandedResults.has(idx)}
                   onToggle={() => toggleResult(idx)}
+                  boqId={selectedBoqId || undefined}
+                  onNavigateToPosition={(bId, posId) => navigate(`/boq/${bId}?highlight=${posId}`)}
                 />
               ))}
             </div>

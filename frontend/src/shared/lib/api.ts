@@ -3,24 +3,22 @@
  *
  * Provides a lightweight fetch wrapper with:
  * - Base URL configuration
- * - Automatic Authorization header from localStorage
+ * - Automatic Authorization header from auth store
  * - JSON serialization / deserialization
- * - 401 handling (redirect to login)
+ * - 401 handling (logout + redirect to login)
  * - Generic type parameters for request/response bodies
  */
 
+import i18next from 'i18next';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { useToastStore } from '@/stores/useToastStore';
+import { cacheResponse, getCachedResponse, queueMutation } from './offlineStore';
+
 const BASE_URL = '/api';
 
-const TOKEN_KEY = 'oe_access_token';
-
-/** Retrieve the stored JWT token (if any). */
+/** Retrieve the stored JWT token from the auth store. */
 function getToken(): string | null {
-  try {
-    return localStorage.getItem(TOKEN_KEY);
-  } catch {
-    // SSR or restricted storage – ignore.
-    return null;
-  }
+  return useAuthStore.getState().accessToken;
 }
 
 /** Build common headers for every request. */
@@ -71,21 +69,60 @@ async function request<TResponse>(
     headers.set('Content-Type', 'application/json');
   }
 
-  const response = await fetch(`${BASE_URL}${path}`, {
-    ...init,
-    method,
-    headers,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${BASE_URL}${path}`, {
+      ...init,
+      method,
+      headers,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
+  } catch (err) {
+    // Network error — likely offline
+    if (!navigator.onLine) {
+      // For GET requests: try to serve from IndexedDB cache
+      if (method === 'GET') {
+        const cached = await getCachedResponse<TResponse>(path);
+        if (cached !== null) return cached;
+      }
+      // For mutating requests: queue for later replay
+      if (method !== 'GET') {
+        await queueMutation({
+          method: method as 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+          path,
+          body,
+          queuedAt: Date.now(),
+          retries: 0,
+        });
+        useToastStore.getState().addToast({
+          type: 'info',
+          title: i18next.t('common.saved_offline', 'Saved offline'),
+          message: i18next.t('common.sync_when_reconnect', 'Your change will sync when you reconnect.'),
+        });
+        return undefined as TResponse;
+      }
+    }
+    throw err;
+  }
 
-  // Handle 401 – clear token and redirect to login page.
+  // Handle 401 – logout via auth store and redirect to login.
   if (response.status === 401) {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem('oe_refresh_token');
-    // Don't redirect immediately — let the caller handle it or use the auth store
+    useAuthStore.getState().logout();
     if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
       window.location.href = '/login';
     }
+    throw new ApiError(response.status, response.statusText, undefined);
+  }
+
+  // Handle 429 – rate limited.
+  if (response.status === 429) {
+    const retryAfter = response.headers.get('Retry-After');
+    const seconds = retryAfter ? parseInt(retryAfter, 10) : 30;
+    useToastStore.getState().addToast({
+      type: 'warning',
+      title: i18next.t('common.too_many_requests', 'Too many requests'),
+      message: i18next.t('common.rate_limit_wait', { defaultValue: 'Please wait {{seconds}} seconds before trying again.', seconds }),
+    });
     throw new ApiError(response.status, response.statusText, undefined);
   }
 
@@ -93,9 +130,14 @@ async function request<TResponse>(
   if (!response.ok) {
     let errorBody: unknown;
     try {
-      errorBody = await response.json();
+      const text = await response.text();
+      try {
+        errorBody = JSON.parse(text);
+      } catch {
+        errorBody = text;
+      }
     } catch {
-      errorBody = await response.text();
+      errorBody = response.statusText;
     }
     throw new ApiError(response.status, response.statusText, errorBody);
   }
@@ -105,7 +147,14 @@ async function request<TResponse>(
     return undefined as TResponse;
   }
 
-  return (await response.json()) as TResponse;
+  const data = (await response.json()) as TResponse;
+
+  // Cache successful GET responses for offline use
+  if (method === 'GET') {
+    cacheResponse(path, data).catch(() => {});
+  }
+
+  return data;
 }
 
 // ---------------------------------------------------------------------------
@@ -157,6 +206,17 @@ export async function apiPatch<TResponse, TBody = unknown>(
 }
 
 /**
+ * Typed PUT request.
+ */
+export async function apiPut<TResponse, TBody = unknown>(
+  path: string,
+  body?: TBody,
+  init?: RequestInit,
+): Promise<TResponse> {
+  return request<TResponse>('PUT', path, body, init);
+}
+
+/**
  * Typed DELETE request.
  */
 export async function apiDelete<TResponse = void>(
@@ -164,4 +224,25 @@ export async function apiDelete<TResponse = void>(
   init?: RequestInit,
 ): Promise<TResponse> {
   return request<TResponse>('DELETE', path, undefined, init);
+}
+
+/**
+ * Trigger a browser file download from a Blob.
+ *
+ * Uses a hidden anchor with the `download` attribute, appended to the DOM.
+ * Cleanup (removeChild + revokeObjectURL) is deferred so Chrome has time
+ * to start the download before the blob URL is revoked.
+ */
+export function triggerDownload(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.style.display = 'none';
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 200);
 }

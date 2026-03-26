@@ -1,9 +1,1242 @@
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
-import { Package, Layers, ShieldCheck, Calendar, DollarSign, Database, Users, FolderOpen } from 'lucide-react';
-import { Card, Badge } from '@/shared/ui';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import {
+  Search,
+  Database,
+  Sparkles,
+  Globe,
+  FileInput,
+  BarChart3,
+  Plug,
+  Package,
+  Check,
+  Download,
+  ShieldCheck,
+  Building2,
+  Boxes,
+  Loader2,
+  Trash2,
+  RefreshCw,
+  ArrowUpCircle,
+  Upload,
+  X,
+  ChevronDown,
+  AlertTriangle,
+  type LucideIcon,
+} from 'lucide-react';
+import { Card, Badge, Button, Input, InfoHint } from '@/shared/ui';
+import { apiGet, apiPost } from '@/shared/lib/api';
+import { useToastStore } from '@/stores/useToastStore';
+import { useModuleStore, type ModuleUpdateInfo } from '@/stores/useModuleStore';
+import { getModulesByCategory } from '@/modules/_registry';
+import { ModuleUploadDialog } from './ModuleUploadDialog';
 
-interface ModuleInfo {
+/* ── Types ─────────────────────────────────────────────────────────────── */
+
+interface MarketplaceModule {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  icon: string;
+  version: string;
+  size_mb: number;
+  author: string;
+  tags: string[];
+  requires: string[];
+  installed: boolean;
+  price: string;
+}
+
+/* ── Category config (marketplace data packages) ─────────────────────── */
+
+type CategoryKey =
+  | 'all'
+  | 'demo_project'
+  | 'resource_catalog'
+  | 'cost_database'
+  | 'vector_index'
+  | 'language'
+  | 'converter'
+  | 'analytics'
+  | 'integration';
+
+interface CategoryMeta {
+  labelKey: string;
+  defaultLabel: string;
+  icon: LucideIcon;
+}
+
+const CATEGORIES: Record<CategoryKey, CategoryMeta> = {
+  all: { labelKey: 'marketplace.category_all', defaultLabel: 'All', icon: Package },
+  demo_project: {
+    labelKey: 'marketplace.category_demo',
+    defaultLabel: 'Demo Projects',
+    icon: Building2,
+  },
+  resource_catalog: {
+    labelKey: 'marketplace.category_resource_catalog',
+    defaultLabel: 'Resource Catalogs',
+    icon: Boxes,
+  },
+  cost_database: {
+    labelKey: 'marketplace.category_cost_database',
+    defaultLabel: 'Cost Databases',
+    icon: Database,
+  },
+  vector_index: {
+    labelKey: 'marketplace.category_vector_index',
+    defaultLabel: 'Vector Indices',
+    icon: Sparkles,
+  },
+  language: {
+    labelKey: 'marketplace.category_language',
+    defaultLabel: 'Languages',
+    icon: Globe,
+  },
+  converter: {
+    labelKey: 'marketplace.category_converter',
+    defaultLabel: 'Converters',
+    icon: FileInput,
+  },
+  analytics: {
+    labelKey: 'marketplace.category_analytics',
+    defaultLabel: 'Analytics',
+    icon: BarChart3,
+  },
+  integration: {
+    labelKey: 'marketplace.category_integration',
+    defaultLabel: 'Integrations',
+    icon: Plug,
+  },
+};
+
+const CATEGORY_KEYS = Object.keys(CATEGORIES) as CategoryKey[];
+
+/** Map icon name string from the backend to a lucide-react component. */
+const ICON_MAP: Record<string, LucideIcon> = {
+  Database: Database,
+  Sparkles: Sparkles,
+  Globe: Globe,
+  FileInput: FileInput,
+  BarChart3: BarChart3,
+  Plug: Plug,
+  Building2: Building2,
+  Boxes: Boxes,
+};
+
+function getModuleIcon(iconName: string): LucideIcon {
+  return ICON_MAP[iconName] ?? Package;
+}
+
+/** Turn a module ID like "cost-benchmark" into "Cost Benchmark". */
+function formatModuleId(id: string): string {
+  return id
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
+/** Format size in MB with sensible precision. */
+function formatSize(sizeMb: number): string {
+  if (sizeMb < 1) return `${Math.round(sizeMb * 1024)} KB`;
+  if (sizeMb >= 1024) return `${(sizeMb / 1024).toFixed(1)} GB`;
+  return `${sizeMb.toFixed(1)} MB`;
+}
+
+/* ── Module category display config ──────────────────────────────────── */
+
+const MODULE_CATEGORY_ORDER = ['estimation', 'planning', 'procurement', 'tools', 'regional'] as const;
+
+const MODULE_CATEGORY_META: Record<string, { labelKey: string; defaultLabel: string; descKey: string; defaultDesc: string }> = {
+  estimation: {
+    labelKey: 'nav.group_estimation',
+    defaultLabel: 'Estimation',
+    descKey: 'modules.cat_estimation_desc',
+    defaultDesc: 'Core tools for building and managing estimates',
+  },
+  planning: {
+    labelKey: 'nav.group_planning',
+    defaultLabel: 'Planning',
+    descKey: 'modules.cat_planning_desc',
+    defaultDesc: 'Scheduling, cost modeling, and timeline management',
+  },
+  procurement: {
+    labelKey: 'nav.group_procurement',
+    defaultLabel: 'Procurement',
+    descKey: 'modules.cat_procurement_desc',
+    defaultDesc: 'Tendering, bid management, and reporting',
+  },
+  tools: {
+    labelKey: 'nav.group_tools',
+    defaultLabel: 'Tools',
+    descKey: 'modules.cat_tools_desc',
+    defaultDesc: 'Analysis, sustainability, exchange formats, and more',
+  },
+  regional: {
+    labelKey: 'modules.cat_regional',
+    defaultLabel: 'Regional Standards',
+    descKey: 'modules.cat_regional_desc',
+    defaultDesc: 'Country-specific BOQ import/export formats and classification standards',
+  },
+};
+
+/* ── Main component ───────────────────────────────────────────────────── */
+
+export function ModulesPage() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
+  const [activeCategory, setActiveCategory] = useState<CategoryKey>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [marketplaceLimit, setMarketplaceLimit] = useState(12);
+  const [installingId, setInstallingId] = useState<string | null>(null);
+  const [expandedUpdate, setExpandedUpdate] = useState<string | null>(null);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const { setModuleEnabled, isModuleEnabled, canDisable, getEnabledDependents } = useModuleStore();
+  const customModules = useModuleStore((s) => s.customModules);
+  const removeCustomModule = useModuleStore((s) => s.removeCustomModule);
+  const moduleUpdates = useModuleStore((s) => s.moduleUpdates);
+  const isCheckingUpdates = useModuleStore((s) => s.isCheckingUpdates);
+  const checkForUpdates = useModuleStore((s) => s.checkForUpdates);
+  const dismissUpdate = useModuleStore((s) => s.dismissUpdate);
+  const updateCount = Object.keys(moduleUpdates).length;
+
+  const { data: modules, isLoading } = useQuery({
+    queryKey: ['marketplace'],
+    queryFn: () => apiGet<MarketplaceModule[]>('/marketplace'),
+  });
+
+  /* Also fetch loaded system modules for the installed-modules section */
+  const { data: systemModules } = useQuery({
+    queryKey: ['modules'],
+    queryFn: () =>
+      apiGet<{ modules: SystemModule[] }>('/system/modules').then((d) => d.modules),
+  });
+
+  const { data: rules } = useQuery({
+    queryKey: ['validation-rules'],
+    queryFn: () => apiGet<ValidationRulesResponse>('/system/validation-rules'),
+  });
+
+  /* Filter modules */
+  const filtered = useMemo(() => {
+    if (!modules) return [];
+    const query = searchQuery.toLowerCase().trim();
+    return modules.filter((mod) => {
+      const matchesCategory =
+        activeCategory === 'all' || mod.category === activeCategory;
+      const matchesSearch =
+        !query ||
+        mod.name.toLowerCase().includes(query) ||
+        mod.description.toLowerCase().includes(query) ||
+        mod.tags.some((tag) => tag.toLowerCase().includes(query)) ||
+        mod.author.toLowerCase().includes(query);
+      return matchesCategory && matchesSearch;
+    });
+  }, [modules, activeCategory, searchQuery]);
+
+  /* Category counts */
+  const categoryCounts = useMemo(() => {
+    if (!modules) return {} as Record<CategoryKey, number>;
+    const counts: Record<string, number> = { all: modules.length };
+    for (const mod of modules) {
+      counts[mod.category] = (counts[mod.category] ?? 0) + 1;
+    }
+    return counts as Record<CategoryKey, number>;
+  }, [modules]);
+
+  /** Map catalog marketplace module ID to the region key used by the import API. */
+  const CATALOG_ID_TO_REGION: Record<string, string> = {
+    'catalog-ar-dubai': 'AR_DUBAI',
+    'catalog-de-berlin': 'DE_BERLIN',
+    'catalog-en-toronto': 'ENG_TORONTO',
+    'catalog-sp-barcelona': 'SP_BARCELONA',
+    'catalog-fr-paris': 'FR_PARIS',
+    'catalog-hi-mumbai': 'HI_MUMBAI',
+    'catalog-pt-saopaulo': 'PT_SAOPAULO',
+    'catalog-ru-stpetersburg': 'RU_STPETERSBURG',
+    'catalog-uk-gbp': 'UK_GBP',
+    'catalog-usa-usd': 'USA_USD',
+    'catalog-zh-shanghai': 'ZH_SHANGHAI',
+  };
+
+  async function handleInstallClick(mod: MarketplaceModule): Promise<void> {
+    switch (mod.category) {
+      case 'resource_catalog': {
+        const region = CATALOG_ID_TO_REGION[mod.id];
+        if (!region) {
+          addToast({ type: 'error', title: t('marketplace.unknown_region', { defaultValue: 'Unknown region' }), message: t('marketplace.no_region_mapping', { defaultValue: 'No region mapping for {{id}}', id: mod.id }) });
+          break;
+        }
+        setInstallingId(mod.id);
+        try {
+          const result = await apiPost<{ imported: number; skipped: number; region: string }>(`/v1/catalog/import/${region}`);
+          addToast({
+            type: 'success',
+            title: t('marketplace.catalog_imported', { defaultValue: 'Catalog imported' }),
+            message: t('marketplace.catalog_imported_message', { defaultValue: '{{imported}} resources imported, {{skipped}} skipped for {{region}}.', imported: result.imported, skipped: result.skipped, region: result.region }),
+          });
+          queryClient.invalidateQueries({ queryKey: ['marketplace'] });
+          queryClient.invalidateQueries({ queryKey: ['catalog'] });
+        } catch (err) {
+          addToast({ type: 'error', title: t('marketplace.import_failed', { defaultValue: 'Import failed' }), message: err instanceof Error ? err.message : t('common.unknown_error', { defaultValue: 'Unknown error' }) });
+        } finally {
+          setInstallingId(null);
+        }
+        break;
+      }
+      case 'cost_database':
+        navigate('/costs/import');
+        break;
+      case 'vector_index': {
+        const VECTOR_ID_TO_DB: Record<string, string> = {
+          'vector-usa-usd': 'USA_USD',
+          'vector-uk-gbp': 'UK_GBP',
+          'vector-de-berlin': 'DE_BERLIN',
+          'vector-eng-toronto': 'ENG_TORONTO',
+          'vector-fr-paris': 'FR_PARIS',
+          'vector-sp-barcelona': 'SP_BARCELONA',
+          'vector-pt-saopaulo': 'PT_SAOPAULO',
+          'vector-ru-stpetersburg': 'RU_STPETERSBURG',
+          'vector-ar-dubai': 'AR_DUBAI',
+          'vector-zh-shanghai': 'ZH_SHANGHAI',
+          'vector-hi-mumbai': 'HI_MUMBAI',
+        };
+        const dbId = VECTOR_ID_TO_DB[mod.id];
+        if (!dbId) {
+          addToast({ type: 'error', title: t('marketplace.unknown_region', { defaultValue: 'Unknown region' }), message: t('marketplace.no_region_mapping', { defaultValue: 'No region mapping for {{id}}', id: mod.id }) });
+          break;
+        }
+        setInstallingId(mod.id);
+        try {
+          const result = await apiPost<{ indexed: number; database: string; duration_seconds: number }>(`/v1/costs/vector/load-github/${dbId}`);
+          addToast({
+            type: 'success',
+            title: t('marketplace.vector_imported', { defaultValue: 'Vector index loaded' }),
+            message: t('marketplace.vector_imported_message', { defaultValue: '{{count}} vectors indexed for {{db}} in {{sec}}s.', count: result.indexed, db: result.database, sec: result.duration_seconds }),
+          });
+          queryClient.invalidateQueries({ queryKey: ['marketplace'] });
+          queryClient.invalidateQueries({ queryKey: ['vector-status'] });
+        } catch (err) {
+          addToast({ type: 'error', title: t('marketplace.import_failed', { defaultValue: 'Import failed' }), message: err instanceof Error ? err.message : t('common.unknown_error', { defaultValue: 'Unknown error' }) });
+        } finally {
+          setInstallingId(null);
+        }
+        break;
+      }
+      case 'language':
+        if (mod.installed) {
+          addToast({ type: 'info', title: mod.name, message: t('marketplace.language_already_included', { defaultValue: 'This language is already included.' }) });
+        } else {
+          addToast({ type: 'success', title: mod.name, message: t('marketplace.language_activated', { defaultValue: 'Language pack activated. Change language in Settings.' }) });
+        }
+        break;
+      case 'demo_project': {
+        const demoId = mod.id.replace('demo-', '');
+        setInstallingId(mod.id);
+        try {
+          const result = await apiPost<{ project_id: string; project_name: string }>(`/demo/install/${demoId}`);
+          addToast({ type: 'success', title: t('marketplace.demo_installed', { defaultValue: 'Demo installed' }), message: t('marketplace.demo_installed_message', { defaultValue: '{{name}} created with full BOQ, schedule, budget, and tendering.', name: result.project_name }) });
+          navigate(`/projects/${result.project_id}`);
+        } catch (err) {
+          addToast({ type: 'error', title: t('marketplace.install_failed', { defaultValue: 'Install failed' }), message: err instanceof Error ? err.message : t('common.unknown_error', { defaultValue: 'Unknown error' }) });
+        } finally {
+          setInstallingId(null);
+        }
+        break;
+      }
+      case 'converter':
+      case 'analytics':
+      case 'integration':
+        addToast({ type: 'info', title: mod.name, message: t('marketplace.builtin_message', { defaultValue: 'This module is built into your installation and ready to use.' }) });
+        break;
+    }
+  }
+
+  return (
+    <div className="max-w-content mx-auto">
+      {/* ── Header ─────────────────────────────────────────────────── */}
+      <div className="mb-8 animate-card-in" style={{ animationDelay: '0ms' }}>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-content-primary">
+              {t('modules.page_title', { defaultValue: 'Modules & Marketplace' })}
+            </h1>
+            <p className="mt-1 text-sm text-content-secondary">
+              {t('modules.page_subtitle', {
+                defaultValue:
+                  'Manage optional features and browse data packages for your platform.',
+              })}
+            </p>
+            <InfoHint inline className="ml-1" text={t('marketplace.description', { defaultValue: 'Extend OpenEstimate with regional cost databases, resource catalogs (CWICR), vector search indices for AI, language packs, demo projects, and integrations. Install a module to activate it — uninstall anytime.' })} />
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="primary"
+              size="sm"
+              icon={<Upload size={14} />}
+              onClick={() => setUploadDialogOpen(true)}
+              data-testid="upload-module-btn"
+            >
+              {t('marketplace.upload_module', { defaultValue: 'Upload Module' })}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<RefreshCw size={14} className={isCheckingUpdates ? 'animate-spin' : ''} />}
+              onClick={() => void checkForUpdates()}
+              disabled={isCheckingUpdates}
+            >
+              {isCheckingUpdates
+                ? t('marketplace.checking_updates', { defaultValue: 'Checking...' })
+                : t('marketplace.check_updates', { defaultValue: 'Check for Updates' })}
+              {updateCount > 0 && !isCheckingUpdates && (
+                <span className="ml-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-amber-500 px-1 text-2xs font-bold text-white">
+                  {updateCount}
+                </span>
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Update notifications banner ──────────────────────────────── */}
+      {updateCount > 0 && (
+        <div className="mb-6 animate-card-in" style={{ animationDelay: '20ms' }}>
+          <div className="rounded-lg border border-amber-300 bg-amber-50 dark:border-amber-500/30 dark:bg-amber-500/10 p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <ArrowUpCircle size={16} className="text-amber-600 dark:text-amber-400" />
+              <span className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                {t('marketplace.updates_available', {
+                  defaultValue: '{{count}} module update(s) available',
+                  count: updateCount,
+                })}
+              </span>
+            </div>
+            <div className="space-y-2">
+              {Object.entries(moduleUpdates).map(([moduleKey, info]) => (
+                <UpdateNotificationCard
+                  key={moduleKey}
+                  moduleKey={moduleKey}
+                  info={info}
+                  isExpanded={expandedUpdate === moduleKey}
+                  onToggleExpand={() =>
+                    setExpandedUpdate(expandedUpdate === moduleKey ? null : moduleKey)
+                  }
+                  onUpdate={() => {
+                    dismissUpdate(moduleKey);
+                    addToast({
+                      type: 'success',
+                      title: t('marketplace.module_updated', { defaultValue: 'Module updated' }),
+                      message: t('marketplace.module_updated_message', {
+                        defaultValue: '{{module}} updated to v{{version}}.',
+                        module: moduleKey,
+                        version: info.latestVersion,
+                      }),
+                    });
+                    if (expandedUpdate === moduleKey) setExpandedUpdate(null);
+                  }}
+                  onDismiss={() => {
+                    dismissUpdate(moduleKey);
+                    if (expandedUpdate === moduleKey) setExpandedUpdate(null);
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════════════ */}
+      {/* ── SECTION 1: Modules (unified toggles) ─────────────────── */}
+      {/* ══════════════════════════════════════════════════════════════ */}
+      <UnifiedModulesSection
+        isModuleEnabled={isModuleEnabled}
+        setModuleEnabled={setModuleEnabled}
+        canDisable={canDisable}
+        getEnabledDependents={getEnabledDependents}
+      />
+
+      {/* ══════════════════════════════════════════════════════════════ */}
+      {/* ── SECTION 2: Marketplace (data packages) ───────────────── */}
+      {/* ══════════════════════════════════════════════════════════════ */}
+
+      {/* Installed data packages */}
+      {modules && modules.filter((m) => m.installed).length > 0 && (
+        <div className="mb-6 animate-card-in" style={{ animationDelay: '80ms' }}>
+          <h3 className="text-xs font-semibold text-content-tertiary uppercase tracking-wider mb-2">
+            {t('marketplace.my_modules', { defaultValue: 'Installed Packages' })}
+          </h3>
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {modules.filter((m) => m.installed).map((mod) => {
+              const Icon = getModuleIcon(mod.icon);
+              const statusBadge = getInstalledModuleBadge(mod, t);
+
+              return (
+                <div
+                  key={mod.id}
+                  className="flex items-center gap-3 rounded-lg border border-border-light bg-surface-elevated px-3 py-2.5 transition-all hover:border-border"
+                >
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-semantic-success-bg text-[#15803d]">
+                    <Icon size={15} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="text-xs font-medium text-content-primary truncate block">{mod.name}</span>
+                    <span className="text-2xs text-content-tertiary">
+                      {statusBadge.subtitle}
+                    </span>
+                  </div>
+
+                  {statusBadge.type === 'badge' ? (
+                    <Badge variant="success" size="sm">
+                      <Check size={10} className="mr-0.5" />
+                      {statusBadge.label}
+                    </Badge>
+                  ) : statusBadge.type === 'manage' ? (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => navigate('/costs/import')}
+                    >
+                      {t('marketplace.manage', 'Manage')}
+                    </Button>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Marketplace header */}
+      <h2 className="text-sm font-semibold text-content-secondary uppercase tracking-wider mb-3 mt-10">
+        {t('marketplace.available', { defaultValue: 'Data Packages & Add-ons' })}
+      </h2>
+
+      {/* Search bar */}
+      <div
+        className="mb-6 max-w-md animate-card-in"
+        style={{ animationDelay: '100ms' }}
+      >
+        <Input
+          placeholder={t('marketplace.search_placeholder', {
+            defaultValue: 'Search packages...',
+          })}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          icon={<Search size={16} />}
+        />
+      </div>
+
+      {/* Category tabs */}
+      <div
+        className="mb-6 flex flex-wrap gap-2 animate-card-in"
+        style={{ animationDelay: '120ms' }}
+      >
+        {CATEGORY_KEYS.map((key) => {
+          const meta = CATEGORIES[key];
+          const Icon = meta.icon;
+          const isActive = activeCategory === key;
+          const count = categoryCounts[key] ?? 0;
+          return (
+            <button
+              key={key}
+              onClick={() => setActiveCategory(key)}
+              className={`
+                inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5
+                text-sm font-medium transition-all duration-fast ease-oe
+                ${
+                  isActive
+                    ? 'bg-oe-blue text-content-inverse shadow-xs'
+                    : 'bg-surface-secondary text-content-secondary hover:bg-surface-tertiary hover:text-content-primary'
+                }
+              `}
+            >
+              <Icon size={14} strokeWidth={1.75} />
+              <span>{t(meta.labelKey, { defaultValue: meta.defaultLabel })}</span>
+              {count > 0 && (
+                <span
+                  className={`
+                    ml-0.5 text-2xs font-semibold rounded-full px-1.5
+                    ${isActive ? 'bg-white/20 text-content-inverse' : 'bg-surface-primary text-content-tertiary'}
+                  `}
+                >
+                  {count}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Module grid */}
+      {isLoading ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <div className="flex items-start gap-3">
+                <div className="h-11 w-11 rounded-xl bg-surface-secondary" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-2/3 rounded bg-surface-secondary" />
+                  <div className="h-3 w-full rounded bg-surface-secondary" />
+                  <div className="h-3 w-1/2 rounded bg-surface-secondary" />
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="py-16 text-center">
+          <Package size={40} className="mx-auto mb-3 text-content-tertiary" />
+          <p className="text-sm font-medium text-content-secondary">
+            {t('marketplace.no_results', { defaultValue: 'No modules found' })}
+          </p>
+          <p className="mt-1 text-xs text-content-tertiary">
+            {t('marketplace.no_results_hint', {
+              defaultValue: 'Try adjusting your search or category filter.',
+            })}
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.slice(0, marketplaceLimit).map((mod, i) => (
+              <MarketplaceCard
+                key={mod.id}
+                module={mod}
+                index={i}
+                isInstalling={installingId === mod.id}
+                onInstall={() => void handleInstallClick(mod)}
+              />
+            ))}
+          </div>
+          {filtered.length > marketplaceLimit && (
+            <div className="mt-6 text-center">
+              <Button
+                variant="secondary"
+                onClick={() => setMarketplaceLimit((prev) => prev + 12)}
+              >
+                {t('marketplace.show_more', {
+                  defaultValue: 'Show more ({{remaining}} remaining)',
+                  remaining: filtered.length - marketplaceLimit,
+                })}
+              </Button>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ── Installed system modules section ──────────────────────── */}
+      {systemModules && systemModules.length > 0 && (
+        <div className="mt-12 animate-card-in" style={{ animationDelay: '300ms' }}>
+          <h2 className="text-lg font-semibold text-content-primary mb-1">
+            {t('marketplace.installed_modules', {
+              defaultValue: 'Installed Core Modules',
+            })}
+          </h2>
+          <p className="text-sm text-content-secondary mb-4">
+            {systemModules.length}{' '}
+            {t('marketplace.modules_loaded', { defaultValue: 'modules loaded' })}
+            {rules?.rules ? `, ${rules.rules.length} ${t('marketplace.validation_rules_active', { defaultValue: 'validation rules active' })}` : ''}
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {systemModules.map((mod, i) => {
+              const moduleKey = mod.name.replace(/^oe_/, '').replace(/_/g, '-');
+              const updateInfo = moduleUpdates[moduleKey];
+
+              return (
+                <Card
+                  key={mod.name}
+                  className="animate-card-in relative"
+                  style={{ animationDelay: `${350 + i * 40}ms` }}
+                  padding="sm"
+                >
+                  {updateInfo && (
+                    <span className="absolute top-2 right-2 flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500" />
+                    </span>
+                  )}
+                  <div className="flex items-center gap-2.5">
+                    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${updateInfo ? 'bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400' : 'bg-semantic-success-bg text-[#15803d]'}`}>
+                      <ShieldCheck size={15} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-semibold text-content-primary truncate">
+                          {mod.display_name}
+                        </span>
+                        {updateInfo ? (
+                          <Badge variant="warning" size="sm" dot>
+                            {t('marketplace.update_available_short', { defaultValue: 'Update' })}
+                          </Badge>
+                        ) : (
+                          <Badge variant="success" size="sm" dot>
+                            {t('marketplace.active', { defaultValue: 'Active' })}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="text-2xs text-content-tertiary font-mono">
+                        {updateInfo
+                          ? `v${mod.version} → v${updateInfo.latestVersion}`
+                          : `v${mod.version}`}
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Validation Rules ─────────────────────────────────────── */}
+      {rules?.rule_sets && Object.keys(rules.rule_sets).length > 0 && (
+        <div
+          className="mt-8 animate-card-in"
+          style={{ animationDelay: '500ms' }}
+        >
+          <h2 className="text-lg font-semibold text-content-primary mb-4">
+            {t('marketplace.validation_rule_sets', {
+              defaultValue: 'Validation Rule Sets',
+            })}
+          </h2>
+          <Card padding="none">
+            <div className="divide-y divide-border-light">
+              {Object.entries(rules.rule_sets).map(([name, count]) => (
+                <div
+                  key={name}
+                  className="flex items-center justify-between px-5 py-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <ShieldCheck
+                      size={16}
+                      className="text-content-tertiary"
+                    />
+                    <span className="text-sm font-medium text-content-primary">
+                      {name}
+                    </span>
+                  </div>
+                  <Badge variant="neutral" size="sm">
+                    {count} {t('marketplace.rules', { defaultValue: 'rules' })}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* ── Custom (uploaded) modules ──────────────────────────────── */}
+      {customModules.length > 0 && (
+        <div className="mt-8 animate-card-in" style={{ animationDelay: '550ms' }}>
+          <h2 className="text-lg font-semibold text-content-primary mb-1">
+            {t('marketplace.custom_modules', { defaultValue: 'Custom Modules' })}
+          </h2>
+          <p className="text-sm text-content-secondary mb-4">
+            {t('marketplace.custom_modules_desc', {
+              defaultValue: '{{count}} user-uploaded module(s)',
+              count: customModules.length,
+            })}
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {customModules.map((mod, i) => (
+              <Card
+                key={mod.name}
+                className="animate-card-in"
+                style={{ animationDelay: `${600 + i * 40}ms` }}
+                padding="sm"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue">
+                    <Package size={16} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="text-xs font-semibold text-content-primary truncate block">
+                      {mod.displayName}
+                    </span>
+                    <span className="text-2xs text-content-tertiary font-mono">
+                      v{mod.version}
+                      {mod.author ? ` \u00B7 ${mod.author}` : ''}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      removeCustomModule(mod.name);
+                      addToast({
+                        type: 'success',
+                        title: t('marketplace.module_removed', { defaultValue: 'Module removed' }),
+                        message: t('marketplace.module_removed_message', {
+                          defaultValue: '"{{name}}" has been uninstalled.',
+                          name: mod.displayName,
+                        }),
+                      });
+                    }}
+                    title={t('marketplace.uninstall', 'Uninstall')}
+                    className="flex h-6 w-6 items-center justify-center rounded text-content-quaternary hover:text-semantic-error hover:bg-semantic-error-bg transition-colors"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Upload Module Dialog ───────────────────────────────── */}
+      <ModuleUploadDialog
+        open={uploadDialogOpen}
+        onClose={() => setUploadDialogOpen(false)}
+      />
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* ── Unified Modules Section (all optional features in one place) ─────── */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+interface UnifiedModulesSectionProps {
+  isModuleEnabled: (key: string) => boolean;
+  setModuleEnabled: (key: string, enabled: boolean) => void;
+  canDisable: (key: string) => { allowed: boolean; blockedBy: string[] };
+  getEnabledDependents: (key: string) => string[];
+}
+
+function UnifiedModulesSection({
+  isModuleEnabled,
+  setModuleEnabled,
+  canDisable,
+  getEnabledDependents,
+}: UnifiedModulesSectionProps) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+
+  const grouped = getModulesByCategory();
+
+  function handleToggle(key: string, name: string, currentlyEnabled: boolean) {
+    if (currentlyEnabled) {
+      const { allowed, blockedBy } = canDisable(key);
+      if (!allowed) {
+        addToast({
+          type: 'warning',
+          title: t('modules.cannot_disable', { defaultValue: 'Cannot disable' }),
+          message: t('modules.required_by', {
+            defaultValue: '{{name}} is required by: {{deps}}',
+            name,
+            deps: blockedBy.join(', '),
+          }),
+        });
+        return;
+      }
+    }
+    setModuleEnabled(key, !currentlyEnabled);
+    addToast({
+      type: 'success',
+      title: !currentlyEnabled
+        ? t('modules.enabled', { defaultValue: '{{name}} enabled', name })
+        : t('modules.disabled', { defaultValue: '{{name}} disabled', name }),
+    });
+  }
+
+  const isI18nKey = (s: string) => s.startsWith('modules.') || s.startsWith('nav.') || s.startsWith('validation.') || s.startsWith('schedule.') || s.startsWith('tendering.');
+
+  return (
+    <div className="mb-10 animate-card-in" style={{ animationDelay: '30ms' }}>
+      <div className="mb-5">
+        <h2 className="text-sm font-semibold text-content-secondary uppercase tracking-wider mb-1">
+          {t('modules.section_title', { defaultValue: 'Modules' })}
+        </h2>
+        <p className="text-xs text-content-tertiary">
+          {t('modules.section_desc', {
+            defaultValue: 'Toggle optional features on or off. Disabled modules are hidden from the sidebar.',
+          })}
+        </p>
+      </div>
+
+      <div className="space-y-6">
+        {MODULE_CATEGORY_ORDER.map((cat) => {
+          const mods = grouped[cat];
+          if (!mods || mods.length === 0) return null;
+          const catMeta = MODULE_CATEGORY_META[cat] ?? { labelKey: cat, defaultLabel: cat, descKey: '', defaultDesc: '' };
+
+          return (
+            <div key={cat}>
+              {/* Category header */}
+              <div className="flex items-center gap-2 mb-2.5">
+                <h3 className="text-xs font-semibold text-content-primary">
+                  {t(catMeta.labelKey, { defaultValue: catMeta.defaultLabel })}
+                </h3>
+                <div className="flex-1 h-px bg-border-light" />
+                <span className="text-2xs text-content-quaternary">
+                  {mods.filter((m) => isModuleEnabled(m.id)).length}/{mods.length} {t('modules.active_count', { defaultValue: 'active' })}
+                </span>
+              </div>
+
+              {/* Module grid */}
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {mods.map((mod) => {
+                  const Icon = mod.icon;
+                  const enabled = isModuleEnabled(mod.id);
+                  const deps = mod.depends ?? [];
+                  const dependents = getEnabledDependents(mod.id);
+                  const displayName = isI18nKey(mod.name)
+                    ? t(mod.name, { defaultValue: formatModuleId(mod.id) })
+                    : mod.name;
+                  const displayDesc = isI18nKey(mod.description)
+                    ? t(mod.description, { defaultValue: '' })
+                    : mod.description;
+
+                  return (
+                    <ModuleToggleCard
+                      key={mod.id}
+                      icon={Icon}
+                      name={displayName}
+                      description={displayDesc}
+                      version={mod.version}
+                      enabled={enabled}
+                      onToggle={() => handleToggle(mod.id, displayName, enabled)}
+                      deps={deps}
+                      dependents={dependents}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ── Module Toggle Card ──────────────────────────────────────────────── */
+
+interface ModuleToggleCardProps {
+  icon: LucideIcon;
+  name: string;
+  description: string;
+  version?: string;
+  enabled: boolean;
+  onToggle: () => void;
+  deps?: string[];
+  dependents?: string[];
+}
+
+function ModuleToggleCard({
+  icon: Icon,
+  name,
+  description,
+  version,
+  enabled,
+  onToggle,
+  deps,
+  dependents,
+}: ModuleToggleCardProps) {
+  const { t } = useTranslation();
+  const hasBlockers = (dependents ?? []).length > 0;
+
+  return (
+    <div
+      className={`
+        flex items-center gap-3 rounded-lg border px-3 py-2.5 transition-all
+        ${enabled
+          ? 'border-border-light bg-surface-elevated hover:border-border'
+          : 'border-border-light/50 bg-surface-secondary/50 opacity-60 hover:opacity-80'
+        }
+      `}
+    >
+      <div
+        className={`
+          flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors
+          ${enabled ? 'bg-oe-blue-subtle text-oe-blue' : 'bg-surface-tertiary text-content-quaternary'}
+        `}
+      >
+        <Icon size={15} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <span className="text-xs font-medium text-content-primary truncate block">{name}</span>
+        <span className="text-2xs text-content-tertiary line-clamp-1">
+          {description}
+          {version ? ` · v${version}` : ''}
+        </span>
+        {hasBlockers && enabled && (
+          <div className="flex items-center gap-1 mt-0.5">
+            <AlertTriangle size={9} className="text-amber-500 shrink-0" />
+            <span className="text-2xs text-amber-600 dark:text-amber-400 truncate">
+              {t('modules.required_by_short', {
+                defaultValue: 'Required by {{deps}}',
+                deps: (dependents ?? []).join(', '),
+              })}
+            </span>
+          </div>
+        )}
+        {deps && deps.length > 0 && (
+          <span className="text-2xs text-content-quaternary">
+            {t('modules.depends_on', { defaultValue: 'Requires: {{deps}}', deps: deps.join(', ') })}
+          </span>
+        )}
+      </div>
+
+      {/* Toggle switch */}
+      <button
+        onClick={onToggle}
+        role="switch"
+        aria-checked={enabled}
+        aria-label={`${enabled ? 'Disable' : 'Enable'} ${name}`}
+        className="shrink-0"
+      >
+        <div
+          className={`
+            relative h-5 w-9 rounded-full transition-colors duration-200
+            ${enabled ? 'bg-oe-blue' : 'bg-content-quaternary/40'}
+          `}
+        >
+          <div
+            className={`
+              absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200
+              ${enabled ? 'translate-x-[18px]' : 'translate-x-0.5'}
+            `}
+          />
+        </div>
+      </button>
+    </div>
+  );
+}
+
+/* ── Marketplace Card ────────────────────────────────────────────────── */
+
+interface MarketplaceCardProps {
+  module: MarketplaceModule;
+  index: number;
+  isInstalling?: boolean;
+  onInstall: () => void;
+}
+
+function MarketplaceCard({ module: mod, index, isInstalling, onInstall }: MarketplaceCardProps) {
+  const { t } = useTranslation();
+  const Icon = getModuleIcon(mod.icon);
+
+  const isLanguage = mod.category === 'language';
+
+  return (
+    <Card
+      hoverable
+      className="animate-card-in group"
+      style={{ animationDelay: `${150 + index * 40}ms` }}
+    >
+      <div className="flex items-start gap-3">
+        {/* Icon */}
+        <div
+          className={`
+            flex h-11 w-11 shrink-0 items-center justify-center rounded-xl
+            transition-colors duration-fast ease-oe
+            ${
+              mod.category === 'resource_catalog'
+                ? 'bg-[#fef3c7] text-[#92400e]'
+                : mod.category === 'cost_database'
+                  ? 'bg-oe-blue-subtle text-oe-blue'
+                  : mod.category === 'vector_index'
+                    ? 'bg-[#f0e6ff] text-[#7c3aed]'
+                    : mod.category === 'language'
+                      ? 'bg-semantic-success-bg text-[#15803d]'
+                      : mod.category === 'converter'
+                      ? 'bg-semantic-warning-bg text-[#b45309]'
+                      : mod.category === 'analytics'
+                        ? 'bg-[#e0f2fe] text-[#0369a1]'
+                        : 'bg-surface-secondary text-content-secondary'
+            }
+          `}
+        >
+          <Icon size={20} strokeWidth={1.75} />
+        </div>
+
+        {/* Content */}
+        <div className="min-w-0 flex-1">
+          {/* Title row */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-content-primary truncate">
+              {mod.name}
+            </span>
+          </div>
+
+          {/* Author & version */}
+          <div className="mt-0.5 flex items-center gap-1.5 text-2xs text-content-tertiary">
+            <span>{mod.author}</span>
+            <span className="text-border">|</span>
+            <span className="font-mono">v{mod.version}</span>
+            <span className="text-border">|</span>
+            <span>{formatSize(mod.size_mb)}</span>
+          </div>
+
+          {/* Description */}
+          <p className="mt-2 text-xs text-content-secondary line-clamp-2 leading-relaxed">
+            {mod.description}
+          </p>
+
+          {/* Tags & price */}
+          <div className="mt-3 flex items-center gap-1.5 flex-wrap">
+            {mod.tags.slice(0, 3).map((tag) => (
+              <Badge key={tag} variant="neutral" size="sm">
+                {tag}
+              </Badge>
+            ))}
+            {mod.tags.length > 3 && (
+              <Badge variant="neutral" size="sm">
+                +{mod.tags.length - 3}
+              </Badge>
+            )}
+
+            <div className="flex-1" />
+
+            {!isLanguage && (
+              <Badge variant="success" size="sm">
+                {t('marketplace.free', { defaultValue: 'Free' })}
+              </Badge>
+            )}
+          </div>
+
+          {/* Install / Status button */}
+          <div className="mt-3">
+            {mod.installed && isLanguage ? (
+              <Button variant="secondary" size="sm" disabled icon={<Check size={14} />}>
+                {t('marketplace.included', { defaultValue: 'Included' })}
+              </Button>
+            ) : mod.installed && (mod.category === 'analytics' || mod.category === 'integration' || mod.category === 'converter') ? (
+              <Button variant="secondary" size="sm" disabled icon={<Check size={14} />}>
+                {t('marketplace.builtin', { defaultValue: 'Built-in' })}
+              </Button>
+            ) : mod.installed && mod.category === 'cost_database' ? (
+              <Button variant="secondary" size="sm" icon={<Check size={14} />} onClick={onInstall}>
+                {t('marketplace.manage', { defaultValue: 'Manage' })}
+              </Button>
+            ) : mod.installed && mod.category === 'resource_catalog' ? (
+              <Button variant="secondary" size="sm" disabled icon={<Check size={14} />}>
+                {t('marketplace.imported', { defaultValue: 'Imported' })}
+              </Button>
+            ) : mod.installed && mod.category === 'vector_index' ? (
+              <Button variant="secondary" size="sm" disabled icon={<Check size={14} />}>
+                {t('marketplace.indexed', { defaultValue: 'Indexed' })}
+              </Button>
+            ) : mod.installed && mod.category === 'demo_project' ? (
+              <Button variant="secondary" size="sm" disabled icon={<Check size={14} />}>
+                {t('marketplace.installed', { defaultValue: 'Installed' })}
+              </Button>
+            ) : (
+              <Button
+                variant="primary"
+                size="sm"
+                icon={isInstalling ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                onClick={onInstall}
+                disabled={isInstalling}
+              >
+                {isInstalling
+                  ? t('marketplace.installing', { defaultValue: 'Installing...' })
+                  : t('marketplace.install', { defaultValue: 'Install' })}
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+/* ── Update Notification Card ──────────────────────────────────────────── */
+
+interface UpdateNotificationCardProps {
+  moduleKey: string;
+  info: ModuleUpdateInfo;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+  onUpdate: () => void;
+  onDismiss: () => void;
+}
+
+function UpdateNotificationCard({
+  moduleKey,
+  info,
+  isExpanded,
+  onToggleExpand,
+  onUpdate,
+  onDismiss,
+}: UpdateNotificationCardProps) {
+  const { t } = useTranslation();
+  return (
+    <div className="rounded-lg border border-amber-200 bg-white dark:border-amber-500/20 dark:bg-surface-elevated px-3 py-2">
+      <div className="flex items-center justify-between">
+        <button onClick={onToggleExpand} className="flex items-center gap-2 text-left flex-1 min-w-0">
+          <ChevronDown
+            size={14}
+            className={`text-amber-600 dark:text-amber-400 transition-transform ${isExpanded ? '' : '-rotate-90'}`}
+          />
+          <span className="text-xs font-semibold text-content-primary truncate">{moduleKey}</span>
+          <span className="text-2xs text-content-tertiary font-mono">
+            v{info.currentVersion} → v{info.latestVersion}
+          </span>
+        </button>
+        <div className="flex items-center gap-1 shrink-0 ml-2">
+          <Button variant="primary" size="sm" onClick={onUpdate}>
+            {t('marketplace.update_now', { defaultValue: 'Update' })}
+          </Button>
+          <button
+            onClick={onDismiss}
+            className="flex h-6 w-6 items-center justify-center rounded text-content-quaternary hover:text-content-secondary transition-colors"
+            title={t('common.dismiss', { defaultValue: 'Dismiss' })}
+          >
+            <X size={12} />
+          </button>
+        </div>
+      </div>
+      {isExpanded && (
+        <p className="mt-2 text-xs text-content-secondary leading-relaxed pl-6">
+          {info.changelog}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/* ── Installed module badge helper ────────────────────────────────────── */
+
+interface InstalledBadgeInfo {
+  type: 'badge' | 'manage';
+  label: string;
+  subtitle: string;
+}
+
+function getInstalledModuleBadge(
+  mod: MarketplaceModule,
+  t: (key: string, opts?: Record<string, unknown>) => string,
+): InstalledBadgeInfo {
+  switch (mod.category) {
+    case 'language':
+      return { type: 'badge', label: t('marketplace.included', { defaultValue: 'Included' }), subtitle: t('marketplace.included', { defaultValue: 'Included' }) };
+    case 'analytics':
+    case 'integration':
+    case 'converter':
+      return { type: 'badge', label: t('marketplace.builtin', { defaultValue: 'Built-in' }), subtitle: t('marketplace.builtin', { defaultValue: 'Built-in' }) };
+    case 'resource_catalog':
+      return { type: 'badge', label: t('marketplace.imported', { defaultValue: 'Imported' }), subtitle: t('marketplace.imported', { defaultValue: 'Imported' }) };
+    case 'vector_index':
+      return { type: 'badge', label: t('marketplace.indexed', { defaultValue: 'Indexed' }), subtitle: t('marketplace.indexed', { defaultValue: 'Indexed' }) };
+    case 'demo_project':
+      return { type: 'badge', label: t('marketplace.installed', { defaultValue: 'Installed' }), subtitle: t('marketplace.installed', { defaultValue: 'Installed' }) };
+    case 'cost_database':
+      return { type: 'manage', label: t('marketplace.manage', { defaultValue: 'Manage' }), subtitle: `v${mod.version}` };
+    default:
+      return { type: 'badge', label: t('marketplace.installed', { defaultValue: 'Installed' }), subtitle: `v${mod.version}` };
+  }
+}
+
+/* ── Helper types for system modules query ────────────────────────────── */
+
+interface SystemModule {
   name: string;
   version: string;
   display_name: string;
@@ -13,91 +1246,7 @@ interface ModuleInfo {
   loaded: boolean;
 }
 
-const moduleIcons: Record<string, React.ReactNode> = {
-  oe_users: <Users size={18} />,
-  oe_projects: <FolderOpen size={18} />,
-  oe_boq: <Layers size={18} />,
-  oe_costs: <Database size={18} />,
-  oe_assemblies: <Package size={18} />,
-  oe_schedule: <Calendar size={18} />,
-  oe_costmodel: <DollarSign size={18} />,
-  oe_validation: <ShieldCheck size={18} />,
-};
-
-export function ModulesPage() {
-  const { t } = useTranslation();
-
-  const { data: modules } = useQuery({
-    queryKey: ['modules'],
-    queryFn: () => fetch('/api/system/modules').then((r) => r.json()).then((d: { modules: ModuleInfo[] }) => d.modules),
-  });
-
-  const { data: rules } = useQuery({
-    queryKey: ['validation-rules'],
-    queryFn: () => fetch('/api/system/validation-rules').then((r) => r.json()),
-  });
-
-  return (
-    <div className="max-w-content mx-auto">
-      <div className="mb-6 animate-card-in" style={{ animationDelay: '0ms' }}>
-        <h1 className="text-2xl font-bold text-content-primary">{t('modules.title', 'Modules')}</h1>
-        <p className="mt-1 text-sm text-content-secondary">
-          {modules?.length ?? 0} modules loaded, {rules?.rules?.length ?? 0} validation rules active
-        </p>
-      </div>
-
-      {/* Loaded modules */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {modules?.map((mod, i) => (
-          <Card
-            key={mod.name}
-            className="animate-card-in"
-            style={{ animationDelay: `${100 + i * 60}ms` }}
-          >
-            <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue">
-                {moduleIcons[mod.name] ?? <Package size={18} />}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-content-primary truncate">{mod.display_name}</span>
-                  <Badge variant="success" size="sm" dot>Active</Badge>
-                </div>
-                <div className="mt-0.5 text-xs text-content-tertiary font-mono">{mod.name} v{mod.version}</div>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  <Badge variant="neutral" size="sm">{mod.category}</Badge>
-                  {mod.has_router && <Badge variant="blue" size="sm">API</Badge>}
-                  {mod.depends.length > 0 && (
-                    <Badge variant="neutral" size="sm">
-                      {mod.depends.length} deps
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      {/* Validation Rules */}
-      {rules?.rule_sets && (
-        <div className="mt-8 animate-card-in" style={{ animationDelay: '500ms' }}>
-          <h2 className="text-lg font-semibold text-content-primary mb-4">Validation Rule Sets</h2>
-          <Card padding="none">
-            <div className="divide-y divide-border-light">
-              {Object.entries(rules.rule_sets as Record<string, number>).map(([name, count]) => (
-                <div key={name} className="flex items-center justify-between px-5 py-3">
-                  <div className="flex items-center gap-3">
-                    <ShieldCheck size={16} className="text-content-tertiary" />
-                    <span className="text-sm font-medium text-content-primary">{name}</span>
-                  </div>
-                  <Badge variant="neutral" size="sm">{count} rules</Badge>
-                </div>
-              ))}
-            </div>
-          </Card>
-        </div>
-      )}
-    </div>
-  );
+interface ValidationRulesResponse {
+  rule_sets: Record<string, number>;
+  rules: Array<{ rule_id: string; name: string; standard: string }>;
 }

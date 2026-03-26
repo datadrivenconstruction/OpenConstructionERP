@@ -18,6 +18,7 @@ import {
 import { Button, Badge } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { apiGet, apiPost, ApiError } from '@/shared/lib/api';
+import { getIntlLocale } from '@/shared/lib/formatters';
 import { projectsApi, type Project } from '@/features/projects/api';
 import type { BOQ } from './api';
 
@@ -198,12 +199,12 @@ const FALLBACK_TEMPLATES: BOQTemplate[] = [
 
 /* ── Number formatter ───────────────────────────────────────────────── */
 
-const fmt = new Intl.NumberFormat('de-DE', {
+const fmt = new Intl.NumberFormat(getIntlLocale(), {
   minimumFractionDigits: 0,
   maximumFractionDigits: 0,
 });
 
-const fmtCurrency = new Intl.NumberFormat('de-DE', {
+const fmtCurrency = new Intl.NumberFormat(getIntlLocale(), {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });

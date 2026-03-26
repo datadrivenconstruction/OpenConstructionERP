@@ -1,0 +1,333 @@
+/**
+ * BOQToolbar — The toolbar/action bar at the top of the BOQ editor.
+ *
+ * Contains: undo/redo, add buttons, import/export, validate, recalculate, AI toggle.
+ * Extracted from BOQEditorPage.tsx for modularity.
+ */
+
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  Plus,
+  Download,
+  Upload,
+  ShieldCheck,
+  Layers,
+  Database,
+  Sparkles,
+  Undo2,
+  Redo2,
+  Clock,
+  FileSpreadsheet,
+  FileText,
+  FileDown,
+  RefreshCw,
+  AlertTriangle,
+  SearchCheck,
+  Check,
+  Brain,
+} from 'lucide-react';
+import { Button } from '@/shared/ui';
+import type { QualityBreakdown } from './boqHelpers';
+
+export interface BOQToolbarProps {
+  t: (key: string, options?: Record<string, string | number>) => string;
+  // Undo / redo
+  canUndo: boolean;
+  canRedo: boolean;
+  onUndo: () => void;
+  onRedo: () => void;
+  onShowVersionHistory: () => void;
+  // Add actions
+  onAddPosition: () => void;
+  onAddSection: () => void;
+  onOpenCostDb: () => void;
+  onOpenAssembly: () => void;
+  // Import
+  onImportClick: () => void;
+  isImporting: boolean;
+  importInputRef: React.RefObject<HTMLInputElement | null>;
+  onImportInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  // Export
+  onExport: (format: 'excel' | 'csv' | 'pdf' | 'gaeb') => void;
+  // Validate & recalculate
+  onValidate: () => void;
+  isValidating?: boolean;
+  lastValidationScore?: number | null;
+  onRecalculate: () => void;
+  isRecalculating: boolean;
+  isCheckingAnomalies?: boolean;
+  // AI
+  aiChatOpen: boolean;
+  onToggleAiChat: () => void;
+  costFinderOpen: boolean;
+  onToggleCostFinder: () => void;
+  onCheckAnomalies?: () => void;
+  anomalyCount?: number;
+  onAcceptAllAnomalies?: () => void;
+  // AI Smart Panel
+  smartPanelOpen: boolean;
+  onToggleSmartPanel: () => void;
+  // Quality
+  hasPositions: boolean;
+  qualityBreakdown: QualityBreakdown;
+  qualityScoreRing: React.ReactNode;
+}
+
+export function BOQToolbar({
+  t,
+  canUndo,
+  canRedo,
+  onUndo,
+  onRedo,
+  onShowVersionHistory,
+  onAddPosition,
+  onAddSection,
+  onOpenCostDb,
+  onOpenAssembly,
+  onImportClick,
+  isImporting,
+  importInputRef,
+  onImportInputChange,
+  onExport,
+  onValidate,
+  isValidating,
+  lastValidationScore,
+  onRecalculate,
+  isRecalculating,
+  isCheckingAnomalies,
+  aiChatOpen,
+  onToggleAiChat,
+  costFinderOpen,
+  onToggleCostFinder,
+  onCheckAnomalies,
+  anomalyCount,
+  onAcceptAllAnomalies,
+  smartPanelOpen,
+  onToggleSmartPanel,
+  hasPositions,
+  qualityScoreRing,
+}: BOQToolbarProps) {
+  /* ── Export dropdown state ─────────────────────────────────────────── */
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const exportRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (exportRef.current && !exportRef.current.contains(e.target as Node)) {
+        setShowExportMenu(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleExportItem = (format: 'excel' | 'csv' | 'pdf' | 'gaeb') => {
+    setShowExportMenu(false);
+    onExport(format);
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+      {/* ── Row-group: Quality + Undo/Redo ─────────────────────────────── */}
+      <div className="flex items-center gap-1.5">
+        {hasPositions && qualityScoreRing}
+        <Button variant="ghost" size="sm" icon={<Undo2 size={15} />} onClick={onUndo} disabled={!canUndo} title={t('boq.undo', { defaultValue: 'Undo (Ctrl+Z)' })} />
+        <Button variant="ghost" size="sm" icon={<Redo2 size={15} />} onClick={onRedo} disabled={!canRedo} title={t('boq.redo', { defaultValue: 'Redo (Ctrl+Y)' })} />
+        <Button variant="ghost" size="sm" icon={<Clock size={15} />} onClick={onShowVersionHistory} title={t('boq.version_history', { defaultValue: 'Version History' })} />
+      </div>
+
+      <div className="w-px h-6 bg-border-light hidden sm:block" />
+
+      {/* ── Row-group: Add ─────────────────────────────────────────────── */}
+      <div className="flex items-center gap-1.5">
+        <Button variant="primary" size="sm" icon={<Plus size={15} />} onClick={onAddPosition}>
+          {t('boq.add_position')}
+        </Button>
+        <Button variant="secondary" size="sm" icon={<Layers size={15} />} onClick={onAddSection} title={t('boq.add_section')}>
+          {t('boq.add_section')}
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          icon={<Database size={15} />}
+          onClick={onOpenCostDb}
+          className="border-oe-blue/30 text-oe-blue hover:bg-oe-blue/10"
+          title={t('boq.add_from_database')}
+        >
+          {t('boq.add_from_database')}
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          icon={<Layers size={15} />}
+          onClick={onOpenAssembly}
+          className="border-purple-300/30 text-purple-600 hover:bg-purple-50"
+          title={t('boq.from_assembly', { defaultValue: 'From Assembly' })}
+        >
+          {t('boq.from_assembly', { defaultValue: 'From Assembly' })}
+        </Button>
+      </div>
+
+      <div className="w-px h-6 bg-border-light hidden sm:block" />
+
+      {/* ── Row-group: File (Import / Export) ──────────────────────────── */}
+      <div className="flex items-center gap-1.5">
+        <Button variant="ghost" size="sm" icon={<Upload size={15} />} onClick={onImportClick} loading={isImporting} disabled={isImporting}>
+          {t('common.import', { defaultValue: 'Import' })}
+        </Button>
+        <input ref={importInputRef} type="file" accept=".xlsx,.csv,.pdf,.jpg,.jpeg,.png,.tiff,.rvt,.ifc,.dwg,.dgn" className="hidden" onChange={onImportInputChange} />
+        <div ref={exportRef} className="relative">
+          <Button variant="ghost" size="sm" icon={<Download size={15} />} onClick={() => setShowExportMenu((prev) => !prev)} aria-expanded={showExportMenu} aria-haspopup="true">
+            {t('boq.export')}
+          </Button>
+          {showExportMenu && (
+            <div role="menu" className="absolute left-0 top-full mt-1 z-50 w-44 rounded-lg border border-border-light bg-surface-elevated shadow-md animate-fade-in">
+              <button onClick={() => handleExportItem('excel')} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors rounded-t-lg">
+                <FileSpreadsheet size={15} className="text-content-tertiary" />
+                {t('boq.export_format_excel', { defaultValue: 'Excel (.xlsx)' })}
+              </button>
+              <button onClick={() => handleExportItem('csv')} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors">
+                <FileText size={15} className="text-content-tertiary" />
+                {t('boq.export_format_csv', { defaultValue: 'CSV (.csv)' })}
+              </button>
+              <button onClick={() => handleExportItem('pdf')} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors">
+                <FileDown size={15} className="text-content-tertiary" />
+                {t('boq.export_format_pdf', { defaultValue: 'PDF' })}
+              </button>
+              <button onClick={() => handleExportItem('gaeb')} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors rounded-b-lg">
+                <FileText size={15} className="text-content-tertiary" />
+                {t('boq.export_format_gaeb', { defaultValue: 'GAEB XML (.x83)' })}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="w-px h-6 bg-border-light hidden sm:block" />
+
+      {/* ── Row-group: Tools & AI ──────────────────────────────────────── */}
+      <div className="flex items-center gap-1.5">
+        {/* Validate: checks data quality, completeness, DIN 276 compliance */}
+        <div className="relative group/validate">
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<ShieldCheck size={15} className={isValidating ? 'animate-pulse text-oe-blue' : lastValidationScore != null ? (lastValidationScore >= 80 ? 'text-emerald-500' : lastValidationScore >= 50 ? 'text-amber-500' : 'text-red-500') : ''} />}
+            onClick={onValidate}
+            disabled={isValidating}
+          >
+            <span className="hidden xl:inline">
+              {isValidating
+                ? t('boq.validating', { defaultValue: 'Checking...' })
+                : t('boq.validate', { defaultValue: 'Validate' })
+              }
+            </span>
+            {lastValidationScore != null && !isValidating && (
+              <span className={`ml-1 text-2xs font-bold tabular-nums ${lastValidationScore >= 80 ? 'text-emerald-600' : lastValidationScore >= 50 ? 'text-amber-600' : 'text-red-600'}`}>
+                {lastValidationScore}%
+              </span>
+            )}
+          </Button>
+          <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-56 rounded-lg bg-gray-900 text-white text-2xs p-2.5 shadow-lg opacity-0 invisible group-hover/validate:opacity-100 group-hover/validate:visible transition-all z-50 pointer-events-none">
+            <p className="font-medium mb-1">{t('boq.validate_tip_title', { defaultValue: 'Quality Check' })}</p>
+            <p className="text-gray-300">{t('boq.validate_tip', { defaultValue: 'Checks for missing descriptions, zero quantities, pricing gaps, DIN 276 compliance, and duplicate positions.' })}</p>
+          </div>
+        </div>
+
+        {/* Recalculate: enriches resources from cost DB and recalculates unit rates */}
+        <div className="relative group/recalc">
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<RefreshCw size={15} className={isRecalculating ? 'animate-spin text-oe-blue' : ''} />}
+            onClick={onRecalculate}
+            disabled={isRecalculating}
+          >
+            <span className="hidden xl:inline">
+              {isRecalculating
+                ? t('boq.recalculating', { defaultValue: 'Updating...' })
+                : t('boq.recalculate_rates', { defaultValue: 'Update Rates' })
+              }
+            </span>
+          </Button>
+          <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-56 rounded-lg bg-gray-900 text-white text-2xs p-2.5 shadow-lg opacity-0 invisible group-hover/recalc:opacity-100 group-hover/recalc:visible transition-all z-50 pointer-events-none">
+            <p className="font-medium mb-1">{t('boq.recalculate_tip_title', { defaultValue: 'Update Unit Rates' })}</p>
+            <p className="text-gray-300">{t('boq.recalculate_tip', { defaultValue: 'Matches positions to cost database, attaches resource breakdowns (materials, labor, equipment), and recalculates unit rates from components.' })}</p>
+          </div>
+        </div>
+
+        {/* Anomalies: compares unit rates against cost database median rates */}
+        {onCheckAnomalies && (
+          <div className="relative group/anomaly">
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<AlertTriangle size={15} className={isCheckingAnomalies ? 'animate-pulse text-amber-500' : anomalyCount ? 'text-amber-500' : ''} />}
+            onClick={onCheckAnomalies}
+            disabled={isCheckingAnomalies}
+            className={anomalyCount ? 'text-amber-600 dark:text-amber-400' : ''}
+          >
+            <span className="hidden xl:inline">
+              {isCheckingAnomalies
+                ? t('boq.checking_anomalies', { defaultValue: 'Checking...' })
+                : anomalyCount
+                  ? t('boq.anomalies_badge', { defaultValue: 'Anomalies ({{count}})', count: anomalyCount })
+                  : t('boq.price_check', { defaultValue: 'Price Check' })
+              }
+            </span>
+          </Button>
+          <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-56 rounded-lg bg-gray-900 text-white text-2xs p-2.5 shadow-lg opacity-0 invisible group-hover/anomaly:opacity-100 group-hover/anomaly:visible transition-all z-50 pointer-events-none">
+            <p className="font-medium mb-1">{t('boq.anomaly_tip_title', { defaultValue: 'Price Benchmark' })}</p>
+            <p className="text-gray-300">{t('boq.anomaly_tip', { defaultValue: 'Compares each unit rate against median market rates from the cost database. Flags overpriced and underpriced positions.' })}</p>
+          </div>
+          </div>
+        )}
+        {anomalyCount !== undefined && anomalyCount > 0 && onAcceptAllAnomalies && (
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<Check size={15} className="text-green-500" />}
+            onClick={onAcceptAllAnomalies}
+            title={t('boq.accept_all_anomaly_suggestions', { defaultValue: 'Accept All Suggested Rates ({{count}})', count: anomalyCount })}
+            className="text-green-600 dark:text-green-400"
+          >
+            <span className="hidden xl:inline">{t('boq.accept_all', { defaultValue: 'Accept All' })}</span>
+          </Button>
+        )}
+        <div className="w-px h-6 bg-border-light hidden sm:block" />
+
+        {/* ── AI Tools (visually grouped) ───────────────────────────────── */}
+        <div className="flex items-center gap-1 rounded-lg bg-gradient-to-r from-violet-50 to-blue-50 dark:from-violet-950/30 dark:to-blue-950/30 border border-violet-200/50 dark:border-violet-800/30 px-1.5 py-0.5">
+          <span className="text-2xs font-semibold text-violet-500 dark:text-violet-400 mr-0.5 hidden lg:inline">AI</span>
+          <Button
+            variant={costFinderOpen ? 'primary' : 'ghost'}
+            size="sm"
+            icon={<SearchCheck size={15} className={costFinderOpen ? '' : 'text-violet-600 dark:text-violet-400'} />}
+            onClick={onToggleCostFinder}
+            title={t('boq.cost_finder_tooltip', { defaultValue: 'Search cost database using AI semantic matching — find similar items by description' })}
+          >
+            <span className="hidden xl:inline">{t('boq.cost_finder_short', { defaultValue: 'Cost Finder' })}</span>
+          </Button>
+          <Button
+            variant={aiChatOpen ? 'primary' : 'ghost'}
+            size="sm"
+            icon={<Sparkles size={15} className={aiChatOpen ? '' : 'text-violet-600 dark:text-violet-400'} />}
+            onClick={onToggleAiChat}
+            title={t('boq.ai_assistant_tooltip', { defaultValue: 'Describe what you need in natural language — AI generates BOQ positions with pricing' })}
+          >
+            <span className="hidden xl:inline">{t('boq.ai_assistant_short', { defaultValue: 'Assistant' })}</span>
+          </Button>
+          <Button
+            variant={smartPanelOpen ? 'primary' : 'ghost'}
+            size="sm"
+            icon={<Brain size={15} className={smartPanelOpen ? '' : 'text-violet-600 dark:text-violet-400'} />}
+            onClick={onToggleSmartPanel}
+            title={t('boq.ai_smart_tooltip', { defaultValue: 'AI analysis: gap detection, scope review, cost optimization suggestions' })}
+          >
+            <span className="hidden xl:inline">{t('boq.ai_smart_short', { defaultValue: 'Smart AI' })}</span>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -23,6 +23,7 @@ export interface CreateProjectData {
   classification_standard?: string;
   currency?: string;
   locale?: string;
+  regional_factor?: number;
 }
 
 export const projectsApi = {

@@ -59,6 +59,47 @@ export interface GanttData {
   };
 }
 
+export interface CPMActivityResult {
+  activity_id: string;
+  name: string;
+  duration_days: number;
+  early_start: number;
+  early_finish: number;
+  late_start: number;
+  late_finish: number;
+  total_float: number;
+  is_critical: boolean;
+}
+
+export interface CriticalPathResponse {
+  schedule_id: string;
+  project_duration_days: number;
+  critical_path: CPMActivityResult[];
+  all_activities: CPMActivityResult[];
+}
+
+export interface RiskAnalysisResponse {
+  schedule_id: string;
+  deterministic_days: number;
+  p50_days: number;
+  p80_days: number;
+  p95_days: number;
+  mean_days: number;
+  std_dev_days: number;
+  risk_buffer_days: number;
+  activity_risks: Array<{
+    activity_id: string;
+    name: string;
+    duration_days: number;
+    optimistic: number;
+    most_likely: number;
+    pessimistic: number;
+    expected: number;
+    std_dev: number;
+    is_critical: boolean;
+  }>;
+}
+
 export const scheduleApi = {
   // Schedules
   listSchedules: (projectId: string) =>
@@ -80,6 +121,17 @@ export const scheduleApi = {
     apiPost(`/v1/schedule/activities/${activityId}/link-position`, { boq_position_id: positionId }),
   updateProgress: (activityId: string, progressPct: number) =>
     apiPatch(`/v1/schedule/activities/${activityId}/progress`, { progress_pct: progressPct }),
+
+  // CPM & BOQ Generation
+  generateFromBOQ: (scheduleId: string, boqId: string, totalProjectDays?: number) =>
+    apiPost<Activity[]>(`/v1/schedule/schedules/${scheduleId}/generate-from-boq`, {
+      boq_id: boqId,
+      ...(totalProjectDays != null ? { total_project_days: totalProjectDays } : {}),
+    }),
+  calculateCPM: (scheduleId: string) =>
+    apiPost<CriticalPathResponse>(`/v1/schedule/schedules/${scheduleId}/calculate-cpm`),
+  getRiskAnalysis: (scheduleId: string) =>
+    apiGet<RiskAnalysisResponse>(`/v1/schedule/schedules/${scheduleId}/risk-analysis`),
 
   // Work Orders
   listWorkOrders: (params: { schedule_id?: string; activity_id?: string }) =>

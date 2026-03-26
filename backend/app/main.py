@@ -2,9 +2,13 @@
 
 Usage:
     uvicorn app.main:create_app --factory --reload --port 8000
+    openestimate serve  (CLI mode — also serves frontend)
 """
 
 import logging
+import os
+import uuid
+from pathlib import Path
 from typing import Any
 
 import structlog
@@ -40,6 +44,98 @@ def configure_logging(settings: Settings) -> None:
     logging.basicConfig(level=getattr(logging, settings.log_level), format="%(message)s")
 
 
+def _init_vector_db() -> None:
+    """Initialize vector database on startup.
+
+    Default: LanceDB (embedded, no Docker needed).
+    If VECTOR_BACKEND=qdrant, checks if Qdrant is reachable.
+    """
+    from app.core.vector import vector_status
+
+    status = vector_status()
+    engine = status.get("engine", "lancedb")
+    if status.get("connected"):
+        vectors = status.get("cost_collection", {})
+        count = vectors.get("vectors_count", 0) if vectors else 0
+        logger.info("Vector DB ready: %s (%d vectors indexed)", engine, count)
+    else:
+        if engine == "lancedb":
+            logger.warning("LanceDB init failed: %s", status.get("error", "unknown"))
+        else:
+            logger.info("Qdrant not available — semantic search disabled")
+
+
+async def _seed_demo_account() -> None:
+    """Create demo user + 5 demo projects if they don't exist yet.
+
+    Idempotent — safe to call on every startup.  Creates:
+    - demo@openestimator.io / DemoPass1234!  (role=admin)
+    - 5 projects: residential-berlin, office-london, hospital-munich,
+      school-paris, warehouse-dubai (each with 2 BOQs: detailed + budget)
+    """
+    from app.database import async_session_factory
+    from app.modules.users.models import User
+    from app.modules.users.service import hash_password
+    from app.modules.projects.models import Project
+    from sqlalchemy import select, func
+
+    try:
+        async with async_session_factory() as session:
+            # 1. Create demo user if missing
+            demo = (
+                await session.execute(
+                    select(User).where(User.email == "demo@openestimator.io")
+                )
+            ).scalar_one_or_none()
+
+            if demo is None:
+                demo = User(
+                    id=uuid.uuid4(),
+                    email="demo@openestimator.io",
+                    hashed_password=hash_password("DemoPass1234!"),
+                    full_name="Demo User",
+                    role="admin",
+                    locale="en",
+                    is_active=True,
+                    metadata_={},
+                )
+                session.add(demo)
+                await session.flush()
+                logger.info("Demo user created: demo@openestimator.io")
+
+            # 2. Install 5 demo projects if user has none
+            count = (
+                await session.execute(
+                    select(func.count())
+                    .select_from(Project)
+                    .where(Project.owner_id == demo.id)
+                )
+            ).scalar() or 0
+
+            if count == 0:
+                from app.core.demo_projects import install_demo_project
+
+                for demo_id in [
+                    "residential-berlin",
+                    "office-london",
+                    "hospital-munich",
+                    "school-paris",
+                    "warehouse-dubai",
+                ]:
+                    result = await install_demo_project(session, demo_id)
+                    logger.info(
+                        "Demo project installed: %s (%s positions, %s %s)",
+                        demo_id,
+                        result.get("positions"),
+                        result.get("currency"),
+                        result.get("grand_total"),
+                    )
+
+            await session.commit()
+    except Exception:
+        logger.exception("Failed to seed demo account (non-fatal)")
+
+
 def create_app() -> FastAPI:
     """Application factory.
 
@@ -72,6 +168,18 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    # ── Global exception handler — return JSON for unhandled errors ────
+    from fastapi import Request
+    from fastapi.responses import JSONResponse
+
+    @app.exception_handler(Exception)
+    async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+        logger.exception("Unhandled exception on %s %s", request.method, request.url.path)
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"Internal server error: {type(exc).__name__}"},
+        )
+
     # ── System Routes ───────────────────────────────────────────────────
     from app.core.i18n_router import router as i18n_router
 
@@ -85,9 +193,113 @@ def create_app() -> FastAPI:
             "env": settings.app_env,
         }
 
+    @app.get("/api/system/status", tags=["System"])
+    async def system_status() -> dict[str, Any]:
+        """Full system status: database, vector DB, AI providers."""
+        result: dict[str, Any] = {
+            "api": {"status": "healthy", "version": settings.app_version},
+            "database": {"status": "unknown"},
+            "vector_db": {"status": "offline", "engine": "qdrant"},
+            "ai": {"providers": []},
+        }
+
+        # Database check
+        try:
+            from app.database import engine
+            from sqlalchemy import text
+
+            async with engine.connect() as conn:
+                await conn.execute(text("SELECT 1"))
+            result["database"] = {"status": "connected", "engine": "sqlite" if "sqlite" in settings.database_url else "postgresql"}
+        except Exception as exc:
+            result["database"] = {"status": "error", "error": str(exc)[:100]}
+
+        # Vector DB check (LanceDB or Qdrant)
+        try:
+            from app.core.vector import vector_status as vs
+            vstat = vs()
+            if vstat.get("connected"):
+                col = vstat.get("cost_collection") or {}
+                result["vector_db"] = {
+                    "status": "connected",
+                    "engine": vstat.get("engine", "lancedb"),
+                    "vectors": col.get("vectors_count", 0),
+                }
+            else:
+                result["vector_db"] = {
+                    "status": "offline",
+                    "engine": vstat.get("engine", "lancedb"),
+                }
+        except Exception:
+            result["vector_db"] = {"status": "offline", "engine": "lancedb"}
+
+        # AI providers check
+        providers = []
+        if settings.openai_api_key:
+            providers.append({"name": "OpenAI", "configured": True})
+        if settings.anthropic_api_key:
+            providers.append({"name": "Anthropic", "configured": True})
+        # Check localStorage-style user keys via a flag
+        result["ai"] = {
+            "providers": providers,
+            "configured": len(providers) > 0,
+        }
+
+        return result
+
     @app.get("/api/system/modules", tags=["System"])
     async def list_modules() -> dict[str, Any]:
         return {"modules": module_loader.list_modules()}
+
+    @app.get("/api/marketplace", tags=["System"])
+    async def get_marketplace() -> list[dict[str, Any]]:
+        """Return all marketplace modules with runtime installed status."""
+        from app.core.marketplace import get_marketplace_catalog
+        from app.database import async_session_factory
+
+        # Query loaded catalog regions so resource_catalog entries show as installed
+        loaded_catalog_regions: set[str] = set()
+        try:
+            async with async_session_factory() as session:
+                from app.modules.catalog.repository import CatalogResourceRepository
+
+                repo = CatalogResourceRepository(session)
+                region_stats = await repo.stats_by_region()
+                loaded_catalog_regions = {
+                    r["region"] for r in region_stats if r.get("region")
+                }
+        except Exception:
+            pass  # Graceful degradation: show all as uninstalled
+
+        return get_marketplace_catalog(loaded_catalog_regions=loaded_catalog_regions)
+
+    @app.get("/api/demo/catalog", tags=["System"])
+    async def demo_catalog() -> list[dict[str, Any]]:
+        """Return the list of available demo project templates."""
+        from app.core.demo_projects import DEMO_CATALOG
+
+        return DEMO_CATALOG
+
+    @app.post("/api/demo/install/{demo_id}", tags=["System"])
+    async def install_demo(demo_id: str) -> dict[str, Any]:
+        """Install a demo project with full BOQ, Schedule, Budget, and Tendering data."""
+        from app.core.demo_projects import DEMO_TEMPLATES, install_demo_project
+        from app.database import async_session_factory
+
+        if demo_id not in DEMO_TEMPLATES:
+            from fastapi import HTTPException
+
+            valid = ", ".join(sorted(DEMO_TEMPLATES.keys()))
+            raise HTTPException(
+                status_code=404,
+                detail=f"Unknown demo_id '{demo_id}'. Valid options: {valid}",
+            )
+
+        async with async_session_factory() as session:
+            result = await install_demo_project(session, demo_id)
+            await session.commit()
+
+        return result
 
     @app.get("/api/system/validation-rules", tags=["System"])
     async def list_validation_rules() -> dict[str, Any]:
@@ -106,6 +318,50 @@ def create_app() -> FastAPI:
             "filters": hooks.list_filters(),
             "actions": hooks.list_actions(),
         }
+
+    @app.post("/api/v1/feedback", tags=["System"])
+    async def submit_feedback(payload: dict[str, Any]) -> dict[str, Any]:
+        """Store user feedback (bug reports, ideas, general comments)."""
+        from datetime import datetime, timezone
+
+        from app.database import engine
+        from sqlalchemy import text
+
+        category = str(payload.get("category", "general"))[:20]
+        subject = str(payload.get("subject", ""))[:200]
+        description = str(payload.get("description", ""))[:2000]
+        email = str(payload.get("email") or "")[:100] or None
+        page_path = str(payload.get("page_path", ""))[:200]
+
+        # Auto-create table if needed (SQLite dev mode)
+        async with engine.begin() as conn:
+            await conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS oe_feedback (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    category TEXT NOT NULL DEFAULT 'general',
+                    subject TEXT NOT NULL,
+                    description TEXT NOT NULL,
+                    email TEXT,
+                    page_path TEXT,
+                    created_at TEXT NOT NULL
+                )
+            """))
+            await conn.execute(
+                text("""
+                    INSERT INTO oe_feedback (category, subject, description, email, page_path, created_at)
+                    VALUES (:category, :subject, :description, :email, :page_path, :created_at)
+                """),
+                {
+                    "category": category,
+                    "subject": subject,
+                    "description": description,
+                    "email": email,
+                    "page_path": page_path,
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                },
+            )
+
+        return {"status": "received"}
 
     # ── Lifecycle ───────────────────────────────────────────────────────
     @app.on_event("startup")
@@ -136,6 +392,8 @@ def create_app() -> FastAPI:
             from app.modules.costmodel import models as _cm_models  # noqa: F401
             from app.modules.ai import models as _ai_models  # noqa: F401
             from app.modules.tendering import models as _tendering_models  # noqa: F401
+            from app.modules.catalog import models as _catalog_models  # noqa: F401
+            from app.modules.takeoff import models as _takeoff_models  # noqa: F401
 
             async with engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
@@ -149,6 +407,12 @@ def create_app() -> FastAPI:
 
         register_builtin_rules()
 
+        # Seed demo account + 3 demo projects (idempotent)
+        await _seed_demo_account()
+
+        # Initialize vector database (LanceDB embedded, no Docker)
+        _init_vector_db()
+
         logger.info("Application started successfully")
 
     @app.on_event("shutdown")
@@ -158,4 +422,12 @@ def create_app() -> FastAPI:
 
         await engine.dispose()
 
+    # ── Frontend Static Files (CLI / single-image mode) ──────────────
+    if os.environ.get("SERVE_FRONTEND", "").lower() in ("1", "true", "yes"):
+        from app.cli_static import mount_frontend
+
+        mount_frontend(app)
+
     return app
+
+

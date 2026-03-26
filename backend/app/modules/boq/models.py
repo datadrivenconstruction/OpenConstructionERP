@@ -236,3 +236,35 @@ class BOQActivityLog(Base):
 
     def __repr__(self) -> str:
         return f"<BOQActivityLog {self.action} target={self.target_type}:{self.target_id}>"
+
+
+class BOQSnapshot(Base):
+    """Point-in-time snapshot of a BOQ for version history.
+
+    Stores a full JSON snapshot of the BOQ state (positions, markups)
+    so users can view and restore previous versions.
+    """
+
+    __tablename__ = "oe_boq_snapshot"
+
+    boq_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_boq_boq.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
+    snapshot_data: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_users_user.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+
+    def __repr__(self) -> str:
+        return f"<BOQSnapshot boq={self.boq_id} name={self.name}>"

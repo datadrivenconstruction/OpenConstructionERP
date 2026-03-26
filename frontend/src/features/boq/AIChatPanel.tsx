@@ -11,6 +11,7 @@ import {
   type CreatePositionData,
 } from './api';
 import { ApiError } from '@/shared/lib/api';
+import { getIntlLocale } from '@/shared/lib/formatters';
 
 /* ── Types ──────────────────────────────────────────────────────────── */
 
@@ -38,7 +39,7 @@ export function AIChatPanel({
   onClose,
   onAddPositions,
 }: AIChatPanelProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
@@ -61,16 +62,28 @@ export function AIChatPanel({
   // AI chat mutation
   const chatMutation = useMutation({
     mutationFn: (message: string) =>
-      boqApi.aiChat(boqId, { message, context }),
+      boqApi.aiChat(boqId, { message, context, locale: i18n.language }),
     onSuccess: (response: AIChatResponse, _message: string) => {
       // Remove the loading indicator
       setMessages((prev) => prev.filter((m) => m.id !== 'loading'));
+
+      // Build localized summary
+      const total = response.items.reduce((s, item) => s + (item.total ?? 0), 0);
+      const currency = context.currency || 'EUR';
+      const localizedMessage = response.items.length > 0
+        ? t('boq.ai_generated_summary', {
+            defaultValue: 'Generated {{count}} positions totalling {{total}} {{currency}}.',
+            count: response.items.length,
+            total: total.toLocaleString(i18n.language, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+            currency,
+          })
+        : response.message;
 
       // Add assistant response
       const assistantMsg: ChatMessage = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
-        text: response.message,
+        text: localizedMessage,
         items: response.items.length > 0 ? response.items : undefined,
       };
       setMessages((prev) => [...prev, assistantMsg]);
@@ -179,7 +192,7 @@ export function AIChatPanel({
 
   /** Format a number for display. */
   const fmtNum = (n: number) =>
-    new Intl.NumberFormat('de-DE', {
+    new Intl.NumberFormat(getIntlLocale(), {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(n);

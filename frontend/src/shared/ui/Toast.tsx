@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react';
 import type { Toast as ToastType } from '@/stores/useToastStore';
 
@@ -46,12 +47,18 @@ interface ToastProps {
 }
 
 export function Toast({ toast, onDismiss }: ToastProps) {
+  const { t } = useTranslation();
   const Icon = iconMap[toast.type];
   const styles = styleMap[toast.type];
 
   const handleDismiss = useCallback(() => {
     onDismiss(toast.id);
   }, [onDismiss, toast.id]);
+
+  const handleAction = useCallback(() => {
+    toast.action?.onClick();
+    onDismiss(toast.id);
+  }, [toast.action, toast.id, onDismiss]);
 
   return (
     <div
@@ -64,11 +71,19 @@ export function Toast({ toast, onDismiss }: ToastProps) {
         {toast.message && (
           <p className={`mt-0.5 text-xs ${styles.message}`}>{toast.message}</p>
         )}
+        {toast.action && (
+          <button
+            onClick={handleAction}
+            className="mt-1 text-xs font-semibold text-accent hover:text-accent-hover underline underline-offset-2 transition-colors"
+          >
+            {toast.action.label}
+          </button>
+        )}
       </div>
       <button
         onClick={handleDismiss}
         className="shrink-0 mt-0.5 h-5 w-5 flex items-center justify-center rounded text-content-tertiary hover:text-content-primary transition-colors"
-        aria-label="Close"
+        aria-label={t('common.close', 'Close')}
       >
         <X size={14} />
       </button>

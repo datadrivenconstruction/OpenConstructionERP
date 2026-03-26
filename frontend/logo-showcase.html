@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OpenEstimator Logo Concepts</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #0a0a0f; color: #e0e0e0; padding: 40px; }
+  h1 { text-align: center; font-size: 28px; margin-bottom: 8px; color: #fff; }
+  .subtitle { text-align: center; color: #888; margin-bottom: 40px; font-size: 14px; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; max-width: 1200px; margin: 0 auto; }
+  .card { background: #141419; border: 1px solid #2a2a35; border-radius: 16px; padding: 28px 20px 20px; display: flex; flex-direction: column; align-items: center; transition: all 0.2s; }
+  .card:hover { border-color: #0071e3; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,113,227,0.15); }
+  .logo-wrap { width: 64px; height: 64px; margin-bottom: 16px; }
+  .logo-wrap svg { width: 100%; height: 100%; }
+  .card h3 { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 4px; text-align: center; }
+  .card p { font-size: 11px; color: #777; text-align: center; line-height: 1.4; }
+  .num { position: absolute; top: 8px; left: 12px; font-size: 10px; color: #555; font-weight: 700; }
+  .card { position: relative; }
+  .with-text { display: flex; align-items: center; gap: 12px; margin-top: 12px; padding: 8px 16px; background: #1a1a22; border-radius: 10px; width: 100%; }
+  .with-text .mini { width: 32px; height: 32px; flex-shrink: 0; }
+  .with-text .mini svg { width: 100%; height: 100%; }
+  .with-text span { font-size: 14px; font-weight: 600; color: #fff; white-space: nowrap; }
+  .with-text span em { font-style: normal; color: #0071e3; }
+  .with-text span .dim { color: #555; }
+  .section-label { grid-column: 1 / -1; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: #555; border-bottom: 1px solid #222; padding-bottom: 8px; margin-top: 16px; }
+</style>
+</head>
+<body>
+
+<h1>OpenEstimator.io — Logo Concepts</h1>
+<p class="subtitle">20 variants across different styles: Geometric, Typography, Symbol, Abstract</p>
+
+<div class="grid">
+
+<!-- ═══ GEOMETRIC ═══ -->
+<div class="section-label">Geometric / Architectural</div>
+
+<!-- 1. Stacked Bars (cost breakdown) -->
+<div class="card">
+  <span class="num">#1</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#0071e3"/>
+      <rect x="12" y="38" width="10" height="16" rx="2" fill="white" opacity="0.5"/>
+      <rect x="27" y="26" width="10" height="28" rx="2" fill="white" opacity="0.7"/>
+      <rect x="42" y="14" width="10" height="40" rx="2" fill="white" opacity="0.95"/>
+      <line x1="10" y1="56" x2="54" y2="56" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+    </svg>
+  </div>
+  <h3>Rising Bars</h3>
+  <p>Cost estimation growth chart — clean, professional</p>
+  <div class="with-text"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#0071e3"/><rect x="12" y="38" width="10" height="16" rx="2" fill="white" opacity="0.5"/><rect x="27" y="26" width="10" height="28" rx="2" fill="white" opacity="0.7"/><rect x="42" y="14" width="10" height="40" rx="2" fill="white" opacity="0.95"/><line x1="10" y1="56" x2="54" y2="56" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.4"/></svg></div><span>Open<em>Estimator</em><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 2. Building blocks -->
+<div class="card">
+  <span class="num">#2</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#0071e3"/>
+      <rect x="14" y="34" width="14" height="14" rx="2" fill="white" opacity="0.95"/>
+      <rect x="14" y="18" width="14" height="14" rx="2" fill="white" opacity="0.5"/>
+      <rect x="30" y="34" width="14" height="14" rx="2" fill="white" opacity="0.7"/>
+      <rect x="36" y="18" width="14" height="14" rx="2" fill="white" opacity="0.4"/>
+      <line x1="14" y1="50" x2="50" y2="50" stroke="white" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
+      <text x="50" y="16" text-anchor="end" fill="white" font-size="9" font-weight="700" font-family="system-ui" opacity="0.9">OE</text>
+    </svg>
+  </div>
+  <h3>Building Blocks</h3>
+  <p>Modular construction — stacked elements</p>
+  <div class="with-text"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#0071e3"/><rect x="14" y="34" width="14" height="14" rx="2" fill="white" opacity="0.95"/><rect x="14" y="18" width="14" height="14" rx="2" fill="white" opacity="0.5"/><rect x="30" y="34" width="14" height="14" rx="2" fill="white" opacity="0.7"/><rect x="36" y="18" width="14" height="14" rx="2" fill="white" opacity="0.4"/></svg></div><span>Open<em>Estimator</em><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 3. Blueprint grid -->
+<div class="card">
+  <span class="num">#3</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#0c2d5a"/>
+      <line x1="12" y1="12" x2="12" y2="52" stroke="#1a5fb4" stroke-width="0.8"/>
+      <line x1="22" y1="12" x2="22" y2="52" stroke="#1a5fb4" stroke-width="0.8"/>
+      <line x1="32" y1="12" x2="32" y2="52" stroke="#1a5fb4" stroke-width="0.8"/>
+      <line x1="42" y1="12" x2="42" y2="52" stroke="#1a5fb4" stroke-width="0.8"/>
+      <line x1="52" y1="12" x2="52" y2="52" stroke="#1a5fb4" stroke-width="0.8"/>
+      <line x1="12" y1="12" x2="52" y2="12" stroke="#1a5fb4" stroke-width="0.8"/>
+      <line x1="12" y1="22" x2="52" y2="22" stroke="#1a5fb4" stroke-width="0.8"/>
+      <line x1="12" y1="32" x2="52" y2="32" stroke="#1a5fb4" stroke-width="0.8"/>
+      <line x1="12" y1="42" x2="52" y2="42" stroke="#1a5fb4" stroke-width="0.8"/>
+      <line x1="12" y1="52" x2="52" y2="52" stroke="#1a5fb4" stroke-width="0.8"/>
+      <rect x="12" y="22" width="20" height="20" fill="#0071e3" opacity="0.7" rx="1"/>
+      <rect x="32" y="32" width="20" height="20" fill="white" opacity="0.15" rx="1"/>
+      <text x="22" y="36" text-anchor="middle" fill="white" font-size="12" font-weight="800" font-family="system-ui">OE</text>
+    </svg>
+  </div>
+  <h3>Blueprint Grid</h3>
+  <p>Engineering blueprint aesthetic</p>
+  <div class="with-text"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#0c2d5a"/><line x1="12" y1="12" x2="12" y2="52" stroke="#1a5fb4" stroke-width="0.8"/><line x1="22" y1="12" x2="22" y2="52" stroke="#1a5fb4" stroke-width="0.8"/><line x1="32" y1="12" x2="32" y2="52" stroke="#1a5fb4" stroke-width="0.8"/><line x1="42" y1="12" x2="42" y2="52" stroke="#1a5fb4" stroke-width="0.8"/><line x1="52" y1="12" x2="52" y2="52" stroke="#1a5fb4" stroke-width="0.8"/><line x1="12" y1="12" x2="52" y2="12" stroke="#1a5fb4" stroke-width="0.8"/><line x1="12" y1="22" x2="52" y2="22" stroke="#1a5fb4" stroke-width="0.8"/><line x1="12" y1="32" x2="52" y2="32" stroke="#1a5fb4" stroke-width="0.8"/><line x1="12" y1="42" x2="52" y2="42" stroke="#1a5fb4" stroke-width="0.8"/><line x1="12" y1="52" x2="52" y2="52" stroke="#1a5fb4" stroke-width="0.8"/><rect x="12" y="22" width="20" height="20" fill="#0071e3" opacity="0.7" rx="1"/><text x="22" y="36" text-anchor="middle" fill="white" font-size="12" font-weight="800" font-family="system-ui">OE</text></svg></div><span>Open<em>Estimator</em><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 4. Sigma / Sum symbol -->
+<div class="card">
+  <span class="num">#4</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#0071e3"/>
+      <path d="M18 14 L44 14 L44 20 L28 20 L38 32 L28 44 L44 44 L44 50 L18 50 L32 32 Z" fill="white" opacity="0.95"/>
+      <circle cx="48" cy="14" r="4" fill="white" opacity="0.5"/>
+    </svg>
+  </div>
+  <h3>Sigma Sum</h3>
+  <p>Mathematical summation — core of estimation</p>
+  <div class="with-text"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#0071e3"/><path d="M18 14 L44 14 L44 20 L28 20 L38 32 L28 44 L44 44 L44 50 L18 50 L32 32 Z" fill="white" opacity="0.95"/><circle cx="48" cy="14" r="4" fill="white" opacity="0.5"/></svg></div><span>Open<em>Estimator</em><span class="dim">.io</span></span></div>
+</div>
+
+<!-- ═══ LETTERMARK ═══ -->
+<div class="section-label">Lettermark / Monogram</div>
+
+<!-- 5. Bold OE -->
+<div class="card">
+  <span class="num">#5</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#111"/>
+      <text x="32" y="44" text-anchor="middle" fill="#0071e3" font-size="30" font-weight="900" font-family="system-ui">OE</text>
+      <line x1="12" y1="50" x2="52" y2="50" stroke="#0071e3" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <h3>Bold OE</h3>
+  <p>Stark monogram, dark premium feel</p>
+  <div class="with-text"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#111"/><text x="32" y="44" text-anchor="middle" fill="#0071e3" font-size="30" font-weight="900" font-family="system-ui">OE</text><line x1="12" y1="50" x2="52" y2="50" stroke="#0071e3" stroke-width="2.5" stroke-linecap="round"/></svg></div><span>Open<em>Estimator</em><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 6. Outlined O with E inside -->
+<div class="card">
+  <span class="num">#6</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#0071e3"/>
+      <circle cx="32" cy="32" r="18" stroke="white" stroke-width="3.5" fill="none"/>
+      <line x1="25" y1="24" x2="40" y2="24" stroke="white" stroke-width="3" stroke-linecap="round"/>
+      <line x1="25" y1="32" x2="36" y2="32" stroke="white" stroke-width="3" stroke-linecap="round"/>
+      <line x1="25" y1="40" x2="40" y2="40" stroke="white" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <h3>O(E) Merged</h3>
+  <p>E inside O — elegant monogram fusion</p>
+  <div class="with-text"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#0071e3"/><circle cx="32" cy="32" r="18" stroke="white" stroke-width="3.5" fill="none"/><line x1="25" y1="24" x2="40" y2="24" stroke="white" stroke-width="3" stroke-linecap="round"/><line x1="25" y1="32" x2="36" y2="32" stroke="white" stroke-width="3" stroke-linecap="round"/><line x1="25" y1="40" x2="40" y2="40" stroke="white" stroke-width="3" stroke-linecap="round"/></svg></div><span>Open<em>Estimator</em><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 7. Gradient slash -->
+<div class="card">
+  <span class="num">#7</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <defs>
+        <linearGradient id="g7" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#0071e3"/>
+          <stop offset="100%" stop-color="#5856d6"/>
+        </linearGradient>
+      </defs>
+      <rect width="64" height="64" rx="14" fill="url(#g7)"/>
+      <text x="22" y="44" fill="white" font-size="32" font-weight="300" font-family="system-ui" opacity="0.95">/</text>
+      <text x="30" y="42" fill="white" font-size="24" font-weight="800" font-family="system-ui">e</text>
+    </svg>
+  </div>
+  <h3>Slash-E</h3>
+  <p>Code-inspired /estimate aesthetic</p>
+  <div class="with-text"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><defs><linearGradient id="g7m" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0071e3"/><stop offset="100%" stop-color="#5856d6"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#g7m)"/><text x="22" y="44" fill="white" font-size="32" font-weight="300" font-family="system-ui" opacity="0.95">/</text><text x="30" y="42" fill="white" font-size="24" font-weight="800" font-family="system-ui">e</text></svg></div><span>Open<em>Estimator</em><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 8. Stencil O -->
+<div class="card">
+  <span class="num">#8</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#0071e3"/>
+      <path d="M32 10 C18 10 10 20 10 32 C10 44 18 54 32 54 C46 54 54 44 54 32 C54 20 46 10 32 10 Z M32 18 C42 18 46 24 46 32 C46 40 42 46 32 46 C22 46 18 40 18 32 C18 24 22 18 32 18 Z" fill="white" opacity="0.95"/>
+      <rect x="30" y="10" width="4" height="44" fill="#0071e3"/>
+    </svg>
+  </div>
+  <h3>Split O</h3>
+  <p>Open — literally split open circle</p>
+  <div class="with-text"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#0071e3"/><path d="M32 10 C18 10 10 20 10 32 C10 44 18 54 32 54 C46 54 54 44 54 32 C54 20 46 10 32 10 Z M32 18 C42 18 46 24 46 32 C46 40 42 46 32 46 C22 46 18 40 18 32 C18 24 22 18 32 18 Z" fill="white" opacity="0.95"/><rect x="30" y="10" width="4" height="44" fill="#0071e3"/></svg></div><span>Open<em>Estimator</em><span class="dim">.io</span></span></div>
+</div>
+
+<!-- ═══ SYMBOL / ICON ═══ -->
+<div class="section-label">Symbol / Construction Icon</div>
+
+<!-- 9. Ruler + calculator -->
+<div class="card">
+  <span class="num">#9</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#0071e3"/>
+      <!-- Ruler vertical -->
+      <rect x="12" y="10" width="12" height="44" rx="2" fill="white" opacity="0.3"/>
+      <line x1="12" y1="18" x2="19" y2="18" stroke="white" stroke-width="1.2" opacity="0.6"/>
+      <line x1="12" y1="26" x2="21" y2="26" stroke="white" stroke-width="1.2" opacity="0.6"/>
+      <line x1="12" y1="34" x2="19" y2="34" stroke="white" stroke-width="1.2" opacity="0.6"/>
+      <line x1="12" y1="42" x2="21" y2="42" stroke="white" stroke-width="1.2" opacity="0.6"/>
+      <!-- Calculator display -->
+      <rect x="30" y="10" width="24" height="44" rx="3" fill="white" opacity="0.95"/>
+      <rect x="33" y="13" width="18" height="10" rx="2" fill="#0071e3" opacity="0.2"/>
+      <text x="48" y="21" text-anchor="end" fill="#0071e3" font-size="8" font-weight="700" font-family="system-ui">$</text>
+      <!-- Buttons -->
+      <rect x="33" y="27" width="5" height="5" rx="1" fill="#0071e3" opacity="0.6"/>
+      <rect x="41" y="27" width="5" height="5" rx="1" fill="#0071e3" opacity="0.4"/>
+      <rect x="49" y="27" width="5" height="5" rx="1" fill="#0071e3" opacity="0.4"/>
+      <rect x="33" y="35" width="5" height="5" rx="1" fill="#0071e3" opacity="0.4"/>
+      <rect x="41" y="35" width="5" height="5" rx="1" fill="#0071e3" opacity="0.4"/>
+      <rect x="49" y="35" width="5" height="5" rx="1" fill="#0071e3" opacity="0.4"/>
+      <rect x="33" y="43" width="21" height="8" rx="2" fill="#0071e3" opacity="0.8"/>
+      <text x="43.5" y="49" text-anchor="middle" fill="white" font-size="5" font-weight="700" font-family="system-ui">=</text>
+    </svg>
+  </div>
+  <h3>Ruler + Calc</h3>
+  <p>Measure + calculate — construction estimating</p>
+  <div class="with-text"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#0071e3"/><rect x="12" y="10" width="12" height="44" rx="2" fill="white" opacity="0.3"/><line x1="12" y1="18" x2="19" y2="18" stroke="white" stroke-width="1.2" opacity="0.6"/><line x1="12" y1="26" x2="21" y2="26" stroke="white" stroke-width="1.2" opacity="0.6"/><line x1="12" y1="34" x2="19" y2="34" stroke="white" stroke-width="1.2" opacity="0.6"/><line x1="12" y1="42" x2="21" y2="42" stroke="white" stroke-width="1.2" opacity="0.6"/><rect x="30" y="10" width="24" height="44" rx="3" fill="white" opacity="0.95"/><rect x="33" y="13" width="18" height="10" rx="2" fill="#0071e3" opacity="0.2"/><text x="48" y="21" text-anchor="end" fill="#0071e3" font-size="8" font-weight="700" font-family="system-ui">$</text></svg></div><span>Open<em>Estimator</em><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 10. Hard hat / helmet -->
+<div class="card">
+  <span class="num">#10</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#0071e3"/>
+      <!-- Helmet -->
+      <path d="M16 36 C16 22 22 14 32 14 C42 14 48 22 48 36" stroke="white" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+      <rect x="12" y="35" width="40" height="6" rx="3" fill="white" opacity="0.95"/>
+      <!-- Equals -->
+      <line x1="22" y1="48" x2="42" y2="48" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+      <line x1="22" y1="53" x2="42" y2="53" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.4"/>
+    </svg>
+  </div>
+  <h3>Hard Hat</h3>
+  <p>Construction identity — helmet + equals</p>
+  <div class="with-text"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#0071e3"/><path d="M16 36 C16 22 22 14 32 14 C42 14 48 22 48 36" stroke="white" stroke-width="3.5" stroke-linecap="round" fill="none"/><rect x="12" y="35" width="40" height="6" rx="3" fill="white" opacity="0.95"/><line x1="22" y1="48" x2="42" y2="48" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/><line x1="22" y1="53" x2="42" y2="53" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.4"/></svg></div><span>Open<em>Estimator</em><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 11. Cube / 3D box -->
+<div class="card">
+  <span class="num">#11</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <defs>
+        <linearGradient id="g11" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#0071e3"/>
+          <stop offset="100%" stop-color="#00a3ff"/>
+        </linearGradient>
+      </defs>
+      <rect width="64" height="64" rx="14" fill="url(#g11)"/>
+      <!-- 3D cube -->
+      <polygon points="32,12 50,22 50,42 32,52 14,42 14,22" fill="none" stroke="white" stroke-width="2.5" stroke-linejoin="round"/>
+      <line x1="32" y1="32" x2="32" y2="52" stroke="white" stroke-width="2" opacity="0.7"/>
+      <line x1="32" y1="32" x2="50" y2="22" stroke="white" stroke-width="2" opacity="0.7"/>
+      <line x1="32" y1="32" x2="14" y2="22" stroke="white" stroke-width="2" opacity="0.7"/>
+      <!-- Top face fill -->
+      <polygon points="32,12 50,22 32,32 14,22" fill="white" opacity="0.2"/>
+    </svg>
+  </div>
+  <h3>3D Cube</h3>
+  <p>Volume / BIM — dimensional estimation</p>
+  <div class="with-text"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><defs><linearGradient id="g11m" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0071e3"/><stop offset="100%" stop-color="#00a3ff"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#g11m)"/><polygon points="32,12 50,22 50,42 32,52 14,42 14,22" fill="none" stroke="white" stroke-width="2.5" stroke-linejoin="round"/><line x1="32" y1="32" x2="32" y2="52" stroke="white" stroke-width="2" opacity="0.7"/><line x1="32" y1="32" x2="50" y2="22" stroke="white" stroke-width="2" opacity="0.7"/><line x1="32" y1="32" x2="14" y2="22" stroke="white" stroke-width="2" opacity="0.7"/><polygon points="32,12 50,22 32,32 14,22" fill="white" opacity="0.2"/></svg></div><span>Open<em>Estimator</em><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 12. Triangle / pyramid  -->
+<div class="card">
+  <span class="num">#12</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#111"/>
+      <polygon points="32,10 54,52 10,52" fill="none" stroke="#0071e3" stroke-width="3" stroke-linejoin="round"/>
+      <line x1="18" y1="38" x2="46" y2="38" stroke="#0071e3" stroke-width="1.5" opacity="0.5"/>
+      <line x1="24" y1="26" x2="40" y2="26" stroke="#0071e3" stroke-width="1.5" opacity="0.3"/>
+      <circle cx="32" cy="36" r="3" fill="#0071e3"/>
+    </svg>
+  </div>
+  <h3>Pyramid Layers</h3>
+  <p>Cost hierarchy — WBS breakdown</p>
+  <div class="with-text"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#111"/><polygon points="32,10 54,52 10,52" fill="none" stroke="#0071e3" stroke-width="3" stroke-linejoin="round"/><line x1="18" y1="38" x2="46" y2="38" stroke="#0071e3" stroke-width="1.5" opacity="0.5"/><line x1="24" y1="26" x2="40" y2="26" stroke="#0071e3" stroke-width="1.5" opacity="0.3"/><circle cx="32" cy="36" r="3" fill="#0071e3"/></svg></div><span>Open<em>Estimator</em><span class="dim">.io</span></span></div>
+</div>
+
+<!-- ═══ ABSTRACT / MODERN ═══ -->
+<div class="section-label">Abstract / Modern</div>
+
+<!-- 13. Concentric circles -->
+<div class="card">
+  <span class="num">#13</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#0071e3"/>
+      <circle cx="32" cy="32" r="20" stroke="white" stroke-width="2" opacity="0.3"/>
+      <circle cx="32" cy="32" r="14" stroke="white" stroke-width="2" opacity="0.5"/>
+      <circle cx="32" cy="32" r="8" stroke="white" stroke-width="2" opacity="0.8"/>
+      <circle cx="32" cy="32" r="3" fill="white"/>
+    </svg>
+  </div>
+  <h3>Target</h3>
+  <p>Precision estimation — hitting the target cost</p>
+  <div class="with-text"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#0071e3"/><circle cx="32" cy="32" r="20" stroke="white" stroke-width="2" opacity="0.3"/><circle cx="32" cy="32" r="14" stroke="white" stroke-width="2" opacity="0.5"/><circle cx="32" cy="32" r="8" stroke="white" stroke-width="2" opacity="0.8"/><circle cx="32" cy="32" r="3" fill="white"/></svg></div><span>Open<em>Estimator</em><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 14. Gradient wave / layers -->
+<div class="card">
+  <span class="num">#14</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <defs>
+        <linearGradient id="g14" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#0071e3"/>
+          <stop offset="50%" stop-color="#5856d6"/>
+          <stop offset="100%" stop-color="#bf5af2"/>
+        </linearGradient>
+      </defs>
+      <rect width="64" height="64" rx="14" fill="url(#g14)"/>
+      <path d="M10 40 Q22 28 32 36 Q42 44 54 32" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.4"/>
+      <path d="M10 32 Q22 20 32 28 Q42 36 54 24" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.7"/>
+      <path d="M10 24 Q22 12 32 20 Q42 28 54 16" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.95"/>
+      <circle cx="54" cy="16" r="3" fill="white"/>
+    </svg>
+  </div>
+  <h3>Wave Layers</h3>
+  <p>Data layers — multi-dimensional analysis</p>
+  <div class="with-text"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><defs><linearGradient id="g14m" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0071e3"/><stop offset="50%" stop-color="#5856d6"/><stop offset="100%" stop-color="#bf5af2"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#g14m)"/><path d="M10 40 Q22 28 32 36 Q42 44 54 32" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.4"/><path d="M10 32 Q22 20 32 28 Q42 36 54 24" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.7"/><path d="M10 24 Q22 12 32 20 Q42 28 54 16" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.95"/><circle cx="54" cy="16" r="3" fill="white"/></svg></div><span>Open<em>Estimator</em><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 15. Diamond / rhombus -->
+<div class="card">
+  <span class="num">#15</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#111"/>
+      <rect x="16" y="16" width="32" height="32" rx="4" transform="rotate(45 32 32)" fill="none" stroke="#0071e3" stroke-width="3"/>
+      <rect x="22" y="22" width="20" height="20" rx="2" transform="rotate(45 32 32)" fill="#0071e3" opacity="0.3"/>
+      <text x="32" y="37" text-anchor="middle" fill="#0071e3" font-size="16" font-weight="800" font-family="system-ui">E</text>
+    </svg>
+  </div>
+  <h3>Diamond E</h3>
+  <p>Premium diamond frame — enterprise feel</p>
+  <div class="with-text"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#111"/><rect x="16" y="16" width="32" height="32" rx="4" transform="rotate(45 32 32)" fill="none" stroke="#0071e3" stroke-width="3"/><rect x="22" y="22" width="20" height="20" rx="2" transform="rotate(45 32 32)" fill="#0071e3" opacity="0.3"/><text x="32" y="37" text-anchor="middle" fill="#0071e3" font-size="16" font-weight="800" font-family="system-ui">E</text></svg></div><span>Open<em>Estimator</em><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 16. Hexagon -->
+<div class="card">
+  <span class="num">#16</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <defs>
+        <linearGradient id="g16" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#0071e3"/>
+          <stop offset="100%" stop-color="#34c759"/>
+        </linearGradient>
+      </defs>
+      <rect width="64" height="64" rx="14" fill="#fafafa"/>
+      <polygon points="32,8 54,20 54,44 32,56 10,44 10,20" fill="url(#g16)"/>
+      <text x="32" y="37" text-anchor="middle" fill="white" font-size="18" font-weight="800" font-family="system-ui">OE</text>
+    </svg>
+  </div>
+  <h3>Hex Badge</h3>
+  <p>Technical hexagon — engineering identity</p>
+  <div class="with-text"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><defs><linearGradient id="g16m" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0071e3"/><stop offset="100%" stop-color="#34c759"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="#fafafa"/><polygon points="32,8 54,20 54,44 32,56 10,44 10,20" fill="url(#g16m)"/><text x="32" y="37" text-anchor="middle" fill="white" font-size="18" font-weight="800" font-family="system-ui">OE</text></svg></div><span>Open<em>Estimator</em><span class="dim">.io</span></span></div>
+</div>
+
+<!-- ═══ MINIMAL / CLEAN ═══ -->
+<div class="section-label">Minimal / Clean</div>
+
+<!-- 17. Simple equals + building -->
+<div class="card">
+  <span class="num">#17</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#0071e3"/>
+      <!-- Minimal building outline -->
+      <rect x="18" y="20" width="28" height="30" rx="2" fill="none" stroke="white" stroke-width="2.5"/>
+      <rect x="24" y="26" width="6" height="6" rx="1" fill="white" opacity="0.5"/>
+      <rect x="34" y="26" width="6" height="6" rx="1" fill="white" opacity="0.5"/>
+      <rect x="24" y="36" width="6" height="6" rx="1" fill="white" opacity="0.5"/>
+      <rect x="34" y="36" width="6" height="6" rx="1" fill="white" opacity="0.5"/>
+      <!-- Roof line -->
+      <path d="M14 20 L32 10 L50 20" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <line x1="18" y1="54" x2="46" y2="54" stroke="white" stroke-width="1.5" opacity="0.3"/>
+    </svg>
+  </div>
+  <h3>Building</h3>
+  <p>Clean house icon — construction is home</p>
+  <div class="with-text"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#0071e3"/><rect x="18" y="20" width="28" height="30" rx="2" fill="none" stroke="white" stroke-width="2.5"/><rect x="24" y="26" width="6" height="6" rx="1" fill="white" opacity="0.5"/><rect x="34" y="26" width="6" height="6" rx="1" fill="white" opacity="0.5"/><rect x="24" y="36" width="6" height="6" rx="1" fill="white" opacity="0.5"/><rect x="34" y="36" width="6" height="6" rx="1" fill="white" opacity="0.5"/><path d="M14 20 L32 10 L50 20" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div><span>Open<em>Estimator</em><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 18. Minimal checkmark + dollar -->
+<div class="card">
+  <span class="num">#18</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#0071e3"/>
+      <circle cx="32" cy="30" r="16" fill="none" stroke="white" stroke-width="2.5"/>
+      <text x="32" y="36" text-anchor="middle" fill="white" font-size="18" font-weight="700" font-family="system-ui">€</text>
+      <polyline points="20,50 28,56 44,42" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+  </div>
+  <h3>Cost Check</h3>
+  <p>Currency + checkmark — verified estimation</p>
+  <div class="with-text"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#0071e3"/><circle cx="32" cy="30" r="16" fill="none" stroke="white" stroke-width="2.5"/><text x="32" y="36" text-anchor="middle" fill="white" font-size="18" font-weight="700" font-family="system-ui">€</text><polyline points="20,50 28,56 44,42" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div><span>Open<em>Estimator</em><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 19. Brackets  -->
+<div class="card">
+  <span class="num">#19</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#111"/>
+      <!-- Open bracket -->
+      <path d="M20 14 L14 14 L14 50 L20 50" stroke="#0071e3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- Close bracket -->
+      <path d="M44 14 L50 14 L50 50 L44 50" stroke="#0071e3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- E inside -->
+      <line x1="26" y1="22" x2="40" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/>
+      <line x1="26" y1="32" x2="36" y2="32" stroke="white" stroke-width="3" stroke-linecap="round"/>
+      <line x1="26" y1="42" x2="40" y2="42" stroke="white" stroke-width="3" stroke-linecap="round"/>
+      <line x1="26" y1="22" x2="26" y2="42" stroke="white" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <h3>Code Brackets</h3>
+  <p>Open-source identity — [E] in brackets</p>
+  <div class="with-text"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#111"/><path d="M20 14 L14 14 L14 50 L20 50" stroke="#0071e3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M44 14 L50 14 L50 50 L44 50" stroke="#0071e3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/><line x1="26" y1="22" x2="40" y2="22" stroke="white" stroke-width="3" stroke-linecap="round"/><line x1="26" y1="32" x2="36" y2="32" stroke="white" stroke-width="3" stroke-linecap="round"/><line x1="26" y1="42" x2="40" y2="42" stroke="white" stroke-width="3" stroke-linecap="round"/><line x1="26" y1="22" x2="26" y2="42" stroke="white" stroke-width="3" stroke-linecap="round"/></svg></div><span>Open<em>Estimator</em><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 20. Stacked lines / spreadsheet -->
+<div class="card">
+  <span class="num">#20</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <defs>
+        <linearGradient id="g20" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#0071e3"/>
+          <stop offset="100%" stop-color="#0051a3"/>
+        </linearGradient>
+      </defs>
+      <rect width="64" height="64" rx="14" fill="url(#g20)"/>
+      <!-- Spreadsheet rows -->
+      <rect x="12" y="12" width="40" height="8" rx="2" fill="white" opacity="0.95"/>
+      <rect x="12" y="23" width="28" height="6" rx="1.5" fill="white" opacity="0.4"/>
+      <rect x="42" y="23" width="10" height="6" rx="1.5" fill="white" opacity="0.6"/>
+      <rect x="12" y="32" width="28" height="6" rx="1.5" fill="white" opacity="0.3"/>
+      <rect x="42" y="32" width="10" height="6" rx="1.5" fill="white" opacity="0.5"/>
+      <rect x="12" y="41" width="28" height="6" rx="1.5" fill="white" opacity="0.25"/>
+      <rect x="42" y="41" width="10" height="6" rx="1.5" fill="white" opacity="0.4"/>
+      <!-- Total row -->
+      <rect x="12" y="50" width="40" height="6" rx="1.5" fill="white" opacity="0.8"/>
+      <text x="49" y="55" text-anchor="end" fill="#0051a3" font-size="4.5" font-weight="700" font-family="system-ui">TOTAL</text>
+    </svg>
+  </div>
+  <h3>Spreadsheet</h3>
+  <p>BOQ table — direct product metaphor</p>
+  <div class="with-text"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><defs><linearGradient id="g20m" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#0071e3"/><stop offset="100%" stop-color="#0051a3"/></linearGradient></defs><rect width="64" height="64" rx="14" fill="url(#g20m)"/><rect x="12" y="12" width="40" height="8" rx="2" fill="white" opacity="0.95"/><rect x="12" y="23" width="28" height="6" rx="1.5" fill="white" opacity="0.4"/><rect x="42" y="23" width="10" height="6" rx="1.5" fill="white" opacity="0.6"/><rect x="12" y="32" width="28" height="6" rx="1.5" fill="white" opacity="0.3"/><rect x="42" y="32" width="10" height="6" rx="1.5" fill="white" opacity="0.5"/><rect x="12" y="41" width="28" height="6" rx="1.5" fill="white" opacity="0.25"/><rect x="42" y="41" width="10" height="6" rx="1.5" fill="white" opacity="0.4"/><rect x="12" y="50" width="40" height="6" rx="1.5" fill="white" opacity="0.8"/></svg></div><span>Open<em>Estimator</em><span class="dim">.io</span></span></div>
+</div>
+
+</div>
+
+</body>
+</html>

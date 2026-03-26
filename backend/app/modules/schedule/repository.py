@@ -53,6 +53,9 @@ class ScheduleRepository:
         """Update specific fields on a schedule."""
         stmt = update(Schedule).where(Schedule.id == schedule_id).values(**fields)
         await self.session.execute(stmt)
+        await self.session.flush()
+        # Expire cached ORM instances so the next get_by_id re-reads from DB
+        self.session.expire_all()
 
     async def delete(self, schedule_id: uuid.UUID) -> None:
         """Delete a schedule and all its activities (via CASCADE)."""
@@ -105,6 +108,9 @@ class ActivityRepository:
         """Update specific fields on an activity."""
         stmt = update(Activity).where(Activity.id == activity_id).values(**fields)
         await self.session.execute(stmt)
+        await self.session.flush()
+        # Expire cached ORM instances so the next get_by_id re-reads from DB
+        self.session.expire_all()
 
     async def delete(self, activity_id: uuid.UUID) -> None:
         """Delete an activity."""
@@ -190,6 +196,9 @@ class WorkOrderRepository:
         """Update specific fields on a work order."""
         stmt = update(WorkOrder).where(WorkOrder.id == work_order_id).values(**fields)
         await self.session.execute(stmt)
+        await self.session.flush()
+        # Expire cached ORM instances so the next get_by_id re-reads from DB
+        self.session.expire_all()
 
     async def delete(self, work_order_id: uuid.UUID) -> None:
         """Delete a work order."""

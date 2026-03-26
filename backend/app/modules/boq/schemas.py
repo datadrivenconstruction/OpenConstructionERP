@@ -48,9 +48,15 @@ class BOQResponse(BaseModel):
     name: str
     description: str
     status: str
-    metadata: dict[str, Any] = Field(default_factory=dict, alias="metadata_")
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+
+
+class BOQListItem(BOQResponse):
+    """BOQ summary returned from list endpoints, includes computed grand_total."""
+
+    grand_total: float = 0.0
 
 
 # ── Position schemas ──────────────────────────────────────────────────────────
@@ -128,7 +134,7 @@ class PositionResponse(BaseModel):
     confidence: float | None
     cad_element_ids: list[str]
     validation_status: str
-    metadata: dict[str, Any] = Field(default_factory=dict, alias="metadata_")
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     sort_order: int
     created_at: datetime
     updated_at: datetime
@@ -198,7 +204,7 @@ class MarkupResponse(BaseModel):
     apply_to: str
     sort_order: int
     is_active: bool
-    metadata: dict[str, Any] = Field(default_factory=dict, alias="metadata_")
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
 
@@ -355,7 +361,7 @@ class ActivityLogResponse(BaseModel):
     target_id: UUID | None
     description: str
     changes: dict[str, Any] = Field(default_factory=dict)
-    metadata: dict[str, Any] = Field(default_factory=dict, alias="metadata_")
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
 
 
@@ -368,17 +374,129 @@ class ActivityLogList(BaseModel):
     limit: int = 50
 
 
+# ── Snapshot schemas ─────────────────────────────────────────────────────────
+
+
+class SnapshotCreate(BaseModel):
+    """Create a point-in-time snapshot of a BOQ."""
+
+    name: str = ""
+
+
+class SnapshotResponse(BaseModel):
+    """A BOQ snapshot returned from the API."""
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    boq_id: UUID
+    name: str
+    created_at: datetime
+    created_by: UUID | None = None
+
+
+class SnapshotDetail(SnapshotResponse):
+    """Full snapshot including data payload."""
+
+    snapshot_data: dict[str, Any] = Field(default_factory=dict)
+
+
 # ── Sustainability / CO2 schemas ─────────────────────────────────────────────
 
 
+class CostBreakdownCategory(BaseModel):
+    """A single cost category in the breakdown (e.g. material, labor)."""
+
+    type: str
+    amount: float
+    percentage: float
+    item_count: int
+
+
+class CostBreakdownMarkup(BaseModel):
+    """A markup line in the cost breakdown."""
+
+    name: str
+    percentage: float
+    amount: float
+
+
+class CostBreakdownResource(BaseModel):
+    """A top resource by cost in the breakdown."""
+
+    name: str
+    type: str
+    total_cost: float
+    positions_count: int
+
+
+class CostBreakdownResponse(BaseModel):
+    """Full cost breakdown response for a BOQ."""
+
+    boq_id: str
+    grand_total: float
+    direct_cost: float
+    categories: list[CostBreakdownCategory] = Field(default_factory=list)
+    markups: list[CostBreakdownMarkup] = Field(default_factory=list)
+    top_resources: list[CostBreakdownResource] = Field(default_factory=list)
+
+
+# ── Resource Summary schemas ─────────────────────────────────────────────────
+
+
+class ResourceSummaryItem(BaseModel):
+    """A single aggregated resource across all positions in a BOQ."""
+
+    name: str
+    type: str
+    unit: str
+    total_quantity: float
+    avg_unit_rate: float
+    total_cost: float
+    positions_used: int
+
+
+class ResourceTypeSummary(BaseModel):
+    """Summary statistics for a single resource type."""
+
+    count: int
+    total_cost: float
+
+
+class ResourceSummaryResponse(BaseModel):
+    """Full resource summary for a BOQ — aggregated across all positions."""
+
+    total_resources: int
+    by_type: dict[str, ResourceTypeSummary] = Field(default_factory=dict)
+    resources: list[ResourceSummaryItem] = Field(default_factory=list)
+
+
 class CO2MaterialBreakdown(BaseModel):
-    """CO2 breakdown for a single material type."""
+    """CO2 breakdown for a single material category."""
 
     material: str
+    category: str = ""
     quantity: float
     unit: str
     co2_kg: float
     percentage: float
+    positions_count: int = 0
+
+
+class PositionCO2Detail(BaseModel):
+    """CO2 data for a single BOQ position."""
+
+    position_id: str
+    ordinal: str
+    description: str
+    quantity: float
+    unit: str
+    epd_id: str | None = None
+    epd_name: str | None = None
+    gwp_per_unit: float = 0.0
+    gwp_total: float = 0.0
+    category: str = ""
+    source: str = "none"  # "enriched" | "auto-detected" | "none"
 
 
 class SustainabilityResponse(BaseModel):
@@ -393,3 +511,381 @@ class SustainabilityResponse(BaseModel):
     project_area_m2: float | None = None
     positions_analyzed: int = 0
     positions_matched: int = 0
+    lifecycle_stages: str = "A1-A3"
+    data_quality: str = "estimated"  # "enriched" | "estimated" | "mixed"
+    positions_detail: list[PositionCO2Detail] = Field(default_factory=list)
+    eu_cpr_compliance: str = ""  # "excellent" | "good" | "acceptable" | "non-compliant" | ""
+    eu_cpr_gwp_per_m2_year: float | None = None
+
+
+class CO2EnrichResponse(BaseModel):
+    """Response from the CO2 enrichment endpoint."""
+
+    enriched: int = 0
+    skipped: int = 0
+    total: int = 0
+
+
+class CO2AssignRequest(BaseModel):
+    """Request to manually assign an EPD material to a position."""
+
+    epd_id: str = Field(..., min_length=1, max_length=100)
+
+
+# ── AACE Estimate Classification schemas ────────────────────────────────────
+
+
+class EstimateClassificationMetrics(BaseModel):
+    """Raw metrics used to determine the AACE estimate class."""
+
+    total_positions: int = 0
+    positions_with_rates: int = 0
+    positions_with_resources: int = 0
+    positions_with_classification: int = 0
+    rate_completeness_pct: float = 0.0
+    resource_completeness_pct: float = 0.0
+    classification_completeness_pct: float = 0.0
+
+
+class EstimateClassificationResponse(BaseModel):
+    """AACE 18R-97 estimate classification result for a BOQ.
+
+    See AACE International Recommended Practice 18R-97 for the full standard.
+    Classes range from 5 (least defined) to 1 (most defined).
+    """
+
+    estimate_class: int = Field(..., ge=1, le=5, description="AACE class 1-5")
+    class_label: str = Field(
+        default="", description="Human-readable label (e.g. 'Screening')"
+    )
+    accuracy_low: str = Field(
+        default="", description="Lower accuracy bound (e.g. '-50%')"
+    )
+    accuracy_high: str = Field(
+        default="", description="Upper accuracy bound (e.g. '+100%')"
+    )
+    definition_level_low: int = Field(
+        default=0, ge=0, le=100, description="Lower definition level %"
+    )
+    definition_level_high: int = Field(
+        default=0, ge=0, le=100, description="Upper definition level %"
+    )
+    methodology: str = Field(
+        default="", description="Typical estimation methodology for this class"
+    )
+    metrics: EstimateClassificationMetrics = Field(
+        default_factory=EstimateClassificationMetrics
+    )
+
+
+# ── Sensitivity Analysis schemas ────────────────────────────────────────────
+
+
+class SensitivityItem(BaseModel):
+    """A single item in the sensitivity / tornado chart analysis."""
+
+    ordinal: str
+    description: str
+    total: float
+    share_pct: float
+    impact_low: float
+    impact_high: float
+
+
+class SensitivityResponse(BaseModel):
+    """Sensitivity analysis (tornado chart) result for a BOQ.
+
+    Shows which positions have the biggest impact on the total cost when
+    their cost varies by ``variation_pct`` percent.
+    """
+
+    base_total: float
+    variation_pct: float = 10.0
+    items: list[SensitivityItem] = Field(default_factory=list)
+
+
+# ── Monte Carlo Cost Risk Analysis schemas ────────────────────────────────
+
+
+class CostRiskHistogramBin(BaseModel):
+    """A single bin in the Monte Carlo histogram."""
+
+    bin_start: float
+    bin_end: float
+    count: int
+
+
+class CostRiskDriver(BaseModel):
+    """A position contributing to total cost variance in Monte Carlo simulation."""
+
+    ordinal: str
+    description: str
+    contribution_pct: float
+
+
+class CostRiskPercentiles(BaseModel):
+    """Percentile values from the Monte Carlo simulation."""
+
+    p10: float
+    p25: float
+    p50: float
+    p75: float
+    p80: float
+    p90: float
+
+
+class CostRiskResponse(BaseModel):
+    """Monte Carlo cost risk simulation result for a BOQ.
+
+    Runs N iterations of PERT-distributed cost sampling per position,
+    collects total costs, and returns percentiles, histogram, contingency,
+    and risk drivers (positions contributing most to variance).
+    """
+
+    iterations: int
+    base_total: float
+    percentiles: CostRiskPercentiles
+    contingency_p80: float
+    contingency_pct: float
+    recommended_budget: float
+    histogram: list[CostRiskHistogramBin] = Field(default_factory=list)
+    risk_drivers: list[CostRiskDriver] = Field(default_factory=list)
+
+
+# ── AI Classification schemas ─────────────────────────────────────────────
+
+
+class ClassifyRequest(BaseModel):
+    """Request body for AI-powered classification code suggestion."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    description: str = Field(..., min_length=1, max_length=1000)
+    unit: str = ""
+    project_standard: str = Field(
+        default="din276", pattern=r"^(din276|nrm|masterformat)$"
+    )
+
+
+class ClassificationSuggestion(BaseModel):
+    """A single classification code suggestion with confidence score."""
+
+    standard: str
+    code: str
+    label: str
+    confidence: float = Field(ge=0.0, le=1.0)
+
+
+class ClassifyResponse(BaseModel):
+    """Response containing ranked classification code suggestions."""
+
+    suggestions: list[ClassificationSuggestion] = Field(default_factory=list)
+
+
+# ── AI Rate Suggestion schemas ─────────────────────────────────────────────
+
+
+class SuggestRateRequest(BaseModel):
+    """Request body for AI-powered market rate suggestion."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    description: str = Field(..., min_length=1, max_length=1000)
+    unit: str = ""
+    classification: dict[str, Any] = Field(default_factory=dict)
+    region: str | None = None
+
+
+class RateMatch(BaseModel):
+    """A single rate match from vector search results."""
+
+    code: str
+    description: str
+    rate: float
+    region: str
+    score: float
+
+
+class SuggestRateResponse(BaseModel):
+    """Response containing a suggested market rate with supporting matches."""
+
+    suggested_rate: float
+    confidence: float = Field(ge=0.0, le=1.0)
+    source: str = "vector_search"
+    matches: list[RateMatch] = Field(default_factory=list)
+
+
+# ── Anomaly Detection schemas ──────────────────────────────────────────────
+
+
+class PricingAnomaly(BaseModel):
+    """A pricing anomaly detected in a BOQ position."""
+
+    position_id: str
+    field: str = "unit_rate"
+    current_value: float
+    market_range: dict[str, float] = Field(
+        default_factory=dict,
+        description="Market rate percentiles: p25, median, p75",
+    )
+    severity: str = Field(pattern=r"^(warning|error)$")
+    message: str
+    suggestion: float
+
+
+class AnomalyCheckResponse(BaseModel):
+    """Response from a BOQ pricing anomaly check."""
+
+    anomalies: list[PricingAnomaly] = Field(default_factory=list)
+    positions_checked: int = 0
+
+
+# ── AI Cost Finder (vector search) ──────────────────────────────────────────
+
+
+class CostItemSearchRequest(BaseModel):
+    """Request body for AI-powered cost item search."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    query: str = Field(..., min_length=1, max_length=500)
+    unit: str | None = Field(default=None, max_length=20)
+    region: str | None = Field(default=None, max_length=50)
+    limit: int = Field(default=15, ge=1, le=30)
+    min_score: float = Field(default=0.3, ge=0.0, le=1.0)
+
+
+class CostItemSearchResult(BaseModel):
+    """A single cost item result from vector search."""
+
+    id: str
+    code: str
+    description: str
+    unit: str
+    rate: float
+    region: str
+    score: float = Field(ge=0.0, le=1.0)
+    classification: dict[str, str] = Field(default_factory=dict)
+    components: list[dict[str, Any]] = Field(default_factory=list)
+    currency: str = "EUR"
+
+
+class CostItemSearchResponse(BaseModel):
+    """Response from AI cost item search."""
+
+    results: list[CostItemSearchResult] = Field(default_factory=list)
+    total_found: int = 0
+    query_embedding_ms: float = 0.0
+    search_ms: float = 0.0
+
+
+# ── LLM-powered AI features ─────────────────────────────────────────────────
+
+
+class EnhanceDescriptionRequest(BaseModel):
+    """Request to enhance a BOQ position description via LLM."""
+
+    description: str = Field(..., min_length=2, max_length=500)
+    unit: str = "m2"
+    classification: dict[str, str] = Field(default_factory=dict)
+
+
+class EnhanceDescriptionResponse(BaseModel):
+    """Enhanced description with specs and standards."""
+
+    enhanced_description: str
+    specifications: list[str] = Field(default_factory=list)
+    standards: list[str] = Field(default_factory=list)
+    confidence: float = Field(default=0.0, ge=0.0, le=1.0)
+    model_used: str = ""
+    tokens_used: int = 0
+
+
+class SuggestPrerequisitesRequest(BaseModel):
+    """Request to suggest prerequisite/related positions."""
+
+    description: str = Field(..., min_length=2, max_length=500)
+    unit: str = "m2"
+    classification: dict[str, str] = Field(default_factory=dict)
+    existing_descriptions: list[str] = Field(default_factory=list)
+
+
+class PrerequisiteItem(BaseModel):
+    """A single suggested prerequisite/companion position."""
+
+    description: str
+    unit: str
+    typical_rate_eur: float = 0.0
+    relationship: str = "companion"  # prerequisite | companion | successor
+    reason: str = ""
+
+
+class SuggestPrerequisitesResponse(BaseModel):
+    """List of suggested prerequisite positions."""
+
+    suggestions: list[PrerequisiteItem] = Field(default_factory=list)
+    model_used: str = ""
+    tokens_used: int = 0
+
+
+class CheckScopeRequest(BaseModel):
+    """Request to check BOQ scope completeness."""
+
+    project_type: str = "general"  # residential, commercial, industrial, infrastructure
+    region: str = "DACH"
+    currency: str = "EUR"
+
+
+class ScopeMissingItem(BaseModel):
+    """A single missing scope item."""
+
+    description: str
+    category: str = ""
+    priority: str = "medium"  # high | medium | low
+    reason: str = ""
+    estimated_rate: float = 0.0
+    unit: str = "lsum"
+
+
+class CheckScopeResponse(BaseModel):
+    """Scope completeness analysis result."""
+
+    completeness_score: float = Field(default=0.0, ge=0.0, le=1.0)
+    missing_items: list[ScopeMissingItem] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+    summary: str = ""
+    model_used: str = ""
+    tokens_used: int = 0
+
+
+class EscalateRateRequest(BaseModel):
+    """Request to escalate a rate to current prices."""
+
+    description: str = Field(..., min_length=2, max_length=500)
+    unit: str = "m2"
+    rate: float = Field(..., gt=0)
+    currency: str = "EUR"
+    base_year: int = Field(default=2023, ge=2000, le=2030)
+    target_year: int = Field(default=2026, ge=2000, le=2035)
+    region: str = "DACH"
+
+
+class EscalationFactors(BaseModel):
+    """Breakdown of escalation factors."""
+
+    material_inflation: float = 0.0
+    labor_cost_change: float = 0.0
+    regional_adjustment: float = 0.0
+
+
+class EscalateRateResponse(BaseModel):
+    """Rate escalation result."""
+
+    original_rate: float
+    escalated_rate: float
+    escalation_percent: float
+    factors: EscalationFactors = Field(default_factory=EscalationFactors)
+    confidence: str = "medium"  # high | medium | low
+    reasoning: str = ""
+    model_used: str = ""
+    tokens_used: int = 0

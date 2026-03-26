@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Isometric Cube — All Variations</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a2e;padding:40px 20px}
+  h1{text-align:center;font-size:28px;margin-bottom:8px}
+  .subtitle{text-align:center;color:#666;margin-bottom:48px;font-size:15px}
+  .category{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#888;margin:48px 0 20px;padding-left:8px;border-left:3px solid #2563eb}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1200px;margin:0 auto 40px}
+  .card{background:#fff;border-radius:16px;padding:32px 24px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.06)}
+  .card .num{font-size:11px;color:#aaa;text-align:left;margin-bottom:16px}
+  .card .icon{display:flex;justify-content:center;margin-bottom:20px}
+  .card h3{font-size:15px;margin-bottom:6px}
+  .card p{font-size:12px;color:#888;line-height:1.5;margin-bottom:18px;min-height:36px}
+  .previews{display:flex;justify-content:center;gap:12px;margin-bottom:14px}
+  .preview{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600}
+  .preview.light{background:#f8f9fa;color:#1a1a2e}
+  .preview.dark{background:#1a1a2e;color:#fff}
+  .preview .brand b{font-weight:700;color:#2563eb}
+  .preview.dark .brand b{color:#60a5fa}
+  .sizes{display:flex;justify-content:center;gap:14px;align-items:flex-end;margin-top:10px}
+  .sizes .sz{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .sizes .sz span{font-size:9px;color:#aaa}
+  .finalist{border:2px solid #2563eb;position:relative}
+  .finalist::after{content:'★ TOP';position:absolute;top:12px;right:12px;background:#2563eb;color:white;font-size:9px;padding:2px 8px;border-radius:4px;letter-spacing:1px}
+</style>
+</head>
+<body>
+
+<h1>Isometric Cube — All Variations</h1>
+<p class="subtitle">12 вариаций изометрического куба: цвета, слои, детали, стили</p>
+
+<div style="max-width:1200px;margin:0 auto;">
+
+<!-- === TIER 1: Classic single cube === -->
+<div class="category">Классический куб</div>
+<div class="grid">
+
+<!-- #1 — Original refined: 3 face cube with gold stripe -->
+<div class="card finalist">
+  <div class="num">#1</div>
+  <div class="icon">
+    <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+      <path d="M40 8 L72 24 L40 40 L8 24 Z" fill="#93c5fd"/>
+      <path d="M72 24 L72 56 L40 72 L40 40 Z" fill="#2563eb"/>
+      <path d="M8 24 L40 40 L40 72 L8 56 Z" fill="#1d4ed8"/>
+      <!-- Floor lines -->
+      <line x1="8" y1="35" x2="40" y2="51" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+      <line x1="8" y1="46" x2="40" y2="62" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+      <!-- Gold accent stripe right face -->
+      <path d="M72 34 L72 42 L40 58 L40 50 Z" fill="#f59e0b" opacity="0.85"/>
+    </svg>
+  </div>
+  <h3>Classic Cube + Gold</h3>
+  <p>Базовый изометрический куб. Три грани: светлая крыша, синие стены. Золотая полоса-этаж.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><path d="M40 8 L72 24 L40 40 L8 24 Z" fill="#93c5fd"/><path d="M72 24 L72 56 L40 72 L40 40 Z" fill="#2563eb"/><path d="M8 24 L40 40 L40 72 L8 56 Z" fill="#1d4ed8"/><path d="M72 34 L72 42 L40 58 L40 50 Z" fill="#f59e0b" opacity="0.85"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><path d="M40 8 L72 24 L40 40 L8 24 Z" fill="#3b82f6"/><path d="M72 24 L72 56 L40 72 L40 40 Z" fill="#60a5fa"/><path d="M8 24 L40 40 L40 72 L8 56 Z" fill="#93c5fd"/><path d="M72 34 L72 42 L40 58 L40 50 Z" fill="#fbbf24" opacity="0.85"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+  <div class="sizes">
+    <div class="sz"><svg width="16" height="16" viewBox="0 0 80 80"><path d="M40 8 L72 24 L40 40 L8 24 Z" fill="#93c5fd"/><path d="M72 24 L72 56 L40 72 L40 40 Z" fill="#2563eb"/><path d="M8 24 L40 40 L40 72 L8 56 Z" fill="#1d4ed8"/><path d="M72 34 L72 42 L40 58 L40 50 Z" fill="#f59e0b" opacity="0.85"/></svg><span>16</span></div>
+    <div class="sz"><svg width="24" height="24" viewBox="0 0 80 80"><path d="M40 8 L72 24 L40 40 L8 24 Z" fill="#93c5fd"/><path d="M72 24 L72 56 L40 72 L40 40 Z" fill="#2563eb"/><path d="M8 24 L40 40 L40 72 L8 56 Z" fill="#1d4ed8"/><path d="M72 34 L72 42 L40 58 L40 50 Z" fill="#f59e0b" opacity="0.85"/></svg><span>24</span></div>
+    <div class="sz"><svg width="32" height="32" viewBox="0 0 80 80"><path d="M40 8 L72 24 L40 40 L8 24 Z" fill="#93c5fd"/><path d="M72 24 L72 56 L40 72 L40 40 Z" fill="#2563eb"/><path d="M8 24 L40 40 L40 72 L8 56 Z" fill="#1d4ed8"/><line x1="8" y1="35" x2="40" y2="51" stroke="rgba(255,255,255,0.25)" stroke-width="1"/><line x1="8" y1="46" x2="40" y2="62" stroke="rgba(255,255,255,0.25)" stroke-width="1"/><path d="M72 34 L72 42 L40 58 L40 50 Z" fill="#f59e0b" opacity="0.85"/></svg><span>32</span></div>
+    <div class="sz"><svg width="48" height="48" viewBox="0 0 80 80"><path d="M40 8 L72 24 L40 40 L8 24 Z" fill="#93c5fd"/><path d="M72 24 L72 56 L40 72 L40 40 Z" fill="#2563eb"/><path d="M8 24 L40 40 L40 72 L8 56 Z" fill="#1d4ed8"/><line x1="8" y1="35" x2="40" y2="51" stroke="rgba(255,255,255,0.25)" stroke-width="1"/><line x1="8" y1="46" x2="40" y2="62" stroke="rgba(255,255,255,0.25)" stroke-width="1"/><path d="M72 34 L72 42 L40 58 L40 50 Z" fill="#f59e0b" opacity="0.85"/></svg><span>48</span></div>
+  </div>
+</div>
+
+<!-- #2 — Cube with window grid -->
+<div class="card">
+  <div class="num">#2</div>
+  <div class="icon">
+    <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+      <path d="M40 8 L72 24 L40 40 L8 24 Z" fill="#93c5fd"/>
+      <path d="M72 24 L72 56 L40 72 L40 40 Z" fill="#2563eb"/>
+      <path d="M8 24 L40 40 L40 72 L8 56 Z" fill="#1d4ed8"/>
+      <!-- Windows right face -->
+      <path d="M60 32 L60 38 L48 44 L48 38 Z" fill="rgba(255,255,255,0.35)"/>
+      <path d="M60 44 L60 50 L48 56 L48 50 Z" fill="rgba(255,255,255,0.35)"/>
+      <path d="M72 32 L72 38 L60 44 L60 38 Z" fill="rgba(255,255,255,0.2)"/>
+      <path d="M72 44 L72 50 L60 56 L60 50 Z" fill="rgba(255,255,255,0.2)"/>
+      <!-- Windows left face -->
+      <path d="M20 32 L32 38 L32 44 L20 38 Z" fill="rgba(255,255,255,0.25)"/>
+      <path d="M20 44 L32 50 L32 56 L20 50 Z" fill="rgba(255,255,255,0.25)"/>
+    </svg>
+  </div>
+  <h3>Cube + Windows</h3>
+  <p>Изометрический куб-здание с окнами на обоих гранях. Больше «здание».</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><path d="M40 8 L72 24 L40 40 L8 24 Z" fill="#93c5fd"/><path d="M72 24 L72 56 L40 72 L40 40 Z" fill="#2563eb"/><path d="M8 24 L40 40 L40 72 L8 56 Z" fill="#1d4ed8"/><path d="M60 32 L60 38 L48 44 L48 38 Z" fill="rgba(255,255,255,0.35)"/><path d="M60 44 L60 50 L48 56 L48 50 Z" fill="rgba(255,255,255,0.35)"/><path d="M20 32 L32 38 L32 44 L20 38 Z" fill="rgba(255,255,255,0.25)"/><path d="M20 44 L32 50 L32 56 L20 50 Z" fill="rgba(255,255,255,0.25)"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><path d="M40 8 L72 24 L40 40 L8 24 Z" fill="#3b82f6"/><path d="M72 24 L72 56 L40 72 L40 40 Z" fill="#60a5fa"/><path d="M8 24 L40 40 L40 72 L8 56 Z" fill="#93c5fd"/><path d="M60 32 L60 38 L48 44 L48 38 Z" fill="rgba(255,255,255,0.3)"/><path d="M60 44 L60 50 L48 56 L48 50 Z" fill="rgba(255,255,255,0.3)"/><path d="M20 32 L32 38 L32 44 L20 38 Z" fill="rgba(255,255,255,0.2)"/><path d="M20 44 L32 50 L32 56 L20 50 Z" fill="rgba(255,255,255,0.2)"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+</div>
+
+<!-- #3 — All gold top face, deep blue walls -->
+<div class="card">
+  <div class="num">#3</div>
+  <div class="icon">
+    <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+      <path d="M40 8 L72 24 L40 40 L8 24 Z" fill="#f59e0b"/>
+      <path d="M72 24 L72 56 L40 72 L40 40 Z" fill="#2563eb"/>
+      <path d="M8 24 L40 40 L40 72 L8 56 Z" fill="#1d4ed8"/>
+    </svg>
+  </div>
+  <h3>Gold Roof Cube</h3>
+  <p>Золотая крыша, синие стены. Максимально простой и контрастный.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><path d="M40 8 L72 24 L40 40 L8 24 Z" fill="#f59e0b"/><path d="M72 24 L72 56 L40 72 L40 40 Z" fill="#2563eb"/><path d="M8 24 L40 40 L40 72 L8 56 Z" fill="#1d4ed8"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><path d="M40 8 L72 24 L40 40 L8 24 Z" fill="#fbbf24"/><path d="M72 24 L72 56 L40 72 L40 40 Z" fill="#60a5fa"/><path d="M8 24 L40 40 L40 72 L8 56 Z" fill="#3b82f6"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- === TIER 2: Multi-cube / stacked === -->
+<div class="category">Многоэтажный / Составной</div>
+<div class="grid">
+
+<!-- #4 — Two stacked cubes (tower) -->
+<div class="card finalist">
+  <div class="num">#4</div>
+  <div class="icon">
+    <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+      <!-- Bottom cube -->
+      <path d="M40 36 L64 24 L64 48 L40 60 Z" fill="#2563eb"/>
+      <path d="M16 24 L40 36 L40 60 L16 48 Z" fill="#1d4ed8"/>
+      <path d="M40 12 L64 24 L40 36 L16 24 Z" fill="#3b82f6"/>
+      <!-- Top cube (smaller, shifted up) -->
+      <path d="M40 4 L56 12 L56 28 L40 36 Z" fill="#60a5fa"/>
+      <path d="M24 12 L40 4 L40 36 L24 28 Z" fill="#3b82f6"/>
+      <path d="M40 -4 L56 4 L40 12 L24 4 Z" fill="#f59e0b"/>
+      <!-- Floor lines on bottom cube left -->
+      <line x1="16" y1="36" x2="40" y2="48" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+      <!-- Base shadow -->
+      <ellipse cx="40" cy="66" rx="26" ry="5" fill="rgba(0,0,0,0.06)"/>
+    </svg>
+  </div>
+  <h3>Stacked Tower</h3>
+  <p>Два куба друг на друге = башня-этажность. Золотая крыша верхнего.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><path d="M40 36 L64 24 L64 48 L40 60 Z" fill="#2563eb"/><path d="M16 24 L40 36 L40 60 L16 48 Z" fill="#1d4ed8"/><path d="M40 12 L64 24 L40 36 L16 24 Z" fill="#3b82f6"/><path d="M40 4 L56 12 L56 28 L40 36 Z" fill="#60a5fa"/><path d="M24 12 L40 4 L40 36 L24 28 Z" fill="#3b82f6"/><path d="M40 -4 L56 4 L40 12 L24 4 Z" fill="#f59e0b"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><path d="M40 36 L64 24 L64 48 L40 60 Z" fill="#3b82f6"/><path d="M16 24 L40 36 L40 60 L16 48 Z" fill="#2563eb"/><path d="M40 12 L64 24 L40 36 L16 24 Z" fill="#60a5fa"/><path d="M40 4 L56 12 L56 28 L40 36 Z" fill="#93c5fd"/><path d="M24 12 L40 4 L40 36 L24 28 Z" fill="#60a5fa"/><path d="M40 -4 L56 4 L40 12 L24 4 Z" fill="#fbbf24"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+  <div class="sizes">
+    <div class="sz"><svg width="16" height="16" viewBox="0 0 80 80"><path d="M40 36 L64 24 L64 48 L40 60 Z" fill="#2563eb"/><path d="M16 24 L40 36 L40 60 L16 48 Z" fill="#1d4ed8"/><path d="M40 12 L64 24 L40 36 L16 24 Z" fill="#3b82f6"/><path d="M40 4 L56 12 L56 28 L40 36 Z" fill="#60a5fa"/><path d="M24 12 L40 4 L40 36 L24 28 Z" fill="#3b82f6"/><path d="M40 -4 L56 4 L40 12 L24 4 Z" fill="#f59e0b"/></svg><span>16</span></div>
+    <div class="sz"><svg width="24" height="24" viewBox="0 0 80 80"><path d="M40 36 L64 24 L64 48 L40 60 Z" fill="#2563eb"/><path d="M16 24 L40 36 L40 60 L16 48 Z" fill="#1d4ed8"/><path d="M40 12 L64 24 L40 36 L16 24 Z" fill="#3b82f6"/><path d="M40 4 L56 12 L56 28 L40 36 Z" fill="#60a5fa"/><path d="M24 12 L40 4 L40 36 L24 28 Z" fill="#3b82f6"/><path d="M40 -4 L56 4 L40 12 L24 4 Z" fill="#f59e0b"/></svg><span>24</span></div>
+    <div class="sz"><svg width="32" height="32" viewBox="0 0 80 80"><path d="M40 36 L64 24 L64 48 L40 60 Z" fill="#2563eb"/><path d="M16 24 L40 36 L40 60 L16 48 Z" fill="#1d4ed8"/><path d="M40 12 L64 24 L40 36 L16 24 Z" fill="#3b82f6"/><path d="M40 4 L56 12 L56 28 L40 36 Z" fill="#60a5fa"/><path d="M24 12 L40 4 L40 36 L24 28 Z" fill="#3b82f6"/><path d="M40 -4 L56 4 L40 12 L24 4 Z" fill="#f59e0b"/><line x1="16" y1="36" x2="40" y2="48" stroke="rgba(255,255,255,0.2)" stroke-width="1"/></svg><span>32</span></div>
+    <div class="sz"><svg width="48" height="48" viewBox="0 0 80 80"><path d="M40 36 L64 24 L64 48 L40 60 Z" fill="#2563eb"/><path d="M16 24 L40 36 L40 60 L16 48 Z" fill="#1d4ed8"/><path d="M40 12 L64 24 L40 36 L16 24 Z" fill="#3b82f6"/><path d="M40 4 L56 12 L56 28 L40 36 Z" fill="#60a5fa"/><path d="M24 12 L40 4 L40 36 L24 28 Z" fill="#3b82f6"/><path d="M40 -4 L56 4 L40 12 L24 4 Z" fill="#f59e0b"/><line x1="16" y1="36" x2="40" y2="48" stroke="rgba(255,255,255,0.2)" stroke-width="1"/><ellipse cx="40" cy="66" rx="26" ry="5" fill="rgba(0,0,0,0.06)"/></svg><span>48</span></div>
+  </div>
+</div>
+
+<!-- #5 — L-shaped building (two cubes joined) -->
+<div class="card">
+  <div class="num">#5</div>
+  <div class="icon">
+    <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+      <!-- Main tall block -->
+      <path d="M32 6 L56 18 L56 50 L32 62 Z" fill="#2563eb"/>
+      <path d="M8 18 L32 6 L32 62 L8 50 Z" fill="#1d4ed8"/>
+      <path d="M32 6 L56 18 L32 30 L8 18 Z" fill="#93c5fd"/>
+      <!-- Side lower block -->
+      <path d="M56 30 L72 22 L72 54 L56 62 Z" fill="#3b82f6"/>
+      <path d="M56 18 L72 22 L56 30 Z" fill="#60a5fa"/>
+      <path d="M56 30 L56 62 L40 70 L40 38 Z" fill="#2563eb" opacity="0.7"/>
+      <!-- Gold accent on lower block top -->
+      <path d="M56 30 L72 22 L56 18 L40 26 Z" fill="#f59e0b" opacity="0.8"/>
+    </svg>
+  </div>
+  <h3>L-Shape Building</h3>
+  <p>Г-образное здание из двух блоков. Более сложная архитектура. Золотая крыша пристройки.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><path d="M32 6 L56 18 L56 50 L32 62 Z" fill="#2563eb"/><path d="M8 18 L32 6 L32 62 L8 50 Z" fill="#1d4ed8"/><path d="M32 6 L56 18 L32 30 L8 18 Z" fill="#93c5fd"/><path d="M56 30 L72 22 L72 54 L56 62 Z" fill="#3b82f6"/><path d="M56 30 L72 22 L56 18 L40 26 Z" fill="#f59e0b" opacity="0.8"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><path d="M32 6 L56 18 L56 50 L32 62 Z" fill="#60a5fa"/><path d="M8 18 L32 6 L32 62 L8 50 Z" fill="#3b82f6"/><path d="M32 6 L56 18 L32 30 L8 18 Z" fill="#93c5fd"/><path d="M56 30 L72 22 L72 54 L56 62 Z" fill="#60a5fa"/><path d="M56 30 L72 22 L56 18 L40 26 Z" fill="#fbbf24" opacity="0.8"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+</div>
+
+<!-- #6 — Exploded/layered cube (3 horizontal slices) -->
+<div class="card finalist">
+  <div class="num">#6</div>
+  <div class="icon">
+    <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+      <!-- Layer 3 (top, floating) -->
+      <path d="M40 4 L64 16 L40 28 L16 16 Z" fill="#f59e0b"/>
+      <path d="M64 16 L64 22 L40 34 L40 28 Z" fill="#d97706"/>
+      <path d="M16 16 L40 28 L40 34 L16 22 Z" fill="#b45309"/>
+      <!-- Layer 2 (middle, floating) -->
+      <path d="M40 24 L64 36 L40 48 L16 36 Z" fill="#93c5fd"/>
+      <path d="M64 36 L64 42 L40 54 L40 48 Z" fill="#3b82f6"/>
+      <path d="M16 36 L40 48 L40 54 L16 42 Z" fill="#2563eb"/>
+      <!-- Layer 1 (bottom) -->
+      <path d="M40 44 L64 56 L40 68 L16 56 Z" fill="#bfdbfe"/>
+      <path d="M64 56 L64 62 L40 74 L40 68 Z" fill="#2563eb"/>
+      <path d="M16 56 L40 68 L40 74 L16 62 Z" fill="#1d4ed8"/>
+    </svg>
+  </div>
+  <h3>Exploded Layers</h3>
+  <p>Куб разобранный на 3 слоя = cost breakdown. Золотой верх, синие нижние слои.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><path d="M40 4 L64 16 L40 28 L16 16 Z" fill="#f59e0b"/><path d="M64 16 L64 22 L40 34 L40 28 Z" fill="#d97706"/><path d="M16 16 L40 28 L40 34 L16 22 Z" fill="#b45309"/><path d="M40 24 L64 36 L40 48 L16 36 Z" fill="#93c5fd"/><path d="M64 36 L64 42 L40 54 L40 48 Z" fill="#3b82f6"/><path d="M16 36 L40 48 L40 54 L16 42 Z" fill="#2563eb"/><path d="M40 44 L64 56 L40 68 L16 56 Z" fill="#bfdbfe"/><path d="M64 56 L64 62 L40 74 L40 68 Z" fill="#2563eb"/><path d="M16 56 L40 68 L40 74 L16 62 Z" fill="#1d4ed8"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><path d="M40 4 L64 16 L40 28 L16 16 Z" fill="#fbbf24"/><path d="M64 16 L64 22 L40 34 L40 28 Z" fill="#d97706"/><path d="M16 16 L40 28 L40 34 L16 22 Z" fill="#b45309"/><path d="M40 24 L64 36 L40 48 L16 36 Z" fill="#60a5fa"/><path d="M64 36 L64 42 L40 54 L40 48 Z" fill="#3b82f6"/><path d="M16 36 L40 48 L40 54 L16 42 Z" fill="#2563eb"/><path d="M40 44 L64 56 L40 68 L16 56 Z" fill="#3b82f6"/><path d="M64 56 L64 62 L40 74 L40 68 Z" fill="#60a5fa"/><path d="M16 56 L40 68 L40 74 L16 62 Z" fill="#3b82f6"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+  <div class="sizes">
+    <div class="sz"><svg width="16" height="16" viewBox="0 0 80 80"><path d="M40 4 L64 16 L40 28 L16 16 Z" fill="#f59e0b"/><path d="M64 16 L64 22 L40 34 L40 28 Z" fill="#d97706"/><path d="M40 24 L64 36 L40 48 L16 36 Z" fill="#93c5fd"/><path d="M64 36 L64 42 L40 54 L40 48 Z" fill="#3b82f6"/><path d="M40 44 L64 56 L40 68 L16 56 Z" fill="#bfdbfe"/><path d="M64 56 L64 62 L40 74 L40 68 Z" fill="#2563eb"/></svg><span>16</span></div>
+    <div class="sz"><svg width="24" height="24" viewBox="0 0 80 80"><path d="M40 4 L64 16 L40 28 L16 16 Z" fill="#f59e0b"/><path d="M64 16 L64 22 L40 34 L40 28 Z" fill="#d97706"/><path d="M16 16 L40 28 L40 34 L16 22 Z" fill="#b45309"/><path d="M40 24 L64 36 L40 48 L16 36 Z" fill="#93c5fd"/><path d="M64 36 L64 42 L40 54 L40 48 Z" fill="#3b82f6"/><path d="M16 36 L40 48 L40 54 L16 42 Z" fill="#2563eb"/><path d="M40 44 L64 56 L40 68 L16 56 Z" fill="#bfdbfe"/><path d="M64 56 L64 62 L40 74 L40 68 Z" fill="#2563eb"/><path d="M16 56 L40 68 L40 74 L16 62 Z" fill="#1d4ed8"/></svg><span>24</span></div>
+    <div class="sz"><svg width="32" height="32" viewBox="0 0 80 80"><path d="M40 4 L64 16 L40 28 L16 16 Z" fill="#f59e0b"/><path d="M64 16 L64 22 L40 34 L40 28 Z" fill="#d97706"/><path d="M16 16 L40 28 L40 34 L16 22 Z" fill="#b45309"/><path d="M40 24 L64 36 L40 48 L16 36 Z" fill="#93c5fd"/><path d="M64 36 L64 42 L40 54 L40 48 Z" fill="#3b82f6"/><path d="M16 36 L40 48 L40 54 L16 42 Z" fill="#2563eb"/><path d="M40 44 L64 56 L40 68 L16 56 Z" fill="#bfdbfe"/><path d="M64 56 L64 62 L40 74 L40 68 Z" fill="#2563eb"/><path d="M16 56 L40 68 L40 74 L16 62 Z" fill="#1d4ed8"/></svg><span>32</span></div>
+    <div class="sz"><svg width="48" height="48" viewBox="0 0 80 80"><path d="M40 4 L64 16 L40 28 L16 16 Z" fill="#f59e0b"/><path d="M64 16 L64 22 L40 34 L40 28 Z" fill="#d97706"/><path d="M16 16 L40 28 L40 34 L16 22 Z" fill="#b45309"/><path d="M40 24 L64 36 L40 48 L16 36 Z" fill="#93c5fd"/><path d="M64 36 L64 42 L40 54 L40 48 Z" fill="#3b82f6"/><path d="M16 36 L40 48 L40 54 L16 42 Z" fill="#2563eb"/><path d="M40 44 L64 56 L40 68 L16 56 Z" fill="#bfdbfe"/><path d="M64 56 L64 62 L40 74 L40 68 Z" fill="#2563eb"/><path d="M16 56 L40 68 L40 74 L16 62 Z" fill="#1d4ed8"/></svg><span>48</span></div>
+  </div>
+</div>
+
+</div>
+
+<!-- === TIER 3: App Icons === -->
+<div class="category">App Icon формат</div>
+<div class="grid">
+
+<!-- #7 — Blue filled bg -->
+<div class="card finalist">
+  <div class="num">#7</div>
+  <div class="icon">
+    <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+      <rect width="80" height="80" rx="18" fill="#2563eb"/>
+      <path d="M40 14 L66 28 L40 42 L14 28 Z" fill="rgba(255,255,255,0.9)"/>
+      <path d="M66 28 L66 54 L40 68 L40 42 Z" fill="rgba(255,255,255,0.5)"/>
+      <path d="M14 28 L40 42 L40 68 L14 54 Z" fill="rgba(255,255,255,0.3)"/>
+      <path d="M66 38 L66 44 L40 58 L40 52 Z" fill="#fbbf24"/>
+    </svg>
+  </div>
+  <h3>Blue App Icon</h3>
+  <p>Синий фон, белый куб с прозрачностью на гранях. Золотая полоса-акцент.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><rect width="80" height="80" rx="18" fill="#2563eb"/><path d="M40 14 L66 28 L40 42 L14 28 Z" fill="rgba(255,255,255,0.9)"/><path d="M66 28 L66 54 L40 68 L40 42 Z" fill="rgba(255,255,255,0.5)"/><path d="M14 28 L40 42 L40 68 L14 54 Z" fill="rgba(255,255,255,0.3)"/><path d="M66 38 L66 44 L40 58 L40 52 Z" fill="#fbbf24"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><rect width="80" height="80" rx="18" fill="#2563eb"/><path d="M40 14 L66 28 L40 42 L14 28 Z" fill="rgba(255,255,255,0.9)"/><path d="M66 28 L66 54 L40 68 L40 42 Z" fill="rgba(255,255,255,0.5)"/><path d="M14 28 L40 42 L40 68 L14 54 Z" fill="rgba(255,255,255,0.3)"/><path d="M66 38 L66 44 L40 58 L40 52 Z" fill="#fbbf24"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+  <div class="sizes">
+    <div class="sz"><svg width="16" height="16" viewBox="0 0 80 80"><rect width="80" height="80" rx="18" fill="#2563eb"/><path d="M40 14 L66 28 L40 42 L14 28 Z" fill="rgba(255,255,255,0.9)"/><path d="M66 28 L66 54 L40 68 L40 42 Z" fill="rgba(255,255,255,0.5)"/><path d="M14 28 L40 42 L40 68 L14 54 Z" fill="rgba(255,255,255,0.3)"/></svg><span>16</span></div>
+    <div class="sz"><svg width="24" height="24" viewBox="0 0 80 80"><rect width="80" height="80" rx="18" fill="#2563eb"/><path d="M40 14 L66 28 L40 42 L14 28 Z" fill="rgba(255,255,255,0.9)"/><path d="M66 28 L66 54 L40 68 L40 42 Z" fill="rgba(255,255,255,0.5)"/><path d="M14 28 L40 42 L40 68 L14 54 Z" fill="rgba(255,255,255,0.3)"/><path d="M66 38 L66 44 L40 58 L40 52 Z" fill="#fbbf24"/></svg><span>24</span></div>
+    <div class="sz"><svg width="32" height="32" viewBox="0 0 80 80"><rect width="80" height="80" rx="18" fill="#2563eb"/><path d="M40 14 L66 28 L40 42 L14 28 Z" fill="rgba(255,255,255,0.9)"/><path d="M66 28 L66 54 L40 68 L40 42 Z" fill="rgba(255,255,255,0.5)"/><path d="M14 28 L40 42 L40 68 L14 54 Z" fill="rgba(255,255,255,0.3)"/><path d="M66 38 L66 44 L40 58 L40 52 Z" fill="#fbbf24"/></svg><span>32</span></div>
+    <div class="sz"><svg width="48" height="48" viewBox="0 0 80 80"><rect width="80" height="80" rx="18" fill="#2563eb"/><path d="M40 14 L66 28 L40 42 L14 28 Z" fill="rgba(255,255,255,0.9)"/><path d="M66 28 L66 54 L40 68 L40 42 Z" fill="rgba(255,255,255,0.5)"/><path d="M14 28 L40 42 L40 68 L14 54 Z" fill="rgba(255,255,255,0.3)"/><path d="M66 38 L66 44 L40 58 L40 52 Z" fill="#fbbf24"/></svg><span>48</span></div>
+  </div>
+</div>
+
+<!-- #8 — Dark bg, glowing cube -->
+<div class="card">
+  <div class="num">#8</div>
+  <div class="icon">
+    <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+      <rect width="80" height="80" rx="18" fill="#0f172a"/>
+      <defs><filter id="gc"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+      <path d="M40 14 L66 28 L40 42 L14 28 Z" fill="#3b82f6" filter="url(#gc)"/>
+      <path d="M66 28 L66 54 L40 68 L40 42 Z" fill="#2563eb" filter="url(#gc)"/>
+      <path d="M14 28 L40 42 L40 68 L14 54 Z" fill="#1d4ed8" filter="url(#gc)"/>
+      <path d="M66 38 L66 44 L40 58 L40 52 Z" fill="#f59e0b" filter="url(#gc)"/>
+    </svg>
+  </div>
+  <h3>Dark Glow Cube</h3>
+  <p>Тёмный фон, светящийся куб. Премиальный, высокотехнологичный вид.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><rect width="80" height="80" rx="18" fill="#0f172a"/><path d="M40 14 L66 28 L40 42 L14 28 Z" fill="#3b82f6"/><path d="M66 28 L66 54 L40 68 L40 42 Z" fill="#2563eb"/><path d="M14 28 L40 42 L40 68 L14 54 Z" fill="#1d4ed8"/><path d="M66 38 L66 44 L40 58 L40 52 Z" fill="#f59e0b"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><rect width="80" height="80" rx="18" fill="#0f172a"/><path d="M40 14 L66 28 L40 42 L14 28 Z" fill="#60a5fa"/><path d="M66 28 L66 54 L40 68 L40 42 Z" fill="#3b82f6"/><path d="M14 28 L40 42 L40 68 L14 54 Z" fill="#2563eb"/><path d="M66 38 L66 44 L40 58 L40 52 Z" fill="#fbbf24"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+</div>
+
+<!-- #9 — Gradient bg -->
+<div class="card">
+  <div class="num">#9</div>
+  <div class="icon">
+    <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+      <defs><linearGradient id="gic" x1="0" y1="0" x2="80" y2="80"><stop offset="0%" stop-color="#2563eb"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient></defs>
+      <rect width="80" height="80" rx="18" fill="url(#gic)"/>
+      <path d="M40 14 L66 28 L40 42 L14 28 Z" fill="white" opacity="0.95"/>
+      <path d="M66 28 L66 54 L40 68 L40 42 Z" fill="white" opacity="0.5"/>
+      <path d="M14 28 L40 42 L40 68 L14 54 Z" fill="white" opacity="0.3"/>
+    </svg>
+  </div>
+  <h3>Gradient + White Cube</h3>
+  <p>Blue-purple gradient, полностью белый куб. Элегантный и чистый.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><defs><linearGradient id="gics" x1="0" y1="0" x2="80" y2="80"><stop offset="0%" stop-color="#2563eb"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient></defs><rect width="80" height="80" rx="18" fill="url(#gics)"/><path d="M40 14 L66 28 L40 42 L14 28 Z" fill="white" opacity="0.95"/><path d="M66 28 L66 54 L40 68 L40 42 Z" fill="white" opacity="0.5"/><path d="M14 28 L40 42 L40 68 L14 54 Z" fill="white" opacity="0.3"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><defs><linearGradient id="gicd" x1="0" y1="0" x2="80" y2="80"><stop offset="0%" stop-color="#2563eb"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient></defs><rect width="80" height="80" rx="18" fill="url(#gicd)"/><path d="M40 14 L66 28 L40 42 L14 28 Z" fill="white" opacity="0.95"/><path d="M66 28 L66 54 L40 68 L40 42 Z" fill="white" opacity="0.5"/><path d="M14 28 L40 42 L40 68 L14 54 Z" fill="white" opacity="0.3"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- === TIER 4: Outline / Wire === -->
+<div class="category">Контурный / Wireframe</div>
+<div class="grid">
+
+<!-- #10 — Wire cube -->
+<div class="card">
+  <div class="num">#10</div>
+  <div class="icon">
+    <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+      <!-- Front face -->
+      <path d="M40 8 L72 24 L40 40 L8 24 Z" stroke="#2563eb" stroke-width="2.5" fill="none"/>
+      <!-- Vertical edges -->
+      <line x1="8" y1="24" x2="8" y2="56" stroke="#2563eb" stroke-width="2.5"/>
+      <line x1="40" y1="40" x2="40" y2="72" stroke="#2563eb" stroke-width="2.5"/>
+      <line x1="72" y1="24" x2="72" y2="56" stroke="#2563eb" stroke-width="2.5"/>
+      <!-- Bottom face -->
+      <path d="M8 56 L40 72 L72 56" stroke="#2563eb" stroke-width="2.5" fill="none"/>
+      <!-- Gold top edge highlight -->
+      <line x1="40" y1="8" x2="72" y2="24" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+      <!-- Gold vertex -->
+      <circle cx="40" cy="8" r="3.5" fill="#f59e0b"/>
+    </svg>
+  </div>
+  <h3>Wireframe Cube</h3>
+  <p>Каркасный 3D куб. Золотое ребро + вершина. CAD/BIM стиль.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><path d="M40 8 L72 24 L40 40 L8 24 Z" stroke="#2563eb" stroke-width="2.5" fill="none"/><line x1="8" y1="24" x2="8" y2="56" stroke="#2563eb" stroke-width="2.5"/><line x1="40" y1="40" x2="40" y2="72" stroke="#2563eb" stroke-width="2.5"/><line x1="72" y1="24" x2="72" y2="56" stroke="#2563eb" stroke-width="2.5"/><path d="M8 56 L40 72 L72 56" stroke="#2563eb" stroke-width="2.5" fill="none"/><line x1="40" y1="8" x2="72" y2="24" stroke="#f59e0b" stroke-width="3"/><circle cx="40" cy="8" r="3.5" fill="#f59e0b"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><path d="M40 8 L72 24 L40 40 L8 24 Z" stroke="#60a5fa" stroke-width="2.5" fill="none"/><line x1="8" y1="24" x2="8" y2="56" stroke="#60a5fa" stroke-width="2.5"/><line x1="40" y1="40" x2="40" y2="72" stroke="#60a5fa" stroke-width="2.5"/><line x1="72" y1="24" x2="72" y2="56" stroke="#60a5fa" stroke-width="2.5"/><path d="M8 56 L40 72 L72 56" stroke="#60a5fa" stroke-width="2.5" fill="none"/><line x1="40" y1="8" x2="72" y2="24" stroke="#fbbf24" stroke-width="3"/><circle cx="40" cy="8" r="3.5" fill="#fbbf24"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+</div>
+
+<!-- #11 — Outlined badge with cube -->
+<div class="card">
+  <div class="num">#11</div>
+  <div class="icon">
+    <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+      <rect x="3" y="3" width="74" height="74" rx="16" stroke="#2563eb" stroke-width="3" fill="none"/>
+      <path d="M40 16 L62 28 L40 40 L18 28 Z" fill="#93c5fd"/>
+      <path d="M62 28 L62 50 L40 62 L40 40 Z" fill="#2563eb"/>
+      <path d="M18 28 L40 40 L40 62 L18 50 Z" fill="#1d4ed8"/>
+      <path d="M62 36 L62 42 L40 54 L40 48 Z" fill="#f59e0b" opacity="0.85"/>
+    </svg>
+  </div>
+  <h3>Outlined Badge + Cube</h3>
+  <p>Контурная рамка + куб внутри. Как штамп/бейдж.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><rect x="3" y="3" width="74" height="74" rx="16" stroke="#2563eb" stroke-width="3" fill="none"/><path d="M40 16 L62 28 L40 40 L18 28 Z" fill="#93c5fd"/><path d="M62 28 L62 50 L40 62 L40 40 Z" fill="#2563eb"/><path d="M18 28 L40 40 L40 62 L18 50 Z" fill="#1d4ed8"/><path d="M62 36 L62 42 L40 54 L40 48 Z" fill="#f59e0b" opacity="0.85"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><rect x="3" y="3" width="74" height="74" rx="16" stroke="#60a5fa" stroke-width="3" fill="none"/><path d="M40 16 L62 28 L40 40 L18 28 Z" fill="#3b82f6"/><path d="M62 28 L62 50 L40 62 L40 40 Z" fill="#60a5fa"/><path d="M18 28 L40 40 L40 62 L18 50 Z" fill="#93c5fd"/><path d="M62 36 L62 42 L40 54 L40 48 Z" fill="#fbbf24" opacity="0.85"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+</div>
+
+<!-- #12 — Circle badge with cube -->
+<div class="card">
+  <div class="num">#12</div>
+  <div class="icon">
+    <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+      <circle cx="40" cy="40" r="36" fill="#2563eb"/>
+      <path d="M40 14 L62 26 L40 38 L18 26 Z" fill="rgba(255,255,255,0.9)"/>
+      <path d="M62 26 L62 50 L40 62 L40 38 Z" fill="rgba(255,255,255,0.5)"/>
+      <path d="M18 26 L40 38 L40 62 L18 50 Z" fill="rgba(255,255,255,0.3)"/>
+      <path d="M62 36 L62 42 L40 54 L40 48 Z" fill="#fbbf24"/>
+    </svg>
+  </div>
+  <h3>Circle + Cube</h3>
+  <p>Круглый бейдж с кубом внутри. Идеальный фавикон/аватар.</p>
+  <div class="previews">
+    <div class="preview light">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="36" fill="#2563eb"/><path d="M40 14 L62 26 L40 38 L18 26 Z" fill="rgba(255,255,255,0.9)"/><path d="M62 26 L62 50 L40 62 L40 38 Z" fill="rgba(255,255,255,0.5)"/><path d="M18 26 L40 38 L40 62 L18 50 Z" fill="rgba(255,255,255,0.3)"/><path d="M62 36 L62 42 L40 54 L40 48 Z" fill="#fbbf24"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+    <div class="preview dark">
+      <svg width="26" height="26" viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="36" fill="#2563eb"/><path d="M40 14 L62 26 L40 38 L18 26 Z" fill="rgba(255,255,255,0.9)"/><path d="M62 26 L62 50 L40 62 L40 38 Z" fill="rgba(255,255,255,0.5)"/><path d="M18 26 L40 38 L40 62 L18 50 Z" fill="rgba(255,255,255,0.3)"/><path d="M62 36 L62 42 L40 54 L40 48 Z" fill="#fbbf24"/></svg>
+      <span class="brand">Open<b>Estimator</b>.io</span>
+    </div>
+  </div>
+</div>
+
+</div>
+
+</div>
+</body>
+</html>

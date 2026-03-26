@@ -11,7 +11,7 @@ def register_boq_permissions() -> None:
             "boq.create": Role.EDITOR,
             "boq.read": Role.VIEWER,
             "boq.update": Role.EDITOR,
-            "boq.delete": Role.MANAGER,
+            "boq.delete": Role.EDITOR,
             "boq.export": Role.VIEWER,
             "boq.import": Role.EDITOR,
         },

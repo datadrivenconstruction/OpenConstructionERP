@@ -1,0 +1,16 @@
+# OpenEstimate Code Owners
+# These users will be automatically requested for review on PRs.
+
+# Default owner for everything
+* @ArtemBoiko
+
+# Backend
+backend/ @ArtemBoiko
+
+# Frontend
+frontend/ @ArtemBoiko
+
+# Infrastructure & CI
+.github/ @ArtemBoiko
+deploy/ @ArtemBoiko
+docker-compose*.yml @ArtemBoiko

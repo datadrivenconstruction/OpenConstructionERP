@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
@@ -43,15 +44,15 @@ export default {
         mono: ['var(--oe-font-mono)'],
       },
       fontSize: {
-        '2xs': ['11px', { lineHeight: '1.36' }],
-        xs: ['12px', { lineHeight: '1.33' }],
-        sm: ['14px', { lineHeight: '1.43' }],
-        base: ['16px', { lineHeight: '1.47' }],
-        lg: ['17px', { lineHeight: '1.29' }],
-        xl: ['20px', { lineHeight: '1.2' }],
-        '2xl': ['24px', { lineHeight: '1.17' }],
-        '3xl': ['32px', { lineHeight: '1.125' }],
-        '4xl': ['40px', { lineHeight: '1.1' }],
+        '2xs': ['10px', { lineHeight: '1.4' }],
+        xs: ['11px', { lineHeight: '1.36' }],
+        sm: ['13px', { lineHeight: '1.46' }],
+        base: ['15px', { lineHeight: '1.47' }],
+        lg: ['16px', { lineHeight: '1.31' }],
+        xl: ['19px', { lineHeight: '1.21' }],
+        '2xl': ['22px', { lineHeight: '1.18' }],
+        '3xl': ['30px', { lineHeight: '1.13' }],
+        '4xl': ['37px', { lineHeight: '1.1' }],
       },
       borderRadius: {
         xs: 'var(--oe-radius-xs)',
@@ -126,8 +127,15 @@ export default {
 
         /* Toast — slide in from right */
         'toast-in': 'toastIn 300ms cubic-bezier(0.22, 1, 0.36, 1) both',
+
+        /* Drawer — slide in from right */
+        'slide-in-right': 'slideInRight 250ms cubic-bezier(0.22, 1, 0.36, 1) both',
       },
       keyframes: {
+        slideInRight: {
+          from: { opacity: '0', transform: 'translateX(100%)' },
+          to: { opacity: '1', transform: 'translateX(0)' },
+        },
         fadeIn: {
           from: { opacity: '0' },
           to: { opacity: '1' },

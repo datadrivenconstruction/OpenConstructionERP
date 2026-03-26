@@ -82,6 +82,7 @@ class CostAutocompleteItem(BaseModel):
     unit: str
     rate: float
     classification: dict[str, str]
+    components: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class CostSearchQuery(BaseModel):
@@ -90,7 +91,20 @@ class CostSearchQuery(BaseModel):
     q: str | None = Field(default=None, description="Text search on code and description")
     unit: str | None = None
     source: str | None = None
+    region: str | None = Field(default=None, description="Filter by region (e.g. DE_BERLIN)")
+    category: str | None = Field(
+        default=None, description="Filter by classification.collection value"
+    )
     min_rate: float | None = Field(default=None, ge=0)
     max_rate: float | None = Field(default=None, ge=0)
     limit: int = Field(default=50, ge=1, le=500)
     offset: int = Field(default=0, ge=0)
+
+
+class CostSearchResponse(BaseModel):
+    """Paginated search response for cost items."""
+
+    items: list[CostItemResponse]
+    total: int
+    limit: int
+    offset: int

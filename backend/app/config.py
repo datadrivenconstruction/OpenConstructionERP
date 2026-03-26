@@ -52,8 +52,10 @@ class Settings(BaseSettings):
     jwt_expire_minutes: int = 60
     jwt_refresh_expire_days: int = 30
 
-    # ── AI Services (optional) ───────────────────────────────────────────
+    # ── AI / Vector ──────────────────────────────────────────────────────
+    vector_backend: str = "lancedb"  # "lancedb" (embedded, default) or "qdrant" (server)
     qdrant_url: str | None = "http://localhost:6333"
+    vector_data_dir: str = ""  # LanceDB storage path, default: ~/.openestimator/data/vectors
     openai_api_key: str | None = None
     anthropic_api_key: str | None = None
 

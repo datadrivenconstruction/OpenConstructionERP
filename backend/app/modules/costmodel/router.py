@@ -13,6 +13,8 @@ Endpoints:
     POST   /projects/{project_id}/5d/snapshots           — create EVM snapshot
     GET    /projects/{project_id}/5d/snapshots           — list snapshots
     POST   /projects/{project_id}/5d/generate-cash-flow  — generate from schedule
+    GET    /projects/{project_id}/5d/evm                 — full EVM calculation
+    POST   /projects/{project_id}/5d/what-if             — create what-if scenario
 """
 
 import uuid
@@ -29,9 +31,12 @@ from app.modules.costmodel.schemas import (
     CashFlowData,
     CashFlowResponse,
     DashboardResponse,
+    EVMResponse,
     SCurveData,
     SnapshotCreate,
     SnapshotResponse,
+    WhatIfAdjustments,
+    WhatIfResult,
 )
 from app.modules.costmodel.service import CostModelService
 
@@ -218,7 +223,7 @@ async def update_budget_line(
 @router.delete(
     "/5d/budget-lines/{line_id}",
     status_code=204,
-    dependencies=[Depends(RequirePermission("costmodel.manage"))],
+    dependencies=[Depends(RequirePermission("costmodel.write"))],
 )
 async def delete_budget_line(
     line_id: uuid.UUID,
@@ -235,7 +240,7 @@ async def delete_budget_line(
     "/projects/{project_id}/5d/generate-budget",
     response_model=list[BudgetLineResponse],
     status_code=201,
-    dependencies=[Depends(RequirePermission("costmodel.manage"))],
+    dependencies=[Depends(RequirePermission("costmodel.write"))],
 )
 async def generate_budget(
     project_id: uuid.UUID,
@@ -294,6 +299,49 @@ async def list_snapshots(
     return [_snapshot_to_response(snap) for snap in snapshots]
 
 
+# ── EVM (Earned Value Management) ───────────────────────────────────────────
+
+
+@router.get(
+    "/projects/{project_id}/5d/evm",
+    response_model=EVMResponse,
+    dependencies=[Depends(RequirePermission("costmodel.read"))],
+)
+async def get_evm(
+    project_id: uuid.UUID,
+    service: CostModelService = Depends(_get_service),
+) -> EVMResponse:
+    """Calculate full EVM metrics from schedule progress and budget data.
+
+    Returns BAC, PV, EV, AC, SV, CV, SPI, CPI, EAC, ETC, VAC, TCPI
+    computed by linking budget lines to schedule activities.
+    """
+    return await service.calculate_evm(project_id)
+
+
+# ── What-If Scenarios ──────────────────────────────────────────────────────
+
+
+@router.post(
+    "/projects/{project_id}/5d/what-if",
+    response_model=WhatIfResult,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("costmodel.write"))],
+)
+async def create_what_if_scenario(
+    project_id: uuid.UUID,
+    data: WhatIfAdjustments,
+    _user_id: CurrentUserId,
+    service: CostModelService = Depends(_get_service),
+) -> WhatIfResult:
+    """Create a what-if cost scenario by applying percentage adjustments.
+
+    Clones current budget state, applies material/labor/duration adjustments,
+    and returns the impact on EAC. Also creates a snapshot for the scenario.
+    """
+    return await service.create_what_if_scenario(project_id, data)
+
+
 # ── Cash Flow Generation ────────────────────────────────────────────────────
 
 
@@ -301,7 +349,7 @@ async def list_snapshots(
     "/projects/{project_id}/5d/generate-cash-flow",
     response_model=list[CashFlowResponse],
     status_code=201,
-    dependencies=[Depends(RequirePermission("costmodel.manage"))],
+    dependencies=[Depends(RequirePermission("costmodel.write"))],
 )
 async def generate_cash_flow(
     project_id: uuid.UUID,

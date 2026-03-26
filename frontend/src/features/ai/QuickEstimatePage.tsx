@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
   Sparkles,
   ArrowRight,
@@ -21,11 +21,18 @@ import {
   Image as ImageIcon,
   FileArchive,
   Info,
+  CheckCircle2,
+  XCircle,
+  ExternalLink,
+  ChevronDown,
+  ChevronRight,
+  Layers,
 } from 'lucide-react';
 import { Card, CardContent, Button, Badge } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
-import { aiApi, type QuickEstimateRequest, type EstimateJobResponse, type EstimateItem } from './api';
+import { aiApi, type QuickEstimateRequest, type EstimateJobResponse, type EstimateItem, type CadExtractResponse } from './api';
 import { apiGet } from '@/shared/lib/api';
+import { getIntlLocale } from '@/shared/lib/formatters';
 
 // ── Tab types ────────────────────────────────────────────────────────────────
 
@@ -108,7 +115,7 @@ const FORMAT_LABELS: { [K in FileTab]: string } = {
 
 function formatNumber(n: number, currency?: string): string {
   try {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat(getIntlLocale(), {
       style: currency ? 'currency' : 'decimal',
       currency: currency || undefined,
       minimumFractionDigits: 0,
@@ -158,6 +165,7 @@ function ShimmerRow() {
 }
 
 function LoadingState() {
+  const { t } = useTranslation();
   return (
     <div className="animate-card-in" style={{ animationDelay: '100ms' }}>
       <Card>
@@ -168,10 +176,10 @@ function LoadingState() {
             </div>
             <div>
               <p className="text-sm font-semibold text-content-primary">
-                AI is analyzing your input...
+                {t('ai.analyzing', { defaultValue: 'AI is analyzing your input...' })}
               </p>
               <p className="text-xs text-content-tertiary">
-                Generating cost breakdown and quantities
+                {t('ai.generating', { defaultValue: 'Generating cost breakdown and quantities' })}
               </p>
             </div>
           </div>
@@ -236,7 +244,7 @@ function SaveToBOQDialog({ open, onClose, onSave, saving }: SaveDialogProps) {
 
   const { data: projects } = useQuery({
     queryKey: ['projects-list-simple'],
-    queryFn: () => apiGet<{ items: ProjectSummary[] }>('/v1/projects/?page_size=100'),
+    queryFn: () => apiGet<ProjectSummary[]>('/v1/projects/?page_size=100'),
     enabled: open,
   });
 
@@ -263,7 +271,7 @@ function SaveToBOQDialog({ open, onClose, onSave, saving }: SaveDialogProps) {
               <option value="" disabled>
                 {t('ai.choose_project', { defaultValue: '-- Choose a project --' })}
               </option>
-              {projects?.items?.map((p) => (
+              {projects?.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
                 </option>
@@ -306,9 +314,9 @@ function SaveToBOQDialog({ open, onClose, onSave, saving }: SaveDialogProps) {
 
 // ── Results table ────────────────────────────────────────────────────────────
 
-function ResultsTable({ result }: { result: EstimateJobResponse }) {
+function ResultsTable({ result, selectedCurrency }: { result: EstimateJobResponse; selectedCurrency?: string }) {
   const { t } = useTranslation();
-  const currency = result.currency || 'EUR';
+  const currency = selectedCurrency || result.currency || 'EUR';
 
   let currentCategory = '';
 
@@ -398,11 +406,152 @@ function ResultsTable({ result }: { result: EstimateJobResponse }) {
               {t('ai.grand_total', { defaultValue: 'Grand Total' })}
             </td>
             <td className="px-4 py-4 text-right font-mono text-lg font-bold text-oe-blue">
-              {formatNumber(result.total_cost, currency)}
+              {formatNumber(result.grand_total, currency)}
             </td>
           </tr>
         </tfoot>
       </table>
+    </div>
+  );
+}
+
+// ── Quantity Tables result (CAD extraction, no AI) ──────────────────────────
+
+function QuantityTablesResult({ data }: { data: CadExtractResponse }) {
+  const { t } = useTranslation();
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
+    () => new Set(data.groups.map((g) => g.category)),
+  );
+
+  const toggleGroup = (cat: string) => {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(cat)) next.delete(cat);
+      else next.add(cat);
+      return next;
+    });
+  };
+
+  const fmtNum = (v: number) => {
+    if (v === 0) return '-';
+    return v.toLocaleString(getIntlLocale(), { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  };
+
+  return (
+    <div className="space-y-3">
+      {data.groups.map((group) => {
+        const isExpanded = expandedGroups.has(group.category);
+        return (
+          <div
+            key={group.category}
+            className="rounded-xl border border-border-light overflow-hidden"
+          >
+            {/* Category header */}
+            <button
+              type="button"
+              onClick={() => toggleGroup(group.category)}
+              className="w-full flex items-center gap-3 px-4 py-3 bg-surface-secondary/50 hover:bg-surface-secondary transition-colors text-left"
+            >
+              {isExpanded ? (
+                <ChevronDown size={16} className="text-content-tertiary shrink-0" />
+              ) : (
+                <ChevronRight size={16} className="text-content-tertiary shrink-0" />
+              )}
+              <span className="text-sm font-semibold text-content-primary flex-1">
+                {group.category}
+              </span>
+              <span className="text-xs text-content-tertiary">
+                {group.items.length} {group.items.length === 1 ? 'type' : 'types'}
+              </span>
+              <div className="flex items-center gap-3 text-xs text-content-tertiary ml-3">
+                {group.totals.count > 0 && (
+                  <span>{fmtNum(group.totals.count)} pcs</span>
+                )}
+                {group.totals.volume_m3 > 0 && (
+                  <span>{fmtNum(group.totals.volume_m3)} m&sup3;</span>
+                )}
+                {group.totals.area_m2 > 0 && (
+                  <span>{fmtNum(group.totals.area_m2)} m&sup2;</span>
+                )}
+                {group.totals.length_m > 0 && (
+                  <span>{fmtNum(group.totals.length_m)} m</span>
+                )}
+              </div>
+            </button>
+
+            {/* Items table */}
+            {isExpanded && (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border-light/50 text-left">
+                      <th className="px-4 py-2 text-xs font-semibold text-content-tertiary uppercase tracking-wide">
+                        {t('ai.cad_col_type', { defaultValue: 'Type' })}
+                      </th>
+                      <th className="px-4 py-2 text-xs font-semibold text-content-tertiary uppercase tracking-wide">
+                        {t('ai.cad_col_material', { defaultValue: 'Material' })}
+                      </th>
+                      <th className="px-4 py-2 text-xs font-semibold text-content-tertiary uppercase tracking-wide text-right w-20">
+                        {t('ai.cad_col_count', { defaultValue: 'Count' })}
+                      </th>
+                      <th className="px-4 py-2 text-xs font-semibold text-content-tertiary uppercase tracking-wide text-right w-28">
+                        {t('ai.cad_col_volume', { defaultValue: 'Volume (m\u00b3)' })}
+                      </th>
+                      <th className="px-4 py-2 text-xs font-semibold text-content-tertiary uppercase tracking-wide text-right w-28">
+                        {t('ai.cad_col_area', { defaultValue: 'Area (m\u00b2)' })}
+                      </th>
+                      <th className="px-4 py-2 text-xs font-semibold text-content-tertiary uppercase tracking-wide text-right w-24">
+                        {t('ai.cad_col_length', { defaultValue: 'Length (m)' })}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {group.items.map((item, idx) => (
+                      <tr
+                        key={idx}
+                        className="border-b border-border-light/30 hover:bg-surface-secondary/20 transition-colors"
+                      >
+                        <td className="px-4 py-2 text-content-primary">{item.type}</td>
+                        <td className="px-4 py-2 text-content-secondary text-xs">{item.material || '-'}</td>
+                        <td className="px-4 py-2 text-right font-mono text-content-primary">{fmtNum(item.count)}</td>
+                        <td className="px-4 py-2 text-right font-mono text-content-primary">{fmtNum(item.volume_m3)}</td>
+                        <td className="px-4 py-2 text-right font-mono text-content-primary">{fmtNum(item.area_m2)}</td>
+                        <td className="px-4 py-2 text-right font-mono text-content-primary">{fmtNum(item.length_m)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="border-t border-border bg-surface-secondary/30">
+                      <td colSpan={2} className="px-4 py-2 text-xs font-semibold text-content-secondary uppercase">
+                        {t('ai.cad_subtotal', { defaultValue: 'Subtotal' })}
+                      </td>
+                      <td className="px-4 py-2 text-right font-mono font-semibold text-content-primary">{fmtNum(group.totals.count)}</td>
+                      <td className="px-4 py-2 text-right font-mono font-semibold text-content-primary">{fmtNum(group.totals.volume_m3)}</td>
+                      <td className="px-4 py-2 text-right font-mono font-semibold text-content-primary">{fmtNum(group.totals.area_m2)}</td>
+                      <td className="px-4 py-2 text-right font-mono font-semibold text-content-primary">{fmtNum(group.totals.length_m)}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            )}
+          </div>
+        );
+      })}
+
+      {/* Grand totals */}
+      <div className="rounded-xl border-2 border-oe-blue/20 bg-oe-blue-subtle/30 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-bold text-content-primary">
+            {t('ai.cad_grand_total', { defaultValue: 'Grand Total' })}
+          </span>
+          <div className="flex items-center gap-4 text-sm font-mono font-bold text-oe-blue">
+            {data.grand_totals.count > 0 && <span>{fmtNum(data.grand_totals.count)} pcs</span>}
+            {data.grand_totals.volume_m3 > 0 && <span>{fmtNum(data.grand_totals.volume_m3)} m&sup3;</span>}
+            {data.grand_totals.area_m2 > 0 && <span>{fmtNum(data.grand_totals.area_m2)} m&sup2;</span>}
+            {data.grand_totals.length_m > 0 && <span>{fmtNum(data.grand_totals.length_m)} m</span>}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -640,8 +789,12 @@ export function QuickEstimatePage() {
   const addToast = useToastStore((s) => s.addToast);
   const queryClient = useQueryClient();
 
-  // Active tab
-  const [activeTab, setActiveTab] = useState<InputTab>('text');
+  // Active tab — read initial value from ?tab= URL param
+  const [searchParams] = useSearchParams();
+  const initialTab = (searchParams.get('tab') as InputTab | null) ?? 'text';
+  const [activeTab, setActiveTab] = useState<InputTab>(
+    ['text', 'photo', 'pdf', 'excel', 'cad', 'paste'].includes(initialTab) ? initialTab : 'text',
+  );
 
   // Text form state
   const [description, setDescription] = useState('');
@@ -660,6 +813,7 @@ export function QuickEstimatePage() {
 
   // Result state
   const [result, setResult] = useState<EstimateJobResponse | null>(null);
+  const [cadResult, setCadResult] = useState<CadExtractResponse | null>(null);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 
   // Check if AI is configured
@@ -674,6 +828,18 @@ export function QuickEstimatePage() {
     aiSettings?.openai_api_key_set ||
     aiSettings?.gemini_api_key_set
   );
+
+  // ── Converter status (for CAD tab) ────────────────────────────────────
+  const { data: convertersData } = useQuery<{
+    converters: { id: string; name: string; extensions: string[]; version: string; installed: boolean }[];
+    installed_count: number;
+    total_count: number;
+  }>({
+    queryKey: ['takeoff', 'converters'],
+    queryFn: () => apiGet('/v1/takeoff/converters'),
+    staleTime: 60_000,
+    enabled: activeTab === 'cad',
+  });
 
   // ── File selection handler ────────────────────────────────────────────
 
@@ -763,6 +929,56 @@ export function QuickEstimatePage() {
     },
   });
 
+  // ── File estimate mutation (PDF, Excel, CSV, CAD) ───────────────────
+
+  const fileEstimateMutation = useMutation({
+    mutationFn: aiApi.fileEstimate,
+    onSuccess: (data) => {
+      setResult(data);
+      addToast({
+        type: 'success',
+        title: t('ai.estimate_complete', { defaultValue: 'Estimate generated' }),
+        message: t('ai.estimate_complete_msg', {
+          defaultValue: `${data.items.length} items in ${(data.duration_ms / 1000).toFixed(1)}s`,
+          count: data.items.length,
+          duration: (data.duration_ms / 1000).toFixed(1),
+        }),
+      });
+    },
+    onError: (err: Error) => {
+      addToast({
+        type: 'error',
+        title: t('ai.estimate_failed', { defaultValue: 'Estimation failed' }),
+        message: err.message,
+      });
+    },
+  });
+
+  // ── CAD extract mutation (no AI, deterministic grouping) ────────────
+
+  const cadExtractMutation = useMutation({
+    mutationFn: aiApi.cadExtract,
+    onSuccess: (data) => {
+      setCadResult(data);
+      addToast({
+        type: 'success',
+        title: t('ai.cad_extract_complete', { defaultValue: 'Quantities extracted' }),
+        message: t('ai.cad_extract_msg', {
+          defaultValue: `${data.total_elements} elements in ${data.groups.length} categories`,
+          count: data.total_elements,
+          groups: data.groups.length,
+        }),
+      });
+    },
+    onError: (err: Error) => {
+      addToast({
+        type: 'error',
+        title: t('ai.cad_extract_failed', { defaultValue: 'CAD extraction failed' }),
+        message: err.message,
+      });
+    },
+  });
+
   // ── Save as BOQ mutation ──────────────────────────────────────────────
 
   const saveMutation = useMutation({
@@ -794,12 +1010,18 @@ export function QuickEstimatePage() {
 
   // ── Determine if any mutation is pending ──────────────────────────────
 
-  const isPending = textEstimateMutation.isPending || photoEstimateMutation.isPending;
+  const isPending =
+    textEstimateMutation.isPending || photoEstimateMutation.isPending || fileEstimateMutation.isPending || cadExtractMutation.isPending;
   const isError =
     (textEstimateMutation.isError && !textEstimateMutation.isPending) ||
-    (photoEstimateMutation.isError && !photoEstimateMutation.isPending);
+    (photoEstimateMutation.isError && !photoEstimateMutation.isPending) ||
+    (fileEstimateMutation.isError && !fileEstimateMutation.isPending) ||
+    (cadExtractMutation.isError && !cadExtractMutation.isPending);
   const mutationError =
-    (textEstimateMutation.error as Error | null) || (photoEstimateMutation.error as Error | null);
+    (textEstimateMutation.error as Error | null) ||
+    (photoEstimateMutation.error as Error | null) ||
+    (fileEstimateMutation.error as Error | null) ||
+    (cadExtractMutation.error as Error | null);
 
   // ── Submit handlers per tab ───────────────────────────────────────────
 
@@ -813,8 +1035,8 @@ export function QuickEstimatePage() {
       };
       if (location.trim()) request.location = location.trim();
       if (currency) request.currency = currency;
-      if (standard) request.classification_standard = standard;
-      if (buildingType) request.building_type = buildingType;
+      if (standard) request.standard = standard;
+      if (buildingType) request.project_type = buildingType;
       if (areaM2 && Number(areaM2) > 0) request.area_m2 = Number(areaM2);
 
       setResult(null);
@@ -836,17 +1058,21 @@ export function QuickEstimatePage() {
 
   const handleFileSubmit = useCallback(() => {
     if (!selectedFile) return;
-    // For PDF, Excel, CAD: use photo-estimate endpoint which accepts any file
-    // The backend smart-import requires a BOQ ID, so for a standalone estimate
-    // we send files through the photo-estimate endpoint which handles various formats.
     setResult(null);
-    photoEstimateMutation.mutate({
+    fileEstimateMutation.mutate({
       file: selectedFile,
       location: location.trim() || undefined,
       currency: currency || undefined,
       standard: standard || undefined,
     });
-  }, [selectedFile, location, currency, standard, photoEstimateMutation]);
+  }, [selectedFile, location, currency, standard, fileEstimateMutation]);
+
+  const handleCadSubmit = useCallback(() => {
+    if (!selectedFile) return;
+    setResult(null);
+    setCadResult(null);
+    cadExtractMutation.mutate(selectedFile);
+  }, [selectedFile, cadExtractMutation]);
 
   const handlePasteSubmit = useCallback(() => {
     if (!pasteText.trim()) return;
@@ -856,7 +1082,7 @@ export function QuickEstimatePage() {
     };
     if (location.trim()) request.location = location.trim();
     if (currency) request.currency = currency;
-    if (standard) request.classification_standard = standard;
+    if (standard) request.standard = standard;
 
     setResult(null);
     textEstimateMutation.mutate(request);
@@ -869,22 +1095,24 @@ export function QuickEstimatePage() {
       if (e) e.preventDefault();
       switch (activeTab) {
         case 'text':
-          if (e) handleTextSubmit(e);
+          handleTextSubmit(e ?? ({ preventDefault: () => {} } as FormEvent));
           break;
         case 'photo':
           handlePhotoSubmit();
           break;
         case 'pdf':
         case 'excel':
-        case 'cad':
           handleFileSubmit();
+          break;
+        case 'cad':
+          handleCadSubmit();
           break;
         case 'paste':
           handlePasteSubmit();
           break;
       }
     },
-    [activeTab, handleTextSubmit, handlePhotoSubmit, handleFileSubmit, handlePasteSubmit],
+    [activeTab, handleTextSubmit, handlePhotoSubmit, handleFileSubmit, handleCadSubmit, handlePasteSubmit],
   );
 
   // ── Can submit check ──────────────────────────────────────────────────
@@ -920,7 +1148,7 @@ export function QuickEstimatePage() {
       case 'excel':
         return t('ai.import_parse', { defaultValue: 'Import & Parse' });
       case 'cad':
-        return t('ai.convert_estimate', { defaultValue: 'Convert & Estimate' });
+        return t('ai.extract_quantities', { defaultValue: 'Extract Quantities' });
       case 'paste':
         return t('ai.parse_import', { defaultValue: 'Parse & Import' });
       default:
@@ -932,6 +1160,7 @@ export function QuickEstimatePage() {
 
   const handleReset = useCallback(() => {
     setResult(null);
+    setCadResult(null);
     setDescription('');
     setLocation('');
     setCurrency('');
@@ -942,12 +1171,16 @@ export function QuickEstimatePage() {
     handleRemoveFile();
     textEstimateMutation.reset();
     photoEstimateMutation.reset();
-  }, [handleRemoveFile, textEstimateMutation, photoEstimateMutation]);
+    fileEstimateMutation.reset();
+    cadExtractMutation.reset();
+  }, [handleRemoveFile, textEstimateMutation, photoEstimateMutation, fileEstimateMutation, cadExtractMutation]);
 
   const resetMutationErrors = useCallback(() => {
     textEstimateMutation.reset();
     photoEstimateMutation.reset();
-  }, [textEstimateMutation, photoEstimateMutation]);
+    fileEstimateMutation.reset();
+    cadExtractMutation.reset();
+  }, [textEstimateMutation, photoEstimateMutation, fileEstimateMutation, cadExtractMutation]);
 
   // ── Render ────────────────────────────────────────────────────────────
 
@@ -1297,7 +1530,7 @@ export function QuickEstimatePage() {
               </div>
             )}
 
-            {/* ── Tab 5: CAD / BIM ────────────────────────────────── */}
+            {/* ── Tab 5: CAD / BIM (direct extraction, no AI) ────── */}
             {activeTab === 'cad' && (
               <div>
                 {!selectedFile ? (
@@ -1306,6 +1539,9 @@ export function QuickEstimatePage() {
                     formatLabel={FORMAT_LABELS.cad as string}
                     onFileSelect={handleFileSelect}
                     disabled={isPending}
+                    hint={t('ai.cad_extract_hint', {
+                      defaultValue: 'File will be converted and quantities extracted automatically — no AI key needed.',
+                    })}
                   />
                 ) : (
                   <FilePreview
@@ -1315,24 +1551,61 @@ export function QuickEstimatePage() {
                     disabled={isPending}
                   />
                 )}
-                <div className="mt-3 flex items-start gap-2 rounded-lg bg-oe-blue-subtle/50 px-3 py-2.5">
-                  <Info size={14} className="shrink-0 mt-0.5 text-oe-blue" />
-                  <p className="text-xs text-oe-blue leading-relaxed">
-                    {t('ai.cad_info', {
-                      defaultValue:
-                        'CAD/BIM files (.rvt, .ifc, .dwg, .dgn) require the DDC converter to be installed. Elements will be extracted and used to generate a cost estimate. Download converters from GitHub and place them in ~/.openestimator/converters/.',
-                    })}
-                  </p>
+                {/* ── DDC Converter Modules Status ─────────────── */}
+                <div className="mt-3 rounded-xl border border-border bg-surface-secondary/50 p-3">
+                  <div className="flex items-center justify-between mb-2.5">
+                    <h4 className="text-xs font-semibold text-content-primary flex items-center gap-1.5">
+                      <HardHat size={13} />
+                      {t('ai.cad_converters_title', { defaultValue: 'DDC Converter Modules' })}
+                    </h4>
+                    {convertersData && (
+                      <Badge variant={convertersData.installed_count > 0 ? 'success' : 'warning'} size="sm">
+                        {convertersData.installed_count}/{convertersData.total_count}{' '}
+                        {t('ai.cad_installed', { defaultValue: 'installed' })}
+                      </Badge>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {(convertersData?.converters ?? []).map((c) => (
+                      <div
+                        key={c.id}
+                        className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs ${
+                          c.installed
+                            ? 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400'
+                            : 'bg-surface-primary text-content-tertiary'
+                        }`}
+                      >
+                        {c.installed ? (
+                          <CheckCircle2 size={13} className="shrink-0 text-green-500" />
+                        ) : (
+                          <XCircle size={13} className="shrink-0 text-content-quaternary" />
+                        )}
+                        <span className="font-medium truncate">{c.name}</span>
+                        <span className="ml-auto text-[10px] opacity-60">{c.extensions.join(', ')}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-2.5 flex items-start gap-2 rounded-lg bg-oe-blue-subtle/50 px-2.5 py-2">
+                    <Info size={13} className="shrink-0 mt-0.5 text-oe-blue" />
+                    <div className="text-[11px] text-oe-blue leading-relaxed">
+                      <p>
+                        {t('ai.cad_module_info_extract', {
+                          defaultValue:
+                            'CAD/BIM files are converted using DDC converters and quantities are extracted directly — no AI API key required. Install converters from the Quantities page.',
+                        })}
+                      </p>
+                      <Link
+                        to="/quantities"
+                        className="mt-1 inline-flex items-center gap-1 font-medium text-oe-blue hover:underline"
+                      >
+                        {t('ai.cad_manage_converters', { defaultValue: 'Manage Converters' })}
+                        <ExternalLink size={11} />
+                      </Link>
+                    </div>
+                  </div>
                 </div>
-                <CompactOptions
-                  location={location}
-                  setLocation={setLocation}
-                  currency={currency}
-                  setCurrency={setCurrency}
-                  standard={standard}
-                  setStandard={setStandard}
-                  disabled={isPending}
-                />
               </div>
             )}
 
@@ -1392,7 +1665,7 @@ export function QuickEstimatePage() {
                 size="lg"
                 loading={isPending}
                 disabled={!canSubmit}
-                icon={<Sparkles size={18} />}
+                icon={activeTab === 'cad' ? <Layers size={18} /> : <Sparkles size={18} />}
               >
                 {submitLabel}
               </Button>
@@ -1439,8 +1712,88 @@ export function QuickEstimatePage() {
         </div>
       )}
 
-      {/* Results */}
-      {result && !isPending && (
+      {/* CAD Quantity Tables Result */}
+      {cadResult && !isPending && (
+        <div className="space-y-4 animate-card-in" style={{ animationDelay: '50ms' }}>
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-content-primary">
+                {t('ai.cad_quantity_tables', { defaultValue: 'Quantity Tables' })}
+              </h2>
+              <Badge variant="success" size="sm">
+                {cadResult.total_elements} {t('ai.cad_elements', { defaultValue: 'elements' })}
+              </Badge>
+              <Badge variant="neutral" size="sm">
+                {cadResult.groups.length} {t('ai.cad_categories', { defaultValue: 'categories' })}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-3 text-xs text-content-tertiary">
+              <Badge variant="neutral" size="sm">.{cadResult.format}</Badge>
+              <span>
+                {t('ai.cad_extracted_in', {
+                  defaultValue: 'Extracted in {{duration}}s',
+                  duration: (cadResult.duration_ms / 1000).toFixed(1),
+                })}
+              </span>
+            </div>
+          </div>
+
+          {/* Quantity tables */}
+          <Card padding="none">
+            <div className="p-4">
+              <QuantityTablesResult data={cadResult} />
+            </div>
+          </Card>
+
+          {/* Action buttons */}
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleReset}
+              icon={<RotateCcw size={14} />}
+            >
+              {t('ai.new_extract', { defaultValue: 'New Extraction' })}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* AI Estimate Results — failed status */}
+      {result && !isPending && result.status === 'failed' && result.error_message && (
+        <div className="animate-card-in" style={{ animationDelay: '50ms' }}>
+          <Card>
+            <CardContent>
+              <div className="flex items-start gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-50 dark:bg-red-500/10">
+                  <AlertCircle size={16} className="text-red-500" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-content-primary">
+                    {t('ai.estimate_failed', { defaultValue: 'Estimation failed' })}
+                  </p>
+                  <p className="mt-1 text-sm text-content-secondary">
+                    {result.error_message}
+                  </p>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="mt-3"
+                    onClick={handleReset}
+                    icon={<RotateCcw size={14} />}
+                  >
+                    {t('ai.try_again', { defaultValue: 'Try again' })}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* AI Estimate Results — success */}
+      {result && !isPending && result.status === 'completed' && result.items.length > 0 && (
         <div className="space-y-4 animate-card-in" style={{ animationDelay: '50ms' }}>
           {/* Results header */}
           <div className="flex items-center justify-between">
@@ -1451,7 +1804,7 @@ export function QuickEstimatePage() {
               <Badge variant="success" size="sm">
                 {result.items.length} {t('ai.items', { defaultValue: 'items' })}
               </Badge>
-              {result.confidence > 0 && (
+              {(result.confidence ?? 0) > 0 && (
                 <Badge
                   variant={
                     result.confidence >= 0.7
@@ -1478,7 +1831,7 @@ export function QuickEstimatePage() {
 
           {/* Results table */}
           <Card padding="none">
-            <ResultsTable result={result} />
+            <ResultsTable result={result} selectedCurrency={currency || undefined} />
           </Card>
 
           {/* Action buttons */}
