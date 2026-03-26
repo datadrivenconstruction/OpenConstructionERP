@@ -54,3 +54,161 @@ logs/
 # Generated
 backend/locales/
 openestimate.db*
+
+# Claude Code / MCP
+.claude/
+.mcp.json
+.playwright-mcp/
+
+# QA / Testing artifacts
+screenshots/
+qa-tests/
+ux-review/
+QA_*.md
+UX_*.md
+TESTING_PLAN.md
+TAKEOFF_TESTING_PLAN.md
+IMPROVEMENTS_TODO.md
+screenshot_*.png
+settings_before_*.png
+
+# SQLite journal files
+*.db-shm
+*.db-wal
+
+# Build artifacts
+frontend/stats.html
+i18n-audit/
+translation_keys.txt
+
+# Desktop build
+desktop/dist/
+desktop/build/
+desktop/src-tauri/target/
+desktop/src-tauri/binaries/
+
+# Claude Code / MCP
+.claude/
+.mcp.json
+.playwright-mcp/
+
+# QA / Testing artifacts
+screenshots/
+qa-tests/
+ux-review/
+QA_*.md
+UX_*.md
+TESTING_PLAN.md
+TAKEOFF_TESTING_PLAN.md
+IMPROVEMENTS_TODO.md
+screenshot_*.png
+settings_before_*.png
+
+# Database WAL/SHM
+*.db-shm
+*.db-wal
+
+# Dev screenshots
+audit_*.png
+qa-*.png
+boq-*.png
+module_*.png
+logo-*.png
+logo-*.jpeg
+takeoff-*.png
+takeoff-*.jpeg
+
+# Build artifacts
+frontend/stats.html
+i18n-audit/
+translation_keys.txt
+
+# LanceDB local data
+lancedb_data/
+*.lance
+
+# SQLite WAL/SHM
+*.db-shm
+*.db-wal
+
+# Claude Code / MCP
+.claude/
+.mcp.json
+.playwright-mcp/
+
+# QA / Testing artifacts
+screenshots/
+qa-tests/
+ux-review/
+QA_*.md
+UX_*.md
+TESTING_PLAN.md
+TAKEOFF_TESTING_PLAN.md
+IMPROVEMENTS_TODO.md
+screenshot_*.png
+settings_before_*.png
+
+# Dev screenshots
+audit_*.png
+qa-*.png
+boq-*.png
+module_*.png
+logo-*.png
+logo-*.jpeg
+takeoff-*.png
+takeoff-*.jpeg
+
+# Build artifacts
+frontend/stats.html
+i18n-audit/
+translation_keys.txt
+
+# LanceDB local data
+lancedb_data/
+*.lance
+
+# Database WAL/SHM
+*.db-shm
+*.db-wal
+
+# Claude Code / MCP
+.claude/
+.mcp.json
+.playwright-mcp/
+
+# QA / Testing artifacts
+screenshots/
+qa-tests/
+ux-review/
+QA_*.md
+UX_*.md
+TESTING_PLAN.md
+TAKEOFF_TESTING_PLAN.md
+IMPROVEMENTS_TODO.md
+screenshot_*.png
+settings_before_*.png
+
+# Dev screenshots & audit images
+audit_*.png
+qa-*.png
+boq-*.png
+module_*.png
+logo-*.png
+logo-*.jpeg
+takeoff-*.png
+takeoff-*.jpeg
+
+# Build artifacts
+frontend/stats.html
+i18n-audit/
+translation_keys.txt
+
+# LanceDB local data
+lancedb_data/
+*.lance
+
+# Desktop build
+desktop/dist/
+desktop/build/
+desktop/src-tauri/target/
+desktop/src-tauri/binaries/

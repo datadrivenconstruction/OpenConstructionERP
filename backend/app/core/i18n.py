@@ -173,10 +173,17 @@ def _generate_default_locales(locales_dir: Path) -> None:
         },
         "nav": {
             "dashboard": "Dashboard",
+            "assemblies": "Assemblies",
             "ai_estimate": "AI Estimate",
             "settings": "Settings",
             "5d_cost_model": "5D Cost Model",
             "templates": "Templates",
+            "reports": "Reports",
+            "sustainability": "Sustainability",
+            "group_estimation": "Estimation",
+            "group_planning": "Planning",
+            "group_procurement": "Procurement",
+            "group_tools": "Tools",
         },
         "common": {
             "save": "Save",
@@ -202,6 +209,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "logout": "Log Out",
             "email": "Email",
             "password": "Password",
+            "try_demo": "Try demo account \u2192",
         },
         "projects": {
             "title": "Projects",
@@ -241,6 +249,22 @@ def _generate_default_locales(locales_dir: Path) -> None:
         },
         "assemblies": {
             "title": "Assemblies",
+            "description": "Reusable cost recipes — combine materials, labor, and equipment into ready-to-use templates",
+            "new_assembly": "New Assembly",
+            "from_database": "From Database",
+            "apply_to_boq": "Apply to BOQ",
+            "add_component": "Add Component",
+            "no_assemblies": "No assemblies yet",
+            "no_assemblies_hint": "Create your first assembly from the Cost Database or Resource Catalog",
+            "total_rate": "Total Rate",
+        },
+        "catalog": {
+            "title": "Resource Catalog",
+            "description": "Browse and manage materials, equipment, labor rates, and operators",
+            "add_resource": "Add Resource",
+            "import_region": "Import Region",
+            "build_assembly": "Build Assembly",
+            "my_catalog": "My Catalog",
         },
         "validation": {
             "title": "Validation",
@@ -288,12 +312,30 @@ def _generate_default_locales(locales_dir: Path) -> None:
         },
         "dashboard": {
             "welcome": "Welcome to OpenEstimator.io",
-            "subtitle": "Open-source construction cost estimation platform",
+            "subtitle": "Your construction estimation workspace",
             "recent_projects": "Recent Projects",
             "system_status": "System Status",
             "modules_loaded": "Modules Loaded",
             "validation_rules": "Validation Rules",
             "languages": "Languages",
+            "continue_estimate": "Continue last estimate",
+            "getting_started": "Getting Started",
+            "total_value": "Total Value",
+            "active_estimates": "Active Estimates",
+            "schedule_status": "Schedule Status",
+            "quality_score": "Quality Score",
+            "analytics": "Analytics",
+            "project_overview": "Project Overview",
+            "step_load_db": "Load Cost Database",
+            "step_load_db_desc": "Import regional pricing data with 55,000+ items",
+            "step_ai_search": "Enable AI Search",
+            "step_ai_search_desc": "Generate vector embeddings for semantic cost matching",
+            "step_connect_ai": "Connect AI",
+            "step_connect_ai_desc": "Add your API keys for AI-powered estimation",
+            "step_create_project": "Create Project",
+            "step_create_project_desc": "Start your first construction estimation project",
+            "step_build_boq": "Build Your BOQ",
+            "step_build_boq_desc": "Create a Bill of Quantities with AI assistance",
         },
         "units": {
             "m": "m",
@@ -347,6 +389,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "logout": "Abmelden",
             "email": "E-Mail",
             "password": "Passwort",
+            "try_demo": "Demo-Konto testen \u2192",
         },
         "projects": {
             "title": "Projekte",
@@ -439,6 +482,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "modules_loaded": "Geladene Module",
             "validation_rules": "Validierungsregeln",
             "languages": "Sprachen",
+            "continue_estimate": "Letzte Kalkulation fortsetzen",
         },
         "units": {
             "m": "m",
@@ -463,10 +507,17 @@ def _generate_default_locales(locales_dir: Path) -> None:
         },
         "nav": {
             "dashboard": "\u041f\u0430\u043d\u0435\u043b\u044c \u0443\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u044f",
+            "assemblies": "\u041a\u0430\u043b\u044c\u043a\u0443\u043b\u044f\u0446\u0438\u0438",
             "ai_estimate": "\u0418\u0418 \u041e\u0446\u0435\u043d\u043a\u0430",
             "settings": "\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438",
             "5d_cost_model": "5D \u041c\u043e\u0434\u0435\u043b\u044c \u0441\u0442\u043e\u0438\u043c\u043e\u0441\u0442\u0438",
             "templates": "\u0428\u0430\u0431\u043b\u043e\u043d\u044b",
+            "reports": "\u041e\u0442\u0447\u0451\u0442\u044b",
+            "sustainability": "\u042d\u043a\u043e\u043b\u043e\u0433\u0438\u044f",
+            "group_estimation": "\u0421\u043c\u0435\u0442\u043d\u043e\u0435 \u0434\u0435\u043b\u043e",
+            "group_planning": "\u041f\u043b\u0430\u043d\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435",
+            "group_procurement": "\u0417\u0430\u043a\u0443\u043f\u043a\u0438",
+            "group_tools": "\u0418\u043d\u0441\u0442\u0440\u0443\u043c\u0435\u043d\u0442\u044b",
         },
         "common": {
             "save": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c",
@@ -492,6 +543,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "logout": "\u0412\u044b\u0439\u0442\u0438",
             "email": "\u042d\u043b. \u043f\u043e\u0447\u0442\u0430",
             "password": "\u041f\u0430\u0440\u043e\u043b\u044c",
+            "try_demo": "\u041f\u043e\u043f\u0440\u043e\u0431\u043e\u0432\u0430\u0442\u044c \u0434\u0435\u043c\u043e \u2192",
         },
         "projects": {
             "title": "\u041f\u0440\u043e\u0435\u043a\u0442\u044b",
@@ -531,6 +583,22 @@ def _generate_default_locales(locales_dir: Path) -> None:
         },
         "assemblies": {
             "title": "\u041a\u0430\u043b\u044c\u043a\u0443\u043b\u044f\u0446\u0438\u0438",
+            "description": "\u0421\u0431\u043e\u0440\u043d\u044b\u0435 \u0440\u0430\u0441\u0446\u0435\u043d\u043a\u0438 \u2014 \u043a\u043e\u043c\u0431\u0438\u043d\u0438\u0440\u0443\u0439\u0442\u0435 \u043c\u0430\u0442\u0435\u0440\u0438\u0430\u043b\u044b, \u0442\u0440\u0443\u0434 \u0438 \u0442\u0435\u0445\u043d\u0438\u043a\u0443 \u0432 \u0433\u043e\u0442\u043e\u0432\u044b\u0435 \u0448\u0430\u0431\u043b\u043e\u043d\u044b",
+            "new_assembly": "\u041d\u043e\u0432\u0430\u044f \u043a\u0430\u043b\u044c\u043a\u0443\u043b\u044f\u0446\u0438\u044f",
+            "from_database": "\u0418\u0437 \u0431\u0430\u0437\u044b \u0434\u0430\u043d\u043d\u044b\u0445",
+            "apply_to_boq": "\u041f\u0440\u0438\u043c\u0435\u043d\u0438\u0442\u044c \u043a \u0441\u043c\u0435\u0442\u0435",
+            "add_component": "\u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u043a\u043e\u043c\u043f\u043e\u043d\u0435\u043d\u0442",
+            "no_assemblies": "\u041d\u0435\u0442 \u043a\u0430\u043b\u044c\u043a\u0443\u043b\u044f\u0446\u0438\u0439",
+            "no_assemblies_hint": "\u0421\u043e\u0437\u0434\u0430\u0439\u0442\u0435 \u043f\u0435\u0440\u0432\u0443\u044e \u0441\u0431\u043e\u0440\u043d\u0443\u044e \u0440\u0430\u0441\u0446\u0435\u043d\u043a\u0443 \u0438\u0437 \u0411\u0430\u0437\u044b \u0440\u0430\u0441\u0446\u0435\u043d\u043e\u043a \u0438\u043b\u0438 \u041a\u0430\u0442\u0430\u043b\u043e\u0433\u0430 \u0440\u0435\u0441\u0443\u0440\u0441\u043e\u0432",
+            "total_rate": "\u0418\u0442\u043e\u0433\u043e\u0432\u0430\u044f \u0440\u0430\u0441\u0446\u0435\u043d\u043a\u0430",
+        },
+        "catalog": {
+            "title": "\u041a\u0430\u0442\u0430\u043b\u043e\u0433 \u0440\u0435\u0441\u0443\u0440\u0441\u043e\u0432",
+            "description": "\u041c\u0430\u0442\u0435\u0440\u0438\u0430\u043b\u044b, \u043e\u0431\u043e\u0440\u0443\u0434\u043e\u0432\u0430\u043d\u0438\u0435, \u0442\u0440\u0443\u0434\u043e\u0432\u044b\u0435 \u0440\u0435\u0441\u0443\u0440\u0441\u044b \u0438 \u043e\u043f\u0435\u0440\u0430\u0442\u043e\u0440\u044b",
+            "add_resource": "\u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u0440\u0435\u0441\u0443\u0440\u0441",
+            "import_region": "\u0418\u043c\u043f\u043e\u0440\u0442 \u0440\u0435\u0433\u0438\u043e\u043d\u0430",
+            "build_assembly": "\u0421\u043e\u0437\u0434\u0430\u0442\u044c \u043a\u0430\u043b\u044c\u043a\u0443\u043b\u044f\u0446\u0438\u044e",
+            "my_catalog": "\u041c\u043e\u0439 \u043a\u0430\u0442\u0430\u043b\u043e\u0433",
         },
         "validation": {
             "title": "\u041f\u0440\u043e\u0432\u0435\u0440\u043a\u0430",
@@ -578,12 +646,30 @@ def _generate_default_locales(locales_dir: Path) -> None:
         },
         "dashboard": {
             "welcome": "\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u0432 OpenEstimate",
-            "subtitle": "Open-source \u043f\u043b\u0430\u0442\u0444\u043e\u0440\u043c\u0430 \u0441\u043c\u0435\u0442\u043d\u043e\u0433\u043e \u0434\u0435\u043b\u0430",
+            "subtitle": "\u0412\u0430\u0448\u0435 \u0440\u0430\u0431\u043e\u0447\u0435\u0435 \u043f\u0440\u043e\u0441\u0442\u0440\u0430\u043d\u0441\u0442\u0432\u043e \u0441\u043c\u0435\u0442\u043d\u043e\u0433\u043e \u0434\u0435\u043b\u0430",
             "recent_projects": "\u041f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0435 \u043f\u0440\u043e\u0435\u043a\u0442\u044b",
             "system_status": "\u0421\u043e\u0441\u0442\u043e\u044f\u043d\u0438\u0435 \u0441\u0438\u0441\u0442\u0435\u043c\u044b",
             "modules_loaded": "\u0417\u0430\u0433\u0440\u0443\u0436\u0435\u043d\u043e \u043c\u043e\u0434\u0443\u043b\u0435\u0439",
             "validation_rules": "\u041f\u0440\u0430\u0432\u0438\u043b\u0430 \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438",
             "languages": "\u042f\u0437\u044b\u043a\u0438",
+            "getting_started": "\u041d\u0430\u0447\u0430\u043b\u043e \u0440\u0430\u0431\u043e\u0442\u044b",
+            "total_value": "\u041e\u0431\u0449\u0430\u044f \u0441\u0442\u043e\u0438\u043c\u043e\u0441\u0442\u044c",
+            "active_estimates": "\u0410\u043a\u0442\u0438\u0432\u043d\u044b\u0435 \u0441\u043c\u0435\u0442\u044b",
+            "schedule_status": "\u0421\u0442\u0430\u0442\u0443\u0441 \u0433\u0440\u0430\u0444\u0438\u043a\u0430",
+            "quality_score": "\u041e\u0446\u0435\u043d\u043a\u0430 \u043a\u0430\u0447\u0435\u0441\u0442\u0432\u0430",
+            "analytics": "\u0410\u043d\u0430\u043b\u0438\u0442\u0438\u043a\u0430",
+            "project_overview": "\u041e\u0431\u0437\u043e\u0440 \u043f\u0440\u043e\u0435\u043a\u0442\u043e\u0432",
+            "continue_estimate": "\u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u044c \u0441\u043c\u0435\u0442\u0443",
+            "step_load_db": "\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c \u0431\u0430\u0437\u0443 \u0440\u0430\u0441\u0446\u0435\u043d\u043e\u043a",
+            "step_load_db_desc": "\u0418\u043c\u043f\u043e\u0440\u0442\u0438\u0440\u0443\u0439\u0442\u0435 \u0440\u0435\u0433\u0438\u043e\u043d\u0430\u043b\u044c\u043d\u0443\u044e \u0431\u0430\u0437\u0443 \u0441 55 000+ \u043f\u043e\u0437\u0438\u0446\u0438\u044f\u043c\u0438",
+            "step_ai_search": "\u0412\u043a\u043b\u044e\u0447\u0438\u0442\u044c \u0418\u0418-\u043f\u043e\u0438\u0441\u043a",
+            "step_ai_search_desc": "\u0421\u043e\u0437\u0434\u0430\u0439\u0442\u0435 \u0432\u0435\u043a\u0442\u043e\u0440\u043d\u044b\u0435 \u044d\u043c\u0431\u0435\u0434\u0434\u0438\u043d\u0433\u0438 \u0434\u043b\u044f \u0441\u0435\u043c\u0430\u043d\u0442\u0438\u0447\u0435\u0441\u043a\u043e\u0433\u043e \u043f\u043e\u0438\u0441\u043a\u0430",
+            "step_connect_ai": "\u041f\u043e\u0434\u043a\u043b\u044e\u0447\u0438\u0442\u044c \u0418\u0418",
+            "step_connect_ai_desc": "\u0414\u043e\u0431\u0430\u0432\u044c\u0442\u0435 API-\u043a\u043b\u044e\u0447\u0438 \u0434\u043b\u044f \u0418\u0418-\u043e\u0446\u0435\u043d\u043a\u0438",
+            "step_create_project": "\u0421\u043e\u0437\u0434\u0430\u0442\u044c \u043f\u0440\u043e\u0435\u043a\u0442",
+            "step_create_project_desc": "\u041d\u0430\u0447\u043d\u0438\u0442\u0435 \u043f\u0435\u0440\u0432\u044b\u0439 \u043f\u0440\u043e\u0435\u043a\u0442 \u0441\u0442\u0440\u043e\u0438\u0442\u0435\u043b\u044c\u043d\u043e\u0439 \u0441\u043c\u0435\u0442\u044b",
+            "step_build_boq": "\u0421\u043e\u0441\u0442\u0430\u0432\u0438\u0442\u044c \u0441\u043c\u0435\u0442\u0443",
+            "step_build_boq_desc": "\u0421\u043e\u0437\u0434\u0430\u0439\u0442\u0435 \u0441\u043c\u0435\u0442\u0443 \u0441 \u043f\u043e\u043c\u043e\u0449\u044c\u044e \u0418\u0418",
         },
         "units": {
             "m": "\u043c",
@@ -637,6 +723,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "logout": "Se d\u00e9connecter",
             "email": "E-mail",
             "password": "Mot de passe",
+            "try_demo": "Essayer le compte d\u00e9mo \u2192",
         },
         "projects": {
             "title": "Projets",
@@ -782,6 +869,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "logout": "Cerrar sesi\u00f3n",
             "email": "Correo electr\u00f3nico",
             "password": "Contrase\u00f1a",
+            "try_demo": "Probar cuenta demo \u2192",
         },
         "projects": {
             "title": "Proyectos",
@@ -927,6 +1015,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "logout": "Terminar sess\u00e3o",
             "email": "E-mail",
             "password": "Palavra-passe",
+            "try_demo": "Testar conta demo \u2192",
         },
         "projects": {
             "title": "Projetos",
@@ -1072,6 +1161,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "logout": "Esci",
             "email": "E-mail",
             "password": "Password",
+            "try_demo": "Prova account demo \u2192",
         },
         "projects": {
             "title": "Progetti",
@@ -1217,6 +1307,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "logout": "Uitloggen",
             "email": "E-mail",
             "password": "Wachtwoord",
+            "try_demo": "Probeer demo-account \u2192",
         },
         "projects": {
             "title": "Projecten",
@@ -1362,6 +1453,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "logout": "Wyloguj si\u0119",
             "email": "E-mail",
             "password": "Has\u0142o",
+            "try_demo": "Wypr\u00f3buj konto demo \u2192",
         },
         "projects": {
             "title": "Projekty",
@@ -1507,6 +1599,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "logout": "Odhl\u00e1sit se",
             "email": "E-mail",
             "password": "Heslo",
+            "try_demo": "Vyzkou\u0161et demo \u00fa\u010det \u2192",
         },
         "projects": {
             "title": "Projekty",
@@ -1652,6 +1745,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "logout": "\u00c7\u0131k\u0131\u015f yap",
             "email": "E-posta",
             "password": "\u015eifre",
+            "try_demo": "Demo hesab\u0131n\u0131 dene \u2192",
         },
         "projects": {
             "title": "Projeler",
@@ -1797,6 +1891,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "logout": "Logga ut",
             "email": "E-post",
             "password": "L\u00f6senord",
+            "try_demo": "Testa demokonto \u2192",
         },
         "projects": {
             "title": "Projekt",
@@ -1942,6 +2037,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "logout": "Logg ut",
             "email": "E-post",
             "password": "Passord",
+            "try_demo": "Pr\u00f8v demokonto \u2192",
         },
         "projects": {
             "title": "Prosjekter",
@@ -2087,6 +2183,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "logout": "Log ud",
             "email": "E-mail",
             "password": "Adgangskode",
+            "try_demo": "Pr\u00f8v demokonto \u2192",
         },
         "projects": {
             "title": "Projekter",
@@ -2232,6 +2329,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "logout": "Kirjaudu ulos",
             "email": "S\u00e4hk\u00f6posti",
             "password": "Salasana",
+            "try_demo": "Kokeile demotili\u00e4 \u2192",
         },
         "projects": {
             "title": "Projektit",
@@ -2377,6 +2475,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "logout": "\u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u062e\u0631\u0648\u062c",
             "email": "\u0627\u0644\u0628\u0631\u064a\u062f \u0627\u0644\u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a",
             "password": "\u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631",
+            "try_demo": "\u062c\u0631\u0628 \u0627\u0644\u062d\u0633\u0627\u0628 \u0627\u0644\u062a\u062c\u0631\u064a\u0628\u064a \u2190",
         },
         "projects": {
             "title": "\u0627\u0644\u0645\u0634\u0627\u0631\u064a\u0639",
@@ -2469,6 +2568,28 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "modules_loaded": "\u0627\u0644\u0648\u062d\u062f\u0627\u062a \u0627\u0644\u0645\u062d\u0645\u0651\u0644\u0629",
             "validation_rules": "\u0642\u0648\u0627\u0639\u062f \u0627\u0644\u062a\u062d\u0642\u0642",
             "languages": "\u0627\u0644\u0644\u063a\u0627\u062a",
+            "continue_estimate": "\u0645\u062a\u0627\u0628\u0639\u0629 \u0622\u062e\u0631 \u062a\u0642\u062f\u064a\u0631",
+            "getting_started": "\u0627\u0644\u0628\u062f\u0621",
+            "total_value": "\u0627\u0644\u0642\u064a\u0645\u0629 \u0627\u0644\u0625\u062c\u0645\u0627\u0644\u064a\u0629",
+            "active_estimates": "\u0627\u0644\u062a\u0642\u062f\u064a\u0631\u0627\u062a \u0627\u0644\u0646\u0634\u0637\u0629",
+            "schedule_status": "\u062d\u0627\u0644\u0629 \u0627\u0644\u062c\u062f\u0648\u0644",
+            "quality_score": "\u062f\u0631\u062c\u0629 \u0627\u0644\u062c\u0648\u062f\u0629",
+            "analytics": "\u0627\u0644\u062a\u062d\u0644\u064a\u0644\u0627\u062a",
+            "project_overview": "\u0646\u0638\u0631\u0629 \u0639\u0627\u0645\u0629 \u0639\u0644\u0649 \u0627\u0644\u0645\u0634\u0631\u0648\u0639",
+            "step_load_db": "\u062a\u062d\u0645\u064a\u0644 \u0642\u0627\u0639\u062f\u0629 \u0627\u0644\u0623\u0633\u0639\u0627\u0631",
+            "step_load_db_desc": "\u0627\u0633\u062a\u064a\u0631\u0627\u062f \u0628\u064a\u0627\u0646\u0627\u062a \u0627\u0644\u0623\u0633\u0639\u0627\u0631 \u0627\u0644\u0625\u0642\u0644\u064a\u0645\u064a\u0629 \u0645\u0639 55,000+ \u0639\u0646\u0635\u0631",
+            "step_ai_search": "\u062a\u0641\u0639\u064a\u0644 \u0627\u0644\u0628\u062d\u062b \u0627\u0644\u0630\u0643\u064a",
+            "step_ai_search_desc": "\u0625\u0646\u0634\u0627\u0621 \u062a\u0636\u0645\u064a\u0646\u0627\u062a \u0645\u062a\u062c\u0647\u064a\u0629 \u0644\u0644\u0645\u0637\u0627\u0628\u0642\u0629 \u0627\u0644\u062f\u0644\u0627\u0644\u064a\u0629 \u0644\u0644\u062a\u0643\u0627\u0644\u064a\u0641",
+            "step_connect_ai": "\u0631\u0628\u0637 \u0627\u0644\u0630\u0643\u0627\u0621 \u0627\u0644\u0627\u0635\u0637\u0646\u0627\u0639\u064a",
+            "step_connect_ai_desc": "\u0623\u0636\u0641 \u0645\u0641\u0627\u062a\u064a\u062d API \u0644\u0644\u062a\u0642\u062f\u064a\u0631 \u0628\u0627\u0644\u0630\u0643\u0627\u0621 \u0627\u0644\u0627\u0635\u0637\u0646\u0627\u0639\u064a",
+            "step_create_project": "\u0625\u0646\u0634\u0627\u0621 \u0645\u0634\u0631\u0648\u0639",
+            "step_create_project_desc": "\u0627\u0628\u062f\u0623 \u0623\u0648\u0644 \u0645\u0634\u0631\u0648\u0639 \u062a\u0642\u062f\u064a\u0631 \u062a\u0643\u0627\u0644\u064a\u0641 \u0627\u0644\u0628\u0646\u0627\u0621",
+            "step_build_boq": "\u0625\u0646\u0634\u0627\u0621 \u062c\u062f\u0648\u0644 \u0627\u0644\u0643\u0645\u064a\u0627\u062a",
+            "step_build_boq_desc": "\u0623\u0646\u0634\u0626 \u062c\u062f\u0648\u0644 \u0643\u0645\u064a\u0627\u062a \u0628\u0645\u0633\u0627\u0639\u062f\u0629 \u0627\u0644\u0630\u0643\u0627\u0621 \u0627\u0644\u0627\u0635\u0637\u0646\u0627\u0639\u064a",
+            "new_project": "\u0645\u0634\u0631\u0648\u0639 \u062c\u062f\u064a\u062f",
+            "create_boq": "\u0625\u0646\u0634\u0627\u0621 \u062c\u062f\u0648\u0644 \u0643\u0645\u064a\u0627\u062a",
+            "add_api_keys": "\u0625\u0636\u0627\u0641\u0629 \u0645\u0641\u0627\u062a\u064a\u062d API",
+            "load_database": "\u062a\u062d\u0645\u064a\u0644 \u0642\u0627\u0639\u062f\u0629 \u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a",
         },
         "units": {
             "m": "\u0645",
@@ -2522,6 +2643,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "logout": "\u9000\u51fa",
             "email": "\u7535\u5b50\u90ae\u7bb1",
             "password": "\u5bc6\u7801",
+            "try_demo": "\u8bd5\u7528\u6f14\u793a\u5e10\u6237 \u2192",
         },
         "projects": {
             "title": "\u9879\u76ee",
@@ -2667,6 +2789,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "logout": "\u30ed\u30b0\u30a2\u30a6\u30c8",
             "email": "\u30e1\u30fc\u30eb\u30a2\u30c9\u30ec\u30b9",
             "password": "\u30d1\u30b9\u30ef\u30fc\u30c9",
+            "try_demo": "\u30c7\u30e2\u30a2\u30ab\u30a6\u30f3\u30c8\u3092\u8a66\u3059 \u2192",
         },
         "projects": {
             "title": "\u30d7\u30ed\u30b8\u30a7\u30af\u30c8",
@@ -2812,6 +2935,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "logout": "\ub85c\uadf8\uc544\uc6c3",
             "email": "\uc774\uba54\uc77c",
             "password": "\ube44\ubc00\ubc88\ud638",
+            "try_demo": "\ub370\ubaa8 \uacc4\uc815 \uc0ac\uc6a9\ud574\ubcf4\uae30 \u2192",
         },
         "projects": {
             "title": "\ud504\ub85c\uc81d\ud2b8",
@@ -2957,6 +3081,7 @@ def _generate_default_locales(locales_dir: Path) -> None:
             "logout": "\u0932\u0949\u0917 \u0906\u0909\u091f",
             "email": "\u0908\u092e\u0947\u0932",
             "password": "\u092a\u093e\u0938\u0935\u0930\u094d\u0921",
+            "try_demo": "\u0921\u0947\u092e\u094b \u0916\u093e\u0924\u093e \u0906\u091c\u093c\u092e\u093e\u090f\u0902 \u2192",
         },
         "projects": {
             "title": "\u092a\u0930\u093f\u092f\u094b\u091c\u0928\u093e\u090f\u0902",
@@ -3093,3 +3218,4 @@ def _generate_default_locales(locales_dir: Path) -> None:
         path = locales_dir / f"{locale_code}.json"
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
+

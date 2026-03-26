@@ -379,10 +379,10 @@ def _build_cover_page(
         vat_amount = net_total * vat_rate / 100.0
         gross_total = net_total + vat_amount
     else:
-        # Default: assume 19% VAT for display purposes
-        vat_rate = 19.0
-        vat_amount = net_total * 0.19
-        gross_total = net_total + vat_amount
+        # No tax markup found — show net=gross with 0% VAT
+        vat_rate = 0.0
+        vat_amount = 0.0
+        gross_total = net_total
 
     summary_rows = [
         ("Direct Cost:", f"{_fmt(direct_cost)} {currency}", False),
@@ -616,8 +616,7 @@ def _build_boq_table(
     if vat_rate > 0:
         vat_amount = boq_data.net_total * vat_rate / 100.0
     else:
-        vat_rate = 19.0
-        vat_amount = boq_data.net_total * 0.19
+        vat_amount = 0.0
 
     gross_total = boq_data.net_total + vat_amount
 

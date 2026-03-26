@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo } from 'react';
+import { useState, useCallback, useRef, useMemo, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import clsx from 'clsx';
@@ -16,9 +16,14 @@ import {
   ChevronRight,
   Loader2,
   X,
+  Ruler,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Input, Skeleton } from '@/shared/ui';
+
+import { Button, Card, Badge, EmptyState, Input, Skeleton, InfoHint } from '@/shared/ui';
 import { apiGet, apiPost } from '@/shared/lib/api';
+import { useAuthStore } from '@/stores/useAuthStore';
+
+const TakeoffViewerModule = lazy(() => import('@/modules/pdf-takeoff/TakeoffViewerModule'));
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -64,6 +69,8 @@ interface UploadedDocument {
   analysis: AnalysisResult | null;
   analyzing: boolean;
   extractingTables: boolean;
+  uploadError?: string;
+  uploading?: boolean;
 }
 
 interface QuickMeasurement {
@@ -132,7 +139,7 @@ function SelectDropdown({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className={clsx(
-          'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm',
+          'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm',
           'transition-all duration-normal ease-oe',
           'focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue',
           'hover:border-content-tertiary',
@@ -324,18 +331,42 @@ function DocumentCard({
     : 0;
   const totalCount = doc.analysis ? doc.analysis.elements.length : 0;
 
+  const hasError = !!doc.uploadError;
+  const isUploading = !!doc.uploading;
+
   return (
-    <Card className="overflow-hidden">
+    <Card className={clsx('overflow-hidden', hasError && 'border-semantic-error/40')}>
       {/* Document header */}
       <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-semantic-error-bg text-semantic-error">
-          <FileText size={20} strokeWidth={1.5} />
+        <div className={clsx(
+          'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
+          hasError
+            ? 'bg-semantic-error-bg text-semantic-error'
+            : isUploading
+              ? 'bg-oe-blue-subtle text-oe-blue'
+              : 'bg-semantic-error-bg text-semantic-error',
+        )}>
+          {isUploading ? (
+            <Loader2 size={20} strokeWidth={1.5} className="animate-spin" />
+          ) : (
+            <FileText size={20} strokeWidth={1.5} />
+          )}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-semibold text-content-primary truncate">
               {doc.filename}
             </h3>
+            {hasError && (
+              <Badge variant="red" size="sm">
+                {t('takeoff.upload_failed', 'Upload failed')}
+              </Badge>
+            )}
+            {isUploading && (
+              <Badge variant="blue" size="sm">
+                {t('takeoff.uploading', 'Uploading...')}
+              </Badge>
+            )}
             <button
               onClick={() => onRemove(doc.id)}
               className="shrink-0 rounded-md p-1 text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-colors duration-fast"
@@ -345,10 +376,16 @@ function DocumentCard({
             </button>
           </div>
           <p className="mt-0.5 text-xs text-content-tertiary">
-            {doc.pages} {t('takeoff.pages', 'pages')} &bull; {formatFileSize(doc.size_bytes)}{' '}
+            {doc.pages > 0 ? `${doc.pages} ${t('takeoff.pages', 'pages')} \u2022 ` : ''}
+            {formatFileSize(doc.size_bytes)}{' '}
             &bull; {t('takeoff.uploaded', 'Uploaded')}{' '}
             {formatTimeAgo(doc.uploaded_at, t)}
           </p>
+          {hasError && (
+            <p className="mt-1 text-xs text-semantic-error">
+              {doc.uploadError}
+            </p>
+          )}
         </div>
       </div>
 
@@ -364,7 +401,7 @@ function DocumentCard({
               <Sparkles size={14} />
             )
           }
-          disabled={doc.analyzing || doc.extractingTables}
+          disabled={doc.analyzing || doc.extractingTables || isUploading || hasError}
           onClick={() => onAnalyze(doc.id)}
         >
           {doc.analyzing
@@ -381,7 +418,7 @@ function DocumentCard({
               <Table2 size={14} />
             )
           }
-          disabled={doc.analyzing || doc.extractingTables}
+          disabled={doc.analyzing || doc.extractingTables || isUploading || hasError}
           onClick={() => onExtractTables(doc.id)}
         >
           {doc.extractingTables
@@ -467,7 +504,7 @@ function DocumentCard({
               </div>
 
               {/* Add to BOQ button */}
-              <div className="flex items-center gap-2 pt-2">
+              <div className="flex items-center gap-3 pt-3 border-t border-border-light mt-2">
                 <Button
                   variant="primary"
                   size="sm"
@@ -483,6 +520,12 @@ function DocumentCard({
                 {selectedCount === 0 && (
                   <span className="text-xs text-content-tertiary">
                     {t('takeoff.select_items_hint', 'Select items to add to BOQ')}
+                  </span>
+                )}
+                {selectedCount > 0 && !boqSelected && (
+                  <span className="text-xs text-amber-600 font-medium flex items-center gap-1">
+                    <AlertTriangle size={12} />
+                    {t('takeoff.select_boq_warning', 'Select a project & BOQ above first')}
                   </span>
                 )}
               </div>
@@ -574,7 +617,7 @@ function QuickMeasurementForm({
             onChange={(e) => setUnit(e.target.value)}
             disabled={disabled}
             className={clsx(
-              'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm',
+              'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm',
               'transition-all duration-normal ease-oe text-content-primary',
               'focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue',
               'hover:border-content-tertiary',
@@ -606,8 +649,14 @@ function QuickMeasurementForm({
 
 /* ── Main Page ─────────────────────────────────────────────────────────── */
 
+type TakeoffTab = 'documents' | 'measurements';
+
 export function TakeoffPage() {
   const { t } = useTranslation();
+
+  /* ── Tab state ─────────────────────────────────────────────────────── */
+
+  const [activeTab, setActiveTab] = useState<TakeoffTab>('documents');
 
   /* ── State ──────────────────────────────────────────────────────────── */
 
@@ -615,6 +664,7 @@ export function TakeoffPage() {
   const [selectedBoqId, setSelectedBoqId] = useState('');
   const [documents, setDocuments] = useState<UploadedDocument[]>([]);
   const [addToBOQSuccess, setAddToBOQSuccess] = useState<string | null>(null);
+  const [uploadErrorToast, setUploadErrorToast] = useState<string | null>(null);
 
   /* ── Queries ────────────────────────────────────────────────────────── */
 
@@ -636,7 +686,7 @@ export function TakeoffPage() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const token = localStorage.getItem('oe_access_token');
+      const token = useAuthStore.getState().accessToken;
       const headers: HeadersInit = {};
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
@@ -659,19 +709,7 @@ export function TakeoffPage() {
         size_bytes: number;
       };
     },
-    onSuccess: (data, file) => {
-      const newDoc: UploadedDocument = {
-        id: data.id,
-        filename: data.filename || file.name,
-        pages: data.pages || 0,
-        size_bytes: data.size_bytes || file.size,
-        uploaded_at: new Date().toISOString(),
-        analysis: null,
-        analyzing: false,
-        extractingTables: false,
-      };
-      setDocuments((prev) => [...prev, newDoc]);
-    },
+    // NOTE: onSuccess/onError handled per-call in handleFilesSelected
   });
 
   const analyzeMutation = useMutation({
@@ -738,11 +776,23 @@ export function TakeoffPage() {
 
   const addToBOQMutation = useMutation({
     mutationFn: async (items: { description: string; quantity: number; unit: string }[]) => {
+      if (!selectedBoqId) {
+        throw new Error(t('takeoff.no_boq_selected', 'Please select a project and BOQ first'));
+      }
       return apiPost(`/v1/boq/boqs/${selectedBoqId}/positions/bulk`, { items });
     },
-    onSuccess: () => {
-      setAddToBOQSuccess(t('takeoff.added_to_boq_success', 'Items added to BOQ successfully'));
-      setTimeout(() => setAddToBOQSuccess(null), 3000);
+    onSuccess: (_data, variables) => {
+      setAddToBOQSuccess(
+        t('takeoff.added_to_boq_success_count', '{{count}} items added to BOQ successfully').replace(
+          '{{count}}',
+          String(variables.length),
+        ),
+      );
+      setTimeout(() => setAddToBOQSuccess(null), 5000);
+    },
+    onError: (err: Error) => {
+      setUploadErrorToast(err.message || t('takeoff.add_to_boq_failed', 'Failed to add items to BOQ'));
+      setTimeout(() => setUploadErrorToast(null), 5000);
     },
   });
 
@@ -771,6 +821,7 @@ export function TakeoffPage() {
           analysis: null,
           analyzing: false,
           extractingTables: false,
+          uploading: true,
         };
         setDocuments((prev) => [...prev, localDoc]);
 
@@ -786,14 +837,21 @@ export function TakeoffPage() {
                       pages: data.pages || d.pages,
                       size_bytes: data.size_bytes || d.size_bytes,
                       filename: data.filename || d.filename,
+                      uploading: false,
                     }
                   : d,
               ),
             );
           },
-          onError: () => {
-            // Remove the optimistic entry on failure
-            setDocuments((prev) => prev.filter((d) => d.id !== tempId));
+          onError: (err) => {
+            // Keep the entry visible with error state instead of removing it
+            const msg = err instanceof Error ? err.message : 'Upload failed';
+            setDocuments((prev) =>
+              prev.map((d) =>
+                d.id === tempId ? { ...d, uploading: false, uploadError: msg } : d,
+              ),
+            );
+            setUploadErrorToast(msg);
           },
         });
       }
@@ -869,7 +927,11 @@ export function TakeoffPage() {
 
   const handleAddToBOQ = useCallback(
     (docId: string) => {
-      if (!selectedBoqId) return;
+      if (!selectedBoqId) {
+        setUploadErrorToast(t('takeoff.no_boq_selected', 'Please select a project and BOQ first'));
+        setTimeout(() => setUploadErrorToast(null), 5000);
+        return;
+      }
       const doc = documents.find((d) => d.id === docId);
       if (!doc?.analysis) return;
 
@@ -885,12 +947,16 @@ export function TakeoffPage() {
         addToBOQMutation.mutate(selectedItems);
       }
     },
-    [selectedBoqId, documents, addToBOQMutation],
+    [selectedBoqId, documents, addToBOQMutation, t],
   );
 
   const handleQuickMeasurement = useCallback(
     (measurement: QuickMeasurement) => {
-      if (!selectedBoqId) return;
+      if (!selectedBoqId) {
+        setUploadErrorToast(t('takeoff.no_boq_selected', 'Please select a project and BOQ first'));
+        setTimeout(() => setUploadErrorToast(null), 5000);
+        return;
+      }
       addToBOQMutation.mutate([
         {
           description: measurement.description,
@@ -899,7 +965,7 @@ export function TakeoffPage() {
         },
       ]);
     },
-    [selectedBoqId, addToBOQMutation],
+    [selectedBoqId, addToBOQMutation, t],
   );
 
   /* ── Derived ────────────────────────────────────────────────────────── */
@@ -940,113 +1006,188 @@ export function TakeoffPage() {
         </div>
       </div>
 
-      {/* Project + BOQ selector */}
-      <Card className="mb-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-          <div className="flex-1">
-            {projectsLoading ? (
-              <Skeleton height={40} className="w-full" rounded="md" />
-            ) : (
-              <SelectDropdown
-                label={t('takeoff.select_project', 'Project')}
-                value={selectedProjectId}
-                onChange={handleProjectChange}
-                options={projectOptions}
-                placeholder={t('takeoff.select_project_placeholder', 'Choose a project...')}
-              />
-            )}
+      {/* Tabs */}
+      <div className="mb-6 flex gap-2 rounded-2xl bg-surface-secondary/60 p-1.5">
+        <button
+          onClick={() => setActiveTab('documents')}
+          className={clsx(
+            'flex flex-1 items-center justify-center gap-2.5 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-200',
+            activeTab === 'documents'
+              ? 'bg-surface-primary text-oe-blue shadow-md ring-1 ring-oe-blue/20'
+              : 'text-content-tertiary hover:text-content-primary hover:bg-surface-primary/50',
+          )}
+        >
+          <div className={clsx(
+            'flex h-7 w-7 items-center justify-center rounded-lg transition-colors',
+            activeTab === 'documents' ? 'bg-oe-blue-subtle' : 'bg-surface-tertiary/50',
+          )}>
+            <Sparkles size={14} strokeWidth={2} className={activeTab === 'documents' ? 'text-oe-blue' : ''} />
           </div>
-          <div className="flex-1">
-            {boqsLoading ? (
-              <Skeleton height={40} className="w-full" rounded="md" />
-            ) : (
-              <SelectDropdown
-                label={t('takeoff.select_boq', 'Bill of Quantities')}
-                value={selectedBoqId}
-                onChange={handleBoqChange}
-                options={boqOptions}
-                placeholder={
-                  selectedProjectId
-                    ? t('takeoff.select_boq_placeholder', 'Choose a BOQ...')
-                    : t('takeoff.select_project_first', 'Select a project first')
-                }
-              />
-            )}
+          {t('takeoff.tab_documents', 'Documents & AI')}
+          {documents.length > 0 && (
+            <Badge variant={activeTab === 'documents' ? 'blue' : 'neutral'} size="sm">
+              {documents.length}
+            </Badge>
+          )}
+        </button>
+        <button
+          onClick={() => setActiveTab('measurements')}
+          className={clsx(
+            'flex flex-1 items-center justify-center gap-2.5 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-200',
+            activeTab === 'measurements'
+              ? 'bg-surface-primary text-oe-blue shadow-md ring-1 ring-oe-blue/20'
+              : 'text-content-tertiary hover:text-content-primary hover:bg-surface-primary/50',
+          )}
+        >
+          <div className={clsx(
+            'flex h-7 w-7 items-center justify-center rounded-lg transition-colors',
+            activeTab === 'measurements' ? 'bg-oe-blue-subtle' : 'bg-surface-tertiary/50',
+          )}>
+            <Ruler size={14} strokeWidth={2} className={activeTab === 'measurements' ? 'text-oe-blue' : ''} />
           </div>
-        </div>
-      </Card>
-
-      {/* Success toast */}
-      {addToBOQSuccess && (
-        <div className="mb-4 flex items-center gap-3 rounded-xl bg-semantic-success-bg px-5 py-3 animate-fade-in">
-          <CheckCircle2 size={18} className="shrink-0 text-semantic-success" />
-          <p className="text-sm font-medium text-[#15803d]">{addToBOQSuccess}</p>
-        </div>
-      )}
-
-      {/* Upload Area */}
-      <div className="mb-6">
-        <DropZone onFilesSelected={handleFilesSelected} disabled={false} />
+          {t('takeoff.tab_measurements', 'Measurements')}
+        </button>
       </div>
 
-      {/* Uploaded Documents */}
-      {documents.length > 0 && (
-        <div className="mb-8">
-          <h2 className="mb-4 text-lg font-semibold text-content-primary">
-            {t('takeoff.uploaded_documents', 'Uploaded Documents')}
-          </h2>
-          <div className="space-y-4">
-            {documents.map((doc) => (
-              <DocumentCard
-                key={doc.id}
-                doc={doc}
-                onAnalyze={handleAnalyze}
-                onExtractTables={handleExtractTables}
-                onRemove={handleRemoveDocument}
-                onToggleElement={handleToggleElement}
-                onSelectAll={handleSelectAll}
-                onDeselectAll={handleDeselectAll}
-                onAddToBOQ={handleAddToBOQ}
-                boqSelected={hasBoqSelected}
-              />
-            ))}
+      {/* Tab content */}
+      {activeTab === 'documents' ? (
+        <>
+          {/* Workflow explanation */}
+          <InfoHint className="mb-6" text={t('takeoff.workflow_desc', { defaultValue: 'Upload a PDF drawing → AI analyzes pages and extracts elements (walls, slabs, doors, etc.) with quantities → Review results and adjust → Add selected items to your BOQ. Confidence scores: green (>80%) = high confidence, yellow (50-80%) = review recommended, red (<50%) = manual verification needed.' })} />
+
+          {/* Project + BOQ selector */}
+          <Card className="mb-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+              <div className="flex-1">
+                {projectsLoading ? (
+                  <Skeleton height={40} className="w-full" rounded="md" />
+                ) : (
+                  <SelectDropdown
+                    label={t('takeoff.select_project', 'Project')}
+                    value={selectedProjectId}
+                    onChange={handleProjectChange}
+                    options={projectOptions}
+                    placeholder={t('takeoff.select_project_placeholder', 'Choose a project...')}
+                  />
+                )}
+              </div>
+              <div className="flex-1">
+                {boqsLoading ? (
+                  <Skeleton height={40} className="w-full" rounded="md" />
+                ) : (
+                  <SelectDropdown
+                    label={t('takeoff.select_boq', 'Bill of Quantities')}
+                    value={selectedBoqId}
+                    onChange={handleBoqChange}
+                    options={boqOptions}
+                    placeholder={
+                      selectedProjectId
+                        ? t('takeoff.select_boq_placeholder', 'Choose a BOQ...')
+                        : t('takeoff.select_project_first', 'Select a project first')
+                    }
+                  />
+                )}
+              </div>
+            </div>
+          </Card>
+
+          {/* Success toast */}
+          {addToBOQSuccess && (
+            <div className="mb-4 flex items-center gap-3 rounded-xl bg-semantic-success-bg px-5 py-3 animate-fade-in">
+              <CheckCircle2 size={18} className="shrink-0 text-semantic-success" />
+              <p className="text-sm font-medium text-[#15803d]">{addToBOQSuccess}</p>
+            </div>
+          )}
+
+          {/* Upload error toast */}
+          {uploadErrorToast && (
+            <div className="mb-4 flex items-center gap-3 rounded-xl bg-semantic-error-bg px-5 py-3 animate-fade-in">
+              <AlertTriangle size={18} className="shrink-0 text-semantic-error" />
+              <p className="text-sm font-medium text-semantic-error flex-1">{uploadErrorToast}</p>
+              <button
+                onClick={() => setUploadErrorToast(null)}
+                className="shrink-0 rounded-md p-1 text-semantic-error/60 hover:text-semantic-error transition-colors"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          )}
+
+          {/* Upload Area */}
+          <div className="mb-6">
+            <DropZone onFilesSelected={handleFilesSelected} disabled={false} />
           </div>
-        </div>
-      )}
 
-      {/* Empty state when no documents */}
-      {documents.length === 0 && (
-        <div className="mb-8">
-          <EmptyState
-            icon={<FileSearch size={24} strokeWidth={1.5} />}
-            title={t('takeoff.no_documents', 'No documents uploaded')}
-            description={t(
-              'takeoff.no_documents_description',
-              'Upload PDF construction drawings to start extracting quantities with AI.',
-            )}
-          />
-        </div>
-      )}
+          {/* Uploaded Documents */}
+          {documents.length > 0 && (
+            <div className="mb-8">
+              <h2 className="mb-4 text-lg font-semibold text-content-primary">
+                {t('takeoff.uploaded_documents', 'Uploaded Documents')}
+              </h2>
+              <div className="space-y-4">
+                {documents.map((doc) => (
+                  <DocumentCard
+                    key={doc.id}
+                    doc={doc}
+                    onAnalyze={handleAnalyze}
+                    onExtractTables={handleExtractTables}
+                    onRemove={handleRemoveDocument}
+                    onToggleElement={handleToggleElement}
+                    onSelectAll={handleSelectAll}
+                    onDeselectAll={handleDeselectAll}
+                    onAddToBOQ={handleAddToBOQ}
+                    boqSelected={hasBoqSelected}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
-      {/* Quick Measurements */}
-      <div className="border-t border-border-light pt-6">
-        <h2 className="mb-1 text-lg font-semibold text-content-primary">
-          {t('takeoff.quick_measurements', 'Quick Measurements')}
-        </h2>
-        <p className="mb-4 text-sm text-content-secondary">
-          {t('takeoff.quick_measurements_desc', 'Enter measurements manually:')}
-        </p>
-        <QuickMeasurementForm onAdd={handleQuickMeasurement} disabled={!hasBoqSelected} />
-        {!hasBoqSelected && (
-          <p className="mt-2 flex items-center gap-1.5 text-xs text-content-tertiary">
-            <AlertTriangle size={12} />
-            {t(
-              'takeoff.select_boq_to_add',
-              'Select a project and BOQ above to add measurements.',
+          {/* Empty state when no documents */}
+          {documents.length === 0 && (
+            <div className="mb-8">
+              <EmptyState
+                icon={<FileSearch size={24} strokeWidth={1.5} />}
+                title={t('takeoff.no_documents', 'No documents uploaded')}
+                description={t(
+                  'takeoff.no_documents_description',
+                  'Upload PDF construction drawings to start extracting quantities with AI.',
+                )}
+              />
+            </div>
+          )}
+
+          {/* Quick Measurements */}
+          <div className="border-t border-border-light pt-6">
+            <h2 className="mb-1 text-lg font-semibold text-content-primary">
+              {t('takeoff.quick_measurements', 'Quick Measurements')}
+            </h2>
+            <p className="mb-4 text-sm text-content-secondary">
+              {t('takeoff.quick_measurements_desc', 'Enter measurements manually:')}
+            </p>
+            <QuickMeasurementForm onAdd={handleQuickMeasurement} disabled={!hasBoqSelected} />
+            {!hasBoqSelected && (
+              <p className="mt-2 flex items-center gap-1.5 text-xs text-content-tertiary">
+                <AlertTriangle size={12} />
+                {t(
+                  'takeoff.select_boq_to_add',
+                  'Select a project and BOQ above to add measurements.',
+                )}
+              </p>
             )}
-          </p>
-        )}
-      </div>
+          </div>
+        </>
+      ) : (
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center py-20">
+              <Loader2 size={24} className="animate-spin text-oe-blue" />
+            </div>
+          }
+        >
+          <TakeoffViewerModule />
+        </Suspense>
+      )}
     </div>
   );
 }

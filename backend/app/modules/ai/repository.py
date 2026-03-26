@@ -40,6 +40,9 @@ class AISettingsRepository:
             .values(**fields)
         )
         await self.session.execute(stmt)
+        await self.session.flush()
+        # Expire cached ORM instances so the next get_by_id re-reads from DB
+        self.session.expire_all()
 
 
 class AIEstimateJobRepository:
@@ -49,8 +52,10 @@ class AIEstimateJobRepository:
         self.session = session
 
     async def get_by_id(self, job_id: uuid.UUID) -> AIEstimateJob | None:
-        """Get an estimate job by ID."""
-        return await self.session.get(AIEstimateJob, job_id)
+        """Get an estimate job by ID (fresh SELECT, bypasses identity map)."""
+        stmt = select(AIEstimateJob).where(AIEstimateJob.id == job_id)
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
 
     async def create(self, job: AIEstimateJob) -> AIEstimateJob:
         """Insert a new estimate job."""
@@ -68,3 +73,6 @@ class AIEstimateJobRepository:
             .values(**fields)
         )
         await self.session.execute(stmt)
+        await self.session.flush()
+        # Expire cached ORM instances so the next get_by_id re-reads from DB
+        self.session.expire_all()

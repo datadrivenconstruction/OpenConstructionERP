@@ -263,13 +263,14 @@ class GanttActivity(BaseModel):
 
     id: UUID
     name: str
-    start: str
-    end: str
-    progress: float
+    start_date: str
+    end_date: str
+    duration_days: int = 0
+    progress_pct: float
     dependencies: list[dict[str, Any]]
     parent_id: UUID | None
     color: str
-    boq_positions: list[str]
+    boq_position_ids: list[str]
     wbs_code: str
     activity_type: str
     status: str
@@ -290,3 +291,64 @@ class GanttData(BaseModel):
 
     activities: list[GanttActivity] = Field(default_factory=list)
     summary: GanttSummary = Field(default_factory=GanttSummary)
+
+
+# ── CPM & Risk Analysis schemas ─────────────────────────────────────────────
+
+
+class GenerateFromBOQRequest(BaseModel):
+    """Request body for generating schedule activities from a BOQ."""
+
+    boq_id: UUID
+    total_project_days: int | None = Field(
+        default=None,
+        ge=1,
+        description=(
+            "Total project duration in calendar days. "
+            "If omitted, defaults to 365 (residential) or 540 (office) based on BOQ metadata."
+        ),
+    )
+
+
+class CPMActivityResult(BaseModel):
+    """CPM calculation results for a single activity."""
+
+    activity_id: UUID
+    name: str
+    duration_days: int
+    early_start: int = Field(description="Early start day (0-based from project start)")
+    early_finish: int = Field(description="Early finish day")
+    late_start: int = Field(description="Late start day")
+    late_finish: int = Field(description="Late finish day")
+    total_float: int = Field(description="Total float (LS - ES). 0 = critical.")
+    is_critical: bool
+
+
+class CriticalPathResponse(BaseModel):
+    """Response from CPM calculation."""
+
+    schedule_id: UUID
+    project_duration_days: int = Field(description="Total project duration from CPM")
+    critical_path: list[CPMActivityResult] = Field(
+        description="Activities on the critical path (float = 0)"
+    )
+    all_activities: list[CPMActivityResult] = Field(
+        description="All activities with CPM data"
+    )
+
+
+class RiskAnalysisResponse(BaseModel):
+    """PERT-based risk analysis response."""
+
+    schedule_id: UUID
+    deterministic_days: int = Field(description="Deterministic project duration from CPM")
+    p50_days: int = Field(description="50th percentile duration estimate")
+    p80_days: int = Field(description="80th percentile duration estimate")
+    p95_days: int = Field(description="95th percentile duration estimate")
+    mean_days: float = Field(description="Expected (mean) duration")
+    std_dev_days: float = Field(description="Standard deviation in days")
+    risk_buffer_days: int = Field(description="Recommended buffer (P80 - deterministic)")
+    activity_risks: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Per-activity PERT estimates (optimistic, most_likely, pessimistic)",
+    )

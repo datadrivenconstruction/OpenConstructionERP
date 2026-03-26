@@ -1,0 +1,79 @@
+# OpenEstimate — Single Unified Docker Image
+#
+# All-in-one image: FastAPI backend serves React frontend directly.
+# Uses SQLite by default — no external database needed.
+#
+# Usage:
+#   docker build -t openestimate -f deploy/docker/Dockerfile.unified .
+#   docker run -d -p 8080:8080 -v oe_data:/data openestimate
+#
+# With PostgreSQL (override DATABASE_URL):
+#   docker run -d -p 8080:8080 \
+#     -e DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/dbname \
+#     openestimate
+
+# ── Stage 1: Build frontend ──────────────────────────────────────────
+FROM node:20-alpine AS frontend-build
+
+WORKDIR /build
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci --ignore-scripts
+COPY frontend/ .
+RUN npm run build
+
+# ── Stage 2: Production image ────────────────────────────────────────
+FROM python:3.12-slim
+
+# Install system dependencies (libpq for optional PostgreSQL support)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libpq-dev curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+RUN groupadd -r oe && useradd -r -g oe -d /app -s /sbin/nologin oe
+
+WORKDIR /app
+
+# Install Python dependencies
+COPY backend/pyproject.toml backend/
+RUN pip install --no-cache-dir ./backend
+
+# Copy backend source
+COPY backend/ backend/
+
+# Copy pre-built frontend into the package location
+COPY --from=frontend-build /build/dist backend/app/_frontend_dist/
+
+# Copy data catalogs (for seed/enrichment)
+COPY data/ data/
+
+# Create data volume directory
+RUN mkdir -p /data && chown oe:oe /data
+
+# Set ownership
+RUN chown -R oe:oe /app
+
+USER oe
+
+# Environment defaults for single-image mode
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    SERVE_FRONTEND=true \
+    DATABASE_URL=sqlite+aiosqlite:////data/openestimate.db \
+    DATABASE_SYNC_URL=sqlite:////data/openestimate.db \
+    VECTOR_BACKEND=lancedb \
+    VECTOR_DATA_DIR=/data/vectors \
+    APP_ENV=production \
+    APP_DEBUG=false \
+    JWT_SECRET=change-me-in-production \
+    ALLOWED_ORIGINS=*
+
+EXPOSE 8080
+VOLUME ["/data"]
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD curl -f http://localhost:8080/api/health || exit 1
+
+CMD ["python", "-m", "uvicorn", "app.main:create_app", \
+     "--factory", "--host", "0.0.0.0", "--port", "8080", \
+     "--app-dir", "/app/backend"]

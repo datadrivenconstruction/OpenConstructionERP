@@ -11,6 +11,7 @@ Endpoints:
     GET    /boqs/{boq_id}/structured           — Full BOQ with sections + markups
     GET    /boqs/{boq_id}/activity             — Activity log for a BOQ
     POST   /boqs/{boq_id}/positions            — Add a position to a BOQ
+    POST   /boqs/{boq_id}/positions/bulk      — Bulk insert multiple positions
     PATCH  /positions/{position_id}            — Update a position
     DELETE /positions/{position_id}            — Delete a position
     POST   /boqs/{boq_id}/sections             — Create a section header
@@ -20,6 +21,7 @@ Endpoints:
     POST   /boqs/{boq_id}/markups/apply-defaults — Apply regional default markups
     POST   /boqs/{boq_id}/duplicate            — Duplicate a BOQ with all data
     POST   /positions/{position_id}/duplicate  — Duplicate a single position
+    POST   /boqs/{boq_id}/recalculate-rates    — Recalculate unit_rates from resources
     POST   /boqs/{boq_id}/validate             — Validate a BOQ against rule sets
     GET    /boqs/{boq_id}/export/csv           — Export BOQ as CSV
     GET    /boqs/{boq_id}/export/excel         — Export BOQ as Excel (xlsx)
@@ -27,18 +29,26 @@ Endpoints:
     GET    /boqs/{boq_id}/export/gaeb          — Export BOQ as GAEB XML 3.3 (X83)
     POST   /boqs/{boq_id}/import/excel         — Import positions from Excel/CSV
     POST   /boqs/{boq_id}/import/smart         — Smart import: any file via AI (incl. CAD/BIM)
+    GET    /boqs/{boq_id}/resource-summary    — Aggregated resource summary across positions
+    GET    /boqs/{boq_id}/cost-breakdown     — Cost breakdown by resource category
+    GET    /boqs/{boq_id}/sensitivity       — Sensitivity analysis (tornado chart)
+    GET    /boqs/{boq_id}/cost-risk        — Monte Carlo cost risk simulation
     GET    /projects/{project_id}/activity     — Activity log for a project
+    POST   /boqs/classify                    — AI: suggest classification codes
+    POST   /boqs/suggest-rate                — AI: suggest market rate
+    POST   /boqs/{boq_id}/check-anomalies   — AI: detect pricing anomalies
 """
 
 import csv
 import io
 import logging
+import random
 import tempfile
 import uuid
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, UploadFile, File, status
 from fastapi.responses import StreamingResponse
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
@@ -46,30 +56,107 @@ from app.modules.boq.schemas import (
     AIChatRequest,
     AIChatResponse,
     ActivityLogList,
+    AnomalyCheckResponse,
     BOQCreate,
     BOQFromTemplateRequest,
+    BOQListItem,
     BOQResponse,
     BOQUpdate,
     BOQWithPositions,
     BOQWithSections,
+    CheckScopeRequest,
+    CheckScopeResponse,
+    ClassificationSuggestion,
+    ClassifyRequest,
+    ClassifyResponse,
+    CostItemSearchRequest,
+    CostItemSearchResponse,
+    CostItemSearchResult,
     CO2MaterialBreakdown,
+    CostBreakdownResponse,
+    CostRiskDriver,
+    CostRiskHistogramBin,
+    CostRiskPercentiles,
+    CostRiskResponse,
+    EnhanceDescriptionRequest,
+    EnhanceDescriptionResponse,
+    EscalateRateRequest,
+    EscalateRateResponse,
+    EscalationFactors,
     MarkupCreate,
     MarkupResponse,
     MarkupUpdate,
     PositionCreate,
     PositionResponse,
     PositionUpdate,
+    PrerequisiteItem,
+    PricingAnomaly,
+    RateMatch,
+    ResourceSummaryItem,
+    ResourceSummaryResponse,
+    ResourceTypeSummary,
+    ScopeMissingItem,
     SectionCreate,
+    SensitivityItem,
+    SensitivityResponse,
+    SnapshotCreate,
+    SnapshotDetail,
+    SnapshotResponse,
+    SuggestPrerequisitesRequest,
+    SuggestPrerequisitesResponse,
+    SuggestRateRequest,
+    SuggestRateResponse,
     SustainabilityResponse,
+    CO2EnrichResponse,
+    CO2AssignRequest,
+    PositionCO2Detail,
+    EstimateClassificationResponse,
     TemplateInfo,
 )
 from app.modules.boq.service import BOQService
+from app.modules.costs.repository import CostItemRepository
 
 router = APIRouter()
+_log = logging.getLogger(__name__)
 
 
 def _get_service(session: SessionDep) -> BOQService:
     return BOQService(session)
+
+
+async def _log_activity(
+    service: BOQService,
+    *,
+    user_id: uuid.UUID,
+    action: str,
+    target_type: str,
+    description: str,
+    project_id: uuid.UUID | None = None,
+    boq_id: uuid.UUID | None = None,
+    target_id: uuid.UUID | None = None,
+    changes: dict | None = None,
+) -> None:
+    """Fire-and-forget activity logging — never fails the request."""
+    try:
+        # Resolve project_id from boq if not provided
+        if project_id is None and boq_id is not None:
+            try:
+                boq = await service.get_boq(boq_id)
+                project_id = boq.project_id
+            except Exception:
+                pass
+        await service.log_activity(
+            user_id=user_id,
+            action=action,
+            target_type=target_type,
+            description=description,
+            project_id=project_id,
+            boq_id=boq_id,
+            target_id=target_id,
+            changes=changes,
+        )
+    except Exception:
+        _log.debug("Activity log write failed (non-critical)", exc_info=True)
 
 
 def _position_to_response(position: object) -> PositionResponse:
@@ -91,7 +178,7 @@ def _position_to_response(position: object) -> PositionResponse:
         ),
         cad_element_ids=position.cad_element_ids,  # type: ignore[attr-defined]
         validation_status=position.validation_status,  # type: ignore[attr-defined]
-        metadata_=position.metadata_,  # type: ignore[attr-defined]
+        metadata=position.metadata_,  # type: ignore[attr-defined]
         sort_order=position.sort_order,  # type: ignore[attr-defined]
         created_at=position.created_at,  # type: ignore[attr-defined]
         updated_at=position.updated_at,  # type: ignore[attr-defined]
@@ -133,12 +220,22 @@ async def create_boq(
 ) -> BOQResponse:
     """Create a new Bill of Quantities."""
     boq = await service.create_boq(data)
+    await _log_activity(
+        service,
+        user_id=_user_id,
+        action="boq_created",
+        target_type="boq",
+        description=f"Created BOQ '{boq.name}'",
+        project_id=data.project_id,
+        boq_id=boq.id,
+        target_id=boq.id,
+    )
     return BOQResponse.model_validate(boq)
 
 
 @router.get(
     "/boqs/",
-    response_model=list[BOQResponse],
+    response_model=list[BOQListItem],
     dependencies=[Depends(RequirePermission("boq.read"))],
 )
 async def list_boqs(
@@ -146,12 +243,30 @@ async def list_boqs(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
     service: BOQService = Depends(_get_service),
-) -> list[BOQResponse]:
-    """List all BOQs for a given project."""
+) -> list[BOQListItem]:
+    """List all BOQs for a given project with computed grand totals."""
     boqs, _ = await service.list_boqs_for_project(
         project_id, offset=offset, limit=limit
     )
-    return [BOQResponse.model_validate(b) for b in boqs]
+    # Compute grand totals via a single aggregate query (avoids loading all positions)
+    boq_ids = [b.id for b in boqs]
+    totals = await service.boq_repo.grand_totals_for_boqs(boq_ids)
+
+    results: list[BOQListItem] = []
+    for b in boqs:
+        item = BOQListItem(
+            id=b.id,
+            project_id=b.project_id,
+            name=b.name,
+            description=b.description,
+            status=b.status,
+            metadata=b.metadata_,
+            created_at=b.created_at,
+            updated_at=b.updated_at,
+            grand_total=totals.get(b.id, 0.0),
+        )
+        results.append(item)
+    return results
 
 
 # ── Templates ────────────────────────────────────────────────────────────────
@@ -206,6 +321,426 @@ async def create_boq_from_template(
     """
     boq = await service.create_boq_from_template(data)
     return BOQResponse.model_validate(boq)
+
+
+# ── AI-powered Classification ─────────────────────────────────────────────
+# NOTE: These POST routes with literal paths (/boqs/classify, /boqs/suggest-rate)
+# MUST be defined BEFORE GET /boqs/{boq_id}, otherwise FastAPI matches "classify"
+# and "suggest-rate" as {boq_id} path parameters and returns 405 Method Not Allowed.
+
+
+@router.post(
+    "/boqs/classify",
+    response_model=ClassifyResponse,
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def classify_position(
+    data: ClassifyRequest,
+    service: BOQService = Depends(_get_service),
+) -> ClassifyResponse:
+    """Suggest classification codes for a BOQ position description.
+
+    Uses vector similarity search against the cost database to find items
+    with similar descriptions, then aggregates their classification codes
+    ranked by frequency weighted by similarity score.
+
+    Returns 3-5 suggestions ordered by confidence (highest first).
+    Gracefully returns an empty list if the vector database is unavailable.
+
+    Args:
+        data: ClassifyRequest with description, unit, and project_standard.
+
+    Returns:
+        ClassifyResponse with a list of ClassificationSuggestion.
+    """
+    try:
+        raw_suggestions = await service.classify_position(
+            description=data.description,
+            unit=data.unit,
+            project_standard=data.project_standard,
+        )
+    except Exception:
+        _log.exception("classify_position failed")
+        raw_suggestions = []
+
+    suggestions = [
+        ClassificationSuggestion(
+            standard=s["standard"],
+            code=s["code"],
+            label=s["label"],
+            confidence=s["confidence"],
+        )
+        for s in raw_suggestions
+    ]
+
+    return ClassifyResponse(suggestions=suggestions)
+
+
+# ── AI Cost Finder (vector search) ────────────────────────────────────────
+
+
+@router.post(
+    "/boqs/search-cost-items",
+    response_model=CostItemSearchResponse,
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def search_cost_items(
+    data: CostItemSearchRequest,
+    service: BOQService = Depends(_get_service),
+) -> CostItemSearchResponse:
+    """Search cost items using AI vector similarity.
+
+    Performs semantic search against the cost database using text embeddings.
+    Returns ranked results with similarity scores, enriched with full item
+    details (components, classification) from the SQL database.
+
+    Filters: unit (exact match), region, min_score threshold.
+    Gracefully returns empty results if vector DB is unavailable.
+    """
+    try:
+        result = await service.search_cost_items(
+            query=data.query,
+            unit=data.unit,
+            region=data.region,
+            limit=data.limit,
+            min_score=data.min_score,
+        )
+    except Exception:
+        _log.exception("search_cost_items failed")
+        result = {
+            "results": [],
+            "total_found": 0,
+            "query_embedding_ms": 0,
+            "search_ms": 0,
+        }
+
+    items = [
+        CostItemSearchResult(
+            id=r["id"],
+            code=r["code"],
+            description=r["description"],
+            unit=r["unit"],
+            rate=r["rate"],
+            region=r["region"],
+            score=r["score"],
+            classification=r.get("classification", {}),
+            components=r.get("components", []),
+            currency=r.get("currency", "EUR"),
+        )
+        for r in result.get("results", [])
+    ]
+
+    return CostItemSearchResponse(
+        results=items,
+        total_found=result.get("total_found", 0),
+        query_embedding_ms=result.get("query_embedding_ms", 0),
+        search_ms=result.get("search_ms", 0),
+    )
+
+
+# ── AI-powered Rate Suggestion ─────────────────────────────────────────────
+
+
+@router.post(
+    "/boqs/suggest-rate",
+    response_model=SuggestRateResponse,
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def suggest_rate(
+    data: SuggestRateRequest,
+    service: BOQService = Depends(_get_service),
+) -> SuggestRateResponse:
+    """Suggest a market rate for a BOQ position based on its description.
+
+    Uses vector similarity search to find cost items with similar
+    descriptions, optionally filtered by unit and region. Computes a
+    weighted average rate (weighted by similarity score) and returns
+    the individual matches for transparency.
+
+    Gracefully returns zero rate with empty matches if the vector database
+    is unavailable.
+
+    Args:
+        data: SuggestRateRequest with description, unit, classification, region.
+
+    Returns:
+        SuggestRateResponse with suggested_rate, confidence, source, matches.
+    """
+    try:
+        result = await service.suggest_rate(
+            description=data.description,
+            unit=data.unit,
+            classification=data.classification,
+            region=data.region,
+        )
+    except Exception:
+        _log.exception("suggest_rate failed")
+        result = {
+            "suggested_rate": 0.0,
+            "confidence": 0.0,
+            "source": "vector_search",
+            "matches": [],
+        }
+
+    matches = [
+        RateMatch(
+            code=m["code"],
+            description=m["description"],
+            rate=m["rate"],
+            region=m["region"],
+            score=m["score"],
+        )
+        for m in result.get("matches", [])
+    ]
+
+    return SuggestRateResponse(
+        suggested_rate=result["suggested_rate"],
+        confidence=result["confidence"],
+        source=result["source"],
+        matches=matches,
+    )
+
+
+# ── BOQ Anomaly Detection ─────────────────────────────────────────────────
+
+
+@router.post(
+    "/boqs/{boq_id}/check-anomalies",
+    response_model=AnomalyCheckResponse,
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def check_anomalies(
+    boq_id: uuid.UUID,
+    service: BOQService = Depends(_get_service),
+) -> AnomalyCheckResponse:
+    """Check all positions in a BOQ for pricing anomalies.
+
+    For each position with a description and unit_rate > 0, performs a
+    vector search to find 5-10 similar cost items. Calculates the p25,
+    median, and p75 of matched rates and flags positions whose rate
+    deviates significantly from the market range:
+
+    - **error**: rate > 3x median (likely a pricing mistake)
+    - **warning**: rate > 2x median (review recommended)
+    - **warning**: rate < 0.3x median (suspiciously low)
+
+    Gracefully returns an empty anomaly list if the vector database is
+    unavailable.
+
+    Args:
+        boq_id: Target BOQ identifier.
+
+    Returns:
+        AnomalyCheckResponse with anomalies list and positions_checked count.
+    """
+    try:
+        result = await service.check_anomalies(boq_id)
+    except HTTPException:
+        raise
+    except Exception:
+        _log.exception("check_anomalies failed for BOQ %s", boq_id)
+        result = {"anomalies": [], "positions_checked": 0}
+
+    anomalies = [
+        PricingAnomaly(
+            position_id=a["position_id"],
+            field=a["field"],
+            current_value=a["current_value"],
+            market_range=a["market_range"],
+            severity=a["severity"],
+            message=a["message"],
+            suggestion=a["suggestion"],
+        )
+        for a in result.get("anomalies", [])
+    ]
+
+    return AnomalyCheckResponse(
+        anomalies=anomalies,
+        positions_checked=result.get("positions_checked", 0),
+    )
+
+
+# ── LLM-powered AI features ─────────────────────────────────────────────────
+
+
+@router.post(
+    "/boqs/enhance-description",
+    response_model=EnhanceDescriptionResponse,
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def enhance_description(
+    data: EnhanceDescriptionRequest,
+    user_id: CurrentUserId,
+    service: BOQService = Depends(_get_service),
+) -> EnhanceDescriptionResponse:
+    """Enhance a short BOQ position description into a precise technical specification.
+
+    Uses LLM to add material grades, standards references, and technical details.
+    Requires an AI API key configured in user settings.
+    """
+    try:
+        result = await service.enhance_description(
+            user_id=user_id,
+            description=data.description,
+            unit=data.unit,
+            classification=data.classification,
+        )
+    except HTTPException:
+        raise
+    except Exception:
+        _log.exception("enhance_description failed")
+        result = {
+            "enhanced_description": data.description,
+            "specifications": [],
+            "standards": [],
+            "confidence": 0.0,
+            "model_used": "",
+            "tokens_used": 0,
+        }
+
+    return EnhanceDescriptionResponse(**result)
+
+
+@router.post(
+    "/boqs/suggest-prerequisites",
+    response_model=SuggestPrerequisitesResponse,
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def suggest_prerequisites(
+    data: SuggestPrerequisitesRequest,
+    user_id: CurrentUserId,
+    service: BOQService = Depends(_get_service),
+) -> SuggestPrerequisitesResponse:
+    """Suggest prerequisite and related work items for a BOQ position.
+
+    Analyzes the target position and existing BOQ to identify commonly
+    needed companion, prerequisite, and successor work items.
+    """
+    try:
+        result = await service.suggest_prerequisites(
+            user_id=user_id,
+            description=data.description,
+            unit=data.unit,
+            classification=data.classification,
+            existing_descriptions=data.existing_descriptions,
+        )
+    except HTTPException:
+        raise
+    except Exception:
+        _log.exception("suggest_prerequisites failed")
+        result = {"suggestions": [], "model_used": "", "tokens_used": 0}
+
+    suggestions = [
+        PrerequisiteItem(**s)
+        for s in result.get("suggestions", [])
+    ]
+    return SuggestPrerequisitesResponse(
+        suggestions=suggestions,
+        model_used=result.get("model_used", ""),
+        tokens_used=result.get("tokens_used", 0),
+    )
+
+
+@router.post(
+    "/boqs/{boq_id}/check-scope",
+    response_model=CheckScopeResponse,
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def check_scope(
+    boq_id: uuid.UUID,
+    data: CheckScopeRequest,
+    user_id: CurrentUserId,
+    service: BOQService = Depends(_get_service),
+) -> CheckScopeResponse:
+    """Analyze BOQ for scope completeness — find missing trades and work packages.
+
+    Sends a summary of all positions to the LLM which identifies gaps:
+    missing structural items, MEP, finishes, external works, preliminaries, etc.
+    """
+    try:
+        result = await service.check_scope_completeness(
+            user_id=user_id,
+            boq_id=boq_id,
+            project_type=data.project_type,
+            region=data.region,
+            currency=data.currency,
+        )
+    except HTTPException:
+        raise
+    except Exception:
+        _log.exception("check_scope failed for BOQ %s", boq_id)
+        result = {
+            "completeness_score": 0.0,
+            "missing_items": [],
+            "warnings": ["Analysis failed"],
+            "summary": "",
+            "model_used": "",
+            "tokens_used": 0,
+        }
+
+    missing = [ScopeMissingItem(**m) for m in result.get("missing_items", [])]
+    return CheckScopeResponse(
+        completeness_score=result.get("completeness_score", 0.0),
+        missing_items=missing,
+        warnings=result.get("warnings", []),
+        summary=result.get("summary", ""),
+        model_used=result.get("model_used", ""),
+        tokens_used=result.get("tokens_used", 0),
+    )
+
+
+@router.post(
+    "/boqs/escalate-rate",
+    response_model=EscalateRateResponse,
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def escalate_rate(
+    data: EscalateRateRequest,
+    user_id: CurrentUserId,
+    service: BOQService = Depends(_get_service),
+) -> EscalateRateResponse:
+    """Escalate a unit rate from a base year to current prices.
+
+    Uses LLM to estimate inflation factors (material, labor, regional)
+    and compute an escalated rate.
+    """
+    try:
+        result = await service.escalate_rate(
+            user_id=user_id,
+            description=data.description,
+            unit=data.unit,
+            rate=data.rate,
+            currency=data.currency,
+            base_year=data.base_year,
+            target_year=data.target_year,
+            region=data.region,
+        )
+    except HTTPException:
+        raise
+    except Exception:
+        _log.exception("escalate_rate failed")
+        result = {
+            "original_rate": data.rate,
+            "escalated_rate": data.rate,
+            "escalation_percent": 0.0,
+            "factors": {},
+            "confidence": "low",
+            "reasoning": "Analysis failed",
+            "model_used": "",
+            "tokens_used": 0,
+        }
+
+    factors = result.get("factors", {})
+    return EscalateRateResponse(
+        original_rate=result["original_rate"],
+        escalated_rate=result["escalated_rate"],
+        escalation_percent=result["escalation_percent"],
+        factors=EscalationFactors(**factors) if isinstance(factors, dict) else EscalationFactors(),
+        confidence=result.get("confidence", "low"),
+        reasoning=result.get("reasoning", ""),
+        model_used=result.get("model_used", ""),
+        tokens_used=result.get("tokens_used", 0),
+    )
 
 
 @router.get(
@@ -362,6 +897,7 @@ async def duplicate_position(
 async def add_position(
     boq_id: uuid.UUID,
     data: PositionCreate,
+    user_id: CurrentUserId,
     service: BOQService = Depends(_get_service),
 ) -> PositionResponse:
     """Add a new position to a BOQ.
@@ -371,7 +907,67 @@ async def add_position(
     # Override body boq_id with URL path parameter
     data.boq_id = boq_id
     position = await service.add_position(data)
+    await _log_activity(
+        service,
+        user_id=user_id,
+        action="position_added",
+        target_type="position",
+        description=f"Added position '{data.description[:60]}'",
+        boq_id=boq_id,
+        target_id=position.id,
+    )
     return _position_to_response(position)
+
+
+@router.post(
+    "/boqs/{boq_id}/positions/bulk",
+    response_model=list[PositionResponse],
+    status_code=201,
+    dependencies=[Depends(RequirePermission("boq.import"))],
+)
+async def bulk_add_positions(
+    boq_id: uuid.UUID,
+    payload: dict[str, Any],
+    service: BOQService = Depends(_get_service),
+) -> list[PositionResponse]:
+    """Bulk insert multiple positions into a BOQ.
+
+    Accepts ``{"items": [{"description": ..., "quantity": ..., "unit": ...}, ...]}``
+    as sent by the Takeoff page.  Each item is converted into a full
+    :class:`PositionCreate` and inserted sequentially.
+    """
+    items: list[dict[str, Any]] = payload.get("items", [])
+    if not items:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="'items' list is required and must not be empty",
+        )
+
+    # Determine next ordinal base from existing positions
+    try:
+        boq_data = await service.get_boq_with_positions(boq_id)
+        existing_count = len(boq_data.positions) if boq_data.positions else 0
+    except HTTPException:
+        existing_count = 0
+
+    results: list[PositionResponse] = []
+    for idx, item in enumerate(items):
+        ordinal = item.get("ordinal", f"{existing_count + idx + 1:03d}")
+        pos_data = PositionCreate(
+            boq_id=boq_id,
+            ordinal=ordinal,
+            description=item.get("description", ""),
+            unit=item.get("unit", "pcs"),
+            quantity=float(item.get("quantity", 0)),
+            unit_rate=float(item.get("unit_rate", 0)),
+            source=item.get("source", "takeoff"),
+            classification=item.get("classification", {}),
+            metadata=item.get("metadata", {}),
+        )
+        position = await service.add_position(pos_data)
+        results.append(_position_to_response(position))
+
+    return results
 
 
 @router.patch(
@@ -382,11 +978,43 @@ async def add_position(
 async def update_position(
     position_id: uuid.UUID,
     data: PositionUpdate,
+    user_id: CurrentUserId,
     service: BOQService = Depends(_get_service),
 ) -> PositionResponse:
     """Update a BOQ position. Recalculates total if quantity or unit_rate changed."""
     position = await service.update_position(position_id, data)
-    return _position_to_response(position)
+    changed = {k: v for k, v in data.model_dump(exclude_unset=True).items()}
+    await _log_activity(
+        service,
+        user_id=user_id,
+        action="position_updated",
+        target_type="position",
+        description=f"Updated position '{position.description[:60] if position.description else position_id}'",
+        boq_id=position.boq_id,
+        target_id=position_id,
+        changes=changed,
+    )
+    # Build response directly from attributes to avoid lazy-load greenlet issues
+    return PositionResponse(
+        id=position.id,
+        boq_id=position.boq_id,
+        parent_id=position.parent_id,
+        ordinal=position.ordinal,
+        description=position.description,
+        unit=position.unit,
+        quantity=float(position.quantity) if position.quantity else 0.0,
+        unit_rate=float(position.unit_rate) if position.unit_rate else 0.0,
+        total=float(position.total) if position.total else 0.0,
+        classification=position.classification if isinstance(position.classification, dict) else {},
+        source=position.source or "manual",
+        confidence=float(position.confidence) if position.confidence else None,
+        cad_element_ids=position.cad_element_ids if isinstance(position.cad_element_ids, list) else [],
+        validation_status=position.validation_status or "pending",
+        metadata=position.metadata_ if isinstance(position.metadata_, dict) else {},
+        sort_order=position.sort_order or 0,
+        created_at=position.created_at,
+        updated_at=position.updated_at,
+    )
 
 
 @router.delete(
@@ -396,9 +1024,18 @@ async def update_position(
 )
 async def delete_position(
     position_id: uuid.UUID,
+    user_id: CurrentUserId,
     service: BOQService = Depends(_get_service),
 ) -> None:
     """Delete a single position."""
+    await _log_activity(
+        service,
+        user_id=user_id,
+        action="position_deleted",
+        target_type="position",
+        description=f"Deleted position {position_id}",
+        target_id=position_id,
+    )
     await service.delete_position(position_id)
 
 
@@ -426,6 +1063,19 @@ async def create_section(
 
 
 # ── Markup CRUD ───────────────────────────────────────────────────────────────
+
+
+@router.get(
+    "/boqs/{boq_id}/markups",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def list_markups(
+    boq_id: uuid.UUID,
+    service: BOQService = Depends(_get_service),
+) -> dict:
+    """List all markups for a BOQ."""
+    markups = await service.list_markups(boq_id)
+    return {"markups": [_markup_to_response(m) for m in markups]}
 
 
 @router.post(
@@ -483,24 +1133,84 @@ async def apply_default_markups(
     boq_id: uuid.UUID,
     region: str = Query(
         default="DEFAULT",
-        description="Region code: DACH, UK, US, RU, GULF, or DEFAULT",
+        description="Region code: DACH, UK, US, FR, GULF, IN, AU, JP, BR, NORDIC, RU, CN, KR, DEFAULT",
     ),
     service: BOQService = Depends(_get_service),
 ) -> list[MarkupResponse]:
     """Apply regional default markups to a BOQ.
 
     Replaces any existing markups with the standard template for the region.
+    Pass region as query parameter: ``?region=DACH``.
 
-    Supported regions:
-    - **DACH**: BGK 8%, AGK 5%, W&G 3%
-    - **UK**: Preliminaries 12%, OH&P 6%, Contingency 5%
-    - **US**: General Conditions 10%, OH&P 8%, Contingency 5%, Escalation 3%
-    - **RU**: Overhead 15%, Estimated Profit 8%, VAT 20%
-    - **GULF**: OH&P 10%, Contingency 5%, VAT 5%
-    - **DEFAULT**: Overhead 10%, Profit 5%, Contingency 5%
+    Supported regions: DACH, UK, US, FR, GULF, IN, AU, JP, BR, NORDIC,
+    RU, CN, KR, DEFAULT.
     """
     markups = await service.apply_default_markups(boq_id, region)
     return [_markup_to_response(m) for m in markups]
+
+
+# ── Snapshots (Version History) ───────────────────────────────────────────────
+
+
+@router.get(
+    "/boqs/{boq_id}/snapshots",
+    response_model=list[SnapshotResponse],
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def list_snapshots(
+    boq_id: uuid.UUID,
+    service: BOQService = Depends(_get_service),
+) -> list[SnapshotResponse]:
+    """List all snapshots for a BOQ, newest first."""
+    snapshots = await service.list_snapshots(boq_id)
+    return [
+        SnapshotResponse(
+            id=s.id,
+            boq_id=s.boq_id,
+            name=s.name,
+            created_at=s.created_at,
+            created_by=s.created_by,
+        )
+        for s in snapshots
+    ]
+
+
+@router.post(
+    "/boqs/{boq_id}/snapshots",
+    response_model=SnapshotResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def create_snapshot(
+    boq_id: uuid.UUID,
+    data: SnapshotCreate,
+    user_id: CurrentUserId = None,
+    service: BOQService = Depends(_get_service),
+) -> SnapshotResponse:
+    """Create a point-in-time snapshot of the current BOQ state."""
+    snap = await service.create_snapshot(boq_id, name=data.name, user_id=user_id)
+    return SnapshotResponse(
+        id=snap.id,
+        boq_id=snap.boq_id,
+        name=snap.name,
+        created_at=snap.created_at,
+        created_by=snap.created_by,
+    )
+
+
+@router.post(
+    "/boqs/{boq_id}/restore/{snapshot_id}",
+    response_model=BOQWithPositions,
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def restore_snapshot(
+    boq_id: uuid.UUID,
+    snapshot_id: uuid.UUID,
+    service: BOQService = Depends(_get_service),
+) -> BOQWithPositions:
+    """Restore a BOQ to a previous snapshot state."""
+    boq = await service.restore_snapshot(boq_id, snapshot_id)
+    return boq
 
 
 # ── Validation ────────────────────────────────────────────────────────────────
@@ -543,6 +1253,23 @@ def _build_rule_sets(
         rule_sets.append("masterformat")
 
     return rule_sets
+
+
+@router.post(
+    "/boqs/{boq_id}/recalculate-rates",
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def recalculate_rates(
+    boq_id: uuid.UUID,
+    service: BOQService = Depends(_get_service),
+) -> dict[str, Any]:
+    """Recalculate position unit_rates from their resource breakdowns.
+
+    Iterates over all positions in the BOQ and, for those with resource
+    entries in metadata, recomputes unit_rate as the sum of resource costs.
+    Returns a summary with updated/skipped/total counts.
+    """
+    return await service.recalculate_rates(boq_id)
 
 
 @router.post(
@@ -2006,87 +2733,18 @@ async def smart_import(
 
 # ── Sustainability / CO2 Calculator ──────────────────────────────────────────
 
-# Standard emission factors per material type (kg CO2e per unit)
-CO2_FACTORS: dict[str, dict[str, object]] = {
-    "concrete": {"factor": 250, "unit": "m3", "material": "Concrete C30/37"},
-    "steel": {"factor": 1800, "unit": "t", "material": "Structural Steel"},
-    "rebar": {"factor": 2.5, "unit": "kg", "material": "Reinforcement Steel"},
-    "masonry": {"factor": 120, "unit": "m3", "material": "Masonry (Brick/Block)"},
-    "timber": {"factor": -500, "unit": "m3", "material": "Timber (Carbon Sink)"},
-    "glass": {"factor": 1200, "unit": "t", "material": "Glass"},
-    "insulation": {"factor": 5, "unit": "m2", "material": "Insulation"},
-    "asphalt": {"factor": 50, "unit": "t", "material": "Asphalt"},
-    "aluminum": {"factor": 8700, "unit": "t", "material": "Aluminum"},
-    "copper": {"factor": 3500, "unit": "t", "material": "Copper"},
-}
-
-# Keywords to detect material type from position descriptions (lowercased)
-_MATERIAL_KEYWORDS: dict[str, list[str]] = {
-    "concrete": [
-        "concrete", "beton", "c20", "c25", "c30", "c35", "c40",
-        "reinforced concrete", "stahlbeton", "ortbeton", "fertigbeton",
-    ],
-    "steel": [
-        "steel", "stahl", "structural steel", "stahlbau", "steel beam",
-        "steel column", "steel frame", "stahltraeger",
-    ],
-    "rebar": [
-        "rebar", "reinforcement", "bewehrung", "bewehrungsstahl",
-        "reinforcing", "armierung", "betonstahl",
-    ],
-    "masonry": [
-        "masonry", "mauerwerk", "brick", "ziegel", "block", "blockwork",
-        "kalksandstein", "porenbeton", "poroton",
-    ],
-    "timber": [
-        "timber", "holz", "wood", "lumber", "glulam", "brettschichtholz",
-        "clt", "cross laminated", "brettsperrholz",
-    ],
-    "glass": [
-        "glass", "glas", "glazing", "verglasung", "fenster", "window",
-    ],
-    "insulation": [
-        "insulation", "daemmung", "isolierung", "waermedaemmung",
-        "mineral wool", "mineralwolle", "eps", "xps", "styropor",
-    ],
-    "asphalt": [
-        "asphalt", "bitumen", "tarmac", "schwarzdecke",
-    ],
-    "aluminum": [
-        "aluminum", "aluminium", "alu",
-    ],
-    "copper": [
-        "copper", "kupfer",
-    ],
-}
-
-
-def _detect_material(description: str) -> str | None:
-    """Detect material type from a position description using keyword matching.
-
-    Args:
-        description: BOQ position description text.
-
-    Returns:
-        Material key (e.g. "concrete", "steel") or None if no match found.
-    """
-    desc_lower = description.lower()
-    for material, keywords in _MATERIAL_KEYWORDS.items():
-        for keyword in keywords:
-            if keyword in desc_lower:
-                return material
-    return None
+from app.modules.boq.epd_materials import (
+    EPD_CATEGORIES,
+    EPD_INDEX,
+    EPD_MATERIALS,
+    EU_CPR_BENCHMARKS,
+    detect_epd_material,
+    search_epd_materials,
+)
 
 
 def _co2_rating(benchmark_per_m2: float) -> tuple[str, str]:
-    """Determine CO2 rating based on benchmark per m2.
-
-    Args:
-        benchmark_per_m2: CO2 emissions in kg per m2.
-
-    Returns:
-        Tuple of (rating letter, rating label).
-    """
+    """Determine CO2 rating based on benchmark per m2."""
     if benchmark_per_m2 < 80:
         return "A", "Excellent"
     if benchmark_per_m2 < 150:
@@ -2094,6 +2752,365 @@ def _co2_rating(benchmark_per_m2: float) -> tuple[str, str]:
     if benchmark_per_m2 < 250:
         return "C", "Average"
     return "D", "Poor"
+
+
+def _eu_cpr_compliance(gwp_per_m2_year: float) -> str:
+    """Determine EU CPR 2024/3110 compliance level."""
+    if gwp_per_m2_year <= EU_CPR_BENCHMARKS["excellent"]:
+        return "excellent"
+    if gwp_per_m2_year <= EU_CPR_BENCHMARKS["good"]:
+        return "good"
+    if gwp_per_m2_year <= EU_CPR_BENCHMARKS["acceptable"]:
+        return "acceptable"
+    return "non-compliant"
+
+
+def _get_position_co2(pos: Any) -> dict[str, Any] | None:
+    """Extract stored CO2 data from position metadata, or auto-detect."""
+    meta = pos.metadata_ if hasattr(pos, "metadata_") else (pos.metadata or {})
+    if isinstance(meta, dict) and "co2" in meta:
+        return meta["co2"]
+    return None
+
+
+# ── Resource Summary ──────────────────────────────────────────────────────────
+
+
+@router.get(
+    "/boqs/{boq_id}/resource-summary",
+    response_model=ResourceSummaryResponse,
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def get_resource_summary(
+    boq_id: uuid.UUID,
+    session: SessionDep,
+    service: BOQService = Depends(_get_service),
+) -> ResourceSummaryResponse:
+    """Aggregate all resources across a BOQ's positions.
+
+    Loads every position's ``metadata_.resources`` list, combines resources
+    that share the same (name, type) key, sums quantities and costs, and
+    groups totals by resource type (material, labor, equipment, etc.).
+
+    When a position has no explicit resources in metadata, falls back to
+    looking up the matching cost item from the database and using its
+    ``components`` list as the resource data.
+
+    Returns:
+        ResourceSummaryResponse with per-type counts/totals and a flat
+        resource list sorted by total_cost descending.
+    """
+    boq_data = await service.get_boq_with_positions(boq_id)
+
+    # Aggregation key: (name_lower, type_lower) → accumulator
+    agg: dict[tuple[str, str], dict[str, Any]] = {}
+
+    def _add_resource(
+        raw: dict[str, Any], pos_id: str, pos_qty: float = 1.0
+    ) -> None:
+        """Add a single resource dict to the aggregation map."""
+        name = str(raw.get("name", raw.get("code", ""))).strip()
+        rtype = str(raw.get("type", "other")).strip().lower()
+        if not name:
+            return
+
+        unit = str(raw.get("unit", "")).strip()
+        try:
+            qty = float(raw.get("quantity", 1.0))
+            rate = float(raw.get("unit_rate", 0))
+        except (ValueError, TypeError):
+            return
+
+        cost = qty * rate * max(pos_qty, 1.0)
+        key = (name.lower(), rtype)
+
+        if key not in agg:
+            agg[key] = {
+                "name": name,
+                "type": rtype,
+                "unit": unit,
+                "total_quantity": 0.0,
+                "total_cost": 0.0,
+                "rates": [],
+                "positions": set(),
+            }
+
+        entry = agg[key]
+        entry["total_quantity"] += qty * max(pos_qty, 1.0)
+        entry["total_cost"] += cost
+        entry["rates"].append(rate)
+        entry["positions"].add(pos_id)
+
+    for pos in boq_data.positions:
+        meta = pos.metadata or {}
+        resources = meta.get("resources")
+        pos_qty = float(pos.quantity or 0) if hasattr(pos, "quantity") else 1.0
+
+        if isinstance(resources, list) and len(resources) > 0:
+            for raw in resources:
+                if not isinstance(raw, dict):
+                    continue
+                _add_resource(raw, str(pos.id))
+        else:
+            # Fast heuristic: classify by description and create a synthetic resource
+            desc = pos.description or ""
+            if not desc.strip():
+                continue
+            rate = float(pos.unit_rate or 0) if hasattr(pos, "unit_rate") else 0.0
+            total = rate * max(pos_qty, 1.0)
+            if total <= 0:
+                continue
+            cat = BOQService._classify_position_category(desc)
+            _add_resource({
+                "name": desc[:80],
+                "type": cat,
+                "unit": str(getattr(pos, "unit", "") or ""),
+                "quantity": pos_qty,
+                "unit_rate": rate,
+            }, str(pos.id))
+
+    # Build flat resource list sorted by total_cost descending
+    resource_items: list[ResourceSummaryItem] = []
+    for entry in agg.values():
+        rates_list: list[float] = entry["rates"]
+        avg_rate = sum(rates_list) / len(rates_list) if rates_list else 0.0
+        resource_items.append(
+            ResourceSummaryItem(
+                name=entry["name"],
+                type=entry["type"],
+                unit=entry["unit"],
+                total_quantity=round(entry["total_quantity"], 3),
+                avg_unit_rate=round(avg_rate, 2),
+                total_cost=round(entry["total_cost"], 2),
+                positions_used=len(entry["positions"]),
+            )
+        )
+
+    resource_items.sort(key=lambda r: r.total_cost, reverse=True)
+
+    # Build by_type summary
+    by_type: dict[str, ResourceTypeSummary] = {}
+    for item in resource_items:
+        if item.type not in by_type:
+            by_type[item.type] = ResourceTypeSummary(count=0, total_cost=0.0)
+        by_type[item.type].count += 1
+        by_type[item.type].total_cost = round(
+            by_type[item.type].total_cost + item.total_cost, 2
+        )
+
+    return ResourceSummaryResponse(
+        total_resources=len(resource_items),
+        by_type=by_type,
+        resources=resource_items,
+    )
+
+
+@router.post(
+    "/boqs/{boq_id}/enrich-resources",
+    dependencies=[Depends(RequirePermission("boq.write"))],
+)
+async def enrich_resources(
+    boq_id: uuid.UUID,
+    session: SessionDep,
+    service: BOQService = Depends(_get_service),
+) -> dict[str, Any]:
+    """Auto-populate metadata.resources for positions that don't have them.
+
+    For each position without explicit resources:
+    1. If metadata has cost_item_code → look up cost item → copy components
+    2. Else → fuzzy match by description via _lookup_cost_item_components
+
+    Returns count of enriched positions.
+    """
+    boq_data = await service.get_boq_with_positions(boq_id)
+    cost_repo = CostItemRepository(session)
+    enriched_count = 0
+    total_positions = 0
+
+    for pos in boq_data.positions:
+        # Skip sections (positions with children / no unit)
+        if not pos.unit:
+            continue
+        total_positions += 1
+
+        meta = dict(pos.metadata_) if pos.metadata_ else {}
+        existing_resources = meta.get("resources")
+        if isinstance(existing_resources, list) and len(existing_resources) > 0:
+            continue  # Already has resources
+
+        # Try lookup by cost_item_code first
+        components: list[dict[str, Any]] = []
+        cost_item_code = meta.get("cost_item_code")
+        if cost_item_code:
+            try:
+                items, _ = await cost_repo.search(q=str(cost_item_code), limit=1)
+                if items and items[0].components:
+                    raw = items[0].components
+                    if isinstance(raw, str):
+                        import json as _json
+                        raw = _json.loads(raw)
+                    if isinstance(raw, list):
+                        components = raw
+            except Exception:
+                pass
+
+        # Fallback: lookup by description
+        if not components:
+            components = await BOQService._lookup_cost_item_components(
+                cost_repo, pos.description or ""
+            )
+
+        if components:
+            resources = []
+            for c in components:
+                res = {
+                    "name": c.get("name", ""),
+                    "code": c.get("code", ""),
+                    "type": c.get("type", "other"),
+                    "unit": c.get("unit", ""),
+                    "quantity": float(c.get("quantity", 0)),
+                    "unit_rate": float(c.get("unit_rate", 0)),
+                    "total": float(c.get("cost", 0))
+                    or float(c.get("quantity", 0)) * float(c.get("unit_rate", 0)),
+                }
+                resources.append(res)
+
+            meta["resources"] = resources
+            await service.repo.update(pos.id, {"metadata_": meta})
+            enriched_count += 1
+
+    await session.commit()
+
+    return {
+        "enriched_count": enriched_count,
+        "total_positions": total_positions,
+    }
+
+
+@router.get(
+    "/epd-materials",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def list_epd_materials(
+    category: str | None = Query(default=None, description="Filter by category"),
+    search: str | None = Query(default=None, description="Search by name or ID"),
+) -> dict[str, Any]:
+    """List available EPD materials with optional filtering."""
+    materials = search_epd_materials(category=category, query=search)
+    return {
+        "materials": materials,
+        "categories": EPD_CATEGORIES,
+        "total": len(materials),
+    }
+
+
+@router.post(
+    "/boqs/{boq_id}/enrich-co2",
+    response_model=CO2EnrichResponse,
+    dependencies=[Depends(RequirePermission("boq.write"))],
+)
+async def enrich_co2(
+    boq_id: uuid.UUID,
+    session: SessionDep,
+    service: BOQService = Depends(_get_service),
+) -> CO2EnrichResponse:
+    """Auto-detect EPD materials for all BOQ positions and store CO2 data.
+
+    Loops through positions, matches descriptions to the 77 EPD materials,
+    calculates GWP totals, and stores results in position metadata.
+    Skips positions that already have manually assigned CO2 data.
+    """
+    boq_data = await service.get_boq_with_positions(boq_id)
+    enriched = 0
+    skipped = 0
+    total = 0
+
+    for pos in boq_data.positions:
+        if not pos.unit:
+            continue  # Skip section headers
+        total += 1
+
+        meta = dict(pos.metadata_) if pos.metadata_ else {}
+        existing_co2 = meta.get("co2", {})
+
+        # Skip manually assigned (source=manual)
+        if existing_co2.get("source") == "manual":
+            skipped += 1
+            continue
+
+        epd = detect_epd_material(pos.description)
+        if epd is None:
+            skipped += 1
+            continue
+
+        qty = float(pos.quantity) if pos.quantity else 0.0
+        gwp_total = qty * epd["gwp"]
+
+        meta["co2"] = {
+            "epd_id": epd["id"],
+            "epd_name": epd["name"],
+            "category": epd["category"],
+            "gwp_per_unit": epd["gwp"],
+            "gwp_total": round(gwp_total, 2),
+            "unit": epd["unit"],
+            "source": "auto",
+            "stages": epd["stages"],
+            "data_source": epd["source"],
+        }
+        await service.repo.update(pos.id, {"metadata_": meta})
+        enriched += 1
+
+    await session.commit()
+    return CO2EnrichResponse(enriched=enriched, skipped=skipped, total=total)
+
+
+@router.put(
+    "/positions/{position_id}/co2",
+    dependencies=[Depends(RequirePermission("boq.write"))],
+)
+async def assign_position_co2(
+    position_id: uuid.UUID,
+    payload: CO2AssignRequest,
+    session: SessionDep,
+    service: BOQService = Depends(_get_service),
+) -> dict[str, Any]:
+    """Manually assign an EPD material to a BOQ position.
+
+    Updates the position's metadata with CO2 data from the specified EPD material.
+    """
+    from fastapi import HTTPException
+
+    epd = EPD_INDEX.get(payload.epd_id)
+    if not epd:
+        raise HTTPException(
+            status_code=404,
+            detail=f"EPD material '{payload.epd_id}' not found. "
+            f"Use GET /epd-materials to list available materials.",
+        )
+
+    pos = await service.repo.get(position_id)
+    if not pos:
+        raise HTTPException(status_code=404, detail="Position not found")
+
+    meta = dict(pos.metadata_) if pos.metadata_ else {}
+    qty = float(pos.quantity) if pos.quantity else 0.0
+    gwp_total = qty * epd["gwp"]
+
+    meta["co2"] = {
+        "epd_id": epd["id"],
+        "epd_name": epd["name"],
+        "category": epd["category"],
+        "gwp_per_unit": epd["gwp"],
+        "gwp_total": round(gwp_total, 2),
+        "unit": epd["unit"],
+        "source": "manual",
+        "stages": epd["stages"],
+        "data_source": epd["source"],
+    }
+    await service.repo.update(position_id, {"metadata_": meta})
+    await session.commit()
+
+    return {"status": "ok", "co2": meta["co2"]}
 
 
 @router.get(
@@ -2106,69 +3123,133 @@ async def get_sustainability(
     area_m2: float = Query(default=0.0, ge=0.0, description="Project gross floor area in m2"),
     service: BOQService = Depends(_get_service),
 ) -> SustainabilityResponse:
-    """Calculate estimated CO2 emissions for a BOQ based on material types.
+    """Calculate CO2 emissions for a BOQ using EPD data.
 
-    Analyzes each BOQ position's description to detect material types and
-    calculates CO2 emissions using standard emission factors. Returns a
-    breakdown by material with totals and an optional benchmark per m2.
+    Two-pass approach:
+    1. Use stored metadata.co2 data (from enrich-co2 or manual assignment)
+    2. Fall back to auto-detection for positions without stored CO2
 
-    Args:
-        boq_id: Target BOQ identifier.
-        area_m2: Optional project area for benchmark calculation.
-
-    Returns:
-        SustainabilityResponse with total CO2, breakdown, and rating.
+    Returns per-position detail, category breakdown, benchmarks, and EU CPR compliance.
     """
     boq_data = await service.get_boq_with_positions(boq_id)
 
-    # Accumulate CO2 per material type
-    material_totals: dict[str, float] = {}
-    material_quantities: dict[str, float] = {}
+    positions_detail: list[PositionCO2Detail] = []
+    category_totals: dict[str, dict[str, Any]] = {}  # category -> {co2, qty, count}
     positions_matched = 0
+    enriched_count = 0
+    total_positions = 0
 
     for pos in boq_data.positions:
-        material = _detect_material(pos.description)
-        if material is None:
-            continue
+        if not pos.unit:
+            continue  # Skip section headers
+        total_positions += 1
+        qty = float(pos.quantity) if pos.quantity else 0.0
 
-        positions_matched += 1
-        factor_info = CO2_FACTORS[material]
-        factor = float(factor_info["factor"])
+        # Try stored CO2 data first
+        stored = _get_position_co2(pos)
+        if stored and stored.get("epd_id"):
+            epd_id = stored["epd_id"]
+            epd_name = stored.get("epd_name", "")
+            gwp_per_unit = float(stored.get("gwp_per_unit", 0))
+            gwp_total = qty * gwp_per_unit  # Recalculate with current quantity
+            category = stored.get("category", "")
+            source = "enriched" if stored.get("source") != "manual" else "manual"
+            enriched_count += 1
+            positions_matched += 1
+        else:
+            # Auto-detect fallback
+            epd = detect_epd_material(pos.description)
+            if epd:
+                epd_id = epd["id"]
+                epd_name = epd["name"]
+                gwp_per_unit = epd["gwp"]
+                gwp_total = qty * gwp_per_unit
+                category = epd["category"]
+                source = "auto-detected"
+                positions_matched += 1
+            else:
+                epd_id = None
+                epd_name = None
+                gwp_per_unit = 0.0
+                gwp_total = 0.0
+                category = ""
+                source = "none"
 
-        co2 = pos.quantity * factor
-        material_totals[material] = material_totals.get(material, 0.0) + co2
-        material_quantities[material] = (
-            material_quantities.get(material, 0.0) + pos.quantity
-        )
-
-    total_co2_kg = sum(material_totals.values())
-    total_co2_tons = total_co2_kg / 1000.0
-
-    # Build breakdown sorted by absolute CO2 descending
-    breakdown: list[CO2MaterialBreakdown] = []
-    abs_total = sum(abs(v) for v in material_totals.values()) or 1.0
-
-    for material, co2_kg in sorted(
-        material_totals.items(), key=lambda x: abs(x[1]), reverse=True
-    ):
-        factor_info = CO2_FACTORS[material]
-        breakdown.append(
-            CO2MaterialBreakdown(
-                material=str(factor_info["material"]),
-                quantity=round(material_quantities[material], 2),
-                unit=str(factor_info["unit"]),
-                co2_kg=round(co2_kg, 1),
-                percentage=round(abs(co2_kg) / abs_total * 100, 1),
+        positions_detail.append(
+            PositionCO2Detail(
+                position_id=str(pos.id),
+                ordinal=pos.ordinal,
+                description=pos.description[:120],
+                quantity=qty,
+                unit=pos.unit,
+                epd_id=epd_id,
+                epd_name=epd_name,
+                gwp_per_unit=round(gwp_per_unit, 4),
+                gwp_total=round(gwp_total, 2),
+                category=category,
+                source=source,
             )
         )
 
-    # Benchmark per m2
+        # Accumulate by category
+        if category and gwp_total != 0:
+            if category not in category_totals:
+                cat_info = next(
+                    (c for c in EPD_CATEGORIES if c["id"] == category), {}
+                )
+                category_totals[category] = {
+                    "label": cat_info.get("label", category),
+                    "co2": 0.0,
+                    "qty": 0.0,
+                    "count": 0,
+                    "unit": pos.unit,
+                }
+            category_totals[category]["co2"] += gwp_total
+            category_totals[category]["qty"] += qty
+            category_totals[category]["count"] += 1
+
+    total_co2_kg = sum(ct["co2"] for ct in category_totals.values())
+    total_co2_tons = total_co2_kg / 1000.0
+    abs_total = sum(abs(ct["co2"]) for ct in category_totals.values()) or 1.0
+
+    # Build breakdown sorted by absolute CO2 descending
+    breakdown: list[CO2MaterialBreakdown] = []
+    for cat, info in sorted(
+        category_totals.items(), key=lambda x: abs(x[1]["co2"]), reverse=True
+    ):
+        breakdown.append(
+            CO2MaterialBreakdown(
+                material=info["label"],
+                category=cat,
+                quantity=round(info["qty"], 2),
+                unit=info["unit"],
+                co2_kg=round(info["co2"], 1),
+                percentage=round(abs(info["co2"]) / abs_total * 100, 1),
+                positions_count=info["count"],
+            )
+        )
+
+    # Benchmark per m2 and rating
     benchmark: float | None = None
     rating = ""
     rating_label = ""
+    eu_cpr_compliance = ""
+    eu_cpr_gwp_per_m2_year: float | None = None
+
     if area_m2 > 0:
         benchmark = round(total_co2_kg / area_m2, 1)
         rating, rating_label = _co2_rating(benchmark)
+        # EU CPR uses annualized value (50-year reference service period)
+        eu_cpr_gwp_per_m2_year = round(total_co2_kg / area_m2 / 50, 2)
+        eu_cpr_compliance = _eu_cpr_compliance(eu_cpr_gwp_per_m2_year)
+
+    # Data quality
+    if enriched_count == positions_matched and enriched_count > 0:
+        data_quality = "enriched"
+    elif enriched_count > 0:
+        data_quality = "mixed"
+    else:
+        data_quality = "estimated"
 
     return SustainabilityResponse(
         total_co2_kg=round(total_co2_kg, 1),
@@ -2178,6 +3259,334 @@ async def get_sustainability(
         rating=rating,
         rating_label=rating_label,
         project_area_m2=area_m2 if area_m2 > 0 else None,
-        positions_analyzed=len(boq_data.positions),
+        positions_analyzed=total_positions,
         positions_matched=positions_matched,
+        lifecycle_stages="A1-A3",
+        data_quality=data_quality,
+        positions_detail=positions_detail,
+        eu_cpr_compliance=eu_cpr_compliance,
+        eu_cpr_gwp_per_m2_year=eu_cpr_gwp_per_m2_year,
+    )
+
+
+# ── Cost Breakdown ──────────────────────────────────────────────────────────
+
+
+@router.get(
+    "/boqs/{boq_id}/cost-breakdown",
+    response_model=CostBreakdownResponse,
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def get_cost_breakdown(
+    boq_id: uuid.UUID,
+    service: BOQService = Depends(_get_service),
+) -> CostBreakdownResponse:
+    """Get a cost breakdown for a BOQ split by resource category.
+
+    Analyzes all positions in the BOQ and aggregates costs into categories:
+    material, labor, equipment, subcontractor, and other. Each position's
+    ``metadata.resources`` list is used when available; otherwise, the position
+    description is classified via keyword heuristics.
+
+    Returns:
+        CostBreakdownResponse with direct cost categories, markup lines,
+        grand total, and top 10 most expensive resources.
+    """
+    return await service.get_cost_breakdown(boq_id)
+
+
+# ── Sensitivity Analysis (Tornado Chart) ─────────────────────────────────────
+
+
+@router.get(
+    "/boqs/{boq_id}/sensitivity",
+    response_model=SensitivityResponse,
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def get_sensitivity(
+    boq_id: uuid.UUID,
+    variation_pct: float = Query(
+        default=10.0, gt=0.0, le=100.0, description="Cost variation percentage"
+    ),
+    top_n: int = Query(
+        default=15, ge=1, le=50, description="Number of top positions to return"
+    ),
+    service: BOQService = Depends(_get_service),
+) -> SensitivityResponse:
+    """Compute sensitivity analysis (tornado chart data) for a BOQ.
+
+    For each non-section position, calculates the share of the total cost and
+    the impact of a ``variation_pct`` increase or decrease.  Returns the top N
+    positions sorted by descending impact.
+
+    Args:
+        boq_id: Target BOQ identifier.
+        variation_pct: Percentage to vary each position's cost (default 10%).
+        top_n: Maximum number of positions to return (default 15).
+
+    Returns:
+        SensitivityResponse with base_total, variation_pct, and ranked items.
+    """
+    boq_data = await service.get_boq_with_positions(boq_id)
+
+    # Filter to non-section positions (positions that have a unit)
+    items = [p for p in boq_data.positions if p.unit and p.unit.strip() != ""]
+
+    base_total = sum(p.total for p in items)
+
+    if base_total == 0 or len(items) == 0:
+        return SensitivityResponse(
+            base_total=0.0,
+            variation_pct=variation_pct,
+            items=[],
+        )
+
+    factor = variation_pct / 100.0
+
+    sensitivity_items: list[SensitivityItem] = []
+    for pos in items:
+        pos_total = pos.total
+        share_pct = round(pos_total / base_total * 100, 2)
+        impact = round(pos_total * factor, 2)
+        sensitivity_items.append(
+            SensitivityItem(
+                ordinal=pos.ordinal,
+                description=pos.description,
+                total=round(pos_total, 2),
+                share_pct=share_pct,
+                impact_low=round(-impact, 2),
+                impact_high=round(impact, 2),
+            )
+        )
+
+    # Sort by absolute impact descending, take top N
+    sensitivity_items.sort(key=lambda x: abs(x.impact_high), reverse=True)
+    sensitivity_items = sensitivity_items[:top_n]
+
+    return SensitivityResponse(
+        base_total=round(base_total, 2),
+        variation_pct=variation_pct,
+        items=sensitivity_items,
+    )
+
+
+# ── AACE Estimate Classification ─────────────────────────────────────────────
+
+
+@router.get(
+    "/boqs/{boq_id}/classification",
+    response_model=EstimateClassificationResponse,
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def get_estimate_classification(
+    boq_id: uuid.UUID,
+    service: BOQService = Depends(_get_service),
+) -> EstimateClassificationResponse:
+    """Get the AACE 18R-97 estimate classification for a BOQ.
+
+    Auto-detects the estimate class (1-5) based on the number of positions,
+    rate completeness, resource completeness, and classification coverage.
+
+    Returns:
+        EstimateClassificationResponse with class, accuracy range, definition
+        level, methodology description, and underlying metrics.
+    """
+    return await service.get_estimate_classification(boq_id)
+
+
+# ── Monte Carlo Cost Risk Analysis ───────────────────────────────────────────
+
+
+def _pert_sample(low: float, mode: float, high: float) -> float:
+    """Sample from a Beta-PERT distribution.
+
+    Uses the standard PERT parameterization with lambda=4.
+
+    Args:
+        low: Minimum value (optimistic).
+        mode: Most likely value.
+        high: Maximum value (pessimistic).
+
+    Returns:
+        A random sample from the PERT distribution in [low, high].
+    """
+    if high <= low:
+        return mode
+    lam = 4.0
+    alpha = 1.0 + lam * (mode - low) / (high - low)
+    beta_param = 1.0 + lam * (high - mode) / (high - low)
+    sample = random.betavariate(alpha, beta_param)
+    return low + (high - low) * sample
+
+
+@router.get(
+    "/boqs/{boq_id}/cost-risk",
+    response_model=CostRiskResponse,
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def get_cost_risk(
+    boq_id: uuid.UUID,
+    iterations: int = Query(
+        default=1000, ge=100, le=10000, description="Number of Monte Carlo iterations"
+    ),
+    optimistic_pct: float = Query(
+        default=15.0, ge=0.0, le=50.0, description="Optimistic cost reduction %"
+    ),
+    pessimistic_pct: float = Query(
+        default=25.0, ge=0.0, le=100.0, description="Pessimistic cost increase %"
+    ),
+    service: BOQService = Depends(_get_service),
+) -> CostRiskResponse:
+    """Run a Monte Carlo cost risk simulation for a BOQ.
+
+    For each iteration, every non-section position's total cost is sampled
+    using a Beta-PERT distribution with:
+        - optimistic = total * (1 - optimistic_pct/100)
+        - most_likely = total
+        - pessimistic = total * (1 + pessimistic_pct/100)
+
+    After all iterations, percentiles (P10..P90) are computed, a histogram
+    with ~20 bins is built, and the top risk drivers (positions contributing
+    most to total variance) are identified.
+
+    Contingency is defined as P80 - P50.  Recommended budget is P80.
+
+    Args:
+        boq_id: Target BOQ identifier.
+        iterations: Number of simulation iterations (default 1000).
+        optimistic_pct: Optimistic cost reduction percentage (default 15).
+        pessimistic_pct: Pessimistic cost increase percentage (default 25).
+
+    Returns:
+        CostRiskResponse with percentiles, histogram, contingency, and risk drivers.
+    """
+    boq_data = await service.get_boq_with_positions(boq_id)
+
+    # Filter to non-section positions (positions that have a unit)
+    items = [p for p in boq_data.positions if p.unit and p.unit.strip() != ""]
+    base_total = sum(p.total for p in items)
+
+    if base_total == 0 or len(items) == 0:
+        return CostRiskResponse(
+            iterations=iterations,
+            base_total=0.0,
+            percentiles=CostRiskPercentiles(
+                p10=0.0, p25=0.0, p50=0.0, p75=0.0, p80=0.0, p90=0.0
+            ),
+            contingency_p80=0.0,
+            contingency_pct=0.0,
+            recommended_budget=0.0,
+            histogram=[],
+            risk_drivers=[],
+        )
+
+    opt_factor = 1.0 - optimistic_pct / 100.0
+    pess_factor = 1.0 + pessimistic_pct / 100.0
+
+    # Pre-compute per-position bounds
+    position_bounds: list[tuple[float, float, float, str, str]] = []
+    for pos in items:
+        t = pos.total
+        position_bounds.append((t * opt_factor, t, t * pess_factor, pos.ordinal, pos.description))
+
+    # Run Monte Carlo simulation
+    iteration_totals: list[float] = []
+    # Track per-position sampled values for variance analysis
+    n_positions = len(position_bounds)
+    position_sums: list[float] = [0.0] * n_positions
+    position_sq_sums: list[float] = [0.0] * n_positions
+
+    for _ in range(iterations):
+        iter_total = 0.0
+        for idx, (low, mode, high, _ordinal, _desc) in enumerate(position_bounds):
+            sampled = _pert_sample(low, mode, high)
+            iter_total += sampled
+            position_sums[idx] += sampled
+            position_sq_sums[idx] += sampled * sampled
+        iteration_totals.append(iter_total)
+
+    # Sort for percentile extraction
+    iteration_totals.sort()
+
+    def _percentile(sorted_data: list[float], pct: float) -> float:
+        """Extract a percentile from sorted data using linear interpolation."""
+        n = len(sorted_data)
+        idx = pct / 100.0 * (n - 1)
+        lower = int(idx)
+        upper = min(lower + 1, n - 1)
+        frac = idx - lower
+        return sorted_data[lower] + frac * (sorted_data[upper] - sorted_data[lower])
+
+    p10 = round(_percentile(iteration_totals, 10), 2)
+    p25 = round(_percentile(iteration_totals, 25), 2)
+    p50 = round(_percentile(iteration_totals, 50), 2)
+    p75 = round(_percentile(iteration_totals, 75), 2)
+    p80 = round(_percentile(iteration_totals, 80), 2)
+    p90 = round(_percentile(iteration_totals, 90), 2)
+
+    contingency_p80 = round(p80 - p50, 2)
+    contingency_pct = round((contingency_p80 / p50 * 100) if p50 > 0 else 0.0, 1)
+
+    # Build histogram with ~20 bins
+    min_val = iteration_totals[0]
+    max_val = iteration_totals[-1]
+    num_bins = 20
+    bin_width = (max_val - min_val) / num_bins if max_val > min_val else 1.0
+
+    histogram: list[CostRiskHistogramBin] = []
+    for i in range(num_bins):
+        bin_start = min_val + i * bin_width
+        bin_end = min_val + (i + 1) * bin_width
+        count = 0
+        for val in iteration_totals:
+            if i == num_bins - 1:
+                # Last bin includes the upper bound
+                if bin_start <= val <= bin_end:
+                    count += 1
+            else:
+                if bin_start <= val < bin_end:
+                    count += 1
+        histogram.append(
+            CostRiskHistogramBin(
+                bin_start=round(bin_start, 2),
+                bin_end=round(bin_end, 2),
+                count=count,
+            )
+        )
+
+    # Calculate risk drivers — positions sorted by their share of total variance
+    position_variances: list[tuple[float, str, str]] = []
+    for idx in range(n_positions):
+        mean = position_sums[idx] / iterations
+        variance = (position_sq_sums[idx] / iterations) - (mean * mean)
+        ordinal = position_bounds[idx][3]
+        description = position_bounds[idx][4]
+        position_variances.append((variance, ordinal, description))
+
+    total_variance = sum(v[0] for v in position_variances)
+
+    risk_drivers: list[CostRiskDriver] = []
+    if total_variance > 0:
+        position_variances.sort(key=lambda x: x[0], reverse=True)
+        for variance, ordinal, description in position_variances[:10]:
+            contribution_pct = round(variance / total_variance * 100, 1)
+            risk_drivers.append(
+                CostRiskDriver(
+                    ordinal=ordinal,
+                    description=description,
+                    contribution_pct=contribution_pct,
+                )
+            )
+
+    return CostRiskResponse(
+        iterations=iterations,
+        base_total=round(base_total, 2),
+        percentiles=CostRiskPercentiles(
+            p10=p10, p25=p25, p50=p50, p75=p75, p80=p80, p90=p90
+        ),
+        contingency_p80=contingency_p80,
+        contingency_pct=contingency_pct,
+        recommended_budget=p80,
+        histogram=histogram,
+        risk_drivers=risk_drivers,
     )

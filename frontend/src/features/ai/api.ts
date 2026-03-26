@@ -1,4 +1,5 @@
 import { apiGet, apiPost, apiPatch } from '@/shared/lib/api';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -39,8 +40,8 @@ export interface QuickEstimateRequest {
   description: string;
   location?: string;
   currency?: string;
-  classification_standard?: string;
-  building_type?: string;
+  standard?: string;
+  project_type?: string;
   area_m2?: number;
 }
 
@@ -59,11 +60,13 @@ export interface EstimateJobResponse {
   id: string;
   status: string;
   items: EstimateItem[];
-  total_cost: number;
-  currency: string;
+  grand_total: number;
+  currency?: string;
   model_used: string;
   duration_ms: number;
-  confidence: number;
+  confidence?: number;
+  error_message?: string | null;
+  input_type?: string;
 }
 
 export interface CreateBOQFromEstimate {
@@ -73,10 +76,8 @@ export interface CreateBOQFromEstimate {
 
 // ── API functions ────────────────────────────────────────────────────────────
 
-const TOKEN_KEY = 'oe_access_token';
-
 function getAuthHeaders(): Record<string, string> {
-  const token = localStorage.getItem(TOKEN_KEY);
+  const token = useAuthStore.getState().accessToken;
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -117,22 +118,27 @@ export const aiApi = {
     return res.json();
   },
 
-  /** Upload any file (PDF, Excel, CSV, CAD) to BOQ smart import via AI. */
+  /** Upload any file (PDF, Excel, CSV, CAD, image) for standalone AI estimate. */
   fileEstimate: async (params: {
     file: File;
-    boqId: string;
-  }): Promise<SmartImportResult> => {
+    location?: string;
+    currency?: string;
+    standard?: string;
+  }): Promise<EstimateJobResponse> => {
     const form = new FormData();
     form.append('file', params.file);
+    if (params.location) form.append('location', params.location);
+    if (params.currency) form.append('currency', params.currency);
+    if (params.standard) form.append('standard', params.standard);
 
-    const res = await fetch(`/api/v1/boq/boqs/${params.boqId}/import/smart`, {
+    const res = await fetch('/api/v1/ai/file-estimate', {
       method: 'POST',
       headers: { ...getAuthHeaders(), Accept: 'application/json' },
       body: form,
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({ detail: res.statusText }));
-      throw new Error(body.detail || 'File import failed');
+      throw new Error(body.detail || 'File estimate failed');
     }
     return res.json();
   },
@@ -142,7 +148,57 @@ export const aiApi = {
       `/v1/ai/estimate/${jobId}/create-boq`,
       data,
     ),
+
+  /** Extract grouped quantity tables from a CAD/BIM file (no AI needed). */
+  cadExtract: async (file: File): Promise<CadExtractResponse> => {
+    const form = new FormData();
+    form.append('file', file);
+
+    const res = await fetch('/api/v1/takeoff/cad-extract', {
+      method: 'POST',
+      headers: { ...getAuthHeaders(), Accept: 'application/json' },
+      body: form,
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(body.detail || 'CAD extraction failed');
+    }
+    return res.json();
+  },
 };
+
+// ── CAD quantity extraction types ───────────────────────────────────────────
+
+export interface CadQuantityItem {
+  type: string;
+  material: string;
+  count: number;
+  volume_m3: number;
+  area_m2: number;
+  length_m: number;
+}
+
+export interface QuantityTotals {
+  count: number;
+  volume_m3: number;
+  area_m2: number;
+  length_m: number;
+}
+
+export interface CadQuantityGroup {
+  category: string;
+  items: CadQuantityItem[];
+  totals: QuantityTotals;
+}
+
+export interface CadExtractResponse {
+  filename: string;
+  format: string;
+  total_elements: number;
+  duration_ms: number;
+  groups: CadQuantityGroup[];
+  grand_totals: QuantityTotals;
+}
 
 /** Result returned by the BOQ smart import endpoint. */
 export interface SmartImportResult {

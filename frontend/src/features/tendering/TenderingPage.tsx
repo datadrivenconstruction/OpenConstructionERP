@@ -19,8 +19,12 @@ import {
   FileText,
   X,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Skeleton } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Skeleton, InfoHint, SkeletonTable } from '@/shared/ui';
 import { apiGet, apiPost, apiPatch } from '@/shared/lib/api';
+import { useToastStore } from '@/stores/useToastStore';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { BidComparisonChart } from './BidComparisonChart';
+import { getIntlLocale } from '@/shared/lib/formatters';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -132,16 +136,21 @@ const STATUS_COLORS: Record<string, 'neutral' | 'blue' | 'success' | 'warning' |
 
 function formatCurrency(amount: number | string, currency: string = 'EUR'): string {
   const num = typeof amount === 'string' ? parseFloat(amount) || 0 : amount;
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(num);
+  const safe = /^[A-Z]{3}$/.test(currency) ? currency : 'EUR';
+  try {
+    return new Intl.NumberFormat(getIntlLocale(), {
+      style: 'currency',
+      currency: safe,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(num);
+  } catch {
+    return `${num.toFixed(0)} ${safe}`;
+  }
 }
 
 function formatNumber(n: number, decimals: number = 2): string {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat(getIntlLocale(), {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   }).format(n);
@@ -219,6 +228,8 @@ function CreatePackageDialog({
   const [description, setDescription] = useState('');
   const [deadline, setDeadline] = useState('');
 
+  const addToast = useToastStore((s) => s.addToast);
+
   const createMutation = useMutation({
     mutationFn: () =>
       apiPost<TenderPackage>('/v1/tendering/packages/', {
@@ -231,6 +242,10 @@ function CreatePackageDialog({
     onSuccess: () => {
       onCreated();
       onClose();
+      addToast({ type: 'success', title: t('toasts.package_created', { defaultValue: 'Tender package created' }) });
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
     },
   });
 
@@ -333,6 +348,7 @@ function AddBidDialog({
   onCreated: () => void;
 }) {
   const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
   const [companyName, setCompanyName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
@@ -352,6 +368,10 @@ function AddBidDialog({
     onSuccess: () => {
       onCreated();
       onClose();
+      addToast({ type: 'success', title: t('toasts.bid_submitted', { defaultValue: 'Bid submitted' }) });
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
     },
   });
 
@@ -612,6 +632,7 @@ function PackageDetail({
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
   const [showAddBid, setShowAddBid] = useState(false);
 
   // Fetch package with bids
@@ -633,6 +654,10 @@ function PackageDetail({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tendering-package', packageId] });
       queryClient.invalidateQueries({ queryKey: ['tendering-comparison', packageId] });
+      addToast({ type: 'success', title: t('toasts.bid_awarded', { defaultValue: 'Bid awarded' }) });
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
     },
   });
 
@@ -645,6 +670,10 @@ function PackageDetail({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tendering-package', packageId] });
       queryClient.invalidateQueries({ queryKey: ['tendering-packages'] });
+      addToast({ type: 'success', title: t('toasts.status_updated', { defaultValue: 'Status updated' }) });
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
     },
   });
 
@@ -654,17 +683,6 @@ function PackageDetail({
     queryClient.invalidateQueries({ queryKey: ['tendering-packages'] });
   }, [queryClient, packageId]);
 
-  if (pkgLoading) {
-    return (
-      <div className="space-y-4 mt-4">
-        <Skeleton height={48} className="w-full" rounded="lg" />
-        <Skeleton height={200} className="w-full" rounded="lg" />
-      </div>
-    );
-  }
-
-  if (!pkg) return null;
-
   const lowestBid = useMemo(() => {
     if (!comparison || comparison.bid_totals.length === 0) return undefined;
     let min = comparison.bid_totals[0]!;
@@ -673,6 +691,16 @@ function PackageDetail({
     }
     return min;
   }, [comparison]);
+
+  if (pkgLoading) {
+    return (
+      <div className="mt-4">
+        <SkeletonTable rows={4} columns={5} />
+      </div>
+    );
+  }
+
+  if (!pkg) return null;
 
   return (
     <div className="mt-4 space-y-4 animate-fade-in">
@@ -768,7 +796,7 @@ function PackageDetail({
         </div>
       )}
 
-      {/* Comparison table */}
+      {/* Comparison chart + table */}
       <Card>
         <div className="flex items-center justify-between mb-4">
           <h4 className="text-sm font-semibold text-content-primary flex items-center gap-2">
@@ -780,9 +808,16 @@ function PackageDetail({
           </Button>
         </div>
         {comparisonLoading ? (
-          <Skeleton height={200} className="w-full" rounded="lg" />
+          <SkeletonTable rows={4} columns={4} />
         ) : comparison ? (
-          <BidComparisonTable comparison={comparison} currency={currency} />
+          <>
+            <BidComparisonChart
+              bidTotals={comparison.bid_totals}
+              budgetTotal={comparison.budget_total}
+              currency={currency}
+            />
+            <BidComparisonTable comparison={comparison} currency={currency} />
+          </>
         ) : null}
       </Card>
 
@@ -826,8 +861,9 @@ function PackageDetail({
 export function TenderingPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { activeProjectId, setActiveProject } = useProjectContextStore();
 
-  const [selectedProjectId, setSelectedProjectId] = useState('');
+  const selectedProjectId = activeProjectId ?? '';
   const [selectedPackageId, setSelectedPackageId] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
@@ -862,9 +898,14 @@ export function TenderingPage() {
   const currency = selectedProject?.currency || 'EUR';
 
   const handleProjectChange = useCallback((id: string) => {
-    setSelectedProjectId(id);
+    const name = projects?.find((p) => p.id === id)?.name ?? '';
+    if (id) {
+      setActiveProject(id, name);
+    } else {
+      useProjectContextStore.getState().clearProject();
+    }
     setSelectedPackageId('');
-  }, []);
+  }, [projects, setActiveProject]);
 
   const handlePackageCreated = useCallback(() => {
     queryClient.invalidateQueries({
@@ -894,6 +935,9 @@ export function TenderingPage() {
         </div>
       </div>
 
+      {/* Workflow explanation */}
+      <InfoHint className="mb-6" text={t('tendering.workflow_desc', { defaultValue: 'Tendering workflow: Draft (prepare package) → Issued (send to bidders) → Collecting (receive bids) → Evaluating (compare offers side-by-side) → Awarded (select winner). Create a package from a BOQ, add subcontractor bids, then use the comparison table to identify the best offer. Add 2+ bids to see a side-by-side analysis.' })} />
+
       {/* Project selector + New package button */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end">
         <div className="flex-1">
@@ -913,57 +957,47 @@ export function TenderingPage() {
             </div>
           )}
         </div>
-        <Button
-          variant="primary"
-          size="md"
-          icon={<Plus size={16} />}
-          disabled={!selectedProjectId}
-          onClick={() => setShowCreateDialog(true)}
-        >
-          {t('tendering.new_package', 'New Tender Package')}
-        </Button>
+        <span title={!selectedProjectId ? t('tendering.select_project_first', { defaultValue: 'Select a project first' }) : undefined}>
+          <Button
+            variant="primary"
+            size="md"
+            icon={<Plus size={16} />}
+            disabled={!selectedProjectId}
+            onClick={() => setShowCreateDialog(true)}
+          >
+            {t('tendering.new_package', 'New Tender Package')}
+          </Button>
+        </span>
       </div>
 
       {/* No project selected */}
       {!selectedProjectId && (
         <EmptyState
-          icon={<Package size={24} strokeWidth={1.5} />}
-          title={t('tendering.empty_title', 'Select a project')}
-          description={t(
-            'tendering.empty_description',
-            'Choose a project to view or create tender packages.',
-          )}
+          icon={<FileText size={24} strokeWidth={1.5} />}
+          title={t('tendering.empty_title', { defaultValue: 'No tenders yet' })}
+          description={t('tendering.empty_description', {
+            defaultValue: 'Select a project and create a tender from a BOQ to get started',
+          })}
         />
       )}
 
       {/* Loading packages */}
       {selectedProjectId && packagesLoading && (
-        <div className="space-y-3">
-          {[1, 2].map((i) => (
-            <Skeleton key={i} height={72} className="w-full" rounded="lg" />
-          ))}
-        </div>
+        <SkeletonTable rows={2} columns={4} />
       )}
 
       {/* No packages */}
       {selectedProjectId && !packagesLoading && packages && packages.length === 0 && (
         <EmptyState
-          icon={<Package size={24} strokeWidth={1.5} />}
-          title={t('tendering.no_packages', 'No tender packages')}
-          description={t(
-            'tendering.no_packages_description',
-            'Create a tender package from a BOQ to start collecting bids.',
-          )}
-          action={
-            <Button
-              variant="primary"
-              size="md"
-              icon={<Plus size={16} />}
-              onClick={() => setShowCreateDialog(true)}
-            >
-              {t('tendering.new_package', 'New Tender Package')}
-            </Button>
-          }
+          icon={<FileText size={24} strokeWidth={1.5} />}
+          title={t('tendering.no_packages', { defaultValue: 'No tenders yet' })}
+          description={t('tendering.no_packages_description', {
+            defaultValue: 'Create a tender from a BOQ to start collecting bids',
+          })}
+          action={{
+            label: t('tendering.new_package', { defaultValue: 'New Tender Package' }),
+            onClick: () => setShowCreateDialog(true),
+          }}
         />
       )}
 

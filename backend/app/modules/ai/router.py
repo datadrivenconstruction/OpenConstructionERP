@@ -5,14 +5,18 @@ Endpoints:
     PATCH  /ai/settings                          — Update API keys and preferences
     POST   /ai/quick-estimate                    — Text description -> AI -> BOQ items
     POST   /ai/photo-estimate                    — Photo upload -> AI Vision -> BOQ items
+    POST   /ai/file-estimate                     — Any file (PDF/Excel/CAD/image) -> AI -> BOQ items
     POST   /ai/estimate/{job_id}/create-boq      — Save AI estimate as a real BOQ
     GET    /ai/estimate/{job_id}                 — Get estimate job status and results
 """
 
+import logging
 import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+
+logger = logging.getLogger(__name__)
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.ai.schemas import (
@@ -28,12 +32,34 @@ router = APIRouter()
 
 # Maximum upload size for photos: 10 MB
 MAX_PHOTO_SIZE = 10 * 1024 * 1024
+# Maximum upload size for documents: 50 MB
+MAX_FILE_SIZE = 50 * 1024 * 1024
 
 ALLOWED_IMAGE_TYPES = {
     "image/jpeg",
     "image/png",
     "image/webp",
     "image/gif",
+}
+
+# Extension → file category mapping for file-estimate
+_EXT_CATEGORY: dict[str, str] = {
+    "pdf": "pdf",
+    "xlsx": "excel",
+    "xls": "excel",
+    "csv": "csv",
+    "rvt": "cad",
+    "ifc": "cad",
+    "dwg": "cad",
+    "dgn": "cad",
+    "rfa": "cad",
+    "jpg": "image",
+    "jpeg": "image",
+    "png": "image",
+    "webp": "image",
+    "gif": "image",
+    "tiff": "image",
+    "bmp": "image",
 }
 
 
@@ -183,6 +209,81 @@ async def photo_estimate(
         image_bytes=image_bytes,
         filename=file.filename or "photo.jpg",
         media_type=content_type,
+        location=location or None,
+        currency=currency or None,
+        standard=standard or None,
+        project_id=parsed_project_id,
+    )
+
+
+# ── Universal File Estimate (any file -> AI -> BOQ) ─────────────────────────
+
+
+@router.post(
+    "/file-estimate",
+    response_model=EstimateJobResponse,
+    dependencies=[Depends(RequirePermission("ai.estimate"))],
+)
+async def file_estimate(
+    user_id: CurrentUserId,
+    file: UploadFile = File(..., description="Any file: PDF, Excel, CSV, CAD, or image"),
+    location: str = Form(default="Europe", description="Location for pricing context"),
+    currency: str = Form(default="EUR", description="Currency code"),
+    standard: str = Form(default="din276", description="Classification standard"),
+    project_id: str | None = Form(default=None, description="Optional project ID"),
+    service: AIService = Depends(_get_service),
+) -> EstimateJobResponse:
+    """Generate a BOQ estimate from any uploaded file using AI.
+
+    Supports: PDF, Excel (.xlsx/.xls), CSV, CAD/BIM (.rvt, .ifc, .dwg, .dgn),
+    and images (JPEG, PNG, WebP, GIF).
+
+    The file is analysed based on its extension:
+    - **PDF**: Text and tables extracted, sent to AI for BOQ generation
+    - **Excel/CSV**: Parsed for structured data; falls back to AI if unstructured
+    - **CAD/BIM**: Converted via DDC converter, elements summarised, AI generates BOQ
+    - **Image**: Sent to AI Vision for OCR and BOQ extraction
+
+    Max file size: 50 MB.
+    """
+    filename = file.filename or "file"
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+
+    category = _EXT_CATEGORY.get(ext)
+    if not category:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                f"Unsupported file type: .{ext}. "
+                f"Accepted: {', '.join(f'.{e}' for e in sorted(_EXT_CATEGORY))}"
+            ),
+        )
+
+    content = await file.read()
+    if not content:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File is empty.")
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"File too large ({len(content) / 1024 / 1024:.1f} MB). Max: {MAX_FILE_SIZE // 1024 // 1024} MB.",
+        )
+
+    parsed_project_id: uuid.UUID | None = None
+    if project_id:
+        try:
+            parsed_project_id = uuid.UUID(project_id)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid project_id: {project_id}",
+            ) from exc
+
+    return await service.file_estimate(
+        user_id=user_id,
+        content=content,
+        filename=filename,
+        ext=ext,
+        category=category,
         location=location or None,
         currency=currency or None,
         standard=standard or None,

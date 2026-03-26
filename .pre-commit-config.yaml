@@ -1,0 +1,37 @@
+# Pre-commit hooks for OpenEstimate
+# Install: pip install pre-commit && pre-commit install
+
+repos:
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+        args: ['--maxkb=1024']
+      - id: detect-private-key
+
+  # Python linting & formatting
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.0
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  # Secret scanning
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.22.0
+    hooks:
+      - id: gitleaks
+
+  # Conventional commit messages
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.0.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: [feat, fix, refactor, docs, test, chore, perf, ci, build, style]

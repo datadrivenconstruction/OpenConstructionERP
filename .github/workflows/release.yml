@@ -1,0 +1,108 @@
+# OpenEstimate — Release Pipeline
+#
+# Triggered on version tag push (e.g., v0.1.0).
+# Builds Docker image, pushes to GHCR, creates GitHub Release.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # ── Run full CI first ───────────────────────────────────────────────
+  ci:
+    name: CI Check
+    uses: ./.github/workflows/ci.yml
+
+  # ── Build & Push Docker Image ──────────────────────────────────────
+  docker:
+    name: Docker Build & Push
+    needs: ci
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "major_minor=$(echo $VERSION | cut -d. -f1-2)" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/docker/Dockerfile.unified
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.major_minor }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          labels: |
+            org.opencontainers.image.title=OpenEstimate
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.licenses=AGPL-3.0-or-later
+
+  # ── Create GitHub Release ──────────────────────────────────────────
+  release:
+    name: GitHub Release
+    needs: [ci, docker]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+
+      - name: Extract changelog for this version
+        id: changelog
+        run: |
+          # Extract the section for this version from CHANGELOG.md
+          VERSION="${{ steps.version.outputs.version }}"
+          CONTENT=$(awk "/^## \[$VERSION\]/{found=1; next} /^## \[/{if(found) exit} found{print}" CHANGELOG.md)
+          if [ -z "$CONTENT" ]; then
+            CONTENT="Release $VERSION"
+          fi
+          # Write to file for multi-line support
+          echo "$CONTENT" > /tmp/release-notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "OpenEstimate ${{ github.ref_name }}"
+          body_path: /tmp/release-notes.md
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-rc') || contains(github.ref_name, '-beta') || contains(github.ref_name, '-alpha') }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

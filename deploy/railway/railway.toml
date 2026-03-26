@@ -1,0 +1,22 @@
+# OpenEstimate — Railway Deployment Configuration
+#
+# Deploy: click "Deploy on Railway" button in README, or:
+#   railway init
+#   railway up
+
+[build]
+dockerfilePath = "deploy/docker/Dockerfile.unified"
+
+[deploy]
+healthcheckPath = "/api/health"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+[[services]]
+name = "openestimate"
+
+[services.env]
+SERVE_FRONTEND = "true"
+APP_ENV = "production"
+VECTOR_BACKEND = "lancedb"

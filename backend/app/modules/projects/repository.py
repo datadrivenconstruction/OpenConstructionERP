@@ -29,9 +29,15 @@ class ProjectRepository:
         offset: int = 0,
         limit: int = 50,
         status: str | None = None,
+        is_admin: bool = False,
     ) -> tuple[list[Project], int]:
-        """List projects for a user with pagination. Returns (projects, total_count)."""
-        base = select(Project).where(Project.owner_id == owner_id)
+        """List projects for a user with pagination. Returns (projects, total_count).
+
+        Admins see all projects; regular users see only their own.
+        """
+        base = select(Project)
+        if not is_admin:
+            base = base.where(Project.owner_id == owner_id)
         if status is not None:
             base = base.where(Project.status == status)
 
@@ -56,6 +62,9 @@ class ProjectRepository:
         """Update specific fields on a project."""
         stmt = update(Project).where(Project.id == project_id).values(**fields)
         await self.session.execute(stmt)
+        await self.session.flush()
+        # Expire cached ORM instances so the next get_by_id re-reads from DB
+        self.session.expire_all()
 
     async def delete(self, project_id: uuid.UUID) -> None:
         """Hard delete a project."""

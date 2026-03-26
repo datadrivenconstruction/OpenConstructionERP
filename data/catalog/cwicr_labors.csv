@@ -1,0 +1,69 @@
+code,name,type,category,unit,base_price,min_price,max_price,currency,usage_count,regions
+ME_MEKAKA_PUKA,Worker Category 1,labor,Labor,hrs,17.12,17.12,17.12,EUR,7620,ENG_TORONTO
+RI_MEKAKA_KAPU,Grade 4 worker,labor,Labor,hrs,17.12,17.12,17.12,EUR,2918,ENG_TORONTO
+ME_MEKAKA_TOKA,Average workload TO.KA,labor,Labor,hrs,15.2,15.2,15.2,EUR,2694,ENG_TORONTO
+ME_MEKAKA_TOVO,Worker Category 1,labor,Labor,hrs,16.73,16.73,16.73,EUR,2594,ENG_TORONTO
+RI_MEKAKA_KASA,Grade 5 worker,labor,Labor,hrs,19.67,19.67,19.67,EUR,2550,ENG_TORONTO
+RI_MEKAKA_KARI,2nd grade worker,labor,Labor,hrs,13.92,13.92,13.92,EUR,2220,ENG_TORONTO
+ME_MEKAKA_TOSA,Worker Category 1,labor,Labor,hrs,16.16,16.16,16.16,EUR,2210,ENG_TORONTO
+RI_MEKAKA_KATO,Grade 3 worker,labor,Labor,hrs,15.2,15.2,15.2,EUR,2130,ENG_TORONTO
+ME_MEKAKA_TODX,Worker Category 1,labor,Labor,hrs,16.93,16.93,16.93,EUR,1933,ENG_TORONTO
+ME_MEKAKA_SAKA,Worker Category 1,labor,Labor,hrs,19.67,19.67,19.67,EUR,1829,ENG_TORONTO
+ME_MEKAKA_PURI,Worker Category 1,labor,Labor,hrs,17.63,17.63,17.63,EUR,1798,ENG_TORONTO
+ME_MEKAKA_TONE,Worker Category 1,labor,Labor,hrs,16.35,16.35,16.35,EUR,1726,ENG_TORONTO
+ME_MEKAKA_TOLI,Worker Category 1,labor,Labor,hrs,16.54,16.54,16.54,EUR,1611,ENG_TORONTO
+TO_RIKAKA_KAME,Category I engineer,labor,Labor,person-hour,27.46,27.46,27.46,EUR,1536,ENG_TORONTO
+ME_MEKAKA_TOME,Worker Category 1,labor,Labor,hrs,15.39,15.39,15.39,EUR,1517,ENG_TORONTO
+TO_RIKAKA_KARI,Category II Engineer,labor,Labor,person-hour,25.04,25.04,25.04,EUR,1512,ENG_TORONTO
+ME_MEKAKA_PUME,Worker Category 1,labor,Labor,hrs,17.37,17.37,17.37,EUR,1507,ENG_TORONTO
+ME_MEKAKA_TORI,Worker Category 1,labor,Labor,hrs,15.58,15.58,15.58,EUR,1420,ENG_TORONTO
+RI_MEKAKA_KANE,Grade 6 worker,labor,Labor,hrs,22.99,22.99,22.99,EUR,1405,ENG_TORONTO
+ME_MEKAKA_TOPU,Worker Category 1,labor,Labor,hrs,15.97,15.97,15.97,EUR,1337,ENG_TORONTO
+ME_MEKAKA_PUSA,Worker Category 1,labor,Labor,hrs,18.39,18.39,18.39,EUR,1313,ENG_TORONTO
+ME_MEKAKA_TOTO,Worker Category 1,labor,Labor,hrs,15.78,15.78,15.78,EUR,1306,ENG_TORONTO
+ME_MEKAKA_RIKA,Worker Category 1,labor,Labor,hrs,13.92,13.92,13.92,EUR,1242,ENG_TORONTO
+ME_MEKAKA_PUTO,Worker Category 1,labor,Labor,hrs,17.88,17.88,17.88,EUR,1222,ENG_TORONTO
+TO_RIKAKA_KATO,Category III Engineer,labor,Labor,person-hour,22.48,22.48,22.48,EUR,1203,ENG_TORONTO
+ME_MEKAKA_PUVO,Worker Category 1,labor,Labor,hrs,19.16,19.16,19.16,EUR,1074,ENG_TORONTO
+ME_MEKAKA_PULI,Worker Category 1,labor,Labor,hrs,18.91,18.91,18.91,EUR,1018,ENG_TORONTO
+ME_MEKAKA_PUPU,Worker Category 1,labor,Labor,hrs,18.14,18.14,18.14,EUR,1007,ENG_TORONTO
+TO_TOKAKA_KAME,Lead engineer,labor,Labor,person-hour,30.02,30.02,30.02,EUR,918,ENG_TORONTO
+ME_MEKAKA_PUDX,Worker Category 1,labor,Labor,hrs,19.42,19.42,19.42,EUR,905,ENG_TORONTO
+ME_MEKAKA_PUNE,Worker Category 1,labor,Labor,hrs,18.65,18.65,18.65,EUR,785,ENG_TORONTO
+ME_MEKAKA_NEKA,Worker Category 1,labor,Labor,hrs,22.99,22.99,22.99,EUR,718,ENG_TORONTO
+ME_MEKAKA_RISA,Worker Category 1,labor,Labor,hrs,14.56,14.56,14.56,EUR,661,ENG_TORONTO
+ME_MEKAKA_RIVO,Worker Category 1,labor,Labor,hrs,14.95,14.95,14.95,EUR,560,ENG_TORONTO
+ME_MEKAKA_RIDX,Average work load RI.DX,labor,Labor,hrs,15.07,15.07,15.07,EUR,540,ENG_TORONTO
+ME_MEKAKA_SARI,Worker Category 1,labor,Labor,hrs,20.34,20.34,20.34,EUR,523,ENG_TORONTO
+ME_MEKAKA_SASA,Worker Category 1,labor,Labor,hrs,21.33,21.33,21.33,EUR,499,ENG_TORONTO
+RI_MEKAKA_KAME,Grade 1 worker,labor,Labor,hrs,12.77,12.77,12.77,EUR,464,ENG_TORONTO
+TO_MEKAKA_KAME,Category I technician,labor,Labor,person-hour,18.14,18.14,18.14,EUR,459,ENG_TORONTO
+ME_MEKAKA_RILI,Worker Category 1,labor,Labor,hrs,14.82,14.82,14.82,EUR,427,ENG_TORONTO
+ME_MEKAKA_RITO,Worker Category 1,labor,Labor,hrs,14.31,14.31,14.31,EUR,379,ENG_TORONTO
+TO_MEKAKA_KARI,Category II technician,labor,Labor,person-hour,16.35,16.35,16.35,EUR,334,ENG_TORONTO
+ME_MEKAKA_SAME,Worker Category 1,labor,Labor,hrs,20.0,20.0,20.0,EUR,279,ENG_TORONTO
+ME_MEKAKA_MEDX,Worker Category 1,labor,Labor,hrs,13.81,13.81,13.81,EUR,251,ENG_TORONTO
+ME_MEKAKA_SALI,Worker Category 1,labor,Labor,hrs,22.0,22.0,22.0,EUR,244,ENG_TORONTO
+ME_MEKAKA_SATO,Worker Category 1,labor,Labor,hrs,20.67,20.67,20.67,EUR,241,ENG_TORONTO
+ME_MEKAKA_RINE,Worker Category 1,labor,Labor,hrs,14.69,14.69,14.69,EUR,228,ENG_TORONTO
+TO_PUKAKA_KAME,Chief Technologist,labor,Labor,person-hour,32.57,32.57,32.57,EUR,209,ENG_TORONTO
+ME_MEKAKA_RIPU,Worker Category 1,labor,Labor,hrs,14.43,14.43,14.43,EUR,198,ENG_TORONTO
+ME_MEKAKA_RIRI,Average workload RI.RI,labor,Labor,hrs,14.18,14.18,14.18,EUR,196,ENG_TORONTO
+ME_MEKAKA_SAPU,Average work grade SA.PU,labor,Labor,hrs,21.0,21.0,21.0,EUR,186,ENG_TORONTO
+ME_MEKAKA_RIME,Average work load RI.ME,labor,Labor,hrs,14.05,14.05,14.05,EUR,153,ENG_TORONTO
+ME_MEKAKA_SANE,Worker Category 1,labor,Labor,hrs,21.66,21.66,21.66,EUR,132,ENG_TORONTO
+ME_MEKAKA_MEVO,Worker Category 1,labor,Labor,hrs,13.69,13.69,13.69,EUR,77,ENG_TORONTO
+ME_MEKAKA_MELI,Worker Category 1,labor,Labor,hrs,13.58,13.58,13.58,EUR,65,ENG_TORONTO
+ME_MEKAKA_MEKA,Worker Category 1,labor,Labor,hrs,12.77,12.77,12.77,EUR,64,ENG_TORONTO
+ME_MEKAKA_SAVO,Worker Category 1,labor,Labor,hrs,22.33,22.33,22.33,EUR,50,ENG_TORONTO
+ME_MEKAKA_MENE,Worker Category 1,labor,Labor,hrs,13.46,13.46,13.46,EUR,41,ENG_TORONTO
+ME_MEKAKA_LITO,Average operating discharge LI.TO,labor,Labor,hrs,25.02,25.02,25.02,EUR,36,ENG_TORONTO
+ME_MEKAKA_MESA,Worker Category 1,labor,Labor,hrs,13.35,13.35,13.35,EUR,33,ENG_TORONTO
+ME_MEKAKA_MEPU,Worker Category 1,labor,Labor,hrs,13.23,13.23,13.23,EUR,28,ENG_TORONTO
+ME_MEKAKA_SADX,Worker Category 1,labor,Labor,hrs,22.66,22.66,22.66,EUR,28,ENG_TORONTO
+ME_MEKAKA_LISA,Worker Category 1,labor,Labor,hrs,25.36,25.36,25.36,EUR,13,ENG_TORONTO
+ME_MEKAKA_METO,Worker Category 1,labor,Labor,hrs,13.12,13.12,13.12,EUR,11,ENG_TORONTO
+ME_MEKAKA_MERI,Average workload ME.RI,labor,Labor,hrs,13.0,13.0,13.0,EUR,9,ENG_TORONTO
+RI_MEKAKA_KALI,Grade 7 worker,labor,Labor,hrs,24.53,24.53,24.53,EUR,5,ENG_TORONTO
+ME_MEKAKA_MEME,Worker Category 1,labor,Labor,hrs,12.89,12.89,12.89,EUR,3,ENG_TORONTO
+ME_MEKAKA_VOKA,Worker Category 1,labor,Labor,hrs,26.19,26.19,26.19,EUR,2,ENG_TORONTO

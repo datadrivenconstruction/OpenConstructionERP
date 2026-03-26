@@ -9,6 +9,9 @@ Endpoints:
     POST   /schedules/{id}/activities           — Add activity to schedule
     GET    /schedules/{id}/activities           — List activities for schedule
     GET    /schedules/{id}/gantt                — Get Gantt chart data
+    POST   /schedules/{id}/generate-from-boq   — Generate activities from BOQ
+    POST   /schedules/{id}/calculate-cpm       — Calculate critical path
+    GET    /schedules/{id}/risk-analysis       — PERT risk analysis
     PATCH  /activities/{id}                     — Update activity
     DELETE /activities/{id}                     — Delete activity
     POST   /activities/{id}/link-position       — Link BOQ position to activity
@@ -18,18 +21,24 @@ Endpoints:
     PATCH  /work-orders/{id}                    — Update work order
 """
 
+import logging
 import uuid
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+
+logger = logging.getLogger(__name__)
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.schedule.schemas import (
     ActivityCreate,
     ActivityResponse,
     ActivityUpdate,
+    CriticalPathResponse,
     GanttData,
+    GenerateFromBOQRequest,
     LinkPositionRequest,
     ProgressUpdateRequest,
+    RiskAnalysisResponse,
     ScheduleCreate,
     ScheduleResponse,
     ScheduleUpdate,
@@ -227,6 +236,74 @@ async def get_gantt_data(
 ) -> GanttData:
     """Get structured Gantt chart data for a schedule."""
     return await service.get_gantt_data(schedule_id)
+
+
+# ── CPM & BOQ Generation ───────────────────────────────────────────────────
+
+
+@router.post(
+    "/schedules/{schedule_id}/generate-from-boq",
+    response_model=list[ActivityResponse],
+    status_code=201,
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
+async def generate_from_boq(
+    schedule_id: uuid.UUID,
+    body: GenerateFromBOQRequest,
+    service: ScheduleService = Depends(_get_service),
+) -> list[ActivityResponse]:
+    """Generate schedule activities from a BOQ.
+
+    Creates one activity per BOQ section with cost-proportional durations
+    and sequential finish-to-start dependencies.
+    """
+    import traceback as _tb
+    try:
+        await service.generate_from_boq(
+            schedule_id, body.boq_id, body.total_project_days
+        )
+        # Re-fetch activities to avoid greenlet/lazy-loading issues
+        activities, _ = await service.list_activities_for_schedule(schedule_id, limit=5000)
+        return [_activity_to_response(a) for a in activities]
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.error("generate_from_boq failed: %s\n%s", exc, _tb.format_exc())
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@router.post(
+    "/schedules/{schedule_id}/calculate-cpm",
+    response_model=CriticalPathResponse,
+    dependencies=[Depends(RequirePermission("schedule.read"))],
+)
+async def calculate_cpm(
+    schedule_id: uuid.UUID,
+    service: ScheduleService = Depends(_get_service),
+) -> CriticalPathResponse:
+    """Calculate the critical path (CPM forward/backward pass).
+
+    Returns early/late start/finish, total float, and critical path for all
+    activities. Updates activity colors: red for critical, blue for non-critical.
+    """
+    return await service.calculate_critical_path(schedule_id)
+
+
+@router.get(
+    "/schedules/{schedule_id}/risk-analysis",
+    response_model=RiskAnalysisResponse,
+    dependencies=[Depends(RequirePermission("schedule.read"))],
+)
+async def get_risk_analysis(
+    schedule_id: uuid.UUID,
+    service: ScheduleService = Depends(_get_service),
+) -> RiskAnalysisResponse:
+    """Get PERT-based risk analysis with P50, P80, P95 duration estimates.
+
+    Computes optimistic/pessimistic durations for each activity and derives
+    project-level probability estimates for schedule completion.
+    """
+    return await service.get_risk_analysis(schedule_id)
 
 
 @router.patch(

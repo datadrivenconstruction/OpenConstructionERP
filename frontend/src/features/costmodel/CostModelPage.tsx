@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -12,13 +12,17 @@ import {
   Banknote,
   Activity,
 } from 'lucide-react';
-import { Card, CardHeader, CardContent, Button, Badge, EmptyState, Skeleton } from '@/shared/ui';
+import { Card, CardHeader, CardContent, Button, Badge, EmptyState, Skeleton, InfoHint } from '@/shared/ui';
 import { apiGet } from '@/shared/lib/api';
 import {
   costModelApi,
   type SCurvePoint,
   type BudgetCategorySummary,
+  type EVMData,
+  type WhatIfResult,
 } from './api';
+import { CostBenchmark } from './CostBenchmark';
+import { getIntlLocale } from '@/shared/lib/formatters';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -41,12 +45,17 @@ interface BOQ {
 /* ── Helpers ───────────────────────────────────────────────────────────── */
 
 function formatCurrency(amount: number, currency: string): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currency || 'EUR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
+  const safe = /^[A-Z]{3}$/.test(currency) ? currency : 'EUR';
+  try {
+    return new Intl.NumberFormat(getIntlLocale(), {
+      style: 'currency',
+      currency: safe,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  } catch {
+    return `${amount.toFixed(0)} ${safe}`;
+  }
 }
 
 function formatCompact(amount: number, currency: string): string {
@@ -74,7 +83,7 @@ function varianceBg(variance: number): string {
 
 /* ── KPI Card ──────────────────────────────────────────────────────────── */
 
-function KPICard({
+const KPICard = memo(function KPICard({
   label,
   amount,
   currency,
@@ -87,6 +96,7 @@ function KPICard({
   variance?: number;
   icon: React.ReactNode;
 }) {
+  const { t } = useTranslation();
   return (
     <Card padding="none" className="flex-1 min-w-[200px]">
       <div className="p-5">
@@ -110,17 +120,17 @@ function KPICard({
               {variance > 0 ? '+' : ''}
               {formatCompact(variance, currency)}
             </span>
-            <span className="text-2xs text-content-tertiary">vs budget</span>
+            <span className="text-2xs text-content-tertiary">{t('costmodel.vs_budget', { defaultValue: 'vs budget' })}</span>
           </div>
         )}
       </div>
     </Card>
   );
-}
+});
 
 /* ── SPI / CPI Indicator ───────────────────────────────────────────────── */
 
-function PerformanceIndicator({
+const PerformanceIndicator = memo(function PerformanceIndicator({
   label,
   value,
   description,
@@ -129,6 +139,7 @@ function PerformanceIndicator({
   value: number;
   description: string;
 }) {
+  const { t } = useTranslation();
   const isHealthy = value >= 1.0;
   const displayValue = value.toFixed(2);
 
@@ -147,18 +158,18 @@ function PerformanceIndicator({
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold text-content-primary">{label}</span>
           <Badge variant={isHealthy ? 'success' : 'error'} size="sm">
-            {isHealthy ? 'On Track' : 'At Risk'}
+            {isHealthy ? t('costmodel.on_track', { defaultValue: 'On Track' }) : t('costmodel.at_risk', { defaultValue: 'At Risk' })}
           </Badge>
         </div>
         <p className="mt-0.5 text-xs text-content-secondary">{description}</p>
       </div>
     </div>
   );
-}
+});
 
 /* ── S-Curve Chart (SVG) ───────────────────────────────────────────────── */
 
-function SCurveChart({ data }: { data: SCurvePoint[] }) {
+const SCurveChart = memo(function SCurveChart({ data }: { data: SCurvePoint[] }) {
   const { t } = useTranslation();
 
   const chartDimensions = useMemo(() => {
@@ -192,18 +203,25 @@ function SCurveChart({ data }: { data: SCurvePoint[] }) {
     return { scales: { x: xScale, y: yScale, maxVal: niceMax }, gridLines: gridLinesArr };
   }, [data, chartDimensions]);
 
-  function buildPath(values: number[]): string {
-    return values
-      .map(
-        (v, i) =>
-          `${i === 0 ? 'M' : 'L'} ${scales.x(i).toFixed(1)} ${scales.y(v).toFixed(1)}`,
-      )
-      .join(' ');
-  }
+  const buildPath = useCallback(
+    (values: number[]): string =>
+      values
+        .map(
+          (v, i) =>
+            `${i === 0 ? 'M' : 'L'} ${scales.x(i).toFixed(1)} ${scales.y(v).toFixed(1)}`,
+        )
+        .join(' '),
+    [scales],
+  );
 
-  const plannedPath = buildPath(data.map((d) => d.planned));
-  const earnedPath = buildPath(data.map((d) => d.earned));
-  const actualPath = buildPath(data.map((d) => d.actual));
+  const { plannedPath, earnedPath, actualPath } = useMemo(
+    () => ({
+      plannedPath: buildPath(data.map((d) => d.planned)),
+      earnedPath: buildPath(data.map((d) => d.earned)),
+      actualPath: buildPath(data.map((d) => d.actual)),
+    }),
+    [buildPath, data],
+  );
 
   const { padding, width, height, plotWidth, plotHeight } = chartDimensions;
 
@@ -361,11 +379,11 @@ function SCurveChart({ data }: { data: SCurvePoint[] }) {
       </svg>
     </div>
   );
-}
+});
 
 /* ── Budget Category Table ─────────────────────────────────────────────── */
 
-function BudgetTable({
+const BudgetTable = memo(function BudgetTable({
   categories,
   currency,
 }: {
@@ -374,8 +392,19 @@ function BudgetTable({
 }) {
   const { t } = useTranslation();
 
+  const safeCategories = useMemo(
+    () =>
+      categories.map((cat) => ({
+        ...cat,
+        variance: typeof cat.variance === 'number' && !Number.isNaN(cat.variance)
+          ? cat.variance
+          : (cat.planned || 0) - (cat.forecast || 0),
+      })),
+    [categories],
+  );
+
   const totals = useMemo(() => {
-    return categories.reduce(
+    return safeCategories.reduce(
       (acc, cat) => ({
         planned: acc.planned + cat.planned,
         committed: acc.committed + cat.committed,
@@ -385,16 +414,19 @@ function BudgetTable({
       }),
       { planned: 0, committed: 0, actual: 0, forecast: 0, variance: 0 },
     );
-  }, [categories]);
+  }, [safeCategories]);
 
-  const categoryLabels: Record<string, string> = {
-    material: t('costmodel.cat_material', 'Material'),
-    labor: t('costmodel.cat_labor', 'Labor'),
-    equipment: t('costmodel.cat_equipment', 'Equipment'),
-    subcontractor: t('costmodel.cat_subcontractor', 'Subcontractor'),
-    overhead: t('costmodel.cat_overhead', 'Overhead'),
-    contingency: t('costmodel.cat_contingency', 'Contingency'),
-  };
+  const categoryLabels = useMemo<Record<string, string>>(
+    () => ({
+      material: t('costmodel.cat_material', 'Material'),
+      labor: t('costmodel.cat_labor', 'Labor'),
+      equipment: t('costmodel.cat_equipment', 'Equipment'),
+      subcontractor: t('costmodel.cat_subcontractor', 'Subcontractor'),
+      overhead: t('costmodel.cat_overhead', 'Overhead'),
+      contingency: t('costmodel.cat_contingency', 'Contingency'),
+    }),
+    [t],
+  );
 
   return (
     <div className="overflow-x-auto">
@@ -422,7 +454,7 @@ function BudgetTable({
           </tr>
         </thead>
         <tbody className="divide-y divide-border-light">
-          {categories.map((cat) => (
+          {safeCategories.map((cat) => (
             <tr key={cat.category} className="transition-colors hover:bg-surface-secondary/50">
               <td className="py-3 pr-4 font-medium text-content-primary">
                 {categoryLabels[cat.category] || cat.category}
@@ -476,6 +508,567 @@ function BudgetTable({
       </table>
     </div>
   );
+});
+
+/* ── EVM KPI Box ──────────────────────────────────────────────────────── */
+
+const EVMKPIBox = memo(function EVMKPIBox({
+  label,
+  value,
+  format = 'number',
+  thresholdMode = 'none',
+  currency = '',
+}: {
+  label: string;
+  value: number;
+  format?: 'number' | 'index' | 'currency';
+  thresholdMode?: 'none' | 'index' | 'variance';
+  currency?: string;
+}) {
+  let displayValue: string;
+  if (format === 'index') {
+    displayValue = value.toFixed(2);
+  } else if (format === 'currency') {
+    displayValue = formatCompact(value, currency);
+  } else {
+    displayValue = value.toFixed(2);
+  }
+
+  let colorClass = 'text-content-primary';
+  let bgClass = 'bg-surface-secondary';
+
+  if (thresholdMode === 'index') {
+    if (value >= 1.0) {
+      colorClass = 'text-[#15803d]';
+      bgClass = 'bg-semantic-success-bg';
+    } else if (value >= 0.85) {
+      colorClass = 'text-amber-600';
+      bgClass = 'bg-amber-50';
+    } else {
+      colorClass = 'text-semantic-error';
+      bgClass = 'bg-semantic-error-bg';
+    }
+  } else if (thresholdMode === 'variance') {
+    if (value > 0) {
+      colorClass = 'text-[#15803d]';
+      bgClass = 'bg-semantic-success-bg';
+    } else if (value < 0) {
+      colorClass = 'text-semantic-error';
+      bgClass = 'bg-semantic-error-bg';
+    }
+  }
+
+  return (
+    <div className={`flex-1 min-w-[140px] rounded-xl p-4 ${bgClass}`}>
+      <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-1">
+        {label}
+      </div>
+      <div className={`text-xl font-bold tabular-nums ${colorClass}`}>{displayValue}</div>
+    </div>
+  );
+});
+
+/* ── EVM Progress Bars ────────────────────────────────────────────────── */
+
+const EVMProgressBars = memo(function EVMProgressBars({
+  evm,
+  currency,
+}: {
+  evm: EVMData;
+  currency: string;
+}) {
+  const { t } = useTranslation();
+
+  const maxValue = useMemo(
+    () => Math.max(evm.bac, evm.pv, evm.ev, evm.ac, 1),
+    [evm.bac, evm.pv, evm.ev, evm.ac],
+  );
+
+  const barWidth = useCallback(
+    (value: number): string =>
+      `${Math.max(0, Math.min(100, (value / maxValue) * 100))}%`,
+    [maxValue],
+  );
+
+  const bars = useMemo(
+    () => [
+      {
+        label: t('costmodel.evm_pv', { defaultValue: 'Planned Value (PV)' }),
+        value: evm.pv,
+        color: 'bg-blue-500',
+      },
+      {
+        label: t('costmodel.evm_ev', { defaultValue: 'Earned Value (EV)' }),
+        value: evm.ev,
+        color: 'bg-green-500',
+      },
+      {
+        label: t('costmodel.evm_ac', { defaultValue: 'Actual Cost (AC)' }),
+        value: evm.ac,
+        color: 'bg-red-500',
+      },
+    ],
+    [t, evm.pv, evm.ev, evm.ac],
+  );
+
+  return (
+    <div className="space-y-3">
+      {bars.map((bar) => (
+        <div key={bar.label}>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-medium text-content-secondary">{bar.label}</span>
+            <span className="text-xs font-semibold tabular-nums text-content-primary">
+              {formatCompact(bar.value, currency)}
+            </span>
+          </div>
+          <div className="h-3 w-full rounded-full bg-surface-secondary overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${bar.color}`}
+              style={{ width: barWidth(bar.value) }}
+            />
+          </div>
+        </div>
+      ))}
+      <div className="flex items-center justify-between pt-1 border-t border-border-light">
+        <span className="text-xs text-content-tertiary">
+          {t('costmodel.evm_bac', { defaultValue: 'BAC (Budget At Completion)' })}
+        </span>
+        <span className="text-xs font-semibold tabular-nums text-content-primary">
+          {formatCompact(maxValue, currency)}
+        </span>
+      </div>
+    </div>
+  );
+});
+
+/* ── EVM Dashboard Section ────────────────────────────────────────────── */
+
+const EVMDashboard = memo(function EVMDashboard({
+  evm,
+  currency,
+  isLoading,
+}: {
+  evm: EVMData | undefined;
+  currency: string;
+  isLoading: boolean;
+}) {
+  const { t } = useTranslation();
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader title={t('costmodel.evm_title', { defaultValue: 'Earned Value Analysis' })} />
+        <CardContent>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} height={72} className="w-full" rounded="lg" />
+              ))}
+            </div>
+            <Skeleton height={120} className="w-full" rounded="lg" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!evm || evm.bac === 0) {
+    return null;
+  }
+
+  return (
+    <Card>
+      <CardHeader title={t('costmodel.evm_title', { defaultValue: 'Earned Value Analysis' })} />
+      <CardContent>
+        <div className="space-y-5">
+          {/* EVM KPI boxes */}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <EVMKPIBox
+              label={t('costmodel.evm_spi', { defaultValue: 'SPI' })}
+              value={evm.spi}
+              format="index"
+              thresholdMode="index"
+            />
+            <EVMKPIBox
+              label={t('costmodel.evm_cpi', { defaultValue: 'CPI' })}
+              value={evm.cpi}
+              format="index"
+              thresholdMode="index"
+            />
+            <EVMKPIBox
+              label={t('costmodel.evm_eac_label', { defaultValue: 'EAC' })}
+              value={evm.eac}
+              format="currency"
+              currency={currency}
+            />
+            <EVMKPIBox
+              label={t('costmodel.evm_vac_label', { defaultValue: 'VAC' })}
+              value={evm.vac}
+              format="currency"
+              thresholdMode="variance"
+              currency={currency}
+            />
+          </div>
+
+          {/* EVM Progress Bars */}
+          <EVMProgressBars evm={evm} currency={currency} />
+
+          {/* TCPI indicator */}
+          {evm.tcpi > 0 && (
+            <div className="rounded-xl bg-surface-secondary p-4">
+              <div className="flex items-center gap-2">
+                <Activity size={14} className="text-content-tertiary" />
+                <span className="text-sm text-content-secondary">
+                  {t('costmodel.evm_tcpi_hint', {
+                    defaultValue: 'To finish on budget, you need a CPI of {{tcpi}} going forward',
+                    tcpi: evm.tcpi.toFixed(2),
+                  })}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Secondary metrics row */}
+          <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
+            <div className="flex justify-between">
+              <span className="text-content-tertiary">
+                {t('costmodel.evm_sv_label', { defaultValue: 'SV' })}
+              </span>
+              <span
+                className={`font-medium tabular-nums ${evm.sv >= 0 ? 'text-[#15803d]' : 'text-semantic-error'}`}
+              >
+                {evm.sv >= 0 ? '+' : ''}
+                {formatCompact(evm.sv, currency)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-content-tertiary">
+                {t('costmodel.evm_cv_label', { defaultValue: 'CV' })}
+              </span>
+              <span
+                className={`font-medium tabular-nums ${evm.cv >= 0 ? 'text-[#15803d]' : 'text-semantic-error'}`}
+              >
+                {evm.cv >= 0 ? '+' : ''}
+                {formatCompact(evm.cv, currency)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-content-tertiary">
+                {t('costmodel.evm_etc_label', { defaultValue: 'ETC' })}
+              </span>
+              <span className="font-medium tabular-nums text-content-primary">
+                {formatCompact(evm.etc, currency)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-content-tertiary">
+                {t('costmodel.evm_time_elapsed', { defaultValue: 'Time Elapsed' })}
+              </span>
+              <span className="font-medium tabular-nums text-content-primary">
+                {evm.time_elapsed_pct.toFixed(1)}%
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-content-tertiary">
+                {t('costmodel.evm_schedule_progress', { defaultValue: 'Schedule Progress' })}
+              </span>
+              <span className="font-medium tabular-nums text-content-primary">
+                {evm.schedule_progress_pct.toFixed(1)}%
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-content-tertiary">
+                {t('costmodel.evm_status', { defaultValue: 'Status' })}
+              </span>
+              <Badge
+                variant={
+                  evm.status === 'on_track'
+                    ? 'success'
+                    : evm.status === 'at_risk'
+                      ? 'warning'
+                      : evm.status === 'critical'
+                        ? 'error'
+                        : 'neutral'
+                }
+                size="sm"
+              >
+                {evm.status === 'on_track'
+                  ? t('costmodel.evm_on_track', { defaultValue: 'On Track' })
+                  : evm.status === 'at_risk'
+                    ? t('costmodel.evm_at_risk', { defaultValue: 'At Risk' })
+                    : evm.status === 'critical'
+                      ? t('costmodel.evm_critical', { defaultValue: 'Critical' })
+                      : t('costmodel.evm_unknown', { defaultValue: 'Unknown' })}
+              </Badge>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+});
+
+/* ── Slider Control (extracted to module scope to avoid remount on re-render) ── */
+
+const SliderControl = memo(function SliderControl({
+  label,
+  value,
+  onChange,
+  min,
+  max,
+  unit,
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+  min: number;
+  max: number;
+  unit: string;
+}) {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-medium text-content-secondary">{label}</span>
+        <span
+          className={`text-sm font-bold tabular-nums ${
+            value > 0
+              ? 'text-semantic-error'
+              : value < 0
+                ? 'text-[#15803d]'
+                : 'text-content-primary'
+          }`}
+        >
+          {value > 0 ? '+' : ''}
+          {value}
+          {unit}
+        </span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={1}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="w-full h-2 rounded-full appearance-none cursor-pointer bg-surface-secondary accent-oe-blue"
+        aria-label={label}
+      />
+      <div className="flex justify-between mt-1">
+        <span className="text-2xs text-content-tertiary">
+          {min}
+          {unit}
+        </span>
+        <span className="text-2xs text-content-tertiary">0{unit}</span>
+        <span className="text-2xs text-content-tertiary">
+          +{max}
+          {unit}
+        </span>
+      </div>
+    </div>
+  );
+});
+
+/* ── What-If Scenario Panel ───────────────────────────────────────────── */
+
+function WhatIfPanel({
+  projectId,
+  currency,
+  currentBAC: _currentBAC,
+}: {
+  projectId: string;
+  currency: string;
+  currentBAC: number;
+}) {
+  void _currentBAC;
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [materialPct, setMaterialPct] = useState(0);
+  const [laborPct, setLaborPct] = useState(0);
+  const [durationPct, setDurationPct] = useState(0);
+  const [result, setResult] = useState<WhatIfResult | null>(null);
+
+  const whatIfMutation = useMutation({
+    mutationFn: () =>
+      costModelApi.createWhatIfScenario(projectId, {
+        name: t('costmodel.whatif_scenario_name', {
+          defaultValue: 'What-If: M{{material}}% L{{labor}}% D{{duration}}%',
+          material: materialPct >= 0 ? `+${materialPct}` : materialPct,
+          labor: laborPct >= 0 ? `+${laborPct}` : laborPct,
+          duration: durationPct >= 0 ? `+${durationPct}` : durationPct,
+        }),
+        material_cost_pct: materialPct,
+        labor_cost_pct: laborPct,
+        duration_pct: durationPct,
+      }),
+    onSuccess: (data: WhatIfResult) => {
+      setResult(data);
+      queryClient.invalidateQueries({ queryKey: ['costmodel'] });
+    },
+  });
+
+  const handleToggle = useCallback(() => setIsExpanded((v) => !v), []);
+  const handleToggleKey = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setIsExpanded((v) => !v);
+      }
+    },
+    [],
+  );
+  const handleReset = useCallback(() => {
+    setMaterialPct(0);
+    setLaborPct(0);
+    setDurationPct(0);
+    setResult(null);
+  }, []);
+
+  return (
+    <Card>
+      <div
+        className="flex items-center justify-between cursor-pointer px-5 py-4"
+        onClick={handleToggle}
+        role="button"
+        tabIndex={0}
+        aria-expanded={isExpanded}
+        onKeyDown={handleToggleKey}
+      >
+        <div className="flex items-center gap-2">
+          <TrendingUp size={16} className="text-content-tertiary" />
+          <span className="text-sm font-semibold text-content-primary">
+            {t('costmodel.whatif_title', { defaultValue: 'What-If Scenarios' })}
+          </span>
+        </div>
+        <ChevronRight
+          size={16}
+          className={`text-content-tertiary transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+        />
+      </div>
+
+      {isExpanded && (
+        <CardContent>
+          <div className="space-y-5">
+            {/* Sliders */}
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+              <SliderControl
+                label={t('costmodel.whatif_material', { defaultValue: 'Material Cost' })}
+                value={materialPct}
+                onChange={setMaterialPct}
+                min={-20}
+                max={20}
+                unit="%"
+              />
+              <SliderControl
+                label={t('costmodel.whatif_labor', { defaultValue: 'Labor Cost' })}
+                value={laborPct}
+                onChange={setLaborPct}
+                min={-20}
+                max={20}
+                unit="%"
+              />
+              <SliderControl
+                label={t('costmodel.whatif_duration', { defaultValue: 'Duration' })}
+                value={durationPct}
+                onChange={setDurationPct}
+                min={-30}
+                max={30}
+                unit="%"
+              />
+            </div>
+
+            {/* Calculate button */}
+            <div className="flex items-center gap-3">
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<BarChart3 size={14} />}
+                loading={whatIfMutation.isPending}
+                onClick={() => whatIfMutation.mutate()}
+                disabled={materialPct === 0 && laborPct === 0 && durationPct === 0}
+              >
+                {t('costmodel.whatif_calculate', { defaultValue: 'Calculate Impact' })}
+              </Button>
+              {(materialPct !== 0 || laborPct !== 0 || durationPct !== 0) && (
+                <button
+                  className="text-xs text-content-tertiary hover:text-content-secondary transition-colors"
+                  onClick={handleReset}
+                >
+                  {t('costmodel.whatif_reset', { defaultValue: 'Reset' })}
+                </button>
+              )}
+            </div>
+
+            {/* Results */}
+            {result && (
+              <div className="rounded-xl border border-border-light p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Badge variant="blue" size="sm">
+                    {result.scenario_name}
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                  <div>
+                    <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-0.5">
+                      {t('costmodel.whatif_original_bac', { defaultValue: 'Original BAC' })}
+                    </div>
+                    <div className="text-sm font-semibold tabular-nums text-content-primary">
+                      {formatCompact(result.original_bac, currency)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-0.5">
+                      {t('costmodel.whatif_adjusted_bac', { defaultValue: 'Adjusted BAC' })}
+                    </div>
+                    <div className="text-sm font-semibold tabular-nums text-content-primary">
+                      {formatCompact(result.adjusted_bac, currency)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-0.5">
+                      {t('costmodel.whatif_adjusted_eac', { defaultValue: 'Adjusted EAC' })}
+                    </div>
+                    <div className="text-sm font-semibold tabular-nums text-content-primary">
+                      {formatCompact(result.adjusted_eac, currency)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary mb-0.5">
+                      {t('costmodel.whatif_impact', { defaultValue: 'Impact' })}
+                    </div>
+                    <div
+                      className={`text-sm font-bold tabular-nums ${
+                        result.delta > 0
+                          ? 'text-semantic-error'
+                          : result.delta < 0
+                            ? 'text-[#15803d]'
+                            : 'text-content-primary'
+                      }`}
+                    >
+                      {result.delta > 0 ? '+' : ''}
+                      {formatCompact(result.delta, currency)}
+                      <span className="text-xs font-medium ml-1">
+                        ({result.delta_pct > 0 ? '+' : ''}
+                        {result.delta_pct.toFixed(1)}%)
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {whatIfMutation.isError && (
+              <div className="rounded-lg bg-semantic-error-bg p-3 text-sm text-semantic-error">
+                {t('costmodel.whatif_error', {
+                  defaultValue: 'Failed to calculate scenario. Please try again.',
+                })}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      )}
+    </Card>
+  );
 }
 
 /* ── 5D Dashboard ──────────────────────────────────────────────────────── */
@@ -499,6 +1092,12 @@ function FiveDDashboard({ project }: { project: Project }) {
   const { data: budgetData, isLoading: budgetLoading } = useQuery({
     queryKey: ['costmodel', 'budget', project.id],
     queryFn: () => costModelApi.getBudgetSummary(project.id),
+    retry: false,
+  });
+
+  const { data: evmData, isLoading: evmLoading } = useQuery({
+    queryKey: ['costmodel', 'evm', project.id],
+    queryFn: () => costModelApi.getEVM(project.id),
     retry: false,
   });
 
@@ -535,6 +1134,19 @@ function FiveDDashboard({ project }: { project: Project }) {
 
   const currency = dashboard?.currency || project.currency || 'EUR';
 
+  const handleGenerateBudget = useCallback(() => {
+    const firstBoq = boqs?.[0];
+    if (firstBoq) generateBudget.mutate(firstBoq.id);
+  }, [boqs, generateBudget]);
+
+  const handleCreateSnapshot = useCallback(() => {
+    createSnapshot.mutate();
+  }, [createSnapshot]);
+
+  const handleGenerateCashFlow = useCallback(() => {
+    generateCashFlow.mutate();
+  }, [generateCashFlow]);
+
   return (
     <div className="space-y-6">
       {/* Actions bar */}
@@ -545,7 +1157,7 @@ function FiveDDashboard({ project }: { project: Project }) {
             size="sm"
             icon={<BarChart3 size={14} />}
             loading={generateBudget.isPending}
-            onClick={() => { const firstBoq = boqs?.[0]; if (firstBoq) generateBudget.mutate(firstBoq.id); }}
+            onClick={handleGenerateBudget}
           >
             {t('costmodel.generate_budget', 'Generate Budget from BOQ')}
           </Button>
@@ -555,7 +1167,7 @@ function FiveDDashboard({ project }: { project: Project }) {
           size="sm"
           icon={<Camera size={14} />}
           loading={createSnapshot.isPending}
-          onClick={() => createSnapshot.mutate()}
+          onClick={handleCreateSnapshot}
         >
           {t('costmodel.create_snapshot', 'Create Snapshot')}
         </Button>
@@ -564,7 +1176,7 @@ function FiveDDashboard({ project }: { project: Project }) {
           size="sm"
           icon={<Banknote size={14} />}
           loading={generateCashFlow.isPending}
-          onClick={() => generateCashFlow.mutate()}
+          onClick={handleGenerateCashFlow}
         >
           {t('costmodel.generate_cash_flow', 'Generate Cash Flow')}
         </Button>
@@ -622,7 +1234,7 @@ function FiveDDashboard({ project }: { project: Project }) {
                 size="sm"
                 icon={<BarChart3 size={14} />}
                 loading={generateBudget.isPending}
-                onClick={() => { const firstBoq = boqs?.[0]; if (firstBoq) generateBudget.mutate(firstBoq.id); }}
+                onClick={handleGenerateBudget}
               >
                 {t('costmodel.generate_budget', 'Generate Budget from BOQ')}
               </Button>
@@ -630,6 +1242,24 @@ function FiveDDashboard({ project }: { project: Project }) {
           }
         />
       )}
+
+      {/* Cost per m² Benchmark */}
+      {dashboard && (
+        <CostBenchmark
+          totalBudget={dashboard.total_budget}
+          currency={currency}
+        />
+      )}
+
+      {/* Earned Value Analysis */}
+      <EVMDashboard evm={evmData} currency={currency} isLoading={evmLoading} />
+
+      {/* What-If Scenarios */}
+      <WhatIfPanel
+        projectId={project.id}
+        currency={currency}
+        currentBAC={evmData?.bac ?? dashboard?.total_budget ?? 0}
+      />
 
       {/* Performance Indicators + S-Curve row */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -709,7 +1339,7 @@ function FiveDDashboard({ project }: { project: Project }) {
                         size="sm"
                         icon={<BarChart3 size={14} />}
                         loading={generateBudget.isPending}
-                        onClick={() => { const firstBoq = boqs?.[0]; if (firstBoq) generateBudget.mutate(firstBoq.id); }}
+                        onClick={handleGenerateBudget}
                       >
                         {t('costmodel.generate_budget', 'Generate Budget from BOQ')}
                       </Button>
@@ -750,6 +1380,49 @@ function FiveDDashboard({ project }: { project: Project }) {
   );
 }
 
+/* ── Project Selector Card ─────────────────────────────────────────────── */
+
+const ProjectCard = memo(function ProjectCard({
+  project,
+  onSelect,
+}: {
+  project: Project;
+  onSelect: (id: string) => void;
+}) {
+  const handleClick = useCallback(() => onSelect(project.id), [onSelect, project.id]);
+  return (
+    <Card
+      hoverable
+      padding="none"
+      className="cursor-pointer"
+      onClick={handleClick}
+    >
+      <div className="flex items-center gap-3 px-5 py-4">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue font-bold">
+          {project.name.charAt(0).toUpperCase()}
+        </div>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-sm font-semibold text-content-primary truncate">
+            {project.name}
+          </h2>
+          {project.description && (
+            <p className="mt-0.5 text-xs text-content-secondary truncate">
+              {project.description}
+            </p>
+          )}
+        </div>
+        <Badge variant="blue" size="sm">
+          {project.currency || 'EUR'}
+        </Badge>
+        <Badge variant="neutral" size="sm">
+          {project.classification_standard === 'din276' ? 'DIN 276' : project.classification_standard?.toUpperCase() || '—'}
+        </Badge>
+        <ChevronRight size={16} className="shrink-0 text-content-tertiary" />
+      </div>
+    </Card>
+  );
+});
+
 /* ── Main Page ─────────────────────────────────────────────────────────── */
 
 export function CostModelPage() {
@@ -761,16 +1434,25 @@ export function CostModelPage() {
     queryFn: () => apiGet<Project[]>('/v1/projects/'),
   });
 
-  const selectedProject = selectedProjectId
-    ? projects?.find((p) => p.id === selectedProjectId)
-    : null;
+  // Auto-select if there's only one project
+  const effectiveProjectId = useMemo(
+    () => selectedProjectId ?? (projects?.length === 1 ? projects[0]!.id : null),
+    [selectedProjectId, projects],
+  );
+
+  const selectedProject = useMemo(
+    () => (effectiveProjectId ? projects?.find((p) => p.id === effectiveProjectId) : null),
+    [effectiveProjectId, projects],
+  );
+
+  const handleBack = useCallback(() => setSelectedProjectId(null), []);
 
   // Project detail view with 5D dashboard
   if (selectedProject) {
     return (
       <div className="max-w-content mx-auto animate-fade-in">
         <button
-          onClick={() => setSelectedProjectId(null)}
+          onClick={handleBack}
           className="mb-4 flex items-center gap-1.5 text-sm text-content-secondary hover:text-content-primary transition-colors"
         >
           <ArrowLeft size={14} />
@@ -804,6 +1486,9 @@ export function CostModelPage() {
         </p>
       </div>
 
+      {/* 5D explanation */}
+      <InfoHint className="mb-6" text={t('costmodel.what_is_5d', { defaultValue: '5D cost management adds cost tracking over time to your project. Monitor budget vs. actual spend with S-curve charts, track Earned Value (SPI = schedule efficiency, CPI = cost efficiency — both >= 1.0 means healthy), and run what-if scenarios to forecast outcomes.' })} />
+
       {isLoading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
@@ -822,36 +1507,11 @@ export function CostModelPage() {
       ) : (
         <div className="space-y-3">
           {projects.map((project) => (
-            <Card
+            <ProjectCard
               key={project.id}
-              hoverable
-              padding="none"
-              className="cursor-pointer"
-              onClick={() => setSelectedProjectId(project.id)}
-            >
-              <div className="flex items-center gap-3 px-5 py-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue font-bold">
-                  {project.name.charAt(0).toUpperCase()}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h2 className="text-sm font-semibold text-content-primary truncate">
-                    {project.name}
-                  </h2>
-                  {project.description && (
-                    <p className="mt-0.5 text-xs text-content-secondary truncate">
-                      {project.description}
-                    </p>
-                  )}
-                </div>
-                <Badge variant="blue" size="sm">
-                  {project.currency || 'EUR'}
-                </Badge>
-                <Badge variant="neutral" size="sm">
-                  {project.classification_standard}
-                </Badge>
-                <ChevronRight size={16} className="shrink-0 text-content-tertiary" />
-              </div>
-            </Card>
+              project={project}
+              onSelect={setSelectedProjectId}
+            />
           ))}
         </div>
       )}

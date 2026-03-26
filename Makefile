@@ -88,10 +88,28 @@ module-new: ## Create new module (usage: make module-new NAME=oe_tendering)
 module-test: ## Test specific module (usage: make module-test NAME=oe_boq)
 	cd $(BACKEND_DIR) && pytest -x -v tests/ -k "$(NAME)"
 
+# ─── Quickstart (single command) ──────────────────────────────────────────
+quickstart: ## Start OpenEstimate (PostgreSQL + App) — zero config
+	$(DOCKER_COMPOSE) -f docker-compose.quickstart.yml up --build
+
+quickstart-down: ## Stop quickstart
+	$(DOCKER_COMPOSE) -f docker-compose.quickstart.yml down
+
+quickstart-reset: ## Reset quickstart (delete data)
+	$(DOCKER_COMPOSE) -f docker-compose.quickstart.yml down -v
+
 # ─── Build & Deploy ────────────────────────────────────────────────────────
-build: ## Build Docker images
+build: ## Build all Docker images
+	docker build -t openestimate:latest -f deploy/docker/Dockerfile.unified .
 	docker build -t openestimate-backend:latest -f deploy/docker/Dockerfile.backend .
 	docker build -t openestimate-frontend:latest -f deploy/docker/Dockerfile.frontend .
+
+build-unified: ## Build single all-in-one Docker image
+	docker build -t openestimate:latest -f deploy/docker/Dockerfile.unified .
+
+build-wheel: ## Build Python wheel (pip installable)
+	cd $(FRONTEND_DIR) && npm ci && npm run build
+	cd $(BACKEND_DIR) && pip install build && python -m build
 
 # ─── Utilities ──────────────────────────────────────────────────────────────
 clean: ## Clean build artifacts
