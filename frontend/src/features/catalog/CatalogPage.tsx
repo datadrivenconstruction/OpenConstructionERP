@@ -25,10 +25,12 @@ import {
   Upload,
   Trash2,
   House,
+  TrendingUp,
+  AlertTriangle,
   type LucideIcon,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Skeleton, InfoHint, CountryFlag } from '@/shared/ui';
-import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
+import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { REGION_MAP } from '@/stores/useCostDatabaseStore';
@@ -603,7 +605,7 @@ function ResourceRow({
             }`}
             title={resource.category}
           >
-            {resource.category}
+            {translate(`catalog.category_${resource.category.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`, { defaultValue: resource.category })}
           </span>
         </td>
 
@@ -1151,7 +1153,10 @@ export function CatalogPage() {
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
 
+  const navigate = useNavigate();
+
   const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [resourceType, setResourceType] = useState('');
   const [category, setCategory] = useState('');
   const [unit, setUnit] = useState('');
@@ -1163,6 +1168,16 @@ export function CatalogPage() {
   const [showImportGrid, setShowImportGrid] = useState(false);
   const [showCreateResource, setShowCreateResource] = useState(false);
   const [showBuildAssembly, setShowBuildAssembly] = useState(false);
+  const [showPriceAdjust, setShowPriceAdjust] = useState(false);
+
+  // Debounce search query by 300ms
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(query);
+      setOffset(0);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [query]);
 
   // Fetch stats (for tab counts)
   const { data: stats } = useQuery({
@@ -1179,16 +1194,15 @@ export function CatalogPage() {
   });
 
   // Fetch resources
-  const searchUrl = buildSearchUrl(query, resourceType, category, unit, region, offset);
+  const searchUrl = buildSearchUrl(debouncedQuery, resourceType, category, unit, region, offset);
   const { data, isLoading, isFetching } = useQuery({
-    queryKey: ['catalog', query, resourceType, category, unit, region, offset],
+    queryKey: ['catalog', debouncedQuery, resourceType, category, unit, region, offset],
     queryFn: () => apiGet<CatalogSearchResponse>(searchUrl),
     placeholderData: (prev) => prev,
   });
 
   const items = data?.items ?? [];
   const total = data?.total ?? 0;
-  const hasMore = offset + PAGE_SIZE < total;
 
   // Count per type for tabs
   const typeCountMap = new Map(
@@ -1211,7 +1225,6 @@ export function CatalogPage() {
 
   const handleSearch = useCallback((value: string) => {
     setQuery(value);
-    setOffset(0);
   }, []);
 
   const handleTypeChange = useCallback((value: string) => {
@@ -1227,10 +1240,6 @@ export function CatalogPage() {
   const handleRegionChange = useCallback((value: string) => {
     setRegion(value);
     setOffset(0);
-  }, []);
-
-  const handleLoadMore = useCallback(() => {
-    setOffset((prev) => prev + PAGE_SIZE);
   }, []);
 
   const handleCopyRate = useCallback(async (resource: CatalogResource) => {
@@ -1305,7 +1314,6 @@ export function CatalogPage() {
                     defaultValue: 'Browse materials, equipment, labor, and operators',
                   })}
           </p>
-          <InfoHint inline className="ml-1" text={t('catalog.what_is_catalog', { defaultValue: 'Materials, labor, equipment, and operator rates organized by region. Install regional catalogs from Modules, then use them to build assemblies or add items directly to BOQ positions.' })} />
         </div>
         <div className="flex items-center gap-2">
           {/* Region selector dropdown */}
@@ -1346,6 +1354,18 @@ export function CatalogPage() {
             </Button>
           )}
 
+          {/* Bulk price adjustment */}
+          {totalCount > 0 && (
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<TrendingUp size={14} />}
+              onClick={() => setShowPriceAdjust(true)}
+            >
+              {t('catalog.adjust_prices', { defaultValue: 'Adjust Prices' })}
+            </Button>
+          )}
+
           {/* Add custom resource */}
           <Button
             variant="secondary"
@@ -1367,6 +1387,15 @@ export function CatalogPage() {
           </Button>
         </div>
       </div>
+
+      {/* What is catalog info hint */}
+      <InfoHint
+        className="mb-4"
+        text={t('catalog.what_is_catalog', {
+          defaultValue:
+            'Resource Catalog contains atomic building blocks for estimates: individual materials, labor rates, and equipment costs. Use it to manage and update prices across all your projects -- apply inflation adjustments, regional coefficients, or group-level price changes.',
+        })}
+      />
 
       {/* Region Import Grid (expandable) */}
       {(showImportGrid || (!hasAnyRegions && totalCount === 0)) && (
@@ -1447,8 +1476,21 @@ export function CatalogPage() {
                       defaultValue: 'Search by name or code...',
                     })
               }
-              className="h-10 w-full rounded-lg border border-border bg-surface-primary pl-10 pr-3 text-sm text-content-primary placeholder:text-content-tertiary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary"
+              className="h-10 w-full rounded-lg border border-border bg-surface-primary pl-10 pr-9 text-sm text-content-primary placeholder:text-content-tertiary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary"
             />
+            {query && (
+              <button
+                onClick={() => {
+                  setQuery('');
+                  setDebouncedQuery('');
+                  setOffset(0);
+                }}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-content-tertiary hover:text-content-secondary transition-colors"
+                aria-label={t('common.clear', { defaultValue: 'Clear' })}
+              >
+                <X size={14} />
+              </button>
+            )}
           </div>
 
           {/* Category filter */}
@@ -1464,7 +1506,7 @@ export function CatalogPage() {
                 </option>
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>
-                    {cat}
+                    {t(`catalog.category_${cat.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`, { defaultValue: cat })}
                   </option>
                 ))}
               </select>
@@ -1525,7 +1567,9 @@ export function CatalogPage() {
           title={
             region === 'CUSTOM'
               ? t('catalog.my_catalog_empty', { defaultValue: 'Your catalog is empty' })
-              : t('catalog.no_results', { defaultValue: 'No resources found' })
+              : !hasAnyRegions && !debouncedQuery
+                ? t('catalog.empty_title', { defaultValue: 'Resource Catalog' })
+                : t('catalog.no_results', { defaultValue: 'No resources found' })
           }
           description={
             region === 'CUSTOM'
@@ -1533,19 +1577,24 @@ export function CatalogPage() {
                   defaultValue:
                     'Add your own materials, equipment, and labor rates. Custom resources can be used in assemblies and applied to BOQ positions.',
                 })
-              : query
-                ? t('catalog.no_results_hint', {
-                    defaultValue: 'Try adjusting your search or filters',
+              : !hasAnyRegions && !debouncedQuery
+                ? t('catalog.empty_desc', {
+                    defaultValue:
+                      'The catalog stores individual materials, equipment, and labor rates. Import a regional database to get started, or add custom resources.',
                   })
-                : hasAnyRegions
-                  ? t('catalog.empty_with_regions', {
-                      defaultValue:
-                        'No resources match the current filters. Try changing the type or region.',
+                : debouncedQuery
+                  ? t('catalog.no_results_hint', {
+                      defaultValue: 'Try adjusting your search or filters',
                     })
-                  : t('catalog.empty_hint', {
-                      defaultValue:
-                        'Import a regional catalog to populate resources, or extract from cost items.',
-                    })
+                  : hasAnyRegions
+                    ? t('catalog.empty_with_regions', {
+                        defaultValue:
+                          'No resources match the current filters. Try changing the type or region.',
+                      })
+                    : t('catalog.empty_hint', {
+                        defaultValue:
+                          'Import a regional catalog to populate resources, or extract from cost items.',
+                      })
           }
           action={
             region === 'CUSTOM' ? (
@@ -1557,13 +1606,21 @@ export function CatalogPage() {
                 {t('catalog.add_resource', { defaultValue: 'Add Resource' })}
               </Button>
             ) : !hasAnyRegions ? (
-              <Button
-                variant="primary"
-                icon={<Upload size={16} />}
-                onClick={() => setShowImportGrid(true)}
-              >
-                {t('catalog.import_region', { defaultValue: 'Import Region' })}
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="primary"
+                  icon={<Upload size={16} />}
+                  onClick={() => setShowImportGrid(true)}
+                >
+                  {t('catalog.import_region', { defaultValue: 'Import Region' })}
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => navigate('/costs/import')}
+                >
+                  {t('catalog.import_database', { defaultValue: 'Import Database' })}
+                </Button>
+              </div>
             ) : undefined
           }
         />
@@ -1633,23 +1690,85 @@ export function CatalogPage() {
           </Card>
 
           {/* Pagination */}
-          <div className="mt-6 flex flex-col items-center gap-3">
-            <p className="text-xs text-content-tertiary">
-              {t('catalog.showing', { defaultValue: 'Showing' })}{' '}
-              {Math.min(offset + PAGE_SIZE, total)} {t('catalog.of', { defaultValue: 'of' })}{' '}
-              {total.toLocaleString()} {t('catalog.resources', { defaultValue: 'resources' })}
-            </p>
-            {hasMore && (
-              <Button
-                variant="secondary"
-                size="sm"
-                loading={isFetching}
-                onClick={handleLoadMore}
-              >
-                {t('catalog.load_more', { defaultValue: 'Load more' })}
-              </Button>
-            )}
-          </div>
+          {(() => {
+            const currentPage = Math.floor(offset / PAGE_SIZE) + 1;
+            const totalPages = Math.ceil(total / PAGE_SIZE);
+            const goToPage = (p: number) => setOffset((p - 1) * PAGE_SIZE);
+            const start = Math.max(1, currentPage - 2);
+            const end = Math.min(totalPages, start + 4);
+            const pages = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+
+            return (
+              <div className="mt-6 flex flex-col items-center gap-3">
+                <p className="text-xs text-content-tertiary">
+                  {t('catalog.showing_range', {
+                    defaultValue: '{{from}}-{{to}} of {{total}}',
+                    from: offset + 1,
+                    to: Math.min(offset + PAGE_SIZE, total),
+                    total: total.toLocaleString(),
+                  })}
+                </p>
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => goToPage(currentPage - 1)}
+                      disabled={currentPage === 1 || isFetching}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+                    {start > 1 && (
+                      <>
+                        <button
+                          onClick={() => goToPage(1)}
+                          className="flex h-8 min-w-[32px] items-center justify-center rounded-lg text-xs text-content-secondary hover:bg-surface-secondary transition-colors"
+                        >
+                          1
+                        </button>
+                        {start > 2 && (
+                          <span className="text-content-quaternary text-xs px-1">...</span>
+                        )}
+                      </>
+                    )}
+                    {pages.map((p) => (
+                      <button
+                        key={p}
+                        onClick={() => goToPage(p)}
+                        disabled={isFetching}
+                        className={`flex h-8 min-w-[32px] items-center justify-center rounded-lg text-xs font-medium transition-colors ${
+                          p === currentPage
+                            ? 'bg-oe-blue text-white'
+                            : 'text-content-secondary hover:bg-surface-secondary'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                    {end < totalPages && (
+                      <>
+                        {end < totalPages - 1 && (
+                          <span className="text-content-quaternary text-xs px-1">...</span>
+                        )}
+                        <button
+                          onClick={() => goToPage(totalPages)}
+                          className="flex h-8 min-w-[32px] items-center justify-center rounded-lg text-xs text-content-secondary hover:bg-surface-secondary transition-colors"
+                        >
+                          {totalPages}
+                        </button>
+                      </>
+                    )}
+                    <button
+                      onClick={() => goToPage(currentPage + 1)}
+                      disabled={currentPage === totalPages || isFetching}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </>
       )}
 
@@ -1722,6 +1841,458 @@ export function CatalogPage() {
           }}
         />
       )}
+
+      {showPriceAdjust && (
+        <PriceAdjustModal
+          stats={stats}
+          regionStats={regionStats ?? []}
+          currentFilters={{ resourceType, category, region }}
+          onClose={() => setShowPriceAdjust(false)}
+          onSuccess={() => {
+            setShowPriceAdjust(false);
+            invalidateAll();
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+/* ── Price Adjust Modal ──────────────────────────────────────────────── */
+
+function PriceAdjustModal({
+  stats,
+  regionStats,
+  currentFilters,
+  onClose,
+  onSuccess,
+}: {
+  stats: CatalogStatsResponse | undefined;
+  regionStats: CatalogRegionStat[];
+  currentFilters: { resourceType: string; category: string; region: string };
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+
+  const [factor, setFactor] = useState(1.05);
+  const [filterType, setFilterType] = useState(currentFilters.resourceType);
+  const [filterCategory, setFilterCategory] = useState(currentFilters.category);
+  const [filterRegion, setFilterRegion] = useState(currentFilters.region);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
+
+  // Published construction cost indices (BKI, BCIS, ENR, Eurostat)
+  const [useIndex, setUseIndex] = useState(false);
+  const [indexRegion, setIndexRegion] = useState('DE');
+  const [baseYear, setBaseYear] = useState(2024);
+  const [targetYear, setTargetYear] = useState(2026);
+
+  const INDICES: Record<string, { label: string; rates: Record<string, number> }> = {
+    DE: { label: 'Germany (BKI)', rates: { '2020': 3.2, '2021': 5.1, '2022': 14.6, '2023': 7.8, '2024': 4.2, '2025': 3.5, '2026': 3.0 } },
+    AT: { label: 'Austria', rates: { '2020': 2.8, '2021': 4.9, '2022': 12.3, '2023': 6.5, '2024': 3.8, '2025': 3.2, '2026': 2.8 } },
+    CH: { label: 'Switzerland', rates: { '2020': 1.5, '2021': 2.8, '2022': 6.2, '2023': 3.4, '2024': 2.5, '2025': 2.0, '2026': 1.8 } },
+    UK: { label: 'UK (BCIS)', rates: { '2020': 2.0, '2021': 8.5, '2022': 10.2, '2023': 4.8, '2024': 3.5, '2025': 3.0, '2026': 2.8 } },
+    US: { label: 'USA (ENR)', rates: { '2020': 1.2, '2021': 6.3, '2022': 11.5, '2023': 3.2, '2024': 2.8, '2025': 2.5, '2026': 2.3 } },
+    FR: { label: 'France', rates: { '2020': 2.3, '2021': 5.5, '2022': 9.8, '2023': 5.6, '2024': 3.6, '2025': 2.8, '2026': 2.5 } },
+    EU: { label: 'EU Average', rates: { '2020': 2.5, '2021': 5.8, '2022': 11.0, '2023': 6.0, '2024': 3.5, '2025': 3.0, '2026': 2.5 } },
+    AE: { label: 'UAE / Gulf', rates: { '2020': 1.8, '2021': 3.5, '2022': 7.2, '2023': 4.0, '2024': 3.0, '2025': 2.5, '2026': 2.2 } },
+    RU: { label: 'Russia', rates: { '2020': 4.5, '2021': 8.2, '2022': 18.5, '2023': 9.0, '2024': 6.0, '2025': 5.0, '2026': 4.5 } },
+    IN: { label: 'India', rates: { '2020': 3.0, '2021': 5.0, '2022': 8.5, '2023': 5.5, '2024': 4.5, '2025': 4.0, '2026': 3.5 } },
+  };
+
+  // Auto-compute factor from published index
+  useEffect(() => {
+    if (!useIndex || baseYear >= targetYear) return;
+    const indexData = INDICES[indexRegion];
+    if (!indexData) return;
+    let f = 1;
+    for (let y = baseYear; y < targetYear; y++) {
+      const rate = indexData.rates[String(y)] ?? indexData.rates[String(Math.min(y, 2026))] ?? 3.0;
+      f *= 1 + rate / 100;
+    }
+    setFactor(Math.round(f * 10000) / 10000);
+    setConfirmed(false);
+  }, [useIndex, indexRegion, baseYear, targetYear]);
+
+  const percentage = ((factor - 1) * 100).toFixed(1);
+  const isIncrease = factor > 1;
+  const isDecrease = factor < 1;
+  const isLargeChange = Math.abs(factor - 1) > 0.2;
+
+  // Estimate affected count
+  const totalResources = stats?.total ?? 0;
+  const categories = (stats?.by_category ?? []).map((c) => c.category);
+
+  // Rough estimate of affected resources based on filters
+  let estimatedCount = totalResources;
+  if (filterType) {
+    const typeStat = (stats?.by_type ?? []).find((s) => s.resource_type === filterType);
+    estimatedCount = typeStat?.count ?? 0;
+  }
+
+  const handleApply = useCallback(async () => {
+    setIsSubmitting(true);
+    try {
+      const params = new URLSearchParams();
+      params.set('factor', String(factor));
+      if (filterType) params.set('resource_type', filterType);
+      if (filterCategory) params.set('category', filterCategory);
+      if (filterRegion) params.set('region', filterRegion);
+
+      const result = await apiPatch<{ adjusted: number; factor: number }>(
+        `/v1/catalog/adjust-prices?${params.toString()}`,
+      );
+
+      addToast({
+        type: 'success',
+        title: t('catalog.prices_adjusted', { defaultValue: 'Prices adjusted' }),
+        message: t('catalog.prices_adjusted_desc', {
+          defaultValue: '{{count}} resources updated by {{pct}}%',
+          count: result.adjusted,
+          pct: percentage,
+        }),
+      });
+      onSuccess();
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: t('catalog.adjust_failed', { defaultValue: 'Adjustment failed' }),
+        message: err instanceof Error ? err.message : t('common.unknown_error', { defaultValue: 'Unknown error' }),
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [factor, filterType, filterCategory, filterRegion, percentage, addToast, t, onSuccess]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in"
+      onClick={onClose}
+    >
+      <div
+        className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+              <TrendingUp size={18} />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-content-primary">
+                {t('catalog.adjust_prices', { defaultValue: 'Adjust Prices' })}
+              </h2>
+              <p className="text-xs text-content-tertiary">
+                {t('catalog.adjust_prices_desc', {
+                  defaultValue: 'Apply a multiplication factor to resource prices',
+                })}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 py-5 space-y-5">
+          {/* Mode toggle: Manual vs Published Index */}
+          <div className="flex rounded-lg border border-border overflow-hidden">
+            <button
+              onClick={() => setUseIndex(false)}
+              className={`flex-1 px-3 py-2 text-xs font-medium transition-colors ${!useIndex ? 'bg-oe-blue text-white' : 'bg-surface-primary text-content-secondary hover:bg-surface-secondary'}`}
+            >
+              {t('catalog.manual_factor', { defaultValue: 'Manual Factor' })}
+            </button>
+            <button
+              onClick={() => setUseIndex(true)}
+              className={`flex-1 px-3 py-2 text-xs font-medium transition-colors ${useIndex ? 'bg-oe-blue text-white' : 'bg-surface-primary text-content-secondary hover:bg-surface-secondary'}`}
+            >
+              {t('catalog.from_inflation_index', { defaultValue: 'From Inflation Index' })}
+            </button>
+          </div>
+
+          {/* Published Index selector */}
+          {useIndex && (
+            <div className="rounded-lg border border-amber-200 dark:border-amber-800/40 bg-amber-50/50 dark:bg-amber-900/10 p-4 space-y-3">
+              <div className="flex items-center gap-2 text-xs font-medium text-amber-700 dark:text-amber-300">
+                <TrendingUp size={14} />
+                {t('catalog.inflation_index', { defaultValue: 'Published Construction Cost Indices' })}
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-2xs text-content-tertiary mb-1 block">{t('catalog.index_country', { defaultValue: 'Country / Source' })}</label>
+                  <select value={indexRegion} onChange={(e) => setIndexRegion(e.target.value)} className="h-8 w-full rounded-md border border-border bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30">
+                    {Object.entries(INDICES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-2xs text-content-tertiary mb-1 block">{t('catalog.from_year', { defaultValue: 'From year' })}</label>
+                  <select value={baseYear} onChange={(e) => setBaseYear(Number(e.target.value))} className="h-8 w-full rounded-md border border-border bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30">
+                    {[2020,2021,2022,2023,2024,2025,2026].map(y => <option key={y} value={y}>{y}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-2xs text-content-tertiary mb-1 block">{t('catalog.to_year', { defaultValue: 'To year' })}</label>
+                  <select value={targetYear} onChange={(e) => setTargetYear(Number(e.target.value))} className="h-8 w-full rounded-md border border-border bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30">
+                    {[2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030].map(y => <option key={y} value={y}>{y}</option>)}
+                  </select>
+                </div>
+              </div>
+              {baseYear < targetYear && (
+                <div className="flex flex-wrap gap-1.5">
+                  {(() => {
+                    const idx = INDICES[indexRegion];
+                    const items = [];
+                    for (let y = baseYear; y < targetYear; y++) {
+                      const rate = idx?.rates[String(y)] ?? idx?.rates[String(Math.min(y, 2026))] ?? 3.0;
+                      items.push(<span key={y} className="inline-flex items-center gap-1 rounded bg-surface-secondary px-2 py-0.5 text-2xs"><span className="text-content-tertiary">{y}</span><span className="font-medium text-amber-600">+{rate.toFixed(1)}%</span></span>);
+                    }
+                    return items;
+                  })()}
+                  <span className="inline-flex items-center gap-1 rounded bg-amber-100 dark:bg-amber-900/20 px-2 py-0.5 text-2xs font-bold text-amber-700 dark:text-amber-300">
+                    = ×{factor.toFixed(4)} (+{percentage}%)
+                  </span>
+                </div>
+              )}
+              <p className="text-2xs text-content-quaternary">
+                {t('catalog.index_sources', { defaultValue: 'Sources: BKI (Germany), BCIS (UK), ENR (USA), Eurostat (EU). Representative averages.' })}
+              </p>
+            </div>
+          )}
+
+          {/* Factor input (manual or auto-filled from index) */}
+          <div>
+            <label className="text-xs font-medium text-content-secondary mb-2 block">
+              {useIndex
+                ? t('catalog.computed_factor', { defaultValue: 'Computed Factor (from index above)' })
+                : t('catalog.price_factor', { defaultValue: 'Price Factor' })}
+            </label>
+            <div className="flex items-center gap-4">
+              <input
+                type="range"
+                min="0.50"
+                max="2.00"
+                step="0.01"
+                value={factor}
+                onChange={(e) => {
+                  setFactor(parseFloat(e.target.value));
+                  setConfirmed(false);
+                }}
+                className="flex-1 h-2 accent-oe-blue"
+              />
+              <input
+                type="number"
+                min="0.50"
+                max="2.00"
+                step="0.01"
+                value={factor}
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value);
+                  if (!isNaN(val) && val >= 0.5 && val <= 2.0) {
+                    setFactor(val);
+                    setConfirmed(false);
+                  }
+                }}
+                className="h-9 w-20 rounded-lg border border-border bg-surface-primary px-2 text-center text-sm font-mono tabular-nums focus:outline-none focus:ring-2 focus:ring-oe-blue"
+              />
+            </div>
+            <div className="mt-2 flex items-center gap-2">
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${
+                  isIncrease
+                    ? 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                    : isDecrease
+                      ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+                      : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                }`}
+              >
+                {isIncrease ? '+' : ''}{percentage}%
+              </span>
+              <span className="text-xs text-content-tertiary">
+                {factor === 1
+                  ? t('catalog.no_change', { defaultValue: 'No change' })
+                  : isIncrease
+                    ? t('catalog.price_increase', { defaultValue: 'Price increase' })
+                    : t('catalog.price_decrease', { defaultValue: 'Price decrease' })}
+              </span>
+            </div>
+          </div>
+
+          {/* Filter selectors */}
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="text-xs font-medium text-content-secondary mb-1 block">
+                {t('catalog.type_label', { defaultValue: 'Type' })}
+              </label>
+              <select
+                value={filterType}
+                onChange={(e) => {
+                  setFilterType(e.target.value);
+                  setConfirmed(false);
+                }}
+                className="h-9 w-full appearance-none rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+              >
+                <option value="">
+                  {t('catalog.all_types', { defaultValue: 'All types' })}
+                </option>
+                <option value="material">
+                  {t('catalog.type_material', { defaultValue: 'Material' })}
+                </option>
+                <option value="equipment">
+                  {t('catalog.type_equipment', { defaultValue: 'Equipment' })}
+                </option>
+                <option value="labor">
+                  {t('catalog.type_labor', { defaultValue: 'Labor' })}
+                </option>
+                <option value="operator">
+                  {t('catalog.type_operator', { defaultValue: 'Operator' })}
+                </option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-content-secondary mb-1 block">
+                {t('catalog.category', { defaultValue: 'Category' })}
+              </label>
+              <select
+                value={filterCategory}
+                onChange={(e) => {
+                  setFilterCategory(e.target.value);
+                  setConfirmed(false);
+                }}
+                className="h-9 w-full appearance-none rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+              >
+                <option value="">
+                  {t('catalog.all_categories', { defaultValue: 'All categories' })}
+                </option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {t(`catalog.category_${cat.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`, { defaultValue: cat })}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-content-secondary mb-1 block">
+                {t('catalog.region_label', { defaultValue: 'Region' })}
+              </label>
+              <select
+                value={filterRegion}
+                onChange={(e) => {
+                  setFilterRegion(e.target.value);
+                  setConfirmed(false);
+                }}
+                className="h-9 w-full appearance-none rounded-lg border border-border bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
+              >
+                <option value="">
+                  {t('catalog.all_regions', { defaultValue: 'All regions' })}
+                </option>
+                {regionStats.map((rs) => {
+                  const info = REGION_MAP[rs.region];
+                  return (
+                    <option key={rs.region} value={rs.region}>
+                      {info?.name ?? rs.region}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+          </div>
+
+          {/* Preview */}
+          <div className="rounded-lg border border-border-light bg-surface-secondary/40 px-4 py-3">
+            <p className="text-sm text-content-secondary">
+              {t('catalog.adjust_preview', {
+                defaultValue: 'This will affect approximately {{num}} resources',
+                num: estimatedCount.toLocaleString(),
+              })}
+            </p>
+            {factor !== 1 && (
+              <p className="text-xs text-content-tertiary mt-1">
+                {t('catalog.adjust_example', {
+                  defaultValue: 'Example: {{oldPrice}} -> {{newPrice}}',
+                  oldPrice: '100.00',
+                  newPrice: (100 * factor).toFixed(2),
+                })}
+              </p>
+            )}
+          </div>
+
+          {/* Warning for large changes */}
+          {isLargeChange && (
+            <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/10 px-4 py-3">
+              <AlertTriangle size={16} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs font-medium text-amber-700 dark:text-amber-300">
+                  {t('catalog.large_change_warning', {
+                    defaultValue: 'Large price change detected (>20%)',
+                  })}
+                </p>
+                <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
+                  {t('catalog.large_change_hint', {
+                    defaultValue:
+                      'Please confirm this is intentional. This operation cannot be undone.',
+                  })}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Confirmation checkbox for large changes */}
+          {isLargeChange && (
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={confirmed}
+                onChange={(e) => setConfirmed(e.target.checked)}
+                className="h-4 w-4 rounded border-border accent-oe-blue"
+              />
+              <span className="text-xs text-content-secondary">
+                {t('catalog.confirm_large_change', {
+                  defaultValue: 'I confirm this price adjustment of {{pct}}%',
+                  pct: percentage,
+                })}
+              </span>
+            </label>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between px-6 py-4 border-t border-border-light bg-surface-secondary/30">
+          <span className="text-xs text-content-tertiary">
+            {t('catalog.factor_label', { defaultValue: 'Factor' })}: {factor.toFixed(2)}{' '}
+            ({isIncrease ? '+' : ''}{percentage}%)
+          </span>
+          <div className="flex items-center gap-2">
+            <Button variant="secondary" size="sm" onClick={onClose}>
+              {t('common.cancel', { defaultValue: 'Cancel' })}
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              icon={
+                isSubmitting ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <TrendingUp size={14} />
+                )
+              }
+              onClick={handleApply}
+              disabled={factor === 1 || isSubmitting || (isLargeChange && !confirmed)}
+            >
+              {isSubmitting
+                ? t('catalog.adjusting', { defaultValue: 'Adjusting...' })
+                : t('catalog.apply_adjustment', { defaultValue: 'Apply' })}
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

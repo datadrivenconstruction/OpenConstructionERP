@@ -7,7 +7,7 @@ import {
   Search, Plus, Layers, ChevronDown, ChevronLeft, ChevronRight, MoreHorizontal,
   Copy, Trash2, Download, ExternalLink, FileSpreadsheet, X, Sparkles, Loader2,
   Wrench, Hammer, Zap, HardHat, PaintBucket, Home, Mountain,
-  ChevronUp, PackagePlus,
+  ChevronUp,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, InfoHint, SkeletonGrid } from '@/shared/ui';
 import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
@@ -50,144 +50,10 @@ const CATEGORY_COLORS: Record<string, 'blue' | 'success' | 'warning' | 'error' |
 
 const UNIT_OPTIONS = ['m', 'm2', 'm3', 'kg', 't', 'pcs', 'lsum', 'h', 'set', 'lm'];
 
-/* -- Template library ----------------------------------------------------- */
+/* Templates removed — assemblies are managed via New/AI Generate/Clone/Save from BOQ */
 
-interface TemplateComponent {
-  name: string;
-  type: string;
-  unit: string;
-  quantity: number;
-  unit_rate: number;
-}
-
-interface AssemblyTemplate {
-  nameKey: string;
-  defaultName: string;
-  code: string;
-  unit: string;
-  category: string;
-  components: TemplateComponent[];
-}
-
-const ASSEMBLY_TEMPLATES: AssemblyTemplate[] = [
-  {
-    nameKey: 'assemblies.tpl_rc_wall',
-    defaultName: 'Reinforced Concrete Wall C30/37',
-    code: 'TPL-RC-WALL',
-    unit: 'm3',
-    category: 'concrete',
-    components: [
-      { name: 'Concrete C30/37', type: 'material', unit: 'm3', quantity: 1.0, unit_rate: 120 },
-      { name: 'Reinforcement BSt 500', type: 'material', unit: 'kg', quantity: 120, unit_rate: 1.15 },
-      { name: 'Formwork', type: 'material', unit: 'm2', quantity: 6.5, unit_rate: 12.50 },
-      { name: 'Concrete labor', type: 'labor', unit: 'h', quantity: 2.5, unit_rate: 45 },
-      { name: 'Crane + pump', type: 'equipment', unit: 'h', quantity: 0.5, unit_rate: 85 },
-    ],
-  },
-  {
-    nameKey: 'assemblies.tpl_foundation',
-    defaultName: 'Foundation Slab C25/30',
-    code: 'TPL-FOUNDATION',
-    unit: 'm3',
-    category: 'concrete',
-    components: [
-      { name: 'Concrete C25/30', type: 'material', unit: 'm3', quantity: 1.0, unit_rate: 105 },
-      { name: 'Reinforcement mesh', type: 'material', unit: 'kg', quantity: 80, unit_rate: 1.10 },
-      { name: 'PE foil', type: 'material', unit: 'm2', quantity: 1.2, unit_rate: 3.50 },
-      { name: 'Concrete labor', type: 'labor', unit: 'h', quantity: 1.8, unit_rate: 45 },
-      { name: 'Vibrator', type: 'equipment', unit: 'h', quantity: 0.3, unit_rate: 15 },
-    ],
-  },
-  {
-    nameKey: 'assemblies.tpl_masonry',
-    defaultName: 'Masonry Wall 24cm',
-    code: 'TPL-MASONRY',
-    unit: 'm2',
-    category: 'masonry',
-    components: [
-      { name: 'Blocks 24cm', type: 'material', unit: 'pcs', quantity: 16, unit_rate: 2.80 },
-      { name: 'Mortar M5', type: 'material', unit: 'kg', quantity: 25, unit_rate: 0.12 },
-      { name: 'Mason labor', type: 'labor', unit: 'h', quantity: 1.2, unit_rate: 42 },
-      { name: 'Helper', type: 'labor', unit: 'h', quantity: 0.6, unit_rate: 28 },
-    ],
-  },
-  {
-    nameKey: 'assemblies.tpl_insulation',
-    defaultName: 'Mineral Wool Insulation 160mm',
-    code: 'TPL-INSULATION',
-    unit: 'm2',
-    category: 'insulation',
-    components: [
-      { name: 'Mineral wool 160mm', type: 'material', unit: 'm2', quantity: 1.05, unit_rate: 18.50 },
-      { name: 'Vapor barrier', type: 'material', unit: 'm2', quantity: 1.1, unit_rate: 2.80 },
-      { name: 'Fixings + tape', type: 'material', unit: 'set', quantity: 1, unit_rate: 4.50 },
-      { name: 'Insulation labor', type: 'labor', unit: 'h', quantity: 0.4, unit_rate: 38 },
-    ],
-  },
-  {
-    nameKey: 'assemblies.tpl_steel',
-    defaultName: 'Steel Structure HEB 200',
-    code: 'TPL-STEEL-HEB',
-    unit: 't',
-    category: 'steel',
-    components: [
-      { name: 'HEB 200 profile', type: 'material', unit: 't', quantity: 1.0, unit_rate: 1850 },
-      { name: 'Bolts + connections', type: 'material', unit: 'set', quantity: 1, unit_rate: 120 },
-      { name: 'Welding consumables', type: 'material', unit: 'kg', quantity: 5, unit_rate: 8.50 },
-      { name: 'Steel fitter', type: 'labor', unit: 'h', quantity: 8, unit_rate: 52 },
-      { name: 'Welder', type: 'labor', unit: 'h', quantity: 4, unit_rate: 58 },
-      { name: 'Crane', type: 'equipment', unit: 'h', quantity: 2, unit_rate: 95 },
-    ],
-  },
-  {
-    nameKey: 'assemblies.tpl_plaster',
-    defaultName: 'Interior Plaster 15mm',
-    code: 'TPL-PLASTER',
-    unit: 'm2',
-    category: 'finishing',
-    components: [
-      { name: 'Plaster mix', type: 'material', unit: 'kg', quantity: 18, unit_rate: 0.35 },
-      { name: 'Primer', type: 'material', unit: 'liter', quantity: 0.15, unit_rate: 5.20 },
-      { name: 'Plasterer', type: 'labor', unit: 'h', quantity: 0.35, unit_rate: 44 },
-      { name: 'Spray machine', type: 'equipment', unit: 'h', quantity: 0.1, unit_rate: 25 },
-    ],
-  },
-  {
-    nameKey: 'assemblies.tpl_roofing',
-    defaultName: 'Clay Tile Roofing',
-    code: 'TPL-ROOFING',
-    unit: 'm2',
-    category: 'roofing',
-    components: [
-      { name: 'Clay roof tiles', type: 'material', unit: 'm2', quantity: 1.05, unit_rate: 28 },
-      { name: 'Battens 30x50mm', type: 'material', unit: 'm', quantity: 3.5, unit_rate: 1.80 },
-      { name: 'Underlayment', type: 'material', unit: 'm2', quantity: 1.1, unit_rate: 4.50 },
-      { name: 'Fixings', type: 'material', unit: 'set', quantity: 1, unit_rate: 3.20 },
-      { name: 'Roofer', type: 'labor', unit: 'h', quantity: 0.6, unit_rate: 46 },
-      { name: 'Helper', type: 'labor', unit: 'h', quantity: 0.3, unit_rate: 28 },
-    ],
-  },
-  {
-    nameKey: 'assemblies.tpl_excavation',
-    defaultName: 'Excavation with Disposal',
-    code: 'TPL-EXCAVATION',
-    unit: 'm3',
-    category: 'earthwork',
-    components: [
-      { name: 'Excavator CAT 320', type: 'equipment', unit: 'h', quantity: 0.08, unit_rate: 95 },
-      { name: 'Dump truck 20t', type: 'equipment', unit: 'h', quantity: 0.12, unit_rate: 72 },
-      { name: 'Disposal fees', type: 'material', unit: 'm3', quantity: 1.3, unit_rate: 12 },
-      { name: 'Operator', type: 'labor', unit: 'h', quantity: 0.08, unit_rate: 48 },
-      { name: 'Driver', type: 'labor', unit: 'h', quantity: 0.12, unit_rate: 38 },
-    ],
-  },
-];
-
-function computeTemplateTotal(tpl: AssemblyTemplate): number {
-  return tpl.components.reduce((sum, c) => sum + c.quantity * c.unit_rate, 0);
-}
-
-const TEMPLATE_ICON_MAP: Record<string, React.ReactNode> = {
+/* Category icon map — used on assembly cards */
+const CATEGORY_ICON_MAP: Record<string, React.ReactNode> = {
   concrete: <HardHat size={16} />,
   masonry: <Hammer size={16} />,
   steel: <Wrench size={16} />,
@@ -228,7 +94,7 @@ export function AssembliesPage() {
   const [offset, setOffset] = useState(0);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [showAiGenerate, setShowAiGenerate] = useState(false);
-  const [showTemplates, setShowTemplates] = useState(true);
+  // Templates removed
 
   // Debounce search query (300ms)
   useEffect(() => {
@@ -282,42 +148,7 @@ export function AssembliesPage() {
     setOffset(0);
   }, []);
 
-  const handleCreateFromTemplate = useCallback(async (tpl: AssemblyTemplate) => {
-    try {
-      // Create the assembly
-      const assembly = await assembliesApi.create({
-        code: `${tpl.code}-${Date.now().toString(36).toUpperCase()}`,
-        name: t(tpl.nameKey, { defaultValue: tpl.defaultName }),
-        unit: tpl.unit,
-        category: tpl.category,
-        bid_factor: 1.0,
-      });
-
-      // Add all components
-      for (const comp of tpl.components) {
-        await assembliesApi.addComponent(assembly.id, {
-          description: comp.name,
-          factor: 1.0,
-          quantity: comp.quantity,
-          unit: comp.unit,
-          unit_cost: comp.unit_rate,
-        });
-      }
-
-      queryClient.invalidateQueries({ queryKey: ['assemblies'] });
-      addToast({
-        type: 'success',
-        title: t('assemblies.template_created', { defaultValue: 'Assembly created from template' }),
-        message: assembly.name,
-      });
-      navigate(`/assemblies/${assembly.id}`);
-    } catch {
-      addToast({
-        type: 'error',
-        title: t('assemblies.template_create_failed', { defaultValue: 'Failed to create from template' }),
-      });
-    }
-  }, [t, navigate, queryClient, addToast]);
+  // Templates removed — use New / AI Generate / Clone instead
 
   const fmt = (n: number) =>
     new Intl.NumberFormat(getIntlLocale(), {
@@ -413,87 +244,6 @@ export function AssembliesPage() {
 
       {/* Explanation */}
       <InfoHint className="mb-4" text={t('assemblies.what_are_assemblies', { defaultValue: 'Assemblies are reusable cost recipes that combine multiple resources (materials, labor, equipment) into a single composite rate. For example, a "Reinforced Concrete Wall" assembly includes concrete, rebar, formwork, and labor. Apply assemblies to BOQ positions to auto-populate component costs.' })} />
-
-      {/* Quick Start — Ready Templates */}
-      {(items.length < 3) && (
-        <Card padding="none" className="mb-6 border-dashed border-oe-blue/30">
-          <div className="px-5 py-4">
-            <div className="flex items-center gap-2 mb-1">
-              <PackagePlus size={16} className="text-oe-blue" />
-              <span className="text-sm font-semibold text-content-primary">
-                {t('assemblies.quick_start', { defaultValue: 'Quick Start' })}
-              </span>
-            </div>
-            <p className="text-xs text-content-tertiary mb-4">
-              {t('assemblies.quick_start_hint', { defaultValue: 'No assemblies yet? Create one from a ready template — click to add, then adjust prices for your project.' })}
-            </p>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-              {ASSEMBLY_TEMPLATES.slice(0, 4).map((tpl) => {
-                const total = computeTemplateTotal(tpl);
-                return (
-                  <button
-                    key={tpl.code}
-                    className="group flex items-center gap-3 rounded-lg border border-border-light px-3 py-2.5 text-left hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30 transition-all"
-                    onClick={() => handleCreateFromTemplate(tpl)}
-                    title={t('assemblies.click_to_create', { defaultValue: 'Click to create this assembly' })}
-                  >
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-tertiary text-content-tertiary group-hover:bg-oe-blue/10 group-hover:text-oe-blue transition-colors">
-                      {TEMPLATE_ICON_MAP[tpl.category] || <Layers size={16} />}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-xs font-semibold text-content-primary truncate group-hover:text-oe-blue">
-                        {t(tpl.nameKey, { defaultValue: tpl.defaultName })}
-                      </div>
-                      <div className="text-2xs text-content-tertiary">
-                        {tpl.components.length} {t('assemblies.components', { defaultValue: 'comp.' })} &middot; {fmt(total)}/{tpl.unit}
-                      </div>
-                    </div>
-                    <Plus size={14} className="shrink-0 text-oe-blue opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </button>
-                );
-              })}
-            </div>
-            {ASSEMBLY_TEMPLATES.length > 4 && (
-              <button
-                onClick={() => setShowTemplates((p) => !p)}
-                className="mt-2 text-xs text-oe-blue hover:underline"
-              >
-                {showTemplates
-                  ? t('assemblies.hide_more', { defaultValue: 'Show less' })
-                  : t('assemblies.show_more_templates', { defaultValue: `Show all ${ASSEMBLY_TEMPLATES.length} templates` })}
-              </button>
-            )}
-            {showTemplates && (
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4 mt-2">
-                {ASSEMBLY_TEMPLATES.slice(4).map((tpl) => {
-                  const total = computeTemplateTotal(tpl);
-                  return (
-                    <button
-                      key={tpl.code}
-                      className="group flex items-center gap-3 rounded-lg border border-border-light px-3 py-2.5 text-left hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30 transition-all"
-                      onClick={() => handleCreateFromTemplate(tpl)}
-                      title={t('assemblies.click_to_create', { defaultValue: 'Click to create this assembly' })}
-                    >
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-tertiary text-content-tertiary group-hover:bg-oe-blue/10 group-hover:text-oe-blue transition-colors">
-                        {TEMPLATE_ICON_MAP[tpl.category] || <Layers size={16} />}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-xs font-semibold text-content-primary truncate group-hover:text-oe-blue">
-                          {t(tpl.nameKey, { defaultValue: tpl.defaultName })}
-                        </div>
-                        <div className="text-2xs text-content-tertiary">
-                          {tpl.components.length} {t('assemblies.components', { defaultValue: 'comp.' })} &middot; {fmt(total)}/{tpl.unit}
-                        </div>
-                      </div>
-                      <Plus size={14} className="shrink-0 text-oe-blue opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </Card>
-      )}
 
       {/* Search & Filters */}
       <Card padding="none" className="mb-6">
@@ -1053,13 +803,23 @@ function AssemblyCard({
               onClick={() => { setMenuOpen(false); onClick(); }}
               className="flex w-full items-center gap-2 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
             >
-              <ExternalLink size={14} /> {t('common.open', { defaultValue: 'Open' })}
+              <ExternalLink size={14} /> {t('assemblies.open_editor', { defaultValue: 'Open Editor' })}
             </button>
             <button
               onClick={() => { setMenuOpen(false); onDuplicate(); }}
               className="flex w-full items-center gap-2 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
             >
-              <Copy size={14} /> {t('common.duplicate', { defaultValue: 'Duplicate' })}
+              <Copy size={14} /> {t('assemblies.duplicate', { defaultValue: 'Duplicate & Edit' })}
+            </button>
+            <button
+              onClick={() => {
+                setMenuOpen(false);
+                const text = `${assembly.code}\t${assembly.name}\t${assembly.unit}\t${assembly.total_rate}\t${assembly.category}`;
+                navigator.clipboard.writeText(text).catch(() => {});
+              }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
+            >
+              <Download size={14} /> {t('assemblies.copy_data', { defaultValue: 'Copy to Clipboard' })}
             </button>
             <div className="h-px bg-border-light" />
             <button

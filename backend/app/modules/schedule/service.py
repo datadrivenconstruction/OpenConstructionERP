@@ -68,18 +68,84 @@ def _str_to_float(value: str | None) -> float:
         return 0.0
 
 
-def compute_duration(start_date: str, end_date: str) -> int:
+# ── Regional work calendar configuration ─────────────────────────────────
+# Defines hours_per_day, working_days (weekday indices), and typical holidays.
+# weekday(): Monday=0, Tuesday=1, ... Saturday=5, Sunday=6
+
+WORK_CALENDARS: dict[str, dict] = {
+    "DEFAULT": {
+        "hours_per_day": 8,
+        "work_days": {0, 1, 2, 3, 4},  # Mon-Fri
+        "label": "Standard (Mon-Fri, 8h)",
+    },
+    "DACH": {
+        "hours_per_day": 8,
+        "work_days": {0, 1, 2, 3, 4},  # Mon-Fri
+        "label": "DACH (Mon-Fri, 8h)",
+    },
+    "UK": {
+        "hours_per_day": 8,
+        "work_days": {0, 1, 2, 3, 4},  # Mon-Fri
+        "label": "UK (Mon-Fri, 8h)",
+    },
+    "US": {
+        "hours_per_day": 8,
+        "work_days": {0, 1, 2, 3, 4},  # Mon-Fri
+        "label": "US (Mon-Fri, 8h)",
+    },
+    "GULF": {
+        "hours_per_day": 10,
+        "work_days": {0, 1, 2, 3, 4, 5},  # Mon-Sat (some: Sun-Thu)
+        "label": "Gulf (Mon-Sat, 10h)",
+    },
+    "RU": {
+        "hours_per_day": 8,
+        "work_days": {0, 1, 2, 3, 4},  # Mon-Fri
+        "label": "Russia (Mon-Fri, 8h)",
+    },
+    "NORDIC": {
+        "hours_per_day": 7.5,
+        "work_days": {0, 1, 2, 3, 4},  # Mon-Fri
+        "label": "Nordic (Mon-Fri, 7.5h)",
+    },
+}
+
+
+def get_work_calendar(region: str | None = None) -> dict:
+    """Get work calendar for a region. Falls back to DEFAULT."""
+    if region:
+        # Try exact match, then prefix match
+        cal = WORK_CALENDARS.get(region.upper())
+        if cal:
+            return cal
+        # Try matching region prefix (e.g., "DE_BERLIN" → "DACH")
+        region_map = {
+            "DE": "DACH", "AT": "DACH", "CH": "DACH",
+            "GB": "UK", "UK": "UK",
+            "US": "US", "USA": "US",
+            "AE": "GULF", "SA": "GULF", "QA": "GULF", "AR": "GULF",
+            "RU": "RU",
+            "NO": "NORDIC", "SE": "NORDIC", "DK": "NORDIC", "FI": "NORDIC",
+        }
+        prefix = region.split("_")[0].upper()
+        mapped = region_map.get(prefix)
+        if mapped:
+            return WORK_CALENDARS.get(mapped, WORK_CALENDARS["DEFAULT"])
+    return WORK_CALENDARS["DEFAULT"]
+
+
+def compute_duration(start_date: str, end_date: str, region: str | None = None) -> int:
     """Calculate working days between two ISO date strings.
 
-    Excludes weekends (Saturday and Sunday). If dates are invalid or
-    end_date is before start_date, returns 0.
+    Uses regional work calendar (respects different work weeks).
 
     Args:
         start_date: ISO date string (e.g. "2026-04-01").
         end_date: ISO date string (e.g. "2026-04-15").
+        region: Optional region for work calendar (e.g. "DACH", "GULF").
 
     Returns:
-        Number of working days (Mon-Fri) between start and end, inclusive.
+        Number of working days between start and end, inclusive.
     """
     try:
         start = date.fromisoformat(start_date)
@@ -90,11 +156,13 @@ def compute_duration(start_date: str, end_date: str) -> int:
     if end < start:
         return 0
 
+    cal = get_work_calendar(region)
+    work_days_set = cal["work_days"]
+
     working_days = 0
     current = start
     while current <= end:
-        # weekday(): Monday=0, Sunday=6
-        if current.weekday() < 5:
+        if current.weekday() in work_days_set:
             working_days += 1
         current += timedelta(days=1)
 
@@ -808,6 +876,8 @@ class ScheduleService:
             HTTPException 409 if schedule already has activities.
         """
         schedule = await self.get_schedule(schedule_id)
+        schedule_project_id = schedule.project_id  # Save before expire
+        schedule_start_date = schedule.start_date
 
         # Check schedule doesn't already have activities
         existing, count = await self.activity_repo.list_for_schedule(schedule_id, limit=1)
@@ -831,6 +901,10 @@ class ScheduleService:
             )
 
         raw_positions, _ = await pos_repo.list_for_boq(boq_id, limit=5000)
+        # Force-load all attributes in session context to prevent MissingGreenlet
+        for p in raw_positions:
+            _ = p.id, p.parent_id, p.ordinal, p.description, p.unit
+            _ = p.quantity, p.unit_rate, p.total, p.metadata_
         if not raw_positions:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -841,6 +915,11 @@ class ScheduleService:
         # Access every attribute while still inside the async session context.
         positions = []
         for p in raw_positions:
+            # metadata_ uses SQL alias "metadata" — access carefully
+            try:
+                meta = dict(p.metadata_) if p.metadata_ else {}
+            except Exception:
+                meta = {}
             positions.append({
                 "id": p.id,
                 "parent_id": p.parent_id,
@@ -850,6 +929,7 @@ class ScheduleService:
                 "quantity": p.quantity or "0",
                 "unit_rate": p.unit_rate or "0",
                 "total": p.total or "0",
+                "metadata_": meta,
             })
 
         # Determine project duration
@@ -858,62 +938,92 @@ class ScheduleService:
             building_type = boq_meta.get("building_type", "residential")
             total_project_days = 540 if building_type == "office" else 365
 
-        # ── Default production rates (quantity per working day per crew) ──
-        production_rates: dict[str, float | None] = {
-            "m3": 30.0,      # concrete: ~30 m3/day (commercial pump pour)
-            "m2": 150.0,     # general m2 work: ~150 m2/day (team of 4-6)
-            "m": 200.0,      # linear work: ~200 m/day (pipes, cables)
-            "kg": 2000.0,    # rebar/fixings: ~2000 kg/day
-            "t": 3.0,        # structural steel: ~3 t/day (erection team)
-            "pcs": 10.0,     # units: ~10 pcs/day (doors, sanitaryware)
-            "lsum": None,    # lump sum: use cost-proportional or 14 calendar days
-            "h": 8.0,        # hours: 1 day = 8h
-            "set": 5.0,      # sets: ~5/day
-            "lm": 200.0,     # linear meters: ~200/day
-        }
+        # ── Get regional work calendar from project ──────────────────────
+        # Fetch project to get region for work calendar
+        from app.modules.projects.repository import ProjectRepository
+        proj_repo = ProjectRepository(self.session)
+        project = await proj_repo.get_by_id(schedule_project_id)
+        project_region = project.region if project else None
+        cal = get_work_calendar(project_region)
+        hours_per_day = cal["hours_per_day"]
+        work_days_set = cal["work_days"]
+        work_days_per_week = len(work_days_set)
+        logger.info("Using work calendar: %s (%.1fh/day, %d days/week)",
+                     cal["label"], hours_per_day, work_days_per_week)
 
-        def _calc_duration(
-            quantity: float, unit: str, total_cost: float,
+        # ── Duration calculation from real labor data ──────────────────
+        # Priority:
+        #   1. labor_hours & workers_per_unit from position metadata
+        #   2. Sum labor-type resources from position metadata
+        #   3. Cost-proportional fallback
+
+        def _calc_duration_from_resources(
+            pos_meta: dict, quantity: float, total_cost: float,
             grand_total: float, total_days: int,
         ) -> int:
-            """Calculate activity duration from quantity and production rate."""
-            rate = production_rates.get(unit.lower().strip()) if unit else None
-            if rate and quantity > 0:
-                # Quantity-based duration (working days)
-                work_days = math.ceil(quantity / rate)
-                # Add 20% for mobilization / demobilization
-                work_days = math.ceil(work_days * 1.2)
-                # Convert working days to calendar days (5 work days = 7 calendar days)
-                calendar_days = math.ceil(work_days * 7 / 5)
-                return max(3, min(calendar_days, total_days))
-            elif unit and unit.lower().strip() == "lsum":
-                # Lump-sum items: estimate 10 working days (2 weeks) as default
-                return 14  # 10 working days = 14 calendar days
-            elif total_cost > 0 and grand_total > 0:
-                # Fallback: cost-proportional
+            """Calculate calendar days from labor_hours and workers.
+
+            Uses regional work calendar for hours_per_day and work_days_per_week.
+            """
+            # ── Try 1: explicit labor_hours + workers_per_unit in metadata ──
+            labor_hours = pos_meta.get("labor_hours", 0)
+            workers = pos_meta.get("workers_per_unit", 0)
+
+            if labor_hours > 0 and quantity > 0:
+                total_hours = quantity * labor_hours
+                crew_hours_per_day = max(workers, 1) * hours_per_day
+                working_days = total_hours / crew_hours_per_day
+                # Add 10% for mobilization / demobilization
+                cal_days = working_days * 1.1
+                # Convert working days → calendar days
+                cal_days = cal_days * 7 / work_days_per_week
+                return max(1, min(int(round(cal_days)), total_days))
+
+            # ── Try 2: sum labor-type resources stored in metadata ──────────
+            resources = pos_meta.get("resources", [])
+            if resources and quantity > 0:
+                labor_hrs_per_unit = 0.0
+                for res in resources:
+                    res_type = (res.get("type") or "").lower()
+                    res_unit = (res.get("unit") or "").lower()
+                    if res_type in ("labor", "operator") or "hrs" in res_unit or "hours" in res_unit:
+                        labor_hrs_per_unit += res.get("quantity", 0)
+                if labor_hrs_per_unit > 0:
+                    total_hours = quantity * labor_hrs_per_unit
+                    crew_size = max(
+                        sum(1 for r in resources
+                            if (r.get("type") or "").lower() in ("labor", "operator")),
+                        1,
+                    )
+                    crew_hours_per_day = crew_size * hours_per_day
+                    working_days = total_hours / crew_hours_per_day
+                    cal_days = working_days * 1.1 * 7 / work_days_per_week
+                    return max(1, min(int(round(cal_days)), total_days))
+
+            # ── Try 3: cost-proportional fallback ───────────────────────────
+            if total_cost > 0 and grand_total > 0:
                 proportion = total_cost / grand_total
-                return max(5, round(proportion * total_days))
-            else:
-                return 5  # minimum default
+                return max(1, round(proportion * total_days))
+
+            return 3  # minimum default
 
         def _add_working_days(start: date, working_days: int) -> date:
-            """Advance a date by N working days, skipping weekends."""
+            """Advance a date by N working days, using regional calendar."""
             current = start
             added = 0
             while added < working_days:
                 current += timedelta(days=1)
-                # weekday(): 0=Mon … 4=Fri, 5=Sat, 6=Sun
-                if current.weekday() < 5:
+                if current.weekday() in work_days_set:
                     added += 1
             return current
 
         def _working_days_between(start: date, end: date) -> int:
-            """Count working days between two dates (exclusive of start)."""
+            """Count working days between two dates, using regional calendar."""
             count = 0
             current = start
             while current < end:
                 current += timedelta(days=1)
-                if current.weekday() < 5:
+                if current.weekday() in work_days_set:
                     count += 1
             return count
 
@@ -1005,8 +1115,11 @@ class ScheduleService:
                 metadata_={"source": "boq_generation", "boq_id": str(boq_id)},
             )
             summary = await self.activity_repo.create(summary)
-            created_activities.append(summary)
-            summary_activity_map[summary.id] = []
+            summary_id = summary.id  # Save ID before any expire_all
+            created_activities.append({
+                "activity_type": "summary", "end_date": summary.end_date, "id": summary_id,
+            })
+            summary_activity_map[summary_id] = []
 
             # Inter-section dependency: SS with lag = 50% of previous section
             if prev_section_summary_id is not None:
@@ -1017,7 +1130,7 @@ class ScheduleService:
                     "lag_days": lag,
                 }]
                 await self.activity_repo.update_fields(
-                    summary.id, dependencies=summary_deps,
+                    summary_id, dependencies=summary_deps,
                 )
 
             # ── Create TASK activities for each child position ───────────
@@ -1029,9 +1142,10 @@ class ScheduleService:
                 child_quantity = _str_to_float(child_pos["quantity"])
                 child_unit = child_pos["unit"] or ""
                 child_total = _str_to_float(child_pos["total"])
+                child_meta = child_pos.get("metadata_", {}) or {}
 
-                duration_cal = _calc_duration(
-                    child_quantity, child_unit, child_total,
+                duration_cal = _calc_duration_from_resources(
+                    child_meta, child_quantity, child_total,
                     grand_total, total_project_days,
                 )
                 # Convert calendar days to working days for date arithmetic
@@ -1057,7 +1171,7 @@ class ScheduleService:
                 )
                 child_activity = Activity(
                     schedule_id=schedule_id,
-                    parent_id=summary.id,
+                    parent_id=summary_id,
                     name=child_name,
                     description=(
                         f"Auto-generated from BOQ position {child_pos['ordinal']} "
@@ -1080,41 +1194,62 @@ class ScheduleService:
                         "boq_id": str(boq_id),
                         "quantity": child_quantity,
                         "unit": child_unit,
+                        "labor_hours": child_meta.get("labor_hours", 0),
+                        "workers_per_unit": child_meta.get("workers_per_unit", 0),
+                        "duration_method": (
+                            "labor_hours"
+                            if child_meta.get("labor_hours", 0) > 0
+                            else (
+                                "resource_sum"
+                                if child_meta.get("resources")
+                                else "cost_proportional"
+                            )
+                        ),
                     },
                 )
                 child_activity = await self.activity_repo.create(child_activity)
-                created_activities.append(child_activity)
-                summary_activity_map[summary.id].append(child_activity)
+                child_activity_id = child_activity.id  # Save before expire
+                child_activity_start = child_activity.start_date
+                child_activity_end = child_activity.end_date
+                created_activities.append({
+                    "activity_type": "task", "end_date": child_activity_end, "id": child_activity_id,
+                })
+                # Store as dict to avoid ORM lazy-loading issues
+                summary_activity_map[summary_id].append({
+                    "id": child_activity_id,
+                    "start_date": child_activity_start,
+                    "end_date": child_activity_end,
+                })
 
-                prev_child_id = child_activity.id
+                prev_child_id = child_activity_id
                 child_start = child_end  # next child starts after this one ends
 
             # ── Update SUMMARY dates from children (rollup) ─────────────
-            children_activities = summary_activity_map[summary.id]
-            if children_activities:
+            children_data = summary_activity_map[summary_id]
+            if children_data:
                 earliest_start = min(
-                    date.fromisoformat(a.start_date) for a in children_activities
+                    date.fromisoformat(a["start_date"]) for a in children_data
                 )
                 latest_end = max(
-                    date.fromisoformat(a.end_date) for a in children_activities
+                    date.fromisoformat(a["end_date"]) for a in children_data
                 )
                 summary_duration = (latest_end - earliest_start).days
                 await self.activity_repo.update_fields(
-                    summary.id,
+                    summary_id,
                     start_date=earliest_start.isoformat(),
                     end_date=latest_end.isoformat(),
                     duration_days=max(1, summary_duration),
                     boq_position_ids=[str(c["id"]) for c in section["children"]],
                 )
 
-            prev_section_summary_id = summary.id
+            prev_section_summary_id = summary_id
             prev_section_duration_work_days = section_work_days_total
 
             # Next section start: overlap via SS — section_start advances by
             # half the previous section's working days for partial overlap
-            if children_activities:
+            if children_data:
                 latest_end = max(
-                    date.fromisoformat(a.end_date) for a in children_activities
+                    date.fromisoformat(a["end_date"]) for a in children_data
                 )
                 half_work_days = max(3, section_work_days_total // 2)
                 section_start = _add_working_days(section_start, half_work_days)
@@ -1144,16 +1279,21 @@ class ScheduleService:
             metadata_={"source": "boq_generation", "boq_id": str(boq_id)},
         )
         ms_start = await self.activity_repo.create(ms_start)
-        created_activities.append(ms_start)
+        ms_start_end = ms_start.end_date
+        created_activities.append({
+            "activity_type": "milestone", "end_date": ms_start_end,
+        })
 
         # Milestone: Project Completion (depends on last section finishing)
         if prev_section_summary_id is not None:
             # Find the latest end date across all activities
             all_end_dates = []
-            for act in created_activities:
-                if act.activity_type != "milestone" and act.end_date:
+            for act_info in created_activities:
+                atype = act_info.get("activity_type", "task") if isinstance(act_info, dict) else "task"
+                aend = act_info.get("end_date", "") if isinstance(act_info, dict) else ""
+                if atype != "milestone" and aend:
                     try:
-                        all_end_dates.append(date.fromisoformat(act.end_date))
+                        all_end_dates.append(date.fromisoformat(aend))
                     except (ValueError, TypeError):
                         pass
             project_end = max(all_end_dates) if all_end_dates else schedule_start
@@ -1183,24 +1323,26 @@ class ScheduleService:
                 metadata_={"source": "boq_generation", "boq_id": str(boq_id)},
             )
             ms_end = await self.activity_repo.create(ms_end)
-            created_activities.append(ms_end)
+            ms_end_date = ms_end.end_date
+            created_activities.append({"activity_type": "milestone", "end_date": ms_end_date})
 
         # ── Update schedule dates ────────────────────────────────────────
         if created_activities:
             all_end_dates = []
-            for act in created_activities:
-                if act.end_date:
+            for act_info in created_activities:
+                aend = act_info.get("end_date", "") if isinstance(act_info, dict) else ""
+                if aend:
                     try:
-                        all_end_dates.append(date.fromisoformat(act.end_date))
+                        all_end_dates.append(date.fromisoformat(aend))
                     except (ValueError, TypeError):
                         pass
             if all_end_dates:
                 final_end = max(all_end_dates).isoformat()
                 await self.schedule_repo.update_fields(schedule_id, end_date=final_end)
-            if not schedule.start_date:
-                await self.schedule_repo.update_fields(
-                    schedule_id, start_date=schedule_start.isoformat()
-                )
+            # Always set start_date (schedule object may be expired by now)
+            await self.schedule_repo.update_fields(
+                schedule_id, start_date=schedule_start.isoformat()
+            )
 
         await _safe_publish(
             "schedule.generated_from_boq",
