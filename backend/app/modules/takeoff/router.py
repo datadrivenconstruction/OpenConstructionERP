@@ -105,7 +105,7 @@ async def list_converters() -> dict[str, Any]:
 
 
 _GITHUB_CONVERTER_BASE_URL = (
-    "https://github.com/datadrivenconstructionIO/"
+    "https://github.com/datadrivenconstruction/"
     "ddc-community-toolkit/releases/download/v1.0.0"
 )
 
@@ -372,7 +372,7 @@ async def cad_extract(
             detail=(
                 f"DDC converter for .{ext} files is not installed. "
                 f"Install it from the Quantities page (/quantities) or download "
-                f"from https://github.com/datadrivenconstructionIO/ddc-community-toolkit/releases"
+                f"from https://github.com/datadrivenconstruction/ddc-community-toolkit/releases"
             ),
         )
 

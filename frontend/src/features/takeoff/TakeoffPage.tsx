@@ -188,7 +188,7 @@ function DropZone({
       if (disabled) return;
 
       const files = Array.from(e.dataTransfer.files).filter(
-        (f) => f.type === 'application/pdf' && f.size <= MAX_FILE_SIZE_BYTES,
+        (f) => (f.type === 'application/pdf' || f.type.startsWith('image/')) && f.size <= MAX_FILE_SIZE_BYTES,
       );
       if (files.length > 0) {
         onFilesSelected(files);
@@ -206,7 +206,7 @@ function DropZone({
   const handleFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = Array.from(e.target.files || []).filter(
-        (f) => f.type === 'application/pdf' && f.size <= MAX_FILE_SIZE_BYTES,
+        (f) => (f.type === 'application/pdf' || f.type.startsWith('image/')) && f.size <= MAX_FILE_SIZE_BYTES,
       );
       if (files.length > 0) {
         onFilesSelected(files);
@@ -249,10 +249,10 @@ function DropZone({
       </div>
       <div className="text-center">
         <p className="text-sm font-medium text-content-primary">
-          {t('takeoff.drop_pdf_here', 'Drop your PDF drawing here')}
+          {t('takeoff.drop_file_here', 'Drop your PDF or image here')}
         </p>
         <p className="mt-1 text-xs text-content-tertiary">
-          {t('takeoff.pdf_limit', '.pdf files up to {{size}}MB').replace(
+          {t('takeoff.file_limit', 'PDF, JPG, PNG up to {{size}}MB').replace(
             '{{size}}',
             String(MAX_FILE_SIZE_MB),
           )}
@@ -261,7 +261,7 @@ function DropZone({
       <input
         ref={fileInputRef}
         type="file"
-        accept="application/pdf,.pdf"
+        accept="application/pdf,.pdf,image/*,.jpg,.jpeg,.png,.tiff"
         multiple
         onChange={handleFileChange}
         className="hidden"

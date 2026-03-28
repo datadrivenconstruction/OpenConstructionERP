@@ -324,6 +324,7 @@ class AIChatRequest(BaseModel):
 
     message: str = Field(..., min_length=1, max_length=2000)
     context: AIChatContext = Field(default_factory=AIChatContext)
+    locale: str = Field(default="en", max_length=10)
 
 
 class AIChatItem(BaseModel):
@@ -788,6 +789,7 @@ class EnhanceDescriptionRequest(BaseModel):
     description: str = Field(..., min_length=2, max_length=500)
     unit: str = "m2"
     classification: dict[str, str] = Field(default_factory=dict)
+    locale: str = Field(default="en", max_length=10)
 
 
 class EnhanceDescriptionResponse(BaseModel):
@@ -808,6 +810,7 @@ class SuggestPrerequisitesRequest(BaseModel):
     unit: str = "m2"
     classification: dict[str, str] = Field(default_factory=dict)
     existing_descriptions: list[str] = Field(default_factory=list)
+    locale: str = Field(default="en", max_length=10)
 
 
 class PrerequisiteItem(BaseModel):
@@ -834,6 +837,7 @@ class CheckScopeRequest(BaseModel):
     project_type: str = "general"  # residential, commercial, industrial, infrastructure
     region: str = "DACH"
     currency: str = "EUR"
+    locale: str = Field(default="en", max_length=10)
 
 
 class ScopeMissingItem(BaseModel):
@@ -868,6 +872,7 @@ class EscalateRateRequest(BaseModel):
     base_year: int = Field(default=2023, ge=2000, le=2030)
     target_year: int = Field(default=2026, ge=2000, le=2035)
     region: str = "DACH"
+    locale: str = Field(default="en", max_length=10)
 
 
 class EscalationFactors(BaseModel):

@@ -31,7 +31,7 @@ CONVERTER_SEARCH_PATHS: list[Path] = [
     Path("converters/bin"),
     Path.home() / ".openestimator" / "converters",
     Path("/opt/openestimator/converters"),
-    Path("C:/ProgramData/OpenEstimator/converters"),
+    Path("C:/ProgramData/OpenConstructionERP/converters"),
 ]
 
 

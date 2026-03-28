@@ -28,8 +28,16 @@ export interface Assembly {
   is_template: boolean;
   project_id: string | null;
   is_active: boolean;
+  component_count: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface AssemblySearchResponse {
+  items: Assembly[];
+  total: number;
+  limit: number;
+  offset: number;
 }
 
 export interface AssemblyWithComponents extends Assembly {
@@ -56,9 +64,40 @@ export interface CreateComponentData {
   unit_cost: number;
 }
 
+export interface AIGenerateRequest {
+  description: string;
+  region?: string;
+  unit?: string;
+}
+
+export interface AIGeneratedComponent {
+  name: string;
+  code: string;
+  unit: string;
+  quantity: number;
+  unit_rate: number;
+  total: number;
+  type: string;
+  sort_order: number;
+  cost_item_id?: string;
+}
+
+export interface AIGeneratedAssembly {
+  name: string;
+  code: string;
+  unit: string;
+  category: string;
+  components: AIGeneratedComponent[];
+  total_rate: number;
+  source_items_count: number;
+  confidence: number;
+  description: string;
+  region: string;
+}
+
 export const assembliesApi = {
-  list: (params?: { q?: string; category?: string; project_id?: string }) =>
-    apiGet<Assembly[]>(`/v1/assemblies/?${new URLSearchParams(params as Record<string, string>)}`),
+  list: (params?: Record<string, string>) =>
+    apiGet<AssemblySearchResponse>(`/v1/assemblies/?${new URLSearchParams(params)}`),
   get: (id: string) => apiGet<AssemblyWithComponents>(`/v1/assemblies/${id}`),
   create: (data: CreateAssemblyData) => apiPost<Assembly>('/v1/assemblies/', data),
   update: (id: string, data: Partial<CreateAssemblyData>) =>
@@ -72,4 +111,6 @@ export const assembliesApi = {
     apiDelete(`/v1/assemblies/${assemblyId}/components/${componentId}`),
   applyToBoq: (assemblyId: string, boqId: string, quantity: number) =>
     apiPost(`/v1/assemblies/${assemblyId}/apply-to-boq`, { boq_id: boqId, quantity }),
+  aiGenerate: (data: AIGenerateRequest) =>
+    apiPost<AIGeneratedAssembly>('/v1/assemblies/ai-generate', data),
 };

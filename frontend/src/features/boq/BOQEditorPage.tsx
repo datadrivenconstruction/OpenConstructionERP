@@ -5,12 +5,14 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 // lucide-react icons used by sub-components (BOQToolbar, BOQGrid, etc.) — none needed directly here
 import { Database, Download, ExternalLink, X, Sparkles, AlertTriangle as WarnTriangle } from 'lucide-react';
 import { Button, Badge, InfoHint, Breadcrumb } from '@/shared/ui';
+import { useProgressStore } from '@/shared/ui/GlobalProgress';
 import { apiGet, apiPost, triggerDownload } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import {
   boqApi,
   groupPositionsIntoSections,
+  isSection,
   normalizePositions,
   type Position,
   type CreatePositionData,
@@ -53,8 +55,10 @@ import {
   getVatRate,
   getLocaleForRegion,
   getCurrencySymbol,
+  getCurrencyCode,
   createFormatter,
   fmtCompact,
+  fmtWithCurrency,
   computeQualityScore,
   type QualityBreakdown,
   formatTimeAgo,
@@ -67,6 +71,8 @@ import {
 } from './boqHelpers';
 
 import { BOQToolbar } from './BOQToolbar';
+import { PriceReviewPanel } from './PriceReviewPanel';
+import { ExcelPasteModal, type PastedRow } from './ExcelPasteModal';
 import { QualityScoreRing, TipsPanel, QuickAddFAB, EmptyBOQOnboarding, ExportWarningDialog } from './BOQSummaryPanel';
 import { ActivityPanel } from './ActivityPanel';
 import { CostDatabaseSearchModal, AssemblyPickerModal } from './BOQModals';
@@ -110,9 +116,11 @@ export function BOQEditorPage() {
 
   const vatRate = useMemo(() => getVatRate(project?.region), [project?.region]);
   const currencySymbol = useMemo(() => getCurrencySymbol(project?.currency), [project?.currency]);
+  const currencyCode = useMemo(() => getCurrencyCode(project?.currency), [project?.currency]);
+  const locale = useMemo(() => getLocaleForRegion(project?.region), [project?.region]);
   const fmt = useMemo(
-    () => createFormatter(getLocaleForRegion(project?.region)),
-    [project?.region],
+    () => createFormatter(locale),
+    [locale],
   );
 
   const { data: markupsData } = useQuery({
@@ -340,6 +348,8 @@ export function BOQEditorPage() {
   const [smartPanelOpen, setSmartPanelOpen] = useState(false);
   const [costDbModalOpen, setCostDbModalOpen] = useState(false);
   const [assemblyModalOpen, setAssemblyModalOpen] = useState(false);
+  const [excelPasteOpen, setExcelPasteOpen] = useState(false);
+  const [isExcelPasteImporting, setIsExcelPasteImporting] = useState(false);
   /** When set, the cost DB modal adds a resource to this position instead of creating a new position. */
   const [costDbForPositionId, setCostDbForPositionId] = useState<string | null>(null);
 
@@ -549,6 +559,12 @@ export function BOQEditorPage() {
         handleRedo();
         return;
       }
+      // Ctrl+Shift+V = Paste from Excel modal
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'V' || e.key === 'v')) {
+        e.preventDefault();
+        setExcelPasteOpen(true);
+        return;
+      }
     }
 
     document.addEventListener('keydown', handleKeyDown);
@@ -576,6 +592,7 @@ export function BOQEditorPage() {
 
   const [showVersionHistory, setShowVersionHistory] = useState(false);
   const [exportWarning, setExportWarning] = useState<{ format: 'excel' | 'csv' | 'pdf' | 'gaeb'; score: number } | null>(null);
+  const [gaebPreviewOpen, setGaebPreviewOpen] = useState(false);
 
   /* ── Computed data ─────────────────────────────────────────────────── */
 
@@ -626,48 +643,29 @@ export function BOQEditorPage() {
 
   /* ── Position drag-and-drop reordering ─────────────────────────── */
 
+  const reorderMutation = useMutation({
+    mutationFn: (positionIds: string[]) => boqApi.reorderPositions(boqId!, positionIds),
+    onSuccess: () => {
+      invalidateAll();
+      addToast({
+        type: 'success',
+        title: t('boq.positions_reordered', { defaultValue: 'Positions reordered' }),
+      });
+    },
+    onError: () => {
+      addToast({
+        type: 'error',
+        title: t('boq.reorder_failed', { defaultValue: 'Failed to reorder positions' }),
+      });
+    },
+  });
+
   const handleReorderPositions = useCallback(
     (reorderedIds: string[]) => {
-      if (!boq) return;
-      const positionMap = new Map(boq.positions.map((p) => [p.id, p]));
-
-      // Group reordered IDs by their parent section so ordinals stay per-section
-      const sectionChildren = new Map<string | null, string[]>();
-      for (const id of reorderedIds) {
-        const pos = positionMap.get(id);
-        if (!pos) continue;
-        const parentId = pos.parent_id ?? null;
-        if (!sectionChildren.has(parentId)) {
-          sectionChildren.set(parentId, []);
-        }
-        sectionChildren.get(parentId)!.push(id);
-      }
-
-      // For each section group, update sort_order and ordinal based on new position
-      for (const [parentId, childIds] of sectionChildren) {
-        const parentPos = parentId ? positionMap.get(parentId) : null;
-        const sectionPrefix = parentPos ? parentPos.ordinal : '';
-
-        childIds.forEach((id, idx) => {
-          const pos = positionMap.get(id);
-          if (!pos) return;
-
-          const newSortOrder = idx * 10;
-          const newOrdinal = sectionPrefix
-            ? `${sectionPrefix}.${String(idx + 1).padStart(3, '0')}`
-            : String(idx + 1).padStart(2, '0');
-
-          // Only send update if sort_order or ordinal actually changed
-          if (pos.sort_order !== newSortOrder || pos.ordinal !== newOrdinal) {
-            updateMutation.mutate({
-              id,
-              data: { sort_order: newSortOrder, ordinal: newOrdinal },
-            });
-          }
-        });
-      }
+      if (!boq || reorderedIds.length === 0) return;
+      reorderMutation.mutate(reorderedIds);
     },
-    [boq, updateMutation],
+    [boq, reorderMutation],
   );
 
   /* ── Build flat position list for keyboard navigation ────────────── */
@@ -883,8 +881,11 @@ export function BOQEditorPage() {
         }
       }
 
-      // Client-side PDF export via jsPDF
-      if (format === 'pdf' && positions.length > 0) {
+      // Client-side PDF export via jsPDF (skip for very large BOQs to avoid
+      // browser memory issues — let the server handle them with a simplified report)
+      const LARGE_BOQ_THRESHOLD = 500;
+      const nonSectionPositions = positions.filter((p) => !isSection(p));
+      if (format === 'pdf' && nonSectionPositions.length > 0 && nonSectionPositions.length <= LARGE_BOQ_THRESHOLD) {
         try {
           const markupTotalsForExport = markupTotals.map((m) => ({
             name: m.name,
@@ -903,7 +904,7 @@ export function BOQEditorPage() {
             vatRate,
             vatAmount,
             grossTotal,
-            locale: getLocaleForRegion(project?.region),
+            locale,
           });
           addToast({ type: 'success', title: t('boq.file_downloaded', { defaultValue: 'File downloaded' }) });
           return;
@@ -924,15 +925,29 @@ export function BOQEditorPage() {
         triggerDownload(blob, `${boq?.name ?? 'boq'}.${extensions[format] ?? format}`);
         addToast({ type: 'success', title: t('boq.file_downloaded', { defaultValue: 'File downloaded' }) });
       } else {
-        addToast({ type: 'error', title: t('boq.export_failed', { defaultValue: 'Export failed' }) });
+        let errorMsg = t('boq.export_failed', { defaultValue: 'Export failed' });
+        try {
+          const errBody = await r.json();
+          if (errBody?.detail) {
+            errorMsg = errBody.detail;
+          }
+        } catch {
+          // Response was not JSON — use default message
+        }
+        addToast({ type: 'error', title: errorMsg });
       }
     },
     [boqId, boq, positions, markups, directCost, netTotal, addToast, t],
   );
 
-  /** Pre-export validation check: warn if quality < 60%. */
+  /** Pre-export validation check: warn if quality < 60%, GAEB preview before export. */
   const handleExport = useCallback(
     (format: 'excel' | 'csv' | 'pdf' | 'gaeb') => {
+      // Show GAEB confirmation dialog before quality check
+      if (format === 'gaeb') {
+        setGaebPreviewOpen(true);
+        return;
+      }
       const score = qualityBreakdown.score;
       if (score < 60) {
         setExportWarning({ format, score });
@@ -943,12 +958,24 @@ export function BOQEditorPage() {
     [qualityBreakdown.score, doExport],
   );
 
+  /** Confirm GAEB export after preview dialog. */
+  const confirmGaebExport = useCallback(() => {
+    setGaebPreviewOpen(false);
+    const score = qualityBreakdown.score;
+    if (score < 60) {
+      setExportWarning({ format: 'gaeb', score });
+    } else {
+      doExport('gaeb');
+    }
+  }, [qualityBreakdown.score, doExport]);
+
   const [isValidating, setIsValidating] = useState(false);
   const [lastValidationScore, setLastValidationScore] = useState<number | null>(null);
 
   const handleValidate = useCallback(async () => {
     const token = useAuthStore.getState().accessToken;
     setIsValidating(true);
+    useProgressStore.getState().start();
     try {
       const r = await fetch(`/api/v1/boq/boqs/${boqId}/validate`, {
         method: 'POST',
@@ -998,14 +1025,18 @@ export function BOQEditorPage() {
       });
     } finally {
       setIsValidating(false);
+      useProgressStore.getState().done();
     }
   }, [boqId, addToast, t, invalidateAll]);
 
   const [isRecalculating, setIsRecalculating] = useState(false);
+  const [showRecalcConfirm, setShowRecalcConfirm] = useState(false);
 
-  const handleRecalculate = useCallback(async () => {
+  const doRecalculate = useCallback(async () => {
     if (!boqId) return;
+    setShowRecalcConfirm(false);
     setIsRecalculating(true);
+    useProgressStore.getState().start();
     try {
       // Step 1: Enrich — match positions to cost database items and attach resource breakdowns
       let enrichedCount = 0;
@@ -1061,6 +1092,43 @@ export function BOQEditorPage() {
       });
     } finally {
       setIsRecalculating(false);
+      useProgressStore.getState().done();
+    }
+  }, [boqId, addToast, t, invalidateAll]);
+
+  const handleRecalculate = useCallback(() => {
+    setShowRecalcConfirm(true);
+  }, []);
+
+  /* ── Excel paste handler ──────────────────────────────────────────── */
+
+  const handleExcelPaste = useCallback(async (rows: PastedRow[]) => {
+    if (!boqId || rows.length === 0) return;
+    setIsExcelPasteImporting(true);
+    try {
+      const items = rows.map((r) => ({
+        boq_id: boqId,
+        ordinal: r.ordinal,
+        description: r.description,
+        unit: r.unit,
+        quantity: r.quantity,
+        unit_rate: r.unit_rate,
+      }));
+      await apiPost(`/v1/boq/boqs/${boqId}/positions/bulk`, { items });
+      addToast({
+        type: 'success',
+        title: t('boq.paste_import_success', { defaultValue: 'Imported successfully' }),
+        message: t('boq.paste_import_count', { defaultValue: '{{count}} positions added to BOQ', count: rows.length }),
+      });
+      setExcelPasteOpen(false);
+      invalidateAll();
+    } catch {
+      addToast({
+        type: 'error',
+        title: t('boq.paste_import_failed', { defaultValue: 'Import failed' }),
+      });
+    } finally {
+      setIsExcelPasteImporting(false);
     }
   }, [boqId, addToast, t, invalidateAll]);
 
@@ -1331,7 +1399,7 @@ export function BOQEditorPage() {
         });
         if (result.suggested_rate > 0) {
           // AI proposes, human confirms — show toast with Apply action button
-          const rateStr = `${currencySymbol}${fmt.format(result.suggested_rate)}`;
+          const rateStr = fmtWithCurrency(result.suggested_rate, locale, currencyCode);
           const conf = Math.round(result.confidence * 100);
           addToast(
             {
@@ -1417,11 +1485,26 @@ export function BOQEditorPage() {
   );
 
   const [isCheckingAnomalies, setIsCheckingAnomalies] = useState(false);
+  const anomalyAbortRef = useRef<AbortController | null>(null);
+
+  const handleCancelAnomalies = useCallback(() => {
+    anomalyAbortRef.current?.abort();
+    setIsCheckingAnomalies(false);
+    addToast({ type: 'info', title: t('boq.anomaly_cancelled', { defaultValue: 'Price check cancelled' }) });
+  }, [addToast, t]);
 
   const handleCheckAnomalies = useCallback(async () => {
     if (!boqId) return;
     if (!ensureVectorDB()) return;
+    anomalyAbortRef.current?.abort();
+    const controller = new AbortController();
+    anomalyAbortRef.current = controller;
+
+    // Auto-timeout after 30 seconds
+    const timeout = setTimeout(() => controller.abort(), 30000);
+
     setIsCheckingAnomalies(true);
+    useProgressStore.getState().start();
     try {
       const result = await boqApi.checkAnomalies(boqId);
       const map = new Map<string, { severity: string; message: string; suggestion: number }>();
@@ -1458,7 +1541,10 @@ export function BOQEditorPage() {
         message: detail.includes('API') ? detail : t('boq.ai_error_generic', { defaultValue: 'Could not connect to AI service. Check that the embedding model is available.' }),
       });
     } finally {
+      clearTimeout(timeout);
       setIsCheckingAnomalies(false);
+      anomalyAbortRef.current = null;
+      useProgressStore.getState().done();
     }
   }, [boqId, addToast, t, ensureVectorDB]);
 
@@ -1473,10 +1559,10 @@ export function BOQEditorPage() {
       addToast({
         type: 'success',
         title: t('boq.cost_finder_applied', { defaultValue: 'Rate Applied' }),
-        message: `${currencySymbol}${fmt.format(rate)} (${source})`,
+        message: `${fmtWithCurrency(rate, locale, currencyCode)} (${source})`,
       });
     },
-    [updateMutation, addToast, t, currencySymbol, fmt],
+    [updateMutation, addToast, t, locale, currencyCode],
   );
 
   const handleCostFinderAddPosition = useCallback(
@@ -1505,11 +1591,23 @@ export function BOQEditorPage() {
       addToast({
         type: 'success',
         title: t('boq.anomaly_rate_applied', { defaultValue: 'Suggested Rate Applied' }),
-        message: `${currencySymbol}${fmt.format(suggestedRate)}`,
+        message: fmtWithCurrency(suggestedRate, locale, currencyCode),
       });
     },
-    [updateMutation, addToast, t, currencySymbol, fmt],
+    [updateMutation, addToast, t, locale, currencyCode],
   );
+
+  const handleIgnoreAnomaly = useCallback((positionId: string) => {
+    setAnomalyMap((prev) => {
+      const next = new Map(prev);
+      next.delete(positionId);
+      return next;
+    });
+  }, []);
+
+  const handleDismissAnomalies = useCallback(() => {
+    setAnomalyMap(new Map());
+  }, []);
 
   const handleAcceptAllAnomalies = useCallback(() => {
     for (const [positionId, anomaly] of anomalyMap.entries()) {
@@ -1670,6 +1768,66 @@ export function BOQEditorPage() {
     [boq?.positions, t, addToast],
   );
 
+  /** Handle "Save as Assembly" from the BOQ position context menu */
+  const handleSaveAsAssembly = useCallback(
+    async (positionId: string) => {
+      const pos = boq?.positions.find((p) => p.id === positionId);
+      if (!pos) return;
+
+      try {
+        const resources = (pos.metadata?.resources as Array<{
+          name: string; code?: string; type?: string; unit: string;
+          quantity: number; unit_rate: number; total?: number;
+        }>) || [];
+
+        // Create the assembly via the API
+        const assemblyCode = `FROM-BOQ-${(pos.ordinal || '').replace(/[^a-zA-Z0-9]/g, '-') || Date.now().toString(36).toUpperCase()}`;
+        const assemblyResp = await apiPost<{ id: string; name: string }>('/v1/assemblies/', {
+          code: assemblyCode,
+          name: pos.description || 'Assembly from BOQ',
+          unit: pos.unit || 'm2',
+          category: 'custom',
+          bid_factor: 1.0,
+        });
+
+        // Add components from resources
+        for (let i = 0; i < resources.length; i++) {
+          const r = resources[i];
+          await apiPost(`/v1/assemblies/${assemblyResp.id}/components`, {
+            description: r.name || '',
+            factor: 1.0,
+            quantity: r.quantity || 1,
+            unit: r.unit || pos.unit || 'm2',
+            unit_cost: r.unit_rate || 0,
+          });
+        }
+
+        // If no resources, add a single component from the position itself
+        if (resources.length === 0) {
+          await apiPost(`/v1/assemblies/${assemblyResp.id}/components`, {
+            description: pos.description || 'Main item',
+            factor: 1.0,
+            quantity: 1,
+            unit: pos.unit || 'm2',
+            unit_cost: pos.unit_rate || 0,
+          });
+        }
+
+        addToast({
+          type: 'success',
+          title: t('boq.saved_as_assembly', { defaultValue: 'Saved as Assembly' }),
+          message: assemblyResp.name,
+        });
+      } catch {
+        addToast({
+          type: 'error',
+          title: t('boq.save_as_assembly_failed', { defaultValue: 'Failed to create assembly' }),
+        });
+      }
+    },
+    [boq?.positions, t, addToast],
+  );
+
   /** Handle formula applied from AG Grid quantity editor */
   const handleGridFormulaApplied = useCallback(
     (positionId: string, formula: string, _result: number) => {
@@ -1793,6 +1951,7 @@ export function BOQEditorPage() {
           isImporting={isImporting}
           importInputRef={importInputRef}
           onImportInputChange={handleImportInputChange}
+          onPasteFromExcel={() => setExcelPasteOpen(true)}
           onExport={handleExport}
           onValidate={handleValidate}
           isValidating={isValidating}
@@ -1816,6 +1975,7 @@ export function BOQEditorPage() {
             if (!smartPanelOpen) { setAiChatOpen(false); setCostFinderOpen(false); }
           }}
           onCheckAnomalies={handleCheckAnomalies}
+          onCancelAnomalies={isCheckingAnomalies ? handleCancelAnomalies : undefined}
           anomalyCount={anomalyMap.size}
           onAcceptAllAnomalies={anomalyMap.size > 0 ? handleAcceptAllAnomalies : undefined}
           hasPositions={hasPositions}
@@ -1851,7 +2011,8 @@ export function BOQEditorPage() {
           onToggleSection={toggleSection}
           highlightPositionId={undefined}
           currencySymbol={currencySymbol}
-          locale={getLocaleForRegion(project?.region)}
+          currencyCode={currencyCode}
+          locale={locale}
           footerRows={boqFooterRows}
           onSelectionChanged={handleSelectionChanged}
           onRemoveResource={handleRemoveResource}
@@ -1865,6 +2026,7 @@ export function BOQEditorPage() {
           onCheckAnomalies={handleCheckAnomalies}
           anomalyMap={anomalyMap}
           onApplyAnomalySuggestion={handleApplyAnomalySuggestion}
+          onSaveAsAssembly={handleSaveAsAssembly}
         /></div>
       ) : (
         <div className="rounded-xl border border-border-light bg-surface-elevated shadow-xs overflow-hidden p-8">
@@ -1879,6 +2041,20 @@ export function BOQEditorPage() {
         </div>
       )}
 
+      {/* ── Price Review Panel (shown after Price Check) ────────────── */}
+      {anomalyMap.size > 0 && (
+        <PriceReviewPanel
+          anomalyMap={anomalyMap}
+          positions={positions}
+          currencyCode={currencyCode}
+          locale={locale}
+          onApply={handleApplyAnomalySuggestion}
+          onIgnore={handleIgnoreAnomaly}
+          onApplyAll={handleAcceptAllAnomalies}
+          onDismiss={handleDismissAnomalies}
+        />
+      )}
+
       {/* ── Markup Management Panel ──────────────────────────────────── */}
       {boqId && (
         <MarkupPanel
@@ -1886,24 +2062,26 @@ export function BOQEditorPage() {
           markups={markups}
           directCost={directCost}
           currencySymbol={currencySymbol}
+          currencyCode={currencyCode}
+          locale={locale}
           fmt={fmt}
         />
       )}
 
       {/* ── Resource Summary ──────────────────────────────────────────── */}
-      {boqId && hasPositions && <div className="mt-6"><ResourceSummary boqId={boqId} /></div>}
+      {boqId && hasPositions && <div className="mt-6"><ResourceSummary boqId={boqId} locale={locale} /></div>}
 
       {/* ── Cost Breakdown Panel ─────────────────────────────────────── */}
-      {boqId && hasPositions && <div className="mt-6"><CostBreakdownPanel boqId={boqId} /></div>}
+      {boqId && hasPositions && <div className="mt-6"><CostBreakdownPanel boqId={boqId} locale={locale} /></div>}
 
       {/* ── AACE Estimate Classification ──────────────────────────────── */}
       {boqId && hasPositions && <div className="mt-6"><EstimateClassification boqId={boqId} /></div>}
 
       {/* ── Sensitivity Analysis (Tornado Chart) ──────────────────────── */}
-      {boqId && hasPositions && <div className="mt-6"><SensitivityChart boqId={boqId} /></div>}
+      {boqId && hasPositions && <div className="mt-6"><SensitivityChart boqId={boqId} locale={locale} /></div>}
 
       {/* ── Monte Carlo Cost Risk ─────────────────────────────────────── */}
-      {boqId && hasPositions && <div className="mt-6"><CostRiskPanel boqId={boqId} /></div>}
+      {boqId && hasPositions && <div className="mt-6"><CostRiskPanel boqId={boqId} locale={locale} /></div>}
 
       {/* ── Activity Log Panel ────────────────────────────────────────── */}
       <ActivityPanel
@@ -1931,7 +2109,8 @@ export function BOQEditorPage() {
         onAddPosition={handleCostFinderAddPosition}
         onApplyRate={handleCostFinderApplyRate}
         projectRegion={project?.region}
-        currencySymbol={currencySymbol}
+        currencyCode={currencyCode}
+        locale={locale}
       />
 
       {/* ── AI Smart Panel ───────────────────────────────────────── */}
@@ -1949,7 +2128,8 @@ export function BOQEditorPage() {
           });
         }}
         onAddPosition={handleCostFinderAddPosition}
-        currencySymbol={currencySymbol}
+        currencyCode={currencyCode}
+        locale={locale}
         projectRegion={project?.region}
       />
 
@@ -2037,6 +2217,103 @@ export function BOQEditorPage() {
         />
       )}
 
+      {/* ── Update Rates Confirmation Dialog ────────────────────────── */}
+      {showRecalcConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in" onClick={() => setShowRecalcConfirm(false)}>
+          <div className="w-full max-w-md mx-4 rounded-2xl bg-surface-primary shadow-2xl border border-border-light overflow-hidden animate-scale-in" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-10 w-10 rounded-xl bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center">
+                  <Database size={20} className="text-oe-blue" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold">{t('boq.recalc_confirm_title', { defaultValue: 'Update Unit Rates' })}</h3>
+                  <p className="text-xs text-content-secondary">{t('boq.recalc_confirm_subtitle', { defaultValue: 'Match positions to cost database' })}</p>
+                </div>
+              </div>
+              <div className="space-y-2 text-sm text-content-secondary">
+                <p>{t('boq.recalc_confirm_step1', { defaultValue: '1. Search cost database for matching items by description' })}</p>
+                <p>{t('boq.recalc_confirm_step2', { defaultValue: '2. Attach resource breakdowns (materials, labor, equipment)' })}</p>
+                <p>{t('boq.recalc_confirm_step3', { defaultValue: '3. Recalculate unit rates from resource components' })}</p>
+              </div>
+              <div className="mt-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30 px-3 py-2">
+                <p className="text-xs text-amber-700 dark:text-amber-300">
+                  {t('boq.recalc_confirm_warning', { defaultValue: 'Positions with manual rates that have no match in the cost database will not be changed.' })}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-border-light bg-surface-secondary/30">
+              <Button variant="ghost" size="sm" onClick={() => setShowRecalcConfirm(false)}>
+                {t('common.cancel', { defaultValue: 'Cancel' })}
+              </Button>
+              <Button variant="primary" size="sm" onClick={doRecalculate} loading={isRecalculating}>
+                {t('boq.recalc_confirm_button', { defaultValue: 'Update Rates' })}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── GAEB Export Preview Dialog ─────────────────────────────── */}
+      {gaebPreviewOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={() => setGaebPreviewOpen(false)}
+        >
+          <div
+            className="bg-surface-elevated rounded-xl border border-border-light shadow-lg w-[420px] p-6 animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-content-primary">
+                {t('boq.gaeb_export_title', { defaultValue: 'Export GAEB XML (X83)' })}
+              </h3>
+              <button
+                onClick={() => setGaebPreviewOpen(false)}
+                className="p-1 rounded-lg text-content-tertiary hover:bg-surface-secondary transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <p className="text-xs text-content-secondary leading-relaxed mb-4">
+              {t('boq.gaeb_export_desc', {
+                defaultValue:
+                  'This will export your BOQ as GAEB XML 3.3 format, compatible with German tender workflows (DIN 276).',
+              })}
+            </p>
+
+            <div className="rounded-lg bg-surface-secondary p-3 mb-5 space-y-1.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-content-tertiary">
+                  {t('boq.gaeb_positions', { defaultValue: 'Positions' })}
+                </span>
+                <span className="font-medium text-content-primary">
+                  {positions.filter((p) => !isSection(p)).length}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-content-tertiary">
+                  {t('boq.gaeb_grand_total', { defaultValue: 'Grand Total' })}
+                </span>
+                <span className="font-medium text-content-primary">
+                  {fmt(grossTotal)} {currencySymbol}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setGaebPreviewOpen(false)}>
+                {t('common.cancel', { defaultValue: 'Cancel' })}
+              </Button>
+              <Button variant="primary" size="sm" onClick={confirmGaebExport}>
+                {t('boq.export', { defaultValue: 'Export' })}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Version History Drawer ──────────────────────────────────── */}
       {boqId && (
         <VersionHistoryDrawer
@@ -2045,6 +2322,14 @@ export function BOQEditorPage() {
           onClose={() => setShowVersionHistory(false)}
         />
       )}
+
+      {/* ── Excel Paste Modal ─────────────────────────────────────── */}
+      <ExcelPasteModal
+        open={excelPasteOpen}
+        onClose={() => setExcelPasteOpen(false)}
+        onImport={handleExcelPaste}
+        loading={isExcelPasteImporting}
+      />
 
       {/* ── Section Name Modal ────────────────────────────────────── */}
       {showSectionModal && (

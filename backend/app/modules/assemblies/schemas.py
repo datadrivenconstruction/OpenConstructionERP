@@ -126,9 +126,22 @@ class AssemblyResponse(BaseModel):
     project_id: UUID | None
     owner_id: UUID | None
     is_active: bool
+    component_count: int = 0
     metadata: dict[str, Any] = Field(default_factory=dict, alias="metadata_")
     created_at: datetime
     updated_at: datetime
+
+
+# ── Paginated response ──────────────────────────────────────────────────────
+
+
+class AssemblySearchResponse(BaseModel):
+    """Paginated assembly search result."""
+
+    items: list[AssemblyResponse]
+    total: int
+    limit: int
+    offset: int
 
 
 # ── Composite schemas ────────────────────────────────────────────────────────

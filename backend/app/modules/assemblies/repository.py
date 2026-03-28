@@ -8,6 +8,7 @@ import uuid
 
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import noload, selectinload
 
 from app.modules.assemblies.models import Assembly, Component
 
@@ -19,8 +20,24 @@ class AssemblyRepository:
         self.session = session
 
     async def get_by_id(self, assembly_id: uuid.UUID) -> Assembly | None:
-        """Get assembly by ID."""
-        return await self.session.get(Assembly, assembly_id)
+        """Get assembly by ID without loading components (avoids MissingGreenlet)."""
+        stmt = (
+            select(Assembly)
+            .where(Assembly.id == assembly_id)
+            .options(noload(Assembly.components))
+        )
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def get_by_id_with_components(self, assembly_id: uuid.UUID) -> Assembly | None:
+        """Get assembly by ID with components eagerly loaded."""
+        stmt = (
+            select(Assembly)
+            .where(Assembly.id == assembly_id)
+            .options(selectinload(Assembly.components))
+        )
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
 
     async def get_by_code(self, code: str) -> Assembly | None:
         """Get assembly by unique code."""
@@ -90,6 +107,7 @@ class AssemblyRepository:
         """Insert a new assembly."""
         self.session.add(assembly)
         await self.session.flush()
+        await self.session.refresh(assembly)
         return assembly
 
     async def update_fields(self, assembly_id: uuid.UUID, **fields: object) -> None:
@@ -97,8 +115,6 @@ class AssemblyRepository:
         stmt = update(Assembly).where(Assembly.id == assembly_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
-        # Expire cached ORM instances so the next get_by_id re-reads from DB
-        self.session.expire_all()
 
     async def delete(self, assembly_id: uuid.UUID) -> None:
         """Delete an assembly and all its components (via CASCADE)."""
@@ -121,7 +137,9 @@ class ComponentRepository:
 
     async def get_by_id(self, component_id: uuid.UUID) -> Component | None:
         """Get component by ID."""
-        return await self.session.get(Component, component_id)
+        stmt = select(Component).where(Component.id == component_id)
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
 
     async def list_for_assembly(
         self,
@@ -147,6 +165,7 @@ class ComponentRepository:
         """Insert a new component."""
         self.session.add(component)
         await self.session.flush()
+        await self.session.refresh(component)
         return component
 
     async def bulk_create(self, components: list[Component]) -> list[Component]:

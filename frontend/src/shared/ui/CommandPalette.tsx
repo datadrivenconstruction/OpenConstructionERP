@@ -26,12 +26,13 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { projectsApi, type Project } from '@/features/projects/api';
+import { boqApi, type BOQ } from '@/features/boq/api';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
 interface SearchResult {
   id: string;
-  type: 'page' | 'project' | 'recent';
+  type: 'page' | 'project' | 'boq' | 'recent';
   labelKey?: string;
   label?: string;
   description?: string;
@@ -77,7 +78,7 @@ interface RecentEntry {
   id: string;
   label: string;
   path: string;
-  type: 'page' | 'project';
+  type: 'page' | 'project' | 'boq';
 }
 
 function loadRecent(): RecentEntry[] {
@@ -116,6 +117,8 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [projects, setProjects] = useState<Project[]>([]);
   const [projectsLoaded, setProjectsLoaded] = useState(false);
+  const [boqs, setBoqs] = useState<(BOQ & { projectName?: string })[]>([]);
+  const [boqsLoaded, setBoqsLoaded] = useState(false);
 
   // Load projects once when palette opens
   useEffect(() => {
@@ -141,6 +144,35 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       cancelled = true;
     };
   }, [open, projectsLoaded]);
+
+  // Load BOQs for the first few projects when palette opens and projects are loaded
+  useEffect(() => {
+    if (!open || !projectsLoaded || boqsLoaded || projects.length === 0) return;
+
+    let cancelled = false;
+    const projectSlice = projects.slice(0, 5);
+    Promise.all(
+      projectSlice.map((p) =>
+        boqApi.list(p.id).then((list) =>
+          list.map((b) => ({ ...b, projectName: p.name })),
+        ).catch(() => [] as (BOQ & { projectName?: string })[]),
+      ),
+    ).then((results) => {
+      if (!cancelled) {
+        // Flatten and take top 5 most recent
+        const allBoqs = results
+          .flat()
+          .sort((a, b) => new Date(b.updated_at ?? b.created_at).getTime() - new Date(a.updated_at ?? a.created_at).getTime())
+          .slice(0, 5);
+        setBoqs(allBoqs);
+        setBoqsLoaded(true);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, projectsLoaded, boqsLoaded, projects]);
 
   // Reset state when opening
   useEffect(() => {
@@ -169,7 +201,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
             id: `recent-${r.id}`,
             type: 'recent' as const,
             label: r.label,
-            icon: r.type === 'project' ? FolderOpen : LayoutDashboard,
+            icon: r.type === 'project' ? FolderOpen : r.type === 'boq' ? Table2 : LayoutDashboard,
             path: r.path,
           })),
         });
@@ -180,6 +212,40 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
         title: t('command_palette.pages', { defaultValue: 'Pages' }),
         items: PAGE_RESULTS,
       });
+
+      // Show recent projects (top 5 from API)
+      if (projects.length > 0) {
+        groups.push({
+          title: t('command_palette.projects', { defaultValue: 'Projects' }),
+          items: projects.slice(0, 5).map(
+            (p): SearchResult => ({
+              id: `project-${p.id}`,
+              type: 'project',
+              label: p.name,
+              description: p.description,
+              icon: FolderOpen,
+              path: `/projects/${p.id}`,
+            }),
+          ),
+        });
+      }
+
+      // Show recent BOQs (top 5 from API)
+      if (boqs.length > 0) {
+        groups.push({
+          title: t('command_palette.boqs', { defaultValue: 'Bills of Quantities' }),
+          items: boqs.slice(0, 5).map(
+            (b): SearchResult => ({
+              id: `boq-${b.id}`,
+              type: 'boq',
+              label: b.name,
+              description: b.projectName,
+              icon: Table2,
+              path: `/boq/${b.id}`,
+            }),
+          ),
+        });
+      }
 
       return groups;
     }
@@ -223,8 +289,35 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       });
     }
 
+    // Filter BOQs
+    const matchingBoqs = boqs
+      .filter(
+        (b) =>
+          b.name.toLowerCase().includes(lowerQuery) ||
+          b.description?.toLowerCase().includes(lowerQuery) ||
+          b.projectName?.toLowerCase().includes(lowerQuery),
+      )
+      .slice(0, 5)
+      .map(
+        (b): SearchResult => ({
+          id: `boq-${b.id}`,
+          type: 'boq',
+          label: b.name,
+          description: b.projectName,
+          icon: Table2,
+          path: `/boq/${b.id}`,
+        }),
+      );
+
+    if (matchingBoqs.length > 0) {
+      groups.push({
+        title: t('command_palette.boqs', { defaultValue: 'Bills of Quantities' }),
+        items: matchingBoqs,
+      });
+    }
+
     return groups;
-  }, [query, projects, t]);
+  }, [query, projects, boqs, t]);
 
   // Flat list for keyboard navigation
   const flatResults = useMemo(() => results.flatMap((g) => g.items), [results]);
@@ -242,7 +335,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
         id: result.id.replace(/^recent-/, ''),
         label,
         path: result.path,
-        type: result.type === 'project' ? 'project' : 'page',
+        type: result.type === 'project' ? 'project' : result.type === 'boq' ? 'boq' : 'page',
       });
       navigate(result.path);
       onClose();
@@ -328,7 +421,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
               setActiveIndex(0);
             }}
             placeholder={t('command_palette.placeholder', {
-              defaultValue: 'Search pages, projects...',
+              defaultValue: 'Search pages, projects, BOQs...',
             })}
             className={clsx(
               'flex-1 h-12 bg-transparent text-sm text-content-primary',

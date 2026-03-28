@@ -393,11 +393,15 @@ class UserService:
                 detail="Current password is incorrect",
             )
 
+        # Eagerly read email before update_fields (which calls expire_all)
+        # to avoid MissingGreenlet on expired attributes in async context.
+        user_email = user.email
+
         await self.user_repo.update_fields(
             user_id,
             hashed_password=hash_password(data.new_password),
         )
-        logger.info("Password changed for user %s", user.email)
+        logger.info("Password changed for user %s", user_email)
 
     async def list_users(
         self,

@@ -16,11 +16,13 @@ import {
   FileBarChart,
   Package,
   Settings,
+  Info,
   TrendingUp,
   ChevronDown,
   Ruler,
   ScanLine,
   Sparkles,
+  Box,
   X,
   type LucideIcon,
 } from 'lucide-react';
@@ -69,6 +71,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.takeoff_overview', to: '/quantities', icon: Ruler },
       { labelKey: 'nav.pdf_takeoff', to: '/takeoff', icon: ScanLine },
       { labelKey: 'nav.ai_estimate', to: '/ai-estimate', icon: Sparkles },
+      { labelKey: 'nav.cad_takeoff', to: '/cad-takeoff', icon: Box },
     ],
   },
   {
@@ -127,6 +130,7 @@ const navGroups: NavGroup[] = [
 const bottomNav: NavItem[] = [
   { labelKey: 'modules.title', to: '/modules', icon: Package },
   { labelKey: 'nav.settings', to: '/settings', icon: Settings },
+  { labelKey: 'nav.about', to: '/about', icon: Info },
 ];
 
 // localStorage key for collapsed state
@@ -191,7 +195,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         {onClose && (
           <button
             onClick={onClose}
-            className="lg:hidden flex h-7 w-7 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+            className="lg:hidden flex h-7 w-7 min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
             aria-label={t('common.close', { defaultValue: 'Close' })}
           >
             <X size={16} />
@@ -269,13 +273,13 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         {/* DDC branding */}
         <div className="mt-3 pt-3 border-t border-border-light px-1">
           <a
-            href="https://datadrivenconstruction.io"
+            href="https://OpenConstructionERP.com"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-content-quaternary hover:text-content-secondary hover:bg-surface-secondary/50 transition-all"
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            <span className="text-2xs">datadrivenconstruction.io</span>
+            <span className="text-2xs">OpenConstructionERP.com</span>
           </a>
           <a
             href="https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR"

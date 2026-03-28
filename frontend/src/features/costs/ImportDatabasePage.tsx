@@ -193,6 +193,8 @@ function MiniFlag({ code }: { code: string }) {
 }
 
 function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState<string | null>(null);
   const [loaded, setLoaded] = useState<Set<string>>(() => new Set(getLoadedDatabases()));
   const [result, setResult] = useState<{
@@ -205,6 +207,20 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
   const [elapsed, setElapsed] = useState(0);
   const [activeDb, setActiveDb] = useState<string | null>(() => getActiveDatabase());
   const addToast = useToastStore((s) => s.addToast);
+
+  // Sync loaded state with actual backend data
+  const { data: regionStats } = useQuery({
+    queryKey: ['costs', 'regions', 'stats'],
+    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats'),
+    retry: false,
+  });
+
+  useEffect(() => {
+    if (regionStats) {
+      const actualRegions = new Set(regionStats.map((r) => r.region));
+      setLoaded(actualRegions);
+    }
+  }, [regionStats]);
 
   // Timer for elapsed time display
   useEffect(() => {
@@ -226,11 +242,11 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
       setActiveDb(dbId);
       addToast({
         type: 'success',
-        title: 'Active database changed',
-        message: `${CWICR_DATABASES.find((d) => d.id === dbId)?.name ?? dbId} is now the active database`,
+        title: t('costs.active_db_changed', { defaultValue: 'Active database changed' }),
+        message: `${CWICR_DATABASES.find((d) => d.id === dbId)?.name ?? dbId} ${t('costs.is_now_active', { defaultValue: 'is now the active database' })}`,
       });
     },
-    [addToast],
+    [addToast, t],
   );
 
   const handleLoad = useCallback(
@@ -254,25 +270,38 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
           setActiveDb(db.id);
         }
 
+        const status = data.status as string | undefined;
+        const imported = (data.imported as number) ?? 0;
+        const totalItems = (data.total_items as number) ?? imported;
+
         setResult({
           id: db.id,
-          imported: (data.imported as number) ?? 0,
+          imported,
           skipped: (data.skipped as number) ?? 0,
           file: (data.source_file as string) ?? '',
         });
-        // Log captured in result state
-        addToast({
-          type: 'success',
-          title: `${db.name} database loaded`,
-          message: `${(data.imported as number) ?? 0} cost items imported`,
-        });
 
-        // After import success, auto-index vectors
-        try {
-          await apiPost('/v1/costs/vector/index');
-        } catch {
-          /* non-critical — vector indexing is best-effort */
+        if (status === 'already_loaded') {
+          addToast({
+            type: 'info',
+            title: `${db.name} already loaded`,
+            message: (data.message as string) ?? `${totalItems.toLocaleString()} items available`,
+          });
+        } else {
+          addToast({
+            type: 'success',
+            title: t('costs.db_installed', { defaultValue: 'Database installed successfully' }),
+            message: `${imported.toLocaleString()} cost items imported`,
+          });
         }
+
+        // Invalidate all cost queries so LoadedDatabasesSection and other consumers refresh
+        queryClient.invalidateQueries({ queryKey: ['costs'] });
+
+        // Auto-index vectors in background — don't await (it takes 30-60s and blocks UI)
+        apiPost('/v1/costs/vector/index').catch((err) => {
+          console.error('Vector indexing failed (non-critical):', err);
+        });
       } catch (err: unknown) {
         const detail =
           err instanceof Error ? err.message : 'Failed to load database';
@@ -285,7 +314,7 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
         setLoading(null);
       }
     },
-    [addToast],
+    [addToast, t, queryClient],
   );
 
   return (
@@ -338,7 +367,7 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
                     {db.city} &middot; {db.lang} &middot; {db.currency}
                   </div>
                   <div className="flex items-center gap-1.5 mt-1">
-                    <span className="text-2xs text-content-quaternary">55,719 items</span>
+                    <span className="text-2xs text-content-quaternary">{t('costs.items_count', { defaultValue: '55,719 items' })}</span>
                     {isGithub && !isLoaded && (
                       <Badge variant="blue" size="sm" className="text-2xs px-1.5 py-0">
                         GitHub
@@ -374,7 +403,7 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
                     `}
                   >
                     <Star size={10} className={isActive ? 'fill-current' : ''} />
-                    {isActive ? 'Active' : 'Set as Active'}
+                    {isActive ? t('costs.active', { defaultValue: 'Active' }) : t('costs.set_active', { defaultValue: 'Set as Active' })}
                   </button>
                 </div>
               )}
@@ -389,10 +418,10 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
         // Simulate phased progress: 0-15s = reading file, 15-30s = parsing, 30+ = writing
         const phase = elapsed < 15 ? 0 : elapsed < 30 ? 1 : elapsed < 120 ? 2 : 3;
         const phaseLabels = [
-          'Reading Parquet file...',
-          'Extracting resources & cost breakdown...',
-          'Writing to local database...',
-          'Finalizing...',
+          t('costs.phase_reading', { defaultValue: 'Reading Parquet file...' }),
+          t('costs.phase_extracting', { defaultValue: 'Extracting resources & cost breakdown...' }),
+          t('costs.phase_writing', { defaultValue: 'Writing to local database...' }),
+          t('costs.phase_finalizing', { defaultValue: 'Finalizing...' }),
         ];
         // Smooth estimated progress (never reaches 100% until done)
         const progressPct = result
@@ -418,7 +447,7 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm font-semibold text-content-primary">
-                      {result ? 'Database installed successfully' : `Installing ${loadingDb?.name ?? 'database'}...`}
+                      {result ? t('costs.db_installed', { defaultValue: 'Database installed successfully' }) : t('costs.db_installing', { defaultValue: 'Installing {{name}}...', name: loadingDb?.name ?? 'database' })}
                     </h3>
                     {!result && (
                       <span className="text-xs text-oe-blue font-mono tabular-nums">
@@ -428,8 +457,8 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
                   </div>
                   <p className="text-xs text-content-tertiary mt-0.5">
                     {result
-                      ? 'Cost items are saved locally and available offline.'
-                      : 'Downloading and indexing cost items with full resource breakdown. This is a one-time setup.'}
+                      ? t('costs.db_saved_offline', { defaultValue: 'Cost items are saved locally and available offline.' })
+                      : t('costs.db_downloading', { defaultValue: 'Downloading and indexing cost items with full resource breakdown. This is a one-time setup.' })}
                   </p>
                 </div>
               </div>
@@ -438,7 +467,7 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
               <div className="mb-3">
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-xs font-medium text-content-secondary">
-                    {result ? 'Complete' : phaseLabels[phase]}
+                    {result ? t('costs.phase_complete', { defaultValue: 'Complete' }) : phaseLabels[phase]}
                   </span>
                   <span className="text-xs font-semibold text-oe-blue tabular-nums">
                     {Math.round(progressPct)}%
@@ -459,7 +488,12 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
               {/* Phase steps */}
               {!result && (
                 <div className="flex items-center gap-1 text-2xs">
-                  {['Read', 'Parse', 'Write', 'Done'].map((label, i) => (
+                  {[
+                    t('costs.step_read', { defaultValue: 'Read' }),
+                    t('costs.step_parse', { defaultValue: 'Parse' }),
+                    t('costs.step_write', { defaultValue: 'Write' }),
+                    t('costs.step_done', { defaultValue: 'Done' }),
+                  ].map((label, i) => (
                     <div key={label} className="flex items-center gap-1">
                       <div className={`h-1.5 w-1.5 rounded-full ${
                         i < phase ? 'bg-semantic-success' : i === phase ? 'bg-oe-blue animate-pulse' : 'bg-surface-tertiary'
@@ -480,19 +514,19 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
                     <div className="text-lg font-bold text-[#15803d] tabular-nums">
                       {result.imported.toLocaleString()}
                     </div>
-                    <div className="text-2xs text-[#15803d]/70">items installed</div>
+                    <div className="text-2xs text-[#15803d]/70">{t('costs.items_installed', { defaultValue: 'items installed' })}</div>
                   </div>
                   <div className="rounded-lg bg-surface-secondary px-3 py-2 text-center">
                     <div className="text-lg font-bold text-content-secondary tabular-nums">
                       {result.skipped.toLocaleString()}
                     </div>
-                    <div className="text-2xs text-content-tertiary">duplicates skipped</div>
+                    <div className="text-2xs text-content-tertiary">{t('costs.duplicates_skipped', { defaultValue: 'duplicates skipped' })}</div>
                   </div>
                   <div className="rounded-lg bg-surface-secondary px-3 py-2 text-center">
                     <div className="text-lg font-bold text-content-secondary tabular-nums">
                       {loadingDb?.currency ?? '—'}
                     </div>
-                    <div className="text-2xs text-content-tertiary">currency</div>
+                    <div className="text-2xs text-content-tertiary">{t('costs.currency', { defaultValue: 'currency' })}</div>
                   </div>
                 </div>
               )}
@@ -502,19 +536,19 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
             <div className="px-5 py-3 bg-surface-secondary/50 border-t border-border-light">
               <div className="flex items-center gap-4 text-2xs text-content-tertiary">
                 <span className="flex items-center gap-1">
-                  <Database size={10} /> 55,000+ cost items
+                  <Database size={10} /> {t('costs.cost_items_count', { defaultValue: '55,000+ cost items' })}
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-400" /> Labor rates
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-400" /> {t('costs.labor_rates', { defaultValue: 'Labor rates' })}
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-400" /> Equipment
+                  <span className="h-1.5 w-1.5 rounded-full bg-blue-400" /> {t('costs.equipment', { defaultValue: 'Equipment' })}
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-green-400" /> Materials
+                  <span className="h-1.5 w-1.5 rounded-full bg-green-400" /> {t('costs.materials', { defaultValue: 'Materials' })}
                 </span>
                 <span className="ml-auto font-medium text-content-secondary">
-                  {result ? 'Available offline' : 'One-time download'}
+                  {result ? t('costs.available_offline', { defaultValue: 'Available offline' }) : t('costs.one_time_download', { defaultValue: 'One-time download' })}
                 </span>
               </div>
             </div>
@@ -873,7 +907,8 @@ function VectorDatabaseSection() {
           title: `${db.name} vectors loaded`,
           message: `${indexed.toLocaleString()} vectors indexed in ${duration}s`,
         });
-      } catch {
+      } catch (err) {
+        console.error('GitHub vector load failed, falling back to local generation:', err);
         // GitHub vectors not available — generate locally for this region
         try {
           const token = useAuthStore.getState().accessToken;
@@ -1153,9 +1188,6 @@ export function ImportDatabasePage() {
   const [isDragging, setIsDragging] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
 
-  // Suppress unused-variable warnings for items injected by the outer context
-  void queryClient;
-
   const handleFile = useCallback(
     (file: File) => {
       const type = getFileType(file.name);
@@ -1228,6 +1260,7 @@ export function ImportDatabasePage() {
     },
     onSuccess: (data) => {
       setResult(data);
+      queryClient.invalidateQueries({ queryKey: ['costs'] });
       if (data.imported > 0) {
         addToast({
           type: 'success',

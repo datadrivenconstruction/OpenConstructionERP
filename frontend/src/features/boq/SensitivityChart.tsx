@@ -6,7 +6,7 @@ import { boqApi, type SensitivityItem } from './api';
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
-function createFormatter(locale = 'de-DE') {
+function createSCFormatter(locale: string) {
   return new Intl.NumberFormat(locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -26,9 +26,9 @@ function fmtCompact(n: number, fmt: Intl.NumberFormat): string {
 
 /* ── Component ───────────────────────────────────────────────────────── */
 
-export function SensitivityChart({ boqId }: { boqId: string }) {
+export function SensitivityChart({ boqId, locale = 'de-DE' }: { boqId: string; locale?: string }) {
   const { t } = useTranslation();
-  const fmt = useMemo(() => createFormatter(), []);
+  const fmt = useMemo(() => createSCFormatter(locale), [locale]);
   const [collapsed, setCollapsed] = useState(false);
 
   const { data, isLoading } = useQuery({

@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { boqApi, type Markup, type CreateMarkupData, type UpdateMarkupData } from './api';
+import { fmtWithCurrency } from './boqHelpers';
 import { useToastStore } from '@/stores/useToastStore';
 import clsx from 'clsx';
 import {
@@ -47,6 +48,8 @@ interface MarkupPanelProps {
   markups: Markup[];
   directCost: number;
   currencySymbol: string;
+  currencyCode: string;
+  locale: string;
   fmt: Intl.NumberFormat;
 }
 
@@ -56,7 +59,7 @@ interface EditState {
   value: string;
 }
 
-export function MarkupPanel({ boqId, markups, directCost, currencySymbol, fmt }: MarkupPanelProps) {
+export function MarkupPanel({ boqId, markups, directCost, currencySymbol, currencyCode, locale, fmt }: MarkupPanelProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -113,12 +116,29 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, fmt }:
 
   const handleToggleActive = useCallback(
     (markup: Markup) => {
-      updateMutation.mutate({
-        markupId: markup.id,
-        data: { is_active: !markup.is_active },
-      });
+      // Calculate impact for visual feedback
+      const pct = markup.percentage ?? 0;
+      const impact = directCost * (pct / 100);
+      const sign = markup.is_active ? '-' : '+';
+      updateMutation.mutate(
+        { markupId: markup.id, data: { is_active: !markup.is_active } },
+        {
+          onSuccess: () => {
+            if (impact > 0) {
+              const formatted = fmt.format(impact);
+              const msg = `${sign}${currencySymbol}${formatted} (${markup.name})`;
+              // Brief inline feedback via data attribute (consumed by CSS animation)
+              const el = document.querySelector(`[data-markup-id="${markup.id}"]`);
+              if (el) {
+                el.setAttribute('data-delta', msg);
+                setTimeout(() => el.removeAttribute('data-delta'), 3000);
+              }
+            }
+          },
+        },
+      );
     },
-    [updateMutation],
+    [updateMutation, directCost, fmt, currencySymbol],
   );
 
   const handleStartEdit = useCallback((markupId: string, field: 'name' | 'percentage' | 'category', value: string) => {
@@ -276,6 +296,7 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, fmt }:
                     return (
                       <tr
                         key={markup.id}
+                        data-markup-id={markup.id}
                         className={clsx(
                           'border-b border-border-light last:border-b-0 transition-colors',
                           !markup.is_active && 'opacity-50',
@@ -366,7 +387,7 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, fmt }:
 
                         {/* Amount */}
                         <td className="px-3 py-2 text-right tabular-nums text-content-secondary">
-                          {currencySymbol}{fmt.format(amount)}
+                          {fmtWithCurrency(amount, locale, currencyCode)}
                         </td>
 
                         {/* Active toggle */}
@@ -416,7 +437,7 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, fmt }:
             <div className="border-t border-border-light px-5 py-3 bg-surface-secondary/20">
               <div className="flex items-center justify-between gap-4 text-sm">
                 <span className="text-content-tertiary whitespace-nowrap">{t('boq.direct_cost', { defaultValue: 'Direct Cost' })}</span>
-                <span className="tabular-nums text-content-secondary whitespace-nowrap shrink-0">{currencySymbol}{fmt.format(directCost)}</span>
+                <span className="tabular-nums text-content-secondary whitespace-nowrap shrink-0">{fmtWithCurrency(directCost, locale, currencyCode)}</span>
               </div>
               {calculated.map((c) => {
                 const m = markups.find((mk) => mk.id === c.id);
@@ -424,13 +445,13 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, fmt }:
                 return (
                   <div key={c.id} className="flex items-center justify-between gap-4 text-sm mt-1">
                     <span className="text-content-tertiary min-w-0 truncate">+ {m.name} ({fmt.format(m.percentage)}%)</span>
-                    <span className="tabular-nums text-content-secondary whitespace-nowrap shrink-0">{currencySymbol}{fmt.format(c.amount)}</span>
+                    <span className="tabular-nums text-content-secondary whitespace-nowrap shrink-0">{fmtWithCurrency(c.amount, locale, currencyCode)}</span>
                   </div>
                 );
               })}
               <div className="flex items-center justify-between gap-4 text-sm font-semibold mt-2 pt-2 border-t border-border-light">
                 <span className="text-content-primary whitespace-nowrap">{t('boq.net_total', { defaultValue: 'Net Total' })}</span>
-                <span className="tabular-nums text-content-primary whitespace-nowrap shrink-0">{currencySymbol}{fmt.format(netTotal)}</span>
+                <span className="tabular-nums text-content-primary whitespace-nowrap shrink-0">{fmtWithCurrency(netTotal, locale, currencyCode)}</span>
               </div>
             </div>
           )}

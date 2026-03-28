@@ -18,15 +18,7 @@ export const manifest: ModuleManifest = {
       component: lazy(() => import('./CollaborationModule')),
     },
   ],
-  navItems: [
-    {
-      labelKey: 'nav.collaboration',
-      to: '/collaboration',
-      icon: Users,
-      group: 'tools',
-      advancedOnly: true,
-    },
-  ],
+  navItems: [],
   searchEntries: [
     {
       label: 'Real-time Collaboration',

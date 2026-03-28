@@ -519,6 +519,12 @@ export const boqApi = {
     apiPatch<Position>(`/v1/boq/positions/${posId}`, data),
   deletePosition: (posId: string) => apiDelete(`/v1/boq/positions/${posId}`),
 
+  /* Position reorder (drag-and-drop) */
+  reorderPositions: (boqId: string, positionIds: string[]) =>
+    apiPost<{ ok: boolean }>(`/v1/boq/boqs/${boqId}/positions/reorder`, {
+      position_ids: positionIds,
+    }),
+
   /* Markups */
   getMarkups: (boqId: string) => apiGet<MarkupsResponse>(`/v1/boq/boqs/${boqId}/markups`),
   addMarkup: (boqId: string, data: CreateMarkupData) =>
@@ -676,6 +682,7 @@ export const boqApi = {
     base_year?: number;
     target_year?: number;
     region?: string;
+    locale?: string;
   }) => apiPost<EscalateRateResponse>('/v1/boq/boqs/escalate-rate', data),
 };
 

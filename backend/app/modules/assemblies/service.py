@@ -285,6 +285,11 @@ class AssemblyService:
         # Recalculate assembly total
         await self._recalculate_total(assembly_id)
 
+        # Re-fetch component to avoid MissingGreenlet after expire_all
+        refreshed = await self.component_repo.get_by_id(component.id)
+        if refreshed is not None:
+            component = refreshed
+
         await _safe_publish(
             "assemblies.component.created",
             {
