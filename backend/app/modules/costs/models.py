@@ -4,7 +4,7 @@ Tables:
     oe_costs_item — cost database entries (CWICR, RSMeans, BKI, custom)
 """
 
-from sqlalchemy import JSON, Boolean, String, Text
+from sqlalchemy import JSON, Boolean, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import Base
@@ -14,9 +14,12 @@ class CostItem(Base):
     """A single cost database entry (rate, unit price, assembly component)."""
 
     __tablename__ = "oe_costs_item"
+    __table_args__ = (
+        UniqueConstraint("code", "region", name="uq_costs_code_region"),
+    )
 
     code: Mapped[str] = mapped_column(
-        String(100), unique=True, index=True, nullable=False
+        String(100), index=True, nullable=False
     )
     description: Mapped[str] = mapped_column(Text, nullable=False)
     descriptions: Mapped[dict] = mapped_column(  # type: ignore[assignment]

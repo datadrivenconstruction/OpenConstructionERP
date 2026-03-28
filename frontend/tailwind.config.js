@@ -130,6 +130,9 @@ export default {
 
         /* Drawer — slide in from right */
         'slide-in-right': 'slideInRight 250ms cubic-bezier(0.22, 1, 0.36, 1) both',
+
+        /* Quantities — pulsing border for uninstalled converters */
+        'pulse-border': 'pulseBorder 2s ease-in-out infinite',
       },
       keyframes: {
         slideInRight: {
@@ -255,6 +258,12 @@ export default {
         toastIn: {
           from: { opacity: '0', transform: 'translateX(100%)' },
           to: { opacity: '1', transform: 'translateX(0)' },
+        },
+
+        /* Quantities — pulsing border ring for uninstalled converters */
+        pulseBorder: {
+          '0%, 100%': { boxShadow: '0 0 0 0 rgba(0, 113, 227, 0.15)' },
+          '50%': { boxShadow: '0 0 0 4px rgba(0, 113, 227, 0.08)' },
         },
       },
     },

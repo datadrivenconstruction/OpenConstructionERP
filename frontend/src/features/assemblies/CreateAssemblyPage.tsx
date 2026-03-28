@@ -9,25 +9,25 @@ import { assembliesApi, type CreateAssemblyData } from './api';
 /* -- Constants ------------------------------------------------------------ */
 
 const CATEGORIES = [
-  { value: 'concrete', label: 'Concrete' },
-  { value: 'masonry', label: 'Masonry' },
-  { value: 'steel', label: 'Steel' },
-  { value: 'mep', label: 'MEP' },
-  { value: 'earthwork', label: 'Earthwork' },
-  { value: 'general', label: 'General' },
+  { value: 'concrete', key: 'assemblies.cat_concrete', defaultLabel: 'Concrete' },
+  { value: 'masonry', key: 'assemblies.cat_masonry', defaultLabel: 'Masonry' },
+  { value: 'steel', key: 'assemblies.cat_steel', defaultLabel: 'Steel' },
+  { value: 'mep', key: 'assemblies.cat_mep', defaultLabel: 'MEP' },
+  { value: 'earthwork', key: 'assemblies.cat_earthwork', defaultLabel: 'Earthwork' },
+  { value: 'general', key: 'assemblies.cat_general', defaultLabel: 'General' },
 ];
 
 const UNITS = [
-  { value: 'm', label: 'm -- Meter' },
-  { value: 'm2', label: 'm2 -- Square meter' },
-  { value: 'm3', label: 'm3 -- Cubic meter' },
-  { value: 'kg', label: 'kg -- Kilogram' },
-  { value: 't', label: 't -- Tonne' },
-  { value: 'pcs', label: 'pcs -- Piece' },
-  { value: 'lsum', label: 'lsum -- Lump sum' },
-  { value: 'h', label: 'h -- Hour' },
-  { value: 'set', label: 'set -- Set' },
-  { value: 'lm', label: 'lm -- Linear meter' },
+  { value: 'm', key: 'units.meter', defaultLabel: 'm -- Meter' },
+  { value: 'm2', key: 'units.square_meter', defaultLabel: 'm\u00B2 -- Square meter' },
+  { value: 'm3', key: 'units.cubic_meter', defaultLabel: 'm\u00B3 -- Cubic meter' },
+  { value: 'kg', key: 'units.kilogram', defaultLabel: 'kg -- Kilogram' },
+  { value: 't', key: 'units.tonne', defaultLabel: 't -- Tonne' },
+  { value: 'pcs', key: 'units.piece', defaultLabel: 'pcs -- Piece' },
+  { value: 'lsum', key: 'units.lump_sum', defaultLabel: 'lsum -- Lump sum' },
+  { value: 'h', key: 'units.hour', defaultLabel: 'h -- Hour' },
+  { value: 'set', key: 'units.set', defaultLabel: 'set -- Set' },
+  { value: 'lm', key: 'units.linear_meter', defaultLabel: 'lm -- Linear meter' },
 ];
 
 const CURRENCIES = [
@@ -52,11 +52,11 @@ const CURRENCIES = [
 ];
 
 const STANDARDS = [
-  { value: 'din276', label: 'DIN 276' },
-  { value: 'nrm', label: 'NRM' },
-  { value: 'masterformat', label: 'MasterFormat' },
-  { value: 'uniformat', label: 'UniFormat' },
-  { value: 'uniclass', label: 'Uniclass' },
+  { value: 'din276', key: 'assemblies.std_din276', defaultLabel: 'DIN 276' },
+  { value: 'nrm', key: 'assemblies.std_nrm', defaultLabel: 'NRM' },
+  { value: 'masterformat', key: 'assemblies.std_masterformat', defaultLabel: 'MasterFormat' },
+  { value: 'uniformat', key: 'assemblies.std_uniformat', defaultLabel: 'UniFormat' },
+  { value: 'uniclass', key: 'assemblies.std_uniclass', defaultLabel: 'Uniclass' },
 ];
 
 /* -- Component ------------------------------------------------------------ */
@@ -130,19 +130,19 @@ export function CreateAssemblyPage() {
           {/* Code & Name */}
           <div className="grid grid-cols-3 gap-4">
             <Input
-              label="Code"
+              label={t('assemblies.code', { defaultValue: 'Code' })}
               value={form.code}
               onChange={(e) => set('code', e.target.value)}
-              placeholder="e.g. ASM-001"
+              placeholder={t('assemblies.code_placeholder', { defaultValue: 'e.g. ASM-001' })}
               required
               autoFocus
             />
             <div className="col-span-2">
               <Input
-                label="Name"
+                label={t('assemblies.name', { defaultValue: 'Name' })}
                 value={form.name}
                 onChange={(e) => set('name', e.target.value)}
-                placeholder="e.g. Reinforced Concrete Wall C30/37"
+                placeholder={t('assemblies.name_placeholder', { defaultValue: 'e.g. Reinforced Concrete Wall C30/37' })}
                 required
               />
             </div>
@@ -151,7 +151,7 @@ export function CreateAssemblyPage() {
           {/* Unit & Category */}
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-content-primary">Unit</label>
+              <label className="text-sm font-medium text-content-primary">{t('assemblies.unit', { defaultValue: 'Unit' })}</label>
               <select
                 value={form.unit}
                 onChange={(e) => set('unit', e.target.value)}
@@ -159,13 +159,13 @@ export function CreateAssemblyPage() {
               >
                 {UNITS.map((u) => (
                   <option key={u.value} value={u.value}>
-                    {u.label}
+                    {t(u.key, { defaultValue: u.defaultLabel })}
                   </option>
                 ))}
               </select>
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-content-primary">Category</label>
+              <label className="text-sm font-medium text-content-primary">{t('assemblies.category', { defaultValue: 'Category' })}</label>
               <select
                 value={form.category}
                 onChange={(e) => set('category', e.target.value)}
@@ -173,7 +173,7 @@ export function CreateAssemblyPage() {
               >
                 {CATEGORIES.map((c) => (
                   <option key={c.value} value={c.value}>
-                    {c.label}
+                    {t(c.key, { defaultValue: c.defaultLabel })}
                   </option>
                 ))}
               </select>
@@ -184,26 +184,26 @@ export function CreateAssemblyPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-content-primary">
-                Classification Standard
+                {t('assemblies.classification_standard', { defaultValue: 'Classification Standard' })}
               </label>
               <select
                 value={form.classificationStandard}
                 onChange={(e) => set('classificationStandard', e.target.value)}
                 className={selectClass}
               >
-                <option value="">-- None --</option>
+                <option value="">{t('assemblies.none', { defaultValue: '-- None --' })}</option>
                 {STANDARDS.map((s) => (
                   <option key={s.value} value={s.value}>
-                    {s.label}
+                    {t(s.key, { defaultValue: s.defaultLabel })}
                   </option>
                 ))}
               </select>
             </div>
             <Input
-              label="Classification Code"
+              label={t('assemblies.classification_code', { defaultValue: 'Classification Code' })}
               value={form.classificationCode}
               onChange={(e) => set('classificationCode', e.target.value)}
-              placeholder="e.g. 330"
+              placeholder={t('assemblies.classification_code_placeholder', { defaultValue: 'e.g. 330' })}
               disabled={!form.classificationStandard}
             />
           </div>
@@ -211,7 +211,7 @@ export function CreateAssemblyPage() {
           {/* Currency & Bid Factor */}
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-content-primary">Currency</label>
+              <label className="text-sm font-medium text-content-primary">{t('assemblies.currency', { defaultValue: 'Currency' })}</label>
               <select
                 value={form.currency}
                 onChange={(e) => set('currency', e.target.value)}
@@ -225,19 +225,19 @@ export function CreateAssemblyPage() {
               </select>
             </div>
             <Input
-              label="Bid Factor"
+              label={t('assemblies.bid_factor', { defaultValue: 'Bid Factor' })}
               type="number"
               value={form.bid_factor}
               onChange={(e) => set('bid_factor', e.target.value)}
               placeholder="1.00"
-              hint="Multiplier applied to the total rate (1.00 = no markup)"
+              hint={t('assemblies.bid_factor_hint', { defaultValue: 'Multiplier applied to the total rate (1.00 = no markup)' })}
             />
           </div>
 
           {/* Error */}
           {mutation.error && (
             <div className="rounded-lg bg-semantic-error-bg px-3 py-2 text-sm text-semantic-error">
-              {(mutation.error as Error).message || 'Failed to create assembly'}
+              {(mutation.error as Error).message || t('assemblies.create_failed', { defaultValue: 'Failed to create assembly' })}
             </div>
           )}
 

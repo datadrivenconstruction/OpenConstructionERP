@@ -88,7 +88,8 @@ export function AssemblyEditorPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-content mx-auto py-8 text-center text-content-secondary animate-fade-in">
+      <div className="max-w-content mx-auto py-8 flex flex-col items-center gap-3 text-content-secondary animate-fade-in">
+        <Loader2 size={24} className="animate-spin text-oe-blue" />
         {t('assemblies.loading', { defaultValue: 'Loading assembly...' })}
       </div>
     );
@@ -251,7 +252,12 @@ export function AssemblyEditorPage() {
                 )}
                 <tr className="border-t-2 border-border bg-surface-tertiary font-semibold">
                   <td colSpan={5} className="px-4 py-3 text-right text-content-primary">
-                    {t('assemblies.total_rate', { defaultValue: 'Total Rate' })}
+                    {assembly.bid_factor !== 1.0
+                      ? t('assemblies.total_rate_adjusted', {
+                          defaultValue: 'Total Rate (\u00d7{{factor}} bid factor)',
+                          factor: assembly.bid_factor,
+                        })
+                      : t('assemblies.total_rate', { defaultValue: 'Total Rate' })}
                   </td>
                   <td className="px-4 py-3 text-right text-content-primary text-base tabular-nums">
                     {fmt(adjustedTotal)}
@@ -272,6 +278,7 @@ export function AssemblyEditorPage() {
         <ApplyToBOQModal
           assemblyId={assemblyId!}
           assemblyName={assembly.name}
+          regionalFactors={assembly.regional_factors}
           onClose={() => setApplyModalOpen(false)}
         />
       )}
@@ -556,7 +563,11 @@ function ComponentRow({
       {/* Delete */}
       <td className="px-2 py-2.5">
         <button
-          onClick={onDelete}
+          onClick={() => {
+            if (window.confirm(t('assemblies.confirm_delete_component', { defaultValue: 'Remove this component from the assembly?' }))) {
+              onDelete();
+            }
+          }}
           className="opacity-0 group-hover:opacity-100 flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-all"
         >
           <Trash2 size={14} />
@@ -619,16 +630,34 @@ function EditableCell({
 function ApplyToBOQModal({
   assemblyId,
   assemblyName,
+  regionalFactors,
   onClose,
 }: {
   assemblyId: string;
   assemblyName: string;
+  regionalFactors?: Record<string, string>;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
+  const [projectId, setProjectId] = useState('');
   const [boqId, setBoqId] = useState('');
   const [quantity, setQuantity] = useState('1');
+  const [region, setRegion] = useState('');
+
+  const { data: projects } = useQuery({
+    queryKey: ['projects'],
+    queryFn: () => apiGet<Array<{ id: string; name: string }>>('/v1/projects/'),
+    retry: false,
+  });
+
+  const { data: boqs } = useQuery({
+    queryKey: ['boqs', projectId],
+    queryFn: () =>
+      apiGet<Array<{ id: string; name: string }>>(`/v1/boq/boqs/?project_id=${projectId}`),
+    enabled: !!projectId,
+    retry: false,
+  });
 
   const applyMutation = useMutation({
     mutationFn: () =>
@@ -644,9 +673,15 @@ function ApplyToBOQModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!boqId.trim()) return;
+    if (!boqId) return;
     applyMutation.mutate();
   };
+
+  const hasRegionalFactors =
+    regionalFactors && Object.keys(regionalFactors).length > 0;
+
+  const selectClass =
+    'w-full h-10 px-3 rounded-lg border border-border-light bg-surface-primary text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue-light/50 focus:border-oe-blue-light';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -675,14 +710,80 @@ function ApplyToBOQModal({
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              label={t('assemblies.boq_id_label', { defaultValue: 'BOQ ID' })}
-              value={boqId}
-              onChange={(e) => setBoqId(e.target.value)}
-              placeholder={t('assemblies.boq_id_placeholder', { defaultValue: 'Enter the BOQ identifier...' })}
-              required
-              autoFocus
-            />
+            {/* Project selector */}
+            <div>
+              <label className="block text-sm font-medium text-content-secondary mb-1.5">
+                {t('projects.project', { defaultValue: 'Project' })}
+              </label>
+              <select
+                value={projectId}
+                onChange={(e) => {
+                  setProjectId(e.target.value);
+                  setBoqId('');
+                }}
+                className={selectClass}
+                autoFocus
+              >
+                <option value="">
+                  {t('projects.select_project', { defaultValue: 'Select project...' })}
+                </option>
+                {projects?.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* BOQ selector */}
+            <div>
+              <label className="block text-sm font-medium text-content-secondary mb-1.5">
+                {t('boq.boq', { defaultValue: 'BOQ' })}
+              </label>
+              <select
+                value={boqId}
+                onChange={(e) => setBoqId(e.target.value)}
+                className={selectClass}
+                disabled={!projectId}
+              >
+                <option value="">
+                  {t('boq.select_boq', { defaultValue: 'Select BOQ...' })}
+                </option>
+                {boqs?.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name}
+                  </option>
+                ))}
+              </select>
+              {projectId && boqs && boqs.length === 0 && (
+                <p className="mt-1 text-xs text-content-tertiary">
+                  {t('boq.no_boqs_for_project', { defaultValue: 'No BOQs found for this project' })}
+                </p>
+              )}
+            </div>
+
+            {/* Regional factor selector */}
+            {hasRegionalFactors && (
+              <div>
+                <label className="block text-sm font-medium text-content-secondary mb-1.5">
+                  {t('assemblies.select_region', { defaultValue: 'Region (applies regional factor)' })}
+                </label>
+                <select
+                  value={region}
+                  onChange={(e) => setRegion(e.target.value)}
+                  className={selectClass}
+                >
+                  <option value="">
+                    {t('assemblies.no_regional_factor', { defaultValue: 'No regional factor' })}
+                  </option>
+                  {Object.entries(regionalFactors!).map(([r, factor]) => (
+                    <option key={r} value={r}>
+                      {r} (&times;{factor})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <Input
               label={t('boq.quantity', { defaultValue: 'Quantity' })}
@@ -707,6 +808,7 @@ function ApplyToBOQModal({
                 variant="primary"
                 type="submit"
                 loading={applyMutation.isPending}
+                disabled={!boqId}
                 icon={<Send size={15} />}
               >
                 {t('common.apply', { defaultValue: 'Apply' })}

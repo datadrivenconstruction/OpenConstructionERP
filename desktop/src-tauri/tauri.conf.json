@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/nicegui/nicegui/main/nicegui/templates/tauri-schema.json",
-  "productName": "OpenEstimate",
+  "productName": "OpenEstimator ERP",
   "version": "0.1.0",
   "identifier": "io.openestimator.desktop",
   "build": {
@@ -12,9 +12,9 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "OpenEstimate — Construction Cost Estimation",
-        "width": 1400,
-        "height": 900,
+        "title": "OpenEstimator ERP — Construction Cost Estimation",
+        "width": 1280,
+        "height": 800,
         "minWidth": 1024,
         "minHeight": 600,
         "resizable": true,
@@ -42,7 +42,7 @@
       "icons/icon.ico"
     ],
     "externalBin": [
-      "binaries/openestimate-server"
+      "binaries/openestimate-server/openestimate-server"
     ],
     "windows": {
       "nsis": {
@@ -69,7 +69,7 @@
       "pubkey": ""
     },
     "shell": {
-      "sidecar": true
+      "open": true
     }
   }
 }

@@ -224,9 +224,12 @@ def _make_header_footer(
         # Left side: brand
         canvas.setFont("Helvetica", 7)
         canvas.setFillColor(colors.HexColor("#999999"))
-        canvas.drawString(MARGIN_LEFT, 10 * mm, f"OpenEstimator.io  |  Generated: {generated_date}")
+        canvas.drawString(MARGIN_LEFT, 10 * mm, f"OpenConstructionERP  |  Generated: {generated_date}")
         # Right side: page number
-        page_text = f"Page {doc.page} of {doc.page_count}"
+        if getattr(doc, "page_count", 0) > 0:
+            page_text = f"Page {doc.page} of {doc.page_count}"
+        else:
+            page_text = f"Page {doc.page}"
         canvas.drawRightString(PAGE_WIDTH - MARGIN_RIGHT, 10 * mm, page_text)
         canvas.restoreState()
 
@@ -267,7 +270,7 @@ def _build_cover_page(
     elements.append(Spacer(1, 30 * mm))
 
     # Brand
-    elements.append(Paragraph("OpenEstimator.io", styles["brand"]))
+    elements.append(Paragraph("OpenConstructionERP", styles["brand"]))
     elements.append(Spacer(1, 10 * mm))
 
     # Decorative line
@@ -752,7 +755,7 @@ def generate_boq_pdf(
         topMargin=MARGIN_TOP,
         bottomMargin=MARGIN_BOTTOM,
         title=f"Cost Estimate - {boq_data.name}",
-        author="OpenEstimator.io",
+        author="OpenConstructionERP",
     )
     doc.addPageTemplates([cover_template, table_template])
 
@@ -785,7 +788,7 @@ def generate_boq_pdf(
         topMargin=MARGIN_TOP,
         bottomMargin=MARGIN_BOTTOM,
         title=f"Cost Estimate - {boq_data.name}",
-        author="OpenEstimator.io",
+        author="OpenConstructionERP",
     )
     doc2.page_count = total_pages
     doc2.addPageTemplates([cover_template, table_template])
@@ -798,6 +801,234 @@ def generate_boq_pdf(
     flowables2.extend(_build_boq_table(boq_data, currency, styles))
 
     doc2.build(flowables2)
+
+    pdf_bytes = buffer.getvalue()
+    buffer.close()
+    return pdf_bytes
+
+
+def count_boq_positions(boq_data: Any) -> int:
+    """Count the total number of line-item positions in a BOQWithSections.
+
+    Counts positions inside sections plus ungrouped positions.
+    Section headers themselves are not counted.
+
+    Args:
+        boq_data: BOQWithSections schema instance.
+
+    Returns:
+        Total number of line-item positions.
+    """
+    total = 0
+    for section in boq_data.sections:
+        total += len(section.positions)
+    total += len(boq_data.positions)
+    return total
+
+
+# ── Large BOQ threshold ──────────────────────────────────────────────────────
+
+LARGE_BOQ_THRESHOLD = 500
+
+
+def generate_boq_pdf_simple(
+    boq_data: Any,
+    project_name: str,
+    currency: str = "EUR",
+    prepared_by: str = "",
+) -> bytes:
+    """Generate a simplified PDF for large BOQs (> 500 positions).
+
+    Uses a single-pass build (no two-pass page counting) and a compact
+    table layout to reduce memory usage and generation time on Windows.
+
+    The simplified report includes:
+    - Cover page with summary
+    - Section-level summary table (no individual positions)
+    - Cost summary with markups
+
+    Args:
+        boq_data: BOQWithSections schema instance.
+        project_name: Name of the parent project.
+        currency: Currency code (e.g. "EUR").
+        prepared_by: Full name of the person who prepared the estimate.
+
+    Returns:
+        PDF file contents as bytes.
+    """
+    buffer = io.BytesIO()
+    styles = _build_styles()
+    generated_date = datetime.now(tz=UTC).strftime("%d.%m.%Y")
+
+    header_func, footer_func = _make_header_footer(project_name, boq_data.name, generated_date)
+
+    cover_frame = Frame(
+        MARGIN_LEFT,
+        MARGIN_BOTTOM,
+        USABLE_WIDTH,
+        PAGE_HEIGHT - MARGIN_TOP - MARGIN_BOTTOM,
+        id="cover",
+    )
+    table_frame = Frame(
+        MARGIN_LEFT,
+        MARGIN_BOTTOM + 5 * mm,
+        USABLE_WIDTH,
+        PAGE_HEIGHT - MARGIN_TOP - MARGIN_BOTTOM - 12 * mm,
+        id="table",
+    )
+
+    def _table_page_handler(canvas: Any, doc: Any) -> None:
+        header_func(canvas, doc)
+        footer_func(canvas, doc)
+
+    cover_template = PageTemplate(id="cover", frames=[cover_frame])
+    table_template = PageTemplate(
+        id="table",
+        frames=[table_frame],
+        onPage=_table_page_handler,
+    )
+
+    doc = _NumberedDocTemplate(
+        buffer,
+        pagesize=A4,
+        leftMargin=MARGIN_LEFT,
+        rightMargin=MARGIN_RIGHT,
+        topMargin=MARGIN_TOP,
+        bottomMargin=MARGIN_BOTTOM,
+        title=f"Cost Estimate - {boq_data.name} (Summary)",
+        author="OpenConstructionERP",
+    )
+    doc.addPageTemplates([cover_template, table_template])
+
+    flowables: list[Any] = []
+
+    # Cover page
+    flowables.extend(_build_cover_page(boq_data, project_name, currency, prepared_by, styles))
+
+    # Switch to table template
+    flowables.append(NextPageTemplate("table"))
+    flowables.append(PageBreak())
+
+    # Section-level summary table instead of full position listing
+    total_positions = count_boq_positions(boq_data)
+    flowables.append(
+        Paragraph(
+            f"<b>Summary Report</b> &mdash; {total_positions} positions "
+            f"(full detail omitted for performance)",
+            styles["section_header"],
+        )
+    )
+    flowables.append(Spacer(1, 4 * mm))
+
+    # Build a compact section summary table
+    header_row = [
+        Paragraph("<b>Section</b>", styles["section_header"]),
+        Paragraph("<b>Description</b>", styles["section_header"]),
+        Paragraph("<b>Items</b>", styles["cell_bold_right"]),
+        Paragraph("<b>Subtotal</b>", styles["cell_bold_right"]),
+    ]
+    summary_col_widths = [35 * mm, USABLE_WIDTH - 35 * mm - 25 * mm - 35 * mm, 25 * mm, 35 * mm]
+    table_data: list[list[Any]] = [header_row]
+
+    for section in boq_data.sections:
+        table_data.append([
+            Paragraph(section.ordinal, styles["cell"]),
+            Paragraph(section.description, styles["cell"]),
+            Paragraph(str(len(section.positions)), styles["cell_right"]),
+            Paragraph(_fmt(section.subtotal), styles["cell_right"]),
+        ])
+
+    if boq_data.positions:
+        ungrouped_total = sum(p.total for p in boq_data.positions)
+        table_data.append([
+            Paragraph("", styles["cell"]),
+            Paragraph("Other Positions", styles["cell"]),
+            Paragraph(str(len(boq_data.positions)), styles["cell_right"]),
+            Paragraph(_fmt(ungrouped_total), styles["cell_right"]),
+        ])
+
+    summary_table = Table(table_data, colWidths=summary_col_widths, repeatRows=1)
+    summary_style_commands: list[Any] = [
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1a1a2e")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTSIZE", (0, 0), (-1, 0), 9),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("TOPPADDING", (0, 0), (-1, -1), 2 * mm),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 2 * mm),
+        ("LEFTPADDING", (0, 0), (-1, -1), 2 * mm),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 2 * mm),
+        ("LINEBELOW", (0, 0), (-1, 0), 1, colors.HexColor("#1a1a2e")),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f8f8f8")]),
+    ]
+    summary_table.setStyle(TableStyle(summary_style_commands))
+    flowables.append(summary_table)
+    flowables.append(Spacer(1, 6 * mm))
+
+    # Direct cost, markups, net total, VAT, gross total
+    flowables.append(Paragraph("<b>Cost Summary</b>", styles["section_header"]))
+    flowables.append(Spacer(1, 3 * mm))
+
+    cost_rows: list[list[Any]] = []
+    cost_rows.append([
+        Paragraph("<b>Direct Cost:</b>", styles["cell_bold_right"]),
+        Paragraph(f"<b>{_fmt(boq_data.direct_cost)} {currency}</b>", styles["cell_bold_right"]),
+    ])
+
+    for markup in boq_data.markups:
+        if not markup.is_active:
+            continue
+        label = markup.name
+        if markup.markup_type == "percentage":
+            label = f"{markup.name} ({_fmt(markup.percentage, 1)}%)"
+        cost_rows.append([
+            Paragraph(label, styles["cell_right"]),
+            Paragraph(f"{_fmt(markup.amount)} {currency}", styles["cell_right"]),
+        ])
+
+    cost_rows.append([
+        Paragraph("<b>Net Total:</b>", styles["cell_bold_right"]),
+        Paragraph(f"<b>{_fmt(boq_data.net_total)} {currency}</b>", styles["cell_bold_right"]),
+    ])
+
+    vat_rate = 0.0
+    for m in boq_data.markups:
+        if m.category == "tax" and m.is_active:
+            vat_rate = m.percentage
+            break
+
+    vat_amount = boq_data.net_total * vat_rate / 100.0 if vat_rate > 0 else 0.0
+    gross_total = boq_data.net_total + vat_amount
+
+    cost_rows.append([
+        Paragraph(f"VAT {_fmt(vat_rate, 0)}%:", styles["cell_right"]),
+        Paragraph(f"{_fmt(vat_amount)} {currency}", styles["cell_right"]),
+    ])
+    cost_rows.append([
+        Paragraph(f"<b>Gross Total ({currency}):</b>", styles["cell_bold_right"]),
+        Paragraph(f"<b>{_fmt(gross_total)} {currency}</b>", styles["cell_bold_right"]),
+    ])
+
+    cost_table = Table(
+        cost_rows,
+        colWidths=[USABLE_WIDTH * 0.6, USABLE_WIDTH * 0.4],
+    )
+    cost_style: list[Any] = [
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING", (0, 0), (-1, -1), 2 * mm),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 2 * mm),
+    ]
+    # Gross total row styling
+    last_row = len(cost_rows) - 1
+    cost_style.append(("LINEABOVE", (0, last_row), (-1, last_row), 1.5, colors.HexColor("#1a1a2e")))
+    cost_style.append(("BACKGROUND", (0, last_row), (-1, last_row), colors.HexColor("#e8e8ee")))
+    cost_table.setStyle(TableStyle(cost_style))
+    flowables.append(cost_table)
+
+    # Single-pass build (no two-pass for page count — acceptable trade-off
+    # for large BOQs; footer shows "Page X" without " of Y")
+    doc.page_count = 0  # Will not display " of 0" — see footer_func logic
+    doc.build(flowables)
 
     pdf_bytes = buffer.getvalue()
     buffer.close()

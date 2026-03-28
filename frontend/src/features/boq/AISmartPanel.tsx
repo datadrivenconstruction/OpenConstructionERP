@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 
 import { Button } from '@/shared/ui';
+import { fmtWithCurrency } from './boqHelpers';
 import {
   boqApi,
   type CheckScopeResponse,
@@ -49,7 +50,8 @@ interface AISmartPanelProps {
   allPositions: Position[];
   onUpdatePosition: (positionId: string, data: { description?: string; unit_rate?: number }) => void;
   onAddPosition: (data: CreatePositionData) => void;
-  currencySymbol: string;
+  currencyCode?: string;
+  locale?: string;
   projectRegion?: string;
 }
 
@@ -63,10 +65,11 @@ export function AISmartPanel({
   allPositions,
   onUpdatePosition,
   onAddPosition,
-  currencySymbol,
+  currencyCode = 'EUR',
+  locale = 'de-DE',
   projectRegion,
 }: AISmartPanelProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   /* ── Loading states ──────────────────────────────────────────────── */
   const [enhanceLoading, setEnhanceLoading] = useState(false);
@@ -94,6 +97,7 @@ export function AISmartPanel({
         description: selectedPosition.description,
         unit: selectedPosition.unit,
         classification: selectedPosition.classification,
+        locale: i18n.language,
       });
       setEnhanceResult(res);
       setExpandedSection('enhance');
@@ -128,6 +132,7 @@ export function AISmartPanel({
         unit: selectedPosition.unit,
         classification: selectedPosition.classification,
         existing_descriptions: existing,
+        locale: i18n.language,
       });
       setPrereqResult(res);
       setExpandedSection('prereqs');
@@ -164,6 +169,7 @@ export function AISmartPanel({
         unit: selectedPosition.unit,
         rate: selectedPosition.unit_rate,
         region: projectRegion || 'DACH',
+        locale: i18n.language,
       });
       setEscalateResult(res);
       setExpandedSection('escalate');
@@ -191,6 +197,7 @@ export function AISmartPanel({
       const res = await boqApi.checkScope(boqId, {
         project_type: 'general',
         region: projectRegion || 'DACH',
+        locale: i18n.language,
       });
       setScopeResult(res);
       setExpandedSection('scope');
@@ -214,11 +221,6 @@ export function AISmartPanel({
     },
     [boqId, onAddPosition],
   );
-
-  const fmt = new Intl.NumberFormat(navigator.language ?? 'en', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 
   /* ── Render ──────────────────────────────────────────────────────── */
   return (
@@ -249,7 +251,7 @@ export function AISmartPanel({
             </p>
             <p className="text-sm font-medium truncate">{selectedPosition.description || '—'}</p>
             <p className="text-xs text-text-muted">
-              {selectedPosition.unit} | {currencySymbol}{fmt.format(selectedPosition.unit_rate)}
+              {selectedPosition.unit} | {fmtWithCurrency(selectedPosition.unit_rate, locale, currencyCode)}
             </p>
           </div>
         ) : (
@@ -347,7 +349,7 @@ export function AISmartPanel({
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium leading-tight">{item.description}</p>
                       <p className="text-[10px] text-text-muted mt-0.5">
-                        {item.unit} | {currencySymbol}{fmt.format(item.typical_rate_eur)}
+                        {item.unit} | {fmtWithCurrency(item.typical_rate_eur, locale, currencyCode)}
                       </p>
                       <p className="text-[10px] text-text-muted italic mt-0.5">{item.reason}</p>
                     </div>
@@ -387,13 +389,13 @@ export function AISmartPanel({
               <div className="flex items-center gap-3 p-2 rounded bg-surface-secondary">
                 <div className="text-center">
                   <p className="text-[10px] text-text-muted">{t('boq.ai_original', { defaultValue: 'Original' })}</p>
-                  <p className="text-sm font-mono">{currencySymbol}{fmt.format(escalateResult.original_rate)}</p>
+                  <p className="text-sm font-mono">{fmtWithCurrency(escalateResult.original_rate, locale, currencyCode)}</p>
                 </div>
                 <ArrowUpRight size={16} className="text-green-500 shrink-0" />
                 <div className="text-center">
                   <p className="text-[10px] text-text-muted">{t('boq.ai_escalated', { defaultValue: 'Escalated' })}</p>
                   <p className="text-sm font-mono font-bold text-green-600 dark:text-green-400">
-                    {currencySymbol}{fmt.format(escalateResult.escalated_rate)}
+                    {fmtWithCurrency(escalateResult.escalated_rate, locale, currencyCode)}
                   </p>
                 </div>
                 <span className="ml-auto text-xs font-bold text-green-600 dark:text-green-400">
@@ -498,7 +500,7 @@ export function AISmartPanel({
                           <p className="text-[10px] text-text-muted mt-0.5">{item.category}</p>
                           <p className="text-[10px] text-text-muted italic">{item.reason}</p>
                           <p className="text-[10px] text-text-secondary mt-0.5">
-                            {item.unit} | ~{currencySymbol}{fmt.format(item.estimated_rate)}
+                            {item.unit} | ~{fmtWithCurrency(item.estimated_rate, locale, currencyCode)}
                           </p>
                         </div>
                       </div>

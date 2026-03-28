@@ -12,7 +12,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """OpenEstimator.io application settings."""
+    """OpenConstructionERP application settings."""
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     )
 
     # ── App ──────────────────────────────────────────────────────────────
-    app_name: str = "OpenEstimator.io"
+    app_name: str = "OpenConstructionERP"
     app_version: str = "0.1.0"
     app_env: Literal["development", "staging", "production"] = "development"
     app_debug: bool = True
@@ -47,7 +47,7 @@ class Settings(BaseSettings):
     s3_region: str = "us-east-1"
 
     # ── Auth ─────────────────────────────────────────────────────────────
-    jwt_secret: str = "change-me-in-production"
+    jwt_secret: str = "openestimate-local-dev-key"
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60
     jwt_refresh_expire_days: int = 30

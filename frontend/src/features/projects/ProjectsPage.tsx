@@ -31,6 +31,25 @@ interface ProjectBOQStats {
 type SortOption = 'name_asc' | 'newest' | 'oldest' | 'value';
 type StatusFilter = 'all' | 'active' | 'archived';
 
+const ITEMS_PER_PAGE = 12;
+
+const REGION_OPTIONS = ['all', 'DACH', 'UK', 'US', 'GULF', 'RU', 'NORDIC', 'DEFAULT'] as const;
+
+const regionColorMap: Record<string, string> = {
+  DACH: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+  UK: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+  US: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+  GULF: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+  RU: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
+  NORDIC: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300',
+  DEFAULT: 'bg-gray-100 text-gray-700 dark:bg-gray-900/40 dark:text-gray-300',
+};
+
+function getRegionAvatarClass(region?: string): string {
+  if (region && regionColorMap[region]) return regionColorMap[region];
+  return 'bg-oe-blue-subtle text-oe-blue';
+}
+
 const currencyFmt = new Intl.NumberFormat(getIntlLocale(), {
   minimumFractionDigits: 0,
   maximumFractionDigits: 0,
@@ -41,36 +60,86 @@ export function ProjectsPage() {
   const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
-  const [sortOption, setSortOption] = useState<SortOption>('newest');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('oe_projects_filters') ?? '{}');
+      return saved.status ?? 'all';
+    } catch { return 'all'; }
+  });
+  const [regionFilter, setRegionFilter] = useState<string>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('oe_projects_filters') ?? '{}');
+      return saved.region ?? 'all';
+    } catch { return 'all'; }
+  });
+  const [sortOption, setSortOption] = useState<SortOption>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('oe_projects_filters') ?? '{}');
+      return saved.sort ?? 'newest';
+    } catch { return 'newest'; }
+  });
+  const [page, setPage] = useState(1);
+
+  // Persist filters to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('oe_projects_filters', JSON.stringify({
+        sort: sortOption,
+        status: statusFilter,
+        region: regionFilter,
+      }));
+    } catch {}
+  }, [sortOption, statusFilter, regionFilter]);
 
   const { data: projects, isLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: projectsApi.list,
   });
 
-  /* Fetch BOQ stats for all projects (count + total value) */
+  /* Fetch BOQ stats for all projects (count + total value) — single request + parallel detail fetches */
   const { data: boqStats } = useQuery({
     queryKey: ['projects-boq-stats', projects],
     queryFn: async () => {
       if (!projects || projects.length === 0) return [];
-      const results: ProjectBOQStats[] = [];
-      for (const p of projects) {
-        try {
-          const boqs = await apiGet<BOQBasic[]>(`/v1/boq/boqs/?project_id=${p.id}`);
-          let totalValue = 0;
-          for (const b of boqs) {
-            try {
-              const full = await apiGet<BOQWithPositions>(`/v1/boq/boqs/${b.id}`);
-              totalValue += full.grand_total;
-            } catch { /* ignore */ }
-          }
-          results.push({ projectId: p.id, boqCount: boqs.length, totalValue });
-        } catch {
-          results.push({ projectId: p.id, boqCount: 0, totalValue: 0 });
-        }
+
+      // Single API call to fetch ALL BOQs, then group client-side
+      let allBoqs: BOQBasic[];
+      try {
+        allBoqs = await apiGet<BOQBasic[]>('/v1/boq/boqs/');
+      } catch {
+        return projects.map((p) => ({ projectId: p.id, boqCount: 0, totalValue: 0 }));
       }
-      return results;
+
+      // Group BOQs by project_id
+      const boqsByProject = new Map<string, BOQBasic[]>();
+      for (const b of allBoqs) {
+        const list = boqsByProject.get(b.project_id) ?? [];
+        list.push(b);
+        boqsByProject.set(b.project_id, list);
+      }
+
+      // Fetch grand_total for each BOQ in parallel
+      const detailPromises = allBoqs.map(async (b) => {
+        try {
+          const full = await apiGet<BOQWithPositions>(`/v1/boq/boqs/${b.id}`);
+          return { boqId: b.id, projectId: b.project_id, grandTotal: full.grand_total };
+        } catch {
+          return { boqId: b.id, projectId: b.project_id, grandTotal: 0 };
+        }
+      });
+      const details = await Promise.all(detailPromises);
+
+      // Aggregate totals per project
+      const totalsByProject = new Map<string, number>();
+      for (const d of details) {
+        totalsByProject.set(d.projectId, (totalsByProject.get(d.projectId) ?? 0) + d.grandTotal);
+      }
+
+      return projects.map((p) => ({
+        projectId: p.id,
+        boqCount: boqsByProject.get(p.id)?.length ?? 0,
+        totalValue: totalsByProject.get(p.id) ?? 0,
+      }));
     },
     enabled: !!projects && projects.length > 0,
   });
@@ -103,6 +172,11 @@ export function ProjectsPage() {
       list = list.filter((p) => p.status === statusFilter);
     }
 
+    // Region filter
+    if (regionFilter !== 'all') {
+      list = list.filter((p) => p.region === regionFilter);
+    }
+
     // Sort — pinned first, then by selected sort option
     list.sort((a, b) => {
       const aPinned = pinnedIds.includes(a.id) ? 0 : 1;
@@ -127,7 +201,19 @@ export function ProjectsPage() {
     });
 
     return list;
-  }, [projects, searchQuery, statusFilter, sortOption, boqStatsMap, pinnedIds]);
+  }, [projects, searchQuery, statusFilter, regionFilter, sortOption, boqStatsMap, pinnedIds]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, statusFilter, regionFilter, sortOption]);
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const paginatedProjects = filtered.slice(
+    (page - 1) * ITEMS_PER_PAGE,
+    page * ITEMS_PER_PAGE,
+  );
 
   /* ── Stats ────────────────────────────────────────────────────────── */
 
@@ -248,6 +334,7 @@ export function ProjectsPage() {
                 placeholder={t('projects.search_placeholder', {
                   defaultValue: 'Search projects...',
                 })}
+                aria-label={t('projects.search_placeholder', { defaultValue: 'Search projects...' })}
                 className="h-10 w-full rounded-lg border border-border bg-surface-primary pl-10 pr-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
               />
             </div>
@@ -268,6 +355,26 @@ export function ProjectsPage() {
                 <option value="archived">
                   {t('projects.filter_archived', { defaultValue: 'Archived' })}
                 </option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-content-tertiary">
+                <ChevronDown size={14} />
+              </div>
+            </div>
+
+            {/* Region filter */}
+            <div className="relative">
+              <select
+                value={regionFilter}
+                onChange={(e) => setRegionFilter(e.target.value)}
+                className="h-10 appearance-none rounded-lg border border-border bg-surface-primary pl-3 pr-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-40"
+              >
+                {REGION_OPTIONS.map((r) => (
+                  <option key={r} value={r}>
+                    {r === 'all'
+                      ? t('projects.filter_all_regions', { defaultValue: 'All Regions' })
+                      : r}
+                  </option>
+                ))}
               </select>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-content-tertiary">
                 <ChevronDown size={14} />
@@ -298,7 +405,7 @@ export function ProjectsPage() {
       {/* Results */}
       {isLoading ? (
         <SkeletonGrid items={3} />
-      ) : filtered.length === 0 && (searchQuery || statusFilter !== 'all') ? (
+      ) : filtered.length === 0 && (searchQuery || statusFilter !== 'all' || regionFilter !== 'all') ? (
         <EmptyState
           icon={<Search size={24} strokeWidth={1.5} />}
           title={t('projects.no_results', { defaultValue: 'No matching projects' })}
@@ -321,7 +428,7 @@ export function ProjectsPage() {
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((project, i) => (
+            {paginatedProjects.map((project, i) => (
               <ProjectCard
                 key={project.id}
                 project={project}
@@ -332,13 +439,80 @@ export function ProjectsPage() {
             ))}
           </div>
 
-          {/* Summary footer */}
-          <div className="pt-4 text-center text-xs text-content-tertiary">
-            {filtered.length} {t('projects.of', { defaultValue: 'of' })}{' '}
-            {projects.length} {t('projects.projects_label', { defaultValue: 'projects' })}
-            {searchQuery || statusFilter !== 'all'
-              ? ` (${t('projects.filtered', { defaultValue: 'filtered' })})`
-              : ''}
+          {/* Pagination */}
+          <div className="mt-6 flex flex-col items-center gap-3">
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setPage(1)}
+                  disabled={page === 1}
+                  className="rounded-lg border border-border-light px-3 py-2 text-sm font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  title={t('common.first_page', { defaultValue: 'First page' })}
+                >
+                  &laquo;
+                </button>
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="rounded-lg border border-border-light px-4 py-2 text-sm font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  {t('common.previous', { defaultValue: 'Previous' })}
+                </button>
+
+                {/* Page numbers */}
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+                  .reduce<(number | 'dots')[]>((acc, p, i, arr) => {
+                    if (i > 0 && arr[i - 1] !== undefined && p - (arr[i - 1] as number) > 1) acc.push('dots');
+                    acc.push(p);
+                    return acc;
+                  }, [])
+                  .map((item, i) =>
+                    item === 'dots' ? (
+                      <span key={`dots-${i}`} className="px-1 text-content-quaternary">...</span>
+                    ) : (
+                      <button
+                        key={item}
+                        onClick={() => setPage(item as number)}
+                        className={`rounded-lg min-w-[40px] py-2 text-sm font-semibold transition-colors ${
+                          page === item
+                            ? 'bg-oe-blue text-white shadow-sm'
+                            : 'border border-border-light text-content-secondary hover:bg-surface-secondary'
+                        }`}
+                      >
+                        {item}
+                      </button>
+                    ),
+                  )}
+
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="rounded-lg border border-border-light px-4 py-2 text-sm font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  {t('common.next', { defaultValue: 'Next' })}
+                </button>
+                <button
+                  onClick={() => setPage(totalPages)}
+                  disabled={page === totalPages}
+                  className="rounded-lg border border-border-light px-3 py-2 text-sm font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  title={t('common.last_page', { defaultValue: 'Last page' })}
+                >
+                  &raquo;
+                </button>
+              </div>
+            )}
+            <p className="text-sm text-content-tertiary">
+              {t('projects.showing_of', {
+                defaultValue: '{{from}}–{{to}} of {{filtered}} projects',
+                from: (page - 1) * ITEMS_PER_PAGE + 1,
+                to: Math.min(page * ITEMS_PER_PAGE, filtered.length),
+                filtered: filtered.length,
+              })}
+              {(searchQuery || statusFilter !== 'all' || regionFilter !== 'all') && filtered.length !== (projects?.length ?? 0)
+                ? ` (${t('projects.filtered_from', { defaultValue: 'filtered from {{total}}', total: projects?.length ?? 0 })})`
+                : ''}
+            </p>
           </div>
         </>
       )}
@@ -375,6 +549,16 @@ function ProjectCard({
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
+  }, [menuOpen]);
+
+  // Close dropdown on Escape key
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false);
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
   }, [menuOpen]);
 
   const deleteMutation = useMutation({
@@ -444,7 +628,7 @@ function ProjectCard({
     >
       <div className="p-5">
         <div className="flex items-start justify-between">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue font-bold">
+          <div className={`flex h-10 w-10 items-center justify-center rounded-xl font-bold ${getRegionAvatarClass(project.region)}`}>
             {project.name.charAt(0).toUpperCase()}
           </div>
           <div className="flex items-center gap-1.5">
@@ -455,7 +639,7 @@ function ProjectCard({
             )}
             <PinButton projectId={project.id} />
             <button
-              className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary transition-colors"
+              className="flex h-7 w-7 min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
                 setMenuOpen(!menuOpen);
@@ -566,26 +750,28 @@ function ProjectCard({
           </Badge>
         </div>
       </div>
-      <div className="flex items-center justify-between border-t border-border-light px-5 py-2.5">
-        <div className="flex items-center gap-3 text-2xs text-content-tertiary">
-          <span>{new Date(project.created_at).toLocaleDateString(getIntlLocale())}</span>
-          {boqStats && boqStats.boqCount > 0 && (
-            <>
+      <div className="border-t border-border-light px-5 py-2.5">
+        {boqStats && boqStats.boqCount > 0 && boqStats.totalValue > 0 && (
+          <div className="mb-1">
+            <span className="text-base font-bold text-content-primary tabular-nums">
+              {project.currency} {currencyFmt.format(boqStats.totalValue)}
+            </span>
+          </div>
+        )}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 text-2xs text-content-tertiary">
+            <span>{new Date(project.created_at).toLocaleDateString(getIntlLocale())}</span>
+            {boqStats && boqStats.boqCount > 0 && (
               <span>
                 {t('projects.boq_count', {
                   defaultValue: '{{count}} BOQs',
                   count: boqStats.boqCount,
                 })}
               </span>
-              {boqStats.totalValue > 0 && (
-                <span className="font-medium text-content-secondary tabular-nums">
-                  {currencyFmt.format(boqStats.totalValue)} {project.currency}
-                </span>
-              )}
-            </>
-          )}
+            )}
+          </div>
+          <ArrowRight size={12} className="text-content-tertiary" />
         </div>
-        <ArrowRight size={12} className="text-content-tertiary" />
       </div>
     </Card>
   );
@@ -598,7 +784,7 @@ function PinButton({ projectId }: { projectId: string }) {
 
   return (
     <button
-      className={`flex h-7 w-7 items-center justify-center rounded-md transition-colors ${
+      className={`flex h-7 w-7 min-h-[44px] min-w-[44px] items-center justify-center rounded-md transition-colors ${
         isPinned
           ? 'text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10'
           : 'text-content-tertiary hover:bg-surface-secondary hover:text-content-secondary'

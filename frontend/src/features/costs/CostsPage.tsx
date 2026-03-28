@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -29,9 +29,10 @@ import {
   Clock,
   Layers,
   TrendingUp,
+  Trash2,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Skeleton, InfoHint, SkeletonTable, CountryFlag } from '@/shared/ui';
-import { apiGet, apiPost, triggerDownload } from '@/shared/lib/api';
+import { Button, Card, Badge, EmptyState, Skeleton, InfoHint, SkeletonTable, CountryFlag, Breadcrumb } from '@/shared/ui';
+import { apiGet, apiPost, apiDelete, triggerDownload } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { useCostDatabaseStore, REGION_MAP } from '@/stores/useCostDatabaseStore';
@@ -396,6 +397,7 @@ export function CostsPage() {
   const setActiveRegion = useCostDatabaseStore((s) => s.setActiveRegion);
 
   const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [unit, setUnit] = useState('');
   const [source, setSource] = useState('');
   const [category, setCategory] = useState('');
@@ -409,6 +411,12 @@ export function CostsPage() {
   const [showCreateItem, setShowCreateItem] = useState(false);
   const [showEscalation, setShowEscalation] = useState(false);
   const [semanticSearch, setSemanticSearch] = useState(false);
+
+  // Column sorting
+  type SortField = 'code' | 'rate' | 'description' | '';
+  type SortDir = 'asc' | 'desc';
+  const [sortField, setSortField] = useState<SortField>('');
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
 
   // Favourites & Recently Used
   const [favourites, setFavourites] = useState<Set<string>>(() => loadFavourites());
@@ -440,15 +448,21 @@ export function CostsPage() {
     retry: false,
   });
 
-  const searchUrl = buildSearchUrl(query, unit, source, region, offset, category);
+  // Debounce search query (300ms)
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(query), 300);
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  const searchUrl = buildSearchUrl(debouncedQuery, unit, source, region, offset, category);
 
   const { data, isLoading, isFetching } = useQuery({
-    queryKey: ['costs', query, unit, source, category, region, offset, semanticSearch],
+    queryKey: ['costs', debouncedQuery, unit, source, category, region, offset, semanticSearch],
     queryFn: async () => {
       // Use vector semantic search when toggled and query is present
-      if (semanticSearch && query.length >= 2) {
+      if (semanticSearch && debouncedQuery.length >= 2) {
         try {
-          const params = new URLSearchParams({ q: query, limit: String(PAGE_SIZE) });
+          const params = new URLSearchParams({ q: debouncedQuery, limit: String(PAGE_SIZE) });
           if (region) params.set('region', region);
           const results = await apiGet<Array<Record<string, unknown>>>(`/v1/costs/vector/search?${params}`);
           // Wrap in CostSearchResponse format
@@ -469,13 +483,25 @@ export function CostsPage() {
             limit: PAGE_SIZE,
             offset: 0,
           } as CostSearchResponse;
-        } catch {
+        } catch (err) {
+          console.error('Semantic search failed, falling back to regular search:', err);
           // Fall back to regular search
         }
       }
       return apiGet<CostSearchResponse>(searchUrl);
     },
     placeholderData: (prev) => prev,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => apiDelete(`/v1/costs/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['costs'] });
+      addToast({ type: 'success', title: t('costs.item_deleted', { defaultValue: 'Item deleted' }) });
+    },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('costs.delete_failed', { defaultValue: 'Delete failed' }), message: err.message });
+    },
   });
 
   const exportMutation = useMutation({
@@ -507,6 +533,40 @@ export function CostsPage() {
       : rawItems;
   const total = specialTab ? items.length : rawTotal;
   const hasMore = specialTab ? false : offset + PAGE_SIZE < rawTotal;
+
+  // Client-side column sorting
+  const sortedItems = useMemo(() => {
+    if (!sortField) return items;
+    return [...items].sort((a, b) => {
+      let cmp = 0;
+      if (sortField === 'code') cmp = a.code.localeCompare(b.code);
+      else if (sortField === 'rate') cmp = a.rate - b.rate;
+      else if (sortField === 'description') cmp = a.description.localeCompare(b.description);
+      return sortDir === 'desc' ? -cmp : cmp;
+    });
+  }, [items, sortField, sortDir]);
+
+  const toggleSort = useCallback((field: SortField) => {
+    if (sortField === field) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDir('asc');
+    }
+  }, [sortField]);
+
+  // Active filter count & clear all
+  const activeFilterCount = [query, unit, source, category].filter(Boolean).length + (region ? 1 : 0) + (specialTab ? 1 : 0);
+
+  const clearAllFilters = useCallback(() => {
+    setQuery('');
+    setDebouncedQuery('');
+    setUnit('');
+    setSource('');
+    setCategory('');
+    setOffset(0);
+    setSpecialTab('');
+  }, []);
 
   const handleSearch = useCallback((value: string) => {
     setQuery(value);
@@ -596,6 +656,11 @@ export function CostsPage() {
 
   return (
     <div className="max-w-content mx-auto animate-fade-in">
+      <Breadcrumb items={[
+        { label: t('nav.dashboard', 'Dashboard'), to: '/' },
+        { label: t('costs.title', 'Cost Database') },
+      ]} className="mb-4" />
+
       {/* Header */}
       <div className="mb-5 flex items-start justify-between">
         <div>
@@ -721,21 +786,31 @@ export function CostsPage() {
                       ? t('costs.search_in_region', { defaultValue: 'Search in {{name}}...', name: regionInfo.name })
                       : t('costs.search_placeholder', 'Search by description or code...')
                 }
-                className={`h-10 w-full rounded-lg border bg-surface-primary pl-10 pr-3 text-sm text-content-primary placeholder:text-content-tertiary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:border-transparent hover:border-content-tertiary ${
+                aria-label={t('costs.search_placeholder', { defaultValue: 'Search cost items' })}
+                className={`h-10 w-full rounded-lg border bg-surface-primary pl-10 ${query ? 'pr-8' : 'pr-3'} text-sm text-content-primary placeholder:text-content-tertiary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:border-transparent hover:border-content-tertiary ${
                   semanticSearch ? 'border-purple-400 focus:ring-purple-400/30' : 'border-border focus:ring-oe-blue'
                 }`}
               />
+              {query && (
+                <button
+                  onClick={() => { setQuery(''); setDebouncedQuery(''); setOffset(0); }}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-content-tertiary hover:text-content-primary"
+                >
+                  <X size={14} />
+                </button>
+              )}
             </div>
             <button
               onClick={() => setSemanticSearch(!semanticSearch)}
               title={semanticSearch ? t('costs.switch_to_text_search', { defaultValue: 'Switch to text search' }) : t('costs.switch_to_ai_search', { defaultValue: 'Switch to AI semantic search' })}
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border transition-all ${
+              className={`flex h-10 shrink-0 items-center gap-1.5 rounded-lg border px-2.5 transition-all text-xs font-medium ${
                 semanticSearch
                   ? 'border-purple-400 bg-purple-500/10 text-purple-500'
                   : 'border-border bg-surface-primary text-content-tertiary hover:text-purple-500 hover:border-purple-300'
               }`}
             >
-              <Sparkles size={16} />
+              <Sparkles size={14} />
+              <span className="hidden sm:inline">{semanticSearch ? 'AI' : 'AI'}</span>
             </button>
           </div>
 
@@ -768,7 +843,7 @@ export function CostsPage() {
               <option value="">{t('costs.all_sources', 'All sources')}</option>
               {SOURCES.filter(Boolean).map((s) => (
                 <option key={s} value={s}>
-                  {s === 'cwicr' ? 'CWICR' : s.charAt(0).toUpperCase() + s.slice(1)}
+                  {t(`costs.source_${s}`, { defaultValue: s === 'cwicr' ? 'CWICR' : s.charAt(0).toUpperCase() + s.slice(1) })}
                 </option>
               ))}
             </select>
@@ -802,17 +877,40 @@ export function CostsPage() {
         </div>
       </Card>
 
+      {/* Active filters indicator */}
+      {activeFilterCount > 0 && (
+        <div className="flex items-center gap-2 mb-4 -mt-3">
+          <Badge variant="blue" size="sm">{activeFilterCount} {t('costs.filters_active', { defaultValue: 'filters active' })}</Badge>
+          <button
+            onClick={clearAllFilters}
+            className="text-xs text-oe-blue hover:underline"
+          >
+            {t('costs.clear_filters', { defaultValue: 'Clear all' })}
+          </button>
+        </div>
+      )}
+
       {/* Results Table */}
       {isLoading ? (
         <SkeletonTable rows={6} columns={6} />
       ) : items.length === 0 ? (
         <EmptyState
-          icon={<Database size={24} strokeWidth={1.5} />}
-          title={t('costs.no_results', 'No cost items found')}
+          icon={specialTab === 'favourites' ? <Star size={24} strokeWidth={1.5} /> : specialTab === 'recent' ? <Clock size={24} strokeWidth={1.5} /> : <Database size={24} strokeWidth={1.5} />}
+          title={
+            specialTab === 'favourites'
+              ? t('costs.no_favourites', { defaultValue: 'No favourites yet' })
+              : specialTab === 'recent'
+                ? t('costs.no_recent', { defaultValue: 'No recently used items' })
+                : t('costs.no_results', 'No cost items found')
+          }
           description={
-            query
-              ? t('costs.no_results_hint', 'Try adjusting your search or filters')
-              : t('costs.empty_hint', 'Start typing to search the cost database')
+            specialTab === 'favourites'
+              ? t('costs.no_favourites_hint', { defaultValue: 'Click the star icon on any cost item to add it to your favourites' })
+              : specialTab === 'recent'
+                ? t('costs.no_recent_hint', { defaultValue: 'Items you add to BOQ will appear here for quick access' })
+                : query
+                  ? t('costs.no_results_hint', 'Try adjusting your search or filters')
+                  : t('costs.empty_hint', 'Start typing to search the cost database')
           }
         />
       ) : (
@@ -837,17 +935,26 @@ export function CostsPage() {
                         </button>
                       </div>
                     </th>
-                    <th className="px-4 py-3 font-medium text-content-secondary w-28">
-                      {t('costs.code', 'Code')}
+                    <th className="px-4 py-3 font-medium text-content-secondary w-28 cursor-pointer select-none" onClick={() => toggleSort('code')}>
+                      <div className="flex items-center gap-1">
+                        {t('costs.code', 'Code')}
+                        {sortField === 'code' && (sortDir === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />)}
+                      </div>
                     </th>
-                    <th className="px-4 py-3 font-medium text-content-secondary">
-                      {t('boq.description')}
+                    <th className="px-4 py-3 font-medium text-content-secondary cursor-pointer select-none" onClick={() => toggleSort('description')}>
+                      <div className="flex items-center gap-1">
+                        {t('boq.description')}
+                        {sortField === 'description' && (sortDir === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />)}
+                      </div>
                     </th>
                     <th className="px-4 py-3 font-medium text-content-secondary w-20 text-center">
                       {t('boq.unit')}
                     </th>
-                    <th className="px-4 py-3 font-medium text-content-secondary w-32 text-right">
-                      {t('costs.rate', 'Rate')}
+                    <th className="px-4 py-3 font-medium text-content-secondary w-32 text-right cursor-pointer select-none" onClick={() => toggleSort('rate')}>
+                      <div className="flex items-center justify-end gap-1">
+                        {t('costs.rate', 'Rate')}
+                        {sortField === 'rate' && (sortDir === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />)}
+                      </div>
                     </th>
                     <th className="px-4 py-3 font-medium text-content-secondary w-28 text-center">
                       {t('costs.classification', 'Class.')}
@@ -856,7 +963,7 @@ export function CostsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border-light">
-                  {items.map((item) => {
+                  {sortedItems.map((item) => {
                     const isExpanded = expandedId === item.id;
                     const hasComponents = item.components && item.components.length > 0;
                     return (
@@ -872,6 +979,7 @@ export function CostsPage() {
                         onToggle={() => setExpandedId(isExpanded ? null : item.id)}
                         onCopy={() => handleCopyRate(item)}
                         onToggleFavourite={() => toggleFavourite(item.id)}
+                        onDelete={(id) => deleteMutation.mutate(id)}
                         fmt={fmt}
                         t={t}
                       />
@@ -882,23 +990,73 @@ export function CostsPage() {
             </div>
           </Card>
 
-          {/* Load More / Pagination */}
-          <div className="mt-6 flex flex-col items-center gap-3">
-            <p className="text-xs text-content-tertiary">
-              {t('costs.showing', 'Showing')} {Math.min(offset + PAGE_SIZE, total)}{' '}
-              {t('costs.of', 'of')} {total.toLocaleString()} {t('costs.items', 'items')}
-            </p>
-            {hasMore && (
-              <Button
-                variant="secondary"
-                size="sm"
-                loading={isFetching}
-                onClick={handleLoadMore}
-              >
-                {t('costs.load_more', 'Load more')}
-              </Button>
-            )}
-          </div>
+          {/* Pagination */}
+          {(() => {
+            const currentPage = Math.floor(offset / PAGE_SIZE) + 1;
+            const totalPages = Math.ceil(total / PAGE_SIZE);
+            const goToPage = (p: number) => setOffset((p - 1) * PAGE_SIZE);
+            // Show up to 5 page buttons around current
+            const start = Math.max(1, currentPage - 2);
+            const end = Math.min(totalPages, start + 4);
+            const pages = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+
+            return (
+              <div className="mt-6 flex flex-col items-center gap-3">
+                <p className="text-xs text-content-tertiary">
+                  {t('costs.showing_range', {
+                    defaultValue: '{{from}}-{{to}} of {{total}}',
+                    from: offset + 1,
+                    to: Math.min(offset + PAGE_SIZE, total),
+                    total: total.toLocaleString(),
+                  })}
+                </p>
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => goToPage(currentPage - 1)}
+                      disabled={currentPage === 1 || isFetching}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+                    {start > 1 && (
+                      <>
+                        <button onClick={() => goToPage(1)} className="flex h-8 min-w-[32px] items-center justify-center rounded-lg text-xs text-content-secondary hover:bg-surface-secondary transition-colors">1</button>
+                        {start > 2 && <span className="text-content-quaternary text-xs px-1">...</span>}
+                      </>
+                    )}
+                    {pages.map((p) => (
+                      <button
+                        key={p}
+                        onClick={() => goToPage(p)}
+                        disabled={isFetching}
+                        className={`flex h-8 min-w-[32px] items-center justify-center rounded-lg text-xs font-medium transition-colors ${
+                          p === currentPage
+                            ? 'bg-oe-blue text-white'
+                            : 'text-content-secondary hover:bg-surface-secondary'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                    {end < totalPages && (
+                      <>
+                        {end < totalPages - 1 && <span className="text-content-quaternary text-xs px-1">...</span>}
+                        <button onClick={() => goToPage(totalPages)} className="flex h-8 min-w-[32px] items-center justify-center rounded-lg text-xs text-content-secondary hover:bg-surface-secondary transition-colors">{totalPages}</button>
+                      </>
+                    )}
+                    <button
+                      onClick={() => goToPage(currentPage + 1)}
+                      disabled={currentPage === totalPages || isFetching}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </>
       )}
 
@@ -1007,6 +1165,14 @@ function AddToBOQModal({
   const [boqId, setBoqId] = useState('');
   const [isAdding, setIsAdding] = useState(false);
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
   // Fetch projects
   const { data: projects } = useQuery({
     queryKey: ['projects'],
@@ -1042,16 +1208,74 @@ function AddToBOQModal({
 
     try {
       let nextOrdinal = 1;
-      // Get existing positions count for ordinal numbering
+      // Get existing positions and find max ordinal for correct numbering
       try {
-        const existing = await apiGet<unknown[]>(`/v1/boq/boqs/${boqId}/positions`);
-        nextOrdinal = existing.length + 1;
+        const existing = await apiGet<Array<{ordinal: string}>>(`/v1/boq/boqs/${boqId}/positions`);
+        if (existing.length > 0) {
+          const maxOrd = Math.max(...existing.map(p => {
+            const parts = p.ordinal.split('.');
+            const last = parts[parts.length - 1] ?? '0';
+            return parseInt(last, 10) || 0;
+          }));
+          nextOrdinal = maxOrd + 1;
+        }
       } catch {
-        // ignore
+        // Fallback: start at 1
       }
 
       for (const item of items) {
         const ordinal = String(nextOrdinal).padStart(3, '0');
+
+        // Build rich metadata with cost breakdown + components
+        const meta: Record<string, unknown> = {
+          cost_item_id: item.id,
+          cost_item_code: item.code,
+          cost_item_region: item.region,
+          ...item.metadata_,
+        };
+
+        // Include resource breakdown for BOQ Grid display
+        // BOQ Grid reads from metadata.resources: Array<{name, code, type, unit, quantity, unit_rate, total}>
+        if (item.components && item.components.length > 0) {
+          // Full component data available — use it directly
+          meta.resources = item.components.map((c) => ({
+            name: c.name,
+            code: c.code,
+            type: c.type,
+            unit: c.unit,
+            quantity: c.quantity,
+            unit_rate: c.unit_rate,
+            total: c.cost,
+          }));
+          meta.resource_count = item.components.length;
+        } else if (item.metadata_) {
+          // No components stored — synthesize from metadata cost summary
+          const synth: Array<{ name: string; code: string; type: string; unit: string; quantity: number; unit_rate: number; total: number }> = [];
+          const m = item.metadata_;
+          if (m.labor_cost && m.labor_cost > 0) {
+            synth.push({ name: t('costs.component_labor', { defaultValue: 'Labor' }), code: '', type: 'labor', unit: item.unit, quantity: 1, unit_rate: m.labor_cost, total: m.labor_cost });
+          }
+          if (m.material_cost && m.material_cost > 0) {
+            synth.push({ name: t('costs.component_material', { defaultValue: 'Material' }), code: '', type: 'material', unit: item.unit, quantity: 1, unit_rate: m.material_cost, total: m.material_cost });
+          }
+          if (m.equipment_cost && m.equipment_cost > 0) {
+            synth.push({ name: t('costs.component_equipment', { defaultValue: 'Equipment' }), code: '', type: 'equipment', unit: item.unit, quantity: 1, unit_rate: m.equipment_cost, total: m.equipment_cost });
+          }
+          if (synth.length > 0) {
+            meta.resources = synth;
+            meta.resource_count = synth.length;
+          }
+        }
+
+        // Cost breakdown summary
+        if (meta.resources) {
+          const byType: Record<string, number> = {};
+          for (const r of meta.resources as Array<{ type: string; total: number }>) {
+            byType[r.type] = (byType[r.type] ?? 0) + r.total;
+          }
+          meta.cost_breakdown = byType;
+        }
+
         await apiPost(`/v1/boq/boqs/${boqId}/positions`, {
           boq_id: boqId,
           ordinal,
@@ -1062,11 +1286,7 @@ function AddToBOQModal({
           classification: item.classification || {},
           parent_id: sectionId || undefined,
           source: 'cost_database',
-          metadata: {
-            cost_item_id: item.id,
-            cost_item_code: item.code,
-            cost_item_region: item.region,
-          },
+          metadata: meta,
         });
         nextOrdinal++;
       }
@@ -1094,6 +1314,9 @@ function AddToBOQModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="add-to-boq-modal-title"
         className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
@@ -1104,7 +1327,7 @@ function AddToBOQModal({
               <Table2 size={18} />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-content-primary">{t('costs.add_to_boq', { defaultValue: 'Add to BOQ' })}</h2>
+              <h2 id="add-to-boq-modal-title" className="text-base font-semibold text-content-primary">{t('costs.add_to_boq', { defaultValue: 'Add to BOQ' })}</h2>
               <p className="text-xs text-content-tertiary">
                 {t('costs.n_items_selected', { defaultValue: '{{count}} items selected', count: items.length })}
               </p>
@@ -1271,6 +1494,14 @@ function CreateAssemblyFromCostsModal({
   const [unit, setUnit] = useState('m2');
   const [isCreating, setIsCreating] = useState(false);
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
   const fmt = (n: number) =>
     new Intl.NumberFormat(getIntlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 
@@ -1322,6 +1553,9 @@ function CreateAssemblyFromCostsModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="create-assembly-modal-title"
         className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
@@ -1331,7 +1565,7 @@ function CreateAssemblyFromCostsModal({
               <Layers size={18} />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-content-primary">{t('assemblies.create_assembly', { defaultValue: 'Create Assembly' })}</h2>
+              <h2 id="create-assembly-modal-title" className="text-base font-semibold text-content-primary">{t('assemblies.create_assembly', { defaultValue: 'Create Assembly' })}</h2>
               <p className="text-xs text-content-tertiary">
                 {t('costs.n_cost_items_to_recipe', { defaultValue: '{{count}} cost items → reusable recipe', count: items.length })}
               </p>
@@ -1421,6 +1655,14 @@ function CreateCostItemModal({
     currency: 'EUR',
   });
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
   const UNITS = ['m', 'm2', 'm3', 'kg', 't', 'pcs', 'lsum', 'h', 'set', 'lm'];
 
   const handleSubmit = useCallback(async () => {
@@ -1450,12 +1692,15 @@ function CreateCostItemModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="create-cost-item-modal-title"
         className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-fade-in"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div>
-            <h2 className="text-base font-semibold text-content-primary">
+            <h2 id="create-cost-item-modal-title" className="text-base font-semibold text-content-primary">
               {t('costs.create_item', { defaultValue: 'Add Custom Cost Item' })}
             </h2>
             <p className="text-xs text-content-tertiary">
@@ -1477,7 +1722,7 @@ function CreateCostItemModal({
               type="text"
               value={form.code}
               onChange={(e) => setForm({ ...form, code: e.target.value })}
-              placeholder="e.g. WALL-001"
+              placeholder={t('costs.code_placeholder', { defaultValue: 'e.g. WALL-001' })}
               className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
             />
           </div>
@@ -1491,7 +1736,7 @@ function CreateCostItemModal({
               type="text"
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              placeholder="e.g. Reinforced concrete wall C30/37, 25cm"
+              placeholder={t('costs.description_placeholder', { defaultValue: 'e.g. Reinforced concrete wall C30/37, 25cm' })}
               className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue"
             />
           </div>
@@ -1565,6 +1810,7 @@ function CostItemRow({
   onToggle,
   onCopy,
   onToggleFavourite,
+  onDelete,
   fmt,
   t,
 }: {
@@ -1578,6 +1824,7 @@ function CostItemRow({
   onToggle: () => void;
   onCopy: () => void;
   onToggleFavourite: () => void;
+  onDelete?: (id: string) => void;
   fmt: (n: number) => string;
   t: ReturnType<typeof import('react-i18next').useTranslation>['t'];
 }) {
@@ -1641,6 +1888,11 @@ function CostItemRow({
                 : <ChevronDown size={14} className="text-content-quaternary shrink-0" />
             )}
             <span className="truncate" title={item.description}>{item.description}</span>
+            {item.source === 'custom' && (
+              <Badge variant="neutral" size="sm" className="ml-1.5 text-2xs">
+                {t('costs.custom_label', { defaultValue: 'Custom' })}
+              </Badge>
+            )}
             {hasComponents && (
               <span className="text-2xs text-content-quaternary shrink-0">
                 {item.components.length} res.
@@ -1687,6 +1939,20 @@ function CostItemRow({
                 <Copy size={13} />
               )}
             </button>
+            {item.source === 'custom' && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (window.confirm(t('costs.confirm_delete', { defaultValue: 'Delete this custom cost item?' }))) {
+                    onDelete?.(item.id);
+                  }
+                }}
+                title={t('common.delete', { defaultValue: 'Delete' })}
+                className="flex h-7 w-7 items-center justify-center rounded text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-colors"
+              >
+                <Trash2 size={13} />
+              </button>
+            )}
           </div>
         </td>
       </tr>
@@ -1824,17 +2090,16 @@ function CostItemRow({
                   </thead>
                   <tbody className="divide-y divide-border-light">
                     {item.components.map((comp, i) => {
-                      const TYPE_MAP: Record<string, { label: string; color: string }> = {
-                        labor: { label: 'Labor', color: 'text-amber-700 bg-amber-50' },
-                        material: { label: 'Material', color: 'text-green-700 bg-green-50' },
-                        equipment: { label: 'Equip.', color: 'text-blue-600 bg-blue-50' },
-                        operator: { label: 'Operator', color: 'text-violet-600 bg-violet-50' },
-                        electricity: { label: 'Electric', color: 'text-cyan-600 bg-cyan-50' },
-                        other: { label: 'Other', color: 'text-gray-600 bg-gray-50' },
+                      const TYPE_COLOR_MAP: Record<string, string> = {
+                        labor: 'text-amber-700 bg-amber-50',
+                        material: 'text-green-700 bg-green-50',
+                        equipment: 'text-blue-600 bg-blue-50',
+                        operator: 'text-violet-600 bg-violet-50',
+                        electricity: 'text-cyan-600 bg-cyan-50',
+                        other: 'text-gray-600 bg-gray-50',
                       };
-                      const typeInfo = TYPE_MAP[comp.type] || { label: 'Other', color: 'text-gray-600 bg-gray-50' };
-                      const typeLabel = typeInfo.label;
-                      const typeColor = typeInfo.color;
+                      const typeColor = TYPE_COLOR_MAP[comp.type] || 'text-gray-600 bg-gray-50';
+                      const typeLabel = t(`costs.component_${comp.type}`, { defaultValue: comp.type.charAt(0).toUpperCase() + comp.type.slice(1) });
                       return (
                         <tr key={i} className="hover:bg-surface-secondary/30">
                           <td className="px-3 py-2 text-content-primary truncate" title={comp.name}>{comp.name}</td>

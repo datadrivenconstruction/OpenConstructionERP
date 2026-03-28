@@ -40,8 +40,8 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
-function createFormatter(locale?: string) {
-  return new Intl.NumberFormat(locale ?? navigator.language ?? 'en', {
+function createRSFormatter(locale: string) {
+  return new Intl.NumberFormat(locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
@@ -49,9 +49,9 @@ function createFormatter(locale?: string) {
 
 /* ── Component ───────────────────────────────────────────────────────── */
 
-export function ResourceSummary({ boqId }: { boqId: string }) {
+export function ResourceSummary({ boqId, locale = 'de-DE' }: { boqId: string; locale?: string }) {
   const { t } = useTranslation();
-  const fmt = useMemo(() => createFormatter(), []);
+  const fmt = useMemo(() => createRSFormatter(locale), [locale]);
   const [collapsed, setCollapsed] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [typeFilter, setTypeFilter] = useState<ResourceTypeFilter>('all');

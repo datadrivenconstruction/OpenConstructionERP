@@ -11,7 +11,7 @@ import {
   BookmarkPlus,
   MoreHorizontal,
 } from 'lucide-react';
-import { RESOURCE_TYPE_BADGE } from '../boqHelpers';
+import { RESOURCE_TYPE_BADGE, fmtWithCurrency } from '../boqHelpers';
 import { countComments } from '../CommentDrawer';
 
 /* ── Validation Status Dot ────────────────────────────────────────── */
@@ -30,6 +30,8 @@ export interface SectionGroupContext {
   onToggleSection: (sectionId: string) => void;
   onAddPosition: (sectionId?: string) => void;
   currencySymbol: string;
+  currencyCode?: string;
+  locale?: string;
   fmt: Intl.NumberFormat;
   t: (key: string, opts?: Record<string, string | number>) => string;
 }
@@ -46,7 +48,7 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
   const description: string = data.description ?? '';
 
   const formattedSubtotal = ctx.fmt
-    ? `${ctx.currencySymbol}${ctx.fmt.format(subtotal)}`
+    ? fmtWithCurrency(subtotal, ctx.locale ?? 'de-DE', ctx.currencyCode ?? 'EUR')
     : `${subtotal.toFixed(2)}`;
 
   const t = ctx.t ?? ((key: string, opts?: Record<string, string | number>) =>
@@ -147,6 +149,8 @@ export interface ResourceGridContext {
   onSaveResourceToCatalog: (positionId: string, resourceIndex: number) => void;
   onOpenCostDbForPosition: (positionId: string) => void;
   currencySymbol: string;
+  currencyCode: string;
+  locale: string;
   fmt: Intl.NumberFormat;
   t: (key: string, opts?: Record<string, string | number>) => string;
 }
@@ -321,7 +325,7 @@ function EditableResourceRow({ data, ctx }: { data: Record<string, unknown>; ctx
   const qty = (data._resourceQty as number) ?? 0;
   const rate = (data._resourceRate as number) ?? 0;
   const total = qty * rate;
-  const formattedTotal = `${ctx.currencySymbol}${ctx.fmt.format(total)}`;
+  const formattedTotal = fmtWithCurrency(total, ctx.locale ?? 'de-DE', ctx.currencyCode ?? 'EUR');
   const posId = data._parentPositionId as string;
   const resIdx = data._resourceIndex as number;
 
@@ -454,7 +458,7 @@ export function ResourceFullWidthRenderer(params: ICellRendererParams) {
         <div className="flex-1" />
         {typeof data._positionResourceTotal === 'number' && data._positionResourceTotal > 0 && (
           <span className="text-[10px] font-medium text-content-tertiary tabular-nums pr-5">
-            {ctx.t('boq.resources_total', { defaultValue: 'Resources total' })}: {ctx.currencySymbol}{ctx.fmt.format(data._positionResourceTotal)}
+            {ctx.t('boq.resources_total', { defaultValue: 'Resources total' })}: {fmtWithCurrency(data._positionResourceTotal as number, ctx.locale ?? 'de-DE', ctx.currencyCode ?? 'EUR')}
           </span>
         )}
       </div>

@@ -14,6 +14,7 @@ Endpoints:
     POST   /boqs/{boq_id}/positions/bulk      — Bulk insert multiple positions
     PATCH  /positions/{position_id}            — Update a position
     DELETE /positions/{position_id}            — Delete a position
+    POST   /boqs/{boq_id}/positions/reorder   — Reorder positions via drag-and-drop
     POST   /boqs/{boq_id}/sections             — Create a section header
     POST   /boqs/{boq_id}/markups              — Add a markup line
     PATCH  /boqs/{boq_id}/markups/{markup_id}  — Update a markup
@@ -46,12 +47,13 @@ import random
 import tempfile
 import uuid
 from pathlib import Path
+from collections.abc import Iterator
 from typing import Any
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, UploadFile, File, status
 from fastapi.responses import StreamingResponse
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermission, SessionDep
 from app.modules.boq.schemas import (
     AIChatRequest,
     AIChatResponse,
@@ -122,6 +124,58 @@ _log = logging.getLogger(__name__)
 
 def _get_service(session: SessionDep) -> BOQService:
     return BOQService(session)
+
+
+async def _verify_boq_owner(
+    session: SessionDep,
+    boq_id: uuid.UUID,
+    user_id: str,
+    payload: dict | None = None,
+) -> None:
+    """Load a BOQ, then its project, and verify ownership.
+
+    Admins bypass the check. Raises 403 if the user is not the project owner.
+    """
+    if payload and payload.get("role") == "admin":
+        return
+    from app.modules.boq.repository import BOQRepository
+    from app.modules.projects.repository import ProjectRepository
+
+    boq_repo = BOQRepository(session)
+    boq = await boq_repo.get_by_id(boq_id)
+    if boq is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ not found")
+    project_repo = ProjectRepository(session)
+    project = await project_repo.get_by_id(boq.project_id)
+    if project is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    if str(project.owner_id) != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have access to this BOQ",
+        )
+
+
+async def _verify_project_owner_for_boq(
+    session: SessionDep,
+    project_id: uuid.UUID,
+    user_id: str,
+    payload: dict | None = None,
+) -> None:
+    """Verify the current user owns the given project. Admins bypass."""
+    if payload and payload.get("role") == "admin":
+        return
+    from app.modules.projects.repository import ProjectRepository
+
+    project_repo = ProjectRepository(session)
+    project = await project_repo.get_by_id(project_id)
+    if project is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    if str(project.owner_id) != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have access to this project",
+        )
 
 
 async def _log_activity(
@@ -216,9 +270,12 @@ def _markup_to_response(markup: object) -> MarkupResponse:
 async def create_boq(
     data: BOQCreate,
     _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: BOQService = Depends(_get_service),
 ) -> BOQResponse:
     """Create a new Bill of Quantities."""
+    await _verify_project_owner_for_boq(session, data.project_id, _user_id, payload)
     boq = await service.create_boq(data)
     await _log_activity(
         service,
@@ -239,12 +296,16 @@ async def create_boq(
     dependencies=[Depends(RequirePermission("boq.read"))],
 )
 async def list_boqs(
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     project_id: uuid.UUID = Query(..., description="Filter BOQs by project"),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
     service: BOQService = Depends(_get_service),
 ) -> list[BOQListItem]:
     """List all BOQs for a given project with computed grand totals."""
+    await _verify_project_owner_for_boq(session, project_id, _user_id, payload)
     boqs, _ = await service.list_boqs_for_project(
         project_id, offset=offset, limit=limit
     )
@@ -584,6 +645,7 @@ async def enhance_description(
             description=data.description,
             unit=data.unit,
             classification=data.classification,
+            locale=data.locale,
         )
     except HTTPException:
         raise
@@ -623,6 +685,7 @@ async def suggest_prerequisites(
             unit=data.unit,
             classification=data.classification,
             existing_descriptions=data.existing_descriptions,
+            locale=data.locale,
         )
     except HTTPException:
         raise
@@ -664,6 +727,7 @@ async def check_scope(
             project_type=data.project_type,
             region=data.region,
             currency=data.currency,
+            locale=data.locale,
         )
     except HTTPException:
         raise
@@ -714,6 +778,7 @@ async def escalate_rate(
             base_year=data.base_year,
             target_year=data.target_year,
             region=data.region,
+            locale=data.locale,
         )
     except HTTPException:
         raise
@@ -750,9 +815,13 @@ async def escalate_rate(
 )
 async def get_boq(
     boq_id: uuid.UUID,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: BOQService = Depends(_get_service),
 ) -> BOQWithPositions:
     """Get a BOQ with all its positions and grand total."""
+    await _verify_boq_owner(session, boq_id, _user_id, payload)
     return await service.get_boq_with_positions(boq_id)
 
 
@@ -825,9 +894,13 @@ async def get_project_activity(
 async def update_boq(
     boq_id: uuid.UUID,
     data: BOQUpdate,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: BOQService = Depends(_get_service),
 ) -> BOQResponse:
     """Update BOQ metadata (name, description, status)."""
+    await _verify_boq_owner(session, boq_id, _user_id, payload)
     boq = await service.update_boq(boq_id, data)
     return BOQResponse.model_validate(boq)
 
@@ -839,9 +912,13 @@ async def update_boq(
 )
 async def delete_boq(
     boq_id: uuid.UUID,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: BOQService = Depends(_get_service),
 ) -> None:
     """Delete a BOQ and all its positions."""
+    await _verify_boq_owner(session, boq_id, _user_id, payload)
     await service.delete_boq(boq_id)
 
 
@@ -1037,6 +1114,35 @@ async def delete_position(
         target_id=position_id,
     )
     await service.delete_position(position_id)
+
+
+@router.post(
+    "/boqs/{boq_id}/positions/reorder",
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def reorder_positions(
+    boq_id: uuid.UUID,
+    data: dict = Body(...),
+    user_id: CurrentUserId = None,
+    service: BOQService = Depends(_get_service),
+) -> dict:
+    """Reorder positions within a BOQ.
+
+    Expects ``{"position_ids": ["uuid1", "uuid2", ...]}``.
+    The list order determines the new ``sort_order`` for each position.
+    """
+    raw_ids = data.get("position_ids", [])
+    position_ids = [uuid.UUID(pid) if isinstance(pid, str) else pid for pid in raw_ids]
+    await service.reorder_positions(boq_id, position_ids)
+    await _log_activity(
+        service,
+        user_id=user_id,
+        action="position_updated",
+        target_type="boq",
+        description=f"Reordered {len(position_ids)} positions",
+        boq_id=boq_id,
+    )
+    return {"ok": True}
 
 
 # ── Section CRUD ──────────────────────────────────────────────────────────────
@@ -1364,6 +1470,7 @@ BOQ_CHAT_USER_PROMPT = """\
 You are a cost estimator assistant. The user is working on a BOQ for {project_name}.
 Current BOQ has {existing_positions_count} positions.
 Classification standard: {standard}.
+User's language/locale: {locale}
 
 User request: {message}
 
@@ -1376,6 +1483,7 @@ Rules:
 - Be specific and use realistic prices in {currency}
 - Each item must have: ordinal, description, unit, quantity, unit_rate
 - Use realistic market-rate unit prices
+- ALL description values MUST be in the user's language ({locale})
 - Return ONLY the JSON array, no other text
 """
 
@@ -1419,20 +1527,24 @@ async def ai_chat_boq(
 
     # Build prompt
     ctx = data.context
+    locale = getattr(data, "locale", "en") or "en"
     prompt = BOQ_CHAT_USER_PROMPT.format(
         project_name=ctx.project_name or "Unnamed project",
         existing_positions_count=ctx.existing_positions_count,
         standard=ctx.standard or "din276",
         currency=ctx.currency or "EUR",
+        locale=locale,
         message=data.message,
     )
 
     # Call AI
+    from app.modules.boq.ai_prompts import with_locale
+
     try:
         raw_response, _tokens = await call_ai(
             provider=provider,
             api_key=api_key,
-            system=BOQ_CHAT_SYSTEM_PROMPT,
+            system=with_locale(BOQ_CHAT_SYSTEM_PROMPT, locale),
             prompt=prompt,
             max_tokens=4096,
         )
@@ -1698,8 +1810,16 @@ async def export_boq_pdf(
     - Cover page: project name, BOQ title, cost summary, date, status
     - BOQ table pages: sections, positions, subtotals, markups, totals
     - Running headers/footers with page numbering
+
+    For large BOQs (> 500 positions), a simplified summary report is generated
+    to avoid memory issues and connection resets on Windows.
     """
-    from app.modules.boq.pdf_export import generate_boq_pdf
+    from app.modules.boq.pdf_export import (
+        LARGE_BOQ_THRESHOLD,
+        count_boq_positions,
+        generate_boq_pdf,
+        generate_boq_pdf_simple,
+    )
     from app.modules.projects.repository import ProjectRepository
     from app.modules.users.models import User
 
@@ -1720,12 +1840,36 @@ async def export_boq_pdf(
     if owner is not None:
         prepared_by = owner.full_name or owner.email
 
-    pdf_bytes = generate_boq_pdf(
-        boq_data=boq_data,
-        project_name=project.name,
-        currency=project.currency or "EUR",
-        prepared_by=prepared_by,
-    )
+    try:
+        position_count = count_boq_positions(boq_data)
+
+        if position_count > LARGE_BOQ_THRESHOLD:
+            _log.info(
+                "BOQ %s has %d positions (> %d) — generating simplified PDF",
+                boq_id,
+                position_count,
+                LARGE_BOQ_THRESHOLD,
+            )
+            pdf_bytes = generate_boq_pdf_simple(
+                boq_data=boq_data,
+                project_name=project.name,
+                currency=project.currency or "EUR",
+                prepared_by=prepared_by,
+            )
+        else:
+            pdf_bytes = generate_boq_pdf(
+                boq_data=boq_data,
+                project_name=project.name,
+                currency=project.currency or "EUR",
+                prepared_by=prepared_by,
+            )
+    except Exception:
+        _log.exception("PDF generation failed for BOQ %s", boq_id)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="PDF generation failed. The BOQ may be too large or contain "
+            "invalid data. Please try exporting as Excel or CSV instead.",
+        )
 
     safe_name = (
         boq_data.name.encode("ascii", errors="replace")
@@ -1734,11 +1878,20 @@ async def export_boq_pdf(
     )
     filename = f"{safe_name}.pdf"
 
+    def _iter_pdf_chunks() -> Iterator[bytes]:
+        """Yield PDF bytes in chunks to enable true streaming."""
+        chunk_size = 64 * 1024  # 64 KB chunks
+        offset = 0
+        while offset < len(pdf_bytes):
+            yield pdf_bytes[offset : offset + chunk_size]
+            offset += chunk_size
+
     return StreamingResponse(
-        io.BytesIO(pdf_bytes),
+        _iter_pdf_chunks(),
         media_type="application/pdf",
         headers={
             "Content-Disposition": f'attachment; filename="{filename}"',
+            "Content-Length": str(len(pdf_bytes)),
         },
     )
 
@@ -2386,7 +2539,7 @@ async def _extract_from_cad(content: bytes, ext: str, filename: str) -> dict[str
             "text": (
                 f"CAD file detected (.{ext}) but no DDC converter found.\n"
                 f"Download DDC converters from:\n"
-                f"https://github.com/datadrivenconstructionIO/ddc-community-toolkit/releases\n"
+                f"https://github.com/datadrivenconstruction/ddc-community-toolkit/releases\n"
                 f"Place .exe files in one of these locations:\n"
                 f"  - converters/bin/ (project root)\n"
                 f"  - ~/.openestimator/converters/\n"

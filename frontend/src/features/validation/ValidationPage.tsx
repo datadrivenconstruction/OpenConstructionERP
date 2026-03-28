@@ -16,7 +16,7 @@ import {
   Filter,
   ExternalLink,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Skeleton } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Skeleton, Breadcrumb } from '@/shared/ui';
 import { apiGet, apiPost } from '@/shared/lib/api';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
@@ -518,6 +518,11 @@ export function ValidationPage() {
 
   return (
     <div className="max-w-content mx-auto animate-fade-in">
+      <Breadcrumb items={[
+        { label: t('nav.dashboard', 'Dashboard'), to: '/' },
+        { label: t('validation.title', 'Validation Dashboard') },
+      ]} className="mb-4" />
+
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-content-primary">

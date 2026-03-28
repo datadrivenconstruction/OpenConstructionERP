@@ -20,15 +20,7 @@ export const manifest: ModuleManifest = {
       component: BenchmarkModule,
     },
   ],
-  navItems: [
-    {
-      labelKey: 'nav.benchmarks',
-      to: '/benchmarks',
-      icon: BarChart3,
-      group: 'tools',
-      advancedOnly: true,
-    },
-  ],
+  navItems: [],
   searchEntries: [
     {
       label: 'Cost Benchmarks',

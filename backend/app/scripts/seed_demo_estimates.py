@@ -619,7 +619,7 @@ async def main() -> None:
         # 1. Find or create a demo user
         # ------------------------------------------------------------------
         print("=" * 78)
-        print("  OpenEstimator.io  —  Demo Estimate Seeder")
+        print("  OpenConstructionERP  —  Demo Estimate Seeder")
         print("=" * 78)
 
         user = (
