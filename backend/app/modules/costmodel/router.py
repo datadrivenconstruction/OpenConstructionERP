@@ -359,3 +359,91 @@ async def generate_cash_flow(
     """Generate cash flow entries by spreading budget across schedule."""
     entries = await service.generate_cash_flow_from_schedule(project_id)
     return [_cash_flow_to_response(entry) for entry in entries]
+
+
+# ── Monte Carlo Cost Simulation ──────────────────────────────────────────────
+
+
+@router.post(
+    "/projects/{project_id}/5d/monte-carlo",
+    dependencies=[Depends(RequirePermission("costmodel.read"))],
+)
+async def run_monte_carlo(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    iterations: int = Query(default=1000, ge=100, le=5000),
+) -> dict:
+    """Run Monte Carlo cost risk simulation.
+
+    Generates N random cost outcomes based on category-level uncertainty,
+    then returns percentile estimates (P50, P80, P95) and a histogram.
+    """
+    import random
+
+    from sqlalchemy import Float, func, select
+    from sqlalchemy.sql.expression import cast
+
+    from app.modules.costmodel.models import BudgetLine
+
+    stmt = (
+        select(
+            BudgetLine.category,
+            func.sum(cast(BudgetLine.planned_amount, Float)).label("planned"),
+        )
+        .where(BudgetLine.project_id == project_id, BudgetLine.is_active.is_(True))
+        .group_by(BudgetLine.category)
+    )
+    result = await session.execute(stmt)
+    categories = [{"category": r[0], "planned": float(r[1] or 0)} for r in result.all()]
+
+    bac = sum(c["planned"] for c in categories)
+    if bac <= 0:
+        from fastapi import HTTPException
+
+        raise HTTPException(400, detail="No budget data. Generate budget from BOQ first.")
+
+    # Uncertainty by category (standard deviation as fraction of planned)
+    uncertainty = {
+        "material": 0.12, "labor": 0.08, "equipment": 0.10,
+        "subcontractor": 0.15, "overhead": 0.05, "contingency": 0.20,
+    }
+
+    results: list[float] = []
+    for _ in range(iterations):
+        total = 0.0
+        for cat in categories:
+            std = uncertainty.get(cat["category"], 0.10)
+            simulated = random.gauss(cat["planned"], cat["planned"] * std)
+            total += max(0, simulated)
+        results.append(round(total, 2))
+
+    results.sort()
+    n = len(results)
+    mean = sum(results) / n
+
+    # Histogram (10 bins)
+    mn, mx = results[0], results[-1]
+    step = (mx - mn) / 10 if mx > mn else 1
+    histogram = []
+    for i in range(10):
+        lo = mn + i * step
+        hi = mn + (i + 1) * step
+        if i < 9:
+            count = sum(1 for v in results if lo <= v < hi)
+        else:
+            count = sum(1 for v in results if lo <= v <= hi)
+        histogram.append({"from": round(lo, 0), "to": round(hi, 0), "count": count})
+
+    return {
+        "iterations": n,
+        "bac": round(bac, 2),
+        "min": results[0],
+        "max": results[-1],
+        "mean": round(mean, 2),
+        "p50": results[int(n * 0.50)],
+        "p80": results[int(n * 0.80)],
+        "p95": results[int(n * 0.95)],
+        "std_dev": round((sum((r - mean) ** 2 for r in results) / n) ** 0.5, 2),
+        "histogram": histogram,
+    }
