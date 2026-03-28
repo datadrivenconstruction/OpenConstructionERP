@@ -6,6 +6,7 @@ Endpoints:
     GET  /regions    -- List loaded catalog regions with counts
     POST /import/{region} -- Download catalog from GitHub and import
     DELETE /region/{region} -- Remove all resources for a region
+    PATCH /adjust-prices -- Bulk price adjustment by factor
     GET  /{resource_id}  -- Get single resource by ID
     POST /           -- Create a custom resource (auth required)
     POST /extract    -- Extract resources from cost items (admin)
@@ -202,6 +203,79 @@ async def delete_catalog_region(
     deleted = await repo.delete_by_region(region)
     logger.info("Deleted %d catalog resources for region %s", deleted, region)
     return {"deleted": deleted, "region": region}
+
+
+# ── Bulk Price Adjustment ─────────────────────────────────────────────────
+
+
+@router.patch(
+    "/adjust-prices",
+    dependencies=[Depends(RequirePermission("catalog.create"))],
+)
+async def adjust_prices(
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    factor: float = Query(..., description="Multiplication factor (e.g. 1.05 for +5%)"),
+    resource_type: str | None = Query(
+        default=None, description="Filter by type: material, labor, equipment"
+    ),
+    category: str | None = Query(default=None, description="Filter by category"),
+    region: str | None = Query(default=None, description="Filter by region"),
+) -> dict:
+    """Adjust prices by a factor for filtered resources.
+
+    Use cases:
+    - Inflation adjustment: factor=1.05 (+5%)
+    - Regional coefficient: factor=1.12 (Munich vs Berlin)
+    - Discount: factor=0.95 (-5%)
+    """
+    from sqlalchemy import text
+
+    filter_clauses = ["is_active = 1"]
+    params: dict[str, object] = {"factor": factor}
+    if resource_type:
+        filter_clauses.append("resource_type = :resource_type")
+        params["resource_type"] = resource_type
+    if category:
+        filter_clauses.append("category = :category")
+        params["category"] = category
+    if region:
+        filter_clauses.append("region = :region")
+        params["region"] = region
+
+    where = " AND ".join(filter_clauses)
+
+    sql = text(f"""
+        UPDATE oe_catalog_resource
+        SET base_price = CAST(ROUND(CAST(base_price AS REAL) * :factor, 2) AS TEXT),
+            min_price = CAST(ROUND(CAST(min_price AS REAL) * :factor, 2) AS TEXT),
+            max_price = CAST(ROUND(CAST(max_price AS REAL) * :factor, 2) AS TEXT),
+            updated_at = datetime('now')
+        WHERE {where}
+    """)
+
+    result = await session.execute(sql, params)
+    await session.commit()
+    count = result.rowcount
+
+    logger.info(
+        "Adjusted %d resource prices by factor %.4f (type=%s, category=%s, region=%s)",
+        count,
+        factor,
+        resource_type,
+        category,
+        region,
+    )
+
+    return {
+        "adjusted": count,
+        "factor": factor,
+        "filters": {
+            "resource_type": resource_type,
+            "category": category,
+            "region": region,
+        },
+    }
 
 
 # ── Search / List ─────────────────────────────────────────────────────────

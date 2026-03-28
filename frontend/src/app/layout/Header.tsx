@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Search, ChevronDown, LogOut, User, Settings, Menu, MessageSquarePlus, FolderOpen, Bell, CheckCircle2, XCircle, AlertTriangle, Info, Trash2 } from 'lucide-react';
 import clsx from 'clsx';
 import { SUPPORTED_LANGUAGES, getLanguageByCode } from '../i18n';
@@ -8,6 +9,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore, type HistoryEntry } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { CountryFlag } from '@/shared/ui';
+import { apiGet } from '@/shared/lib/api';
 
 /** Map English page titles (passed from App.tsx routes) to i18n keys. */
 const TITLE_I18N_MAP: Record<string, string> = {
@@ -108,24 +110,8 @@ export function Header({ title, onMenuClick, onFeedbackClick }: HeaderProps) {
           <h1 className="text-base font-semibold text-content-primary truncate sm:text-lg">{translatedTitle}</h1>
         )}
 
-        {/* Active project indicator */}
-        {activeProjectId && (
-          <button
-            onClick={() => navigate(`/projects/${activeProjectId}`)}
-            className={clsx(
-              'hidden sm:flex items-center gap-1.5 rounded-lg px-2.5 py-1',
-              'bg-oe-blue-subtle text-oe-blue',
-              'text-xs font-medium',
-              'transition-all duration-fast ease-oe',
-              'hover:bg-oe-blue/10',
-              'max-w-[180px]',
-            )}
-            title={activeProjectName}
-          >
-            <FolderOpen size={13} className="shrink-0" />
-            <span className="truncate">{activeProjectName || t('projects.title', 'Project')}</span>
-          </button>
-        )}
+        {/* Active project switcher */}
+        <ProjectSwitcher />
       </div>
 
       {/* Right */}
@@ -549,6 +535,100 @@ function UserMenu() {
             <LogOut size={14} />
             {t('auth.logout', 'Sign out')}
           </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Project Switcher (global dropdown in header) ─────────────────────── */
+
+function ProjectSwitcher() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+  const activeProjectName = useProjectContextStore((s) => s.activeProjectName);
+  const setActiveProject = useProjectContextStore((s) => s.setActiveProject);
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const { data: projects } = useQuery({
+    queryKey: ['projects-switcher'],
+    queryFn: () => apiGet<Array<{ id: string; name: string }>>('/v1/projects/?limit=20'),
+    staleTime: 60_000,
+    enabled: open,
+  });
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [open]);
+
+  return (
+    <div className="relative hidden sm:block" ref={ref}>
+      <button
+        onClick={() => setOpen(!open)}
+        className={clsx(
+          'flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-all',
+          activeProjectId
+            ? 'bg-oe-blue-subtle text-oe-blue hover:bg-oe-blue/10 max-w-[200px]'
+            : 'text-content-tertiary hover:text-content-primary hover:bg-surface-secondary',
+        )}
+      >
+        <FolderOpen size={13} className="shrink-0" />
+        <span className="truncate">
+          {activeProjectName || t('schedule.select_project', { defaultValue: 'Select Project' })}
+        </span>
+        <ChevronDown size={12} className="shrink-0 text-content-quaternary" />
+      </button>
+
+      {open && (
+        <div className="absolute top-full left-0 mt-1 z-50 w-56 rounded-xl border border-border bg-surface-elevated shadow-xl overflow-hidden animate-fade-in">
+          <div className="px-3 py-2 border-b border-border-light">
+            <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
+              {t('schedule.switch_project', { defaultValue: 'Switch Project' })}
+            </p>
+          </div>
+          <div className="max-h-60 overflow-y-auto py-1">
+            {projects?.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => { setActiveProject(p.id, p.name); setOpen(false); }}
+                className={clsx(
+                  'flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors',
+                  p.id === activeProjectId
+                    ? 'bg-oe-blue-subtle text-oe-blue font-medium'
+                    : 'text-content-primary hover:bg-surface-secondary',
+                )}
+              >
+                <FolderOpen size={14} className="shrink-0" />
+                <span className="truncate">{p.name}</span>
+              </button>
+            ))}
+          </div>
+          {activeProjectId && (
+            <div className="border-t border-border-light px-3 py-2">
+              <button
+                onClick={() => { navigate(`/projects/${activeProjectId}`); setOpen(false); }}
+                className="text-xs text-oe-blue hover:underline"
+              >
+                {t('projects.open_details', { defaultValue: 'Open Project Details →' })}
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -18,7 +18,7 @@ import {
   FileBarChart,
   ShieldAlert,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Skeleton, Input, InfoHint, SkeletonTable, Breadcrumb } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Input, InfoHint, SkeletonTable, Breadcrumb } from '@/shared/ui';
 import { apiGet } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
@@ -75,8 +75,10 @@ function formatDate(dateStr: string): string {
 }
 
 function daysBetween(start: string, end: string): number {
-  const ms = new Date(end).getTime() - new Date(start).getTime();
-  return Math.max(1, Math.ceil(ms / (1000 * 60 * 60 * 24)));
+  const s = new Date(start).getTime();
+  const e = new Date(end).getTime();
+  if (isNaN(s) || isNaN(e)) return 1;
+  return Math.max(1, Math.ceil((e - s) / (1000 * 60 * 60 * 24)));
 }
 
 function statusColor(status: string): {
@@ -342,6 +344,8 @@ const PIXELS_PER_DAY: Record<ZoomLevel, number> = {
   month: 2,
 };
 
+const ROW_HEIGHT = 44;
+
 function GanttChart({
   activities,
   onUpdateProgress,
@@ -355,41 +359,21 @@ function GanttChart({
 }) {
   const { t } = useTranslation();
   const ganttBodyRef = useRef<HTMLDivElement>(null);
-  const [bodyMetrics, setBodyMetrics] = useState<{
-    rowHeight: number;
-    containerWidth: number;
-  } | null>(null);
+  const ganttScrollRef = useRef<HTMLDivElement>(null);
+  // Debounced progress updates
+  const [pendingProgress, setPendingProgress] = useState<Record<string, number>>({});
 
-  // Measure the gantt body for SVG overlay dimensions
   useEffect(() => {
-    const container = ganttBodyRef.current;
-    if (!container || activities.length === 0) return;
-
-    const measure = () => {
-      const firstRow = container.querySelector<HTMLElement>('[data-gantt-row]');
-      if (!firstRow) return;
-
-      // Find the first right-panel element to get its width
-      const rightPanel = firstRow.querySelector<HTMLElement>('[data-gantt-bar-area]');
-      if (!rightPanel) return;
-
-      const firstRowRect = firstRow.getBoundingClientRect();
-      const containerRect = rightPanel.getBoundingClientRect();
-
-      setBodyMetrics({
-        rowHeight: firstRowRect.height,
-        containerWidth: containerRect.width,
-      });
-    };
-
-    // Measure after paint
-    requestAnimationFrame(measure);
-
-    const observer = new ResizeObserver(measure);
-    observer.observe(container);
-
-    return () => observer.disconnect();
-  }, [activities]);
+    const entries = Object.entries(pendingProgress);
+    if (entries.length === 0) return;
+    const timer = setTimeout(() => {
+      for (const [id, pct] of entries) {
+        onUpdateProgress(id, pct);
+      }
+      setPendingProgress({});
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [pendingProgress, onUpdateProgress]);
 
   // Compute timeline bounds
   const { timelineStart, timelineEnd, totalDays } = useMemo(() => {
@@ -406,8 +390,16 @@ function GanttChart({
       };
     }
 
-    const starts = activities.map((a) => new Date(a.start_date).getTime());
-    const ends = activities.map((a) => new Date(a.end_date).getTime());
+    const starts = activities.map((a) => new Date(a.start_date).getTime()).filter((t) => !isNaN(t));
+    const ends = activities.map((a) => new Date(a.end_date).getTime()).filter((t) => !isNaN(t));
+    if (starts.length === 0 || ends.length === 0) {
+      const now = new Date();
+      const fallbackStart = new Date(now);
+      fallbackStart.setDate(fallbackStart.getDate() - 7);
+      const fallbackEnd = new Date(now);
+      fallbackEnd.setDate(fallbackEnd.getDate() + 30);
+      return { timelineStart: fallbackStart, timelineEnd: fallbackEnd, totalDays: 37 };
+    }
     const minStart = new Date(Math.min(...starts));
     const maxEnd = new Date(Math.max(...ends));
 
@@ -540,17 +532,17 @@ function GanttChart({
     return links;
   }, [activities]);
 
-  // Compute SVG arrow paths when metrics are available
+  // Compute SVG arrow paths
   const arrowPaths = useMemo(() => {
-    if (!bodyMetrics || dependencyLinks.length === 0) return [];
+    if (dependencyLinks.length === 0 || timelineWidthPx === 0) return [];
     return computeArrowPaths(
       dependencyLinks,
       activityIndex,
       barPositions,
-      bodyMetrics.rowHeight,
-      bodyMetrics.containerWidth,
+      ROW_HEIGHT,
+      timelineWidthPx,
     );
-  }, [dependencyLinks, activityIndex, barPositions, bodyMetrics]);
+  }, [dependencyLinks, activityIndex, barPositions, timelineWidthPx]);
 
   if (activities.length === 0) {
     return (
@@ -564,221 +556,227 @@ function GanttChart({
     );
   }
 
+  // Calculate today marker position
+  const todayOffset = daysBetween(timelineStart.toISOString(), new Date().toISOString());
+  const todayPct = (todayOffset / totalDays) * 100;
+
+  // Sort activities for stable rendering
+  const sortedActivities = activities;
+
   return (
     <Card padding="none" className="overflow-hidden">
-      {/* Header */}
-      <div className="flex border-b border-border-light bg-surface-secondary/50">
-        {/* Left panel header */}
-        <div className="w-[420px] shrink-0 border-r border-border-light px-4 py-2.5">
-          <div className="grid grid-cols-[1fr_70px_70px_50px] gap-2 text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-            <span>{t('schedule.activity', 'Activity')}</span>
-            <span>{t('schedule.start', 'Start')}</span>
-            <span>{t('schedule.end', 'End')}</span>
-            <span className="text-right">%</span>
+      <div className="flex">
+        {/* LEFT: fixed activity list */}
+        <div className="w-[280px] shrink-0 border-r border-border-light">
+          {/* Header labels */}
+          <div className="flex h-10 items-center border-b border-border-light bg-surface-secondary/50 px-3">
+            <span className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+              {t('schedule.activity', 'Activity')}
+            </span>
           </div>
-        </div>
-        {/* Right panel header — timeline markers */}
-        <div className="min-w-0 flex-1 overflow-x-auto">
-          <div
-            className="relative px-2 py-2.5"
-            style={{ minWidth: timelineWidthPx }}
-          >
-            {timelineMarkers.map((marker) => (
-              <span
-                key={marker.label + marker.offsetPct}
-                className="absolute top-2.5 text-2xs font-medium text-content-tertiary"
-                style={{ left: `${marker.offsetPct}%` }}
+          {/* Activity rows — left panel */}
+          {sortedActivities.map((activity) => {
+            const cpActive = criticalActivityIds != null && criticalActivityIds.size > 0;
+            const isCritical = criticalActivityIds?.has(activity.id) ?? false;
+            const sc = isCritical
+              ? { bg: 'bg-semantic-error/20', fill: 'bg-semantic-error', text: 'text-semantic-error', variant: 'error' as const }
+              : cpActive
+                ? { bg: 'bg-oe-blue-subtle', fill: 'bg-oe-blue/30', text: 'text-oe-blue', variant: 'neutral' as const }
+                : statusColor(activity.status);
+            const isMilestone = activity.activity_type === 'milestone';
+            const isSummary = activity.activity_type === 'summary';
+            const displayProgress = pendingProgress[activity.id] ?? activity.progress_pct;
+
+            return (
+              <div
+                key={activity.id}
+                className="flex items-start gap-2 border-b border-border-light px-3 transition-colors hover:bg-surface-secondary/30"
+                style={{ height: ROW_HEIGHT }}
               >
-                {marker.label}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Body rows */}
-      <div ref={ganttBodyRef} className="relative divide-y divide-border-light">
-        {activities.map((activity) => {
-          const cpActive = criticalActivityIds != null && criticalActivityIds.size > 0;
-          const isCritical = criticalActivityIds?.has(activity.id) ?? false;
-          const sc = isCritical
-            ? {
-                bg: 'bg-[#ef4444]/20',
-                fill: 'bg-[#ef4444]',
-                text: 'text-[#ef4444]',
-                variant: 'error' as const,
-              }
-            : cpActive
-              ? {
-                  bg: 'bg-[#93c5fd]/30',
-                  fill: 'bg-[#93c5fd]',
-                  text: 'text-[#93c5fd]',
-                  variant: 'neutral' as const,
-                }
-              : statusColor(activity.status);
-          const barStyle = getBarStyle(activity);
-          const isMilestone = activity.activity_type === 'milestone';
-          const isSummary = activity.activity_type === 'summary';
-
-          return (
-            <div
-              key={activity.id}
-              data-gantt-row
-              className="flex transition-colors hover:bg-surface-secondary/30"
-            >
-              {/* Left panel — activity info */}
-              <div className="w-[420px] shrink-0 border-r border-border-light px-4 py-2.5">
-                <div className="grid grid-cols-[1fr_70px_70px_50px] items-center gap-2">
-                  {/* Name + WBS */}
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      {isCritical && (
-                        <span className="shrink-0 rounded bg-[#ef4444] px-1 py-0.5 text-[9px] font-bold leading-none text-white">
-                          CP
-                        </span>
-                      )}
-                      {isMilestone && (
-                        <Diamond size={12} className={`shrink-0 ${sc.text}`} fill="currentColor" />
-                      )}
-                      {isSummary && <Minus size={12} className="shrink-0 text-content-tertiary" />}
-                      <span className="text-sm font-medium text-content-primary truncate">
-                        {activity.name}
-                      </span>
-                    </div>
-                    {activity.wbs_code && (
-                      <span className="text-2xs font-mono text-content-tertiary">
-                        {activity.wbs_code}
+                <div className="flex min-w-0 flex-1 flex-col justify-center py-1.5" style={{ height: ROW_HEIGHT }}>
+                  <div className="flex items-center gap-1.5">
+                    {isCritical && (
+                      <span className="shrink-0 rounded bg-semantic-error px-1 py-0.5 text-[9px] font-bold leading-none text-white">
+                        CP
                       </span>
                     )}
+                    {isMilestone && (
+                      <Diamond size={10} className={`shrink-0 ${sc.text}`} fill="currentColor" />
+                    )}
+                    {isSummary && <Minus size={10} className="shrink-0 text-content-tertiary" />}
+                    <span className="text-xs font-medium text-content-primary truncate">
+                      {activity.name}
+                    </span>
                   </div>
-
-                  {/* Dates */}
-                  <span className="text-2xs tabular-nums text-content-secondary">
-                    {formatDate(activity.start_date)}
-                  </span>
-                  <span className="text-2xs tabular-nums text-content-secondary">
-                    {formatDate(activity.end_date)}
-                  </span>
-
-                  {/* Progress */}
-                  <div className="flex items-center justify-end gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xs tabular-nums text-content-tertiary">
+                      {formatDate(activity.start_date)} &mdash; {formatDate(activity.end_date)}
+                    </span>
                     <Badge variant={sc.variant} size="sm">
-                      {activity.progress_pct}%
+                      {displayProgress}%
                     </Badge>
                   </div>
                 </div>
-
                 {/* Progress slider */}
-                <div className="mt-1.5 flex items-center gap-2">
+                <div className="flex shrink-0 items-center" style={{ height: ROW_HEIGHT }}>
                   <input
                     type="range"
                     min={0}
                     max={100}
                     step={5}
-                    value={activity.progress_pct}
-                    onChange={(e) => onUpdateProgress(activity.id, Number(e.target.value))}
-                    className="h-1 w-full cursor-pointer appearance-none rounded-full bg-surface-secondary accent-oe-blue [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-oe-blue [&::-webkit-slider-thumb]:shadow-sm"
+                    value={displayProgress}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      setPendingProgress((prev) => ({ ...prev, [activity.id]: val }));
+                    }}
+                    className="h-1 w-12 cursor-pointer appearance-none rounded-full bg-surface-secondary accent-oe-blue [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-oe-blue [&::-webkit-slider-thumb]:shadow-sm"
                   />
                 </div>
               </div>
+            );
+          })}
+        </div>
 
-              {/* Right panel — gantt bar */}
-              <div className="min-w-0 flex-1 overflow-x-auto">
-                <div
-                  data-gantt-bar-area
-                  className="relative px-2 py-2.5"
-                  style={{ minWidth: timelineWidthPx }}
+        {/* RIGHT: single scroll container for header + bars + arrows */}
+        <div ref={ganttScrollRef} className="min-w-0 flex-1 overflow-x-auto">
+          <div style={{ minWidth: timelineWidthPx }} className="relative">
+            {/* Timeline header markers */}
+            <div className="relative h-10 border-b border-border-light bg-surface-secondary/50">
+              {timelineMarkers.map((marker) => (
+                <span
+                  key={marker.label + marker.offsetPct}
+                  className="absolute top-2.5 text-2xs font-medium text-content-tertiary"
+                  style={{ left: `${marker.offsetPct}%` }}
                 >
-                {/* Vertical grid lines for timeline markers */}
-                {timelineMarkers.map((marker) => (
+                  {marker.label}
+                </span>
+              ))}
+            </div>
+
+            {/* Activity rows — gantt bars */}
+            <div ref={ganttBodyRef}>
+              {sortedActivities.map((activity) => {
+                const cpActive = criticalActivityIds != null && criticalActivityIds.size > 0;
+                const isCritical = criticalActivityIds?.has(activity.id) ?? false;
+                const sc = isCritical
+                  ? { bg: 'bg-semantic-error/20', fill: 'bg-semantic-error', text: 'text-semantic-error', variant: 'error' as const }
+                  : cpActive
+                    ? { bg: 'bg-oe-blue-subtle', fill: 'bg-oe-blue/30', text: 'text-oe-blue', variant: 'neutral' as const }
+                    : statusColor(activity.status);
+                const barStyle = getBarStyle(activity);
+                const isMilestone = activity.activity_type === 'milestone';
+                const displayProgress = pendingProgress[activity.id] ?? activity.progress_pct;
+
+                return (
                   <div
-                    key={`grid-${marker.label}-${marker.offsetPct}`}
-                    className="absolute top-0 bottom-0 w-px bg-border-light/50"
-                    style={{ left: `${marker.offsetPct}%` }}
+                    key={activity.id}
+                    data-gantt-row
+                    className="relative border-b border-border-light"
+                    style={{ height: ROW_HEIGHT }}
+                  >
+                    {/* Vertical grid lines */}
+                    {timelineMarkers.map((marker) => (
+                      <div
+                        key={`grid-${marker.label}-${marker.offsetPct}`}
+                        className="absolute top-0 bottom-0 w-px bg-border-light/50"
+                        style={{ left: `${marker.offsetPct}%` }}
+                      />
+                    ))}
+
+                    {isMilestone ? (
+                      /* Diamond marker for milestones */
+                      <div
+                        className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2"
+                        style={{ left: barStyle.left }}
+                      >
+                        <Diamond
+                          size={16}
+                          className={sc.text}
+                          fill="currentColor"
+                          strokeWidth={1.5}
+                        />
+                        {isCritical && (
+                          <span className="absolute -top-3 left-1/2 -translate-x-1/2 flex h-4 items-center rounded bg-semantic-error px-1 text-[9px] font-bold leading-none text-white shadow-sm">
+                            CP
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      /* Standard bar */
+                      <div
+                        className={`absolute top-1/2 -translate-y-1/2 h-7 rounded-md ${sc.bg} transition-all duration-200${isCritical ? ' ring-2 ring-semantic-error/60' : ''}`}
+                        style={barStyle}
+                      >
+                        {/* Progress fill */}
+                        <div
+                          className={`h-full rounded-md ${sc.fill} transition-all duration-300`}
+                          style={{ width: `${displayProgress}%` }}
+                        />
+                        {/* CP badge for critical path activities */}
+                        {isCritical && (
+                          <span className="absolute -top-2.5 -right-1 flex h-4 items-center rounded bg-semantic-error px-1 text-[9px] font-bold leading-none text-white shadow-sm">
+                            CP
+                          </span>
+                        )}
+                        {/* Label overlay */}
+                        {parseFloat(barStyle.width) > 4 && (
+                          <span className="absolute inset-0 flex items-center px-2 text-2xs font-medium text-content-primary truncate">
+                            {activity.name}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Dependency arrow SVG overlay — same scroll context */}
+            {arrowPaths.length > 0 && (
+              <svg
+                className="pointer-events-none absolute top-10 left-0"
+                style={{ width: '100%', height: sortedActivities.length * ROW_HEIGHT }}
+                overflow="visible"
+              >
+                <defs>
+                  <marker
+                    id="gantt-arrowhead"
+                    markerWidth="8"
+                    markerHeight="6"
+                    refX="7"
+                    refY="3"
+                    orient="auto"
+                    markerUnits="userSpaceOnUse"
+                  >
+                    <path d="M 0 0 L 8 3 L 0 6 Z" fill="#94a3b8" />
+                  </marker>
+                </defs>
+                {arrowPaths.map((arrow) => (
+                  <path
+                    key={arrow.key}
+                    d={arrow.d}
+                    fill="none"
+                    stroke="#94a3b8"
+                    strokeWidth={1.5}
+                    markerEnd={arrow.markerEnd}
                   />
                 ))}
+              </svg>
+            )}
 
-                {isMilestone ? (
-                  /* Diamond marker for milestones */
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2"
-                    style={{ left: barStyle.left }}
-                  >
-                    <Diamond
-                      size={16}
-                      className={sc.text}
-                      fill="currentColor"
-                      strokeWidth={1.5}
-                    />
-                    {isCritical && (
-                      <span className="absolute -top-3 left-1/2 -translate-x-1/2 flex h-4 items-center rounded bg-[#ef4444] px-1 text-[9px] font-bold leading-none text-white shadow-sm">
-                        CP
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  /* Standard bar */
-                  <div
-                    className={`absolute top-1/2 -translate-y-1/2 h-7 rounded-md ${sc.bg} transition-all duration-200${isCritical ? ' ring-2 ring-[#ef4444]/60' : ''}`}
-                    style={barStyle}
-                  >
-                    {/* Progress fill */}
-                    <div
-                      className={`h-full rounded-md ${sc.fill} transition-all duration-300`}
-                      style={{ width: `${activity.progress_pct}%` }}
-                    />
-                    {/* CP badge for critical path activities */}
-                    {isCritical && (
-                      <span className="absolute -top-2.5 -right-1 flex h-4 items-center rounded bg-[#ef4444] px-1 text-[9px] font-bold leading-none text-white shadow-sm">
-                        CP
-                      </span>
-                    )}
-                    {/* Label overlay */}
-                    {parseFloat(barStyle.width) > 4 && (
-                      <span className="absolute inset-0 flex items-center px-2 text-2xs font-medium text-content-primary truncate">
-                        {activity.name}
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-              </div>
-            </div>
-          );
-        })}
-
-        {/* Dependency arrow SVG overlay */}
-        {arrowPaths.length > 0 && bodyMetrics && (
-          <svg
-            className="pointer-events-none absolute top-0 right-0 bottom-0"
-            style={{ width: bodyMetrics.containerWidth, left: 420 + 8 }}
-            overflow="visible"
-          >
-            <defs>
-              <marker
-                id="gantt-arrowhead"
-                markerWidth="8"
-                markerHeight="6"
-                refX="7"
-                refY="3"
-                orient="auto"
-                markerUnits="userSpaceOnUse"
+            {/* Today marker */}
+            {todayPct >= 0 && todayPct <= 100 && (
+              <div
+                className="absolute top-0 bottom-0 w-px bg-red-500 z-10 pointer-events-none"
+                style={{ left: `${todayPct}%` }}
               >
-                <path d="M 0 0 L 8 3 L 0 6 Z" fill="#94a3b8" />
-              </marker>
-            </defs>
-            {arrowPaths.map((arrow) => (
-              <path
-                key={arrow.key}
-                d={arrow.d}
-                fill="none"
-                stroke="#94a3b8"
-                strokeWidth={1.5}
-                markerEnd={arrow.markerEnd}
-              />
-            ))}
-          </svg>
-        )}
+                <div className="absolute -top-0 left-1/2 -translate-x-1/2 rounded bg-red-500 px-1.5 py-0.5 text-[9px] font-bold text-white whitespace-nowrap">
+                  {t('schedule.today', { defaultValue: 'Today' })}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </Card>
   );
@@ -1471,6 +1469,26 @@ export function SchedulePage() {
           { label: t('schedule.title', '4D Schedule'), to: '/schedule' },
           { label: selectedProject.name },
         ]} className="mb-4" />
+
+        {/* Project switcher */}
+        {projects && projects.length > 1 && (
+          <div className="mb-4 flex items-center gap-2">
+            <span className="text-xs text-content-tertiary">{t('schedule.project', { defaultValue: 'Project:' })}</span>
+            <select
+              value={selectedProject.id}
+              onChange={(e) => {
+                const p = projects.find((pr) => pr.id === e.target.value);
+                if (p) setActiveProject(p.id, p.name);
+              }}
+              className="h-8 rounded-lg border border-border bg-surface-primary px-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+            >
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <ProjectSchedules
           project={selectedProject}
           onBack={() => useProjectContextStore.getState().clearProject()}
