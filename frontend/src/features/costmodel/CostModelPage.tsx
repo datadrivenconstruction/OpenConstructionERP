@@ -13,7 +13,8 @@ import {
   Activity,
 } from 'lucide-react';
 import { Card, CardHeader, CardContent, Button, Badge, EmptyState, Skeleton, InfoHint } from '@/shared/ui';
-import { apiGet } from '@/shared/lib/api';
+import { apiGet, apiPost } from '@/shared/lib/api';
+import { useToastStore } from '@/stores/useToastStore';
 import {
   costModelApi,
   type SCurvePoint,
@@ -949,6 +950,26 @@ function WhatIfPanel({
       {isExpanded && (
         <CardContent>
           <div className="space-y-5">
+            {/* Presets */}
+            <div className="flex flex-wrap gap-2">
+              <button onClick={() => { setMaterialPct(-10); setLaborPct(-5); setDurationPct(-10); setResult(null); }}
+                className="px-3 py-1.5 text-xs font-medium rounded-lg border border-green-300 text-green-700 hover:bg-green-50 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900/20 transition-colors">
+                {t('costmodel.preset_optimistic', { defaultValue: 'Optimistic (-10%)' })}
+              </button>
+              <button onClick={() => { setMaterialPct(0); setLaborPct(0); setDurationPct(0); setResult(null); }}
+                className="px-3 py-1.5 text-xs font-medium rounded-lg border border-border text-content-secondary hover:bg-surface-secondary transition-colors">
+                {t('costmodel.preset_baseline', { defaultValue: 'Baseline (0%)' })}
+              </button>
+              <button onClick={() => { setMaterialPct(5); setLaborPct(3); setDurationPct(5); setResult(null); }}
+                className="px-3 py-1.5 text-xs font-medium rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-400 dark:hover:bg-amber-900/20 transition-colors">
+                {t('costmodel.preset_moderate', { defaultValue: 'Moderate (+5%)' })}
+              </button>
+              <button onClick={() => { setMaterialPct(15); setLaborPct(10); setDurationPct(20); setResult(null); }}
+                className="px-3 py-1.5 text-xs font-medium rounded-lg border border-red-300 text-red-700 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20 transition-colors">
+                {t('costmodel.preset_pessimistic', { defaultValue: 'Pessimistic (+15%)' })}
+              </button>
+            </div>
+
             {/* Sliders */}
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
               <SliderControl
@@ -1065,6 +1086,139 @@ function WhatIfPanel({
               </div>
             )}
           </div>
+        </CardContent>
+      )}
+    </Card>
+  );
+}
+
+/* ── Monte Carlo Panel ─────────────────────────────────────────────────── */
+
+interface MCResult {
+  iterations: number;
+  bac: number;
+  min: number;
+  max: number;
+  mean: number;
+  p50: number;
+  p80: number;
+  p95: number;
+  std_dev: number;
+  histogram: Array<{ from: number; to: number; count: number }>;
+}
+
+function MonteCarloPanel({ projectId, currency }: { projectId: string; currency: string }) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [result, setResult] = useState<MCResult | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const fmt = useCallback(
+    (n: number) => new Intl.NumberFormat(getIntlLocale(), { style: 'currency', currency: currency || 'EUR', maximumFractionDigits: 0 }).format(n),
+    [currency],
+  );
+
+  const runSimulation = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await apiPost<MCResult>(`/v1/costmodel/projects/${projectId}/5d/monte-carlo?iterations=1000`);
+      setResult(data);
+    } catch (err) {
+      addToast({ type: 'error', title: t('costmodel.mc_failed', { defaultValue: 'Simulation failed' }), message: err instanceof Error ? err.message : '' });
+    } finally {
+      setLoading(false);
+    }
+  }, [projectId, addToast, t]);
+
+  const maxCount = result ? Math.max(...result.histogram.map((b) => b.count)) : 0;
+
+  return (
+    <Card>
+      <div
+        className="flex items-center justify-between cursor-pointer px-5 py-4"
+        onClick={() => setIsExpanded((v) => !v)}
+        role="button"
+        tabIndex={0}
+        aria-expanded={isExpanded}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setIsExpanded((v) => !v); } }}
+      >
+        <div className="flex items-center gap-2">
+          <BarChart3 size={16} className="text-content-tertiary" />
+          <span className="text-sm font-semibold text-content-primary">
+            {t('costmodel.mc_title', { defaultValue: 'Cost Risk Simulation (Monte Carlo)' })}
+          </span>
+        </div>
+        <ChevronRight size={16} className={`text-content-tertiary transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+      </div>
+
+      {isExpanded && (
+        <CardContent>
+          <p className="text-xs text-content-tertiary mb-4">
+            {t('costmodel.mc_desc', { defaultValue: 'Runs 1,000 random simulations with category-level cost uncertainty to estimate probable total cost ranges.' })}
+          </p>
+
+          <Button variant="primary" size="sm" icon={<BarChart3 size={14} />} loading={loading} onClick={runSimulation}>
+            {t('costmodel.mc_run', { defaultValue: 'Run Simulation (1,000 iterations)' })}
+          </Button>
+
+          {result && (
+            <div className="mt-5 space-y-5 animate-fade-in">
+              {/* P50 / P80 / P95 cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {[
+                  { label: t('costmodel.mc_bac', { defaultValue: 'Budget (BAC)' }), value: result.bac, color: 'text-content-primary' },
+                  { label: 'P50', value: result.p50, color: 'text-oe-blue' },
+                  { label: 'P80', value: result.p80, color: 'text-semantic-warning' },
+                  { label: 'P95', value: result.p95, color: 'text-semantic-error' },
+                ].map((item) => (
+                  <div key={item.label} className="rounded-xl border border-border-light bg-surface-secondary/50 px-3 py-2.5">
+                    <p className="text-2xs font-semibold uppercase tracking-wider text-content-tertiary">{item.label}</p>
+                    <p className={`text-lg font-bold tabular-nums ${item.color}`}>{fmt(item.value)}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Histogram */}
+              <div>
+                <h4 className="text-xs font-medium text-content-secondary mb-2">
+                  {t('costmodel.mc_distribution', { defaultValue: 'Cost Distribution' })}
+                </h4>
+                <div className="flex items-end gap-1 h-32">
+                  {result.histogram.map((bin, i) => {
+                    const pct = maxCount > 0 ? (bin.count / maxCount) * 100 : 0;
+                    const isP50 = result.p50 >= bin.from && result.p50 < bin.to;
+                    const isP80 = result.p80 >= bin.from && result.p80 < bin.to;
+                    const isP95 = result.p95 >= bin.from && result.p95 < bin.to;
+                    return (
+                      <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
+                        <span className="text-2xs text-content-quaternary tabular-nums">{bin.count}</span>
+                        <div
+                          className={`w-full rounded-t transition-all ${
+                            isP95 ? 'bg-semantic-error' : isP80 ? 'bg-semantic-warning' : isP50 ? 'bg-oe-blue' : 'bg-oe-blue/30'
+                          }`}
+                          style={{ height: `${Math.max(2, pct)}%` }}
+                          title={`${fmt(bin.from)} — ${fmt(bin.to)}: ${bin.count} iterations`}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex justify-between text-2xs text-content-quaternary mt-1">
+                  <span>{fmt(result.min)}</span>
+                  <span>{fmt(result.max)}</span>
+                </div>
+              </div>
+
+              {/* Summary */}
+              <div className="flex flex-wrap gap-3 text-xs text-content-tertiary">
+                <span>{t('costmodel.mc_mean', { defaultValue: 'Mean' })}: {fmt(result.mean)}</span>
+                <span>{t('costmodel.mc_stddev', { defaultValue: 'Std Dev' })}: {fmt(result.std_dev)}</span>
+                <span>{t('costmodel.mc_range', { defaultValue: 'Range' })}: {fmt(result.min)} — {fmt(result.max)}</span>
+                <span>{result.iterations} {t('costmodel.mc_iterations', { defaultValue: 'iterations' })}</span>
+              </div>
+            </div>
+          )}
         </CardContent>
       )}
     </Card>
@@ -1260,6 +1414,9 @@ function FiveDDashboard({ project }: { project: Project }) {
         currency={currency}
         currentBAC={evmData?.bac ?? dashboard?.total_budget ?? 0}
       />
+
+      {/* Monte Carlo Cost Risk Simulation */}
+      <MonteCarloPanel projectId={project.id} currency={currency} />
 
       {/* Performance Indicators + S-Curve row */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
