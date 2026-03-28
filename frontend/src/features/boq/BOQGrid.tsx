@@ -37,6 +37,7 @@ import {
   TrendingUp,
   AlertTriangle,
   Tag,
+  Layers,
 } from 'lucide-react';
 
 import {
@@ -59,6 +60,7 @@ import {
   type FullGridContext,
 } from './grid/cellRenderers';
 import { countComments } from './CommentDrawer';
+import { fmtWithCurrency } from './boqHelpers';
 import { useToastStore } from '@/stores/useToastStore';
 import { getIntlLocale } from '@/shared/lib/formatters';
 
@@ -209,6 +211,7 @@ export interface BOQGridProps {
   onToggleSection: (sectionId: string) => void;
   highlightPositionId?: string;
   currencySymbol: string;
+  currencyCode: string;
   locale: string;
   footerRows: FooterRow[];
   onSelectionChanged?: (selectedIds: string[]) => void;
@@ -226,6 +229,8 @@ export interface BOQGridProps {
   anomalyMap?: Map<string, { severity: string; message: string; suggestion: number }>;
   /** Apply the suggested rate from an anomaly to a position */
   onApplyAnomalySuggestion?: (positionId: string, suggestedRate: number) => void;
+  /** Save a BOQ position as a reusable assembly */
+  onSaveAsAssembly?: (positionId: string) => void;
 }
 
 /** Imperative handle exposed by BOQGrid for external control (e.g. clearing selection). */
@@ -250,6 +255,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   onToggleSection,
   highlightPositionId,
   currencySymbol,
+  currencyCode,
   locale,
   footerRows,
   onSelectionChanged,
@@ -264,6 +270,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   // onCheckAnomalies is consumed by BOQToolbar, not directly by the grid
   anomalyMap,
   onApplyAnomalySuggestion,
+  onSaveAsAssembly,
 }, ref) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -349,6 +356,8 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   const gridContext: FullGridContext = useMemo(
     () => ({
       currencySymbol,
+      currencyCode,
+      locale,
       fmt,
       t,
       collapsedSections,
@@ -374,7 +383,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       anomalyMap,
       onApplyAnomalySuggestion,
     }),
-    [currencySymbol, fmt, t, collapsedSections, onToggleSection, onAddPosition,
+    [currencySymbol, currencyCode, locale, fmt, t, collapsedSections, onToggleSection, onAddPosition,
      expandedPositions, toggleResources, onRemoveResource, onUpdateResource,
      onSaveResourceToCatalog, onOpenCostDbForPosition,
      onDeletePosition, onSaveToDatabase, onAddComment,
@@ -383,7 +392,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
 
   /* ── Column defs (stable — only depends on translation function) ── */
   const columnDefs = useMemo(() => {
-    const defs = getColumnDefs({ currencySymbol, fmt, t });
+    const defs = getColumnDefs({ currencySymbol, currencyCode, locale, fmt, t });
     // Override ordinal column with custom renderer
     const ordinalCol = defs.find((c) => c.field === 'ordinal');
     if (ordinalCol) {
@@ -394,7 +403,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       };
     }
     return defs;
-  }, [currencySymbol, fmt, t]);
+  }, [currencySymbol, currencyCode, locale, fmt, t]);
 
   /* ── Helper: insert resource sub-rows after an expanded position ── */
   const insertResourceRows = useCallback((rows: GridRow[], pos: Position) => {
@@ -1085,6 +1094,12 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                   label={t('boq.save_to_database', { defaultValue: 'Save to Catalog' })}
                   onClick={() => { onSaveToDatabase(d.id as string); closeContextMenu(); }}
                 />
+                {onSaveAsAssembly && (
+                  <CtxItem icon={<Layers size={14}/>}
+                    label={t('boq.save_as_assembly', { defaultValue: 'Save as Assembly' })}
+                    onClick={() => { onSaveAsAssembly(d.id as string); closeContextMenu(); }}
+                  />
+                )}
                 {costItemId && (
                   <CtxItem icon={<ExternalLink size={14}/>}
                     label={t('boq.view_in_cost_db', { defaultValue: 'View in Cost Database' })}
@@ -1267,9 +1282,11 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
             <div className="flex items-center justify-between mb-4 px-1">
               <span className="text-[11px] text-content-tertiary">{t('boq.total', { defaultValue: 'Total' })}</span>
               <span className="text-sm font-bold text-content-primary tabular-nums">
-                {currencySymbol}{fmt.format(
+                {fmtWithCurrency(
                   (parseFloat(manualResourceDialog.quantity.replace(',', '.')) || 0) *
-                  (parseFloat(manualResourceDialog.unitRate.replace(',', '.')) || 0)
+                  (parseFloat(manualResourceDialog.unitRate.replace(',', '.')) || 0),
+                  locale,
+                  currencyCode,
                 )}
               </span>
             </div>

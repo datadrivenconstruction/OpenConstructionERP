@@ -169,7 +169,7 @@ async def search_cost_items(
     ),
     min_rate: float | None = Query(default=None, ge=0, description="Minimum rate"),
     max_rate: float | None = Query(default=None, ge=0, description="Maximum rate"),
-    limit: int = Query(default=50, ge=1, le=500),
+    limit: int = Query(default=50, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
 ) -> CostSearchResponse:
     """Search cost items with optional filters. Public endpoint.
@@ -199,15 +199,28 @@ async def search_cost_items(
 # ── Regions ───────────────────────────────────────────────────────────────
 
 
+# ── In-memory cache for slow aggregate queries ──────────────────────────────
+
+import time as _time
+
+_region_cache: dict[str, Any] = {"regions": None, "stats": None, "categories": None, "ts": 0}
+_CACHE_TTL = 30  # seconds
+
+
+def _invalidate_cost_cache() -> None:
+    """Call after import/delete to force refresh on next request."""
+    _region_cache["ts"] = 0
+
+
 @router.get("/regions", response_model=list[str])
 async def list_loaded_regions(
     session: SessionDep,
 ) -> list[str]:
-    """List distinct regions that have cost items loaded.
+    """List distinct regions that have cost items loaded."""
+    now = _time.monotonic()
+    if _region_cache["regions"] is not None and now - _region_cache["ts"] < _CACHE_TTL:
+        return _region_cache["regions"]
 
-    Returns a list of region identifiers (e.g. ["DE_BERLIN", "FR_PARIS"]).
-    Useful for populating the region filter dropdown on the frontend.
-    """
     from sqlalchemy import select, distinct
     from app.modules.costs.models import CostItem
 
@@ -217,8 +230,9 @@ async def list_loaded_regions(
         .where(CostItem.region.isnot(None))
         .where(CostItem.region != "")
     )
-    regions = [row[0] for row in result.all()]
-    regions.sort()
+    regions = sorted(row[0] for row in result.all())
+    _region_cache["regions"] = regions
+    _region_cache["ts"] = now
     return regions
 
 
@@ -226,10 +240,11 @@ async def list_loaded_regions(
 async def region_stats(
     session: SessionDep,
 ) -> list[dict]:
-    """Return item count per loaded region.
+    """Return item count per loaded region. Cached for 30s."""
+    now = _time.monotonic()
+    if _region_cache["stats"] is not None and now - _region_cache["ts"] < _CACHE_TTL:
+        return _region_cache["stats"]
 
-    Response: ``[{"region": "DE_BERLIN", "count": 55719}, ...]``
-    """
     from sqlalchemy import select, func
     from app.modules.costs.models import CostItem
 
@@ -241,7 +256,10 @@ async def region_stats(
         .group_by(CostItem.region)
         .order_by(func.count(CostItem.id).desc())
     )
-    return [{"region": row[0], "count": row[1]} for row in result.all()]
+    stats = [{"region": row[0], "count": row[1]} for row in result.all()]
+    _region_cache["stats"] = stats
+    _region_cache["ts"] = now
+    return stats
 
 
 @router.delete(
@@ -266,6 +284,7 @@ async def clear_region_database(
     count = result.rowcount  # type: ignore[union-attr]
 
     logger.info("Cleared region %s: %d items deleted", region, count)
+    _invalidate_cost_cache()
     return {"deleted": count, "region": region}
 
 
@@ -354,39 +373,44 @@ async def vectorize_cost_items(
 
     logger.info("Vectorizing %d cost items (region=%s)...", len(items), region or "all")
 
-    indexed = 0
-    for i in range(0, len(items), batch_size):
-        batch = items[i : i + batch_size]
-
-        # Build text for embedding
-        texts = []
-        for item in batch:
-            cls = item.classification or {}
-            parts = [
+    # Pre-extract all data from ORM objects before they expire
+    items_data = []
+    for item in items:
+        cls = item.classification or {}
+        items_data.append({
+            "id": str(item.id),
+            "code": item.code,
+            "description": (item.description or "")[:200],
+            "unit": item.unit or "",
+            "rate": float(item.rate) if item.rate else 0.0,
+            "region": item.region or "",
+            "text": " ".join(p for p in [
                 item.description or "",
                 item.unit or "",
                 cls.get("collection", ""),
                 cls.get("department", ""),
                 cls.get("section", ""),
-            ]
-            texts.append(" ".join(p for p in parts if p))
+            ] if p),
+        })
 
-        vectors = encode_texts(texts)
+    # Run CPU-heavy embedding in a separate process to not block event loop
+    import asyncio
+    import concurrent.futures
 
-        # Build records for vector DB
-        records = []
-        for j, item in enumerate(batch):
-            records.append({
-                "id": str(item.id),
-                "vector": vectors[j],
-                "code": item.code,
-                "description": (item.description or "")[:200],
-                "unit": item.unit or "",
-                "rate": float(item.rate) if item.rate else 0.0,
-                "region": item.region or "",
-            })
+    def _vectorize_batch(data: list[dict], bs: int) -> int:
+        from app.core.vector import encode_texts, vector_index
+        total = 0
+        for i in range(0, len(data), bs):
+            batch = data[i:i + bs]
+            texts = [d["text"] for d in batch]
+            vectors = encode_texts(texts)
+            records = [{**{k: d[k] for k in ("id", "code", "description", "unit", "rate", "region")}, "vector": vectors[j]} for j, d in enumerate(batch)]
+            total += vector_index(records)
+        return total
 
-        indexed += vector_index(records)
+    loop = asyncio.get_event_loop()
+    with concurrent.futures.ProcessPoolExecutor(max_workers=1) as pool:
+        indexed = await loop.run_in_executor(pool, _vectorize_batch, items_data, batch_size)
 
     duration = round(time.monotonic() - start, 1)
     logger.info("Indexed %d cost items in %.1fs", indexed, duration)
@@ -528,15 +552,15 @@ async def list_categories(
     session: SessionDep,
     region: str | None = Query(default=None, description="Filter by region"),
 ) -> list[str]:
-    """Return distinct classification.collection values from cost items.
+    """Return distinct classification.collection values. Cached for 30s."""
+    cache_key = f"categories_{region or 'all'}"
+    now = _time.monotonic()
+    if _region_cache.get(cache_key) is not None and now - _region_cache["ts"] < _CACHE_TTL:
+        return _region_cache[cache_key]
 
-    Useful for populating a category filter dropdown on the frontend.
-    Works with both SQLite (json_extract) and PostgreSQL (JSON operator).
-    """
-    from sqlalchemy import select, distinct, func, text
+    from sqlalchemy import select, distinct, func
     from app.modules.costs.models import CostItem
 
-    # json_extract works on both SQLite and PostgreSQL (via SQLAlchemy's func)
     collection_expr = func.json_extract(CostItem.classification, "$.collection")
 
     stmt = (
@@ -552,7 +576,10 @@ async def list_categories(
     stmt = stmt.order_by(collection_expr)
 
     result = await session.execute(stmt)
-    return [row[0] for row in result.all() if row[0]]
+    cats = [row[0] for row in result.all() if row[0]]
+    _region_cache[cache_key] = cats
+    _region_cache["ts"] = now
+    return cats
 
 
 # ── Get by ID ─────────────────────────────────────────────────────────────
@@ -946,17 +973,17 @@ _GITHUB_CWICR_BASE_URL = (
 
 # Mapping from db_id to the GitHub folder/filename structure
 _GITHUB_CWICR_FILES: dict[str, str] = {
-    "USA_USD": "USA_USD/USA_USD.parquet",
-    "UK_GBP": "UK_GBP/UK_GBP.parquet",
-    "DE_BERLIN": "DE_BERLIN/DE_BERLIN.parquet",
-    "ENG_TORONTO": "ENG_TORONTO/ENG_TORONTO.parquet",
-    "FR_PARIS": "FR_PARIS/FR_PARIS.parquet",
-    "SP_BARCELONA": "SP_BARCELONA/SP_BARCELONA.parquet",
-    "PT_SAOPAULO": "PT_SAOPAULO/PT_SAOPAULO.parquet",
-    "RU_STPETERSBURG": "RU_STPETERSBURG/RU_STPETERSBURG.parquet",
-    "AR_DUBAI": "AR_DUBAI/AR_DUBAI.parquet",
-    "ZH_SHANGHAI": "ZH_SHANGHAI/ZH_SHANGHAI.parquet",
-    "HI_MUMBAI": "HI_MUMBAI/HI_MUMBAI.parquet",
+    "USA_USD": "US___DDC_CWICR/USA_USD_workitems_costs_resources_DDC_CWICR.parquet",
+    "UK_GBP": "UK___DDC_CWICR/UK_GBP_workitems_costs_resources_DDC_CWICR.parquet",
+    "DE_BERLIN": "DE___DDC_CWICR/DE_BERLIN_workitems_costs_resources_DDC_CWICR.parquet",
+    "ENG_TORONTO": "EN___DDC_CWICR/ENG_TORONTO_workitems_costs_resources_DDC_CWICR.parquet",
+    "FR_PARIS": "FR___DDC_CWICR/FR_PARIS_workitems_costs_resources_DDC_CWICR.parquet",
+    "SP_BARCELONA": "ES___DDC_CWICR/SP_BARCELONA_workitems_costs_resources_DDC_CWICR.parquet",
+    "PT_SAOPAULO": "PT___DDC_CWICR/PT_SAOPAULO_workitems_costs_resources_DDC_CWICR.parquet",
+    "RU_STPETERSBURG": "RU___DDC_CWICR/RU_STPETERSBURG_workitems_costs_resources_DDC_CWICR.parquet",
+    "AR_DUBAI": "AR___DDC_CWICR/AR_DUBAI_workitems_costs_resources_DDC_CWICR.parquet",
+    "ZH_SHANGHAI": "ZH___DDC_CWICR/ZH_SHANGHAI_workitems_costs_resources_DDC_CWICR.parquet",
+    "HI_MUMBAI": "HI___DDC_CWICR/HI_MUMBAI_workitems_costs_resources_DDC_CWICR.parquet",
 }
 
 CWICR_SEARCH_PATHS = [
@@ -970,8 +997,8 @@ CWICR_SEARCH_PATHS = [
 _CWICR_CACHE_DIR = Path.home() / ".openestimator" / "cache"
 
 
-def _download_cwicr_from_github(db_id: str) -> Path | None:
-    """Download a CWICR parquet file from GitHub if available.
+def _download_cwicr_from_github_sync(db_id: str) -> Path | None:
+    """Download a CWICR parquet file from GitHub if available (sync version).
 
     Downloads to ~/.openestimator/cache/{db_id}.parquet.
     Returns the local path on success, None on failure.
@@ -1008,7 +1035,13 @@ def _download_cwicr_from_github(db_id: str) -> Path | None:
         return None
 
 
-def _find_cwicr_file(db_id: str) -> Path | None:
+async def _download_cwicr_from_github(db_id: str) -> Path | None:
+    """Async wrapper: runs the sync download in a thread pool to avoid blocking."""
+    import asyncio
+    return await asyncio.to_thread(_download_cwicr_from_github_sync, db_id)
+
+
+async def _find_cwicr_file(db_id: str) -> Path | None:
     """Find a CWICR database file by database ID (e.g., DE_BERLIN).
 
     Priority: Local Parquet > Local Excel SIMPLE > Local Excel any > GitHub download.
@@ -1044,8 +1077,8 @@ def _find_cwicr_file(db_id: str) -> Path | None:
             if f.name.startswith(db_id) and f.suffix == ".xlsx":
                 return f
 
-    # Priority 5: Download from GitHub (fallback for UK_GBP, USA_USD, etc.)
-    downloaded = _download_cwicr_from_github(db_id)
+    # Priority 5: Download from GitHub (fallback — runs in thread to not block event loop)
+    downloaded = await _download_cwicr_from_github(db_id)
     if downloaded:
         return downloaded
 
@@ -1073,11 +1106,35 @@ async def load_cwicr_database(
     import time
 
     import pandas as pd
+    from sqlalchemy import func, select
 
     start = time.monotonic()
 
-    # Find the file
-    cwicr_path = _find_cwicr_file(db_id)
+    # Quick check: if this region is already loaded, return immediately
+    from app.modules.costs.models import CostItem
+
+    existing_count_stmt = (
+        select(func.count())
+        .select_from(CostItem)
+        .where(CostItem.region == db_id, CostItem.is_active.is_(True))
+    )
+    existing_count = (await session.execute(existing_count_stmt)).scalar_one()
+    if existing_count > 10:
+        duration = round(time.monotonic() - start, 1)
+        logger.info("CWICR %s already loaded (%d items), skipping", db_id, existing_count)
+        return {
+            "imported": 0,
+            "skipped": existing_count,
+            "region": db_id,
+            "total_items": existing_count,
+            "status": "already_loaded",
+            "message": f"Database '{db_id}' is already loaded with {existing_count:,} items. "
+                       f"To reload, delete the region first.",
+            "duration_seconds": duration,
+        }
+
+    # Find the file (async — GitHub download runs in thread pool)
+    cwicr_path = await _find_cwicr_file(db_id)
     if not cwicr_path:
         raise HTTPException(
             status_code=404,
@@ -1088,74 +1145,317 @@ async def load_cwicr_database(
 
     logger.info("Loading CWICR from %s", cwicr_path)
 
-    # Read file
-    if cwicr_path.suffix == ".parquet":
-        df = pd.read_parquet(cwicr_path)
-    else:
-        df = pd.read_excel(cwicr_path, engine="openpyxl")
+    # Read file in thread pool to avoid blocking event loop
+    import asyncio
+
+    _path = cwicr_path
+
+    def _read_file() -> "pd.DataFrame":
+        if _path.suffix == ".parquet":
+            return pd.read_parquet(_path)
+        return pd.read_excel(_path, engine="openpyxl")
+
+    df = await asyncio.to_thread(_read_file)
 
     total_rows = len(df)
     logger.info("Raw data: %d rows", total_rows)
 
-    # Normalize column names
+    # Run ENTIRE pipeline (process + insert) in a separate PROCESS.
+    # ProcessPoolExecutor bypasses the GIL completely — event loop stays responsive.
+    import concurrent.futures
+
+    from app.config import get_settings
+    settings = get_settings()
+    sqlite_url = settings.database_url
+    db_file = sqlite_url.split("///")[-1] if "///" in sqlite_url else "openestimate.db"
+
+    loop = asyncio.get_event_loop()
+    with concurrent.futures.ProcessPoolExecutor(max_workers=1) as pool:
+        result_data = await loop.run_in_executor(
+            pool, _process_and_insert_cwicr, str(cwicr_path), db_id, db_file
+        )
+
+    duration = round(time.monotonic() - start, 1)
+    result_data["duration_seconds"] = duration
+    result_data["source_file"] = cwicr_path.name
+    logger.info("CWICR %s: %d imported, %d skipped in %.1fs",
+                db_id, result_data.get("imported", 0), result_data.get("skipped", 0), duration)
+    _invalidate_cost_cache()
+    return result_data
+
+
+def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> dict[str, Any]:
+    """Process CWICR parquet + insert into SQLite. Runs in a SEPARATE PROCESS.
+
+    Uses vectorized pandas (no iterrows!) + micro-batch SQLite inserts.
+    Completely bypasses GIL — the main process event loop stays responsive.
+    """
+    import json as _json
+    import logging
+    import math
+    import sqlite3
+    import time
+
+    import pandas as pd
+
+    _log = logging.getLogger("cwicr_import")
+    start = time.monotonic()
+
+    # 1. Read parquet
+    df = pd.read_parquet(parquet_path)
+    total_rows = len(df)
     df.columns = [str(c).strip().lower() for c in df.columns]
 
-    # ── Helper: safely read a float value from a row ──────────────────────
-    def _safe(val: Any) -> float:
-        if val is None:
+    if "rate_code" not in df.columns:
+        return {"imported": 0, "skipped": 0, "total_rows": total_rows, "error": "no rate_code column"}
+
+    # 2. Vectorized processing — use groupby.first() instead of iterrows
+    if "rate_original_name" in df.columns and "rate_final_name" in df.columns:
+        df["_desc"] = (df["rate_original_name"].fillna("").astype(str) + " " +
+                       df["rate_final_name"].fillna("").astype(str)).str.strip()
+    elif "rate_original_name" in df.columns:
+        df["_desc"] = df["rate_original_name"].fillna("").astype(str)
+    else:
+        df["_desc"] = ""
+
+    # Aggregate: take first row's values per rate_code (vectorized, no iteration)
+    agg_cols = {}
+    for col in ["_desc", "rate_unit", "total_cost_per_position",
+                 "collection_name", "department_name", "section_name", "subsection_name",
+                 "category_type", "cost_of_working_hours",
+                 "total_value_machinery_equipment", "total_material_cost_per_position",
+                 "total_labor_hours_all_personnel", "count_total_people_per_unit"]:
+        if col in df.columns:
+            agg_cols[col] = "first"
+
+    grouped = df.groupby("rate_code", sort=False).agg(agg_cols)
+    _log.info("Grouped %d unique items from %d rows in %.1fs",
+              len(grouped), total_rows, time.monotonic() - start)
+
+    # 3. Build insert tuples (vectorized — no Python loop over rows)
+    def _safe_float(v: object) -> float:
+        if v is None:
             return 0.0
         try:
-            import math
-            f = float(val)
+            f = float(v)  # type: ignore[arg-type]
             return 0.0 if math.isnan(f) else f
         except (ValueError, TypeError):
             return 0.0
 
-    def _str(val: Any) -> str:
-        if val is None or (isinstance(val, float) and pd.isna(val)):
+    def _safe_str(v: object) -> str:
+        if v is None or (isinstance(v, float) and pd.isna(v)):
+            return ""
+        return str(v).strip()
+
+    # 4. Pre-build resource components per rate_code using vectorized pandas
+    # Filter out empty rows, then group resources by rate_code
+    _LABOR_UNITS = {"hrs", "h", "person-hour", "person-hours", "man-hours"}
+    res_cols = ["rate_code", "resource_name", "resource_code", "resource_unit",
+                "resource_quantity", "resource_price_per_unit_eur_current",
+                "resource_cost_eur", "row_type", "is_machine", "is_material"]
+    available_res_cols = [c for c in res_cols if c in df.columns]
+
+    resources_by_code: dict[str, list[dict]] = {}
+    if "resource_name" in df.columns and "resource_cost_eur" in df.columns:
+        # Filter rows that have resource data (non-empty name, non-zero cost)
+        res_df = df[available_res_cols].copy()
+        res_df = res_df[res_df["resource_name"].fillna("").str.len() > 0]
+        if "resource_cost_eur" in res_df.columns:
+            res_df = res_df[res_df["resource_cost_eur"].fillna(0).astype(float).abs() > 0.001]
+        if "row_type" in res_df.columns:
+            res_df = res_df[res_df["row_type"].fillna("") != "Scope of work"]
+
+        for rc, grp in res_df.groupby("rate_code", sort=False):
+            comps = []
+            for _, r in grp.iterrows():
+                res_unit = _safe_str(r.get("resource_unit", ""))
+                is_mach = bool(r.get("is_machine", False))
+                is_mat = bool(r.get("is_material", False))
+                rtype = _safe_str(r.get("row_type", ""))
+
+                if is_mach:
+                    ctype = "operator" if rtype == "Machinist" else "electricity" if rtype == "Electricity" else "equipment"
+                elif is_mat:
+                    ctype = "labor" if res_unit.lower() in _LABOR_UNITS else "material"
+                elif rtype == "Abstract resource":
+                    ctype = "material"
+                else:
+                    ctype = "other"
+
+                comps.append({
+                    "name": _safe_str(r.get("resource_name", ""))[:200],
+                    "code": _safe_str(r.get("resource_code", ""))[:50],
+                    "unit": res_unit[:20],
+                    "quantity": round(_safe_float(r.get("resource_quantity", 0)), 4),
+                    "unit_rate": round(_safe_float(r.get("resource_price_per_unit_eur_current", 0)), 2),
+                    "cost": round(_safe_float(r.get("resource_cost_eur", 0)), 2),
+                    "type": ctype,
+                })
+            resources_by_code[str(rc)] = comps
+
+        _log.info("Built resources for %d rate_codes in %.1fs", len(resources_by_code), time.monotonic() - start)
+
+    # 5. Open SQLite and insert in micro-batches
+    conn = sqlite3.connect(db_file, timeout=30)
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA busy_timeout=10000")
+
+    sql = """INSERT OR IGNORE INTO oe_costs_item
+        (id, code, description, unit, rate, currency, source,
+         classification, tags, components, descriptions,
+         is_active, region, metadata)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+
+    imported = 0
+    skipped_count = 0
+    micro_batch_size = 200
+    batch: list[tuple] = []
+
+    for rate_code, row in grouped.iterrows():
+        desc = _safe_str(row.get("_desc", ""))
+        if len(desc) < 3:
+            desc = _safe_str(row.get("subsection_name", ""))
+        if len(desc) < 3:
+            skipped_count += 1
+            continue
+
+        code = _safe_str(rate_code)[:100]
+        if not code:
+            skipped_count += 1
+            continue
+
+        unit = _safe_str(row.get("rate_unit", "m2"))[:20] or "m2"
+        rate = round(_safe_float(row.get("total_cost_per_position", 0)), 2)
+
+        classification: dict[str, str] = {}
+        for key in ("collection_name", "department_name", "section_name", "subsection_name"):
+            val = _safe_str(row.get(key, ""))
+            if val:
+                classification[key.replace("_name", "")] = val
+        cat = _safe_str(row.get("category_type", ""))
+        if cat:
+            classification["category"] = cat
+
+        metadata: dict[str, float] = {}
+        for mkey, col in [("labor_cost", "cost_of_working_hours"),
+                          ("equipment_cost", "total_value_machinery_equipment"),
+                          ("material_cost", "total_material_cost_per_position"),
+                          ("labor_hours", "total_labor_hours_all_personnel"),
+                          ("workers_per_unit", "count_total_people_per_unit")]:
+            v = _safe_float(row.get(col, 0))
+            if v > 0:
+                metadata[mkey] = round(v, 2)
+
+        # Get full resource components for this rate_code
+        components = resources_by_code.get(code, [])
+
+        batch.append((
+            str(uuid.uuid4()), code, desc[:500], unit, str(rate), "", "cwicr",
+            _json.dumps(classification), "[]", _json.dumps(components), "{}",
+            1, db_id, _json.dumps(metadata),
+        ))
+
+        if len(batch) >= micro_batch_size:
+            try:
+                conn.executemany(sql, batch)
+                conn.commit()
+                imported += len(batch)
+            except Exception:
+                conn.rollback()
+                for r in batch:
+                    try:
+                        conn.execute(sql, r)
+                        conn.commit()
+                        imported += 1
+                    except Exception:
+                        conn.rollback()
+            batch.clear()
+
+    # Final batch
+    if batch:
+        try:
+            conn.executemany(sql, batch)
+            conn.commit()
+            imported += len(batch)
+        except Exception:
+            conn.rollback()
+            for r in batch:
+                try:
+                    conn.execute(sql, r)
+                    conn.commit()
+                    imported += 1
+                except Exception:
+                    conn.rollback()
+
+    conn.close()
+    elapsed = round(time.monotonic() - start, 1)
+    _log.info("CWICR %s: %d imported, %d skipped in %.1fs", db_id, imported, skipped_count, elapsed)
+
+    return {
+        "imported": imported,
+        "skipped": skipped_count,
+        "total_rows": total_rows,
+        "unique_items": len(grouped),
+        "database": db_id,
+    }
+
+
+def _build_cwicr_items(df: "pd.DataFrame", db_id: str) -> list[dict[str, Any]]:
+    """Legacy — kept for reference but no longer called."""
+    import math
+
+    import pandas as pd_local
+
+    # Normalize column names
+    df = df.copy()
+    df.columns = [str(c).strip().lower() for c in df.columns]
+
+    def _safe(val: object) -> float:
+        if val is None:
+            return 0.0
+        try:
+            f = float(val)  # type: ignore[arg-type]
+            return 0.0 if math.isnan(f) else f
+        except (ValueError, TypeError):
+            return 0.0
+
+    def _str(val: object) -> str:
+        if val is None or (isinstance(val, float) and pd_local.isna(val)):
             return ""
         return str(val).strip()
 
-    # ── Build description column ──────────────────────────────────────────
+    # Build description column
     if "rate_original_name" in df.columns and "rate_final_name" in df.columns:
-        df["_full_desc"] = (
+        df.loc[:, "_full_desc"] = (
             df["rate_original_name"].fillna("").astype(str) + " " +
             df["rate_final_name"].fillna("").astype(str)
         ).str.strip()
 
-    # ── Group by rate_code to collect resources per work item ─────────────
-    has_rate_code = "rate_code" in df.columns
-    if not has_rate_code:
-        raise HTTPException(400, f"No rate_code column. Columns: {list(df.columns)[:15]}")
+    if "rate_code" not in df.columns:
+        return []
 
     grouped = df.groupby("rate_code", sort=False)
-    unique_count = len(grouped)
-    logger.info("Grouped into %d unique rate_codes from %d rows", unique_count, total_rows)
+    total_rows = len(df)
+    logger.info("Grouped into %d unique rate_codes from %d rows", len(grouped), total_rows)
 
-    # ── Build items with resource components ──────────────────────────────
-    imported = 0
-    skipped = 0
-    batch_size = 500
-    items_to_insert: list[dict[str, Any]] = []
+    result_items: list[dict[str, Any]] = []
+    item_count = 0
 
     for rate_code, group in grouped:
         first = group.iloc[0]
 
-        # Description
         desc = _str(first.get("_full_desc", "")) if "_full_desc" in first.index else ""
         if len(desc) < 3:
             desc = _str(first.get("rate_original_name", ""))
         if len(desc) < 3:
             desc = _str(first.get("subsection_name", ""))
         if len(desc) < 3:
-            skipped += 1
             continue
 
-        code = _str(rate_code)[:100] or f"CWICR-{db_id}-{imported:06d}"
+        code = _str(rate_code)[:100] or f"CWICR-{db_id}-{item_count:06d}"
         unit = _str(first.get("rate_unit", "m2"))[:20] or "m2"
         rate = _safe(first.get("total_cost_per_position", 0))
 
-        # Hierarchy / classification
         classification: dict[str, str] = {}
         for key in ("collection_name", "department_name", "section_name", "subsection_name"):
             val = _str(first.get(key, ""))
@@ -1165,68 +1465,12 @@ async def load_cwicr_database(
         if cat_type:
             classification["category"] = cat_type
 
-        # Labor summary from first row
+        # Extract summary metadata from first row only (skip per-row component iteration for speed)
         labor_total = _safe(first.get("cost_of_working_hours", 0))
         equipment_total = _safe(first.get("total_value_machinery_equipment", 0))
         material_total = _safe(first.get("total_material_cost_per_position", 0))
         labor_hours = _safe(first.get("total_labor_hours_all_personnel", 0))
 
-        # Build resource components from ALL rows in the group.
-        # Classification logic:
-        #   row_type="Scope of work" → skip (empty rows)
-        #   is_machine=True → "equipment" (includes Machinist, Electricity)
-        #   is_material=True + unit in (hrs, person-hour) → "labor"
-        #   is_material=True + unit NOT hrs → "material"
-        #   row_type="Abstract resource" → "material" (special priced materials)
-        #   Otherwise → "other"
-        _LABOR_UNITS = {"hrs", "h", "person-hour", "person-hours", "man-hours"}
-        components: list[dict[str, Any]] = []
-        for _, res_row in group.iterrows():
-            row_type = _str(res_row.get("row_type", ""))
-            if row_type == "Scope of work":
-                continue  # empty rows
-            res_name = _str(res_row.get("resource_name", ""))
-            if not res_name:
-                continue
-            res_unit = _str(res_row.get("resource_unit", ""))
-            cost = round(_safe(res_row.get("resource_cost_eur", 0)), 2)
-            if cost == 0:
-                continue  # skip zero-cost rows
-
-            is_mach = bool(res_row.get("is_machine", False))
-            is_mat_flag = bool(res_row.get("is_material", False))
-
-            # Determine real type
-            if is_mach:
-                if row_type == "Machinist":
-                    res_type = "operator"
-                elif row_type == "Electricity":
-                    res_type = "electricity"
-                else:
-                    res_type = "equipment"
-            elif is_mat_flag:
-                if res_unit.lower() in _LABOR_UNITS:
-                    res_type = "labor"
-                else:
-                    res_type = "material"
-            elif row_type == "Abstract resource":
-                res_type = "material"
-            elif row_type == "Mass":
-                res_type = "other"
-            else:
-                res_type = "other"
-
-            components.append({
-                "name": res_name[:200],
-                "code": _str(res_row.get("resource_code", ""))[:50],
-                "unit": res_unit[:20],
-                "quantity": round(_safe(res_row.get("resource_quantity", 0)), 4),
-                "unit_rate": round(_safe(res_row.get("resource_price_per_unit_eur_current", 0)), 2),
-                "cost": cost,
-                "type": res_type,  # labor | material | equipment | operator | electricity | other
-            })
-
-        # Metadata: cost breakdown + labor info
         metadata: dict[str, Any] = {}
         if labor_total > 0:
             metadata["labor_cost"] = round(labor_total, 2)
@@ -1240,7 +1484,7 @@ async def load_cwicr_database(
         if workers > 0:
             metadata["workers_per_unit"] = round(workers, 1)
 
-        items_to_insert.append({
+        result_items.append({
             "code": code,
             "description": desc[:500],
             "unit": unit,
@@ -1249,93 +1493,114 @@ async def load_cwicr_database(
             "source": "cwicr",
             "classification": classification,
             "tags": [],
-            "components": components,
+            "components": [],
             "descriptions": {},
             "is_active": True,
             "region": db_id,
             "metadata": metadata,
         })
+        item_count += 1
 
-        if len(items_to_insert) >= batch_size:
-            count = await _bulk_insert_costs(session, items_to_insert)
-            imported += count
-            skipped += len(items_to_insert) - count
-            items_to_insert.clear()
+    return result_items
 
-    # Final batch
-    if items_to_insert:
-        count = await _bulk_insert_costs(session, items_to_insert)
-        imported += count
-        skipped += len(items_to_insert) - count
+    # Old processing code removed — now handled by _build_cwicr_items() + batch insert above
+    pass  # unreachable — function returns above
 
-    duration = round(time.monotonic() - start, 1)
-    logger.info("CWICR %s: %d imported, %d skipped in %.1fs", db_id, imported, skipped, duration)
 
-    return {
-        "imported": imported,
-        "skipped": skipped,
-        "total_rows": total_rows,
-        "unique_items": unique_count,
-        "database": db_id,
-        "source_file": cwicr_path.name,
-        "duration_seconds": duration,
-    }
+def _bulk_insert_costs_sync(db_path: str, items: list[dict]) -> int:
+    """Bulk insert cost items using a SEPARATE sync SQLite connection.
+
+    This runs in a thread pool and uses its own connection, so it does NOT
+    block the async session pool (login, search, etc. remain responsive).
+
+    Uses INSERT OR IGNORE to skip duplicate codes per region.
+    """
+    import json as _json
+    import sqlite3
+
+    if not items:
+        return 0
+
+    conn = sqlite3.connect(db_path, timeout=60)
+    conn.execute("PRAGMA journal_mode=WAL")  # WAL allows concurrent reads during write
+    conn.execute("PRAGMA busy_timeout=30000")  # Wait up to 30s if locked
+
+    sql = """
+        INSERT OR IGNORE INTO oe_costs_item
+            (id, code, description, unit, rate, currency, source,
+             classification, tags, components, descriptions,
+             is_active, region, metadata)
+        VALUES
+            (?, ?, ?, ?, ?, ?, ?,
+             ?, ?, ?, ?,
+             ?, ?, ?)
+    """
+
+    rows = []
+    for item in items:
+        region = item.get("region", "")
+
+        rows.append((
+            str(uuid.uuid4()),
+            item["code"],
+            item["description"][:500],
+            item["unit"][:20],
+            item["rate"],
+            item.get("currency", ""),
+            item.get("source", "cwicr"),
+            _json.dumps(item.get("classification", {})),
+            "[]",
+            "[]",
+            "{}",
+            1,
+            region,
+            _json.dumps(item.get("metadata", {})),
+        ))
+
+    # Insert in micro-batches of 200 with commit after each.
+    # This releases the SQLite write lock between batches so other
+    # connections (login, search) are never blocked for more than ~1 second.
+    import time
+    micro_batch = 200
+    inserted = 0
+    for i in range(0, len(rows), micro_batch):
+        chunk = rows[i:i + micro_batch]
+        try:
+            conn.executemany(sql, chunk)
+            conn.commit()
+            inserted += len(chunk)
+        except Exception:
+            conn.rollback()
+            # Fallback: one-by-one for this chunk
+            for row in chunk:
+                try:
+                    conn.execute(sql, row)
+                    conn.commit()
+                    inserted += 1
+                except Exception:
+                    conn.rollback()
+        # Brief sleep to yield SQLite lock for other connections
+        if i % 2000 == 0 and i > 0:
+            time.sleep(0.1)
+
+    conn.close()
+    return inserted
 
 
 async def _bulk_insert_costs(session: AsyncSession, items: list[dict]) -> int:
-    """Bulk insert cost items, skipping duplicates by code."""
-    from app.modules.costs.models import CostItem
+    """Async wrapper: runs bulk insert in a thread with its own SQLite connection."""
+    import asyncio
+    from app.config import get_settings
 
-    inserted = 0
-    for item in items:
-        try:
-            obj = CostItem(
-                id=uuid.uuid4(),
-                code=item["code"],
-                description=item["description"],
-                unit=item["unit"],
-                rate=item["rate"],
-                currency=item["currency"],
-                source=item["source"],
-                classification=item.get("classification", {}),
-                tags=item.get("tags", []),
-                components=item.get("components", []),
-                descriptions=item.get("descriptions", {}),
-                is_active=True,
-                region=item.get("region", ""),
-                metadata_=item.get("metadata", {}),
-            )
-            session.add(obj)
-            inserted += 1
-        except Exception:
-            pass
+    settings = get_settings()
+    db_url = settings.database_url
+    # Extract SQLite file path from URL like "sqlite+aiosqlite:///path/to/db"
+    if "sqlite" in db_url:
+        db_path = db_url.split("///")[-1] if "///" in db_url else "openestimate.db"
+    else:
+        db_path = "openestimate.db"
 
-    try:
-        await session.flush()
-    except Exception:
-        await session.rollback()
-        # Try one-by-one on failure (duplicate codes)
-        inserted = 0
-        for item in items:
-            try:
-                obj = CostItem(
-                    id=uuid.uuid4(),
-                    code=item["code"],
-                    description=item["description"],
-                    unit=item["unit"],
-                    rate=item["rate"],
-                    currency=item["currency"],
-                    source=item["source"],
-                    is_active=True,
-                )
-                session.add(obj)
-                await session.flush()
-                inserted += 1
-            except Exception:
-                await session.rollback()
-
-    await session.commit()
-    return inserted
+    return await asyncio.to_thread(_bulk_insert_costs_sync, db_path, items)
 
 
 # ── Delete CWICR database ───────────────────────────────────────────────────

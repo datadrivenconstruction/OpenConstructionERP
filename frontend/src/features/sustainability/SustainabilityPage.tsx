@@ -481,7 +481,9 @@ export function SustainabilityPage() {
                       className="inline-flex items-center gap-1 text-sm text-oe-blue hover:underline"
                     >
                       {showAllPositions ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                      {showAllPositions ? 'Show less' : `Show all ${data.positions_detail.length} positions`}
+                      {showAllPositions
+                        ? t('sustainability.show_less', { defaultValue: 'Show less' })
+                        : t('sustainability.show_all_positions', { defaultValue: 'Show all {{count}} positions', count: data.positions_detail.length })}
                     </button>
                   </div>
                 )}
@@ -493,14 +495,14 @@ export function SustainabilityPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               {[
-                { label: 'A: <80', color: '#16a34a' },
-                { label: 'B: 80-150', color: '#2563eb' },
-                { label: 'C: 150-250', color: '#ca8a04' },
-                { label: 'D: >250', color: '#dc2626' },
+                { label: 'A: <80', color: '#16a34a', key: 'a' },
+                { label: 'B: 80-150', color: '#2563eb', key: 'b' },
+                { label: 'C: 150-250', color: '#ca8a04', key: 'c' },
+                { label: 'D: >250', color: '#dc2626', key: 'd' },
               ].map((r) => (
-                <div key={r.label} className="flex items-center gap-1.5 text-xs text-content-tertiary">
+                <div key={r.key} className="flex items-center gap-1.5 text-xs text-content-tertiary">
                   <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: r.color }} />
-                  {r.label} kg/m2
+                  {t(`sustainability.rating_${r.key}`, { defaultValue: r.label })} kg/m²
                 </div>
               ))}
             </div>

@@ -219,7 +219,7 @@ async def search_catalog(
     unit: str | None = Query(default=None, description="Filter by unit"),
     min_price: float | None = Query(default=None, ge=0, description="Min base price"),
     max_price: float | None = Query(default=None, ge=0, description="Max base price"),
-    limit: int = Query(default=50, ge=1, le=500),
+    limit: int = Query(default=50, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
 ) -> CatalogSearchResponse:
     """Search and list catalog resources with optional filters."""

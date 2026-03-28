@@ -20,6 +20,9 @@ import {
   Loader2,
   Trash2,
   XCircle,
+  FileText,
+  Clock,
+  Star,
 } from 'lucide-react';
 import { apiGet, apiPost } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
@@ -137,7 +140,7 @@ const methods: MethodCard[] = [
     gradient:
       'from-emerald-500/10 to-teal-500/10 hover:from-emerald-500/15 hover:to-teal-500/15',
     iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-500',
-    route: '/ai-estimate?tab=cad',
+    route: '/cad-takeoff',
     badgeKey: 'quantities.badge_cad',
     badgeColor:
       'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
@@ -208,7 +211,7 @@ function ConverterCard({
   disabled: boolean;
 }) {
   const { t } = useTranslation();
-  const colors = CONVERTER_COLORS[converter.id] ?? CONVERTER_COLORS.dwg;
+  const colors = CONVERTER_COLORS[converter.id] ?? CONVERTER_COLORS['dwg'] ?? { bg: 'from-gray-500/8 to-gray-500/8', border: 'border-gray-200', icon: 'bg-gray-500' };
   const installed = converter.installed || isInstalled;
 
   return (
@@ -217,10 +220,25 @@ function ConverterCard({
         'group relative flex flex-col rounded-xl border p-5 transition-all duration-200',
         installed
           ? 'border-emerald-300 dark:border-emerald-800/50 bg-gradient-to-br from-emerald-500/5 to-teal-500/5'
-          : clsx('bg-gradient-to-br', colors.bg, colors.border),
+          : clsx(
+              'bg-gradient-to-br',
+              colors.bg,
+              colors.border,
+              'ring-2 ring-oe-blue/30 animate-pulse-border',
+            ),
         disabled && !installing ? 'opacity-40 pointer-events-none' : '',
       )}
     >
+      {/* Recommended badge for uninstalled converters */}
+      {!installed && !installing && (
+        <div className="absolute -top-2.5 left-4 z-10">
+          <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-2.5 py-0.5 text-2xs font-bold text-white shadow-sm">
+            <Star size={10} />
+            {t('quantities.recommended', { defaultValue: 'Recommended' })}
+          </span>
+        </div>
+      )}
+
       {/* Status badge */}
       <div className="absolute top-3 right-3">
         {installing ? (
@@ -308,7 +326,10 @@ function ConverterCard({
               ) : (
                 <Download size={10} />
               )}
-              {t('quantities.install', { defaultValue: 'Install' })}
+              {t('quantities.install_with_size', {
+                defaultValue: 'Install ({{size}} MB)',
+                size: converter.size_mb,
+              })}
             </button>
           )}
           <span className="inline-flex items-center gap-1 rounded bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 text-2xs font-medium text-content-secondary">
@@ -644,6 +665,12 @@ export function QuantitiesPage() {
     staleTime: 30_000,
   });
 
+  // Recent documents from API
+  const { data: documents } = useQuery({
+    queryKey: ['takeoff', 'documents'],
+    queryFn: () => apiGet<any[]>('/v1/takeoff/documents/'),
+  });
+
   const converters = convertersData?.converters ?? [];
   const installedCount = convertersData?.installed_count ?? 0;
   const totalCount = convertersData?.total_count ?? 4;
@@ -825,6 +852,28 @@ export function QuantitiesPage() {
         })}
       </div>
 
+      {/* How it works */}
+      <div className="rounded-xl border border-border-light bg-surface-primary p-6">
+        <h2 className="text-lg font-semibold text-content-primary">
+          {t('quantities.how_it_works', { defaultValue: 'How it works' })}
+        </h2>
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          {steps.map((step) => (
+            <div key={step.num} className="flex gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-sm font-bold text-oe-blue">
+                {step.num}
+              </div>
+              <div>
+                <p className="text-sm font-medium text-content-primary">
+                  {t(step.titleKey)}
+                </p>
+                <p className="mt-0.5 text-xs text-content-tertiary">{t(step.descKey)}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* ── CAD/BIM Converter Modules ──────────────────────────────── */}
       <div className="space-y-4">
         {/* Header card */}
@@ -857,6 +906,14 @@ export function QuantitiesPage() {
                 'Install converter modules to extract elements, quantities, and geometry from CAD/BIM files. Each module handles a specific file format and transforms it into structured data for AI-powered cost estimation.',
             })}
           </p>
+          <button
+            onClick={() => navigate('/cad-takeoff')}
+            className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-oe-blue/10 px-3 py-1.5 text-xs font-medium text-oe-blue hover:bg-oe-blue/20 transition-colors"
+          >
+            <Box size={14} />
+            {t('quantities.go_to_cad_takeoff', { defaultValue: 'Go to CAD/BIM Takeoff' })}
+            <ArrowRight size={12} />
+          </button>
         </div>
 
         {/* Converter module cards — 2-column grid */}
@@ -878,7 +935,7 @@ export function QuantitiesPage() {
         {converters.length === 0 && (
           <div className="grid gap-3 sm:grid-cols-2">
             {['dwg', 'rvt', 'ifc', 'dgn'].map((id) => {
-              const colors = CONVERTER_COLORS[id] ?? CONVERTER_COLORS.dwg;
+              const colors = CONVERTER_COLORS[id] ?? CONVERTER_COLORS['dwg'] ?? { bg: 'from-gray-500/8 to-gray-500/8', border: 'border-gray-200', icon: 'bg-gray-500' };
               return (
                 <div
                   key={id}
@@ -945,28 +1002,6 @@ export function QuantitiesPage() {
         </div>
       </div>
 
-      {/* How it works */}
-      <div className="rounded-xl border border-border-light bg-surface-primary p-6">
-        <h2 className="text-lg font-semibold text-content-primary">
-          {t('quantities.how_it_works', { defaultValue: 'How it works' })}
-        </h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
-          {steps.map((step) => (
-            <div key={step.num} className="flex gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue/10 text-sm font-bold text-oe-blue">
-                {step.num}
-              </div>
-              <div>
-                <p className="text-sm font-medium text-content-primary">
-                  {t(step.titleKey)}
-                </p>
-                <p className="mt-0.5 text-xs text-content-tertiary">{t(step.descKey)}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Quick manual entry */}
       <div className="rounded-xl border border-border-light bg-surface-primary p-6">
         <div className="flex items-center justify-between">
@@ -988,6 +1023,75 @@ export function QuantitiesPage() {
             {t('quantities.open_boq', { defaultValue: 'Open BOQ Editor' })}
           </button>
         </div>
+      </div>
+
+      {/* Recent Documents */}
+      <div className="rounded-xl border border-border-light bg-surface-primary p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
+              <FileText size={20} className="text-blue-500" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-content-primary">
+                {t('quantities.recent_documents_title', { defaultValue: 'Recent Documents' })}
+              </h2>
+              <p className="text-xs text-content-quaternary">
+                {t('quantities.recent_documents_count', {
+                  defaultValue: '{{count}} document(s) uploaded',
+                  count: documents?.length ?? 0,
+                })}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {documents && documents.length > 0 ? (
+          <div className="space-y-2">
+            {documents.slice(0, 10).map((doc: any, idx: number) => (
+              <div
+                key={doc.id ?? idx}
+                className="flex items-center justify-between rounded-lg border border-border-light px-4 py-3 hover:bg-surface-secondary transition-colors"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <FileText size={16} className="shrink-0 text-content-quaternary" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-content-primary truncate">
+                      {doc.name ?? doc.filename ?? t('quantities.unnamed_document', { defaultValue: 'Unnamed document' })}
+                    </p>
+                    <div className="flex items-center gap-2 text-2xs text-content-quaternary">
+                      {doc.created_at && (
+                        <span className="flex items-center gap-1">
+                          <Clock size={10} />
+                          {new Date(doc.created_at).toLocaleDateString()}
+                        </span>
+                      )}
+                      {(doc.type ?? doc.file_type) && (
+                        <span className="rounded bg-surface-tertiary px-1.5 py-0.5 font-mono uppercase">
+                          {doc.type ?? doc.file_type}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <FileText size={32} className="text-content-quaternary mb-3" />
+            <p className="text-sm text-content-tertiary">
+              {t('quantities.no_documents', { defaultValue: 'No documents uploaded yet' })}
+            </p>
+            <button
+              onClick={() => navigate('/takeoff')}
+              className="mt-3 flex items-center gap-2 rounded-lg bg-oe-blue px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-oe-blue-dark"
+            >
+              <Upload size={16} />
+              {t('quantities.upload_document', { defaultValue: 'Upload Document' })}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

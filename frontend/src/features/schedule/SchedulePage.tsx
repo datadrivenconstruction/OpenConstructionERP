@@ -18,7 +18,7 @@ import {
   FileBarChart,
   ShieldAlert,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Skeleton, Input, InfoHint, SkeletonTable } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Skeleton, Input, InfoHint, SkeletonTable, Breadcrumb } from '@/shared/ui';
 import { apiGet } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
@@ -130,16 +130,26 @@ function Modal({
   title: string;
   children: React.ReactNode;
 }) {
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [open, onClose]);
+
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-md rounded-2xl border border-border-light bg-surface-elevated p-6 shadow-xl animate-fade-in">
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" onClick={onClose} />
+      <div role="dialog" aria-modal="true" aria-labelledby="schedule-modal-title" className="relative z-10 w-full max-w-md rounded-2xl border border-border-light bg-surface-elevated p-6 shadow-xl animate-fade-in">
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-content-primary">{title}</h2>
+          <h2 id="schedule-modal-title" className="text-lg font-semibold text-content-primary">{title}</h2>
           <button
             onClick={onClose}
+            aria-label={title}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary transition-colors hover:bg-surface-secondary hover:text-content-primary"
           >
             <X size={16} />
@@ -1456,6 +1466,11 @@ export function SchedulePage() {
   if (selectedProject) {
     return (
       <div className="max-w-content mx-auto animate-fade-in">
+        <Breadcrumb items={[
+          { label: t('nav.dashboard', 'Dashboard'), to: '/' },
+          { label: t('schedule.title', '4D Schedule'), to: '/schedule' },
+          { label: selectedProject.name },
+        ]} className="mb-4" />
         <ProjectSchedules
           project={selectedProject}
           onBack={() => useProjectContextStore.getState().clearProject()}
@@ -1467,6 +1482,11 @@ export function SchedulePage() {
   // Project list view
   return (
     <div className="max-w-content mx-auto animate-fade-in">
+      <Breadcrumb items={[
+        { label: t('nav.dashboard', 'Dashboard'), to: '/' },
+        { label: t('schedule.title', '4D Schedule') },
+      ]} className="mb-4" />
+
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-content-primary">
           {t('schedule.title', '4D Schedule')}

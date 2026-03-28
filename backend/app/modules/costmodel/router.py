@@ -177,7 +177,7 @@ async def list_budget_lines(
     project_id: uuid.UUID,
     category: str | None = Query(default=None, description="Filter by cost category"),
     offset: int = Query(default=0, ge=0),
-    limit: int = Query(default=200, ge=1, le=1000),
+    limit: int = Query(default=50, ge=1, le=100),
     service: CostModelService = Depends(_get_service),
 ) -> list[BudgetLineResponse]:
     """List detailed budget lines for a project."""
@@ -285,7 +285,7 @@ async def list_snapshots(
     period_from: str | None = Query(default=None, description="Start period (YYYY-MM)"),
     period_to: str | None = Query(default=None, description="End period (YYYY-MM)"),
     offset: int = Query(default=0, ge=0),
-    limit: int = Query(default=100, ge=1, le=500),
+    limit: int = Query(default=50, ge=1, le=100),
     service: CostModelService = Depends(_get_service),
 ) -> list[SnapshotResponse]:
     """List EVM snapshots for a project, optionally filtered by period range."""

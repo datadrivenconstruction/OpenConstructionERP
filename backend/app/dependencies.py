@@ -12,6 +12,7 @@ Usage in routers:
         ...
 """
 
+import logging
 from typing import Annotated, Any
 
 from fastapi import Depends, HTTPException, status
@@ -20,7 +21,10 @@ from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import Settings, get_settings
+from app.core.rate_limiter import ai_limiter
 from app.database import async_session_factory
+
+logger = logging.getLogger(__name__)
 
 # ── Security scheme ────────────────────────────────────────────────────────
 
@@ -147,6 +151,10 @@ class RequirePermission:
 
         # Superadmin bypasses all checks
         if role == "admin":
+            user_id = payload.get("sub", "unknown")
+            logger.info(
+                "Admin bypass: permission=%s user=%s", self.permission, user_id
+            )
             return
 
         if self.permission not in permissions:
@@ -154,6 +162,27 @@ class RequirePermission:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Missing permission: {self.permission}",
             )
+
+
+# ── AI rate limiting ──────────────────────────────────────────────────────
+
+
+async def check_ai_rate_limit(
+    user_id: Annotated[str, Depends(get_current_user_id)],
+) -> int:
+    """Check AI endpoint rate limit for the current user.
+
+    Returns the number of remaining requests in the current window.
+    Raises HTTP 429 if the limit is exceeded.
+    """
+    allowed, remaining = ai_limiter.is_allowed(user_id)
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="AI rate limit exceeded. Please wait a moment and try again.",
+            headers={"Retry-After": "60"},
+        )
+    return remaining
 
 
 # ── Convenience type aliases ───────────────────────────────────────────────

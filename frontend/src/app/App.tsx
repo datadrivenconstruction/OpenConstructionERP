@@ -13,6 +13,7 @@ import { QuantitiesPage } from '@/features/quantities';
 import { ModulesPage } from '@/features/modules';
 import { useModuleRouteElements } from '@/modules/ModuleRoutes';
 import { SettingsPage } from '@/features/settings';
+import { AboutPage } from '@/features/about/AboutPage';
 import { QuickEstimatePage } from '@/features/ai';
 import { Logo, ShortcutsDialog, CommandPalette, ToastContainer, ErrorBoundary, NotFoundPage } from '@/shared/ui';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -187,6 +188,7 @@ export default function App() {
         <Route path="/" element={<P title="Dashboard"><DashboardPage /></P>} />
 
         <Route path="/ai-estimate" element={<P title="AI Quick Estimate"><QuickEstimatePage /></P>} />
+        <Route path="/cad-takeoff" element={<P title="CAD/BIM Takeoff"><QuickEstimatePage /></P>} />
 
         <Route path="/projects" element={<P title="Projects"><ProjectsPage /></P>} />
         <Route path="/projects/new" element={<P title="New Project"><CreateProjectPage /></P>} />
@@ -222,6 +224,7 @@ export default function App() {
         <Route path="/modules" element={<P title="Modules"><ModulesPage /></P>} />
 
         <Route path="/settings" element={<P title="Settings"><SettingsPage /></P>} />
+        <Route path="/about" element={<P title="About"><AboutPage /></P>} />
 
         {/* Plugin module routes — lazy-loaded */}
         {moduleRoutes}

@@ -78,11 +78,7 @@ fn main() {
             let sidecar_cmd = shell
                 .sidecar("openestimate-server")
                 .expect("Failed to create sidecar command")
-                .args([
-                    "serve",
-                    "--host", "127.0.0.1",
-                    "--port", &port.to_string(),
-                ]);
+                .args(["--host", "127.0.0.1", "--port", &port.to_string()]);
 
             let (mut _rx, _child) = sidecar_cmd
                 .spawn()
@@ -95,13 +91,13 @@ fn main() {
             // Wait for backend to be ready, then navigate the webview
             let handle_clone = handle.clone();
             tauri::async_runtime::spawn(async move {
-                if wait_for_backend(port, 30).await {
+                if wait_for_backend(port, 60).await {
                     if let Some(window) = handle_clone.get_webview_window("main") {
                         let url = format!("http://127.0.0.1:{}", port);
                         let _ = window.eval(&format!("window.location.replace('{}')", url));
                     }
                 } else {
-                    eprintln!("Backend failed to start within 30 seconds");
+                    eprintln!("Backend failed to start within 60 seconds");
                 }
             });
 

@@ -164,8 +164,8 @@ def create_app() -> FastAPI:
         CORSMiddleware,
         allow_origins=settings.cors_origins,
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization", "Accept", "Accept-Language"],
     )
 
     # ── Global exception handler — return JSON for unhandled errors ────
@@ -177,7 +177,7 @@ def create_app() -> FastAPI:
         logger.exception("Unhandled exception on %s %s", request.method, request.url.path)
         return JSONResponse(
             status_code=500,
-            content={"detail": f"Internal server error: {type(exc).__name__}"},
+            content={"detail": "Internal server error"},
         )
 
     # ── System Routes ───────────────────────────────────────────────────
@@ -201,7 +201,15 @@ def create_app() -> FastAPI:
             "database": {"status": "unknown"},
             "vector_db": {"status": "offline", "engine": "qdrant"},
             "ai": {"providers": []},
+            "cache": {"status": "unknown"},
         }
+
+        # Cache check
+        try:
+            from app.core.cache import cache as app_cache
+            result["cache"] = app_cache.stats()
+        except Exception:
+            result["cache"] = {"status": "unavailable"}
 
         # Database check
         try:
@@ -233,13 +241,34 @@ def create_app() -> FastAPI:
         except Exception:
             result["vector_db"] = {"status": "offline", "engine": "lancedb"}
 
-        # AI providers check
+        # AI providers check — env vars first, then database
         providers = []
         if settings.openai_api_key:
             providers.append({"name": "OpenAI", "configured": True})
         if settings.anthropic_api_key:
             providers.append({"name": "Anthropic", "configured": True})
-        # Check localStorage-style user keys via a flag
+
+        # Fallback: check user-configured keys in oe_ai_settings table
+        if not providers:
+            try:
+                from app.database import async_session_factory
+                from sqlalchemy import text as sa_text
+
+                async with async_session_factory() as ai_session:
+                    row = (await ai_session.execute(sa_text(
+                        "SELECT openai_api_key, anthropic_api_key, gemini_api_key "
+                        "FROM oe_ai_settings LIMIT 1"
+                    ))).first()
+                    if row:
+                        if row[0]:
+                            providers.append({"name": "OpenAI", "configured": True})
+                        if row[1]:
+                            providers.append({"name": "Anthropic", "configured": True})
+                        if row[2]:
+                            providers.append({"name": "Gemini", "configured": True})
+            except Exception:
+                pass  # Table may not exist yet
+
         result["ai"] = {
             "providers": providers,
             "configured": len(providers) > 0,
@@ -369,6 +398,18 @@ def create_app() -> FastAPI:
         logger.info(
             "Starting %s v%s (%s)", settings.app_name, settings.app_version, settings.app_env
         )
+
+        # Warn about insecure JWT secret
+        if not settings.jwt_secret:
+            logger.warning(
+                "JWT_SECRET is empty — authentication will not work. "
+                "Set JWT_SECRET environment variable."
+            )
+        elif settings.jwt_secret == "change-me-in-production" and settings.is_production:
+            logger.warning(
+                "JWT_SECRET is still set to the default value in production! "
+                "Change it immediately to a secure random string."
+            )
 
         # Load translations (20 languages)
         from app.core.i18n import load_translations

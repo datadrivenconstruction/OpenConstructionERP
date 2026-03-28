@@ -1,9 +1,12 @@
 import type { ColDef, ValueFormatterParams } from 'ag-grid-community';
+import { fmtWithCurrency } from '../boqHelpers';
 
 const UNITS = ['m', 'm2', 'm3', 'kg', 't', 'pcs', 'lsum', 'h', 'set', 'lm'] as const;
 
 export interface BOQColumnContext {
   currencySymbol: string;
+  currencyCode: string;
+  locale: string;
   fmt: Intl.NumberFormat;
   t: (key: string, opts?: Record<string, string>) => string;
 }
@@ -18,9 +21,9 @@ function currencyFormatter(params: ValueFormatterParams): string {
 function totalFormatter(params: ValueFormatterParams): string {
   const ctx = params.context as BOQColumnContext | undefined;
   if (params.value == null) return '';
-  const fmt = ctx?.fmt ?? new Intl.NumberFormat('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  const sym = ctx?.currencySymbol ?? '';
-  return `${sym}${fmt.format(params.value)}`;
+  const locale = ctx?.locale ?? 'de-DE';
+  const currencyCode = ctx?.currencyCode ?? 'EUR';
+  return fmtWithCurrency(params.value, locale, currencyCode);
 }
 
 export function getColumnDefs(context: BOQColumnContext): ColDef[] {

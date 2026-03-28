@@ -56,6 +56,7 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
     items: [
       { keys: ['Tab'], descriptionKey: 'shortcuts.next_field' },
       { keys: ['Enter'], descriptionKey: 'shortcuts.confirm_next_row' },
+      { keys: ['Ctrl', 'Shift', 'V'], descriptionKey: 'shortcuts.paste_from_excel' },
       { keys: ['Esc'], descriptionKey: 'shortcuts.cancel_editing' },
     ],
   },
