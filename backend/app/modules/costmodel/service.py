@@ -85,6 +85,16 @@ class CostModelService:
         self.budget_repo = BudgetLineRepository(session)
         self.cashflow_repo = CashFlowRepository(session)
 
+    async def _get_project_currency(self, project_id: uuid.UUID) -> str:
+        """Get the currency from the project settings. Defaults to EUR."""
+        try:
+            from app.modules.projects.repository import ProjectRepository
+            repo = ProjectRepository(self.session)
+            project = await repo.get_by_id(project_id)
+            return (project.currency if project and project.currency else "EUR")
+        except Exception:
+            return "EUR"
+
     # ── Snapshot operations ────────────────────────────────────────────────
 
     async def create_snapshot(
@@ -255,7 +265,7 @@ class CostModelService:
             spi=round(spi, 4),
             cpi=round(cpi, 4),
             status=budget_status,
-            currency="EUR",
+            currency=await self._get_project_currency(project_id),
         )
 
     # ── S-Curve ────────────────────────────────────────────────────────────

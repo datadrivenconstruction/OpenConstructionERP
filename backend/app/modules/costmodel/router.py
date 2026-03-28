@@ -391,7 +391,7 @@ async def run_monte_carlo(
             BudgetLine.category,
             func.sum(cast(BudgetLine.planned_amount, Float)).label("planned"),
         )
-        .where(BudgetLine.project_id == project_id, BudgetLine.is_active.is_(True))
+        .where(BudgetLine.project_id == project_id)
         .group_by(BudgetLine.category)
     )
     result = await session.execute(stmt)
