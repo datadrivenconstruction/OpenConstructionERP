@@ -79,7 +79,7 @@ export function AppLayout({ title, children }: AppLayoutProps) {
           onMenuClick={openSidebar}
           onFeedbackClick={() => setFeedbackOpen(true)}
         />
-        <main className="px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
+        <main className="px-3 py-4 sm:px-4 lg:px-6">
           <div className="mx-auto max-w-content">
             {children}
           </div>
