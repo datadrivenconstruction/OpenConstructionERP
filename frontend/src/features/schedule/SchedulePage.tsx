@@ -17,9 +17,11 @@ import {
   Zap,
   FileBarChart,
   ShieldAlert,
+  RotateCcw,
+  Download,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Input, InfoHint, SkeletonTable, Breadcrumb } from '@/shared/ui';
-import { apiGet } from '@/shared/lib/api';
+import { apiGet, apiDelete } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -118,6 +120,23 @@ function statusColor(status: string): {
       };
   }
 }
+
+/* ── Work Calendar Info ────────────────────────────────────────────────── */
+
+const WORK_CALENDAR_INFO: Record<string, { hours: number; days: number; label: string }> = {
+  DACH: { hours: 8, days: 5, label: 'Mon-Fri, 8h' },
+  UK: { hours: 8, days: 5, label: 'Mon-Fri, 8h' },
+  US: { hours: 8, days: 5, label: 'Mon-Fri, 8h' },
+  GULF: { hours: 10, days: 6, label: 'Mon-Sat, 10h' },
+  RU: { hours: 8, days: 5, label: 'Mon-Fri, 8h' },
+  NORDIC: { hours: 7.5, days: 5, label: 'Mon-Fri, 7.5h' },
+  FRANCE: { hours: 7, days: 5, label: 'Mon-Fri, 7h' },
+  BRAZIL: { hours: 8, days: 6, label: 'Mon-Sat, 8h' },
+  CHINA: { hours: 8, days: 6, label: 'Mon-Sat, 8h' },
+  INDIA: { hours: 8, days: 6, label: 'Mon-Sat, 8h' },
+  CANADA: { hours: 8, days: 5, label: 'Mon-Fri, 8h' },
+  SPAIN: { hours: 8, days: 5, label: 'Mon-Fri, 8h' },
+};
 
 /* ── Modal Overlay ─────────────────────────────────────────────────────── */
 
@@ -867,6 +886,7 @@ function ScheduleDetail({
   const [showAddActivity, setShowAddActivity] = useState(false);
   const [showGenerateBOQ, setShowGenerateBOQ] = useState(false);
   const [selectedBOQId, setSelectedBOQId] = useState('');
+  const [activityFilter, setActivityFilter] = useState('all');
   const [activityForm, setActivityForm] = useState<CreateActivityForm>({
     name: '',
     wbs_code: '',
@@ -874,6 +894,14 @@ function ScheduleDetail({
     end_date: '',
     activity_type: 'task',
   });
+
+  // Fetch project data for region / work calendar
+  const { data: projectData } = useQuery({
+    queryKey: ['project', projectId],
+    queryFn: () => apiGet<{ id: string; region: string }>(`/v1/projects/${projectId}`),
+    staleTime: 300_000,
+  });
+  const calInfo = WORK_CALENDAR_INFO[projectData?.region ?? ''] ?? WORK_CALENDAR_INFO['DACH'];
 
   const { data: ganttData, isLoading } = useQuery({
     queryKey: ['gantt', schedule.id],
@@ -975,6 +1003,25 @@ function ScheduleDetail({
     },
   });
 
+  const resetSchedule = useMutation({
+    mutationFn: async () => {
+      const activities = ganttData?.activities ?? [];
+      for (const a of activities) {
+        await apiDelete(`/v1/schedule/activities/${a.id}`);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['gantt', schedule.id] });
+      setCpmResult(null);
+      setRiskResult(null);
+      setActivityFilter('all');
+      addToast({ type: 'success', title: t('schedule.reset_success', { defaultValue: 'Schedule reset' }) });
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+    },
+  });
+
   const handleUpdateProgress = useCallback(
     (activityId: string, progress: number) => {
       updateProgress.mutate({ activityId, progress });
@@ -983,6 +1030,22 @@ function ScheduleDetail({
   );
 
   const hasActivities = (ganttData?.summary.total_activities ?? 0) > 0;
+
+  // Filtered activities for the Gantt chart (Improvement #5)
+  const filteredActivities = useMemo(() => {
+    const activities = ganttData?.activities ?? [];
+    if (activityFilter === 'all') return activities;
+    if (activityFilter === 'critical') {
+      return activities.filter((a) => criticalActivityIds?.has(a.id));
+    }
+    if (activityFilter === 'delayed') {
+      return activities.filter((a) => a.status === 'delayed');
+    }
+    if (activityFilter === 'in_progress') {
+      return activities.filter((a) => a.status === 'in_progress');
+    }
+    return activities;
+  }, [ganttData, activityFilter, criticalActivityIds]);
 
   return (
     <div className="animate-fade-in">
@@ -1019,6 +1082,15 @@ function ScheduleDetail({
                 })}
               </Badge>
             )}
+            {/* Work calendar indicator */}
+            <Badge variant="neutral" size="sm" className="flex items-center gap-1">
+              <Clock size={11} />
+              {t('schedule.work_calendar', {
+                defaultValue: '{{hours}}h/day, {{days}} days/week',
+                hours: String(calInfo.hours),
+                days: String(calInfo.days),
+              })}
+            </Badge>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -1064,6 +1136,46 @@ function ScheduleDetail({
               >
                 {t('schedule.risk_analysis_btn', 'Risk Analysis')}
               </Button>
+              {/* Export schedule as TSV */}
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<Download size={14} />}
+                onClick={() => {
+                  const activities = ganttData?.activities ?? [];
+                  const rows = [
+                    ['WBS', 'Name', 'Type', 'Start', 'End', 'Duration (days)', 'Progress %', 'Status'].join('\t'),
+                    ...activities.map((a) => [
+                      a.wbs_code, a.name, a.activity_type, a.start_date, a.end_date,
+                      a.duration_days, a.progress_pct, a.status,
+                    ].join('\t')),
+                  ];
+                  const blob = new Blob([rows.join('\n')], { type: 'text/tab-separated-values' });
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.download = `schedule_${schedule.name.replace(/\s+/g, '_')}.tsv`;
+                  link.click();
+                  URL.revokeObjectURL(url);
+                  addToast({ type: 'success', title: t('schedule.exported', { defaultValue: 'Schedule exported' }) });
+                }}
+              >
+                {t('common.export', { defaultValue: 'Export' })}
+              </Button>
+              {/* Reset schedule */}
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={<RotateCcw size={14} />}
+                onClick={() => {
+                  if (window.confirm(t('schedule.confirm_reset', { defaultValue: 'Delete all activities and regenerate? This cannot be undone.' }))) {
+                    resetSchedule.mutate();
+                  }
+                }}
+                loading={resetSchedule.isPending}
+              >
+                {t('schedule.reset', { defaultValue: 'Reset' })}
+              </Button>
             </>
           )}
           <Button
@@ -1078,6 +1190,57 @@ function ScheduleDetail({
 
       {/* Summary stats */}
       {ganttData && <SummaryStats summary={ganttData.summary} />}
+
+      {/* Overall project progress bar */}
+      {ganttData && ganttData.summary.total_activities > 0 && (
+        <div className="mt-4 rounded-xl border border-border-light bg-surface-primary p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-content-primary">
+              {t('schedule.overall_progress', { defaultValue: 'Overall Progress' })}
+            </span>
+            <span className="text-sm font-bold text-oe-blue tabular-nums">
+              {Math.round((ganttData.summary.completed / Math.max(ganttData.summary.total_activities, 1)) * 100)}%
+            </span>
+          </div>
+          <div className="h-3 w-full overflow-hidden rounded-full bg-surface-secondary">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-500"
+              style={{ width: `${(ganttData.summary.completed / Math.max(ganttData.summary.total_activities, 1)) * 100}%` }}
+            />
+          </div>
+          <div className="mt-2 flex items-center gap-4 text-xs text-content-tertiary">
+            <span>{ganttData.summary.completed} {t('schedule.completed_label', { defaultValue: 'completed' })}</span>
+            <span>{ganttData.summary.in_progress} {t('schedule.in_progress_label', { defaultValue: 'in progress' })}</span>
+            <span>{ganttData.summary.delayed} {t('schedule.delayed_label', { defaultValue: 'delayed' })}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Activity filter */}
+      {hasActivities && (
+        <div className="mt-4 flex items-center gap-2">
+          <span className="text-xs text-content-tertiary">{t('schedule.filter_label', { defaultValue: 'Show:' })}</span>
+          {[
+            { key: 'all', label: t('schedule.filter_all', { defaultValue: 'All' }), count: ganttData?.summary.total_activities ?? 0 },
+            { key: 'critical', label: t('schedule.filter_critical', { defaultValue: 'Critical Path' }), count: cpmResult?.critical_path.length ?? 0, show: !!cpmResult },
+            { key: 'delayed', label: t('schedule.filter_delayed', { defaultValue: 'Delayed' }), count: ganttData?.summary.delayed ?? 0 },
+            { key: 'in_progress', label: t('schedule.filter_in_progress', { defaultValue: 'In Progress' }), count: ganttData?.summary.in_progress ?? 0 },
+          ].filter((f) => f.show !== false && (f.key === 'all' || f.count > 0)).map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setActivityFilter(f.key)}
+              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full transition-colors ${
+                activityFilter === f.key
+                  ? 'bg-oe-blue text-white'
+                  : 'text-content-secondary hover:bg-surface-secondary border border-border-light'
+              }`}
+            >
+              {f.label}
+              <span className="tabular-nums">{f.count}</span>
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Risk analysis card */}
       {riskResult && <RiskAnalysisCard data={riskResult} />}
@@ -1103,7 +1266,7 @@ function ScheduleDetail({
           <SkeletonTable rows={4} columns={4} />
         ) : ganttData ? (
           <GanttChart
-            activities={ganttData.activities}
+            activities={filteredActivities}
             onUpdateProgress={handleUpdateProgress}
             criticalActivityIds={criticalActivityIds}
             zoomLevel={zoomLevel}

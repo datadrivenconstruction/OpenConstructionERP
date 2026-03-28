@@ -78,35 +78,71 @@ WORK_CALENDARS: dict[str, dict] = {
         "work_days": {0, 1, 2, 3, 4},  # Mon-Fri
         "label": "Standard (Mon-Fri, 8h)",
     },
-    "DACH": {
+    # 1. USA — USA_USD
+    "US": {
         "hours_per_day": 8,
         "work_days": {0, 1, 2, 3, 4},  # Mon-Fri
-        "label": "DACH (Mon-Fri, 8h)",
+        "label": "USA (Mon-Fri, 8h)",
     },
+    # 2. UK — UK_GBP
     "UK": {
         "hours_per_day": 8,
         "work_days": {0, 1, 2, 3, 4},  # Mon-Fri
         "label": "UK (Mon-Fri, 8h)",
     },
-    "US": {
+    # 3. Germany/DACH — DE_BERLIN
+    "DACH": {
         "hours_per_day": 8,
         "work_days": {0, 1, 2, 3, 4},  # Mon-Fri
-        "label": "US (Mon-Fri, 8h)",
+        "label": "Germany/DACH (Mon-Fri, 8h)",
     },
-    "GULF": {
-        "hours_per_day": 10,
-        "work_days": {0, 1, 2, 3, 4, 5},  # Mon-Sat (some: Sun-Thu)
-        "label": "Gulf (Mon-Sat, 10h)",
+    # 4. Canada — ENG_TORONTO
+    "CANADA": {
+        "hours_per_day": 8,
+        "work_days": {0, 1, 2, 3, 4},  # Mon-Fri
+        "label": "Canada (Mon-Fri, 8h)",
     },
+    # 5. France — FR_PARIS
+    "FRANCE": {
+        "hours_per_day": 7,
+        "work_days": {0, 1, 2, 3, 4},  # Mon-Fri (35h/week legal)
+        "label": "France (Mon-Fri, 7h)",
+    },
+    # 6. Spain — SP_BARCELONA
+    "SPAIN": {
+        "hours_per_day": 8,
+        "work_days": {0, 1, 2, 3, 4},  # Mon-Fri
+        "label": "Spain (Mon-Fri, 8h)",
+    },
+    # 7. Brazil — PT_SAOPAULO
+    "BRAZIL": {
+        "hours_per_day": 8,
+        "work_days": {0, 1, 2, 3, 4, 5},  # Mon-Sat (44h/week legal)
+        "label": "Brazil (Mon-Sat, 8h)",
+    },
+    # 8. Russia — RU_STPETERSBURG
     "RU": {
         "hours_per_day": 8,
         "work_days": {0, 1, 2, 3, 4},  # Mon-Fri
         "label": "Russia (Mon-Fri, 8h)",
     },
-    "NORDIC": {
-        "hours_per_day": 7.5,
-        "work_days": {0, 1, 2, 3, 4},  # Mon-Fri
-        "label": "Nordic (Mon-Fri, 7.5h)",
+    # 9. UAE/Gulf — AR_DUBAI
+    "GULF": {
+        "hours_per_day": 10,
+        "work_days": {0, 1, 2, 3, 4, 5},  # Mon-Sat
+        "label": "UAE/Gulf (Mon-Sat, 10h)",
+    },
+    # 10. China — ZH_SHANGHAI
+    "CHINA": {
+        "hours_per_day": 8,
+        "work_days": {0, 1, 2, 3, 4, 5},  # Mon-Sat (common in construction)
+        "label": "China (Mon-Sat, 8h)",
+    },
+    # 11. India — HI_MUMBAI
+    "INDIA": {
+        "hours_per_day": 8,
+        "work_days": {0, 1, 2, 3, 4, 5},  # Mon-Sat
+        "label": "India (Mon-Sat, 8h)",
     },
 }
 
@@ -120,12 +156,22 @@ def get_work_calendar(region: str | None = None) -> dict:
             return cal
         # Try matching region prefix (e.g., "DE_BERLIN" → "DACH")
         region_map = {
+            # CWICR db_id prefixes → calendar keys
+            "USA": "US", "US": "US",
+            "UK": "UK", "GB": "UK",
             "DE": "DACH", "AT": "DACH", "CH": "DACH",
-            "GB": "UK", "UK": "UK",
-            "US": "US", "USA": "US",
-            "AE": "GULF", "SA": "GULF", "QA": "GULF", "AR": "GULF",
+            "ENG": "CANADA",  # ENG_TORONTO
+            "FR": "FRANCE",
+            "SP": "SPAIN", "ES": "SPAIN",
+            "PT": "BRAZIL", "BR": "BRAZIL",
             "RU": "RU",
-            "NO": "NORDIC", "SE": "NORDIC", "DK": "NORDIC", "FI": "NORDIC",
+            "AR": "GULF", "AE": "GULF", "SA": "GULF", "QA": "GULF",
+            "ZH": "CHINA", "CN": "CHINA",
+            "HI": "INDIA", "IN": "INDIA",
+            # Project region values
+            "DACH": "DACH", "GULF": "GULF", "NORDIC": "DACH",
+            "CANADA": "CANADA", "FRANCE": "FRANCE", "SPAIN": "SPAIN",
+            "BRAZIL": "BRAZIL", "CHINA": "CHINA", "INDIA": "INDIA",
         }
         prefix = region.split("_")[0].upper()
         mapped = region_map.get(prefix)
@@ -1396,17 +1442,29 @@ class ScheduleService:
                 detail="Schedule has no activities",
             )
 
+        # Snapshot all activity data to avoid MissingGreenlet after expire_all
+        act_data: list[dict] = []
+        for a in activities:
+            act_data.append({
+                "id": str(a.id),
+                "name": a.name or "",
+                "duration_days": a.duration_days or 0,
+                "activity_type": a.activity_type or "task",
+                "dependencies": list(a.dependencies or []),
+                "color": a.color or "#0071e3",
+            })
+
         # Build activity index and dependency map
-        idx: dict[str, Activity] = {str(a.id): a for a in activities}
+        idx: dict[str, dict] = {d["id"]: d for d in act_data}
         active_ids = set(idx.keys())
 
         # Parse dependencies: map activity_id -> list of (predecessor_id, type, lag)
         deps: dict[str, list[tuple[str, str, int]]] = {
-            str(a.id): [] for a in activities
+            d["id"]: [] for d in act_data
         }
-        for act in activities:
-            act_id = str(act.id)
-            for dep in (act.dependencies or []):
+        for ad in act_data:
+            act_id = ad["id"]
+            for dep in ad["dependencies"]:
                 pred_id = str(dep.get("activity_id", ""))
                 dep_type = dep.get("type", "FS")
                 lag = dep.get("lag_days", 0)
@@ -1416,11 +1474,12 @@ class ScheduleService:
         # --- Forward pass: compute ES, EF ---
         es: dict[str, int] = {}
         ef: dict[str, int] = {}
-        for act in activities:
-            act_id = str(act.id)
+        for ad in act_data:
+            act_id = ad["id"]
+            dur = ad["duration_days"]
             act_es = 0
             for pred_id, dep_type, lag in deps[act_id]:
-                pred_dur = idx[pred_id].duration_days
+                pred_dur = idx[pred_id]["duration_days"]
                 if dep_type == "FS":
                     candidate = ef.get(pred_id, pred_dur) + lag
                 elif dep_type == "SS":
@@ -1429,50 +1488,49 @@ class ScheduleService:
                     candidate = ef.get(pred_id, pred_dur)
                 act_es = max(act_es, candidate)
             es[act_id] = act_es
-            ef[act_id] = act_es + act.duration_days
+            ef[act_id] = act_es + dur
 
         # Project duration
         project_duration = max(ef.values()) if ef else 0
 
         # --- Backward pass: compute LS, LF ---
-        # Build successor map
         successors: dict[str, list[tuple[str, str, int]]] = {
-            str(a.id): [] for a in activities
+            d["id"]: [] for d in act_data
         }
-        for act in activities:
-            act_id = str(act.id)
+        for ad in act_data:
+            act_id = ad["id"]
             for pred_id, dep_type, lag in deps[act_id]:
                 successors[pred_id].append((act_id, dep_type, lag))
 
-        lf: dict[str, int] = {str(a.id): project_duration for a in activities}
+        lf: dict[str, int] = {d["id"]: project_duration for d in act_data}
         ls: dict[str, int] = {}
 
-        # Process in reverse order
-        for act in reversed(activities):
-            act_id = str(act.id)
+        for ad in reversed(act_data):
+            act_id = ad["id"]
+            dur = ad["duration_days"]
             for succ_id, dep_type, lag in successors.get(act_id, []):
                 if dep_type == "FS":
                     lf[act_id] = min(lf[act_id], ls.get(succ_id, project_duration) - lag)
                 elif dep_type == "SS":
                     lf[act_id] = min(
                         lf[act_id],
-                        ls.get(succ_id, project_duration) - lag + act.duration_days,
+                        ls.get(succ_id, project_duration) - lag + dur,
                     )
-            ls[act_id] = lf[act_id] - act.duration_days
+            ls[act_id] = lf[act_id] - dur
 
         # --- Compute float and identify critical path ---
         all_results: list[CPMActivityResult] = []
         critical_results: list[CPMActivityResult] = []
 
-        for act in activities:
-            act_id = str(act.id)
+        for ad in act_data:
+            act_id = ad["id"]
             total_float = ls[act_id] - es[act_id]
             is_critical = total_float <= 0
 
             result = CPMActivityResult(
-                activity_id=act.id,
-                name=act.name,
-                duration_days=act.duration_days,
+                activity_id=uuid.UUID(act_id),
+                name=ad["name"],
+                duration_days=ad["duration_days"],
                 early_start=es[act_id],
                 early_finish=ef[act_id],
                 late_start=ls[act_id],
@@ -1484,20 +1542,15 @@ class ScheduleService:
             if is_critical:
                 critical_results.append(result)
 
-            # Store CPM results in activity metadata
-            meta = dict(act.metadata_ or {})
-            meta["cpm"] = {
-                "es": es[act_id],
-                "ef": ef[act_id],
-                "ls": ls[act_id],
-                "lf": lf[act_id],
-                "total_float": total_float,
-                "is_critical": is_critical,
+            # Update activity color + CPM metadata
+            cpm_meta = {
+                "es": es[act_id], "ef": ef[act_id],
+                "ls": ls[act_id], "lf": lf[act_id],
+                "total_float": total_float, "is_critical": is_critical,
             }
-            # Update color: red for critical, original for non-critical
             new_color = "#ef4444" if is_critical else "#0071e3"
             await self.activity_repo.update_fields(
-                act.id, metadata_=meta, color=new_color
+                uuid.UUID(act_id), color=new_color,
             )
 
         await _safe_publish(
