@@ -188,7 +188,7 @@ function StepWelcome({ onNext }: { onNext: () => void }) {
       </div>
 
       <h1 className="text-4xl font-bold text-content-primary tracking-tight">
-        {t('onboarding.welcome_title', { defaultValue: 'Welcome to OpenEstimator.io' })}
+        {t('onboarding.welcome_title', { defaultValue: 'Welcome to OpenConstructionERP' })}
       </h1>
 
       <p className="mt-4 max-w-md text-lg text-content-secondary leading-relaxed">
@@ -382,7 +382,7 @@ function StepCostDatabase({
         <div className="mt-4 w-full max-w-xl rounded-xl border border-semantic-success/30 bg-semantic-success-bg/40 p-4 animate-fade-in">
           <div className="flex items-center gap-2">
             <CheckCircle2 size={16} className="text-semantic-success" />
-            <span className="text-sm font-semibold text-[#15803d]">
+            <span className="text-sm font-semibold text-semantic-success">
               {loadedDb.count.toLocaleString()}{' '}
               {t('onboarding.items_loaded', { defaultValue: 'items loaded' })}
             </span>
@@ -866,7 +866,7 @@ export function OnboardingWizard() {
   }, []);
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="flex min-h-screen flex-col bg-surface-primary">
       {/* Top bar with progress */}
       <div className="px-8 pt-6 pb-4 max-w-3xl mx-auto w-full">
         <ProgressBar current={step} total={TOTAL_STEPS} />

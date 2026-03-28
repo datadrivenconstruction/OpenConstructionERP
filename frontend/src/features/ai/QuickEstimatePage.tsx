@@ -1,7 +1,7 @@
-import { useState, useCallback, useRef, type FormEvent } from 'react';
+import { useState, useCallback, useRef, useEffect, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
 import {
   Sparkles,
   ArrowRight,
@@ -27,11 +27,17 @@ import {
   ChevronDown,
   ChevronRight,
   Layers,
+  FileInput,
+  Loader2,
+  Trash2,
+  HardDrive,
+  Star,
 } from 'lucide-react';
+import clsx from 'clsx';
 import { Card, CardContent, Button, Badge } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { aiApi, type QuickEstimateRequest, type EstimateJobResponse, type EstimateItem, type CadExtractResponse } from './api';
-import { apiGet } from '@/shared/lib/api';
+import { apiGet, apiPost } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 
 // ── Tab types ────────────────────────────────────────────────────────────────
@@ -43,44 +49,44 @@ interface TabDef {
   label: string;
   labelKey: string;
   icon: React.ReactNode;
-  description: string;
+  descKey: string;
+  descFallback: string;
   color: string;
 }
 
 const TABS: TabDef[] = [
-  { id: 'text', label: 'Text', labelKey: 'ai.tab_text', icon: <Pencil size={22} />, description: 'Describe your project in plain text', color: 'from-blue-500/10 to-cyan-500/10 text-blue-600' },
-  { id: 'photo', label: 'Photo / Scan', labelKey: 'ai.tab_photo', icon: <Camera size={22} />, description: 'Building photo or scanned document', color: 'from-violet-500/10 to-purple-500/10 text-violet-600' },
-  { id: 'pdf', label: 'PDF', labelKey: 'ai.tab_pdf', icon: <FileText size={22} />, description: 'BOQ sheets, specs, tender docs', color: 'from-red-500/10 to-orange-500/10 text-red-600' },
-  { id: 'excel', label: 'Excel / CSV', labelKey: 'ai.tab_excel', icon: <FileSpreadsheet size={22} />, description: 'Spreadsheet with BOQ data', color: 'from-green-500/10 to-emerald-500/10 text-green-600' },
-  { id: 'cad', label: 'CAD / BIM', labelKey: 'ai.tab_cad', icon: <HardHat size={22} />, description: 'Revit, IFC, DWG, DGN files', color: 'from-amber-500/10 to-yellow-500/10 text-amber-600' },
-  { id: 'paste', label: 'Paste', labelKey: 'ai.tab_paste', icon: <ClipboardPaste size={22} />, description: 'Copy-paste from any app', color: 'from-slate-500/10 to-gray-500/10 text-slate-600' },
+  { id: 'text', label: 'Text', labelKey: 'ai.tab_text', icon: <Pencil size={22} />, descKey: 'ai.tab_text_desc', descFallback: 'Describe your project in plain text', color: 'from-blue-500/10 to-cyan-500/10 text-blue-600' },
+  { id: 'photo', label: 'Photo / Scan', labelKey: 'ai.tab_photo', icon: <Camera size={22} />, descKey: 'ai.tab_photo_desc', descFallback: 'Building photo or scanned document', color: 'from-violet-500/10 to-purple-500/10 text-violet-600' },
+  { id: 'pdf', label: 'PDF', labelKey: 'ai.tab_pdf', icon: <FileText size={22} />, descKey: 'ai.tab_pdf_desc', descFallback: 'BOQ sheets, specs, tender docs', color: 'from-red-500/10 to-orange-500/10 text-red-600' },
+  { id: 'excel', label: 'Excel / CSV', labelKey: 'ai.tab_excel', icon: <FileSpreadsheet size={22} />, descKey: 'ai.tab_excel_desc', descFallback: 'Spreadsheet with BOQ data', color: 'from-green-500/10 to-emerald-500/10 text-green-600' },
+  { id: 'paste', label: 'Paste', labelKey: 'ai.tab_paste', icon: <ClipboardPaste size={22} />, descKey: 'ai.tab_paste_desc', descFallback: 'Copy-paste from any app', color: 'from-slate-500/10 to-gray-500/10 text-slate-600' },
 ];
 
 // ── Option data ──────────────────────────────────────────────────────────────
 
 const BUILDING_TYPES = [
-  { value: '', label: 'Any type' },
-  { value: 'residential', label: 'Residential' },
-  { value: 'commercial_office', label: 'Commercial / Office' },
-  { value: 'industrial', label: 'Industrial' },
-  { value: 'retail', label: 'Retail' },
-  { value: 'healthcare', label: 'Healthcare' },
-  { value: 'education', label: 'Education' },
-  { value: 'hospitality', label: 'Hospitality' },
-  { value: 'infrastructure', label: 'Infrastructure' },
-  { value: 'mixed_use', label: 'Mixed Use' },
+  { value: '', labelKey: 'ai.building_any', fallback: 'Any type' },
+  { value: 'residential', labelKey: 'ai.building_residential', fallback: 'Residential' },
+  { value: 'commercial_office', labelKey: 'ai.building_commercial', fallback: 'Commercial / Office' },
+  { value: 'industrial', labelKey: 'ai.building_industrial', fallback: 'Industrial' },
+  { value: 'retail', labelKey: 'ai.building_retail', fallback: 'Retail' },
+  { value: 'healthcare', labelKey: 'ai.building_healthcare', fallback: 'Healthcare' },
+  { value: 'education', labelKey: 'ai.building_education', fallback: 'Education' },
+  { value: 'hospitality', labelKey: 'ai.building_hospitality', fallback: 'Hospitality' },
+  { value: 'infrastructure', labelKey: 'ai.building_infrastructure', fallback: 'Infrastructure' },
+  { value: 'mixed_use', labelKey: 'ai.building_mixed', fallback: 'Mixed Use' },
 ];
 
-const STANDARDS = [
-  { value: '', label: 'Auto-detect' },
+const STANDARDS: Array<{ value: string; label?: string; labelKey?: string; fallback?: string }> = [
+  { value: '', labelKey: 'ai.standard_auto', fallback: 'Auto-detect' },
   { value: 'din276', label: 'DIN 276' },
   { value: 'nrm', label: 'NRM 1/2' },
   { value: 'masterformat', label: 'MasterFormat' },
   { value: 'uniformat', label: 'UniFormat' },
 ];
 
-const CURRENCIES = [
-  { value: '', label: 'Auto' },
+const CURRENCIES: Array<{ value: string; label?: string; labelKey?: string; fallback?: string }> = [
+  { value: '', labelKey: 'ai.currency_auto', fallback: 'Auto' },
   { value: 'EUR', label: 'EUR' },
   { value: 'USD', label: 'USD' },
   { value: 'GBP', label: 'GBP' },
@@ -192,22 +198,22 @@ function LoadingState() {
             <thead>
               <tr className="border-b border-border-light text-left">
                 <th className="px-4 py-3 text-xs font-semibold text-content-tertiary uppercase tracking-wide">
-                  Pos
+                  {t('boq.pos', { defaultValue: 'Pos' })}
                 </th>
                 <th className="px-4 py-3 text-xs font-semibold text-content-tertiary uppercase tracking-wide">
-                  Description
+                  {t('boq.description', { defaultValue: 'Description' })}
                 </th>
                 <th className="px-4 py-3 text-xs font-semibold text-content-tertiary uppercase tracking-wide">
-                  Unit
+                  {t('boq.unit', { defaultValue: 'Unit' })}
                 </th>
                 <th className="px-4 py-3 text-xs font-semibold text-content-tertiary uppercase tracking-wide text-right">
-                  Qty
+                  {t('boq.quantity', { defaultValue: 'Qty' })}
                 </th>
                 <th className="px-4 py-3 text-xs font-semibold text-content-tertiary uppercase tracking-wide text-right">
-                  Rate
+                  {t('boq.unit_rate', { defaultValue: 'Rate' })}
                 </th>
                 <th className="px-4 py-3 text-xs font-semibold text-content-tertiary uppercase tracking-wide text-right">
-                  Total
+                  {t('boq.total', { defaultValue: 'Total' })}
                 </th>
               </tr>
             </thead>
@@ -252,9 +258,9 @@ function SaveToBOQDialog({ open, onClose, onSave, saving }: SaveDialogProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-md animate-card-in rounded-2xl border border-border-light bg-surface-elevated p-6 shadow-xl">
-        <h3 className="text-lg font-semibold text-content-primary mb-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" onClick={onClose} />
+      <div role="dialog" aria-modal="true" aria-labelledby="save-boq-dialog-title" className="relative w-full max-w-md animate-card-in rounded-2xl border border-border-light bg-surface-elevated p-6 shadow-xl">
+        <h3 id="save-boq-dialog-title" className="text-lg font-semibold text-content-primary mb-4">
           {t('ai.save_to_boq', { defaultValue: 'Save as BOQ' })}
         </h3>
 
@@ -781,6 +787,243 @@ function CompactOptions({
   );
 }
 
+// ── Converter color map ──────────────────────────────────────────────────────
+
+const CONVERTER_COLORS: Record<string, { bg: string; border: string; icon: string }> = {
+  dwg: { bg: 'from-red-500/8 to-orange-500/8', border: 'border-red-200 dark:border-red-900/30', icon: 'bg-gradient-to-br from-red-500 to-orange-500' },
+  rvt: { bg: 'from-blue-500/8 to-indigo-500/8', border: 'border-blue-200 dark:border-blue-900/30', icon: 'bg-gradient-to-br from-blue-500 to-indigo-500' },
+  ifc: { bg: 'from-emerald-500/8 to-green-500/8', border: 'border-emerald-200 dark:border-emerald-900/30', icon: 'bg-gradient-to-br from-emerald-500 to-green-500' },
+  dgn: { bg: 'from-purple-500/8 to-violet-500/8', border: 'border-purple-200 dark:border-purple-900/30', icon: 'bg-gradient-to-br from-purple-500 to-violet-500' },
+};
+
+// ── Full Converter Section (for /cad-takeoff) ──────────────────────────────
+
+interface CadConverterSectionProps {
+  converters: { id: string; name: string; description: string; engine: string; extensions: string[]; exe: string; version: string; size_mb: number; installed: boolean; path: string | null }[];
+  installedCount: number;
+  totalCount: number;
+  installingId: string | null;
+  installElapsed: number;
+  installResult: { message: string } | null;
+  installError: string | null;
+  onInstall: (c: CadConverterSectionProps['converters'][0]) => void;
+  onUninstall: (c: CadConverterSectionProps['converters'][0]) => void;
+  onDismissProgress: () => void;
+  t: ReturnType<typeof useTranslation>['t'];
+}
+
+function CadConverterSection({
+  converters, installedCount, totalCount,
+  installingId, installElapsed, installResult, installError,
+  onInstall, onUninstall, onDismissProgress, t,
+}: CadConverterSectionProps) {
+  const installingName = converters.find((c) => c.id === installingId)?.name ?? '';
+
+  // Progress phase simulation
+  const phase = installElapsed < 5 ? 0 : installElapsed < 15 ? 1 : installElapsed < 30 ? 2 : 3;
+  const phaseLabels = [
+    t('quantities.phase_downloading', { defaultValue: 'Downloading from GitHub...' }),
+    t('quantities.phase_extracting', { defaultValue: 'Extracting converter files...' }),
+    t('quantities.phase_verifying', { defaultValue: 'Verifying executable...' }),
+    t('quantities.phase_finalizing', { defaultValue: 'Finalizing...' }),
+  ];
+  const progressPct = installError ? 100 : installResult ? 100
+    : !installingId ? 0
+    : Math.min(95, phase === 0 ? installElapsed * 8 : phase === 1 ? 40 + (installElapsed - 5) * 3 : phase === 2 ? 70 + (installElapsed - 15) * 1.5 : 92 + (installElapsed - 30) * 0.1);
+
+  return (
+    <div className="mt-6 space-y-4">
+      {/* Section header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <HardHat size={18} className="text-oe-blue" />
+          <h3 className="text-sm font-semibold text-content-primary">
+            {t('ai.cad_converters_title', { defaultValue: 'DDC Converter Modules' })}
+          </h3>
+          <Badge variant={installedCount > 0 ? 'success' : 'warning'} size="sm">
+            {installedCount}/{totalCount} {t('ai.cad_installed', { defaultValue: 'installed' })}
+          </Badge>
+        </div>
+      </div>
+
+      {/* How it works */}
+      <div className="flex items-center gap-4 text-xs text-content-tertiary">
+        {[
+          { num: '1', label: t('ai.cad_step_upload', { defaultValue: 'Upload CAD/BIM file' }) },
+          { num: '2', label: t('ai.cad_step_convert', { defaultValue: 'Auto-convert via DDC' }) },
+          { num: '3', label: t('ai.cad_step_extract', { defaultValue: 'Get quantities & elements' }) },
+        ].map((s, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue/10 text-2xs font-bold text-oe-blue">
+              {s.num}
+            </span>
+            <span>{s.label}</span>
+            {i < 2 && <ArrowRight size={12} className="text-content-quaternary ml-1" />}
+          </div>
+        ))}
+      </div>
+
+      {/* Install progress panel */}
+      {(installingId || installResult || installError) && (
+        <div className="rounded-xl border border-border-light bg-surface-elevated overflow-hidden shadow-sm">
+          <div className="px-4 pt-4 pb-3">
+            <div className="flex items-center gap-3 mb-3">
+              {installError ? (
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-50 dark:bg-red-900/20">
+                  <XCircle size={20} className="text-red-500" />
+                </div>
+              ) : installResult ? (
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-semantic-success-bg">
+                  <CheckCircle2 size={20} className="text-semantic-success" />
+                </div>
+              ) : (
+                <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle">
+                  <HardDrive size={18} className="text-oe-blue" />
+                  <div className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-oe-blue animate-ping" />
+                  <div className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-oe-blue" />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm font-semibold text-content-primary">
+                  {installError ? t('quantities.install_failed', { defaultValue: 'Installation failed' })
+                    : installResult ? t('quantities.install_success', { defaultValue: 'Converter installed successfully' })
+                    : t('quantities.installing_converter', { defaultValue: `Installing ${installingName}...`, name: installingName })}
+                </h4>
+                <p className="text-xs text-content-tertiary mt-0.5">
+                  {installError ?? (installResult ? t('quantities.install_ready', { defaultValue: 'Converter is ready to use.' }) : phaseLabels[phase])}
+                </p>
+              </div>
+              {(installResult || installError) && (
+                <button onClick={onDismissProgress} className="text-content-quaternary hover:text-content-secondary">
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+            {/* Progress bar */}
+            <div className="h-2 w-full overflow-hidden rounded-full bg-surface-secondary">
+              <div
+                className={clsx(
+                  'h-full rounded-full transition-all duration-1000 ease-out',
+                  installError ? 'bg-red-500' : installResult ? 'bg-semantic-success' : 'bg-gradient-to-r from-oe-blue via-blue-400 to-oe-blue bg-[length:200%_100%] animate-shimmer',
+                )}
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Converter cards grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {converters.map((c) => {
+          const colors = CONVERTER_COLORS[c.id] ?? CONVERTER_COLORS['dwg']!;
+          const isInstalling = installingId === c.id;
+          return (
+            <div
+              key={c.id}
+              className={clsx(
+                'group relative flex flex-col rounded-xl border p-4 transition-all duration-200',
+                c.installed
+                  ? 'border-emerald-300 dark:border-emerald-800/50 bg-gradient-to-br from-emerald-500/5 to-teal-500/5'
+                  : clsx('bg-gradient-to-br', colors.bg, colors.border),
+              )}
+            >
+              {/* Recommended badge */}
+              {!c.installed && !isInstalling && (
+                <div className="absolute -top-2 left-3 z-10">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-2 py-0.5 text-2xs font-bold text-white shadow-sm">
+                    <Star size={9} />
+                    {t('quantities.recommended', { defaultValue: 'Recommended' })}
+                  </span>
+                </div>
+              )}
+
+              {/* Status badge */}
+              <div className="absolute top-2.5 right-2.5">
+                {isInstalling ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 text-2xs font-semibold text-blue-700 dark:text-blue-400">
+                    <Loader2 size={10} className="animate-spin" />
+                    {t('quantities.converter_installing', { defaultValue: 'Installing...' })}
+                  </span>
+                ) : c.installed ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 text-2xs font-semibold text-emerald-700 dark:text-emerald-400">
+                    <CheckCircle2 size={10} />
+                    {t('quantities.converter_installed', { defaultValue: 'Installed' })}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 text-2xs font-semibold text-amber-700 dark:text-amber-400">
+                    <Download size={10} />
+                    {t('quantities.converter_available', { defaultValue: 'Available' })}
+                  </span>
+                )}
+              </div>
+
+              {/* Icon + Name */}
+              <div className="flex items-center gap-3">
+                <div className={clsx('flex h-9 w-9 items-center justify-center rounded-lg text-white', c.installed ? 'bg-gradient-to-br from-emerald-500 to-teal-500' : colors.icon)}>
+                  <FileInput size={18} strokeWidth={1.75} />
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-content-primary">{c.name}</h4>
+                  <p className="text-2xs text-content-quaternary">{c.engine}</p>
+                </div>
+              </div>
+
+              {/* Description */}
+              <p className="mt-2 text-xs text-content-tertiary leading-relaxed line-clamp-2">{c.description}</p>
+
+              {/* Extensions */}
+              <div className="mt-2 flex flex-wrap gap-1">
+                {c.extensions.map((ext) => (
+                  <span key={ext} className="inline-flex rounded bg-surface-tertiary px-1.5 py-0.5 text-2xs font-mono text-content-secondary">
+                    {ext}
+                  </span>
+                ))}
+              </div>
+
+              {/* Footer */}
+              <div className="mt-3 flex items-center justify-between pt-2 border-t border-border-light">
+                <span className="text-2xs text-content-quaternary">
+                  v{c.version} &middot; {c.size_mb >= 1024 ? `${(c.size_mb / 1024).toFixed(1)} GB` : `${c.size_mb} MB`}
+                </span>
+                {c.installed ? (
+                  <button
+                    onClick={() => onUninstall(c)}
+                    disabled={!!installingId}
+                    className="inline-flex items-center gap-1 rounded bg-red-50 dark:bg-red-900/20 px-2 py-1 text-2xs font-medium text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                  >
+                    <Trash2 size={10} />
+                    {t('quantities.uninstall', { defaultValue: 'Uninstall' })}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => onInstall(c)}
+                    disabled={!!installingId}
+                    className="inline-flex items-center gap-1 rounded bg-oe-blue/10 px-2 py-1 text-2xs font-medium text-oe-blue hover:bg-oe-blue/20 transition-colors"
+                  >
+                    {isInstalling ? <Loader2 size={10} className="animate-spin" /> : <Download size={10} />}
+                    {t('quantities.install_with_size', { defaultValue: 'Install ({{size}} MB)', size: c.size_mb })}
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Info note */}
+      <div className="flex items-start gap-2 rounded-lg bg-oe-blue-subtle/50 px-3 py-2.5">
+        <Info size={14} className="shrink-0 mt-0.5 text-oe-blue" />
+        <p className="text-xs text-oe-blue leading-relaxed">
+          {t('ai.cad_module_info_extract', {
+            defaultValue: 'CAD/BIM files are converted using DDC converters and quantities are extracted directly — no AI API key required.',
+          })}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ── Main page ────────────────────────────────────────────────────────────────
 
 export function QuickEstimatePage() {
@@ -791,7 +1034,9 @@ export function QuickEstimatePage() {
 
   // Active tab — read initial value from ?tab= URL param
   const [searchParams] = useSearchParams();
-  const initialTab = (searchParams.get('tab') as InputTab | null) ?? 'text';
+  const routeLocation = useLocation();
+  const isCadRoute = routeLocation.pathname === '/cad-takeoff';
+  const initialTab = isCadRoute ? 'cad' : ((searchParams.get('tab') as InputTab | null) ?? 'text');
   const [activeTab, setActiveTab] = useState<InputTab>(
     ['text', 'photo', 'pdf', 'excel', 'cad', 'paste'].includes(initialTab) ? initialTab : 'text',
   );
@@ -830,16 +1075,69 @@ export function QuickEstimatePage() {
   );
 
   // ── Converter status (for CAD tab) ────────────────────────────────────
+  interface ConverterFull {
+    id: string;
+    name: string;
+    description: string;
+    engine: string;
+    extensions: string[];
+    exe: string;
+    version: string;
+    size_mb: number;
+    installed: boolean;
+    path: string | null;
+  }
   const { data: convertersData } = useQuery<{
-    converters: { id: string; name: string; extensions: string[]; version: string; installed: boolean }[];
+    converters: ConverterFull[];
     installed_count: number;
     total_count: number;
   }>({
     queryKey: ['takeoff', 'converters'],
     queryFn: () => apiGet('/v1/takeoff/converters'),
     staleTime: 60_000,
-    enabled: activeTab === 'cad',
+    enabled: activeTab === 'cad' || isCadRoute,
   });
+
+  // ── Converter install/uninstall state (for /cad-takeoff route) ──────
+  const [installingId, setInstallingId] = useState<string | null>(null);
+  const [installElapsed, setInstallElapsed] = useState(0);
+  const [installResult, setInstallResult] = useState<{ message: string } | null>(null);
+  const [installError, setInstallError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!installingId) { setInstallElapsed(0); return; }
+    const iv = setInterval(() => setInstallElapsed((e) => e + 1), 1000);
+    return () => clearInterval(iv);
+  }, [installingId]);
+
+  const handleConverterInstall = useCallback(async (c: ConverterFull) => {
+    setInstallingId(c.id);
+    setInstallResult(null);
+    setInstallError(null);
+    try {
+      const data = await apiPost<{ message: string }>(`/v1/takeoff/converters/${c.id}/install`);
+      setInstallResult(data);
+      addToast({ type: 'success', title: `${c.name} installed`, message: data.message });
+      queryClient.invalidateQueries({ queryKey: ['takeoff', 'converters'] });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Installation failed';
+      setInstallError(msg);
+      addToast({ type: 'error', title: `Failed to install ${c.name}`, message: msg });
+    } finally {
+      setInstallingId(null);
+    }
+  }, [addToast, queryClient]);
+
+  const handleConverterUninstall = useCallback(async (c: ConverterFull) => {
+    try {
+      await apiPost(`/v1/takeoff/converters/${c.id}/uninstall`);
+      addToast({ type: 'success', title: `${c.name} uninstalled` });
+      queryClient.invalidateQueries({ queryKey: ['takeoff', 'converters'] });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Uninstall failed';
+      addToast({ type: 'error', title: `Failed to uninstall ${c.name}`, message: msg });
+    }
+  }, [addToast, queryClient]);
 
   // ── File selection handler ────────────────────────────────────────────
 
@@ -1186,6 +1484,18 @@ export function QuickEstimatePage() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-1.5 text-xs text-content-tertiary">
+        <a href="/" className="hover:text-content-primary transition-colors">{t('nav.dashboard', { defaultValue: 'Dashboard' })}</a>
+        <span className="text-content-quaternary">/</span>
+        <span className="text-content-primary font-medium">
+          {isCadRoute
+            ? t('nav.cad_takeoff', { defaultValue: 'CAD/BIM Takeoff' })
+            : t('nav.ai_estimate', { defaultValue: 'AI Estimate' })
+          }
+        </span>
+      </nav>
+
       {/* Header */}
       <div className="animate-card-in" style={{ animationDelay: '0ms' }}>
         <div className="flex items-center gap-3">
@@ -1194,12 +1504,16 @@ export function QuickEstimatePage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-content-primary">
-              {t('ai.estimate_title', { defaultValue: 'AI Estimate' })}
+              {isCadRoute
+                ? t('ai.cad_takeoff_title', { defaultValue: 'CAD/BIM Takeoff' })
+                : t('ai.estimate_title', { defaultValue: 'AI Estimate' })
+              }
             </h1>
             <p className="text-sm text-content-secondary">
-              {t('ai.estimate_subtitle', {
-                defaultValue: 'Create an estimate from any source',
-              })}
+              {isCadRoute
+                ? t('ai.cad_takeoff_subtitle', { defaultValue: 'Extract quantities from 3D models and drawings' })
+                : t('ai.estimate_subtitle', { defaultValue: 'Create an estimate from any source' })
+              }
             </p>
           </div>
         </div>
@@ -1271,46 +1585,49 @@ export function QuickEstimatePage() {
             <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-semantic-success" /> Text</span>
             <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-semantic-success" /> Photo</span>
             <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-semantic-success" /> PDF</span>
-            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-semantic-success" /> CAD</span>
+            <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-semantic-success" /> Excel</span>
           </div>
         </div>
       ) : null}
 
-      {/* Source type selector — 2×3 horizontal card grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 animate-card-in" style={{ animationDelay: '100ms' }}>
-        {TABS.map((tab, i) => {
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => handleTabChange(tab.id)}
-              disabled={isPending}
-              className={`
-                group relative flex items-center gap-3.5 rounded-xl px-4 py-3
-                border transition-all duration-normal ease-oe text-left
-                ${isActive
-                  ? 'border-oe-blue bg-oe-blue-subtle/60 shadow-sm'
-                  : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary active:scale-[0.99]'
-                }
-                ${isPending ? 'opacity-50 pointer-events-none' : ''}
-              `}
-              style={{ animationDelay: `${80 + i * 40}ms` }}
-            >
-              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors ${isActive ? 'bg-oe-blue text-white' : 'bg-surface-secondary text-content-tertiary group-hover:text-content-secondary'}`}>
-                {tab.icon}
-              </div>
-              <div className="min-w-0">
-                <div className={`text-sm font-semibold ${isActive ? 'text-oe-blue' : 'text-content-primary'}`}>
-                  {t(tab.labelKey, { defaultValue: tab.label })}
+      {/* Source type selector (hidden on /cad-takeoff) */}
+      {!isCadRoute && (
+      <div className="animate-card-in" style={{ animationDelay: '100ms' }}>
+        {/* Horizontal tab pills — single row */}
+        <div className="grid grid-cols-5 gap-2">
+          {TABS.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
+                disabled={isPending}
+                className={`
+                  flex flex-col items-center gap-1.5 rounded-xl px-2 py-3 text-center transition-all border
+                  ${isActive
+                    ? 'border-oe-blue bg-oe-blue-subtle/70 shadow-sm ring-1 ring-oe-blue/20'
+                    : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary active:scale-[0.98]'
+                  }
+                  ${isPending ? 'opacity-50 pointer-events-none' : ''}
+                `}
+              >
+                <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors ${isActive ? 'bg-oe-blue text-white' : 'bg-surface-secondary text-content-tertiary'}`}>
+                  {tab.icon}
                 </div>
-                <div className="text-2xs text-content-tertiary truncate">
-                  {tab.description}
+                <div>
+                  <div className={`text-xs font-semibold ${isActive ? 'text-oe-blue' : 'text-content-primary'}`}>
+                    {t(tab.labelKey, { defaultValue: tab.label })}
+                  </div>
+                  <div className="text-2xs text-content-tertiary leading-tight mt-0.5">
+                    {t(tab.descKey, { defaultValue: tab.descFallback })}
+                  </div>
                 </div>
-              </div>
-            </button>
-          );
-        })}
+              </button>
+            );
+          })}
+        </div>
       </div>
+      )}
 
       {/* Input area for selected source */}
       <Card className="animate-card-in" style={{ animationDelay: '200ms' }} padding="none">
@@ -1371,7 +1688,7 @@ export function QuickEstimatePage() {
                     >
                       {CURRENCIES.map((c) => (
                         <option key={c.value} value={c.value}>
-                          {c.label}
+                          {c.labelKey ? t(c.labelKey, { defaultValue: c.fallback ?? '' }) : c.label}
                         </option>
                       ))}
                     </select>
@@ -1389,7 +1706,7 @@ export function QuickEstimatePage() {
                     >
                       {STANDARDS.map((s) => (
                         <option key={s.value} value={s.value}>
-                          {s.label}
+                          {s.labelKey ? t(s.labelKey, { defaultValue: s.fallback ?? '' }) : s.label}
                         </option>
                       ))}
                     </select>
@@ -1407,7 +1724,7 @@ export function QuickEstimatePage() {
                     >
                       {BUILDING_TYPES.map((bt) => (
                         <option key={bt.value} value={bt.value}>
-                          {bt.label}
+                          {t(bt.labelKey, { defaultValue: bt.fallback })}
                         </option>
                       ))}
                     </select>
@@ -1551,61 +1868,77 @@ export function QuickEstimatePage() {
                     disabled={isPending}
                   />
                 )}
-                {/* ── DDC Converter Modules Status ─────────────── */}
-                <div className="mt-3 rounded-xl border border-border bg-surface-secondary/50 p-3">
-                  <div className="flex items-center justify-between mb-2.5">
-                    <h4 className="text-xs font-semibold text-content-primary flex items-center gap-1.5">
-                      <HardHat size={13} />
-                      {t('ai.cad_converters_title', { defaultValue: 'DDC Converter Modules' })}
-                    </h4>
-                    {convertersData && (
-                      <Badge variant={convertersData.installed_count > 0 ? 'success' : 'warning'} size="sm">
-                        {convertersData.installed_count}/{convertersData.total_count}{' '}
-                        {t('ai.cad_installed', { defaultValue: 'installed' })}
-                      </Badge>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {(convertersData?.converters ?? []).map((c) => (
-                      <div
-                        key={c.id}
-                        className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs ${
-                          c.installed
-                            ? 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400'
-                            : 'bg-surface-primary text-content-tertiary'
-                        }`}
-                      >
-                        {c.installed ? (
-                          <CheckCircle2 size={13} className="shrink-0 text-green-500" />
-                        ) : (
-                          <XCircle size={13} className="shrink-0 text-content-quaternary" />
-                        )}
-                        <span className="font-medium truncate">{c.name}</span>
-                        <span className="ml-auto text-[10px] opacity-60">{c.extensions.join(', ')}</span>
+                {/* ── DDC Converter Modules ─────────────────────── */}
+                {isCadRoute ? (
+                  /* Full converter management UI on /cad-takeoff */
+                  <CadConverterSection
+                    converters={convertersData?.converters ?? []}
+                    installedCount={convertersData?.installed_count ?? 0}
+                    totalCount={convertersData?.total_count ?? 4}
+                    installingId={installingId}
+                    installElapsed={installElapsed}
+                    installResult={installResult}
+                    installError={installError}
+                    onInstall={handleConverterInstall}
+                    onUninstall={handleConverterUninstall}
+                    onDismissProgress={() => { setInstallResult(null); setInstallError(null); }}
+                    t={t}
+                  />
+                ) : (
+                  /* Compact status panel on /ai-estimate?tab=cad */
+                  <div className="mt-3 rounded-xl border border-border bg-surface-secondary/50 p-3">
+                    <div className="flex items-center justify-between mb-2.5">
+                      <h4 className="text-xs font-semibold text-content-primary flex items-center gap-1.5">
+                        <HardHat size={13} />
+                        {t('ai.cad_converters_title', { defaultValue: 'DDC Converter Modules' })}
+                      </h4>
+                      {convertersData && (
+                        <Badge variant={convertersData.installed_count > 0 ? 'success' : 'warning'} size="sm">
+                          {convertersData.installed_count}/{convertersData.total_count}{' '}
+                          {t('ai.cad_installed', { defaultValue: 'installed' })}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {(convertersData?.converters ?? []).map((c) => (
+                        <div
+                          key={c.id}
+                          className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs ${
+                            c.installed
+                              ? 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400'
+                              : 'bg-surface-primary text-content-tertiary'
+                          }`}
+                        >
+                          {c.installed ? (
+                            <CheckCircle2 size={13} className="shrink-0 text-green-500" />
+                          ) : (
+                            <XCircle size={13} className="shrink-0 text-content-quaternary" />
+                          )}
+                          <span className="font-medium truncate">{c.name}</span>
+                          <span className="ml-auto text-[10px] opacity-60">{c.extensions.join(', ')}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-2.5 flex items-start gap-2 rounded-lg bg-oe-blue-subtle/50 px-2.5 py-2">
+                      <Info size={13} className="shrink-0 mt-0.5 text-oe-blue" />
+                      <div className="text-[11px] text-oe-blue leading-relaxed">
+                        <p>
+                          {t('ai.cad_module_info_extract', {
+                            defaultValue:
+                              'CAD/BIM files are converted using DDC converters and quantities are extracted directly — no AI API key required.',
+                          })}
+                        </p>
+                        <Link
+                          to="/cad-takeoff"
+                          className="mt-1 inline-flex items-center gap-1 font-medium text-oe-blue hover:underline"
+                        >
+                          {t('ai.cad_manage_converters', { defaultValue: 'Manage Converters' })}
+                          <ExternalLink size={11} />
+                        </Link>
                       </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-2.5 flex items-start gap-2 rounded-lg bg-oe-blue-subtle/50 px-2.5 py-2">
-                    <Info size={13} className="shrink-0 mt-0.5 text-oe-blue" />
-                    <div className="text-[11px] text-oe-blue leading-relaxed">
-                      <p>
-                        {t('ai.cad_module_info_extract', {
-                          defaultValue:
-                            'CAD/BIM files are converted using DDC converters and quantities are extracted directly — no AI API key required. Install converters from the Quantities page.',
-                        })}
-                      </p>
-                      <Link
-                        to="/quantities"
-                        className="mt-1 inline-flex items-center gap-1 font-medium text-oe-blue hover:underline"
-                      >
-                        {t('ai.cad_manage_converters', { defaultValue: 'Manage Converters' })}
-                        <ExternalLink size={11} />
-                      </Link>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
 
@@ -1659,16 +1992,26 @@ export function QuickEstimatePage() {
                   </span>
                 )}
               </div>
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                loading={isPending}
-                disabled={!canSubmit}
-                icon={activeTab === 'cad' ? <Layers size={18} /> : <Sparkles size={18} />}
-              >
-                {submitLabel}
-              </Button>
+              <div className="flex flex-col items-end gap-1">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  loading={isPending}
+                  disabled={!canSubmit}
+                  icon={activeTab === 'cad' ? <Layers size={18} /> : <Sparkles size={18} />}
+                >
+                  {submitLabel}
+                </Button>
+                {!canSubmit && !isPending && (
+                  <span className="text-2xs text-content-tertiary">
+                    {activeTab === 'text'
+                      ? t('ai.hint_enter_description', { defaultValue: 'Enter a project description to continue' })
+                      : t('ai.hint_select_file', { defaultValue: 'Select a file to continue' })
+                    }
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </form>
@@ -1807,15 +2150,15 @@ export function QuickEstimatePage() {
               {(result.confidence ?? 0) > 0 && (
                 <Badge
                   variant={
-                    result.confidence >= 0.7
+                    (result.confidence ?? 0) >= 0.7
                       ? 'success'
-                      : result.confidence >= 0.4
+                      : (result.confidence ?? 0) >= 0.4
                         ? 'warning'
                         : 'error'
                   }
                   size="sm"
                 >
-                  {Math.round(result.confidence * 100)}%{' '}
+                  {Math.round((result.confidence ?? 0) * 100)}%{' '}
                   {t('ai.confidence', { defaultValue: 'confidence' })}
                 </Badge>
               )}
@@ -1849,14 +2192,24 @@ export function QuickEstimatePage() {
                 variant="secondary"
                 size="sm"
                 icon={<Download size={14} />}
-                onClick={() =>
-                  addToast({
-                    type: 'info',
-                    title: t('ai.export_coming_soon', { defaultValue: 'Export coming soon' }),
-                  })
-                }
+                onClick={() => {
+                  // Generate a simple CSV download from results
+                  if (!result?.items?.length) return;
+                  const header = 'Pos,Description,Unit,Quantity,Unit Rate,Total\n';
+                  const rows = result.items.map((item, i) =>
+                    `${item.ordinal || i + 1},"${(item.description || '').replace(/"/g, '""')}",${item.unit},${item.quantity},${item.unit_rate},${item.quantity * item.unit_rate}`
+                  ).join('\n');
+                  const blob = new Blob([header + rows], { type: 'text/csv' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `ai-estimate-${new Date().toISOString().slice(0, 10)}.csv`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  addToast({ type: 'success', title: t('ai.exported', { defaultValue: 'Estimate exported as CSV' }) });
+                }}
               >
-                {t('ai.export_pdf', { defaultValue: 'Export PDF' })}
+                {t('ai.export_csv', { defaultValue: 'Export CSV' })}
               </Button>
               <Button
                 variant="primary"

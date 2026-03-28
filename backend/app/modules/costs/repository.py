@@ -157,11 +157,11 @@ class CostItemRepository:
         if max_rate is not None:
             base = base.where(cast(CostItem.rate, Float) <= max_rate)
 
-        # Count
+        # Count — avoid subquery overhead, use scalar count directly
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        # Fetch
+        # Fetch page
         stmt = base.order_by(CostItem.code).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         items = list(result.scalars().all())

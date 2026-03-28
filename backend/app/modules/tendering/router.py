@@ -13,13 +13,14 @@ Endpoints:
 """
 
 import io
+import logging
 import uuid
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
 
-from app.dependencies import CurrentUserId, SessionDep
+from app.dependencies import CurrentUserId, CurrentUserPayload, SessionDep
 from app.modules.tendering.schemas import (
     BidComparisonResponse,
     BidCreate,
@@ -33,10 +34,52 @@ from app.modules.tendering.schemas import (
 from app.modules.tendering.service import TenderingService
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 def _get_service(session: SessionDep) -> TenderingService:
     return TenderingService(session)
+
+
+async def _verify_tender_project_owner(
+    session: SessionDep,
+    project_id: uuid.UUID,
+    user_id: str,
+    payload: dict | None = None,
+) -> None:
+    """Verify the current user owns the project. Admins bypass."""
+    if payload and payload.get("role") == "admin":
+        return
+    from app.modules.projects.repository import ProjectRepository
+
+    project_repo = ProjectRepository(session)
+    project = await project_repo.get_by_id(project_id)
+    if project is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+    if str(project.owner_id) != user_id:
+        raise HTTPException(status_code=403, detail="You do not have access to this project")
+
+
+async def _verify_package_owner(
+    service: TenderingService,
+    session: SessionDep,
+    package_id: uuid.UUID,
+    user_id: str,
+    payload: dict | None = None,
+) -> object:
+    """Load a package, then verify the user owns its project. Admins bypass."""
+    package = await service.get_package(package_id)
+    if payload and payload.get("role") == "admin":
+        return package
+    from app.modules.projects.repository import ProjectRepository
+
+    project_repo = ProjectRepository(session)
+    project = await project_repo.get_by_id(package.project_id)
+    if project is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+    if str(project.owner_id) != user_id:
+        raise HTTPException(status_code=403, detail="You do not have access to this tender package")
+    return package
 
 
 def _package_to_response(package: object) -> PackageResponse:
@@ -105,22 +148,38 @@ def _package_with_bids(package: object) -> PackageWithBidsResponse:
 async def create_package(
     data: PackageCreate,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: TenderingService = Depends(_get_service),
 ) -> PackageResponse:
     """Create a new tender package from a BOQ."""
-    package = await service.create_package(data)
-    return _package_to_response(package)
+    await _verify_tender_project_owner(session, data.project_id, user_id, payload)
+    try:
+        package = await service.create_package(data)
+        return _package_to_response(package)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Failed to create tender package")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create tender package",
+        )
 
 
 @router.get("/packages/", response_model=list[PackageResponse])
 async def list_packages(
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: TenderingService = Depends(_get_service),
     project_id: uuid.UUID | None = Query(default=None),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
 ) -> list[PackageResponse]:
     """List tender packages with optional project filter."""
+    if project_id is not None:
+        await _verify_tender_project_owner(session, project_id, user_id, payload)
     packages, _ = await service.list_packages(
         project_id=project_id, offset=offset, limit=limit
     )
@@ -131,10 +190,12 @@ async def list_packages(
 async def get_package(
     package_id: uuid.UUID,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: TenderingService = Depends(_get_service),
 ) -> PackageWithBidsResponse:
     """Get a tender package with all bids."""
-    package = await service.get_package(package_id)
+    package = await _verify_package_owner(service, session, package_id, user_id, payload)
     return _package_with_bids(package)
 
 
@@ -143,9 +204,12 @@ async def update_package(
     package_id: uuid.UUID,
     data: PackageUpdate,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: TenderingService = Depends(_get_service),
 ) -> PackageResponse:
     """Update a tender package status or fields."""
+    await _verify_package_owner(service, session, package_id, user_id, payload)
     package = await service.update_package(package_id, data)
     return _package_to_response(package)
 
@@ -160,20 +224,35 @@ async def create_bid(
     package_id: uuid.UUID,
     data: BidCreate,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: TenderingService = Depends(_get_service),
 ) -> BidResponse:
     """Add a bid to a tender package."""
-    bid = await service.create_bid(package_id, data)
-    return _bid_to_response(bid)
+    await _verify_package_owner(service, session, package_id, user_id, payload)
+    try:
+        bid = await service.create_bid(package_id, data)
+        return _bid_to_response(bid)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Failed to create bid for package %s", package_id)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create bid",
+        )
 
 
 @router.get("/packages/{package_id}/bids", response_model=list[BidResponse])
 async def list_bids(
     package_id: uuid.UUID,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: TenderingService = Depends(_get_service),
 ) -> list[BidResponse]:
     """List all bids for a tender package."""
+    await _verify_package_owner(service, session, package_id, user_id, payload)
     bids = await service.list_bids(package_id)
     return [_bid_to_response(b) for b in bids]
 
@@ -186,8 +265,17 @@ async def update_bid(
     service: TenderingService = Depends(_get_service),
 ) -> BidResponse:
     """Update a bid."""
-    bid = await service.update_bid(bid_id, data)
-    return _bid_to_response(bid)
+    try:
+        bid = await service.update_bid(bid_id, data)
+        return _bid_to_response(bid)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Failed to update bid %s", bid_id)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update bid",
+        )
 
 
 # ── Comparison Endpoint ──────────────────────────────────────────────────────
@@ -200,9 +288,12 @@ async def update_bid(
 async def compare_bids(
     package_id: uuid.UUID,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: TenderingService = Depends(_get_service),
 ) -> BidComparisonResponse:
     """Compare all bids for a package side-by-side."""
+    await _verify_package_owner(service, session, package_id, user_id, payload)
     return await service.compare_bids(package_id)
 
 
@@ -213,6 +304,8 @@ async def compare_bids(
 async def export_tender_pdf(
     package_id: uuid.UUID,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: TenderingService = Depends(_get_service),
 ) -> StreamingResponse:
     """Export tender package with bid comparison as a PDF report.
@@ -220,6 +313,7 @@ async def export_tender_pdf(
     Generates a simple text-based PDF using only the Python standard library
     so that no extra dependencies (reportlab, etc.) are required.
     """
+    await _verify_package_owner(service, session, package_id, user_id, payload)
     package = await service.get_package(package_id)
     comparison = await service.compare_bids(package_id)
 

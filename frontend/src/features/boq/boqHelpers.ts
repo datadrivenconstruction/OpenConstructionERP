@@ -104,10 +104,27 @@ export function getCurrencySymbol(currencyStr?: string): string {
   if (!currencyStr) return '\u20ac';
   // Try "(symbol)" pattern first: "CAD (C$) — Canadian Dollar"
   const match = currencyStr.match(/\((.+?)\)/);
-  if (match) return match[1];
+  if (match?.[1]) return match[1];
   // Try plain 3-letter code: "CAD", "EUR", "GBP"
   const code = currencyStr.trim().substring(0, 3).toUpperCase();
   return CURRENCY_SYMBOLS[code] || code;
+}
+
+/* ── Currency Code Extraction ───────────────────────────────────────── */
+
+/**
+ * Extract ISO 4217 currency code from currency string. Handles formats:
+ *  - "EUR (€) — Euro" → "EUR"
+ *  - "CAD (C$) — Canadian Dollar" → "CAD"
+ *  - "EUR" → "EUR"
+ *  - "GBP" → "GBP"
+ */
+export function getCurrencyCode(currencyStr?: string): string {
+  if (!currencyStr) return 'EUR';
+  const code = currencyStr.trim().substring(0, 3).toUpperCase();
+  // Validate it looks like a currency code (3 uppercase letters)
+  if (/^[A-Z]{3}$/.test(code)) return code;
+  return 'EUR';
 }
 
 /* ── Number Formatting ───────────────────────────────────────────────── */
@@ -126,6 +143,38 @@ export function createFormatter(locale = 'de-DE'): Intl.NumberFormat {
  */
 export function fmtCompact(n: number, fmt: Intl.NumberFormat): string {
   return fmt.format(n);
+}
+
+/**
+ * Format a number with locale-aware currency symbol placement.
+ * Uses Intl.NumberFormat with style: 'currency' so the symbol position,
+ * decimal separator, and grouping are all determined by the locale:
+ *  - de-DE + EUR → "1.400,00 €"
+ *  - en-US + USD → "$1,400.00"
+ *  - en-GB + GBP → "£1,400.00"
+ *  - ar-AE + AED → "١٬٤٠٠٫٠٠ د.إ." (with Latin digits fallback)
+ *  - ru-RU + RUB → "1 400,00 ₽"
+ */
+export function fmtWithCurrency(
+  value: number,
+  locale: string,
+  currencyCode: string,
+): string {
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: currencyCode,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  } catch {
+    // Fallback: use the plain number formatter + symbol
+    const fmt = new Intl.NumberFormat(locale, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    return `${fmt.format(value)} ${currencyCode}`;
+  }
 }
 
 /* ── Quality Score ───────────────────────────────────────────────────── */

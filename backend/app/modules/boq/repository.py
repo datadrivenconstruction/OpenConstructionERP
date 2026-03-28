@@ -237,21 +237,26 @@ class MarkupRepository:
         """Insert a new markup."""
         self.session.add(markup)
         await self.session.flush()
+        await self.session.refresh(markup)
         return markup
 
     async def bulk_create(self, markups: list[BOQMarkup]) -> list[BOQMarkup]:
         """Insert multiple markups at once."""
         self.session.add_all(markups)
         await self.session.flush()
+        for m in markups:
+            await self.session.refresh(m)
         return markups
 
-    async def update_fields(self, markup_id: uuid.UUID, **fields: object) -> None:
-        """Update specific fields on a markup."""
+    async def update_fields(self, markup_id: uuid.UUID, **fields: object) -> BOQMarkup | None:
+        """Update specific fields on a markup and return refreshed object."""
         stmt = update(BOQMarkup).where(BOQMarkup.id == markup_id).values(**fields)
         await self.session.execute(stmt)
         await self.session.flush()
-        # Expire cached ORM instances so the next get_by_id re-reads from DB
-        self.session.expire_all()
+        markup = await self.session.get(BOQMarkup, markup_id)
+        if markup is not None:
+            await self.session.refresh(markup)
+        return markup
 
     async def delete(self, markup_id: uuid.UUID) -> None:
         """Delete a single markup."""

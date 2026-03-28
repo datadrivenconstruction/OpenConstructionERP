@@ -28,7 +28,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 logger = logging.getLogger(__name__)
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermission, SessionDep
 from app.modules.schedule.schemas import (
     ActivityCreate,
     ActivityResponse,
@@ -53,6 +53,47 @@ router = APIRouter()
 
 def _get_service(session: SessionDep) -> ScheduleService:
     return ScheduleService(session)
+
+
+async def _verify_schedule_project_owner(
+    session: SessionDep,
+    project_id: uuid.UUID,
+    user_id: str,
+    payload: dict | None = None,
+) -> None:
+    """Verify the current user owns the project. Admins bypass."""
+    if payload and payload.get("role") == "admin":
+        return
+    from app.modules.projects.repository import ProjectRepository
+
+    project_repo = ProjectRepository(session)
+    project = await project_repo.get_by_id(project_id)
+    if project is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+    if str(project.owner_id) != user_id:
+        raise HTTPException(status_code=403, detail="You do not have access to this project")
+
+
+async def _verify_schedule_owner(
+    service: ScheduleService,
+    session: SessionDep,
+    schedule_id: uuid.UUID,
+    user_id: str,
+    payload: dict | None = None,
+) -> object:
+    """Load a schedule and verify the user owns its project. Admins bypass."""
+    if payload and payload.get("role") == "admin":
+        return await service.get_schedule(schedule_id)
+    schedule = await service.get_schedule(schedule_id)
+    from app.modules.projects.repository import ProjectRepository
+
+    project_repo = ProjectRepository(session)
+    project = await project_repo.get_by_id(schedule.project_id)
+    if project is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+    if str(project.owner_id) != user_id:
+        raise HTTPException(status_code=403, detail="You do not have access to this schedule")
+    return schedule
 
 
 def _activity_to_response(activity: object) -> ActivityResponse:
@@ -116,11 +157,20 @@ def _work_order_to_response(wo: object) -> WorkOrderResponse:
 async def create_schedule(
     data: ScheduleCreate,
     _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: ScheduleService = Depends(_get_service),
 ) -> ScheduleResponse:
     """Create a new schedule."""
-    schedule = await service.create_schedule(data)
-    return ScheduleResponse.model_validate(schedule)
+    await _verify_schedule_project_owner(session, data.project_id, _user_id, payload)
+    try:
+        schedule = await service.create_schedule(data)
+        return ScheduleResponse.model_validate(schedule)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Failed to create schedule")
+        raise HTTPException(status_code=500, detail="Failed to create schedule")
 
 
 @router.get(
@@ -129,12 +179,16 @@ async def create_schedule(
     dependencies=[Depends(RequirePermission("schedule.read"))],
 )
 async def list_schedules(
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     project_id: uuid.UUID = Query(..., description="Filter schedules by project"),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
     service: ScheduleService = Depends(_get_service),
 ) -> list[ScheduleResponse]:
     """List all schedules for a given project."""
+    await _verify_schedule_project_owner(session, project_id, _user_id, payload)
     schedules, _ = await service.list_schedules_for_project(
         project_id, offset=offset, limit=limit
     )
@@ -148,9 +202,13 @@ async def list_schedules(
 )
 async def get_schedule(
     schedule_id: uuid.UUID,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: ScheduleService = Depends(_get_service),
 ) -> ScheduleResponse:
     """Get a schedule by ID."""
+    await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
     schedule = await service.get_schedule(schedule_id)
     return ScheduleResponse.model_validate(schedule)
 
@@ -163,9 +221,13 @@ async def get_schedule(
 async def update_schedule(
     schedule_id: uuid.UUID,
     data: ScheduleUpdate,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: ScheduleService = Depends(_get_service),
 ) -> ScheduleResponse:
     """Update schedule metadata (name, description, status, dates)."""
+    await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
     schedule = await service.update_schedule(schedule_id, data)
     return ScheduleResponse.model_validate(schedule)
 
@@ -177,9 +239,13 @@ async def update_schedule(
 )
 async def delete_schedule(
     schedule_id: uuid.UUID,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: ScheduleService = Depends(_get_service),
 ) -> None:
     """Delete a schedule and all its activities and work orders."""
+    await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
     await service.delete_schedule(schedule_id)
 
 
@@ -215,7 +281,7 @@ async def create_activity(
 async def list_activities(
     schedule_id: uuid.UUID,
     offset: int = Query(default=0, ge=0),
-    limit: int = Query(default=1000, ge=1, le=5000),
+    limit: int = Query(default=50, ge=1, le=100),
     service: ScheduleService = Depends(_get_service),
 ) -> list[ActivityResponse]:
     """List all activities for a schedule, ordered by sort_order."""
@@ -396,7 +462,7 @@ async def create_work_order(
 async def list_work_orders(
     schedule_id: uuid.UUID = Query(..., description="Filter work orders by schedule"),
     offset: int = Query(default=0, ge=0),
-    limit: int = Query(default=500, ge=1, le=1000),
+    limit: int = Query(default=50, ge=1, le=100),
     service: ScheduleService = Depends(_get_service),
 ) -> list[WorkOrderResponse]:
     """List all work orders for a schedule."""

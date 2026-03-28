@@ -302,6 +302,575 @@ class GAEBOrdinalFormat(ValidationRule):
         return results
 
 
+# ── Additional BOQ Quality Rules ──────────────────────────────────────────
+
+
+class NegativeValues(ValidationRule):
+    rule_id = "boq_quality.negative_values"
+    name = "No Negative Values"
+    standard = "boq_quality"
+    severity = Severity.ERROR
+    category = RuleCategory.QUALITY
+    description = "Positions must not have negative quantity or unit_rate"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            qty = pos.get("quantity")
+            rate = pos.get("unit_rate")
+            qty_val = float(qty) if qty is not None else 0
+            rate_val = float(rate) if rate is not None else 0
+            passed = qty_val >= 0 and rate_val >= 0
+            if not passed:
+                parts: list[str] = []
+                if qty_val < 0:
+                    parts.append(f"quantity={qty_val}")
+                if rate_val < 0:
+                    parts.append(f"unit_rate={rate_val}")
+                msg = (
+                    f"Position {pos.get('ordinal', '?')} has negative "
+                    f"{', '.join(parts)}"
+                )
+            else:
+                msg = "OK"
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=msg,
+                    element_ref=pos.get("id"),
+                    suggestion="Correct negative values — use positive numbers"
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+class UnrealisticRate(ValidationRule):
+    rule_id = "boq_quality.unrealistic_rate"
+    name = "Unrealistic Rate Detection"
+    standard = "boq_quality"
+    severity = Severity.WARNING
+    category = RuleCategory.QUALITY
+    description = "Flags positions with unit rate > 100,000 or total > 10,000,000"
+
+    RATE_THRESHOLD = 100_000
+    TOTAL_THRESHOLD = 10_000_000
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            rate = float(pos.get("unit_rate", 0)) if pos.get("unit_rate") is not None else 0
+            total = float(pos.get("total", 0)) if pos.get("total") is not None else 0
+            rate_ok = rate <= self.RATE_THRESHOLD
+            total_ok = total <= self.TOTAL_THRESHOLD
+            passed = rate_ok and total_ok
+            if not passed:
+                parts: list[str] = []
+                if not rate_ok:
+                    parts.append(f"unit_rate {rate:,.2f} > {self.RATE_THRESHOLD:,}")
+                if not total_ok:
+                    parts.append(f"total {total:,.2f} > {self.TOTAL_THRESHOLD:,}")
+                msg = (
+                    f"Position {pos.get('ordinal', '?')}: "
+                    f"{'; '.join(parts)}"
+                )
+            else:
+                msg = "OK"
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=msg,
+                    element_ref=pos.get("id"),
+                    details={"unit_rate": rate, "total": total},
+                    suggestion="Verify this value — it seems unrealistically high"
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+class TotalMismatch(ValidationRule):
+    rule_id = "boq_quality.total_mismatch"
+    name = "Total Matches Quantity × Rate"
+    standard = "boq_quality"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "Computed total (quantity × unit_rate) must match stored total within tolerance"
+
+    TOLERANCE = 0.01
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            qty = pos.get("quantity")
+            rate = pos.get("unit_rate")
+            stored_total = pos.get("total")
+            # Skip positions where any of the three values is missing
+            if qty is None or rate is None or stored_total is None:
+                continue
+            qty_val = float(qty)
+            rate_val = float(rate)
+            stored_val = float(stored_total)
+            computed = qty_val * rate_val
+            diff = abs(computed - stored_val)
+            passed = diff <= self.TOLERANCE
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else (
+                        f"Position {pos.get('ordinal', '?')}: "
+                        f"computed {computed:.2f} != stored {stored_val:.2f} "
+                        f"(diff={diff:.2f})"
+                    ),
+                    element_ref=pos.get("id"),
+                    details={
+                        "quantity": qty_val,
+                        "unit_rate": rate_val,
+                        "computed_total": computed,
+                        "stored_total": stored_val,
+                        "difference": diff,
+                    },
+                    suggestion="Recalculate total = quantity × unit_rate"
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+class EmptyUnit(ValidationRule):
+    rule_id = "boq_quality.empty_unit"
+    name = "Position Has Unit"
+    standard = "boq_quality"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLETENESS
+    description = "Every BOQ position must have a unit field (e.g., m, m2, m3, kg, pcs)"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            unit = (pos.get("unit") or "").strip()
+            passed = len(unit) > 0
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Position {pos.get('ordinal', '?')} has empty or missing unit",
+                    element_ref=pos.get("id"),
+                    suggestion="Assign a measurement unit (m, m2, m3, kg, pcs, lsum, etc.)"
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+class SectionWithoutItems(ValidationRule):
+    rule_id = "boq_quality.section_without_items"
+    name = "Section Has Child Items"
+    standard = "boq_quality"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Section-type positions should contain at least one child position"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        positions = _get_positions(context)
+        # Build a set of all parent IDs
+        parent_ids: set[str] = set()
+        for pos in positions:
+            pid = pos.get("parent_id")
+            if pid:
+                parent_ids.add(pid)
+
+        results: list[RuleResult] = []
+        for pos in positions:
+            pos_type = (pos.get("type") or "").lower()
+            if pos_type != "section":
+                continue
+            pos_id = pos.get("id", "")
+            has_children = pos_id in parent_ids
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=has_children,
+                    message="OK"
+                    if has_children
+                    else (
+                        f"Section {pos.get('ordinal', '?')} "
+                        f"({pos.get('description', 'untitled')}) has no child items"
+                    ),
+                    element_ref=pos_id,
+                    suggestion="Add positions under this section or remove the empty section"
+                    if not has_children
+                    else None,
+                )
+            )
+        return results
+
+
+# ── Benchmark & Coverage Rules ────────────────────────────────────────────
+
+
+class RateVsBenchmark(ValidationRule):
+    rule_id = "boq_quality.rate_vs_benchmark"
+    name = "Rate vs Benchmark"
+    standard = "boq_quality"
+    severity = Severity.WARNING
+    category = RuleCategory.QUALITY
+    description = (
+        "Compares unit rates against typical benchmark thresholds per unit type. "
+        "Flags rates that are potentially unrealistic compared to industry medians."
+    )
+
+    # Simple heuristic thresholds per unit (upper bound for typical rates)
+    UNIT_THRESHOLDS: dict[str, float] = {
+        "m2": 10_000,   # > 10,000 per m2 is suspicious
+        "m3": 50_000,   # > 50,000 per m3 is suspicious
+    }
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            rate = pos.get("unit_rate")
+            if rate is None:
+                continue
+            rate_val = float(rate)
+            if rate_val <= 0:
+                continue
+            unit = (pos.get("unit") or "").strip().lower()
+            threshold = self.UNIT_THRESHOLDS.get(unit)
+            if threshold is None:
+                continue
+            passed = rate_val <= threshold
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else (
+                        f"Position {pos.get('ordinal', '?')}: unit rate "
+                        f"{rate_val:,.2f}/{unit} exceeds benchmark threshold "
+                        f"{threshold:,.2f}/{unit} — potentially unrealistic"
+                    ),
+                    element_ref=pos.get("id"),
+                    details={
+                        "unit_rate": rate_val,
+                        "unit": unit,
+                        "benchmark_threshold": threshold,
+                    },
+                    suggestion=(
+                        f"Verify this rate — typical rates for {unit} should be "
+                        f"below {threshold:,.2f}. Check for unit or decimal errors."
+                    )
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+class LumpSumRatio(ValidationRule):
+    rule_id = "boq_quality.lump_sum_ratio"
+    name = "Lump Sum Ratio"
+    standard = "boq_quality"
+    severity = Severity.INFO
+    category = RuleCategory.QUALITY
+    description = (
+        "Flags BOQs where more than 30% of positions use lump sum (lsum) unit — "
+        "indicates poor estimation granularity"
+    )
+
+    THRESHOLD = 0.30  # 30%
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        positions = _get_positions(context)
+        if not positions:
+            return []
+
+        total_count = len(positions)
+        lsum_count = sum(
+            1
+            for pos in positions
+            if (pos.get("unit") or "").strip().lower() == "lsum"
+        )
+        ratio = lsum_count / total_count
+        passed = ratio <= self.THRESHOLD
+
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=passed,
+                message="OK"
+                if passed
+                else (
+                    f"{lsum_count} of {total_count} positions "
+                    f"({ratio:.0%}) use lump sum — exceeds {self.THRESHOLD:.0%} threshold"
+                ),
+                details={
+                    "lsum_count": lsum_count,
+                    "total_count": total_count,
+                    "ratio": round(ratio, 3),
+                    "threshold": self.THRESHOLD,
+                },
+                suggestion=(
+                    "Break down lump sum positions into measured quantities "
+                    "(m, m2, m3, kg, pcs) for better estimation accuracy"
+                )
+                if not passed
+                else None,
+            )
+        ]
+
+
+class CostConcentration(ValidationRule):
+    rule_id = "boq_quality.cost_concentration"
+    name = "Cost Concentration"
+    standard = "boq_quality"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "Flags positions that account for more than 40% of total BOQ cost — "
+        "indicates potential scope error or missing breakdown"
+    )
+
+    THRESHOLD = 0.40  # 40%
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        positions = _get_positions(context)
+        if not positions:
+            return []
+
+        # Compute total from each position
+        totals: list[tuple[dict[str, Any], float]] = []
+        grand_total = 0.0
+        for pos in positions:
+            pos_total = pos.get("total")
+            if pos_total is None:
+                # Fallback: compute from quantity × unit_rate
+                qty = pos.get("quantity")
+                rate = pos.get("unit_rate")
+                if qty is not None and rate is not None:
+                    val = float(qty) * float(rate)
+                else:
+                    val = 0.0
+            else:
+                val = float(pos_total)
+            totals.append((pos, val))
+            grand_total += val
+
+        if grand_total <= 0:
+            return []
+
+        results: list[RuleResult] = []
+        for pos, val in totals:
+            if val <= 0:
+                continue
+            share = val / grand_total
+            if share > self.THRESHOLD:
+                results.append(
+                    RuleResult(
+                        rule_id=self.rule_id,
+                        rule_name=self.name,
+                        severity=self.severity,
+                        category=self.category,
+                        passed=False,
+                        message=(
+                            f"Position {pos.get('ordinal', '?')} accounts for "
+                            f"{share:.0%} of total BOQ cost ({val:,.2f} of "
+                            f"{grand_total:,.2f}) — exceeds {self.THRESHOLD:.0%} threshold"
+                        ),
+                        element_ref=pos.get("id"),
+                        details={
+                            "position_total": val,
+                            "grand_total": grand_total,
+                            "share": round(share, 3),
+                            "threshold": self.THRESHOLD,
+                        },
+                        suggestion=(
+                            "Break this position into smaller items or verify "
+                            "the cost — a single position should not dominate "
+                            "the estimate"
+                        ),
+                    )
+                )
+
+        # If no positions exceeded the threshold, emit a single passing result
+        if not results:
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=True,
+                    message="OK",
+                    details={"grand_total": grand_total, "threshold": self.THRESHOLD},
+                )
+            )
+
+        return results
+
+
+# ── Additional DIN 276 Rules ─────────────────────────────────────────────
+
+
+class DIN276Hierarchy(ValidationRule):
+    rule_id = "din276.hierarchy"
+    name = "DIN 276 Cost Group Hierarchy"
+    standard = "din276"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = (
+        "Child KG code should be nested under the correct parent "
+        "(e.g., 331 under 330 under 300)"
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        positions = _get_positions(context)
+        # Build a map from position id to its DIN 276 KG code
+        id_to_kg: dict[str, str] = {}
+        id_to_pos: dict[str, dict[str, Any]] = {}
+        for pos in positions:
+            pos_id = pos.get("id", "")
+            kg = str((pos.get("classification") or {}).get("din276", ""))
+            if pos_id and kg:
+                id_to_kg[pos_id] = kg
+                id_to_pos[pos_id] = pos
+
+        results: list[RuleResult] = []
+        for pos in positions:
+            kg = str((pos.get("classification") or {}).get("din276", ""))
+            parent_id = pos.get("parent_id")
+            if not kg or not parent_id or parent_id not in id_to_kg:
+                continue
+            parent_kg = id_to_kg[parent_id]
+            # A valid hierarchy means the child KG starts with the parent KG prefix.
+            # e.g., child "331" should start with parent "330" is wrong;
+            # but child "331" should start with parent "33" or "3" level.
+            # DIN 276 hierarchy: 3xx (top) → 3x0 (mid) → 3xx (detail)
+            # The parent KG prefix (ignoring trailing zeros) should match.
+            # Simpler check: the child code must start with the same leading digit(s)
+            # as the parent code at a higher level.
+            # parent=300 (3 chars) → child should start with "3"
+            # parent=330 (3 chars) → child should start with "33"
+            # Determine the significant prefix of the parent
+            parent_prefix = parent_kg.rstrip("0") or parent_kg[0]
+            passed = kg.startswith(parent_prefix)
+            if not passed:
+                msg = (
+                    f"Position {pos.get('ordinal', '?')}: KG {kg} is not "
+                    f"under parent KG {parent_kg} (expected prefix '{parent_prefix}')"
+                )
+            else:
+                msg = "OK"
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=msg,
+                    element_ref=pos.get("id"),
+                    details={"child_kg": kg, "parent_kg": parent_kg},
+                    suggestion=(
+                        f"Move position to correct parent or update KG code to "
+                        f"match parent hierarchy ({parent_prefix}xx)"
+                    )
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+class DIN276Completeness(ValidationRule):
+    rule_id = "din276.completeness"
+    name = "DIN 276 Major Groups Present"
+    standard = "din276"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Major KG groups 300 (Building Construction) and 400 (Technical Systems) should be present"
+
+    REQUIRED_GROUPS = {"300", "400"}
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        positions = _get_positions(context)
+        # Collect all top-level KG groups (first digit × 100) present in the BOQ
+        present_groups: set[str] = set()
+        for pos in positions:
+            kg = str((pos.get("classification") or {}).get("din276", ""))
+            if kg and len(kg) >= 3 and kg.isdigit():
+                # Normalize to top-level group: e.g., 331 → 300, 421 → 400
+                top_group = kg[0] + "00"
+                present_groups.add(top_group)
+
+        results: list[RuleResult] = []
+        for group in sorted(self.REQUIRED_GROUPS):
+            passed = group in present_groups
+            group_names = {
+                "300": "Building Construction (Baukonstruktionen)",
+                "400": "Technical Systems (Technische Anlagen)",
+            }
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else (
+                        f"KG group {group} — {group_names.get(group, '')} "
+                        f"is missing from BOQ"
+                    ),
+                    details={
+                        "required_group": group,
+                        "present_groups": sorted(present_groups),
+                    },
+                    suggestion=(
+                        f"Add positions for KG {group} "
+                        f"({group_names.get(group, '')}) to ensure complete coverage"
+                    )
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
 # ── Helpers ─────────────────────────────────────────────────────────────────
 
 
@@ -327,9 +896,19 @@ def register_builtin_rules() -> None:
         (PositionHasDescription(), None),
         (NoDuplicateOrdinals(), None),
         (UnitRateInRange(), None),
+        (NegativeValues(), None),
+        (UnrealisticRate(), None),
+        (TotalMismatch(), None),
+        (EmptyUnit(), None),
+        (SectionWithoutItems(), None),
+        (RateVsBenchmark(), None),
+        (LumpSumRatio(), None),
+        (CostConcentration(), None),
         # DIN 276 (DACH)
         (DIN276CostGroupRequired(), None),
         (DIN276ValidCostGroup(), None),
+        (DIN276Hierarchy(), None),
+        (DIN276Completeness(), None),
         # GAEB (DACH)
         (GAEBOrdinalFormat(), None),
     ]

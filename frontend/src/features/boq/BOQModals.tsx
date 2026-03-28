@@ -66,7 +66,7 @@ export function AssemblyPickerModal({
 
   const { data: assemblies, isLoading } = useQuery({
     queryKey: ['assemblies', search],
-    queryFn: () => apiGet<Array<{
+    queryFn: () => apiGet<{ items: Array<{
       id: string;
       code: string;
       name: string;
@@ -75,7 +75,7 @@ export function AssemblyPickerModal({
       total_rate: number;
       currency: string;
       components: Array<{ description: string; unit: string; unit_cost: number; quantity: number }>;
-    }>>(`/v1/assemblies/?q=${encodeURIComponent(search)}&limit=20`),
+    }>; total: number }>(`/v1/assemblies/?q=${encodeURIComponent(search)}&limit=20`).then((r) => r.items),
     retry: false,
   });
 

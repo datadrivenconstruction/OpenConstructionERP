@@ -9,7 +9,7 @@
  * Auto-searches when a grid position is selected (fills search with its description).
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
@@ -27,6 +27,7 @@ import {
   type CreatePositionData,
   type Position,
 } from './api';
+import { fmtWithCurrency } from './boqHelpers';
 
 /* ── Props ─────────────────────────────────────────────────────────── */
 
@@ -42,8 +43,10 @@ interface AICostFinderPanelProps {
   onApplyRate: (positionId: string, rate: number, source: string) => void;
   /** Project region for default filter */
   projectRegion?: string;
-  /** Currency symbol for display */
-  currencySymbol: string;
+  /** ISO currency code (e.g. EUR, USD) */
+  currencyCode?: string;
+  /** Locale for number formatting (e.g. de-DE, en-US) */
+  locale?: string;
 }
 
 /* ── Helpers ───────────────────────────────────────────────────────── */
@@ -72,7 +75,8 @@ export function AICostFinderPanel({
   onAddPosition,
   onApplyRate,
   projectRegion,
-  currencySymbol,
+  currencyCode = 'EUR',
+  locale = 'de-DE',
 }: AICostFinderPanelProps) {
   const { t } = useTranslation();
 
@@ -85,15 +89,6 @@ export function AICostFinderPanel({
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const lastAutoFilledRef = useRef<string | null>(null);
-
-  const fmt = useMemo(
-    () =>
-      new Intl.NumberFormat(navigator.language ?? 'en', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }),
-    [],
-  );
 
   /* ── Debounce search ───────────────────────────────────────────── */
   useEffect(() => {
@@ -278,8 +273,8 @@ export function AICostFinderPanel({
           <ResultCard
             key={item.id}
             item={item}
-            currencySymbol={currencySymbol}
-            fmt={fmt}
+            currencyCode={currencyCode}
+            locale={locale}
             expanded={expandedId === item.id}
             onToggleExpand={() =>
               setExpandedId((prev) => (prev === item.id ? null : item.id))
@@ -320,8 +315,8 @@ export function AICostFinderPanel({
 
 interface ResultCardProps {
   item: CostItemSearchResult;
-  currencySymbol: string;
-  fmt: Intl.NumberFormat;
+  currencyCode: string;
+  locale: string;
   expanded: boolean;
   onToggleExpand: () => void;
   canApplyRate: boolean;
@@ -332,8 +327,8 @@ interface ResultCardProps {
 
 function ResultCard({
   item,
-  currencySymbol,
-  fmt,
+  currencyCode,
+  locale,
   expanded,
   onToggleExpand,
   canApplyRate,
@@ -362,7 +357,7 @@ function ResultCard({
             <span>{item.unit}</span>
             <span className="text-text-muted">|</span>
             <span className="font-semibold text-text-primary">
-              {currencySymbol}{fmt.format(item.rate)}
+              {fmtWithCurrency(item.rate, locale, currencyCode)}
             </span>
           </div>
           <div className="text-[10px] text-text-muted mt-0.5">
@@ -390,7 +385,7 @@ function ResultCard({
             <div key={i} className="text-xs text-text-muted flex justify-between">
               <span className="truncate mr-2">{c.description}</span>
               <span className="shrink-0">
-                {c.unit} {currencySymbol}{fmt.format(c.rate)}
+                {c.unit} {fmtWithCurrency(c.rate, locale, currencyCode)}
               </span>
             </div>
           ))}

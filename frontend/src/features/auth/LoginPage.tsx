@@ -115,70 +115,112 @@ export function LoginPage() {
       </div>
 
       {/* ── Left: benefits (desktop) ── */}
-      <div className="hidden lg:flex lg:w-[460px] xl:w-[500px] shrink-0 relative z-10 flex-col justify-center pl-14 xl:pl-20 pr-8 xl:pr-10 py-6">
-        {/* Hero */}
-        <div className="mb-4 animate-stagger-in" style={{ animationDelay: '0ms' }}>
-          <h2 className="text-xl font-bold text-content-primary leading-snug">
-            {t('login.hero_title', 'Construction cost estimation,')}{' '}
-            <span className="gradient-text">{t('login.hero_highlight', 'reimagined')}</span>
-          </h2>
-          <p className="mt-1.5 text-[13px] text-content-secondary leading-relaxed">
-            {t('login.hero_desc', 'Professional BOQ, 4D scheduling, 5D cost model, and tendering — all in one open-source platform.')}
+      <div className="hidden lg:flex lg:w-[500px] xl:w-[540px] shrink-0 relative z-10 flex-col justify-center pl-14 xl:pl-20 pr-12 xl:pr-16 py-6">
+
+        {/* Eyebrow pill */}
+        <div className="mb-5 animate-stagger-in" style={{ animationDelay: '0ms' }}>
+          <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/[0.08] dark:bg-emerald-400/[0.1] px-3.5 py-1.5">
+            <span className="relative flex h-[6px] w-[6px]">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
+              <span className="relative inline-flex rounded-full h-[6px] w-[6px] bg-emerald-500" />
+            </span>
+            <span className="text-[11px] font-medium tracking-[0.04em] text-emerald-700 dark:text-emerald-300">Open Source</span>
+          </span>
+        </div>
+
+        {/* Headline */}
+        <h2 className="text-[32px] xl:text-[36px] font-semibold text-content-primary leading-[1.08] tracking-[-0.025em] animate-stagger-in" style={{ animationDelay: '60ms' }}>
+          The <span className="bg-gradient-to-r from-oe-blue to-violet-500 bg-clip-text text-transparent">#1</span> open&#8209;source construction&nbsp;ERP
+        </h2>
+
+        {/* Subhead */}
+        <p className="mt-5 text-[17px] text-content-secondary/70 leading-[1.65] tracking-[-0.008em] max-w-[400px] animate-stagger-in" style={{ animationDelay: '120ms' }}>
+          {t('login.hero_desc', 'Professional BOQ, 4D scheduling, 5D cost model, and tendering — all in one platform.')}
+        </p>
+
+        {/* Stats row */}
+        <div className="mt-5 flex items-center gap-5 animate-stagger-in" style={{ animationDelay: '180ms' }}>
+          {[
+            { value: '55K+', label: t('login.stat_costs', { defaultValue: 'cost items' }) },
+            { value: '20', label: t('login.stat_langs', { defaultValue: 'languages' }) },
+            { value: '11', label: t('login.stat_regions', { defaultValue: 'regions' }) },
+          ].map((s) => (
+            <div key={s.label} className="text-center">
+              <div className="text-[22px] font-semibold text-content-primary tracking-tight">{s.value}</div>
+              <div className="text-[11px] text-content-tertiary mt-0.5">{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Divider */}
+        <div className="mt-5 mb-4 h-px bg-gradient-to-r from-content-primary/[0.06] via-content-primary/[0.1] to-transparent animate-stagger-in" style={{ animationDelay: '220ms' }} />
+
+        {/* Value props */}
+        <div className="space-y-5 animate-stagger-in" style={{ animationDelay: '260ms' }}>
+          {[
+            { icon: ShieldCheck, title: t('login.feat_local_title', { defaultValue: 'Your data, your machine' }), desc: t('login.feat_local', { defaultValue: 'Nothing leaves your computer. Full ownership, zero cloud dependency.' }) },
+            { icon: Brain, title: t('login.feat_ai_title', { defaultValue: 'AI-assisted, human-confirmed' }), desc: t('login.feat_ai', { defaultValue: 'Smart suggestions with confidence scores. You always have the final say.' }) },
+          ].map((feat, i) => (
+            <div key={i} className="flex gap-3.5">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-content-primary/[0.04] dark:bg-white/[0.06]">
+                <feat.icon size={16} className="text-content-primary/60" strokeWidth={1.6} />
+              </div>
+              <div>
+                <div className="text-[13px] font-semibold text-content-primary leading-tight tracking-[-0.01em]">{feat.title}</div>
+                <div className="text-[12px] text-content-tertiary leading-[1.55] mt-0.5">{feat.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Tags */}
+        <div className="mt-5 flex flex-wrap gap-[5px] animate-stagger-in" style={{ animationDelay: '320ms' }}>
+          {['Bill of Quantities', '4D Scheduling', '5D Cost Model', 'AI Estimation', 'Tendering', 'CAD/BIM', 'PDF Takeoff', 'DIN 276', 'NRM', 'GAEB XML'].map((tag) => (
+            <span key={tag} className="rounded-full bg-content-primary/[0.04] dark:bg-white/[0.06] px-2.5 py-[3px] text-[10px] font-medium text-content-tertiary/80 tracking-[0.01em]">
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        {/* Footer */}
+        <div className="mt-4 space-y-1 animate-stagger-in" style={{ animationDelay: '380ms' }}>
+          <div className="flex items-center gap-2 text-[11px] text-content-quaternary/60">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" className="opacity-40"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            <span>AGPL-3.0</span>
+            <span className="opacity-30">&middot;</span>
+            <a href="https://OpenConstructionERP.com" target="_blank" rel="noopener noreferrer" className="hover:text-content-tertiary transition-colors">OpenConstructionERP.com</a>
+          </div>
+          <p className="text-[10px] text-content-quaternary/40">
+            Created by Artem Boiko &middot; 2026 &middot; OpenConstructionERP
           </p>
         </div>
-
-        {/* Benefits 2×3 */}
-        <div className="grid grid-cols-2 gap-2">
-          {benefits.map((item, idx) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={idx}
-                className="rounded-lg border border-border-light/40 bg-surface-elevated/40 backdrop-blur-sm px-2.5 py-2 animate-stagger-in"
-                style={{ animationDelay: `${50 + idx * 40}ms` }}
-              >
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded ${item.color}`}>
-                    <Icon size={11} />
-                  </div>
-                  <span className="text-2xs font-semibold text-content-primary leading-tight">{item.title}</span>
-                </div>
-                <p className="text-2xs text-content-tertiary leading-snug pl-[26px]">{item.desc}</p>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Privacy */}
-        <div className="mt-3 flex items-start gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2 animate-stagger-in" style={{ animationDelay: '320ms' }}>
-          <HardDrive size={13} className="text-emerald-500 shrink-0 mt-0.5" />
-          <div>
-            <p className="text-2xs text-content-secondary leading-snug">
-              {t('login.privacy', 'All data is processed and stored locally on your machine. Nothing is sent to external servers. You own your data — always.')}
-            </p>
-            <p className="mt-0.5 text-[10px] text-content-quaternary leading-snug">
-              * {t('login.privacy_ai', 'If you use built-in AI tools, some data may be sent to the AI provider you configure (OpenAI, Anthropic, etc.). You control which provider to use and what data to share.')}
-            </p>
-          </div>
-        </div>
-
-        {/* Bottom */}
-        <div className="mt-3 flex items-center gap-3 text-2xs text-content-quaternary animate-stagger-in" style={{ animationDelay: '360ms' }}>
-          <span className="inline-flex items-center gap-1 rounded-full border border-border-light px-2 py-0.5 text-content-tertiary">
-            <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" className="opacity-50"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-            Open Source · AGPL-3.0
-          </span>
-          <a href="https://datadrivenconstruction.io" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">datadrivenconstruction.io</a>
-        </div>
       </div>
+
+      {/* Center column removed — tags moved to left panel footer */}
 
       {/* ── Right: logo + form ── */}
       <div className="flex flex-1 items-center justify-center p-4 sm:p-6 relative z-10">
         <div className="w-full max-w-[380px]">
           {/* Logo */}
           <div className="mb-5 flex flex-col items-center animate-stagger-in" style={{ animationDelay: '0ms' }}>
-            <LogoWithText size="md" animate />
-            <p className="mt-1 text-xs text-content-tertiary">{t('app.tagline')}</p>
+            <LogoWithText size="lg" animate />
+            <p className="mt-2 text-sm text-content-tertiary">{t('app.tagline')}</p>
+          </div>
+
+          {/* Open-source banner (mobile) */}
+          <div className="lg:hidden mb-4 animate-stagger-in" style={{ animationDelay: '100ms' }}>
+            <div className="rounded-xl bg-gradient-to-r from-oe-blue/10 via-violet-500/10 to-emerald-500/10 border border-oe-blue/20 px-4 py-3 text-center">
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Open Source</span>
+              </div>
+              <p className="text-sm font-bold bg-gradient-to-r from-oe-blue via-violet-600 to-emerald-600 bg-clip-text text-transparent">
+                #1 {t('login.open_source_badge', { defaultValue: 'Open-Source Construction ERP' })}
+              </p>
+            </div>
           </div>
 
           {/* Form */}
@@ -255,7 +297,7 @@ export function LoginPage() {
           </div>
           <div className="lg:hidden mt-2 text-center text-2xs text-content-quaternary">
             <div className="flex items-center justify-center gap-3">
-              <a href="https://datadrivenconstruction.io" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">datadrivenconstruction.io</a>
+              <a href="https://OpenConstructionERP.com" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">OpenConstructionERP.com</a>
               <span>·</span>
               <a href="https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">GitHub</a>
             </div>
@@ -283,10 +325,10 @@ export function LoginPage() {
                 {t('about.title', 'Professional construction cost estimation — free and open source')}
               </h3>
               <p className="text-[13px] text-content-secondary leading-relaxed">
-                {t('about.intro', 'OpenEstimator.io is a modern platform for construction cost management. It covers the full estimation workflow — from creating a bill of quantities to tendering and bid comparison. Designed for professionals worldwide, it supports international standards and works in 20 languages.')}
+                {t('about.intro', 'OpenConstructionERP is a modern platform for construction cost management. It covers the full estimation workflow — from creating a bill of quantities to tendering and bid comparison. Designed for professionals worldwide, it supports international standards and works in 20 languages.')}
               </p>
               <p className="mt-2 text-[13px] text-content-secondary leading-relaxed">
-                {t('about.intro2', 'Unlike traditional commercial solutions, OpenEstimator runs entirely on your computer. Your project data never leaves your machine — you have full ownership and control. The source code is open and auditable, so you always know exactly what the software does.')}
+                {t('about.intro2', 'Unlike traditional commercial solutions, OpenConstructionERP runs entirely on your computer. Your project data never leaves your machine — you have full ownership and control. The source code is open and auditable, so you always know exactly what the software does.')}
               </p>
             </div>
 
@@ -329,7 +371,7 @@ export function LoginPage() {
               </h3>
               <div className="space-y-2 text-[13px] text-content-secondary leading-relaxed">
                 <p>{t('about.why_1', 'Construction cost data is one of the most valuable assets a company owns. With proprietary software, your data is often locked inside formats you cannot control. If the vendor raises prices, changes terms, or discontinues the product — you may lose access to years of work.')}</p>
-                <p>{t('about.why_2', 'OpenEstimator takes a different approach. Your data is stored in open formats (SQLite, JSON, CSV) on your own hardware. You can export everything at any time. The source code is publicly auditable under AGPL-3.0, so there are no hidden data transfers, no telemetry, and no surprises.')}</p>
+                <p>{t('about.why_2', 'OpenConstructionERP takes a different approach. Your data is stored in open formats (SQLite, JSON, CSV) on your own hardware. You can export everything at any time. The source code is publicly auditable under AGPL-3.0, so there are no hidden data transfers, no telemetry, and no surprises.')}</p>
                 <p>{t('about.why_3', 'The platform is modular — install only what you need. Community modules extend functionality without bloating the core. And because it runs locally, it works offline and performs fast even with large projects.')}</p>
               </div>
             </div>
@@ -340,7 +382,7 @@ export function LoginPage() {
                 {t('about.who_title', 'Who is it for')}
               </h3>
               <p className="text-[13px] text-content-secondary leading-relaxed mb-3">
-                {t('about.who_desc', 'OpenEstimator is designed for anyone involved in construction cost management — whether you work on residential projects or large-scale infrastructure, in-house or as a consultant.')}
+                {t('about.who_desc', 'OpenConstructionERP is designed for anyone involved in construction cost management — whether you work on residential projects or large-scale infrastructure, in-house or as a consultant.')}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {[
@@ -388,7 +430,7 @@ export function LoginPage() {
                 {t('about.ai_title', 'About AI features')}
               </h3>
               <p className="text-[13px] text-content-secondary leading-relaxed">
-                {t('about.ai_desc', 'OpenEstimator includes optional AI-powered tools — quick estimation from text descriptions, smart cost suggestions, and BOQ chat assistant. These features require an API key from a provider of your choice (Anthropic, OpenAI, Google). AI is always opt-in: it only activates when you configure it, and you decide what data to send. Without an API key, all other features work fully offline.')}
+                {t('about.ai_desc', 'OpenConstructionERP includes optional AI-powered tools — quick estimation from text descriptions, smart cost suggestions, and BOQ chat assistant. These features require an API key from a provider of your choice (Anthropic, OpenAI, Google). AI is always opt-in: it only activates when you configure it, and you decide what data to send. Without an API key, all other features work fully offline.')}
               </p>
             </div>
 
@@ -396,7 +438,7 @@ export function LoginPage() {
             <div className="px-6 py-4 border-t border-border-light flex items-center justify-between">
               <div className="flex items-center gap-3 text-2xs text-content-quaternary">
                 <span>AGPL-3.0</span>
-                <a href="https://datadrivenconstruction.io" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">datadrivenconstruction.io</a>
+                <a href="https://OpenConstructionERP.com" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">OpenConstructionERP.com</a>
                 <a href="https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">GitHub</a>
               </div>
               <Button variant="primary" size="sm" onClick={() => setShowInfo(false)}>

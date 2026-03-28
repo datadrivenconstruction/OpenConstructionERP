@@ -58,3 +58,5 @@ export { CountryFlag } from './CountryFlag';
 
 export { OnboardingTour, DEFAULT_TOUR_STEPS, ONBOARDING_STORAGE_KEY } from './OnboardingTour';
 export type { TourStep } from './OnboardingTour';
+
+export { GlobalProgress, useProgressStore } from './GlobalProgress';

@@ -39,6 +39,8 @@ interface BOQWithProject extends BOQ {
   classificationStandard: string;
 }
 
+const ITEMS_PER_PAGE = 12;
+
 const currencyFmt = new Intl.NumberFormat(getIntlLocale(), {
   minimumFractionDigits: 0,
   maximumFractionDigits: 0,
@@ -293,10 +295,43 @@ export function BOQListPage() {
 
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [projectFilter, setProjectFilter] = useState('');
-  const [sortField, setSortField] = useState<SortField>('date');
-  const [sortAsc, setSortAsc] = useState(false);
+  const [statusFilter, setStatusFilter] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('oe_boq_filters') ?? '{}');
+      return saved.status ?? '';
+    } catch { return ''; }
+  });
+  const [projectFilter, setProjectFilter] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('oe_boq_filters') ?? '{}');
+      return saved.project ?? '';
+    } catch { return ''; }
+  });
+  const [sortField, setSortField] = useState<SortField>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('oe_boq_filters') ?? '{}');
+      return saved.sortField ?? 'date';
+    } catch { return 'date'; }
+  });
+  const [sortAsc, setSortAsc] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('oe_boq_filters') ?? '{}');
+      return saved.sortAsc ?? false;
+    } catch { return false; }
+  });
+  const [page, setPage] = useState(1);
+
+  // Persist filters to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('oe_boq_filters', JSON.stringify({
+        status: statusFilter,
+        project: projectFilter,
+        sortField,
+        sortAsc,
+      }));
+    } catch {}
+  }, [statusFilter, projectFilter, sortField, sortAsc]);
 
   // Compare mode state
   const [compareMode, setCompareMode] = useState(false);
@@ -331,33 +366,31 @@ export function BOQListPage() {
   });
 
   const { data: allBoqs, isLoading: boqLoading } = useQuery({
-    queryKey: ['all-boqs', projects],
+    queryKey: ['all-boqs', projects?.map((p) => p.id).join(',')],
     queryFn: async () => {
       if (!projects || projects.length === 0) return [];
-      const results: BOQWithProject[] = [];
-      for (const p of projects) {
+
+      // Fetch all BOQs in parallel (one request per project, no N+1 for grand_total)
+      const projectMap = new Map(projects.map((p) => [p.id, p]));
+      const fetches = projects.map(async (p) => {
         try {
           const boqs = await apiGet<BOQ[]>(`/v1/boq/boqs/?project_id=${p.id}`);
-          for (const b of boqs) {
-            let positionCount = 0;
-            let grandTotal = 0;
-            try {
-              const full = await apiGet<BOQWithPositions>(`/v1/boq/boqs/${b.id}`);
-              positionCount = full.positions.length;
-              grandTotal = full.grand_total;
-            } catch { /* ignore */ }
-            results.push({
-              ...b,
-              projectName: p.name,
-              currency: p.currency,
-              positionCount,
-              grandTotal,
-              classificationStandard: p.classification_standard,
-            });
-          }
-        } catch { /* skip */ }
-      }
-      return results;
+          return boqs.map((b) => ({
+            ...b,
+            projectName: p.name,
+            currency: p.currency,
+            positionCount: 0, // not available in list endpoint
+            grandTotal: (b as any).grand_total ?? 0,
+            classificationStandard: p.classification_standard,
+          } as BOQWithProject));
+        } catch (err) {
+          console.error(`Failed to fetch BOQs for project ${p.id}:`, err);
+          return [] as BOQWithProject[];
+        }
+      });
+
+      const results = await Promise.all(fetches);
+      return results.flat();
     },
     enabled: !!projects && projects.length > 0,
   });
@@ -406,6 +439,18 @@ export function BOQListPage() {
 
     return list;
   }, [allBoqs, searchQuery, statusFilter, projectFilter, sortField, sortAsc]);
+
+  // Reset page when filters/search/sort change
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, statusFilter, projectFilter, sortField, sortAsc]);
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const paginatedBoqs = filtered.slice(
+    (page - 1) * ITEMS_PER_PAGE,
+    page * ITEMS_PER_PAGE,
+  );
 
   /* ── Stats ────────────────────────────────────────────────────────── */
 
@@ -463,8 +508,17 @@ export function BOQListPage() {
   }
 
   const isLoading = projLoading || boqLoading;
-  const uniqueProjects = projects ?? [];
+  const uniqueProjects = Array.from(
+    new Map((projects ?? []).map((p) => [p.name, p])).values(),
+  );
   const uniqueStatuses = [...new Set((allBoqs ?? []).map((b) => b.status))];
+
+  function valueBorderColor(value: number): string {
+    if (value > 10_000_000) return 'border-l-amber-500';
+    if (value > 1_000_000) return 'border-l-emerald-500';
+    if (value > 100_000) return 'border-l-blue-500';
+    return 'border-l-gray-300 dark:border-l-gray-600';
+  }
 
   return (
     <div className="max-w-content mx-auto animate-fade-in">
@@ -647,12 +701,12 @@ export function BOQListPage() {
         />
       ) : (
         <div className="space-y-2">
-          {filtered.map((boq, i) => (
+          {paginatedBoqs.map((boq, i) => (
             <Card
               key={boq.id}
               hoverable
               padding="none"
-              className={`cursor-pointer animate-card-in ${selectedForCompare?.id === boq.id ? 'ring-2 ring-oe-blue' : ''}`}
+              className={`cursor-pointer animate-card-in border-l-4 ${valueBorderColor(boq.grandTotal)} ${selectedForCompare?.id === boq.id ? 'ring-2 ring-oe-blue' : ''}`}
               style={{ animationDelay: `${50 + i * 30}ms` }}
               onClick={() => {
                 if (compareMode && selectedForCompare && selectedForCompare.id !== boq.id) {
@@ -675,11 +729,10 @@ export function BOQListPage() {
                   <div className="mt-0.5 flex items-center gap-2 text-xs text-content-tertiary">
                     <span className="truncate">{boq.projectName}</span>
                     <span>·</span>
-                    <span className="tabular-nums">{boq.positionCount} pos.</span>
-                    <span>·</span>
-                    <span className="font-medium text-content-secondary tabular-nums">
-                      {currencyFmt.format(boq.grandTotal)} {boq.currency}
-                    </span>
+                    <span className="tabular-nums">{boq.positionCount} {t('boq.positions_short', { defaultValue: 'pos.' })}</span>
+                  </div>
+                  <div className="mt-1 text-base font-bold text-content-primary tabular-nums">
+                    {currencyFmt.format(boq.grandTotal)} {boq.currency}
                   </div>
                 </div>
 
@@ -738,10 +791,77 @@ export function BOQListPage() {
             </Card>
           ))}
 
-          {/* Summary footer */}
-          <div className="pt-3 text-center text-xs text-content-tertiary">
-            {t('boq.showing_estimates', { defaultValue: '{{shown}} of {{total}} estimates', shown: filtered.length, total: allBoqs?.length ?? 0 })}
-            {searchQuery || statusFilter || projectFilter ? ` (${t('boq.filtered', { defaultValue: 'filtered' })})` : ''}
+          {/* Pagination */}
+          <div className="mt-6 flex flex-col items-center gap-3">
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setPage(1)}
+                  disabled={page === 1}
+                  className="rounded-lg border border-border-light px-3 py-2 text-sm font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  title={t('common.first_page', { defaultValue: 'First page' })}
+                >
+                  &laquo;
+                </button>
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="rounded-lg border border-border-light px-4 py-2 text-sm font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  {t('common.previous', { defaultValue: 'Previous' })}
+                </button>
+
+                {/* Page numbers */}
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+                  .reduce<(number | 'dots')[]>((acc, p, i, arr) => {
+                    if (i > 0 && arr[i - 1] !== undefined && p - (arr[i - 1] as number) > 1) acc.push('dots');
+                    acc.push(p);
+                    return acc;
+                  }, [])
+                  .map((item, i) =>
+                    item === 'dots' ? (
+                      <span key={`dots-${i}`} className="px-1 text-content-quaternary">...</span>
+                    ) : (
+                      <button
+                        key={item}
+                        onClick={() => setPage(item as number)}
+                        className={`rounded-lg min-w-[40px] py-2 text-sm font-semibold transition-colors ${
+                          page === item
+                            ? 'bg-oe-blue text-white shadow-sm'
+                            : 'border border-border-light text-content-secondary hover:bg-surface-secondary'
+                        }`}
+                      >
+                        {item}
+                      </button>
+                    ),
+                  )}
+
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="rounded-lg border border-border-light px-4 py-2 text-sm font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  {t('common.next', { defaultValue: 'Next' })}
+                </button>
+                <button
+                  onClick={() => setPage(totalPages)}
+                  disabled={page === totalPages}
+                  className="rounded-lg border border-border-light px-3 py-2 text-sm font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  title={t('common.last_page', { defaultValue: 'Last page' })}
+                >
+                  &raquo;
+                </button>
+              </div>
+            )}
+
+            {/* Summary footer */}
+            <p className="text-sm text-content-tertiary">
+              {`${(page - 1) * ITEMS_PER_PAGE + 1}\u2013${Math.min(page * ITEMS_PER_PAGE, filtered.length)} ${t('boq.of_estimates', { defaultValue: 'of {{count}} estimates', count: filtered.length })}`}
+              {(searchQuery || statusFilter || projectFilter) && filtered.length !== (allBoqs?.length ?? 0)
+                ? ` (${t('boq.filtered_from', { defaultValue: 'filtered from {{total}}', total: allBoqs?.length ?? 0 })})`
+                : ''}
+            </p>
           </div>
         </div>
       )}

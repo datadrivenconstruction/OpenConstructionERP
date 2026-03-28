@@ -38,8 +38,8 @@ const CATEGORY_TEXT_CLASSES: Record<string, string> = {
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
-function createFormatter(locale?: string) {
-  return new Intl.NumberFormat(locale ?? navigator.language ?? 'en', {
+function createCBFormatter(locale: string) {
+  return new Intl.NumberFormat(locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
@@ -96,17 +96,16 @@ function buildConicGradient(
 
 /* ── Component ───────────────────────────────────────────────────────── */
 
-export function CostBreakdownPanel({ boqId }: { boqId: string }) {
+export function CostBreakdownPanel({ boqId, locale = 'de-DE' }: { boqId: string; locale?: string }) {
   const { t } = useTranslation();
-  const fmt = useMemo(() => createFormatter(), []);
+  const fmt = useMemo(() => createCBFormatter(locale), [locale]);
   const [collapsed, setCollapsed] = useState(false);
 
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['boq-cost-breakdown', boqId],
     queryFn: () => boqApi.getCostBreakdown(boqId),
     enabled: !!boqId,
-    staleTime: 5000, // Don't refetch within 5 seconds
-    placeholderData: (prev: unknown) => prev, // Keep old data while refetching
+    staleTime: 5000,
   });
 
   const conicGradient = useMemo(() => {
