@@ -10,6 +10,7 @@ import {
   Plus,
   Download,
   Upload,
+  ClipboardPaste,
   ShieldCheck,
   Layers,
   Database,
@@ -62,11 +63,14 @@ export interface BOQToolbarProps {
   costFinderOpen: boolean;
   onToggleCostFinder: () => void;
   onCheckAnomalies?: () => void;
+  onCancelAnomalies?: () => void;
   anomalyCount?: number;
   onAcceptAllAnomalies?: () => void;
   // AI Smart Panel
   smartPanelOpen: boolean;
   onToggleSmartPanel: () => void;
+  // Excel paste
+  onPasteFromExcel?: () => void;
   // Quality
   hasPositions: boolean;
   qualityBreakdown: QualityBreakdown;
@@ -100,10 +104,12 @@ export function BOQToolbar({
   costFinderOpen,
   onToggleCostFinder,
   onCheckAnomalies,
+  onCancelAnomalies,
   anomalyCount,
   onAcceptAllAnomalies,
   smartPanelOpen,
   onToggleSmartPanel,
+  onPasteFromExcel,
   hasPositions,
   qualityScoreRing,
 }: BOQToolbarProps) {
@@ -176,6 +182,11 @@ export function BOQToolbar({
           {t('common.import', { defaultValue: 'Import' })}
         </Button>
         <input ref={importInputRef} type="file" accept=".xlsx,.csv,.pdf,.jpg,.jpeg,.png,.tiff,.rvt,.ifc,.dwg,.dgn" className="hidden" onChange={onImportInputChange} />
+        {onPasteFromExcel && (
+          <Button variant="ghost" size="sm" icon={<ClipboardPaste size={15} />} onClick={onPasteFromExcel} title={t('boq.paste_from_excel', { defaultValue: 'Paste from Excel' })}>
+            <span className="hidden xl:inline">{t('boq.paste_from_excel', { defaultValue: 'Paste' })}</span>
+          </Button>
+        )}
         <div ref={exportRef} className="relative">
           <Button variant="ghost" size="sm" icon={<Download size={15} />} onClick={() => setShowExportMenu((prev) => !prev)} aria-expanded={showExportMenu} aria-haspopup="true">
             {t('boq.export')}
@@ -205,8 +216,9 @@ export function BOQToolbar({
 
       <div className="w-px h-6 bg-border-light hidden sm:block" />
 
-      {/* ── Row-group: Tools & AI ──────────────────────────────────────── */}
+      {/* ── Row-group: Quality & AI ─────────────────────────────────────── */}
       <div className="flex items-center gap-1.5">
+        <span className="text-2xs font-medium text-content-quaternary uppercase tracking-wider hidden lg:inline mr-0.5">{t('boq.toolbar_quality', { defaultValue: 'Quality' })}</span>
         {/* Validate: checks data quality, completeness, DIN 276 compliance */}
         <div className="relative group/validate">
           <Button
@@ -256,30 +268,45 @@ export function BOQToolbar({
           </div>
         </div>
 
-        {/* Anomalies: compares unit rates against cost database median rates */}
+        {/* Price Check: compares unit rates against cost database */}
         {onCheckAnomalies && (
           <div className="relative group/anomaly">
-          <Button
-            variant="ghost"
-            size="sm"
-            icon={<AlertTriangle size={15} className={isCheckingAnomalies ? 'animate-pulse text-amber-500' : anomalyCount ? 'text-amber-500' : ''} />}
-            onClick={onCheckAnomalies}
-            disabled={isCheckingAnomalies}
-            className={anomalyCount ? 'text-amber-600 dark:text-amber-400' : ''}
-          >
-            <span className="hidden xl:inline">
-              {isCheckingAnomalies
-                ? t('boq.checking_anomalies', { defaultValue: 'Checking...' })
-                : anomalyCount
-                  ? t('boq.anomalies_badge', { defaultValue: 'Anomalies ({{count}})', count: anomalyCount })
-                  : t('boq.price_check', { defaultValue: 'Price Check' })
-              }
-            </span>
-          </Button>
-          <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-56 rounded-lg bg-gray-900 text-white text-2xs p-2.5 shadow-lg opacity-0 invisible group-hover/anomaly:opacity-100 group-hover/anomaly:visible transition-all z-50 pointer-events-none">
-            <p className="font-medium mb-1">{t('boq.anomaly_tip_title', { defaultValue: 'Price Benchmark' })}</p>
-            <p className="text-gray-300">{t('boq.anomaly_tip', { defaultValue: 'Compares each unit rate against median market rates from the cost database. Flags overpriced and underpriced positions.' })}</p>
-          </div>
+            {isCheckingAnomalies ? (
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="sm" icon={<AlertTriangle size={15} className="animate-pulse text-amber-500" />} disabled>
+                  <span className="hidden xl:inline text-amber-600">
+                    {t('boq.checking_anomalies', { defaultValue: 'Checking...' })}
+                  </span>
+                </Button>
+                {onCancelAnomalies && (
+                  <button
+                    onClick={onCancelAnomalies}
+                    className="rounded-md px-1.5 py-1 text-2xs font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                  >
+                    {t('common.cancel', { defaultValue: 'Cancel' })}
+                  </button>
+                )}
+              </div>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                icon={<AlertTriangle size={15} className={anomalyCount ? 'text-amber-500' : ''} />}
+                onClick={onCheckAnomalies}
+                className={anomalyCount ? 'text-amber-600 dark:text-amber-400' : ''}
+              >
+                <span className="hidden xl:inline">
+                  {anomalyCount
+                    ? t('boq.anomalies_badge', { defaultValue: 'Anomalies ({{count}})', count: anomalyCount })
+                    : t('boq.price_check', { defaultValue: 'Price Check' })
+                  }
+                </span>
+              </Button>
+            )}
+            <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-56 rounded-lg bg-gray-900 text-white text-2xs p-2.5 shadow-lg opacity-0 invisible group-hover/anomaly:opacity-100 group-hover/anomaly:visible transition-all z-50 pointer-events-none">
+              <p className="font-medium mb-1">{t('boq.anomaly_tip_title', { defaultValue: 'Price Benchmark' })}</p>
+              <p className="text-gray-300">{t('boq.anomaly_tip', { defaultValue: 'Compares each unit rate against median market rates from the cost database. Flags overpriced and underpriced positions.' })}</p>
+            </div>
           </div>
         )}
         {anomalyCount !== undefined && anomalyCount > 0 && onAcceptAllAnomalies && (
@@ -297,35 +324,59 @@ export function BOQToolbar({
         <div className="w-px h-6 bg-border-light hidden sm:block" />
 
         {/* ── AI Tools (visually grouped) ───────────────────────────────── */}
-        <div className="flex items-center gap-1 rounded-lg bg-gradient-to-r from-violet-50 to-blue-50 dark:from-violet-950/30 dark:to-blue-950/30 border border-violet-200/50 dark:border-violet-800/30 px-1.5 py-0.5">
-          <span className="text-2xs font-semibold text-violet-500 dark:text-violet-400 mr-0.5 hidden lg:inline">AI</span>
-          <Button
-            variant={costFinderOpen ? 'primary' : 'ghost'}
-            size="sm"
-            icon={<SearchCheck size={15} className={costFinderOpen ? '' : 'text-violet-600 dark:text-violet-400'} />}
-            onClick={onToggleCostFinder}
-            title={t('boq.cost_finder_tooltip', { defaultValue: 'Search cost database using AI semantic matching — find similar items by description' })}
-          >
-            <span className="hidden xl:inline">{t('boq.cost_finder_short', { defaultValue: 'Cost Finder' })}</span>
-          </Button>
-          <Button
-            variant={aiChatOpen ? 'primary' : 'ghost'}
-            size="sm"
-            icon={<Sparkles size={15} className={aiChatOpen ? '' : 'text-violet-600 dark:text-violet-400'} />}
-            onClick={onToggleAiChat}
-            title={t('boq.ai_assistant_tooltip', { defaultValue: 'Describe what you need in natural language — AI generates BOQ positions with pricing' })}
-          >
-            <span className="hidden xl:inline">{t('boq.ai_assistant_short', { defaultValue: 'Assistant' })}</span>
-          </Button>
-          <Button
-            variant={smartPanelOpen ? 'primary' : 'ghost'}
-            size="sm"
-            icon={<Brain size={15} className={smartPanelOpen ? '' : 'text-violet-600 dark:text-violet-400'} />}
-            onClick={onToggleSmartPanel}
-            title={t('boq.ai_smart_tooltip', { defaultValue: 'AI analysis: gap detection, scope review, cost optimization suggestions' })}
-          >
-            <span className="hidden xl:inline">{t('boq.ai_smart_short', { defaultValue: 'Smart AI' })}</span>
-          </Button>
+        <div className="flex items-center gap-1 rounded-xl bg-gradient-to-r from-violet-50 to-blue-50 dark:from-violet-950/30 dark:to-blue-950/30 border border-violet-200/50 dark:border-violet-800/30 px-2 py-1">
+          <div className="flex items-center gap-1 mr-1 hidden lg:flex">
+            <Sparkles size={12} className="text-violet-500" />
+            <span className="text-2xs font-bold text-violet-600 dark:text-violet-400 uppercase tracking-wider">AI</span>
+          </div>
+
+          {/* Cost Finder — search cost database */}
+          <div className="relative group/cf">
+            <Button
+              variant={costFinderOpen ? 'primary' : 'ghost'}
+              size="sm"
+              icon={<SearchCheck size={15} className={costFinderOpen ? '' : 'text-violet-600 dark:text-violet-400'} />}
+              onClick={onToggleCostFinder}
+            >
+              <span className="hidden xl:inline">{t('boq.cost_finder_short', { defaultValue: 'Find Costs' })}</span>
+            </Button>
+            <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-52 rounded-lg bg-gray-900 text-white text-2xs p-2.5 shadow-lg opacity-0 invisible group-hover/cf:opacity-100 group-hover/cf:visible transition-all z-50 pointer-events-none">
+              <p className="font-semibold mb-1">{t('boq.cost_finder_tip_title', { defaultValue: 'Find Costs in Database' })}</p>
+              <p className="text-gray-300">{t('boq.cost_finder_tooltip', { defaultValue: 'Search 55,000+ cost items by description. Find materials, labor, and equipment rates from regional databases.' })}</p>
+            </div>
+          </div>
+
+          {/* AI Chat — generate positions */}
+          <div className="relative group/chat">
+            <Button
+              variant={aiChatOpen ? 'primary' : 'ghost'}
+              size="sm"
+              icon={<Sparkles size={15} className={aiChatOpen ? '' : 'text-violet-600 dark:text-violet-400'} />}
+              onClick={onToggleAiChat}
+            >
+              <span className="hidden xl:inline">{t('boq.ai_assistant_short', { defaultValue: 'Generate' })}</span>
+            </Button>
+            <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-52 rounded-lg bg-gray-900 text-white text-2xs p-2.5 shadow-lg opacity-0 invisible group-hover/chat:opacity-100 group-hover/chat:visible transition-all z-50 pointer-events-none">
+              <p className="font-semibold mb-1">{t('boq.ai_chat_tip_title', { defaultValue: 'AI Position Generator' })}</p>
+              <p className="text-gray-300">{t('boq.ai_assistant_tooltip', { defaultValue: 'Describe what you need in plain text — AI creates BOQ positions with realistic pricing.' })}</p>
+            </div>
+          </div>
+
+          {/* Smart AI — analysis tools */}
+          <div className="relative group/smart">
+            <Button
+              variant={smartPanelOpen ? 'primary' : 'ghost'}
+              size="sm"
+              icon={<Brain size={15} className={smartPanelOpen ? '' : 'text-violet-600 dark:text-violet-400'} />}
+              onClick={onToggleSmartPanel}
+            >
+              <span className="hidden xl:inline">{t('boq.ai_smart_short', { defaultValue: 'Analyze' })}</span>
+            </Button>
+            <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-52 rounded-lg bg-gray-900 text-white text-2xs p-2.5 shadow-lg opacity-0 invisible group-hover/smart:opacity-100 group-hover/smart:visible transition-all z-50 pointer-events-none">
+              <p className="font-semibold mb-1">{t('boq.ai_smart_tip_title', { defaultValue: 'AI Analysis & Optimization' })}</p>
+              <p className="text-gray-300">{t('boq.ai_smart_tooltip', { defaultValue: 'Enhance descriptions, find missing items, check scope completeness, escalate rates to current prices.' })}</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

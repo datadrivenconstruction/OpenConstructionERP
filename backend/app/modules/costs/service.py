@@ -169,15 +169,18 @@ class CostItemService:
                 detail="Cost item not found",
             )
 
+        # Save code before expire_all() invalidates the ORM object
+        item_code = item.code
+
         await self.repo.update_fields(item_id, is_active=False)
 
         await _safe_publish(
             "costs.item.deleted",
-            {"item_id": str(item_id), "code": item.code},
+            {"item_id": str(item_id), "code": item_code},
             source_module="oe_costs",
         )
 
-        logger.info("Cost item deleted (soft): %s", item.code)
+        logger.info("Cost item deleted (soft): %s", item_code)
 
     # ── Bulk import ───────────────────────────────────────────────────────
 

@@ -10,7 +10,7 @@ import {
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
-function createFormatter(locale = 'de-DE') {
+function createCRFormatter(locale: string) {
   return new Intl.NumberFormat(locale, {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
@@ -297,9 +297,9 @@ function RiskDriversTable({
 
 /* ── Main Component ──────────────────────────────────────────────────── */
 
-export function CostRiskPanel({ boqId }: { boqId: string }) {
+export function CostRiskPanel({ boqId, locale = 'de-DE' }: { boqId: string; locale?: string }) {
   const { t } = useTranslation();
-  const fmt = useMemo(() => createFormatter(), []);
+  const fmt = useMemo(() => createCRFormatter(locale), [locale]);
   const [collapsed, setCollapsed] = useState(false);
 
   const { data, isLoading } = useQuery({

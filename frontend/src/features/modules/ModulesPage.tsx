@@ -481,7 +481,7 @@ export function ModulesPage() {
                   key={mod.id}
                   className="flex items-center gap-3 rounded-lg border border-border-light bg-surface-elevated px-3 py-2.5 transition-all hover:border-border"
                 >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-semantic-success-bg text-[#15803d]">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-semantic-success-bg text-[#15803d] dark:text-emerald-400">
                     <Icon size={15} />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -662,7 +662,7 @@ export function ModulesPage() {
                     </span>
                   )}
                   <div className="flex items-center gap-2.5">
-                    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${updateInfo ? 'bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400' : 'bg-semantic-success-bg text-[#15803d]'}`}>
+                    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${updateInfo ? 'bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400' : 'bg-semantic-success-bg text-[#15803d] dark:text-emerald-400'}`}>
                       <ShieldCheck size={15} />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -1038,17 +1038,17 @@ function MarketplaceCard({ module: mod, index, isInstalling, onInstall }: Market
             transition-colors duration-fast ease-oe
             ${
               mod.category === 'resource_catalog'
-                ? 'bg-[#fef3c7] text-[#92400e]'
+                ? 'bg-[#fef3c7] text-[#92400e] dark:bg-amber-900/30 dark:text-amber-300'
                 : mod.category === 'cost_database'
                   ? 'bg-oe-blue-subtle text-oe-blue'
                   : mod.category === 'vector_index'
-                    ? 'bg-[#f0e6ff] text-[#7c3aed]'
+                    ? 'bg-[#f0e6ff] text-[#7c3aed] dark:bg-purple-900/30 dark:text-purple-400'
                     : mod.category === 'language'
-                      ? 'bg-semantic-success-bg text-[#15803d]'
+                      ? 'bg-semantic-success-bg text-[#15803d] dark:text-emerald-400'
                       : mod.category === 'converter'
-                      ? 'bg-semantic-warning-bg text-[#b45309]'
+                      ? 'bg-semantic-warning-bg text-[#b45309] dark:text-amber-400'
                       : mod.category === 'analytics'
-                        ? 'bg-[#e0f2fe] text-[#0369a1]'
+                        ? 'bg-[#e0f2fe] text-[#0369a1] dark:bg-sky-900/30 dark:text-sky-400'
                         : 'bg-surface-secondary text-content-secondary'
             }
           `}

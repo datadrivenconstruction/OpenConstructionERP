@@ -5,6 +5,23 @@ All prompts enforce JSON-only output for reliable parsing.
 Works with Anthropic Claude, OpenAI GPT-4, and Google Gemini.
 """
 
+
+def with_locale(system_prompt: str, locale: str = "en") -> str:
+    """Append a locale instruction to the system prompt.
+
+    Ensures LLM responses use the user's language for all text fields
+    (descriptions, reasons, summaries) while keeping JSON keys in English.
+    """
+    if not locale or locale == "en":
+        return system_prompt
+    return (
+        f"{system_prompt}\n"
+        f"IMPORTANT: The user's language is '{locale}'. "
+        f"ALL text values in your JSON response (descriptions, reasons, summaries, "
+        f"specifications, warnings) MUST be written in '{locale}'. "
+        f"JSON keys must remain in English."
+    )
+
 # ── Enhance Description ──────────────────────────────────────────────────────
 
 ENHANCE_DESCRIPTION_SYSTEM = """\

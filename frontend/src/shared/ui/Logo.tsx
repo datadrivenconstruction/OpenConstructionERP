@@ -117,8 +117,8 @@ export function LogoWithText({ size = 'md', animate, showVersion = true, classNa
     <div className={clsx('flex items-center', gapSizeMap[size], className)}>
       <Logo size={size} animate={animate} />
       <span className={clsx(textSizeMap[size], 'font-bold text-content-primary tracking-tight whitespace-nowrap')}>
-        Open<span className="text-oe-blue">Estimator</span>
-        {showVersion && <span className="text-content-quaternary font-semibold">.io</span>}
+        Open<span className="text-oe-blue">Construction</span>
+        {showVersion && <span className="text-content-quaternary font-semibold">ERP</span>}
       </span>
     </div>
   );

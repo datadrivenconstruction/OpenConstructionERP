@@ -8,19 +8,44 @@ Endpoints:
     DELETE /{project_id}     — Archive project (auth required)
 """
 
+import logging
 import uuid
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.dependencies import CurrentUserId, CurrentUserPayload, SessionDep, SettingsDep
 from app.modules.projects.schemas import ProjectCreate, ProjectResponse, ProjectUpdate
 from app.modules.projects.service import ProjectService
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 def _get_service(session: SessionDep, settings: SettingsDep) -> ProjectService:
     return ProjectService(session, settings)
+
+
+async def _verify_project_owner(
+    service: ProjectService,
+    project_id: uuid.UUID,
+    user_id: str,
+    payload: dict | None = None,
+) -> object:
+    """Load a project and verify the current user is the owner.
+
+    Admins (role=admin in JWT payload) bypass the ownership check.
+    Returns the project object on success, raises 403 if not owner.
+    """
+    project = await service.get_project(project_id)
+    # Admin bypass
+    if payload and payload.get("role") == "admin":
+        return project
+    if str(project.owner_id) != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have access to this project",
+        )
+    return project
 
 
 # ── Create ────────────────────────────────────────────────────────────────
@@ -33,8 +58,17 @@ async def create_project(
     service: ProjectService = Depends(_get_service),
 ) -> ProjectResponse:
     """Create a new project."""
-    project = await service.create_project(data, uuid.UUID(user_id))
-    return ProjectResponse.model_validate(project)
+    try:
+        project = await service.create_project(data, uuid.UUID(user_id))
+        return ProjectResponse.model_validate(project)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Failed to create project")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create project",
+        )
 
 
 # ── List ──────────────────────────────────────────────────────────────────
@@ -68,10 +102,11 @@ async def list_projects(
 async def get_project(
     project_id: uuid.UUID,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
     service: ProjectService = Depends(_get_service),
 ) -> ProjectResponse:
-    """Get project by ID."""
-    project = await service.get_project(project_id)
+    """Get project by ID. Verifies ownership."""
+    project = await _verify_project_owner(service, project_id, user_id, payload)
     return ProjectResponse.model_validate(project)
 
 
@@ -83,9 +118,11 @@ async def update_project(
     project_id: uuid.UUID,
     data: ProjectUpdate,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
     service: ProjectService = Depends(_get_service),
 ) -> ProjectResponse:
-    """Update project fields."""
+    """Update project fields. Verifies ownership."""
+    await _verify_project_owner(service, project_id, user_id, payload)
     project = await service.update_project(project_id, data)
     return ProjectResponse.model_validate(project)
 
@@ -97,7 +134,9 @@ async def update_project(
 async def delete_project(
     project_id: uuid.UUID,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
     service: ProjectService = Depends(_get_service),
 ) -> None:
-    """Archive a project (soft delete)."""
+    """Archive a project (soft delete). Verifies ownership."""
+    await _verify_project_owner(service, project_id, user_id, payload)
     await service.delete_project(project_id)

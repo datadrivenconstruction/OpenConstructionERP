@@ -19,7 +19,7 @@ import {
   FileText,
   X,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Skeleton, InfoHint, SkeletonTable } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Skeleton, InfoHint, SkeletonTable, Breadcrumb } from '@/shared/ui';
 import { apiGet, apiPost, apiPatch } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -920,6 +920,11 @@ export function TenderingPage() {
 
   return (
     <div className="max-w-content mx-auto animate-fade-in">
+      <Breadcrumb items={[
+        { label: t('nav.dashboard', 'Dashboard'), to: '/' },
+        { label: t('tendering.title', 'Tendering') },
+      ]} className="mb-4" />
+
       {/* Header */}
       <div className="mb-6 flex items-start justify-between">
         <div>

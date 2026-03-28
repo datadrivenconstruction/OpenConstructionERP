@@ -1229,6 +1229,32 @@ class BOQService:
 
         logger.info("Position deleted: %s from BOQ %s", position_id, boq_id)
 
+    async def reorder_positions(
+        self, boq_id: uuid.UUID, position_ids: list[uuid.UUID]
+    ) -> None:
+        """Reorder positions within a BOQ.
+
+        Assigns sequential sort_order values based on the order of
+        ``position_ids``.  The BOQ is verified to exist first.
+
+        Args:
+            boq_id: The BOQ that owns the positions.
+            position_ids: Ordered list of position UUIDs.
+
+        Raises:
+            HTTPException 404: If the BOQ does not exist.
+        """
+        boq = await self.boq_repo.get_by_id(boq_id)
+        if boq is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="BOQ not found",
+            )
+        await self.position_repo.reorder(position_ids)
+        logger.info(
+            "Reordered %d positions in BOQ %s", len(position_ids), boq_id
+        )
+
     # ── Markup operations ─────────────────────────────────────────────────
 
     async def list_markups(self, boq_id: uuid.UUID) -> list[BOQMarkup]:
@@ -1314,7 +1340,7 @@ class BOQService:
             fields["metadata_"] = fields.pop("metadata")
 
         if fields:
-            await self.markup_repo.update_fields(markup_id, **fields)
+            refreshed = await self.markup_repo.update_fields(markup_id, **fields)
 
             await _safe_publish(
                 "boq.markup.updated",
@@ -1325,6 +1351,9 @@ class BOQService:
                 },
             )
 
+            if refreshed is not None:
+                return refreshed
+
         # Re-fetch to return fresh data
         updated = await self.markup_repo.get_by_id(markup_id)
         if updated is None:
@@ -1332,6 +1361,7 @@ class BOQService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Markup not found after update",
             )
+        await self.markup_repo.session.refresh(updated)
         return updated
 
     async def delete_markup(self, markup_id: uuid.UUID) -> None:
@@ -3033,6 +3063,7 @@ class BOQService:
         description: str,
         unit: str = "m2",
         classification: dict[str, str] | None = None,
+        locale: str = "en",
     ) -> dict[str, Any]:
         """Enhance a BOQ position description using LLM.
 
@@ -3041,6 +3072,7 @@ class BOQService:
             description: Short position description to enhance.
             unit: Unit of measurement.
             classification: Optional classification codes.
+            locale: User's language for AI response text.
 
         Returns:
             Dict with enhanced_description, specifications, standards, confidence.
@@ -3049,6 +3081,7 @@ class BOQService:
         from app.modules.boq.ai_prompts import (
             ENHANCE_DESCRIPTION_PROMPT,
             ENHANCE_DESCRIPTION_SYSTEM,
+            with_locale,
         )
 
         cls_str = ", ".join(f"{k}: {v}" for k, v in (classification or {}).items()) or "none"
@@ -3057,7 +3090,7 @@ class BOQService:
         )
 
         raw_text, provider, tokens = await self._call_llm(
-            user_id, ENHANCE_DESCRIPTION_SYSTEM, prompt,
+            user_id, with_locale(ENHANCE_DESCRIPTION_SYSTEM, locale), prompt,
         )
         parsed = extract_json(raw_text)
 
@@ -3087,6 +3120,7 @@ class BOQService:
         unit: str = "m2",
         classification: dict[str, str] | None = None,
         existing_descriptions: list[str] | None = None,
+        locale: str = "en",
     ) -> dict[str, Any]:
         """Suggest prerequisite/related positions for a BOQ item.
 
@@ -3096,6 +3130,7 @@ class BOQService:
             unit: Unit of measurement.
             classification: Optional classification codes.
             existing_descriptions: Descriptions already in the BOQ (to avoid duplicates).
+            locale: User's language for AI response text.
 
         Returns:
             Dict with suggestions list, model_used, tokens_used.
@@ -3104,6 +3139,7 @@ class BOQService:
         from app.modules.boq.ai_prompts import (
             SUGGEST_PREREQUISITES_PROMPT,
             SUGGEST_PREREQUISITES_SYSTEM,
+            with_locale,
         )
 
         cls_str = ", ".join(f"{k}: {v}" for k, v in (classification or {}).items()) or "none"
@@ -3119,7 +3155,7 @@ class BOQService:
         )
 
         raw_text, provider, tokens = await self._call_llm(
-            user_id, SUGGEST_PREREQUISITES_SYSTEM, prompt,
+            user_id, with_locale(SUGGEST_PREREQUISITES_SYSTEM, locale), prompt,
         )
         parsed = extract_json(raw_text)
 
@@ -3147,6 +3183,7 @@ class BOQService:
         project_type: str = "general",
         region: str = "DACH",
         currency: str = "EUR",
+        locale: str = "en",
     ) -> dict[str, Any]:
         """Check BOQ scope completeness using LLM analysis.
 
@@ -3164,7 +3201,7 @@ class BOQService:
             Dict with completeness_score, missing_items, warnings, summary.
         """
         from app.modules.ai.ai_client import extract_json
-        from app.modules.boq.ai_prompts import CHECK_SCOPE_PROMPT, CHECK_SCOPE_SYSTEM
+        from app.modules.boq.ai_prompts import CHECK_SCOPE_PROMPT, CHECK_SCOPE_SYSTEM, with_locale
 
         # Fetch BOQ positions
         boq = await self.boq_repo.get_by_id(boq_id)
@@ -3205,7 +3242,7 @@ class BOQService:
         )
 
         raw_text, provider, tokens = await self._call_llm(
-            user_id, CHECK_SCOPE_SYSTEM, prompt,
+            user_id, with_locale(CHECK_SCOPE_SYSTEM, locale), prompt,
         )
         parsed = extract_json(raw_text)
 
@@ -3251,6 +3288,7 @@ class BOQService:
         base_year: int = 2023,
         target_year: int = 2026,
         region: str = "DACH",
+        locale: str = "en",
     ) -> dict[str, Any]:
         """Escalate a unit rate to current prices using LLM analysis.
 
@@ -3268,7 +3306,7 @@ class BOQService:
             Dict with escalated_rate, escalation_percent, factors, reasoning.
         """
         from app.modules.ai.ai_client import extract_json
-        from app.modules.boq.ai_prompts import ESCALATE_RATE_PROMPT, ESCALATE_RATE_SYSTEM
+        from app.modules.boq.ai_prompts import ESCALATE_RATE_PROMPT, ESCALATE_RATE_SYSTEM, with_locale
 
         prompt = ESCALATE_RATE_PROMPT.format(
             description=description,
@@ -3281,7 +3319,7 @@ class BOQService:
         )
 
         raw_text, provider, tokens = await self._call_llm(
-            user_id, ESCALATE_RATE_SYSTEM, prompt,
+            user_id, with_locale(ESCALATE_RATE_SYSTEM, locale), prompt,
         )
         parsed = extract_json(raw_text)
 

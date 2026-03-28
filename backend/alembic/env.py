@@ -25,9 +25,18 @@ from app.modules.schedule import models as _sched  # noqa: F401
 from app.modules.costmodel import models as _cm  # noqa: F401
 from app.modules.ai import models as _ai  # noqa: F401
 from app.modules.tendering import models as _tender  # noqa: F401
+from app.modules.catalog import models as _catalog  # noqa: F401
+from app.modules.takeoff import models as _takeoff  # noqa: F401
 
 config = context.config
 settings = get_settings()
+
+# Render UUID columns properly for autogenerate
+def render_item(type_, obj, autogen_context):
+    """Custom render for UUID type."""
+    if type_ == "type" and hasattr(obj, "__class__") and obj.__class__.__name__ == "GUID":
+        return "sa.String(36)"
+    return False
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

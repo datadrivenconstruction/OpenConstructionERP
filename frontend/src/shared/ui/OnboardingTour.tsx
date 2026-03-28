@@ -5,7 +5,7 @@ import clsx from 'clsx';
 
 /* ── Constants ──────────────────────────────────────────────────────────── */
 
-export const ONBOARDING_STORAGE_KEY = 'oe_onboarding_complete';
+export const ONBOARDING_STORAGE_KEY = 'oe_tour_completed';
 
 /* ── Types ──────────────────────────────────────────────────────────────── */
 

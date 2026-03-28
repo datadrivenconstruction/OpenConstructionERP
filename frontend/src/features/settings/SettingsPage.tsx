@@ -17,7 +17,7 @@ import {
   Pencil,
   Save,
 } from 'lucide-react';
-import { Card, CardHeader, CardContent, CardFooter, Button, Badge, InfoHint, Skeleton } from '@/shared/ui';
+import { Card, CardHeader, CardContent, CardFooter, Button, Badge, InfoHint, Skeleton, Breadcrumb } from '@/shared/ui';
 import { apiGet, apiPatch } from '@/shared/lib/api';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -549,6 +549,11 @@ export function SettingsPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
+      <Breadcrumb items={[
+        { label: t('nav.dashboard', 'Dashboard'), to: '/' },
+        { label: t('nav.settings', 'Settings') },
+      ]} className="mb-2" />
+
       <div className="animate-card-in" style={{ animationDelay: '0ms' }}>
         <h1 className="text-2xl font-bold text-content-primary">{t('nav.settings', 'Settings')}</h1>
         <p className="mt-1 text-sm text-content-secondary">{t('settings.subtitle', { defaultValue: 'Manage your account and preferences' })}</p>
@@ -687,6 +692,13 @@ export function SettingsPage() {
           </Button>
         </CardContent>
       </Card>
+
+      {/* About link */}
+      <div className="mt-6 text-center">
+        <a href="/about" className="text-sm text-content-tertiary hover:text-oe-blue transition-colors">
+          {t('settings.about_link', { defaultValue: 'About OpenConstructionERP' })} →
+        </a>
+      </div>
     </div>
   );
 }

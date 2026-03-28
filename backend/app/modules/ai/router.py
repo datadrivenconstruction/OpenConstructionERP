@@ -14,11 +14,11 @@ import logging
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile, status
 
 logger = logging.getLogger(__name__)
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, check_ai_rate_limit
 from app.modules.ai.schemas import (
     AISettingsResponse,
     AISettingsUpdate,
@@ -123,6 +123,8 @@ async def update_ai_settings(
 async def quick_estimate(
     request: QuickEstimateRequest,
     user_id: CurrentUserId,
+    response: Response,
+    remaining: int = Depends(check_ai_rate_limit),
     service: AIService = Depends(_get_service),
 ) -> EstimateJobResponse:
     """Generate a BOQ estimate from a text description using AI.
@@ -140,6 +142,7 @@ async def quick_estimate(
     - Classification codes (DIN 276, NRM, MasterFormat)
     - Token usage and processing time
     """
+    response.headers["X-RateLimit-Remaining"] = str(remaining)
     return await service.quick_estimate(user_id, request)
 
 
@@ -153,11 +156,13 @@ async def quick_estimate(
 )
 async def photo_estimate(
     user_id: CurrentUserId,
+    response: Response,
     file: UploadFile = File(..., description="Building or construction site photo"),
     location: str = Form(default="Europe", description="Location for pricing context"),
     currency: str = Form(default="EUR", description="Currency code"),
     standard: str = Form(default="din276", description="Classification standard"),
     project_id: str | None = Form(default=None, description="Optional project ID"),
+    remaining: int = Depends(check_ai_rate_limit),
     service: AIService = Depends(_get_service),
 ) -> EstimateJobResponse:
     """Generate a BOQ estimate from a building photo using AI Vision.
@@ -169,6 +174,7 @@ async def photo_estimate(
 
     Accepted formats: JPEG, PNG, WebP, GIF. Max size: 10 MB.
     """
+    response.headers["X-RateLimit-Remaining"] = str(remaining)
     # Validate file type
     content_type = file.content_type or ""
     if content_type not in ALLOWED_IMAGE_TYPES:
@@ -226,11 +232,13 @@ async def photo_estimate(
 )
 async def file_estimate(
     user_id: CurrentUserId,
+    response: Response,
     file: UploadFile = File(..., description="Any file: PDF, Excel, CSV, CAD, or image"),
     location: str = Form(default="Europe", description="Location for pricing context"),
     currency: str = Form(default="EUR", description="Currency code"),
     standard: str = Form(default="din276", description="Classification standard"),
     project_id: str | None = Form(default=None, description="Optional project ID"),
+    remaining: int = Depends(check_ai_rate_limit),
     service: AIService = Depends(_get_service),
 ) -> EstimateJobResponse:
     """Generate a BOQ estimate from any uploaded file using AI.
@@ -246,6 +254,7 @@ async def file_estimate(
 
     Max file size: 50 MB.
     """
+    response.headers["X-RateLimit-Remaining"] = str(remaining)
     filename = file.filename or "file"
     ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
 

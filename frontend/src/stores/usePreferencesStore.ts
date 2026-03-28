@@ -21,6 +21,9 @@ interface Preferences {
   dateFormat: DateFormat;
   numberLocale: NumberLocale;
   vatRate: number;
+  defaultRegion: string;
+  defaultCurrency: string;
+  defaultStandard: string;
 }
 
 const DEFAULTS: Preferences = {
@@ -29,6 +32,9 @@ const DEFAULTS: Preferences = {
   dateFormat: 'DD.MM.YYYY',
   numberLocale: 'de-DE',
   vatRate: 19,
+  defaultRegion: 'DACH',
+  defaultCurrency: 'EUR',
+  defaultStandard: 'din276',
 };
 
 function readPreferences(): Preferences {

@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Search, ChevronDown, LogOut, User, Settings, Menu, MessageSquarePlus, FolderOpen } from 'lucide-react';
+import { Search, ChevronDown, LogOut, User, Settings, Menu, MessageSquarePlus, FolderOpen, Bell, CheckCircle2, XCircle, AlertTriangle, Info, Trash2 } from 'lucide-react';
 import clsx from 'clsx';
 import { SUPPORTED_LANGUAGES, getLanguageByCode } from '../i18n';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useToastStore, type HistoryEntry } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { CountryFlag } from '@/shared/ui';
 
@@ -132,7 +133,7 @@ export function Header({ title, onMenuClick, onFeedbackClick }: HeaderProps) {
         {/* Search — overlay style so it doesn't push layout */}
         {searchOpen && (
           <div className="fixed inset-0 z-50 flex items-start justify-center pt-[12vh]">
-            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => { setSearchOpen(false); setSearchQuery(''); }} />
+            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" onClick={() => { setSearchOpen(false); setSearchQuery(''); }} />
             <div className="relative z-10 w-full max-w-md mx-4 rounded-xl border border-border-light bg-surface-elevated shadow-xl overflow-hidden">
               <div className="flex items-center gap-3 px-4">
                 <Search size={18} className="shrink-0 text-content-tertiary" />
@@ -146,6 +147,7 @@ export function Header({ title, onMenuClick, onFeedbackClick }: HeaderProps) {
                     if (e.key === 'Escape') { setSearchOpen(false); setSearchQuery(''); }
                   }}
                   placeholder={t('common.search_placeholder', { defaultValue: 'Search costs, projects...' })}
+                  aria-label={t('common.search_placeholder', { defaultValue: 'Search costs, projects...' })}
                   className="flex-1 h-12 bg-transparent text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none"
                   autoComplete="off"
                 />
@@ -226,6 +228,9 @@ export function Header({ title, onMenuClick, onFeedbackClick }: HeaderProps) {
           </button>
         )}
 
+        {/* Notification bell */}
+        <NotificationBell />
+
         <div className="w-px h-5 bg-border-light mx-1 hidden sm:block" />
 
         {/* Language */}
@@ -241,13 +246,174 @@ export function Header({ title, onMenuClick, onFeedbackClick }: HeaderProps) {
   );
 }
 
+/* ── Notification Bell ─────────────────────────────────────────────────── */
+
+function formatTimeAgo(timestamp: number, t: ReturnType<typeof useTranslation>['t']): string {
+  const diff = Date.now() - timestamp;
+  const seconds = Math.floor(diff / 1000);
+  if (seconds < 60) return t('time.just_now', { defaultValue: 'just now' });
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return t('time.minutes_ago', { defaultValue: '{{count}}m ago', count: minutes });
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return t('time.hours_ago', { defaultValue: '{{count}}h ago', count: hours });
+  const days = Math.floor(hours / 24);
+  return t('time.days_ago', { defaultValue: '{{count}}d ago', count: days });
+}
+
+const NOTIFICATION_TYPE_CONFIG: Record<
+  HistoryEntry['type'],
+  { icon: typeof CheckCircle2; colorClass: string }
+> = {
+  success: { icon: CheckCircle2, colorClass: 'text-semantic-success' },
+  error: { icon: XCircle, colorClass: 'text-semantic-error' },
+  warning: { icon: AlertTriangle, colorClass: 'text-amber-500' },
+  info: { icon: Info, colorClass: 'text-oe-blue' },
+};
+
+function NotificationBell() {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const history = useToastStore((s) => s.history);
+  const clearHistory = useToastStore((s) => s.clearHistory);
+  const markAllRead = useToastStore((s) => s.markAllRead);
+
+  const unreadCount = history.filter((h) => !h.read).length;
+  const displayItems = history.slice(0, 10);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [open]);
+
+  const handleOpen = useCallback(() => {
+    setOpen((prev) => {
+      if (!prev) {
+        // Mark all as read when opening
+        markAllRead();
+      }
+      return !prev;
+    });
+  }, [markAllRead]);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={handleOpen}
+        aria-expanded={open}
+        aria-haspopup="true"
+        className={clsx(
+          'flex h-8 w-8 items-center justify-center rounded-lg',
+          'text-content-secondary transition-all duration-fast ease-oe',
+          'hover:bg-surface-secondary hover:text-content-primary',
+          open && 'bg-surface-secondary text-content-primary',
+        )}
+        title={t('notifications.title', { defaultValue: 'Notifications' })}
+        aria-label={t('notifications.title', { defaultValue: 'Notifications' })}
+      >
+        <Bell size={16} strokeWidth={1.75} />
+        {unreadCount > 0 && (
+          <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-semantic-error px-1 text-[10px] font-bold text-white">
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 top-full mt-1.5 w-80 rounded-xl border border-border-light bg-surface-elevated shadow-lg animate-scale-in overflow-hidden"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 py-2.5 border-b border-border-light">
+            <span className="text-xs font-semibold text-content-primary">
+              {t('notifications.title', { defaultValue: 'Notifications' })}
+            </span>
+            {history.length > 0 && (
+              <span className="text-2xs text-content-tertiary">
+                {history.length} {t('notifications.total', { defaultValue: 'total' })}
+              </span>
+            )}
+          </div>
+
+          {/* Items */}
+          {displayItems.length === 0 ? (
+            <div className="px-4 py-8 text-center">
+              <Bell size={24} className="mx-auto mb-2 text-content-quaternary" />
+              <p className="text-xs text-content-tertiary">
+                {t('notifications.empty', { defaultValue: 'No notifications yet' })}
+              </p>
+            </div>
+          ) : (
+            <div className="max-h-80 overflow-y-auto">
+              {displayItems.map((entry) => {
+                const config = NOTIFICATION_TYPE_CONFIG[entry.type];
+                const TypeIcon = config.icon;
+                return (
+                  <div
+                    key={entry.id}
+                    className="flex items-start gap-2.5 px-4 py-2.5 hover:bg-surface-secondary transition-colors border-b border-border-light last:border-b-0"
+                  >
+                    <TypeIcon size={15} className={clsx('shrink-0 mt-0.5', config.colorClass)} />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-content-primary truncate">
+                        {entry.title}
+                      </p>
+                      {entry.message && (
+                        <p className="text-2xs text-content-tertiary truncate mt-0.5">
+                          {entry.message}
+                        </p>
+                      )}
+                    </div>
+                    <span className="text-2xs text-content-quaternary whitespace-nowrap shrink-0">
+                      {formatTimeAgo(entry.timestamp, t)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Footer */}
+          {history.length > 0 && (
+            <div className="border-t border-border-light px-4 py-2">
+              <button
+                onClick={() => {
+                  clearHistory();
+                  setOpen(false);
+                }}
+                className="flex w-full items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs font-medium text-content-secondary hover:text-content-primary hover:bg-surface-secondary transition-colors"
+              >
+                <Trash2 size={12} />
+                {t('notifications.clear_all', { defaultValue: 'Clear all' })}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Language Switcher Dropdown ─────────────────────────────────────────── */
 
 function LanguageSwitcher({
   currentLang,
   onSelect,
 }: {
-  currentLang: (typeof SUPPORTED_LANGUAGES)[number];
+  currentLang: (typeof SUPPORTED_LANGUAGES)[number] | undefined;
   onSelect: (code: string) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -260,6 +426,15 @@ function LanguageSwitcher({
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [open]);
 
   return (
     <div className="relative" ref={ref}>
@@ -321,6 +496,15 @@ function UserMenu() {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [open]);
 
   return (
     <div className="relative" ref={ref}>

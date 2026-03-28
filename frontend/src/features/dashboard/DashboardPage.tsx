@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -24,6 +24,8 @@ import {
   DollarSign,
   FileText,
   Calendar,
+  Upload,
+  ExternalLink,
 } from 'lucide-react';
 import { Card, CardHeader, CardContent, Button, Badge, Skeleton, InfoHint } from '@/shared/ui';
 
@@ -130,6 +132,15 @@ function ImportDemoModal({
   const queryClient = useQueryClient();
   const [installingId, setInstallingId] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [open, onClose]);
+
   const { data: catalog } = useQuery({
     queryKey: ['demo-catalog'],
     queryFn: () => apiGet<DemoCatalogEntry[]>('/demo/catalog'),
@@ -165,11 +176,12 @@ function ImportDemoModal({
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        aria-hidden="true"
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="relative z-10 w-full max-w-2xl mx-4 rounded-xl bg-surface-primary shadow-2xl border border-border-light animate-card-in">
+      <div role="dialog" aria-modal="true" aria-labelledby="demo-modal-title" className="relative z-10 w-full max-w-2xl mx-4 rounded-xl bg-surface-primary shadow-2xl border border-border-light animate-card-in">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <div className="flex items-center gap-3">
@@ -177,7 +189,7 @@ function ImportDemoModal({
               <Download size={16} className="text-oe-blue" strokeWidth={2} />
             </div>
             <div>
-              <h3 className="text-base font-semibold text-content-primary">
+              <h3 id="demo-modal-title" className="text-base font-semibold text-content-primary">
                 {t('demo.modal_title', 'Import Demo Project')}
               </h3>
               <p className="text-xs text-content-tertiary">
@@ -377,7 +389,7 @@ function OnboardingSteps({
   ];
 
   return (
-    <div className="mb-8">
+    <div>
       {/* Section header */}
       <div
         className="mb-5 flex items-center justify-between animate-card-in"
@@ -734,10 +746,10 @@ export function DashboardPage() {
   }, [allBoqs]);
 
   return (
-    <div className="max-w-content mx-auto">
+    <div className="max-w-content mx-auto space-y-6">
       {/* Hero — gradient animated heading */}
       <div
-        className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-card-in"
+        className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-card-in"
         style={{ animationDelay: '0ms' }}
       >
         <div>
@@ -750,6 +762,23 @@ export function DashboardPage() {
           >
             {t('dashboard.subtitle')}
           </p>
+          {/* Open-source banner */}
+          <a
+            href="https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 flex items-center gap-3 rounded-xl bg-gradient-to-r from-oe-blue/8 via-violet-500/8 to-emerald-500/8 border border-oe-blue/15 px-4 py-2.5 hover:shadow-md hover:border-oe-blue/30 transition-all animate-stagger-in"
+            style={{ animationDelay: '150ms' }}
+          >
+            <span className="relative flex h-2.5 w-2.5 shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+            </span>
+            <span className="text-sm font-bold bg-gradient-to-r from-oe-blue via-violet-600 to-emerald-600 bg-clip-text text-transparent">
+              {t('dashboard.open_source_badge', { defaultValue: 'The #1 open-source construction ERP' })}
+            </span>
+            <ExternalLink size={13} className="text-oe-blue opacity-50 shrink-0" />
+          </a>
         </div>
         <div className="flex items-center gap-2 animate-stagger-in" style={{ animationDelay: '200ms' }}>
           {lastBoqId && (
@@ -874,7 +903,7 @@ export function DashboardPage() {
 
       {/* Analytics Section */}
       {projects && projects.length > 0 && (
-        <div className="mt-8 animate-card-in" style={{ animationDelay: '450ms' }}>
+        <div className="animate-card-in" style={{ animationDelay: '450ms' }}>
           <div className="mb-4 flex items-center gap-2">
             <BarChart3 size={18} className="text-content-tertiary" strokeWidth={1.75} />
             <h2 className="text-lg font-semibold text-content-primary">
@@ -893,29 +922,96 @@ export function DashboardPage() {
 function ProjectsList({ projects }: { projects?: ProjectSummary[] }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const installDemoMutation = useMutation({
+    mutationFn: () => apiPost<DemoInstallResult>('/demo/install/residential-berlin'),
+    onSuccess: (result) => {
+      void queryClient.invalidateQueries({ queryKey: ['projects'] });
+      navigate(`/projects/${result.project_id}`);
+    },
+  });
 
   if (!projects || projects.length === 0) {
     return (
-      <div className="px-6 py-10 text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-secondary">
-          <FolderPlus size={22} className="text-content-tertiary" strokeWidth={1.5} />
+      <div className="px-6 py-8">
+        <div className="text-center mb-6">
+          <p className="text-sm font-semibold text-content-primary">
+            {t('dashboard.welcome_title', { defaultValue: 'Welcome to OpenConstructionERP' })}
+          </p>
+          <p className="mt-1 text-xs text-content-tertiary">
+            {t('dashboard.welcome_desc', { defaultValue: 'Start by installing a demo project or creating your own.' })}
+          </p>
         </div>
-        <p className="text-sm font-medium text-content-primary">{t('dashboard.no_projects', { defaultValue: 'No projects yet' })}</p>
-        <p className="mt-1 text-xs text-content-tertiary">
-          {t('dashboard.no_projects_desc', { defaultValue: 'Create your first project to get started' })}
-        </p>
-        <div className="mt-4">
-          <Button variant="primary" size="sm" onClick={() => navigate('/projects/new')}>
-            {t('projects.new_project')}
-          </Button>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {/* Install Demo Project */}
+          <button
+            onClick={() => installDemoMutation.mutate()}
+            disabled={installDemoMutation.isPending}
+            className="group flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30 disabled:opacity-60"
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-110">
+              {installDemoMutation.isPending ? (
+                <Loader2 size={20} className="animate-spin" strokeWidth={1.5} />
+              ) : (
+                <Download size={20} strokeWidth={1.5} />
+              )}
+            </div>
+            <span className="text-sm font-medium text-content-primary">
+              {t('dashboard.install_demo', { defaultValue: 'Install Demo Project' })}
+            </span>
+            <span className="text-[11px] leading-snug text-content-tertiary">
+              {t('dashboard.install_demo_desc', { defaultValue: 'Pre-built residential project with realistic data' })}
+            </span>
+          </button>
+
+          {/* Create First Project */}
+          <button
+            onClick={() => navigate('/projects/new')}
+            className="group flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30"
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-110">
+              <FolderPlus size={20} strokeWidth={1.5} />
+            </div>
+            <span className="text-sm font-medium text-content-primary">
+              {t('dashboard.create_first_project', { defaultValue: 'Create First Project' })}
+            </span>
+            <span className="text-[11px] leading-snug text-content-tertiary">
+              {t('dashboard.create_first_project_desc', { defaultValue: 'Set up a new estimation from scratch' })}
+            </span>
+          </button>
+
+          {/* Import Existing BOQ */}
+          <button
+            onClick={() => navigate('/ai-estimate')}
+            className="group flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30"
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-110">
+              <Upload size={20} strokeWidth={1.5} />
+            </div>
+            <span className="text-sm font-medium text-content-primary">
+              {t('dashboard.import_existing_boq', { defaultValue: 'Import Existing BOQ' })}
+            </span>
+            <span className="text-[11px] leading-snug text-content-tertiary">
+              {t('dashboard.import_existing_boq_desc', { defaultValue: 'Use AI to estimate from an existing document' })}
+            </span>
+          </button>
         </div>
       </div>
     );
   }
 
+  // Deduplicate by ID and show only latest 10
+  const seen = new Set<string>();
+  const unique = projects.filter((p) => {
+    if (seen.has(p.id)) return false;
+    seen.add(p.id);
+    return true;
+  }).slice(0, 6);
+
   return (
     <div className="divide-y divide-border-light">
-      {projects.map((p, index) => (
+      {unique.map((p, index) => (
         <button
           key={p.id}
           onClick={() => navigate(`/projects/${p.id}`)}
@@ -974,13 +1070,16 @@ function AnalyticsSection({ projects }: { projects: ProjectSummary[] }) {
     const totalValue = allBoqs.reduce((sum, b) => sum + (b.grand_total ?? 0), 0);
 
     // Value per project
-    const projectValues: { name: string; value: number }[] = projects
-      .map((p) => ({
-        name: p.name,
-        value: allBoqs
-          .filter((b) => b.project_id === p.id)
-          .reduce((sum, b) => sum + (b.grand_total ?? 0), 0),
-      }))
+    // Deduplicate projects by name (merge values for same-named projects)
+    const valueByName = new Map<string, number>();
+    for (const p of projects) {
+      const val = allBoqs
+        .filter((b) => b.project_id === p.id)
+        .reduce((sum, b) => sum + (b.grand_total ?? 0), 0);
+      valueByName.set(p.name, (valueByName.get(p.name) ?? 0) + val);
+    }
+    const projectValues: { name: string; value: number }[] = Array.from(valueByName.entries())
+      .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
 
     // BOQ status distribution
@@ -1060,7 +1159,7 @@ function AnalyticsSection({ projects }: { projects: ProjectSummary[] }) {
               {t('dashboard.value_by_project', 'Value by Project')}
             </div>
             <div className="space-y-2.5">
-              {stats.projectValues.map((pv, i) => {
+              {stats.projectValues.filter((pv) => pv.value > 0).slice(0, 10).map((pv, i) => {
                 const barWidth = maxValue > 0 ? (pv.value / maxValue) * 100 : 0;
                 const color = BAR_COLORS[i % BAR_COLORS.length];
                 const formattedValue =
