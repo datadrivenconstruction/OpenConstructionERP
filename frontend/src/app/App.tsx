@@ -56,6 +56,9 @@ const AnalyticsPage = lazy(() =>
 const RiskRegisterPage = lazy(() =>
   import('@/features/risk/RiskRegisterPage').then((m) => ({ default: m.RiskRegisterPage }))
 );
+const DocumentsPage = lazy(() =>
+  import('@/features/documents/DocumentsPage').then((m) => ({ default: m.DocumentsPage }))
+);
 
 function LoadingScreen() {
   return (
@@ -237,6 +240,7 @@ export default function App() {
         <Route path="/tendering" element={<P title="Tendering"><TenderingPage /></P>} />
 
         <Route path="/changeorders" element={<P title="Change Orders"><ChangeOrdersPage /></P>} />
+        <Route path="/documents" element={<P title="Documents"><DocumentsPage /></P>} />
 
         <Route path="/risks" element={<P title="Risk Register"><RiskRegisterPage /></P>} />
 
