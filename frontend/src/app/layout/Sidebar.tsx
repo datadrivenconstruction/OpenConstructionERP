@@ -28,7 +28,6 @@ import {
   FileEdit,
   BarChart3,
   ShieldAlert,
-  FolderOpen,
   type LucideIcon,
 } from 'lucide-react';
 import { useModuleStore } from '@/stores/useModuleStore';
