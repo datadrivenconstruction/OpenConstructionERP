@@ -437,6 +437,7 @@ def create_app() -> FastAPI:
             from app.modules.takeoff import models as _takeoff_models  # noqa: F401
             from app.modules.changeorders import models as _changeorders_models  # noqa: F401
             from app.modules.risk import models as _risk_models  # noqa: F401
+            from app.modules.documents import models as _documents_models  # noqa: F401
 
             async with engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
