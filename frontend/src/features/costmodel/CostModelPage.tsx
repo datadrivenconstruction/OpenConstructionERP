@@ -70,15 +70,20 @@ function formatCompact(amount: number, currency: string): string {
   return formatCurrency(amount, currency);
 }
 
+/**
+ * Variance = planned - actual (or planned - forecast).
+ * Positive variance means under budget (GOOD = green).
+ * Negative variance means over budget (BAD = red).
+ */
 function varianceColor(variance: number): string {
-  if (variance < 0) return 'text-[#15803d]';
-  if (variance > 0) return 'text-semantic-error';
+  if (variance > 0) return 'text-[#15803d]';
+  if (variance < 0) return 'text-semantic-error';
   return 'text-content-secondary';
 }
 
 function varianceBg(variance: number): string {
-  if (variance < 0) return 'bg-semantic-success-bg';
-  if (variance > 0) return 'bg-semantic-error-bg';
+  if (variance > 0) return 'bg-semantic-success-bg';
+  if (variance < 0) return 'bg-semantic-error-bg';
   return 'bg-surface-secondary';
 }
 
@@ -117,7 +122,7 @@ const KPICard = memo(function KPICard({
             <span
               className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-medium ${varianceBg(variance)} ${varianceColor(variance)}`}
             >
-              {variance > 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+              {variance < 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
               {variance > 0 ? '+' : ''}
               {formatCompact(variance, currency)}
             </span>
@@ -435,7 +440,7 @@ const BudgetTable = memo(function BudgetTable({
         <thead>
           <tr className="border-b border-border-light">
             <th className="py-3 pr-4 text-left text-xs font-medium uppercase tracking-wider text-content-tertiary">
-              {t('costmodel.category', 'Category')}
+              {t('costmodel.name_category', { defaultValue: 'Name / Category' })}
             </th>
             <th className="py-3 px-4 text-right text-xs font-medium uppercase tracking-wider text-content-tertiary">
               {t('costmodel.planned', 'Planned')}
@@ -458,7 +463,10 @@ const BudgetTable = memo(function BudgetTable({
           {safeCategories.map((cat) => (
             <tr key={cat.category} className="transition-colors hover:bg-surface-secondary/50">
               <td className="py-3 pr-4 font-medium text-content-primary">
-                {categoryLabels[cat.category] || cat.category}
+                <span>{categoryLabels[cat.category] || cat.category}</span>
+                {categoryLabels[cat.category] && cat.category !== categoryLabels[cat.category] && (
+                  <span className="block text-2xs text-content-tertiary font-normal">{cat.category}</span>
+                )}
               </td>
               <td className="py-3 px-4 text-right tabular-nums text-content-secondary">
                 {formatCurrency(cat.planned, currency)}
@@ -1230,6 +1238,7 @@ function MonteCarloPanel({ projectId, currency }: { projectId: string; currency:
 function FiveDDashboard({ project }: { project: Project }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [selectedBoqId, setSelectedBoqId] = useState('');
 
   const { data: dashboard, isLoading: dashboardLoading } = useQuery({
     queryKey: ['costmodel', 'dashboard', project.id],
@@ -1287,11 +1296,7 @@ function FiveDDashboard({ project }: { project: Project }) {
   });
 
   const currency = dashboard?.currency || project.currency || 'EUR';
-
-  const handleGenerateBudget = useCallback(() => {
-    const firstBoq = boqs?.[0];
-    if (firstBoq) generateBudget.mutate(firstBoq.id);
-  }, [boqs, generateBudget]);
+  const hasBudget = (dashboard?.total_budget ?? 0) > 0;
 
   const handleCreateSnapshot = useCallback(() => {
     createSnapshot.mutate();
@@ -1303,57 +1308,108 @@ function FiveDDashboard({ project }: { project: Project }) {
 
   return (
     <div className="space-y-6">
-      {/* Actions bar */}
-      {(!boqs || boqs.length === 0) && (
-        <div className="rounded-xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/50 dark:bg-amber-900/10 px-5 py-4">
-          <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
-            {t('costmodel.no_boq', { defaultValue: 'No BOQ found for this project' })}
-          </p>
-          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-            {t('costmodel.no_boq_hint', { defaultValue: 'Create a Bill of Quantities first, then generate a budget from it. Go to BOQ → New BOQ to get started.' })}
-          </p>
-        </div>
-      )}
-      <div className="flex flex-wrap items-center gap-3">
-        {boqs && boqs.length > 0 && (
-          <>
-            <Button
-              variant="primary"
-              size="sm"
-              icon={<BarChart3 size={14} />}
-              loading={generateBudget.isPending}
-              onClick={handleGenerateBudget}
-            >
-              {t('costmodel.generate_budget', 'Generate Budget from BOQ')}
-            </Button>
-            {boqs.length > 1 && (
-              <span className="text-xs text-content-tertiary">
-                {t('costmodel.using_boq', { defaultValue: 'Using: {{name}}', name: boqs[0]?.name })}
+      {/* 5D explanation */}
+      <InfoHint className="mb-0" text={t('costmodel.what_is_5d', { defaultValue: '5D cost management adds cost tracking over time to your project. Monitor budget vs. actual spend with S-curve charts, track Earned Value (SPI = schedule efficiency, CPI = cost efficiency — both >= 1.0 means healthy), and run what-if scenarios to forecast outcomes.' })} />
+
+      {/* Workflow Steps */}
+      <Card padding="md" className="mb-6">
+        <h3 className="text-sm font-semibold text-content-primary mb-3">
+          {t('costmodel.workflow', { defaultValue: 'Setup Workflow' })}
+        </h3>
+        <div className="flex items-start gap-4">
+          {/* Step 1: Generate Budget */}
+          <div className={`flex-1 rounded-lg border p-3 ${hasBudget ? 'border-semantic-success/30 bg-semantic-success-bg/30' : 'border-oe-blue/30 bg-oe-blue-subtle/20'}`}>
+            <div className="flex items-center gap-2 mb-1">
+              <div className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${hasBudget ? 'bg-semantic-success text-white' : 'bg-oe-blue text-white'}`}>
+                {hasBudget ? '\u2713' : '1'}
+              </div>
+              <span className="text-xs font-medium text-content-primary">
+                {t('costmodel.step_budget', { defaultValue: 'Generate Budget' })}
               </span>
+            </div>
+            <p className="text-2xs text-content-tertiary mb-2">
+              {hasBudget
+                ? t('costmodel.step_budget_done', { defaultValue: 'Budget created from BOQ' })
+                : t('costmodel.step_budget_hint', { defaultValue: 'Create budget lines from your BOQ positions' })}
+            </p>
+            {!hasBudget && boqs && boqs.length > 0 && (
+              <div className="flex items-center gap-2">
+                {boqs.length > 1 && (
+                  <select
+                    value={selectedBoqId}
+                    onChange={(e) => setSelectedBoqId(e.target.value)}
+                    className="h-7 rounded border border-border bg-surface-primary px-2 text-xs"
+                  >
+                    {boqs.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                  </select>
+                )}
+                <Button variant="primary" size="sm" loading={generateBudget.isPending}
+                  onClick={() => generateBudget.mutate(selectedBoqId || boqs[0]?.id)}>
+                  {t('costmodel.generate', { defaultValue: 'Generate' })}
+                </Button>
+              </div>
             )}
-          </>
+            {!hasBudget && (!boqs || boqs.length === 0) && (
+              <p className="text-2xs text-amber-600">{t('costmodel.no_boq_warning', { defaultValue: 'Create a BOQ first \u2192' })}</p>
+            )}
+          </div>
+
+          {/* Arrow */}
+          <div className="pt-4 text-content-quaternary">{'\u2192'}</div>
+
+          {/* Step 2: Track Costs */}
+          <div className={`flex-1 rounded-lg border p-3 ${hasBudget ? 'border-border-light' : 'border-border-light/50 opacity-50'}`}>
+            <div className="flex items-center gap-2 mb-1">
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-surface-tertiary text-xs font-bold text-content-secondary">2</div>
+              <span className="text-xs font-medium text-content-primary">
+                {t('costmodel.step_track', { defaultValue: 'Track Costs' })}
+              </span>
+            </div>
+            <p className="text-2xs text-content-tertiary">
+              {t('costmodel.step_track_hint', { defaultValue: 'Update actual costs in the budget table below' })}
+            </p>
+          </div>
+
+          <div className="pt-4 text-content-quaternary">{'\u2192'}</div>
+
+          {/* Step 3: Analyze */}
+          <div className={`flex-1 rounded-lg border p-3 ${hasBudget ? 'border-border-light' : 'border-border-light/50 opacity-50'}`}>
+            <div className="flex items-center gap-2 mb-1">
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-surface-tertiary text-xs font-bold text-content-secondary">3</div>
+              <span className="text-xs font-medium text-content-primary">
+                {t('costmodel.step_analyze', { defaultValue: 'Analyze & Forecast' })}
+              </span>
+            </div>
+            <p className="text-2xs text-content-tertiary">
+              {t('costmodel.step_analyze_hint', { defaultValue: 'Use What-If, Monte Carlo, and EVM to forecast outcomes' })}
+            </p>
+          </div>
+        </div>
+
+        {/* Snapshot / Cash Flow actions (visible once budget exists) */}
+        {hasBudget && (
+          <div className="flex flex-wrap items-center gap-3 mt-4 pt-3 border-t border-border-light">
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Camera size={14} />}
+              loading={createSnapshot.isPending}
+              onClick={handleCreateSnapshot}
+            >
+              {t('costmodel.create_snapshot', { defaultValue: 'Create Snapshot' })}
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Banknote size={14} />}
+              loading={generateCashFlow.isPending}
+              onClick={handleGenerateCashFlow}
+            >
+              {t('costmodel.generate_cash_flow', { defaultValue: 'Generate Cash Flow' })}
+            </Button>
+          </div>
         )}
-        <Button
-          variant="secondary"
-          size="sm"
-          icon={<Camera size={14} />}
-          loading={createSnapshot.isPending}
-          onClick={handleCreateSnapshot}
-          disabled={!dashboard || dashboard.total_budget === 0}
-        >
-          {t('costmodel.create_snapshot', 'Create Snapshot')}
-        </Button>
-        <Button
-          variant="secondary"
-          size="sm"
-          icon={<Banknote size={14} />}
-          loading={generateCashFlow.isPending}
-          onClick={handleGenerateCashFlow}
-          disabled={!dashboard || dashboard.total_budget === 0}
-        >
-          {t('costmodel.generate_cash_flow', 'Generate Cash Flow')}
-        </Button>
-      </div>
+      </Card>
 
       {/* KPI Cards */}
       {dashboardLoading ? (
@@ -1374,46 +1430,30 @@ function FiveDDashboard({ project }: { project: Project }) {
             label={t('costmodel.committed', 'Committed')}
             amount={dashboard.total_committed}
             currency={currency}
-            variance={dashboard.total_committed - dashboard.total_budget}
+            variance={dashboard.total_budget - dashboard.total_committed}
             icon={<Banknote size={16} />}
           />
           <KPICard
             label={t('costmodel.actual_spent', 'Actual Spent')}
             amount={dashboard.total_actual}
             currency={currency}
-            variance={dashboard.total_actual - dashboard.total_budget}
+            variance={dashboard.total_budget - dashboard.total_actual}
             icon={<TrendingUp size={16} />}
           />
           <KPICard
             label={t('costmodel.forecast_eac', 'Forecast (EAC)')}
             amount={dashboard.total_forecast}
             currency={currency}
-            variance={dashboard.total_forecast - dashboard.total_budget}
+            variance={dashboard.total_budget - dashboard.total_forecast}
             icon={<Activity size={16} />}
           />
         </div>
       ) : (
-        <EmptyState
-          icon={<DollarSign size={24} strokeWidth={1.5} />}
-          title={t('costmodel.no_budget', 'No budget data yet')}
-          description={t(
-            'costmodel.no_budget_hint',
-            'Generate a budget from your BOQ to see cost metrics',
-          )}
-          action={
-            boqs && boqs.length > 0 ? (
-              <Button
-                variant="primary"
-                size="sm"
-                icon={<BarChart3 size={14} />}
-                loading={generateBudget.isPending}
-                onClick={handleGenerateBudget}
-              >
-                {t('costmodel.generate_budget', 'Generate Budget from BOQ')}
-              </Button>
-            ) : undefined
-          }
-        />
+        <div className="rounded-xl border border-border-light bg-surface-secondary/30 px-5 py-8 text-center">
+          <p className="text-sm text-content-secondary">
+            {t('costmodel.complete_step1', { defaultValue: 'Complete Step 1 above to see cost metrics here.' })}
+          </p>
+        </div>
       )}
 
       {/* Cost per m² Benchmark */}
@@ -1425,7 +1465,18 @@ function FiveDDashboard({ project }: { project: Project }) {
       )}
 
       {/* Earned Value Analysis */}
-      <EVMDashboard evm={evmData} currency={currency} isLoading={evmLoading} />
+      {evmData && evmData.bac > 0 && evmData.spi > 0 ? (
+        <EVMDashboard evm={evmData} currency={currency} isLoading={evmLoading} />
+      ) : hasBudget ? (
+        <Card>
+          <CardHeader title={t('costmodel.evm_title', { defaultValue: 'Earned Value Analysis' })} />
+          <CardContent>
+            <p className="text-sm text-content-tertiary">
+              {t('costmodel.evm_needs_schedule', { defaultValue: 'Create a 4D Schedule and track activity progress to see EVM performance metrics (SPI, CPI).' })}
+            </p>
+          </CardContent>
+        </Card>
+      ) : null}
 
       {/* What-If Scenarios */}
       <WhatIfPanel
@@ -1442,14 +1493,14 @@ function FiveDDashboard({ project }: { project: Project }) {
         {/* SPI / CPI */}
         <div>
           <Card>
-            <CardHeader title={t('costmodel.performance', 'Performance')} />
+            <CardHeader title={t('costmodel.performance', { defaultValue: 'Performance' })} />
             <CardContent>
               {dashboardLoading ? (
                 <div className="space-y-4">
                   <Skeleton height={56} className="w-full" rounded="lg" />
                   <Skeleton height={56} className="w-full" rounded="lg" />
                 </div>
-              ) : dashboard ? (
+              ) : dashboard && dashboard.spi > 0 && dashboard.cpi > 0 ? (
                 <div className="space-y-5">
                   <PerformanceIndicator
                     label="SPI"
@@ -1470,7 +1521,7 @@ function FiveDDashboard({ project }: { project: Project }) {
                       <div className="border-t border-border-light" />
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-content-secondary">
-                          {t('costmodel.overall_variance', 'Overall Variance')}
+                          {t('costmodel.overall_variance', { defaultValue: 'Overall Variance' })}
                         </span>
                         <span
                           className={`text-sm font-semibold tabular-nums ${varianceColor(dashboard.variance)}`}
@@ -1482,9 +1533,13 @@ function FiveDDashboard({ project }: { project: Project }) {
                     </>
                   )}
                 </div>
+              ) : hasBudget ? (
+                <p className="py-6 text-center text-sm text-content-secondary">
+                  {t('costmodel.performance_needs_schedule', { defaultValue: 'Link a schedule to see performance metrics.' })}
+                </p>
               ) : (
                 <p className="py-6 text-center text-sm text-content-secondary">
-                  {t('costmodel.no_performance_data', 'No performance data available')}
+                  {t('costmodel.complete_step1', { defaultValue: 'Complete Step 1 above to see cost metrics here.' })}
                 </p>
               )}
             </CardContent>
@@ -1494,34 +1549,20 @@ function FiveDDashboard({ project }: { project: Project }) {
         {/* S-Curve */}
         <div className="lg:col-span-2">
           <Card>
-            <CardHeader title={t('costmodel.s_curve', 'S-Curve (EVM)')} />
+            <CardHeader title={t('costmodel.s_curve', { defaultValue: 'S-Curve (EVM)' })} />
             <CardContent>
               {sCurveLoading ? (
                 <Skeleton height={320} className="w-full" rounded="lg" />
               ) : sCurveData && sCurveData.periods.length > 0 ? (
                 <SCurveChart data={sCurveData.periods} />
               ) : (
-                <EmptyState
-                  icon={<TrendingUp size={24} strokeWidth={1.5} />}
-                  title={t('costmodel.no_s_curve', 'No S-Curve data')}
-                  description={t(
-                    'costmodel.no_s_curve_hint',
-                    'Generate budget from BOQ and create snapshots to build the S-Curve',
-                  )}
-                  action={
-                    boqs && boqs.length > 0 ? (
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        icon={<BarChart3 size={14} />}
-                        loading={generateBudget.isPending}
-                        onClick={handleGenerateBudget}
-                      >
-                        {t('costmodel.generate_budget', 'Generate Budget from BOQ')}
-                      </Button>
-                    ) : undefined
-                  }
-                />
+                <div className="py-8 text-center">
+                  <p className="text-sm text-content-secondary">
+                    {hasBudget
+                      ? t('costmodel.s_curve_needs_snapshots', { defaultValue: 'Create snapshots (Step 2) to build the S-Curve over time.' })
+                      : t('costmodel.complete_step1', { defaultValue: 'Complete Step 1 above to see cost metrics here.' })}
+                  </p>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -1543,10 +1584,7 @@ function FiveDDashboard({ project }: { project: Project }) {
           ) : (
             <div className="py-8 text-center">
               <p className="text-sm text-content-secondary">
-                {t(
-                  'costmodel.no_categories',
-                  'No budget categories yet. Generate a budget from BOQ to populate this table.',
-                )}
+                {t('costmodel.complete_step1', { defaultValue: 'Complete Step 1 above to see cost metrics here.' })}
               </p>
             </div>
           )}
