@@ -1304,17 +1304,34 @@ function FiveDDashboard({ project }: { project: Project }) {
   return (
     <div className="space-y-6">
       {/* Actions bar */}
+      {(!boqs || boqs.length === 0) && (
+        <div className="rounded-xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/50 dark:bg-amber-900/10 px-5 py-4">
+          <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
+            {t('costmodel.no_boq', { defaultValue: 'No BOQ found for this project' })}
+          </p>
+          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+            {t('costmodel.no_boq_hint', { defaultValue: 'Create a Bill of Quantities first, then generate a budget from it. Go to BOQ → New BOQ to get started.' })}
+          </p>
+        </div>
+      )}
       <div className="flex flex-wrap items-center gap-3">
         {boqs && boqs.length > 0 && (
-          <Button
-            variant="primary"
-            size="sm"
-            icon={<BarChart3 size={14} />}
-            loading={generateBudget.isPending}
-            onClick={handleGenerateBudget}
-          >
-            {t('costmodel.generate_budget', 'Generate Budget from BOQ')}
-          </Button>
+          <>
+            <Button
+              variant="primary"
+              size="sm"
+              icon={<BarChart3 size={14} />}
+              loading={generateBudget.isPending}
+              onClick={handleGenerateBudget}
+            >
+              {t('costmodel.generate_budget', 'Generate Budget from BOQ')}
+            </Button>
+            {boqs.length > 1 && (
+              <span className="text-xs text-content-tertiary">
+                {t('costmodel.using_boq', { defaultValue: 'Using: {{name}}', name: boqs[0]?.name })}
+              </span>
+            )}
+          </>
         )}
         <Button
           variant="secondary"
@@ -1322,6 +1339,7 @@ function FiveDDashboard({ project }: { project: Project }) {
           icon={<Camera size={14} />}
           loading={createSnapshot.isPending}
           onClick={handleCreateSnapshot}
+          disabled={!dashboard || dashboard.total_budget === 0}
         >
           {t('costmodel.create_snapshot', 'Create Snapshot')}
         </Button>
@@ -1331,6 +1349,7 @@ function FiveDDashboard({ project }: { project: Project }) {
           icon={<Banknote size={14} />}
           loading={generateCashFlow.isPending}
           onClick={handleGenerateCashFlow}
+          disabled={!dashboard || dashboard.total_budget === 0}
         >
           {t('costmodel.generate_cash_flow', 'Generate Cash Flow')}
         </Button>
