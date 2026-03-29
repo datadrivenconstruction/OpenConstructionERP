@@ -14,6 +14,10 @@ import {
   CheckSquare2,
   Square,
   Leaf,
+  DollarSign,
+  ShieldAlert,
+  FileEdit,
+  Table2,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { InfoHint } from '@/shared/ui';
@@ -307,7 +311,7 @@ export function ReportsPage() {
   const [downloading, setDownloading] = useState<string | null>(null);
   const [showBuilder, setShowBuilder] = useState(false);
   const [builderSections, setBuilderSections] = useState<Set<string>>(
-    new Set(['summary', 'boq_detail', 'cost_breakdown']),
+    new Set(['summary', 'budget', 'cost_breakdown', 'boq_detail']),
   );
   const [builderGenerating, setBuilderGenerating] = useState(false);
 
@@ -593,28 +597,206 @@ export function ReportsPage() {
             });
           }}
           onGenerate={async () => {
-            if (!selectedBoqId || !selectedBoq) {
+            if (!selectedProjectId || !selectedProject) {
               addToast({
                 type: 'warning',
-                title: t('reports.select_boq_first', { defaultValue: 'Please select a project and BOQ first' }),
+                title: t('reports.select_project_first', { defaultValue: 'Please select a project first' }),
               });
               return;
             }
             setBuilderGenerating(true);
             try {
-              const token = useAuthStore.getState().accessToken;
-              const sectionsParam = Array.from(builderSections).join(',');
-              const r = await fetch(
-                `/api/v1/boq/boqs/${selectedBoqId}/export/pdf?sections=${sectionsParam}`,
-                { headers: token ? { Authorization: `Bearer ${token}` } : {} },
-              );
-              if (r.ok) {
-                const blob = await r.blob();
-                triggerDownload(blob, `${selectedBoq.name}_custom_report.pdf`);
-                addToast({ type: 'success', title: t('reports.download_success', { defaultValue: 'Report downloaded successfully' }) });
-              } else {
-                throw new Error('Export failed');
+              const sections = Array.from(builderSections);
+              const projectName = selectedProject.name;
+              const htmlParts: string[] = [];
+
+              htmlParts.push(`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>${projectName} — Project Report</title>`);
+              htmlParts.push('<style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;max-width:900px;margin:0 auto;padding:40px 24px;color:#1a1a1a;line-height:1.6}h1{font-size:28px;border-bottom:3px solid #2563eb;padding-bottom:12px;margin-bottom:8px}h2{font-size:20px;color:#2563eb;margin-top:32px;border-bottom:1px solid #e5e7eb;padding-bottom:6px}h3{font-size:16px;margin-top:20px;color:#374151}table{width:100%;border-collapse:collapse;margin:12px 0}th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #e5e7eb;font-size:14px}th{background:#f9fafb;font-weight:600;color:#374151}tr:hover{background:#f9fafb}.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600}.badge-success{background:#dcfce7;color:#166534}.badge-warning{background:#fef3c7;color:#92400e}.badge-error{background:#fee2e2;color:#991b1b}.badge-blue{background:#dbeafe;color:#1e40af}.badge-neutral{background:#f3f4f6;color:#4b5563}.metric{display:inline-block;margin:8px 16px 8px 0;padding:12px 20px;border:1px solid #e5e7eb;border-radius:8px;text-align:center}.metric-label{font-size:11px;text-transform:uppercase;color:#6b7280;letter-spacing:0.05em}.metric-value{font-size:22px;font-weight:700;color:#1a1a1a}p.generated{color:#9ca3af;font-size:12px;margin-top:40px;border-top:1px solid #e5e7eb;padding-top:12px}@media print{body{padding:0}}</style>');
+              htmlParts.push('</head><body>');
+              htmlParts.push(`<h1>${projectName}</h1>`);
+              htmlParts.push(`<p style="color:#6b7280;margin-bottom:24px">Generated: ${new Date().toLocaleString()}</p>`);
+
+              // Executive Summary
+              if (sections.includes('summary')) {
+                htmlParts.push('<h2>Executive Summary</h2>');
+                try {
+                  const dashboard = await costModelApi.getDashboard(selectedProjectId);
+                  htmlParts.push('<div>');
+                  htmlParts.push(`<div class="metric"><div class="metric-label">Total Budget</div><div class="metric-value">${Number(dashboard.total_budget || 0).toLocaleString()} ${dashboard.currency || 'EUR'}</div></div>`);
+                  htmlParts.push(`<div class="metric"><div class="metric-label">Total Actual</div><div class="metric-value">${Number(dashboard.total_actual || 0).toLocaleString()} ${dashboard.currency || 'EUR'}</div></div>`);
+                  htmlParts.push(`<div class="metric"><div class="metric-label">Variance</div><div class="metric-value">${Number(dashboard.variance || 0).toLocaleString()} ${dashboard.currency || 'EUR'}</div></div>`);
+                  htmlParts.push(`<div class="metric"><div class="metric-label">Status</div><div class="metric-value">${dashboard.status || 'N/A'}</div></div>`);
+                  htmlParts.push('</div>');
+                } catch {
+                  htmlParts.push('<p>No budget data available for this project.</p>');
+                }
               }
+
+              // Budget vs Actual
+              if (sections.includes('budget')) {
+                htmlParts.push('<h2>Budget vs Actual</h2>');
+                try {
+                  const dashboard = await costModelApi.getDashboard(selectedProjectId);
+                  htmlParts.push('<table><thead><tr><th>Metric</th><th style="text-align:right">Value</th></tr></thead><tbody>');
+                  htmlParts.push(`<tr><td>Total Budget (Planned)</td><td style="text-align:right">${Number(dashboard.total_budget || 0).toLocaleString()}</td></tr>`);
+                  htmlParts.push(`<tr><td>Total Committed</td><td style="text-align:right">${Number(dashboard.total_committed || 0).toLocaleString()}</td></tr>`);
+                  htmlParts.push(`<tr><td>Total Actual</td><td style="text-align:right">${Number(dashboard.total_actual || 0).toLocaleString()}</td></tr>`);
+                  htmlParts.push(`<tr><td>Total Forecast</td><td style="text-align:right">${Number(dashboard.total_forecast || 0).toLocaleString()}</td></tr>`);
+                  const variance = Number(dashboard.variance || 0);
+                  htmlParts.push(`<tr><td><strong>Variance</strong></td><td style="text-align:right;color:${variance >= 0 ? '#166534' : '#991b1b'}"><strong>${variance >= 0 ? '+' : ''}${variance.toLocaleString()}</strong></td></tr>`);
+                  htmlParts.push(`<tr><td>Variance %</td><td style="text-align:right">${dashboard.variance_pct || 0}%</td></tr>`);
+                  htmlParts.push('</tbody></table>');
+                } catch {
+                  htmlParts.push('<p>No budget data available.</p>');
+                }
+              }
+
+              // Cost Breakdown by Category
+              if (sections.includes('cost_breakdown')) {
+                htmlParts.push('<h2>Cost Breakdown by Category</h2>');
+                try {
+                  const dashboard = await costModelApi.getDashboard(selectedProjectId);
+                  if (dashboard.categories && dashboard.categories.length > 0) {
+                    htmlParts.push('<table><thead><tr><th>Category</th><th style="text-align:right">Planned</th><th style="text-align:right">Actual</th><th style="text-align:right">Variance</th></tr></thead><tbody>');
+                    for (const cat of dashboard.categories) {
+                      const v = Number(cat.planned || 0) - Number(cat.actual || 0);
+                      htmlParts.push(`<tr><td>${cat.category || cat.name || 'Unknown'}</td><td style="text-align:right">${Number(cat.planned || 0).toLocaleString()}</td><td style="text-align:right">${Number(cat.actual || 0).toLocaleString()}</td><td style="text-align:right;color:${v >= 0 ? '#166534' : '#991b1b'}">${v >= 0 ? '+' : ''}${v.toLocaleString()}</td></tr>`);
+                    }
+                    htmlParts.push('</tbody></table>');
+                  } else {
+                    htmlParts.push('<p>No category breakdown available.</p>');
+                  }
+                } catch {
+                  htmlParts.push('<p>No cost breakdown data available.</p>');
+                }
+              }
+
+              // EVM Performance
+              if (sections.includes('evm')) {
+                htmlParts.push('<h2>Earned Value Management (EVM)</h2>');
+                try {
+                  const dashboard = await costModelApi.getDashboard(selectedProjectId);
+                  htmlParts.push('<div>');
+                  htmlParts.push(`<div class="metric"><div class="metric-label">SPI</div><div class="metric-value">${Number(dashboard.spi || 0).toFixed(2)}</div></div>`);
+                  htmlParts.push(`<div class="metric"><div class="metric-label">CPI</div><div class="metric-value">${Number(dashboard.cpi || 0).toFixed(2)}</div></div>`);
+                  htmlParts.push(`<div class="metric"><div class="metric-label">EAC</div><div class="metric-value">${Number(dashboard.total_forecast || 0).toLocaleString()}</div></div>`);
+                  htmlParts.push('</div>');
+                  htmlParts.push('<p style="color:#6b7280;font-size:13px">SPI &gt; 1.0 = ahead of schedule. CPI &gt; 1.0 = under budget. EAC = Estimate at Completion.</p>');
+                } catch {
+                  htmlParts.push('<p>No EVM data available.</p>');
+                }
+              }
+
+              // Schedule Summary
+              if (sections.includes('schedule')) {
+                htmlParts.push('<h2>Schedule Summary</h2>');
+                try {
+                  const schedules = await scheduleApi.listSchedules(selectedProjectId);
+                  if (schedules.length === 0) {
+                    htmlParts.push('<p>No schedules found.</p>');
+                  }
+                  for (const sched of schedules) {
+                    htmlParts.push(`<h3>${sched.name} <span class="badge badge-blue">${sched.status}</span></h3>`);
+                    try {
+                      const gantt = await scheduleApi.getGantt(sched.id);
+                      htmlParts.push(`<div class="metric"><div class="metric-label">Total Activities</div><div class="metric-value">${gantt.summary.total_activities}</div></div>`);
+                      htmlParts.push(`<div class="metric"><div class="metric-label">Completed</div><div class="metric-value">${gantt.summary.completed}</div></div>`);
+                      htmlParts.push(`<div class="metric"><div class="metric-label">In Progress</div><div class="metric-value">${gantt.summary.in_progress}</div></div>`);
+                      htmlParts.push(`<div class="metric"><div class="metric-label">Delayed</div><div class="metric-value">${gantt.summary.delayed}</div></div>`);
+                    } catch {
+                      htmlParts.push('<p>Could not load activities.</p>');
+                    }
+                  }
+                } catch {
+                  htmlParts.push('<p>No schedule data available.</p>');
+                }
+              }
+
+              // Risk Summary
+              if (sections.includes('risk')) {
+                htmlParts.push('<h2>Risk Summary</h2>');
+                try {
+                  const { apiGet: get } = await import('@/shared/lib/api');
+                  const risks = await get<Array<{ id: string; code: string; title: string; probability: number; impact_cost: number; impact_severity: string; risk_score: number; status: string }>>(`/v1/risk/?project_id=${selectedProjectId}&limit=50`);
+                  if (risks.length === 0) {
+                    htmlParts.push('<p>No risks registered.</p>');
+                  } else {
+                    const totalExposure = risks.reduce((sum, r) => sum + r.probability * r.impact_cost, 0);
+                    const highCritical = risks.filter(r => r.impact_severity === 'high' || r.impact_severity === 'critical').length;
+                    htmlParts.push(`<div class="metric"><div class="metric-label">Total Risks</div><div class="metric-value">${risks.length}</div></div>`);
+                    htmlParts.push(`<div class="metric"><div class="metric-label">High/Critical</div><div class="metric-value">${highCritical}</div></div>`);
+                    htmlParts.push(`<div class="metric"><div class="metric-label">Total Exposure</div><div class="metric-value">${totalExposure.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div></div>`);
+                    htmlParts.push('<h3>Top 5 Risks</h3>');
+                    htmlParts.push('<table><thead><tr><th>Code</th><th>Title</th><th>Probability</th><th>Severity</th><th style="text-align:right">Score</th></tr></thead><tbody>');
+                    const top5 = [...risks].sort((a, b) => b.risk_score - a.risk_score).slice(0, 5);
+                    for (const r of top5) {
+                      const cls = r.impact_severity === 'critical' ? 'error' : r.impact_severity === 'high' ? 'warning' : 'neutral';
+                      htmlParts.push(`<tr><td>${r.code}</td><td>${r.title}</td><td>${(r.probability * 100).toFixed(0)}%</td><td><span class="badge badge-${cls}">${r.impact_severity}</span></td><td style="text-align:right">${r.risk_score.toFixed(1)}</td></tr>`);
+                    }
+                    htmlParts.push('</tbody></table>');
+                  }
+                } catch {
+                  htmlParts.push('<p>No risk data available.</p>');
+                }
+              }
+
+              // Change Orders Summary
+              if (sections.includes('changeorders')) {
+                htmlParts.push('<h2>Change Orders Summary</h2>');
+                try {
+                  const { apiGet: get } = await import('@/shared/lib/api');
+                  const summary = await get<{ total_orders: number; draft_count: number; submitted_count: number; approved_count: number; rejected_count: number; total_cost_impact: number; total_schedule_impact_days: number; currency: string }>(`/v1/changeorders/summary?project_id=${selectedProjectId}`);
+                  htmlParts.push(`<div class="metric"><div class="metric-label">Total Orders</div><div class="metric-value">${summary.total_orders}</div></div>`);
+                  htmlParts.push(`<div class="metric"><div class="metric-label">Approved</div><div class="metric-value">${summary.approved_count}</div></div>`);
+                  htmlParts.push(`<div class="metric"><div class="metric-label">Pending</div><div class="metric-value">${summary.draft_count + summary.submitted_count}</div></div>`);
+                  htmlParts.push(`<div class="metric"><div class="metric-label">Cost Impact</div><div class="metric-value">${Number(summary.total_cost_impact).toLocaleString()} ${summary.currency}</div></div>`);
+                  htmlParts.push(`<div class="metric"><div class="metric-label">Schedule Impact</div><div class="metric-value">${summary.total_schedule_impact_days} days</div></div>`);
+                } catch {
+                  htmlParts.push('<p>No change order data available.</p>');
+                }
+              }
+
+              // BOQ Detail
+              if (sections.includes('boq_detail') && selectedBoqId && selectedBoq) {
+                htmlParts.push('<h2>BOQ Detail</h2>');
+                try {
+                  const { apiGet: get } = await import('@/shared/lib/api');
+                  const positions = await get<Array<{ ordinal: string; description: string; unit: string; quantity: number; unit_rate: number; total: number }>>(`/v1/boq/boqs/${selectedBoqId}/positions`);
+                  htmlParts.push(`<p>BOQ: <strong>${selectedBoq.name}</strong> (${positions.length} positions)</p>`);
+                  htmlParts.push('<table><thead><tr><th>#</th><th>Description</th><th>Unit</th><th style="text-align:right">Qty</th><th style="text-align:right">Rate</th><th style="text-align:right">Total</th></tr></thead><tbody>');
+                  let grandTotal = 0;
+                  for (const pos of positions) {
+                    grandTotal += Number(pos.total || 0);
+                    htmlParts.push(`<tr><td>${pos.ordinal || ''}</td><td>${pos.description || ''}</td><td>${pos.unit || ''}</td><td style="text-align:right">${Number(pos.quantity || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</td><td style="text-align:right">${Number(pos.unit_rate || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</td><td style="text-align:right">${Number(pos.total || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}</td></tr>`);
+                  }
+                  htmlParts.push(`<tr style="font-weight:700;border-top:2px solid #1a1a1a"><td colspan="5">Grand Total</td><td style="text-align:right">${grandTotal.toLocaleString(undefined, { maximumFractionDigits: 2 })}</td></tr>`);
+                  htmlParts.push('</tbody></table>');
+                } catch {
+                  htmlParts.push('<p>Could not load BOQ positions.</p>');
+                }
+              } else if (sections.includes('boq_detail')) {
+                htmlParts.push('<h2>BOQ Detail</h2><p>No BOQ selected. Select a BOQ to include position details.</p>');
+              }
+
+              // Validation
+              if (sections.includes('validation')) {
+                htmlParts.push('<h2>Validation Report</h2>');
+                htmlParts.push('<p>Run validation from the Validation Dashboard for detailed compliance results.</p>');
+              }
+
+              // Sustainability
+              if (sections.includes('sustainability')) {
+                htmlParts.push('<h2>Sustainability / CO2</h2>');
+                htmlParts.push('<p>Enable the Sustainability module for embodied carbon analysis.</p>');
+              }
+
+              htmlParts.push(`<p class="generated">Report generated by OpenEstimate on ${new Date().toLocaleString()}</p>`);
+              htmlParts.push('</body></html>');
+
+              const htmlContent = htmlParts.join('\n');
+              const blob = new Blob([htmlContent], { type: 'text/html' });
+              triggerDownload(blob, `${projectName}_report.html`);
+              addToast({ type: 'success', title: t('reports.download_success', { defaultValue: 'Report downloaded successfully' }) });
             } catch {
               addToast({ type: 'error', title: t('reports.download_error', { defaultValue: 'Failed to generate report' }) });
             } finally {
@@ -701,10 +883,14 @@ function ReportCardComponent({
 
 const REPORT_SECTIONS = [
   { id: 'summary', label: 'Executive Summary', icon: FileText, description: 'Project overview, key metrics, grand total' },
-  { id: 'boq_detail', label: 'BOQ Detail', icon: FileText, description: 'Full bill of quantities with sections and positions' },
-  { id: 'cost_breakdown', label: 'Cost Breakdown', icon: BarChart3, description: 'Cost distribution by category (KG/NRM/Division)' },
+  { id: 'budget', label: 'Budget vs Actual', icon: DollarSign, description: 'Planned, committed, actual, and variance analysis' },
+  { id: 'cost_breakdown', label: 'Cost Breakdown by Category', icon: BarChart3, description: 'Cost distribution by material, labor, equipment' },
+  { id: 'evm', label: 'EVM Performance', icon: TrendingUp, description: 'SPI, CPI, EAC earned value metrics' },
+  { id: 'schedule', label: 'Schedule Summary', icon: CalendarDays, description: 'Total activities, critical path, milestones' },
+  { id: 'risk', label: 'Risk Summary', icon: ShieldAlert, description: 'Top 5 risks, total exposure, mitigation status' },
+  { id: 'changeorders', label: 'Change Orders Summary', icon: FileEdit, description: 'Approved, pending, total cost/schedule impact' },
+  { id: 'boq_detail', label: 'BOQ Detail', icon: Table2, description: 'Full position list with quantities and rates' },
   { id: 'validation', label: 'Validation Report', icon: ShieldCheck, description: 'Compliance check results and quality score' },
-  { id: 'schedule', label: 'Schedule Summary', icon: CalendarDays, description: 'Gantt chart activities and milestones' },
   { id: 'sustainability', label: 'Sustainability / CO2', icon: Leaf, description: 'Embodied carbon estimates and EPD references' },
 ] as const;
 
