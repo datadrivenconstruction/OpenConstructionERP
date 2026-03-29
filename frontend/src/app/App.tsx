@@ -44,6 +44,12 @@ const ReportsPage = lazy(() =>
 const CatalogPage = lazy(() =>
   import('@/features/catalog/CatalogPage').then((m) => ({ default: m.CatalogPage }))
 );
+const AdvisorPage = lazy(() =>
+  import('@/features/ai/AdvisorPage').then((m) => ({ default: m.AdvisorPage }))
+);
+const ChangeOrdersPage = lazy(() =>
+  import('@/features/changeorders/ChangeOrdersPage').then((m) => ({ default: m.ChangeOrdersPage }))
+);
 
 function LoadingScreen() {
   return (
@@ -188,6 +194,7 @@ export default function App() {
         <Route path="/" element={<P title="Dashboard"><DashboardPage /></P>} />
 
         <Route path="/ai-estimate" element={<P title="AI Quick Estimate"><QuickEstimatePage /></P>} />
+        <Route path="/advisor" element={<P title="AI Cost Advisor"><AdvisorPage /></P>} />
         <Route path="/cad-takeoff" element={<P title="CAD/BIM Takeoff"><QuickEstimatePage /></P>} />
 
         <Route path="/projects" element={<P title="Projects"><ProjectsPage /></P>} />
@@ -220,6 +227,8 @@ export default function App() {
         <Route path="/reports" element={<P title="Reports"><ReportsPage /></P>} />
 
         <Route path="/tendering" element={<P title="Tendering"><TenderingPage /></P>} />
+
+        <Route path="/changeorders" element={<P title="Change Orders"><ChangeOrdersPage /></P>} />
 
         <Route path="/modules" element={<P title="Modules"><ModulesPage /></P>} />
 
