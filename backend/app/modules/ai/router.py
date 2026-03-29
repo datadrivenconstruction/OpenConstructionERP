@@ -8,6 +8,7 @@ Endpoints:
     POST   /ai/file-estimate                     — Any file (PDF/Excel/CAD/image) -> AI -> BOQ items
     POST   /ai/estimate/{job_id}/create-boq      — Save AI estimate as a real BOQ
     GET    /ai/estimate/{job_id}                 — Get estimate job status and results
+    POST   /ai/advisor/chat                      — AI Cost Advisor chat
 """
 
 import logging
@@ -26,6 +27,7 @@ from app.modules.ai.schemas import (
     EstimateJobResponse,
     QuickEstimateRequest,
 )
+from app.modules.ai.ai_client import call_ai, resolve_provider_and_key
 from app.modules.ai.service import AIService
 
 router = APIRouter()
@@ -366,3 +368,151 @@ async def get_estimate_job(
         )
 
     return _build_job_response(job)
+
+
+# ── AI Cost Advisor chat ──────────────────────────────────────────────────
+
+
+@router.post(
+    "/advisor/chat",
+    dependencies=[Depends(RequirePermission("ai.estimate"))],
+)
+async def advisor_chat(
+    body: dict,
+    session: SessionDep,
+    user_id: CurrentUserId,
+) -> dict:
+    """AI Cost Advisor — answer questions about costs using the cost database.
+
+    Body: ``{message: str, project_id?: str, region?: str}``
+
+    Steps:
+        1. Search cost DB for relevant items (vector search if available, text fallback)
+        2. Build context from found items
+        3. Call AI with context + user question
+        4. Return structured answer with source references
+    """
+    message = body.get("message", "").strip()
+    if not message:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Message is required")
+
+    project_id = body.get("project_id")
+    region = body.get("region", "")
+
+    # 1. Search cost database for relevant items
+    from app.modules.costs.models import CostItem
+    from sqlalchemy import select
+
+    context_items: list[dict] = []
+
+    # Try vector search first
+    try:
+        from app.core.vector import encode_texts, vector_search
+
+        query_vector = encode_texts([message])[0]
+        results = vector_search(query_vector, region=region or None, limit=8)
+        context_items = results
+    except Exception:
+        # Fallback: simple text search on first keyword
+        keywords = message.split()
+        pattern = f"%{keywords[0] if keywords else message}%"
+        stmt = (
+            select(CostItem)
+            .where(CostItem.is_active.is_(True), CostItem.description.ilike(pattern))
+            .limit(8)
+        )
+        result = await session.execute(stmt)
+        items = result.scalars().all()
+        for item in items:
+            context_items.append({
+                "code": item.code,
+                "description": item.description[:200],
+                "unit": item.unit,
+                "rate": float(item.rate) if item.rate else 0,
+                "region": item.region or "",
+            })
+
+    # 2. Build context from found items
+    if context_items:
+        items_text = "\n".join([
+            f"- {it.get('code', '')}: {it.get('description', '')[:100]} | "
+            f"{it.get('unit', '')} | {it.get('rate', 0)} | {it.get('region', '')}"
+            for it in context_items[:8]
+        ])
+        context = f"Available cost data from database:\n{items_text}"
+    else:
+        context = "No specific cost items found in the database for this query."
+
+    # 3. Get project context if provided
+    project_context = ""
+    if project_id:
+        try:
+            from app.modules.projects.models import Project
+
+            proj = await session.get(Project, project_id)
+            if proj:
+                project_context = (
+                    f"\nProject: {proj.name}, Region: {proj.region}, "
+                    f"Currency: {proj.currency}"
+                )
+        except Exception:
+            pass
+
+    # 4. Build prompt
+    system_prompt = (
+        "You are an AI Cost Advisor for construction projects. "
+        "You help estimators with cost-related questions.\n\n"
+        "Rules:\n"
+        "- Use the cost database data provided as context to answer questions\n"
+        "- Always mention specific rates and units when available\n"
+        "- If asked about costs, provide ranges (min-max) when possible\n"
+        "- Suggest alternatives if the user asks about expensive items\n"
+        "- Be concise and professional\n"
+        "- Format numbers with proper currency\n"
+        "- If you don't have data for the question, say so honestly"
+    )
+
+    user_prompt = (
+        f"{context}{project_context}\n\n"
+        f"User question: {message}\n\n"
+        "Provide a helpful, concise answer based on the cost data above."
+    )
+
+    # 5. Call AI (reuse existing settings/provider resolution)
+    service = _get_service(session)
+    uid = uuid.UUID(user_id)
+    settings = await service.settings_repo.get_by_user_id(uid)
+
+    try:
+        provider, api_key = resolve_provider_and_key(settings)
+        text, _tokens = await call_ai(
+            provider=provider,
+            api_key=api_key,
+            system=system_prompt,
+            prompt=user_prompt,
+            max_tokens=500,
+        )
+        answer = text
+    except (ValueError, Exception) as exc:
+        answer = (
+            "AI is not configured. Please set up an AI provider in Settings. "
+            f"(Error: {str(exc)[:100]})"
+        )
+
+    # 6. Build source references
+    sources = [
+        {
+            "code": it.get("code", ""),
+            "description": it.get("description", "")[:80],
+            "rate": it.get("rate", 0),
+            "unit": it.get("unit", ""),
+            "region": it.get("region", ""),
+        }
+        for it in context_items[:5]
+    ]
+
+    return {
+        "answer": answer,
+        "sources": sources,
+        "query": message,
+    }

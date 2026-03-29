@@ -22,8 +22,10 @@ import {
   Ruler,
   ScanLine,
   Sparkles,
+  MessageSquare,
   Box,
   X,
+  FileEdit,
   type LucideIcon,
 } from 'lucide-react';
 import { useModuleStore } from '@/stores/useModuleStore';
@@ -71,6 +73,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.takeoff_overview', to: '/quantities', icon: Ruler },
       { labelKey: 'nav.pdf_takeoff', to: '/takeoff', icon: ScanLine },
       { labelKey: 'nav.ai_estimate', to: '/ai-estimate', icon: Sparkles },
+      { labelKey: 'nav.ai_advisor', to: '/advisor', icon: MessageSquare },
       { labelKey: 'nav.cad_takeoff', to: '/cad-takeoff', icon: Box },
     ],
   },
@@ -101,6 +104,7 @@ const navGroups: NavGroup[] = [
     defaultOpen: false,
     items: [
       { labelKey: 'tendering.title', to: '/tendering', icon: FileText, moduleKey: 'tendering', advancedOnly: true },
+      { labelKey: 'nav.change_orders', to: '/changeorders', icon: FileEdit, advancedOnly: true },
       { labelKey: 'nav.reports', to: '/reports', icon: FileBarChart, advancedOnly: true },
     ],
   },
