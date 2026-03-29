@@ -26,6 +26,8 @@ import {
   Box,
   X,
   FileEdit,
+  BarChart3,
+  ShieldAlert,
   type LucideIcon,
 } from 'lucide-react';
 import { useModuleStore } from '@/stores/useModuleStore';
@@ -63,6 +65,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.dashboard', to: '/', icon: LayoutDashboard },
       { labelKey: 'projects.title', to: '/projects', icon: FolderOpen, tourId: 'projects' },
       { labelKey: 'boq.title', to: '/boq', icon: Table2, tourId: 'boq' },
+      { labelKey: 'nav.analytics', to: '/analytics', icon: BarChart3 },
     ],
   },
   {
@@ -116,6 +119,7 @@ const navGroups: NavGroup[] = [
     hideInSimple: true,
     items: [
       { labelKey: 'validation.title', to: '/validation', icon: ShieldCheck, moduleKey: 'validation' },
+      { labelKey: 'nav.risk_register', to: '/risks', icon: ShieldAlert },
       // sustainability + cost-benchmark injected dynamically from module registry
     ],
   },

@@ -50,6 +50,12 @@ const AdvisorPage = lazy(() =>
 const ChangeOrdersPage = lazy(() =>
   import('@/features/changeorders/ChangeOrdersPage').then((m) => ({ default: m.ChangeOrdersPage }))
 );
+const AnalyticsPage = lazy(() =>
+  import('@/features/analytics/AnalyticsPage').then((m) => ({ default: m.AnalyticsPage }))
+);
+const RiskRegisterPage = lazy(() =>
+  import('@/features/risk/RiskRegisterPage').then((m) => ({ default: m.RiskRegisterPage }))
+);
 
 function LoadingScreen() {
   return (
@@ -224,11 +230,15 @@ export default function App() {
 
         <Route path="/5d" element={<P title="5D Cost Model"><CostModelPage /></P>} />
 
+        <Route path="/analytics" element={<P title="Analytics"><AnalyticsPage /></P>} />
+
         <Route path="/reports" element={<P title="Reports"><ReportsPage /></P>} />
 
         <Route path="/tendering" element={<P title="Tendering"><TenderingPage /></P>} />
 
         <Route path="/changeorders" element={<P title="Change Orders"><ChangeOrdersPage /></P>} />
+
+        <Route path="/risks" element={<P title="Risk Register"><RiskRegisterPage /></P>} />
 
         <Route path="/modules" element={<P title="Modules"><ModulesPage /></P>} />
 
