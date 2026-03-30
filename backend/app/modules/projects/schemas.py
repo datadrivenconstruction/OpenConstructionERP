@@ -1,10 +1,13 @@
 """Project Pydantic schemas for request/response validation."""
 
+import re
 from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+_HTML_TAG_RE = re.compile(r"<[^>]+>")
 
 
 # ── Create / Update ───────────────────────────────────────────────────────
@@ -14,6 +17,12 @@ class ProjectCreate(BaseModel):
     """Create a new project."""
 
     name: str = Field(..., min_length=1, max_length=255)
+
+    @field_validator("name", mode="after")
+    @classmethod
+    def strip_html_tags(cls, v: str) -> str:
+        """Remove HTML tags to prevent XSS in project names."""
+        return _HTML_TAG_RE.sub("", v).strip()
     description: str = Field(default="", max_length=5000)
     region: str = Field(
         default="",

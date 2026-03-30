@@ -144,6 +144,7 @@ class ProjectService:
         Raises 404 if not found.
         """
         project = await self.get_project(project_id)
+        owner_id = str(project.owner_id)  # Save before expire_all()
 
         await self.repo.update_fields(project_id, status="archived")
 
@@ -151,7 +152,7 @@ class ProjectService:
             "projects.project.deleted",
             {
                 "project_id": str(project_id),
-                "owner_id": str(project.owner_id),
+                "owner_id": owner_id,
             },
             source_module="oe_projects",
         )
