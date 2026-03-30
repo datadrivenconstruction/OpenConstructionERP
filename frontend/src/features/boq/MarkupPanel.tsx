@@ -200,6 +200,8 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
       {/* Header */}
       <button
         onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        aria-label={t('boq.markups_title', { defaultValue: 'Markups & Overheads' })}
         className="flex w-full items-center justify-between px-5 py-3 text-left hover:bg-surface-secondary/50 transition-colors"
       >
         <div className="flex items-center gap-2">
@@ -229,6 +231,9 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
             <div className="relative">
               <button
                 onClick={() => setShowRegionMenu(!showRegionMenu)}
+                aria-expanded={showRegionMenu}
+                aria-haspopup="true"
+                aria-label={t('boq.apply_template', { defaultValue: 'Apply Regional Template' })}
                 className="flex items-center gap-1.5 text-xs text-content-secondary hover:text-content-primary transition-colors rounded-md px-2 py-1.5 hover:bg-surface-secondary"
               >
                 <Globe size={14} className="shrink-0" />
@@ -266,6 +271,7 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
             <button
               onClick={handleAddMarkup}
               disabled={addMutation.isPending}
+              aria-label={t('boq.add_markup', { defaultValue: 'Add Markup' })}
               className="flex items-center gap-1.5 text-xs font-medium text-oe-blue hover:text-oe-blue-dark transition-colors rounded-md px-2 py-1.5 hover:bg-oe-blue-subtle whitespace-nowrap"
             >
               <Plus size={14} className="shrink-0" />

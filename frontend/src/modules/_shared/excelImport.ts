@@ -37,7 +37,8 @@ export function detectColumns(headers: string[]): ColumnMapping {
   const lower = headers.map((h) => h.toLowerCase().trim());
 
   for (let i = 0; i < lower.length; i++) {
-    const h = lower[i];
+    const h = lower[i] ?? '';
+    if (!h) continue;
     const col = String(i);
     if (/^(ordinal|pos|no\.?|item|ref|code)$/i.test(h)) mapping.ordinal = col;
     else if (/^(description|desc|text|bezeichnung|libellé|désignation)$/i.test(h)) mapping.description = col;
@@ -136,6 +137,6 @@ export async function parseExcelFile(
     return { positions: [], warnings: [], errors: ['File is empty or has insufficient data.'] };
   }
 
-  const mapping = overrideMapping ?? detectColumns(rows[0]);
+  const mapping = overrideMapping ?? detectColumns(rows[0]!);
   return parseSpreadsheetData(rows, mapping);
 }

@@ -1,30 +1,18 @@
 /**
- * Tracks which optional modules are enabled/disabled,
- * and available module updates.
+ * Tracks which optional modules are enabled/disabled.
  *
  * Core modules (Projects, BOQ, Costs) are always visible.
  * Optional modules (Sustainability, Takeoff, etc.) can be toggled
  * from the Modules page.
  *
- * Persists to localStorage so the sidebar reflects user choices.
+ * Persists to localStorage and syncs with the server when available.
  */
 
 import { create } from 'zustand';
 import { getModuleDefaults, getModuleDependents, getModuleDependencies } from '@/modules/_registry';
+import { apiGet, apiPatch } from '@/shared/lib/api';
 
 const STORE_KEY = 'oe_enabled_modules';
-const CUSTOM_MODULES_KEY = 'oe_custom_modules';
-
-/** Shape of a custom (user-uploaded) module manifest. */
-export interface CustomModuleManifest {
-  name: string;
-  version: string;
-  displayName: string;
-  description?: string;
-  author?: string;
-  category?: string;
-  installedAt: string; // ISO date
-}
 
 /** Modules that are ALWAYS shown in sidebar — cannot be disabled. */
 const CORE_MODULES = new Set([
@@ -64,6 +52,8 @@ function migrateInstalledPlugins(): void {
     }
     localStorage.setItem(STORE_KEY, JSON.stringify(enabled));
     localStorage.removeItem('oe_installed_plugins');
+    // Clean up legacy custom modules key
+    localStorage.removeItem('oe_custom_modules');
   } catch {
     // ignore
   }
@@ -82,26 +72,10 @@ function readState(): Record<string, boolean> {
   return { ...OPTIONAL_DEFAULTS };
 }
 
-function readCustomModules(): CustomModuleManifest[] {
-  try {
-    const raw = localStorage.getItem(CUSTOM_MODULES_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed as CustomModuleManifest[];
-    }
-  } catch {
-    // ignore
-  }
-  return [];
-}
+/* ── Server sync helpers ─────────────────────────────────────────────── */
 
-/* ── Module update types ──────────────────────────────────────────────── */
-
-export interface ModuleUpdateInfo {
-  currentVersion: string;
-  latestVersion: string;
-  changelog: string;
-}
+/** Debounce timer for saving preferences to server. */
+let saveTimer: ReturnType<typeof setTimeout> | null = null;
 
 /* ── Store interface ──────────────────────────────────────────────────── */
 
@@ -110,17 +84,6 @@ interface ModuleStore {
   isModuleEnabled: (moduleKey: string) => boolean;
   setModuleEnabled: (moduleKey: string, enabled: boolean) => void;
 
-  /** Tracks available updates per module key. */
-  moduleUpdates: Record<string, ModuleUpdateInfo>;
-  /** True if any module has a pending update. */
-  hasUpdates: () => boolean;
-  /** Simulate checking for updates (mock — no real backend). */
-  checkForUpdates: () => Promise<void>;
-  /** Clear the update notification for a single module (simulates "Update"). */
-  dismissUpdate: (moduleKey: string) => void;
-  /** Whether a check-for-updates request is in progress. */
-  isCheckingUpdates: boolean;
-
   /** Get enabled modules that depend on the given module key. */
   getEnabledDependents: (moduleKey: string) => string[];
   /** Get modules that the given module depends on. */
@@ -128,19 +91,12 @@ interface ModuleStore {
   /** Check if disabling this module would break other enabled modules. */
   canDisable: (moduleKey: string) => { allowed: boolean; blockedBy: string[] };
 
-  /** User-uploaded custom modules persisted in localStorage. */
-  customModules: CustomModuleManifest[];
-  /** Install a custom module from an uploaded zip manifest. */
-  installCustomModule: (manifest: {
-    name: string;
-    version: string;
-    displayName: string;
-    description?: string;
-    author?: string;
-    category?: string;
-  }) => void;
-  /** Remove a custom module by name. */
-  removeCustomModule: (name: string) => void;
+  /** Fetch module preferences from server and merge with local state. */
+  syncFromServer: () => Promise<void>;
+  /** Persist current module preferences to server (debounced internally). */
+  saveToServer: () => void;
+  /** Whether a server sync is in progress. */
+  isSyncing: boolean;
 }
 
 export const useModuleStore = create<ModuleStore>((set, get) => ({
@@ -162,6 +118,8 @@ export const useModuleStore = create<ModuleStore>((set, get) => ({
       }
       return { enabledModules: next };
     });
+    // Persist to server (debounced)
+    get().saveToServer();
   },
 
   /* ── Dependency tracking ───────────────────────────────────────────── */
@@ -181,96 +139,40 @@ export const useModuleStore = create<ModuleStore>((set, get) => ({
     return { allowed: enabledDeps.length === 0, blockedBy: enabledDeps };
   },
 
-  /* ── Update tracking ──────────────────────────────────────────────── */
+  /* ── Server sync ─────────────────────────────────────────────────── */
 
-  moduleUpdates: {},
-  isCheckingUpdates: false,
+  isSyncing: false,
 
-  hasUpdates: () => Object.keys(get().moduleUpdates).length > 0,
-
-  checkForUpdates: async () => {
-    set({ isCheckingUpdates: true });
-
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-
-    // Mock update data for 3 modules
-    const mockUpdates: Record<string, ModuleUpdateInfo> = {
-      sustainability: {
-        currentVersion: '1.0.0',
-        latestVersion: '1.2.0',
-        changelog:
-          'Added EPD database for 200+ new materials. Improved GWP calculation accuracy. New benchmark comparison chart.',
-      },
-      'cost-benchmark': {
-        currentVersion: '1.0.0',
-        latestVersion: '1.1.0',
-        changelog:
-          'Regional cost indices updated to Q1 2026. Added BKI 2026 dataset. Performance improvements for large projects.',
-      },
-      collaboration: {
-        currentVersion: '1.0.0',
-        latestVersion: '2.0.0',
-        changelog:
-          'Major release: offline-first sync, presence awareness overhaul, conflict resolution UI, and 3x faster initial load.',
-      },
-    };
-
-    // Only include updates for modules that haven't been dismissed
-    const current = get().moduleUpdates;
-    const next: Record<string, ModuleUpdateInfo> = {};
-    for (const [key, info] of Object.entries(mockUpdates)) {
-      // Keep existing dismissed state — if the key is already absent, add it
-      if (!(key in current) || current[key]) {
-        next[key] = info;
-      }
+  syncFromServer: async () => {
+    set({ isSyncing: true });
+    try {
+      const resp = await apiGet<{ modules: Record<string, boolean> }>(
+        '/v1/users/module-preferences',
+      );
+      const serverPrefs = resp.modules ?? resp;
+      set((state) => {
+        const merged = { ...state.enabledModules, ...serverPrefs };
+        try {
+          localStorage.setItem(STORE_KEY, JSON.stringify(merged));
+        } catch {
+          // ignore
+        }
+        return { enabledModules: merged, isSyncing: false };
+      });
+    } catch {
+      // Server may not support this endpoint yet — silently fall back to local
+      set({ isSyncing: false });
     }
-
-    set({ moduleUpdates: next, isCheckingUpdates: false });
   },
 
-  dismissUpdate: (moduleKey: string) => {
-    set((state) => {
-      const next = { ...state.moduleUpdates };
-      delete next[moduleKey];
-      return { moduleUpdates: next };
-    });
-  },
-
-  /* ── Custom (user-uploaded) modules ──────────────────────────────────── */
-
-  customModules: readCustomModules(),
-
-  installCustomModule: (manifest) => {
-    set((state) => {
-      // Prevent duplicates
-      if (state.customModules.some((m) => m.name === manifest.name)) {
-        return state;
-      }
-      const entry: CustomModuleManifest = {
-        ...manifest,
-        installedAt: new Date().toISOString(),
-      };
-      const next = [...state.customModules, entry];
-      try {
-        localStorage.setItem(CUSTOM_MODULES_KEY, JSON.stringify(next));
-      } catch {
-        // ignore
-      }
-      return { customModules: next };
-    });
-  },
-
-  removeCustomModule: (name: string) => {
-    set((state) => {
-      const next = state.customModules.filter((m) => m.name !== name);
-      try {
-        localStorage.setItem(CUSTOM_MODULES_KEY, JSON.stringify(next));
-      } catch {
-        // ignore
-      }
-      return { customModules: next };
-    });
+  saveToServer: () => {
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      const prefs = get().enabledModules;
+      apiPatch('/v1/users/module-preferences', { modules: prefs }).catch(() => {
+        // Server may not support this endpoint yet — ignore
+      });
+    }, 1000);
   },
 }));
 

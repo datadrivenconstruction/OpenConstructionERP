@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-export type AIProvider = 'anthropic' | 'openai' | 'gemini';
+export type AIProvider = 'anthropic' | 'openai' | 'gemini' | 'openrouter' | 'mistral' | 'groq' | 'deepseek';
 
 export type AIConnectionStatus = 'connected' | 'not_configured' | 'error';
 
@@ -13,6 +13,10 @@ export interface AISettings {
   anthropic_api_key_set: boolean;
   openai_api_key_set: boolean;
   gemini_api_key_set: boolean;
+  openrouter_api_key_set: boolean;
+  mistral_api_key_set: boolean;
+  groq_api_key_set: boolean;
+  deepseek_api_key_set: boolean;
   preferred_model: string;
   metadata_: Record<string, unknown>;
   created_at: string;
@@ -28,6 +32,10 @@ export interface AISettingsUpdate {
   anthropic_api_key?: string | null;
   openai_api_key?: string | null;
   gemini_api_key?: string | null;
+  openrouter_api_key?: string | null;
+  mistral_api_key?: string | null;
+  groq_api_key?: string | null;
+  deepseek_api_key?: string | null;
 }
 
 export interface AITestResult {

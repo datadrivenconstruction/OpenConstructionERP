@@ -302,7 +302,7 @@ export function CostRiskPanel({ boqId, locale = 'de-DE' }: { boqId: string; loca
   const fmt = useMemo(() => createCRFormatter(locale), [locale]);
   const [collapsed, setCollapsed] = useState(false);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['boq-cost-risk', boqId],
     queryFn: () => boqApi.getCostRisk(boqId),
     enabled: !!boqId,
@@ -315,6 +315,8 @@ export function CostRiskPanel({ boqId, locale = 'de-DE' }: { boqId: string; loca
       {/* ── Toggle header ──────────────────────────────────────────── */}
       <button
         onClick={() => setCollapsed((prev) => !prev)}
+        aria-expanded={!collapsed}
+        aria-label={t('boq.cost_risk_title', { defaultValue: 'Monte Carlo Cost Risk' })}
         className="flex w-full items-center justify-between px-5 py-3.5 hover:bg-surface-secondary/50 transition-colors"
       >
         <div className="flex items-center gap-2.5">
@@ -345,6 +347,15 @@ export function CostRiskPanel({ boqId, locale = 'de-DE' }: { boqId: string; loca
                 {t('boq.cost_risk_loading', {
                   defaultValue: 'Running Monte Carlo simulation...',
                 })}
+              </p>
+            </div>
+          ) : isError ? (
+            <div className="px-5 py-8 text-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-semantic-error/10 mx-auto mb-2">
+                <Inbox size={18} className="text-semantic-error" />
+              </div>
+              <p className="text-xs text-content-secondary">
+                {t('boq.cost_risk_error', { defaultValue: 'Failed to load cost risk analysis. Please try again.' })}
               </p>
             </div>
           ) : !hasData ? (

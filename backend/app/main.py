@@ -70,7 +70,7 @@ async def _seed_demo_account() -> None:
 
     Idempotent — safe to call on every startup.  Creates:
     - demo@openestimator.io / DemoPass1234!  (role=admin)
-    - 5 projects: residential-berlin, office-london, hospital-munich,
+    - 5 projects: residential-berlin, office-london, medical-us,
       school-paris, warehouse-dubai (each with 2 BOQs: detailed + budget)
     """
     from app.database import async_session_factory
@@ -118,18 +118,21 @@ async def _seed_demo_account() -> None:
                 for demo_id in [
                     "residential-berlin",
                     "office-london",
-                    "hospital-munich",
+                    "medical-us",
                     "school-paris",
                     "warehouse-dubai",
                 ]:
-                    result = await install_demo_project(session, demo_id)
-                    logger.info(
-                        "Demo project installed: %s (%s positions, %s %s)",
-                        demo_id,
-                        result.get("positions"),
-                        result.get("currency"),
-                        result.get("grand_total"),
-                    )
+                    try:
+                        result = await install_demo_project(session, demo_id)
+                        logger.info(
+                            "Demo project installed: %s (%s positions, %s %s)",
+                            demo_id,
+                            result.get("positions"),
+                            result.get("currency"),
+                            result.get("grand_total"),
+                        )
+                    except Exception:
+                        logger.warning("Failed to install demo %s (skipping)", demo_id)
 
             await session.commit()
     except Exception:
@@ -329,6 +332,74 @@ def create_app() -> FastAPI:
             await session.commit()
 
         return result
+
+    @app.get("/api/demo/status", tags=["System"])
+    async def demo_status() -> dict[str, bool]:
+        """Check which demo projects are currently installed."""
+        from app.database import async_session_factory
+
+        async with async_session_factory() as session:
+            rows = (
+                await session.execute(
+                    select(Project.metadata_).where(
+                        Project.metadata_["is_demo"].as_boolean() == True  # noqa: E712
+                    )
+                )
+            ).scalars().all()
+
+        installed: dict[str, bool] = {}
+        for meta in rows:
+            if isinstance(meta, dict) and meta.get("demo_id"):
+                installed[meta["demo_id"]] = True
+        return installed
+
+    @app.delete("/api/demo/uninstall/{demo_id}", tags=["System"])
+    async def uninstall_demo(demo_id: str) -> dict[str, Any]:
+        """Remove a demo project and all its data."""
+        from app.database import async_session_factory
+
+        async with async_session_factory() as session:
+            projects = (
+                await session.execute(
+                    select(Project).where(
+                        Project.metadata_["demo_id"].as_string() == demo_id
+                    )
+                )
+            ).scalars().all()
+
+            if not projects:
+                from fastapi import HTTPException
+                raise HTTPException(status_code=404, detail=f"Demo '{demo_id}' not installed")
+
+            deleted = 0
+            for proj in projects:
+                await session.delete(proj)
+                deleted += 1
+            await session.commit()
+
+        return {"deleted_projects": deleted, "demo_id": demo_id}
+
+    @app.delete("/api/demo/clear-all", tags=["System"])
+    async def clear_all_demos() -> dict[str, Any]:
+        """Remove ALL demo projects and their data."""
+        from app.database import async_session_factory
+
+        async with async_session_factory() as session:
+            projects = (
+                await session.execute(
+                    select(Project).where(
+                        Project.metadata_["is_demo"].as_boolean() == True  # noqa: E712
+                    )
+                )
+            ).scalars().all()
+
+            deleted = 0
+            for proj in projects:
+                await session.delete(proj)
+                deleted += 1
+            await session.commit()
+
+        return {"deleted_projects": deleted}
 
     @app.get("/api/system/validation-rules", tags=["System"])
     async def list_validation_rules() -> dict[str, Any]:

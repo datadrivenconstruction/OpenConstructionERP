@@ -1,22 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
   <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#0071e3"/>
-      <stop offset="100%" style="stop-color:#5856d6"/>
-    </linearGradient>
-    <linearGradient id="grad2" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#0071e3"/>
-      <stop offset="100%" style="stop-color:#34c759"/>
+    <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0066ff"/>
+      <stop offset="100%" stop-color="#5856d6"/>
     </linearGradient>
   </defs>
-  <!-- Rounded square background -->
-  <rect x="32" y="32" width="448" height="448" rx="96" fill="url(#grad)"/>
-  <!-- Building/estimate icon: three ascending bars (like a chart/building) -->
-  <rect x="128" y="288" width="64" height="128" rx="8" fill="white" opacity="0.9"/>
-  <rect x="224" y="208" width="64" height="208" rx="8" fill="white"/>
-  <rect x="320" y="128" width="64" height="288" rx="8" fill="white" opacity="0.9"/>
-  <!-- Diagonal line across bars (estimate/calculation line) -->
-  <line x1="128" y1="368" x2="384" y2="128" stroke="white" stroke-width="6" stroke-linecap="round" opacity="0.5" stroke-dasharray="12 8"/>
-  <!-- Small diamond accent at top right -->
-  <path d="M400 96 L416 80 L432 96 L416 112 Z" fill="white" opacity="0.6"/>
+  <!-- Background -->
+  <rect x="32" y="32" width="448" height="448" rx="96" fill="url(#lg)"/>
+  <!-- Bar 1 (short) -->
+  <rect x="102" y="296" width="42" height="114" rx="6" fill="#fff" opacity=".85"/>
+  <!-- Bar 2 (medium) -->
+  <rect x="162" y="233" width="42" height="177" rx="6" fill="#fff" opacity=".95"/>
+  <!-- Bar 3 (tall) -->
+  <rect x="222" y="176" width="42" height="234" rx="6" fill="#fff" opacity=".85"/>
+  <!-- Building body -->
+  <rect x="282" y="150" width="128" height="260" rx="8" fill="#fff" opacity=".9"/>
+  <!-- Windows row 1 -->
+  <rect x="304" y="182" width="26" height="28" rx="4" fill="url(#lg)" opacity=".5"/>
+  <rect x="362" y="182" width="26" height="28" rx="4" fill="url(#lg)" opacity=".5"/>
+  <!-- Windows row 2 -->
+  <rect x="304" y="226" width="26" height="28" rx="4" fill="url(#lg)" opacity=".5"/>
+  <rect x="362" y="226" width="26" height="28" rx="4" fill="url(#lg)" opacity=".5"/>
+  <!-- Windows row 3 -->
+  <rect x="304" y="272" width="26" height="28" rx="4" fill="url(#lg)" opacity=".45"/>
+  <rect x="362" y="272" width="26" height="28" rx="4" fill="url(#lg)" opacity=".45"/>
+  <!-- Door -->
+  <rect x="329" y="328" width="34" height="82" rx="4" fill="url(#lg)" opacity=".55"/>
 </svg>

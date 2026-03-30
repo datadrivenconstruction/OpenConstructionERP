@@ -87,7 +87,7 @@ export default function TakeoffViewerModule() {
   const [activeTool, setActiveTool] = useState<MeasureTool>('select');
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
   const [activePoints, setActivePoints] = useState<Point[]>([]);
-  const [countLabel, setCountLabel] = useState('Element');
+  const [countLabel, setCountLabel] = useState(t('takeoff_viewer.default_count_label', { defaultValue: 'Element' }));
 
   // Scale
   const [scale, setScale] = useState<ScaleConfig>({ pixelsPerUnit: 100, unitLabel: 'm' });
@@ -127,7 +127,7 @@ export default function TakeoffViewerModule() {
 
   // Document persistence
   const [fileName, setFileName] = useState<string | null>(null);
-  const { hasPersistedData, saveNow, clearPersisted, savedDocumentCount } = useMeasurementPersistence({
+  const { hasPersistedData, saveNow, clearPersisted } = useMeasurementPersistence({
     fileName,
     measurements,
     setMeasurements: (ms) => setMeasurements(ms),
@@ -237,13 +237,15 @@ export default function TakeoffViewerModule() {
       ctx.fillStyle = color;
 
       if (m.type === 'distance' && m.points.length === 2) {
+        const p0 = m.points[0]!;
+        const p1 = m.points[1]!;
         ctx.beginPath();
-        ctx.moveTo(m.points[0].x * dpr * zoom, m.points[0].y * dpr * zoom);
-        ctx.lineTo(m.points[1].x * dpr * zoom, m.points[1].y * dpr * zoom);
+        ctx.moveTo(p0.x * dpr * zoom, p0.y * dpr * zoom);
+        ctx.lineTo(p1.x * dpr * zoom, p1.y * dpr * zoom);
         ctx.stroke();
         // Measurement value label
-        const mx = ((m.points[0].x + m.points[1].x) / 2) * dpr * zoom;
-        const my = ((m.points[0].y + m.points[1].y) / 2) * dpr * zoom - 8 * dpr;
+        const mx = ((p0.x + p1.x) / 2) * dpr * zoom;
+        const my = ((p0.y + p1.y) / 2) * dpr * zoom - 8 * dpr;
         ctx.font = `${12 * dpr}px sans-serif`;
         ctx.fillText(m.label, mx, my);
         // Annotation near midpoint (offset above the value label)
@@ -251,10 +253,12 @@ export default function TakeoffViewerModule() {
       }
 
       if (m.type === 'area' && m.points.length >= 3) {
+        const firstPt = m.points[0]!;
         ctx.beginPath();
-        ctx.moveTo(m.points[0].x * dpr * zoom, m.points[0].y * dpr * zoom);
+        ctx.moveTo(firstPt.x * dpr * zoom, firstPt.y * dpr * zoom);
         for (let i = 1; i < m.points.length; i++) {
-          ctx.lineTo(m.points[i].x * dpr * zoom, m.points[i].y * dpr * zoom);
+          const pt = m.points[i]!;
+          ctx.lineTo(pt.x * dpr * zoom, pt.y * dpr * zoom);
         }
         ctx.closePath();
         ctx.globalAlpha = 0.15;
@@ -281,7 +285,7 @@ export default function TakeoffViewerModule() {
         }
         // Annotation near first point
         if (m.points.length > 0) {
-          const fp = m.points[0];
+          const fp = m.points[0]!;
           drawAnnotationLabel(
             `${m.annotation} (${m.points.length})`,
             fp.x * dpr * zoom + 12 * dpr,
@@ -302,10 +306,12 @@ export default function TakeoffViewerModule() {
         ctx.fill();
       }
       if (activePoints.length >= 2 && activeTool === 'area') {
+        const ap0 = activePoints[0]!;
         ctx.beginPath();
-        ctx.moveTo(activePoints[0].x * dpr * zoom, activePoints[0].y * dpr * zoom);
+        ctx.moveTo(ap0.x * dpr * zoom, ap0.y * dpr * zoom);
         for (let i = 1; i < activePoints.length; i++) {
-          ctx.lineTo(activePoints[i].x * dpr * zoom, activePoints[i].y * dpr * zoom);
+          const apt = activePoints[i]!;
+          ctx.lineTo(apt.x * dpr * zoom, apt.y * dpr * zoom);
         }
         ctx.stroke();
       }
@@ -321,9 +327,11 @@ export default function TakeoffViewerModule() {
         ctx.fill();
       }
       if (scalePoints.length === 2) {
+        const sp0 = scalePoints[0]!;
+        const sp1 = scalePoints[1]!;
         ctx.beginPath();
-        ctx.moveTo(scalePoints[0].x * dpr * zoom, scalePoints[0].y * dpr * zoom);
-        ctx.lineTo(scalePoints[1].x * dpr * zoom, scalePoints[1].y * dpr * zoom);
+        ctx.moveTo(sp0.x * dpr * zoom, sp0.y * dpr * zoom);
+        ctx.lineTo(sp1.x * dpr * zoom, sp1.y * dpr * zoom);
         ctx.stroke();
       }
     }
@@ -388,8 +396,10 @@ export default function TakeoffViewerModule() {
     (e: React.TouchEvent<HTMLCanvasElement>) => {
       if (e.touches.length === 2) {
         // Pinch start
-        const dx = e.touches[0].clientX - e.touches[1].clientX;
-        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const t0 = e.touches[0]!;
+        const t1 = e.touches[1]!;
+        const dx = t0.clientX - t1.clientX;
+        const dy = t0.clientY - t1.clientY;
         touchStateRef.current = {
           initialDistance: Math.sqrt(dx * dx + dy * dy),
           initialZoom: zoom,
@@ -404,8 +414,10 @@ export default function TakeoffViewerModule() {
     (e: React.TouchEvent<HTMLCanvasElement>) => {
       if (e.touches.length === 2 && touchStateRef.current) {
         // Pinch zoom
-        const dx = e.touches[0].clientX - e.touches[1].clientX;
-        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const tm0 = e.touches[0]!;
+        const tm1 = e.touches[1]!;
+        const dx = tm0.clientX - tm1.clientX;
+        const dy = tm0.clientY - tm1.clientY;
         const distance = Math.sqrt(dx * dx + dy * dy);
         const scaleFactor = distance / touchStateRef.current.initialDistance;
         const newZoom = Math.max(0.25, Math.min(4.0, touchStateRef.current.initialZoom * scaleFactor));
@@ -425,7 +437,7 @@ export default function TakeoffViewerModule() {
 
       // Single-finger tap → treat as click for measurement placement
       if (e.changedTouches.length === 1 && activeTool !== 'select') {
-        const touch = e.changedTouches[0];
+        const touch = e.changedTouches[0]!;
         const rect = overlayRef.current?.getBoundingClientRect();
         if (!rect) return;
         // Synthesize a click event for measurement placement
@@ -456,7 +468,9 @@ export default function TakeoffViewerModule() {
         const newPoints = [...scalePoints, point];
         setScalePoints(newPoints);
         if (newPoints.length === 2) {
-          const dist = pixelDistance(newPoints[0].x, newPoints[0].y, newPoints[1].x, newPoints[1].y);
+          const np0 = newPoints[0]!;
+          const np1 = newPoints[1]!;
+          const dist = pixelDistance(np0.x, np0.y, np1.x, np1.y);
           setScaleRefPixels(dist);
           setSettingScale(false);
           setShowScaleDialog(true);
@@ -470,7 +484,9 @@ export default function TakeoffViewerModule() {
         const newPoints = [...activePoints, point];
         setActivePoints(newPoints);
         if (newPoints.length === 2) {
-          const dist = pixelDistance(newPoints[0].x, newPoints[0].y, newPoints[1].x, newPoints[1].y);
+          const dp0 = newPoints[0]!;
+          const dp1 = newPoints[1]!;
+          const dist = pixelDistance(dp0.x, dp0.y, dp1.x, dp1.y);
           const realDist = toRealDistance(dist, scale);
           const newMeasurement: Measurement = {
             id: `m_${Date.now()}`,
@@ -575,7 +591,7 @@ export default function TakeoffViewerModule() {
       ms.map((m) => {
         if (m.type === 'count') return m; // counts are scale-independent
         if (m.type === 'distance' && m.points.length === 2) {
-          const dist = pixelDistance(m.points[0].x, m.points[0].y, m.points[1].x, m.points[1].y);
+          const dist = pixelDistance(m.points[0]!.x, m.points[0]!.y, m.points[1]!.x, m.points[1]!.y);
           const realDist = toRealDistance(dist, scale);
           return { ...m, value: realDist, unit: scale.unitLabel, label: formatMeasurement(realDist, scale.unitLabel) };
         }
@@ -793,27 +809,27 @@ export default function TakeoffViewerModule() {
             {/* Toolbar */}
             <div className="flex items-center gap-1 rounded-lg border border-border bg-surface-primary p-1.5 flex-wrap">
               {/* Page nav */}
-              <button onClick={prevPage} disabled={currentPage <= 1} className="p-1.5 rounded hover:bg-surface-secondary disabled:opacity-30 transition-colors">
+              <button onClick={prevPage} disabled={currentPage <= 1} className="p-1.5 rounded hover:bg-surface-secondary disabled:opacity-30 transition-colors" aria-label={t('takeoff_viewer.prev_page', { defaultValue: 'Previous page' })}>
                 <ChevronLeft size={16} />
               </button>
               <span className="text-xs text-content-secondary tabular-nums px-1">
                 {currentPage} / {totalPages}
               </span>
-              <button onClick={nextPage} disabled={currentPage >= totalPages} className="p-1.5 rounded hover:bg-surface-secondary disabled:opacity-30 transition-colors">
+              <button onClick={nextPage} disabled={currentPage >= totalPages} className="p-1.5 rounded hover:bg-surface-secondary disabled:opacity-30 transition-colors" aria-label={t('takeoff_viewer.next_page', { defaultValue: 'Next page' })}>
                 <ChevronRight size={16} />
               </button>
 
               <span className="w-px h-5 bg-border mx-1" />
 
               {/* Zoom */}
-              <button onClick={zoomOut} className="p-1.5 rounded hover:bg-surface-secondary transition-colors" title="Zoom out">
+              <button onClick={zoomOut} className="p-1.5 rounded hover:bg-surface-secondary transition-colors" title={t('takeoff_viewer.zoom_out', { defaultValue: 'Zoom out' })} aria-label={t('takeoff_viewer.zoom_out', { defaultValue: 'Zoom out' })}>
                 <ZoomOut size={16} />
               </button>
               <span className="text-xs text-content-tertiary tabular-nums w-10 text-center">{(zoom * 100).toFixed(0)}%</span>
-              <button onClick={zoomIn} className="p-1.5 rounded hover:bg-surface-secondary transition-colors" title="Zoom in">
+              <button onClick={zoomIn} className="p-1.5 rounded hover:bg-surface-secondary transition-colors" title={t('takeoff_viewer.zoom_in', { defaultValue: 'Zoom in' })} aria-label={t('takeoff_viewer.zoom_in', { defaultValue: 'Zoom in' })}>
                 <ZoomIn size={16} />
               </button>
-              <button onClick={zoomFit} className="p-1.5 rounded hover:bg-surface-secondary transition-colors" title="Fit">
+              <button onClick={zoomFit} className="p-1.5 rounded hover:bg-surface-secondary transition-colors" title={t('takeoff_viewer.zoom_fit', { defaultValue: 'Fit' })} aria-label={t('takeoff_viewer.zoom_fit', { defaultValue: 'Fit' })}>
                 <Maximize size={16} />
               </button>
 
@@ -821,10 +837,10 @@ export default function TakeoffViewerModule() {
 
               {/* Measure tools */}
               {([
-                { tool: 'select' as MeasureTool, icon: MousePointer2, label: 'Select' },
-                { tool: 'distance' as MeasureTool, icon: Minus, label: 'Distance' },
-                { tool: 'area' as MeasureTool, icon: Pentagon, label: 'Area' },
-                { tool: 'count' as MeasureTool, icon: Hash, label: 'Count' },
+                { tool: 'select' as MeasureTool, icon: MousePointer2, label: t('takeoff_viewer.tool_select', { defaultValue: 'Select' }) },
+                { tool: 'distance' as MeasureTool, icon: Minus, label: t('takeoff_viewer.tool_distance', { defaultValue: 'Distance' }) },
+                { tool: 'area' as MeasureTool, icon: Pentagon, label: t('takeoff_viewer.tool_area', { defaultValue: 'Area' }) },
+                { tool: 'count' as MeasureTool, icon: Hash, label: t('takeoff_viewer.tool_count', { defaultValue: 'Count' }) },
               ] as const).map(({ tool, icon: Icon, label }) => (
                 <button
                   key={tool}
@@ -835,6 +851,8 @@ export default function TakeoffViewerModule() {
                       : 'hover:bg-surface-secondary text-content-secondary'
                   }`}
                   title={label}
+                  aria-label={label}
+                  aria-pressed={activeTool === tool}
                 >
                   <Icon size={14} />
                   <span className="hidden sm:inline">{label}</span>
@@ -849,10 +867,11 @@ export default function TakeoffViewerModule() {
                 className={`flex items-center gap-1 px-2 py-1.5 rounded text-xs transition-colors ${
                   settingScale ? 'bg-purple-500 text-white' : 'hover:bg-surface-secondary text-content-secondary'
                 }`}
-                title="Set scale"
+                title={t('takeoff_viewer.set_scale', { defaultValue: 'Set scale' })}
+                aria-label={t('takeoff_viewer.set_scale', { defaultValue: 'Set scale' })}
               >
                 <Settings2 size={14} />
-                <span className="hidden sm:inline">Scale</span>
+                <span className="hidden sm:inline">{t('takeoff_viewer.scale', { defaultValue: 'Scale' })}</span>
               </button>
 
               {/* Undo */}
@@ -867,12 +886,12 @@ export default function TakeoffViewerModule() {
               </button>
 
               {/* Clear */}
-              <button onClick={clearAll} className="p-1.5 rounded hover:bg-surface-secondary text-content-tertiary transition-colors" title="Clear all">
+              <button onClick={clearAll} className="p-1.5 rounded hover:bg-surface-secondary text-content-tertiary transition-colors" title={t('takeoff_viewer.clear_all', { defaultValue: 'Clear all' })} aria-label={t('takeoff_viewer.clear_all', { defaultValue: 'Clear all' })}>
                 <Trash2 size={14} />
               </button>
 
               {/* New file */}
-              <label className="p-1.5 rounded hover:bg-surface-secondary text-content-tertiary transition-colors cursor-pointer" title="Load new PDF">
+              <label className="p-1.5 rounded hover:bg-surface-secondary text-content-tertiary transition-colors cursor-pointer" title={t('takeoff_viewer.load_new_pdf', { defaultValue: 'Load new PDF' })} aria-label={t('takeoff_viewer.load_new_pdf', { defaultValue: 'Load new PDF' })}>
                 <Upload size={14} />
                 <input type="file" accept="application/pdf" onChange={handleFileUpload} className="hidden" />
               </label>
@@ -898,8 +917,8 @@ export default function TakeoffViewerModule() {
               {settingScale && (
                 <div className="absolute top-2 left-2 bg-purple-500/90 text-white px-3 py-1.5 rounded-lg text-xs font-medium">
                   {scalePoints.length === 0
-                    ? 'Click first point of known dimension'
-                    : 'Click second point'}
+                    ? t('takeoff_viewer.scale_click_first', { defaultValue: 'Click first point of known dimension' })
+                    : t('takeoff_viewer.scale_click_second', { defaultValue: 'Click second point' })}
                 </div>
               )}
             </div>
@@ -1019,6 +1038,7 @@ export default function TakeoffViewerModule() {
                       <button
                         onClick={() => deleteMeasurement(m.id)}
                         className="opacity-0 group-hover:opacity-100 text-content-tertiary hover:text-semantic-error transition-all shrink-0"
+                        aria-label={t('takeoff_viewer.delete_measurement', { defaultValue: 'Delete measurement' })}
                       >
                         <Trash2 size={12} />
                       </button>

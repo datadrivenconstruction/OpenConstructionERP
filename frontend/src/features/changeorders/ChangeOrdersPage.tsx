@@ -14,9 +14,11 @@ import {
   AlertTriangle,
   Trash2,
   X,
+  Download,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Breadcrumb, InfoHint } from '@/shared/ui';
 import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
+import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
@@ -99,10 +101,21 @@ const REASON_LABELS: Record<string, string> = {
   error: 'Error/Omission',
 };
 
+function translateStatus(status: string, t: (key: string, opts?: Record<string, unknown>) => string): string {
+  const map: Record<string, string> = {
+    draft: t('changeorders.status_draft', { defaultValue: 'Draft' }),
+    submitted: t('changeorders.status_submitted', { defaultValue: 'Submitted' }),
+    under_review: t('changeorders.status_under_review', { defaultValue: 'Under Review' }),
+    approved: t('changeorders.status_approved', { defaultValue: 'Approved' }),
+    rejected: t('changeorders.status_rejected', { defaultValue: 'Rejected' }),
+  };
+  return map[status] || status;
+}
+
 function formatCurrency(amount: number, currency: string = 'EUR'): string {
   const safe = /^[A-Z]{3}$/.test(currency) ? currency : 'EUR';
   try {
-    return new Intl.NumberFormat(undefined, {
+    return new Intl.NumberFormat(getIntlLocale(), {
       style: 'currency',
       currency: safe,
       minimumFractionDigits: 0,
@@ -116,7 +129,7 @@ function formatCurrency(amount: number, currency: string = 'EUR'): string {
 function formatDate(iso: string | null): string {
   if (!iso) return '-';
   try {
-    return new Date(iso).toLocaleDateString(undefined, {
+    return new Date(iso).toLocaleDateString(getIntlLocale(), {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -264,10 +277,12 @@ function CreateDialog({
 
 function AddItemDialog({
   orderId,
+  currency,
   onClose,
   onCreated,
 }: {
   orderId: string;
+  currency: string;
   onClose: () => void;
   onCreated: () => void;
 }) {
@@ -356,7 +371,7 @@ function AddItemDialog({
               <input
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
-                placeholder="m2, m3, pcs..."
+                placeholder={t('changeorders.unit_placeholder', { defaultValue: 'm2, m3, pcs...' })}
                 className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
               />
             </div>
@@ -422,8 +437,8 @@ function AddItemDialog({
 
           <div className="rounded-lg bg-surface-secondary p-3 text-sm">
             <span className="text-content-secondary">{t('changeorders.cost_delta', { defaultValue: 'Cost Delta' })}:</span>{' '}
-            <span className={costDelta >= 0 ? 'font-semibold text-semantic-error' : 'font-semibold text-[#15803d]'}>
-              {costDelta >= 0 ? '+' : ''}{costDelta.toFixed(2)}
+            <span className={costDelta >= 0 ? 'font-semibold text-semantic-error' : 'font-semibold text-semantic-success'}>
+              {costDelta >= 0 ? '+' : ''}{formatCurrency(costDelta, currency)}
             </span>
           </div>
         </div>
@@ -447,6 +462,60 @@ function AddItemDialog({
   );
 }
 
+/* ── Workflow Stepper ─────────────────────────────────────────────────── */
+
+function WorkflowStepper({ status, t }: { status: string; t: (key: string, opts?: Record<string, unknown>) => string }) {
+  const steps = [
+    { key: 'draft', label: t('changeorders.status_draft', { defaultValue: 'Draft' }) },
+    { key: 'submitted', label: t('changeorders.status_submitted', { defaultValue: 'Submitted' }) },
+    { key: 'approved', label: t('changeorders.status_approved', { defaultValue: 'Approved' }) },
+  ];
+
+  // Map status to step index
+  const statusIndex: Record<string, number> = { draft: 0, submitted: 1, under_review: 1, approved: 2, rejected: 2 };
+  const currentIdx = statusIndex[status] ?? 0;
+  const isRejected = status === 'rejected';
+
+  return (
+    <div className="flex items-center gap-0 mb-6" role="list" aria-label={t('changeorders.workflow', { defaultValue: 'Workflow' })}>
+      {steps.map((step, i) => {
+        const isActive = i === currentIdx;
+        const isCompleted = i < currentIdx;
+        const isLast = i === steps.length - 1;
+        const showRejected = isLast && isRejected;
+
+        return (
+          <div key={step.key} className="flex items-center" role="listitem">
+            <div className="flex flex-col items-center">
+              <div className={`flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-bold transition-colors ${
+                showRejected
+                  ? 'border-semantic-error bg-semantic-error-bg text-semantic-error'
+                  : isCompleted
+                    ? 'border-semantic-success bg-semantic-success-bg text-semantic-success'
+                    : isActive
+                      ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue'
+                      : 'border-border-light bg-surface-secondary text-content-tertiary'
+              }`}>
+                {showRejected ? '\u2715' : isCompleted ? '\u2713' : i + 1}
+              </div>
+              <span className={`mt-1.5 text-2xs font-medium ${
+                showRejected ? 'text-semantic-error' : isActive ? 'text-oe-blue' : isCompleted ? 'text-semantic-success' : 'text-content-tertiary'
+              }`}>
+                {showRejected ? t('changeorders.status_rejected', { defaultValue: 'Rejected' }) : step.label}
+              </span>
+            </div>
+            {!isLast && (
+              <div className={`h-0.5 w-12 mx-2 rounded ${
+                isCompleted ? 'bg-semantic-success' : 'bg-border-light'
+              }`} />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 /* ── Detail View ───────────────────────────────────────────────────────── */
 
 function DetailView({
@@ -461,7 +530,7 @@ function DetailView({
   const addToast = useToastStore((s) => s.addToast);
   const [showAddItem, setShowAddItem] = useState(false);
 
-  const { data: order, isLoading } = useQuery({
+  const { data: order, isLoading, isError } = useQuery({
     queryKey: ['changeorder', orderId],
     queryFn: () => apiGet<ChangeOrderWithItems>(`/v1/changeorders/${orderId}`),
   });
@@ -506,10 +575,31 @@ function DetailView({
     onError: (err: Error) => addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: err.message }),
   });
 
-  if (isLoading || !order) {
+  if (isLoading || (!order && !isError)) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="h-6 w-6 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (isError || !order) {
+    return (
+      <div>
+        <button
+          onClick={onBack}
+          className="inline-flex items-center gap-1.5 text-sm text-content-secondary hover:text-content-primary mb-3"
+        >
+          <ArrowLeft size={14} />
+          {t('common.back', { defaultValue: 'Back' })}
+        </button>
+        <Card className="py-12">
+          <EmptyState
+            icon={<AlertTriangle size={24} />}
+            title={t('common.error', { defaultValue: 'Error' })}
+            description={t('changeorders.load_error', { defaultValue: 'Failed to load change order. Please try again.' })}
+          />
+        </Card>
       </div>
     );
   }
@@ -520,19 +610,21 @@ function DetailView({
     <div>
       {/* Header */}
       <div className="mb-6">
-        <button
-          onClick={onBack}
-          className="inline-flex items-center gap-1.5 text-sm text-content-secondary hover:text-content-primary mb-3"
-        >
-          <ArrowLeft size={14} />
-          {t('common.back', { defaultValue: 'Back' })}
-        </button>
+        <nav className="flex items-center gap-1.5 text-sm mb-4" aria-label="Breadcrumb">
+          <button onClick={onBack} className="text-content-secondary hover:text-oe-blue transition-colors">
+            {t('nav.change_orders', { defaultValue: 'Change Orders' })}
+          </button>
+          <ChevronRight size={12} className="text-content-tertiary" />
+          <span className="text-content-primary font-medium">{order.code}</span>
+        </nav>
+
+        <WorkflowStepper status={order.status} t={t} />
 
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3">
               <h2 className="text-xl font-semibold text-content-primary">{order.code}</h2>
-              <Badge variant={STATUS_COLORS[order.status] || 'neutral'}>{order.status}</Badge>
+              <Badge variant={STATUS_COLORS[order.status] || 'neutral'}>{translateStatus(order.status, t)}</Badge>
             </div>
             <h3 className="mt-1 text-lg text-content-secondary">{order.title}</h3>
             {order.description && (
@@ -542,18 +634,30 @@ function DetailView({
 
           <div className="flex gap-2">
             {order.status === 'draft' && (
-              <Button variant="primary" size="sm" onClick={() => submitMut.mutate()} disabled={submitMut.isPending}>
+              <Button variant="primary" size="sm" onClick={() => {
+                if (window.confirm(t('changeorders.submit_confirm', { defaultValue: 'Submit this change order for review? This cannot be undone.' }))) {
+                  submitMut.mutate();
+                }
+              }} disabled={submitMut.isPending}>
                 <Send size={14} className="mr-1.5" />
                 {t('changeorders.submit', { defaultValue: 'Submit' })}
               </Button>
             )}
             {order.status === 'submitted' && (
               <>
-                <Button variant="primary" size="sm" onClick={() => approveMut.mutate()} disabled={approveMut.isPending}>
+                <Button variant="primary" size="sm" onClick={() => {
+                  if (window.confirm(t('changeorders.approve_confirm', { defaultValue: 'Approve this change order? Cost impact will be applied to the project budget.' }))) {
+                    approveMut.mutate();
+                  }
+                }} disabled={approveMut.isPending}>
                   <CheckCircle2 size={14} className="mr-1.5" />
                   {t('changeorders.approve', { defaultValue: 'Approve' })}
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => rejectMut.mutate()} disabled={rejectMut.isPending}>
+                <Button variant="ghost" size="sm" onClick={() => {
+                  if (window.confirm(t('changeorders.reject_confirm', { defaultValue: 'Reject this change order?' }))) {
+                    rejectMut.mutate();
+                  }
+                }} disabled={rejectMut.isPending}>
                   <XCircle size={14} className="mr-1.5" />
                   {t('changeorders.reject', { defaultValue: 'Reject' })}
                 </Button>
@@ -579,7 +683,7 @@ function DetailView({
           <p className="text-xs text-content-tertiary uppercase tracking-wide">
             {t('changeorders.cost_impact', { defaultValue: 'Cost Impact' })}
           </p>
-          <p className={`mt-1 text-sm font-semibold ${order.cost_impact >= 0 ? 'text-semantic-error' : 'text-[#15803d]'}`}>
+          <p className={`mt-1 text-sm font-semibold ${order.cost_impact >= 0 ? 'text-semantic-error' : 'text-semantic-success'}`}>
             {order.cost_impact >= 0 ? '+' : ''}{formatCurrency(order.cost_impact, order.currency)}
           </p>
         </Card>
@@ -598,6 +702,36 @@ function DetailView({
           <p className="mt-1 text-sm font-medium text-content-primary">{formatDate(order.created_at)}</p>
         </Card>
       </div>
+
+      {/* Audit trail */}
+      {(order.submitted_at || order.approved_at) && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+          {order.submitted_at && (
+            <Card className="p-4">
+              <p className="text-xs text-content-tertiary uppercase tracking-wide">
+                {t('changeorders.submitted_at', { defaultValue: 'Submitted' })}
+              </p>
+              <p className="mt-1 text-sm font-medium text-content-primary">{formatDate(order.submitted_at)}</p>
+              {order.submitted_by && (
+                <p className="mt-0.5 text-xs text-content-tertiary">{order.submitted_by}</p>
+              )}
+            </Card>
+          )}
+          {order.approved_at && (
+            <Card className="p-4">
+              <p className="text-xs text-content-tertiary uppercase tracking-wide">
+                {order.status === 'rejected'
+                  ? t('changeorders.rejected_at', { defaultValue: 'Rejected' })
+                  : t('changeorders.approved_at', { defaultValue: 'Approved' })}
+              </p>
+              <p className="mt-1 text-sm font-medium text-content-primary">{formatDate(order.approved_at)}</p>
+              {order.approved_by && (
+                <p className="mt-0.5 text-xs text-content-tertiary">{order.approved_by}</p>
+              )}
+            </Card>
+          )}
+        </div>
+      )}
 
       {/* Items */}
       <div className="flex items-center justify-between mb-4">
@@ -666,13 +800,17 @@ function DetailView({
                     <td className="px-4 py-3 text-right text-content-secondary tabular-nums">
                       {item.new_quantity} {item.unit}
                     </td>
-                    <td className={`px-4 py-3 text-right font-medium tabular-nums ${item.cost_delta >= 0 ? 'text-semantic-error' : 'text-[#15803d]'}`}>
+                    <td className={`px-4 py-3 text-right font-medium tabular-nums ${item.cost_delta >= 0 ? 'text-semantic-error' : 'text-semantic-success'}`}>
                       {item.cost_delta >= 0 ? '+' : ''}{item.cost_delta.toFixed(2)}
                     </td>
                     {canEdit && (
                       <td className="px-4 py-3 text-center">
                         <button
-                          onClick={() => deleteItemMut.mutate(item.id)}
+                          onClick={() => {
+                            if (window.confirm(t('changeorders.delete_item_confirm', { defaultValue: 'Delete this item?' }))) {
+                              deleteItemMut.mutate(item.id);
+                            }
+                          }}
                           className="text-content-tertiary hover:text-semantic-error transition-colors"
                           title={t('common.delete', { defaultValue: 'Delete' })}
                         >
@@ -691,6 +829,7 @@ function DetailView({
       {showAddItem && (
         <AddItemDialog
           orderId={orderId}
+          currency={order.currency}
           onClose={() => setShowAddItem(false)}
           onCreated={() => {
             queryClient.invalidateQueries({ queryKey: ['changeorder', orderId] });
@@ -712,6 +851,7 @@ export function ChangeOrdersPage() {
 
   const [showCreate, setShowCreate] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>('');
 
   // Fetch projects
   const { data: projects = [] } = useQuery({
@@ -723,11 +863,16 @@ export function ChangeOrdersPage() {
   const project = useMemo(() => projects.find((p) => p.id === projectId), [projects, projectId]);
 
   // Fetch change orders
-  const { data: orders = [], isLoading } = useQuery({
+  const { data: orders = [], isLoading, isError } = useQuery({
     queryKey: ['changeorders', projectId],
     queryFn: () => apiGet<ChangeOrder[]>(`/v1/changeorders/?project_id=${projectId}`),
     enabled: !!projectId,
   });
+
+  const filteredOrders = useMemo(() => {
+    if (!statusFilter) return orders;
+    return orders.filter((o) => o.status === statusFilter);
+  }, [orders, statusFilter]);
 
   // Fetch summary
   const { data: summary } = useQuery({
@@ -751,6 +896,29 @@ export function ChangeOrdersPage() {
     queryClient.invalidateQueries({ queryKey: ['changeorders-summary'] });
   }, [queryClient]);
 
+  const handleExportCSV = useCallback(() => {
+    if (!filteredOrders.length) return;
+    const headers = ['Code', 'Title', 'Status', 'Reason', 'Cost Impact', 'Schedule Days', 'Items', 'Created'];
+    const rows = filteredOrders.map(o => [
+      o.code,
+      `"${o.title.replace(/"/g, '""')}"`,
+      o.status,
+      REASON_LABELS[o.reason_category] || o.reason_category,
+      o.cost_impact.toFixed(2),
+      String(o.schedule_impact_days),
+      String(o.item_count),
+      o.created_at?.slice(0, 10) || '',
+    ].join(','));
+    const csv = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `change_orders_${project?.name || 'export'}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [filteredOrders, project]);
+
   // Detail view
   if (selectedOrderId) {
     return (
@@ -770,20 +938,47 @@ export function ChangeOrdersPage() {
       ]} />
 
       {/* Header */}
-      <div className="mt-4 flex items-center justify-between">
+      <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-content-primary">
             {t('nav.change_orders', { defaultValue: 'Change Orders' })}
           </h1>
-          {project && (
-            <p className="mt-1 text-sm text-content-secondary">{project.name}</p>
-          )}
+          <p className="mt-1 text-sm text-content-secondary">
+            {t('changeorders.subtitle', { defaultValue: 'Track scope changes with cost and schedule impact' })}
+          </p>
         </div>
-        <Button variant="primary" onClick={() => setShowCreate(true)} disabled={!projectId}>
-          <Plus size={16} className="mr-1.5" />
-          {t('changeorders.new', { defaultValue: 'New Change Order' })}
-        </Button>
+        <div className="flex items-end gap-3">
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
+              {t('common.project', { defaultValue: 'Project' })}
+            </label>
+            <select
+              value={projectId}
+              onChange={(e) => {
+                const id = e.target.value;
+                const name = projects.find((p) => p.id === id)?.name ?? '';
+                if (id) {
+                  useProjectContextStore.getState().setActiveProject(id, name);
+                }
+              }}
+              className="h-10 w-full min-w-[200px] rounded-lg border border-border bg-surface-primary px-3 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+            >
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
+          <Button variant="secondary" size="sm" icon={<Download size={14} />} onClick={handleExportCSV} disabled={!filteredOrders || filteredOrders.length === 0}>
+            {t('changeorders.export_csv', { defaultValue: 'Export CSV' })}
+          </Button>
+          <Button variant="primary" onClick={() => setShowCreate(true)} disabled={!projectId}>
+            <Plus size={16} className="mr-1.5" />
+            {t('changeorders.new', { defaultValue: 'New Change Order' })}
+          </Button>
+        </div>
       </div>
+
+      <InfoHint className="mt-4 mb-2" text={t('changeorders.workflow_desc', { defaultValue: 'Change Order workflow: Draft (prepare scope change) \u2192 Submitted (send for review) \u2192 Approved or Rejected. Each order tracks cost impact and schedule impact in days. Add line items to detail what changed \u2014 original vs new quantities and rates. The cost delta is computed automatically.' })} />
 
       {/* Summary cards */}
       {summary && (
@@ -810,7 +1005,7 @@ export function ChangeOrdersPage() {
                 <p className="text-2xs text-content-tertiary uppercase tracking-wide">
                   {t('changeorders.approved_impact', { defaultValue: 'Approved Impact' })}
                 </p>
-                <p className={`text-lg font-semibold ${summary.total_cost_impact >= 0 ? 'text-semantic-error' : 'text-[#15803d]'}`}>
+                <p className={`text-lg font-semibold ${summary.total_cost_impact >= 0 ? 'text-semantic-error' : 'text-semantic-success'}`}>
                   {summary.total_cost_impact >= 0 ? '+' : ''}{formatCurrency(summary.total_cost_impact, currency)}
                 </p>
               </div>
@@ -849,12 +1044,39 @@ export function ChangeOrdersPage() {
         </div>
       )}
 
+      {/* Status filter */}
+      <div className="mt-6 flex items-center gap-3 mb-3">
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="h-9 rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+          aria-label={t('changeorders.filter_status', { defaultValue: 'Filter by status' })}
+        >
+          <option value="">{t('changeorders.all_statuses', { defaultValue: 'All Statuses' })}</option>
+          <option value="draft">{translateStatus('draft', t)}</option>
+          <option value="submitted">{translateStatus('submitted', t)}</option>
+          <option value="approved">{translateStatus('approved', t)}</option>
+          <option value="rejected">{translateStatus('rejected', t)}</option>
+        </select>
+        <span className="text-xs text-content-tertiary">
+          {filteredOrders.length} {t('changeorders.of_total', { defaultValue: 'of' })} {orders.length}
+        </span>
+      </div>
+
       {/* Orders table */}
-      <div className="mt-6">
+      <div>
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" />
           </div>
+        ) : isError ? (
+          <Card className="py-12">
+            <EmptyState
+              icon={<AlertTriangle size={24} />}
+              title={t('common.error', { defaultValue: 'Error' })}
+              description={t('changeorders.load_error', { defaultValue: 'Failed to load change orders. Please try again.' })}
+            />
+          </Card>
         ) : orders.length === 0 ? (
           <Card>
             <EmptyState
@@ -900,25 +1122,25 @@ export function ChangeOrdersPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {orders.map((order) => (
+                  {filteredOrders.map((order) => (
                     <tr
                       key={order.id}
                       className="border-b border-border last:border-0 hover:bg-surface-secondary/30 cursor-pointer"
                       onClick={() => setSelectedOrderId(order.id)}
                     >
-                      <td className="px-4 py-3 font-mono text-xs text-content-secondary">{order.code}</td>
+                      <td className="px-4 py-3 font-mono text-xs text-content-secondary whitespace-nowrap">{order.code}</td>
                       <td className="px-4 py-3 text-content-primary font-medium max-w-[200px] truncate">
                         {order.title}
                       </td>
                       <td className="px-4 py-3">
-                        <Badge variant={STATUS_COLORS[order.status] || 'neutral'}>{order.status}</Badge>
+                        <Badge variant={STATUS_COLORS[order.status] || 'neutral'}>{translateStatus(order.status, t)}</Badge>
                       </td>
                       <td className="px-4 py-3 text-content-secondary text-xs">
                         {t(`changeorders.reason_${order.reason_category}`, {
                           defaultValue: REASON_LABELS[order.reason_category] || order.reason_category,
                         })}
                       </td>
-                      <td className={`px-4 py-3 text-right font-medium tabular-nums ${order.cost_impact >= 0 ? 'text-semantic-error' : 'text-[#15803d]'}`}>
+                      <td className={`px-4 py-3 text-right font-medium tabular-nums ${order.cost_impact >= 0 ? 'text-semantic-error' : 'text-semantic-success'}`}>
                         {order.cost_impact >= 0 ? '+' : ''}{formatCurrency(order.cost_impact, order.currency)}
                       </td>
                       <td className="px-4 py-3 text-right text-content-secondary tabular-nums">

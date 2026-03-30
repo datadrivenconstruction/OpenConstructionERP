@@ -74,7 +74,7 @@ export function Toast({ toast, onDismiss }: ToastProps) {
         {toast.action && (
           <button
             onClick={handleAction}
-            className="mt-1 text-xs font-semibold text-accent hover:text-accent-hover underline underline-offset-2 transition-colors"
+            className="mt-1 text-xs font-semibold text-oe-blue hover:text-oe-blue-hover underline underline-offset-2 transition-colors"
           >
             {toast.action.label}
           </button>

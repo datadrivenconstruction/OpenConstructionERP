@@ -1,0 +1,105 @@
+import { lazy } from 'react';
+import { Building } from 'lucide-react';
+import type { ModuleManifest } from '../_types';
+
+const CNExchangeModule = lazy(() => import('./CNExchangeModule'));
+
+export const manifest: ModuleManifest = {
+  id: 'cn-boq-exchange',
+  name: 'China BOQ Exchange',
+  description: 'Import/export BOQs in GB/T 50500 format (\u5DE5\u7A0B\u91CF\u6E05\u5355\u8BA1\u4EF7\u89C4\u8303, Excel/CSV)',
+  version: '1.0.0',
+  icon: Building,
+  category: 'regional',
+  defaultEnabled: false,
+  depends: ['boq'],
+  routes: [
+    {
+      path: '/cn-boq-exchange',
+      title: 'China BOQ Exchange',
+      component: CNExchangeModule,
+    },
+  ],
+  navItems: [
+    {
+      labelKey: 'nav.cn_boq_exchange',
+      to: '/cn-boq-exchange',
+      icon: Building,
+      group: 'regional',
+      advancedOnly: true,
+    },
+  ],
+  searchEntries: [
+    {
+      label: 'China BOQ Import / Export',
+      path: '/cn-boq-exchange',
+      keywords: [
+        'china',
+        'chinese',
+        'gb/t 50500',
+        '\u5DE5\u7A0B\u91CF\u6E05\u5355',
+        'gongchengliangqingdan',
+        'cec',
+        'construction',
+        'yuan',
+        'rmb',
+      ],
+    },
+  ],
+  translations: {
+    en: {
+      'nav.cn_boq_exchange': 'China BOQ Exchange',
+      'cn.title': 'China BOQ Import / Export',
+      'cn.subtitle': 'Exchange Bills of Quantities in GB/T 50500 format (Excel / CSV)',
+      'cn.tab_import': 'Import',
+      'cn.tab_export': 'Export',
+      'cn.import_complete': 'Chinese BOQ import complete',
+      'cn.export_complete': 'Chinese BOQ export complete',
+      'cn.info': 'GB/T 50500 (\u5DE5\u7A0B\u91CF\u6E05\u5355\u8BA1\u4EF7\u89C4\u8303) is the national standard for construction BOQ pricing in China. Compatible with CEC (China Engineering Cost) guidelines, provincial quota systems, and standard Chinese construction estimation workflows.',
+      'cn.drop_file': 'Drop a Chinese BOQ file here (Excel or CSV), or',
+      'cn.browse': 'Browse files',
+      'cn.formats_hint': 'Supported: .csv, .tsv, .xlsx (GB/T 50500-formatted BOQ)',
+      'cn.classification': 'GB/T 50500 Section',
+      'cn.export_format': 'Format',
+      'cn.csv_format': 'CSV (Excel-compatible)',
+      'cn.detailed': 'GB/T Detailed',
+      'cn.summary': 'GB/T Summary',
+    },
+    zh: {
+      'nav.cn_boq_exchange': '\u4E2D\u56FD\u5DE5\u7A0B\u91CF\u6E05\u5355\u4EA4\u6362',
+      'cn.title': '\u4E2D\u56FD\u5DE5\u7A0B\u91CF\u6E05\u5355 \u5BFC\u5165 / \u5BFC\u51FA',
+      'cn.subtitle': '\u6309GB/T 50500\u683C\u5F0F\u4EA4\u6362\u5DE5\u7A0B\u91CF\u6E05\u5355 (Excel / CSV)',
+      'cn.tab_import': '\u5BFC\u5165',
+      'cn.tab_export': '\u5BFC\u51FA',
+      'cn.import_complete': '\u5DE5\u7A0B\u91CF\u6E05\u5355\u5BFC\u5165\u5B8C\u6210',
+      'cn.export_complete': '\u5DE5\u7A0B\u91CF\u6E05\u5355\u5BFC\u51FA\u5B8C\u6210',
+      'cn.info': 'GB/T 50500\uFF08\u5DE5\u7A0B\u91CF\u6E05\u5355\u8BA1\u4EF7\u89C4\u8303\uFF09\u662F\u4E2D\u56FD\u5EFA\u7B51\u5DE5\u7A0B\u91CF\u6E05\u5355\u8BA1\u4EF7\u7684\u56FD\u5BB6\u6807\u51C6\u3002\u517C\u5BB9\u4E2D\u56FD\u5DE5\u7A0B\u9020\u4EF7\uFF08CEC\uFF09\u6307\u5357\u3001\u7701\u7EA7\u5B9A\u989D\u7CFB\u7EDF\u548C\u6807\u51C6\u4E2D\u56FD\u5EFA\u7B51\u4F30\u7B97\u5DE5\u4F5C\u6D41\u7A0B\u3002',
+      'cn.drop_file': '\u5C06\u5DE5\u7A0B\u91CF\u6E05\u5355\u6587\u4EF6\u62D6\u653E\u5230\u6B64\u5904 (Excel \u6216 CSV)\uFF0C\u6216',
+      'cn.browse': '\u6D4F\u89C8\u6587\u4EF6',
+      'cn.formats_hint': '\u652F\u6301: .csv, .tsv, .xlsx (GB/T 50500\u683C\u5F0F\u5DE5\u7A0B\u91CF\u6E05\u5355)',
+      'cn.classification': 'GB/T 50500 \u5206\u90E8\u5206\u9879',
+      'cn.export_format': '\u683C\u5F0F',
+      'cn.csv_format': 'CSV (Excel\u517C\u5BB9)',
+      'cn.detailed': 'GB/T \u8BE6\u7EC6',
+      'cn.summary': 'GB/T \u6C47\u603B',
+    },
+    de: {
+      'nav.cn_boq_exchange': 'China LV Austausch',
+      'cn.title': 'China LV Import / Export',
+      'cn.subtitle': 'Leistungsverzeichnis im GB/T 50500-Format austauschen (Excel / CSV)',
+      'cn.tab_import': 'Importieren',
+      'cn.tab_export': 'Exportieren',
+      'cn.import_complete': 'Chinesisches LV-Import abgeschlossen',
+      'cn.export_complete': 'Chinesisches LV-Export abgeschlossen',
+    },
+    ru: {
+      'nav.cn_boq_exchange': 'Kitaj BOQ Obmen',
+      'cn.title': 'Kitaj BOQ Import / Export',
+      'cn.subtitle': 'Obmen dannymi smety v formate GB/T 50500 (Excel / CSV)',
+      'cn.tab_import': 'Import',
+      'cn.tab_export': 'Eksport',
+      'cn.import_complete': 'Kitajskij import smety zavershyon',
+      'cn.export_complete': 'Kitajskij eksport smety zavershyon',
+    },
+  },
+};

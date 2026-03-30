@@ -9,6 +9,7 @@ export default {
           blue: 'var(--oe-blue)',
           'blue-hover': 'var(--oe-blue-hover)',
           'blue-active': 'var(--oe-blue-active)',
+          'blue-dark': 'var(--oe-blue-dark)',
           'blue-subtle': 'var(--oe-blue-subtle)',
         },
         surface: {
@@ -26,6 +27,7 @@ export default {
           primary: 'var(--oe-text-primary)',
           secondary: 'var(--oe-text-secondary)',
           tertiary: 'var(--oe-text-tertiary)',
+          quaternary: 'var(--oe-text-quaternary)',
           inverse: 'var(--oe-text-inverse)',
         },
         semantic: {

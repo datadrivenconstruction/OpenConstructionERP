@@ -13,6 +13,7 @@ import i18next from 'i18next';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { cacheResponse, getCachedResponse, queueMutation } from './offlineStore';
+import { logApiError, logError } from './errorLogger';
 
 const BASE_URL = '/api';
 
@@ -78,6 +79,12 @@ async function request<TResponse>(
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch (err) {
+    // Log network errors
+    logError(
+      err instanceof Error ? err : new Error(String(err)),
+      'network',
+      { method, path },
+    );
     // Network error — likely offline
     if (!navigator.onLine) {
       // For GET requests: try to serve from IndexedDB cache
@@ -107,6 +114,7 @@ async function request<TResponse>(
 
   // Handle 401 – logout via auth store and redirect to login.
   if (response.status === 401) {
+    logApiError(path, 401, response.statusText);
     useAuthStore.getState().logout();
     if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
       window.location.href = '/login';
@@ -116,6 +124,7 @@ async function request<TResponse>(
 
   // Handle 429 – rate limited.
   if (response.status === 429) {
+    logApiError(path, 429, response.statusText);
     const retryAfter = response.headers.get('Retry-After');
     const seconds = retryAfter ? parseInt(retryAfter, 10) : 30;
     useToastStore.getState().addToast({
@@ -139,6 +148,7 @@ async function request<TResponse>(
     } catch {
       errorBody = response.statusText;
     }
+    logApiError(path, response.status, typeof errorBody === 'string' ? errorBody : JSON.stringify(errorBody));
     throw new ApiError(response.status, response.statusText, errorBody);
   }
 

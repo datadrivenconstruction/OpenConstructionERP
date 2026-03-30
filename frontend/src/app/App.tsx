@@ -21,6 +21,7 @@ import { useThemeStore } from '@/stores/useThemeStore';
 import { useKeyboardShortcuts } from '@/shared/hooks/useKeyboardShortcuts';
 import { useTranslation } from 'react-i18next';
 import { getLanguageByCode } from './i18n';
+import { initErrorLogger } from '@/shared/lib/errorLogger';
 
 // Lazy-loaded heavy pages — code-split into separate chunks
 const BOQEditorPage = lazy(() =>
@@ -125,6 +126,10 @@ function GlobalShortcuts() {
         e.preventDefault();
         setPaletteOpen((prev) => !prev);
       }
+      if (e.key === '/' && !mod) {
+        e.preventDefault();
+        setPaletteOpen(true);
+      }
       if (mod && e.shiftKey && e.key === 'N') {
         e.preventDefault();
         navigate('/boq/new');
@@ -152,6 +157,9 @@ function GlobalShortcuts() {
 // Run once at module load — synchronous, before any render
 useAuthStore.getState().loadFromStorage();
 useThemeStore.getState().init();
+
+// Initialize the anonymized error logger (global handlers for unhandled errors)
+initErrorLogger();
 
 /** Keeps <html dir="..."> and lang attribute in sync with the active i18n language. */
 function useDocumentDirection() {

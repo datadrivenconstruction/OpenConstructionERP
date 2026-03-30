@@ -31,7 +31,7 @@ export function SensitivityChart({ boqId, locale = 'de-DE' }: { boqId: string; l
   const fmt = useMemo(() => createSCFormatter(locale), [locale]);
   const [collapsed, setCollapsed] = useState(false);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['boq-sensitivity', boqId],
     queryFn: () => boqApi.getSensitivity(boqId),
     enabled: !!boqId,
@@ -52,6 +52,8 @@ export function SensitivityChart({ boqId, locale = 'de-DE' }: { boqId: string; l
       {/* ── Toggle header ──────────────────────────────────────────── */}
       <button
         onClick={() => setCollapsed((prev) => !prev)}
+        aria-expanded={!collapsed}
+        aria-label={t('boq.sensitivity_title', { defaultValue: 'Sensitivity Analysis' })}
         className="flex w-full items-center justify-between px-5 py-3.5 hover:bg-surface-secondary/50 transition-colors"
       >
         <div className="flex items-center gap-2.5">
@@ -77,6 +79,15 @@ export function SensitivityChart({ boqId, locale = 'de-DE' }: { boqId: string; l
             <div className="px-5 py-8 text-center">
               <Loader2 size={20} className="mx-auto mb-2 animate-spin text-oe-blue" />
               <p className="text-xs text-content-tertiary">{t('common.loading')}</p>
+            </div>
+          ) : isError ? (
+            <div className="px-5 py-8 text-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-semantic-error/10 mx-auto mb-2">
+                <Inbox size={18} className="text-semantic-error" />
+              </div>
+              <p className="text-xs text-content-secondary">
+                {t('boq.sensitivity_error', { defaultValue: 'Failed to load sensitivity analysis. Please try again.' })}
+              </p>
             </div>
           ) : items.length === 0 ? (
             <div className="px-5 pb-5 pt-1">

@@ -871,6 +871,902 @@ class DIN276Completeness(ValidationRule):
         return results
 
 
+# ── NRM Rules (UK) ───────────────────────────────────────────────────────
+
+
+class NRMClassificationRequired(ValidationRule):
+    rule_id = "nrm.classification_required"
+    name = "NRM Classification Required"
+    standard = "nrm"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "Every BOQ position must have an NRM element code"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            nrm = (pos.get("classification") or {}).get("nrm", "")
+            passed = bool(nrm) and len(str(nrm)) >= 3
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Position {pos.get('ordinal', '?')} missing NRM element code",
+                    element_ref=pos.get("id"),
+                    suggestion="Assign an NRM 1/2 element code (e.g., 2.6.1 for external walls)"
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+class NRMValidElement(ValidationRule):
+    rule_id = "nrm.valid_element"
+    name = "Valid NRM Element Code"
+    standard = "nrm"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "NRM element code must match NRM 1/2 structure (e.g., 1.1, 2.6.1)"
+
+    VALID_GROUPS = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"}
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        import re
+
+        pattern = re.compile(r"^\d{1,2}(\.\d{1,2}){0,3}$")
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            nrm = str((pos.get("classification") or {}).get("nrm", ""))
+            if not nrm:
+                continue
+            top = nrm.split(".")[0]
+            passed = bool(pattern.match(nrm)) and top in self.VALID_GROUPS
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Invalid NRM code '{nrm}' in position {pos.get('ordinal', '?')}",
+                    element_ref=pos.get("id"),
+                    details={"given_code": nrm},
+                )
+            )
+        return results
+
+
+class NRMCompleteness(ValidationRule):
+    rule_id = "nrm.completeness"
+    name = "NRM Major Groups Present"
+    standard = "nrm"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Major NRM groups (Substructure, Superstructure, Services) should be present"
+
+    REQUIRED_GROUPS = {"1", "2", "5"}  # 1=Substructure, 2=Superstructure, 5=Services
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        positions = _get_positions(context)
+        present_groups: set[str] = set()
+        for pos in positions:
+            nrm = str((pos.get("classification") or {}).get("nrm", ""))
+            if nrm:
+                present_groups.add(nrm.split(".")[0])
+
+        group_names = {
+            "1": "Substructure",
+            "2": "Superstructure",
+            "5": "Services",
+        }
+        results: list[RuleResult] = []
+        for group in sorted(self.REQUIRED_GROUPS):
+            passed = group in present_groups
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"NRM group {group} — {group_names.get(group, '')} missing from BOQ",
+                    details={"required_group": group, "present_groups": sorted(present_groups)},
+                    suggestion=f"Add positions for NRM group {group} ({group_names.get(group, '')})"
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+# ── MasterFormat Rules (US) ──────────────────────────────────────────────
+
+
+class MasterFormatClassificationRequired(ValidationRule):
+    rule_id = "masterformat.classification_required"
+    name = "MasterFormat Classification Required"
+    standard = "masterformat"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "Every BOQ position must have a CSI MasterFormat division code"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            mf = (pos.get("classification") or {}).get("masterformat", "")
+            passed = bool(mf) and len(str(mf).replace(" ", "")) >= 4
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Position {pos.get('ordinal', '?')} missing MasterFormat code",
+                    element_ref=pos.get("id"),
+                    suggestion="Assign a MasterFormat code (e.g., 03 30 00 for Cast-in-Place Concrete)"
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+class MasterFormatValidDivision(ValidationRule):
+    rule_id = "masterformat.valid_division"
+    name = "Valid MasterFormat Division"
+    standard = "masterformat"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "MasterFormat code must be a valid division (00-49)"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        import re
+
+        pattern = re.compile(r"^\d{2}(\s?\d{2}){0,2}(\.\d{2})?$")
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            mf = str((pos.get("classification") or {}).get("masterformat", ""))
+            if not mf:
+                continue
+            div = mf[:2]
+            valid_div = div.isdigit() and 0 <= int(div) <= 49
+            passed = bool(pattern.match(mf)) and valid_div
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Invalid MasterFormat code '{mf}' in position {pos.get('ordinal', '?')}",
+                    element_ref=pos.get("id"),
+                    details={"given_code": mf},
+                    suggestion="Use 6-digit MasterFormat format: XX XX XX (e.g., 03 30 00)"
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+class MasterFormatCompleteness(ValidationRule):
+    rule_id = "masterformat.completeness"
+    name = "MasterFormat Core Divisions Present"
+    standard = "masterformat"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Core divisions (03 Concrete, 05 Metals, 26 Electrical) should be present"
+
+    REQUIRED_DIVISIONS = {"03", "05", "26"}
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        positions = _get_positions(context)
+        present_divs: set[str] = set()
+        for pos in positions:
+            mf = str((pos.get("classification") or {}).get("masterformat", ""))
+            if mf and len(mf) >= 2:
+                present_divs.add(mf[:2])
+
+        div_names = {
+            "03": "Concrete",
+            "05": "Metals",
+            "26": "Electrical",
+        }
+        results: list[RuleResult] = []
+        for div in sorted(self.REQUIRED_DIVISIONS):
+            passed = div in present_divs
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Division {div} — {div_names.get(div, '')} missing from BOQ",
+                    details={"required_div": div, "present_divs": sorted(present_divs)},
+                    suggestion=f"Add positions for Division {div} ({div_names.get(div, '')})"
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+# ── SINAPI Rules (Brazil) ───────────────────────────────────────────────
+
+
+class SINAPICodeRequired(ValidationRule):
+    rule_id = "sinapi.code_required"
+    name = "SINAPI Code Required"
+    standard = "sinapi"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "BOQ positions should have a SINAPI composition code"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            code = (pos.get("classification") or {}).get("sinapi", "")
+            passed = bool(code) and len(str(code)) >= 4
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Position {pos.get('ordinal', '?')} missing SINAPI code",
+                    element_ref=pos.get("id"),
+                    suggestion="Assign a SINAPI composition code (e.g., 87878 for concrete C30)"
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+class SINAPIValidCode(ValidationRule):
+    rule_id = "sinapi.valid_code"
+    name = "Valid SINAPI Code Format"
+    standard = "sinapi"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = "SINAPI codes should be 5-digit numeric codes"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            code = str((pos.get("classification") or {}).get("sinapi", ""))
+            if not code:
+                continue
+            passed = code.isdigit() and 4 <= len(code) <= 6
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Invalid SINAPI code '{code}' in position {pos.get('ordinal', '?')}",
+                    element_ref=pos.get("id"),
+                    details={"given_code": code},
+                )
+            )
+        return results
+
+
+# ── GESN Rules (Russia/CIS) ─────────────────────────────────────────────
+
+
+class GESNCodeRequired(ValidationRule):
+    rule_id = "gesn.code_required"
+    name = "GESN/FER Code Required"
+    standard = "gesn"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "BOQ positions should have a ГЭСН/ФЕР code"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            code = (pos.get("classification") or {}).get("gesn", "")
+            passed = bool(code) and len(str(code)) >= 5
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Position {pos.get('ordinal', '?')} missing ГЭСН/ФЕР code",
+                    element_ref=pos.get("id"),
+                    suggestion="Assign a ГЭСН code (e.g., 06-01-001-01 for concrete)"
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+class GESNValidCode(ValidationRule):
+    rule_id = "gesn.valid_code"
+    name = "Valid GESN Code Format"
+    standard = "gesn"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = "ГЭСН codes should follow XX-XX-XXX-XX format"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        import re
+
+        pattern = re.compile(r"^\d{2}-\d{2}-\d{3}-\d{2}$")
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            code = str((pos.get("classification") or {}).get("gesn", ""))
+            if not code:
+                continue
+            passed = bool(pattern.match(code))
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"ГЭСН code '{code}' doesn't match format XX-XX-XXX-XX",
+                    element_ref=pos.get("id"),
+                    details={"given_code": code},
+                    suggestion="Use format: NN-NN-NNN-NN (e.g., 06-01-001-01)"
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+# ── DPGF Rules (France) ─────────────────────────────────────────────────
+
+
+class DPGFLotRequired(ValidationRule):
+    rule_id = "dpgf.lot_required"
+    name = "DPGF Lot Technique Required"
+    standard = "dpgf"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "BOQ positions must be assigned to a Lot technique (trade package)"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            lot = (pos.get("classification") or {}).get("dpgf", "") or pos.get("section", "")
+            passed = bool(lot)
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Position {pos.get('ordinal', '?')} not assigned to any Lot technique",
+                    element_ref=pos.get("id"),
+                    suggestion="Assign a Lot technique (e.g., Lot 01 Gros Œuvre)"
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+class DPGFPricingComplete(ValidationRule):
+    rule_id = "dpgf.pricing_complete"
+    name = "DPGF Pricing Complete"
+    standard = "dpgf"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "All DPGF positions should have complete pricing (unit rate or lump sum)"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        positions = _get_positions(context)
+        if not positions:
+            return []
+        priced = sum(1 for p in positions if p.get("unit_rate") and float(p["unit_rate"]) > 0)
+        total = len(positions)
+        ratio = priced / total if total > 0 else 0
+        passed = ratio >= 0.80
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=passed,
+                message="OK"
+                if passed
+                else f"Only {priced}/{total} positions ({ratio:.0%}) have pricing — below 80% threshold",
+                details={"priced": priced, "total": total, "ratio": round(ratio, 3)},
+                suggestion="Complete pricing for all positions before DPGF submission"
+                if not passed
+                else None,
+            )
+        ]
+
+
+# ── ÖNORM Rules (Austria) ───────────────────────────────────────────────
+
+
+class ONORMPositionFormat(ValidationRule):
+    rule_id = "onorm.position_format"
+    name = "ÖNORM B 2063 Position Format"
+    standard = "onorm"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = "Position ordinals should follow ÖNORM B 2063 LV structure"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        import re
+
+        pattern = re.compile(r"^\d{2}\.\d{2}\.\d{2,4}[A-Z]?$")
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            ordinal = pos.get("ordinal", "")
+            if not ordinal:
+                continue
+            passed = bool(pattern.match(ordinal))
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Ordinal '{ordinal}' doesn't match ÖNORM format XX.XX.XXXXA",
+                    element_ref=pos.get("id"),
+                    suggestion="Use ÖNORM B 2063 format (e.g., 01.02.01A)"
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+class ONORMDescriptionLength(ValidationRule):
+    rule_id = "onorm.description_length"
+    name = "ÖNORM Description Length"
+    standard = "onorm"
+    severity = Severity.WARNING
+    category = RuleCategory.QUALITY
+    description = "ÖNORM positions should have descriptions with sufficient detail (min 20 chars)"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            desc = (pos.get("description") or "").strip()
+            passed = len(desc) >= 20
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else (
+                        f"Position {pos.get('ordinal', '?')}: description too short "
+                        f"({len(desc)} chars, min 20)"
+                    ),
+                    element_ref=pos.get("id"),
+                    suggestion="Add more detail to the position description per ÖNORM B 2063"
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+# ── GB/T 50500 Rules (China) ────────────────────────────────────────────
+
+
+class GBT50500CodeRequired(ValidationRule):
+    rule_id = "gbt50500.code_required"
+    name = "GB/T 50500 Code Required"
+    standard = "gbt50500"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "BOQ positions must have a GB/T 50500 item code (工程量清单编码)"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            code = (pos.get("classification") or {}).get("gbt50500", "")
+            passed = bool(code) and len(str(code)) >= 6
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Position {pos.get('ordinal', '?')} missing GB/T 50500 code",
+                    element_ref=pos.get("id"),
+                    suggestion="Assign a 9-digit GB/T 50500 code (e.g., 010101001)"
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+class GBT50500ValidCode(ValidationRule):
+    rule_id = "gbt50500.valid_code"
+    name = "Valid GB/T 50500 Code"
+    standard = "gbt50500"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = "GB/T 50500 codes should be 9-digit or 12-digit numeric codes"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            code = str((pos.get("classification") or {}).get("gbt50500", ""))
+            if not code:
+                continue
+            passed = code.isdigit() and len(code) in (9, 12)
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Invalid GB/T 50500 code '{code}' — expected 9 or 12 digits",
+                    element_ref=pos.get("id"),
+                    details={"given_code": code},
+                )
+            )
+        return results
+
+
+# ── CPWD Rules (India) ──────────────────────────────────────────────────
+
+
+class CPWDCodeRequired(ValidationRule):
+    rule_id = "cpwd.code_required"
+    name = "CPWD/DSR Code Required"
+    standard = "cpwd"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "BOQ positions should have a CPWD/DSR item reference"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            code = (pos.get("classification") or {}).get("cpwd", "")
+            passed = bool(code) and len(str(code)) >= 3
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Position {pos.get('ordinal', '?')} missing CPWD/DSR code",
+                    element_ref=pos.get("id"),
+                    suggestion="Assign a CPWD DSR item reference (e.g., 4.1.1)"
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+class CPWDMeasurementUnits(ValidationRule):
+    rule_id = "cpwd.measurement_units"
+    name = "CPWD IS 1200 Measurement Units"
+    standard = "cpwd"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = "Units must follow IS 1200 measurement standards (metric only)"
+
+    VALID_UNITS = {
+        "m", "m2", "m3", "kg", "t", "nos", "pcs", "rm", "rmt",
+        "sqm", "cum", "each", "lsum", "ls", "set", "pair", "litre", "kl",
+    }
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            unit = (pos.get("unit") or "").strip().lower()
+            if not unit:
+                continue
+            passed = unit in self.VALID_UNITS
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Unit '{unit}' in position {pos.get('ordinal', '?')} not standard IS 1200",
+                    element_ref=pos.get("id"),
+                    suggestion="Use standard IS 1200 units: m, m2, m3, kg, nos, rm, etc."
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+# ── Birim Fiyat Rules (Turkey) ──────────────────────────────────────────
+
+
+class BirimFiyatCodeRequired(ValidationRule):
+    rule_id = "birimfiyat.code_required"
+    name = "Birim Fiyat Poz Required"
+    standard = "birimfiyat"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "BOQ positions must have a Bayındırlık birim fiyat poz number"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            code = (pos.get("classification") or {}).get("birimfiyat", "")
+            passed = bool(code) and len(str(code)) >= 4
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Position {pos.get('ordinal', '?')} missing birim fiyat poz number",
+                    element_ref=pos.get("id"),
+                    suggestion="Assign a Bayındırlık poz number (e.g., 04.013/1)"
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+class BirimFiyatValidPoz(ValidationRule):
+    rule_id = "birimfiyat.valid_poz"
+    name = "Valid Birim Fiyat Poz Format"
+    standard = "birimfiyat"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = "Poz numbers should follow Bayındırlık format (XX.XXX/X)"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        import re
+
+        pattern = re.compile(r"^\d{2}\.\d{3}(/\d{1,2})?$")
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            code = str((pos.get("classification") or {}).get("birimfiyat", ""))
+            if not code:
+                continue
+            passed = bool(pattern.match(code))
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Poz '{code}' doesn't match format XX.XXX/X",
+                    element_ref=pos.get("id"),
+                    details={"given_code": code},
+                    suggestion="Use format: NN.NNN or NN.NNN/N (e.g., 04.013/1)"
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+# ── Sekisan Rules (Japan) ───────────────────────────────────────────────
+
+
+class SekisanCodeRequired(ValidationRule):
+    rule_id = "sekisan.code_required"
+    name = "Sekisan Code Required"
+    standard = "sekisan"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "BOQ positions should have a 積算基準 item code"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            code = (pos.get("classification") or {}).get("sekisan", "")
+            passed = bool(code) and len(str(code)) >= 3
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Position {pos.get('ordinal', '?')} missing 積算 code",
+                    element_ref=pos.get("id"),
+                    suggestion="Assign a 積算基準 item code" if not passed else None,
+                )
+            )
+        return results
+
+
+class SekisanMetricUnits(ValidationRule):
+    rule_id = "sekisan.metric_units"
+    name = "Sekisan Metric Units"
+    standard = "sekisan"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = "Units must be metric per Japanese construction standards"
+
+    VALID_UNITS = {
+        "m", "m2", "m3", "kg", "t", "本", "枚", "箇所", "式",
+        "台", "セット", "個", "組", "m2/回", "pcs", "set", "lsum",
+    }
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        results: list[RuleResult] = []
+        for pos in _get_positions(context):
+            unit = (pos.get("unit") or "").strip().lower()
+            if not unit:
+                continue
+            passed = unit in self.VALID_UNITS or unit in {u.lower() for u in self.VALID_UNITS}
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message="OK"
+                    if passed
+                    else f"Unit '{unit}' in position {pos.get('ordinal', '?')} not standard",
+                    element_ref=pos.get("id"),
+                    suggestion="Use standard metric units: m, m2, m3, kg, t, 式, etc."
+                    if not passed
+                    else None,
+                )
+            )
+        return results
+
+
+# ── Universal Additional Rules ──────────────────────────────────────────
+
+
+class CurrencyConsistency(ValidationRule):
+    rule_id = "boq_quality.currency_consistency"
+    name = "Currency Consistency"
+    standard = "boq_quality"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "All positions in a BOQ should use the same currency"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        positions = _get_positions(context)
+        currencies: set[str] = set()
+        for pos in positions:
+            ccy = (pos.get("currency") or "").strip().upper()
+            if ccy:
+                currencies.add(ccy)
+        if len(currencies) <= 1:
+            return [
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=True,
+                    message="OK",
+                )
+            ]
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=False,
+                message=f"Mixed currencies found: {', '.join(sorted(currencies))}",
+                details={"currencies": sorted(currencies)},
+                suggestion="Use a single currency throughout the BOQ",
+            )
+        ]
+
+
+class MeasurementConsistency(ValidationRule):
+    rule_id = "boq_quality.measurement_consistency"
+    name = "Measurement Unit Consistency"
+    standard = "boq_quality"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags mixing of metric and imperial units in the same BOQ"
+
+    IMPERIAL_UNITS = {"ft", "ft2", "ft3", "yd", "yd2", "yd3", "in", "lb", "ton", "gal", "sf", "sy", "cy", "lf"}
+    METRIC_UNITS = {"m", "m2", "m3", "mm", "cm", "km", "kg", "t", "l", "kl", "ml"}
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        positions = _get_positions(context)
+        has_metric = False
+        has_imperial = False
+        for pos in positions:
+            unit = (pos.get("unit") or "").strip().lower()
+            if unit in self.IMPERIAL_UNITS:
+                has_imperial = True
+            if unit in self.METRIC_UNITS:
+                has_metric = True
+        if has_metric and has_imperial:
+            return [
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=False,
+                    message="BOQ mixes metric and imperial units — use one system consistently",
+                    suggestion="Convert all quantities to either metric or imperial units",
+                )
+            ]
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=True,
+                message="OK",
+            )
+        ]
+
+
 # ── Helpers ─────────────────────────────────────────────────────────────────
 
 
@@ -904,6 +1800,8 @@ def register_builtin_rules() -> None:
         (RateVsBenchmark(), None),
         (LumpSumRatio(), None),
         (CostConcentration(), None),
+        (CurrencyConsistency(), None),
+        (MeasurementConsistency(), None),
         # DIN 276 (DACH)
         (DIN276CostGroupRequired(), None),
         (DIN276ValidCostGroup(), None),
@@ -911,6 +1809,38 @@ def register_builtin_rules() -> None:
         (DIN276Completeness(), None),
         # GAEB (DACH)
         (GAEBOrdinalFormat(), None),
+        # NRM (UK)
+        (NRMClassificationRequired(), None),
+        (NRMValidElement(), None),
+        (NRMCompleteness(), None),
+        # MasterFormat (US)
+        (MasterFormatClassificationRequired(), None),
+        (MasterFormatValidDivision(), None),
+        (MasterFormatCompleteness(), None),
+        # SINAPI (Brazil)
+        (SINAPICodeRequired(), None),
+        (SINAPIValidCode(), None),
+        # GESN (Russia/CIS)
+        (GESNCodeRequired(), None),
+        (GESNValidCode(), None),
+        # DPGF (France)
+        (DPGFLotRequired(), None),
+        (DPGFPricingComplete(), None),
+        # ÖNORM (Austria)
+        (ONORMPositionFormat(), None),
+        (ONORMDescriptionLength(), None),
+        # GB/T 50500 (China)
+        (GBT50500CodeRequired(), None),
+        (GBT50500ValidCode(), None),
+        # CPWD (India)
+        (CPWDCodeRequired(), None),
+        (CPWDMeasurementUnits(), None),
+        # Birim Fiyat (Turkey)
+        (BirimFiyatCodeRequired(), None),
+        (BirimFiyatValidPoz(), None),
+        # Sekisan (Japan)
+        (SekisanCodeRequired(), None),
+        (SekisanMetricUnits(), None),
     ]
 
     for rule, sets in rules:

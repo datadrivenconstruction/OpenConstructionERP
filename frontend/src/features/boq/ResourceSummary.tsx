@@ -105,7 +105,7 @@ export function ResourceSummary({ boqId, locale = 'de-DE' }: { boqId: string; lo
           message: resource.name,
         });
       } catch (err: unknown) {
-        const detail = err instanceof Error ? err.message : 'Failed to save';
+        const detail = err instanceof Error ? err.message : t('boq.rs_save_failed', { defaultValue: 'Failed to save' });
         addToast({
           type: 'error',
           title: t('boq.rs_save_failed', { defaultValue: 'Save failed' }),
@@ -115,12 +115,12 @@ export function ResourceSummary({ boqId, locale = 'de-DE' }: { boqId: string; lo
         setSavingResource(null);
       }
     },
-    [addToast, t],
+    [addToast, t, boqId, queryClient],
   );
 
   void savingResource; // used implicitly via savedResources
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['boq-resource-summary', boqId],
     queryFn: () => boqApi.getResourceSummary(boqId),
     enabled: !!boqId,
@@ -151,7 +151,7 @@ export function ResourceSummary({ boqId, locale = 'de-DE' }: { boqId: string; lo
     return items;
   }, [summary.resources, typeFilter, searchQuery]);
 
-  if (summary.total_resources === 0 && !isLoading) {
+  if (summary.total_resources === 0 && !isLoading && !isError) {
     return null;
   }
 
@@ -188,6 +188,8 @@ export function ResourceSummary({ boqId, locale = 'de-DE' }: { boqId: string; lo
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <button
         onClick={() => setCollapsed((prev) => !prev)}
+        aria-expanded={!collapsed}
+        aria-label={t('boq.resource_summary', { defaultValue: 'Resource Summary' })}
         className="flex w-full items-center justify-between px-4 py-3 hover:bg-surface-secondary/50 transition-colors"
       >
         <div className="flex items-center gap-2.5">
@@ -273,6 +275,7 @@ export function ResourceSummary({ boqId, locale = 'de-DE' }: { boqId: string; lo
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('boq.rs_search', { defaultValue: 'Search resources...' })}
+                aria-label={t('boq.rs_search', { defaultValue: 'Search resources...' })}
                 className="w-44 pl-7 pr-2 py-1 text-2xs rounded-md border border-border-light bg-surface-primary text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-1 focus:ring-oe-blue/40"
               />
             </div>
@@ -283,6 +286,12 @@ export function ResourceSummary({ boqId, locale = 'de-DE' }: { boqId: string; lo
             <div className="flex items-center justify-center py-8">
               <span className="text-xs text-content-tertiary">
                 {t('common.loading', { defaultValue: 'Loading...' })}
+              </span>
+            </div>
+          ) : isError ? (
+            <div className="flex items-center justify-center py-8">
+              <span className="text-xs text-content-secondary">
+                {t('boq.rs_error', { defaultValue: 'Failed to load resource summary.' })}
               </span>
             </div>
           ) : filteredResources.length === 0 ? (

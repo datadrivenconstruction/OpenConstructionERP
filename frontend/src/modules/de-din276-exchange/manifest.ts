@@ -1,0 +1,101 @@
+import { lazy } from 'react';
+import { Landmark } from 'lucide-react';
+import type { ModuleManifest } from '../_types';
+
+const DEExchangeModule = lazy(() => import('./DEExchangeModule'));
+
+export const manifest: ModuleManifest = {
+  id: 'de-din276-exchange',
+  name: 'DACH DIN 276 Exchange',
+  description: 'Import/export BOQs in DIN 276 / ÖNORM B 1801 / SIA 112 format (Excel/CSV)',
+  version: '1.0.0',
+  icon: Landmark,
+  category: 'regional',
+  defaultEnabled: false,
+  depends: ['boq'],
+  routes: [
+    {
+      path: '/de-din276-exchange',
+      title: 'DACH DIN 276 Exchange',
+      component: DEExchangeModule,
+    },
+  ],
+  navItems: [
+    {
+      labelKey: 'nav.de_din276_exchange',
+      to: '/de-din276-exchange',
+      icon: Landmark,
+      group: 'regional',
+      advancedOnly: true,
+    },
+  ],
+  searchEntries: [
+    {
+      label: 'DACH DIN 276 Import / Export',
+      path: '/de-din276-exchange',
+      keywords: [
+        'germany',
+        'deutschland',
+        'austria',
+        'österreich',
+        'switzerland',
+        'schweiz',
+        'din276',
+        'din 276',
+        'önorm',
+        'sia',
+        'kostengruppe',
+        'lv',
+        'dach',
+        'leistungsverzeichnis',
+      ],
+    },
+  ],
+  translations: {
+    en: {
+      'nav.de_din276_exchange': 'DACH DIN 276 Exchange',
+      'din.title': 'DACH DIN 276 Import / Export',
+      'din.subtitle': 'Exchange Bills of Quantities in DIN 276 / ÖNORM / SIA format (Excel / CSV)',
+      'din.tab_import': 'Import',
+      'din.tab_export': 'Export',
+      'din.import_complete': 'DIN 276 BOQ import complete',
+      'din.export_complete': 'DIN 276 BOQ export complete',
+      'din.info': 'DIN 276 (Kosten im Bauwesen) is the primary cost classification standard for Germany, Austria (ÖNORM B 1801), and Switzerland (SIA 112). Compatible with GAEB, BKI, and standard DACH quantity surveying workflows.',
+      'din.drop_file': 'Drop a DIN 276 BOQ file here (Excel or CSV), or',
+      'din.browse': 'Browse files',
+      'din.formats_hint': 'Supported: .csv, .tsv, .xlsx (DIN 276 / ÖNORM / SIA-formatted BOQ)',
+      'din.classification': 'DIN 276 KG',
+      'din.export_format': 'Format',
+      'din.csv_format': 'CSV (Excel-compatible)',
+      'din.detailed': 'DIN 276 Detailed',
+      'din.summary': 'DIN 276 Summary',
+    },
+    de: {
+      'nav.de_din276_exchange': 'DACH DIN 276 Austausch',
+      'din.title': 'DACH DIN 276 Import / Export',
+      'din.subtitle': 'Leistungsverzeichnis im DIN 276 / ÖNORM / SIA-Format austauschen (Excel / CSV)',
+      'din.tab_import': 'Importieren',
+      'din.tab_export': 'Exportieren',
+      'din.import_complete': 'DIN 276 LV-Import abgeschlossen',
+      'din.export_complete': 'DIN 276 LV-Export abgeschlossen',
+      'din.info': 'DIN 276 (Kosten im Bauwesen) ist der primäre Kostenklassifikationsstandard für Deutschland, Österreich (ÖNORM B 1801) und die Schweiz (SIA 112). Kompatibel mit GAEB, BKI und Standard-DACH-Kalkulationsworkflows.',
+      'din.drop_file': 'DIN 276 LV-Datei hierher ziehen (Excel oder CSV), oder',
+      'din.browse': 'Dateien durchsuchen',
+      'din.formats_hint': 'Unterstützt: .csv, .tsv, .xlsx (DIN 276 / ÖNORM / SIA-formatiertes LV)',
+      'din.classification': 'DIN 276 KG',
+      'din.export_format': 'Format',
+      'din.csv_format': 'CSV (Excel-kompatibel)',
+      'din.detailed': 'DIN 276 Detailliert',
+      'din.summary': 'DIN 276 Zusammenfassung',
+    },
+    ru: {
+      'nav.de_din276_exchange': 'DACH DIN 276 Obmen',
+      'din.title': 'DACH DIN 276 Import / Export',
+      'din.subtitle': 'Obmen dannymi smety v formate DIN 276 / ÖNORM / SIA (Excel / CSV)',
+      'din.tab_import': 'Import',
+      'din.tab_export': 'Eksport',
+      'din.import_complete': 'DIN 276 import smety zavershyon',
+      'din.export_complete': 'DIN 276 eksport smety zavershyon',
+    },
+  },
+};

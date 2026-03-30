@@ -131,6 +131,10 @@ def _build_settings_response(settings: AISettings) -> AISettingsResponse:
         anthropic_api_key_set=bool(settings.anthropic_api_key),
         openai_api_key_set=bool(settings.openai_api_key),
         gemini_api_key_set=bool(settings.gemini_api_key),
+        openrouter_api_key_set=bool(settings.openrouter_api_key),
+        mistral_api_key_set=bool(settings.mistral_api_key),
+        groq_api_key_set=bool(settings.groq_api_key),
+        deepseek_api_key_set=bool(settings.deepseek_api_key),
         preferred_model=settings.preferred_model,
         metadata_=settings.metadata_ or {},
         created_at=settings.created_at,
@@ -236,6 +240,10 @@ class AIService:
                 anthropic_api_key=data.anthropic_api_key,
                 openai_api_key=data.openai_api_key,
                 gemini_api_key=data.gemini_api_key,
+                openrouter_api_key=data.openrouter_api_key,
+                mistral_api_key=data.mistral_api_key,
+                groq_api_key=data.groq_api_key,
+                deepseek_api_key=data.deepseek_api_key,
                 preferred_model=data.preferred_model or "claude-sonnet",
             )
             settings = await self.settings_repo.create(settings)
@@ -247,6 +255,14 @@ class AIService:
                 fields["openai_api_key"] = data.openai_api_key
             if data.gemini_api_key is not None:
                 fields["gemini_api_key"] = data.gemini_api_key
+            if data.openrouter_api_key is not None:
+                fields["openrouter_api_key"] = data.openrouter_api_key
+            if data.mistral_api_key is not None:
+                fields["mistral_api_key"] = data.mistral_api_key
+            if data.groq_api_key is not None:
+                fields["groq_api_key"] = data.groq_api_key
+            if data.deepseek_api_key is not None:
+                fields["deepseek_api_key"] = data.deepseek_api_key
             if data.preferred_model is not None:
                 fields["preferred_model"] = data.preferred_model
 

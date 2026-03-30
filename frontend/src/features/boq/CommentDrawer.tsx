@@ -158,6 +158,9 @@ export function CommentDrawer({
 
       {/* Drawer panel */}
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('comments.title', { defaultValue: 'Comments' })}
         className="relative w-full max-w-md bg-surface-elevated border-l border-border-light shadow-2xl
                     flex flex-col animate-slide-in-right"
         onClick={(e) => e.stopPropagation()}
@@ -178,6 +181,7 @@ export function CommentDrawer({
           </div>
           <button
             onClick={onClose}
+            aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors shrink-0"
           >
             <X size={16} />
@@ -227,6 +231,7 @@ export function CommentDrawer({
                         className="flex h-5 w-5 items-center justify-center rounded text-content-quaternary
                                    hover:text-semantic-error hover:bg-semantic-error-bg
                                    opacity-0 group-hover:opacity-100 transition-all shrink-0"
+                        aria-label={t('comments.delete', { defaultValue: 'Delete comment' })}
                         title={t('comments.delete', { defaultValue: 'Delete comment' })}
                       >
                         <Trash2 size={11} />
@@ -252,6 +257,7 @@ export function CommentDrawer({
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={handleKeyDown}
               rows={2}
+              aria-label={t('comments.input_placeholder', { defaultValue: 'Write a comment... (Enter to send)' })}
               placeholder={t('comments.input_placeholder', { defaultValue: 'Write a comment... (Enter to send)' })}
               className="flex-1 rounded-lg border border-border-light bg-surface-primary px-3 py-2
                          text-xs text-content-primary placeholder:text-content-quaternary
@@ -266,6 +272,7 @@ export function CommentDrawer({
                          hover:bg-oe-blue-hover
                          disabled:opacity-30 disabled:cursor-not-allowed
                          transition-all shrink-0"
+              aria-label={t('comments.send', { defaultValue: 'Send' })}
               title={t('comments.send', { defaultValue: 'Send' })}
             >
               <Send size={14} />

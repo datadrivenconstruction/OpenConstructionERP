@@ -22,6 +22,10 @@ class AISettingsUpdate(BaseModel):
     anthropic_api_key: str | None = None
     openai_api_key: str | None = None
     gemini_api_key: str | None = None
+    openrouter_api_key: str | None = None
+    mistral_api_key: str | None = None
+    groq_api_key: str | None = None
+    deepseek_api_key: str | None = None
     preferred_model: str | None = Field(default=None, max_length=100)
 
 
@@ -38,6 +42,10 @@ class AISettingsResponse(BaseModel):
     anthropic_api_key_set: bool = False
     openai_api_key_set: bool = False
     gemini_api_key_set: bool = False
+    openrouter_api_key_set: bool = False
+    mistral_api_key_set: bool = False
+    groq_api_key_set: bool = False
+    deepseek_api_key_set: bool = False
     preferred_model: str
     metadata: dict[str, Any] = Field(default_factory=dict, alias="metadata_")
     created_at: datetime

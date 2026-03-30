@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -178,6 +178,30 @@ function DeviationBadge({ pct }: { pct: number }) {
   );
 }
 
+function translateStatus(status: string, t: ReturnType<typeof useTranslation>['t']): string {
+  const STATUS_I18N: Record<string, string> = {
+    draft: t('tendering.status_draft', 'Draft'),
+    issued: t('tendering.status_issued', 'Issued'),
+    collecting: t('tendering.status_collecting', 'Collecting'),
+    evaluating: t('tendering.status_evaluating', 'Evaluating'),
+    awarded: t('tendering.status_awarded', 'Awarded'),
+    closed: t('tendering.status_closed', 'Closed'),
+    pending: t('tendering.status_pending', 'Pending'),
+    submitted: t('tendering.status_submitted', 'Submitted'),
+    accepted: t('tendering.status_accepted', 'Accepted'),
+    rejected: t('tendering.status_rejected', 'Rejected'),
+  };
+  return STATUS_I18N[status] || status;
+}
+
+function formatDate(dateStr: string): string {
+  try {
+    return new Intl.DateTimeFormat(getIntlLocale(), { dateStyle: 'medium' }).format(new Date(dateStr));
+  } catch {
+    return dateStr;
+  }
+}
+
 /* ── Select Dropdown ──────────────────────────────────────────────────── */
 
 function SelectDropdown({
@@ -229,6 +253,14 @@ function CreatePackageDialog({
   const [deadline, setDeadline] = useState('');
 
   const addToast = useToastStore((s) => s.addToast);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
 
   const createMutation = useMutation({
     mutationFn: () =>
@@ -353,6 +385,14 @@ function AddBidDialog({
   const [contactEmail, setContactEmail] = useState('');
   const [totalAmount, setTotalAmount] = useState('');
   const [notes, setNotes] = useState('');
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
 
   const createMutation = useMutation({
     mutationFn: () =>
@@ -495,18 +535,18 @@ function PackageCard({
           <div className="mt-0.5 flex items-center gap-3 text-xs text-content-secondary">
             <span className="flex items-center gap-1">
               <FileText size={12} />
-              {pkg.bid_count} {t('tendering.bids_count', 'bids')}
+              {t('tendering.bid_count', { defaultValue: '{{count}} bids', count: pkg.bid_count })}
             </span>
             {pkg.deadline && (
               <span className="flex items-center gap-1">
                 <Clock size={12} />
-                {pkg.deadline}
+                {formatDate(pkg.deadline)}
               </span>
             )}
           </div>
         </div>
         <Badge variant={STATUS_COLORS[pkg.status] || 'neutral'} size="sm">
-          {pkg.status}
+          {translateStatus(pkg.status, t)}
         </Badge>
         <span className="text-content-tertiary">
           {isSelected ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
@@ -683,6 +723,27 @@ function PackageDetail({
     queryClient.invalidateQueries({ queryKey: ['tendering-packages'] });
   }, [queryClient, packageId]);
 
+  const handleExport = useCallback(() => {
+    if (!comparison) return;
+    const headers = ['Position', 'Unit', 'Budget Rate', ...comparison.bid_companies.map(c => `${c} Rate`)];
+    const rows = comparison.rows.map(row => [
+      row.description,
+      row.unit,
+      row.budget_rate.toFixed(2),
+      ...row.bids.map(b => b.unit_rate.toFixed(2)),
+    ]);
+    const footer = ['TOTAL', '', comparison.budget_total.toFixed(0), ...comparison.bid_totals.map(bt => bt.total.toFixed(0))];
+    const csv = [headers, ...rows, footer].map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bid-comparison-${pkg?.name || 'export'}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    addToast({ type: 'success', title: t('tendering.exported', { defaultValue: 'Comparison exported' }) });
+  }, [comparison, pkg, addToast, t]);
+
   const lowestBid = useMemo(() => {
     if (!comparison || comparison.bid_totals.length === 0) return undefined;
     let min = comparison.bid_totals[0]!;
@@ -714,15 +775,15 @@ function PackageDetail({
             )}
             <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-content-tertiary">
               <Badge variant={STATUS_COLORS[pkg.status] || 'neutral'} size="sm">
-                {pkg.status}
+                {translateStatus(pkg.status, t)}
               </Badge>
               {pkg.deadline && (
                 <span className="flex items-center gap-1">
                   <Clock size={12} />
-                  {t('tendering.deadline', 'Deadline')}: {pkg.deadline}
+                  {t('tendering.deadline', 'Deadline')}: {formatDate(pkg.deadline)}
                 </span>
               )}
-              <span>{pkg.bids.length} {t('tendering.bids_count', 'bids')}</span>
+              <span>{t('tendering.bid_count', { defaultValue: '{{count}} bids', count: pkg.bids.length })}</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -743,6 +804,49 @@ function PackageDetail({
                 onClick={() => updateStatusMutation.mutate('issued')}
               >
                 {t('tendering.issue', 'Issue')}
+              </Button>
+            )}
+            {pkg.status === 'issued' && (
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<Clock size={14} />}
+                loading={updateStatusMutation.isPending}
+                onClick={() => updateStatusMutation.mutate('collecting')}
+              >
+                {t('tendering.start_collecting', 'Start Collecting')}
+              </Button>
+            )}
+            {pkg.status === 'collecting' && (
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<BarChart3 size={14} />}
+                loading={updateStatusMutation.isPending}
+                onClick={() => updateStatusMutation.mutate('evaluating')}
+              >
+                {t('tendering.evaluate', 'Evaluate Bids')}
+              </Button>
+            )}
+            {pkg.status === 'evaluating' && (
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<Award size={14} />}
+                loading={updateStatusMutation.isPending}
+                onClick={() => updateStatusMutation.mutate('awarded')}
+              >
+                {t('tendering.mark_awarded', 'Mark Awarded')}
+              </Button>
+            )}
+            {(pkg.status === 'awarded' || pkg.status === 'evaluating') && (
+              <Button
+                variant="ghost"
+                size="sm"
+                loading={updateStatusMutation.isPending}
+                onClick={() => updateStatusMutation.mutate('closed')}
+              >
+                {t('tendering.close_package', 'Close')}
               </Button>
             )}
           </div>
@@ -776,7 +880,7 @@ function PackageDetail({
                   {formatCurrency(bid.total_amount, bid.currency)}
                 </span>
                 <Badge variant={STATUS_COLORS[bid.status] || 'neutral'} size="sm">
-                  {bid.status}
+                  {translateStatus(bid.status, t)}
                 </Badge>
                 {bid.status !== 'accepted' && (
                   <Button
@@ -784,7 +888,11 @@ function PackageDetail({
                     size="sm"
                     icon={<Award size={14} />}
                     loading={awardMutation.isPending}
-                    onClick={() => awardMutation.mutate(bid.id)}
+                    onClick={() => {
+                      if (window.confirm(t('tendering.award_confirm', { defaultValue: 'Award this contract to {{company}}? This action cannot be undone.', company: bid.company_name }))) {
+                        awardMutation.mutate(bid.id);
+                      }
+                    }}
                     title={t('tendering.award_bid', 'Award this bid')}
                   >
                     {t('tendering.award', 'Award')}
@@ -803,7 +911,7 @@ function PackageDetail({
             <BarChart3 size={16} className="text-oe-blue" />
             {t('tendering.bid_comparison', 'Bid Comparison')}
           </h4>
-          <Button variant="ghost" size="sm" icon={<Download size={14} />}>
+          <Button variant="ghost" size="sm" icon={<Download size={14} />} onClick={handleExport}>
             {t('tendering.export_comparison', 'Export')}
           </Button>
         </div>
@@ -979,8 +1087,8 @@ export function TenderingPage() {
       {!selectedProjectId && (
         <EmptyState
           icon={<FileText size={24} strokeWidth={1.5} />}
-          title={t('tendering.empty_title', { defaultValue: 'No tenders yet' })}
-          description={t('tendering.empty_description', {
+          title={t('tendering.select_project_title', { defaultValue: 'Select a project' })}
+          description={t('tendering.select_project_desc', {
             defaultValue: 'Select a project and create a tender from a BOQ to get started',
           })}
         />
