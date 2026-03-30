@@ -189,10 +189,9 @@ export function Header({ title, onMenuClick }: HeaderProps) {
         </button>
 
         {/* Feedback — Variant A (optional file) + B (URL params) */}
-        <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
+        <button
+          type="button"
+          onClick={() => {
             // Variant A: Download log if errors exist
             if (getErrorCount() > 0) {
               const blob = exportErrorReport();
@@ -225,7 +224,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
         >
           <MessageSquarePlus size={14} strokeWidth={1.75} />
           <span className="hidden sm:inline">{t('feedback.title', { defaultValue: 'Feedback' })}</span>
-        </a>
+        </button>
 
         {/* Notification bell */}
         <NotificationBell />

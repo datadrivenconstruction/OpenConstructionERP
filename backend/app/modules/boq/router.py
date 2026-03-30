@@ -309,9 +309,25 @@ async def list_boqs(
     boqs, _ = await service.list_boqs_for_project(
         project_id, offset=offset, limit=limit
     )
-    # Compute grand totals via a single aggregate query (avoids loading all positions)
+    # Compute grand totals + position counts via aggregate queries
     boq_ids = [b.id for b in boqs]
     totals = await service.boq_repo.grand_totals_for_boqs(boq_ids)
+
+    # Position counts per BOQ
+    from sqlalchemy import select, func
+    from app.modules.boq.models import Position
+    pos_counts: dict[uuid.UUID, int] = {}
+    if boq_ids:
+        rows = (
+            await session.execute(
+                select(Position.boq_id, func.count())
+                .where(Position.boq_id.in_(boq_ids))
+                .where(Position.unit != "")  # Exclude section headers
+                .group_by(Position.boq_id)
+            )
+        ).all()
+        for bid, cnt in rows:
+            pos_counts[bid] = cnt
 
     results: list[BOQListItem] = []
     for b in boqs:
@@ -325,6 +341,7 @@ async def list_boqs(
             created_at=b.created_at,
             updated_at=b.updated_at,
             grand_total=totals.get(b.id, 0.0),
+            position_count=pos_counts.get(b.id, 0),
         )
         results.append(item)
     return results

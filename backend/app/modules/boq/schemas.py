@@ -57,6 +57,7 @@ class BOQListItem(BOQResponse):
     """BOQ summary returned from list endpoints, includes computed grand_total."""
 
     grand_total: float = 0.0
+    position_count: int = 0
 
 
 # ── Position schemas ──────────────────────────────────────────────────────────

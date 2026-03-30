@@ -185,7 +185,7 @@ export function AboutPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
               { value: '55K+', label: t('about.stat_costs', { defaultValue: 'Cost Items' }) },
-              { value: '21', label: t('about.stat_langs', { defaultValue: 'Languages' }) },
+              { value: '20+', label: t('about.stat_langs', { defaultValue: 'Languages' }) },
               { value: '20', label: t('about.stat_regions', { defaultValue: 'Regional Standards' }) },
               { value: '42', label: t('about.stat_rules', { defaultValue: 'Validation Rules' }) },
             ].map((s, i) => (
