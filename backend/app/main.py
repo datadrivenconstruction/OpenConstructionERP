@@ -336,70 +336,64 @@ def create_app() -> FastAPI:
     @app.get("/api/demo/status", tags=["System"])
     async def demo_status() -> dict[str, bool]:
         """Check which demo projects are currently installed."""
+        from sqlalchemy import select
         from app.database import async_session_factory
+        from app.modules.projects.models import Project
 
         async with async_session_factory() as session:
             rows = (
-                await session.execute(
-                    select(Project.metadata_).where(
-                        Project.metadata_["is_demo"].as_boolean() == True  # noqa: E712
-                    )
-                )
+                await session.execute(select(Project.metadata_))
             ).scalars().all()
 
         installed: dict[str, bool] = {}
         for meta in rows:
-            if isinstance(meta, dict) and meta.get("demo_id"):
+            if isinstance(meta, dict) and meta.get("is_demo") and meta.get("demo_id"):
                 installed[meta["demo_id"]] = True
         return installed
 
     @app.delete("/api/demo/uninstall/{demo_id}", tags=["System"])
     async def uninstall_demo(demo_id: str) -> dict[str, Any]:
         """Remove a demo project and all its data."""
+        from sqlalchemy import select
         from app.database import async_session_factory
+        from app.modules.projects.models import Project
 
         async with async_session_factory() as session:
-            projects = (
-                await session.execute(
-                    select(Project).where(
-                        Project.metadata_["demo_id"].as_string() == demo_id
-                    )
-                )
-            ).scalars().all()
+            all_projects = (await session.execute(select(Project))).scalars().all()
+            targets = [
+                p for p in all_projects
+                if isinstance(p.metadata_, dict) and p.metadata_.get("demo_id") == demo_id
+            ]
 
-            if not projects:
+            if not targets:
                 from fastapi import HTTPException
                 raise HTTPException(status_code=404, detail=f"Demo '{demo_id}' not installed")
 
-            deleted = 0
-            for proj in projects:
+            for proj in targets:
                 await session.delete(proj)
-                deleted += 1
             await session.commit()
 
-        return {"deleted_projects": deleted, "demo_id": demo_id}
+        return {"deleted_projects": len(targets), "demo_id": demo_id}
 
     @app.delete("/api/demo/clear-all", tags=["System"])
     async def clear_all_demos() -> dict[str, Any]:
         """Remove ALL demo projects and their data."""
+        from sqlalchemy import select
         from app.database import async_session_factory
+        from app.modules.projects.models import Project
 
         async with async_session_factory() as session:
-            projects = (
-                await session.execute(
-                    select(Project).where(
-                        Project.metadata_["is_demo"].as_boolean() == True  # noqa: E712
-                    )
-                )
-            ).scalars().all()
+            all_projects = (await session.execute(select(Project))).scalars().all()
+            targets = [
+                p for p in all_projects
+                if isinstance(p.metadata_, dict) and p.metadata_.get("is_demo")
+            ]
 
-            deleted = 0
-            for proj in projects:
+            for proj in targets:
                 await session.delete(proj)
-                deleted += 1
             await session.commit()
 
-        return {"deleted_projects": deleted}
+        return {"deleted_projects": len(targets)}
 
     @app.get("/api/system/validation-rules", tags=["System"])
     async def list_validation_rules() -> dict[str, Any]:
