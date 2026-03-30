@@ -2440,6 +2440,49 @@ async def install_demo_project(session: AsyncSession, demo_id: str) -> dict:
             positions.append(pos)
             session.add(pos)
 
+            # ── Create child resource positions (material/labor/equipment) ──
+            resources = pos_meta.get("resources", {})
+            res_idx = 0
+            for res_type, res_data in resources.items():
+                if not isinstance(res_data, dict) or "rate" not in res_data:
+                    continue
+                res_idx += 1
+                sort += 1
+                res_name = res_data.get("name", res_type.capitalize())
+                res_rate = res_data["rate"]
+                res_pct = res_data.get("pct", 0)
+                res_total = round(float(qty) * res_rate, 2)
+                res_ordinal = f"{sub_ordinal}.{res_idx}"
+
+                # Resource type label for metadata
+                type_labels = {
+                    "material": "Material",
+                    "labor": "Labor",
+                    "equipment": "Equipment",
+                    "overhead": "Overhead",
+                }
+                child = _make_position(
+                    boq_id=boq_id,
+                    parent_id=pos.id,
+                    ordinal=res_ordinal,
+                    description=res_name,
+                    unit=unit if unit != "lsum" else "lsum",
+                    quantity=qty,
+                    unit_rate=res_rate,
+                    sort_order=sort,
+                    classification=cls,
+                    metadata={
+                        "resource_type": res_type,
+                        "resource_label": type_labels.get(res_type, res_type),
+                        "pct_of_parent": round(res_pct * 100, 1),
+                        "cwicr_ref": pos_meta.get("cwicr_ref", ""),
+                    },
+                    source="cwicr",
+                    validation_status="valid",
+                )
+                positions.append(child)
+                session.add(child)
+
     await session.flush()
 
     # ── 4. Markups ────────────────────────────────────────────────────
