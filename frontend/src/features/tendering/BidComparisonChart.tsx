@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useCallback } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getIntlLocale } from '@/shared/lib/formatters';
 
@@ -60,8 +60,8 @@ function getBarColor(
   bidCount: number,
 ): string {
   if (bidCount <= 1) return 'var(--color-oe-blue, #3b82f6)';
-  if (total === lowestTotal) return '#15803d';
-  if (total === highestTotal) return '#dc2626';
+  if (total === lowestTotal) return 'var(--oe-success, #15803d)';
+  if (total === highestTotal) return 'var(--oe-error, #dc2626)';
   return 'var(--color-oe-blue, #3b82f6)';
 }
 
@@ -103,7 +103,15 @@ export function BidComparisonChart({
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [svgWidth, setSvgWidth] = useState(600);
 
+  const containerNodeRef = useRef<HTMLDivElement | null>(null);
+
   const containerRef = useCallback((node: HTMLDivElement | null) => {
+    containerNodeRef.current = node;
+    if (node) setSvgWidth(node.clientWidth);
+  }, []);
+
+  useEffect(() => {
+    const node = containerNodeRef.current;
     if (!node) return;
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
@@ -111,7 +119,6 @@ export function BidComparisonChart({
       }
     });
     observer.observe(node);
-    setSvgWidth(node.clientWidth);
     return () => observer.disconnect();
   }, []);
 
@@ -224,7 +231,7 @@ export function BidComparisonChart({
                 y1={budgetY}
                 x2={chartArea.x + chartArea.width}
                 y2={budgetY}
-                stroke="#f59e0b"
+                stroke="var(--oe-warning, #f59e0b)"
                 strokeWidth={1.5}
                 strokeDasharray="6 4"
               />
@@ -232,7 +239,7 @@ export function BidComparisonChart({
                 x={chartArea.x + chartArea.width + 2}
                 y={budgetY - 6}
                 className="text-[10px] font-medium"
-                fill="#f59e0b"
+                fill="var(--oe-warning, #f59e0b)"
                 textAnchor="end"
               >
                 {t('tendering.budget', 'Budget')}
@@ -276,9 +283,9 @@ export function BidComparisonChart({
                   className="text-[10px] font-semibold"
                   fill={
                     bar.bid.deviation_pct < -0.1
-                      ? '#15803d'
+                      ? 'var(--oe-success, #15803d)'
                       : bar.bid.deviation_pct > 0.1
-                        ? '#dc2626'
+                        ? 'var(--oe-error, #dc2626)'
                         : 'var(--color-content-tertiary, #9ca3af)'
                   }
                 >
@@ -342,7 +349,7 @@ export function BidComparisonChart({
           <g transform={`translate(${chartArea.x}, ${MIN_CHART_HEIGHT - 20})`}>
             {bidTotals.length > 1 && (
               <>
-                <rect x={0} y={0} width={10} height={10} rx={2} fill="#15803d" />
+                <rect x={0} y={0} width={10} height={10} rx={2} fill="var(--oe-success, #15803d)" />
                 <text
                   x={14}
                   y={9}
@@ -351,7 +358,7 @@ export function BidComparisonChart({
                 >
                   {t('tendering.lowest', 'Lowest')}
                 </text>
-                <rect x={60} y={0} width={10} height={10} rx={2} fill="#dc2626" />
+                <rect x={60} y={0} width={10} height={10} rx={2} fill="var(--oe-error, #dc2626)" />
                 <text
                   x={74}
                   y={9}
@@ -378,7 +385,7 @@ export function BidComparisonChart({
                   y1={5}
                   x2={20}
                   y2={5}
-                  stroke="#f59e0b"
+                  stroke="var(--oe-warning, #f59e0b)"
                   strokeWidth={1.5}
                   strokeDasharray="4 3"
                 />

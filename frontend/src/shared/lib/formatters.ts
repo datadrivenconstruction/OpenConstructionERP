@@ -56,11 +56,16 @@ export function fmtCompact(value: number): string {
 
 /** Currency formatter using current locale. */
 export function fmtCurrency(value: number, currency = 'EUR'): string {
-  return new Intl.NumberFormat(getIntlLocale(), {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: 0,
-  }).format(value);
+  const safe = currency && /^[A-Z]{3}$/.test(currency) ? currency : 'EUR';
+  try {
+    return new Intl.NumberFormat(getIntlLocale(), {
+      style: 'currency',
+      currency: safe,
+      maximumFractionDigits: 0,
+    }).format(value);
+  } catch {
+    return `${value.toFixed(0)} ${safe}`;
+  }
 }
 
 /** Date formatter using current locale. */

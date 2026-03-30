@@ -33,6 +33,18 @@ class AISettings(Base):
     gemini_api_key: Mapped[str | None] = mapped_column(
         String(500), nullable=True, default=None
     )
+    openrouter_api_key: Mapped[str | None] = mapped_column(
+        String(500), nullable=True, default=None
+    )
+    mistral_api_key: Mapped[str | None] = mapped_column(
+        String(500), nullable=True, default=None
+    )
+    groq_api_key: Mapped[str | None] = mapped_column(
+        String(500), nullable=True, default=None
+    )
+    deepseek_api_key: Mapped[str | None] = mapped_column(
+        String(500), nullable=True, default=None
+    )
     preferred_model: Mapped[str] = mapped_column(
         String(100), nullable=False, default="claude-sonnet"
     )

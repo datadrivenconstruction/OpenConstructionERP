@@ -857,7 +857,7 @@ export function BOQListPage() {
 
             {/* Summary footer */}
             <p className="text-sm text-content-tertiary">
-              {`${(page - 1) * ITEMS_PER_PAGE + 1}\u2013${Math.min(page * ITEMS_PER_PAGE, filtered.length)} ${t('boq.of_estimates', { defaultValue: 'of {{count}} estimates', count: filtered.length })}`}
+              {t('boq.pagination_range', { defaultValue: '{{from}}–{{to}} of {{total}} estimates', from: (page - 1) * ITEMS_PER_PAGE + 1, to: Math.min(page * ITEMS_PER_PAGE, filtered.length), total: filtered.length })}
               {(searchQuery || statusFilter || projectFilter) && filtered.length !== (allBoqs?.length ?? 0)
                 ? ` (${t('boq.filtered_from', { defaultValue: 'filtered from {{total}}', total: allBoqs?.length ?? 0 })})`
                 : ''}

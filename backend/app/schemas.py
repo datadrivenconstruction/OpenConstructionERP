@@ -255,7 +255,6 @@ class ModuleInfoSchema(OEBase):
     languages: list[str] = Field(default_factory=list)
     tags: list[str] = Field(default_factory=list)
     installed: bool = False
-    update_available: bool = False
 
 
 # ── Pagination ──────────────────────────────────────────────────────────────

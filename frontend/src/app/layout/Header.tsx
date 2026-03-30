@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Search, ChevronDown, LogOut, User, Settings, Menu, MessageSquarePlus, FolderOpen, Bell, CheckCircle2, XCircle, AlertTriangle, Info, Trash2 } from 'lucide-react';
+import { Search, ChevronDown, LogOut, User, Settings, Menu, MessageSquarePlus, FolderOpen, Bell, CheckCircle2, XCircle, AlertTriangle, Info, Trash2, Bug } from 'lucide-react';
 import clsx from 'clsx';
 import { SUPPORTED_LANGUAGES, getLanguageByCode } from '../i18n';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -10,11 +10,14 @@ import { useToastStore, type HistoryEntry } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { CountryFlag } from '@/shared/ui';
 import { apiGet } from '@/shared/lib/api';
+import { exportErrorReport, getErrorCount } from '@/shared/lib/errorLogger';
 
 /** Map English page titles (passed from App.tsx routes) to i18n keys. */
 const TITLE_I18N_MAP: Record<string, string> = {
   'Dashboard': 'nav.dashboard',
   'AI Quick Estimate': 'nav.ai_estimate',
+  'AI Cost Advisor': 'nav.ai_advisor',
+  'CAD/BIM Takeoff': 'nav.cad_takeoff',
   'Projects': 'nav.projects',
   'New Project': 'projects.new_project',
   'Project': 'nav.projects',
@@ -29,12 +32,19 @@ const TITLE_I18N_MAP: Record<string, string> = {
   'New Assembly': 'assemblies.new',
   'Assembly Editor': 'assemblies.editor',
   'Validation': 'nav.validation',
+  'Quantity Takeoff': 'nav.takeoff_overview',
   'PDF Takeoff': 'nav.takeoff',
   '4D Schedule': 'nav.schedule',
   '5D Cost Model': 'nav.5d_cost_model',
   'Reports': 'nav.reports',
   'Sustainability': 'nav.sustainability',
   'Tendering': 'nav.tendering',
+  'Change Orders': 'nav.change_orders',
+  'Documents': 'nav.documents',
+  'Risk Register': 'nav.risk_register',
+  'Analytics': 'nav.analytics',
+  'About': 'nav.about',
+  'Not Found': 'error.not_found',
   'Modules': 'nav.modules',
   'Settings': 'nav.settings',
 };
@@ -42,51 +52,16 @@ const TITLE_I18N_MAP: Record<string, string> = {
 interface HeaderProps {
   title?: string;
   onMenuClick?: () => void;
-  onFeedbackClick?: () => void;
 }
 
-export function Header({ title, onMenuClick, onFeedbackClick }: HeaderProps) {
+export function Header({ title, onMenuClick }: HeaderProps) {
   const { t, i18n } = useTranslation();
   const translatedTitle = title ? t(TITLE_I18N_MAP[title] ?? title, title) : undefined;
-  const navigate = useNavigate();
   const currentLang = getLanguageByCode(i18n.language);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const searchRef = useRef<HTMLInputElement>(null);
-  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
-  const activeProjectName = useProjectContextStore((s) => s.activeProjectName);
-
-  // Keyboard shortcut: press / to open search
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === '/' && !searchOpen && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
-        e.preventDefault();
-        setSearchOpen(true);
-      }
-      if (e.key === 'Escape' && searchOpen) {
-        setSearchOpen(false);
-        setSearchQuery('');
-      }
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [searchOpen]);
-
-  useEffect(() => {
-    if (searchOpen && searchRef.current) {
-      searchRef.current.focus();
-    }
-  }, [searchOpen]);
-
-  const handleSearch = useCallback((q: string) => {
-    setSearchQuery(q);
-    // Navigate to cost database with search query
-    if (q.trim().length >= 2) {
-      navigate(`/costs?q=${encodeURIComponent(q.trim())}`);
-      setSearchOpen(false);
-      setSearchQuery('');
-    }
-  }, [navigate]);
+  const openCommandPalette = useCallback(() => {
+    // Dispatch Ctrl+K to open the CommandPalette managed by App.tsx
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }));
+  }, []);
 
   return (
     <header
@@ -116,66 +91,32 @@ export function Header({ title, onMenuClick, onFeedbackClick }: HeaderProps) {
 
       {/* Right */}
       <div className="flex items-center gap-1.5">
-        {/* Search — overlay style so it doesn't push layout */}
-        {searchOpen && (
-          <div className="fixed inset-0 z-50 flex items-start justify-center pt-[12vh]">
-            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" onClick={() => { setSearchOpen(false); setSearchQuery(''); }} />
-            <div className="relative z-10 w-full max-w-md mx-4 rounded-xl border border-border-light bg-surface-elevated shadow-xl overflow-hidden">
-              <div className="flex items-center gap-3 px-4">
-                <Search size={18} className="shrink-0 text-content-tertiary" />
-                <input
-                  ref={searchRef}
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleSearch(searchQuery);
-                    if (e.key === 'Escape') { setSearchOpen(false); setSearchQuery(''); }
-                  }}
-                  placeholder={t('common.search_placeholder', { defaultValue: 'Search costs, projects...' })}
-                  aria-label={t('common.search_placeholder', { defaultValue: 'Search costs, projects...' })}
-                  className="flex-1 h-12 bg-transparent text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none"
-                  autoComplete="off"
-                />
-                <kbd className="text-2xs text-content-tertiary font-mono bg-surface-secondary border border-border-light rounded px-1.5 py-0.5">Esc</kbd>
-              </div>
-              {searchQuery.trim().length >= 2 && (
-                <div className="border-t border-border-light px-4 py-3 text-sm text-content-secondary">
-                  {t('common.search_hint', { defaultValue: 'Press Enter to search in Cost Database' })}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-        {!searchOpen && (
-          <button
-            onClick={() => setSearchOpen(true)}
-            className={clsx(
-              'hidden sm:flex h-9 items-center gap-2 rounded-lg px-3',
-              'border border-border bg-surface-secondary',
-              'text-sm text-content-tertiary',
-              'transition-all duration-fast ease-oe',
-              'hover:border-content-tertiary hover:text-content-secondary',
-              'w-48 lg:w-56',
-            )}
-          >
-            <Search size={15} strokeWidth={1.75} />
-            <span>{t('common.search')}</span>
-            <kbd className="ml-auto text-2xs text-content-tertiary font-mono bg-surface-primary border border-border-light rounded px-1.5 py-0.5">
-              /
-            </kbd>
-          </button>
-        )}
+        {/* Search — opens CommandPalette */}
+        <button
+          onClick={openCommandPalette}
+          className={clsx(
+            'hidden sm:flex h-9 items-center gap-2 rounded-lg px-3',
+            'border border-border bg-surface-secondary',
+            'text-sm text-content-tertiary',
+            'transition-all duration-fast ease-oe',
+            'hover:border-content-tertiary hover:text-content-secondary',
+            'w-48 lg:w-56',
+          )}
+        >
+          <Search size={15} strokeWidth={1.75} />
+          <span>{t('common.search')}</span>
+          <kbd className="ml-auto text-2xs text-content-tertiary font-mono bg-surface-primary border border-border-light rounded px-1.5 py-0.5">
+            /
+          </kbd>
+        </button>
 
         {/* Mobile search icon */}
-        {!searchOpen && (
-          <button
-            onClick={() => setSearchOpen(true)}
-            className="flex sm:hidden h-8 w-8 items-center justify-center rounded-lg text-content-secondary hover:bg-surface-secondary"
-          >
-            <Search size={17} />
-          </button>
-        )}
+        <button
+          onClick={openCommandPalette}
+          className="flex sm:hidden h-8 w-8 items-center justify-center rounded-lg text-content-secondary hover:bg-surface-secondary"
+        >
+          <Search size={17} />
+        </button>
 
         {/* Keyboard shortcuts hint */}
         <button
@@ -193,26 +134,63 @@ export function Header({ title, onMenuClick, onFeedbackClick }: HeaderProps) {
           </kbd>
         </button>
 
+        {/* Bug report — downloads anonymized error log + opens contact form */}
+        <button
+          onClick={() => {
+            const blob = exportErrorReport();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `openconstructionerp-report-${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            window.open('https://openconstructionerp.com/contact.html?report=true', '_blank');
+          }}
+          className={clsx(
+            'hidden sm:flex h-8 items-center gap-1.5 rounded-lg px-2.5',
+            'text-xs font-medium',
+            'text-content-tertiary border border-border-light',
+            'transition-all duration-fast ease-oe',
+            'hover:bg-surface-secondary hover:text-content-secondary',
+          )}
+          title={t('feedback.report_issue', { defaultValue: 'Report Issue' })}
+        >
+          <Bug size={14} />
+          <span className="hidden lg:inline">{t('feedback.report_issue', { defaultValue: 'Report Issue' })}</span>
+        </button>
+
         {/* Feedback */}
-        {onFeedbackClick && (
-          <button
-            onClick={onFeedbackClick}
-            className={clsx(
-              'flex h-8 items-center gap-1.5 rounded-lg px-2.5',
-              'text-xs font-medium',
-              'bg-amber-50 text-amber-700 border border-amber-200',
-              'dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800',
-              'transition-all duration-fast ease-oe',
-              'hover:bg-amber-100 hover:border-amber-300',
-              'dark:hover:bg-amber-900/30',
-            )}
-            title={t('feedback.title', { defaultValue: 'Send Feedback' })}
-            aria-label={t('feedback.title', { defaultValue: 'Send Feedback' })}
-          >
-            <MessageSquarePlus size={14} strokeWidth={1.75} />
-            <span className="hidden sm:inline">{t('feedback.title', { defaultValue: 'Feedback' })}</span>
-          </button>
-        )}
+        <a
+          href="https://openconstructionerp.com/contact.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => {
+            // Auto-download error log when opening feedback (if there are logged errors)
+            if (getErrorCount() > 0) {
+              const blob = exportErrorReport();
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `openconstructionerp-log-${new Date().toISOString().slice(0, 10)}.json`;
+              a.click();
+              URL.revokeObjectURL(url);
+            }
+          }}
+          className={clsx(
+            'flex h-8 items-center gap-1.5 rounded-lg px-2.5',
+            'text-xs font-medium',
+            'bg-amber-50 text-amber-700 border border-amber-200',
+            'dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800',
+            'transition-all duration-fast ease-oe',
+            'hover:bg-amber-100 hover:border-amber-300',
+            'dark:hover:bg-amber-900/30',
+          )}
+          title={t('feedback.title', { defaultValue: 'Send Feedback' })}
+          aria-label={t('feedback.title', { defaultValue: 'Send Feedback' })}
+        >
+          <MessageSquarePlus size={14} strokeWidth={1.75} />
+          <span className="hidden sm:inline">{t('feedback.title', { defaultValue: 'Feedback' })}</span>
+        </a>
 
         {/* Notification bell */}
         <NotificationBell />

@@ -10,6 +10,7 @@
   --oe-blue: #0071e3;
   --oe-blue-hover: #0077ed;
   --oe-blue-active: #006edb;
+  --oe-blue-dark: #005bb5;
   --oe-blue-subtle: #e8f2fe;
 
   /* Surfaces */
@@ -27,6 +28,7 @@
   --oe-text-primary: #1d1d1f;
   --oe-text-secondary: #6e6e73;
   --oe-text-tertiary: #86868b;
+  --oe-text-quaternary: #aeaeb2;
   --oe-text-inverse: #ffffff;
 
   /* Semantic */
@@ -90,6 +92,7 @@
   --oe-blue: #3b82f6;
   --oe-blue-hover: #60a5fa;
   --oe-blue-active: #2563eb;
+  --oe-blue-dark: #1d4ed8;
   --oe-blue-subtle: rgba(59, 130, 246, 0.15);
 
   /* Surfaces — deep blue-gray palette */
@@ -107,6 +110,7 @@
   --oe-text-primary: #f0f0f5;
   --oe-text-secondary: #a0a3b5;
   --oe-text-tertiary: #6b6e80;
+  --oe-text-quaternary: #4a4d5e;
   --oe-text-inverse: #0f1117;
 
   /* Semantic — adjusted for dark backgrounds */
@@ -978,4 +982,237 @@ tbody tr:nth-child(20) { animation-delay: 570ms; }
 }
 .scrollbar-none::-webkit-scrollbar {
   display: none;
+}
+
+/* ── Auth Page — Construction Background ───────────────────────────── */
+/* LEFT: Animated estimation table filling left ~50% of viewport       */
+/* RIGHT: Dashboard cards (bar chart, donut, KPIs, S-curve, blueprint) */
+
+:root {
+  --oce-bp-color: rgba(0, 70, 210, 0.38);
+}
+
+.dark {
+  --oce-bp-color: rgba(100, 160, 255, 0.25);
+}
+
+.oce-auth-bg {
+  z-index: 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   LEFT SIDE — Animated Estimation Table
+   ═══════════════════════════════════════════════════════ */
+
+.oce-bg-table-wrap {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  /* Fill entire left half — generous sizing */
+  left: -30px;
+  top: -20px;
+  width: 52vw;
+  max-width: 720px;
+  height: 105vh;
+  /* 3D tilt for depth */
+  transform: perspective(1400px) rotateX(12deg) rotateY(2deg);
+  transform-origin: top left;
+  /* Fade out toward center — visible but not overpowering */
+  mask-image: radial-gradient(ellipse 70% 65% at 30% 45%, rgba(0,0,0,.85) 10%, rgba(0,0,0,.5) 35%, rgba(0,0,0,.15) 60%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 65% at 30% 45%, rgba(0,0,0,.85) 10%, rgba(0,0,0,.5) 35%, rgba(0,0,0,.15) 60%, transparent 80%);
+}
+
+.oce-table-grid {
+  display: grid;
+  grid-template-columns: 60px 200px 48px 70px 78px 90px 54px;
+  gap: 0;
+}
+
+.oce-cell {
+  height: 34px;
+  background: transparent;
+  border: 1px solid rgba(0, 80, 220, 0.06);
+  transition: background 0.7s, border-color 0.7s, color 0.5s;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  font-size: 11px;
+  color: transparent;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.oce-cell-right { justify-content: flex-end; }
+
+.oce-cell-header {
+  background: rgba(0, 80, 220, 0.05);
+  border-bottom: 1.5px solid rgba(0, 80, 220, 0.12);
+  height: 28px;
+  font-family: var(--oe-font-sans);
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(0, 80, 220, 0.4);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.oce-cell-pos {
+  font-size: 10px;
+  color: rgba(0, 80, 220, 0.3);
+  background: rgba(0, 80, 220, 0.02);
+  border-right: 1px solid rgba(0, 80, 220, 0.08);
+}
+
+.oce-cell-desc { font-family: var(--oe-font-sans); font-size: 11px; }
+.oce-cell-total { font-weight: 700; }
+
+.oce-cell-section {
+  background: rgba(0, 80, 220, 0.025);
+  border-top: 1.5px solid rgba(0, 80, 220, 0.08);
+  font-weight: 700;
+  font-family: var(--oe-font-sans);
+  font-size: 11px;
+}
+
+/* Cell activation levels — light / medium / high */
+.oce-cell.on   { background: rgba(0,80,220,.08);  border-color: rgba(0,80,220,.12); color: rgba(0,60,200,.38); }
+.oce-cell.on-m { background: rgba(0,80,220,.14);  border-color: rgba(0,80,220,.18); color: rgba(0,60,200,.52); }
+.oce-cell.on-h { background: rgba(0,80,220,.20);  border-color: rgba(0,80,220,.24); color: rgba(0,60,200,.68); }
+
+/* Dark mode */
+.dark .oce-cell { border-color: rgba(100,160,255,.04); }
+.dark .oce-cell-header { background: rgba(100,160,255,.03); border-bottom-color: rgba(100,160,255,.08); color: rgba(100,160,255,.3); }
+.dark .oce-cell-pos { color: rgba(100,160,255,.2); background: rgba(100,160,255,.015); border-right-color: rgba(100,160,255,.06); }
+.dark .oce-cell-section { background: rgba(100,160,255,.025); border-top-color: rgba(100,160,255,.08); }
+.dark .oce-cell.on   { background: rgba(100,160,255,.06); border-color: rgba(100,160,255,.08); color: rgba(100,160,255,.28); }
+.dark .oce-cell.on-m { background: rgba(100,160,255,.10); border-color: rgba(100,160,255,.13); color: rgba(100,160,255,.4); }
+.dark .oce-cell.on-h { background: rgba(100,160,255,.15); border-color: rgba(100,160,255,.18); color: rgba(100,160,255,.55); }
+
+/* ═══════════════════════════════════════════════════════
+   RIGHT SIDE — Dashboard Grid
+   Same visual treatment as the table: 3D tilt, mask fade
+   ═══════════════════════════════════════════════════════ */
+
+.oce-bg-dash-wrap {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  /* Fill right half — generous sizing, pushed to the edge */
+  right: 10px;
+  top: -10px;
+  width: 44vw;
+  max-width: 600px;
+  height: 105vh;
+  /* 3D tilt — mirrored from left, slightly more dramatic */
+  transform: perspective(1200px) rotateX(14deg) rotateY(-3deg);
+  transform-origin: top right;
+  /* Softer fade — let the dashboard be clearly visible */
+  mask-image: radial-gradient(ellipse 80% 75% at 75% 45%, rgba(0,0,0,.9) 20%, rgba(0,0,0,.55) 50%, rgba(0,0,0,.15) 75%, transparent 95%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 75% at 75% 45%, rgba(0,0,0,.9) 20%, rgba(0,0,0,.55) 50%, rgba(0,0,0,.15) 75%, transparent 95%);
+}
+
+.oce-bg-dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 4px;
+}
+
+.oce-dash-cell {
+  min-width: 0;
+}
+
+.oce-dash-cell svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Full-width cards span both columns */
+.oce-dash-wide {
+  grid-column: 1 / -1;
+}
+
+.dark .oce-bg-dash-wrap { opacity: 0.75; }
+
+/* ═══════════════════════════════════════════════════════
+   Responsive & Accessibility
+   ═══════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  .oce-bg-table-wrap {
+    width: 48vw;
+    left: -40px;
+  }
+  .oce-bg-dash-wrap {
+    width: 44vw;
+    right: -30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .oce-bg-table-wrap,
+  .oce-bg-dash-wrap {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oce-cell { transition: none; }
+}
+
+/* ── Logo Animations ───────────────────────────────────────────────── */
+
+@keyframes oeBgScale {
+  0% { transform: scale(0.5) rotate(-8deg); opacity: 0; }
+  60% { transform: scale(1.05) rotate(1deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes oeBarGrow {
+  0% { transform: scaleY(0) translateY(8px); opacity: 0; }
+  50% { transform: scaleY(1.12) translateY(-2px); opacity: 1; }
+  70% { transform: scaleY(0.95) translateY(0); opacity: 1; }
+  100% { transform: scaleY(1) translateY(0); opacity: 1; }
+}
+
+@keyframes oeBuildingSlide {
+  0% { transform: translateX(40px) translateY(10px) scale(0.9); opacity: 0; }
+  60% { transform: translateX(-4px) translateY(0) scale(1.02); opacity: 1; }
+  100% { transform: translateX(0) translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes oeWindowFade {
+  0% { opacity: 0; transform: scale(0.5); }
+  60% { opacity: 1; transform: scale(1.15); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes oeLogoFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes oeLogoGlow {
+  0%, 100% { filter: drop-shadow(0 0 0 transparent); }
+  50% { filter: drop-shadow(0 2px 8px rgba(0, 102, 255, 0.25)); }
+}
+
+/* ── Chat / iMessage Animations ──────────────────────────────────── */
+
+@keyframes oeMsgIn {
+  0% { opacity: 0; transform: translateY(12px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-msg-in {
+  animation: oeMsgIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes oeTypingDot {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-4px); }
 }

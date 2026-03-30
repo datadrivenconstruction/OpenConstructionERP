@@ -27,11 +27,11 @@ function getPercentileColor(pct: number): string {
   return 'text-red-600 dark:text-red-400';
 }
 
-function getPercentileLabel(pct: number): string {
-  if (pct <= 25) return 'Below average (cost-effective)';
-  if (pct <= 50) return 'Below median';
-  if (pct <= 75) return 'Above median';
-  return 'Above average (premium)';
+function getPercentileLabelKey(pct: number): { key: string; defaultValue: string } {
+  if (pct <= 25) return { key: 'benchmarks.pct_below_avg', defaultValue: 'Below average (cost-effective)' };
+  if (pct <= 50) return { key: 'benchmarks.pct_below_median', defaultValue: 'Below median' };
+  if (pct <= 75) return { key: 'benchmarks.pct_above_median', defaultValue: 'Above median' };
+  return { key: 'benchmarks.pct_above_avg', defaultValue: 'Above average (premium)' };
 }
 
 /* ── Component ─────────────────────────────────────────────────────── */
@@ -180,7 +180,7 @@ export default function BenchmarkModule() {
             P{analysis.percentile.toFixed(0)}
           </p>
           <p className="text-xs text-content-tertiary mt-1">
-            {getPercentileLabel(analysis.percentile)}
+            {(() => { const lbl = getPercentileLabelKey(analysis.percentile); return t(lbl.key, { defaultValue: lbl.defaultValue }); })()}
           </p>
         </div>
 
@@ -228,9 +228,9 @@ export default function BenchmarkModule() {
           {/* Labels below */}
           <div className="flex justify-between mt-2 text-2xs text-content-quaternary">
             <span>{formatCurrency(benchmarkRange.min, regionInfo.currency)}</span>
-            <span>Q1: {formatCurrency(benchmarkRange.q1, regionInfo.currency)}</span>
-            <span>Median: {formatCurrency(benchmarkRange.median, regionInfo.currency)}</span>
-            <span>Q3: {formatCurrency(benchmarkRange.q3, regionInfo.currency)}</span>
+            <span>{t('benchmarks.q1_short', { defaultValue: 'Q1' })}: {formatCurrency(benchmarkRange.q1, regionInfo.currency)}</span>
+            <span>{t('benchmarks.median', { defaultValue: 'Median' })}: {formatCurrency(benchmarkRange.median, regionInfo.currency)}</span>
+            <span>{t('benchmarks.q3_short', { defaultValue: 'Q3' })}: {formatCurrency(benchmarkRange.q3, regionInfo.currency)}</span>
             <span>{formatCurrency(benchmarkRange.max, regionInfo.currency)}</span>
           </div>
         </div>
@@ -238,23 +238,23 @@ export default function BenchmarkModule() {
         {/* Range details table */}
         <div className="mt-4 grid grid-cols-5 gap-2 text-center text-xs">
           <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/20 p-2">
-            <p className="text-content-tertiary">Min</p>
+            <p className="text-content-tertiary">{t('benchmarks.min', { defaultValue: 'Min' })}</p>
             <p className="font-semibold text-content-primary">{formatCurrency(benchmarkRange.min, regionInfo.currency)}</p>
           </div>
           <div className="rounded-lg bg-green-50 dark:bg-green-950/20 p-2">
-            <p className="text-content-tertiary">Q1 (25th)</p>
+            <p className="text-content-tertiary">{t('benchmarks.q1', { defaultValue: 'Q1 (25th)' })}</p>
             <p className="font-semibold text-content-primary">{formatCurrency(benchmarkRange.q1, regionInfo.currency)}</p>
           </div>
           <div className="rounded-lg bg-blue-50 dark:bg-blue-950/20 p-2 ring-1 ring-blue-200 dark:ring-blue-800">
-            <p className="text-content-tertiary">Median</p>
+            <p className="text-content-tertiary">{t('benchmarks.median', { defaultValue: 'Median' })}</p>
             <p className="font-bold text-content-primary">{formatCurrency(benchmarkRange.median, regionInfo.currency)}</p>
           </div>
           <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 p-2">
-            <p className="text-content-tertiary">Q3 (75th)</p>
+            <p className="text-content-tertiary">{t('benchmarks.q3', { defaultValue: 'Q3 (75th)' })}</p>
             <p className="font-semibold text-content-primary">{formatCurrency(benchmarkRange.q3, regionInfo.currency)}</p>
           </div>
           <div className="rounded-lg bg-red-50 dark:bg-red-950/20 p-2">
-            <p className="text-content-tertiary">Max</p>
+            <p className="text-content-tertiary">{t('benchmarks.max', { defaultValue: 'Max' })}</p>
             <p className="font-semibold text-content-primary">{formatCurrency(benchmarkRange.max, regionInfo.currency)}</p>
           </div>
         </div>
@@ -276,6 +276,8 @@ export default function BenchmarkModule() {
                 className={`w-full flex items-center gap-3 rounded-lg px-3 py-2 text-left transition-all ${
                   isSelected ? 'bg-oe-blue/10 ring-1 ring-oe-blue' : 'hover:bg-surface-secondary'
                 }`}
+                aria-pressed={isSelected}
+                aria-label={t('benchmarks.select_type', { defaultValue: 'Select {{type}}', type: bt.label })}
               >
                 <span className="w-44 text-sm text-content-primary truncate">{bt.label}</span>
                 <div className="flex-1 h-4 bg-surface-secondary rounded-full overflow-hidden relative">

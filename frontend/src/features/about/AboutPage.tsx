@@ -5,7 +5,7 @@
 import { useTranslation } from 'react-i18next';
 import {
   Mail, Shield, BookOpen, Users, Award,
-  Code2, Building2, Briefcase,
+  Code2, Building2, Briefcase, Globe, ExternalLink,
 } from 'lucide-react';
 import { Card, Button, Badge } from '@/shared/ui';
 import { Changelog } from './Changelog';
@@ -37,6 +37,89 @@ export function AboutPage() {
         </div>
       </div>
 
+      {/* Founder & Creator */}
+      <Card className="animate-card-in" style={{ animationDelay: '50ms' }}>
+        <div className="p-6">
+          <div className="flex items-start gap-5">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-oe-blue to-blue-600 text-2xl font-bold text-white shadow-lg">
+              AB
+            </div>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-lg font-bold text-content-primary">
+                {t('about.founder_name', { defaultValue: 'Artem Boiko' })}
+              </h2>
+              <p className="text-sm text-oe-blue font-medium">
+                {t('about.founder_role', { defaultValue: 'Creator & Lead Developer' })}
+              </p>
+              <p className="mt-3 text-sm text-content-secondary leading-relaxed">
+                {t('about.founder_bio', { defaultValue: 'Data expert in the construction industry. Author of open-source tools — CWICR (construction cost database, 55,000+ items, 9 languages), cad2db (CAD/BIM to structured data pipeline), and various open workflows and data pipelines for construction estimation. Founder of Data Driven Construction — bringing modern technology, AI, and open data standards to the global construction industry.' })}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Badge variant="blue" size="sm">Construction data expert</Badge>
+                <Badge variant="blue" size="sm">CWICR & cad2db author</Badge>
+                <Badge variant="blue" size="sm">Open-source workflows</Badge>
+                <Badge variant="blue" size="sm">AI-first estimation</Badge>
+              </div>
+              <div className="mt-4 flex items-center gap-3">
+                <a
+                  href="https://datadrivenconstruction.io"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue px-3.5 py-2 text-sm font-medium text-white shadow-sm hover:bg-oe-blue/90 transition-colors"
+                >
+                  <Globe size={14} />
+                  datadrivenconstruction.io
+                  <ExternalLink size={12} />
+                </a>
+                <a
+                  href="https://github.com/datadrivenconstruction"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3.5 py-2 text-sm font-medium text-content-primary hover:bg-surface-secondary transition-colors"
+                >
+                  <Code2 size={14} />
+                  GitHub
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Data Driven Construction */}
+      <Card className="animate-card-in" style={{ animationDelay: '100ms' }}>
+        <div className="p-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Globe size={18} className="text-oe-blue" />
+            <h2 className="text-lg font-semibold text-content-primary">
+              {t('about.ddc_title', { defaultValue: 'Data Driven Construction' })}
+            </h2>
+          </div>
+          <p className="text-sm text-content-secondary leading-relaxed mb-4">
+            {t('about.ddc_desc', { defaultValue: 'The company behind OpenConstructionERP. Data Driven Construction develops open-source tools and commercial solutions for the global construction industry. Our mission: make professional cost estimation accessible, transparent, and AI-augmented — from a solo quantity surveyor to enterprise-scale contractors.' })}
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="rounded-xl border border-border-light bg-surface-secondary/30 p-4 text-center">
+              <div className="text-2xl font-bold text-content-primary">CWICR</div>
+              <div className="text-xs text-content-tertiary mt-1">
+                {t('about.ddc_cwicr', { defaultValue: '55,000+ cost items across 9 languages and 11 regional price databases' })}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border-light bg-surface-secondary/30 p-4 text-center">
+              <div className="text-2xl font-bold text-content-primary">cad2db</div>
+              <div className="text-xs text-content-tertiary mt-1">
+                {t('about.ddc_cad2db', { defaultValue: 'CAD/BIM to database pipeline — DWG, RVT, IFC to structured quantities' })}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border-light bg-surface-secondary/30 p-4 text-center">
+              <div className="text-2xl font-bold text-content-primary">DDC</div>
+              <div className="text-xs text-content-tertiary mt-1">
+                {t('about.ddc_platform', { defaultValue: 'Consulting, training, and enterprise solutions for digital construction' })}
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
 
       {/* Consulting Services */}
       <Card>
@@ -75,7 +158,7 @@ export function AboutPage() {
               </Button>
             </a>
             <span className="text-xs text-content-tertiary">
-              {t('about.contact_hint', { defaultValue: 'Available worldwide in English, German, and Russian' })}
+              {t('about.contact_hint', { defaultValue: 'Available worldwide' })}
             </span>
           </div>
         </div>
@@ -93,9 +176,9 @@ export function AboutPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
               { value: '55K+', label: t('about.stat_costs', { defaultValue: 'Cost Items' }) },
-              { value: '20', label: t('about.stat_langs', { defaultValue: 'Languages' }) },
-              { value: '11', label: t('about.stat_regions', { defaultValue: 'Regional DBs' }) },
-              { value: '18', label: t('about.stat_rules', { defaultValue: 'Validation Rules' }) },
+              { value: '21', label: t('about.stat_langs', { defaultValue: 'Languages' }) },
+              { value: '20', label: t('about.stat_regions', { defaultValue: 'Regional Standards' }) },
+              { value: '42', label: t('about.stat_rules', { defaultValue: 'Validation Rules' }) },
             ].map((s, i) => (
               <div key={i} className="text-center rounded-xl bg-surface-secondary/50 p-4">
                 <div className="text-2xl font-bold text-content-primary">{s.value}</div>
@@ -141,7 +224,11 @@ export function AboutPage() {
       {/* Credits */}
       <div className="text-center py-4 text-xs text-content-quaternary">
         <p className="flex items-center justify-center gap-1">
-          {t('about.built_by', { defaultValue: 'Created by Artem Boiko · Data Driven Construction' })}
+          {t('about.built_by', { defaultValue: 'Created by Artem Boiko' })}
+          {' · '}
+          <a href="https://datadrivenconstruction.io" target="_blank" rel="noopener noreferrer" className="hover:text-oe-blue transition-colors">
+            datadrivenconstruction.io
+          </a>
         </p>
         <p className="mt-1">&copy; 2026 Data Driven Construction. All rights reserved.</p>
       </div>

@@ -7,6 +7,8 @@ Stateless service layer. Handles:
 """
 
 import logging
+import os
+import re
 import uuid
 from pathlib import Path
 from typing import Any
@@ -22,6 +24,19 @@ logger = logging.getLogger(__name__)
 
 # Base directory for file uploads
 UPLOAD_BASE = Path.home() / ".openestimator" / "uploads"
+
+# Security constants
+MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
+VALID_CATEGORIES = {"drawing", "contract", "specification", "photo", "correspondence", "other"}
+
+
+def _sanitize_filename(name: str) -> str:
+    """Remove path components and dangerous characters from filename."""
+    name = os.path.basename(name)
+    name = re.sub(r"[^\w.\-]", "_", name)
+    if not name or name.startswith("."):
+        name = "untitled"
+    return name
 
 
 class DocumentService:
@@ -40,20 +55,42 @@ class DocumentService:
         category: str,
         user_id: str,
     ) -> Document:
-        """Upload a file and create a document record."""
+        """Upload a file and create a document record.
+
+        Security measures:
+        - Filename sanitization (path traversal prevention)
+        - File size validation (max 100MB)
+        - Category validation against allowed list
+        - UUID-prefixed storage path to avoid collisions
+        - File written AFTER DB record creation for easy rollback
+        """
+        # Sanitize filename
+        raw_name = file.filename or "untitled"
+        safe_name = _sanitize_filename(raw_name)
+
+        # Validate category
+        if category not in VALID_CATEGORIES:
+            category = "other"
+
+        # Read file content and validate size
+        content = await file.read()
+        if len(content) > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail=f"File too large. Maximum size is {MAX_FILE_SIZE // (1024 * 1024)}MB.",
+            )
+
+        # Build storage path with UUID prefix to avoid collisions
+        file_uuid = uuid.uuid4().hex[:12]
+        storage_name = f"{file_uuid}_{safe_name}"
         upload_dir = UPLOAD_BASE / str(project_id)
         upload_dir.mkdir(parents=True, exist_ok=True)
+        file_path = upload_dir / storage_name
 
-        filename = file.filename or "untitled"
-        file_path = upload_dir / filename
-
-        # Read file content
-        content = await file.read()
-        file_path.write_bytes(content)
-
+        # Create DB record FIRST — if this fails we haven't written a file
         document = Document(
             project_id=project_id,
-            name=filename,
+            name=safe_name,
             category=category,
             file_size=len(content),
             mime_type=file.content_type or "",
@@ -62,9 +99,19 @@ class DocumentService:
         )
         document = await self.repo.create(document)
 
+        # Write file AFTER DB record so we can rollback cleanly
+        try:
+            file_path.write_bytes(content)
+        except Exception:
+            logger.exception("Failed to write file to disk: %s", file_path)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to save file to disk.",
+            )
+
         logger.info(
             "Document uploaded: %s (%d bytes) for project %s",
-            filename,
+            safe_name,
             len(content),
             project_id,
         )
@@ -126,36 +173,41 @@ class DocumentService:
     # ── Delete ─────────────────────────────────────────────────────────────
 
     async def delete_document(self, document_id: uuid.UUID) -> None:
-        """Delete a document and its file."""
-        document = await self.get_document(document_id)
+        """Delete a document and its file.
 
-        # Remove file from disk
+        DB record is deleted first so a failure there prevents orphan file removal.
+        File removal failure is logged but not fatal — leaves an orphan file rather
+        than an orphan DB record pointing to a missing file.
+        """
+        document = await self.get_document(document_id)
+        file_path_str = document.file_path
+
+        # Delete DB record FIRST — this is the authoritative state
+        await self.repo.delete(document_id)
+        logger.info("Document deleted: %s", document_id)
+
+        # Then remove file from disk (best-effort)
         try:
-            file_path = Path(document.file_path)
+            file_path = Path(file_path_str)
             if file_path.exists():
                 file_path.unlink()
                 logger.info("File removed: %s", file_path)
         except Exception:
-            logger.warning("Failed to remove file: %s", document.file_path)
-
-        await self.repo.delete(document_id)
-        logger.info("Document deleted: %s", document_id)
+            logger.warning("Failed to remove file: %s", file_path_str)
 
     # ── Summary ────────────────────────────────────────────────────────────
 
     async def get_summary(self, project_id: uuid.UUID) -> dict[str, Any]:
-        """Get aggregated stats for a project's documents."""
-        items = await self.repo.all_for_project(project_id)
+        """Get aggregated stats for a project's documents.
 
-        by_category: dict[str, int] = {}
-        total_size = 0
+        Uses SQL COUNT/SUM aggregation instead of loading all records into memory.
+        """
+        total_count, total_size, cat_rows = await self.repo.summary_for_project(project_id)
 
-        for item in items:
-            by_category[item.category] = by_category.get(item.category, 0) + 1
-            total_size += item.file_size
+        by_category: dict[str, int] = {cat: count for cat, count in cat_rows}
 
         return {
-            "total_documents": len(items),
+            "total_documents": total_count,
             "total_size_bytes": total_size,
             "by_category": by_category,
         }

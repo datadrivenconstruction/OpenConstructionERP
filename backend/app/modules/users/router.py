@@ -12,14 +12,18 @@ Endpoints:
     GET  /me/api-keys           — List own API keys
     POST /me/api-keys           — Create API key
     DELETE /me/api-keys/{id}    — Revoke API key
+    GET  /me/module-preferences — Get saved module preferences
+    PATCH /me/module-preferences — Save module preferences
     GET  /                      — List users (admin/manager)
     GET  /{id}                  — Get user by ID (admin/manager)
     PATCH /{id}                 — Update user (admin only)
 """
 
 import uuid
+from typing import Any
 
 from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel
 
 from app.dependencies import (
     CurrentUserId,
@@ -46,6 +50,12 @@ from app.modules.users.schemas import (
     UserUpdate,
 )
 from app.modules.users.service import UserService
+
+
+class ModulePreferencesPayload(BaseModel):
+    """Request/response body for module preferences."""
+
+    modules: dict[str, bool]
 
 router = APIRouter()
 
@@ -173,6 +183,38 @@ async def revoke_api_key(
 ) -> None:
     """Revoke (deactivate) an API key."""
     await service.revoke_api_key(uuid.UUID(user_id), key_id)
+
+
+# ── Module Preferences ────────────────────────────────────────────────────
+
+
+@router.get("/me/module-preferences", response_model=ModulePreferencesPayload)
+async def get_module_preferences(
+    user_id: CurrentUserId,
+    service: UserService = Depends(_get_service),
+) -> ModulePreferencesPayload:
+    """Get saved module visibility preferences for the current user."""
+    user = await service.get_user(uuid.UUID(user_id))
+    metadata: dict[str, Any] = user.metadata_ or {}
+    prefs: dict[str, bool] = metadata.get("module_preferences", {})
+    return ModulePreferencesPayload(modules=prefs)
+
+
+@router.patch("/me/module-preferences", response_model=ModulePreferencesPayload)
+async def save_module_preferences(
+    data: ModulePreferencesPayload,
+    user_id: CurrentUserId,
+    service: UserService = Depends(_get_service),
+) -> ModulePreferencesPayload:
+    """Save module visibility preferences for the current user.
+
+    Stores the mapping in the user's metadata JSON under key ``module_preferences``.
+    """
+    user = await service.get_user(uuid.UUID(user_id))
+    metadata: dict[str, Any] = dict(user.metadata_ or {})
+    metadata["module_preferences"] = data.modules
+    await service.update_profile(uuid.UUID(user_id), metadata_=metadata)
+    return ModulePreferencesPayload(modules=data.modules)
 
 
 # ── Admin: User management ─────────────────────────────────────────────────

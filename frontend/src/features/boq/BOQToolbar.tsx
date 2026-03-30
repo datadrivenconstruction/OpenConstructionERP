@@ -181,7 +181,7 @@ export function BOQToolbar({
         <Button variant="ghost" size="sm" icon={<Upload size={15} />} onClick={onImportClick} loading={isImporting} disabled={isImporting}>
           {t('common.import', { defaultValue: 'Import' })}
         </Button>
-        <input ref={importInputRef} type="file" accept=".xlsx,.csv,.pdf,.jpg,.jpeg,.png,.tiff,.rvt,.ifc,.dwg,.dgn" className="hidden" onChange={onImportInputChange} />
+        <input ref={importInputRef} type="file" accept=".xlsx,.csv,.pdf,.jpg,.jpeg,.png,.tiff,.rvt,.ifc,.dwg,.dgn" className="hidden" onChange={onImportInputChange} aria-label={t('common.import', { defaultValue: 'Import' })} />
         {onPasteFromExcel && (
           <Button variant="ghost" size="sm" icon={<ClipboardPaste size={15} />} onClick={onPasteFromExcel} title={t('boq.paste_from_excel', { defaultValue: 'Paste from Excel' })}>
             <span className="hidden xl:inline">{t('boq.paste_from_excel', { defaultValue: 'Paste' })}</span>
@@ -193,19 +193,19 @@ export function BOQToolbar({
           </Button>
           {showExportMenu && (
             <div role="menu" className="absolute left-0 top-full mt-1 z-50 w-44 rounded-lg border border-border-light bg-surface-elevated shadow-md animate-fade-in">
-              <button onClick={() => handleExportItem('excel')} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors rounded-t-lg">
+              <button role="menuitem" onClick={() => handleExportItem('excel')} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors rounded-t-lg">
                 <FileSpreadsheet size={15} className="text-content-tertiary" />
                 {t('boq.export_format_excel', { defaultValue: 'Excel (.xlsx)' })}
               </button>
-              <button onClick={() => handleExportItem('csv')} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors">
+              <button role="menuitem" onClick={() => handleExportItem('csv')} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors">
                 <FileText size={15} className="text-content-tertiary" />
                 {t('boq.export_format_csv', { defaultValue: 'CSV (.csv)' })}
               </button>
-              <button onClick={() => handleExportItem('pdf')} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors">
+              <button role="menuitem" onClick={() => handleExportItem('pdf')} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors">
                 <FileDown size={15} className="text-content-tertiary" />
                 {t('boq.export_format_pdf', { defaultValue: 'PDF' })}
               </button>
-              <button onClick={() => handleExportItem('gaeb')} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors rounded-b-lg">
+              <button role="menuitem" onClick={() => handleExportItem('gaeb')} className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors rounded-b-lg">
                 <FileText size={15} className="text-content-tertiary" />
                 {t('boq.export_format_gaeb', { defaultValue: 'GAEB XML (.x83)' })}
               </button>
@@ -281,6 +281,7 @@ export function BOQToolbar({
                 {onCancelAnomalies && (
                   <button
                     onClick={onCancelAnomalies}
+                    aria-label={t('common.cancel', { defaultValue: 'Cancel' })}
                     className="rounded-md px-1.5 py-1 text-2xs font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                   >
                     {t('common.cancel', { defaultValue: 'Cancel' })}

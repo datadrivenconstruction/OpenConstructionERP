@@ -28,18 +28,11 @@ import {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function fmtCurrency(n: number, locale = 'de-DE'): string {
+function fmtCurrency(n: number): string {
   const abs = Math.abs(n);
   if (abs >= 1_000_000) return `${n < 0 ? '-' : ''}${(n / 1_000_000).toFixed(2)}M`;
   if (abs >= 1_000) return `${n < 0 ? '-' : ''}${(n / 1_000).toFixed(1)}K`;
   return n.toFixed(0);
-}
-
-function pctColor(pct: number): string {
-  if (pct <= 25) return 'text-emerald-600 dark:text-emerald-400';
-  if (pct <= 50) return 'text-green-600 dark:text-green-400';
-  if (pct <= 75) return 'text-amber-600 dark:text-amber-400';
-  return 'text-red-600 dark:text-red-400';
 }
 
 // ---------------------------------------------------------------------------
@@ -265,6 +258,7 @@ function ParamRow({
   param: RiskParameter;
   onChange: (updated: RiskParameter) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <tr className="hover:bg-surface-secondary/30 transition-colors">
       <td className="px-3 py-1.5 font-mono text-2xs text-content-tertiary">{param.ordinal}</td>
@@ -281,6 +275,7 @@ function ParamRow({
           value={param.optimistic}
           onChange={(e) => onChange({ ...param, optimistic: parseFloat(e.target.value) || 0.85 })}
           className="w-16 rounded border border-border bg-surface-secondary px-1.5 py-1 text-xs text-center tabular-nums"
+          aria-label={`${t('risk.optimistic', { defaultValue: 'Optimistic' })} ${param.ordinal}`}
         />
       </td>
       <td className="px-1 py-1.5">
@@ -292,6 +287,7 @@ function ParamRow({
           value={param.pessimistic}
           onChange={(e) => onChange({ ...param, pessimistic: parseFloat(e.target.value) || 1.25 })}
           className="w-16 rounded border border-border bg-surface-secondary px-1.5 py-1 text-xs text-center tabular-nums"
+          aria-label={`${t('risk.pessimistic', { defaultValue: 'Pessimistic' })} ${param.ordinal}`}
         />
       </td>
       <td className="px-1 py-1.5">
@@ -299,10 +295,11 @@ function ParamRow({
           value={param.distribution}
           onChange={(e) => onChange({ ...param, distribution: e.target.value as DistributionType })}
           className="w-24 rounded border border-border bg-surface-secondary px-1 py-1 text-xs"
+          aria-label={`${t('risk.distribution', { defaultValue: 'Distribution' })} ${param.ordinal}`}
         >
-          <option value="triangular">Triangular</option>
-          <option value="pert">PERT</option>
-          <option value="uniform">Uniform</option>
+          <option value="triangular">{t('risk.dist_triangular', { defaultValue: 'Triangular' })}</option>
+          <option value="pert">{t('risk.dist_pert', { defaultValue: 'PERT' })}</option>
+          <option value="uniform">{t('risk.dist_uniform', { defaultValue: 'Uniform' })}</option>
         </select>
       </td>
     </tr>

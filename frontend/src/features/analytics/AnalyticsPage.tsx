@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { apiGet } from '@/shared/lib/api';
-import { fmtCurrency, fmtNumber } from '@/shared/lib/formatters';
+import { fmtCurrency, fmtNumber, getIntlLocale } from '@/shared/lib/formatters';
 import {
   FolderOpen,
   DollarSign,
@@ -11,8 +12,27 @@ import {
   ArrowUpDown,
   ChevronUp,
   ChevronDown,
+  Download,
 } from 'lucide-react';
-import { Card, Badge, Skeleton } from '@/shared/ui';
+import { Breadcrumb, Button, Card, Badge, Skeleton } from '@/shared/ui';
+
+/* ── Helpers ─────────────────────────────────────────────────────────── */
+
+function compactCurrency(value: number, currency = 'EUR'): string {
+  const safe = currency && /^[A-Z]{3}$/.test(currency) ? currency : 'EUR';
+  try {
+    return new Intl.NumberFormat(getIntlLocale(), {
+      style: 'currency',
+      currency: safe,
+      notation: 'compact',
+      maximumFractionDigits: 1,
+    }).format(value);
+  } catch {
+    if (Math.abs(value) >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M ${safe}`;
+    if (Math.abs(value) >= 1_000) return `${(value / 1_000).toFixed(0)}K ${safe}`;
+    return `${value.toFixed(0)} ${safe}`;
+  }
+}
 
 /* ── Types ────────────────────────────────────────────────────────────── */
 
@@ -46,17 +66,33 @@ type SortDir = 'asc' | 'desc';
 
 export function AnalyticsPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [sortField, setSortField] = useState<SortField>('budget');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const [regionFilter, setRegionFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [search, setSearch] = useState('');
 
   const { data, isLoading } = useQuery<AnalyticsOverview>({
     queryKey: ['analytics', 'overview'],
     queryFn: () => apiGet<AnalyticsOverview>('/v1/projects/analytics/overview'),
   });
 
+  const regions = useMemo(() => {
+    if (!data?.projects) return [];
+    return [...new Set(data.projects.map(p => p.region).filter(Boolean))].sort();
+  }, [data?.projects]);
+
   const sortedProjects = useMemo(() => {
     if (!data?.projects) return [];
-    return [...data.projects].sort((a, b) => {
+    let filtered = data.projects;
+    if (regionFilter) filtered = filtered.filter(p => p.region === regionFilter);
+    if (statusFilter) filtered = filtered.filter(p => p.status === statusFilter);
+    if (search) {
+      const q = search.toLowerCase();
+      filtered = filtered.filter(p => p.name.toLowerCase().includes(q));
+    }
+    return [...filtered].sort((a, b) => {
       let cmp = 0;
       if (sortField === 'name') {
         cmp = a.name.localeCompare(b.name);
@@ -65,7 +101,7 @@ export function AnalyticsPage() {
       }
       return sortDir === 'asc' ? cmp : -cmp;
     });
-  }, [data?.projects, sortField, sortDir]);
+  }, [data?.projects, sortField, sortDir, regionFilter, statusFilter, search]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -75,6 +111,29 @@ export function AnalyticsPage() {
       setSortDir('desc');
     }
   };
+
+  const handleExportCSV = useCallback(() => {
+    if (!sortedProjects.length) return;
+    const headers = ['Project', 'Region', 'Currency', 'Budget', 'Actual', 'Variance', 'Variance %', 'Status'];
+    const rows = sortedProjects.map(p => [
+      `"${p.name.replace(/"/g, '""')}"`,
+      p.region,
+      p.currency,
+      p.budget.toFixed(0),
+      p.actual.toFixed(0),
+      p.variance.toFixed(0),
+      `${p.variance_pct.toFixed(1)}%`,
+      p.status,
+    ].join(','));
+    const csv = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'analytics_export.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [sortedProjects]);
 
   // Find the max budget for bar chart scaling
   const maxBudget = useMemo(() => {
@@ -116,16 +175,36 @@ export function AnalyticsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Breadcrumb */}
+      <Breadcrumb
+        items={[
+          { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
+          { label: t('analytics.title', { defaultValue: 'Analytics' }) },
+        ]}
+        className="mb-4"
+      />
+
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-content-primary">
-          {t('analytics.title', { defaultValue: 'Cross-Project Analytics' })}
-        </h1>
-        <p className="mt-1 text-sm text-content-secondary">
-          {t('analytics.subtitle', {
-            defaultValue: 'Aggregated KPIs across all projects',
-          })}
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-content-primary">
+            {t('analytics.title', { defaultValue: 'Cross-Project Analytics' })}
+          </h1>
+          <p className="mt-1 text-sm text-content-secondary">
+            {t('analytics.subtitle', {
+              defaultValue: 'Aggregated KPIs across all projects',
+            })}
+          </p>
+        </div>
+        <Button
+          variant="secondary"
+          size="sm"
+          icon={<Download size={14} />}
+          onClick={handleExportCSV}
+          disabled={!sortedProjects.length}
+        >
+          {t('analytics.export_csv', { defaultValue: 'Export CSV' })}
+        </Button>
       </div>
 
       {/* KPI Cards */}
@@ -144,12 +223,12 @@ export function AnalyticsPage() {
         <KPICard
           icon={<DollarSign size={20} />}
           iconBg="bg-semantic-success-bg"
-          iconColor="text-[#15803d]"
+          iconColor="text-semantic-success"
           label={t('analytics.total_budget', { defaultValue: 'Total Budget' })}
-          value={fmtCurrency(data?.total_planned ?? 0)}
+          value={compactCurrency(data?.total_planned ?? 0)}
           sub={t('analytics.actual_spend', {
             defaultValue: '{{amount}} actual',
-            amount: fmtCurrency(data?.total_actual ?? 0),
+            amount: compactCurrency(data?.total_actual ?? 0),
           })}
         />
         <KPICard
@@ -160,10 +239,10 @@ export function AnalyticsPage() {
               : 'bg-semantic-error-bg'
           }
           iconColor={
-            (data?.total_variance ?? 0) >= 0 ? 'text-[#15803d]' : 'text-semantic-error'
+            (data?.total_variance ?? 0) >= 0 ? 'text-semantic-success' : 'text-semantic-error'
           }
           label={t('analytics.overall_variance', { defaultValue: 'Overall Variance' })}
-          value={fmtCurrency(data?.total_variance ?? 0)}
+          value={compactCurrency(data?.total_variance ?? 0)}
           badge={
             <Badge
               variant={(data?.total_variance ?? 0) >= 0 ? 'success' : 'error'}
@@ -181,7 +260,7 @@ export function AnalyticsPage() {
               : 'bg-semantic-success-bg'
           }
           iconColor={
-            (data?.over_budget_count ?? 0) > 0 ? 'text-semantic-error' : 'text-[#15803d]'
+            (data?.over_budget_count ?? 0) > 0 ? 'text-semantic-error' : 'text-semantic-success'
           }
           label={t('analytics.at_risk', { defaultValue: 'Projects at Risk' })}
           value={String(data?.over_budget_count ?? 0)}
@@ -195,6 +274,38 @@ export function AnalyticsPage() {
           <h2 className="text-lg font-semibold text-content-primary">
             {t('analytics.project_comparison', { defaultValue: 'Project Comparison' })}
           </h2>
+        </div>
+        <div className="px-6 py-3 border-b border-border-light flex flex-wrap items-center gap-3">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t('analytics.search_placeholder', { defaultValue: 'Search projects...' })}
+            className="h-8 w-48 rounded-lg border border-border-light bg-surface-primary px-3 text-xs focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            aria-label={t('analytics.search_placeholder', { defaultValue: 'Search projects...' })}
+          />
+          <select
+            value={regionFilter}
+            onChange={(e) => setRegionFilter(e.target.value)}
+            className="h-8 rounded-lg border border-border-light bg-surface-primary px-2 text-xs focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            aria-label={t('analytics.filter_region', { defaultValue: 'Filter by region' })}
+          >
+            <option value="">{t('analytics.all_regions', { defaultValue: 'All Regions' })}</option>
+            {regions.map(r => <option key={r} value={r}>{r}</option>)}
+          </select>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="h-8 rounded-lg border border-border-light bg-surface-primary px-2 text-xs focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            aria-label={t('analytics.filter_status', { defaultValue: 'Filter by status' })}
+          >
+            <option value="">{t('analytics.all_statuses', { defaultValue: 'All Statuses' })}</option>
+            <option value="on_budget">{t('analytics.on_budget', { defaultValue: 'On Budget' })}</option>
+            <option value="over_budget">{t('analytics.over_budget', { defaultValue: 'Over Budget' })}</option>
+          </select>
+          <span className="text-2xs text-content-tertiary ml-auto">
+            {sortedProjects.length} {t('analytics.of_total', { defaultValue: 'of' })} {data?.projects.length ?? 0}
+          </span>
         </div>
         {sortedProjects.length === 0 ? (
           <div className="px-6 py-12 text-center text-content-tertiary text-sm">
@@ -243,7 +354,7 @@ export function AnalyticsPage() {
                   />
                   <SortHeader
                     field="variance_pct"
-                    label="%"
+                    label={t('analytics.col_variance_pct', { defaultValue: 'Var. %' })}
                     current={sortField}
                     dir={sortDir}
                     onClick={handleSort}
@@ -258,7 +369,8 @@ export function AnalyticsPage() {
                 {sortedProjects.map((p) => (
                   <tr
                     key={p.id}
-                    className="hover:bg-surface-secondary/30 transition-colors"
+                    className="hover:bg-surface-secondary/30 transition-colors cursor-pointer"
+                    onClick={() => navigate(`/projects/${p.id}`)}
                   >
                     <td className="px-4 py-3 font-medium text-content-primary whitespace-nowrap">
                       {p.name}
@@ -274,7 +386,7 @@ export function AnalyticsPage() {
                     </td>
                     <td
                       className={`px-4 py-3 text-right tabular-nums font-medium whitespace-nowrap ${
-                        p.variance >= 0 ? 'text-[#15803d]' : 'text-semantic-error'
+                        p.variance >= 0 ? 'text-semantic-success' : 'text-semantic-error'
                       }`}
                     >
                       {p.variance >= 0 ? '+' : ''}
@@ -282,7 +394,7 @@ export function AnalyticsPage() {
                     </td>
                     <td
                       className={`px-4 py-3 text-right tabular-nums whitespace-nowrap ${
-                        p.variance_pct >= 0 ? 'text-[#15803d]' : 'text-semantic-error'
+                        p.variance_pct >= 0 ? 'text-semantic-success' : 'text-semantic-error'
                       }`}
                     >
                       {p.variance_pct >= 0 ? '+' : ''}
@@ -315,6 +427,7 @@ export function AnalyticsPage() {
           </h2>
           <div className="space-y-4">
             {[...sortedProjects]
+              .filter(p => p.budget > 0 || p.actual > 0)
               .sort((a, b) => b.budget - a.budget)
               .map((p) => {
                 const plannedPct = (p.budget / maxBudget) * 100;
@@ -438,6 +551,8 @@ function SortHeader({
         align === 'right' ? 'text-right' : 'text-left'
       }`}
       onClick={() => onClick(field)}
+      aria-sort={isActive ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+      role="columnheader"
     >
       <span className="inline-flex items-center gap-1">
         {label}

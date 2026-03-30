@@ -143,9 +143,9 @@ export default function SustainabilityModule() {
       {
         id: String(Date.now()),
         description: '',
-        materialId: EPD_MATERIALS[0].id,
+        materialId: EPD_MATERIALS[0]!.id,
         quantity: 0,
-        unit: EPD_MATERIALS[0].unit,
+        unit: EPD_MATERIALS[0]!.unit,
       },
     ]);
   };
@@ -206,7 +206,11 @@ export default function SustainabilityModule() {
               className="w-full rounded-lg border border-border bg-surface-secondary py-2 pl-9 pr-8 text-sm text-content-primary placeholder:text-content-quaternary focus:border-oe-blue focus:outline-none"
             />
             {search && (
-              <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2">
+              <button
+                onClick={() => setSearch('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2"
+                aria-label={t('common.clear_search', { defaultValue: 'Clear search' })}
+              >
                 <X className="h-4 w-4 text-content-quaternary hover:text-content-secondary" />
               </button>
             )}
@@ -217,6 +221,7 @@ export default function SustainabilityModule() {
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value as EPDCategory | 'all')}
             className="w-full mb-3 rounded-lg border border-border bg-surface-secondary py-1.5 px-3 text-sm text-content-primary"
+            aria-label={t('sustainability.filter_category', { defaultValue: 'Filter by category' })}
           >
             <option value="all">{t('common.all_categories', { defaultValue: 'All Categories' })}</option>
             {EPD_CATEGORIES.map((c) => (
@@ -234,6 +239,8 @@ export default function SustainabilityModule() {
                   <button
                     onClick={() => toggleCategory(cat)}
                     className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold text-content-secondary hover:bg-surface-secondary"
+                    aria-expanded={isExpanded}
+                    aria-label={t('sustainability.toggle_category', { defaultValue: 'Toggle {{category}}', category: catInfo?.label ?? cat })}
                   >
                     {isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
                     {catInfo?.label ?? cat}
@@ -286,7 +293,8 @@ export default function SustainabilityModule() {
 
             <div className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${cStyle.bg} ${cStyle.text}`}>
               <CIcon className="h-4 w-4" />
-              EU CPR: {carbonBreakdown.compliance.replace('-', ' ')}
+              {t('sustainability.eu_cpr_label', { defaultValue: 'EU CPR' })}:{' '}
+              {carbonBreakdown.compliance.replace('-', ' ')}
               <span className="text-xs opacity-75">
                 ({carbonBreakdown.gwpPerM2Year.toFixed(1)} kg CO2e/m2/yr)
               </span>
@@ -311,7 +319,7 @@ export default function SustainabilityModule() {
                     {t('common.unit', { defaultValue: 'Unit' })}
                   </th>
                   <th className="px-3 py-2 text-right text-xs font-medium text-content-tertiary">
-                    GWP (kg CO2e)
+                    {t('sustainability.gwp_column', { defaultValue: 'GWP (kg CO2e)' })}
                   </th>
                   <th className="px-3 py-2 w-8" />
                 </tr>
@@ -325,7 +333,8 @@ export default function SustainabilityModule() {
                         value={item.description}
                         onChange={(e) => updatePosition(item.id, 'description', e.target.value)}
                         className="w-full bg-transparent text-content-primary outline-none"
-                        placeholder="Position description"
+                        placeholder={t('sustainability.position_desc_placeholder', { defaultValue: 'Position description' })}
+                        aria-label={t('common.description', { defaultValue: 'Description' })}
                       />
                     </td>
                     <td className="px-3 py-2">
@@ -333,6 +342,7 @@ export default function SustainabilityModule() {
                         value={item.materialId}
                         onChange={(e) => updatePosition(item.id, 'materialId', e.target.value)}
                         className="w-full rounded border border-border bg-surface-secondary px-2 py-1 text-xs text-content-primary"
+                        aria-label={t('sustainability.material', { defaultValue: 'Material' })}
                       >
                         {EPD_CATEGORIES.map((cat) => (
                           <optgroup key={cat.id} label={cat.label}>
@@ -351,6 +361,7 @@ export default function SustainabilityModule() {
                         value={item.quantity}
                         onChange={(e) => updatePosition(item.id, 'quantity', Number(e.target.value) || 0)}
                         className="w-20 text-right bg-transparent text-content-primary outline-none"
+                        aria-label={t('common.quantity', { defaultValue: 'Quantity' })}
                       />
                     </td>
                     <td className="px-3 py-2 text-xs text-content-tertiary">{item.unit}</td>
@@ -361,6 +372,7 @@ export default function SustainabilityModule() {
                       <button
                         onClick={() => removePosition(item.id)}
                         className="text-content-quaternary hover:text-red-500"
+                        aria-label={t('sustainability.remove_position', { defaultValue: 'Remove position' })}
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -444,12 +456,14 @@ export default function SustainabilityModule() {
 
           {/* EU CPR info */}
           <div className="rounded-xl border border-border bg-surface-secondary/30 p-4 text-xs text-content-tertiary">
-            <p className="font-semibold text-content-secondary mb-1">EU CPR 2024/3110 — GWP Benchmarks (A1-A3, 50yr RSP)</p>
+            <p className="font-semibold text-content-secondary mb-1">
+              {t('sustainability.cpr_benchmarks_title', { defaultValue: 'EU CPR 2024/3110 — GWP Benchmarks (A1-A3, 50yr RSP)' })}
+            </p>
             <div className="flex flex-wrap gap-4 mt-2">
-              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500" /> Excellent: &le; {EU_CPR_BENCHMARKS.excellent} kg/m2/yr</span>
-              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-green-500" /> Good: &le; {EU_CPR_BENCHMARKS.good} kg/m2/yr</span>
-              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-amber-500" /> Acceptable: &le; {EU_CPR_BENCHMARKS.acceptable} kg/m2/yr</span>
-              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-red-500" /> Non-compliant: &gt; {EU_CPR_BENCHMARKS.limit} kg/m2/yr</span>
+              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500" /> {t('sustainability.level_excellent', { defaultValue: 'Excellent' })}: &le; {EU_CPR_BENCHMARKS.excellent} kg/m2/yr</span>
+              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-green-500" /> {t('sustainability.level_good', { defaultValue: 'Good' })}: &le; {EU_CPR_BENCHMARKS.good} kg/m2/yr</span>
+              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-amber-500" /> {t('sustainability.level_acceptable', { defaultValue: 'Acceptable' })}: &le; {EU_CPR_BENCHMARKS.acceptable} kg/m2/yr</span>
+              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-red-500" /> {t('sustainability.level_non_compliant', { defaultValue: 'Non-compliant' })}: &gt; {EU_CPR_BENCHMARKS.limit} kg/m2/yr</span>
             </div>
           </div>
         </div>

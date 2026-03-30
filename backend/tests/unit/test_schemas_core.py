@@ -188,7 +188,6 @@ class TestModuleInfoSchema:
         assert m.name == "oe_boq"
         assert m.category == "community"
         assert m.installed is False
-        assert m.update_available is False
         assert m.depends == []
 
     def test_full_creation(self):

@@ -74,12 +74,14 @@ export default function CollaborationModule() {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-2 text-sm text-content-primary"
-              placeholder="Your name"
+              placeholder={t('collab.name_placeholder', { defaultValue: 'Your name' })}
+              aria-label={t('collab.display_name', { defaultValue: 'Your display name' })}
             />
           </div>
           <button
             onClick={handleSaveName}
             className="mt-5 rounded-lg bg-oe-blue px-4 py-2 text-xs font-medium text-white hover:bg-oe-blue-hover transition-colors"
+            aria-label={t('collab.save_name', { defaultValue: 'Save display name' })}
           >
             {t('common.save', { defaultValue: 'Save' })}
           </button>
@@ -102,6 +104,8 @@ export default function CollaborationModule() {
               key={color}
               className="h-8 w-8 rounded-full border-2 border-surface-primary shadow-sm"
               style={{ backgroundColor: color }}
+              role="presentation"
+              aria-hidden="true"
             />
           ))}
         </div>

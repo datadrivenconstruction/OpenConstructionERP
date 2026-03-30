@@ -7,7 +7,7 @@ import {
   FileSpreadsheet, CalendarClock, TrendingUp, Boxes, Database,
   BarChart3, Upload, FileCheck,
 } from 'lucide-react';
-import { Button, Input, LogoWithText, CountryFlag } from '@/shared/ui';
+import { Button, Input, Logo, LogoWithText, CountryFlag } from '@/shared/ui';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { AuthBackground } from './AuthBackground';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
@@ -74,7 +74,7 @@ export function LoginPage() {
   const benefits = [
     { icon: HardDrive, color: 'text-emerald-500 bg-emerald-500/10', title: t('login.benefit.local', 'Your data stays on your computer'), desc: t('login.benefit.local_desc', 'No cloud. No third-party servers. Full control.') },
     { icon: ShieldCheck, color: 'text-blue-500 bg-blue-500/10', title: t('login.benefit.open_source', '100% open source'), desc: t('login.benefit.open_source_desc', 'Transparent code. No vendor lock-in.') },
-    { icon: Globe2, color: 'text-violet-500 bg-violet-500/10', title: t('login.benefit.standards', 'DIN 276 · NRM · MasterFormat'), desc: t('login.benefit.standards_desc', '55,000+ cost items, 11 databases.') },
+    { icon: Globe2, color: 'text-violet-500 bg-violet-500/10', title: t('login.benefit.standards', 'International standards'), desc: t('login.benefit.standards_desc', '55,000+ cost items across 11 regional databases worldwide.') },
     { icon: Brain, color: 'text-amber-500 bg-amber-500/10', title: t('login.benefit.ai', 'AI-assisted estimation'), desc: t('login.benefit.ai_desc', 'Smart suggestions. You decide, AI assists.') },
     { icon: Zap, color: 'text-rose-500 bg-rose-500/10', title: t('login.benefit.allinone', 'BOQ + 4D + 5D + Tendering'), desc: t('login.benefit.allinone_desc', 'Full workflow in one tool.') },
     { icon: Users, color: 'text-cyan-500 bg-cyan-500/10', title: t('login.benefit.free', 'Free for everyone'), desc: t('login.benefit.free_desc', 'No fees. No limits. By estimators.') },
@@ -116,6 +116,8 @@ export function LoginPage() {
 
       {/* ── Left: benefits (desktop) ── */}
       <div className="hidden lg:flex lg:w-[500px] xl:w-[540px] shrink-0 relative z-10 flex-col justify-center pl-14 xl:pl-20 pr-12 xl:pr-16 py-6">
+        {/* Semi-transparent backdrop so text doesn't merge with bg table */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white/70 via-white/50 to-transparent dark:from-[#0f1117]/70 dark:via-[#0f1117]/50 dark:to-transparent rounded-r-3xl" />
 
         {/* Eyebrow pill */}
         <div className="mb-5 animate-stagger-in" style={{ animationDelay: '0ms' }}>
@@ -175,7 +177,7 @@ export function LoginPage() {
 
         {/* Tags */}
         <div className="mt-5 flex flex-wrap gap-[5px] animate-stagger-in" style={{ animationDelay: '320ms' }}>
-          {['Bill of Quantities', '4D Scheduling', '5D Cost Model', 'AI Estimation', 'Tendering', 'CAD/BIM', 'PDF Takeoff', 'DIN 276', 'NRM', 'GAEB XML'].map((tag) => (
+          {['Bill of Quantities', '4D Scheduling', '5D Cost Model', 'AI Estimation', 'Tendering', 'CAD/BIM', 'PDF Takeoff', 'Multi-Standard', 'Import/Export', '20 Languages'].map((tag) => (
             <span key={tag} className="rounded-full bg-content-primary/[0.04] dark:bg-white/[0.06] px-2.5 py-[3px] text-[10px] font-medium text-content-tertiary/80 tracking-[0.01em]">
               {tag}
             </span>
@@ -203,7 +205,15 @@ export function LoginPage() {
         <div className="w-full max-w-[380px]">
           {/* Logo */}
           <div className="mb-5 flex flex-col items-center animate-stagger-in" style={{ animationDelay: '0ms' }}>
-            <LogoWithText size="lg" animate />
+            <div className="flex items-center gap-2.5">
+              <Logo size="md" animate />
+              <span
+                className="text-2xl font-extrabold text-content-primary whitespace-nowrap"
+                style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '-0.02em' }}
+              >
+                Open<span className="text-oe-blue">Construction</span><span className="text-content-quaternary font-semibold">ERP</span>
+              </span>
+            </div>
             <p className="mt-2 text-sm text-content-tertiary">{t('app.tagline')}</p>
           </div>
 

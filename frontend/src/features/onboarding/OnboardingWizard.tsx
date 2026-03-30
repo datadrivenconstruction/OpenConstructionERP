@@ -1,7 +1,8 @@
-import { useState, useCallback, useEffect, type FormEvent } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
+import i18n from 'i18next';
 import {
   ArrowRight,
   ArrowLeft,
@@ -11,41 +12,163 @@ import {
   EyeOff,
   ExternalLink,
   Loader2,
-  Building2,
   CheckCircle2,
   Database,
+  Globe,
+  BookOpen,
+  FolderOpen,
+  Rocket,
+  Package,
 } from 'lucide-react';
-import { Logo, Button, Input, CountryFlag } from '@/shared/ui';
+import { Logo, Button, CountryFlag } from '@/shared/ui';
+import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { projectsApi, type CreateProjectData } from '@/features/projects/api';
 import { aiApi, type AIProvider } from '@/features/ai/api';
+import { apiPost } from '@/shared/lib/api';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 7;
 
-interface RegionPreset {
+// ── Language → Region mapping ──────────────────────────────────────────────
+
+const LANG_TO_REGION: Record<string, string> = {
+  de: 'DE_BERLIN',
+  fr: 'FR_PARIS',
+  es: 'SP_BARCELONA',
+  pt: 'PT_SAOPAULO',
+  ru: 'RU_STPETERSBURG',
+  zh: 'ZH_SHANGHAI',
+  ar: 'AR_DUBAI',
+  hi: 'HI_MUMBAI',
+  en: 'ENG_TORONTO',
+  tr: 'ENG_TORONTO',
+  it: 'SP_BARCELONA',
+  ja: 'ZH_SHANGHAI',
+  ko: 'ZH_SHANGHAI',
+  nl: 'DE_BERLIN',
+  pl: 'DE_BERLIN',
+  cs: 'DE_BERLIN',
+  sv: 'DE_BERLIN',
+  no: 'DE_BERLIN',
+  da: 'DE_BERLIN',
+  fi: 'DE_BERLIN',
+  bg: 'DE_BERLIN',
+};
+
+// ── Language → Demo project mapping ────────────────────────────────────────
+
+const LANG_TO_DEMO: Record<string, string> = {
+  de: 'residential-berlin',
+  en: 'medical-us',
+  fr: 'school-paris',
+  ar: 'warehouse-dubai',
+};
+const DEFAULT_DEMO = 'office-london';
+
+// ── CWICR Database definitions ──────────────────────────────────────────────
+
+interface CWICRDatabase {
   id: string;
-  label: string;
+  name: string;
+  city: string;
+  lang: string;
   currency: string;
-  standard: string;
-  locale: string;
+  flagId: string;
 }
 
-const REGIONS: RegionPreset[] = [
-  { id: 'DACH', label: 'DACH', currency: 'EUR', standard: 'din276', locale: 'de' },
-  { id: 'UK', label: 'UK', currency: 'GBP', standard: 'nrm', locale: 'en' },
-  { id: 'US', label: 'US', currency: 'USD', standard: 'masterformat', locale: 'en' },
-  { id: 'France', label: 'France', currency: 'EUR', standard: 'din276', locale: 'fr' },
-  { id: 'Spain', label: 'Spain', currency: 'EUR', standard: 'din276', locale: 'es' },
-  { id: 'Italy', label: 'Italy', currency: 'EUR', standard: 'din276', locale: 'it' },
-  { id: 'GulfStates', label: 'Gulf', currency: 'USD', standard: 'din276', locale: 'en' },
-  { id: 'INTL', label: 'Other', currency: 'USD', standard: 'masterformat', locale: 'en' },
+const CWICR_DATABASES: CWICRDatabase[] = [
+  { id: 'ENG_TORONTO', name: 'English (US / UK / Canada)', city: 'Toronto', lang: 'English', currency: 'USD', flagId: 'us' },
+  { id: 'DE_BERLIN', name: 'Germany / DACH', city: 'Berlin', lang: 'Deutsch', currency: 'EUR', flagId: 'de' },
+  { id: 'FR_PARIS', name: 'France', city: 'Paris', lang: 'Fran\u00e7ais', currency: 'EUR', flagId: 'fr' },
+  { id: 'SP_BARCELONA', name: 'Spain / Latin America', city: 'Barcelona', lang: 'Espa\u00f1ol', currency: 'EUR', flagId: 'es' },
+  { id: 'PT_SAOPAULO', name: 'Brazil / Portugal', city: 'S\u00e3o Paulo', lang: 'Portugu\u00eas', currency: 'BRL', flagId: 'br' },
+  { id: 'RU_STPETERSBURG', name: 'Russia / CIS', city: 'St. Petersburg', lang: '\u0420\u0443\u0441\u0441\u043a\u0438\u0439', currency: 'RUB', flagId: 'ru' },
+  { id: 'AR_DUBAI', name: 'Middle East / Gulf', city: 'Dubai', lang: '\u0627\u0644\u0639\u0631\u0628\u064a\u0629', currency: 'AED', flagId: 'ae' },
+  { id: 'ZH_SHANGHAI', name: 'China', city: 'Shanghai', lang: '\u4e2d\u6587', currency: 'CNY', flagId: 'cn' },
+  { id: 'HI_MUMBAI', name: 'India / South Asia', city: 'Mumbai', lang: 'Hindi', currency: 'INR', flagId: 'in' },
 ];
 
-const CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF', 'AED', 'BRL', 'RUB', 'CNY', 'INR'] as const;
-const STANDARDS = ['din276', 'nrm', 'masterformat'] as const;
+// ── Resource Catalog definitions ────────────────────────────────────────────
+
+interface ResourceCatalog {
+  id: string;
+  name: string;
+  flagId: string;
+  itemCount: number;
+  lang: string;
+}
+
+const RESOURCE_CATALOGS: ResourceCatalog[] = [
+  { id: 'ENG_TORONTO', name: 'North America', flagId: 'us', itemCount: 850, lang: 'English' },
+  { id: 'DE_BERLIN', name: 'Germany / DACH', flagId: 'de', itemCount: 920, lang: 'Deutsch' },
+  { id: 'FR_PARIS', name: 'France', flagId: 'fr', itemCount: 780, lang: 'Fran\u00e7ais' },
+  { id: 'SP_BARCELONA', name: 'Spain / LatAm', flagId: 'es', itemCount: 710, lang: 'Espa\u00f1ol' },
+  { id: 'PT_SAOPAULO', name: 'Brazil / Portugal', flagId: 'br', itemCount: 650, lang: 'Portugu\u00eas' },
+  { id: 'RU_STPETERSBURG', name: 'Russia / CIS', flagId: 'ru', itemCount: 800, lang: '\u0420\u0443\u0441\u0441\u043a\u0438\u0439' },
+  { id: 'AR_DUBAI', name: 'Middle East / Gulf', flagId: 'ae', itemCount: 620, lang: '\u0627\u0644\u0639\u0631\u0628\u064a\u0629' },
+  { id: 'ZH_SHANGHAI', name: 'China', flagId: 'cn', itemCount: 740, lang: '\u4e2d\u6587' },
+  { id: 'HI_MUMBAI', name: 'India / South Asia', flagId: 'in', itemCount: 680, lang: 'Hindi' },
+  { id: 'GB_LONDON', name: 'United Kingdom', flagId: 'gb', itemCount: 870, lang: 'English' },
+  { id: 'JP_TOKYO', name: 'Japan', flagId: 'jp', itemCount: 590, lang: '\u65e5\u672c\u8a9e' },
+];
+
+// ── Demo Project definitions ────────────────────────────────────────────────
+
+interface DemoProject {
+  id: string;
+  name: string;
+  flagId: string;
+  description: string;
+  budget: string;
+  positions: number;
+}
+
+const DEMO_PROJECTS: DemoProject[] = [
+  {
+    id: 'residential-berlin',
+    name: 'Residential Complex Berlin',
+    flagId: 'de',
+    description: '8-storey residential building with underground parking, DIN 276 classification',
+    budget: '\u20ac12.4M',
+    positions: 340,
+  },
+  {
+    id: 'office-london',
+    name: 'Office Tower London',
+    flagId: 'gb',
+    description: 'Grade A office building, 15 floors, NRM 1/2 compliant estimate',
+    budget: '\u00a318.7M',
+    positions: 520,
+  },
+  {
+    id: 'school-paris',
+    name: 'School Complex Paris',
+    flagId: 'fr',
+    description: 'Primary school with gymnasium and canteen, French standards',
+    budget: '\u20ac6.2M',
+    positions: 280,
+  },
+  {
+    id: 'warehouse-dubai',
+    name: 'Logistics Warehouse Dubai',
+    flagId: 'ae',
+    description: 'Climate-controlled warehouse 12,000 m\u00b2 with office block',
+    budget: '$8.9M',
+    positions: 190,
+  },
+  {
+    id: 'medical-us',
+    name: 'Medical Center Houston',
+    flagId: 'us',
+    description: 'Outpatient medical facility, MasterFormat division structure',
+    budget: '$22.1M',
+    positions: 610,
+  },
+];
+
+// ── AI Provider definitions ─────────────────────────────────────────────────
 
 interface ProviderOption {
   id: AIProvider;
@@ -77,29 +200,6 @@ const AI_PROVIDERS: ProviderOption[] = [
   },
 ];
 
-// ── CWICR Database definitions ──────────────────────────────────────────────
-
-interface CWICRDatabase {
-  id: string;
-  name: string;
-  city: string;
-  lang: string;
-  currency: string;
-  flagId: string;
-}
-
-const CWICR_DATABASES: CWICRDatabase[] = [
-  { id: 'ENG_TORONTO', name: 'English (US / UK / Canada)', city: 'Toronto', lang: 'English', currency: 'USD', flagId: 'us' },
-  { id: 'DE_BERLIN', name: 'Germany / DACH', city: 'Berlin', lang: 'Deutsch', currency: 'EUR', flagId: 'de' },
-  { id: 'FR_PARIS', name: 'France', city: 'Paris', lang: 'Fran\u00e7ais', currency: 'EUR', flagId: 'fr' },
-  { id: 'SP_BARCELONA', name: 'Spain / Latin America', city: 'Barcelona', lang: 'Espa\u00f1ol', currency: 'EUR', flagId: 'es' },
-  { id: 'PT_SAOPAULO', name: 'Brazil / Portugal', city: 'S\u00e3o Paulo', lang: 'Portugu\u00eas', currency: 'BRL', flagId: 'br' },
-  { id: 'RU_STPETERSBURG', name: 'Russia / CIS', city: 'St. Petersburg', lang: '\u0420\u0443\u0441\u0441\u043a\u0438\u0439', currency: 'RUB', flagId: 'ru' },
-  { id: 'AR_DUBAI', name: 'Middle East / Gulf', city: 'Dubai', lang: '\u0627\u0644\u0639\u0631\u0628\u064a\u0629', currency: 'AED', flagId: 'ae' },
-  { id: 'ZH_SHANGHAI', name: 'China', city: 'Shanghai', lang: '\u4e2d\u6587', currency: 'CNY', flagId: 'cn' },
-  { id: 'HI_MUMBAI', name: 'India / South Asia', city: 'Mumbai', lang: 'Hindi', currency: 'INR', flagId: 'in' },
-];
-
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function maskApiKey(key: string): string {
@@ -123,6 +223,20 @@ export function isOnboardingCompleted(): boolean {
   } catch {
     return false;
   }
+}
+
+/** Get the suggested region for the current language */
+function getSuggestedRegion(lang?: string): string {
+  const code = lang || i18n.language || 'en';
+  const base = code.split('-')[0] ?? 'en';
+  return LANG_TO_REGION[base] ?? 'ENG_TORONTO';
+}
+
+/** Get the suggested demo project IDs for the current language */
+function getSuggestedDemo(lang?: string): string {
+  const code = lang || i18n.language || 'en';
+  const base = code.split('-')[0] ?? 'en';
+  return LANG_TO_DEMO[base] ?? DEFAULT_DEMO;
 }
 
 /** Mini flag component — uses bundled inline SVGs */
@@ -154,7 +268,7 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
               </div>
               {i < total - 1 && (
                 <div
-                  className={`h-0.5 w-8 rounded-full transition-colors duration-500 ${
+                  className={`h-0.5 w-4 rounded-full transition-colors duration-500 ${
                     i < current ? 'bg-oe-blue' : 'bg-border-light'
                   }`}
                 />
@@ -218,17 +332,123 @@ function StepWelcome({ onNext }: { onNext: () => void }) {
   );
 }
 
-// ── Step 2: Load Cost Database ───────────────────────────────────────────────
+// ── Step 2: Language Selection ───────────────────────────────────────────────
+
+function StepLanguage({
+  onNext,
+  onBack,
+  onLanguageChange,
+}: {
+  onNext: () => void;
+  onBack: () => void;
+  onLanguageChange: (lang: string) => void;
+}) {
+  const { t } = useTranslation();
+  const [selected, setSelected] = useState(() => {
+    const detected = navigator.language?.split('-')[0] || 'en';
+    const match = SUPPORTED_LANGUAGES.find((l) => l.code === detected);
+    return match ? match.code : 'en';
+  });
+
+  const handleSelect = useCallback(
+    (code: string) => {
+      setSelected(code);
+      i18n.changeLanguage(code);
+      onLanguageChange(code);
+    },
+    [onLanguageChange],
+  );
+
+  // Auto-detect on mount
+  useEffect(() => {
+    const detected = navigator.language?.split('-')[0] || 'en';
+    const match = SUPPORTED_LANGUAGES.find((l) => l.code === detected);
+    if (match && match.code !== i18n.language) {
+      i18n.changeLanguage(match.code);
+      onLanguageChange(match.code);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <div className="flex flex-col items-center animate-fade-in">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue-subtle mb-4">
+        <Globe size={24} className="text-oe-blue" />
+      </div>
+
+      <h2 className="text-2xl font-bold text-content-primary">
+        {t('onboarding.language_title', { defaultValue: 'Choose Your Language' })}
+      </h2>
+      <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
+        {t('onboarding.language_subtitle', {
+          defaultValue: 'Select the interface language. You can change this anytime in Settings.',
+        })}
+      </p>
+
+      {/* Language grid */}
+      <div className="mt-6 w-full max-w-xl grid grid-cols-3 sm:grid-cols-4 gap-2">
+        {SUPPORTED_LANGUAGES.map((lang) => {
+          const isSelected = selected === lang.code;
+          return (
+            <button
+              key={lang.code}
+              onClick={() => handleSelect(lang.code)}
+              className={`
+                relative flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-left
+                border transition-all duration-normal ease-oe
+                ${
+                  isSelected
+                    ? 'border-oe-blue bg-oe-blue-subtle/40 ring-2 ring-oe-blue/20'
+                    : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary active:scale-[0.98]'
+                }
+              `}
+            >
+              <CountryFlag code={lang.country} size={20} className="shrink-0" />
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-semibold text-content-primary truncate">
+                  {lang.name}
+                </div>
+                <div className="text-2xs text-content-tertiary uppercase">{lang.code}</div>
+              </div>
+              {isSelected && (
+                <CheckCircle2 size={14} className="text-oe-blue shrink-0" />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-8 flex items-center gap-3">
+        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
+          {t('common.back', { defaultValue: 'Back' })}
+        </Button>
+        <Button
+          variant="primary"
+          onClick={onNext}
+          icon={<ArrowRight size={16} />}
+          iconPosition="right"
+        >
+          {t('common.continue', { defaultValue: 'Continue' })}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ── Step 3: Cost Database ───────────────────────────────────────────────────
 
 function StepCostDatabase({
   onNext,
   onBack,
+  selectedLang,
 }: {
   onNext: () => void;
   onBack: () => void;
+  selectedLang: string;
 }) {
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
+
+  const suggestedRegion = getSuggestedRegion(selectedLang);
 
   const [loading, setLoading] = useState<string | null>(null);
   const [loadedDb, setLoadedDb] = useState<{ id: string; count: number } | null>(null);
@@ -291,8 +511,15 @@ function StepCostDatabase({
         setLoading(null);
       }
     },
-    [loading, addToast],
+    [loading, addToast, t],
   );
+
+  // Sort databases with suggested region first
+  const sortedDatabases = [...CWICR_DATABASES].sort((a, b) => {
+    if (a.id === suggestedRegion) return -1;
+    if (b.id === suggestedRegion) return 1;
+    return 0;
+  });
 
   return (
     <div className="flex flex-col items-center animate-fade-in">
@@ -310,10 +537,11 @@ function StepCostDatabase({
       </p>
 
       {/* Database grid */}
-      <div className="mt-8 w-full max-w-xl grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-        {CWICR_DATABASES.map((db) => {
+      <div className="mt-6 w-full max-w-xl grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        {sortedDatabases.map((db) => {
           const isLoading = loading === db.id;
           const isLoaded = loadedDb?.id === db.id;
+          const isSuggested = db.id === suggestedRegion && !loadedDb;
           return (
             <button
               key={db.id}
@@ -326,7 +554,9 @@ function StepCostDatabase({
                   ? 'border-semantic-success/30 bg-semantic-success-bg/40'
                   : isLoading
                     ? 'border-oe-blue/40 bg-oe-blue-subtle/30'
-                    : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary active:scale-[0.98]'
+                    : isSuggested
+                      ? 'border-oe-blue/30 bg-oe-blue-subtle/20 ring-1 ring-oe-blue/10'
+                      : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary active:scale-[0.98]'
                 }
                 ${loading !== null && !isLoading && !isLoaded ? 'opacity-40 pointer-events-none' : ''}
               `}
@@ -337,6 +567,11 @@ function StepCostDatabase({
                   <span className="text-sm font-semibold text-content-primary">{db.name}</span>
                   {isLoaded && (
                     <CheckCircle2 size={14} className="text-semantic-success shrink-0" />
+                  )}
+                  {isSuggested && !isLoading && (
+                    <span className="inline-flex items-center rounded-full bg-oe-blue-subtle px-1.5 py-0.5 text-2xs font-medium text-oe-blue">
+                      {t('onboarding.suggested', { defaultValue: 'Suggested' })}
+                    </span>
                   )}
                 </div>
                 <div className="text-2xs text-content-tertiary">
@@ -396,7 +631,7 @@ function StepCostDatabase({
         })}
       </p>
 
-      <div className="mt-8 flex items-center gap-3">
+      <div className="mt-6 flex items-center gap-3">
         <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
           {t('common.back', { defaultValue: 'Back' })}
         </Button>
@@ -418,7 +653,406 @@ function StepCostDatabase({
   );
 }
 
-// ── Step 3: AI Setup ─────────────────────────────────────────────────────────
+// ── Step 4: Resource Catalog ────────────────────────────────────────────────
+
+function StepResourceCatalog({
+  onNext,
+  onBack,
+  selectedLang,
+}: {
+  onNext: () => void;
+  onBack: () => void;
+  selectedLang: string;
+}) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+
+  const suggestedRegion = getSuggestedRegion(selectedLang);
+
+  const [loading, setLoading] = useState<string | null>(null);
+  const [loadedCatalog, setLoadedCatalog] = useState<{ id: string; count: number } | null>(null);
+  const [elapsed, setElapsed] = useState(0);
+
+  // Timer for elapsed time display
+  useEffect(() => {
+    if (!loading) {
+      setElapsed(0);
+      return;
+    }
+    const start = Date.now();
+    const interval = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 1000);
+    return () => clearInterval(interval);
+  }, [loading]);
+
+  const handleLoad = useCallback(
+    async (catalog: ResourceCatalog) => {
+      if (loading) return;
+      setLoading(catalog.id);
+
+      try {
+        const data = await apiPost<{ imported: number }>(`/v1/catalog/import/${catalog.id}`);
+        const imported = data.imported ?? catalog.itemCount;
+        setLoadedCatalog({ id: catalog.id, count: imported });
+
+        addToast({
+          type: 'success',
+          title: `${catalog.name} catalog loaded`,
+          message: `${imported.toLocaleString()} resources imported`,
+        });
+      } catch {
+        addToast({
+          type: 'error',
+          title: t('common.connection_error', { defaultValue: 'Connection error' }),
+          message: t('onboarding.catalog_error', { defaultValue: 'Failed to import resource catalog' }),
+        });
+      } finally {
+        setLoading(null);
+      }
+    },
+    [loading, addToast, t],
+  );
+
+  // Sort catalogs with suggested region first
+  const sortedCatalogs = [...RESOURCE_CATALOGS].sort((a, b) => {
+    if (a.id === suggestedRegion) return -1;
+    if (b.id === suggestedRegion) return 1;
+    return 0;
+  });
+
+  return (
+    <div className="flex flex-col items-center animate-fade-in">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue-subtle mb-4">
+        <BookOpen size={24} className="text-oe-blue" />
+      </div>
+
+      <h2 className="text-2xl font-bold text-content-primary">
+        {t('onboarding.catalog_title', { defaultValue: 'Resource Catalog' })}
+      </h2>
+      <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
+        {t('onboarding.catalog_subtitle', {
+          defaultValue: 'Load a catalog of materials, labor, equipment, and assemblies for your region:',
+        })}
+      </p>
+
+      {/* Catalog grid */}
+      <div className="mt-6 w-full max-w-xl grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+        {sortedCatalogs.map((catalog) => {
+          const isLoading = loading === catalog.id;
+          const isLoaded = loadedCatalog?.id === catalog.id;
+          const isSuggested = catalog.id === suggestedRegion && !loadedCatalog;
+          return (
+            <button
+              key={catalog.id}
+              onClick={() => handleLoad(catalog)}
+              disabled={isLoading || (loading !== null && loading !== catalog.id)}
+              className={`
+                relative flex items-center gap-3 rounded-xl px-3.5 py-3 text-left
+                border transition-all duration-normal ease-oe
+                ${isLoaded
+                  ? 'border-semantic-success/30 bg-semantic-success-bg/40'
+                  : isLoading
+                    ? 'border-oe-blue/40 bg-oe-blue-subtle/30'
+                    : isSuggested
+                      ? 'border-oe-blue/30 bg-oe-blue-subtle/20 ring-1 ring-oe-blue/10'
+                      : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary active:scale-[0.98]'
+                }
+                ${loading !== null && !isLoading && !isLoaded ? 'opacity-40 pointer-events-none' : ''}
+              `}
+            >
+              <MiniFlag code={catalog.flagId} />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-content-primary truncate">{catalog.name}</span>
+                  {isLoaded && (
+                    <CheckCircle2 size={14} className="text-semantic-success shrink-0" />
+                  )}
+                  {isSuggested && !isLoading && (
+                    <span className="inline-flex items-center rounded-full bg-oe-blue-subtle px-1.5 py-0.5 text-2xs font-medium text-oe-blue">
+                      {t('onboarding.suggested', { defaultValue: 'Suggested' })}
+                    </span>
+                  )}
+                </div>
+                <div className="text-2xs text-content-tertiary">
+                  {catalog.lang} · {catalog.itemCount.toLocaleString()} {t('onboarding.items', { defaultValue: 'items' })}
+                </div>
+              </div>
+              {isLoading && (
+                <Loader2 size={16} className="animate-spin text-oe-blue shrink-0" />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Loading progress */}
+      {loading && (
+        <div className="mt-4 w-full max-w-xl rounded-xl border border-border-light bg-surface-tertiary p-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Loader2 size={14} className="animate-spin text-oe-blue" />
+              <span className="text-sm font-medium text-content-primary">
+                {t('onboarding.loading_catalog', { defaultValue: 'Importing resource catalog...' })}
+              </span>
+            </div>
+            <span className="text-xs text-content-tertiary font-mono">{elapsed}s</span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-secondary">
+            <div
+              className="h-full animate-shimmer rounded-full bg-oe-blue opacity-70 bg-[length:200%_100%]"
+              style={{ width: '100%' }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Success message */}
+      {loadedCatalog && !loading && (
+        <div className="mt-4 w-full max-w-xl rounded-xl border border-semantic-success/30 bg-semantic-success-bg/40 p-4 animate-fade-in">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 size={16} className="text-semantic-success" />
+            <span className="text-sm font-semibold text-semantic-success">
+              {loadedCatalog.count.toLocaleString()}{' '}
+              {t('onboarding.resources_loaded', { defaultValue: 'resources loaded' })}
+            </span>
+          </div>
+        </div>
+      )}
+
+      <p className="mt-4 text-xs text-content-tertiary text-center max-w-md">
+        {t('onboarding.catalog_hint', {
+          defaultValue: 'Catalogs include materials, labor rates, equipment, and pre-built assemblies.',
+        })}
+      </p>
+
+      <div className="mt-6 flex items-center gap-3">
+        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
+          {t('common.back', { defaultValue: 'Back' })}
+        </Button>
+        <Button variant="secondary" onClick={onNext}>
+          {t('onboarding.skip', { defaultValue: 'Skip' })}
+        </Button>
+        {loadedCatalog && (
+          <Button
+            variant="primary"
+            onClick={onNext}
+            icon={<ArrowRight size={16} />}
+            iconPosition="right"
+          >
+            {t('common.continue', { defaultValue: 'Continue' })}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Step 5: Demo Projects ───────────────────────────────────────────────────
+
+function StepDemoProjects({
+  onNext,
+  onBack,
+  selectedLang,
+}: {
+  onNext: () => void;
+  onBack: () => void;
+  selectedLang: string;
+}) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+
+  const suggestedDemoId = getSuggestedDemo(selectedLang);
+
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => {
+    return new Set([suggestedDemoId]);
+  });
+  const [installing, setInstalling] = useState(false);
+  const [installedIds, setInstalledIds] = useState<Set<string>>(new Set());
+  const [progress, setProgress] = useState({ current: 0, total: 0 });
+
+  const toggleProject = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleInstall = useCallback(async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+
+    setInstalling(true);
+    setProgress({ current: 0, total: ids.length });
+
+    const installed = new Set<string>();
+
+    for (let i = 0; i < ids.length; i++) {
+      const demoId = ids[i]!;
+      setProgress({ current: i + 1, total: ids.length });
+      try {
+        await apiPost(`/demo/install/${demoId}`);
+        installed.add(demoId);
+      } catch {
+        addToast({
+          type: 'error',
+          title: t('onboarding.demo_install_error', { defaultValue: 'Failed to install demo project' }),
+          message: demoId,
+        });
+      }
+    }
+
+    setInstalledIds(installed);
+    setInstalling(false);
+
+    if (installed.size > 0) {
+      addToast({
+        type: 'success',
+        title: t('onboarding.demo_installed', { defaultValue: 'Demo projects installed' }),
+        message: `${installed.size} / ${ids.length}`,
+      });
+    }
+  }, [selectedIds, addToast, t]);
+
+  const allInstalled = installedIds.size > 0 && !installing;
+
+  return (
+    <div className="flex flex-col items-center animate-fade-in">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue-subtle mb-4">
+        <FolderOpen size={24} className="text-oe-blue" />
+      </div>
+
+      <h2 className="text-2xl font-bold text-content-primary">
+        {t('onboarding.demo_title', { defaultValue: 'Demo Projects' })}
+      </h2>
+      <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
+        {t('onboarding.demo_subtitle', {
+          defaultValue: 'Install sample projects to explore the platform. Select one or more:',
+        })}
+      </p>
+
+      {/* Demo project cards */}
+      <div className="mt-6 w-full max-w-xl space-y-2.5">
+        {DEMO_PROJECTS.map((project) => {
+          const isSelected = selectedIds.has(project.id);
+          const isInstalled = installedIds.has(project.id);
+          const isSuggested = project.id === suggestedDemoId;
+          return (
+            <button
+              key={project.id}
+              onClick={() => !installing && !allInstalled && toggleProject(project.id)}
+              disabled={installing || allInstalled}
+              className={`
+                relative flex w-full items-start gap-3.5 rounded-xl px-4 py-3.5 text-left
+                border transition-all duration-normal ease-oe
+                ${isInstalled
+                  ? 'border-semantic-success/30 bg-semantic-success-bg/40'
+                  : isSelected
+                    ? 'border-oe-blue/40 bg-oe-blue-subtle/20 ring-1 ring-oe-blue/10'
+                    : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary'
+                }
+                ${installing ? 'pointer-events-none' : ''}
+              `}
+            >
+              {/* Checkbox */}
+              <div
+                className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-all duration-fast ${
+                  isSelected || isInstalled
+                    ? isInstalled
+                      ? 'border-semantic-success bg-semantic-success'
+                      : 'border-oe-blue bg-oe-blue'
+                    : 'border-content-tertiary bg-transparent'
+                }`}
+              >
+                {(isSelected || isInstalled) && <Check size={12} className="text-white" />}
+              </div>
+
+              <MiniFlag code={project.flagId} />
+
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-content-primary">{project.name}</span>
+                  {isSuggested && !isInstalled && (
+                    <span className="inline-flex items-center rounded-full bg-oe-blue-subtle px-1.5 py-0.5 text-2xs font-medium text-oe-blue">
+                      {t('onboarding.suggested', { defaultValue: 'Suggested' })}
+                    </span>
+                  )}
+                  {isInstalled && (
+                    <CheckCircle2 size={14} className="text-semantic-success shrink-0" />
+                  )}
+                </div>
+                <p className="mt-0.5 text-xs text-content-secondary leading-relaxed">
+                  {project.description}
+                </p>
+                <div className="mt-1.5 flex items-center gap-3 text-2xs text-content-tertiary">
+                  <span>{t('onboarding.budget', { defaultValue: 'Budget' })}: {project.budget}</span>
+                  <span>{project.positions} {t('onboarding.positions', { defaultValue: 'positions' })}</span>
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Install progress */}
+      {installing && (
+        <div className="mt-4 w-full max-w-xl rounded-xl border border-border-light bg-surface-tertiary p-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Loader2 size={14} className="animate-spin text-oe-blue" />
+              <span className="text-sm font-medium text-content-primary">
+                {t('onboarding.installing_demos', { defaultValue: 'Installing demo projects...' })}
+              </span>
+            </div>
+            <span className="text-xs text-content-tertiary font-mono">
+              {progress.current} / {progress.total}
+            </span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-secondary">
+            <div
+              className="h-full rounded-full bg-oe-blue transition-all duration-300 ease-oe"
+              style={{ width: `${progress.total > 0 ? (progress.current / progress.total) * 100 : 0}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      <div className="mt-6 flex items-center gap-3">
+        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
+          {t('common.back', { defaultValue: 'Back' })}
+        </Button>
+        <Button variant="secondary" onClick={onNext}>
+          {t('onboarding.skip', { defaultValue: 'Skip' })}
+        </Button>
+        {!allInstalled && selectedIds.size > 0 && (
+          <Button
+            variant="primary"
+            onClick={handleInstall}
+            loading={installing}
+            icon={<Package size={16} />}
+          >
+            {t('onboarding.install_selected', { defaultValue: 'Install Selected' })} ({selectedIds.size})
+          </Button>
+        )}
+        {allInstalled && (
+          <Button
+            variant="primary"
+            onClick={onNext}
+            icon={<ArrowRight size={16} />}
+            iconPosition="right"
+          >
+            {t('common.continue', { defaultValue: 'Continue' })}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Step 6: AI Setup ────────────────────────────────────────────────────────
 
 function StepAI({
   onNext,
@@ -649,7 +1283,7 @@ function StepAI({
         )}
       </div>
 
-      <div className="mt-10 flex items-center gap-3">
+      <div className="mt-8 flex items-center gap-3">
         <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
           {t('common.back', { defaultValue: 'Back' })}
         </Button>
@@ -672,182 +1306,113 @@ function StepAI({
   );
 }
 
-// ── Step 4: Create First Project ─────────────────────────────────────────────
+// ── Step 7: Finish ──────────────────────────────────────────────────────────
 
-function StepCreateProject({ onBack }: { onBack: () => void }) {
+function StepFinish({ onBack }: { onBack: () => void }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const addToast = useToastStore((s) => s.addToast);
 
-  const [name, setName] = useState(
-    t('onboarding.default_project_name', { defaultValue: 'My First Project' }),
-  );
-  const [region, setRegion] = useState('DACH');
-  const [currency, setCurrency] = useState('EUR');
-  const [standard, setStandard] = useState('din276');
-
-  // Sync currency/standard when region changes
-  const handleRegionChange = useCallback((regionId: string) => {
-    setRegion(regionId);
-    const preset = REGIONS.find((r) => r.id === regionId);
-    if (preset) {
-      setCurrency(preset.currency);
-      setStandard(preset.standard);
+  // Gather what was installed from localStorage
+  const loadedDbs = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('oe_loaded_databases') || '[]') as string[];
+    } catch {
+      return [];
     }
-  }, []);
+  })();
 
-  const createMutation = useMutation({
-    mutationFn: async () => {
-      const projectData: CreateProjectData = {
-        name: name.trim() || 'My First Project',
-        description: 'Created during onboarding',
-        region,
-        classification_standard: standard,
-        currency,
-        locale: REGIONS.find((r) => r.id === region)?.locale || 'en',
-      };
-      return projectsApi.create(projectData);
-    },
-    onSuccess: (project) => {
-      markOnboardingCompleted();
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-      addToast({
-        type: 'success',
-        title: t('onboarding.project_created', { defaultValue: 'Project created!' }),
-        message: t('onboarding.project_created_msg', {
-          defaultValue: "Your workspace is ready. Let's start estimating.",
-        }),
-      });
-      navigate(`/projects/${project.id}`);
-    },
-    onError: (err: Error) => {
-      addToast({
-        type: 'error',
-        title: t('onboarding.project_error', { defaultValue: 'Failed to create project' }),
-        message: err.message,
-      });
-    },
-  });
-
-  const handleSubmit = useCallback(
-    (e: FormEvent) => {
-      e.preventDefault();
-      createMutation.mutate();
-    },
-    [createMutation],
-  );
+  const handleFinish = useCallback(() => {
+    markOnboardingCompleted();
+    navigate('/');
+  }, [navigate]);
 
   return (
-    <div className="flex flex-col items-center animate-fade-in">
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue-subtle mb-4">
-        <Building2 size={24} className="text-oe-blue" />
+    <div className="flex flex-col items-center justify-center text-center animate-fade-in">
+      <div className="mb-6">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-semantic-success-bg/60 ring-4 ring-semantic-success/10">
+          <Rocket size={32} className="text-semantic-success" />
+        </div>
       </div>
 
-      <h2 className="text-2xl font-bold text-content-primary">
-        {t('onboarding.project_title', { defaultValue: 'Your First Project' })}
+      <h2 className="text-3xl font-bold text-content-primary">
+        {t('onboarding.finish_title', { defaultValue: 'You\'re All Set!' })}
       </h2>
-      <p className="mt-2 text-sm text-content-secondary">
-        {t('onboarding.project_subtitle', {
-          defaultValue: 'Set up your first project to get started.',
+
+      <p className="mt-3 max-w-md text-base text-content-secondary leading-relaxed">
+        {t('onboarding.finish_subtitle', {
+          defaultValue: 'Your workspace is configured and ready to use. Here\'s a summary of what was set up:',
         })}
       </p>
 
-      <form onSubmit={handleSubmit} className="mt-8 w-full max-w-md space-y-5">
-        {/* Project name */}
-        <Input
-          label={t('onboarding.project_name', { defaultValue: 'Project Name' })}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder={t('onboarding.project_name_placeholder', {
-            defaultValue: 'e.g. Office Tower Downtown',
-          })}
-          required
-          autoFocus
-        />
-
-        {/* Region / Currency / Standard selectors */}
-        <div className="grid grid-cols-3 gap-3">
-          {/* Region */}
-          <div>
-            <label className="text-sm font-medium text-content-primary block mb-1.5">
-              {t('onboarding.region', { defaultValue: 'Region' })}
-            </label>
-            <select
-              value={region}
-              onChange={(e) => handleRegionChange(e.target.value)}
-              className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary"
-            >
-              {REGIONS.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Currency */}
-          <div>
-            <label className="text-sm font-medium text-content-primary block mb-1.5">
-              {t('onboarding.currency', { defaultValue: 'Currency' })}
-            </label>
-            <select
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value)}
-              className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary"
-            >
-              {CURRENCIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Standard */}
-          <div>
-            <label className="text-sm font-medium text-content-primary block mb-1.5">
-              {t('onboarding.standard', { defaultValue: 'Standard' })}
-            </label>
-            <select
-              value={standard}
-              onChange={(e) => setStandard(e.target.value)}
-              className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary"
-            >
-              {STANDARDS.map((s) => (
-                <option key={s} value={s}>
-                  {s === 'din276' ? 'DIN 276' : s === 'nrm' ? 'NRM' : 'MasterFormat'}
-                </option>
-              ))}
-            </select>
-          </div>
+      {/* Summary card */}
+      <div className="mt-6 w-full max-w-md rounded-xl border border-border-light bg-surface-elevated p-5 text-left space-y-3">
+        {/* Language */}
+        <div className="flex items-center gap-3">
+          <Globe size={16} className="text-oe-blue shrink-0" />
+          <span className="text-sm text-content-primary">
+            {t('onboarding.summary_language', { defaultValue: 'Language' })}:
+          </span>
+          <span className="text-sm font-semibold text-content-primary ml-auto">
+            {SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language)?.name || i18n.language}
+          </span>
         </div>
 
-        {createMutation.error && (
-          <div className="rounded-lg bg-semantic-error-bg px-3 py-2 text-sm text-semantic-error">
-            {(createMutation.error as Error).message ||
-              t('onboarding.create_error', { defaultValue: 'Failed to create project' })}
-          </div>
-        )}
-
-        <div className="flex items-center gap-3 pt-2">
-          <Button variant="ghost" type="button" onClick={onBack} icon={<ArrowLeft size={16} />}>
-            {t('common.back', { defaultValue: 'Back' })}
-          </Button>
-          <Button
-            variant="primary"
-            type="submit"
-            loading={createMutation.isPending}
-            icon={<ArrowRight size={16} />}
-            iconPosition="right"
-            className="flex-1"
-          >
-            {t('onboarding.create_project', {
-              defaultValue: 'Create & Start Estimating',
-            })}
-          </Button>
+        {/* Cost DB */}
+        <div className="flex items-center gap-3">
+          <Database size={16} className="text-oe-blue shrink-0" />
+          <span className="text-sm text-content-primary">
+            {t('onboarding.summary_cost_db', { defaultValue: 'Cost Database' })}:
+          </span>
+          <span className="text-sm font-semibold text-content-primary ml-auto">
+            {loadedDbs.length > 0
+              ? loadedDbs.map((id) => CWICR_DATABASES.find((d) => d.id === id)?.name || id).join(', ')
+              : t('onboarding.summary_skipped', { defaultValue: 'Skipped' })}
+          </span>
         </div>
-      </form>
+
+        {/* Resource Catalog */}
+        <div className="flex items-center gap-3">
+          <BookOpen size={16} className="text-oe-blue shrink-0" />
+          <span className="text-sm text-content-primary">
+            {t('onboarding.summary_catalog', { defaultValue: 'Resource Catalog' })}:
+          </span>
+          <span className="text-sm font-semibold text-content-primary ml-auto">
+            <CheckCircle2 size={14} className="inline text-semantic-success" />
+          </span>
+        </div>
+
+        {/* AI */}
+        <div className="flex items-center gap-3">
+          <Sparkles size={16} className="text-oe-blue shrink-0" />
+          <span className="text-sm text-content-primary">
+            {t('onboarding.summary_ai', { defaultValue: 'AI Provider' })}:
+          </span>
+          <span className="text-sm font-semibold text-content-primary ml-auto">
+            <CheckCircle2 size={14} className="inline text-semantic-success" />
+          </span>
+        </div>
+      </div>
+
+      <p className="mt-5 text-xs text-content-tertiary max-w-md">
+        {t('onboarding.finish_hint', {
+          defaultValue: 'You can adjust all settings later from the Settings page.',
+        })}
+      </p>
+
+      <div className="mt-8 flex items-center gap-3">
+        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
+          {t('common.back', { defaultValue: 'Back' })}
+        </Button>
+        <Button
+          variant="primary"
+          size="lg"
+          onClick={handleFinish}
+          icon={<ArrowRight size={18} />}
+          iconPosition="right"
+        >
+          {t('onboarding.go_to_dashboard', { defaultValue: 'Go to Dashboard' })}
+        </Button>
+      </div>
     </div>
   );
 }
@@ -856,6 +1421,7 @@ function StepCreateProject({ onBack }: { onBack: () => void }) {
 
 export function OnboardingWizard() {
   const [step, setStep] = useState(0);
+  const [selectedLang, setSelectedLang] = useState(() => i18n.language?.split('-')[0] || 'en');
 
   const goNext = useCallback(() => {
     setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1));
@@ -865,20 +1431,29 @@ export function OnboardingWizard() {
     setStep((s) => Math.max(s - 1, 0));
   }, []);
 
+  const handleLanguageChange = useCallback((lang: string) => {
+    setSelectedLang(lang);
+  }, []);
+
   return (
     <div className="flex min-h-screen flex-col bg-surface-primary">
       {/* Top bar with progress */}
-      <div className="px-8 pt-6 pb-4 max-w-3xl mx-auto w-full">
+      <div className="px-8 pt-6 pb-4 max-w-4xl mx-auto w-full">
         <ProgressBar current={step} total={TOTAL_STEPS} />
       </div>
 
       {/* Main content area */}
       <div className="flex flex-1 items-center justify-center px-6 pb-16">
-        <div className="w-full max-w-[600px]">
+        <div className="w-full max-w-[640px]">
           {step === 0 && <StepWelcome onNext={goNext} />}
-          {step === 1 && <StepCostDatabase onNext={goNext} onBack={goBack} />}
-          {step === 2 && <StepAI onNext={goNext} onBack={goBack} />}
-          {step === 3 && <StepCreateProject onBack={goBack} />}
+          {step === 1 && (
+            <StepLanguage onNext={goNext} onBack={goBack} onLanguageChange={handleLanguageChange} />
+          )}
+          {step === 2 && <StepCostDatabase onNext={goNext} onBack={goBack} selectedLang={selectedLang} />}
+          {step === 3 && <StepResourceCatalog onNext={goNext} onBack={goBack} selectedLang={selectedLang} />}
+          {step === 4 && <StepDemoProjects onNext={goNext} onBack={goBack} selectedLang={selectedLang} />}
+          {step === 5 && <StepAI onNext={goNext} onBack={goBack} />}
+          {step === 6 && <StepFinish onBack={goBack} />}
         </div>
       </div>
     </div>

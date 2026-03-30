@@ -17,8 +17,10 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Skeleton, Breadcrumb } from '@/shared/ui';
-import { apiGet, apiPost } from '@/shared/lib/api';
+import { apiGet, apiPost, triggerDownload } from '@/shared/lib/api';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { useToastStore } from '@/stores/useToastStore';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -63,7 +65,7 @@ interface ValidationReportData {
   results: ValidationResultItem[];
 }
 
-type FilterMode = 'all' | 'errors' | 'warnings' | 'passed';
+type FilterMode = 'all' | 'errors' | 'warnings' | 'info' | 'passed';
 
 /* ── Rule descriptions for tooltips ───────────────────────────────────── */
 
@@ -88,16 +90,16 @@ function getScoreLabel(pct: number, t: (key: string, fallback: string) => string
 }
 
 function getScoreColor(pct: number): string {
-  if (pct >= 95) return 'text-[#15803d]';
+  if (pct >= 95) return 'text-semantic-success';
   if (pct >= 80) return 'text-oe-blue';
-  if (pct >= 60) return 'text-[#b45309]';
+  if (pct >= 60) return 'text-semantic-warning';
   return 'text-semantic-error';
 }
 
 function getScoreRingColor(pct: number): string {
-  if (pct >= 95) return 'stroke-[#15803d]';
+  if (pct >= 95) return 'stroke-semantic-success';
   if (pct >= 80) return 'stroke-oe-blue';
-  if (pct >= 60) return 'stroke-[#b45309]';
+  if (pct >= 60) return 'stroke-semantic-warning';
   return 'stroke-semantic-error';
 }
 
@@ -113,7 +115,7 @@ function ScoreCircle({ score }: { score: number }) {
   return (
     <div className="flex flex-col items-center gap-2">
       <div className="relative h-36 w-36">
-        <svg className="h-36 w-36 -rotate-90" viewBox="0 0 120 120">
+        <svg className="h-36 w-36 -rotate-90" viewBox="0 0 120 120" role="img" aria-label={`${t('validation.quality_score', { defaultValue: 'Quality score' })}: ${pct}%`}>
           <circle
             cx="60"
             cy="60"
@@ -174,7 +176,7 @@ function SummaryCard({ report }: { report: ValidationReportData }) {
               <CheckCircle2 size={14} className="text-semantic-success" />
               {t('validation.passed', 'Passed')}
             </span>
-            <span className="font-medium text-[#15803d] tabular-nums">
+            <span className="font-medium text-semantic-success tabular-nums">
               {report.counts.passed}
             </span>
           </div>
@@ -183,7 +185,7 @@ function SummaryCard({ report }: { report: ValidationReportData }) {
               <AlertTriangle size={14} className="text-semantic-warning" />
               {t('validation.warnings', 'Warnings')}
             </span>
-            <span className="font-medium text-[#b45309] tabular-nums">
+            <span className="font-medium text-semantic-warning tabular-nums">
               {report.counts.warnings}
             </span>
           </div>
@@ -330,7 +332,7 @@ function FilterBar({
 }: {
   filter: FilterMode;
   onFilterChange: (f: FilterMode) => void;
-  counts: { all: number; errors: number; warnings: number; passed: number };
+  counts: { all: number; errors: number; warnings: number; infos: number; passed: number };
 }) {
   const { t } = useTranslation();
 
@@ -338,6 +340,7 @@ function FilterBar({
     { value: 'all', label: t('validation.filter_all', 'All'), count: counts.all },
     { value: 'errors', label: t('validation.filter_errors', 'Errors'), count: counts.errors },
     { value: 'warnings', label: t('validation.filter_warnings', 'Warnings'), count: counts.warnings },
+    { value: 'info', label: t('validation.filter_info', 'Info'), count: counts.infos },
     { value: 'passed', label: t('validation.filter_passed', 'Passed'), count: counts.passed },
   ];
 
@@ -348,6 +351,7 @@ function FilterBar({
         <button
           key={opt.value}
           onClick={() => onFilterChange(opt.value)}
+          aria-pressed={filter === opt.value}
           className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all duration-fast ${
             filter === opt.value
               ? 'bg-oe-blue text-content-inverse shadow-xs'
@@ -409,6 +413,7 @@ export function ValidationPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { activeProjectId, setActiveProject } = useProjectContextStore();
+  const addToast = useToastStore((s) => s.addToast);
 
   const selectedProjectId = activeProjectId ?? '';
   const [selectedBoqId, setSelectedBoqId] = useState('');
@@ -466,24 +471,38 @@ export function ValidationPage() {
   // Filter results
   const filteredResults = useMemo(() => {
     if (!report) return [];
+    let results: ValidationResultItem[];
     switch (filter) {
       case 'errors':
-        return report.results.filter((r) => !r.passed && r.severity === 'error');
+        results = report.results.filter((r) => !r.passed && r.severity === 'error');
+        break;
       case 'warnings':
-        return report.results.filter((r) => !r.passed && r.severity === 'warning');
+        results = report.results.filter((r) => !r.passed && r.severity === 'warning');
+        break;
+      case 'info':
+        results = report.results.filter((r) => !r.passed && r.severity === 'info');
+        break;
       case 'passed':
-        return report.results.filter((r) => r.passed);
+        results = report.results.filter((r) => r.passed);
+        break;
       default:
-        return report.results;
+        results = [...report.results];
     }
+    // Sort: errors first, then warnings, then info, then passed
+    const severityOrder: Record<string, number> = { error: 0, warning: 1, info: 2 };
+    return results.sort((a, b) => {
+      if (a.passed !== b.passed) return a.passed ? 1 : -1;
+      return (severityOrder[a.severity] ?? 3) - (severityOrder[b.severity] ?? 3);
+    });
   }, [report, filter]);
 
   const filterCounts = useMemo(() => {
-    if (!report) return { all: 0, errors: 0, warnings: 0, passed: 0 };
+    if (!report) return { all: 0, errors: 0, warnings: 0, infos: 0, passed: 0 };
     return {
       all: report.results.length,
       errors: report.results.filter((r) => !r.passed && r.severity === 'error').length,
       warnings: report.results.filter((r) => !r.passed && r.severity === 'warning').length,
+      infos: report.results.filter((r) => !r.passed && r.severity === 'info').length,
       passed: report.results.filter((r) => r.passed).length,
     };
   }, [report]);
@@ -500,11 +519,24 @@ export function ValidationPage() {
     });
   }, []);
 
-  const handleExportPdf = useCallback(() => {
+  const handleExportPdf = useCallback(async () => {
     if (!selectedBoqId) return;
-    // Open the PDF export URL in a new tab
-    window.open(`/api/v1/boq/boqs/${selectedBoqId}/export/pdf`, '_blank');
-  }, [selectedBoqId]);
+    try {
+      const token = useAuthStore.getState().accessToken;
+      const response = await fetch(`/api/v1/boq/boqs/${selectedBoqId}/export/pdf`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!response.ok) throw new Error(`Export failed: ${response.status}`);
+      const blob = await response.blob();
+      triggerDownload(blob, `validation_report.pdf`);
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: t('validation.export_failed', { defaultValue: 'Export failed' }),
+        message: err instanceof Error ? err.message : undefined,
+      });
+    }
+  }, [selectedBoqId, addToast, t]);
 
   const projectOptions = (projects || []).map((p) => ({
     value: p.id,
@@ -622,10 +654,12 @@ export function ValidationPage() {
                 {t('validation.error_title', 'Validation failed')}
               </p>
               <p className="mt-0.5 text-xs text-content-secondary">
-                {t(
-                  'validation.error_description',
-                  'Could not run validation. Check that the BOQ has positions and try again.',
-                )}
+                {runValidation.error instanceof Error
+                  ? runValidation.error.message
+                  : t(
+                      'validation.error_description',
+                      'Could not run validation. Check that the BOQ has positions and try again.',
+                    )}
               </p>
             </div>
           </div>
@@ -652,18 +686,35 @@ export function ValidationPage() {
               <h2 className="text-lg font-semibold text-content-primary">
                 {t('validation.results_title', 'Results')}
               </h2>
-              <FilterBar
-                filter={filter}
-                onFilterChange={setFilter}
-                counts={filterCounts}
-              />
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setExpandedResults(new Set(filteredResults.map((_, i) => i)))}
+                    className="text-xs font-medium text-content-secondary hover:text-content-primary transition-colors"
+                  >
+                    {t('validation.expand_all', { defaultValue: 'Expand All' })}
+                  </button>
+                  <span className="text-content-quaternary">|</span>
+                  <button
+                    onClick={() => setExpandedResults(new Set())}
+                    className="text-xs font-medium text-content-secondary hover:text-content-primary transition-colors"
+                  >
+                    {t('validation.collapse_all', { defaultValue: 'Collapse All' })}
+                  </button>
+                </div>
+                <FilterBar
+                  filter={filter}
+                  onFilterChange={setFilter}
+                  counts={filterCounts}
+                />
+              </div>
             </div>
 
             {/* All passed banner */}
             {report.counts.errors === 0 && report.counts.warnings === 0 && (
               <div className="mb-4 flex items-center gap-3 rounded-xl bg-semantic-success-bg px-5 py-4">
                 <CheckCircle2 size={20} className="shrink-0 text-semantic-success" />
-                <p className="text-sm font-medium text-[#15803d]">
+                <p className="text-sm font-medium text-semantic-success">
                   {t(
                     'validation.all_passed',
                     'All validation rules passed successfully!',

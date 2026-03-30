@@ -1,7 +1,8 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Send, Sparkles, Loader2, Database, MessageSquare } from 'lucide-react';
-import { Card, Button, Breadcrumb } from '@/shared/ui';
+import i18next from 'i18next';
+import { Sparkles, Database, ArrowUp } from 'lucide-react';
+import { Breadcrumb } from '@/shared/ui';
 import { apiPost } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -26,10 +27,188 @@ interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   sources?: CostSource[];
+  options?: string[];
   timestamp: number;
 }
 
-/* ── Component ──────────────────────────────────────────────────── */
+/* ── Helpers ─────────────────────────────────────────────────────── */
+
+/** Extract numbered options from AI text and return clean text + options array */
+function parseOptions(text: string): { cleanText: string; options: string[] } {
+  const lines = text.split('\n');
+  const options: string[] = [];
+  const textLines: string[] = [];
+  let inOptions = false;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    // Match patterns: "1. Text", "1) Text", "- **Text**"
+    const numMatch = trimmed.match(/^(\d+)[.)]\s+(.+)/);
+    if (numMatch) {
+      inOptions = true;
+      // Strip markdown bold
+      options.push(numMatch[2]!.replace(/\*\*/g, '').trim());
+    } else if (inOptions && trimmed === '') {
+      // Blank line after options = end of options block
+      inOptions = false;
+    } else {
+      textLines.push(line);
+    }
+  }
+
+  return {
+    cleanText: textLines
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim(),
+    options,
+  };
+}
+
+/** Format time as HH:MM */
+function formatTime(ts: number): string {
+  return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+/** Simple markdown-to-JSX: bold, italic, line breaks */
+function renderMarkdown(text: string) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return (
+        <strong key={i} className="font-semibold">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    // Split by newlines for line breaks
+    return part.split('\n').map((line, j, arr) => (
+      <span key={`${i}-${j}`}>
+        {line}
+        {j < arr.length - 1 && <br />}
+      </span>
+    ));
+  });
+}
+
+/* ── Typing Indicator (3 dots) ───────────────────────────────────── */
+
+function TypingDots() {
+  return (
+    <div className="flex items-center gap-[5px] px-4 py-3">
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="inline-block h-[7px] w-[7px] rounded-full bg-content-tertiary/60"
+          style={{
+            animation: 'oeTypingDot 1.4s ease-in-out infinite',
+            animationDelay: `${i * 0.2}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/* ── Chat Bubble ─────────────────────────────────────────────────── */
+
+function ChatBubble({
+  msg,
+  onOptionClick,
+  isLast,
+}: {
+  msg: ChatMessage;
+  onOptionClick: (text: string) => void;
+  isLast: boolean;
+}) {
+  const { t } = useTranslation();
+  const isUser = msg.role === 'user';
+
+  return (
+    <div
+      className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} animate-msg-in`}
+      style={{ animationDelay: isLast ? '0ms' : '0ms' }}
+    >
+      {/* Bubble */}
+      <div
+        className={`relative max-w-[85%] sm:max-w-[75%] px-[14px] py-[9px] text-[15px] leading-[1.38] ${
+          isUser
+            ? 'bg-oe-blue text-white rounded-[20px] rounded-br-[6px]'
+            : 'bg-surface-secondary text-content-primary rounded-[20px] rounded-bl-[6px]'
+        }`}
+      >
+        <div className="whitespace-pre-wrap break-words">
+          {renderMarkdown(msg.content)}
+        </div>
+
+        {/* Sources */}
+        {msg.sources && msg.sources.length > 0 && (
+          <div
+            className={`mt-2 pt-2 border-t ${
+              isUser ? 'border-white/20' : 'border-border-light'
+            }`}
+          >
+            <p
+              className={`flex items-center gap-1 text-[11px] font-medium mb-1 ${
+                isUser ? 'text-white/70' : 'text-content-tertiary'
+              }`}
+            >
+              <Database size={10} />
+              {t('ai.advisor_sources', { defaultValue: 'Sources:' })}
+            </p>
+            {msg.sources.map((s, j) => (
+              <p
+                key={j}
+                className={`text-[11px] leading-tight ${
+                  isUser ? 'text-white/60' : 'text-content-quaternary'
+                }`}
+              >
+                {s.code}: {s.description.slice(0, 50)}
+                {s.description.length > 50 ? '…' : ''}{' '}
+                <span className="font-medium">
+                  {s.rate} /{s.unit}
+                </span>
+              </p>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Option buttons — rendered below assistant bubble */}
+      {msg.options && msg.options.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5 max-w-[85%] sm:max-w-[75%]">
+          {msg.options.map((opt, i) => (
+            <button
+              key={i}
+              onClick={() => onOptionClick(opt)}
+              className="inline-flex items-center gap-1.5 rounded-full border border-oe-blue/30
+                bg-oe-blue/[0.06] px-3.5 py-[7px] text-[13px] font-medium text-oe-blue
+                transition-all duration-150 ease-out
+                hover:bg-oe-blue hover:text-white hover:border-oe-blue hover:shadow-sm
+                active:scale-[0.97]"
+            >
+              <span className="inline-flex h-[18px] w-[18px] items-center justify-center rounded-full bg-oe-blue/10 text-[11px] font-semibold">
+                {i + 1}
+              </span>
+              {opt}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Timestamp */}
+      <p
+        className={`mt-[3px] text-[11px] ${
+          isUser ? 'text-content-quaternary/50 mr-1' : 'text-content-quaternary/50 ml-1'
+        }`}
+      >
+        {formatTime(msg.timestamp)}
+      </p>
+    </div>
+  );
+}
+
+/* ── Main Component ──────────────────────────────────────────────── */
 
 export function AdvisorPage() {
   const { t } = useTranslation();
@@ -37,17 +216,27 @@ export function AdvisorPage() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
   const addToast = useToastStore((s) => s.addToast);
 
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 50);
   }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, scrollToBottom]);
+  }, [messages, loading, scrollToBottom]);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+  }, [input]);
 
   const sendMessage = useCallback(
     async (text?: string) => {
@@ -59,16 +248,29 @@ export function AdvisorPage() {
       setLoading(true);
 
       try {
+        // Build conversation history for context (last 10 messages)
+        const history = messages.slice(-10).map((m) => ({
+          role: m.role,
+          content: m.content,
+        }));
+
         const data = await apiPost<AdvisorResponse>('/v1/ai/advisor/chat', {
           message: msg,
           project_id: activeProjectId || undefined,
+          locale: i18next.language,
+          history,
         });
+
+        // Parse options from the response
+        const { cleanText, options } = parseOptions(data.answer);
+
         setMessages((prev) => [
           ...prev,
           {
             role: 'assistant',
-            content: data.answer,
+            content: cleanText,
             sources: data.sources,
+            options: options.length > 0 ? options : undefined,
             timestamp: Date.now(),
           },
         ]);
@@ -96,147 +298,149 @@ export function AdvisorPage() {
     [input, loading, activeProjectId, addToast, t],
   );
 
-  const suggestions = [
-    t('ai.advisor_q1', { defaultValue: 'What is the average cost of m\u00B2 plaster?' }),
-    t('ai.advisor_q2', { defaultValue: 'Compare concrete prices by region' }),
-    t('ai.advisor_q3', { defaultValue: 'Suggest cheaper alternatives for steel' }),
-    t('ai.advisor_q4', { defaultValue: 'What are typical labor rates for electricians?' }),
-  ];
+  const suggestions = useMemo(
+    () => [
+      t('ai.advisor_q1', { defaultValue: 'What is the average cost per m² of plaster?' }),
+      t('ai.advisor_q2', { defaultValue: 'Compare concrete prices by region' }),
+      t('ai.advisor_q3', { defaultValue: 'Suggest cheaper alternatives for steel' }),
+      t('ai.advisor_q4', { defaultValue: 'What are typical labor rates for electricians?' }),
+    ],
+    [t],
+  );
+
+  const canSend = input.trim().length > 0 && !loading;
 
   return (
-    <div className="max-w-content mx-auto animate-fade-in">
+    <div className="max-w-content mx-auto animate-fade-in flex flex-col" style={{ height: 'calc(100vh - 80px)' }}>
       <Breadcrumb
         items={[
           { label: t('nav.dashboard', 'Dashboard'), to: '/' },
           { label: t('nav.ai_advisor', 'AI Cost Advisor') },
         ]}
-        className="mb-4"
+        className="mb-3 shrink-0"
       />
 
-      <div className="mb-4">
-        <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-blue-500 text-white">
-            <Sparkles size={18} />
+      {/* Chat container — full height */}
+      <div className="flex flex-1 flex-col min-h-0 rounded-2xl border border-border-light bg-surface-primary overflow-hidden shadow-sm">
+        {/* Header bar */}
+        <div className="flex items-center gap-3 px-5 py-3 border-b border-border-light bg-surface-elevated/50 backdrop-blur-sm shrink-0">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-blue-500 text-white shadow-sm">
+            <Sparkles size={14} />
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-content-primary">
+          <div className="min-w-0">
+            <h1 className="text-[15px] font-semibold text-content-primary leading-tight">
               {t('ai.advisor_title', { defaultValue: 'AI Cost Advisor' })}
             </h1>
-            <p className="text-xs text-content-tertiary">
+            <p className="text-[11px] text-content-tertiary leading-tight truncate">
               {t('ai.advisor_desc', {
                 defaultValue:
-                  'Ask questions about costs, materials, and pricing from your database',
+                  'Ask questions about costs, materials, and pricing — from your database and AI knowledge',
               })}
             </p>
           </div>
         </div>
-      </div>
 
-      <div className="flex gap-4" style={{ height: 'calc(100vh - 220px)' }}>
-        {/* Chat area */}
-        <div className="flex flex-1 flex-col">
-          <Card padding="none" className="flex flex-1 flex-col overflow-hidden">
-            {/* Messages */}
-            <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
-              {messages.length === 0 && (
-                <div className="flex h-full flex-col items-center justify-center text-center">
-                  <MessageSquare size={40} className="mb-3 text-content-quaternary" />
-                  <p className="mb-4 text-sm text-content-secondary">
-                    {t('ai.advisor_empty', {
-                      defaultValue: 'Ask me anything about construction costs',
-                    })}
-                  </p>
-                  <div className="grid max-w-md grid-cols-2 gap-2">
-                    {suggestions.map((s, i) => (
-                      <button
-                        key={i}
-                        onClick={() => sendMessage(s)}
-                        className="rounded-lg border border-border-light px-3 py-2 text-left text-xs text-content-secondary transition-colors hover:border-oe-blue/40 hover:bg-oe-blue-subtle/20"
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {messages.map((msg, i) => (
-                <div
-                  key={i}
-                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm ${
-                      msg.role === 'user'
-                        ? 'rounded-br-md bg-oe-blue text-white'
-                        : 'rounded-bl-md bg-surface-secondary text-content-primary'
-                    }`}
+        {/* Messages area */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+          {/* Empty state */}
+          {messages.length === 0 && !loading && (
+            <div className="flex flex-col items-center justify-center h-full text-center px-4">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-violet-500/10 to-blue-500/10 mb-4">
+                <Sparkles size={28} className="text-oe-blue/60" />
+              </div>
+              <p className="text-base font-medium text-content-primary mb-1">
+                {t('ai.advisor_empty', { defaultValue: 'Ask me anything about construction costs' })}
+              </p>
+              <p className="text-[13px] text-content-tertiary mb-5 max-w-xs">
+                {t('ai.advisor_desc', {
+                  defaultValue: 'Ask questions about costs, materials, and pricing — from your database and AI knowledge',
+                })}
+              </p>
+
+              {/* Suggestion chips */}
+              <div className="flex flex-wrap justify-center gap-2 max-w-lg">
+                {suggestions.map((s, i) => (
+                  <button
+                    key={i}
+                    onClick={() => sendMessage(s)}
+                    className="rounded-full border border-border-light bg-surface-elevated px-4 py-2 text-[13px] text-content-secondary
+                      transition-all duration-150
+                      hover:border-oe-blue/40 hover:bg-oe-blue/[0.06] hover:text-oe-blue
+                      active:scale-[0.97]"
                   >
-                    <p className="whitespace-pre-wrap">{msg.content}</p>
-                    {msg.sources && msg.sources.length > 0 && (
-                      <div className="mt-2 border-t border-border-light/30 pt-2">
-                        <p className="mb-1 text-2xs font-medium opacity-70">
-                          <Database size={10} className="mr-1 inline" />
-                          {t('ai.advisor_sources', { defaultValue: 'Sources:' })}
-                        </p>
-                        {msg.sources.map((s, j) => (
-                          <div key={j} className="text-2xs opacity-80">
-                            {s.code}: {s.description.slice(0, 50)}
-                            {s.description.length > 50 ? '...' : ''} ({s.rate} /{s.unit})
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-              {loading && (
-                <div className="flex justify-start">
-                  <div className="rounded-2xl rounded-bl-md bg-surface-secondary px-4 py-3">
-                    <Loader2 size={16} className="animate-spin text-oe-blue" />
-                  </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Input */}
-            <div className="border-t border-border-light px-4 py-3">
-              <div className="flex items-center gap-2">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      sendMessage();
-                    }
-                  }}
-                  placeholder={t('ai.advisor_placeholder', {
-                    defaultValue: 'Ask about costs, materials, pricing...',
-                  })}
-                  className="h-10 flex-1 rounded-lg border border-border bg-surface-primary px-3 text-sm placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
-                  disabled={loading}
-                />
-                <Button
-                  variant="primary"
-                  size="sm"
-                  icon={
-                    loading ? (
-                      <Loader2 size={14} className="animate-spin" />
-                    ) : (
-                      <Send size={14} />
-                    )
-                  }
-                  onClick={() => sendMessage()}
-                  disabled={!input.trim() || loading}
-                >
-                  {t('common.send', { defaultValue: 'Send' })}
-                </Button>
+                    {s}
+                  </button>
+                ))}
               </div>
             </div>
-          </Card>
+          )}
+
+          {/* Message list */}
+          {messages.map((msg, i) => (
+            <ChatBubble
+              key={i}
+              msg={msg}
+              onOptionClick={sendMessage}
+              isLast={i === messages.length - 1}
+            />
+          ))}
+
+          {/* Typing indicator */}
+          {loading && (
+            <div className="flex items-start animate-msg-in">
+              <div className="rounded-[20px] rounded-bl-[6px] bg-surface-secondary">
+                <TypingDots />
+              </div>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input bar — iMessage style */}
+        <div className="shrink-0 border-t border-border-light bg-surface-elevated/50 backdrop-blur-sm px-3 py-2">
+          <div className="flex items-end gap-2">
+            <div className="flex-1 relative">
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                  }
+                }}
+                placeholder={t('ai.advisor_placeholder', {
+                  defaultValue: 'Ask about costs, materials, pricing...',
+                })}
+                rows={1}
+                className="w-full resize-none rounded-[22px] border border-border bg-surface-primary
+                  px-4 py-[10px] pr-10 text-[15px] leading-[1.35]
+                  placeholder:text-content-tertiary/60
+                  focus:outline-none focus:ring-2 focus:ring-oe-blue/20 focus:border-oe-blue/40
+                  transition-all duration-150"
+                disabled={loading}
+                style={{ maxHeight: '120px' }}
+              />
+            </div>
+
+            {/* Send button — circular, like iMessage */}
+            <button
+              onClick={() => sendMessage()}
+              disabled={!canSend}
+              className={`flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full
+                transition-all duration-200 ease-out mb-[1px]
+                ${
+                  canSend
+                    ? 'bg-oe-blue text-white shadow-sm hover:bg-oe-blue-hover active:scale-[0.93]'
+                    : 'bg-content-quaternary/20 text-content-quaternary cursor-not-allowed'
+                }`}
+              aria-label={t('common.send', { defaultValue: 'Send' })}
+            >
+              <ArrowUp size={18} strokeWidth={2.5} />
+            </button>
+          </div>
         </div>
       </div>
     </div>

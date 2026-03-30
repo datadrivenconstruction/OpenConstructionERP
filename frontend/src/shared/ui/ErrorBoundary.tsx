@@ -1,6 +1,7 @@
 import React from 'react';
 import { AlertTriangle, RotateCcw, Home } from 'lucide-react';
 import i18n from '@/app/i18n';
+import { logError } from '@/shared/lib/errorLogger';
 
 interface Props {
   children: React.ReactNode;
@@ -28,6 +29,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     console.error('[ErrorBoundary] Caught render error:', error, info.componentStack);
+    logError(error, 'react_error', {
+      componentStack: info.componentStack ?? '',
+    });
   }
 
   handleReset = () => {
