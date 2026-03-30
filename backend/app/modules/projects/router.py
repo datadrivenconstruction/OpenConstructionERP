@@ -138,8 +138,15 @@ async def delete_project(
     service: ProjectService = Depends(_get_service),
 ) -> None:
     """Archive a project (soft delete). Verifies ownership."""
-    await _verify_project_owner(service, project_id, user_id, payload)
-    await service.delete_project(project_id)
+    import logging as _log
+    try:
+        await _verify_project_owner(service, project_id, user_id, payload)
+        await service.delete_project(project_id)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        _log.getLogger(__name__).exception("Failed to archive project %s", project_id)
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 # ── Cross-Project Analytics ─────────────────────────────────────────────
