@@ -11,7 +11,67 @@ import { getIntlLocale } from '@/shared/lib/formatters';
 
 /* ── Constants ───────────────────────────────────────────────────────── */
 
-export const UNITS = ['m', 'm2', 'm3', 'kg', 't', 'pcs', 'lsum', 'h', 'set', 'lm'] as const;
+/** Base metric units — always available regardless of language. */
+const BASE_UNITS = ['m', 'm2', 'm3', 'kg', 't', 'pcs', 'lsum', 'h', 'set', 'lm'] as const;
+
+/**
+ * Language-specific additional units.
+ * Key = i18n language code, value = extra units for that locale.
+ */
+const LOCALE_UNITS: Record<string, readonly string[]> = {
+  de: ['Stk', 'Psch', 'lfm', 'FM', 'Std', 'Mt', 'Wo', 'Tag', 'LE', 'BE', 'ME'],
+  fr: ['u', 'ens', 'fft', 'ml', 'j', 'sem', 'mois', 'lot'],
+  es: ['ud', 'pa', 'ml', 'gl', 'jor', 'mes'],
+  pt: ['un', 'vb', 'cj', 'gl', 'dia', 'mes'],
+  ru: ['шт', 'компл', 'п.м', 'маш-ч', 'чел-ч', 'мес', 'усл'],
+  zh: ['个', '套', '延米', '台班', '工日', '月'],
+  ar: ['عدد', 'طقم', 'م.ط', 'يوم'],
+  ja: ['本', '枚', '箇所', '式', '台', 'セット', '組'],
+  ko: ['개', '세트', '식', '대'],
+  tr: ['ad', 'tk', 'mt', 'gn', 'ay'],
+  it: ['nr', 'cad', 'cpl', 'ml', 'gg', 'mese', 'corpo'],
+  nl: ['st', 'stel', 'str.m', 'dag', 'mnd'],
+  pl: ['szt', 'kpl', 'mb', 'r-g', 'm-g', 'dzień'],
+  cs: ['ks', 'kpl', 'bm', 'hod', 'den'],
+};
+
+/** Custom units stored in localStorage by the user. */
+const CUSTOM_UNITS_KEY = 'oe_custom_units';
+
+function loadCustomUnits(): string[] {
+  try {
+    const raw = localStorage.getItem(CUSTOM_UNITS_KEY);
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveCustomUnit(unit: string): void {
+  const custom = loadCustomUnits();
+  if (!custom.includes(unit)) {
+    custom.push(unit);
+    try {
+      localStorage.setItem(CUSTOM_UNITS_KEY, JSON.stringify(custom));
+    } catch { /* ignore */ }
+  }
+}
+
+/**
+ * Get units for the current locale. Includes base metric + locale-specific + user custom.
+ * Always deduplicates and keeps base units first.
+ */
+export function getUnitsForLocale(lang?: string): string[] {
+  const code = (lang || 'en').split('-')[0] ?? 'en';
+  const locale = LOCALE_UNITS[code] ?? [];
+  const custom = loadCustomUnits();
+  const all = [...BASE_UNITS, ...locale, ...custom];
+  // Deduplicate preserving order
+  return [...new Set(all)];
+}
+
+/** Default export for backward compatibility. */
+export const UNITS = BASE_UNITS;
 
 /** Maximum number of undo entries stored. */
 export const UNDO_STACK_LIMIT = 20;

@@ -1,7 +1,5 @@
 import type { ColDef, ValueFormatterParams } from 'ag-grid-community';
-import { fmtWithCurrency } from '../boqHelpers';
-
-const UNITS = ['m', 'm2', 'm3', 'kg', 't', 'pcs', 'lsum', 'h', 'set', 'lm'] as const;
+import { fmtWithCurrency, getUnitsForLocale } from '../boqHelpers';
 
 export interface BOQColumnContext {
   currencySymbol: string;
@@ -123,8 +121,8 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       field: 'unit',
       width: 80,
       editable: (params) => !params.data?._isSection && !params.data?._isFooter,
-      cellEditor: 'agSelectCellEditor',
-      cellEditorParams: { values: [...UNITS] },
+      cellEditor: 'agTextCellEditor',
+      cellEditorParams: { useFormatter: false },
       cellClass: 'text-center text-2xs font-mono uppercase',
     },
     {
