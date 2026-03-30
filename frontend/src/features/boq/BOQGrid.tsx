@@ -61,7 +61,7 @@ import {
   type FullGridContext,
 } from './grid/cellRenderers';
 import { countComments } from './CommentDrawer';
-import { fmtWithCurrency } from './boqHelpers';
+import { fmtWithCurrency, getUnitsForLocale } from './boqHelpers';
 import { useToastStore } from '@/stores/useToastStore';
 import { getIntlLocale } from '@/shared/lib/formatters';
 
@@ -988,7 +988,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     { value: 'other', label: 'Other' },
   ];
 
-  const COMMON_UNITS = ['m', 'm²', 'm³', 'kg', 't', 'pcs', 'h', 'lsum', 'l', 'set'];
+  const COMMON_UNITS = getUnitsForLocale();
 
   return (
     <div

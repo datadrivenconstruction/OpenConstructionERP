@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Trash2, Ruler, X, ChevronDown } from 'lucide-react';
+import { getUnitsForLocale } from './boqHelpers';
 
-const UNITS = ['m', 'm2', 'm3', 'kg', 't', 'pcs', 'lsum', 'h', 'set', 'lm'] as const;
+const UNITS = getUnitsForLocale();
 
 export interface BatchActionBarProps {
   /** IDs of the currently selected positions. */
