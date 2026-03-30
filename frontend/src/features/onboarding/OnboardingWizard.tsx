@@ -42,8 +42,8 @@ const LANG_TO_REGION: Record<string, string> = {
   zh: 'ZH_SHANGHAI',
   ar: 'AR_DUBAI',
   hi: 'HI_MUMBAI',
-  en: 'ENG_TORONTO',
-  tr: 'ENG_TORONTO',
+  en: 'USA_USD',
+  tr: 'AR_DUBAI',
   it: 'SP_BARCELONA',
   ja: 'ZH_SHANGHAI',
   ko: 'ZH_SHANGHAI',
@@ -79,7 +79,9 @@ interface CWICRDatabase {
 }
 
 const CWICR_DATABASES: CWICRDatabase[] = [
-  { id: 'ENG_TORONTO', name: 'English (US / UK / Canada)', city: 'Toronto', lang: 'English', currency: 'USD', flagId: 'us' },
+  { id: 'USA_USD', name: 'United States', city: 'New York', lang: 'English', currency: 'USD', flagId: 'us' },
+  { id: 'UK_GBP', name: 'United Kingdom', city: 'London', lang: 'English', currency: 'GBP', flagId: 'gb' },
+  { id: 'ENG_TORONTO', name: 'Canada / International', city: 'Toronto', lang: 'English', currency: 'CAD', flagId: 'ca' },
   { id: 'DE_BERLIN', name: 'Germany / DACH', city: 'Berlin', lang: 'Deutsch', currency: 'EUR', flagId: 'de' },
   { id: 'FR_PARIS', name: 'France', city: 'Paris', lang: 'Fran\u00e7ais', currency: 'EUR', flagId: 'fr' },
   { id: 'SP_BARCELONA', name: 'Spain / Latin America', city: 'Barcelona', lang: 'Espa\u00f1ol', currency: 'EUR', flagId: 'es' },
@@ -471,15 +473,29 @@ function StepCostDatabase({
   const [loading, setLoading] = useState<string | null>(null);
   const [loadedDb, setLoadedDb] = useState<{ id: string; count: number } | null>(null);
   const [elapsed, setElapsed] = useState(0);
+  const [progress, setProgress] = useState(0);
 
-  // Timer for elapsed time display
+  // Timer for elapsed time + simulated progress
   useEffect(() => {
     if (!loading) {
       setElapsed(0);
+      setProgress(0);
       return;
     }
     const start = Date.now();
-    const interval = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 1000);
+    const interval = setInterval(() => {
+      const secs = Math.floor((Date.now() - start) / 1000);
+      setElapsed(secs);
+      // Simulate realistic progress: fast start, slow middle, never reaches 100%
+      // ~55K items, ~85 MB, typical 15-60s
+      const pct = Math.min(95, Math.round(
+        secs < 3 ? secs * 8 :           // 0-3s: fast start (0→24%)
+        secs < 10 ? 24 + (secs - 3) * 6 : // 3-10s: steady (24→66%)
+        secs < 30 ? 66 + (secs - 10) * 1.2 : // 10-30s: slower (66→90%)
+        90 + Math.min(5, (secs - 30) * 0.2)   // 30s+: crawl to 95%
+      ));
+      setProgress(pct);
+    }, 500);
     return () => clearInterval(interval);
   }, [loading]);
 
@@ -498,6 +514,7 @@ function StepCostDatabase({
         if (res.ok) {
           const data = await res.json();
           const imported = data.imported ?? 0;
+          setProgress(100);
           setLoadedDb({ id: db.id, count: imported });
 
           // Persist to localStorage
@@ -605,29 +622,46 @@ function StepCostDatabase({
       </div>
 
       {/* Loading progress */}
-      {loading && (
-        <div className="mt-4 w-full max-w-xl rounded-xl border border-oe-blue/20 bg-oe-blue-subtle/10 p-4">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Loader2 size={16} className="animate-spin text-oe-blue" />
-              <span className="text-sm font-medium text-content-primary">
-                {t('onboarding.loading_database', { defaultValue: 'Importing 55,000+ cost items...' })}
-              </span>
+      {loading && (() => {
+        const loadingDb = CWICR_DATABASES.find((d) => d.id === loading);
+        const sizeMb = 85;
+        const loadedMb = Math.round(sizeMb * progress / 100);
+        const statusText = progress < 20
+          ? t('onboarding.loading_step_download', { defaultValue: 'Downloading pricing database...' })
+          : progress < 50
+            ? t('onboarding.loading_step_parse', { defaultValue: 'Parsing 55,000+ cost items...' })
+            : progress < 80
+              ? t('onboarding.loading_step_import', { defaultValue: 'Importing into local database...' })
+              : t('onboarding.loading_step_index', { defaultValue: 'Indexing and optimizing...' });
+        return (
+          <div className="mt-4 w-full max-w-xl rounded-xl border border-oe-blue/20 bg-oe-blue-subtle/10 p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                {loadingDb && <MiniFlag code={loadingDb.flagId} />}
+                <div>
+                  <span className="text-sm font-medium text-content-primary">
+                    {loadingDb?.name ?? loading}
+                  </span>
+                  <div className="flex items-center gap-1.5 text-xs text-content-tertiary">
+                    <Loader2 size={12} className="animate-spin text-oe-blue" />
+                    <span>{statusText}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="text-lg font-bold text-oe-blue tabular-nums">{progress}%</span>
+                <div className="text-2xs text-content-tertiary tabular-nums">{loadedMb} / {sizeMb} MB · {elapsed}s</div>
+              </div>
             </div>
-            <span className="text-xs font-mono text-oe-blue bg-oe-blue-subtle rounded-full px-2 py-0.5">{elapsed}s</span>
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-surface-secondary">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-500 transition-all duration-500 ease-out"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-surface-secondary">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-oe-blue via-blue-400 to-oe-blue animate-[indeterminate_1.5s_ease-in-out_infinite]"
-              style={{ width: '40%' }}
-            />
-          </div>
-          <div className="mt-2 flex items-center gap-4 text-xs text-content-tertiary">
-            <span>{t('onboarding.loading_step1', { defaultValue: 'Downloading regional pricing data...' })}</span>
-            <span className="ml-auto">{t('onboarding.loading_database_hint', { defaultValue: '~1-3 minutes' })}</span>
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Success message */}
       {loadedDb && !loading && (() => {
