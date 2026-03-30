@@ -1162,9 +1162,9 @@ export function BOQEditorPage() {
     [boq?.positions, updateMutation],
   );
 
-  /** Update a single resource field (quantity or unit_rate) and recalculate position rate. */
+  /** Update a single resource field (quantity, unit_rate, or name) and recalculate position rate. */
   const handleUpdateResource = useCallback(
-    (positionId: string, resourceIndex: number, field: string, value: number) => {
+    (positionId: string, resourceIndex: number, field: string, value: number | string) => {
       const pos = boq?.positions.find((p) => p.id === positionId);
       if (!pos) return;
       const resources = [...((pos.metadata?.resources ?? []) as Array<Record<string, unknown>>)];

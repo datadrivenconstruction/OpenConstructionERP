@@ -146,7 +146,7 @@ export interface ResourceGridContext {
   expandedPositions: Set<string>;
   onToggleResources: (positionId: string) => void;
   onRemoveResource: (positionId: string, resourceIndex: number) => void;
-  onUpdateResource: (positionId: string, resourceIndex: number, field: string, value: number) => void;
+  onUpdateResource: (positionId: string, resourceIndex: number, field: string, value: number | string) => void;
   onSaveResourceToCatalog: (positionId: string, resourceIndex: number) => void;
   onOpenCostDbForPosition: (positionId: string) => void;
   onOpenCatalogForPosition: (positionId: string) => void;
@@ -320,6 +320,62 @@ function InlineNumberInput({
   );
 }
 
+function InlineTextInput({
+  value,
+  onCommit,
+  className,
+}: {
+  value: string;
+  onCommit: (v: string) => void;
+  className?: string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [text, setText] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const startEdit = useCallback(() => {
+    setText(value);
+    setEditing(true);
+    setTimeout(() => inputRef.current?.select(), 0);
+  }, [value]);
+
+  const commit = useCallback(() => {
+    setEditing(false);
+    const trimmed = text.trim();
+    if (trimmed && trimmed !== value) {
+      onCommit(trimmed);
+    }
+  }, [text, value, onCommit]);
+
+  if (editing) {
+    return (
+      <input
+        ref={inputRef}
+        type="text"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') commit();
+          if (e.key === 'Escape') setEditing(false);
+        }}
+        className={`bg-white dark:bg-surface-primary border border-oe-blue rounded px-1 py-0 outline-none ${className ?? ''}`}
+        autoFocus
+      />
+    );
+  }
+
+  return (
+    <span
+      onDoubleClick={startEdit}
+      className={`cursor-text hover:bg-oe-blue-subtle/50 rounded px-1 transition-colors truncate ${className ?? ''}`}
+      title="Double-click to edit"
+    >
+      {value}
+    </span>
+  );
+}
+
 /* ── Editable Resource Row ───────────────────────────────────────── */
 
 function EditableResourceRow({ data, ctx }: { data: Record<string, unknown>; ctx: FullGridContext }) {
@@ -340,10 +396,16 @@ function EditableResourceRow({ data, ctx }: { data: Record<string, unknown>; ctx
     [ctx, posId, resIdx],
   );
 
+  const handleNameChange = useCallback(
+    (v: string) => ctx.onUpdateResource?.(posId, resIdx, 'name', v),
+    [ctx, posId, resIdx],
+  );
+
   return (
     <div
-      className="flex items-center w-full h-full pl-12 pr-3 gap-2 select-none group/res text-[11px]
+      className="flex items-center w-full h-full pr-3 gap-2 select-none group/res text-[11px]
                   bg-surface-secondary/40 border-b border-border-light/50"
+      style={{ paddingLeft: '160px' }}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -355,9 +417,9 @@ function EditableResourceRow({ data, ctx }: { data: Record<string, unknown>; ctx
         {badge.label}
       </span>
 
-      {/* Name */}
+      {/* Name — editable */}
       <span className="truncate min-w-0 flex-1 text-content-secondary font-medium">
-        {data._resourceName as string}
+        <InlineTextInput value={data._resourceName as string} onCommit={handleNameChange} className="w-full text-[11px]" />
       </span>
 
       {/* Unit */}
@@ -427,8 +489,9 @@ export function ResourceFullWidthRenderer(params: ICellRendererParams) {
   if (data?._isAddResource) {
     return (
       <div
-        className="flex items-center w-full h-full pl-12 pr-3 gap-2 select-none
+        className="flex items-center w-full h-full pr-3 gap-2 select-none
                     bg-surface-secondary/20 border-b border-border-light/30"
+        style={{ paddingLeft: '160px' }}
         onContextMenu={(e) => {
           e.preventDefault();
           e.stopPropagation();
