@@ -27,7 +27,7 @@ import {
   type CreatePositionData,
   type Position,
 } from './api';
-import { fmtWithCurrency } from './boqHelpers';
+import { fmtWithCurrency, getUnitsForLocale } from './boqHelpers';
 
 /* ── Props ─────────────────────────────────────────────────────────── */
 
@@ -51,7 +51,7 @@ interface AICostFinderPanelProps {
 
 /* ── Helpers ───────────────────────────────────────────────────────── */
 
-const UNITS = ['', 'm', 'm2', 'm3', 'kg', 't', 'pcs', 'lsum', 'h', 'l'];
+const UNITS = ['', ...getUnitsForLocale()];
 
 function scoreColor(score: number): string {
   if (score >= 0.8) return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
