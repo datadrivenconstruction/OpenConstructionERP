@@ -5,7 +5,7 @@
  * Extracted from BOQEditorPage.tsx for modularity.
  */
 
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -99,12 +99,24 @@ export function AssemblyPickerModal({
     }
   }, [boqId, quantity, onApplied, addToast]);
 
+  // Close on Escape
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') { e.preventDefault(); onClose(); }
+    }
+    document.addEventListener('keydown', handleKeyDown, { capture: true });
+    return () => document.removeEventListener('keydown', handleKeyDown, { capture: true });
+  }, [onClose]);
+
   const fmt = (n: number) =>
     new Intl.NumberFormat(getIntlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose} aria-hidden="true">
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('assemblies.apply_assembly_to_boq', { defaultValue: 'Apply Assembly to BOQ' })}
         className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
@@ -119,7 +131,7 @@ export function AssemblyPickerModal({
               <p className="text-xs text-content-tertiary">{t('assemblies.select_recipe_desc', { defaultValue: 'Select a pre-built recipe to add as a position' })}</p>
             </div>
           </div>
-          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors">
+          <button onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })} className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors">
             <X size={16} />
           </button>
         </div>
@@ -133,6 +145,7 @@ export function AssemblyPickerModal({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t('assemblies.search_placeholder', { defaultValue: 'Search assemblies...' })}
+              aria-label={t('assemblies.search_placeholder', { defaultValue: 'Search assemblies...' })}
               className="w-full h-9 pl-9 pr-3 rounded-lg border border-border-light bg-surface-primary text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400"
               autoFocus
             />
@@ -349,12 +362,26 @@ export function CostDatabaseSearchModal({
     }
   }, [boqId, selected, items, onAdded, onSelectForResources, addToast, t]);
 
+  // Close on Escape
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') { e.preventDefault(); onClose(); }
+    }
+    document.addEventListener('keydown', handleKeyDown, { capture: true });
+    return () => document.removeEventListener('keydown', handleKeyDown, { capture: true });
+  }, [onClose]);
+
   const fmtRate = (n: number) =>
     new Intl.NumberFormat(getIntlLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose} aria-hidden="true">
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={onSelectForResources
+          ? t('boq.add_resource_from_database', { defaultValue: 'Add Resources from Database' })
+          : t('boq.add_from_database', { defaultValue: 'Add from Cost Database' })}
         className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-2xl mx-4 overflow-hidden animate-fade-in"
         onClick={(e) => e.stopPropagation()}
       >
@@ -375,7 +402,7 @@ export function CostDatabaseSearchModal({
                 : t('boq.search_and_add', { defaultValue: 'Search items and add them to your estimate' })}
             </p>
           </div>
-          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary">
+          <button onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })} className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary">
             <X size={16} />
           </button>
         </div>
@@ -430,6 +457,7 @@ export function CostDatabaseSearchModal({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t('boq.search_cost_items', { defaultValue: 'Search cost items by description...' })}
+              aria-label={t('boq.search_cost_items', { defaultValue: 'Search cost items by description...' })}
               className="h-10 w-full rounded-lg border border-border bg-surface-primary pl-10 pr-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue"
             />
           </div>
@@ -528,8 +556,8 @@ export function CostDatabaseSearchModal({
               {isAdding
                 ? t('boq.adding', { defaultValue: 'Adding...' })
                 : onSelectForResources
-                  ? t('boq.add_as_resources', { defaultValue: `Add ${selected.size} as resources`, count: selected.size })
-                  : t('boq.add_n_positions', { defaultValue: `Add ${selected.size} to BOQ`, count: selected.size })}
+                  ? t('boq.add_as_resources', { defaultValue: 'Add {{count}} as resources', count: selected.size })
+                  : t('boq.add_n_positions', { defaultValue: 'Add {{count}} to BOQ', count: selected.size })}
             </Button>
           </div>
         </div>

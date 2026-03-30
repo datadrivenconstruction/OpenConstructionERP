@@ -20,6 +20,10 @@ logger = logging.getLogger(__name__)
 ANTHROPIC_MODEL = "claude-sonnet-4-20250514"
 OPENAI_MODEL = "gpt-4o"
 GEMINI_MODEL = "gemini-2.0-flash"
+OPENROUTER_MODEL = "anthropic/claude-sonnet-4-20250514"
+MISTRAL_MODEL = "mistral-large-latest"
+GROQ_MODEL = "llama-3.3-70b-versatile"
+DEEPSEEK_MODEL = "deepseek-chat"
 
 # Timeout for AI API calls (2 minutes — large BOQ generation can be slow)
 AI_TIMEOUT = 120.0
@@ -223,6 +227,88 @@ async def call_gemini(
     return text, tokens
 
 
+# ── OpenAI-compatible providers (OpenRouter, Mistral, Groq, DeepSeek) ───────
+
+
+_OPENAI_COMPAT_CONFIG = {
+    "openrouter": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "model": OPENROUTER_MODEL,
+        "extra_headers": {"HTTP-Referer": "https://openconstructionerp.com"},
+    },
+    "mistral": {
+        "url": "https://api.mistral.ai/v1/chat/completions",
+        "model": MISTRAL_MODEL,
+    },
+    "groq": {
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "model": GROQ_MODEL,
+    },
+    "deepseek": {
+        "url": "https://api.deepseek.com/chat/completions",
+        "model": DEEPSEEK_MODEL,
+    },
+}
+
+
+async def call_openai_compatible(
+    provider: str,
+    api_key: str,
+    system: str,
+    prompt: str,
+    image_base64: str | None = None,
+    image_media_type: str = "image/jpeg",
+    max_tokens: int = 4096,
+) -> tuple[str, int]:
+    """Call any OpenAI-compatible API (OpenRouter, Mistral, Groq, DeepSeek).
+
+    These providers all implement the OpenAI chat completions format.
+    """
+    config = _OPENAI_COMPAT_CONFIG.get(provider)
+    if not config:
+        msg = f"Unknown OpenAI-compatible provider: {provider}"
+        raise ValueError(msg)
+
+    headers: dict[str, str] = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+    if "extra_headers" in config:
+        headers.update(config["extra_headers"])
+
+    user_content: list[dict[str, Any]] = []
+    if image_base64:
+        data_url = f"data:{image_media_type};base64,{image_base64}"
+        user_content.append({
+            "type": "image_url",
+            "image_url": {"url": data_url},
+        })
+    user_content.append({"type": "text", "text": prompt})
+
+    payload = {
+        "model": config["model"],
+        "max_tokens": max_tokens,
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": user_content},
+        ],
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            config["url"],
+            headers=headers,
+            json=payload,
+            timeout=AI_TIMEOUT,
+        )
+        response.raise_for_status()
+        data = response.json()
+
+    text = data["choices"][0]["message"]["content"]
+    tokens = data.get("usage", {}).get("total_tokens", 0)
+    return text, tokens
+
+
 # ── Unified dispatcher ───────────────────────────────────────────────────────
 
 
@@ -258,6 +344,16 @@ async def call_ai(
         "openai": call_openai,
         "gemini": call_gemini,
     }
+
+    # OpenAI-compatible providers
+    if provider in _OPENAI_COMPAT_CONFIG:
+        try:
+            return await call_openai_compatible(
+                provider, api_key, system, prompt, image_base64, image_media_type,
+                max_tokens=max_tokens,
+            )
+        except httpx.HTTPStatusError:
+            raise  # Will be caught below
     caller = callers.get(provider)
     if caller is None:
         msg = f"Unknown AI provider: {provider}"
@@ -369,8 +465,20 @@ def resolve_provider_and_key(
     elif "gemini" in model or "google" in model:
         if settings and settings.gemini_api_key:
             return "gemini", settings.gemini_api_key
+    elif "openrouter" in model or "router" in model:
+        if settings and settings.openrouter_api_key:
+            return "openrouter", settings.openrouter_api_key
+    elif "mistral" in model:
+        if settings and settings.mistral_api_key:
+            return "mistral", settings.mistral_api_key
+    elif "groq" in model or "llama" in model:
+        if settings and settings.groq_api_key:
+            return "groq", settings.groq_api_key
+    elif "deepseek" in model:
+        if settings and settings.deepseek_api_key:
+            return "deepseek", settings.deepseek_api_key
 
-    # Fallback: try any available key
+    # Fallback: try any available key (in priority order)
     if settings:
         if settings.anthropic_api_key:
             return "anthropic", settings.anthropic_api_key
@@ -378,9 +486,17 @@ def resolve_provider_and_key(
             return "openai", settings.openai_api_key
         if settings.gemini_api_key:
             return "gemini", settings.gemini_api_key
+        if settings.openrouter_api_key:
+            return "openrouter", settings.openrouter_api_key
+        if settings.mistral_api_key:
+            return "mistral", settings.mistral_api_key
+        if settings.groq_api_key:
+            return "groq", settings.groq_api_key
+        if settings.deepseek_api_key:
+            return "deepseek", settings.deepseek_api_key
 
     msg = (
         "No AI API key configured. Please add your API key in Settings > AI. "
-        "Supported providers: Anthropic Claude, OpenAI, Google Gemini."
+        "Supported: Anthropic, OpenAI, Gemini, OpenRouter, Mistral, Groq, DeepSeek."
     )
     raise ValueError(msg)

@@ -166,9 +166,6 @@ function writeCollapsedState(state: Record<string, boolean>) {
 export function Sidebar({ onClose }: { onClose?: () => void }) {
   const { t } = useTranslation();
   const { isModuleEnabled } = useModuleStore();
-  const moduleUpdates = useModuleStore((s) => s.moduleUpdates);
-  const hasModuleUpdates = Object.keys(moduleUpdates).length > 0;
-  const updateCount = Object.keys(moduleUpdates).length;
   const isAdvanced = useViewModeStore((s) => s.isAdvanced);
 
   // Initialize collapsed state from localStorage, falling back to group defaults
@@ -273,7 +270,6 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                 item={item}
                 label={t(item.labelKey)}
                 onClick={onClose}
-                badge={item.to === '/modules' && hasModuleUpdates ? updateCount : undefined}
               />
             </li>
           ))}

@@ -14,7 +14,7 @@ import logging
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, Header, HTTPException, Query, UploadFile, status
 from fastapi.responses import FileResponse
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
@@ -23,7 +23,7 @@ from app.modules.documents.schemas import (
     DocumentSummary,
     DocumentUpdate,
 )
-from app.modules.documents.service import DocumentService
+from app.modules.documents.service import MAX_FILE_SIZE, DocumentService
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -74,11 +74,18 @@ async def upload_document(
     project_id: uuid.UUID = Query(...),
     category: str = Query(default="other"),
     file: UploadFile = File(...),
+    content_length: int | None = Header(default=None),
     user_id: CurrentUserId = "",  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("documents.create")),
     service: DocumentService = Depends(_get_service),
 ) -> DocumentResponse:
     """Upload a document to a project."""
+    # Early rejection based on Content-Length header (before reading body)
+    if content_length is not None and content_length > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"File too large. Maximum size is {MAX_FILE_SIZE // (1024 * 1024)}MB.",
+        )
     try:
         doc = await service.upload_document(project_id, file, category, user_id)
         return _doc_to_response(doc)

@@ -1,7 +1,7 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { X, Clock, RotateCcw, Plus, Loader2, Save } from 'lucide-react';
+import { X, Clock, RotateCcw, Loader2, Save } from 'lucide-react';
 import clsx from 'clsx';
 import { boqApi, type BOQSnapshot } from './api';
 import { useToastStore } from '@/stores/useToastStore';
@@ -70,11 +70,21 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
   const [newLabel, setNewLabel] = useState('');
   const [confirmRestoreId, setConfirmRestoreId] = useState<string | null>(null);
 
-  const { data: snapshots, isLoading } = useQuery({
+  const { data: snapshots, isLoading, isError } = useQuery({
     queryKey: ['boq-snapshots', boqId],
     queryFn: () => boqApi.getSnapshots(boqId),
     enabled: isOpen && !!boqId,
   });
+
+  // Close on Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') { e.preventDefault(); onClose(); }
+    }
+    document.addEventListener('keydown', handleKeyDown, { capture: true });
+    return () => document.removeEventListener('keydown', handleKeyDown, { capture: true });
+  }, [isOpen, onClose]);
 
   const createMutation = useMutation({
     mutationFn: (label?: string) => boqApi.createSnapshot(boqId, label),
@@ -152,10 +162,15 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
   return (
     <div className="fixed inset-y-0 right-0 z-50 flex">
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/20" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/20" onClick={onClose} aria-hidden="true" />
 
       {/* Drawer */}
-      <div className="relative ml-auto flex h-full w-80 flex-col bg-surface-elevated border-l border-border shadow-2xl animate-slide-in-right">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('boq.version_history', { defaultValue: 'Version History' })}
+        className="relative ml-auto flex h-full w-80 flex-col bg-surface-elevated border-l border-border shadow-2xl animate-slide-in-right"
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <div className="flex items-center gap-2">
@@ -166,6 +181,7 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
           </div>
           <button
             onClick={onClose}
+            aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors"
           >
             <X size={16} />
@@ -180,6 +196,7 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
               value={newLabel}
               onChange={(e) => setNewLabel(e.target.value)}
               placeholder={t('boq.snapshot_label', { defaultValue: 'Snapshot label (optional)...' })}
+              aria-label={t('boq.snapshot_label', { defaultValue: 'Snapshot label (optional)...' })}
               className="flex-1 h-8 rounded-md border border-border bg-surface-primary px-2 text-xs text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleCreate();
@@ -188,6 +205,7 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
             <button
               onClick={handleCreate}
               disabled={createMutation.isPending}
+              aria-label={t('boq.save_snapshot', { defaultValue: 'Save snapshot' })}
               className="flex h-8 items-center gap-1.5 rounded-md bg-oe-blue px-3 text-xs font-medium text-white hover:bg-oe-blue-hover disabled:opacity-50 transition-colors"
             >
               {createMutation.isPending ? (
@@ -205,6 +223,13 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 size={20} className="animate-spin text-content-tertiary" />
+            </div>
+          ) : isError ? (
+            <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+              <Clock size={32} className="text-semantic-error/50 mb-3" />
+              <p className="text-sm text-content-secondary">
+                {t('boq.snapshots_error', { defaultValue: 'Failed to load version history.' })}
+              </p>
             </div>
           ) : !snapshots || snapshots.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 px-4 text-center">

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Background Package Demo — OpenConstructionERP</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="bg-styles.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #fff; color: #0a0a0f; margin: 0; }
+    .demo-section {
+      position: relative;
+      overflow: visible;
+      padding: 100px 24px;
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .demo-section h2 { font-size: 32px; font-weight: 800; margin-bottom: 12px; }
+    .demo-section p { font-size: 16px; color: #475569; max-width: 500px; margin: 0 auto; }
+    .demo-section + .demo-section { border-top: 1px solid rgba(0,0,0,.06); }
+    .demo-label {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 100px;
+      background: rgba(0,102,255,.06);
+      font-size: 11px;
+      font-weight: 700;
+      color: #0066ff;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Section 1: Animated Estimation Table -->
+  <section class="demo-section" style="position:relative;overflow:visible">
+    <div class="oce-bg-table" data-side="left" data-rows="10"></div>
+    <div class="oce-bg-chart" data-side="right" data-type="donut"></div>
+    <div style="position:relative;z-index:1">
+      <div class="demo-label">Animated Table + Donut</div>
+      <h2>Estimation table on the left, donut chart on the right</h2>
+      <p>Cells animate with real construction data — positions, descriptions, quantities, and prices.</p>
+    </div>
+  </section>
+
+  <!-- Section 2: Blueprint Frame -->
+  <section class="demo-section" style="position:relative;overflow:visible">
+    <div class="oce-bg-blueprint" data-side="right" data-stage="frame" style="top:10px;right:10px;width:480px;transform:perspective(1000px) rotateX(5deg) rotateY(-5deg);mask-image:radial-gradient(ellipse 75% 75% at 65% 55%,black 20%,transparent 65%);-webkit-mask-image:radial-gradient(ellipse 75% 75% at 65% 55%,black 20%,transparent 65%)"></div>
+    <div class="oce-bg-chart" data-side="left" data-type="sparkline"></div>
+    <div style="position:relative;z-index:1">
+      <div class="demo-label">Blueprint + Sparkline</div>
+      <h2>Structural frame drawing on the right, sparkline on the left</h2>
+      <p>Blueprint lines draw on scroll. SVG stroke-dashoffset animation.</p>
+    </div>
+  </section>
+
+  <!-- Section 3: Walls + Bars -->
+  <section class="demo-section" style="position:relative;overflow:visible">
+    <div class="oce-bg-blueprint" data-side="right" data-stage="walls" style="top:10px;right:10px;width:480px;transform:perspective(1000px) rotateX(4deg) rotateY(-3deg);mask-image:radial-gradient(ellipse 80% 80% at 60% 50%,black 20%,transparent 65%);-webkit-mask-image:radial-gradient(ellipse 80% 80% at 60% 50%,black 20%,transparent 65%)"></div>
+    <div class="oce-bg-chart" data-side="left" data-type="bars"></div>
+    <div style="position:relative;z-index:1">
+      <div class="demo-label">Building + Bar Chart</div>
+      <h2>Building with windows and bar chart</h2>
+      <p>The building shows walls, roof, windows, and door.</p>
+    </div>
+  </section>
+
+  <!-- Section 4: Mixed Charts -->
+  <section class="demo-section" style="position:relative;overflow:visible">
+    <div class="oce-bg-chart" data-side="left" data-type="mixed"></div>
+    <div class="oce-bg-blueprint" data-side="right" data-stage="skyline" style="top:30px;right:10px;width:400px;opacity:0.12"></div>
+    <div style="position:relative;z-index:1">
+      <div class="demo-label">Mixed Charts + Skyline</div>
+      <h2>Donut + bars on the left, city skyline on the right</h2>
+      <p>All chart types available: bars, donut, sparkline, area, mixed.</p>
+    </div>
+  </section>
+
+  <!-- Section 5: Floor Plan -->
+  <section class="demo-section" style="position:relative;overflow:visible">
+    <div class="oce-bg-blueprint" data-side="right" data-stage="drawing" style="top:10px;right:10px;width:500px;transform:perspective(1000px) rotateX(3deg) rotateY(-4deg);mask-image:radial-gradient(ellipse 75% 75% at 60% 50%,black 20%,transparent 65%);-webkit-mask-image:radial-gradient(ellipse 75% 75% at 60% 50%,black 20%,transparent 65%)"></div>
+    <div class="oce-bg-table" data-side="left" data-rows="6"></div>
+    <div style="position:relative;z-index:1">
+      <div class="demo-label">Floor Plan + Mini Table</div>
+      <h2>Detailed drawing with dimension lines</h2>
+      <p>Combines blueprint SVG with animated estimation data.</p>
+    </div>
+  </section>
+
+  <script src="bg-animations.js"></script>
+</body>
+</html>

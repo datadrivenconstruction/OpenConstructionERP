@@ -1,0 +1,156 @@
+/* ============================================
+   OpenConstructionERP Background Package
+   Animated estimation tables, charts, blueprints
+   ============================================ */
+
+:root {
+  --oce-bg-color: #0066ff;
+  --oce-bg-opacity: 0.08;
+  --oce-bg-cell-border: rgba(0, 80, 220, 0.04);
+  --oce-bg-cell-lit: rgba(0, 80, 220, 0.06);
+  --oce-bg-cell-lit-m: rgba(0, 80, 220, 0.10);
+  --oce-bg-cell-lit-h: rgba(0, 80, 220, 0.15);
+  --oce-bg-cell-text: rgba(0, 60, 200, 0.28);
+  --oce-bg-cell-text-m: rgba(0, 60, 200, 0.4);
+  --oce-bg-cell-text-h: rgba(0, 60, 200, 0.55);
+  --oce-bg-perspective: 14deg;
+}
+
+/* ===== Animated Estimation Table ===== */
+.oce-bg-table {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  width: 560px;
+  transform: perspective(1200px) rotateX(var(--oce-bg-perspective));
+  transform-origin: top center;
+  mask-image: radial-gradient(ellipse 48% 55% at 55% 55%, transparent 25%, rgba(0,0,0,.2) 45%, rgba(0,0,0,.55) 65%);
+  -webkit-mask-image: radial-gradient(ellipse 48% 55% at 55% 55%, transparent 25%, rgba(0,0,0,.2) 45%, rgba(0,0,0,.55) 65%);
+}
+
+.oce-bg-table[data-side="left"] {
+  left: 10px;
+  top: -10px;
+}
+
+.oce-bg-table[data-side="right"] {
+  right: 10px;
+  top: -10px;
+}
+
+.oce-bg-table-grid {
+  display: grid;
+  grid-template-columns: 54px 180px 44px 64px 72px 82px 50px;
+  gap: 0;
+}
+
+.oce-bg-cell {
+  height: 30px;
+  background: transparent;
+  border: 1px solid var(--oce-bg-cell-border);
+  transition: background 0.7s, border-color 0.7s, color 0.5s;
+  display: flex;
+  align-items: center;
+  padding: 0 7px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 10px;
+  color: transparent;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.oce-bg-cell-right { justify-content: flex-end; }
+
+.oce-bg-cell-header {
+  background: rgba(0, 80, 220, 0.03);
+  border-bottom: 1.5px solid rgba(0, 80, 220, 0.08);
+  height: 26px;
+  font-family: 'Inter', sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  color: rgba(0, 80, 220, 0.3);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.oce-bg-cell-pos {
+  font-size: 9px;
+  color: rgba(0, 80, 220, 0.2);
+  background: rgba(0, 80, 220, 0.015);
+  border-right: 1px solid rgba(0, 80, 220, 0.06);
+}
+
+.oce-bg-cell-desc { font-family: 'Inter', sans-serif; font-size: 10px; }
+.oce-bg-cell-total { font-weight: 700; }
+.oce-bg-cell-section {
+  background: rgba(0, 80, 220, 0.025);
+  border-top: 1.5px solid rgba(0, 80, 220, 0.08);
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+}
+
+.oce-bg-cell.on   { background: var(--oce-bg-cell-lit);   border-color: rgba(0,80,220,.08); color: var(--oce-bg-cell-text); }
+.oce-bg-cell.on-m { background: var(--oce-bg-cell-lit-m); border-color: rgba(0,80,220,.13); color: var(--oce-bg-cell-text-m); }
+.oce-bg-cell.on-h { background: var(--oce-bg-cell-lit-h); border-color: rgba(0,80,220,.18); color: var(--oce-bg-cell-text-h); }
+
+/* ===== Dashboard Charts ===== */
+.oce-bg-chart {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  width: 320px;
+  opacity: var(--oce-bg-opacity);
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.oce-bg-chart[data-side="left"] {
+  left: 10px;
+  top: 20px;
+}
+
+.oce-bg-chart[data-side="right"] {
+  right: 10px;
+  top: 20px;
+}
+
+.oce-bg-chart svg { display: block; width: 100%; }
+
+/* ===== Construction Blueprint ===== */
+.oce-bg-blueprint {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.15;
+  will-change: transform;
+  transform: translateZ(0);
+  width: 480px;
+}
+
+.oce-bg-blueprint[data-side="left"] { left: 10px; }
+.oce-bg-blueprint[data-side="right"] { right: 10px; }
+
+.oce-bg-blueprint svg { display: block; width: 100%; }
+
+/* Draw animation for blueprint lines */
+.oce-draw {
+  stroke-dasharray: var(--len, 200);
+  stroke-dashoffset: var(--len, 200);
+}
+
+.oce-draw.drawn {
+  animation: oceDraw 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes oceDraw {
+  to { stroke-dashoffset: 0; }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .oce-bg-table,
+  .oce-bg-chart,
+  .oce-bg-blueprint { display: none; }
+}

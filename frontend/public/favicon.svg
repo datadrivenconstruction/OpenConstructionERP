@@ -1,23 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <!-- Calculator body -->
-  <rect x="1" y="5" width="22" height="25" rx="5" fill="#2563eb"/>
-  <!-- Screen -->
-  <rect x="4.5" y="7.5" width="15.5" height="5.5" rx="2" fill="white" opacity=".95"/>
-  <!-- Button dots 3x2 -->
-  <circle cx="7.5" cy="17" r="1.2" fill="white" opacity=".3"/>
-  <circle cx="12" cy="17" r="1.2" fill="white" opacity=".3"/>
-  <circle cx="16.5" cy="17" r="1.2" fill="white" opacity=".3"/>
-  <circle cx="7.5" cy="21" r="1.2" fill="white" opacity=".3"/>
-  <circle cx="12" cy="21" r="1.2" fill="white" opacity=".3"/>
-  <circle cx="16.5" cy="21" r="1.2" fill="white" opacity=".3"/>
-  <!-- Gold equals bar -->
-  <rect x="5" y="25" width="14.5" height="2" rx="1" fill="#f59e0b" opacity=".9"/>
-  <!-- Gold badge circle -->
-  <circle cx="24.5" cy="7" r="6.5" fill="#f59e0b"/>
-  <!-- House roof -->
-  <path d="M24.5 2.5 L29 6 L20 6 Z" fill="white" opacity=".95"/>
-  <!-- House body -->
-  <rect x="21.5" y="6" width="6" height="4.5" rx=".6" fill="white" opacity=".95"/>
-  <!-- House door -->
-  <rect x="23" y="7.5" width="3" height="3" rx=".4" fill="#f59e0b" opacity=".5"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0066ff"/>
+      <stop offset="100%" stop-color="#5856d6"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect x="32" y="32" width="448" height="448" rx="96" fill="url(#lg)"/>
+  <!-- Bar 1 (short) -->
+  <rect x="102" y="296" width="42" height="114" rx="6" fill="#fff" opacity=".85"/>
+  <!-- Bar 2 (medium) -->
+  <rect x="162" y="233" width="42" height="177" rx="6" fill="#fff" opacity=".95"/>
+  <!-- Bar 3 (tall) -->
+  <rect x="222" y="176" width="42" height="234" rx="6" fill="#fff" opacity=".85"/>
+  <!-- Building body -->
+  <rect x="282" y="150" width="128" height="260" rx="8" fill="#fff" opacity=".9"/>
 </svg>

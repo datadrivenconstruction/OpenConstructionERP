@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { TranslationManager } from './TranslationManager';
@@ -8,6 +9,7 @@ import {
   EyeOff,
   CheckCircle2,
   XCircle,
+  Package,
   AlertCircle,
   ExternalLink,
   Loader2,
@@ -44,6 +46,7 @@ interface ProviderInfo {
   id: AIProvider;
   name: string;
   description: string;
+  descriptionDefault: string;
   keyPrefix: string;
   docsUrl: string;
   recommended?: boolean;
@@ -54,6 +57,7 @@ const AI_PROVIDERS: ProviderInfo[] = [
     id: 'anthropic',
     name: 'Anthropic Claude',
     description: 'settings.ai_desc_anthropic',
+    descriptionDefault: 'Claude Sonnet / Opus — best for construction estimation and analysis',
     keyPrefix: 'sk-ant-',
     docsUrl: 'https://console.anthropic.com/settings/keys',
     recommended: true,
@@ -62,6 +66,7 @@ const AI_PROVIDERS: ProviderInfo[] = [
     id: 'openai',
     name: 'OpenAI GPT-4',
     description: 'settings.ai_desc_openai',
+    descriptionDefault: 'GPT-4o — strong general-purpose AI with broad knowledge',
     keyPrefix: 'sk-',
     docsUrl: 'https://platform.openai.com/api-keys',
   },
@@ -69,8 +74,41 @@ const AI_PROVIDERS: ProviderInfo[] = [
     id: 'gemini',
     name: 'Google Gemini',
     description: 'settings.ai_desc_gemini',
+    descriptionDefault: 'Gemini Pro — multimodal AI with Google ecosystem integration',
     keyPrefix: 'AI',
     docsUrl: 'https://aistudio.google.com/app/apikey',
+  },
+  {
+    id: 'openrouter',
+    name: 'OpenRouter',
+    description: 'settings.ai_desc_openrouter',
+    descriptionDefault: 'Access multiple AI models through a single API key',
+    keyPrefix: 'sk-or-',
+    docsUrl: 'https://openrouter.ai/keys',
+  },
+  {
+    id: 'mistral',
+    name: 'Mistral AI',
+    description: 'settings.ai_desc_mistral',
+    descriptionDefault: 'Mistral Large — European AI with strong multilingual support',
+    keyPrefix: '',
+    docsUrl: 'https://console.mistral.ai/api-keys',
+  },
+  {
+    id: 'groq',
+    name: 'Groq',
+    description: 'settings.ai_desc_groq',
+    descriptionDefault: 'Ultra-fast inference for Llama and Mixtral models',
+    keyPrefix: 'gsk_',
+    docsUrl: 'https://console.groq.com/keys',
+  },
+  {
+    id: 'deepseek',
+    name: 'DeepSeek',
+    description: 'settings.ai_desc_deepseek',
+    descriptionDefault: 'DeepSeek V3 — cost-effective AI with strong reasoning',
+    keyPrefix: 'sk-',
+    docsUrl: 'https://platform.deepseek.com/api_keys',
   },
 ];
 
@@ -84,18 +122,13 @@ function maskApiKey(key: string | null | undefined): string {
 
 function isKeySetForProvider(settings: AISettings | undefined, provider: AIProvider): boolean {
   if (!settings) return false;
-  switch (provider) {
-    case 'anthropic':
-      return settings.anthropic_api_key_set;
-    case 'openai':
-      return settings.openai_api_key_set;
-    case 'gemini':
-      return settings.gemini_api_key_set;
-  }
+  const key = `${provider}_api_key_set` as keyof AISettings;
+  return !!settings[key];
 }
 
 function StatusIndicator({ status, lastTested }: { status: AIConnectionStatus; lastTested: string | null }) {
   const { t } = useTranslation();
+  const formatTimeAgo = useFormatTimeAgo();
 
   switch (status) {
     case 'connected':
@@ -137,15 +170,18 @@ function StatusIndicator({ status, lastTested }: { status: AIConnectionStatus; l
   }
 }
 
-function formatTimeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+function useFormatTimeAgo() {
+  const { t } = useTranslation();
+  return (dateStr: string): string => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return t('settings.time_just_now', { defaultValue: 'just now' });
+    if (mins < 60) return t('settings.time_minutes_ago', { defaultValue: '{{count}}m ago', count: mins });
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return t('settings.time_hours_ago', { defaultValue: '{{count}}h ago', count: hours });
+    const days = Math.floor(hours / 24);
+    return t('settings.time_days_ago', { defaultValue: '{{count}}d ago', count: days });
+  };
 }
 
 // ── AI Configuration Card ────────────────────────────────────────────────────
@@ -177,11 +213,24 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
 
   const hasKeySet = isKeySetForProvider(settings, selectedProvider);
 
-  // Test connection mutation
+  // Test connection mutation — auto-saves unsaved key before testing
   const testMutation = useMutation({
-    mutationFn: () => aiApi.testConnection(selectedProvider),
+    mutationFn: async () => {
+      // If there's an unsaved key, save it first
+      if (hasUnsavedKey && apiKeyInput.trim()) {
+        const update: Record<string, string | null> = { provider: selectedProvider };
+        update[`${selectedProvider}_api_key`] = apiKeyInput.trim();
+        await aiApi.updateSettings(update as Parameters<typeof aiApi.updateSettings>[0]);
+      }
+      return aiApi.testConnection(selectedProvider);
+    },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['ai-settings'] });
+      if (hasUnsavedKey) {
+        setApiKeyInput('');
+        setHasUnsavedKey(false);
+        setShowKey(false);
+      }
       if (result.success) {
         addToast({
           type: 'success',
@@ -278,7 +327,7 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
             <label className="text-sm font-medium text-content-primary block mb-3">
               {t('settings.ai_provider', { defaultValue: 'AI Provider' })}
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 pt-1">
               {AI_PROVIDERS.map((provider) => {
                 const isSelected = selectedProvider === provider.id;
                 const hasKey = isKeySetForProvider(settings, provider.id);
@@ -288,6 +337,8 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
                     key={provider.id}
                     type="button"
                     onClick={() => handleProviderChange(provider.id)}
+                    aria-pressed={isSelected}
+                    aria-label={`${provider.name}${isSelected ? ` (${t('settings.ai_selected', { defaultValue: 'selected' })})` : ''}`}
                     className={`relative flex flex-col items-start gap-1 rounded-xl px-4 py-3 text-left transition-all duration-normal ease-oe ${
                       isSelected
                         ? 'bg-oe-blue-subtle border-2 border-oe-blue ring-2 ring-oe-blue/10'
@@ -320,7 +371,7 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
                       </span>
                     </div>
                     <p className="text-xs text-content-secondary pl-5.5 leading-relaxed">
-                      {t(provider.description, { defaultValue: provider.description })}
+                      {t(provider.description, { defaultValue: provider.descriptionDefault })}
                     </p>
                     {hasKey && (
                       <Badge variant="success" size="sm" className="mt-1 ml-5.5">
@@ -351,7 +402,7 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
             </div>
             <div className="relative group">
               <input
-                type={showKey && hasUnsavedKey ? 'text' : 'text'}
+                type={showKey && hasUnsavedKey ? 'text' : 'password'}
                 value={hasUnsavedKey ? apiKeyInput : displayValue}
                 onChange={(e) => handleKeyChange(e.target.value)}
                 placeholder={
@@ -368,6 +419,7 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
               <button
                 type="button"
                 onClick={() => setShowKey(!showKey)}
+                aria-label={showKey ? t('settings.hide_key', { defaultValue: 'Hide' }) : t('settings.show_key', { defaultValue: 'Show' })}
                 className="absolute inset-y-0 right-0 flex items-center px-3 text-content-tertiary hover:text-content-primary transition-colors duration-fast"
                 tabIndex={-1}
               >
@@ -397,6 +449,7 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
           variant="secondary"
           onClick={() => testMutation.mutate()}
           disabled={testMutation.isPending || (!hasKeySet && !hasUnsavedKey)}
+          title={hasUnsavedKey ? t('settings.ai_test_save_hint', { defaultValue: 'Save key and test connection' }) : t('settings.ai_test', { defaultValue: 'Test Connection' })}
           icon={
             testMutation.isPending ? (
               <Loader2 size={14} className="animate-spin" />
@@ -410,7 +463,7 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
         <Button
           variant="primary"
           onClick={() => saveMutation.mutate()}
-          disabled={saveMutation.isPending}
+          disabled={saveMutation.isPending || (!hasUnsavedKey && selectedProvider === settings?.provider)}
           loading={saveMutation.isPending}
         >
           {t('settings.ai_save_btn', { defaultValue: 'Save Settings' })}
@@ -444,6 +497,8 @@ function InterfaceModeCard({ animationDelay }: { animationDelay: string }) {
         <div className="flex gap-3">
           <button
             onClick={() => setMode('simple')}
+            aria-pressed={!isAdvanced}
+            aria-label={t('nav.mode_simple', { defaultValue: 'Simple' })}
             className={`flex-1 flex flex-col items-center gap-2 rounded-xl px-4 py-4 border-2 transition-all ${
               !isAdvanced
                 ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue'
@@ -451,13 +506,15 @@ function InterfaceModeCard({ animationDelay }: { animationDelay: string }) {
             }`}
           >
             <span className="text-sm font-semibold">{t('nav.mode_simple', { defaultValue: 'Simple' })}</span>
-            <span className="text-2xs text-center">{t('settings.mode_simple_detail', { defaultValue: 'Essential estimation tools. Clean interface for focused work.' })}</span>
+            <span className="text-xs text-center leading-snug">{t('settings.mode_simple_detail', { defaultValue: 'Essential estimation tools. Clean interface for focused work.' })}</span>
             <span className={`mt-1 inline-flex h-5 items-center rounded-full px-2 text-2xs font-bold tracking-wide ${
               !isAdvanced ? 'bg-oe-blue/15 text-oe-blue' : 'bg-surface-tertiary text-content-tertiary'
             }`}>STD</span>
           </button>
           <button
             onClick={() => setMode('advanced')}
+            aria-pressed={isAdvanced}
+            aria-label={t('nav.mode_advanced', { defaultValue: 'Advanced' })}
             className={`flex-1 flex flex-col items-center gap-2 rounded-xl px-4 py-4 border-2 transition-all ${
               isAdvanced
                 ? 'border-oe-blue bg-oe-blue-subtle text-oe-blue'
@@ -465,12 +522,27 @@ function InterfaceModeCard({ animationDelay }: { animationDelay: string }) {
             }`}
           >
             <span className="text-sm font-semibold">{t('nav.mode_advanced', { defaultValue: 'Advanced' })}</span>
-            <span className="text-2xs text-center">{t('settings.mode_advanced_detail', { defaultValue: 'Full professional toolset with all modules and features visible.' })}</span>
+            <span className="text-xs text-center leading-snug">{t('settings.mode_advanced_detail', { defaultValue: 'Full professional toolset with all modules and features visible.' })}</span>
             <span className={`mt-1 inline-flex h-5 items-center rounded-full px-2 text-2xs font-bold tracking-wide ${
               isAdvanced ? 'bg-oe-blue/15 text-oe-blue' : 'bg-surface-tertiary text-content-tertiary'
             }`}>PRO</span>
           </button>
         </div>
+        <Link
+          to="/modules"
+          className="mt-4 flex items-center gap-2.5 rounded-lg border border-border-light bg-surface-secondary/40 px-4 py-3 text-left transition-all hover:bg-surface-secondary hover:border-border"
+        >
+          <Package size={16} className="shrink-0 text-oe-blue" />
+          <div className="min-w-0">
+            <span className="text-sm font-medium text-content-primary">
+              {t('settings.modules_link_title', { defaultValue: 'Modules' })}
+            </span>
+            <p className="text-xs text-content-tertiary mt-0.5">
+              {t('settings.modules_link_desc', { defaultValue: 'Enable, disable, and configure individual modules in the Modules section.' })}
+            </p>
+          </div>
+          <span className="ml-auto shrink-0 text-content-quaternary">&rarr;</span>
+        </Link>
       </CardContent>
     </Card>
   );
@@ -498,6 +570,8 @@ function AppearanceCard({ animationDelay }: { animationDelay: string }) {
               <button
                 key={option.value}
                 onClick={() => setTheme(option.value)}
+                aria-pressed={isActive}
+                aria-label={t(option.labelKey, { defaultValue: option.defaultLabel })}
                 className={`flex flex-col items-center gap-2.5 rounded-xl px-4 py-4 text-center transition-all duration-normal ease-oe ${
                   isActive
                     ? 'bg-oe-blue-subtle border-2 border-oe-blue text-oe-blue'
@@ -566,7 +640,7 @@ export function SettingsPage() {
           {profile ? (
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-oe-blue text-xl font-bold text-white">
+                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-oe-blue text-xl font-bold text-white" aria-hidden="true">
                   {profile.full_name?.charAt(0)?.toUpperCase() || 'U'}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -600,7 +674,9 @@ export function SettingsPage() {
                           setProfileForm({ full_name: profile.full_name || '' });
                           setEditingProfile(true);
                         }}
-                        className="flex h-6 w-6 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary hover:text-content-secondary transition-colors"
+                        disabled={profileMutation.isPending}
+                        className="flex h-6 w-6 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary hover:text-content-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        aria-label={t('settings.edit_profile', { defaultValue: 'Edit profile name' })}
                         title={t('common.edit')}
                       >
                         <Pencil size={12} />
@@ -640,23 +716,25 @@ export function SettingsPage() {
       </Card>
 
       {/* Interface Mode */}
-      <InterfaceModeCard animationDelay="120ms" />
+      <InterfaceModeCard animationDelay="150ms" />
 
       {/* AI Configuration */}
-      <InfoHint className="animate-card-in" text={t('settings.ai_guidance', { defaultValue: 'AI features (estimation, takeoff analysis, semantic search) require an API key. Anthropic Claude is recommended for best accuracy. Keys are stored encrypted and never leave your server.' })} />
-      <AIConfigurationCard animationDelay="150ms" />
+      <InfoHint className="animate-card-in" style={{ animationDelay: '140ms' }} text={t('settings.ai_guidance', { defaultValue: 'AI features (estimation, takeoff analysis, semantic search) require an API key. Anthropic Claude is recommended for best accuracy. Keys are stored encrypted and never leave your server.' })} />
+      <AIConfigurationCard animationDelay="200ms" />
 
       {/* Language */}
-      <Card className="animate-card-in" style={{ animationDelay: '200ms' }}>
+      <Card className="animate-card-in" style={{ animationDelay: '250ms' }}>
         <CardHeader title={t('settings.language_title', { defaultValue: 'Language & Region' })} subtitle={t('settings.language_subtitle', { defaultValue: 'Choose your preferred language' })} />
         <CardContent>
-          <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-2">
             {SUPPORTED_LANGUAGES.map((lang) => {
               const isActive = i18n.language === lang.code;
               return (
                 <button
                   key={lang.code}
                   onClick={() => i18n.changeLanguage(lang.code)}
+                  aria-pressed={isActive}
+                  aria-label={`${lang.name} (${lang.code})`}
                   className={`flex flex-col items-center gap-1 rounded-xl px-3 py-3 text-center transition-all duration-normal ease-oe ${
                     isActive
                       ? 'bg-oe-blue-subtle border-2 border-oe-blue text-oe-blue'
@@ -664,7 +742,7 @@ export function SettingsPage() {
                   }`}
                 >
                   <span className="text-lg">{lang.flag}</span>
-                  <span className="text-2xs font-medium truncate w-full">{lang.name}</span>
+                  <span className="text-2xs font-medium truncate w-full" title={lang.name}>{lang.name}</span>
                 </button>
               );
             })}
@@ -673,15 +751,15 @@ export function SettingsPage() {
       </Card>
 
       {/* Appearance */}
-      <AppearanceCard animationDelay="250ms" />
+      <AppearanceCard animationDelay="300ms" />
 
       {/* Translation Manager */}
-      <div className="animate-card-in" style={{ animationDelay: '300ms' }}>
+      <div className="animate-card-in" style={{ animationDelay: '350ms' }}>
         <TranslationManager />
       </div>
 
       {/* Danger zone */}
-      <Card className="animate-card-in border-semantic-error/20" style={{ animationDelay: '350ms' }}>
+      <Card className="animate-card-in border-semantic-error/20" style={{ animationDelay: '400ms' }}>
         <CardHeader title={t('settings.account_title', { defaultValue: 'Account' })} subtitle={t('settings.account_subtitle', { defaultValue: 'Sign out or manage your account' })} />
         <CardContent>
           <Button

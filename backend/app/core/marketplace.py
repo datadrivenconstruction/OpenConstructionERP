@@ -34,7 +34,7 @@ class MarketplaceModule:
     requires: list[str] = field(default_factory=list)  # Module dependencies
     price: str = "Free"  # "Free" | "Pro" | "$9.99/mo"
 
-    def to_dict(self, *, installed: bool) -> dict:
+    def to_dict(self, *, installed: bool, coming_soon: bool = False) -> dict:
         """Serialize to a JSON-friendly dict with runtime ``installed`` flag."""
         return {
             "id": self.id,
@@ -49,6 +49,7 @@ class MarketplaceModule:
             "requires": list(self.requires),
             "installed": installed,
             "price": self.price,
+            "coming_soon": coming_soon,
         }
 
 
@@ -887,15 +888,15 @@ MARKETPLACE_MODULES += [
         price="Free",
     ),
     MarketplaceModule(
-        id="demo-hospital-munich",
-        name="Demo: Hospital Munich",
-        description="200-bed hospital with operating rooms, ICU, clean rooms. DIN 276, 8 sections, 35 positions, 30-month schedule. Medical-grade MEP, sterile environments. Total: ~25M EUR.",
+        id="demo-medical-us",
+        name="Demo: Downtown Medical Center",
+        description="200-bed hospital with ED, surgical suites, diagnostic imaging. 5-story steel frame. MasterFormat, 12 sections, 38 positions, 22-month schedule. Full MEP systems. Total: ~$25M.",
         category="demo_project",
         icon="Building2",
         version="1.0.0",
         size_mb=0.1,
         author=_DDC,
-        tags=["DACH", "EUR", "DIN 276", "Healthcare", "Hospital"],
+        tags=["US", "USD", "MasterFormat", "Healthcare", "Hospital"],
         requires=[],
         price="Free",
     ),
@@ -937,14 +938,14 @@ def get_marketplace_catalog(
     """Return the full marketplace catalog with runtime ``installed`` status.
 
     Installed status is determined by:
-    - Built-in modules: always installed (CO2, GAEB, Risk, etc. are part of core)
-    - Cost databases: check if region has items in DB
-    - Resource catalogs: check if region has items in catalog table
-    - Vector indices: check if LanceDB has vectors
-    - Core languages: always installed (10 core)
-    - Extra languages: available but shown as installable
+    - Languages: all 20 bundled, always installed
+    - Converters: built-in, always installed
+    - Analytics: built-in, always installed
+    - Integrations: not yet implemented, marked ``coming_soon=True``
+    - Cost databases: checked on frontend via /costs/regions
+    - Resource catalogs: checked against loaded catalog regions
+    - Vector indices: checked on frontend
     - Demo projects: always available to install
-    - Pro modules: shown as "Requires Pro"
 
     Args:
         loaded_catalog_regions: Set of catalog region keys that have been imported
@@ -952,20 +953,6 @@ def get_marketplace_catalog(
             ``resource_catalog`` marketplace entries are marked as installed.
     """
     loaded_names = {name for name in module_loader.loaded_modules}
-
-    # Core languages (always installed)
-    _CORE_LANGS = {
-        "lang-en", "lang-de", "lang-fr", "lang-es", "lang-pt",
-        "lang-ru", "lang-zh", "lang-ar", "lang-hi", "lang-tr",
-    }
-
-    # Built-in analytics/integrations that are part of the core app
-    _BUILTIN_MODULES = {
-        "analytics-co2",       # Sustainability page exists
-        "analytics-risk",      # PERT/Monte Carlo in 4D Schedule
-        "integration-gaeb",    # GAEB export in BOQ module
-        "converter-pdf-ocr",   # Takeoff page exists
-    }
 
     # Map catalog module IDs to their corresponding region keys
     _CATALOG_ID_TO_REGION: dict[str, str] = {
@@ -986,12 +973,24 @@ def get_marketplace_catalog(
 
     result: list[dict] = []
     for mod in MARKETPLACE_MODULES:
+        installed = False
+        coming_soon = False
+
         if mod.category == "language":
-            installed = mod.id in _CORE_LANGS
+            # All 20 languages are bundled with the app
+            installed = True
+        elif mod.category == "converter":
+            # All converters are built-in
+            installed = True
+        elif mod.category == "analytics":
+            # All analytics modules are built-in
+            installed = True
+        elif mod.category == "integration":
+            # Integrations are not yet implemented
+            installed = False
+            coming_soon = True
         elif mod.category == "demo_project":
             installed = False  # Always installable
-        elif mod.id in _BUILTIN_MODULES:
-            installed = True  # Part of core app
         elif mod.category == "cost_database":
             # Will be checked on frontend via /costs/regions
             installed = False
@@ -1002,7 +1001,8 @@ def get_marketplace_catalog(
             installed = False  # Checked on frontend
         else:
             installed = mod.id in loaded_names
-        result.append(mod.to_dict(installed=installed))
+
+        result.append(mod.to_dict(installed=installed, coming_soon=coming_soon))
 
     return result
 

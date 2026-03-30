@@ -6,6 +6,7 @@ import clsx from 'clsx';
 interface InfoHintProps {
   text: string;
   className?: string;
+  style?: React.CSSProperties;
   /** Render as inline icon next to a title instead of standalone block */
   inline?: boolean;
   /** Custom label for the block-mode button */
@@ -16,7 +17,7 @@ interface InfoHintProps {
  * Collapsible info hint — shows an (i) icon that reveals help text on click.
  * Use `inline` for placement next to titles; omit for standalone usage.
  */
-export function InfoHint({ text, className, inline, label }: InfoHintProps) {
+export function InfoHint({ text, className, style, inline, label }: InfoHintProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -68,7 +69,7 @@ export function InfoHint({ text, className, inline, label }: InfoHintProps) {
   }
 
   return (
-    <div className={className}>
+    <div className={className} style={style}>
       <button
         onClick={() => setOpen(!open)}
         className={clsx(

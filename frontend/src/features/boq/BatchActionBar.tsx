@@ -85,7 +85,7 @@ export function BatchActionBar({
           <span className="text-sm font-medium text-content-primary tabular-nums whitespace-nowrap">
             {t('boq.n_selected', {
               defaultValue: '{{count}} positions selected',
-              count: String(count),
+              count,
             })}
           </span>
 
@@ -96,6 +96,7 @@ export function BatchActionBar({
           <button
             type="button"
             onClick={handleDeleteClick}
+            aria-label={t('boq.batch_delete', { defaultValue: 'Delete selected' })}
             className="inline-flex items-center gap-1.5 rounded-lg bg-semantic-error/10 px-3 py-1.5 text-xs font-medium text-semantic-error hover:bg-semantic-error/20 transition-colors"
           >
             <Trash2 size={14} />
@@ -107,6 +108,9 @@ export function BatchActionBar({
             <button
               type="button"
               onClick={() => setUnitDropdownOpen((prev) => !prev)}
+              aria-label={t('boq.batch_change_unit', { defaultValue: 'Change unit' })}
+              aria-expanded={unitDropdownOpen}
+              aria-haspopup="listbox"
               className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue-subtle px-3 py-1.5 text-xs font-medium text-oe-blue hover:bg-oe-blue-subtle/80 transition-colors"
             >
               <Ruler size={14} />
@@ -115,12 +119,13 @@ export function BatchActionBar({
             </button>
 
             {unitDropdownOpen && (
-              <div className="absolute bottom-full mb-2 left-0 w-36 rounded-xl border border-border-light bg-surface-elevated shadow-lg overflow-hidden animate-fade-in">
+              <div role="listbox" aria-label={t('boq.unit_options', { defaultValue: 'Unit options' })} className="absolute bottom-full mb-2 left-0 w-36 rounded-xl border border-border-light bg-surface-elevated shadow-lg overflow-hidden animate-fade-in">
                 <div className="py-1 max-h-52 overflow-y-auto">
                   {UNITS.map((unit) => (
                     <button
                       key={unit}
                       type="button"
+                      role="option"
                       onClick={() => handleUnitSelect(unit)}
                       className="flex w-full items-center px-3 py-2 text-xs font-mono uppercase text-content-primary hover:bg-surface-secondary transition-colors"
                     >
@@ -136,6 +141,7 @@ export function BatchActionBar({
           <button
             type="button"
             onClick={onClearSelection}
+            aria-label={t('boq.batch_clear_selection', { defaultValue: 'Clear selection' })}
             className="inline-flex items-center gap-1.5 rounded-lg bg-surface-secondary px-3 py-1.5 text-xs font-medium text-content-secondary hover:bg-surface-tertiary transition-colors"
           >
             <X size={14} />
@@ -151,6 +157,7 @@ export function BatchActionBar({
           <div
             className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
             onClick={() => setConfirmDeleteOpen(false)}
+            aria-hidden="true"
           />
 
           {/* Dialog */}
@@ -158,6 +165,7 @@ export function BatchActionBar({
             role="alertdialog"
             aria-modal="true"
             aria-label={t('boq.batch_delete_confirm_title', { defaultValue: 'Delete positions' })}
+            tabIndex={-1}
             className="relative z-10 w-full max-w-sm mx-4 rounded-2xl border border-border-light bg-surface-elevated shadow-xl animate-scale-in focus:outline-none"
           >
             <div className="px-6 pt-6 pb-4">
@@ -170,7 +178,7 @@ export function BatchActionBar({
               <p className="mt-2 text-sm text-content-secondary text-center leading-relaxed">
                 {t('boq.batch_delete_confirm_message', {
                   defaultValue: 'Are you sure you want to delete {{count}} selected positions? This action cannot be undone.',
-                  count: String(count),
+                  count,
                 })}
               </p>
             </div>
@@ -190,7 +198,7 @@ export function BatchActionBar({
               >
                 {t('boq.batch_delete_confirm', {
                   defaultValue: 'Delete {{count}} positions',
-                  count: String(count),
+                  count,
                 })}
               </button>
             </div>

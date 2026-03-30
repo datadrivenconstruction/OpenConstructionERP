@@ -96,7 +96,7 @@ export function PriceReviewPanel({
           <Button variant="primary" size="sm" icon={<CheckCheck size={14} />} onClick={onApplyAll}>
             {t('boq.apply_all_suggestions', { defaultValue: 'Apply All' })}
           </Button>
-          <button onClick={onDismiss} className="p-1 rounded-md hover:bg-surface-secondary transition-colors">
+          <button onClick={onDismiss} aria-label={t('common.close', { defaultValue: 'Close' })} className="p-1 rounded-md hover:bg-surface-secondary transition-colors">
             <X size={14} className="text-content-tertiary" />
           </button>
         </div>
@@ -151,6 +151,7 @@ export function PriceReviewPanel({
             <div className="flex items-center gap-1 shrink-0">
               <button
                 onClick={() => onApply(item.id, item.suggestedRate)}
+                aria-label={`${t('boq.accept', { defaultValue: 'Accept' })} — ${item.ordinal}`}
                 className="flex items-center gap-1 rounded-md bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors"
               >
                 <Check size={12} />
@@ -158,6 +159,7 @@ export function PriceReviewPanel({
               </button>
               <button
                 onClick={() => onIgnore(item.id)}
+                aria-label={`${t('boq.ignore', { defaultValue: 'Ignore' })} — ${item.ordinal}`}
                 className="flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-content-tertiary hover:bg-surface-secondary transition-colors"
               >
                 <X size={12} />

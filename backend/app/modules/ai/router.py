@@ -12,6 +12,7 @@ Endpoints:
 """
 
 import logging
+import time
 import uuid
 from typing import Any
 
@@ -112,6 +113,84 @@ async def update_ai_settings(
     Preferred model options: `claude-sonnet`, `gpt-4o`, `gemini-flash`
     """
     return await service.update_ai_settings(user_id, data)
+
+
+# ── Test API key ──────────────────────────────────────────────────────────────
+
+
+@router.post(
+    "/settings/test",
+    dependencies=[Depends(RequirePermission("ai.settings.read"))],
+)
+async def test_ai_connection(
+    body: dict,
+    user_id: CurrentUserId,
+    service: AIService = Depends(_get_service),
+) -> dict:
+    """Test an AI provider connection by sending a minimal request.
+
+    Body: ``{provider: "anthropic" | "openai" | "gemini"}``
+
+    Returns success status and response latency.
+    """
+    _VALID_PROVIDERS = ("anthropic", "openai", "gemini", "openrouter", "mistral", "groq", "deepseek")
+    provider = body.get("provider", "").strip()
+    if provider not in _VALID_PROVIDERS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unknown provider: {provider}. Use one of: {', '.join(_VALID_PROVIDERS)}.",
+        )
+
+    uid = uuid.UUID(user_id)
+    settings = await service.settings_repo.get_by_user_id(uid)
+
+    # Resolve the API key for the requested provider
+    key_map = {
+        "anthropic": settings.anthropic_api_key if settings else None,
+        "openai": settings.openai_api_key if settings else None,
+        "gemini": settings.gemini_api_key if settings else None,
+        "openrouter": settings.openrouter_api_key if settings else None,
+        "mistral": settings.mistral_api_key if settings else None,
+        "groq": settings.groq_api_key if settings else None,
+        "deepseek": settings.deepseek_api_key if settings else None,
+    }
+    api_key = key_map.get(provider)
+    if not api_key:
+        return {
+            "success": False,
+            "message": f"No API key configured for {provider}. Please save your key first.",
+            "latency_ms": None,
+        }
+
+    # Make a minimal test call
+    try:
+        t0 = time.monotonic()
+        await call_ai(
+            provider=provider,
+            api_key=api_key,
+            system="You are a test assistant.",
+            prompt="Reply with exactly: OK",
+            max_tokens=10,
+        )
+        latency_ms = int((time.monotonic() - t0) * 1000)
+        return {
+            "success": True,
+            "message": f"{provider.title()} API is working.",
+            "latency_ms": latency_ms,
+        }
+    except ValueError as exc:
+        return {
+            "success": False,
+            "message": str(exc),
+            "latency_ms": None,
+        }
+    except Exception as exc:
+        logger.warning("AI test failed for %s: %s", provider, exc)
+        return {
+            "success": False,
+            "message": f"Connection failed: {str(exc)[:200]}",
+            "latency_ms": None,
+        }
 
 
 # ── Quick Estimate (text -> AI -> BOQ) ───────────────────────────────────────
@@ -398,10 +477,12 @@ async def advisor_chat(
 
     project_id = body.get("project_id")
     region = body.get("region", "")
+    locale = body.get("locale", "en")
+    history: list[dict] = body.get("history", []) or []
 
     # 1. Search cost database for relevant items
     from app.modules.costs.models import CostItem
-    from sqlalchemy import select
+    from sqlalchemy import select, or_
 
     context_items: list[dict] = []
 
@@ -413,24 +494,25 @@ async def advisor_chat(
         results = vector_search(query_vector, region=region or None, limit=8)
         context_items = results
     except Exception:
-        # Fallback: simple text search on first keyword
-        keywords = message.split()
-        pattern = f"%{keywords[0] if keywords else message}%"
-        stmt = (
-            select(CostItem)
-            .where(CostItem.is_active.is_(True), CostItem.description.ilike(pattern))
-            .limit(8)
-        )
-        result = await session.execute(stmt)
-        items = result.scalars().all()
-        for item in items:
-            context_items.append({
-                "code": item.code,
-                "description": item.description[:200],
-                "unit": item.unit,
-                "rate": float(item.rate) if item.rate else 0,
-                "region": item.region or "",
-            })
+        # Fallback: multi-keyword text search (use all significant words)
+        keywords = [w for w in message.split() if len(w) > 2]
+        if keywords:
+            conditions = [CostItem.description.ilike(f"%{kw}%") for kw in keywords[:5]]
+            stmt = (
+                select(CostItem)
+                .where(CostItem.is_active.is_(True), or_(*conditions))
+                .limit(8)
+            )
+            result = await session.execute(stmt)
+            items = result.scalars().all()
+            for item in items:
+                context_items.append({
+                    "code": item.code,
+                    "description": item.description[:200],
+                    "unit": item.unit,
+                    "rate": float(item.rate) if item.rate else 0,
+                    "region": item.region or "",
+                })
 
     # 2. Build context from found items
     if context_items:
@@ -439,9 +521,12 @@ async def advisor_chat(
             f"{it.get('unit', '')} | {it.get('rate', 0)} | {it.get('region', '')}"
             for it in context_items[:8]
         ])
-        context = f"Available cost data from database:\n{items_text}"
+        context = (
+            f"Cost database results (may or may not be relevant — use only if they "
+            f"actually match the user's question):\n{items_text}"
+        )
     else:
-        context = "No specific cost items found in the database for this query."
+        context = "No cost items found in the database. Use your general knowledge."
 
     # 3. Get project context if provided
     project_context = ""
@@ -458,24 +543,73 @@ async def advisor_chat(
         except Exception:
             pass
 
-    # 4. Build prompt
+    # 4. Build prompt — locale-aware, allows general knowledge
+    _LOCALE_NAMES = {
+        "en": "English", "de": "German", "fr": "French", "es": "Spanish",
+        "pt": "Portuguese", "ru": "Russian", "zh": "Chinese", "ar": "Arabic",
+        "hi": "Hindi", "tr": "Turkish", "it": "Italian", "nl": "Dutch",
+        "pl": "Polish", "cs": "Czech", "ja": "Japanese", "ko": "Korean",
+        "sv": "Swedish", "no": "Norwegian", "da": "Danish", "fi": "Finnish",
+        "bg": "Bulgarian",
+    }
+    lang_name = _LOCALE_NAMES.get(locale, "English")
+
     system_prompt = (
-        "You are an AI Cost Advisor for construction projects. "
-        "You help estimators with cost-related questions.\n\n"
-        "Rules:\n"
-        "- Use the cost database data provided as context to answer questions\n"
-        "- Always mention specific rates and units when available\n"
-        "- If asked about costs, provide ranges (min-max) when possible\n"
-        "- Suggest alternatives if the user asks about expensive items\n"
-        "- Be concise and professional\n"
-        "- Format numbers with proper currency\n"
-        "- If you don't have data for the question, say so honestly"
+        f"You are an AI Cost Advisor for construction projects — a smart, interactive "
+        f"assistant that helps estimators with costs, materials, methods, and regulations.\n\n"
+        f"CRITICAL: You MUST respond ONLY in {lang_name}. Every word must be in {lang_name}.\n\n"
+        f"## Conversation style\n"
+        f"You are having a DIALOGUE, not writing a report. Be smart and interactive:\n"
+        f"- If the user's question is AMBIGUOUS or BROAD (e.g., 'compare concrete prices', "
+        f"'how much does plaster cost', 'typical rates for electricians'), DO NOT guess "
+        f"a region or context. Instead, ask a SHORT clarifying question with options.\n"
+        f"  Example: User asks 'Compare concrete prices by region'\n"
+        f"  Good response: 'I can compare concrete prices! To give you accurate data, "
+        f"please tell me:\\n1. Which regions interest you? (e.g., DACH, UK, Middle East, "
+        f"North America, or specific countries)\\n2. What concrete grade? (C20, C25, C30, etc.)\\n"
+        f"3. Ready-mix or precast?\\nOr just tell me your project location and I will suggest "
+        f"relevant comparisons.'\n"
+        f"- If the user provides enough context (specific region, material, project), "
+        f"answer directly with data.\n"
+        f"- If a project is active (see project context below), use its region/currency "
+        f"as default context — but still confirm if the question is broad.\n\n"
+        f"## Data rules\n"
+        f"- Use cost database items when they are relevant to the question\n"
+        f"- IGNORE database items that are clearly unrelated\n"
+        f"- Supplement with your general construction knowledge\n"
+        f"- When providing prices, ALWAYS specify: region, currency, unit, and whether "
+        f"it includes labor/materials/both\n"
+        f"- Give ranges (min–max) not single numbers\n"
+        f"- Suggest cost-saving alternatives when appropriate\n"
+        f"- Format with markdown: use **bold** for key numbers, bullet lists for comparisons\n"
+        f"- Never say 'data not available' — either ask for clarification or provide "
+        f"general estimates with a note about accuracy"
     )
+
+    # Build conversation history into prompt for context continuity
+    history_text = ""
+    if history:
+        history_lines = []
+        for h in history[-10:]:  # Last 10 messages max
+            role = h.get("role", "user")
+            content = h.get("content", "")[:500]  # Truncate long messages
+            prefix = "User" if role == "user" else "Assistant"
+            history_lines.append(f"{prefix}: {content}")
+        if history_lines:
+            history_text = (
+                "Previous conversation:\n"
+                + "\n".join(history_lines)
+                + "\n\n---\n\n"
+            )
 
     user_prompt = (
         f"{context}{project_context}\n\n"
-        f"User question: {message}\n\n"
-        "Provide a helpful, concise answer based on the cost data above."
+        f"{history_text}"
+        f"User message: {message}\n\n"
+        f"Respond in {lang_name}. This is a continuing conversation — use the history above "
+        f"for context. The user may be answering your previous question or selecting an option "
+        f"you offered. If the user selected an option, answer that specific topic directly "
+        f"with data. Do NOT ask the same clarifying questions again."
     )
 
     # 5. Call AI (reuse existing settings/provider resolution)
@@ -483,6 +617,7 @@ async def advisor_chat(
     uid = uuid.UUID(user_id)
     settings = await service.settings_repo.get_by_user_id(uid)
 
+    used_db = bool(context_items)
     try:
         provider, api_key = resolve_provider_and_key(settings)
         text, _tokens = await call_ai(
@@ -490,16 +625,21 @@ async def advisor_chat(
             api_key=api_key,
             system=system_prompt,
             prompt=user_prompt,
-            max_tokens=500,
+            max_tokens=1500,
         )
         answer = text
     except (ValueError, Exception) as exc:
-        answer = (
-            "AI is not configured. Please set up an AI provider in Settings. "
-            f"(Error: {str(exc)[:100]})"
-        )
+        _err_msgs = {
+            "ru": "ИИ не настроен. Пожалуйста, добавьте API-ключ в Настройках.",
+            "de": "KI nicht konfiguriert. Bitte fügen Sie Ihren API-Schlüssel in den Einstellungen hinzu.",
+            "fr": "IA non configurée. Veuillez ajouter votre clé API dans les Paramètres.",
+            "es": "IA no configurada. Agregue su clave API en Configuración.",
+        }
+        fallback = _err_msgs.get(locale, f"AI is not configured. Please set up an AI provider in Settings.")
+        answer = f"{fallback}\n({str(exc)[:100]})"
+        used_db = False
 
-    # 6. Build source references
+    # 6. Build source references — only include if items seem relevant
     sources = [
         {
             "code": it.get("code", ""),
@@ -509,7 +649,16 @@ async def advisor_chat(
             "region": it.get("region", ""),
         }
         for it in context_items[:5]
-    ]
+    ] if used_db else []
+
+    # If AI didn't reference any sources in its answer, don't show them
+    if sources and answer:
+        # Check if the AI actually used any source codes in its response
+        codes_in_answer = any(
+            it.get("code", "xxx") in answer for it in context_items[:5]
+        )
+        if not codes_in_answer:
+            sources = []  # AI ignored the DB items — don't show irrelevant sources
 
     return {
         "answer": answer,

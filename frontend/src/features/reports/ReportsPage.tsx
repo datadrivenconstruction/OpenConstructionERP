@@ -20,11 +20,11 @@ import {
   Table2,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { InfoHint } from '@/shared/ui';
+import { Breadcrumb, InfoHint } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
-import { triggerDownload } from '@/shared/lib/api';
+import { apiGet, triggerDownload } from '@/shared/lib/api';
 import { projectsApi, type Project } from '@/features/projects/api';
 import { boqApi, type BOQ } from '@/features/boq/api';
 import { scheduleApi } from '@/features/schedule/api';
@@ -145,6 +145,46 @@ const REPORT_CARDS: ReportCard[] = [
       },
     ],
     customHandler: download5DReport,
+  },
+  {
+    id: 'tender_comparison',
+    titleKey: 'reports.tender_comparison',
+    descriptionKey: 'reports.tender_comparison_desc',
+    icon: BarChart3,
+    formats: [{ label: 'CSV', extension: 'csv', endpoint: '', mediaType: 'text/csv' }],
+    customHandler: downloadTenderComparisonReport,
+  },
+  {
+    id: 'change_order_register',
+    titleKey: 'reports.change_order_register',
+    descriptionKey: 'reports.change_order_register_desc',
+    icon: FileEdit,
+    formats: [{ label: 'CSV', extension: 'csv', endpoint: '', mediaType: 'text/csv' }],
+    customHandler: downloadChangeOrderReport,
+  },
+  {
+    id: 'risk_register',
+    titleKey: 'reports.risk_register',
+    descriptionKey: 'reports.risk_register_desc',
+    icon: ShieldAlert,
+    formats: [{ label: 'CSV', extension: 'csv', endpoint: '', mediaType: 'text/csv' }],
+    customHandler: downloadRiskRegisterReport,
+  },
+  {
+    id: 'cash_flow',
+    titleKey: 'reports.cash_flow',
+    descriptionKey: 'reports.cash_flow_desc',
+    icon: DollarSign,
+    formats: [{ label: 'CSV', extension: 'csv', endpoint: '', mediaType: 'text/csv' }],
+    customHandler: downloadCashFlowReport,
+  },
+  {
+    id: 'progress_report',
+    titleKey: 'reports.progress_report',
+    descriptionKey: 'reports.progress_report_desc',
+    icon: TrendingUp,
+    formats: [{ label: 'HTML', extension: 'html', endpoint: '', mediaType: 'text/html' }],
+    customHandler: downloadProgressReport,
   },
 ];
 
@@ -271,6 +311,251 @@ async function download5DReport(projectId: string, projectName: string): Promise
   }
 
   downloadBlob(csvLines.join('\n'), `${projectName}_5d_report.csv`, 'text/csv');
+}
+
+/**
+ * Tender Comparison Report — fetch tender packages and bid comparison data,
+ * then generate a CSV download.
+ */
+async function downloadTenderComparisonReport(projectId: string, projectName: string): Promise<void> {
+  const packages = await apiGet<Array<{
+    id: string; name: string; status: string; bid_count: number; deadline: string | null;
+  }>>(`/v1/tendering/packages/?project_id=${projectId}`);
+
+  const csvLines: string[] = [];
+  csvLines.push('Tender Comparison Report');
+  csvLines.push(`Project,${projectName}`);
+  csvLines.push(`Generated,${new Date().toISOString()}`);
+  csvLines.push(`Total Packages,${packages.length}`);
+  csvLines.push('');
+
+  for (const pkg of packages) {
+    csvLines.push(`Package: ${pkg.name}`);
+    csvLines.push(`Status,${pkg.status}`);
+    csvLines.push(`Deadline,${pkg.deadline || 'N/A'}`);
+    csvLines.push(`Bids,${pkg.bid_count}`);
+
+    try {
+      const comparison = await apiGet<{
+        bid_count: number;
+        budget_total: number;
+        bid_totals: Array<{ company_name: string; total: number; currency: string; deviation_pct: number; status: string }>;
+        rows: Array<{ description: string; unit: string; budget_rate: number; bids: Array<{ company_name: string; unit_rate: number; total: number }> }>;
+      }>(`/v1/tendering/packages/${pkg.id}/comparison`);
+
+      if (comparison.bid_totals.length > 0) {
+        csvLines.push('');
+        csvLines.push(['Company', 'Total', 'Currency', 'Deviation %', 'Status'].join(','));
+        for (const bt of comparison.bid_totals) {
+          csvLines.push([bt.company_name, bt.total.toFixed(2), bt.currency, `${bt.deviation_pct.toFixed(1)}%`, bt.status].join(','));
+        }
+        csvLines.push(`Budget Total,${comparison.budget_total.toFixed(2)}`);
+      }
+    } catch { /* skip comparison if unavailable */ }
+
+    csvLines.push('');
+    csvLines.push('---');
+    csvLines.push('');
+  }
+
+  if (packages.length === 0) {
+    csvLines.push('No tender packages found for this project.');
+  }
+
+  downloadBlob(csvLines.join('\n'), `${projectName}_tender_comparison.csv`, 'text/csv');
+}
+
+/**
+ * Change Order Register — fetch change orders and summary, then generate a CSV
+ * download with cumulative cost and schedule impact.
+ */
+async function downloadChangeOrderReport(projectId: string, projectName: string): Promise<void> {
+  const [orders, summary] = await Promise.all([
+    apiGet<Array<{
+      id: string; code: string; title: string; description: string;
+      reason_category: string; status: string; cost_impact: number;
+      schedule_impact_days: number; currency: string; item_count: number;
+      created_at: string; submitted_at: string | null; approved_at: string | null;
+    }>>(`/v1/changeorders/?project_id=${projectId}`),
+    apiGet<{
+      total_orders: number; approved_count: number; rejected_count: number;
+      total_cost_impact: number; total_schedule_impact_days: number; currency: string;
+    }>(`/v1/changeorders/summary?project_id=${projectId}`),
+  ]);
+
+  const csvLines: string[] = [];
+  csvLines.push('Change Order Register');
+  csvLines.push(`Project,${projectName}`);
+  csvLines.push(`Generated,${new Date().toISOString()}`);
+  csvLines.push('');
+  csvLines.push('Summary');
+  csvLines.push(`Total Orders,${summary.total_orders}`);
+  csvLines.push(`Approved,${summary.approved_count}`);
+  csvLines.push(`Rejected,${summary.rejected_count}`);
+  csvLines.push(`Total Cost Impact,${summary.total_cost_impact} ${summary.currency}`);
+  csvLines.push(`Total Schedule Impact,${summary.total_schedule_impact_days} days`);
+  csvLines.push('');
+  csvLines.push(['Code', 'Title', 'Reason', 'Status', 'Cost Impact', 'Schedule Days', 'Items', 'Created', 'Submitted', 'Approved'].join(','));
+
+  for (const o of orders) {
+    csvLines.push([
+      o.code,
+      `"${o.title.replace(/"/g, '""')}"`,
+      o.reason_category,
+      o.status,
+      o.cost_impact.toFixed(2),
+      String(o.schedule_impact_days),
+      String(o.item_count),
+      o.created_at?.slice(0, 10) || '',
+      o.submitted_at?.slice(0, 10) || '',
+      o.approved_at?.slice(0, 10) || '',
+    ].join(','));
+  }
+
+  downloadBlob(csvLines.join('\n'), `${projectName}_change_orders.csv`, 'text/csv');
+}
+
+/**
+ * Risk Register Report — fetch risks with probability, impact, scores, and
+ * mitigation plans, then generate a CSV download.
+ */
+async function downloadRiskRegisterReport(projectId: string, projectName: string): Promise<void> {
+  let risks: Array<{
+    id: string; code: string; title: string; description: string;
+    probability: number; impact_cost: number; impact_severity: string;
+    risk_score: number; status: string; owner_name: string | null;
+    mitigation_plan: string | null; created_at: string;
+  }>;
+  try {
+    risks = await apiGet(`/v1/risk/?project_id=${projectId}&limit=100`);
+  } catch {
+    risks = [];
+  }
+
+  const csvLines: string[] = [];
+  csvLines.push('Risk Register Report');
+  csvLines.push(`Project,${projectName}`);
+  csvLines.push(`Generated,${new Date().toISOString()}`);
+  csvLines.push(`Total Risks,${risks.length}`);
+  const totalExposure = risks.reduce((s, r) => s + r.probability * r.impact_cost, 0);
+  csvLines.push(`Total Exposure,${totalExposure.toFixed(0)}`);
+  csvLines.push('');
+  csvLines.push(['Code', 'Title', 'Probability', 'Impact Cost', 'Severity', 'Score', 'Status', 'Owner', 'Mitigation'].join(','));
+
+  for (const r of risks) {
+    csvLines.push([
+      r.code,
+      `"${r.title.replace(/"/g, '""')}"`,
+      `${(r.probability * 100).toFixed(0)}%`,
+      r.impact_cost.toFixed(0),
+      r.impact_severity,
+      r.risk_score.toFixed(1),
+      r.status,
+      r.owner_name || '',
+      `"${(r.mitigation_plan || '').replace(/"/g, '""')}"`,
+    ].join(','));
+  }
+
+  downloadBlob(csvLines.join('\n'), `${projectName}_risk_register.csv`, 'text/csv');
+}
+
+/**
+ * Cash Flow Report — fetch S-curve data and generate a CSV with planned vs
+ * actual cumulative and per-period spending.
+ */
+async function downloadCashFlowReport(projectId: string, projectName: string): Promise<void> {
+  const sCurve = await costModelApi.getSCurve(projectId);
+
+  const csvLines: string[] = [];
+  csvLines.push('Cash Flow Forecast');
+  csvLines.push(`Project,${projectName}`);
+  csvLines.push(`Generated,${new Date().toISOString()}`);
+  csvLines.push('');
+  csvLines.push(['Period', 'Planned Cumulative', 'Earned Cumulative', 'Actual Cumulative', 'Planned Period', 'Actual Period'].join(','));
+
+  let prevPlanned = 0;
+  let prevActual = 0;
+  for (const p of sCurve.periods) {
+    const plannedPeriod = p.planned - prevPlanned;
+    const actualPeriod = p.actual - prevActual;
+    csvLines.push([
+      p.period,
+      p.planned.toFixed(0),
+      p.earned.toFixed(0),
+      p.actual.toFixed(0),
+      plannedPeriod.toFixed(0),
+      actualPeriod.toFixed(0),
+    ].join(','));
+    prevPlanned = p.planned;
+    prevActual = p.actual;
+  }
+
+  downloadBlob(csvLines.join('\n'), `${projectName}_cash_flow.csv`, 'text/csv');
+}
+
+/**
+ * Progress Report — generates an HTML report combining EVM performance, schedule
+ * status, and top risks into a single downloadable page.
+ */
+async function downloadProgressReport(projectId: string, projectName: string): Promise<void> {
+  const htmlParts: string[] = [];
+  htmlParts.push(`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>${projectName} — Progress Report</title>`);
+  htmlParts.push('<style>body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;max-width:900px;margin:0 auto;padding:40px 24px;color:#1a1a1a;line-height:1.6}h1{font-size:28px;border-bottom:3px solid #2563eb;padding-bottom:12px}h2{font-size:20px;color:#2563eb;margin-top:32px;border-bottom:1px solid #e5e7eb;padding-bottom:6px}table{width:100%;border-collapse:collapse;margin:12px 0}th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #e5e7eb;font-size:14px}th{background:#f9fafb;font-weight:600}.metric{display:inline-block;margin:8px 16px 8px 0;padding:12px 20px;border:1px solid #e5e7eb;border-radius:8px;text-align:center}.metric-label{font-size:11px;text-transform:uppercase;color:#6b7280;letter-spacing:0.05em}.metric-value{font-size:22px;font-weight:700}p.footer{color:#9ca3af;font-size:12px;margin-top:40px;border-top:1px solid #e5e7eb;padding-top:12px}@media print{body{padding:0}}</style>');
+  htmlParts.push('</head><body>');
+  htmlParts.push(`<h1>${projectName} — Progress Report</h1>`);
+  htmlParts.push(`<p style="color:#6b7280">Generated: ${new Date().toLocaleString()}</p>`);
+
+  // EVM section
+  try {
+    const dashboard = await costModelApi.getDashboard(projectId);
+    htmlParts.push('<h2>Earned Value Performance</h2>');
+    htmlParts.push('<div>');
+    htmlParts.push(`<div class="metric"><div class="metric-label">SPI</div><div class="metric-value" style="color:${Number(dashboard.spi||0)>=1?'#166534':'#991b1b'}">${Number(dashboard.spi||0).toFixed(2)}</div></div>`);
+    htmlParts.push(`<div class="metric"><div class="metric-label">CPI</div><div class="metric-value" style="color:${Number(dashboard.cpi||0)>=1?'#166534':'#991b1b'}">${Number(dashboard.cpi||0).toFixed(2)}</div></div>`);
+    htmlParts.push(`<div class="metric"><div class="metric-label">Budget</div><div class="metric-value">${Number(dashboard.total_budget||0).toLocaleString()}</div></div>`);
+    htmlParts.push(`<div class="metric"><div class="metric-label">Actual</div><div class="metric-value">${Number(dashboard.total_actual||0).toLocaleString()}</div></div>`);
+    htmlParts.push(`<div class="metric"><div class="metric-label">Forecast (EAC)</div><div class="metric-value">${Number(dashboard.total_forecast||0).toLocaleString()}</div></div>`);
+    htmlParts.push('</div>');
+  } catch { htmlParts.push('<p>No budget data available.</p>'); }
+
+  // Schedule section
+  try {
+    const schedules = await scheduleApi.listSchedules(projectId);
+    htmlParts.push('<h2>Schedule Status</h2>');
+    for (const sched of schedules) {
+      try {
+        const gantt = await scheduleApi.getGantt(sched.id);
+        const pct = gantt.summary.total_activities > 0
+          ? Math.round((gantt.summary.completed / gantt.summary.total_activities) * 100)
+          : 0;
+        htmlParts.push(`<h3>${sched.name}</h3>`);
+        htmlParts.push(`<div class="metric"><div class="metric-label">Progress</div><div class="metric-value">${pct}%</div></div>`);
+        htmlParts.push(`<div class="metric"><div class="metric-label">Activities</div><div class="metric-value">${gantt.summary.total_activities}</div></div>`);
+        htmlParts.push(`<div class="metric"><div class="metric-label">Completed</div><div class="metric-value">${gantt.summary.completed}</div></div>`);
+        htmlParts.push(`<div class="metric"><div class="metric-label">Delayed</div><div class="metric-value" style="color:${gantt.summary.delayed>0?'#991b1b':'#166534'}">${gantt.summary.delayed}</div></div>`);
+      } catch { /* skip */ }
+    }
+  } catch { htmlParts.push('<p>No schedule data.</p>'); }
+
+  // Risk highlights
+  try {
+    const risks = await apiGet<Array<{ code: string; title: string; risk_score: number; impact_severity: string }>>(`/v1/risk/?project_id=${projectId}&limit=5`);
+    if (risks.length > 0) {
+      htmlParts.push('<h2>Top Risks</h2>');
+      htmlParts.push('<table><thead><tr><th>Code</th><th>Risk</th><th>Severity</th><th>Score</th></tr></thead><tbody>');
+      const sorted = [...risks].sort((a, b) => b.risk_score - a.risk_score);
+      for (const r of sorted) {
+        htmlParts.push(`<tr><td>${r.code}</td><td>${r.title}</td><td>${r.impact_severity}</td><td>${r.risk_score.toFixed(1)}</td></tr>`);
+      }
+      htmlParts.push('</tbody></table>');
+    }
+  } catch { /* skip */ }
+
+  htmlParts.push(`<p class="footer">Report generated by OpenConstructionERP on ${new Date().toLocaleString()}</p>`);
+  htmlParts.push('</body></html>');
+
+  const blob = new Blob([htmlParts.join('\n')], { type: 'text/html' });
+  triggerDownload(blob, `${projectName}_progress_report.html`);
 }
 
 async function downloadBoqExport(
@@ -453,6 +738,14 @@ export function ReportsPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-6">
+      <Breadcrumb
+        items={[
+          { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
+          { label: t('reports.title', { defaultValue: 'Reports' }) },
+        ]}
+        className="mb-4"
+      />
+
       {/* Header */}
       <div>
         <h1 className="text-2xl font-semibold text-content-primary">
@@ -588,6 +881,7 @@ export function ReportsPage() {
       {showBuilder && (
         <CustomReportBuilder
           sections={builderSections}
+          onSetSections={(ids) => setBuilderSections(new Set(ids))}
           onToggle={(id) => {
             setBuilderSections((prev) => {
               const next = new Set(prev);
@@ -608,6 +902,15 @@ export function ReportsPage() {
             try {
               const sections = Array.from(builderSections);
               const projectName = selectedProject.name;
+
+              let cachedDashboard: Awaited<ReturnType<typeof costModelApi.getDashboard>> | null = null;
+              async function getDashboard() {
+                if (!cachedDashboard) {
+                  cachedDashboard = await costModelApi.getDashboard(selectedProjectId);
+                }
+                return cachedDashboard;
+              }
+
               const htmlParts: string[] = [];
 
               htmlParts.push(`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>${projectName} — Project Report</title>`);
@@ -620,7 +923,7 @@ export function ReportsPage() {
               if (sections.includes('summary')) {
                 htmlParts.push('<h2>Executive Summary</h2>');
                 try {
-                  const dashboard = await costModelApi.getDashboard(selectedProjectId);
+                  const dashboard = await getDashboard();
                   htmlParts.push('<div>');
                   htmlParts.push(`<div class="metric"><div class="metric-label">Total Budget</div><div class="metric-value">${Number(dashboard.total_budget || 0).toLocaleString()} ${dashboard.currency || 'EUR'}</div></div>`);
                   htmlParts.push(`<div class="metric"><div class="metric-label">Total Actual</div><div class="metric-value">${Number(dashboard.total_actual || 0).toLocaleString()} ${dashboard.currency || 'EUR'}</div></div>`);
@@ -636,7 +939,7 @@ export function ReportsPage() {
               if (sections.includes('budget')) {
                 htmlParts.push('<h2>Budget vs Actual</h2>');
                 try {
-                  const dashboard = await costModelApi.getDashboard(selectedProjectId);
+                  const dashboard = await getDashboard();
                   htmlParts.push('<table><thead><tr><th>Metric</th><th style="text-align:right">Value</th></tr></thead><tbody>');
                   htmlParts.push(`<tr><td>Total Budget (Planned)</td><td style="text-align:right">${Number(dashboard.total_budget || 0).toLocaleString()}</td></tr>`);
                   htmlParts.push(`<tr><td>Total Committed</td><td style="text-align:right">${Number(dashboard.total_committed || 0).toLocaleString()}</td></tr>`);
@@ -655,7 +958,7 @@ export function ReportsPage() {
               if (sections.includes('cost_breakdown')) {
                 htmlParts.push('<h2>Cost Breakdown by Category</h2>');
                 try {
-                  const dashboard = await costModelApi.getDashboard(selectedProjectId);
+                  const dashboard = await getDashboard();
                   if (dashboard.categories && dashboard.categories.length > 0) {
                     htmlParts.push('<table><thead><tr><th>Category</th><th style="text-align:right">Planned</th><th style="text-align:right">Actual</th><th style="text-align:right">Variance</th></tr></thead><tbody>');
                     for (const cat of dashboard.categories) {
@@ -675,7 +978,7 @@ export function ReportsPage() {
               if (sections.includes('evm')) {
                 htmlParts.push('<h2>Earned Value Management (EVM)</h2>');
                 try {
-                  const dashboard = await costModelApi.getDashboard(selectedProjectId);
+                  const dashboard = await getDashboard();
                   htmlParts.push('<div>');
                   htmlParts.push(`<div class="metric"><div class="metric-label">SPI</div><div class="metric-value">${Number(dashboard.spi || 0).toFixed(2)}</div></div>`);
                   htmlParts.push(`<div class="metric"><div class="metric-label">CPI</div><div class="metric-value">${Number(dashboard.cpi || 0).toFixed(2)}</div></div>`);
@@ -716,8 +1019,7 @@ export function ReportsPage() {
               if (sections.includes('risk')) {
                 htmlParts.push('<h2>Risk Summary</h2>');
                 try {
-                  const { apiGet: get } = await import('@/shared/lib/api');
-                  const risks = await get<Array<{ id: string; code: string; title: string; probability: number; impact_cost: number; impact_severity: string; risk_score: number; status: string }>>(`/v1/risk/?project_id=${selectedProjectId}&limit=50`);
+                  const risks = await apiGet<Array<{ id: string; code: string; title: string; probability: number; impact_cost: number; impact_severity: string; risk_score: number; status: string }>>(`/v1/risk/?project_id=${selectedProjectId}&limit=50`);
                   if (risks.length === 0) {
                     htmlParts.push('<p>No risks registered.</p>');
                   } else {
@@ -744,8 +1046,7 @@ export function ReportsPage() {
               if (sections.includes('changeorders')) {
                 htmlParts.push('<h2>Change Orders Summary</h2>');
                 try {
-                  const { apiGet: get } = await import('@/shared/lib/api');
-                  const summary = await get<{ total_orders: number; draft_count: number; submitted_count: number; approved_count: number; rejected_count: number; total_cost_impact: number; total_schedule_impact_days: number; currency: string }>(`/v1/changeorders/summary?project_id=${selectedProjectId}`);
+                  const summary = await apiGet<{ total_orders: number; draft_count: number; submitted_count: number; approved_count: number; rejected_count: number; total_cost_impact: number; total_schedule_impact_days: number; currency: string }>(`/v1/changeorders/summary?project_id=${selectedProjectId}`);
                   htmlParts.push(`<div class="metric"><div class="metric-label">Total Orders</div><div class="metric-value">${summary.total_orders}</div></div>`);
                   htmlParts.push(`<div class="metric"><div class="metric-label">Approved</div><div class="metric-value">${summary.approved_count}</div></div>`);
                   htmlParts.push(`<div class="metric"><div class="metric-label">Pending</div><div class="metric-value">${summary.draft_count + summary.submitted_count}</div></div>`);
@@ -760,8 +1061,7 @@ export function ReportsPage() {
               if (sections.includes('boq_detail') && selectedBoqId && selectedBoq) {
                 htmlParts.push('<h2>BOQ Detail</h2>');
                 try {
-                  const { apiGet: get } = await import('@/shared/lib/api');
-                  const positions = await get<Array<{ ordinal: string; description: string; unit: string; quantity: number; unit_rate: number; total: number }>>(`/v1/boq/boqs/${selectedBoqId}/positions`);
+                  const positions = await apiGet<Array<{ ordinal: string; description: string; unit: string; quantity: number; unit_rate: number; total: number }>>(`/v1/boq/boqs/${selectedBoqId}/positions`);
                   htmlParts.push(`<p>BOQ: <strong>${selectedBoq.name}</strong> (${positions.length} positions)</p>`);
                   htmlParts.push('<table><thead><tr><th>#</th><th>Description</th><th>Unit</th><th style="text-align:right">Qty</th><th style="text-align:right">Rate</th><th style="text-align:right">Total</th></tr></thead><tbody>');
                   let grandTotal = 0;
@@ -804,7 +1104,7 @@ export function ReportsPage() {
             }
           }}
           generating={builderGenerating}
-          disabled={!selectedBoqId}
+          disabled={!selectedProjectId}
           t={t}
         />
       )}
@@ -859,6 +1159,11 @@ function ReportCardComponent({
                 key={format.extension}
                 onClick={() => onDownload(card, format)}
                 disabled={disabled || isLoading}
+                aria-label={t('reports.download_format_aria', {
+                  defaultValue: 'Download {{format}} for {{report}}',
+                  format: format.label,
+                  report: t(card.titleKey, { defaultValue: card.id }),
+                })}
                 className="inline-flex items-center gap-1.5 rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-primary transition-colors hover:bg-surface-secondary disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {isLoading ? (
@@ -881,22 +1186,50 @@ function ReportCardComponent({
 
 /* ── Custom Report Builder ────────────────────────────────────────────────── */
 
+const REPORT_PRESETS = [
+  {
+    id: 'monthly_progress',
+    labelKey: 'reports.preset_monthly',
+    labelDefault: 'Monthly Progress',
+    sections: ['summary', 'budget', 'evm', 'schedule', 'risk', 'changeorders'],
+  },
+  {
+    id: 'client_presentation',
+    labelKey: 'reports.preset_client',
+    labelDefault: 'Client Presentation',
+    sections: ['summary', 'cost_breakdown', 'boq_detail'],
+  },
+  {
+    id: 'audit_report',
+    labelKey: 'reports.preset_audit',
+    labelDefault: 'Audit Report',
+    sections: ['summary', 'budget', 'boq_detail', 'validation', 'changeorders'],
+  },
+  {
+    id: 'full_report',
+    labelKey: 'reports.preset_full',
+    labelDefault: 'Full Report',
+    sections: ['summary', 'budget', 'cost_breakdown', 'evm', 'schedule', 'risk', 'changeorders', 'boq_detail', 'validation', 'sustainability'],
+  },
+];
+
 const REPORT_SECTIONS = [
-  { id: 'summary', label: 'Executive Summary', icon: FileText, description: 'Project overview, key metrics, grand total' },
-  { id: 'budget', label: 'Budget vs Actual', icon: DollarSign, description: 'Planned, committed, actual, and variance analysis' },
-  { id: 'cost_breakdown', label: 'Cost Breakdown by Category', icon: BarChart3, description: 'Cost distribution by material, labor, equipment' },
-  { id: 'evm', label: 'EVM Performance', icon: TrendingUp, description: 'SPI, CPI, EAC earned value metrics' },
-  { id: 'schedule', label: 'Schedule Summary', icon: CalendarDays, description: 'Total activities, critical path, milestones' },
-  { id: 'risk', label: 'Risk Summary', icon: ShieldAlert, description: 'Top 5 risks, total exposure, mitigation status' },
-  { id: 'changeorders', label: 'Change Orders Summary', icon: FileEdit, description: 'Approved, pending, total cost/schedule impact' },
-  { id: 'boq_detail', label: 'BOQ Detail', icon: Table2, description: 'Full position list with quantities and rates' },
-  { id: 'validation', label: 'Validation Report', icon: ShieldCheck, description: 'Compliance check results and quality score' },
-  { id: 'sustainability', label: 'Sustainability / CO2', icon: Leaf, description: 'Embodied carbon estimates and EPD references' },
+  { id: 'summary', labelKey: 'reports.section_summary', labelDefault: 'Executive Summary', icon: FileText, descKey: 'reports.section_summary_desc', descDefault: 'Project overview, key metrics, grand total' },
+  { id: 'budget', labelKey: 'reports.section_budget', labelDefault: 'Budget vs Actual', icon: DollarSign, descKey: 'reports.section_budget_desc', descDefault: 'Planned, committed, actual, and variance analysis' },
+  { id: 'cost_breakdown', labelKey: 'reports.section_cost_breakdown', labelDefault: 'Cost Breakdown by Category', icon: BarChart3, descKey: 'reports.section_cost_breakdown_desc', descDefault: 'Cost distribution by material, labor, equipment' },
+  { id: 'evm', labelKey: 'reports.section_evm', labelDefault: 'EVM Performance', icon: TrendingUp, descKey: 'reports.section_evm_desc', descDefault: 'SPI, CPI, EAC earned value metrics' },
+  { id: 'schedule', labelKey: 'reports.section_schedule', labelDefault: 'Schedule Summary', icon: CalendarDays, descKey: 'reports.section_schedule_desc', descDefault: 'Total activities, critical path, milestones' },
+  { id: 'risk', labelKey: 'reports.section_risk', labelDefault: 'Risk Summary', icon: ShieldAlert, descKey: 'reports.section_risk_desc', descDefault: 'Top 5 risks, total exposure, mitigation status' },
+  { id: 'changeorders', labelKey: 'reports.section_changeorders', labelDefault: 'Change Orders Summary', icon: FileEdit, descKey: 'reports.section_changeorders_desc', descDefault: 'Approved, pending, total cost/schedule impact' },
+  { id: 'boq_detail', labelKey: 'reports.section_boq_detail', labelDefault: 'BOQ Detail', icon: Table2, descKey: 'reports.section_boq_detail_desc', descDefault: 'Full position list with quantities and rates' },
+  { id: 'validation', labelKey: 'reports.section_validation', labelDefault: 'Validation Report', icon: ShieldCheck, descKey: 'reports.section_validation_desc', descDefault: 'Compliance check results and quality score' },
+  { id: 'sustainability', labelKey: 'reports.section_sustainability', labelDefault: 'Sustainability / CO2', icon: Leaf, descKey: 'reports.section_sustainability_desc', descDefault: 'Embodied carbon estimates and EPD references' },
 ] as const;
 
 function CustomReportBuilder({
   sections,
   onToggle,
+  onSetSections,
   onGenerate,
   generating,
   disabled,
@@ -904,10 +1237,11 @@ function CustomReportBuilder({
 }: {
   sections: Set<string>;
   onToggle: (id: string) => void;
+  onSetSections: (ids: string[]) => void;
   onGenerate: () => void;
   generating: boolean;
   disabled: boolean;
-  t: (key: string, opts?: Record<string, string>) => string;
+  t: (key: string, opts?: Record<string, unknown>) => string;
 }) {
   return (
     <div className="rounded-xl border border-border bg-surface-primary p-5 animate-fade-in">
@@ -932,11 +1266,27 @@ function CustomReportBuilder({
           ) : (
             <Download size={14} />
           )}
-          {t('reports.generate_pdf', { defaultValue: 'Generate PDF' })}
+          {t('reports.generate_report', { defaultValue: 'Generate Report' })}
           {sections.size > 0 && (
             <span className="ml-1 text-xs opacity-70">({sections.size})</span>
           )}
         </button>
+      </div>
+
+      {/* Presets */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <span className="text-xs font-medium text-content-tertiary mr-1 self-center">
+          {t('reports.presets', { defaultValue: 'Quick presets:' })}
+        </span>
+        {REPORT_PRESETS.map((preset) => (
+          <button
+            key={preset.id}
+            onClick={() => onSetSections(preset.sections)}
+            className="rounded-full border border-border-light bg-surface-secondary/50 px-3 py-1 text-2xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+          >
+            {t(preset.labelKey, { defaultValue: preset.labelDefault })}
+          </button>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -947,6 +1297,8 @@ function CustomReportBuilder({
             <button
               key={sec.id}
               onClick={() => onToggle(sec.id)}
+              role="checkbox"
+              aria-checked={isActive}
               className={`flex items-start gap-3 rounded-lg border p-3 text-left transition-colors ${
                 isActive
                   ? 'border-oe-blue/40 bg-oe-blue-subtle/20'
@@ -964,10 +1316,10 @@ function CustomReportBuilder({
                 <div className="flex items-center gap-1.5">
                   <Icon size={13} className={isActive ? 'text-oe-blue' : 'text-content-tertiary'} />
                   <span className={`text-xs font-medium ${isActive ? 'text-content-primary' : 'text-content-secondary'}`}>
-                    {sec.label}
+                    {t(sec.labelKey, { defaultValue: sec.labelDefault })}
                   </span>
                 </div>
-                <p className="text-2xs text-content-tertiary mt-0.5">{sec.description}</p>
+                <p className="text-2xs text-content-tertiary mt-0.5">{t(sec.descKey, { defaultValue: sec.descDefault })}</p>
               </div>
             </button>
           );

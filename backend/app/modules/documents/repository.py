@@ -6,7 +6,7 @@ No business logic — pure data access.
 
 import uuid
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.documents.models import Document
@@ -36,7 +36,13 @@ class DocumentRepository:
         if category is not None:
             base = base.where(Document.category == category)
         if search is not None:
-            base = base.where(Document.name.ilike(f"%{search}%"))
+            pattern = f"%{search}%"
+            base = base.where(
+                or_(
+                    Document.name.ilike(pattern),
+                    Document.description.ilike(pattern),
+                )
+            )
 
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
@@ -72,3 +78,26 @@ class DocumentRepository:
         stmt = select(Document).where(Document.project_id == project_id)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
+
+    async def summary_for_project(
+        self, project_id: uuid.UUID
+    ) -> tuple[int, int, list[tuple[str, int]]]:
+        """Return aggregated stats using SQL: (total_count, total_size, [(category, count)])."""
+        # Total count and size
+        totals_stmt = select(
+            func.count(Document.id),
+            func.coalesce(func.sum(Document.file_size), 0),
+        ).where(Document.project_id == project_id)
+        totals_row = (await self.session.execute(totals_stmt)).one()
+        total_count: int = totals_row[0]
+        total_size: int = totals_row[1]
+
+        # Count by category
+        cat_stmt = (
+            select(Document.category, func.count(Document.id))
+            .where(Document.project_id == project_id)
+            .group_by(Document.category)
+        )
+        cat_rows = (await self.session.execute(cat_stmt)).all()
+
+        return total_count, total_size, list(cat_rows)

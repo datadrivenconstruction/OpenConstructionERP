@@ -38,6 +38,20 @@ import { manifest as frDpgfExchange } from './fr-dpgf-exchange/manifest';
 import { manifest as uaeBoqExchange } from './uae-boq-exchange/manifest';
 import { manifest as auBoqExchange } from './au-boq-exchange/manifest';
 import { manifest as caBoqExchange } from './ca-boq-exchange/manifest';
+import { manifest as nordicNs3420Exchange } from './nordic-ns3420-exchange/manifest';
+import { manifest as czBoqExchange } from './cz-boq-exchange/manifest';
+import { manifest as deDin276Exchange } from './de-din276-exchange/manifest';
+import { manifest as cnBoqExchange } from './cn-boq-exchange/manifest';
+import { manifest as inBoqExchange } from './in-boq-exchange/manifest';
+import { manifest as brSinapiExchange } from './br-sinapi-exchange/manifest';
+import { manifest as esPbcExchange } from './es-pbc-exchange/manifest';
+import { manifest as ruGesnExchange } from './ru-gesn-exchange/manifest';
+import { manifest as trBirimfiyatExchange } from './tr-birimfiyat-exchange/manifest';
+import { manifest as jpSekisanExchange } from './jp-sekisan-exchange/manifest';
+import { manifest as itComputoExchange } from './it-computo-exchange/manifest';
+import { manifest as nlStabuExchange } from './nl-stabu-exchange/manifest';
+import { manifest as plKnrExchange } from './pl-knr-exchange/manifest';
+import { manifest as krBoqExchange } from './kr-boq-exchange/manifest';
 
 /* ── Registry ──────────────────────────────────────────────────────── */
 
@@ -60,6 +74,20 @@ export const MODULE_REGISTRY: ModuleManifest[] = [
   uaeBoqExchange,
   auBoqExchange,
   caBoqExchange,
+  nordicNs3420Exchange,
+  czBoqExchange,
+  deDin276Exchange,
+  cnBoqExchange,
+  inBoqExchange,
+  brSinapiExchange,
+  esPbcExchange,
+  ruGesnExchange,
+  trBirimfiyatExchange,
+  jpSekisanExchange,
+  itComputoExchange,
+  nlStabuExchange,
+  plKnrExchange,
+  krBoqExchange,
 ];
 
 /* ── Helper functions ──────────────────────────────────────────────── */

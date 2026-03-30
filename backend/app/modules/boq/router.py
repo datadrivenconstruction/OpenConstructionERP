@@ -1342,21 +1342,47 @@ def _build_rule_sets(
     """
     rule_sets = list(project_rule_sets)
 
-    # Add classification-standard-specific rules
-    if classification_standard == "din276" and "din276" not in rule_sets:
-        rule_sets.append("din276")
-    if classification_standard == "nrm" and "nrm" not in rule_sets:
-        rule_sets.append("nrm")
-    if classification_standard == "masterformat" and "masterformat" not in rule_sets:
-        rule_sets.append("masterformat")
+    # Map classification standard → rule set name
+    STANDARD_RULES: dict[str, str] = {
+        "din276": "din276",
+        "nrm": "nrm",
+        "masterformat": "masterformat",
+        "sinapi": "sinapi",
+        "gesn": "gesn",
+        "dpgf": "dpgf",
+        "onorm": "onorm",
+        "gbt50500": "gbt50500",
+        "cpwd": "cpwd",
+        "birimfiyat": "birimfiyat",
+        "sekisan": "sekisan",
+    }
+    std_rule = STANDARD_RULES.get(classification_standard)
+    if std_rule and std_rule not in rule_sets:
+        rule_sets.append(std_rule)
 
-    # Add region-specific rules
-    if region.upper() == "DACH" and "gaeb" not in rule_sets:
-        rule_sets.append("gaeb")
-    if region.upper() == "UK" and "nrm" not in rule_sets:
-        rule_sets.append("nrm")
-    if region.upper() == "US" and "masterformat" not in rule_sets:
-        rule_sets.append("masterformat")
+    # Map region → additional rule sets
+    REGION_RULES: dict[str, list[str]] = {
+        "DACH": ["gaeb", "din276"],
+        "DE": ["gaeb", "din276"],
+        "AT": ["gaeb", "onorm"],
+        "CH": ["gaeb", "din276"],
+        "UK": ["nrm"],
+        "GB": ["nrm"],
+        "US": ["masterformat"],
+        "CA": ["masterformat"],
+        "FR": ["dpgf"],
+        "BR": ["sinapi"],
+        "RU": ["gesn"],
+        "CN": ["gbt50500"],
+        "IN": ["cpwd"],
+        "TR": ["birimfiyat"],
+        "JP": ["sekisan"],
+        "UAE": ["nrm"],
+        "GCC": ["nrm"],
+    }
+    for rs in REGION_RULES.get(region.upper(), []):
+        if rs not in rule_sets:
+            rule_sets.append(rs)
 
     return rule_sets
 
