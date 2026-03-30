@@ -10,8 +10,9 @@
  * Works with any LLM provider (Anthropic, OpenAI, Gemini) via user's API key.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import {
   AlertTriangle,
   ArrowUpRight,
@@ -21,6 +22,7 @@ import {
   FileText,
   Layers,
   Plus,
+  Settings,
   Sparkles,
   TrendingUp,
   X,
@@ -28,6 +30,7 @@ import {
 } from 'lucide-react';
 
 import { Button } from '@/shared/ui';
+import { apiGet } from '@/shared/lib/api';
 import { fmtWithCurrency } from './boqHelpers';
 import {
   boqApi,
@@ -70,6 +73,24 @@ export function AISmartPanel({
   projectRegion,
 }: AISmartPanelProps) {
   const { t, i18n } = useTranslation();
+
+  /* ── AI configuration check ─────────────────────────────────────── */
+  const [aiConfigured, setAiConfigured] = useState<boolean | null>(null);
+  const [aiProvider, setAiProvider] = useState('');
+
+  useEffect(() => {
+    if (!isOpen) return;
+    apiGet<Record<string, unknown>>('/v1/ai/settings')
+      .then((s) => {
+        const hasKey =
+          !!s.anthropic_api_key_set || !!s.openai_api_key_set || !!s.gemini_api_key_set ||
+          !!s.openrouter_api_key_set || !!s.mistral_api_key_set || !!s.groq_api_key_set ||
+          !!s.deepseek_api_key_set;
+        setAiConfigured(hasKey);
+        setAiProvider((s.provider as string) || '');
+      })
+      .catch(() => setAiConfigured(false));
+  }, [isOpen]);
 
   /* ── Loading states ──────────────────────────────────────────────── */
   const [enhanceLoading, setEnhanceLoading] = useState(false);
@@ -260,6 +281,38 @@ export function AISmartPanel({
           </p>
         )}
       </div>
+
+      {/* AI not configured warning */}
+      {aiConfigured === false && (
+        <div className="mx-4 mt-3 px-3 py-3 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800">
+          <div className="flex items-start gap-2">
+            <AlertTriangle size={14} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs font-medium text-amber-800 dark:text-amber-300">
+                {t('boq.ai_not_configured', { defaultValue: 'AI not configured' })}
+              </p>
+              <p className="text-[11px] text-amber-700 dark:text-amber-400/80 mt-0.5">
+                {t('boq.ai_not_configured_desc', { defaultValue: 'Add your API key in Settings to use AI Smart Actions.' })}
+              </p>
+              <Link
+                to="/settings"
+                className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-medium text-amber-700 dark:text-amber-300 hover:underline"
+              >
+                <Settings size={11} />
+                {t('boq.go_to_settings', { defaultValue: 'Configure AI' })}
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Connected indicator */}
+      {aiConfigured === true && (
+        <div className="mx-4 mt-2 flex items-center gap-1.5 text-[11px] text-semantic-success font-medium">
+          <span className="h-1.5 w-1.5 rounded-full bg-semantic-success animate-pulse" />
+          {t('boq.ai_connected_via', { defaultValue: 'Connected via {{provider}}', provider: aiProvider || 'AI' })}
+        </div>
+      )}
 
       {/* Error */}
       {error && (
