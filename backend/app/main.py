@@ -521,16 +521,17 @@ def create_app() -> FastAPI:
             "Starting %s v%s (%s)", settings.app_name, settings.app_version, settings.app_env
         )
 
-        # Warn about insecure JWT secret
-        if not settings.jwt_secret:
+        # Validate JWT secret
+        _insecure_secrets = {"change-me-in-production", "openestimate-local-dev-key", ""}
+        if settings.jwt_secret in _insecure_secrets:
+            if settings.is_production:
+                raise RuntimeError(
+                    "FATAL: JWT_SECRET is set to an insecure default value in production! "
+                    "Set JWT_SECRET to a secure random string (min 32 chars). "
+                    "Example: python -c \"import secrets; print(secrets.token_urlsafe(48))\""
+                )
             logger.warning(
-                "JWT_SECRET is empty — authentication will not work. "
-                "Set JWT_SECRET environment variable."
-            )
-        elif settings.jwt_secret == "change-me-in-production" and settings.is_production:
-            logger.warning(
-                "JWT_SECRET is still set to the default value in production! "
-                "Change it immediately to a secure random string."
+                "JWT_SECRET is using default dev key — set JWT_SECRET env var for production."
             )
 
         # Load translations (20 languages)

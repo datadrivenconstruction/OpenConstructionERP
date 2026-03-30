@@ -29465,7 +29465,12 @@ i18n
   .use(initReactI18next)
   .init({
     resources: fallbackResources,
-    lng: localStorage.getItem('i18nextLng') || 'en',
+    lng: localStorage.getItem('i18nextLng') || (() => {
+      // Auto-detect browser language for first-time users
+      const browserLang = (navigator.language || 'en').split('-')[0];
+      const supported = SUPPORTED_LANGUAGES.map((l) => l.code);
+      return supported.includes(browserLang ?? '') ? browserLang : 'en';
+    })(),
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false,

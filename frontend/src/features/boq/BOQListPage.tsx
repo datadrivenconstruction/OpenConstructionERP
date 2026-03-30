@@ -379,7 +379,7 @@ export function BOQListPage() {
             ...b,
             projectName: p.name,
             currency: p.currency,
-            positionCount: 0, // not available in list endpoint
+            positionCount: (b as any).position_count ?? 0,
             grandTotal: (b as any).grand_total ?? 0,
             classificationStandard: p.classification_standard,
           } as BOQWithProject));
