@@ -7,6 +7,7 @@ Usage:
 
 import logging
 import os
+import time
 import uuid
 from pathlib import Path
 from typing import Any
@@ -279,6 +280,62 @@ def create_app() -> FastAPI:
 
         return result
 
+    @app.get("/api/system/version-check", tags=["System"])
+    async def check_version() -> dict:
+        """Check if a newer version is available on GitHub."""
+        import httpx
+
+        current = settings.app_version
+        repo = "datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR"
+        cache_key = "_version_check_cache"
+
+        # Simple in-memory cache (4 hours)
+        cached = getattr(app.state, cache_key, None)
+        if cached and (time.time() - cached["checked_at"]) < 14400:
+            return cached["data"]
+
+        try:
+            async with httpx.AsyncClient(timeout=10) as client:
+                resp = await client.get(
+                    f"https://api.github.com/repos/{repo}/releases/latest",
+                    headers={"Accept": "application/vnd.github.v3+json"},
+                )
+                if resp.status_code == 200:
+                    release = resp.json()
+                    latest = release.get("tag_name", "").lstrip("v")
+                    result = {
+                        "current_version": current,
+                        "latest_version": latest,
+                        "update_available": latest > current and latest != current,
+                        "release_url": release.get("html_url", ""),
+                        "release_notes": release.get("body", "")[:500],
+                        "published_at": release.get("published_at", ""),
+                        "download_url": next(
+                            (
+                                a["browser_download_url"]
+                                for a in release.get("assets", [])
+                                if a["name"].endswith(".zip")
+                            ),
+                            release.get("html_url", ""),
+                        ),
+                    }
+                else:
+                    result = {
+                        "current_version": current,
+                        "latest_version": current,
+                        "update_available": False,
+                    }
+        except Exception:
+            result = {
+                "current_version": current,
+                "latest_version": current,
+                "update_available": False,
+            }
+
+        # Cache result
+        setattr(app.state, cache_key, {"data": result, "checked_at": time.time()})
+        return result
+
     @app.get("/api/system/modules", tags=["System"])
     async def list_modules() -> dict[str, Any]:
         return {"modules": module_loader.list_modules()}
@@ -503,6 +560,13 @@ def create_app() -> FastAPI:
             from app.modules.changeorders import models as _changeorders_models  # noqa: F401
             from app.modules.risk import models as _risk_models  # noqa: F401
             from app.modules.documents import models as _documents_models  # noqa: F401
+
+            # SQLite auto-migration: add missing columns before create_all
+            from app.core.sqlite_migrator import sqlite_auto_migrate
+
+            migrated = await sqlite_auto_migrate(engine, Base)
+            if migrated:
+                logger.info("SQLite auto-migration: %d columns added", migrated)
 
             async with engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
