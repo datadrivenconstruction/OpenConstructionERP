@@ -29484,4 +29484,13 @@ i18n.on('languageChanged', (lng) => {
   }
 });
 
+// Merge module-bundled translations (nav keys for regional modules, etc.)
+import { getModuleTranslations } from '@/modules/_registry';
+const moduleTrans = getModuleTranslations();
+for (const [lng, keys] of Object.entries(moduleTrans)) {
+  if (keys && typeof keys === 'object') {
+    i18n.addResourceBundle(lng, 'translation', keys, true, true);
+  }
+}
+
 export default i18n;
