@@ -1175,13 +1175,60 @@ async def _get_or_create_owner(session: AsyncSession) -> uuid.UUID:
     return user.id
 
 
+def _make_resources(
+    unit_rate: float,
+    unit: str,
+    cwicr_ref: str,
+    specs: list[tuple[str, str, float, float | None]],
+) -> list[dict]:
+    """Build PositionResource array.
+
+    specs: list of (name, type, pct, labor_hourly_rate_or_None)
+    - For material: hourly_rate is None, quantity=1.0, unit_rate = unit_rate * pct
+    - For labor: quantity = total / hourly_rate, unit_rate = hourly_rate
+    - For equipment: quantity = total / hourly_rate, unit_rate = hourly_rate
+    """
+    resources: list[dict] = []
+    type_counter: dict[str, int] = {
+        "material": 0, "labor": 0, "equipment": 0, "overhead": 0, "subcontractor": 0,
+    }
+    for name, res_type, pct, hourly_rate in specs:
+        type_counter[res_type] = type_counter.get(res_type, 0) + 1
+        total = round(unit_rate * pct, 2)
+        code_suffix = res_type[0].upper()  # M, L, E, O
+        code = f"{cwicr_ref}-{code_suffix}{type_counter[res_type]}"
+
+        if hourly_rate and hourly_rate > 0:
+            qty = round(total / hourly_rate, 2)
+            rate = hourly_rate
+            res_unit = "hr"
+        else:
+            qty = 1.0
+            rate = total
+            res_unit = unit
+
+        res: dict = {
+            "name": name,
+            "code": code,
+            "type": res_type,
+            "unit": res_unit,
+            "quantity": qty,
+            "unit_rate": rate,
+            "total": total,
+        }
+        if res_type == "material":
+            res["waste_pct"] = 3
+        resources.append(res)
+    return resources
+
+
 def _enrich_position_metadata(
     description: str, unit: str, unit_rate: float, classification: dict
 ) -> dict:
     """Generate realistic CWICR resource breakdown metadata for a demo position.
 
-    Returns a dict with ``cwicr_ref``, ``resources`` (material/labor/equipment/overhead
-    split), and optional ``epd_id`` / ``gwp_kgco2e_per_unit`` for sustainability data.
+    Returns a dict with ``cwicr_ref``, ``resources`` (PositionResource array),
+    and optional ``epd_id`` / ``gwp_kgco2e_per_unit`` for sustainability data.
     """
     meta: dict = {}
     desc_lower = description.lower()
@@ -1195,12 +1242,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-CON-001"
-        meta["resources"] = {
-            "material": {"name": "Concrete C30/37", "pct": 0.45, "rate": round(unit_rate * 0.45, 2)},
-            "labor": {"name": "Concrete crew", "pct": 0.35, "rate": round(unit_rate * 0.35, 2)},
-            "equipment": {"name": "Pump/vibrator", "pct": 0.15, "rate": round(unit_rate * 0.15, 2)},
-            "overhead": {"pct": 0.05, "rate": round(unit_rate * 0.05, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-CON-001", [
+            ("Concrete C30/37 ready-mix", "material", 0.45, None),
+            ("Concrete crew (pouring, vibrating)", "labor", 0.35, 45.0),
+            ("Concrete pump + vibrator", "equipment", 0.15, 85.0),
+        ])
         meta["epd_id"] = "c30-37"
         meta["gwp_kgco2e_per_unit"] = 280.0 if unit == "m3" else 12.0
     elif any(
@@ -1208,83 +1254,51 @@ def _enrich_position_metadata(
         for k in ["reinforcement", "bewehrung", "rebar", "armature", "bst 500"]
     ):
         meta["cwicr_ref"] = "CWICR-STL-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Reinforcement steel BSt 500",
-                "pct": 0.65,
-                "rate": round(unit_rate * 0.65, 2),
-            },
-            "labor": {"name": "Rebar fitters", "pct": 0.30, "rate": round(unit_rate * 0.30, 2)},
-            "equipment": {"name": "Crane/tools", "pct": 0.05, "rate": round(unit_rate * 0.05, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-STL-001", [
+            ("Reinforcement steel BSt 500", "material", 0.65, None),
+            ("Rebar fitters", "labor", 0.30, 50.0),
+            ("Crane/tools", "equipment", 0.05, 120.0),
+        ])
         meta["epd_id"] = "steel-rebar"
         meta["gwp_kgco2e_per_unit"] = 1.2 if unit == "kg" else 1200.0
     elif any(k in desc_lower for k in ["formwork", "schalung", "coffrages"]):
         meta["cwicr_ref"] = "CWICR-FRM-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Formwork panels",
-                "pct": 0.30,
-                "rate": round(unit_rate * 0.30, 2),
-            },
-            "labor": {
-                "name": "Formwork carpenters",
-                "pct": 0.60,
-                "rate": round(unit_rate * 0.60, 2),
-            },
-            "equipment": {
-                "name": "Tools/accessories",
-                "pct": 0.10,
-                "rate": round(unit_rate * 0.10, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-FRM-001", [
+            ("Formwork panels", "material", 0.30, None),
+            ("Formwork carpenters", "labor", 0.60, 48.0),
+            ("Tools/accessories", "equipment", 0.10, 35.0),
+        ])
     elif any(
         k in desc_lower
         for k in ["steel", "stahl", "acier", "structural steel", "w-shape", "edelstahl"]
     ):
         meta["cwicr_ref"] = "CWICR-STL-002"
-        meta["resources"] = {
-            "material": {
-                "name": "Structural steel",
-                "pct": 0.55,
-                "rate": round(unit_rate * 0.55, 2),
-            },
-            "labor": {"name": "Steel erectors", "pct": 0.30, "rate": round(unit_rate * 0.30, 2)},
-            "equipment": {"name": "Crane", "pct": 0.15, "rate": round(unit_rate * 0.15, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-STL-002", [
+            ("Structural steel sections", "material", 0.55, None),
+            ("Steel erectors", "labor", 0.30, 55.0),
+            ("Crane", "equipment", 0.15, 130.0),
+        ])
         meta["epd_id"] = "steel-structural"
         meta["gwp_kgco2e_per_unit"] = 1.5 if unit == "kg" else 45.0
     elif any(
         k in desc_lower for k in ["masonry", "mauerwerk", "brick", "block", "maconnerie"]
     ):
         meta["cwicr_ref"] = "CWICR-MAS-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Masonry blocks/mortar",
-                "pct": 0.50,
-                "rate": round(unit_rate * 0.50, 2),
-            },
-            "labor": {"name": "Bricklayers", "pct": 0.45, "rate": round(unit_rate * 0.45, 2)},
-            "equipment": {"name": "Scaffolding", "pct": 0.05, "rate": round(unit_rate * 0.05, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-MAS-001", [
+            ("Masonry blocks/mortar", "material", 0.50, None),
+            ("Bricklayers", "labor", 0.45, 48.0),
+            ("Scaffolding", "equipment", 0.05, 40.0),
+        ])
     elif any(
         k in desc_lower
         for k in ["insulation", "daemmung", "dämmung", "isolation", "thermal"]
     ):
         meta["cwicr_ref"] = "CWICR-INS-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Insulation material",
-                "pct": 0.55,
-                "rate": round(unit_rate * 0.55, 2),
-            },
-            "labor": {
-                "name": "Insulation fitters",
-                "pct": 0.40,
-                "rate": round(unit_rate * 0.40, 2),
-            },
-            "equipment": {"name": "Tools", "pct": 0.05, "rate": round(unit_rate * 0.05, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-INS-001", [
+            ("Insulation material", "material", 0.55, None),
+            ("Insulation fitters", "labor", 0.40, 42.0),
+            ("Tools", "equipment", 0.05, 30.0),
+        ])
         meta["epd_id"] = "insulation-mineral-wool"
         meta["gwp_kgco2e_per_unit"] = 3.5
     elif any(
@@ -1292,19 +1306,11 @@ def _enrich_position_metadata(
         for k in ["waterproof", "abdichtung", "membrane", "étanchéité"]
     ):
         meta["cwicr_ref"] = "CWICR-WPR-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Waterproofing membrane",
-                "pct": 0.45,
-                "rate": round(unit_rate * 0.45, 2),
-            },
-            "labor": {
-                "name": "Waterproofing crew",
-                "pct": 0.50,
-                "rate": round(unit_rate * 0.50, 2),
-            },
-            "equipment": {"name": "Tools", "pct": 0.05, "rate": round(unit_rate * 0.05, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-WPR-001", [
+            ("Waterproofing membrane", "material", 0.45, None),
+            ("Waterproofing crew", "labor", 0.50, 46.0),
+            ("Tools", "equipment", 0.05, 30.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -1314,19 +1320,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-ELE-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Electrical materials",
-                "pct": 0.40,
-                "rate": round(unit_rate * 0.40, 2),
-            },
-            "labor": {"name": "Electricians", "pct": 0.50, "rate": round(unit_rate * 0.50, 2)},
-            "equipment": {
-                "name": "Test equipment",
-                "pct": 0.10,
-                "rate": round(unit_rate * 0.10, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-ELE-001", [
+            ("Electrical materials", "material", 0.40, None),
+            ("Electricians", "labor", 0.50, 52.0),
+            ("Test equipment", "equipment", 0.10, 40.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -1336,23 +1334,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-MEC-001"
-        meta["resources"] = {
-            "material": {
-                "name": "HVAC equipment/materials",
-                "pct": 0.50,
-                "rate": round(unit_rate * 0.50, 2),
-            },
-            "labor": {
-                "name": "HVAC technicians",
-                "pct": 0.40,
-                "rate": round(unit_rate * 0.40, 2),
-            },
-            "equipment": {
-                "name": "Tools/testing",
-                "pct": 0.10,
-                "rate": round(unit_rate * 0.10, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-MEC-001", [
+            ("HVAC equipment/materials", "material", 0.50, None),
+            ("HVAC technicians", "labor", 0.40, 52.0),
+            ("Tools/testing", "equipment", 0.10, 45.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -1361,227 +1347,119 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-PLB-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Plumbing materials",
-                "pct": 0.45,
-                "rate": round(unit_rate * 0.45, 2),
-            },
-            "labor": {"name": "Plumbers", "pct": 0.50, "rate": round(unit_rate * 0.50, 2)},
-            "equipment": {"name": "Tools", "pct": 0.05, "rate": round(unit_rate * 0.05, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-PLB-001", [
+            ("Plumbing materials", "material", 0.45, None),
+            ("Plumbers", "labor", 0.50, 52.0),
+            ("Tools", "equipment", 0.05, 30.0),
+        ])
     elif any(
         k in desc_lower
         for k in ["excavat", "aushub", "earthwork", "grading", "terrassement"]
     ):
         meta["cwicr_ref"] = "CWICR-ERT-001"
-        meta["resources"] = {
-            "material": {"name": "Disposal/fill", "pct": 0.15, "rate": round(unit_rate * 0.15, 2)},
-            "labor": {
-                "name": "Machine operators",
-                "pct": 0.25,
-                "rate": round(unit_rate * 0.25, 2),
-            },
-            "equipment": {
-                "name": "Excavator/trucks",
-                "pct": 0.60,
-                "rate": round(unit_rate * 0.60, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-ERT-001", [
+            ("Disposal/fill material", "material", 0.15, None),
+            ("Machine operators", "labor", 0.25, 60.0),
+            ("Excavator/trucks", "equipment", 0.60, 95.0),
+        ])
     elif any(k in desc_lower for k in ["paint", "anstrich", "peinture", "coating", "farbe"]):
         meta["cwicr_ref"] = "CWICR-PNT-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Paint/coatings",
-                "pct": 0.30,
-                "rate": round(unit_rate * 0.30, 2),
-            },
-            "labor": {"name": "Painters", "pct": 0.65, "rate": round(unit_rate * 0.65, 2)},
-            "equipment": {
-                "name": "Sprayers/tools",
-                "pct": 0.05,
-                "rate": round(unit_rate * 0.05, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-PNT-001", [
+            ("Paint/coatings", "material", 0.30, None),
+            ("Painters", "labor", 0.65, 42.0),
+            ("Sprayers/tools", "equipment", 0.05, 30.0),
+        ])
     elif any(k in desc_lower for k in ["roof", "dach", "toiture"]):
         meta["cwicr_ref"] = "CWICR-ROF-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Roofing materials",
-                "pct": 0.45,
-                "rate": round(unit_rate * 0.45, 2),
-            },
-            "labor": {"name": "Roofers", "pct": 0.45, "rate": round(unit_rate * 0.45, 2)},
-            "equipment": {
-                "name": "Access equipment",
-                "pct": 0.10,
-                "rate": round(unit_rate * 0.10, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-ROF-001", [
+            ("Roofing materials", "material", 0.45, None),
+            ("Roofers", "labor", 0.45, 48.0),
+            ("Access equipment", "equipment", 0.10, 60.0),
+        ])
     elif any(
         k in desc_lower
         for k in ["window", "fenster", "glazing", "curtain wall", "vitrage", "fenêtre"]
     ):
         meta["cwicr_ref"] = "CWICR-WIN-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Window/glazing units",
-                "pct": 0.60,
-                "rate": round(unit_rate * 0.60, 2),
-            },
-            "labor": {"name": "Glaziers", "pct": 0.35, "rate": round(unit_rate * 0.35, 2)},
-            "equipment": {
-                "name": "Crane/suction cups",
-                "pct": 0.05,
-                "rate": round(unit_rate * 0.05, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-WIN-001", [
+            ("Window/glazing units", "material", 0.60, None),
+            ("Glaziers", "labor", 0.35, 50.0),
+            ("Crane/suction cups", "equipment", 0.05, 120.0),
+        ])
     elif any(k in desc_lower for k in ["elevator", "aufzug", "lift", "ascenseur"]):
         meta["cwicr_ref"] = "CWICR-ELV-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Elevator equipment",
-                "pct": 0.65,
-                "rate": round(unit_rate * 0.65, 2),
-            },
-            "labor": {
-                "name": "Elevator technicians",
-                "pct": 0.30,
-                "rate": round(unit_rate * 0.30, 2),
-            },
-            "equipment": {"name": "Crane", "pct": 0.05, "rate": round(unit_rate * 0.05, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-ELV-001", [
+            ("Elevator equipment", "material", 0.65, None),
+            ("Elevator technicians", "labor", 0.30, 55.0),
+            ("Crane", "equipment", 0.05, 130.0),
+        ])
     elif any(k in desc_lower for k in ["tile", "fliese", "carrelage", "ceramic"]):
         meta["cwicr_ref"] = "CWICR-TIL-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Tiles/adhesive/grout",
-                "pct": 0.40,
-                "rate": round(unit_rate * 0.40, 2),
-            },
-            "labor": {"name": "Tilers", "pct": 0.55, "rate": round(unit_rate * 0.55, 2)},
-            "equipment": {
-                "name": "Cutting tools",
-                "pct": 0.05,
-                "rate": round(unit_rate * 0.05, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-TIL-001", [
+            ("Tiles/adhesive/grout", "material", 0.40, None),
+            ("Tilers", "labor", 0.55, 46.0),
+            ("Cutting tools", "equipment", 0.05, 30.0),
+        ])
     elif any(k in desc_lower for k in ["door", "tuer", "tür", "porte"]):
         meta["cwicr_ref"] = "CWICR-DOR-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Doors/frames/hardware",
-                "pct": 0.55,
-                "rate": round(unit_rate * 0.55, 2),
-            },
-            "labor": {"name": "Joiners", "pct": 0.40, "rate": round(unit_rate * 0.40, 2)},
-            "equipment": {"name": "Tools", "pct": 0.05, "rate": round(unit_rate * 0.05, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-DOR-001", [
+            ("Doors/frames/hardware", "material", 0.55, None),
+            ("Joiners", "labor", 0.40, 48.0),
+            ("Tools", "equipment", 0.05, 30.0),
+        ])
     elif any(
         k in desc_lower for k in ["fire", "brand", "sprinkler", "incendie"]
     ):
         meta["cwicr_ref"] = "CWICR-FPR-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Fire protection materials",
-                "pct": 0.45,
-                "rate": round(unit_rate * 0.45, 2),
-            },
-            "labor": {
-                "name": "Fire protection crew",
-                "pct": 0.45,
-                "rate": round(unit_rate * 0.45, 2),
-            },
-            "equipment": {
-                "name": "Testing equipment",
-                "pct": 0.10,
-                "rate": round(unit_rate * 0.10, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-FPR-001", [
+            ("Fire protection materials", "material", 0.45, None),
+            ("Fire protection crew", "labor", 0.45, 50.0),
+            ("Testing equipment", "equipment", 0.10, 45.0),
+        ])
     elif any(k in desc_lower for k in ["pile", "pfahl", "pieux", "bohrpfaehle"]):
         meta["cwicr_ref"] = "CWICR-PIL-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Piling materials",
-                "pct": 0.35,
-                "rate": round(unit_rate * 0.35, 2),
-            },
-            "labor": {"name": "Piling crew", "pct": 0.25, "rate": round(unit_rate * 0.25, 2)},
-            "equipment": {
-                "name": "Piling rig",
-                "pct": 0.40,
-                "rate": round(unit_rate * 0.40, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-PIL-001", [
+            ("Piling materials", "material", 0.35, None),
+            ("Piling crew", "labor", 0.25, 55.0),
+            ("Piling rig", "equipment", 0.40, 150.0),
+        ])
     elif any(k in desc_lower for k in ["parquet", "flooring", "bodenbelag"]):
         meta["cwicr_ref"] = "CWICR-FLR-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Flooring material",
-                "pct": 0.50,
-                "rate": round(unit_rate * 0.50, 2),
-            },
-            "labor": {"name": "Floor layers", "pct": 0.45, "rate": round(unit_rate * 0.45, 2)},
-            "equipment": {"name": "Tools", "pct": 0.05, "rate": round(unit_rate * 0.05, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-FLR-001", [
+            ("Flooring material", "material", 0.50, None),
+            ("Floor layers", "labor", 0.45, 44.0),
+            ("Tools", "equipment", 0.05, 30.0),
+        ])
     elif any(k in desc_lower for k in ["estrich", "screed"]):
         meta["cwicr_ref"] = "CWICR-SCR-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Screed material",
-                "pct": 0.40,
-                "rate": round(unit_rate * 0.40, 2),
-            },
-            "labor": {"name": "Screed layers", "pct": 0.45, "rate": round(unit_rate * 0.45, 2)},
-            "equipment": {
-                "name": "Screed pump/tools",
-                "pct": 0.15,
-                "rate": round(unit_rate * 0.15, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-SCR-001", [
+            ("Screed material", "material", 0.40, None),
+            ("Screed layers", "labor", 0.45, 44.0),
+            ("Screed pump/tools", "equipment", 0.15, 70.0),
+        ])
     elif any(
         k in desc_lower for k in ["drywall", "trockenbau", "gipskarton", "plasterboard"]
     ):
         meta["cwicr_ref"] = "CWICR-DRY-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Drywall boards/profiles",
-                "pct": 0.40,
-                "rate": round(unit_rate * 0.40, 2),
-            },
-            "labor": {
-                "name": "Drywall installers",
-                "pct": 0.55,
-                "rate": round(unit_rate * 0.55, 2),
-            },
-            "equipment": {"name": "Tools", "pct": 0.05, "rate": round(unit_rate * 0.05, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-DRY-001", [
+            ("Drywall boards/profiles", "material", 0.40, None),
+            ("Drywall installers", "labor", 0.55, 44.0),
+            ("Tools", "equipment", 0.05, 30.0),
+        ])
     elif any(k in desc_lower for k in ["asphalt", "paving", "pflaster"]):
         meta["cwicr_ref"] = "CWICR-PAV-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Paving materials",
-                "pct": 0.45,
-                "rate": round(unit_rate * 0.45, 2),
-            },
-            "labor": {"name": "Pavers", "pct": 0.35, "rate": round(unit_rate * 0.35, 2)},
-            "equipment": {
-                "name": "Paving equipment",
-                "pct": 0.20,
-                "rate": round(unit_rate * 0.20, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-PAV-001", [
+            ("Paving materials", "material", 0.45, None),
+            ("Pavers", "labor", 0.35, 42.0),
+            ("Paving equipment", "equipment", 0.20, 80.0),
+        ])
     elif any(k in desc_lower for k in ["landscap", "bepflanzung", "rasen", "paysag"]):
         meta["cwicr_ref"] = "CWICR-LAN-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Plants/soil/turf",
-                "pct": 0.45,
-                "rate": round(unit_rate * 0.45, 2),
-            },
-            "labor": {"name": "Landscapers", "pct": 0.45, "rate": round(unit_rate * 0.45, 2)},
-            "equipment": {"name": "Tools", "pct": 0.10, "rate": round(unit_rate * 0.10, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-LAN-001", [
+            ("Plants/soil/turf", "material", 0.45, None),
+            ("Landscapers", "labor", 0.45, 38.0),
+            ("Tools", "equipment", 0.10, 40.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -1593,23 +1471,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-ERT-002"
-        meta["resources"] = {
-            "material": {
-                "name": "Earthworks materials",
-                "pct": 0.20,
-                "rate": round(unit_rate * 0.20, 2),
-            },
-            "labor": {
-                "name": "Machine operators/laborers",
-                "pct": 0.30,
-                "rate": round(unit_rate * 0.30, 2),
-            },
-            "equipment": {
-                "name": "Earthmoving plant",
-                "pct": 0.50,
-                "rate": round(unit_rate * 0.50, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-ERT-002", [
+            ("Earthworks materials", "material", 0.20, None),
+            ("Machine operators/laborers", "labor", 0.30, 60.0),
+            ("Earthmoving plant", "equipment", 0.50, 95.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -1618,15 +1484,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-PLT-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Render/plaster materials",
-                "pct": 0.35,
-                "rate": round(unit_rate * 0.35, 2),
-            },
-            "labor": {"name": "Plasterers", "pct": 0.60, "rate": round(unit_rate * 0.60, 2)},
-            "equipment": {"name": "Tools", "pct": 0.05, "rate": round(unit_rate * 0.05, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-PLT-001", [
+            ("Render/plaster materials", "material", 0.35, None),
+            ("Plasterers", "labor", 0.60, 46.0),
+            ("Tools", "equipment", 0.05, 30.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -1636,19 +1498,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-ELE-002"
-        meta["resources"] = {
-            "material": {
-                "name": "Electrical equipment",
-                "pct": 0.50,
-                "rate": round(unit_rate * 0.50, 2),
-            },
-            "labor": {"name": "Electricians", "pct": 0.40, "rate": round(unit_rate * 0.40, 2)},
-            "equipment": {
-                "name": "Test equipment",
-                "pct": 0.10,
-                "rate": round(unit_rate * 0.10, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-ELE-002", [
+            ("Electrical equipment", "material", 0.50, None),
+            ("Electricians", "labor", 0.40, 52.0),
+            ("Test equipment", "equipment", 0.10, 40.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -1659,15 +1513,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-PLB-002"
-        meta["resources"] = {
-            "material": {
-                "name": "Plumbing fittings/fixtures",
-                "pct": 0.50,
-                "rate": round(unit_rate * 0.50, 2),
-            },
-            "labor": {"name": "Plumbers", "pct": 0.45, "rate": round(unit_rate * 0.45, 2)},
-            "equipment": {"name": "Tools", "pct": 0.05, "rate": round(unit_rate * 0.05, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-PLB-002", [
+            ("Plumbing fittings/fixtures", "material", 0.50, None),
+            ("Plumbers", "labor", 0.45, 52.0),
+            ("Tools", "equipment", 0.05, 30.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -1677,19 +1527,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-MEC-002"
-        meta["resources"] = {
-            "material": {
-                "name": "Mechanical equipment",
-                "pct": 0.55,
-                "rate": round(unit_rate * 0.55, 2),
-            },
-            "labor": {
-                "name": "Mechanical technicians",
-                "pct": 0.35,
-                "rate": round(unit_rate * 0.35, 2),
-            },
-            "equipment": {"name": "Tools", "pct": 0.10, "rate": round(unit_rate * 0.10, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-MEC-002", [
+            ("Mechanical equipment", "material", 0.55, None),
+            ("Mechanical technicians", "labor", 0.35, 52.0),
+            ("Tools", "equipment", 0.10, 40.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -1698,19 +1540,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-STR-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Structural elements",
-                "pct": 0.45,
-                "rate": round(unit_rate * 0.45, 2),
-            },
-            "labor": {
-                "name": "Structural crew",
-                "pct": 0.40,
-                "rate": round(unit_rate * 0.40, 2),
-            },
-            "equipment": {"name": "Crane/tools", "pct": 0.15, "rate": round(unit_rate * 0.15, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-STR-001", [
+            ("Structural elements", "material", 0.45, None),
+            ("Structural crew", "labor", 0.40, 50.0),
+            ("Crane/tools", "equipment", 0.15, 120.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -1720,19 +1554,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-STR-002"
-        meta["resources"] = {
-            "material": {
-                "name": "Stair/balcony components",
-                "pct": 0.50,
-                "rate": round(unit_rate * 0.50, 2),
-            },
-            "labor": {
-                "name": "Structural fitters",
-                "pct": 0.40,
-                "rate": round(unit_rate * 0.40, 2),
-            },
-            "equipment": {"name": "Crane/tools", "pct": 0.10, "rate": round(unit_rate * 0.10, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-STR-002", [
+            ("Stair/balcony components", "material", 0.50, None),
+            ("Structural fitters", "labor", 0.40, 50.0),
+            ("Crane/tools", "equipment", 0.10, 120.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -1741,19 +1567,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-FIN-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Sealants/profiles",
-                "pct": 0.45,
-                "rate": round(unit_rate * 0.45, 2),
-            },
-            "labor": {
-                "name": "Finishing crew",
-                "pct": 0.50,
-                "rate": round(unit_rate * 0.50, 2),
-            },
-            "equipment": {"name": "Tools", "pct": 0.05, "rate": round(unit_rate * 0.05, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-FIN-001", [
+            ("Sealants/profiles", "material", 0.45, None),
+            ("Finishing crew", "labor", 0.50, 44.0),
+            ("Tools", "equipment", 0.05, 30.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -1762,41 +1580,21 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-CLD-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Cladding materials",
-                "pct": 0.50,
-                "rate": round(unit_rate * 0.50, 2),
-            },
-            "labor": {
-                "name": "Cladding installers",
-                "pct": 0.40,
-                "rate": round(unit_rate * 0.40, 2),
-            },
-            "equipment": {
-                "name": "Access equipment",
-                "pct": 0.10,
-                "rate": round(unit_rate * 0.10, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-CLD-001", [
+            ("Cladding materials", "material", 0.50, None),
+            ("Cladding installers", "labor", 0.40, 48.0),
+            ("Access equipment", "equipment", 0.10, 60.0),
+        ])
     elif any(
         k in desc_lower
         for k in ["acoustic", "schallschutz", "schalldae", "acoustique"]
     ):
         meta["cwicr_ref"] = "CWICR-ACO-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Acoustic materials",
-                "pct": 0.45,
-                "rate": round(unit_rate * 0.45, 2),
-            },
-            "labor": {
-                "name": "Acoustic installers",
-                "pct": 0.50,
-                "rate": round(unit_rate * 0.50, 2),
-            },
-            "equipment": {"name": "Tools", "pct": 0.05, "rate": round(unit_rate * 0.05, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-ACO-001", [
+            ("Acoustic materials", "material", 0.45, None),
+            ("Acoustic installers", "labor", 0.50, 46.0),
+            ("Tools", "equipment", 0.05, 30.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -1805,23 +1603,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-SPE-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Safety/protection systems",
-                "pct": 0.45,
-                "rate": round(unit_rate * 0.45, 2),
-            },
-            "labor": {
-                "name": "Specialist installers",
-                "pct": 0.45,
-                "rate": round(unit_rate * 0.45, 2),
-            },
-            "equipment": {
-                "name": "Access equipment",
-                "pct": 0.10,
-                "rate": round(unit_rate * 0.10, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-SPE-001", [
+            ("Safety/protection systems", "material", 0.45, None),
+            ("Specialist installers", "labor", 0.45, 50.0),
+            ("Access equipment", "equipment", 0.10, 60.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -1831,19 +1617,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-ROF-002"
-        meta["resources"] = {
-            "material": {
-                "name": "Roofing accessories",
-                "pct": 0.50,
-                "rate": round(unit_rate * 0.50, 2),
-            },
-            "labor": {"name": "Roofers", "pct": 0.40, "rate": round(unit_rate * 0.40, 2)},
-            "equipment": {
-                "name": "Access equipment",
-                "pct": 0.10,
-                "rate": round(unit_rate * 0.10, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-ROF-002", [
+            ("Roofing accessories", "material", 0.50, None),
+            ("Roofers", "labor", 0.40, 48.0),
+            ("Access equipment", "equipment", 0.10, 60.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -1857,19 +1635,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-EXT-001"
-        meta["resources"] = {
-            "material": {
-                "name": "External works materials",
-                "pct": 0.50,
-                "rate": round(unit_rate * 0.50, 2),
-            },
-            "labor": {
-                "name": "External works crew",
-                "pct": 0.40,
-                "rate": round(unit_rate * 0.40, 2),
-            },
-            "equipment": {"name": "Tools/plant", "pct": 0.10, "rate": round(unit_rate * 0.10, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-EXT-001", [
+            ("External works materials", "material", 0.50, None),
+            ("External works crew", "labor", 0.40, 40.0),
+            ("Tools/plant", "equipment", 0.10, 50.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -1879,19 +1649,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-FIN-002"
-        meta["resources"] = {
-            "material": {
-                "name": "Finishing materials",
-                "pct": 0.50,
-                "rate": round(unit_rate * 0.50, 2),
-            },
-            "labor": {
-                "name": "Finishing tradesmen",
-                "pct": 0.45,
-                "rate": round(unit_rate * 0.45, 2),
-            },
-            "equipment": {"name": "Tools", "pct": 0.05, "rate": round(unit_rate * 0.05, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-FIN-002", [
+            ("Finishing materials", "material", 0.50, None),
+            ("Finishing tradesmen", "labor", 0.45, 44.0),
+            ("Tools", "equipment", 0.05, 30.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -1900,15 +1662,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-TMB-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Timber/joinery",
-                "pct": 0.50,
-                "rate": round(unit_rate * 0.50, 2),
-            },
-            "labor": {"name": "Carpenters", "pct": 0.45, "rate": round(unit_rate * 0.45, 2)},
-            "equipment": {"name": "Tools", "pct": 0.05, "rate": round(unit_rate * 0.05, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-TMB-001", [
+            ("Timber/joinery", "material", 0.50, None),
+            ("Carpenters", "labor", 0.45, 48.0),
+            ("Tools", "equipment", 0.05, 30.0),
+        ])
         meta["epd_id"] = "timber-softwood"
         meta["gwp_kgco2e_per_unit"] = -16.0 if unit == "m3" else 5.0
     elif any(
@@ -1919,23 +1677,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-REN-001"
-        meta["resources"] = {
-            "material": {
-                "name": "PV panels/inverters",
-                "pct": 0.60,
-                "rate": round(unit_rate * 0.60, 2),
-            },
-            "labor": {
-                "name": "Solar installers",
-                "pct": 0.30,
-                "rate": round(unit_rate * 0.30, 2),
-            },
-            "equipment": {
-                "name": "Access equipment",
-                "pct": 0.10,
-                "rate": round(unit_rate * 0.10, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-REN-001", [
+            ("PV panels/inverters", "material", 0.60, None),
+            ("Solar installers", "labor", 0.30, 50.0),
+            ("Access equipment", "equipment", 0.10, 60.0),
+        ])
         meta["epd_id"] = "pv-monocrystalline"
         meta["gwp_kgco2e_per_unit"] = 25.0
     elif any(
@@ -1946,19 +1692,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-ROF-003"
-        meta["resources"] = {
-            "material": {
-                "name": "Roofing/metalwork",
-                "pct": 0.50,
-                "rate": round(unit_rate * 0.50, 2),
-            },
-            "labor": {"name": "Roofers/plumbers", "pct": 0.40, "rate": round(unit_rate * 0.40, 2)},
-            "equipment": {
-                "name": "Access equipment",
-                "pct": 0.10,
-                "rate": round(unit_rate * 0.10, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-ROF-003", [
+            ("Roofing/metalwork", "material", 0.50, None),
+            ("Roofers/plumbers", "labor", 0.40, 48.0),
+            ("Access equipment", "equipment", 0.10, 60.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -1967,23 +1705,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-MHE-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Material handling equipment",
-                "pct": 0.55,
-                "rate": round(unit_rate * 0.55, 2),
-            },
-            "labor": {
-                "name": "Installation crew",
-                "pct": 0.35,
-                "rate": round(unit_rate * 0.35, 2),
-            },
-            "equipment": {
-                "name": "Heavy plant",
-                "pct": 0.10,
-                "rate": round(unit_rate * 0.10, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-MHE-001", [
+            ("Material handling equipment", "material", 0.55, None),
+            ("Installation crew", "labor", 0.35, 50.0),
+            ("Heavy plant", "equipment", 0.10, 95.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -1992,23 +1718,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-REF-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Refrigeration equipment",
-                "pct": 0.55,
-                "rate": round(unit_rate * 0.55, 2),
-            },
-            "labor": {
-                "name": "Refrigeration engineers",
-                "pct": 0.35,
-                "rate": round(unit_rate * 0.35, 2),
-            },
-            "equipment": {
-                "name": "Test equipment",
-                "pct": 0.10,
-                "rate": round(unit_rate * 0.10, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-REF-001", [
+            ("Refrigeration equipment", "material", 0.55, None),
+            ("Refrigeration engineers", "labor", 0.35, 55.0),
+            ("Test equipment", "equipment", 0.10, 45.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -2017,19 +1731,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-ELV-002"
-        meta["resources"] = {
-            "material": {
-                "name": "Lift/shaft equipment",
-                "pct": 0.55,
-                "rate": round(unit_rate * 0.55, 2),
-            },
-            "labor": {
-                "name": "Lift technicians",
-                "pct": 0.35,
-                "rate": round(unit_rate * 0.35, 2),
-            },
-            "equipment": {"name": "Crane", "pct": 0.10, "rate": round(unit_rate * 0.10, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-ELV-002", [
+            ("Lift/shaft equipment", "material", 0.55, None),
+            ("Lift technicians", "labor", 0.35, 55.0),
+            ("Crane", "equipment", 0.10, 130.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -2038,23 +1744,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-PRE-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Temporary works/disposal",
-                "pct": 0.20,
-                "rate": round(unit_rate * 0.20, 2),
-            },
-            "labor": {
-                "name": "General laborers",
-                "pct": 0.35,
-                "rate": round(unit_rate * 0.35, 2),
-            },
-            "equipment": {
-                "name": "Plant/skips",
-                "pct": 0.45,
-                "rate": round(unit_rate * 0.45, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-PRE-001", [
+            ("Temporary works/disposal", "material", 0.20, None),
+            ("General laborers", "labor", 0.35, 36.0),
+            ("Plant/skips", "equipment", 0.45, 80.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -2064,23 +1758,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-STL-003"
-        meta["resources"] = {
-            "material": {
-                "name": "Metal/steel components",
-                "pct": 0.55,
-                "rate": round(unit_rate * 0.55, 2),
-            },
-            "labor": {
-                "name": "Steel fitters",
-                "pct": 0.35,
-                "rate": round(unit_rate * 0.35, 2),
-            },
-            "equipment": {
-                "name": "Crane/tools",
-                "pct": 0.10,
-                "rate": round(unit_rate * 0.10, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-STL-003", [
+            ("Metal/steel components", "material", 0.55, None),
+            ("Steel fitters", "labor", 0.35, 52.0),
+            ("Crane/tools", "equipment", 0.10, 120.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -2089,19 +1771,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-DRY-002"
-        meta["resources"] = {
-            "material": {
-                "name": "Partition/fitout materials",
-                "pct": 0.45,
-                "rate": round(unit_rate * 0.45, 2),
-            },
-            "labor": {
-                "name": "Fitout crew",
-                "pct": 0.50,
-                "rate": round(unit_rate * 0.50, 2),
-            },
-            "equipment": {"name": "Tools", "pct": 0.05, "rate": round(unit_rate * 0.05, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-DRY-002", [
+            ("Partition/fitout materials", "material", 0.45, None),
+            ("Fitout crew", "labor", 0.50, 44.0),
+            ("Tools", "equipment", 0.05, 30.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -2111,23 +1785,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-MEC-003"
-        meta["resources"] = {
-            "material": {
-                "name": "Mechanical/electrical plant",
-                "pct": 0.60,
-                "rate": round(unit_rate * 0.60, 2),
-            },
-            "labor": {
-                "name": "M&E engineers",
-                "pct": 0.30,
-                "rate": round(unit_rate * 0.30, 2),
-            },
-            "equipment": {
-                "name": "Crane/test equipment",
-                "pct": 0.10,
-                "rate": round(unit_rate * 0.10, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-MEC-003", [
+            ("Mechanical/electrical plant", "material", 0.60, None),
+            ("M&E engineers", "labor", 0.30, 55.0),
+            ("Crane/test equipment", "equipment", 0.10, 120.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -2137,23 +1799,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-SIT-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Site infrastructure materials",
-                "pct": 0.40,
-                "rate": round(unit_rate * 0.40, 2),
-            },
-            "labor": {
-                "name": "Groundworkers",
-                "pct": 0.35,
-                "rate": round(unit_rate * 0.35, 2),
-            },
-            "equipment": {
-                "name": "Excavation plant",
-                "pct": 0.25,
-                "rate": round(unit_rate * 0.25, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-SIT-001", [
+            ("Site infrastructure materials", "material", 0.40, None),
+            ("Groundworkers", "labor", 0.35, 40.0),
+            ("Excavation plant", "equipment", 0.25, 85.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -2165,19 +1815,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-ENV-001"
-        meta["resources"] = {
-            "material": {
-                "name": "Building envelope components",
-                "pct": 0.55,
-                "rate": round(unit_rate * 0.55, 2),
-            },
-            "labor": {
-                "name": "Specialist installers",
-                "pct": 0.40,
-                "rate": round(unit_rate * 0.40, 2),
-            },
-            "equipment": {"name": "Tools", "pct": 0.05, "rate": round(unit_rate * 0.05, 2)},
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-ENV-001", [
+            ("Building envelope components", "material", 0.55, None),
+            ("Specialist installers", "labor", 0.40, 50.0),
+            ("Tools", "equipment", 0.05, 30.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -2190,23 +1832,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-MEC-004"
-        meta["resources"] = {
-            "material": {
-                "name": "HVAC/mechanical components",
-                "pct": 0.50,
-                "rate": round(unit_rate * 0.50, 2),
-            },
-            "labor": {
-                "name": "HVAC technicians",
-                "pct": 0.40,
-                "rate": round(unit_rate * 0.40, 2),
-            },
-            "equipment": {
-                "name": "Test equipment",
-                "pct": 0.10,
-                "rate": round(unit_rate * 0.10, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-MEC-004", [
+            ("HVAC/mechanical components", "material", 0.50, None),
+            ("HVAC technicians", "labor", 0.40, 52.0),
+            ("Test equipment", "equipment", 0.10, 45.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -2222,23 +1852,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-ELE-003"
-        meta["resources"] = {
-            "material": {
-                "name": "Electrical/low-voltage equipment",
-                "pct": 0.50,
-                "rate": round(unit_rate * 0.50, 2),
-            },
-            "labor": {
-                "name": "Electricians/IT technicians",
-                "pct": 0.40,
-                "rate": round(unit_rate * 0.40, 2),
-            },
-            "equipment": {
-                "name": "Test equipment",
-                "pct": 0.10,
-                "rate": round(unit_rate * 0.10, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-ELE-003", [
+            ("Electrical/low-voltage equipment", "material", 0.50, None),
+            ("Electricians/IT technicians", "labor", 0.40, 52.0),
+            ("Test equipment", "equipment", 0.10, 45.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -2252,23 +1870,11 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-SPE-002"
-        meta["resources"] = {
-            "material": {
-                "name": "Specialist equipment",
-                "pct": 0.55,
-                "rate": round(unit_rate * 0.55, 2),
-            },
-            "labor": {
-                "name": "Specialist installers",
-                "pct": 0.35,
-                "rate": round(unit_rate * 0.35, 2),
-            },
-            "equipment": {
-                "name": "Tools/plant",
-                "pct": 0.10,
-                "rate": round(unit_rate * 0.10, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-SPE-002", [
+            ("Specialist equipment", "material", 0.55, None),
+            ("Specialist installers", "labor", 0.35, 50.0),
+            ("Tools/plant", "equipment", 0.10, 50.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -2277,45 +1883,21 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-MEC-005"
-        meta["resources"] = {
-            "material": {
-                "name": "Mechanical services",
-                "pct": 0.50,
-                "rate": round(unit_rate * 0.50, 2),
-            },
-            "labor": {
-                "name": "M&E engineers",
-                "pct": 0.40,
-                "rate": round(unit_rate * 0.40, 2),
-            },
-            "equipment": {
-                "name": "Crane/tools",
-                "pct": 0.10,
-                "rate": round(unit_rate * 0.10, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-MEC-005", [
+            ("Mechanical services", "material", 0.50, None),
+            ("M&E engineers", "labor", 0.40, 55.0),
+            ("Crane/tools", "equipment", 0.10, 120.0),
+        ])
     elif any(
         k in desc_lower
         for k in ["plantation", "arbre", "tree planting"]
     ):
         meta["cwicr_ref"] = "CWICR-LAN-002"
-        meta["resources"] = {
-            "material": {
-                "name": "Trees/planting materials",
-                "pct": 0.50,
-                "rate": round(unit_rate * 0.50, 2),
-            },
-            "labor": {
-                "name": "Landscapers",
-                "pct": 0.40,
-                "rate": round(unit_rate * 0.40, 2),
-            },
-            "equipment": {
-                "name": "Mini excavator",
-                "pct": 0.10,
-                "rate": round(unit_rate * 0.10, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-LAN-002", [
+            ("Trees/planting materials", "material", 0.50, None),
+            ("Landscapers", "labor", 0.40, 38.0),
+            ("Mini excavator", "equipment", 0.10, 65.0),
+        ])
     elif any(
         k in desc_lower
         for k in [
@@ -2323,31 +1905,19 @@ def _enrich_position_metadata(
         ]
     ):
         meta["cwicr_ref"] = "CWICR-ERT-003"
-        meta["resources"] = {
-            "material": {
-                "name": "Investigation materials",
-                "pct": 0.10,
-                "rate": round(unit_rate * 0.10, 2),
-            },
-            "labor": {
-                "name": "Geotechnical engineers",
-                "pct": 0.40,
-                "rate": round(unit_rate * 0.40, 2),
-            },
-            "equipment": {
-                "name": "Drilling rig",
-                "pct": 0.50,
-                "rate": round(unit_rate * 0.50, 2),
-            },
-        }
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-ERT-003", [
+            ("Investigation materials", "material", 0.10, None),
+            ("Geotechnical engineers", "labor", 0.40, 65.0),
+            ("Drilling rig", "equipment", 0.50, 150.0),
+        ])
     else:
         # Generic fallback
-        meta["resources"] = {
-            "material": {"pct": 0.40, "rate": round(unit_rate * 0.40, 2)},
-            "labor": {"pct": 0.45, "rate": round(unit_rate * 0.45, 2)},
-            "equipment": {"pct": 0.10, "rate": round(unit_rate * 0.10, 2)},
-            "overhead": {"pct": 0.05, "rate": round(unit_rate * 0.05, 2)},
-        }
+        meta["cwicr_ref"] = "CWICR-GEN-001"
+        meta["resources"] = _make_resources(unit_rate, unit, "CWICR-GEN-001", [
+            ("General materials", "material", 0.40, None),
+            ("General labor", "labor", 0.45, 42.0),
+            ("Tools/equipment", "equipment", 0.10, 40.0),
+        ])
 
     return meta
 
@@ -2439,49 +2009,6 @@ async def install_demo_project(session: AsyncSession, demo_id: str) -> dict:
             )
             positions.append(pos)
             session.add(pos)
-
-            # ── Create child resource positions (material/labor/equipment) ──
-            resources = pos_meta.get("resources", {})
-            res_idx = 0
-            for res_type, res_data in resources.items():
-                if not isinstance(res_data, dict) or "rate" not in res_data:
-                    continue
-                res_idx += 1
-                sort += 1
-                res_name = res_data.get("name", res_type.capitalize())
-                res_rate = res_data["rate"]
-                res_pct = res_data.get("pct", 0)
-                res_total = round(float(qty) * res_rate, 2)
-                res_ordinal = f"{sub_ordinal}.{res_idx}"
-
-                # Resource type label for metadata
-                type_labels = {
-                    "material": "Material",
-                    "labor": "Labor",
-                    "equipment": "Equipment",
-                    "overhead": "Overhead",
-                }
-                child = _make_position(
-                    boq_id=boq_id,
-                    parent_id=pos.id,
-                    ordinal=res_ordinal,
-                    description=res_name,
-                    unit=unit if unit != "lsum" else "lsum",
-                    quantity=qty,
-                    unit_rate=res_rate,
-                    sort_order=sort,
-                    classification=cls,
-                    metadata={
-                        "resource_type": res_type,
-                        "resource_label": type_labels.get(res_type, res_type),
-                        "pct_of_parent": round(res_pct * 100, 1),
-                        "cwicr_ref": pos_meta.get("cwicr_ref", ""),
-                    },
-                    source="cwicr",
-                    validation_status="valid",
-                )
-                positions.append(child)
-                session.add(child)
 
     await session.flush()
 
