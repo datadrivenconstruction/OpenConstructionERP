@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { TranslationManager } from './TranslationManager';
+import { BackupRestore } from './BackupRestore';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Eye,
@@ -758,8 +759,13 @@ export function SettingsPage() {
         <TranslationManager />
       </div>
 
+      {/* Backup & Restore */}
+      <div className="animate-card-in" style={{ animationDelay: '370ms' }}>
+        <BackupRestore />
+      </div>
+
       {/* Setup Wizard */}
-      <Card className="animate-card-in" style={{ animationDelay: '400ms' }}>
+      <Card className="animate-card-in" style={{ animationDelay: '430ms' }}>
         <CardHeader
           title={t('settings.setup_wizard_title', { defaultValue: 'Setup Wizard' })}
           subtitle={t('settings.setup_wizard_subtitle', { defaultValue: 'Re-run the initial setup to change language, install databases, catalogs, or demo projects' })}
@@ -778,7 +784,7 @@ export function SettingsPage() {
       </Card>
 
       {/* Danger zone */}
-      <Card className="animate-card-in border-semantic-error/20" style={{ animationDelay: '450ms' }}>
+      <Card className="animate-card-in border-semantic-error/20" style={{ animationDelay: '480ms' }}>
         <CardHeader title={t('settings.account_title', { defaultValue: 'Account' })} subtitle={t('settings.account_subtitle', { defaultValue: 'Sign out or manage your account' })} />
         <CardContent>
           <Button
