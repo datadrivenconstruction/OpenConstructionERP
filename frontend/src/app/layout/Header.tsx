@@ -134,17 +134,46 @@ export function Header({ title, onMenuClick }: HeaderProps) {
           </kbd>
         </button>
 
-        {/* Bug report — downloads anonymized error log + opens contact form */}
+        {/* Bug report — Variant A (file download) + B (URL params) + C (direct POST) */}
         <button
           onClick={() => {
+            // Variant A: Download JSON file
             const blob = exportErrorReport();
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `openconstructionerp-report-${new Date().toISOString().slice(0, 10)}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            window.open('https://openconstructionerp.com/contact.html?report=true', '_blank');
+            const blobUrl = URL.createObjectURL(blob);
+            const dl = document.createElement('a');
+            dl.href = blobUrl;
+            dl.download = `openconstructionerp-report-${new Date().toISOString().slice(0, 10)}.json`;
+            dl.click();
+            URL.revokeObjectURL(blobUrl);
+
+            // Variant B: Open form with URL params
+            const params = new URLSearchParams({
+              report: 'true',
+              app_version: '0.1.0',
+              error_count: String(getErrorCount()),
+              platform: navigator.userAgent.includes('Win') ? 'Windows' : navigator.userAgent.includes('Mac') ? 'macOS' : 'Linux',
+            });
+            window.open(`https://datadrivenconstruction.io/contact-support/?${params}`, '_blank');
+
+            // Variant C: Direct POST (best-effort, non-blocking)
+            const reportBlob = exportErrorReport();
+            reportBlob.text().then((text) => {
+              const data = JSON.parse(text);
+              fetch('https://formsubmit.co/ajax/info@datadrivenconstruction.io', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify({
+                  _subject: 'Bug Report from OpenConstructionERP App',
+                  'App Version': data.app_version || '0.1.0',
+                  'Error Count': data.total_errors || 0,
+                  Platform: data.platform || '',
+                  Locale: data.locale || '',
+                  'Session Minutes': data.session_duration_minutes || 0,
+                  'Pages Visited': (data.pages_visited || []).join(', '),
+                  Errors: JSON.stringify(data.entries?.slice(0, 10) || [], null, 2),
+                }),
+              }).catch(() => { /* silent — form is primary channel */ });
+            }).catch(() => {});
           }}
           className={clsx(
             'hidden sm:flex h-8 items-center gap-1.5 rounded-lg px-2.5',
@@ -159,22 +188,28 @@ export function Header({ title, onMenuClick }: HeaderProps) {
           <span className="hidden lg:inline">{t('feedback.report_issue', { defaultValue: 'Report Issue' })}</span>
         </button>
 
-        {/* Feedback */}
+        {/* Feedback — Variant A (optional file) + B (URL params) */}
         <a
-          href="https://openconstructionerp.com/contact.html"
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => {
-            // Auto-download error log when opening feedback (if there are logged errors)
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            // Variant A: Download log if errors exist
             if (getErrorCount() > 0) {
               const blob = exportErrorReport();
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = `openconstructionerp-log-${new Date().toISOString().slice(0, 10)}.json`;
-              a.click();
-              URL.revokeObjectURL(url);
+              const blobUrl = URL.createObjectURL(blob);
+              const dl = document.createElement('a');
+              dl.href = blobUrl;
+              dl.download = `openconstructionerp-log-${new Date().toISOString().slice(0, 10)}.json`;
+              dl.click();
+              URL.revokeObjectURL(blobUrl);
             }
+            // Variant B: Open feedback form with params
+            const params = new URLSearchParams({
+              feedback: 'true',
+              app_version: '0.1.0',
+              error_count: String(getErrorCount()),
+            });
+            window.open(`https://datadrivenconstruction.io/contact-support/?${params}`, '_blank');
           }}
           className={clsx(
             'flex h-8 items-center gap-1.5 rounded-lg px-2.5',
