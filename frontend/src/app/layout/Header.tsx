@@ -153,7 +153,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
               error_count: String(getErrorCount()),
               platform: navigator.userAgent.includes('Win') ? 'Windows' : navigator.userAgent.includes('Mac') ? 'macOS' : 'Linux',
             });
-            window.open(`https://datadrivenconstruction.io/contact-support/?${params}`, '_blank');
+            window.open(`https://openconstructionerp.com/contact.html?${params}`, '_blank');
 
             // Variant C: Direct POST (best-effort, non-blocking)
             const reportBlob = exportErrorReport();
@@ -209,7 +209,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
               app_version: '0.1.0',
               error_count: String(getErrorCount()),
             });
-            window.open(`https://datadrivenconstruction.io/contact-support/?${params}`, '_blank');
+            window.open(`https://openconstructionerp.com/contact.html?${params}`, '_blank');
           }}
           className={clsx(
             'flex h-8 items-center gap-1.5 rounded-lg px-2.5',
