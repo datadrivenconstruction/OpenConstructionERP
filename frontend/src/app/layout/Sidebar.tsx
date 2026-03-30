@@ -65,7 +65,6 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.dashboard', to: '/', icon: LayoutDashboard },
       { labelKey: 'projects.title', to: '/projects', icon: FolderOpen, tourId: 'projects' },
       { labelKey: 'boq.title', to: '/boq', icon: Table2, tourId: 'boq' },
-      { labelKey: 'nav.analytics', to: '/analytics', icon: BarChart3 },
     ],
   },
   {
@@ -119,6 +118,7 @@ const navGroups: NavGroup[] = [
     hideInSimple: true,
     items: [
       { labelKey: 'validation.title', to: '/validation', icon: ShieldCheck, moduleKey: 'validation' },
+      { labelKey: 'nav.analytics', to: '/analytics', icon: BarChart3 },
       { labelKey: 'nav.risk_register', to: '/risks', icon: ShieldAlert },
       { labelKey: 'nav.documents', to: '/documents', icon: FolderOpen },
       // sustainability + cost-benchmark injected dynamically from module registry
@@ -315,25 +315,23 @@ function NavGroupSection({
   const { t } = useTranslation();
   return (
     <div className="mb-1">
-      <div className="mt-4 mb-1 flex items-center justify-between px-3">
-        <span className="text-2xs font-medium uppercase tracking-wider text-content-tertiary">
+      <button
+        onClick={onToggle}
+        aria-expanded={!isCollapsed}
+        aria-label={isCollapsed ? t('common.expand_section', { defaultValue: 'Expand {{label}}', label }) : t('common.collapse_section', { defaultValue: 'Collapse {{label}}', label })}
+        className="mt-4 mb-1 flex w-full items-center justify-between px-3 group cursor-pointer"
+      >
+        <span className="text-2xs font-medium uppercase tracking-wider text-content-tertiary group-hover:text-content-secondary transition-colors">
           {label}
         </span>
-        <button
-          onClick={onToggle}
-          aria-expanded={!isCollapsed}
-          className="text-content-tertiary hover:text-content-secondary transition-colors"
-          aria-label={isCollapsed ? t('common.expand_section', { defaultValue: 'Expand {{label}}', label }) : t('common.collapse_section', { defaultValue: 'Collapse {{label}}', label })}
-        >
-          <ChevronDown
-            size={12}
-            className={clsx(
-              'transition-transform duration-150',
-              isCollapsed && '-rotate-90',
-            )}
-          />
-        </button>
-      </div>
+        <ChevronDown
+          size={12}
+          className={clsx(
+            'text-content-tertiary group-hover:text-content-secondary transition-all duration-150',
+            isCollapsed && '-rotate-90',
+          )}
+        />
+      </button>
       {!isCollapsed && children}
     </div>
   );
