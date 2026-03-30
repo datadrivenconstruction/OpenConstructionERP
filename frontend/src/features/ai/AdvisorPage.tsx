@@ -1,9 +1,10 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
-import { Sparkles, Database, ArrowUp } from 'lucide-react';
+import { Sparkles, Database, ArrowUp, AlertTriangle, Settings } from 'lucide-react';
 import { Breadcrumb } from '@/shared/ui';
-import { apiPost } from '@/shared/lib/api';
+import { apiGet, apiPost } from '@/shared/lib/api';
+import { Link } from 'react-router-dom';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
@@ -215,10 +216,30 @@ export function AdvisorPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [aiConfigured, setAiConfigured] = useState<boolean | null>(null); // null = loading
+  const [aiProvider, setAiProvider] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
   const addToast = useToastStore((s) => s.addToast);
+
+  // Check if AI is configured on mount
+  useEffect(() => {
+    apiGet<Record<string, unknown>>('/v1/ai/settings')
+      .then((s) => {
+        const hasKey =
+          !!s.anthropic_api_key_set ||
+          !!s.openai_api_key_set ||
+          !!s.gemini_api_key_set ||
+          !!s.openrouter_api_key_set ||
+          !!s.mistral_api_key_set ||
+          !!s.groq_api_key_set ||
+          !!s.deepseek_api_key_set;
+        setAiConfigured(hasKey);
+        setAiProvider((s.provider as string) || '');
+      })
+      .catch(() => setAiConfigured(false));
+  }, []);
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
@@ -320,6 +341,28 @@ export function AdvisorPage() {
         className="mb-3 shrink-0"
       />
 
+      {/* AI not configured warning */}
+      {aiConfigured === false && (
+        <div className="mb-3 shrink-0 flex items-center gap-3 rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 px-4 py-3">
+          <AlertTriangle size={18} className="text-amber-600 dark:text-amber-400 shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+              {t('ai.not_configured_title', { defaultValue: 'AI is not configured' })}
+            </p>
+            <p className="text-xs text-amber-700 dark:text-amber-400/80">
+              {t('ai.not_configured_desc', { defaultValue: 'Add your API key (Anthropic, OpenAI, or other) to use the AI Cost Advisor.' })}
+            </p>
+          </div>
+          <Link
+            to="/settings"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-700 transition-colors shrink-0"
+          >
+            <Settings size={13} />
+            {t('ai.go_to_settings', { defaultValue: 'Configure AI' })}
+          </Link>
+        </div>
+      )}
+
       {/* Chat container — full height */}
       <div className="flex flex-1 flex-col min-h-0 rounded-2xl border border-border-light bg-surface-primary overflow-hidden shadow-sm">
         {/* Header bar */}
@@ -332,12 +375,22 @@ export function AdvisorPage() {
               {t('ai.advisor_title', { defaultValue: 'AI Cost Advisor' })}
             </h1>
             <p className="text-[11px] text-content-tertiary leading-tight truncate">
-              {t('ai.advisor_desc', {
-                defaultValue:
-                  'Ask questions about costs, materials, and pricing — from your database and AI knowledge',
-              })}
+              {aiConfigured
+                ? t('ai.advisor_desc_connected', {
+                    defaultValue: 'Connected via {{provider}} — ask about costs, materials, pricing',
+                    provider: aiProvider || 'AI',
+                  })
+                : t('ai.advisor_desc', {
+                    defaultValue: 'Ask questions about costs, materials, and pricing — from your database and AI knowledge',
+                  })}
             </p>
           </div>
+          {aiConfigured && (
+            <span className="ml-auto flex items-center gap-1.5 text-2xs text-semantic-success font-medium shrink-0">
+              <span className="h-1.5 w-1.5 rounded-full bg-semantic-success animate-pulse" />
+              {t('ai.connected', { defaultValue: 'Connected' })}
+            </span>
+          )}
         </div>
 
         {/* Messages area */}
