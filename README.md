@@ -1,164 +1,153 @@
-# OpenEstimate
+<div align="center">
 
-**Open-source modular platform for construction cost estimation.**
+# OpenConstructionERP
 
-Replaces iTWO, HeavyBid, Sage Estimating. AI-first. 20 languages built-in. Plugin architecture.
+**The #1 open-source platform for construction cost estimation**
 
-[![CI](https://github.com/openestimate/openestimate/actions/workflows/ci.yml/badge.svg)](https://github.com/openestimate/openestimate/actions/workflows/ci.yml)
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![GitHub release](https://img.shields.io/github/v/release/openestimate/openestimate)](https://github.com/openestimate/openestimate/releases)
-[![Docker Image](https://img.shields.io/badge/ghcr.io-openestimate-blue)](https://ghcr.io/openestimate/openestimate)
-[![i18n: 20 languages](https://img.shields.io/badge/i18n-20_languages-green)](#languages)
+[Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Community](https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR/discussions)
 
-## Features
+![License](https://img.shields.io/badge/license-AGPL--3.0-blue)
+![Version](https://img.shields.io/badge/version-0.1.0-green)
+![Languages](https://img.shields.io/badge/languages-21-orange)
+![Validation Rules](https://img.shields.io/badge/validation_rules-42-purple)
 
-- **BOQ Editor** — Block-based bill of quantities with assemblies, keyboard navigation, real-time totals
-- **Multi-CAD Import** — DWG, DGN, RVT, IFC to automatic quantity extraction (via ODA SDK)
-- **AI Takeoff** — Upload PDF/photo, computer vision detects elements, suggests quantities
-- **Validation Pipeline** — DIN 276, GAEB, NRM, MasterFormat compliance checking
-- **Cost Database** — 55,000+ items (CWICR), 9 languages, semantic search
-- **Plugin Modules** — Download, install, works. Cost databases, AI models, integrations
-- **20 Languages** — EN, DE, RU, FR, ES, PT, IT, NL, PL, CS, TR, AR, ZH, JA, KO, HI, SV, NO, DA, FI
-- **Collaboration** — Real-time multiplayer editing (Figma-style)
-- **GAEB XML** — Full support for X81-X89 phases
-- **Cost Modeling** — Parametric models, benchmarking, sensitivity analysis
-- **Tendering** — Bid packages, distribution, comparison, award recommendations
-- **Schedule** — Gantt charts linked to BOQ positions
-- **Dark Mode** — System-aware with manual toggle
+</div>
+
+---
+
+Professional construction cost estimation for everyone — from solo quantity surveyors to enterprise contractors.
+
+## Why OpenConstructionERP?
+
+- **Free & Open Source** — AGPL-3.0. Self-hosted. Your data stays on your machine.
+- **21 Languages** — Full i18n for DE, FR, ES, PT, RU, ZH, AR, JA, KO, HI, BG and more
+- **20 Regional Standards** — DIN 276, NRM, MasterFormat, ГЭСН, DPGF, GB/T 50500, CPWD, and 13 more
+- **AI-Powered** — Connect any LLM (Anthropic, OpenAI, Gemini, Mistral, Groq, DeepSeek) for smart estimation
+- **55,000+ Cost Items** — CWICR database with 11 regional pricing databases
+- **42 Validation Rules** — Automatic compliance checking for 13 international standards
+
+## Key Features
+
+### Estimation
+
+- **BOQ Editor** — Hierarchical Bill of Quantities with AG Grid, inline editing, resources, markups (overhead, profit, VAT)
+- **Cost Database** — 55K+ items across 11 regions (US, UK, DE, FR, ES, PT, RU, AE, CN, IN, CA)
+- **Resource Catalog** — 7,000+ materials, labor, equipment with catalog picker and assemblies
+- **Assemblies** — Reusable cost recipes with component breakdown
+
+### Planning & Analysis
+
+- **4D Schedule** — Gantt chart with CPM critical path, dependencies, resource assignment
+- **5D Cost Model** — Earned Value Management (SPI, CPI), S-curve, budget tracking, what-if scenarios
+- **Risk Register** — Risk matrix, probability x impact, mitigation strategies
+- **Analytics** — Cross-project KPIs, budget comparison, variance analysis
+
+### Collaboration & Export
+
+- **Tendering** — Bid packages, subcontractor management, bid comparison charts
+- **Change Orders** — Scope changes with cost and schedule impact tracking
+- **Reports** — PDF, Excel, GAEB XML, CSV export with 12 report templates
+- **Documents** — File management with drag-and-drop upload
+
+### AI Features
+
+- **AI Quick Estimate** — Generate BOQ from text, photo, PDF, Excel, or CAD/BIM
+- **AI Cost Advisor** — Chat with AI about costs, materials, pricing
+- **AI Smart Actions** — Enhance descriptions, suggest prerequisites, escalate rates, check scope
+
+### Regional Standards (20 exchange modules)
+
+| Standard | Region | Format |
+|----------|--------|--------|
+| DIN 276 / ÖNORM / SIA | DE/AT/CH | Excel/CSV |
+| NRM 1/2 (RICS) | UK | Excel/CSV |
+| CSI MasterFormat | US/CA | Excel/CSV |
+| GAEB DA XML 3.3 | DACH | XML |
+| DPGF / DQE | France | Excel/CSV |
+| ГЭСН / ФЕР | Russia/CIS | Excel/CSV |
+| GB/T 50500 | China | Excel/CSV |
+| CPWD / IS 1200 | India | Excel/CSV |
+| Bayındırlık Birim Fiyat | Turkey | Excel/CSV |
+| 積算基準 (Sekisan) | Japan | Excel/CSV |
+| Computo Metrico / DEI | Italy | Excel/CSV |
+| STABU / RAW | Netherlands | Excel/CSV |
+| KNR / KNNR | Poland | Excel/CSV |
+| 표준품셈 | South Korea | Excel/CSV |
+| NS 3420 / AMA | Nordic | Excel/CSV |
+| ÚRS / TSKP | Czech/Slovakia | Excel/CSV |
+| ACMM / ANZSMM | Australia/NZ | Excel/CSV |
+| CSI/CIQS | Canada | Excel/CSV |
+| FIDIC | UAE/GCC | Excel/CSV |
+| PBC / Base de Precios | Spain | Excel/CSV |
 
 ## Quick Start
 
 ### Option 1: Docker (recommended)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/openestimate/openestimate/main/docker-compose.quickstart.yml \
-  -o docker-compose.yml
+git clone https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR.git
+cd OpenConstructionEstimate-DDC-CWICR
 docker compose up
 ```
 
-Open http://localhost:8080 — register your first account.
+Open http://localhost:5173 — demo account: `demo@openestimator.io` / `DemoPass1234!`
 
-### Option 2: pip install
-
-```bash
-pip install openestimate
-openestimate serve --open
-```
-
-Opens browser at http://localhost:8080. Data stored in `~/.openestimate/`.
-
-### Option 3: Docker Compose (full stack)
+### Option 2: Local Development
 
 ```bash
-git clone https://github.com/openestimate/openestimate.git
-cd openestimate
-cp .env.example .env
-docker compose up -d
-```
-
-### Option 4: Desktop App
-
-Download from [Releases](https://github.com/openestimate/openestimate/releases) — available for Windows (.exe), macOS (.dmg), Linux (.AppImage/.deb).
-
-## One-Click Cloud Deploy
-
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/openestimate)
-
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/openestimate/openestimate)
-
-## Development
-
-```bash
-# 1. Clone
-git clone https://github.com/openestimate/openestimate.git
-cd openestimate
-
-# 2. Start infrastructure
-docker compose up -d   # PostgreSQL + Redis
-
-# 3. Backend
+# Backend
 cd backend
-pip install -e ".[dev]"
+pip install -r requirements.txt
 uvicorn app.main:create_app --factory --reload --port 8000
 
-# 4. Frontend (new terminal)
+# Frontend (new terminal)
 cd frontend
 npm install
 npm run dev
 ```
 
-Open http://localhost:5173
+### Option 3: One-Click Deploy
 
-### Pre-commit Hooks
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/...)
 
-```bash
-pip install pre-commit
-pre-commit install
-pre-commit install --hook-type commit-msg
-```
-
-## Architecture
-
-```
-openestimate/
-├── backend/          # Python/FastAPI — API, business logic, validation
-├── frontend/         # React/TypeScript — UI, i18n, AG Grid
-├── desktop/          # Tauri v2 — desktop app wrapper
-├── services/         # CAD converter (ODA/Rust), CV pipeline, AI
-├── modules/          # Plugin modules (install from marketplace)
-├── data/             # Cost catalogs, classification mappings
-├── deploy/           # Docker, Railway, Render, Terraform configs
-└── scripts/          # Installation scripts
-```
-
-Every feature = module with `manifest.py`. Core is minimal. Everything extensible via hooks and events.
-
-## Module System
-
-```bash
-# Install a module
-openestimate module install oe-rsmeans-connector
-
-# Create your own module
-make module-new NAME=oe_my_module
-```
-
-## Stack
+## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
 | Backend | Python 3.12+ / FastAPI |
-| Frontend | React 18 / TypeScript / Tailwind |
-| Database | PostgreSQL 16 (SQLite for local/desktop) |
-| CAD | ODA SDK + Rust (RVT reverse engineering) |
-| AI/CV | PaddleOCR + YOLOv11 |
-| Search | LanceDB (embedded) / Qdrant (production) |
-| i18n | 20 languages, JSON-based |
-| Real-time | Yjs (CRDT) |
-| Desktop | Tauri v2 |
+| Frontend | React 18 / TypeScript / Vite |
+| Database | PostgreSQL 16+ / SQLite (dev) |
+| UI | Tailwind CSS / AG Grid |
+| AI | Any LLM via API (Anthropic, OpenAI, etc.) |
+| Search | LanceDB vector search |
+| i18n | 21 languages |
 
-## Languages
+## Architecture
 
-EN, DE, RU, FR, ES, PT, IT, NL, PL, CS, TR, AR, ZH, JA, KO, HI, SV, NO, DA, FI
+```
+Frontend (React SPA)
+    ↓ REST API
+Backend (FastAPI)
+    ↓
+Database (PostgreSQL/SQLite)
+    ↓
+Modules: BOQ, Costs, Schedule, 5D, Validation, AI, Tendering, ...
+```
 
-Adding a new language = one JSON file. See `frontend/src/app/i18n.ts`.
-
-## License
-
-AGPL-3.0 — free for everyone. See [LICENSE](LICENSE).
-
-Commercial license available for enterprise. Contact: license@openestimate.io
+17 auto-discovered modules, 42 validation rules, plugin architecture.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. All contributions welcome.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
 
-## Security
+## License
 
-See [SECURITY.md](SECURITY.md) for reporting vulnerabilities.
+AGPL-3.0 — see [LICENSE](LICENSE).
 
-## Links
+For commercial licensing (without AGPL obligations), contact [info@datadrivenconstruction.io](mailto:info@datadrivenconstruction.io).
 
-- [Changelog](CHANGELOG.md)
-- [Code of Conduct](CODE_OF_CONDUCT.md)
-- [Security Policy](SECURITY.md)
+## Created by
+
+**Artem Boiko** — [datadrivenconstruction.io](https://datadrivenconstruction.io)
+
+Author of CWICR (55K+ cost items, 9 languages) and cad2db pipeline. Building open-source tools for the global construction industry.
