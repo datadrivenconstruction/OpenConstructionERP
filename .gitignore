@@ -30,7 +30,10 @@ Thumbs.db
 
 # Database
 *.db
+*.db-shm
+*.db-wal
 *.sqlite3
+openestimate.db*
 
 # Docker volumes
 pg_data/
@@ -42,10 +45,14 @@ htmlcov/
 .coverage
 coverage.xml
 .pytest_cache/
+frontend/test-results/
+frontend/e2e-results/
+*.trace.zip
 
 # Build
 *.tar.gz
 *.whl
+frontend/stats.html
 
 # Logs
 *.log
@@ -53,14 +60,15 @@ logs/
 
 # Generated
 backend/locales/
-openestimate.db*
+i18n-audit/
+translation_keys.txt
 
 # Claude Code / MCP
 .claude/
 .mcp.json
 .playwright-mcp/
 
-# QA / Testing artifacts
+# QA / Dev artifacts
 screenshots/
 qa-tests/
 ux-review/
@@ -69,17 +77,24 @@ UX_*.md
 TESTING_PLAN.md
 TAKEOFF_TESTING_PLAN.md
 IMPROVEMENTS_TODO.md
-screenshot_*.png
-settings_before_*.png
+AUDIT_*.md
+REVIEW_PROGRESS.md
+test-screenshots/
 
-# SQLite journal files
-*.db-shm
-*.db-wal
+# Dev screenshots & images
+*.png
+!frontend/public/favicon.png
+!frontend/public/logo.png
+!frontend/public/og-image.png
+sidebar-logo.png
 
-# Build artifacts
-frontend/stats.html
-i18n-audit/
-translation_keys.txt
+# LanceDB local data
+lancedb_data/
+*.lance
+
+# Cached data
+*.parquet
+~/.openestimator/
 
 # Desktop build
 desktop/dist/
@@ -87,128 +102,5 @@ desktop/build/
 desktop/src-tauri/target/
 desktop/src-tauri/binaries/
 
-# Claude Code / MCP
-.claude/
-.mcp.json
-.playwright-mcp/
-
-# QA / Testing artifacts
-screenshots/
-qa-tests/
-ux-review/
-QA_*.md
-UX_*.md
-TESTING_PLAN.md
-TAKEOFF_TESTING_PLAN.md
-IMPROVEMENTS_TODO.md
-screenshot_*.png
-settings_before_*.png
-
-# Database WAL/SHM
-*.db-shm
-*.db-wal
-
-# Dev screenshots
-audit_*.png
-qa-*.png
-boq-*.png
-module_*.png
-logo-*.png
-logo-*.jpeg
-takeoff-*.png
-takeoff-*.jpeg
-
-# Build artifacts
-frontend/stats.html
-i18n-audit/
-translation_keys.txt
-
-# LanceDB local data
-lancedb_data/
-*.lance
-
-# SQLite WAL/SHM
-*.db-shm
-*.db-wal
-
-# Claude Code / MCP
-.claude/
-.mcp.json
-.playwright-mcp/
-
-# QA / Testing artifacts
-screenshots/
-qa-tests/
-ux-review/
-QA_*.md
-UX_*.md
-TESTING_PLAN.md
-TAKEOFF_TESTING_PLAN.md
-IMPROVEMENTS_TODO.md
-screenshot_*.png
-settings_before_*.png
-
-# Dev screenshots
-audit_*.png
-qa-*.png
-boq-*.png
-module_*.png
-logo-*.png
-logo-*.jpeg
-takeoff-*.png
-takeoff-*.jpeg
-
-# Build artifacts
-frontend/stats.html
-i18n-audit/
-translation_keys.txt
-
-# LanceDB local data
-lancedb_data/
-*.lance
-
-# Database WAL/SHM
-*.db-shm
-*.db-wal
-
-# Claude Code / MCP
-.claude/
-.mcp.json
-.playwright-mcp/
-
-# QA / Testing artifacts
-screenshots/
-qa-tests/
-ux-review/
-QA_*.md
-UX_*.md
-TESTING_PLAN.md
-TAKEOFF_TESTING_PLAN.md
-IMPROVEMENTS_TODO.md
-screenshot_*.png
-settings_before_*.png
-
-# Dev screenshots & audit images
-audit_*.png
-qa-*.png
-boq-*.png
-module_*.png
-logo-*.png
-logo-*.jpeg
-takeoff-*.png
-takeoff-*.jpeg
-
-# Build artifacts
-frontend/stats.html
-i18n-audit/
-translation_keys.txt
-
-# LanceDB local data
-lancedb_data/
-*.lance
-
-# Desktop build
-desktop/dist/
-desktop/build/
-desktop/src-tauri/target/
-desktop/src-tauri/binaries/
+# Backup files
+*.backup.*
