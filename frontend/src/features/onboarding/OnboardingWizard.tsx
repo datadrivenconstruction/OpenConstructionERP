@@ -247,20 +247,36 @@ function MiniFlag({ code }: { code: string }) {
 // ── Progress Bar ─────────────────────────────────────────────────────────────
 
 function ProgressBar({ current, total }: { current: number; total: number }) {
-  const percentage = ((current + 1) / total) * 100;
+  const { t } = useTranslation();
+  const stepLabels = [
+    t('onboarding.step_welcome', { defaultValue: 'Welcome' }),
+    t('onboarding.step_language', { defaultValue: 'Language' }),
+    t('onboarding.step_costdb', { defaultValue: 'Cost DB' }),
+    t('onboarding.step_catalog', { defaultValue: 'Catalog' }),
+    t('onboarding.step_demos', { defaultValue: 'Demos' }),
+    t('onboarding.step_ai', { defaultValue: 'AI' }),
+    t('onboarding.step_finish', { defaultValue: 'Finish' }),
+  ];
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-3">
-          {Array.from({ length: total }).map((_, i) => (
-            <div key={i} className="flex items-center gap-2">
+      <div className="flex items-center justify-between mb-3">
+        {Array.from({ length: total }).map((_, i) => (
+          <div key={i} className="flex flex-col items-center gap-1 flex-1">
+            <div className="flex items-center w-full">
+              {i > 0 && (
+                <div
+                  className={`h-0.5 flex-1 rounded-full transition-colors duration-500 ${
+                    i <= current ? 'bg-oe-blue' : 'bg-border-light'
+                  }`}
+                />
+              )}
               <div
-                className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all duration-500 ease-oe ${
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all duration-500 ease-oe ${
                   i < current
                     ? 'bg-oe-blue text-white'
                     : i === current
-                      ? 'bg-oe-blue text-white ring-4 ring-oe-blue/20'
+                      ? 'bg-oe-blue text-white ring-4 ring-oe-blue/20 scale-110'
                       : 'bg-surface-secondary text-content-tertiary border border-border-light'
                 }`}
               >
@@ -268,23 +284,25 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
               </div>
               {i < total - 1 && (
                 <div
-                  className={`h-0.5 w-4 rounded-full transition-colors duration-500 ${
+                  className={`h-0.5 flex-1 rounded-full transition-colors duration-500 ${
                     i < current ? 'bg-oe-blue' : 'bg-border-light'
                   }`}
                 />
               )}
             </div>
-          ))}
-        </div>
-        <span className="text-xs text-content-tertiary tabular-nums">
-          {current + 1} / {total}
-        </span>
-      </div>
-      <div className="h-1 w-full overflow-hidden rounded-full bg-surface-secondary">
-        <div
-          className="h-full rounded-full bg-oe-blue transition-all duration-500 ease-oe"
-          style={{ width: `${percentage}%` }}
-        />
+            <span
+              className={`text-2xs font-medium transition-colors ${
+                i === current
+                  ? 'text-oe-blue'
+                  : i < current
+                    ? 'text-content-secondary'
+                    : 'text-content-quaternary'
+              }`}
+            >
+              {stepLabels[i] ?? ''}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -588,42 +606,52 @@ function StepCostDatabase({
 
       {/* Loading progress */}
       {loading && (
-        <div className="mt-4 w-full max-w-xl rounded-xl border border-border-light bg-surface-tertiary p-4">
+        <div className="mt-4 w-full max-w-xl rounded-xl border border-oe-blue/20 bg-oe-blue-subtle/10 p-4">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <Loader2 size={14} className="animate-spin text-oe-blue" />
+              <Loader2 size={16} className="animate-spin text-oe-blue" />
               <span className="text-sm font-medium text-content-primary">
-                {t('onboarding.loading_database', { defaultValue: 'Importing database...' })}
+                {t('onboarding.loading_database', { defaultValue: 'Importing 55,000+ cost items...' })}
               </span>
             </div>
-            <span className="text-xs text-content-tertiary font-mono">{elapsed}s</span>
+            <span className="text-xs font-mono text-oe-blue bg-oe-blue-subtle rounded-full px-2 py-0.5">{elapsed}s</span>
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-secondary">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-surface-secondary">
             <div
-              className="h-full animate-shimmer rounded-full bg-oe-blue opacity-70 bg-[length:200%_100%]"
-              style={{ width: '100%' }}
+              className="h-full rounded-full bg-gradient-to-r from-oe-blue via-blue-400 to-oe-blue animate-[indeterminate_1.5s_ease-in-out_infinite]"
+              style={{ width: '40%' }}
             />
           </div>
-          <p className="mt-2 text-xs text-content-tertiary">
-            {t('onboarding.loading_database_hint', {
-              defaultValue: 'Loading ~55,000 items. This takes 1-3 minutes.',
-            })}
-          </p>
+          <div className="mt-2 flex items-center gap-4 text-xs text-content-tertiary">
+            <span>{t('onboarding.loading_step1', { defaultValue: 'Downloading regional pricing data...' })}</span>
+            <span className="ml-auto">{t('onboarding.loading_database_hint', { defaultValue: '~1-3 minutes' })}</span>
+          </div>
         </div>
       )}
 
       {/* Success message */}
-      {loadedDb && !loading && (
-        <div className="mt-4 w-full max-w-xl rounded-xl border border-semantic-success/30 bg-semantic-success-bg/40 p-4 animate-fade-in">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 size={16} className="text-semantic-success" />
-            <span className="text-sm font-semibold text-semantic-success">
-              {loadedDb.count.toLocaleString()}{' '}
-              {t('onboarding.items_loaded', { defaultValue: 'items loaded' })}
-            </span>
+      {loadedDb && !loading && (() => {
+        const loadedInfo = CWICR_DATABASES.find((d) => d.id === loadedDb.id);
+        return (
+          <div className="mt-4 w-full max-w-xl rounded-xl border border-semantic-success/30 bg-semantic-success-bg/40 p-4 animate-fade-in">
+            <div className="flex items-center gap-3">
+              {loadedInfo && <MiniFlag code={loadedInfo.flagId} />}
+              <div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 size={16} className="text-semantic-success" />
+                  <span className="text-sm font-semibold text-semantic-success">
+                    {loadedInfo?.name ?? loadedDb.id}
+                  </span>
+                </div>
+                <span className="text-xs text-content-secondary">
+                  {loadedDb.count.toLocaleString()}{' '}
+                  {t('onboarding.items_loaded', { defaultValue: 'cost items loaded successfully' })}
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       <p className="mt-4 text-xs text-content-tertiary text-center max-w-md">
         {t('onboarding.cost_db_hint', {
