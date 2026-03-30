@@ -203,6 +203,15 @@ export function TranslationManager() {
     );
   }, [allRows, query]);
 
+  // Pagination — render max 50 rows at a time for performance
+  const PAGE_SIZE = 50;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const visibleRows = useMemo(() => filteredRows.slice(0, visibleCount), [filteredRows, visibleCount]);
+  const hasMore = visibleCount < filteredRows.length;
+
+  // Reset visible count when query changes
+  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [query]);
+
   // ── Handlers ──
 
   const handleSave = useCallback(
@@ -405,7 +414,7 @@ export function TranslationManager() {
                 {t('settings.tm_no_results', { defaultValue: 'No keys match your search.' })}
               </div>
             ) : (
-              filteredRows.map((row) => (
+              visibleRows.map((row) => (
                 <div
                   key={row.key}
                   className={`grid grid-cols-[2fr_2fr_2fr_auto] gap-0 border-b border-border-light last:border-b-0 hover:bg-surface-secondary/50 transition-colors ${
@@ -499,16 +508,24 @@ export function TranslationManager() {
           </div>
         </div>
 
-        {/* Footer count */}
-        {query.trim() && (
-          <p className="mt-2 text-xs text-content-tertiary">
-            {t('settings.tm_showing', {
-              defaultValue: 'Showing {{count}} of {{total}} keys',
-              count: filteredRows.length,
-              total: totalKeys,
-            })}
-          </p>
+        {/* Show more button */}
+        {hasMore && (
+          <button
+            onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+            className="mt-2 w-full rounded-lg border border-border-light py-2 text-xs font-medium text-oe-blue hover:bg-oe-blue-subtle transition-colors"
+          >
+            {t('settings.tm_show_more', { defaultValue: 'Show more ({{remaining}} remaining)', remaining: filteredRows.length - visibleCount })}
+          </button>
         )}
+
+        {/* Footer count */}
+        <p className="mt-2 text-xs text-content-tertiary">
+          {t('settings.tm_showing', {
+            defaultValue: 'Showing {{count}} of {{total}} keys',
+            count: visibleRows.length,
+            total: filteredRows.length,
+          })}
+        </p>
       </CardContent>
     </Card>
   );

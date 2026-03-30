@@ -940,6 +940,8 @@ const fallbackResources = {
       'marketplace.vector_index': 'Vector Index',
       'marketplace.vector_index_hint': 'Import the cost database first, then generate vectors.',
       'modules.title': 'Modules',
+      'modules.cat_regional': 'Regional Standards',
+      'modules.cat_regional_desc': 'Country-specific BOQ import/export formats and classification standards',
       'nav.5d_cost_model': '5D Cost Model',
       'nav.assemblies': 'Assemblies',
       'nav.boq': 'Bill of Quantities',
