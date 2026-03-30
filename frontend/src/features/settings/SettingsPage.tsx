@@ -758,8 +758,27 @@ export function SettingsPage() {
         <TranslationManager />
       </div>
 
+      {/* Setup Wizard */}
+      <Card className="animate-card-in" style={{ animationDelay: '400ms' }}>
+        <CardHeader
+          title={t('settings.setup_wizard_title', { defaultValue: 'Setup Wizard' })}
+          subtitle={t('settings.setup_wizard_subtitle', { defaultValue: 'Re-run the initial setup to change language, install databases, catalogs, or demo projects' })}
+        />
+        <CardContent>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              try { localStorage.removeItem('oe_onboarding_completed'); } catch {}
+              window.location.href = '/onboarding';
+            }}
+          >
+            {t('settings.restart_onboarding', { defaultValue: 'Open Setup Wizard' })}
+          </Button>
+        </CardContent>
+      </Card>
+
       {/* Danger zone */}
-      <Card className="animate-card-in border-semantic-error/20" style={{ animationDelay: '400ms' }}>
+      <Card className="animate-card-in border-semantic-error/20" style={{ animationDelay: '450ms' }}>
         <CardHeader title={t('settings.account_title', { defaultValue: 'Account' })} subtitle={t('settings.account_subtitle', { defaultValue: 'Sign out or manage your account' })} />
         <CardContent>
           <Button
