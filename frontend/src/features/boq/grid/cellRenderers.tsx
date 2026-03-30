@@ -10,6 +10,7 @@ import {
   X,
   BookmarkPlus,
   MoreHorizontal,
+  Boxes,
 } from 'lucide-react';
 import { RESOURCE_TYPE_BADGE, fmtWithCurrency } from '../boqHelpers';
 import { countComments } from '../CommentDrawer';
@@ -148,6 +149,7 @@ export interface ResourceGridContext {
   onUpdateResource: (positionId: string, resourceIndex: number, field: string, value: number) => void;
   onSaveResourceToCatalog: (positionId: string, resourceIndex: number) => void;
   onOpenCostDbForPosition: (positionId: string) => void;
+  onOpenCatalogForPosition: (positionId: string) => void;
   currencySymbol: string;
   currencyCode: string;
   locale: string;
@@ -454,6 +456,17 @@ export function ResourceFullWidthRenderer(params: ICellRendererParams) {
         >
           <Plus size={10} />
           {ctx.t('boq.add_from_database', { defaultValue: 'From Database' })}
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            ctx.onOpenCatalogForPosition?.(data._parentPositionId);
+          }}
+          className="flex items-center gap-1.5 h-5 px-2 rounded text-[10px] font-medium
+                     text-content-tertiary hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/20 transition-all"
+        >
+          <Boxes size={10} />
+          {ctx.t('boq.add_from_catalog_short', { defaultValue: 'From Catalog' })}
         </button>
         <div className="flex-1" />
         {typeof data._positionResourceTotal === 'number' && data._positionResourceTotal > 0 && (

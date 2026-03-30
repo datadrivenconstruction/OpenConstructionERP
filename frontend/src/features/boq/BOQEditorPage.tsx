@@ -76,6 +76,7 @@ import { ExcelPasteModal, type PastedRow } from './ExcelPasteModal';
 import { QualityScoreRing, TipsPanel, QuickAddFAB, EmptyBOQOnboarding, ExportWarningDialog } from './BOQSummaryPanel';
 import { ActivityPanel } from './ActivityPanel';
 import { CostDatabaseSearchModal, AssemblyPickerModal } from './BOQModals';
+import { CatalogPickerModal, type CatalogResource } from './CatalogPickerModal';
 
 /* ── Re-exports for tests ────────────────────────────────────────────── */
 
@@ -352,6 +353,10 @@ export function BOQEditorPage() {
   const [isExcelPasteImporting, setIsExcelPasteImporting] = useState(false);
   /** When set, the cost DB modal adds a resource to this position instead of creating a new position. */
   const [costDbForPositionId, setCostDbForPositionId] = useState<string | null>(null);
+
+  /** Catalog picker modal state. */
+  const [catalogPickerOpen, setCatalogPickerOpen] = useState(false);
+  const [catalogForPositionId, setCatalogForPositionId] = useState<string | null>(null);
 
   // Listen for "From Database" button clicks from child SectionBlock components
   useEffect(() => {
@@ -1277,6 +1282,60 @@ export function BOQEditorPage() {
     [costDbForPositionId, boq?.positions, updateMutation, addToast, t],
   );
 
+  /** Open catalog picker modal in "add resource to position" mode. */
+  const handleOpenCatalogForPosition = useCallback(
+    (positionId: string) => {
+      setCatalogForPositionId(positionId);
+      setCatalogPickerOpen(true);
+    },
+    [],
+  );
+
+  /** When a catalog resource is selected, add it as a resource to the target position. */
+  const handleCatalogSelect = useCallback(
+    (catalogRes: CatalogResource) => {
+      if (!catalogForPositionId || !boq) return;
+      const pos = boq.positions.find((p) => p.id === catalogForPositionId);
+      if (!pos) return;
+
+      const newResource = {
+        name: catalogRes.name,
+        code: catalogRes.resource_code,
+        type: catalogRes.resource_type,
+        unit: catalogRes.unit,
+        quantity: 1,
+        unit_rate: catalogRes.base_price || 0,
+        total: catalogRes.base_price || 0,
+      };
+
+      const existing = [...((pos.metadata?.resources ?? []) as Array<Record<string, unknown>>)];
+      existing.push(newResource);
+
+      // Recalculate unit_rate from all resources
+      let newRate = 0;
+      for (const r of existing) {
+        newRate += ((r.quantity as number) ?? 0) * ((r.unit_rate as number) ?? 0);
+      }
+      newRate = Math.round(newRate * 100) / 100;
+
+      updateMutation.mutate({
+        id: catalogForPositionId,
+        data: {
+          unit_rate: newRate,
+          metadata: { ...pos.metadata, resources: existing },
+        },
+      });
+
+      setCatalogPickerOpen(false);
+      setCatalogForPositionId(null);
+      addToast({
+        type: 'success',
+        title: t('boq.resource_added_from_catalog', { defaultValue: 'Resource added from catalog' }),
+      });
+    },
+    [catalogForPositionId, boq, updateMutation, addToast, t],
+  );
+
   /** Add a manual resource (not from database) to a position. */
   const handleAddManualResource = useCallback(
     (positionId: string, resource: { name: string; type: string; unit: string; quantity: number; unit_rate: number }) => {
@@ -2019,6 +2078,7 @@ export function BOQEditorPage() {
           onUpdateResource={handleUpdateResource}
           onSaveResourceToCatalog={handleSaveResourceToCatalog}
           onOpenCostDbForPosition={handleOpenCostDbForPosition}
+          onOpenCatalogForPosition={handleOpenCatalogForPosition}
           onAddManualResource={handleAddManualResource}
           onDuplicatePosition={handleDuplicatePosition}
           onSuggestRate={handleSuggestRate}
@@ -2180,6 +2240,16 @@ export function BOQEditorPage() {
           }}
         />
       )}
+
+      {/* ── Catalog Picker Modal ─────────────────────────────────────── */}
+      <CatalogPickerModal
+        open={catalogPickerOpen}
+        onClose={() => {
+          setCatalogPickerOpen(false);
+          setCatalogForPositionId(null);
+        }}
+        onSelect={handleCatalogSelect}
+      />
 
       {/* ── Quick Add FAB ─────────────────────────────────────────────── */}
       <QuickAddFAB

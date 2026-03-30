@@ -38,6 +38,7 @@ import {
   AlertTriangle,
   Tag,
   Layers,
+  Boxes,
 } from 'lucide-react';
 
 import {
@@ -219,6 +220,7 @@ export interface BOQGridProps {
   onUpdateResource?: (positionId: string, resourceIndex: number, field: string, value: number) => void;
   onSaveResourceToCatalog?: (positionId: string, resourceIndex: number) => void;
   onOpenCostDbForPosition?: (positionId: string) => void;
+  onOpenCatalogForPosition?: (positionId: string) => void;
   onAddManualResource?: (positionId: string, resource: ManualResource) => void;
   onDuplicatePosition?: (positionId: string) => void;
   /* AI features */
@@ -263,6 +265,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   onUpdateResource,
   onSaveResourceToCatalog,
   onOpenCostDbForPosition,
+  onOpenCatalogForPosition,
   onAddManualResource,
   onDuplicatePosition,
   onSuggestRate,
@@ -369,6 +372,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       onUpdateResource: onUpdateResource ?? (() => {}),
       onSaveResourceToCatalog: onSaveResourceToCatalog ?? (() => {}),
       onOpenCostDbForPosition: onOpenCostDbForPosition ?? (() => {}),
+      onOpenCatalogForPosition: onOpenCatalogForPosition ?? (() => {}),
       onDeletePosition,
       onSaveToDatabase,
       onAddComment: onAddComment ?? (() => {}),
@@ -385,7 +389,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     }),
     [currencySymbol, currencyCode, locale, fmt, t, collapsedSections, onToggleSection, onAddPosition,
      expandedPositions, toggleResources, onRemoveResource, onUpdateResource,
-     onSaveResourceToCatalog, onOpenCostDbForPosition,
+     onSaveResourceToCatalog, onOpenCostDbForPosition, onOpenCatalogForPosition,
      onDeletePosition, onSaveToDatabase, onAddComment,
      onDuplicatePosition, showContextMenu, anomalyMap, onApplyAnomalySuggestion],
   );
@@ -1078,6 +1082,10 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                   label={t('boq.add_from_database', { defaultValue: 'Add from Database' })}
                   onClick={() => { onOpenCostDbForPosition?.(d.id as string); closeContextMenu(); }}
                 />
+                <CtxItem icon={<Boxes size={14}/>}
+                  label={t('boq.add_from_catalog', { defaultValue: 'Pick from Catalog' })}
+                  onClick={() => { onOpenCatalogForPosition?.(d.id as string); closeContextMenu(); }}
+                />
                 <CtxSeparator />
                 <CtxItem icon={<Copy size={14}/>}
                   label={t('boq.duplicate_position', { defaultValue: 'Duplicate Position' })}
@@ -1184,6 +1192,10 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                 <CtxItem icon={<Database size={14}/>}
                   label={t('boq.add_from_database', { defaultValue: 'Add from Database' })}
                   onClick={() => { onOpenCostDbForPosition?.(posId); closeContextMenu(); }}
+                />
+                <CtxItem icon={<Boxes size={14}/>}
+                  label={t('boq.add_from_catalog', { defaultValue: 'Pick from Catalog' })}
+                  onClick={() => { onOpenCatalogForPosition?.(posId); closeContextMenu(); }}
                 />
               </>;
             })()}
