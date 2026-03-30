@@ -657,6 +657,13 @@ tbody tr:nth-child(20) { animation-delay: 570ms; }
   }
 }
 
+/* ── Indeterminate progress bar ──────────────────────────────────── */
+
+@keyframes indeterminate {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+
 /* ── Subtle float for decorative elements ────────────────────────── */
 
 @keyframes floatGentle {
