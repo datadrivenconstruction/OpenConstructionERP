@@ -228,7 +228,7 @@ export function LoginPage() {
                 <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Open Source</span>
               </div>
               <p className="text-sm font-bold bg-gradient-to-r from-oe-blue via-violet-600 to-emerald-600 bg-clip-text text-transparent">
-                #1 {t('login.open_source_badge', { defaultValue: 'Open-Source Construction ERP' })}
+                {t('login.open_source_badge', { defaultValue: 'The #1 Open-Source Construction ERP' })}
               </p>
             </div>
           </div>
