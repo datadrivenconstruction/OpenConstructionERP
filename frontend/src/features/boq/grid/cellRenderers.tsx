@@ -422,52 +422,59 @@ function EditableResourceRow({ data, ctx }: { data: Record<string, unknown>; ctx
         <InlineTextInput value={data._resourceName as string} onCommit={handleNameChange} className="w-full text-[11px]" />
       </span>
 
-      {/* Unit */}
-      <span className="shrink-0 w-10 text-center text-content-tertiary">
-        {data._resourceUnit as string}
+      {/* Code (small, muted) */}
+      {typeof data._resourceCode === 'string' && data._resourceCode && (
+        <span className="shrink-0 text-[9px] font-mono text-content-quaternary truncate max-w-[60px]" title={data._resourceCode}>
+          {data._resourceCode}
+        </span>
+      )}
+
+      {/* Unit — editable, aligned to grid Unit column (80px) */}
+      <span className="shrink-0 text-center text-content-tertiary" style={{ width: '80px' }}>
+        <InlineTextInput value={data._resourceUnit as string} onCommit={(v: string) => ctx.onUpdateResource?.(posId, resIdx, 'unit', v)} className="w-full text-[11px] text-center" />
       </span>
 
-      {/* Quantity — editable */}
-      <span className="shrink-0 w-16 text-right tabular-nums text-content-secondary">
+      {/* Quantity — editable, aligned to grid Qty column (100px) */}
+      <span className="shrink-0 text-right tabular-nums text-content-secondary" style={{ width: '100px' }}>
         <InlineNumberInput value={qty} onCommit={handleQtyChange} fmt={ctx.fmt} className="w-full text-[11px]" />
       </span>
 
-      {/* Rate — editable */}
-      <span className="shrink-0 w-20 text-right tabular-nums text-content-secondary">
+      {/* Rate — editable, aligned to grid Unit Rate column (110px) */}
+      <span className="shrink-0 text-right tabular-nums text-content-secondary" style={{ width: '110px' }}>
         <InlineNumberInput value={rate} onCommit={handleRateChange} fmt={ctx.fmt} className="w-full text-[11px]" />
       </span>
 
-      {/* Total — auto-calculated */}
-      <span className="shrink-0 w-24 text-right tabular-nums font-medium text-content-primary">
+      {/* Total — auto-calculated, aligned to grid Total column (130px) */}
+      <span className="shrink-0 text-right tabular-nums font-medium text-content-primary" style={{ width: '130px' }}>
         {formattedTotal}
       </span>
 
-      {/* Save to catalog */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          ctx.onSaveResourceToCatalog?.(posId, resIdx);
-        }}
-        className="shrink-0 h-4 w-4 flex items-center justify-center rounded
-                   text-content-tertiary hover:text-oe-blue hover:bg-oe-blue-subtle
-                   opacity-0 group-hover/res:opacity-100 transition-all"
-        title={ctx.t('boq.save_to_catalog', { defaultValue: 'Save to My Catalog' })}
-      >
-        <BookmarkPlus size={10} />
-      </button>
-
-      {/* Delete button */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          ctx.onRemoveResource?.(posId, resIdx);
-        }}
-        className="shrink-0 h-4 w-4 flex items-center justify-center rounded
-                   text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg
-                   opacity-0 group-hover/res:opacity-100 transition-all"
-      >
-        <X size={10} />
-      </button>
+      {/* Actions — aligned to grid Actions column (44px) */}
+      <span className="shrink-0 flex items-center justify-center gap-0.5" style={{ width: '44px' }}>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            ctx.onSaveResourceToCatalog?.(posId, resIdx);
+          }}
+          className="shrink-0 h-4 w-4 flex items-center justify-center rounded
+                     text-content-tertiary hover:text-oe-blue hover:bg-oe-blue-subtle
+                     opacity-0 group-hover/res:opacity-100 transition-all"
+          title={ctx.t('boq.save_to_catalog', { defaultValue: 'Save to My Catalog' })}
+        >
+          <BookmarkPlus size={10} />
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            ctx.onRemoveResource?.(posId, resIdx);
+          }}
+          className="shrink-0 h-4 w-4 flex items-center justify-center rounded
+                     text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg
+                     opacity-0 group-hover/res:opacity-100 transition-all"
+        >
+          <X size={10} />
+        </button>
+      </span>
     </div>
   );
 }
