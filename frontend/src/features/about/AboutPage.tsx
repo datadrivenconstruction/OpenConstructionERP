@@ -80,6 +80,15 @@ export function AboutPage() {
                   <Code2 size={14} />
                   GitHub
                 </a>
+                <a
+                  href="https://datadrivenconstruction.io/free-tools/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3.5 py-2 text-sm font-medium text-content-primary hover:bg-surface-secondary transition-colors"
+                >
+                  <ExternalLink size={14} />
+                  Free Tools — cad2db
+                </a>
               </div>
             </div>
           </div>
@@ -152,7 +161,7 @@ export function AboutPage() {
           </div>
 
           <div className="mt-4 flex items-center gap-3">
-            <a href="https://OpenConstructionERP.com" target="_blank" rel="noopener noreferrer">
+            <a href="https://datadrivenconstruction.io/contact-support/" target="_blank" rel="noopener noreferrer">
               <Button variant="primary" size="sm" icon={<Mail size={14} />}>
                 {t('about.contact_us', { defaultValue: 'Contact Us' })}
               </Button>
