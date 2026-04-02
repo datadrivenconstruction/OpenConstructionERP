@@ -83,10 +83,17 @@ test-screenshots/
 
 # Dev screenshots & images
 *.png
+*.jpeg
+*.jpg
 !frontend/public/favicon.png
 !frontend/public/logo.png
 !frontend/public/og-image.png
-sidebar-logo.png
+!frontend/public/*.jpg
+!frontend/public/*.jpeg
+
+# QA test scripts (contain demo credentials)
+backend/qa_*.py
+backend/tmp_*.json
 
 # LanceDB local data
 lancedb_data/

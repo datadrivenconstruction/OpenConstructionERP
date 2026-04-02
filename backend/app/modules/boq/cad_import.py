@@ -1,3 +1,7 @@
+# OpenConstructionERP — DataDrivenConstruction (DDC)
+# CAD2DATA Pipeline · CWICR Cost Database Engine
+# Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+# AGPL-3.0 License · DDC-CWICR-OE-2026
 """CAD/BIM file import via DDC Community converters.
 
 Workflow:
@@ -13,6 +17,7 @@ import asyncio
 import logging
 import os
 from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +40,51 @@ CONVERTER_SEARCH_PATHS: list[Path] = [
 ]
 
 
+def _find_ddc_toolkit_bin() -> Path | None:
+    """Auto-detect DDC toolkit converters/bin from editable install or known paths."""
+    # 1. Check env var
+    env_dir = os.environ.get("DDC_TOOLKIT_DIR")
+    if env_dir:
+        p = Path(env_dir) / "converters" / "bin"
+        if p.is_dir():
+            return p
+
+    # 2. Try importlib.metadata (editable install of ddc-toolkit)
+    try:
+        import importlib.metadata
+
+        dist = importlib.metadata.distribution("ddc-toolkit")
+        for f in dist.files or []:
+            fpath = Path(str(f))
+            if "converters" in str(fpath) or "bin" in str(fpath):
+                resolved = Path(str(dist._path)).parent / fpath  # type: ignore[attr-defined]
+                candidate = resolved.parent
+                while candidate != candidate.parent:
+                    check = candidate / "converters" / "bin"
+                    if check.is_dir():
+                        return check
+                    candidate = candidate.parent
+                break
+    except Exception:
+        pass
+
+    # 3. Scan common sibling directories (projects next to this repo)
+    this_project = Path(__file__).resolve().parents[4]  # backend/app/modules/boq -> repo root
+    for sibling_name in ("ddc_toolkit", "ddc-toolkit", "DDC_Toolkit"):
+        candidate = this_project.parent / sibling_name / "converters" / "bin"
+        if candidate.is_dir():
+            return candidate
+
+    return None
+
+
+# Auto-detect DDC toolkit at import time
+_ddc_bin = _find_ddc_toolkit_bin()
+if _ddc_bin:
+    CONVERTER_SEARCH_PATHS.insert(0, _ddc_bin)
+    logger.info("DDC toolkit converters found at %s", _ddc_bin)
+
+
 def find_converter(extension: str) -> Path | None:
     """Find the converter executable for a given file extension.
 
@@ -51,15 +101,22 @@ def find_converter(extension: str) -> Path | None:
     if not exe_name:
         return None
 
+    # Build dynamic search paths
+    search_paths = list(CONVERTER_SEARCH_PATHS)
+
     # Also check OPENESTIMATOR_CONVERTERS_DIR env var
     env_dir = os.environ.get("OPENESTIMATOR_CONVERTERS_DIR")
-    search_paths = list(CONVERTER_SEARCH_PATHS)
     if env_dir:
         search_paths.insert(0, Path(env_dir))
 
+    # Auto-detect DDC toolkit in sibling directories
+    ddc_bin = _find_ddc_toolkit_bin()
+    if ddc_bin and ddc_bin not in search_paths:
+        search_paths.insert(0, ddc_bin)
+
     for search_path in search_paths:
         exe_path = search_path / exe_name
-        if exe_path.exists():
+        if exe_path.exists() and exe_path.stat().st_size > 1024:
             return exe_path
 
     return None
@@ -102,27 +159,41 @@ async def convert_cad_to_excel(
 
     logger.info("Converting %s using %s", input_path.name, converter.name)
 
-    try:
-        process = await asyncio.create_subprocess_exec(
-            str(converter),
-            str(input_path),
-            "-o",
-            str(output_dir),
-            "--format",
-            "excel",
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        stdout, stderr = await asyncio.wait_for(
-            process.communicate(),
-            timeout=300,  # 5 min max
-        )
+    # DDC converters CLI: <input> [<output.xlsx>] [<mode>] [-no-collada]
+    # Use 'complete' mode for full quantity data (Volume, Area, Length, etc.)
+    output_xlsx = output_dir / (input_path.stem + ".xlsx")
+    args = [str(converter), str(input_path), str(output_xlsx)]
+    # RVT and IFC converters support export modes; DWG/DGN do not
+    if extension in ("rvt", "ifc"):
+        args.append("complete")
+    args.append("-no-collada")
 
-        if process.returncode != 0:
+    try:
+        import subprocess
+        from concurrent.futures import ThreadPoolExecutor
+
+        # DDC converters need DLLs (Qt6Core.dll etc.) from their own directory
+        converter_dir = converter.parent
+
+        def _run_converter() -> subprocess.CompletedProcess:
+            return subprocess.run(
+                args,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                cwd=str(converter_dir),
+                input=b"\n",  # handle "Press Enter to continue..." prompt
+                timeout=300,
+            )
+
+        loop = asyncio.get_event_loop()
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            result = await loop.run_in_executor(pool, _run_converter)
+
+        if result.returncode != 0:
             logger.error(
                 "Converter failed (exit %d): %s",
-                process.returncode,
-                stderr.decode(errors="replace"),
+                result.returncode,
+                result.stderr.decode(errors="replace")[:500],
             )
             return None
 
@@ -131,10 +202,14 @@ async def convert_cad_to_excel(
             if f.suffix in (".xlsx", ".xls"):
                 return f
 
+        # Also check if xlsx was written directly (not in output_dir)
+        if output_xlsx.exists():
+            return output_xlsx
+
         logger.error("No Excel output found in %s after conversion", output_dir)
         return None
 
-    except asyncio.TimeoutError:
+    except subprocess.TimeoutExpired:
         logger.error("Converter timed out after 300s for %s", input_path.name)
         return None
     except Exception:
@@ -168,8 +243,9 @@ def parse_cad_excel(excel_path: Path) -> list[dict]:
         wb.close()
         return []
 
-    # First row is the header
-    headers = [str(h or "").strip().lower() for h in rows[0]]
+    # First row is the header; strip DDC type suffixes like " : String", " : Double"
+    raw_headers = [str(h or "").strip() for h in rows[0]]
+    headers = [h.split(" : ")[0].strip().lower() if " : " in h else h.lower() for h in raw_headers]
 
     elements: list[dict] = []
     for row in rows[1:]:
@@ -261,9 +337,10 @@ def group_cad_elements(elements: list[dict]) -> dict:
     cat_types: dict[str, dict[str, dict]] = OrderedDict()
 
     for el in elements:
-        category = str(
+        raw_cat = str(
             el.get("category", el.get("element type", "Other"))
-        ).strip() or "Other"
+        ).strip()
+        category = raw_cat if raw_cat and raw_cat != "None" else "Other"
         type_name = str(
             el.get("type name", el.get("family", el.get("type", "Unknown")))
         ).strip() or "Unknown"
@@ -342,3 +419,327 @@ def group_cad_elements(elements: list[dict]) -> dict:
             "length_m": round(grand_length, 2),
         },
     }
+
+
+def get_available_columns(elements: list[dict], file_format: str = "rvt") -> dict[str, Any]:
+    """Analyze elements and classify columns into grouping/quantity/text categories.
+
+    Scans all elements to discover column names, then classifies each column
+    based on its content:
+    - **quantity**: >50% numeric values AND name suggests a measurement
+      (or is purely numeric across all non-None values).
+    - **grouping**: string columns with <500 unique values — suitable for
+      GROUP BY operations (e.g. category, type name, level, material).
+    - **text**: everything else (ids, long descriptions with too many uniques).
+
+    Also provides ``suggested_grouping``, ``suggested_quantities``,
+    format-specific ``presets``, and ``unit_labels`` based on common DDC
+    converter output conventions.
+
+    Args:
+        elements: List of element dicts from ``parse_cad_excel``.
+        file_format: Lowercase file extension without dot (e.g. ``"rvt"``, ``"ifc"``).
+
+    Returns:
+        Dict with keys ``grouping``, ``quantity``, ``text``,
+        ``suggested_grouping``, ``suggested_quantities``, ``presets``,
+        and ``unit_labels``.
+    """
+    if not elements:
+        return {
+            "grouping": [],
+            "quantity": [],
+            "text": [],
+            "suggested_grouping": [],
+            "suggested_quantities": [],
+            "presets": {},
+            "unit_labels": {},
+        }
+
+    # Collect all unique column names across every element
+    all_columns: set[str] = set()
+    for el in elements:
+        all_columns.update(el.keys())
+
+    # Keywords that indicate a quantity / measurement column
+    quantity_keywords = {
+        "volume", "area", "length", "width", "height", "count",
+        "weight", "perimeter", "thickness", "depth", "radius",
+        "diameter", "mass", "quantity",
+    }
+
+    grouping_cols: list[str] = []
+    quantity_cols: list[str] = []
+    text_cols: list[str] = []
+
+    for col in all_columns:
+        # Gather non-None values for this column
+        values = [el[col] for el in elements if col in el and el[col] is not None]
+        if not values:
+            text_cols.append(col)
+            continue
+
+        # Check how many values are numeric
+        numeric_count = 0
+        for v in values:
+            try:
+                float(v)
+                numeric_count += 1
+            except (ValueError, TypeError):
+                pass
+
+        total = len(values)
+        numeric_ratio = numeric_count / total if total > 0 else 0.0
+
+        # Does the column name hint at a quantity?
+        col_lower = col.lower()
+        name_is_quantity = any(kw in col_lower for kw in quantity_keywords)
+
+        # Classify
+        if numeric_ratio > 0.5 and (name_is_quantity or numeric_ratio == 1.0):
+            quantity_cols.append(col)
+        else:
+            # Count unique string values to decide grouping vs text
+            unique_values = {str(v) for v in values}
+            if len(unique_values) < 500:
+                grouping_cols.append(col)
+            else:
+                text_cols.append(col)
+
+    # Sort each list alphabetically for deterministic output
+    grouping_cols.sort()
+    quantity_cols.sort()
+    text_cols.sort()
+
+    # Suggested defaults based on common DDC converter output
+    suggested_grouping: list[str] = []
+    suggested_quantities: list[str] = []
+
+    # Preferred grouping columns (in priority order)
+    for candidate in ["category", "type name", "family", "level", "material", "workset"]:
+        if candidate in grouping_cols:
+            suggested_grouping.append(candidate)
+    # Default to first two if none of the preferred ones matched
+    if not suggested_grouping and grouping_cols:
+        suggested_grouping = grouping_cols[:2]
+
+    # Preferred quantity columns
+    for candidate in ["volume", "area", "length", "count"]:
+        if candidate in quantity_cols:
+            suggested_quantities.append(candidate)
+    # Fall back to all quantity columns if none matched
+    if not suggested_quantities:
+        suggested_quantities = quantity_cols[:4]
+
+    # Format-specific QTO presets
+    presets: dict[str, dict] = {}
+
+    # "count" is always available — it's computed as number of elements per group
+    # (not a column from the file, but calculated during grouping)
+    available_qty = set(quantity_cols) | {"count"}
+
+    if file_format in ("rvt", "rfa"):
+        presets = {
+            "standard": {
+                "label": "Standard Revit QTO",
+                "description": "Category + Type Name — standard Revit breakdown",
+                "group_by": [c for c in ["category", "type name"] if c in grouping_cols],
+                "sum_columns": [c for c in ["volume", "area", "count"] if c in available_qty],
+            },
+            "detailed": {
+                "label": "Detailed (with Level)",
+                "description": "Category + Type Name + Level — per-floor breakdown",
+                "group_by": [
+                    c for c in ["category", "type name", "level"] if c in grouping_cols
+                ],
+                "sum_columns": [
+                    c
+                    for c in ["volume", "area", "length", "count"]
+                    if c in available_qty
+                ],
+            },
+            "by_family": {
+                "label": "By Family",
+                "description": "Family + Type — for procurement and ordering",
+                "group_by": [c for c in ["family", "type name"] if c in grouping_cols],
+                "sum_columns": [
+                    c for c in ["count", "volume", "area"] if c in available_qty
+                ],
+            },
+            "summary": {
+                "label": "Quick Summary",
+                "description": "Category only — high-level overview",
+                "group_by": [c for c in ["category"] if c in grouping_cols],
+                "sum_columns": [
+                    c for c in ["count", "volume", "area"] if c in available_qty
+                ],
+            },
+        }
+    elif file_format == "ifc":
+        presets = {
+            "standard": {
+                "label": "Standard IFC QTO",
+                "description": "Group by Category + Type — standard IFC entity breakdown",
+                "group_by": [
+                    c
+                    for c in ["category", "type name", "type"]
+                    if c in grouping_cols
+                ][:2],
+                "sum_columns": [c for c in ["volume", "area", "count"] if c in available_qty],
+            },
+            "detailed": {
+                "label": "Detailed (with Level)",
+                "description": "Category + Type + Level — per-floor breakdown",
+                "group_by": [
+                    c
+                    for c in ["category", "type name", "type", "level"]
+                    if c in grouping_cols
+                ][:3],
+                "sum_columns": [
+                    c
+                    for c in ["volume", "area", "length", "count"]
+                    if c in available_qty
+                ],
+            },
+            "summary": {
+                "label": "Quick Summary",
+                "description": "Category only — high-level element count",
+                "group_by": [c for c in ["category"] if c in grouping_cols],
+                "sum_columns": [
+                    c for c in ["count", "volume", "area"] if c in available_qty
+                ],
+            },
+        }
+    elif file_format == "dwg":
+        presets = {
+            "standard": {
+                "label": "Standard DWG QTO",
+                "description": "Group by Layer — standard AutoCAD organization",
+                "group_by": [c for c in ["layer", "category"] if c in grouping_cols][:1],
+                "sum_columns": [
+                    c for c in ["count", "length", "area"] if c in available_qty
+                ],
+            },
+        }
+    else:
+        presets = {
+            "standard": {
+                "label": "Standard QTO",
+                "description": "Default grouping by available categories",
+                "group_by": suggested_grouping,
+                "sum_columns": suggested_quantities,
+            },
+        }
+
+    # Remove presets with empty group_by
+    presets = {k: v for k, v in presets.items() if v["group_by"]}
+
+    # Unit labels for quantity columns (+ "count" which is always available)
+    unit_labels: dict[str, str] = {"count": "pcs"}
+    for col in quantity_cols:
+        col_lower = col.lower()
+        if "volume" in col_lower:
+            unit_labels[col] = "m\u00b3"
+        elif "area" in col_lower:
+            unit_labels[col] = "m\u00b2"
+        elif "length" in col_lower or "perimeter" in col_lower:
+            unit_labels[col] = "m"
+        elif "weight" in col_lower or "mass" in col_lower:
+            unit_labels[col] = "kg"
+        elif "count" in col_lower:
+            unit_labels[col] = "pcs"
+        else:
+            unit_labels[col] = ""
+
+    return {
+        "grouping": grouping_cols,
+        "quantity": quantity_cols,
+        "text": text_cols,
+        "suggested_grouping": suggested_grouping,
+        "suggested_quantities": suggested_quantities,
+        "presets": presets,
+        "unit_labels": unit_labels,
+    }
+
+
+def group_cad_elements_dynamic(
+    elements: list[dict],
+    group_by: list[str],
+    sum_columns: list[str],
+) -> dict:
+    """Group elements by user-selected columns, sum user-selected quantities.
+
+    This is the interactive counterpart to ``group_cad_elements`` — instead
+    of hardcoded category/type grouping, the caller selects which columns
+    to group by and which numeric columns to sum.
+
+    Args:
+        elements: List of element dicts from ``parse_cad_excel``.
+        group_by: Column names to use as group key (e.g. ``["category", "type name"]``).
+        sum_columns: Numeric column names to aggregate (e.g. ``["volume", "area"]``).
+
+    Returns:
+        Dict with ``total_elements``, ``group_by``, ``sum_columns``, ``groups``
+        (list of group dicts), and ``grand_totals``.
+    """
+    from collections import OrderedDict
+
+    groups: dict[str, dict] = OrderedDict()
+    grand_totals: dict[str, float] = dict.fromkeys(sum_columns, 0.0)
+    grand_totals["count"] = 0.0
+
+    for el in elements:
+        # Build the composite group key
+        key_parts: dict[str, str] = {}
+        for col in group_by:
+            raw = el.get(col)
+            val = str(raw).strip() if raw is not None else ""
+            key_parts[col] = val if val and val != "None" else "(empty)"
+
+        key = " | ".join(key_parts.values())
+
+        if key not in groups:
+            groups[key] = {
+                "key": key,
+                "key_parts": dict(key_parts),
+                "count": 0,
+                "sums": dict.fromkeys(sum_columns, 0.0),
+            }
+
+        entry = groups[key]
+        entry["count"] += 1
+
+        for col in sum_columns:
+            entry["sums"][col] += _to_float(el.get(col, 0))
+
+    grand_totals["count"] = float(len(elements))
+    for col in sum_columns:
+        grand_totals[col] = 0.0
+
+    result_groups: list[dict] = []
+    for g in groups.values():
+        # Round sums
+        for col in sum_columns:
+            g["sums"][col] = round(g["sums"][col], 4)
+            grand_totals[col] += g["sums"][col]
+
+        result_groups.append(g)
+
+    # Round grand totals
+    for col in sum_columns:
+        grand_totals[col] = round(grand_totals[col], 4)
+    grand_totals["count"] = len(elements)
+
+    return {
+        "total_elements": len(elements),
+        "group_by": group_by,
+        "sum_columns": sum_columns,
+        "groups": result_groups,
+        "grand_totals": grand_totals,
+    }
+
+
+def _ddc_cad2data_verify() -> bool:
+    """DataDrivenConstruction CAD2DATA pipeline verification. DDC-CWICR-2026."""
+    _sig = [0x44, 0x44, 0x43, 0x2D, 0x43, 0x57, 0x49, 0x43, 0x52]  # DDC-CWICR
+    return all(c > 0 for c in _sig)

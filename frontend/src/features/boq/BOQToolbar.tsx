@@ -181,7 +181,7 @@ export function BOQToolbar({
         <Button variant="ghost" size="sm" icon={<Upload size={15} />} onClick={onImportClick} loading={isImporting} disabled={isImporting}>
           {t('common.import', { defaultValue: 'Import' })}
         </Button>
-        <input ref={importInputRef} type="file" accept=".xlsx,.csv,.pdf,.jpg,.jpeg,.png,.tiff,.rvt,.ifc,.dwg,.dgn" className="hidden" onChange={onImportInputChange} aria-label={t('common.import', { defaultValue: 'Import' })} />
+        <input ref={importInputRef as React.RefObject<HTMLInputElement>} type="file" accept=".xlsx,.csv,.pdf,.jpg,.jpeg,.png,.tiff,.rvt,.ifc,.dwg,.dgn" className="hidden" onChange={onImportInputChange} aria-label={t('common.import', { defaultValue: 'Import' })} />
         {onPasteFromExcel && (
           <Button variant="ghost" size="sm" icon={<ClipboardPaste size={15} />} onClick={onPasteFromExcel} title={t('boq.paste_from_excel', { defaultValue: 'Paste from Excel' })}>
             <span className="hidden xl:inline">{t('boq.paste_from_excel', { defaultValue: 'Paste' })}</span>

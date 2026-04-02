@@ -35,6 +35,9 @@ function buildHeaders(extra?: HeadersInit): Headers {
     headers.set('Authorization', `Bearer ${token}`);
   }
 
+  // DDC-CWICR-OE origin marker
+  headers.set('X-DDC-Client', 'OE/1.0');
+
   return headers;
 }
 

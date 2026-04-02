@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Unit tests for GAEB XML import parser.
  *

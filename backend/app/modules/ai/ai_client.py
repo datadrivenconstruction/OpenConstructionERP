@@ -1,3 +1,7 @@
+# OpenConstructionERP — DataDrivenConstruction (DDC)
+# CWICR AI Estimation Engine
+# Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+# AGPL-3.0 License · DDC-CWICR-OE-2026
 """AI API client — async calls to Anthropic, OpenAI, and Google Gemini.
 
 All calls use httpx for async HTTP. No SDK dependencies required.

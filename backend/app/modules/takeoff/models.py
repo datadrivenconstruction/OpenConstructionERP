@@ -36,6 +36,8 @@ class TakeoffDocument(Base):
         nullable=False,
         index=True,
     )
+    # Path to the stored PDF file on disk (for viewing/download)
+    file_path: Mapped[str | None] = mapped_column(String(1000), nullable=True, default=None)
     # Extracted text content from PDF (plain text for AI analysis)
     extracted_text: Mapped[str] = mapped_column(Text, nullable=False, default="")
     # Per-page data: [{ page: 1, text: "...", tables: [...] }, ...]

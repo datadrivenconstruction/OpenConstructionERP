@@ -922,7 +922,7 @@ export function ChangeOrdersPage() {
   // Detail view
   if (selectedOrderId) {
     return (
-      <div className="mx-auto max-w-5xl px-6 py-6">
+      <div className="mx-auto max-w-content">
         <DetailView orderId={selectedOrderId} onBack={() => setSelectedOrderId(null)} />
       </div>
     );
@@ -931,7 +931,7 @@ export function ChangeOrdersPage() {
   const currency = project?.currency || summary?.currency || 'EUR';
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-6">
+    <div className="mx-auto max-w-content">
       <Breadcrumb items={[
         { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
         { label: t('nav.change_orders', { defaultValue: 'Change Orders' }) },

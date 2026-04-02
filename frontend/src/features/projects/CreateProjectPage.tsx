@@ -2,7 +2,6 @@ import { useState, type FormEvent, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
 import { Button, Input, Card, InfoHint, Breadcrumb } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { projectsApi, type CreateProjectData } from './api';

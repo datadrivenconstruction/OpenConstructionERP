@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2, Send, X, Database, Search, Loader2, Check } from 'lucide-react';
+import { useParams } from 'react-router-dom';
+import { Plus, Trash2, Send, X, Database, Search, Loader2, Check } from 'lucide-react';
 import { Button, Badge, Card, Input, Breadcrumb } from '@/shared/ui';
 import { apiGet } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
@@ -22,7 +22,6 @@ const UNITS = ['m', 'm2', 'm3', 'kg', 't', 'pcs', 'lsum', 'h', 'set', 'lm'];
 export function AssemblyEditorPage() {
   const { t } = useTranslation();
   const { assemblyId } = useParams<{ assemblyId: string }>();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const [applyModalOpen, setApplyModalOpen] = useState(false);

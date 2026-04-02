@@ -82,6 +82,31 @@ export interface CreateBOQFromEstimate {
   boq_name: string;
 }
 
+export interface CostMatch {
+  code: string;
+  description: string;
+  unit: string;
+  rate: number;
+  region: string;
+  score: number;
+}
+
+export interface EnrichedItem {
+  index: number;
+  description: string;
+  unit: string;
+  ai_rate: number;
+  matches: CostMatch[];
+  best_match: CostMatch | null;
+}
+
+export interface EnrichResult {
+  items: EnrichedItem[];
+  region: string;
+  total_matched: number;
+  total_items: number;
+}
+
 // ── API functions ────────────────────────────────────────────────────────────
 
 function getAuthHeaders(): Record<string, string> {
@@ -157,6 +182,9 @@ export const aiApi = {
       data,
     ),
 
+  enrichEstimate: (jobId: string, region: string, currency: string) =>
+    apiPost<EnrichResult>(`/v1/ai/estimate/${jobId}/enrich`, { region, currency }),
+
   /** Extract grouped quantity tables from a CAD/BIM file (no AI needed). */
   cadExtract: async (file: File): Promise<CadExtractResponse> => {
     const form = new FormData();
@@ -173,6 +201,27 @@ export const aiApi = {
     }
     return res.json();
   },
+
+  /** Upload a CAD file and get available columns for interactive grouping. */
+  cadColumns: async (file: File): Promise<CadColumnsResponse> => {
+    const form = new FormData();
+    form.append('file', file);
+
+    const res = await fetch('/api/v1/takeoff/cad-columns', {
+      method: 'POST',
+      headers: { ...getAuthHeaders(), Accept: 'application/json' },
+      body: form,
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(body.detail || 'CAD column extraction failed');
+    }
+    return res.json();
+  },
+
+  /** Group CAD elements by selected columns and sum quantities. */
+  cadGroup: (data: CadGroupRequest) =>
+    apiPost<CadGroupResponse, CadGroupRequest>('/v1/takeoff/cad-group', data),
 };
 
 // ── CAD quantity extraction types ───────────────────────────────────────────
@@ -206,6 +255,52 @@ export interface CadExtractResponse {
   duration_ms: number;
   groups: CadQuantityGroup[];
   grand_totals: QuantityTotals;
+}
+
+// ── CAD interactive grouping types ──────────────────────────────────────────
+
+export interface CadColumnsResponse {
+  filename: string;
+  format: string;
+  total_elements: number;
+  columns: {
+    grouping: string[];
+    quantity: string[];
+    text: string[];
+  };
+  suggested_grouping: string[];
+  suggested_quantities: string[];
+  preview: Record<string, any>[];
+  session_id: string;
+  duration_ms: number;
+  presets: Record<string, {
+    label: string;
+    description: string;
+    group_by: string[];
+    sum_columns: string[];
+  }>;
+  unit_labels: Record<string, string>;
+}
+
+export interface CadGroupRequest {
+  session_id: string;
+  group_by: string[];
+  sum_columns: string[];
+}
+
+export interface CadDynamicGroup {
+  key: string;
+  key_parts: Record<string, string>;
+  count: number;
+  sums: Record<string, number>;
+}
+
+export interface CadGroupResponse {
+  total_elements: number;
+  group_by: string[];
+  sum_columns: string[];
+  groups: CadDynamicGroup[];
+  grand_totals: Record<string, number>;
 }
 
 /** Result returned by the BOQ smart import endpoint. */

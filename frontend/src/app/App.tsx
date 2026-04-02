@@ -18,6 +18,7 @@ import { QuickEstimatePage } from '@/features/ai';
 import { Logo, ShortcutsDialog, CommandPalette, ToastContainer, ErrorBoundary, NotFoundPage } from '@/shared/ui';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useThemeStore } from '@/stores/useThemeStore';
+import { ddcVerifyIntegrity } from '@/shared/lib/ddc-integrity';
 import { useKeyboardShortcuts } from '@/shared/hooks/useKeyboardShortcuts';
 import { useTranslation } from 'react-i18next';
 import { getLanguageByCode } from './i18n';
@@ -190,6 +191,11 @@ export default function App() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   useDocumentDirection();
 
+  // DDC-CWICR-OE integrity verification
+  if (typeof window !== 'undefined') {
+    (window as any).__ddc_oe = ddcVerifyIntegrity();
+  }
+
   // Dynamic routes from the module registry (lazy-loaded)
   const moduleRoutes = useModuleRouteElements({ Wrapper: P });
 
@@ -264,6 +270,11 @@ export default function App() {
         <Route path="*" element={isAuthenticated ? <P title="Not Found"><NotFoundPage /></P> : <Navigate to="/login" replace />} />
       </Routes>
       <ToastContainer />
+      {/* DDC-CWICR-OE */}
+      <span aria-hidden="true" style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
+        {'\u200B\u200C\u200D\u200B\u200C\u200D\u200B'}
+        DataDrivenConstruction·CWICR·OpenConstructionERP·2026
+      </span>
     </Suspense>
   );
 }

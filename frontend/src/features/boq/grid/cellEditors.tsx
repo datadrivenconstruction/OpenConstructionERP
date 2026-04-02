@@ -39,14 +39,17 @@ function tokenize(expr: string): string[] {
   const tokens: string[] = [];
   let i = 0;
   while (i < expr.length) {
-    if (expr[i] === ' ') { i++; continue; }
-    if ('+-*/()'.includes(expr[i])) {
-      tokens.push(expr[i]);
+    const ch = expr[i]!;
+    if (ch === ' ') { i++; continue; }
+    if ('+-*/()'.includes(ch)) {
+      tokens.push(ch);
       i++;
-    } else if (expr[i] >= '0' && expr[i] <= '9' || expr[i] === '.') {
+    } else if (ch >= '0' && ch <= '9' || ch === '.') {
       let num = '';
-      while (i < expr.length && (expr[i] >= '0' && expr[i] <= '9' || expr[i] === '.')) {
-        num += expr[i];
+      while (i < expr.length) {
+        const c = expr[i]!;
+        if (!(c >= '0' && c <= '9' || c === '.')) break;
+        num += c;
         i++;
       }
       tokens.push(num);
@@ -84,18 +87,19 @@ function parseMathExpr(input: string): number {
   }
 
   function parseFactor(): number {
+    const tok = tokens[pos] ?? '';
     // Unary minus
-    if (tokens[pos] === '-') {
+    if (tok === '-') {
       pos++;
       return -parseFactor();
     }
     // Unary plus
-    if (tokens[pos] === '+') {
+    if (tok === '+') {
       pos++;
       return parseFactor();
     }
     // Parenthesized expression
-    if (tokens[pos] === '(') {
+    if (tok === '(') {
       pos++; // skip '('
       const val = parseExpr();
       if (tokens[pos] !== ')') throw new Error('Missing )');
@@ -103,7 +107,7 @@ function parseMathExpr(input: string): number {
       return val;
     }
     // Number
-    const num = parseFloat(tokens[pos]);
+    const num = parseFloat(tok);
     if (isNaN(num)) throw new Error('Expected number');
     pos++;
     return num;

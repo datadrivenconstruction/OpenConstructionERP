@@ -8,16 +8,22 @@ Routes:
     GET    /documents/                          — list uploaded documents
     GET    /documents/{doc_id}                  — get single document
     POST   /documents/{doc_id}/extract-tables   — extract tables from document
+    POST   /documents/{doc_id}/analyze          — AI analysis of extracted text
+    GET    /documents/{doc_id}/download          — download the stored PDF file
     DELETE /documents/{doc_id}                  — delete a document
 """
 
 import logging
 import shutil
+import time as _time
+import uuid as _uuid
 import zipfile
 from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, status
+from fastapi.responses import FileResponse
+from pydantic import BaseModel, Field
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.takeoff.schemas import TakeoffDocumentResponse
@@ -246,19 +252,14 @@ async def install_converter(
             logger.warning("Failed to extract converter %s: %s", converter_id, exc)
 
     if exe_path is None:
-        # GitHub release not yet available — create a stub so the module
-        # appears installed locally. When the actual release is published,
-        # users can re-install to get the real binary.
-        _CONVERTER_INSTALL_DIR.mkdir(parents=True, exist_ok=True)
-        exe_path = _CONVERTER_INSTALL_DIR / exe_name
-        exe_path.write_text(
-            f"# DDC Community Converter stub — {meta['name']} v{meta['version']}\n"
-            f"# Replace with the real binary from {_GITHUB_CONVERTER_BASE_URL}\n"
-        )
-        logger.info(
-            "Created stub converter for %s at %s (GitHub release not available yet)",
-            converter_id,
-            exe_path,
+        raise HTTPException(
+            status_code=502,
+            detail=(
+                f"Failed to download {meta['name']}. "
+                f"The DDC Community Toolkit release is not yet available at "
+                f"{_GITHUB_CONVERTER_BASE_URL}. "
+                f"CAD/BIM converters are planned for a future release."
+            ),
         )
 
     size_bytes = exe_path.stat().st_size if exe_path.exists() else 0
@@ -425,6 +426,245 @@ async def cad_extract(
     }
 
 
+# ── CAD interactive grouping (two-step flow) ──────────────────────────────
+
+# In-memory cache for CAD extraction sessions (5 min TTL)
+_cad_sessions: dict[str, dict] = {}
+_CAD_SESSION_TTL = 300  # 5 minutes
+
+
+def _cleanup_sessions() -> None:
+    """Remove expired CAD extraction sessions from the in-memory cache."""
+    now = _time.time()
+    expired = [k for k, v in _cad_sessions.items() if now - v["created"] > _CAD_SESSION_TTL]
+    for k in expired:
+        del _cad_sessions[k]
+
+
+class CadGroupRequest(BaseModel):
+    """Request body for the ``POST /cad-group`` endpoint."""
+
+    session_id: str = Field(..., description="Session ID returned by /cad-columns")
+    group_by: list[str] = Field(..., min_length=1, description="Columns to group by")
+    sum_columns: list[str] = Field(default_factory=list, description="Numeric columns to sum")
+
+
+@router.post(
+    "/cad-columns",
+    dependencies=[Depends(RequirePermission("takeoff.read"))],
+)
+async def cad_columns(
+    file: UploadFile = File(..., description="CAD/BIM file (.rvt, .ifc, .dwg, .dgn)"),
+) -> dict[str, Any]:
+    """Upload a CAD file and analyze its columns for interactive grouping.
+
+    Step 1 of the two-step interactive QTO flow:
+    1. Upload file -> get available columns + session_id
+    2. POST /cad-group with session_id + chosen columns -> get grouped results
+
+    Returns column classification (grouping / quantity / text), suggested
+    defaults, a preview of the first 10 elements, and a ``session_id`` for
+    the follow-up grouping request.
+    """
+    import tempfile
+    import time
+
+    from app.modules.boq.cad_import import (
+        convert_cad_to_excel,
+        find_converter,
+        get_available_columns,
+        parse_cad_excel,
+    )
+
+    filename = file.filename or "file"
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+
+    if ext not in _SUPPORTED_CAD_EXTS:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Unsupported file type: .{ext}. "
+                f"Accepted: {', '.join(f'.{e}' for e in sorted(_SUPPORTED_CAD_EXTS))}"
+            ),
+        )
+
+    converter = find_converter(ext)
+    if not converter:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"DDC converter for .{ext} files is not installed. "
+                f"Install it from the Quantities page (/quantities) or download "
+                f"from https://github.com/datadrivenconstruction/ddc-community-toolkit/releases"
+            ),
+        )
+
+    content = await file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+    if len(content) > MAX_CAD_SIZE:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"File too large ({len(content) / 1024 / 1024:.1f} MB). "
+                f"Max: {MAX_CAD_SIZE // 1024 // 1024} MB."
+            ),
+        )
+
+    start_time = time.monotonic()
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        input_path = Path(tmpdir) / filename
+        input_path.write_bytes(content)
+
+        output_dir = Path(tmpdir) / "output"
+        output_dir.mkdir()
+
+        excel_path = await convert_cad_to_excel(input_path, output_dir, ext)
+        if not excel_path:
+            raise HTTPException(
+                status_code=502,
+                detail=(
+                    f"CAD conversion failed for .{ext} file. "
+                    "Ensure the converter is properly installed and the file is valid."
+                ),
+            )
+
+        elements = parse_cad_excel(excel_path)
+
+    if not elements:
+        raise HTTPException(
+            status_code=422,
+            detail="Converter produced no elements. The file may be empty or unsupported.",
+        )
+
+    # Filter out empty/system elements (Phases, Patterns, Views, etc.)
+    _SKIP_CATEGORIES = {
+        "none", "", "ost_phases", "ost_materials", "ost_viewports",
+        "ost_colorfilllegends", "ost_views", "ost_grids", "ost_levels",
+        "ost_sheets", "ost_titleblocks",
+    }
+    real_elements = [
+        el for el in elements
+        if str(el.get("category", "")).strip().lower() not in _SKIP_CATEGORIES
+    ]
+    # If filtering removed everything, keep originals
+    if not real_elements:
+        real_elements = elements
+
+    columns = get_available_columns(real_elements, file_format=ext)
+    duration_ms = int((time.monotonic() - start_time) * 1000)
+
+    # Cleanup expired sessions, then store new one
+    _cleanup_sessions()
+    session_id = str(_uuid.uuid4())
+    _cad_sessions[session_id] = {
+        "elements": real_elements,
+        "filename": filename,
+        "format": ext,
+        "created": _time.time(),
+    }
+
+    # Preview: pick elements that have actual quantity data (volume > 0 or area > 0)
+    def _has_quantity(el: dict) -> bool:
+        for key in ("volume", "area", "length", "gross volume", "gross area"):
+            val = el.get(key)
+            if val is not None:
+                try:
+                    if float(val) > 0:
+                        return True
+                except (ValueError, TypeError):
+                    pass
+        return False
+
+    preview_candidates = [el for el in real_elements if _has_quantity(el)][:10]
+    if not preview_candidates:
+        # Fallback: elements with type name
+        preview_candidates = [
+            el for el in real_elements if el.get("type name")
+        ][:10]
+    if not preview_candidates:
+        preview_candidates = real_elements[:10]
+
+    return {
+        "session_id": session_id,
+        "filename": filename,
+        "format": ext,
+        "total_elements": len(real_elements),
+        "duration_ms": duration_ms,
+        "columns": {
+            "grouping": columns.get("grouping", []),
+            "quantity": columns.get("quantity", []),
+            "text": columns.get("text", []),
+        },
+        "suggested_grouping": columns.get("suggested_grouping", []),
+        "suggested_quantities": columns.get("suggested_quantities", []),
+        "presets": columns.get("presets", {}),
+        "unit_labels": columns.get("unit_labels", {}),
+        "preview": preview_candidates,
+    }
+
+
+@router.post(
+    "/cad-group",
+    dependencies=[Depends(RequirePermission("takeoff.read"))],
+)
+async def cad_group(
+    body: CadGroupRequest,
+) -> dict[str, Any]:
+    """Group previously uploaded CAD elements by user-selected columns.
+
+    Step 2 of the two-step interactive QTO flow. Requires a valid
+    ``session_id`` from a prior ``POST /cad-columns`` call.
+
+    The session is kept alive in memory for 5 minutes. If it expires,
+    the user must re-upload the file.
+    """
+    from app.modules.boq.cad_import import group_cad_elements_dynamic
+
+    _cleanup_sessions()
+
+    session = _cad_sessions.get(body.session_id)
+    if not session:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                "Session not found or expired. "
+                "Please re-upload the CAD file via POST /cad-columns."
+            ),
+        )
+
+    elements: list[dict] = session["elements"]
+
+    # Validate that requested columns actually exist in the data
+    all_columns: set[str] = set()
+    for el in elements:
+        all_columns.update(el.keys())
+
+    missing_group = [c for c in body.group_by if c not in all_columns]
+    if missing_group:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown grouping column(s): {missing_group}. Available: {sorted(all_columns)}",
+        )
+
+    # "count" is a virtual column (computed as number of elements per group)
+    missing_sum = [c for c in body.sum_columns if c not in all_columns and c != "count"]
+    if missing_sum:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown sum column(s): {missing_sum}. Available: {sorted(all_columns)}",
+        )
+
+    grouped = group_cad_elements_dynamic(elements, body.group_by, body.sum_columns)
+
+    return {
+        "filename": session["filename"],
+        "format": session["format"],
+        **grouped,
+    }
+
+
 MAX_PDF_SIZE = 50 * 1024 * 1024  # 50 MB
 
 
@@ -553,6 +793,175 @@ async def extract_tables(
         raise HTTPException(status_code=404, detail="Document not found")
 
     return await service.extract_tables(doc_id)
+
+
+# ── Download stored PDF ─────────────────────────────────────────────────
+
+
+@router.get(
+    "/documents/{doc_id}/download",
+    dependencies=[Depends(RequirePermission("takeoff.read"))],
+)
+async def download_document(
+    doc_id: str,
+    service: TakeoffService = Depends(_get_service),
+) -> FileResponse:
+    """Download the stored PDF file for a takeoff document."""
+    doc = await service.get_document(doc_id)
+    if doc is None:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    if not doc.file_path:
+        raise HTTPException(status_code=404, detail="PDF file not available for this document")
+
+    file_path = Path(doc.file_path)
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="PDF file not found on disk")
+
+    return FileResponse(
+        path=str(file_path),
+        media_type="application/pdf",
+        filename=doc.filename,
+    )
+
+
+# ── AI Analysis ──────────────────────────────────────────────────────────
+
+
+@router.post(
+    "/documents/{doc_id}/analyze",
+    dependencies=[Depends(RequirePermission("takeoff.read"))],
+)
+async def analyze_document(
+    doc_id: str,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: TakeoffService = Depends(_get_service),
+) -> dict[str, Any]:
+    """Analyze a takeoff document's extracted text using AI.
+
+    Sends the document's previously extracted text to the configured AI provider
+    and returns structured BOQ items parsed from the AI response.
+    """
+    import time
+    import uuid as _uuid
+
+    from app.modules.ai.ai_client import call_ai, extract_json, resolve_provider_and_key
+    from app.modules.ai.prompts import SMART_IMPORT_PROMPT, SYSTEM_PROMPT
+    from app.modules.ai.repository import AISettingsRepository
+
+    # 1. Get the document
+    doc = await service.get_document(doc_id)
+    if doc is None:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    # 2. Check extracted text
+    extracted_text = doc.extracted_text or ""
+    if not extracted_text.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Document has no extracted text. Please re-upload the PDF.",
+        )
+
+    # 3. Get user AI settings and resolve provider
+    settings_repo = AISettingsRepository(session)
+    settings = await settings_repo.get_by_user_id(_uuid.UUID(user_id))
+
+    try:
+        provider, api_key = resolve_provider_and_key(settings)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        ) from exc
+
+    # 4. Build prompt
+    filename = doc.filename or "document.pdf"
+    # Limit text to prevent overly large prompts
+    text_for_prompt = extracted_text[:15000]
+    prompt = SMART_IMPORT_PROMPT.format(filename=filename, text=text_for_prompt)
+
+    # 5. Call AI
+    start_time = time.monotonic()
+    try:
+        raw_response, tokens = await call_ai(
+            provider=provider,
+            api_key=api_key,
+            system=SYSTEM_PROMPT,
+            prompt=prompt,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.exception("AI analysis failed for document %s: %s", doc_id, exc)
+        raise HTTPException(
+            status_code=502,
+            detail=f"AI analysis failed: {exc}",
+        ) from exc
+
+    duration_ms = int((time.monotonic() - start_time) * 1000)
+
+    # 6. Parse AI response
+    parsed = extract_json(raw_response)
+    if not isinstance(parsed, list):
+        parsed = []
+
+    # 7. Convert to the AnalysisResult format expected by frontend
+    elements: list[dict[str, Any]] = []
+    categories: dict[str, dict[str, Any]] = {}
+
+    for idx, item in enumerate(parsed):
+        if not isinstance(item, dict):
+            continue
+
+        description = str(item.get("description", "")).strip()
+        if len(description) < 3:
+            continue
+
+        try:
+            quantity = float(item.get("quantity", 0))
+        except (ValueError, TypeError):
+            quantity = 0.0
+
+        unit = str(item.get("unit", "pcs")).strip() or "pcs"
+        category = str(item.get("category", "General")).strip() or "General"
+
+        try:
+            unit_rate = float(item.get("unit_rate", 0))
+        except (ValueError, TypeError):
+            unit_rate = 0.0
+
+        element = {
+            "id": f"ai_{idx + 1}",
+            "category": category,
+            "description": description,
+            "quantity": round(quantity, 2),
+            "unit": unit,
+            "confidence": 0.8,
+        }
+        elements.append(element)
+
+        # Build category summary
+        if category not in categories:
+            categories[category] = {"count": 0, "total_quantity": 0, "unit": unit}
+        categories[category]["count"] += 1
+        categories[category]["total_quantity"] += quantity
+
+    logger.info(
+        "AI analysis completed: doc=%s, items=%d, tokens=%d, duration=%dms",
+        doc_id,
+        len(elements),
+        tokens,
+        duration_ms,
+    )
+
+    return {
+        "elements": elements,
+        "summary": {
+            "total_elements": len(elements),
+            "categories": categories,
+        },
+    }
 
 
 # ── Delete ────────────────────────────────────────────────────────────────

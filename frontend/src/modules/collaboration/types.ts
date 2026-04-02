@@ -35,5 +35,5 @@ export const COLLAB_COLORS = [
 ] as const;
 
 export function pickColor(index: number): string {
-  return COLLAB_COLORS[index % COLLAB_COLORS.length];
+  return COLLAB_COLORS[index % COLLAB_COLORS.length] ?? '#818cf8';
 }

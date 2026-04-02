@@ -352,7 +352,7 @@ export function RiskRegisterPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border bg-surface-secondary/50">
-                    {[['risk.code', 'Code', 'left'], ['common.title', 'Title', 'left'], ['risk.category', 'Category', 'left'], ['risk.probability_short', 'Prob.', 'center'], ['risk.impact', 'Impact', 'left'], ['risk.score', 'Score', 'center'], ['common.status', 'Status', 'left'], ['risk.owner', 'Owner', 'left']].map(([key, dv, align]) => (
+                    {([['risk.code', 'Code', 'left'], ['common.title', 'Title', 'left'], ['risk.category', 'Category', 'left'], ['risk.probability_short', 'Prob.', 'center'], ['risk.impact', 'Impact', 'left'], ['risk.score', 'Score', 'center'], ['common.status', 'Status', 'left'], ['risk.owner', 'Owner', 'left']] as const).map(([key, dv, align]) => (
                       <th key={key} className={`px-4 py-3 text-${align} font-medium text-content-secondary`}>{t(key, { defaultValue: dv })}</th>
                     ))}
                     <th className="px-4 py-3 w-16" />

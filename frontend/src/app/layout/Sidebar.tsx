@@ -301,6 +301,13 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             <span className="text-2xs">GitHub</span>
           </a>
         </div>
+
+        {/* AGPL notice */}
+        <div className="px-3 pb-2 text-center">
+          <a href="/api/source" target="_blank" className="text-2xs text-content-quaternary/40 hover:text-content-quaternary transition-colors">
+            AGPL-3.0
+          </a>
+        </div>
       </div>
     </aside>
   );

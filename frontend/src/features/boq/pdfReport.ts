@@ -105,7 +105,7 @@ function formatDate(dateInput: string | undefined, locale: string): string {
   try {
     return d.toLocaleDateString(locale, { year: 'numeric', month: 'long', day: 'numeric' });
   } catch {
-    return d.toISOString().split('T')[0];
+    return d.toISOString().split('T')[0] ?? '';
   }
 }
 
@@ -168,13 +168,14 @@ function renderCoverPage(
   ];
 
   for (let i = 0; i < metaItems.length; i++) {
+    const item = metaItems[i]!;
     const y = metaY + i * 12;
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...BRAND_MID);
-    doc.text(metaItems[i][0], 20, y);
+    doc.text(item[0], 20, y);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...BRAND_DARK);
-    doc.text(metaItems[i][1], 70, y);
+    doc.text(item[1], 70, y);
   }
 
   // Footer attribution
@@ -210,7 +211,7 @@ function renderTableOfContents(
     doc.text(lines, 20, y);
 
     // Dot leaders
-    const textW = doc.getTextWidth(lines[0]);
+    const textW = doc.getTextWidth(lines[0] ?? '');
     const dotsStart = 20 + textW + 2;
     const dotsEnd = pageW - 35;
     doc.setTextColor(...BRAND_LIGHT);
@@ -351,7 +352,7 @@ function renderBOQTables(
 
   // Record page numbers for TOC
   for (let i = 0; i < sections.length; i++) {
-    const sec = sections[i];
+    const sec = sections[i]!;
     const entry = sectionEntries[i];
     if (entry) {
       entry.pageNumber = (doc.internal as unknown as { getCurrentPageInfo: () => { pageNumber: number } }).getCurrentPageInfo().pageNumber;

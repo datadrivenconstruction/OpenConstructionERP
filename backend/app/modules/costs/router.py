@@ -437,9 +437,8 @@ async def load_vector_from_github(
     for the given region, so users don't need to run the embedding model locally.
     """
     import time
+    import traceback
     import urllib.request
-
-    import pandas as pd
 
     from app.core.vector import vector_index
 
@@ -460,25 +459,100 @@ async def load_vector_from_github(
     local_path = cache_dir / vector_filename
 
     # Download if not cached
+    github_available = False
     if not local_path.exists() or local_path.stat().st_size < 1000:
         logger.info("Downloading vector data for %s from GitHub: %s", db_id, url)
         try:
             urllib.request.urlretrieve(url, str(local_path))
+            if local_path.exists() and local_path.stat().st_size > 1000:
+                github_available = True
         except Exception as exc:
             local_path.unlink(missing_ok=True)
-            raise HTTPException(
-                404,
-                f"Vector data for '{db_id}' not available on GitHub yet. "
-                f"Use 'Generate Vector Index' to build locally. Error: {exc}",
-            )
+            logger.info("GitHub vectors not available for %s, will generate locally: %s", db_id, exc)
+    else:
+        github_available = True
 
-        if not local_path.exists() or local_path.stat().st_size < 1000:
-            local_path.unlink(missing_ok=True)
-            raise HTTPException(404, f"Downloaded vector file for '{db_id}' is invalid or empty.")
+    # Fallback: generate vectors locally from cost items in DB
+    if not github_available:
+        logger.info("Generating vectors locally for %s from cost database", db_id)
+        try:
+            import asyncio
+            from concurrent.futures import ThreadPoolExecutor
+            from app.core.vector import encode_texts, vector_index as vi
+            from app.modules.costs.repository import CostItemRepository
+
+            repo = CostItemRepository(session)
+            items_list, total = await repo.search(region=db_id, limit=5000)
+            if not items_list:
+                items_list, total = await repo.search(limit=5000)
+
+            if not items_list:
+                raise HTTPException(400, f"No cost items found for '{db_id}'.")
+
+            # Run embedding generation in a thread to not block event loop
+            def _generate_vectors(items_data):
+                batch_size = 128
+                indexed = 0
+                for i in range(0, len(items_data), batch_size):
+                    batch = items_data[i:i + batch_size]
+                    texts = [f"{it['code']} {it['desc']}" for it in batch]
+                    vectors = encode_texts(texts)
+                    records = [
+                        {
+                            "id": it["id"],
+                            "vector": vec,
+                            "code": it["code"],
+                            "description": it["desc"],
+                            "unit": it["unit"],
+                            "rate": it["rate"],
+                            "region": it["region"],
+                        }
+                        for it, vec in zip(batch, vectors)
+                    ]
+                    if records:
+                        indexed += vi(records)
+                return indexed
+
+            # Prepare data outside the thread (ORM objects can't cross threads)
+            items_data = [
+                {
+                    "id": str(ci.id),
+                    "code": ci.code or "",
+                    "desc": (ci.description or "")[:200],
+                    "unit": ci.unit or "",
+                    "rate": float(ci.rate) if ci.rate else 0.0,
+                    "region": ci.region or db_id,
+                }
+                for ci in items_list
+            ]
+
+            loop = asyncio.get_event_loop()
+            with ThreadPoolExecutor(max_workers=1) as pool:
+                indexed = await loop.run_in_executor(pool, _generate_vectors, items_data)
+
+            duration = round(time.monotonic() - start, 1)
+            logger.info("Generated %d vectors locally for %s in %.1fs", indexed, db_id, duration)
+            return {
+                "indexed": indexed,
+                "database": db_id,
+                "source": "local",
+                "duration_seconds": duration,
+            }
+        except HTTPException:
+            raise
+        except Exception as gen_err:
+            logger.exception("Failed to generate vectors for %s", db_id)
+            raise HTTPException(
+                500,
+                f"Vector generation failed for '{db_id}': {gen_err}. "
+                f"Ensure sentence-transformers and lancedb are installed.",
+            ) from gen_err
 
     logger.info("Loading vector data from %s", local_path)
 
     # Read parquet: columns = id, vector, code, description, unit, rate, region
+    import pandas as pd
+
     df = pd.read_parquet(local_path)
     total = len(df)
 
@@ -522,6 +596,164 @@ async def load_vector_from_github(
         "indexed": indexed,
         "database": db_id,
         "source": "github",
+        "duration_seconds": duration,
+    }
+
+
+# Mapping db_id to GitHub folder and snapshot filename (3072d embeddings)
+_GITHUB_SNAPSHOT_FILES: dict[str, str] = {
+    "USA_USD": "US___DDC_CWICR/USA_USD_workitems_costs_resources_EMBEDDINGS_3072_DDC_CWICR.snapshot",
+    "UK_GBP": "UK___DDC_CWICR/UK_GBP_workitems_costs_resources_EMBEDDINGS_3072_DDC_CWICR.snapshot",
+    "DE_BERLIN": "DE___DDC_CWICR/DE_BERLIN_workitems_costs_resources_EMBEDDINGS_3072_DDC_CWICR.snapshot",
+    "ENG_TORONTO": "EN___DDC_CWICR/EN_TORONTO_workitems_costs_resources_EMBEDDINGS_3072_DDC_CWICR.snapshot",
+    "FR_PARIS": "FR___DDC_CWICR/FR_PARIS_workitems_costs_resources_EMBEDDINGS_3072_DDC_CWICR.snapshot",
+    "SP_BARCELONA": "ES___DDC_CWICR/SP_BARCELONA_workitems_costs_resources_EMBEDDINGS_3072_DDC_CWICR.snapshot",
+    "PT_SAOPAULO": "PT___DDC_CWICR/PT_SAOPAULO_workitems_costs_resources_EMBEDDINGS_3072_DDC_CWICR.snapshot",
+    "RU_STPETERSBURG": "RU___DDC_CWICR/RU_STPETERSBURG_workitems_costs_resources_EMBEDDINGS_3072_DDC_CWICR.snapshot",
+    "AR_DUBAI": "AR___DDC_CWICR/AR_DUBAI_workitems_costs_resources_EMBEDDINGS_3072_DDC_CWICR.snapshot",
+    "ZH_SHANGHAI": "ZH___DDC_CWICR/ZH_SHANGHAI_workitems_costs_resources_EMBEDDINGS_3072_DDC_CWICR.snapshot",
+    "HI_MUMBAI": "HI___DDC_CWICR/HI_MUMBAI_workitems_costs_resources_EMBEDDINGS_3072_DDC_CWICR.snapshot",
+}
+
+
+@router.post(
+    "/vector/restore-snapshot/{db_id}",
+    dependencies=[Depends(RequirePermission("costs.create"))],
+)
+async def restore_qdrant_snapshot(
+    db_id: str,
+    _user_id: CurrentUserId,
+) -> dict:
+    """Download a pre-built Qdrant snapshot from GitHub and restore it.
+
+    Downloads 3072d embeddings snapshot (~1.1 GB) and restores into Qdrant.
+    Requires Qdrant server running (Docker or binary).
+    """
+    import asyncio
+    import time
+    import urllib.request
+
+    from app.core.vector import _get_qdrant
+
+    start = time.monotonic()
+
+    client = _get_qdrant()
+    if client is None:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            "Qdrant not available. Start Qdrant: docker run -p 6333:6333 qdrant/qdrant",
+        )
+
+    snapshot_path = _GITHUB_SNAPSHOT_FILES.get(db_id)
+    if not snapshot_path:
+        available = ", ".join(sorted(_GITHUB_SNAPSHOT_FILES.keys()))
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            f"Unknown database ID: {db_id}. Available: {available}",
+        )
+
+    url = f"{_GITHUB_CWICR_BASE_URL}/{snapshot_path}"
+
+    # Cache locally to avoid re-downloading ~1.1 GB
+    cache_dir = Path.home() / ".openestimator" / "cache" / "snapshots"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    local_path = cache_dir / f"{db_id}.snapshot"
+
+    # Download if not already cached
+    if not local_path.exists() or local_path.stat().st_size < 10_000:
+        logger.info(
+            "Downloading Qdrant snapshot for %s from GitHub (~1.1 GB): %s",
+            db_id,
+            url,
+        )
+        try:
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(
+                None,
+                urllib.request.urlretrieve,
+                url,
+                str(local_path),
+            )
+        except Exception as exc:
+            local_path.unlink(missing_ok=True)
+            logger.error("Failed to download snapshot for %s: %s", db_id, exc)
+            raise HTTPException(
+                status.HTTP_502_BAD_GATEWAY,
+                f"Failed to download snapshot from GitHub: {exc}",
+            )
+
+        if not local_path.exists() or local_path.stat().st_size < 10_000:
+            local_path.unlink(missing_ok=True)
+            raise HTTPException(
+                status.HTTP_502_BAD_GATEWAY,
+                "Downloaded snapshot file is too small or missing. "
+                "The file may not exist on GitHub yet.",
+            )
+        logger.info(
+            "Snapshot downloaded for %s: %.1f MB",
+            db_id,
+            local_path.stat().st_size / (1024 * 1024),
+        )
+    else:
+        logger.info(
+            "Using cached snapshot for %s: %s (%.1f MB)",
+            db_id,
+            local_path,
+            local_path.stat().st_size / (1024 * 1024),
+        )
+
+    # Restore snapshot into Qdrant
+    collection_name = f"cwicr_{db_id.lower()}"
+
+    try:
+        from qdrant_client.models import Distance, VectorParams
+
+        # Create collection if it does not already exist
+        existing = [c.name for c in client.get_collections().collections]
+        if collection_name not in existing:
+            client.create_collection(
+                collection_name,
+                vectors_config=VectorParams(size=3072, distance=Distance.COSINE),
+            )
+            logger.info("Created Qdrant collection: %s", collection_name)
+
+        # Recover snapshot — uses the Qdrant HTTP API under the hood
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(
+            None,
+            lambda: client.recover_snapshot(collection_name, location=str(local_path)),
+        )
+        logger.info("Snapshot restored for collection %s", collection_name)
+    except Exception as exc:
+        logger.error("Failed to restore snapshot for %s: %s", db_id, exc)
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR,
+            f"Failed to restore Qdrant snapshot: {exc}",
+        )
+
+    duration = round(time.monotonic() - start, 1)
+
+    # Get collection info after restore
+    try:
+        col_info = client.get_collection(collection_name)
+        vectors_count = col_info.vectors_count
+    except Exception:
+        vectors_count = None
+
+    logger.info(
+        "Qdrant snapshot restore complete for %s: collection=%s, vectors=%s, duration=%.1fs",
+        db_id,
+        collection_name,
+        vectors_count,
+        duration,
+    )
+
+    return {
+        "restored": True,
+        "collection": collection_name,
+        "database": db_id,
+        "vectors_count": vectors_count,
+        "source": "github_snapshot",
         "duration_seconds": duration,
     }
 

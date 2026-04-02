@@ -42,7 +42,7 @@ const LEVELS = ['on', 'on-m', 'on-h'] as const;
 /* ── Left: Animated Estimation Table ─────────────────────────────────── */
 
 function AnimatedTable() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const cellsRef = useRef<HTMLDivElement[]>([]);
 
   const initTable = useCallback((node: HTMLDivElement | null) => {

@@ -65,8 +65,8 @@ export const usePresenceStore = create<PresenceState>((set, get) => ({
     // Assign 1-2 demo users to random BOQs
     const count = Math.min(DEMO_USERS.length, Math.max(1, Math.floor(boqIds.length * 0.4)));
     for (let i = 0; i < count; i++) {
-      const user = DEMO_USERS[i];
-      const boqId = boqIds[i % boqIds.length];
+      const user = DEMO_USERS[i]!;
+      const boqId = boqIds[i % boqIds.length] ?? '';
       users[user.id] = {
         ...user,
         boqId,

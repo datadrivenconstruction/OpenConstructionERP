@@ -13,6 +13,17 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.1.1',
+    date: '2026-04-01',
+    changes: [
+      'Fix: Settings page freeze resolved + missing "Regional Standards" EN translation',
+      'Fix: DELETE project 500 error + XSS sanitization in project names',
+      'Fix: Removed duplicate "#1" on login page',
+      'Build: Added requirements.txt for easier pip install',
+      'Build: Cleaned repository for GitHub release (removed 159 dev artifacts)',
+    ],
+  },
+  {
     version: '0.1.0',
     date: '2026-03-27',
     changes: [

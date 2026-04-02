@@ -29,8 +29,10 @@ contourpy==1.3.3
 coverage==7.13.4
 cryptography==46.0.4
 cycler==0.12.1
-# Editable install with no version control (ddc-toolkit==1.0.0)
--e c:\users\artem boiko\desktop\codeprojects\ddc_toolkit
+# DDC Toolkit — optional, for CAD/BIM converter integration
+# Install from: https://github.com/datadrivenconstruction/ddc-community-toolkit
+# pip install git+https://github.com/datadrivenconstruction/ddc-community-toolkit.git
+# ddc-toolkit==1.0.0
 decorator==5.2.1
 deep-translator==1.11.4
 defusedxml==0.7.1

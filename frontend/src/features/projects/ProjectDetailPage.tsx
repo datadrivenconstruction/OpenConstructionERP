@@ -5,7 +5,6 @@ import i18n from '@/app/i18n';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft,
   Table2,
   DollarSign,
   Layers,
@@ -931,7 +930,7 @@ export function ProjectDetailPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {(() => {
           const areaMatch = project.description?.match(/(\d[\d.,]*)\s*m[²2]/i);
-          const area = areaMatch ? parseFloat(areaMatch[1].replace(',', '')) : null;
+          const area = areaMatch ? parseFloat((areaMatch[1] ?? '0').replace(',', '')) : null;
           const costPerM2 = area && stats.totalBudget > 0 ? stats.totalBudget / area : null;
           const costPerM2Str = costPerM2
             ? `${formatCurrency(costPerM2, currency)}/m\u00b2`

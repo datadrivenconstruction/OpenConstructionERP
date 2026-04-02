@@ -1,4 +1,8 @@
-import { useState, useCallback, useRef, useEffect, type FormEvent } from 'react';
+// OpenConstructionERP — DataDrivenConstruction (DDC)
+// CWICR AI Estimation Engine
+// Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+// DDC-CWICR-OE-2026
+import { useState, useCallback, useRef, useEffect, useMemo, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
@@ -32,11 +36,12 @@ import {
   Trash2,
   HardDrive,
   Star,
+  Database,
 } from 'lucide-react';
 import clsx from 'clsx';
 import { Card, CardContent, Button, Badge } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
-import { aiApi, type QuickEstimateRequest, type EstimateJobResponse, type EstimateItem, type CadExtractResponse } from './api';
+import { aiApi, type QuickEstimateRequest, type EstimateJobResponse, type EstimateItem, type CadExtractResponse, type EnrichResult, type EnrichedItem, type CadColumnsResponse, type CadGroupResponse } from './api';
 import { apiGet, apiPost } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 
@@ -320,9 +325,17 @@ function SaveToBOQDialog({ open, onClose, onSave, saving }: SaveDialogProps) {
 
 // ── Results table ────────────────────────────────────────────────────────────
 
-function ResultsTable({ result, selectedCurrency }: { result: EstimateJobResponse; selectedCurrency?: string }) {
+function ResultsTable({ result, selectedCurrency, enrichResult }: { result: EstimateJobResponse; selectedCurrency?: string; enrichResult?: EnrichResult | null }) {
   const { t } = useTranslation();
   const currency = selectedCurrency || result.currency || 'EUR';
+
+  // Build a lookup map from enrichment results by index
+  const enrichMap = new Map<number, EnrichedItem>();
+  if (enrichResult?.items) {
+    for (const ei of enrichResult.items) {
+      enrichMap.set(ei.index, ei);
+    }
+  }
 
   let currentCategory = '';
 
@@ -355,6 +368,8 @@ function ResultsTable({ result, selectedCurrency }: { result: EstimateJobRespons
           {result.items.map((item: EstimateItem, idx: number) => {
             const showCategory = item.category && item.category !== currentCategory;
             if (item.category) currentCategory = item.category;
+            const enriched = enrichMap.get(idx);
+            const bestMatch = enriched?.best_match ?? null;
 
             return (
               <>
@@ -393,10 +408,35 @@ function ResultsTable({ result, selectedCurrency }: { result: EstimateJobRespons
                     {formatNumber(item.quantity)}
                   </td>
                   <td className="px-4 py-3 text-right font-mono text-content-secondary">
-                    {formatNumber(item.unit_rate)}
+                    {bestMatch ? (
+                      <div className="flex flex-col items-end gap-0.5">
+                        <span className="line-through text-content-quaternary text-xs">
+                          {formatNumber(item.unit_rate)}
+                        </span>
+                        <span className="text-emerald-600 font-semibold" title={`CWICR: ${bestMatch.code} (${Math.round(bestMatch.score * 100)}% match)`}>
+                          {formatNumber(bestMatch.rate)}
+                        </span>
+                        <span className="text-[10px] text-emerald-600/70 font-normal">
+                          {bestMatch.code}
+                        </span>
+                      </div>
+                    ) : (
+                      formatNumber(item.unit_rate)
+                    )}
                   </td>
                   <td className="px-4 py-3 text-right font-mono font-medium text-content-primary">
-                    {formatNumber(item.total)}
+                    {bestMatch ? (
+                      <div className="flex flex-col items-end gap-0.5">
+                        <span className="line-through text-content-quaternary text-xs">
+                          {formatNumber(item.total)}
+                        </span>
+                        <span className="text-emerald-600 font-semibold">
+                          {formatNumber(item.quantity * bestMatch.rate)}
+                        </span>
+                      </div>
+                    ) : (
+                      formatNumber(item.total)
+                    )}
                   </td>
                 </tr>
               </>
@@ -412,7 +452,24 @@ function ResultsTable({ result, selectedCurrency }: { result: EstimateJobRespons
               {t('ai.grand_total', { defaultValue: 'Grand Total' })}
             </td>
             <td className="px-4 py-4 text-right font-mono text-lg font-bold text-oe-blue">
-              {formatNumber(result.grand_total, currency)}
+              {enrichMap.size > 0 ? (
+                <div className="flex flex-col items-end gap-0.5">
+                  <span className="line-through text-content-quaternary text-sm font-normal">
+                    {formatNumber(result.grand_total, currency)}
+                  </span>
+                  <span className="text-emerald-600">
+                    {formatNumber(
+                      result.items.reduce((sum, item, idx) => {
+                        const ei = enrichMap.get(idx);
+                        return sum + item.quantity * (ei?.best_match?.rate ?? item.unit_rate);
+                      }, 0),
+                      currency,
+                    )}
+                  </span>
+                </div>
+              ) : (
+                formatNumber(result.grand_total, currency)
+              )}
             </td>
           </tr>
         </tfoot>
@@ -1061,6 +1118,22 @@ export function QuickEstimatePage() {
   const [cadResult, setCadResult] = useState<CadExtractResponse | null>(null);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 
+  // CAD interactive grouping state
+  const [cadColumnsData, setCadColumnsData] = useState<CadColumnsResponse | null>(null);
+  const [selectedGroupBy, setSelectedGroupBy] = useState<string[]>([]);
+  const [selectedSumCols, setSelectedSumCols] = useState<string[]>([]);
+  const [cadGroupResult, setCadGroupResult] = useState<CadGroupResponse | null>(null);
+  const [cadGrouping, setCadGrouping] = useState(false);
+  const [activePreset, setActivePreset] = useState<string>('standard');
+  const [showCustom, setShowCustom] = useState(false);
+  const [hideEmptyGroups, setHideEmptyGroups] = useState(true);
+  const [deletedGroupKeys, setDeletedGroupKeys] = useState<Set<string>>(new Set());
+
+  // Cost DB enrichment state
+  const [enrichRegion, setEnrichRegion] = useState('DE_BERLIN');
+  const [enrichResult, setEnrichResult] = useState<EnrichResult | null>(null);
+  const [enriching, setEnriching] = useState(false);
+
   // Check if AI is configured
   const { data: aiSettings } = useQuery({
     queryKey: ['ai-settings'],
@@ -1277,6 +1350,41 @@ export function QuickEstimatePage() {
     },
   });
 
+  // ── CAD columns mutation (interactive grouping step 1) ──────────────
+
+  const cadColumnsMutation = useMutation({
+    mutationFn: aiApi.cadColumns,
+    onSuccess: (data) => {
+      setCadColumnsData(data);
+      // Auto-select the "standard" preset if available, else fall back to suggested
+      const standardPreset = data.presets?.standard;
+      if (standardPreset) {
+        setActivePreset('standard');
+        setSelectedGroupBy(standardPreset.group_by);
+        setSelectedSumCols(standardPreset.sum_columns);
+      } else {
+        setSelectedGroupBy(data.suggested_grouping || []);
+        setSelectedSumCols(data.suggested_quantities || []);
+      }
+      setShowCustom(false);
+      addToast({
+        type: 'success',
+        title: t('ai.cad_columns_ready', { defaultValue: 'Columns detected' }),
+        message: t('ai.cad_columns_msg', {
+          defaultValue: `${data.total_elements} elements, ${data.columns.grouping.length + data.columns.quantity.length} columns available`,
+          count: data.total_elements,
+        }),
+      });
+    },
+    onError: (err: Error) => {
+      addToast({
+        type: 'error',
+        title: t('ai.cad_columns_failed', { defaultValue: 'Column detection failed' }),
+        message: err.message,
+      });
+    },
+  });
+
   // ── Save as BOQ mutation ──────────────────────────────────────────────
 
   const saveMutation = useMutation({
@@ -1306,20 +1414,51 @@ export function QuickEstimatePage() {
     },
   });
 
+  // ── Cost DB enrichment handler ─────────────────────────────────────
+
+  const handleEnrich = useCallback(async () => {
+    if (!result?.id) return;
+    setEnriching(true);
+    try {
+      const data = await aiApi.enrichEstimate(result.id, enrichRegion, currency || 'EUR');
+      setEnrichResult(data);
+      addToast({
+        type: 'success',
+        title: t('ai.enrich_complete', { defaultValue: 'Cost DB matching complete' }),
+        message: t('ai.enrich_complete_msg', {
+          defaultValue: 'Matched {{matched}}/{{total}} items',
+          matched: data.total_matched,
+          total: data.total_items,
+        }),
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Enrichment failed';
+      addToast({
+        type: 'error',
+        title: t('ai.enrich_failed', { defaultValue: 'Cost DB matching failed' }),
+        message: msg,
+      });
+    } finally {
+      setEnriching(false);
+    }
+  }, [result?.id, enrichRegion, currency, addToast, t]);
+
   // ── Determine if any mutation is pending ──────────────────────────────
 
   const isPending =
-    textEstimateMutation.isPending || photoEstimateMutation.isPending || fileEstimateMutation.isPending || cadExtractMutation.isPending;
+    textEstimateMutation.isPending || photoEstimateMutation.isPending || fileEstimateMutation.isPending || cadExtractMutation.isPending || cadColumnsMutation.isPending || cadGrouping;
   const isError =
     (textEstimateMutation.isError && !textEstimateMutation.isPending) ||
     (photoEstimateMutation.isError && !photoEstimateMutation.isPending) ||
     (fileEstimateMutation.isError && !fileEstimateMutation.isPending) ||
-    (cadExtractMutation.isError && !cadExtractMutation.isPending);
+    (cadExtractMutation.isError && !cadExtractMutation.isPending) ||
+    (cadColumnsMutation.isError && !cadColumnsMutation.isPending);
   const mutationError =
     (textEstimateMutation.error as Error | null) ||
     (photoEstimateMutation.error as Error | null) ||
     (fileEstimateMutation.error as Error | null) ||
-    (cadExtractMutation.error as Error | null);
+    (cadExtractMutation.error as Error | null) ||
+    (cadColumnsMutation.error as Error | null);
 
   // ── Submit handlers per tab ───────────────────────────────────────────
 
@@ -1369,8 +1508,48 @@ export function QuickEstimatePage() {
     if (!selectedFile) return;
     setResult(null);
     setCadResult(null);
-    cadExtractMutation.mutate(selectedFile);
-  }, [selectedFile, cadExtractMutation]);
+    setCadColumnsData(null);
+    setCadGroupResult(null);
+    if (isCadRoute) {
+      cadColumnsMutation.mutate(selectedFile);
+    } else {
+      cadExtractMutation.mutate(selectedFile);
+    }
+  }, [selectedFile, cadExtractMutation, cadColumnsMutation, isCadRoute]);
+
+  const handleApplyGrouping = useCallback(async () => {
+    if (!cadColumnsData || selectedGroupBy.length === 0) return;
+    setCadGrouping(true);
+    try {
+      const data = await aiApi.cadGroup({
+        session_id: cadColumnsData.session_id,
+        group_by: selectedGroupBy,
+        sum_columns: selectedSumCols,
+      });
+      setCadGroupResult(data);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Grouping failed';
+      addToast({
+        type: 'error',
+        title: t('ai.cad_group_failed', { defaultValue: 'Grouping failed' }),
+        message: msg,
+      });
+    } finally {
+      setCadGrouping(false);
+    }
+  }, [cadColumnsData, selectedGroupBy, selectedSumCols, addToast, t]);
+
+  const toggleGroupByCol = useCallback((col: string) => {
+    setSelectedGroupBy((prev) =>
+      prev.includes(col) ? prev.filter((c) => c !== col) : [...prev, col],
+    );
+  }, []);
+
+  const toggleSumCol = useCallback((col: string) => {
+    setSelectedSumCols((prev) =>
+      prev.includes(col) ? prev.filter((c) => c !== col) : [...prev, col],
+    );
+  }, []);
 
   const handlePasteSubmit = useCallback(() => {
     if (!pasteText.trim()) return;
@@ -1459,6 +1638,13 @@ export function QuickEstimatePage() {
   const handleReset = useCallback(() => {
     setResult(null);
     setCadResult(null);
+    setEnrichResult(null);
+    setCadColumnsData(null);
+    setCadGroupResult(null);
+    setSelectedGroupBy([]);
+    setSelectedSumCols([]);
+    setDeletedGroupKeys(new Set());
+    setHideEmptyGroups(true);
     setDescription('');
     setLocation('');
     setCurrency('');
@@ -1471,19 +1657,96 @@ export function QuickEstimatePage() {
     photoEstimateMutation.reset();
     fileEstimateMutation.reset();
     cadExtractMutation.reset();
-  }, [handleRemoveFile, textEstimateMutation, photoEstimateMutation, fileEstimateMutation, cadExtractMutation]);
+    cadColumnsMutation.reset();
+  }, [handleRemoveFile, textEstimateMutation, photoEstimateMutation, fileEstimateMutation, cadExtractMutation, cadColumnsMutation]);
 
   const resetMutationErrors = useCallback(() => {
     textEstimateMutation.reset();
     photoEstimateMutation.reset();
     fileEstimateMutation.reset();
     cadExtractMutation.reset();
-  }, [textEstimateMutation, photoEstimateMutation, fileEstimateMutation, cadExtractMutation]);
+    cadColumnsMutation.reset();
+  }, [textEstimateMutation, photoEstimateMutation, fileEstimateMutation, cadExtractMutation, cadColumnsMutation]);
+
+  // ── Filtered groups for CAD QTO ──────────────────────────────────────
+  const filteredGroups = useMemo(() => {
+    if (!cadGroupResult?.groups) return [];
+    let groups = cadGroupResult.groups.filter(g => !deletedGroupKeys.has(g.key));
+    if (hideEmptyGroups) {
+      groups = groups.filter(g => {
+        const sumValues = Object.values(g.sums || {});
+        return g.count > 0 && sumValues.some(v => v > 0);
+      });
+    }
+    return groups;
+  }, [cadGroupResult?.groups, hideEmptyGroups, deletedGroupKeys]);
+
+  const computedTotals = useMemo(() => {
+    let count = 0;
+    const sums: Record<string, number> = {};
+    for (const g of filteredGroups) {
+      count += g.count;
+      for (const [k, v] of Object.entries(g.sums || {})) {
+        sums[k] = (sums[k] || 0) + v;
+      }
+    }
+    return { count, sums };
+  }, [filteredGroups]);
+
+  const handleSaveQtoAsBOQ = useCallback(async () => {
+    if (!filteredGroups.length) return;
+    const sumCols = cadGroupResult?.sum_columns || [];
+    const unitLabels = cadColumnsData?.unit_labels || {};
+
+    // Build meaningful BOQ positions from grouped data
+    const items = filteredGroups
+      .filter(g => Object.values(g.sums || {}).some(v => v > 0))
+      .map((g, i) => {
+        // Clean description: remove OST_ prefix, join group parts
+        const parts = Object.entries(g.key_parts || {}).map(([col, val]) =>
+          col === 'category' ? (val || '').replace(/^OST_/, '') : val || '',
+        );
+        const description = parts.filter(Boolean).join(' — ');
+
+        // Find primary quantity (volume > area > length > count)
+        let unit = 'pcs';
+        let quantity = g.count;
+        for (const col of ['volume', 'area', 'length']) {
+          if (sumCols.includes(col) && (g.sums[col] || 0) > 0) {
+            unit = unitLabels[col] || col;
+            quantity = Math.round((g.sums[col] ?? 0) * 100) / 100;
+            break;
+          }
+        }
+
+        return {
+          ordinal: String(i + 1).padStart(3, '0'),
+          description,
+          unit,
+          quantity,
+          unit_rate: 0,
+          metadata: { source: 'cad_qto', cad_category: g.key_parts?.category, count: g.count, sums: g.sums },
+        };
+      });
+
+    sessionStorage.setItem('oe_qto_import', JSON.stringify({
+      filename: cadColumnsData?.filename,
+      items,
+      groups: filteredGroups,
+      group_by: cadGroupResult?.group_by,
+      sum_columns: cadGroupResult?.sum_columns,
+    }));
+    addToast({
+      type: 'success',
+      title: t('ai.qto_saved', { defaultValue: 'QTO ready' }),
+      message: t('ai.qto_saved_msg', { defaultValue: '{{count}} positions prepared for BOQ import', count: items.length }),
+    });
+  }, [filteredGroups, cadColumnsData, cadGroupResult, addToast, t]);
 
   // ── Render ────────────────────────────────────────────────────────────
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-content mx-auto space-y-6">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-xs text-content-tertiary">
         <a href="/" className="hover:text-content-primary transition-colors">{t('nav.dashboard', { defaultValue: 'Dashboard' })}</a>
@@ -2055,6 +2318,367 @@ export function QuickEstimatePage() {
         </div>
       )}
 
+      {/* CAD Interactive Column Selection (step 1 of interactive grouping) */}
+      {cadColumnsData && !cadGroupResult && !isPending && (
+        <div className="rounded-xl border border-border-light bg-surface-primary p-5 space-y-4 animate-fade-in">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Layers size={16} className="text-oe-blue" />
+              <h3 className="text-sm font-semibold text-content-primary">
+                {cadColumnsData.filename}
+              </h3>
+              <Badge variant="blue" size="sm">{cadColumnsData.total_elements.toLocaleString()} elements</Badge>
+              <Badge variant="neutral" size="sm">{cadColumnsData.format.toUpperCase()}</Badge>
+            </div>
+            <span className="text-2xs text-content-quaternary">
+              Extracted in {(cadColumnsData.duration_ms / 1000).toFixed(1)}s
+            </span>
+          </div>
+
+          {/* Preset Buttons */}
+          <div>
+            <label className="text-xs font-medium text-content-secondary mb-2 block">
+              QTO Grouping
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(cadColumnsData.presets || {}).map(([key, preset]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => {
+                    setActivePreset(key);
+                    setSelectedGroupBy(preset.group_by);
+                    setSelectedSumCols(preset.sum_columns);
+                    setShowCustom(false);
+                  }}
+                  className={clsx(
+                    'rounded-lg px-4 py-2 text-xs font-medium transition-all border',
+                    activePreset === key && !showCustom
+                      ? 'bg-oe-blue text-white border-oe-blue shadow-sm'
+                      : 'border-border bg-surface-secondary text-content-secondary hover:border-oe-blue/40',
+                  )}
+                >
+                  <div className="font-semibold">{preset.label}</div>
+                  <div className="text-2xs opacity-70 mt-0.5">{preset.description}</div>
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => setShowCustom(!showCustom)}
+                className={clsx(
+                  'rounded-lg px-4 py-2 text-xs font-medium transition-all border',
+                  showCustom
+                    ? 'bg-oe-blue text-white border-oe-blue shadow-sm'
+                    : 'border-border bg-surface-secondary text-content-secondary hover:border-oe-blue/40',
+                )}
+              >
+                <div className="font-semibold">Custom</div>
+                <div className="text-2xs opacity-70 mt-0.5">Advanced column selection</div>
+              </button>
+            </div>
+          </div>
+
+          {/* Selected columns summary (always visible) */}
+          <div className="flex flex-wrap gap-4 text-xs text-content-secondary bg-surface-secondary/50 rounded-lg px-4 py-2.5">
+            <div>
+              <span className="font-medium text-content-primary">Group by: </span>
+              {(selectedGroupBy || []).join(', ') || 'none'}
+            </div>
+            <div>
+              <span className="font-medium text-content-primary">Sum: </span>
+              {(selectedSumCols || []).map(col => {
+                const unit = cadColumnsData.unit_labels?.[col];
+                return unit ? `${col} (${unit})` : col;
+              }).join(', ') || 'none'}
+            </div>
+          </div>
+
+          {/* Custom column selection (collapsible) */}
+          {showCustom && (
+            <div className="space-y-3 border-t border-border-light pt-3">
+              <div>
+                <label className="text-xs font-medium text-content-secondary mb-2 block">Group by columns</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {(cadColumnsData.columns?.grouping || []).map(col => {
+                    const isSelected = (selectedGroupBy || []).includes(col);
+                    return (
+                      <button key={col} type="button" onClick={() => toggleGroupByCol(col)}
+                        className={clsx('rounded-md px-2.5 py-1 text-2xs font-medium transition-colors',
+                          isSelected ? 'bg-oe-blue text-white' : 'border border-border-light bg-surface-secondary text-content-tertiary hover:text-content-primary'
+                        )}>
+                        {col}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-content-secondary mb-2 block">Sum quantities</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {(cadColumnsData.columns?.quantity || []).map(col => {
+                    const isSelected = (selectedSumCols || []).includes(col);
+                    const unit = cadColumnsData.unit_labels?.[col];
+                    return (
+                      <button key={col} type="button" onClick={() => toggleSumCol(col)}
+                        className={clsx('rounded-md px-2.5 py-1 text-2xs font-medium transition-colors',
+                          isSelected ? 'bg-emerald-500 text-white' : 'border border-border-light bg-surface-secondary text-content-tertiary hover:text-content-primary'
+                        )}>
+                        {col}{unit ? ` (${unit})` : ''}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Preview table — show only selected columns */}
+          {(cadColumnsData.preview || []).length > 0 && (
+            <div>
+              <label className="text-xs font-medium text-content-secondary mb-2 block">
+                {t('ai.cad_preview', { defaultValue: 'Preview (first 10 elements)' })}
+              </label>
+              <div className="overflow-x-auto rounded-lg border border-border-light">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-border-light bg-surface-secondary/50">
+                      {(() => {
+                        const previewKeys = new Set(Object.keys(cadColumnsData.preview[0] ?? {}));
+                        const visibleCols = (selectedGroupBy.length || selectedSumCols.length)
+                          ? [...(selectedGroupBy || []), ...(selectedSumCols || [])].filter(c => c !== 'count' && previewKeys.has(c))
+                          : Object.keys(cadColumnsData.preview[0] ?? {}).slice(0, 8);
+                        return visibleCols.map((key) => {
+                          const unit = cadColumnsData.unit_labels?.[key];
+                          return (
+                            <th
+                              key={key}
+                              className="px-3 py-1.5 text-left font-semibold text-content-tertiary uppercase tracking-wide whitespace-nowrap text-oe-blue"
+                            >
+                              {key}{unit ? ` (${unit})` : ''}
+                            </th>
+                          );
+                        });
+                      })()}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cadColumnsData.preview.map((row, idx) => {
+                      const previewKeys = new Set(Object.keys(cadColumnsData.preview[0] ?? {}));
+                      const visibleCols = (selectedGroupBy.length || selectedSumCols.length)
+                        ? [...(selectedGroupBy || []), ...(selectedSumCols || [])].filter(c => c !== 'count' && previewKeys.has(c))
+                        : Object.keys(row).slice(0, 8);
+                      return (
+                        <tr key={idx} className="border-b border-border-light/30 hover:bg-surface-secondary/20">
+                          {visibleCols.map((key) => {
+                            const val = row[key];
+                            return (
+                              <td
+                                key={key}
+                                className={clsx(
+                                  'px-3 py-1 whitespace-nowrap',
+                                  typeof val === 'number' ? 'text-right font-mono text-content-primary' : 'text-content-secondary',
+                                )}
+                              >
+                                {val === null || val === undefined || val === 'None' || val === ''
+                                  ? '-'
+                                  : typeof val === 'number'
+                                    ? val.toLocaleString(getIntlLocale(), { maximumFractionDigits: 2 })
+                                    : String(val)}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Action buttons */}
+          <div className="flex items-center gap-3 pt-2 border-t border-border-light">
+            <Button variant="ghost" size="sm" onClick={() => { setCadColumnsData(null); setCadGroupResult(null); }}>
+              {t('ai.cad_reset', { defaultValue: 'Reset' })}
+            </Button>
+            <div className="flex-1" />
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleApplyGrouping}
+              disabled={!selectedGroupBy?.length || cadGrouping}
+              loading={cadGrouping}
+            >
+              {t('ai.cad_apply_grouping', { defaultValue: 'Apply Grouping' })}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* CAD Dynamic Group Result (step 2 of interactive grouping) */}
+      {cadGroupResult && !isPending && (
+        <div className="space-y-4 animate-card-in" style={{ animationDelay: '50ms' }}>
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-content-primary">
+                {t('ai.cad_grouped_results', { defaultValue: 'Grouped Results' })}
+              </h2>
+              <Badge variant="success" size="sm">
+                {filteredGroups.length} {t('ai.cad_groups', { defaultValue: 'groups' })}
+              </Badge>
+              <Badge variant="neutral" size="sm">
+                {computedTotals.count} {t('ai.cad_elements', { defaultValue: 'elements' })}
+              </Badge>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { setCadGroupResult(null); setDeletedGroupKeys(new Set()); }}
+              icon={<RotateCcw size={14} />}
+            >
+              {t('ai.cad_change_grouping', { defaultValue: 'Change Grouping' })}
+            </Button>
+          </div>
+
+          {/* Filter & sort controls */}
+          <div className="flex flex-wrap items-center gap-3 rounded-lg bg-surface-secondary/30 border border-border-light/40 px-3 py-2">
+            <label className="flex items-center gap-1.5 text-xs text-content-secondary cursor-pointer">
+              <input type="checkbox" checked={hideEmptyGroups} onChange={e => setHideEmptyGroups(e.target.checked)} className="rounded accent-oe-blue" />
+              {t('ai.cad_hide_empty', { defaultValue: 'Hide empty groups' })}
+            </label>
+            <span className="text-border">|</span>
+            <span className="text-xs text-content-quaternary">
+              {filteredGroups.length} / {(cadGroupResult.groups || []).length} {t('ai.cad_groups_label', { defaultValue: 'groups' })}
+            </span>
+            {deletedGroupKeys.size > 0 && (
+              <>
+                <span className="text-border">|</span>
+                <button onClick={() => setDeletedGroupKeys(new Set())} className="text-xs text-oe-blue hover:underline">
+                  {t('ai.cad_restore_removed', { defaultValue: 'Restore {{count}} removed', count: deletedGroupKeys.size })}
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Grouped results table */}
+          <Card padding="none">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border-light bg-surface-secondary/50 text-left">
+                    <th className="px-2 py-2.5 w-8" />
+                    {(cadGroupResult.group_by || []).map((col) => (
+                      <th key={col} className="px-4 py-2.5 text-xs font-semibold text-content-tertiary uppercase tracking-wide">
+                        {col}
+                      </th>
+                    ))}
+                    {(cadGroupResult.sum_columns || []).map((col) => {
+                      const unit = cadColumnsData?.unit_labels?.[col];
+                      return (
+                        <th key={col} className="px-4 py-2.5 text-xs font-semibold text-content-tertiary uppercase tracking-wide text-right">
+                          {col}{unit ? ` (${unit})` : ''}
+                        </th>
+                      );
+                    })}
+                    <th className="px-4 py-2.5 text-xs font-semibold text-content-tertiary uppercase tracking-wide text-right w-20">
+                      {t('ai.cad_col_count', { defaultValue: 'Count' })}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredGroups
+                    .sort((a, b) => {
+                      // Sort by first sum column descending (volume first)
+                      const firstSumCol = (cadGroupResult.sum_columns || []).find(c => c !== 'count') || 'count';
+                      return (b.sums[firstSumCol] || 0) - (a.sums[firstSumCol] || 0);
+                    })
+                    .map((g) => {
+                      const hasQty = Object.values(g.sums || {}).some(v => v > 0);
+                      // Clean category names: remove OST_ prefix
+                      const cleanValue = (col: string, val: string) => {
+                        if (!val || val === '(empty)') return '-';
+                        if (col === 'category') return val.replace(/^OST_/, '');
+                        return val;
+                      };
+                      return (
+                        <tr key={g.key} className={clsx(
+                          'border-b border-border-light/30 hover:bg-surface-secondary/20 transition-colors',
+                          !hasQty && 'opacity-40',
+                        )}>
+                          <td className="px-2 py-1.5">
+                            <button onClick={() => setDeletedGroupKeys(prev => new Set(prev).add(g.key))}
+                              className="text-content-quaternary hover:text-red-500 transition-colors" title={t('ai.cad_remove_group', { defaultValue: 'Remove' })}>
+                              <X size={12} />
+                            </button>
+                          </td>
+                          {(cadGroupResult.group_by || []).map((col) => (
+                            <td key={col} className="px-4 py-1.5 text-sm text-content-primary font-medium">
+                              {cleanValue(col, g.key_parts[col] || '')}
+                            </td>
+                          ))}
+                          {(cadGroupResult.sum_columns || []).map((col) => (
+                            <td key={col} className={clsx(
+                              'px-4 py-1.5 text-right font-mono text-sm',
+                              (g.sums[col] ?? 0) > 0 ? 'text-content-primary font-medium' : 'text-content-quaternary',
+                            )}>
+                              {g.sums[col] != null && g.sums[col] > 0
+                                ? g.sums[col].toLocaleString(getIntlLocale(), { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+                                : '-'}
+                            </td>
+                          ))}
+                          <td className="px-4 py-1.5 text-right font-mono text-sm font-medium text-content-primary">{g.count}</td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t-2 border-oe-blue/20 bg-oe-blue-subtle/30">
+                    <td />
+                    <td
+                      colSpan={(cadGroupResult.group_by || []).length}
+                      className="px-4 py-2.5 text-xs font-bold text-content-primary uppercase"
+                    >
+                      {t('ai.cad_grand_total', { defaultValue: 'Grand Total' })}
+                    </td>
+                    {(cadGroupResult.sum_columns || []).map((col) => (
+                      <td key={col} className="px-4 py-2.5 text-right font-mono font-bold text-oe-blue">
+                        {computedTotals.sums[col] != null
+                          ? (computedTotals.sums[col] ?? 0).toLocaleString(getIntlLocale(), { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+                          : '-'}
+                      </td>
+                    ))}
+                    <td className="px-4 py-2.5 text-right font-mono font-bold text-oe-blue">
+                      {computedTotals.count}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </Card>
+
+          {/* Save as BOQ + Action buttons */}
+          <div className="flex items-center gap-3 pt-3 border-t border-border-light">
+            <Button variant="primary" size="sm" onClick={handleSaveQtoAsBOQ} disabled={!filteredGroups.length} icon={<Save size={14} />}>
+              {t('ai.cad_save_boq', { defaultValue: 'Save as BOQ ({{count}} positions)', count: filteredGroups.length })}
+            </Button>
+            <span className="text-xs text-content-tertiary">
+              {t('ai.cad_save_boq_hint', { defaultValue: 'Creates BOQ positions from grouped quantities' })}
+            </span>
+            <div className="flex-1" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleReset}
+              icon={<RotateCcw size={14} />}
+            >
+              {t('ai.new_extract', { defaultValue: 'New Extraction' })}
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* CAD Quantity Tables Result */}
       {cadResult && !isPending && (
         <div className="space-y-4 animate-card-in" style={{ animationDelay: '50ms' }}>
@@ -2174,8 +2798,76 @@ export function QuickEstimatePage() {
 
           {/* Results table */}
           <Card padding="none">
-            <ResultsTable result={result} selectedCurrency={currency || undefined} />
+            <ResultsTable result={result} selectedCurrency={currency || undefined} enrichResult={enrichResult} />
           </Card>
+
+          {/* Cost Database Matching */}
+          <div className="rounded-xl border border-border-light bg-surface-secondary/30 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Database size={16} className="text-emerald-600" />
+                <span className="text-sm font-semibold text-content-primary">
+                  {t('ai.cost_db_matching', { defaultValue: 'Cost Database Matching' })}
+                </span>
+                {enrichResult && (
+                  <Badge variant={enrichResult.total_matched > 0 ? 'success' : 'neutral'} size="sm">
+                    {enrichResult.total_matched}/{enrichResult.total_items} {t('ai.matched', { defaultValue: 'matched' })}
+                  </Badge>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                <select
+                  value={enrichRegion}
+                  onChange={(e) => setEnrichRegion(e.target.value)}
+                  className="h-8 rounded-lg border border-border bg-surface-primary px-2 text-xs text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue hover:border-content-tertiary cursor-pointer appearance-none"
+                  disabled={enriching}
+                >
+                  <option value="DE_BERLIN">{t('ai.region_de_berlin', { defaultValue: 'Germany (Berlin)' })}</option>
+                  <option value="DE_MUNICH">{t('ai.region_de_munich', { defaultValue: 'Germany (Munich)' })}</option>
+                  <option value="DE_HAMBURG">{t('ai.region_de_hamburg', { defaultValue: 'Germany (Hamburg)' })}</option>
+                  <option value="DE_FRANKFURT">{t('ai.region_de_frankfurt', { defaultValue: 'Germany (Frankfurt)' })}</option>
+                  <option value="AT_VIENNA">{t('ai.region_at_vienna', { defaultValue: 'Austria (Vienna)' })}</option>
+                  <option value="CH_ZURICH">{t('ai.region_ch_zurich', { defaultValue: 'Switzerland (Zurich)' })}</option>
+                  <option value="UK_LONDON">{t('ai.region_uk_london', { defaultValue: 'UK (London)' })}</option>
+                  <option value="UK_MANCHESTER">{t('ai.region_uk_manchester', { defaultValue: 'UK (Manchester)' })}</option>
+                  <option value="US_NEW_YORK">{t('ai.region_us_new_york', { defaultValue: 'USA (New York)' })}</option>
+                  <option value="US_LOS_ANGELES">{t('ai.region_us_la', { defaultValue: 'USA (Los Angeles)' })}</option>
+                  <option value="US_CHICAGO">{t('ai.region_us_chicago', { defaultValue: 'USA (Chicago)' })}</option>
+                  <option value="AE_DUBAI">{t('ai.region_ae_dubai', { defaultValue: 'UAE (Dubai)' })}</option>
+                </select>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleEnrich}
+                  loading={enriching}
+                  disabled={enriching}
+                  icon={<Database size={14} />}
+                >
+                  {t('ai.match_cost_db', { defaultValue: 'Match with Cost DB' })}
+                </Button>
+              </div>
+            </div>
+            {!enrichResult && (
+              <p className="text-xs text-content-tertiary">
+                {t('ai.cost_db_matching_desc', {
+                  defaultValue: 'Match AI-estimated rates against the CWICR cost database for your region. Matched rates will replace AI estimates in the table above.',
+                })}
+              </p>
+            )}
+            {enrichResult && enrichResult.total_matched > 0 && (
+              <div className="flex items-center gap-2 text-xs text-emerald-600">
+                <CheckCircle2 size={13} />
+                <span>
+                  {t('ai.enrich_summary', {
+                    defaultValue: '{{matched}} of {{total}} items matched with regional cost data ({{region}})',
+                    matched: enrichResult.total_matched,
+                    total: enrichResult.total_items,
+                    region: enrichResult.region,
+                  })}
+                </span>
+              </div>
+            )}
+          </div>
 
           {/* Action buttons */}
           <div className="flex items-center justify-between">
