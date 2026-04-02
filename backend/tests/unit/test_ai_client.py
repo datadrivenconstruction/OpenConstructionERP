@@ -128,6 +128,10 @@ class TestResolveProviderAndKey:
             "anthropic_api_key": None,
             "openai_api_key": None,
             "gemini_api_key": None,
+            "openrouter_api_key": None,
+            "mistral_api_key": None,
+            "groq_api_key": None,
+            "deepseek_api_key": None,
             "preferred_model": "claude-sonnet",
         }
         defaults.update(kwargs)

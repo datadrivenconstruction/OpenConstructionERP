@@ -39,7 +39,7 @@ STANDARDS = ["din276", "nrm", "masterformat"]
 
 
 @dataclass
-class TestResult:
+class PlatformTestResult:
     name: str
     passed: bool
     status_code: int | None = None
@@ -49,12 +49,12 @@ class TestResult:
 
 
 @dataclass
-class TestSuite:
-    results: list[TestResult] = field(default_factory=list)
+class PlatformTestSuite:
+    results: list[PlatformTestResult] = field(default_factory=list)
     start_time: float = 0
 
     def add(self, name: str, passed: bool, **kw: Any) -> None:
-        self.results.append(TestResult(name=name, passed=passed, **kw))
+        self.results.append(PlatformTestResult(name=name, passed=passed, **kw))
 
     def summary(self) -> str:
         total = len(self.results)
@@ -123,7 +123,7 @@ class API:
 
 
 def check(
-    suite: TestSuite,
+    suite: PlatformTestSuite,
     name: str,
     response: httpx.Response,
     expected: int | list[int] = 200,
@@ -175,7 +175,7 @@ def check(
 # ══════════════════════════════════════════════════════════════════════════════
 
 
-def test_system(api: API, suite: TestSuite) -> None:
+def test_system(api: API, suite: PlatformTestSuite) -> None:
     """Section 1: System & infrastructure endpoints."""
     print("\n── 1. SYSTEM & INFRASTRUCTURE ──")
 
@@ -213,7 +213,7 @@ def test_system(api: API, suite: TestSuite) -> None:
     check(suite, "GET /api/demo/catalog", r, 200)
 
 
-def test_i18n(api: API, suite: TestSuite) -> None:
+def test_i18n(api: API, suite: PlatformTestSuite) -> None:
     """Section 2: Internationalization — 5 languages."""
     print("\n── 2. i18n — MULTI-LANGUAGE ──")
 
@@ -240,7 +240,7 @@ def test_i18n(api: API, suite: TestSuite) -> None:
                       detail=f"missing={missing}" if missing else "all present")
 
 
-def test_auth(api: API, suite: TestSuite) -> str:
+def test_auth(api: API, suite: PlatformTestSuite) -> str:
     """Section 3: Authentication & user management. Returns token."""
     print("\n── 3. AUTHENTICATION ──")
 
@@ -288,7 +288,7 @@ def test_auth(api: API, suite: TestSuite) -> str:
     return token
 
 
-def test_projects(api: API, suite: TestSuite) -> str:
+def test_projects(api: API, suite: PlatformTestSuite) -> str:
     """Section 4: Project CRUD for multiple regions. Returns project_id."""
     print("\n── 4. PROJECTS — MULTI-REGION ──")
 
@@ -327,7 +327,7 @@ def test_projects(api: API, suite: TestSuite) -> str:
     return project_ids[0] if project_ids else ""
 
 
-def test_boq_crud(api: API, suite: TestSuite, project_id: str) -> str:
+def test_boq_crud(api: API, suite: PlatformTestSuite, project_id: str) -> str:
     """Section 5: BOQ full lifecycle. Returns boq_id."""
     print("\n── 5. BOQ — FULL LIFECYCLE ──")
 
@@ -425,7 +425,7 @@ def test_boq_crud(api: API, suite: TestSuite, project_id: str) -> str:
     return boq_id
 
 
-def test_markups(api: API, suite: TestSuite, boq_id: str) -> None:
+def test_markups(api: API, suite: PlatformTestSuite, boq_id: str) -> None:
     """Section 6: Markup management — overhead, profit, VAT."""
     print("\n── 6. MARKUPS ──")
 
@@ -473,7 +473,7 @@ def test_markups(api: API, suite: TestSuite, boq_id: str) -> None:
         check(suite, "DELETE /markups/{id}", r, 204)
 
 
-def test_validation(api: API, suite: TestSuite, boq_id: str) -> None:
+def test_validation(api: API, suite: PlatformTestSuite, boq_id: str) -> None:
     """Section 7: Validation engine — 15 rules, multiple rule sets."""
     print("\n── 7. VALIDATION ──")
 
@@ -508,7 +508,7 @@ def test_validation(api: API, suite: TestSuite, boq_id: str) -> None:
                   new_errors >= 0, detail=f"errors={new_errors}")
 
 
-def test_snapshots(api: API, suite: TestSuite, boq_id: str) -> None:
+def test_snapshots(api: API, suite: PlatformTestSuite, boq_id: str) -> None:
     """Section 8: Version history — snapshots & restore."""
     print("\n── 8. SNAPSHOTS & VERSIONING ──")
 
@@ -525,7 +525,7 @@ def test_snapshots(api: API, suite: TestSuite, boq_id: str) -> None:
         suite.add(f"Snapshots count ({len(d)})", len(d) >= 1)
 
 
-def test_analysis(api: API, suite: TestSuite, boq_id: str) -> None:
+def test_analysis(api: API, suite: PlatformTestSuite, boq_id: str) -> None:
     """Section 9: BOQ analysis — cost breakdown, sensitivity, classification."""
     print("\n── 9. ANALYSIS & REPORTS ──")
 
@@ -551,7 +551,7 @@ def test_analysis(api: API, suite: TestSuite, boq_id: str) -> None:
     check(suite, "GET /activity (audit log)", r, 200)
 
 
-def test_exports(api: API, suite: TestSuite, boq_id: str) -> None:
+def test_exports(api: API, suite: PlatformTestSuite, boq_id: str) -> None:
     """Section 10: Export in all formats."""
     print("\n── 10. EXPORTS ──")
 
@@ -567,7 +567,7 @@ def test_exports(api: API, suite: TestSuite, boq_id: str) -> None:
             suite.add(f"Export {fmt}", False, detail=str(exc)[:100])
 
 
-def test_costs(api: API, suite: TestSuite) -> None:
+def test_costs(api: API, suite: PlatformTestSuite) -> None:
     """Section 11: Cost database — CRUD, search, vectors."""
     print("\n── 11. COST DATABASE ──")
 
@@ -621,7 +621,7 @@ def test_costs(api: API, suite: TestSuite) -> None:
     check(suite, "GET /costs/vector/search ('reinforced concrete')", r, 200)
 
 
-def test_assemblies(api: API, suite: TestSuite) -> None:
+def test_assemblies(api: API, suite: PlatformTestSuite) -> None:
     """Section 12: Assemblies — composite cost items."""
     print("\n── 12. ASSEMBLIES ──")
 
@@ -647,7 +647,7 @@ def test_assemblies(api: API, suite: TestSuite) -> None:
         check(suite, "PATCH /assemblies/{id}", r, 200)
 
 
-def test_schedule(api: API, suite: TestSuite, project_id: str, boq_id: str) -> None:
+def test_schedule(api: API, suite: PlatformTestSuite, project_id: str, boq_id: str) -> None:
     """Section 13: 4D Schedule — activities, Gantt, CPM."""
     print("\n── 13. SCHEDULE (4D) ──")
 
@@ -700,7 +700,7 @@ def test_schedule(api: API, suite: TestSuite, project_id: str, boq_id: str) -> N
         check(suite, "GET /risk-analysis (PERT)", r, [200, 404])
 
 
-def test_tendering(api: API, suite: TestSuite, project_id: str, boq_id: str) -> None:
+def test_tendering(api: API, suite: PlatformTestSuite, project_id: str, boq_id: str) -> None:
     """Section 14: Tendering — packages, bids, comparison."""
     print("\n── 14. TENDERING ──")
 
@@ -739,7 +739,7 @@ def test_tendering(api: API, suite: TestSuite, project_id: str, boq_id: str) -> 
         check(suite, "GET /packages/comparison", r, 200)
 
 
-def test_costmodel(api: API, suite: TestSuite, project_id: str, boq_id: str) -> None:
+def test_costmodel(api: API, suite: PlatformTestSuite, project_id: str, boq_id: str) -> None:
     """Section 15: 5D Cost Model — budget, EVM, cash flow."""
     print("\n── 15. 5D COST MODEL ──")
 
@@ -779,7 +779,7 @@ def test_costmodel(api: API, suite: TestSuite, project_id: str, boq_id: str) -> 
     check(suite, "POST /5d/snapshots", r, [200, 201])
 
 
-def test_catalog(api: API, suite: TestSuite) -> None:
+def test_catalog(api: API, suite: PlatformTestSuite) -> None:
     """Section 16: Resource catalog."""
     print("\n── 16. CATALOG ──")
 
@@ -793,7 +793,7 @@ def test_catalog(api: API, suite: TestSuite) -> None:
     check(suite, "GET /catalog/regions", r, 200)
 
 
-def test_takeoff(api: API, suite: TestSuite) -> None:
+def test_takeoff(api: API, suite: PlatformTestSuite) -> None:
     """Section 17: Takeoff — converters, documents."""
     print("\n── 17. TAKEOFF ──")
 
@@ -807,7 +807,7 @@ def test_takeoff(api: API, suite: TestSuite) -> None:
     check(suite, "GET /takeoff/documents (list)", r, 200)
 
 
-def test_ai_settings(api: API, suite: TestSuite) -> None:
+def test_ai_settings(api: API, suite: PlatformTestSuite) -> None:
     """Section 18: AI settings."""
     print("\n── 18. AI SETTINGS ──")
 
@@ -818,7 +818,7 @@ def test_ai_settings(api: API, suite: TestSuite) -> None:
                   "preferred_model" in d)
 
 
-def test_demo_projects(api: API, suite: TestSuite) -> None:
+def test_demo_projects(api: API, suite: PlatformTestSuite) -> None:
     """Section 19: Demo project installation."""
     print("\n── 19. DEMO PROJECTS ──")
 
@@ -832,7 +832,7 @@ def test_demo_projects(api: API, suite: TestSuite) -> None:
     check(suite, "POST /demo/install/residential-berlin", r, [200, 201])
 
 
-def test_feedback(api: API, suite: TestSuite) -> None:
+def test_feedback(api: API, suite: PlatformTestSuite) -> None:
     """Section 20: Feedback submission."""
     print("\n── 20. FEEDBACK ──")
 
@@ -846,7 +846,7 @@ def test_feedback(api: API, suite: TestSuite) -> None:
     check(suite, "POST /feedback", r, 200)
 
 
-def test_edge_cases(api: API, suite: TestSuite) -> None:
+def test_edge_cases(api: API, suite: PlatformTestSuite) -> None:
     """Section 21: Edge cases & error handling."""
     print("\n── 21. EDGE CASES ──")
 
@@ -884,7 +884,7 @@ def test_edge_cases(api: API, suite: TestSuite) -> None:
     check(suite, "POST position negative qty → 4xx", r, [400, 404, 422])
 
 
-def test_boq_duplicate_and_delete(api: API, suite: TestSuite, boq_id: str) -> None:
+def test_boq_duplicate_and_delete(api: API, suite: PlatformTestSuite, boq_id: str) -> None:
     """Section 22: BOQ duplicate & cleanup."""
     print("\n── 22. BOQ DUPLICATE & DELETE ──")
 
@@ -902,7 +902,7 @@ def test_boq_duplicate_and_delete(api: API, suite: TestSuite, boq_id: str) -> No
         check(suite, "DELETE /boqs/ (clone)", r, [200, 204])
 
 
-def test_recalculate(api: API, suite: TestSuite, boq_id: str) -> None:
+def test_recalculate(api: API, suite: PlatformTestSuite, boq_id: str) -> None:
     """Section 23: Recalculate rates & enrich."""
     print("\n── 23. RECALCULATE & ENRICH ──")
 
@@ -916,7 +916,7 @@ def test_recalculate(api: API, suite: TestSuite, boq_id: str) -> None:
                   "updated" in d or "skipped" in d)
 
 
-def test_templates(api: API, suite: TestSuite, project_id: str) -> None:
+def test_templates(api: API, suite: PlatformTestSuite, project_id: str) -> None:
     """Section 24: BOQ templates."""
     print("\n── 24. BOQ TEMPLATES ──")
 
@@ -932,7 +932,7 @@ def test_templates(api: API, suite: TestSuite, project_id: str) -> None:
         check(suite, f"POST /boqs/from-template ({template_id})", r, [200, 201, 422])
 
 
-def test_multi_region_boq(api: API, suite: TestSuite) -> None:
+def test_multi_region_boq(api: API, suite: PlatformTestSuite) -> None:
     """Section 25: Create BOQ in every region with regional markups and validate."""
     print("\n── 25. MULTI-REGION BOQ MATRIX ──")
 
@@ -998,7 +998,7 @@ def test_multi_region_boq(api: API, suite: TestSuite) -> None:
         check(suite, f"Structured {region}", r, 200)
 
 
-def test_cost_search_multilingual(api: API, suite: TestSuite) -> None:
+def test_cost_search_multilingual(api: API, suite: PlatformTestSuite) -> None:
     """Section 26: Search cost database in multiple languages."""
     print("\n── 26. COST SEARCH — MULTILINGUAL ──")
 
@@ -1044,7 +1044,7 @@ def test_cost_search_multilingual(api: API, suite: TestSuite) -> None:
             suite.add(f"Semantic '{q[:30]}'", False, detail="connection error")
 
 
-def test_boq_ai_endpoints(api: API, suite: TestSuite, boq_id: str) -> None:
+def test_boq_ai_endpoints(api: API, suite: PlatformTestSuite, boq_id: str) -> None:
     """Section 27: BOQ AI endpoints (without actual AI key — expect 400/502)."""
     print("\n── 27. BOQ AI ENDPOINTS ──")
 
@@ -1077,7 +1077,7 @@ def test_boq_ai_endpoints(api: API, suite: TestSuite, boq_id: str) -> None:
             suite.add(f"AI {path.split('/')[-1]}", False, detail=str(exc)[:80])
 
 
-def test_position_lifecycle(api: API, suite: TestSuite, boq_id: str) -> None:
+def test_position_lifecycle(api: API, suite: PlatformTestSuite, boq_id: str) -> None:
     """Section 28: Position full lifecycle — create, update every field, delete."""
     print("\n── 28. POSITION LIFECYCLE ──")
 
@@ -1134,7 +1134,7 @@ def test_position_lifecycle(api: API, suite: TestSuite, boq_id: str) -> None:
     check(suite, "Delete original position", r, [200, 204])
 
 
-def test_concurrent_operations(api: API, suite: TestSuite, boq_id: str) -> None:
+def test_concurrent_operations(api: API, suite: PlatformTestSuite, boq_id: str) -> None:
     """Section 29: Rapid sequential operations — stress test."""
     print("\n── 29. RAPID OPERATIONS ──")
 
@@ -1161,7 +1161,7 @@ def test_concurrent_operations(api: API, suite: TestSuite, boq_id: str) -> None:
               detail=f"deleted={deleted}")
 
 
-def test_project_activity_log(api: API, suite: TestSuite, project_id: str) -> None:
+def test_project_activity_log(api: API, suite: PlatformTestSuite, project_id: str) -> None:
     """Section 30: Project-level activity log."""
     print("\n── 30. PROJECT ACTIVITY LOG ──")
 
@@ -1172,7 +1172,7 @@ def test_project_activity_log(api: API, suite: TestSuite, project_id: str) -> No
         suite.add(f"Activity entries ({len(entries)})", len(entries) >= 0)
 
 
-def test_user_management(api: API, suite: TestSuite) -> None:
+def test_user_management(api: API, suite: PlatformTestSuite) -> None:
     """Section 31: User registration, profile, password changes."""
     print("\n── 31. USER MANAGEMENT ──")
 
@@ -1218,7 +1218,7 @@ def test_user_management(api: API, suite: TestSuite) -> None:
         api.set_token(saved)
 
 
-def test_epd_sustainability(api: API, suite: TestSuite, boq_id: str) -> None:
+def test_epd_sustainability(api: API, suite: PlatformTestSuite, boq_id: str) -> None:
     """Section 32: EPD materials and CO2 sustainability."""
     print("\n── 32. SUSTAINABILITY / CO2 ──")
 
@@ -1234,7 +1234,7 @@ def test_epd_sustainability(api: API, suite: TestSuite, boq_id: str) -> None:
     check(suite, "GET /sustainability", r, 200)
 
 
-def test_marketplace_modules(api: API, suite: TestSuite) -> None:
+def test_marketplace_modules(api: API, suite: PlatformTestSuite) -> None:
     """Section 33: Marketplace and module system."""
     print("\n── 33. MARKETPLACE & MODULES ──")
 
@@ -1262,7 +1262,7 @@ def test_marketplace_modules(api: API, suite: TestSuite) -> None:
             suite.add(f"Module '{exp}' loaded", exp in loaded_names)
 
 
-def test_data_integrity(api: API, suite: TestSuite, project_id: str) -> None:
+def test_data_integrity(api: API, suite: PlatformTestSuite, project_id: str) -> None:
     """Section 34: Data integrity — totals, calculations, consistency."""
     print("\n── 34. DATA INTEGRITY ──")
 
@@ -1331,7 +1331,7 @@ def test_data_integrity(api: API, suite: TestSuite, project_id: str) -> None:
     api.delete(f"/api/v1/boq/boqs/{bid}")
 
 
-def test_catalog_regions(api: API, suite: TestSuite) -> None:
+def test_catalog_regions(api: API, suite: PlatformTestSuite) -> None:
     """Section 35: Catalog regional data."""
     print("\n── 35. CATALOG REGIONS ──")
 
@@ -1355,8 +1355,8 @@ def test_catalog_regions(api: API, suite: TestSuite) -> None:
 # ══════════════════════════════════════════════════════════════════════════════
 
 
-def run_all_tests() -> TestSuite:
-    suite = TestSuite()
+def run_all_tests() -> PlatformTestSuite:
+    suite = PlatformTestSuite()
     suite.start_time = time.time()
     api = API(BASE_URL)
 

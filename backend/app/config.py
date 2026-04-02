@@ -58,6 +58,11 @@ class Settings(BaseSettings):
     vector_data_dir: str = ""  # LanceDB storage path, default: ~/.openestimator/data/vectors
     openai_api_key: str | None = None
     anthropic_api_key: str | None = None
+    gemini_api_key: str | None = None
+    openrouter_api_key: str | None = None
+    mistral_api_key: str | None = None
+    groq_api_key: str | None = None
+    deepseek_api_key: str | None = None
 
     # ── External Services ────────────────────────────────────────────────
     cad_converter_url: str | None = "http://localhost:8001"
