@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
+import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
@@ -43,7 +44,7 @@ const IMPACT_LEVELS = ['low', 'medium', 'high', 'critical'];
 
 function fmtCur(n: number, c = 'EUR') {
   const s = /^[A-Z]{3}$/.test(c) ? c : 'EUR';
-  try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: s, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n); }
+  try { return new Intl.NumberFormat(getIntlLocale(), { style: 'currency', currency: s, minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n); }
   catch { return `${n.toFixed(0)} ${s}`; }
 }
 
@@ -79,7 +80,7 @@ function RiskMatrix({ cells }: { cells: MatrixCell[] }) {
           <tbody>
             {PROB_LEVELS.map((p) => (
               <tr key={p}>
-                <td className="p-1 text-content-secondary font-medium">{PROB_LABELS[p]}</td>
+                <td className="p-1 text-content-secondary font-medium">{t(`risk.prob_${String(p).replace('.', '')}`, { defaultValue: PROB_LABELS[p] })}</td>
                 {IMPACT_LEVELS.map((i) => {
                   const c = map[`${p}|${i}`]?.count || 0;
                   return <td key={i} className="p-1"><div className={`flex items-center justify-center h-10 rounded-md text-sm font-bold ${c > 0 ? matrixColor(p, i) : 'bg-surface-secondary text-content-quaternary'}`}>{c > 0 ? c : ''}</div></td>;

@@ -12,7 +12,7 @@ import {
   Banknote,
   Activity,
 } from 'lucide-react';
-import { Card, CardHeader, CardContent, Button, Badge, EmptyState, Skeleton, InfoHint } from '@/shared/ui';
+import { Card, CardHeader, CardContent, Button, Badge, EmptyState, Skeleton, InfoHint, Breadcrumb } from '@/shared/ui';
 import { apiGet, apiPost } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import {
@@ -1688,6 +1688,7 @@ export function CostModelPage() {
   // Project selector view
   return (
     <div className="max-w-content mx-auto animate-fade-in">
+      <Breadcrumb items={[{ label: t('nav.dashboard', 'Dashboard'), to: '/' }, { label: t('nav.costmodel', '5D Cost Model') }]} className="mb-4" />
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-content-primary">
           {t('costmodel.title', '5D Cost Model')}

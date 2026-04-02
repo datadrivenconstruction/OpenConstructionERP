@@ -6,7 +6,7 @@ import {
   FolderPlus, FolderOpen, ArrowRight, MoreHorizontal, Copy, Trash2, Archive, ExternalLink,
   Search, ChevronDown, ArrowUpDown, Star,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, SkeletonGrid } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, SkeletonGrid, Breadcrumb } from '@/shared/ui';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { projectsApi, type Project } from './api';
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
@@ -243,6 +243,7 @@ export function ProjectsPage() {
 
   return (
     <div className="max-w-content mx-auto animate-fade-in">
+      <Breadcrumb items={[{ label: t('nav.dashboard', 'Dashboard'), to: '/' }, { label: t('nav.projects', 'Projects') }]} className="mb-4" />
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>

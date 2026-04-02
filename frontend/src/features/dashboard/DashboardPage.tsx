@@ -249,8 +249,8 @@ function ImportDemoModal({
                     </p>
                     <div className="mt-1 flex items-center gap-3 text-2xs text-content-quaternary">
                       <span>{demo.type}</span>
-                      <span>{demo.sections} sections</span>
-                      <span>{demo.positions} positions</span>
+                      <span>{demo.sections} {t('demo.sections', { defaultValue: 'sections' })}</span>
+                      <span>{demo.positions} {t('demo.positions', { defaultValue: 'positions' })}</span>
                       <span>{demo.currency}</span>
                     </div>
                   </div>
