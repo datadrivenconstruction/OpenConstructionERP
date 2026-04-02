@@ -13,7 +13,7 @@ $ErrorActionPreference = "Stop"
 $OE_VERSION = if ($env:OE_VERSION) { $env:OE_VERSION } else { "latest" }
 $OE_INSTALL_DIR = if ($env:OE_INSTALL_DIR) { $env:OE_INSTALL_DIR } else { "$env:LOCALAPPDATA\OpenEstimate" }
 $OE_PORT = if ($env:OE_PORT) { $env:OE_PORT } else { "8080" }
-$OE_REPO = "https://github.com/openestimate/openestimate"
+$OE_REPO = "https://github.com/datadrivenconstruction/OpenConstructionERP"
 
 function Write-Info($msg) { Write-Host "[INFO] $msg" -ForegroundColor Blue }
 function Write-Ok($msg)   { Write-Host "[OK] $msg" -ForegroundColor Green }
