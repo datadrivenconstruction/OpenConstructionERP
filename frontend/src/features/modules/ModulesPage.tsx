@@ -23,7 +23,7 @@ import {
   Info,
   type LucideIcon,
 } from 'lucide-react';
-import { Card, Badge, Button, Input, InfoHint } from '@/shared/ui';
+import { Card, Badge, Button, Input, InfoHint, Breadcrumb } from '@/shared/ui';
 import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useModuleStore } from '@/stores/useModuleStore';
@@ -508,6 +508,7 @@ export function ModulesPage() {
 
   return (
     <div className="max-w-content mx-auto">
+      <Breadcrumb items={[{ label: t('nav.dashboard', 'Dashboard'), to: '/' }, { label: t('nav.modules', 'Modules') }]} className="mb-4" />
       {/* ── Header ─────────────────────────────────────────────────── */}
       <div className="mb-8 animate-card-in" style={{ animationDelay: '0ms' }}>
         <div className="flex items-start justify-between gap-4">

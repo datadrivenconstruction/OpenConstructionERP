@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import clsx from 'clsx';
 import { Sidebar } from './Sidebar';
@@ -23,6 +23,10 @@ export function AppLayout({ title, children }: AppLayoutProps) {
 
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
   const openSidebar = useCallback(() => setSidebarOpen(true), []);
+
+  useEffect(() => {
+    document.title = title ? `${title} | OpenConstructionERP` : 'OpenConstructionERP';
+  }, [title]);
 
   // Auto-replay offline mutations when coming back online
   useOfflineSync();

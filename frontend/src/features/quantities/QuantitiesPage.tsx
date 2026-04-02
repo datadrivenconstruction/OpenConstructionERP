@@ -25,6 +25,7 @@ import {
   Star,
 } from 'lucide-react';
 import { apiGet, apiPost } from '@/shared/lib/api';
+import { Breadcrumb } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 
 // ── Types ────────────────────────────────────────────────────────────────
@@ -785,6 +786,7 @@ export function QuantitiesPage() {
 
   return (
     <div className="mx-auto max-w-content space-y-8">
+      <Breadcrumb items={[{ label: t('nav.dashboard', 'Dashboard'), to: '/' }, { label: t('nav.quantities', 'Quantity Takeoff') }]} className="mb-4" />
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-content-primary">

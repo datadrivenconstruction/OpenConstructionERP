@@ -6,7 +6,7 @@ import {
   Table, Table2, ArrowRight, Copy, Trash2, Plus,
   Search, ArrowUpDown, ChevronDown, GitCompareArrows, X, Loader2,
 } from 'lucide-react';
-import { Card, Badge, EmptyState, Skeleton, Button } from '@/shared/ui';
+import { Card, Badge, EmptyState, Skeleton, Button, Breadcrumb } from '@/shared/ui';
 import { apiGet } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { boqApi, type BOQWithPositions, groupPositionsIntoSections, type SectionGroup } from './api';
@@ -523,6 +523,7 @@ export function BOQListPage() {
 
   return (
     <div className="max-w-content mx-auto animate-fade-in">
+      <Breadcrumb items={[{ label: t('nav.dashboard', 'Dashboard'), to: '/' }, { label: t('nav.boq', 'Bill of Quantities') }]} className="mb-4" />
       {/* Header */}
       <div className="mb-6 flex items-start justify-between">
         <div>
