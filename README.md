@@ -7,7 +7,7 @@
 [Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Community](https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR/discussions)
 
 ![License](https://img.shields.io/badge/license-AGPL--3.0-blue)
-![Version](https://img.shields.io/badge/version-0.1.0-green)
+![Version](https://img.shields.io/badge/version-0.2.0-green)
 ![Languages](https://img.shields.io/badge/languages-21-orange)
 ![Validation Rules](https://img.shields.io/badge/validation_rules-42-purple)
 
@@ -82,7 +82,19 @@ Professional construction cost estimation for everyone — from solo quantity su
 
 ## Quick Start
 
-### Option 1: One Command (Docker)
+### Fastest: One-Line Install
+
+```bash
+# Linux / macOS
+curl -sSL https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionERP/main/scripts/install.sh | bash
+
+# Windows (PowerShell)
+irm https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionERP/main/scripts/install.ps1 | iex
+```
+
+Auto-detects Docker / Python / uv → installs and runs at **http://localhost:8080**
+
+### Option 1: Docker (recommended)
 
 ```bash
 git clone https://github.com/datadrivenconstruction/OpenConstructionERP.git
@@ -90,37 +102,18 @@ cd OpenConstructionERP
 make quickstart
 ```
 
-Open **http://localhost:8080** — demo accounts are pre-loaded:
-
-| Account | Email | Password | Role |
-|---------|-------|----------|------|
-| Admin | `demo@openestimator.io` | `DemoPass1234!` | Full access |
-| Estimator | `estimator@openestimator.io` | `DemoPass1234!` | Estimator |
-| Manager | `manager@openestimator.io` | `DemoPass1234!` | Manager |
-
-> Requires Docker. Builds frontend + backend in a single container (~2 min first time).
+Open **http://localhost:8080** (~2 min first build)
 
 ### Option 2: Local Development (no Docker)
 
 ```bash
 git clone https://github.com/datadrivenconstruction/OpenConstructionERP.git
 cd OpenConstructionERP
-
-# Backend (uses SQLite, no database setup needed)
-cd backend
-pip install -r requirements.txt
-uvicorn app.main:create_app --factory --reload --port 8000
-
-# Frontend (new terminal)
-cd frontend
-npm install
-npm run dev
+make setup   # install Python + Node dependencies
+make dev     # start backend + frontend
 ```
 
-Backend: **http://localhost:8000** · Frontend: **http://localhost:5173**
-
-> Requires Python 3.12+ and Node.js 20+. Uses SQLite by default — zero config.
-> Demo account is created automatically on first start.
+Open **http://localhost:5173** — requires Python 3.12+ and Node.js 20+
 
 ### Option 3: pip install (standalone)
 
@@ -129,8 +122,15 @@ pip install -e ./backend
 openestimate serve --open
 ```
 
-> Runs backend with built-in SQLite. Add `--port 8080` to change port.
-> Frontend must be built separately: `cd frontend && npm run build`
+> Uses SQLite by default — zero config. Demo account created on first start.
+
+### Demo Accounts
+
+| Account | Email | Password | Role |
+|---------|-------|----------|------|
+| Admin | `demo@openestimator.io` | `DemoPass1234!` | Full access |
+| Estimator | `estimator@openestimator.io` | `DemoPass1234!` | Estimator |
+| Manager | `manager@openestimator.io` | `DemoPass1234!` | Manager |
 
 ## Tech Stack
 
