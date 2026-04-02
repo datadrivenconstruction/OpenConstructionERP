@@ -27,6 +27,7 @@ export function useSwipeGesture<T extends HTMLElement = HTMLElement>({
 
   const handleTouchStart = useCallback((e: TouchEvent) => {
     const touch = e.touches[0];
+    if (!touch) return;
     touchStart.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
   }, []);
 
@@ -34,6 +35,7 @@ export function useSwipeGesture<T extends HTMLElement = HTMLElement>({
     (e: TouchEvent) => {
       if (!touchStart.current) return;
       const touch = e.changedTouches[0];
+      if (!touch) return;
       const dx = touch.clientX - touchStart.current.x;
       const dy = touch.clientY - touchStart.current.y;
       const dt = Date.now() - touchStart.current.time;
@@ -92,6 +94,7 @@ export function useEdgeSwipe({
 
     function handleTouchStart(e: TouchEvent) {
       const touch = e.touches[0];
+      if (!touch) return;
       const fromLeftEdge = touch.clientX <= edgeWidth;
       const fromRightEdge = touch.clientX >= window.innerWidth - edgeWidth;
       if (fromLeftEdge || fromRightEdge) {
@@ -102,6 +105,7 @@ export function useEdgeSwipe({
     function handleTouchEnd(e: TouchEvent) {
       if (!touchStart.current) return;
       const touch = e.changedTouches[0];
+      if (!touch) return;
       const dx = touch.clientX - touchStart.current.x;
       const dy = touch.clientY - touchStart.current.y;
       const dt = Date.now() - touchStart.current.time;

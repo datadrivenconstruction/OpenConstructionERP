@@ -1,3 +1,7 @@
+# OpenConstructionERP — DataDrivenConstruction (DDC)
+# CWICR Cost Database Engine · CAD2DATA Pipeline
+# Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+# AGPL-3.0 License · DDC-CWICR-OE-2026
 """OpenEstimate — FastAPI application factory.
 
 Usage:
@@ -5,12 +9,20 @@ Usage:
     openestimate serve  (CLI mode — also serves frontend)
 """
 
+import hashlib as _hashlib
 import logging
 import os
 import time
 import uuid
+import uuid as _instance_uuid
 from pathlib import Path
 from typing import Any
+
+# Unique instance fingerprint — proves this specific deployment origin
+_INSTANCE_ID = str(_instance_uuid.uuid4())
+_BUILD_HASH = _hashlib.sha256(
+    f"DDC-CWICR-OE-{_INSTANCE_ID}".encode()
+).hexdigest()[:16]
 
 import structlog
 from fastapi import FastAPI
@@ -46,24 +58,28 @@ def configure_logging(settings: Settings) -> None:
 
 
 def _init_vector_db() -> None:
-    """Initialize vector database on startup.
+    """Initialize vector database on startup (non-blocking).
 
     Default: LanceDB (embedded, no Docker needed).
     If VECTOR_BACKEND=qdrant, checks if Qdrant is reachable.
+    Embedding model is loaded lazily on first use, NOT at startup.
     """
-    from app.core.vector import vector_status
+    try:
+        from app.core.vector import vector_status
 
-    status = vector_status()
-    engine = status.get("engine", "lancedb")
-    if status.get("connected"):
-        vectors = status.get("cost_collection", {})
-        count = vectors.get("vectors_count", 0) if vectors else 0
-        logger.info("Vector DB ready: %s (%d vectors indexed)", engine, count)
-    else:
-        if engine == "lancedb":
-            logger.warning("LanceDB init failed: %s", status.get("error", "unknown"))
+        status = vector_status()
+        engine = status.get("engine", "lancedb")
+        if status.get("connected"):
+            vectors = status.get("cost_collection", {})
+            count = vectors.get("vectors_count", 0) if vectors else 0
+            logger.info("Vector DB ready: %s (%d vectors indexed)", engine, count)
         else:
-            logger.info("Qdrant not available — semantic search disabled")
+            if engine == "lancedb":
+                logger.info("LanceDB init failed: %s", status.get("error", "unknown"))
+            else:
+                logger.info("Qdrant not available — semantic search disabled")
+    except Exception as exc:
+        logger.info("Vector DB init skipped: %s", exc)
 
 
 async def _seed_demo_account() -> None:
@@ -103,6 +119,42 @@ async def _seed_demo_account() -> None:
                 session.add(demo)
                 await session.flush()
                 logger.info("Demo user created: demo@openestimator.io")
+
+            # Create additional demo accounts (estimator + manager)
+            demo_accounts = [
+                {
+                    "email": "estimator@openestimator.io",
+                    "password": "DemoPass1234!",
+                    "full_name": "Sarah Chen",
+                    "role": "estimator",
+                },
+                {
+                    "email": "manager@openestimator.io",
+                    "password": "DemoPass1234!",
+                    "full_name": "Thomas Müller",
+                    "role": "manager",
+                },
+            ]
+            for acct in demo_accounts:
+                exists = (
+                    await session.execute(
+                        select(User).where(User.email == acct["email"])
+                    )
+                ).scalar_one_or_none()
+                if exists is None:
+                    session.add(
+                        User(
+                            id=uuid.uuid4(),
+                            email=acct["email"],
+                            hashed_password=hash_password(acct["password"]),
+                            full_name=acct["full_name"],
+                            role=acct["role"],
+                            locale="en",
+                            is_active=True,
+                            metadata_={},
+                        )
+                    )
+                    logger.info("Demo user created: %s", acct["email"])
 
             # 2. Install 5 demo projects if user has none
             count = (
@@ -172,6 +224,11 @@ def create_app() -> FastAPI:
         allow_headers=["Content-Type", "Authorization", "Accept", "Accept-Language"],
     )
 
+    # ── DDC Fingerprint ──────────────────────────────────────────────────
+    from app.middleware.fingerprint import DDCFingerprintMiddleware
+
+    app.add_middleware(DDCFingerprintMiddleware)
+
     # ── Global exception handler — return JSON for unhandled errors ────
     from fastapi import Request
     from fastapi.responses import JSONResponse
@@ -195,6 +252,33 @@ def create_app() -> FastAPI:
             "status": "healthy",
             "version": settings.app_version,
             "env": settings.app_env,
+            "instance_id": _INSTANCE_ID,
+            "build": f"DDC-{_BUILD_HASH}",
+        }
+
+    @app.get("/api/source", tags=["System"])
+    async def source_code() -> dict:
+        """AGPL-3.0 Source Code Disclosure.
+
+        As required by AGPL-3.0, this endpoint provides access to the
+        complete corresponding source code of this application.
+        DataDrivenConstruction · OpenConstructionERP · DDC-CWICR-OE-2026
+        """
+        return {
+            "license": "AGPL-3.0",
+            "source_code": "https://github.com/datadrivenconstruction/OpenConstructionERP",
+            "copyright": "Copyright (c) 2026 Artem Boiko / DataDrivenConstruction",
+            "notice": (
+                "This software is licensed under AGPL-3.0. "
+                "If you modify and deploy this software, you MUST make your "
+                "complete source code available to all users under the same license. "
+                "For commercial licensing without AGPL obligations, contact: "
+                "datadrivenconstruction.io/contact-support/"
+            ),
+            "projects": {
+                "CWICR": "https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR",
+                "cad2data": "https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN-pipeline-with-conversion-validation-qto",
+            },
         }
 
     @app.get("/api/system/status", tags=["System"])

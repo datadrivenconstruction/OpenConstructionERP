@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Eye, EyeOff, Mail, Lock, Globe, ChevronDown, Info, X,
-  ShieldCheck, HardDrive, Zap, Globe2, Brain, Users,
+  ShieldCheck, Zap, Brain,
   FileSpreadsheet, CalendarClock, TrendingUp, Boxes, Database,
   BarChart3, Upload, FileCheck,
 } from 'lucide-react';
@@ -26,10 +26,12 @@ export function LoginPage() {
   );
   const [langOpen, setLangOpen] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const [demoOpen, setDemoOpen] = useState(true);
+  const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const langRef = useRef<HTMLDivElement>(null);
 
   const currentLang =
-    SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language) ?? SUPPORTED_LANGUAGES[0];
+    SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language) ?? SUPPORTED_LANGUAGES[0]!;
 
   // Clear form on mount (prevents pre-fill after logout)
   useEffect(() => {
@@ -71,6 +73,37 @@ export function LoginPage() {
     }
   };
 
+  const demoAccounts = [
+    { email: 'demo@openestimator.io', name: 'Admin', role: t('auth.demo_role_admin', 'Administrator'), color: 'bg-blue-500', letter: 'A' },
+    { email: 'estimator@openestimator.io', name: 'Sarah Chen', role: t('auth.demo_role_estimator', 'Estimator'), color: 'bg-emerald-500', letter: 'S' },
+    { email: 'manager@openestimator.io', name: 'Thomas Müller', role: t('auth.demo_role_manager', 'Manager'), color: 'bg-amber-500', letter: 'M' },
+  ];
+
+  const handleDemoLogin = async (demoEmail: string) => {
+    setDemoLoading(demoEmail);
+    setError('');
+    try {
+      const res = await fetch('/api/v1/users/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: demoEmail, password: 'DemoPass1234!' }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setError(data?.detail || t('auth.invalid_credentials', 'Invalid email or password'));
+        return;
+      }
+      const data = await res.json();
+      setTokens(data.access_token, data.refresh_token, false, demoEmail);
+      navigate('/');
+    } catch {
+      setError(t('auth.connection_error', 'Unable to connect to server. Please try again.'));
+    } finally {
+      setDemoLoading(null);
+    }
+  };
+
+  /* Benefits list — reserved for future hero section layout
   const benefits = [
     { icon: HardDrive, color: 'text-emerald-500 bg-emerald-500/10', title: t('login.benefit.local', 'Your data stays on your computer'), desc: t('login.benefit.local_desc', 'No cloud. No third-party servers. Full control.') },
     { icon: ShieldCheck, color: 'text-blue-500 bg-blue-500/10', title: t('login.benefit.open_source', '100% open source'), desc: t('login.benefit.open_source_desc', 'Transparent code. No vendor lock-in.') },
@@ -78,7 +111,7 @@ export function LoginPage() {
     { icon: Brain, color: 'text-amber-500 bg-amber-500/10', title: t('login.benefit.ai', 'AI-assisted estimation'), desc: t('login.benefit.ai_desc', 'Smart suggestions. You decide, AI assists.') },
     { icon: Zap, color: 'text-rose-500 bg-rose-500/10', title: t('login.benefit.allinone', 'BOQ + 4D + 5D + Tendering'), desc: t('login.benefit.allinone_desc', 'Full workflow in one tool.') },
     { icon: Users, color: 'text-cyan-500 bg-cyan-500/10', title: t('login.benefit.free', 'Free for everyone'), desc: t('login.benefit.free_desc', 'No fees. No limits. By estimators.') },
-  ];
+  ]; */
 
   return (
     <div className="relative flex h-screen bg-surface-secondary overflow-hidden">
@@ -188,7 +221,7 @@ export function LoginPage() {
         <div className="mt-4 space-y-1 animate-stagger-in" style={{ animationDelay: '380ms' }}>
           <div className="flex items-center gap-2 text-[11px] text-content-quaternary/60">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" className="opacity-40"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-            <span>AGPL-3.0</span>
+            <a href="/api/source" target="_blank" rel="noopener noreferrer" className="hover:text-content-tertiary transition-colors">AGPL-3.0</a>
             <span className="opacity-30">&middot;</span>
             <a href="https://OpenConstructionERP.com" target="_blank" rel="noopener noreferrer" className="hover:text-content-tertiary transition-colors">OpenConstructionERP.com</a>
           </div>
@@ -282,16 +315,48 @@ export function LoginPage() {
                 {t('auth.no_account', "Don't have an account?")}{' '}
                 <Link to="/register" className="font-medium text-oe-blue hover:text-oe-blue-hover transition-colors">{t('auth.create_account', 'Create account')}</Link>
               </p>
+            </div>
+          </div>
+
+          {/* Demo Access */}
+          <div className="mt-3 animate-stagger-in" style={{ animationDelay: '500ms' }}>
+            <div className="glass-strong rounded-2xl shadow-lg overflow-hidden">
               <button
                 type="button"
-                onClick={() => { setEmail('demo@openestimator.io'); setPassword('DemoPass1234!'); }}
-                className="mt-2 block w-full text-center text-2xs text-oe-blue hover:text-oe-blue-hover hover:underline font-medium cursor-pointer transition-colors"
+                onClick={() => setDemoOpen(!demoOpen)}
+                className="flex w-full items-center justify-center gap-2 px-5 py-2.5 text-sm text-content-secondary hover:text-oe-blue transition-all"
               >
-                {t('auth.try_demo', 'Try demo account →')}
+                <Zap size={14} className="text-oe-blue" />
+                <span className="font-semibold">{t('auth.demo_access', 'Demo Access')}</span>
+                <ChevronDown size={14} className={`text-content-tertiary transition-transform duration-200 ${demoOpen ? 'rotate-180' : ''}`} />
               </button>
-              <p className="mt-1 text-center text-[10px] text-content-quaternary select-all">
-                demo@openestimator.io / DemoPass1234!
-              </p>
+
+              {demoOpen && (
+                <div className="border-t border-border-light/60 px-3 py-2.5 space-y-1.5 animate-stagger-in">
+                  {demoAccounts.map((acct) => (
+                    <button
+                      key={acct.email}
+                      type="button"
+                      onClick={() => handleDemoLogin(acct.email)}
+                      disabled={demoLoading !== null}
+                      className="flex w-full items-center gap-3 rounded-xl border border-border-light/50 bg-surface-secondary/50 px-3.5 py-2.5 text-left transition-all hover:border-oe-blue/40 hover:bg-oe-blue/[0.05] hover:shadow-sm disabled:opacity-50 group"
+                    >
+                      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${acct.color} text-white text-sm font-bold shadow-sm`}>
+                        {demoLoading === acct.email ? (
+                          <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>
+                        ) : (
+                          acct.letter
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[13px] font-semibold text-content-primary">{acct.name}</div>
+                        <div className="text-[11px] text-content-tertiary truncate">{acct.email} · {acct.role}</div>
+                      </div>
+                      <ChevronDown size={15} className="text-content-quaternary -rotate-90 group-hover:text-oe-blue transition-colors shrink-0" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -447,7 +512,7 @@ export function LoginPage() {
             {/* Footer */}
             <div className="px-6 py-4 border-t border-border-light flex items-center justify-between">
               <div className="flex items-center gap-3 text-2xs text-content-quaternary">
-                <span>AGPL-3.0</span>
+                <a href="/api/source" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">AGPL-3.0</a>
                 <a href="https://OpenConstructionERP.com" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">OpenConstructionERP.com</a>
                 <a href="https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">GitHub</a>
               </div>

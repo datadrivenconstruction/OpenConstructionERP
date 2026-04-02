@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18next from 'i18next';
-import { Sparkles, Database, ArrowUp, AlertTriangle, Settings } from 'lucide-react';
+import { Sparkles, Database, ArrowUp, AlertTriangle, Settings, Globe } from 'lucide-react';
 import { Breadcrumb } from '@/shared/ui';
 import { apiGet, apiPost } from '@/shared/lib/api';
 import { Link } from 'react-router-dom';
@@ -218,6 +218,7 @@ export function AdvisorPage() {
   const [loading, setLoading] = useState(false);
   const [aiConfigured, setAiConfigured] = useState<boolean | null>(null); // null = loading
   const [aiProvider, setAiProvider] = useState<string>('');
+  const [region, setRegion] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
@@ -278,6 +279,7 @@ export function AdvisorPage() {
         const data = await apiPost<AdvisorResponse>('/v1/ai/advisor/chat', {
           message: msg,
           project_id: activeProjectId || undefined,
+          region: region || undefined,
           locale: i18next.language,
           history,
         });
@@ -370,25 +372,39 @@ export function AdvisorPage() {
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-blue-500 text-white shadow-sm">
             <Sparkles size={14} />
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h1 className="text-[15px] font-semibold text-content-primary leading-tight">
               {t('ai.advisor_title', { defaultValue: 'AI Cost Advisor' })}
             </h1>
             <p className="text-[11px] text-content-tertiary leading-tight truncate">
-              {aiConfigured
-                ? t('ai.advisor_desc_connected', {
-                    defaultValue: 'Connected via {{provider}} — ask about costs, materials, pricing',
-                    provider: aiProvider || 'AI',
-                  })
-                : t('ai.advisor_desc', {
-                    defaultValue: 'Ask questions about costs, materials, and pricing — from your database and AI knowledge',
-                  })}
+              {t('ai.advisor_desc_short', { defaultValue: 'Ask about costs, materials, and pricing from CWICR database + AI' })}
             </p>
           </div>
+
+          {/* Region selector */}
+          <div className="flex items-center gap-2 shrink-0">
+            <Globe size={13} className="text-content-tertiary" />
+            <select
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              className="h-7 rounded-lg border border-border bg-surface-primary px-2 text-2xs text-content-secondary focus:outline-none focus:ring-1 focus:ring-oe-blue/30"
+            >
+              <option value="">{t('ai.all_regions', { defaultValue: 'All regions' })}</option>
+              <option value="DE_BERLIN">Germany (Berlin)</option>
+              <option value="UK_LONDON">UK (London)</option>
+              <option value="USA_USD">USA (USD)</option>
+              <option value="CA_TORONTO">Canada (Toronto)</option>
+              <option value="FR_PARIS">France (Paris)</option>
+              <option value="ES_BARCELONA">Spain (Barcelona)</option>
+              <option value="AE_DUBAI">UAE (Dubai)</option>
+              <option value="SA_RIYADH">Saudi Arabia</option>
+            </select>
+          </div>
+
           {aiConfigured && (
-            <span className="ml-auto flex items-center gap-1.5 text-2xs text-semantic-success font-medium shrink-0">
+            <span className="flex items-center gap-1.5 text-2xs text-semantic-success font-medium shrink-0">
               <span className="h-1.5 w-1.5 rounded-full bg-semantic-success animate-pulse" />
-              {t('ai.connected', { defaultValue: 'Connected' })}
+              {aiProvider || 'AI'}
             </span>
           )}
         </div>
@@ -404,11 +420,18 @@ export function AdvisorPage() {
               <p className="text-base font-medium text-content-primary mb-1">
                 {t('ai.advisor_empty', { defaultValue: 'Ask me anything about construction costs' })}
               </p>
-              <p className="text-[13px] text-content-tertiary mb-5 max-w-xs">
-                {t('ai.advisor_desc', {
-                  defaultValue: 'Ask questions about costs, materials, and pricing — from your database and AI knowledge',
-                })}
-              </p>
+              <div className="flex flex-wrap justify-center gap-2 mb-5 max-w-md">
+                {[
+                  { icon: Database, label: t('ai.advisor_cap_db', { defaultValue: '55K+ cost items (CWICR)' }) },
+                  { icon: Globe, label: t('ai.advisor_cap_regions', { defaultValue: '11 regional databases' }) },
+                  { icon: Sparkles, label: t('ai.advisor_cap_ai', { defaultValue: 'AI-powered answers' }) },
+                ].map((cap, i) => (
+                  <span key={i} className="inline-flex items-center gap-1.5 rounded-full bg-surface-secondary px-3 py-1 text-2xs text-content-tertiary">
+                    <cap.icon size={11} />
+                    {cap.label}
+                  </span>
+                ))}
+              </div>
 
               {/* Suggestion chips */}
               <div className="flex flex-wrap justify-center gap-2 max-w-lg">

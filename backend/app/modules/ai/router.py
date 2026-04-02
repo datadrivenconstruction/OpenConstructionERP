@@ -7,6 +7,7 @@ Endpoints:
     POST   /ai/photo-estimate                    — Photo upload -> AI Vision -> BOQ items
     POST   /ai/file-estimate                     — Any file (PDF/Excel/CAD/image) -> AI -> BOQ items
     POST   /ai/estimate/{job_id}/create-boq      — Save AI estimate as a real BOQ
+    POST   /ai/estimate/{job_id}/enrich          — Enrich estimate items with cost DB matches
     GET    /ai/estimate/{job_id}                 — Get estimate job status and results
     POST   /ai/advisor/chat                      — AI Cost Advisor chat
 """
@@ -410,6 +411,196 @@ async def create_boq_from_estimate(
         - grand_total: Sum of all position totals
     """
     return await service.create_boq_from_estimate(user_id, job_id, request)
+
+
+# ── Enrich estimate with cost database matches ────────────────────────────
+
+
+@router.post(
+    "/estimate/{job_id}/enrich",
+    dependencies=[Depends(RequirePermission("ai.use"))],
+)
+async def enrich_estimate(
+    job_id: uuid.UUID,
+    body: dict[str, Any],
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> dict[str, Any]:
+    """Enrich AI estimate items with real cost database matches.
+
+    For each item in a completed AI estimate, performs vector similarity search
+    (with text search fallback) against the cost database. Returns matched cost
+    items ranked by relevance score, preferring items with matching units.
+
+    Body:
+        - region (str, optional): Region filter for cost lookup (e.g. "DE_BERLIN")
+        - currency (str, optional): Currency code (default "EUR")
+
+    Returns enriched items with cost database matches and a best_match per item.
+    """
+    uid = uuid.UUID(user_id)
+    region = body.get("region", "")
+    currency = body.get("currency", "EUR")
+
+    # 1. Get the estimate job from DB
+    from app.modules.ai.repository import AIEstimateJobRepository
+
+    job_repo = AIEstimateJobRepository(session)
+    job = await job_repo.get_by_id(job_id)
+
+    if job is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Estimate job not found",
+        )
+
+    # 2. Verify ownership and status
+    if str(job.user_id) != str(uid):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only enrich your own estimate jobs",
+        )
+
+    if job.status != "completed":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Estimate job is not completed (status: {job.status})",
+        )
+
+    # 3. Get items from job result (can be list directly or {"items": [...]})
+    result_data = job.result or []
+    if isinstance(result_data, list):
+        items: list[dict[str, Any]] = result_data
+    else:
+        items = result_data.get("items", [])
+    if not items:
+        return {
+            "items": [],
+            "region": region,
+            "total_matched": 0,
+            "total_items": 0,
+        }
+
+    # 4. Enrich each item
+    from app.modules.costs.repository import CostItemRepository
+
+    cost_repo = CostItemRepository(session)
+    enriched_items: list[dict[str, Any]] = []
+    total_matched = 0
+
+    for idx, item in enumerate(items):
+        description = item.get("description", "")
+        item_unit = item.get("unit", "")
+        ai_rate = item.get("unit_rate", 0.0) or item.get("rate", 0.0) or 0.0
+
+        matches: list[dict[str, Any]] = []
+
+        # 5a. Try vector search first
+        try:
+            from app.core.vector import encode_texts, vector_search
+
+            query_vec = encode_texts([description])[0]
+            raw_matches = vector_search(
+                query_vec, region=region or None, limit=5
+            )
+            for m in raw_matches:
+                matches.append({
+                    "code": m.get("code", ""),
+                    "description": m.get("description", ""),
+                    "unit": m.get("unit", ""),
+                    "rate": float(m.get("rate", 0)),
+                    "region": m.get("region", ""),
+                    "score": float(m.get("score", 0)),
+                })
+        except Exception as vec_err:
+            logger.debug("Vector search unavailable for item %d: %s", idx, vec_err)
+
+        # 5b. If vector search returned nothing, fall back to text search
+        if not matches:
+            try:
+                from sqlalchemy import or_
+
+                # Extract meaningful keywords (skip short/common words)
+                stop = {"the", "and", "for", "with", "from", "into", "per", "all"}
+                keywords = [
+                    w for w in description.lower().split()
+                    if len(w) > 2 and w not in stop
+                ][:5]
+
+                if keywords:
+                    # Search each keyword separately with OR
+                    # Try with region first, then without if no results
+                    for kw in keywords:
+                        kw_results, _ = await cost_repo.search(
+                            q=kw,
+                            region=region or None,
+                            limit=3,
+                        )
+                        # Fallback: search without region filter
+                        if not kw_results and region:
+                            kw_results, _ = await cost_repo.search(
+                                q=kw,
+                                limit=3,
+                            )
+                        for ci in kw_results:
+                            # Avoid duplicates
+                            if not any(m["code"] == ci.code for m in matches):
+                                # Score: count how many keywords match description
+                                desc_lower = (ci.description or "").lower()
+                                kw_hits = sum(1 for k in keywords if k in desc_lower)
+                                score = min(0.9, 0.3 + kw_hits * 0.15)
+                                matches.append({
+                                    "code": ci.code,
+                                    "description": (ci.description or "")[:200],
+                                    "unit": ci.unit or "",
+                                    "rate": float(ci.rate) if ci.rate else 0.0,
+                                    "region": ci.region or "",
+                                    "score": score,
+                                })
+                    # Keep top 5
+                    matches.sort(key=lambda m: m["score"], reverse=True)
+                    matches = matches[:5]
+            except Exception as txt_err:
+                logger.warning(
+                    "Text search failed for item %d (%s): %s", idx, description[:30], txt_err
+                )
+
+        # 5c. Prefer matches with the same unit — boost their score
+        if item_unit:
+            for m in matches:
+                if m["unit"].lower() == item_unit.lower():
+                    m["score"] = min(1.0, m["score"] + 0.05)
+
+        # Sort by score descending
+        matches.sort(key=lambda m: m["score"], reverse=True)
+
+        # Determine best match
+        best_match = matches[0] if matches else None
+        if best_match:
+            total_matched += 1
+
+        enriched_items.append({
+            "index": idx,
+            "description": description,
+            "unit": item_unit,
+            "ai_rate": float(ai_rate),
+            "matches": matches,
+            "best_match": best_match,
+        })
+
+    logger.info(
+        "Enriched estimate job %s: %d/%d items matched",
+        job_id,
+        total_matched,
+        len(items),
+    )
+
+    return {
+        "items": enriched_items,
+        "region": region,
+        "total_matched": total_matched,
+        "total_items": len(items),
+    }
 
 
 # ── Get estimate job ─────────────────────────────────────────────────────────

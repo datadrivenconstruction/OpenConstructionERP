@@ -44,8 +44,10 @@ export function polygonAreaPixels(points: { x: number; y: number }[]): number {
   let area = 0;
   for (let i = 0; i < points.length; i++) {
     const j = (i + 1) % points.length;
-    area += points[i].x * points[j].y;
-    area -= points[j].x * points[i].y;
+    const pi = points[i]!;
+    const pj = points[j]!;
+    area += pi.x * pj.y;
+    area -= pj.x * pi.y;
   }
   return Math.abs(area) / 2;
 }
@@ -67,7 +69,9 @@ export function polygonPerimeterPixels(
   let perimeter = 0;
   for (let i = 0; i < points.length; i++) {
     const j = (i + 1) % points.length;
-    perimeter += pixelDistance(points[i].x, points[i].y, points[j].x, points[j].y);
+    const pi = points[i]!;
+    const pj = points[j]!;
+    perimeter += pixelDistance(pi.x, pi.y, pj.x, pj.y);
   }
   return perimeter;
 }

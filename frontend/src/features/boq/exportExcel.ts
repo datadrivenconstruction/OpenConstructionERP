@@ -3,7 +3,6 @@ import {
   groupPositionsIntoSections,
   isSection,
   type Position,
-  type Markup,
 } from './api';
 
 /* ── Types ────────────────────────────────────────────────────────────── */

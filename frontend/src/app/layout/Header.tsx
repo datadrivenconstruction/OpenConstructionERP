@@ -57,7 +57,7 @@ interface HeaderProps {
 export function Header({ title, onMenuClick }: HeaderProps) {
   const { t, i18n } = useTranslation();
   const translatedTitle = title ? t(TITLE_I18N_MAP[title] ?? title, title) : undefined;
-  const currentLang = getLanguageByCode(i18n.language);
+  const currentLang = getLanguageByCode(i18n.language) ?? { code: 'en', name: 'English', flag: '', country: 'gb' };
   const openCommandPalette = useCallback(() => {
     // Dispatch Ctrl+K to open the CommandPalette managed by App.tsx
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }));
@@ -415,6 +415,7 @@ function LanguageSwitcher({
   onSelect: (code: string) => void;
 }) {
   const [open, setOpen] = useState(false);
+  if (!currentLang) return null;
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

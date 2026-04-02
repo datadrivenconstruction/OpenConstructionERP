@@ -29,7 +29,7 @@ export function Logo({ size = 'md', animate = false, className }: LogoProps) {
   const isSmall = size === 'xs' || size === 'sm';
   const gradientId = `oe-lg-${size}-${animate ? 'a' : 's'}`;
 
-  const barStyle = (delay: number, height: number) =>
+  const barStyle = (delay: number, _height: number) =>
     animate
       ? {
           transformOrigin: 'bottom',

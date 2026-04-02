@@ -2,7 +2,6 @@ import { useEffect, useSyncExternalStore } from 'react';
 import {
   getQueuedMutations,
   removeMutation,
-  type QueuedMutation,
 } from '../lib/offlineStore';
 import { useToastStore } from '../../stores/useToastStore';
 import { useAuthStore } from '../../stores/useAuthStore';

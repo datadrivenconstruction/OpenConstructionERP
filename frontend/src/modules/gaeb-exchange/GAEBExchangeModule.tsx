@@ -11,8 +11,6 @@ import {
   AlertTriangle,
   Loader2,
   Eye,
-  ChevronDown,
-  ChevronRight,
   Info,
   X,
 } from 'lucide-react';
@@ -387,10 +385,10 @@ export default function GAEBExchangeModule() {
                     <CheckCircle2 size={14} />
                     {parsedPositions.length} {t('gaeb.positions_found', { defaultValue: 'positions found' })}
                     {parsedPositions.some((p) => p.unitRate > 0) && (
-                      <Badge variant="info" className="ml-2">X83</Badge>
+                      <Badge variant="blue" className="ml-2">X83</Badge>
                     )}
                     {parsedPositions.every((p) => p.unitRate === 0) && (
-                      <Badge variant="default" className="ml-2">X81</Badge>
+                      <Badge variant="neutral" className="ml-2">X81</Badge>
                     )}
                   </div>
                 )}

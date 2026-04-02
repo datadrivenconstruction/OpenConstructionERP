@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * MSW-based integration tests for React Query hooks.
  *

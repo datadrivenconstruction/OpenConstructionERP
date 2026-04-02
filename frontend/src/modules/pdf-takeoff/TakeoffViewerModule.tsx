@@ -1,3 +1,7 @@
+// OpenConstructionERP — DataDrivenConstruction (DDC)
+// CAD2DATA Pipeline · PDF Takeoff Module
+// Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+// DDC-CWICR-OE-2026
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -783,7 +787,21 @@ export default function TakeoffViewerModule() {
 
       {/* Upload area (when no PDF loaded) */}
       {!pdfDoc && (
-        <label className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border p-12 cursor-pointer hover:border-oe-blue hover:bg-oe-blue-subtle/10 transition-all">
+        <label
+          className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-border p-12 cursor-pointer hover:border-oe-blue hover:bg-oe-blue-subtle/10 transition-all"
+          onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); e.currentTarget.classList.add('border-oe-blue', 'bg-oe-blue-subtle/10'); }}
+          onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); e.currentTarget.classList.remove('border-oe-blue', 'bg-oe-blue-subtle/10'); }}
+          onDrop={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            e.currentTarget.classList.remove('border-oe-blue', 'bg-oe-blue-subtle/10');
+            const file = Array.from(e.dataTransfer.files).find(f => f.type === 'application/pdf');
+            if (file) {
+              const fakeEvent = { target: { files: [file] } } as unknown as React.ChangeEvent<HTMLInputElement>;
+              handleFileUpload(fakeEvent);
+            }
+          }}
+        >
           <Upload className="h-10 w-10 text-content-tertiary mb-3" />
           <p className="text-sm font-medium text-content-primary">
             {t('takeoff_viewer.upload', { defaultValue: 'Drop a PDF here or click to upload' })}
@@ -803,11 +821,11 @@ export default function TakeoffViewerModule() {
 
       {/* Viewer + Sidebar */}
       {pdfDoc && (
-        <div className="flex gap-4">
+        <div className="flex gap-4 min-w-0">
           {/* Left: PDF + Toolbar */}
-          <div className="flex-1 space-y-2">
+          <div className="flex-1 min-w-0 space-y-2">
             {/* Toolbar */}
-            <div className="flex items-center gap-1 rounded-lg border border-border bg-surface-primary p-1.5 flex-wrap">
+            <div className="flex items-center gap-1 rounded-lg border border-border bg-surface-primary p-1.5 overflow-x-auto">
               {/* Page nav */}
               <button onClick={prevPage} disabled={currentPage <= 1} className="p-1.5 rounded hover:bg-surface-secondary disabled:opacity-30 transition-colors" aria-label={t('takeoff_viewer.prev_page', { defaultValue: 'Previous page' })}>
                 <ChevronLeft size={16} />
@@ -901,7 +919,7 @@ export default function TakeoffViewerModule() {
             <div
               ref={containerRef}
               className="relative rounded-lg border border-border overflow-auto bg-gray-100 dark:bg-gray-900"
-              style={{ maxHeight: 'calc(100vh - 300px)' }}
+              style={{ maxHeight: 'calc(100vh - 280px)', maxWidth: '100%' }}
             >
               <canvas ref={canvasRef} className="block" />
               <canvas

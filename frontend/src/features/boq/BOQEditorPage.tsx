@@ -17,18 +17,19 @@ import {
   type Position,
   type CreatePositionData,
   type UpdatePositionData,
-  type SectionGroup,
   type Markup,
   type ActivityEntry,
   type CostAutocompleteItem,
 } from './api';
 import { ApiError } from '@/shared/lib/api';
 import { projectsApi } from '@/features/projects/api';
-import { AutocompleteInput } from './AutocompleteInput';
+// AutocompleteInput used in sub-components, not directly here
+// import { AutocompleteInput } from './AutocompleteInput';
 import { AIChatPanel } from './AIChatPanel';
 import { AICostFinderPanel } from './AICostFinderPanel';
 import { AISmartPanel } from './AISmartPanel';
-import { ClassificationPicker } from './ClassificationPicker';
+// ClassificationPicker used in sub-components
+// import { ClassificationPicker } from './ClassificationPicker';
 import { VersionHistoryDrawer } from './VersionHistoryDrawer';
 import { CostBreakdownPanel } from './CostBreakdownPanel';
 import { EstimateClassification } from './EstimateClassification';
@@ -42,31 +43,22 @@ import { exportBOQToExcel } from './exportExcel';
 import { generateBOQPdf } from './pdfReport';
 import type { BOQGridHandle } from './BOQGrid';
 import { BatchActionBar } from './BatchActionBar';
-import { evaluateFormula } from './grid/cellEditors';
+// evaluateFormula used in BOQGrid, not directly here
+// import { evaluateFormula } from './grid/cellEditors';
 
 /* ── Extracted modules ──────────────────────────────────────────────── */
 
 import {
-  UNITS,
   UNDO_STACK_LIMIT,
-  EDITABLE_FIELDS,
-  type EditableField,
   type UndoEntry,
   getVatRate,
   getLocaleForRegion,
   getCurrencySymbol,
   getCurrencyCode,
   createFormatter,
-  fmtCompact,
   fmtWithCurrency,
   computeQualityScore,
   type QualityBreakdown,
-  formatTimeAgo,
-  VALIDATION_DOT_STYLES,
-  VALIDATION_DOT_LABELS,
-  RESOURCE_TYPE_BADGE,
-  type PositionResource,
-  type PositionComment,
   type Tip,
 } from './boqHelpers';
 
@@ -393,7 +385,7 @@ export function BOQEditorPage() {
     () => ({
       project_name: boq?.name ?? 'Unnamed project',
       currency: project?.currency ?? 'EUR',
-      standard: (project as Record<string, unknown>)?.classification_standard as string ?? 'din276',
+      standard: (project as unknown as Record<string, unknown>)?.classification_standard as string ?? 'din276',
       existing_positions_count: boq?.positions.length ?? 0,
     }),
     [boq?.name, boq?.positions.length, project?.currency, project],
@@ -445,7 +437,7 @@ export function BOQEditorPage() {
           title: t('boq.batch_deleted', {
             defaultValue: '{{count}} positions deleted',
             count: String(deleted),
-          }),
+          } as Record<string, string>),
         });
       }
     },
@@ -470,7 +462,7 @@ export function BOQEditorPage() {
           defaultValue: 'Unit changed to {{unit}} for {{count}} positions',
           unit,
           count: String(ids.length),
-        }),
+        } as Record<string, string>),
       });
     },
     [boq?.positions, trackedUpdate, addToast, t],
@@ -607,44 +599,28 @@ export function BOQEditorPage() {
     return groupPositionsIntoSections(boq.positions);
   }, [boq]);
 
-  /* ── Section drag-and-drop reordering ───────────────────────────── */
+  /* ── Section drag-and-drop reordering (future feature) ───────────── */
 
-  const [dragSectionId, setDragSectionId] = useState<string | null>(null);
-  const [dragOverSectionId, setDragOverSectionId] = useState<string | null>(null);
-
-  const handleSectionDragStart = useCallback((sectionId: string) => {
-    setDragSectionId(sectionId);
-  }, []);
-
-  const handleSectionDrop = useCallback(
-    (targetSectionId: string) => {
-      if (!dragSectionId || dragSectionId === targetSectionId || !grouped.sections.length) {
-        setDragSectionId(null);
-        return;
-      }
-      const sectionIds = grouped.sections.map((g) => g.section.id);
-      const fromIdx = sectionIds.indexOf(dragSectionId);
-      const toIdx = sectionIds.indexOf(targetSectionId);
-      if (fromIdx === -1 || toIdx === -1) {
-        setDragSectionId(null);
-        return;
-      }
-      // Reorder sections and reassign ordinals
-      const reordered = [...sectionIds];
-      reordered.splice(fromIdx, 1);
-      reordered.splice(toIdx, 0, dragSectionId);
-
-      // Update sort_order for each section
-      reordered.forEach((secId, idx) => {
-        const newOrdinal = String(idx + 1).padStart(2, '0');
-        updateMutation.mutate({ id: secId, data: { ordinal: newOrdinal, sort_order: idx * 10 } });
-      });
-
-      setDragSectionId(null);
-      setDragOverSectionId(null);
-    },
-    [dragSectionId, grouped.sections, updateMutation],
-  );
+  /* Section drag state and handlers — wired to section header UI
+  const handleSectionDragStart = (sectionId: string) => setDragSectionId(sectionId);
+  const handleSectionDrop = (targetSectionId: string) => {
+    if (!dragSectionId || dragSectionId === targetSectionId || !grouped.sections.length) {
+      setDragSectionId(null); return;
+    }
+    const sectionIds = grouped.sections.map((g) => g.section.id);
+    const fromIdx = sectionIds.indexOf(dragSectionId);
+    const toIdx = sectionIds.indexOf(targetSectionId);
+    if (fromIdx === -1 || toIdx === -1) { setDragSectionId(null); return; }
+    const reordered = [...sectionIds];
+    reordered.splice(fromIdx, 1);
+    reordered.splice(toIdx, 0, dragSectionId);
+    reordered.forEach((secId, idx) => {
+      const newOrdinal = String(idx + 1).padStart(2, '0');
+      updateMutation.mutate({ id: secId, data: { ordinal: newOrdinal, sort_order: idx * 10 } });
+    });
+    setDragSectionId(null);
+    setDragOverSectionId(null);
+  }; */
 
   /* ── Position drag-and-drop reordering ─────────────────────────── */
 
@@ -673,24 +649,17 @@ export function BOQEditorPage() {
     [boq, reorderMutation],
   );
 
-  /* ── Build flat position list for keyboard navigation ────────────── */
-
+  /* Build flat position list for keyboard navigation — reserved for future use
   const flatPositionIds = useMemo(() => {
     const ids: string[] = [];
-    // Ungrouped first
-    for (const pos of grouped.ungrouped) {
-      ids.push(pos.id);
-    }
-    // Then sections with their children
+    for (const pos of grouped.ungrouped) ids.push(pos.id);
     for (const group of grouped.sections) {
       if (!collapsedSections.has(group.section.id)) {
-        for (const child of group.children) {
-          ids.push(child.id);
-        }
+        for (const child of group.children) ids.push(child.id);
       }
     }
     return ids;
-  }, [grouped, collapsedSections]);
+  }, [grouped, collapsedSections]); */
 
   const directCost = useMemo(() => {
     if (!boq) return 0;
@@ -847,16 +816,14 @@ export function BOQEditorPage() {
     [boqId, boq, grouped, addMutation],
   );
 
+  /* handleDeleteSection — wired via section context menu (future)
   const handleDeleteSection = useCallback(
     (sectionGroup: SectionGroup) => {
-      // Delete all children first, then the section
-      for (const child of sectionGroup.children) {
-        trackedDelete(child.id);
-      }
+      for (const child of sectionGroup.children) trackedDelete(child.id);
       trackedDelete(sectionGroup.section.id);
     },
     [trackedDelete],
-  );
+  ); */
 
   /** Actually perform the export (download file). */
   const doExport = useCallback(
@@ -871,7 +838,7 @@ export function BOQEditorPage() {
           }));
           exportBOQToExcel({
             boqTitle: boq?.name ?? 'BOQ',
-            currency: boq?.currency ?? '\u20ac',
+            currency: (boq as unknown as Record<string, unknown>)?.currency as string ?? '\u20ac',
             positions,
             markupTotals: markupTotalsForExport,
             netTotal,
@@ -1045,11 +1012,10 @@ export function BOQEditorPage() {
     try {
       // Step 1: Enrich — match positions to cost database items and attach resource breakdowns
       let enrichedCount = 0;
-      let enrichTotal = 0;
       try {
         const enrichResult = await boqApi.enrichResources(boqId);
         enrichedCount = enrichResult.enriched_count;
-        enrichTotal = enrichResult.total_positions;
+        // enrichResult.total_positions available for future progress tracking
       } catch {
         // Enrich endpoint not available — skip
       }
@@ -1373,7 +1339,7 @@ export function BOQEditorPage() {
       const pos = boq?.positions.find((p) => p.id === positionId);
       if (!pos) return;
       const siblings = boq?.positions.filter((p) => p.parent_id === pos.parent_id) ?? [];
-      const lastSibOrdinal = siblings.length > 0 ? siblings[siblings.length - 1].ordinal : pos.ordinal;
+      const lastSibOrdinal = siblings.length > 0 ? siblings[siblings.length - 1]!.ordinal : pos.ordinal;
       const parts = lastSibOrdinal.split('.');
       const lastNum = parseInt(parts[parts.length - 1] || '0', 10) + 1;
       parts[parts.length - 1] = String(lastNum).padStart(2, '0');
@@ -1386,8 +1352,8 @@ export function BOQEditorPage() {
         quantity: pos.quantity,
         unit_rate: pos.unit_rate,
         parent_id: pos.parent_id ?? undefined,
-        metadata: pos.metadata ?? undefined,
-      });
+        ...(pos.metadata ? { metadata: pos.metadata } as Record<string, unknown> : {}),
+      } as CreatePositionData);
       addToast({ type: 'success', title: t('boq.position_duplicated', { defaultValue: 'Position duplicated' }) });
     },
     [boqId, boq?.positions, addMutation, addToast, t],
@@ -1503,14 +1469,14 @@ export function BOQEditorPage() {
       const pos = boq?.positions.find((p) => p.id === positionId);
       if (!pos) return;
       try {
-        const projectStandard = (project as Record<string, unknown>)?.classification_standard as string ?? 'din276';
+        const projectStandard = (project as unknown as Record<string, unknown>)?.classification_standard as string ?? 'din276';
         const result = await boqApi.classify({
           description: pos.description,
           unit: pos.unit,
           project_standard: projectStandard,
         });
         if (result.suggestions.length > 0) {
-          const top = result.suggestions[0];
+          const top = result.suggestions[0]!;
           const classification: Record<string, string> = {};
           for (const s of result.suggestions) {
             classification[s.standard] = s.code;
@@ -1851,7 +1817,7 @@ export function BOQEditorPage() {
 
         // Add components from resources
         for (let i = 0; i < resources.length; i++) {
-          const r = resources[i];
+          const r = resources[i]!;
           await apiPost(`/v1/assemblies/${assemblyResp.id}/components`, {
             description: r.name || '',
             factor: 1.0,
@@ -1916,7 +1882,7 @@ export function BOQEditorPage() {
       const pos = boq?.positions.find((p) => p.id === positionId);
       if (!pos) return;
       // Store new array format; also keep legacy `comment` field for backward compat
-      const lastText = updatedComments.length > 0 ? updatedComments[updatedComments.length - 1].text : undefined;
+      const lastText = updatedComments.length > 0 ? updatedComments[updatedComments.length - 1]!.text : undefined;
       updateMutation.mutate({
         id: positionId,
         data: {
@@ -2367,7 +2333,7 @@ export function BOQEditorPage() {
                   {t('boq.gaeb_grand_total', { defaultValue: 'Grand Total' })}
                 </span>
                 <span className="font-medium text-content-primary">
-                  {fmt(grossTotal)} {currencySymbol}
+                  {fmt.format(grossTotal)} {currencySymbol}
                 </span>
               </div>
             </div>

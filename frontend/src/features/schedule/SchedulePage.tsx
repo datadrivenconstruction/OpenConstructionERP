@@ -901,7 +901,7 @@ function ScheduleDetail({
     queryFn: () => apiGet<{ id: string; region: string }>(`/v1/projects/${projectId}`),
     staleTime: 300_000,
   });
-  const calInfo = WORK_CALENDAR_INFO[projectData?.region ?? ''] ?? WORK_CALENDAR_INFO['DACH'];
+  const calInfo = WORK_CALENDAR_INFO[projectData?.region ?? ''] ?? WORK_CALENDAR_INFO['DACH'] ?? { hours: 8, days: 5 };
 
   const { data: ganttData, isLoading } = useQuery({
     queryKey: ['gantt', schedule.id],

@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FileText, ChevronDown } from 'lucide-react';
 import clsx from 'clsx';
 import { apiGet } from '@/shared/lib/api';
-import { projectsApi, type Project } from '@/features/projects/api';
+import { projectsApi } from '@/features/projects/api';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
 interface BOQItem {

@@ -205,12 +205,25 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
     retry: false,
   });
 
-  // Sync provider selection when settings are loaded
+  // Sync provider selection from preferred_model when settings are loaded
   useEffect(() => {
-    if (settings?.provider) {
+    if (settings?.preferred_model) {
+      const model = settings.preferred_model;
+      const providerMap: Record<string, AIProvider> = {
+        anthropic: 'anthropic', claude: 'anthropic',
+        openai: 'openai', gpt: 'openai',
+        gemini: 'gemini', google: 'gemini',
+        openrouter: 'openrouter',
+        mistral: 'mistral',
+        groq: 'groq',
+        deepseek: 'deepseek',
+      };
+      const matched = Object.entries(providerMap).find(([key]) => model.includes(key));
+      if (matched) setSelectedProvider(matched[1]);
+    } else if (settings?.provider) {
       setSelectedProvider(settings.provider);
     }
-  }, [settings?.provider]);
+  }, [settings?.preferred_model, settings?.provider]);
 
   const hasKeySet = isKeySetForProvider(settings, selectedProvider);
 
@@ -219,7 +232,7 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
     mutationFn: async () => {
       // If there's an unsaved key, save it first
       if (hasUnsavedKey && apiKeyInput.trim()) {
-        const update: Record<string, string | null> = { provider: selectedProvider };
+        const update: Record<string, string | null> = { preferred_model: selectedProvider };
         update[`${selectedProvider}_api_key`] = apiKeyInput.trim();
         await aiApi.updateSettings(update as Parameters<typeof aiApi.updateSettings>[0]);
       }
@@ -264,7 +277,7 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
   const saveMutation = useMutation({
     mutationFn: () => {
       const update: Record<string, string | null> = {
-        provider: selectedProvider,
+        preferred_model: selectedProvider,
       };
       if (hasUnsavedKey && apiKeyInput.trim()) {
         const keyField = `${selectedProvider}_api_key`;
@@ -296,7 +309,11 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
     setApiKeyInput('');
     setHasUnsavedKey(false);
     setShowKey(false);
-  }, []);
+    // Auto-save provider selection as preferred_model
+    aiApi.updateSettings({ preferred_model: provider } as any).then(() => {
+      queryClient.invalidateQueries({ queryKey: ['ai-settings'] });
+    }).catch(() => { /* ignore — will save on next explicit Save */ });
+  }, [queryClient]);
 
   const handleKeyChange = useCallback((value: string) => {
     setApiKeyInput(value);

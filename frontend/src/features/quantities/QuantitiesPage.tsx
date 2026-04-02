@@ -198,7 +198,7 @@ const CONVERTER_COLORS: Record<string, { bg: string; border: string; icon: strin
 function ConverterCard({
   converter,
   installing,
-  isInstalled,
+  isInstalled: _isInstalled,
   onInstall,
   onUninstall,
   disabled,
@@ -212,7 +212,7 @@ function ConverterCard({
 }) {
   const { t } = useTranslation();
   const colors = CONVERTER_COLORS[converter.id] ?? CONVERTER_COLORS['dwg'] ?? { bg: 'from-gray-500/8 to-gray-500/8', border: 'border-gray-200', icon: 'bg-gray-500' };
-  const installed = converter.installed || isInstalled;
+  const installed = converter.installed;
 
   return (
     <div
@@ -784,7 +784,7 @@ export function QuantitiesPage() {
     converters.find((c) => c.id === installing)?.name ?? installing ?? '';
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8 p-6">
+    <div className="mx-auto max-w-content space-y-8">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-content-primary">

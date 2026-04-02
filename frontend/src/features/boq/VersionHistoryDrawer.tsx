@@ -23,7 +23,7 @@ function computeSnapshotDiffs(snapshots: BOQSnapshot[]): Map<string, SnapshotDif
   const diffs = new Map<string, SnapshotDiff>();
 
   for (let i = 0; i < snapshots.length; i++) {
-    const current = snapshots[i];
+    const current = snapshots[i]!;
     const previous = snapshots[i + 1]; // older snapshot
 
     if (!previous) {

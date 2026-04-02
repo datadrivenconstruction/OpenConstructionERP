@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
-  Table, Table2, ArrowRight, FolderOpen, Copy, Trash2, Plus,
+  Table, Table2, ArrowRight, Copy, Trash2, Plus,
   Search, ArrowUpDown, ChevronDown, GitCompareArrows, X, Loader2,
 } from 'lucide-react';
 import { Card, Badge, EmptyState, Skeleton, Button } from '@/shared/ui';
@@ -371,7 +371,8 @@ export function BOQListPage() {
       if (!projects || projects.length === 0) return [];
 
       // Fetch all BOQs in parallel (one request per project, no N+1 for grand_total)
-      const projectMap = new Map(projects.map((p) => [p.id, p]));
+      // projectMap available if per-project lookups are needed later
+      // const projectMap = new Map(projects.map((p) => [p.id, p]));
       const fetches = projects.map(async (p) => {
         try {
           const boqs = await apiGet<BOQ[]>(`/v1/boq/boqs/?project_id=${p.id}`);

@@ -154,10 +154,13 @@ export interface ResourceGridContext {
   currencyCode: string;
   locale: string;
   fmt: Intl.NumberFormat;
-  t: (key: string, opts?: Record<string, string | number>) => string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  t: (...args: any[]) => string;
 }
 
-export type FullGridContext = ActionsContext & ResourceGridContext & SectionGroupContext;
+export type FullGridContext = ActionsContext & ResourceGridContext & SectionGroupContext & {
+  onApplyAnomalySuggestion?: (positionId: string, suggestedRate: number) => void;
+};
 
 /* ── Actions Cell Renderer ────────────────────────────────────────── */
 
