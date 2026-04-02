@@ -22,7 +22,7 @@ OE_VERSION="${OE_VERSION:-latest}"
 OE_INSTALL_DIR="${OE_INSTALL_DIR:-$HOME/.openestimate}"
 OE_METHOD="${OE_METHOD:-auto}"
 OE_PORT="${OE_PORT:-8080}"
-OE_REPO="https://github.com/openestimate/openestimate"
+OE_REPO="https://github.com/datadrivenconstruction/OpenConstructionERP"
 
 # ── Colors ───────────────────────────────────────────────────────────
 RED='\033[0;31m'
