@@ -82,20 +82,31 @@ Professional construction cost estimation for everyone — from solo quantity su
 
 ## Quick Start
 
-### Option 1: Docker (recommended)
+### Option 1: One Command (Docker)
 
 ```bash
-git clone https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR.git
-cd OpenConstructionEstimate-DDC-CWICR
-docker compose up
+git clone https://github.com/datadrivenconstruction/OpenConstructionERP.git
+cd OpenConstructionERP
+make quickstart
 ```
 
-Open http://localhost:5173 — demo account: `demo@openestimator.io` / `DemoPass1234!`
+Open **http://localhost:8080** — demo accounts are pre-loaded:
 
-### Option 2: Local Development
+| Account | Email | Password | Role |
+|---------|-------|----------|------|
+| Admin | `demo@openestimator.io` | `DemoPass1234!` | Full access |
+| Estimator | `estimator@openestimator.io` | `DemoPass1234!` | Estimator |
+| Manager | `manager@openestimator.io` | `DemoPass1234!` | Manager |
+
+> Requires Docker. Builds frontend + backend in a single container (~2 min first time).
+
+### Option 2: Local Development (no Docker)
 
 ```bash
-# Backend
+git clone https://github.com/datadrivenconstruction/OpenConstructionERP.git
+cd OpenConstructionERP
+
+# Backend (uses SQLite, no database setup needed)
 cd backend
 pip install -r requirements.txt
 uvicorn app.main:create_app --factory --reload --port 8000
@@ -106,9 +117,20 @@ npm install
 npm run dev
 ```
 
-### Option 3: One-Click Deploy
+Backend: **http://localhost:8000** · Frontend: **http://localhost:5173**
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/...)
+> Requires Python 3.12+ and Node.js 20+. Uses SQLite by default — zero config.
+> Demo account is created automatically on first start.
+
+### Option 3: pip install (standalone)
+
+```bash
+pip install -e ./backend
+openestimate serve --open
+```
+
+> Runs backend with built-in SQLite. Add `--port 8080` to change port.
+> Frontend must be built separately: `cd frontend && npm run build`
 
 ## Tech Stack
 

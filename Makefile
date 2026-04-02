@@ -26,10 +26,13 @@ dev-backend: infra ## Start backend dev server
 dev-frontend: ## Start frontend dev server
 	cd $(FRONTEND_DIR) && npm run dev
 
-dev: ## Start everything (run in separate terminals or use tmux)
-	@echo "Run in separate terminals:"
-	@echo "  make dev-backend"
-	@echo "  make dev-frontend"
+dev: ## Start backend + frontend (SQLite, no Docker needed)
+	@echo "Starting OpenConstructionERP (local dev)..."
+	@echo "  Backend:  http://localhost:8000"
+	@echo "  Frontend: http://localhost:5173"
+	@echo ""
+	@cd $(BACKEND_DIR) && uvicorn app.main:create_app --factory --reload --port 8000 &
+	@cd $(FRONTEND_DIR) && npm run dev
 
 # ─── Testing ────────────────────────────────────────────────────────────────
 test: test-backend test-frontend ## Run all tests
@@ -87,6 +90,18 @@ module-new: ## Create new module (usage: make module-new NAME=oe_tendering)
 
 module-test: ## Test specific module (usage: make module-test NAME=oe_boq)
 	cd $(BACKEND_DIR) && pytest -x -v tests/ -k "$(NAME)"
+
+# ─── Setup (first time) ──────────────────────────────────────────────────
+setup: ## First-time setup: install backend + frontend dependencies
+	@echo "Installing backend dependencies..."
+	cd $(BACKEND_DIR) && pip install -r requirements.txt
+	@echo ""
+	@echo "Installing frontend dependencies..."
+	cd $(FRONTEND_DIR) && npm install
+	@echo ""
+	@echo "Setup complete! Run 'make dev' to start the application."
+	@echo "  Backend:  http://localhost:8000 (FastAPI + SQLite)"
+	@echo "  Frontend: http://localhost:5173 (Vite dev server)"
 
 # ─── Quickstart (single command) ──────────────────────────────────────────
 quickstart: ## Start OpenEstimate (PostgreSQL + App) — zero config
