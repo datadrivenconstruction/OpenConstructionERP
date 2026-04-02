@@ -39,6 +39,7 @@ export default defineConfig({
           'vendor-i18n': ['i18next', 'react-i18next', 'i18next-browser-languagedetector', 'i18next-http-backend'],
           'vendor-pdf': ['pdfjs-dist'],
           'vendor-collab': ['yjs', 'y-webrtc'],
+          'vendor-charts': ['jspdf', 'jspdf-autotable', 'html2canvas'],
         },
       },
     },

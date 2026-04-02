@@ -7,8 +7,16 @@ DOCKER_COMPOSE = docker compose
 
 # ─── Help ───────────────────────────────────────────────────────────────────
 help: ## Show this help
+	@echo ""
+	@echo "  OpenConstructionERP — Construction Cost Estimation Platform"
+	@echo "  ─────────────────────────────────────────────────────────────"
+	@echo ""
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | \
-		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
+	@echo ""
+	@echo "  Quick start: make quickstart → http://localhost:8080"
+	@echo "  Local dev:   make setup && make dev → http://localhost:5173"
+	@echo ""
 
 # ─── Development ────────────────────────────────────────────────────────────
 infra: ## Start infrastructure (PostgreSQL, Redis, MinIO)
