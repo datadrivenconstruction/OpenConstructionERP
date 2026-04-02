@@ -713,10 +713,10 @@ exports[`Visual Regression — ConfirmDialog > renders warning variant (open) 1`
 exports[`Visual Regression — DashboardPage > renders loading/skeleton state 1`] = `
 <div>
   <div
-    class="max-w-content mx-auto"
+    class="max-w-content mx-auto space-y-6"
   >
     <div
-      class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-card-in"
+      class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-card-in"
       style="animation-delay: 0ms;"
     >
       <div>
@@ -731,6 +731,51 @@ exports[`Visual Regression — DashboardPage > renders loading/skeleton state 1`
         >
           dashboard.subtitle
         </p>
+        <a
+          class="mt-3 flex items-center gap-3 rounded-xl bg-gradient-to-r from-oe-blue/8 via-violet-500/8 to-emerald-500/8 border border-oe-blue/15 px-4 py-2.5 hover:shadow-md hover:border-oe-blue/30 transition-all animate-stagger-in"
+          href="https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR"
+          rel="noopener noreferrer"
+          style="animation-delay: 150ms;"
+          target="_blank"
+        >
+          <span
+            class="relative flex h-2.5 w-2.5 shrink-0"
+          >
+            <span
+              class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"
+            />
+            <span
+              class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"
+            />
+          </span>
+          <span
+            class="text-sm font-bold bg-gradient-to-r from-oe-blue via-violet-600 to-emerald-600 bg-clip-text text-transparent"
+          >
+            The #1 open-source construction ERP
+          </span>
+          <svg
+            class="lucide lucide-external-link text-oe-blue opacity-50 shrink-0"
+            fill="none"
+            height="13"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="13"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M15 3h6v6"
+            />
+            <path
+              d="M10 14 21 3"
+            />
+            <path
+              d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+            />
+          </svg>
+        </a>
       </div>
       <div
         class="flex items-center gap-2 animate-stagger-in"
@@ -768,6 +813,68 @@ exports[`Visual Regression — DashboardPage > renders loading/skeleton state 1`
           <span>
             projects.new_project
           </span>
+        </button>
+      </div>
+    </div>
+    <div
+      class="rounded-xl border border-oe-blue/20 bg-gradient-to-r from-oe-blue/[0.04] to-violet-500/[0.04] px-5 py-4 animate-fade-in"
+    >
+      <div
+        class="flex items-start gap-3"
+      >
+        <div
+          class="flex-1"
+        >
+          <h3
+            class="text-sm font-semibold text-content-primary mb-1"
+          >
+            Welcome to OpenConstructionERP
+          </h3>
+          <p
+            class="text-xs text-content-secondary leading-relaxed"
+          >
+            Free, open-source construction cost estimation by Data Driven Construction. 55K+ cost items, AI estimation, CAD/BIM takeoff, 20+ languages.
+          </p>
+          <div
+            class="mt-2 flex items-center gap-2"
+          >
+            <a
+              class="inline-flex items-center gap-1 rounded-lg bg-oe-blue px-3 py-1.5 text-xs font-medium text-white hover:bg-oe-blue/90 transition-colors"
+              href="https://datadrivenconstruction.io/erp"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Learn more
+            </a>
+            <button
+              class="text-xs text-content-tertiary hover:text-content-secondary transition-colors"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+        <button
+          class="text-content-quaternary hover:text-content-secondary transition-colors shrink-0 p-1"
+        >
+          <svg
+            class="lucide lucide-x"
+            fill="none"
+            height="14"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="14"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M18 6 6 18"
+            />
+            <path
+              d="m6 6 12 12"
+            />
+          </svg>
         </button>
       </div>
     </div>
@@ -1036,9 +1143,7 @@ exports[`Visual Regression — DashboardPage > renders loading/skeleton state 1`
         </div>
       </div>
     </div>
-    <div
-      class="mb-8"
-    >
+    <div>
       <div
         class="mb-5 flex items-center justify-between animate-card-in"
         style="animation-delay: 80ms;"
@@ -1732,52 +1837,149 @@ exports[`Visual Regression — DashboardPage > renders loading/skeleton state 1`
             class="mt-4 !mt-0"
           >
             <div
-              class="px-6 py-10 text-center"
+              class="px-6 py-8"
             >
               <div
-                class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-surface-secondary"
+                class="text-center mb-6"
               >
-                <svg
-                  class="lucide lucide-folder-plus text-content-tertiary"
-                  fill="none"
-                  height="22"
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="1.5"
-                  viewBox="0 0 24 24"
-                  width="22"
-                  xmlns="http://www.w3.org/2000/svg"
+                <p
+                  class="text-sm font-semibold text-content-primary"
                 >
-                  <path
-                    d="M12 10v6"
-                  />
-                  <path
-                    d="M9 13h6"
-                  />
-                  <path
-                    d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"
-                  />
-                </svg>
+                  Welcome to OpenConstructionERP
+                </p>
+                <p
+                  class="mt-1 text-xs text-content-tertiary"
+                >
+                  Start by installing a demo project or creating your own.
+                </p>
               </div>
-              <p
-                class="text-sm font-medium text-content-primary"
-              >
-                No projects yet
-              </p>
-              <p
-                class="mt-1 text-xs text-content-tertiary"
-              >
-                Create your first project to get started
-              </p>
               <div
-                class="mt-4"
+                class="grid grid-cols-1 gap-3 sm:grid-cols-3"
               >
                 <button
-                  class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-oe-blue text-content-inverse hover:bg-oe-blue-hover active:bg-oe-blue-active shadow-xs hover:shadow-md border border-transparent hover:scale-[1.02] active:scale-[0.98] h-7 px-2.5 text-xs gap-1.5 rounded-md"
+                  class="group flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30 disabled:opacity-60"
                 >
-                  <span>
-                    projects.new_project
+                  <div
+                    class="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-110"
+                  >
+                    <svg
+                      class="lucide lucide-download"
+                      fill="none"
+                      height="20"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="1.5"
+                      viewBox="0 0 24 24"
+                      width="20"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                      />
+                      <polyline
+                        points="7 10 12 15 17 10"
+                      />
+                      <line
+                        x1="12"
+                        x2="12"
+                        y1="15"
+                        y2="3"
+                      />
+                    </svg>
+                  </div>
+                  <span
+                    class="text-sm font-medium text-content-primary"
+                  >
+                    Install Demo Project
+                  </span>
+                  <span
+                    class="text-[11px] leading-snug text-content-tertiary"
+                  >
+                    Pre-built residential project with realistic data
+                  </span>
+                </button>
+                <button
+                  class="group flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30"
+                >
+                  <div
+                    class="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-110"
+                  >
+                    <svg
+                      class="lucide lucide-folder-plus"
+                      fill="none"
+                      height="20"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="1.5"
+                      viewBox="0 0 24 24"
+                      width="20"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M12 10v6"
+                      />
+                      <path
+                        d="M9 13h6"
+                      />
+                      <path
+                        d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"
+                      />
+                    </svg>
+                  </div>
+                  <span
+                    class="text-sm font-medium text-content-primary"
+                  >
+                    Create First Project
+                  </span>
+                  <span
+                    class="text-[11px] leading-snug text-content-tertiary"
+                  >
+                    Set up a new estimation from scratch
+                  </span>
+                </button>
+                <button
+                  class="group flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30"
+                >
+                  <div
+                    class="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-110"
+                  >
+                    <svg
+                      class="lucide lucide-upload"
+                      fill="none"
+                      height="20"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="1.5"
+                      viewBox="0 0 24 24"
+                      width="20"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                      />
+                      <polyline
+                        points="17 8 12 3 7 8"
+                      />
+                      <line
+                        x1="12"
+                        x2="12"
+                        y1="3"
+                        y2="15"
+                      />
+                    </svg>
+                  </div>
+                  <span
+                    class="text-sm font-medium text-content-primary"
+                  >
+                    Import Existing BOQ
+                  </span>
+                  <span
+                    class="text-[11px] leading-snug text-content-tertiary"
+                  >
+                    Use AI to estimate from an existing document
                   </span>
                 </button>
               </div>
@@ -1996,7 +2198,7 @@ exports[`Visual Regression — DashboardPage > renders loading/skeleton state 1`
                 <span
                   class="text-sm font-semibold text-content-primary tabular-nums"
                 >
-                  —
+                  17
                 </span>
               </div>
               <div
@@ -2011,7 +2213,7 @@ exports[`Visual Regression — DashboardPage > renders loading/skeleton state 1`
                 <span
                   class="text-sm font-semibold text-content-primary tabular-nums"
                 >
-                  —
+                  42
                 </span>
               </div>
               <div
@@ -2409,19 +2611,1355 @@ exports[`Visual Regression — LoginPage > renders the login form 1`] = `
   >
     <div
       aria-hidden="true"
-      class="fixed inset-0 overflow-hidden pointer-events-none"
+      class="fixed inset-0 overflow-hidden pointer-events-none oce-auth-bg"
     >
       <div
-        class="auth-blob -top-40 -left-40 w-[320px] h-[320px] bg-[rgba(0,113,227,0.1)] animate-float"
-      />
+        aria-hidden="true"
+        class="oce-bg-table-wrap"
+      >
+        <div
+          class="oce-table-grid"
+        >
+          <div
+            class="oce-cell oce-cell-header"
+          >
+            Pos.
+          </div>
+          <div
+            class="oce-cell oce-cell-header"
+          >
+            Description
+          </div>
+          <div
+            class="oce-cell oce-cell-header"
+          >
+            Unit
+          </div>
+          <div
+            class="oce-cell oce-cell-header oce-cell-right"
+          >
+            Qty
+          </div>
+          <div
+            class="oce-cell oce-cell-header oce-cell-right"
+          >
+            Rate
+          </div>
+          <div
+            class="oce-cell oce-cell-header oce-cell-right"
+          >
+            Total
+          </div>
+          <div
+            class="oce-cell oce-cell-header oce-cell-right"
+          >
+            CG
+          </div>
+          <div
+            class="oce-cell oce-cell-pos oce-cell-section on-m on"
+            data-txt="300"
+          >
+            300
+          </div>
+          <div
+            class="oce-cell oce-cell-desc oce-cell-section on-m"
+            data-txt="Structure — Building Construction"
+          >
+            Structure — Building Construction
+          </div>
+          <div
+            class="oce-cell oce-cell-section on-m"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-right oce-cell-section on-m"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-right oce-cell-section on-m"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-total oce-cell-right oce-cell-section on-m"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-right oce-cell-section on-m"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-pos on"
+            data-txt="01.001"
+          >
+            01.001
+          </div>
+          <div
+            class="oce-cell oce-cell-desc on"
+            data-txt="Reinforced concrete C30/37, slab"
+          >
+            Reinforced concrete C30/37, slab
+          </div>
+          <div
+            class="oce-cell on-h"
+            data-txt="m³"
+          >
+            m³
+          </div>
+          <div
+            class="oce-cell oce-cell-right on"
+            data-txt="86.40"
+          >
+            86.40
+          </div>
+          <div
+            class="oce-cell oce-cell-right on-m"
+            data-txt="€295.00"
+          >
+            €295.00
+          </div>
+          <div
+            class="oce-cell oce-cell-total oce-cell-right"
+            data-txt="€25,488"
+          />
+          <div
+            class="oce-cell oce-cell-right"
+            data-txt="330"
+          />
+          <div
+            class="oce-cell oce-cell-pos on"
+            data-txt="01.002"
+          >
+            01.002
+          </div>
+          <div
+            class="oce-cell oce-cell-desc"
+            data-txt="Formwork base slab, smooth"
+          />
+          <div
+            class="oce-cell"
+            data-txt="m²"
+          />
+          <div
+            class="oce-cell oce-cell-right on-h"
+            data-txt="432.00"
+          >
+            432.00
+          </div>
+          <div
+            class="oce-cell oce-cell-right on"
+            data-txt="€38.50"
+          >
+            €38.50
+          </div>
+          <div
+            class="oce-cell oce-cell-total oce-cell-right"
+            data-txt="€16,632"
+          />
+          <div
+            class="oce-cell oce-cell-right"
+            data-txt="330"
+          />
+          <div
+            class="oce-cell oce-cell-pos on"
+            data-txt="01.003"
+          >
+            01.003
+          </div>
+          <div
+            class="oce-cell oce-cell-desc"
+            data-txt="Reinforcement BSt 500S, mesh"
+          />
+          <div
+            class="oce-cell"
+            data-txt="kg"
+          />
+          <div
+            class="oce-cell oce-cell-right"
+            data-txt="10,368"
+          />
+          <div
+            class="oce-cell oce-cell-right"
+            data-txt="€2.18"
+          />
+          <div
+            class="oce-cell oce-cell-total oce-cell-right"
+            data-txt="€22,602"
+          />
+          <div
+            class="oce-cell oce-cell-right on-m"
+            data-txt="330"
+          >
+            330
+          </div>
+          <div
+            class="oce-cell oce-cell-pos on"
+            data-txt="01.004"
+          >
+            01.004
+          </div>
+          <div
+            class="oce-cell oce-cell-desc"
+            data-txt="Reinforced concrete C30/37, walls"
+          />
+          <div
+            class="oce-cell on-h"
+            data-txt="m³"
+          >
+            m³
+          </div>
+          <div
+            class="oce-cell oce-cell-right on-m"
+            data-txt="156.00"
+          >
+            156.00
+          </div>
+          <div
+            class="oce-cell oce-cell-right"
+            data-txt="€285.00"
+          />
+          <div
+            class="oce-cell oce-cell-total oce-cell-right"
+            data-txt="€44,460"
+          />
+          <div
+            class="oce-cell oce-cell-right"
+            data-txt="330"
+          />
+          <div
+            class="oce-cell oce-cell-pos on"
+            data-txt="01.005"
+          >
+            01.005
+          </div>
+          <div
+            class="oce-cell oce-cell-desc"
+            data-txt="Formwork walls, smooth finish"
+          />
+          <div
+            class="oce-cell on-m"
+            data-txt="m²"
+          >
+            m²
+          </div>
+          <div
+            class="oce-cell oce-cell-right"
+            data-txt="1,248"
+          />
+          <div
+            class="oce-cell oce-cell-right on-h"
+            data-txt="€42.50"
+          >
+            €42.50
+          </div>
+          <div
+            class="oce-cell oce-cell-total oce-cell-right on"
+            data-txt="€53,040"
+          >
+            €53,040
+          </div>
+          <div
+            class="oce-cell oce-cell-right on-h"
+            data-txt="330"
+          >
+            330
+          </div>
+          <div
+            class="oce-cell oce-cell-pos oce-cell-section on-m on"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-desc oce-cell-section on-m"
+            data-txt="Subtotal CG 330"
+          >
+            Subtotal CG 330
+          </div>
+          <div
+            class="oce-cell oce-cell-section on-m"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-right oce-cell-section on-m"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-right oce-cell-section on-m"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-total oce-cell-right oce-cell-section on-m"
+            data-txt="€162,222"
+          >
+            €162,222
+          </div>
+          <div
+            class="oce-cell oce-cell-right oce-cell-section on-m"
+            data-txt="330"
+          >
+            330
+          </div>
+          <div
+            class="oce-cell oce-cell-pos oce-cell-section on-m on"
+            data-txt="340"
+          >
+            340
+          </div>
+          <div
+            class="oce-cell oce-cell-desc oce-cell-section on-m"
+            data-txt="Structure — Interior Walls"
+          >
+            Structure — Interior Walls
+          </div>
+          <div
+            class="oce-cell oce-cell-section on-m"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-right oce-cell-section on-m"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-right oce-cell-section on-m"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-total oce-cell-right oce-cell-section on-m"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-right oce-cell-section on-m"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-pos on"
+            data-txt="02.001"
+          >
+            02.001
+          </div>
+          <div
+            class="oce-cell oce-cell-desc"
+            data-txt="Masonry KS 24cm, load-bearing"
+          />
+          <div
+            class="oce-cell on-h"
+            data-txt="m²"
+          >
+            m²
+          </div>
+          <div
+            class="oce-cell oce-cell-right"
+            data-txt="890.00"
+          />
+          <div
+            class="oce-cell oce-cell-right on"
+            data-txt="€68.00"
+          >
+            €68.00
+          </div>
+          <div
+            class="oce-cell oce-cell-total oce-cell-right on-h"
+            data-txt="€60,520"
+          >
+            €60,520
+          </div>
+          <div
+            class="oce-cell oce-cell-right"
+            data-txt="340"
+          />
+          <div
+            class="oce-cell oce-cell-pos on"
+            data-txt="02.002"
+          >
+            02.002
+          </div>
+          <div
+            class="oce-cell oce-cell-desc on-m"
+            data-txt="Masonry KS 11.5cm, partition"
+          >
+            Masonry KS 11.5cm, partition
+          </div>
+          <div
+            class="oce-cell"
+            data-txt="m²"
+          />
+          <div
+            class="oce-cell oce-cell-right on"
+            data-txt="620.00"
+          >
+            620.00
+          </div>
+          <div
+            class="oce-cell oce-cell-right"
+            data-txt="€48.00"
+          />
+          <div
+            class="oce-cell oce-cell-total oce-cell-right on-m"
+            data-txt="€29,760"
+          >
+            €29,760
+          </div>
+          <div
+            class="oce-cell oce-cell-right on-m"
+            data-txt="340"
+          >
+            340
+          </div>
+          <div
+            class="oce-cell oce-cell-pos oce-cell-section on-m on"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-desc oce-cell-section on-m"
+            data-txt="Subtotal CG 340"
+          >
+            Subtotal CG 340
+          </div>
+          <div
+            class="oce-cell oce-cell-section on-m"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-right oce-cell-section on-m"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-right oce-cell-section on-m"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-total oce-cell-right oce-cell-section on-m"
+            data-txt="€90,280"
+          >
+            €90,280
+          </div>
+          <div
+            class="oce-cell oce-cell-right oce-cell-section on-m"
+            data-txt="340"
+          >
+            340
+          </div>
+          <div
+            class="oce-cell oce-cell-pos oce-cell-section on-m on"
+            data-txt="400"
+          >
+            400
+          </div>
+          <div
+            class="oce-cell oce-cell-desc oce-cell-section on-m"
+            data-txt="Building Services — HVAC"
+          >
+            Building Services — HVAC
+          </div>
+          <div
+            class="oce-cell oce-cell-section on-m"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-right oce-cell-section on-m"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-right oce-cell-section on-m"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-total oce-cell-right oce-cell-section on-m"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-right oce-cell-section on-m"
+            data-txt=""
+          />
+          <div
+            class="oce-cell oce-cell-pos on"
+            data-txt="04.001"
+          >
+            04.001
+          </div>
+          <div
+            class="oce-cell oce-cell-desc"
+            data-txt="Heating pipes, copper DN15"
+          />
+          <div
+            class="oce-cell"
+            data-txt="m"
+          />
+          <div
+            class="oce-cell oce-cell-right on-m"
+            data-txt="840.00"
+          >
+            840.00
+          </div>
+          <div
+            class="oce-cell oce-cell-right"
+            data-txt="€28.50"
+          />
+          <div
+            class="oce-cell oce-cell-total oce-cell-right"
+            data-txt="€23,940"
+          />
+          <div
+            class="oce-cell oce-cell-right"
+            data-txt="420"
+          />
+          <div
+            class="oce-cell oce-cell-pos on"
+            data-txt="04.002"
+          >
+            04.002
+          </div>
+          <div
+            class="oce-cell oce-cell-desc on-h"
+            data-txt="Cable NYM-J 3×1.5"
+          >
+            Cable NYM-J 3×1.5
+          </div>
+          <div
+            class="oce-cell"
+            data-txt="m"
+          />
+          <div
+            class="oce-cell oce-cell-right"
+            data-txt="2,800"
+          />
+          <div
+            class="oce-cell oce-cell-right"
+            data-txt="€4.80"
+          />
+          <div
+            class="oce-cell oce-cell-total oce-cell-right on-h"
+            data-txt="€13,440"
+          >
+            €13,440
+          </div>
+          <div
+            class="oce-cell oce-cell-right on-m"
+            data-txt="440"
+          >
+            440
+          </div>
+        </div>
+      </div>
       <div
-        class="auth-blob top-1/3 -right-20 w-[384px] h-[384px] bg-[rgba(88,86,214,0.08)] animate-float-delayed"
-        style="animation-delay: 2s;"
-      />
-      <div
-        class="auth-blob -bottom-24 left-1/3 w-[288px] h-[288px] bg-[rgba(0,113,227,0.06)] animate-float-slow"
-        style="animation-delay: 4s;"
-      />
+        aria-hidden="true"
+        class="oce-bg-dash-wrap"
+      >
+        <div
+          class="oce-bg-dash-grid"
+        >
+          <div
+            class="oce-dash-cell oce-dash-wide"
+          >
+            <svg
+              fill="none"
+              viewBox="0 0 420 140"
+            >
+              <rect
+                fill="none"
+                height="132"
+                rx="6"
+                stroke="var(--oce-bp-color)"
+                stroke-width=".7"
+                width="412"
+                x="4"
+                y="4"
+              />
+              <text
+                fill="var(--oce-bp-color)"
+                font-size="8"
+                font-weight="700"
+                letter-spacing=".04em"
+                opacity=".6"
+                x="16"
+                y="22"
+              >
+                COST PER TRADE (DIN 276)
+              </text>
+              <rect
+                fill="var(--oce-bp-color)"
+                height="28"
+                opacity=".3"
+                rx="3"
+                width="30"
+                x="28"
+                y="100"
+              />
+              <rect
+                fill="var(--oce-bp-color)"
+                height="56"
+                opacity=".4"
+                rx="3"
+                width="30"
+                x="68"
+                y="72"
+              />
+              <rect
+                fill="var(--oce-bp-color)"
+                height="84"
+                opacity=".55"
+                rx="3"
+                width="30"
+                x="108"
+                y="44"
+              />
+              <rect
+                fill="var(--oce-bp-color)"
+                height="48"
+                opacity=".35"
+                rx="3"
+                width="30"
+                x="148"
+                y="80"
+              />
+              <rect
+                fill="var(--oce-bp-color)"
+                height="92"
+                opacity=".6"
+                rx="3"
+                width="30"
+                x="188"
+                y="36"
+              />
+              <rect
+                fill="var(--oce-bp-color)"
+                height="68"
+                opacity=".4"
+                rx="3"
+                width="30"
+                x="228"
+                y="60"
+              />
+              <rect
+                fill="var(--oce-bp-color)"
+                height="40"
+                opacity=".25"
+                rx="3"
+                width="30"
+                x="268"
+                y="88"
+              />
+              <rect
+                fill="var(--oce-bp-color)"
+                height="76"
+                opacity=".45"
+                rx="3"
+                width="30"
+                x="308"
+                y="52"
+              />
+              <rect
+                fill="var(--oce-bp-color)"
+                height="60"
+                opacity=".35"
+                rx="3"
+                width="30"
+                x="348"
+                y="68"
+              />
+              <text
+                fill="var(--oce-bp-color)"
+                font-size="7"
+                opacity=".4"
+                text-anchor="middle"
+                x="43"
+                y="137"
+              >
+                KG300
+              </text>
+              <text
+                fill="var(--oce-bp-color)"
+                font-size="7"
+                opacity=".4"
+                text-anchor="middle"
+                x="83"
+                y="137"
+              >
+                KG330
+              </text>
+              <text
+                fill="var(--oce-bp-color)"
+                font-size="7"
+                opacity=".4"
+                text-anchor="middle"
+                x="123"
+                y="137"
+              >
+                KG340
+              </text>
+              <text
+                fill="var(--oce-bp-color)"
+                font-size="7"
+                opacity=".4"
+                text-anchor="middle"
+                x="163"
+                y="137"
+              >
+                KG400
+              </text>
+              <text
+                fill="var(--oce-bp-color)"
+                font-size="7"
+                opacity=".4"
+                text-anchor="middle"
+                x="203"
+                y="137"
+              >
+                KG420
+              </text>
+              <text
+                fill="var(--oce-bp-color)"
+                font-size="7"
+                opacity=".4"
+                text-anchor="middle"
+                x="243"
+                y="137"
+              >
+                KG440
+              </text>
+              <text
+                fill="var(--oce-bp-color)"
+                font-size="7"
+                opacity=".4"
+                text-anchor="middle"
+                x="283"
+                y="137"
+              >
+                KG500
+              </text>
+              <text
+                fill="var(--oce-bp-color)"
+                font-size="7"
+                opacity=".4"
+                text-anchor="middle"
+                x="323"
+                y="137"
+              >
+                KG530
+              </text>
+              <text
+                fill="var(--oce-bp-color)"
+                font-size="7"
+                opacity=".4"
+                text-anchor="middle"
+                x="363"
+                y="137"
+              >
+                KG540
+              </text>
+            </svg>
+          </div>
+          <div
+            class="oce-dash-cell"
+          >
+            <svg
+              fill="none"
+              viewBox="0 0 200 180"
+            >
+              <rect
+                fill="none"
+                height="172"
+                rx="6"
+                stroke="var(--oce-bp-color)"
+                stroke-width=".7"
+                width="192"
+                x="4"
+                y="4"
+              />
+              <text
+                fill="var(--oce-bp-color)"
+                font-size="8"
+                font-weight="700"
+                letter-spacing=".04em"
+                opacity=".6"
+                text-anchor="middle"
+                x="100"
+                y="22"
+              >
+                BOQ BREAKDOWN
+              </text>
+              <circle
+                cx="100"
+                cy="100"
+                fill="none"
+                opacity=".5"
+                r="50"
+                stroke="var(--oce-bp-color)"
+                stroke-dasharray="120 314"
+                stroke-width="14"
+                transform="rotate(-90 100 100)"
+              />
+              <circle
+                cx="100"
+                cy="100"
+                fill="none"
+                opacity=".35"
+                r="50"
+                stroke="var(--oce-bp-color)"
+                stroke-dasharray="85 314"
+                stroke-dashoffset="-120"
+                stroke-width="14"
+                transform="rotate(-90 100 100)"
+              />
+              <circle
+                cx="100"
+                cy="100"
+                fill="none"
+                opacity=".2"
+                r="50"
+                stroke="var(--oce-bp-color)"
+                stroke-dasharray="65 314"
+                stroke-dashoffset="-205"
+                stroke-width="14"
+                transform="rotate(-90 100 100)"
+              />
+              <text
+                fill="var(--oce-bp-color)"
+                font-size="18"
+                font-weight="700"
+                opacity=".5"
+                text-anchor="middle"
+                x="100"
+                y="98"
+              >
+                \\u20AC4.2M
+              </text>
+              <text
+                fill="var(--oce-bp-color)"
+                font-size="7"
+                opacity=".35"
+                text-anchor="middle"
+                x="100"
+                y="112"
+              >
+                total budget
+              </text>
+            </svg>
+          </div>
+          <div
+            class="oce-dash-cell"
+          >
+            <svg
+              fill="none"
+              viewBox="0 0 200 180"
+            >
+              <rect
+                fill="none"
+                height="172"
+                rx="6"
+                stroke="var(--oce-bp-color)"
+                stroke-width=".7"
+                width="192"
+                x="4"
+                y="4"
+              />
+              <text
+                fill="var(--oce-bp-color)"
+                font-size="8"
+                font-weight="700"
+                letter-spacing=".04em"
+                opacity=".6"
+                x="16"
+                y="22"
+              >
+                PROJECT KPIs
+              </text>
+              <g>
+                <text
+                  fill="var(--oce-bp-color)"
+                  font-size="8"
+                  opacity=".35"
+                  x="16"
+                  y="46"
+                >
+                  SPI
+                </text>
+                <text
+                  fill="var(--oce-bp-color)"
+                  font-size="12"
+                  font-weight="600"
+                  opacity=".55"
+                  text-anchor="end"
+                  x="180"
+                  y="46"
+                >
+                  1.04
+                </text>
+                <line
+                  opacity=".15"
+                  stroke="var(--oce-bp-color)"
+                  stroke-width=".4"
+                  x1="16"
+                  x2="184"
+                  y1="52"
+                  y2="52"
+                />
+              </g>
+              <g>
+                <text
+                  fill="var(--oce-bp-color)"
+                  font-size="8"
+                  opacity=".35"
+                  x="16"
+                  y="74"
+                >
+                  CPI
+                </text>
+                <text
+                  fill="var(--oce-bp-color)"
+                  font-size="12"
+                  font-weight="600"
+                  opacity=".55"
+                  text-anchor="end"
+                  x="180"
+                  y="74"
+                >
+                  0.97
+                </text>
+                <line
+                  opacity=".15"
+                  stroke="var(--oce-bp-color)"
+                  stroke-width=".4"
+                  x1="16"
+                  x2="184"
+                  y1="80"
+                  y2="80"
+                />
+              </g>
+              <g>
+                <text
+                  fill="var(--oce-bp-color)"
+                  font-size="8"
+                  opacity=".35"
+                  x="16"
+                  y="102"
+                >
+                  EAC
+                </text>
+                <text
+                  fill="var(--oce-bp-color)"
+                  font-size="12"
+                  font-weight="600"
+                  opacity=".55"
+                  text-anchor="end"
+                  x="180"
+                  y="102"
+                >
+                  €4.3M
+                </text>
+                <line
+                  opacity=".15"
+                  stroke="var(--oce-bp-color)"
+                  stroke-width=".4"
+                  x1="16"
+                  x2="184"
+                  y1="108"
+                  y2="108"
+                />
+              </g>
+              <g>
+                <text
+                  fill="var(--oce-bp-color)"
+                  font-size="8"
+                  opacity=".35"
+                  x="16"
+                  y="130"
+                >
+                  Variance
+                </text>
+                <text
+                  fill="var(--oce-bp-color)"
+                  font-size="12"
+                  font-weight="600"
+                  opacity=".55"
+                  text-anchor="end"
+                  x="180"
+                  y="130"
+                >
+                  -2.8%
+                </text>
+                <line
+                  opacity=".15"
+                  stroke="var(--oce-bp-color)"
+                  stroke-width=".4"
+                  x1="16"
+                  x2="184"
+                  y1="136"
+                  y2="136"
+                />
+              </g>
+              <g>
+                <text
+                  fill="var(--oce-bp-color)"
+                  font-size="8"
+                  opacity=".35"
+                  x="16"
+                  y="158"
+                >
+                  Progress
+                </text>
+                <text
+                  fill="var(--oce-bp-color)"
+                  font-size="12"
+                  font-weight="600"
+                  opacity=".55"
+                  text-anchor="end"
+                  x="180"
+                  y="158"
+                >
+                  68%
+                </text>
+              </g>
+            </svg>
+          </div>
+          <div
+            class="oce-dash-cell oce-dash-wide"
+          >
+            <svg
+              fill="none"
+              viewBox="0 0 420 120"
+            >
+              <rect
+                fill="none"
+                height="112"
+                rx="6"
+                stroke="var(--oce-bp-color)"
+                stroke-width=".7"
+                width="412"
+                x="4"
+                y="4"
+              />
+              <text
+                fill="var(--oce-bp-color)"
+                font-size="8"
+                font-weight="700"
+                letter-spacing=".04em"
+                opacity=".6"
+                x="16"
+                y="22"
+              >
+                S-CURVE — PLANNED vs ACTUAL
+              </text>
+              <defs>
+                <lineargradient
+                  id="oceAreaFill"
+                  x1="0"
+                  x2="0"
+                  y1="0"
+                  y2="1"
+                >
+                  <stop
+                    offset="0%"
+                    stop-color="var(--oce-bp-color)"
+                    stop-opacity=".1"
+                  />
+                  <stop
+                    offset="100%"
+                    stop-color="var(--oce-bp-color)"
+                    stop-opacity="0"
+                  />
+                </lineargradient>
+              </defs>
+              <polyline
+                fill="none"
+                opacity=".3"
+                points="24,95 60,88 100,76 140,62 180,50 220,42 260,36 300,32 340,30 380,28 400,27"
+                stroke="var(--oce-bp-color)"
+                stroke-dasharray="5 4"
+                stroke-width="1.2"
+              />
+              <polyline
+                fill="none"
+                opacity=".5"
+                points="24,95 60,90 100,80 140,68 180,58 220,52 260,48 300,43 340,38 380,33 400,30"
+                stroke="var(--oce-bp-color)"
+                stroke-linecap="round"
+                stroke-width="1.8"
+              />
+              <polygon
+                fill="url(#oceAreaFill)"
+                points="24,95 60,90 100,80 140,68 180,58 220,52 260,48 300,43 340,38 380,33 400,30 400,100 24,100"
+              />
+              <line
+                opacity=".3"
+                stroke="var(--oce-bp-color)"
+                stroke-dasharray="4 3"
+                stroke-width="1.2"
+                x1="300"
+                x2="320"
+                y1="15"
+                y2="15"
+              />
+              <text
+                fill="var(--oce-bp-color)"
+                font-size="7"
+                opacity=".35"
+                x="324"
+                y="18"
+              >
+                Planned
+              </text>
+              <line
+                opacity=".5"
+                stroke="var(--oce-bp-color)"
+                stroke-width="1.5"
+                x1="360"
+                x2="380"
+                y1="15"
+                y2="15"
+              />
+              <text
+                fill="var(--oce-bp-color)"
+                font-size="7"
+                opacity=".5"
+                x="384"
+                y="18"
+              >
+                Actual
+              </text>
+            </svg>
+          </div>
+          <div
+            class="oce-dash-cell"
+          >
+            <svg
+              fill="none"
+              viewBox="0 0 200 130"
+            >
+              <rect
+                fill="none"
+                height="122"
+                rx="6"
+                stroke="var(--oce-bp-color)"
+                stroke-width=".7"
+                width="192"
+                x="4"
+                y="4"
+              />
+              <text
+                fill="var(--oce-bp-color)"
+                font-size="8"
+                font-weight="700"
+                letter-spacing=".04em"
+                opacity=".6"
+                x="16"
+                y="20"
+              >
+                ELEVATION
+              </text>
+              <line
+                opacity=".4"
+                stroke="var(--oce-bp-color)"
+                stroke-width="1"
+                x1="20"
+                x2="180"
+                y1="110"
+                y2="110"
+              />
+              <rect
+                fill="none"
+                height="65"
+                opacity=".5"
+                stroke="var(--oce-bp-color)"
+                stroke-width=".7"
+                width="130"
+                x="35"
+                y="45"
+              />
+              <path
+                d="M30 45 L100 20 L170 45"
+                fill="none"
+                opacity=".5"
+                stroke="var(--oce-bp-color)"
+                stroke-width=".7"
+              />
+              <rect
+                fill="none"
+                height="14"
+                opacity=".4"
+                rx="1"
+                stroke="var(--oce-bp-color)"
+                stroke-width=".4"
+                width="18"
+                x="50"
+                y="56"
+              />
+              <rect
+                fill="none"
+                height="14"
+                opacity=".4"
+                rx="1"
+                stroke="var(--oce-bp-color)"
+                stroke-width=".4"
+                width="18"
+                x="80"
+                y="56"
+              />
+              <rect
+                fill="none"
+                height="14"
+                opacity=".4"
+                rx="1"
+                stroke="var(--oce-bp-color)"
+                stroke-width=".4"
+                width="18"
+                x="120"
+                y="56"
+              />
+              <rect
+                fill="none"
+                height="28"
+                opacity=".5"
+                rx="1"
+                stroke="var(--oce-bp-color)"
+                stroke-width=".5"
+                width="22"
+                x="85"
+                y="82"
+              />
+              <text
+                fill="var(--oce-bp-color)"
+                font-family="monospace"
+                font-size="6"
+                opacity=".3"
+                text-anchor="middle"
+                x="100"
+                y="125"
+              >
+                46.00 m
+              </text>
+            </svg>
+          </div>
+          <div
+            class="oce-dash-cell"
+          >
+            <svg
+              fill="none"
+              viewBox="0 0 200 130"
+            >
+              <rect
+                fill="none"
+                height="122"
+                rx="6"
+                stroke="var(--oce-bp-color)"
+                stroke-width=".7"
+                width="192"
+                x="4"
+                y="4"
+              />
+              <text
+                fill="var(--oce-bp-color)"
+                font-size="8"
+                font-weight="700"
+                letter-spacing=".04em"
+                opacity=".6"
+                x="16"
+                y="20"
+              >
+                SCHEDULE
+              </text>
+              <g>
+                <rect
+                  fill="var(--oce-bp-color)"
+                  height="12"
+                  opacity="0.15"
+                  rx="2"
+                  width="120"
+                  x="30"
+                  y="35"
+                />
+                <text
+                  fill="var(--oce-bp-color)"
+                  font-size="6"
+                  opacity=".35"
+                  x="16"
+                  y="45"
+                >
+                  Foundation
+                </text>
+              </g>
+              <g>
+                <rect
+                  fill="var(--oce-bp-color)"
+                  height="12"
+                  opacity="0.22999999999999998"
+                  rx="2"
+                  width="100"
+                  x="50"
+                  y="55"
+                />
+                <text
+                  fill="var(--oce-bp-color)"
+                  font-size="6"
+                  opacity=".35"
+                  x="16"
+                  y="65"
+                >
+                  Structure
+                </text>
+              </g>
+              <g>
+                <rect
+                  fill="var(--oce-bp-color)"
+                  height="12"
+                  opacity="0.31"
+                  rx="2"
+                  width="80"
+                  x="80"
+                  y="75"
+                />
+                <text
+                  fill="var(--oce-bp-color)"
+                  font-size="6"
+                  opacity=".35"
+                  x="16"
+                  y="85"
+                >
+                  Facade
+                </text>
+              </g>
+              <g>
+                <rect
+                  fill="var(--oce-bp-color)"
+                  height="12"
+                  opacity="0.39"
+                  rx="2"
+                  width="60"
+                  x="100"
+                  y="95"
+                />
+                <text
+                  fill="var(--oce-bp-color)"
+                  font-size="6"
+                  opacity=".35"
+                  x="16"
+                  y="105"
+                >
+                  MEP
+                </text>
+              </g>
+              <g>
+                <rect
+                  fill="var(--oce-bp-color)"
+                  height="12"
+                  opacity="0.47"
+                  rx="2"
+                  width="50"
+                  x="120"
+                  y="115"
+                />
+                <text
+                  fill="var(--oce-bp-color)"
+                  font-size="6"
+                  opacity=".35"
+                  x="16"
+                  y="125"
+                >
+                  Finishing
+                </text>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
     </div>
     <div
       class="absolute top-3 right-3 z-30"
@@ -2485,414 +4023,308 @@ exports[`Visual Regression — LoginPage > renders the login form 1`] = `
       </button>
     </div>
     <div
-      class="hidden lg:flex lg:w-[460px] xl:w-[500px] shrink-0 relative z-10 flex-col justify-center pl-14 xl:pl-20 pr-8 xl:pr-10 py-6"
+      class="hidden lg:flex lg:w-[500px] xl:w-[540px] shrink-0 relative z-10 flex-col justify-center pl-14 xl:pl-20 pr-12 xl:pr-16 py-6"
     >
       <div
-        class="mb-4 animate-stagger-in"
+        class="absolute inset-0 bg-gradient-to-r from-white/70 via-white/50 to-transparent dark:from-[#0f1117]/70 dark:via-[#0f1117]/50 dark:to-transparent rounded-r-3xl"
+      />
+      <div
+        class="mb-5 animate-stagger-in"
         style="animation-delay: 0ms;"
       >
-        <h2
-          class="text-xl font-bold text-content-primary leading-snug"
+        <span
+          class="inline-flex items-center gap-2 rounded-full bg-emerald-500/[0.08] dark:bg-emerald-400/[0.1] px-3.5 py-1.5"
         >
-          login.hero_title
-           
           <span
-            class="gradient-text"
+            class="relative flex h-[6px] w-[6px]"
           >
-            login.hero_highlight
+            <span
+              class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60"
+            />
+            <span
+              class="relative inline-flex rounded-full h-[6px] w-[6px] bg-emerald-500"
+            />
           </span>
-        </h2>
-        <p
-          class="mt-1.5 text-[13px] text-content-secondary leading-relaxed"
-        >
-          login.hero_desc
-        </p>
+          <span
+            class="text-[11px] font-medium tracking-[0.04em] text-emerald-700 dark:text-emerald-300"
+          >
+            Open Source
+          </span>
+        </span>
       </div>
+      <h2
+        class="text-[32px] xl:text-[36px] font-semibold text-content-primary leading-[1.08] tracking-[-0.025em] animate-stagger-in"
+        style="animation-delay: 60ms;"
+      >
+        The 
+        <span
+          class="bg-gradient-to-r from-oe-blue to-violet-500 bg-clip-text text-transparent"
+        >
+          #1
+        </span>
+         open‑source construction ERP
+      </h2>
+      <p
+        class="mt-5 text-[17px] text-content-secondary/70 leading-[1.65] tracking-[-0.008em] max-w-[400px] animate-stagger-in"
+        style="animation-delay: 120ms;"
+      >
+        login.hero_desc
+      </p>
       <div
-        class="grid grid-cols-2 gap-2"
+        class="mt-5 flex items-center gap-5 animate-stagger-in"
+        style="animation-delay: 180ms;"
       >
         <div
-          class="rounded-lg border border-border-light/40 bg-surface-elevated/40 backdrop-blur-sm px-2.5 py-2 animate-stagger-in"
-          style="animation-delay: 50ms;"
+          class="text-center"
         >
           <div
-            class="flex items-center gap-1.5 mb-0.5"
+            class="text-[22px] font-semibold text-content-primary tracking-tight"
           >
-            <div
-              class="flex h-5 w-5 shrink-0 items-center justify-center rounded text-emerald-500 bg-emerald-500/10"
-            >
-              <svg
-                class="lucide lucide-hard-drive"
-                fill="none"
-                height="11"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="11"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <line
-                  x1="22"
-                  x2="2"
-                  y1="12"
-                  y2="12"
-                />
-                <path
-                  d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"
-                />
-                <line
-                  x1="6"
-                  x2="6.01"
-                  y1="16"
-                  y2="16"
-                />
-                <line
-                  x1="10"
-                  x2="10.01"
-                  y1="16"
-                  y2="16"
-                />
-              </svg>
-            </div>
-            <span
-              class="text-2xs font-semibold text-content-primary leading-tight"
-            >
-              login.benefit.local
-            </span>
+            55K+
           </div>
-          <p
-            class="text-2xs text-content-tertiary leading-snug pl-[26px]"
+          <div
+            class="text-[11px] text-content-tertiary mt-0.5"
           >
-            login.benefit.local_desc
-          </p>
+            cost items
+          </div>
         </div>
         <div
-          class="rounded-lg border border-border-light/40 bg-surface-elevated/40 backdrop-blur-sm px-2.5 py-2 animate-stagger-in"
-          style="animation-delay: 90ms;"
+          class="text-center"
         >
           <div
-            class="flex items-center gap-1.5 mb-0.5"
+            class="text-[22px] font-semibold text-content-primary tracking-tight"
           >
-            <div
-              class="flex h-5 w-5 shrink-0 items-center justify-center rounded text-blue-500 bg-blue-500/10"
-            >
-              <svg
-                class="lucide lucide-shield-check"
-                fill="none"
-                height="11"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="11"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"
-                />
-                <path
-                  d="m9 12 2 2 4-4"
-                />
-              </svg>
-            </div>
-            <span
-              class="text-2xs font-semibold text-content-primary leading-tight"
-            >
-              login.benefit.open_source
-            </span>
+            20
           </div>
-          <p
-            class="text-2xs text-content-tertiary leading-snug pl-[26px]"
+          <div
+            class="text-[11px] text-content-tertiary mt-0.5"
           >
-            login.benefit.open_source_desc
-          </p>
+            languages
+          </div>
         </div>
         <div
-          class="rounded-lg border border-border-light/40 bg-surface-elevated/40 backdrop-blur-sm px-2.5 py-2 animate-stagger-in"
-          style="animation-delay: 130ms;"
+          class="text-center"
         >
           <div
-            class="flex items-center gap-1.5 mb-0.5"
+            class="text-[22px] font-semibold text-content-primary tracking-tight"
           >
-            <div
-              class="flex h-5 w-5 shrink-0 items-center justify-center rounded text-violet-500 bg-violet-500/10"
-            >
-              <svg
-                class="lucide lucide-earth"
-                fill="none"
-                height="11"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="11"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M21.54 15H17a2 2 0 0 0-2 2v4.54"
-                />
-                <path
-                  d="M7 3.34V5a3 3 0 0 0 3 3a2 2 0 0 1 2 2c0 1.1.9 2 2 2a2 2 0 0 0 2-2c0-1.1.9-2 2-2h3.17"
-                />
-                <path
-                  d="M11 21.95V18a2 2 0 0 0-2-2a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05"
-                />
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                />
-              </svg>
-            </div>
-            <span
-              class="text-2xs font-semibold text-content-primary leading-tight"
-            >
-              login.benefit.standards
-            </span>
+            11
           </div>
-          <p
-            class="text-2xs text-content-tertiary leading-snug pl-[26px]"
-          >
-            login.benefit.standards_desc
-          </p>
-        </div>
-        <div
-          class="rounded-lg border border-border-light/40 bg-surface-elevated/40 backdrop-blur-sm px-2.5 py-2 animate-stagger-in"
-          style="animation-delay: 170ms;"
-        >
           <div
-            class="flex items-center gap-1.5 mb-0.5"
+            class="text-[11px] text-content-tertiary mt-0.5"
           >
-            <div
-              class="flex h-5 w-5 shrink-0 items-center justify-center rounded text-amber-500 bg-amber-500/10"
-            >
-              <svg
-                class="lucide lucide-brain"
-                fill="none"
-                height="11"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="11"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"
-                />
-                <path
-                  d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"
-                />
-                <path
-                  d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"
-                />
-                <path
-                  d="M17.599 6.5a3 3 0 0 0 .399-1.375"
-                />
-                <path
-                  d="M6.003 5.125A3 3 0 0 0 6.401 6.5"
-                />
-                <path
-                  d="M3.477 10.896a4 4 0 0 1 .585-.396"
-                />
-                <path
-                  d="M19.938 10.5a4 4 0 0 1 .585.396"
-                />
-                <path
-                  d="M6 18a4 4 0 0 1-1.967-.516"
-                />
-                <path
-                  d="M19.967 17.484A4 4 0 0 1 18 18"
-                />
-              </svg>
-            </div>
-            <span
-              class="text-2xs font-semibold text-content-primary leading-tight"
-            >
-              login.benefit.ai
-            </span>
+            regions
           </div>
-          <p
-            class="text-2xs text-content-tertiary leading-snug pl-[26px]"
-          >
-            login.benefit.ai_desc
-          </p>
-        </div>
-        <div
-          class="rounded-lg border border-border-light/40 bg-surface-elevated/40 backdrop-blur-sm px-2.5 py-2 animate-stagger-in"
-          style="animation-delay: 210ms;"
-        >
-          <div
-            class="flex items-center gap-1.5 mb-0.5"
-          >
-            <div
-              class="flex h-5 w-5 shrink-0 items-center justify-center rounded text-rose-500 bg-rose-500/10"
-            >
-              <svg
-                class="lucide lucide-zap"
-                fill="none"
-                height="11"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="11"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"
-                />
-              </svg>
-            </div>
-            <span
-              class="text-2xs font-semibold text-content-primary leading-tight"
-            >
-              login.benefit.allinone
-            </span>
-          </div>
-          <p
-            class="text-2xs text-content-tertiary leading-snug pl-[26px]"
-          >
-            login.benefit.allinone_desc
-          </p>
-        </div>
-        <div
-          class="rounded-lg border border-border-light/40 bg-surface-elevated/40 backdrop-blur-sm px-2.5 py-2 animate-stagger-in"
-          style="animation-delay: 250ms;"
-        >
-          <div
-            class="flex items-center gap-1.5 mb-0.5"
-          >
-            <div
-              class="flex h-5 w-5 shrink-0 items-center justify-center rounded text-cyan-500 bg-cyan-500/10"
-            >
-              <svg
-                class="lucide lucide-users"
-                fill="none"
-                height="11"
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-                width="11"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
-                />
-                <circle
-                  cx="9"
-                  cy="7"
-                  r="4"
-                />
-                <path
-                  d="M22 21v-2a4 4 0 0 0-3-3.87"
-                />
-                <path
-                  d="M16 3.13a4 4 0 0 1 0 7.75"
-                />
-              </svg>
-            </div>
-            <span
-              class="text-2xs font-semibold text-content-primary leading-tight"
-            >
-              login.benefit.free
-            </span>
-          </div>
-          <p
-            class="text-2xs text-content-tertiary leading-snug pl-[26px]"
-          >
-            login.benefit.free_desc
-          </p>
         </div>
       </div>
       <div
-        class="mt-3 flex items-start gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2 animate-stagger-in"
+        class="mt-5 mb-4 h-px bg-gradient-to-r from-content-primary/[0.06] via-content-primary/[0.1] to-transparent animate-stagger-in"
+        style="animation-delay: 220ms;"
+      />
+      <div
+        class="space-y-5 animate-stagger-in"
+        style="animation-delay: 260ms;"
+      >
+        <div
+          class="flex gap-3.5"
+        >
+          <div
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-content-primary/[0.04] dark:bg-white/[0.06]"
+          >
+            <svg
+              class="lucide lucide-shield-check text-content-primary/60"
+              fill="none"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.6"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"
+              />
+              <path
+                d="m9 12 2 2 4-4"
+              />
+            </svg>
+          </div>
+          <div>
+            <div
+              class="text-[13px] font-semibold text-content-primary leading-tight tracking-[-0.01em]"
+            >
+              Your data, your machine
+            </div>
+            <div
+              class="text-[12px] text-content-tertiary leading-[1.55] mt-0.5"
+            >
+              Nothing leaves your computer. Full ownership, zero cloud dependency.
+            </div>
+          </div>
+        </div>
+        <div
+          class="flex gap-3.5"
+        >
+          <div
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-content-primary/[0.04] dark:bg-white/[0.06]"
+          >
+            <svg
+              class="lucide lucide-brain text-content-primary/60"
+              fill="none"
+              height="16"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.6"
+              viewBox="0 0 24 24"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"
+              />
+              <path
+                d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"
+              />
+              <path
+                d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"
+              />
+              <path
+                d="M17.599 6.5a3 3 0 0 0 .399-1.375"
+              />
+              <path
+                d="M6.003 5.125A3 3 0 0 0 6.401 6.5"
+              />
+              <path
+                d="M3.477 10.896a4 4 0 0 1 .585-.396"
+              />
+              <path
+                d="M19.938 10.5a4 4 0 0 1 .585.396"
+              />
+              <path
+                d="M6 18a4 4 0 0 1-1.967-.516"
+              />
+              <path
+                d="M19.967 17.484A4 4 0 0 1 18 18"
+              />
+            </svg>
+          </div>
+          <div>
+            <div
+              class="text-[13px] font-semibold text-content-primary leading-tight tracking-[-0.01em]"
+            >
+              AI-assisted, human-confirmed
+            </div>
+            <div
+              class="text-[12px] text-content-tertiary leading-[1.55] mt-0.5"
+            >
+              Smart suggestions with confidence scores. You always have the final say.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="mt-5 flex flex-wrap gap-[5px] animate-stagger-in"
         style="animation-delay: 320ms;"
       >
-        <svg
-          class="lucide lucide-hard-drive text-emerald-500 shrink-0 mt-0.5"
-          fill="none"
-          height="13"
-          stroke="currentColor"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-          width="13"
-          xmlns="http://www.w3.org/2000/svg"
+        <span
+          class="rounded-full bg-content-primary/[0.04] dark:bg-white/[0.06] px-2.5 py-[3px] text-[10px] font-medium text-content-tertiary/80 tracking-[0.01em]"
         >
-          <line
-            x1="22"
-            x2="2"
-            y1="12"
-            y2="12"
-          />
-          <path
-            d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"
-          />
-          <line
-            x1="6"
-            x2="6.01"
-            y1="16"
-            y2="16"
-          />
-          <line
-            x1="10"
-            x2="10.01"
-            y1="16"
-            y2="16"
-          />
-        </svg>
-        <div>
-          <p
-            class="text-2xs text-content-secondary leading-snug"
-          >
-            login.privacy
-          </p>
-          <p
-            class="mt-0.5 text-[10px] text-content-quaternary leading-snug"
-          >
-            * 
-            login.privacy_ai
-          </p>
-        </div>
+          Bill of Quantities
+        </span>
+        <span
+          class="rounded-full bg-content-primary/[0.04] dark:bg-white/[0.06] px-2.5 py-[3px] text-[10px] font-medium text-content-tertiary/80 tracking-[0.01em]"
+        >
+          4D Scheduling
+        </span>
+        <span
+          class="rounded-full bg-content-primary/[0.04] dark:bg-white/[0.06] px-2.5 py-[3px] text-[10px] font-medium text-content-tertiary/80 tracking-[0.01em]"
+        >
+          5D Cost Model
+        </span>
+        <span
+          class="rounded-full bg-content-primary/[0.04] dark:bg-white/[0.06] px-2.5 py-[3px] text-[10px] font-medium text-content-tertiary/80 tracking-[0.01em]"
+        >
+          AI Estimation
+        </span>
+        <span
+          class="rounded-full bg-content-primary/[0.04] dark:bg-white/[0.06] px-2.5 py-[3px] text-[10px] font-medium text-content-tertiary/80 tracking-[0.01em]"
+        >
+          Tendering
+        </span>
+        <span
+          class="rounded-full bg-content-primary/[0.04] dark:bg-white/[0.06] px-2.5 py-[3px] text-[10px] font-medium text-content-tertiary/80 tracking-[0.01em]"
+        >
+          CAD/BIM
+        </span>
+        <span
+          class="rounded-full bg-content-primary/[0.04] dark:bg-white/[0.06] px-2.5 py-[3px] text-[10px] font-medium text-content-tertiary/80 tracking-[0.01em]"
+        >
+          PDF Takeoff
+        </span>
+        <span
+          class="rounded-full bg-content-primary/[0.04] dark:bg-white/[0.06] px-2.5 py-[3px] text-[10px] font-medium text-content-tertiary/80 tracking-[0.01em]"
+        >
+          Multi-Standard
+        </span>
+        <span
+          class="rounded-full bg-content-primary/[0.04] dark:bg-white/[0.06] px-2.5 py-[3px] text-[10px] font-medium text-content-tertiary/80 tracking-[0.01em]"
+        >
+          Import/Export
+        </span>
+        <span
+          class="rounded-full bg-content-primary/[0.04] dark:bg-white/[0.06] px-2.5 py-[3px] text-[10px] font-medium text-content-tertiary/80 tracking-[0.01em]"
+        >
+          20 Languages
+        </span>
       </div>
       <div
-        class="mt-3 flex items-center gap-3 text-2xs text-content-quaternary animate-stagger-in"
-        style="animation-delay: 360ms;"
+        class="mt-4 space-y-1 animate-stagger-in"
+        style="animation-delay: 380ms;"
       >
-        <span
-          class="inline-flex items-center gap-1 rounded-full border border-border-light px-2 py-0.5 text-content-tertiary"
+        <div
+          class="flex items-center gap-2 text-[11px] text-content-quaternary/60"
         >
           <svg
-            class="opacity-50"
+            class="opacity-40"
             fill="currentColor"
-            height="9"
+            height="11"
             viewBox="0 0 24 24"
-            width="9"
+            width="11"
           >
             <path
               d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
             />
           </svg>
-          Open Source · AGPL-3.0
-        </span>
-        <a
-          class="hover:text-content-secondary transition-colors"
-          href="https://datadrivenconstruction.io"
-          rel="noopener noreferrer"
-          target="_blank"
+          <a
+            class="hover:text-content-tertiary transition-colors"
+            href="/api/source"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            AGPL-3.0
+          </a>
+          <span
+            class="opacity-30"
+          >
+            ·
+          </span>
+          <a
+            class="hover:text-content-tertiary transition-colors"
+            href="https://OpenConstructionERP.com"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            OpenConstructionERP.com
+          </a>
+        </div>
+        <p
+          class="text-[10px] text-content-quaternary/40"
         >
-          datadrivenconstruction.io
-        </a>
+          Created by Artem Boiko · 2026 · OpenConstructionERP
+        </p>
       </div>
     </div>
     <div
@@ -2906,168 +4338,216 @@ exports[`Visual Regression — LoginPage > renders the login form 1`] = `
           style="animation-delay: 0ms;"
         >
           <div
-            class="flex items-center gap-3"
+            class="flex items-center gap-2.5"
           >
             <div
-              class="h-10 w-10 relative animate-pulse-glow"
+              class="h-7 w-7 relative shrink-0"
+              style="animation: oeLogoFloat 3s ease-in-out 1.2s infinite, oeLogoGlow 3s ease-in-out 1.2s infinite;"
             >
               <svg
                 class="w-full h-full"
                 fill="none"
-                viewBox="0 0 32 32"
+                viewBox="0 0 512 512"
                 xmlns="http://www.w3.org/2000/svg"
               >
+                <defs>
+                  <lineargradient
+                    id="oe-lg-md-a"
+                    x1="0%"
+                    x2="100%"
+                    y1="0%"
+                    y2="100%"
+                  >
+                    <stop
+                      offset="0%"
+                      stop-color="#0066ff"
+                    />
+                    <stop
+                      offset="100%"
+                      stop-color="#5856d6"
+                    />
+                  </lineargradient>
+                </defs>
                 <rect
-                  class="origin-center"
-                  fill="#2563eb"
-                  height="25"
-                  rx="5"
-                  style="animation: scaleIn 400ms cubic-bezier(0.34,1.56,0.64,1) both;"
-                  width="22"
-                  x="1"
-                  y="5"
+                  fill="url(#oe-lg-md-a)"
+                  height="448"
+                  rx="96"
+                  style="animation: oeBgScale 450ms cubic-bezier(0.34,1.56,0.64,1) both;"
+                  width="448"
+                  x="32"
+                  y="32"
                 />
                 <rect
-                  class="origin-center"
-                  fill="white"
-                  height="5.5"
-                  opacity="0.95"
-                  rx="2"
-                  style="animation: scaleIn 450ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 80ms;"
-                  width="15.5"
-                  x="4.5"
-                  y="7.5"
+                  fill="#fff"
+                  height="114"
+                  opacity=".85"
+                  rx="6"
+                  style="transform-origin: bottom; animation: oeBarGrow 500ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 120ms;"
+                  width="42"
+                  x="102"
+                  y="296"
                 />
-                <text
-                  fill="#2563eb"
-                  font-family="system-ui"
-                  font-size="4"
-                  font-weight="700"
-                  text-anchor="end"
-                  x="18"
-                  y="11.8"
+                <rect
+                  fill="#fff"
+                  height="177"
+                  opacity=".95"
+                  rx="6"
+                  style="transform-origin: bottom; animation: oeBarGrow 500ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 200ms;"
+                  width="42"
+                  x="162"
+                  y="233"
+                />
+                <rect
+                  fill="#fff"
+                  height="234"
+                  opacity=".85"
+                  rx="6"
+                  style="transform-origin: bottom; animation: oeBarGrow 500ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 280ms;"
+                  width="42"
+                  x="222"
+                  y="176"
+                />
+                <rect
+                  fill="#fff"
+                  height="260"
+                  opacity=".9"
+                  rx="8"
+                  style="animation: oeBuildingSlide 600ms cubic-bezier(0.22,1,0.36,1) both; animation-delay: 300ms;"
+                  width="128"
+                  x="282"
+                  y="150"
+                />
+                <g
+                  style="animation: oeBuildingSlide 600ms cubic-bezier(0.22,1,0.36,1) both; animation-delay: 300ms;"
                 >
-                  1.2M
-                </text>
-                <circle
-                  class="origin-center"
-                  cx="7.5"
-                  cy="17"
-                  fill="white"
-                  opacity="0.3"
-                  r="1.2"
-                  style="animation: scaleIn 350ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 150ms;"
-                />
-                <circle
-                  class="origin-center"
-                  cx="12"
-                  cy="17"
-                  fill="white"
-                  opacity="0.3"
-                  r="1.2"
-                  style="animation: scaleIn 350ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 190ms;"
-                />
-                <circle
-                  class="origin-center"
-                  cx="16.5"
-                  cy="17"
-                  fill="white"
-                  opacity="0.3"
-                  r="1.2"
-                  style="animation: scaleIn 350ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 230ms;"
-                />
-                <circle
-                  class="origin-center"
-                  cx="7.5"
-                  cy="21"
-                  fill="white"
-                  opacity="0.3"
-                  r="1.2"
-                  style="animation: scaleIn 350ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 270ms;"
-                />
-                <circle
-                  class="origin-center"
-                  cx="12"
-                  cy="21"
-                  fill="white"
-                  opacity="0.3"
-                  r="1.2"
-                  style="animation: scaleIn 350ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 310ms;"
-                />
-                <circle
-                  class="origin-center"
-                  cx="16.5"
-                  cy="21"
-                  fill="white"
-                  opacity="0.3"
-                  r="1.2"
-                  style="animation: scaleIn 350ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 350ms;"
-                />
-                <rect
-                  class="origin-center"
-                  fill="#f59e0b"
-                  height="2"
-                  opacity="0.9"
-                  rx="1"
-                  style="animation: scaleIn 350ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 420ms;"
-                  width="14.5"
-                  x="5"
-                  y="25"
-                />
-                <circle
-                  class="origin-center"
-                  cx="24.5"
-                  cy="7"
-                  fill="#f59e0b"
-                  r="6.5"
-                  style="animation: scaleIn 400ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 480ms;"
-                />
-                <path
-                  d="M24.5 2.5 L29 6 L20 6 Z"
-                  fill="white"
-                  opacity="0.95"
-                />
-                <rect
-                  fill="white"
-                  height="4.5"
-                  opacity="0.95"
-                  rx="0.6"
-                  width="6"
-                  x="21.5"
-                  y="6"
-                />
-                <rect
-                  fill="#f59e0b"
-                  height="3"
-                  opacity="0.5"
-                  rx="0.4"
-                  width="3"
-                  x="23"
-                  y="7.5"
-                />
+                  <rect
+                    fill="url(#oe-lg-md-a)"
+                    height="28"
+                    opacity=".5"
+                    rx="4"
+                    style="animation: oeWindowFade 400ms ease both; animation-delay: 550ms;"
+                    width="26"
+                    x="304"
+                    y="182"
+                  />
+                  <rect
+                    fill="url(#oe-lg-md-a)"
+                    height="28"
+                    opacity=".5"
+                    rx="4"
+                    style="animation: oeWindowFade 400ms ease both; animation-delay: 600ms;"
+                    width="26"
+                    x="362"
+                    y="182"
+                  />
+                  <rect
+                    fill="url(#oe-lg-md-a)"
+                    height="28"
+                    opacity=".5"
+                    rx="4"
+                    style="animation: oeWindowFade 400ms ease both; animation-delay: 650ms;"
+                    width="26"
+                    x="304"
+                    y="226"
+                  />
+                  <rect
+                    fill="url(#oe-lg-md-a)"
+                    height="28"
+                    opacity=".5"
+                    rx="4"
+                    style="animation: oeWindowFade 400ms ease both; animation-delay: 700ms;"
+                    width="26"
+                    x="362"
+                    y="226"
+                  />
+                  <rect
+                    fill="url(#oe-lg-md-a)"
+                    height="28"
+                    opacity=".45"
+                    rx="4"
+                    style="animation: oeWindowFade 400ms ease both; animation-delay: 750ms;"
+                    width="26"
+                    x="304"
+                    y="272"
+                  />
+                  <rect
+                    fill="url(#oe-lg-md-a)"
+                    height="28"
+                    opacity=".45"
+                    rx="4"
+                    style="animation: oeWindowFade 400ms ease both; animation-delay: 800ms;"
+                    width="26"
+                    x="362"
+                    y="272"
+                  />
+                  <rect
+                    fill="url(#oe-lg-md-a)"
+                    height="82"
+                    opacity=".55"
+                    rx="4"
+                    style="animation: oeWindowFade 400ms ease both; animation-delay: 850ms;"
+                    width="34"
+                    x="329"
+                    y="328"
+                  />
+                </g>
               </svg>
             </div>
             <span
-              class="text-base font-semibold text-content-primary tracking-tight whitespace-nowrap"
+              class="text-2xl font-extrabold text-content-primary whitespace-nowrap"
+              style="font-family: "Plus Jakarta Sans", system-ui, sans-serif; letter-spacing: -0.02em;"
             >
               Open
               <span
                 class="text-oe-blue"
               >
-                Estimator
+                Construction
               </span>
               <span
-                class="text-content-tertiary"
+                class="text-content-quaternary font-semibold"
               >
-                .io
+                ERP
               </span>
             </span>
           </div>
           <p
-            class="mt-1 text-xs text-content-tertiary"
+            class="mt-2 text-sm text-content-tertiary"
           >
             app.tagline
           </p>
+        </div>
+        <div
+          class="lg:hidden mb-4 animate-stagger-in"
+          style="animation-delay: 100ms;"
+        >
+          <div
+            class="rounded-xl bg-gradient-to-r from-oe-blue/10 via-violet-500/10 to-emerald-500/10 border border-oe-blue/20 px-4 py-3 text-center"
+          >
+            <div
+              class="flex items-center justify-center gap-1.5 mb-1"
+            >
+              <span
+                class="relative flex h-2 w-2"
+              >
+                <span
+                  class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"
+                />
+                <span
+                  class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"
+                />
+              </span>
+              <span
+                class="text-[10px] font-bold uppercase tracking-wider text-emerald-600"
+              >
+                Open Source
+              </span>
+            </div>
+            <p
+              class="text-sm font-bold bg-gradient-to-r from-oe-blue via-violet-600 to-emerald-600 bg-clip-text text-transparent"
+            >
+              The #1 Open-Source Construction ERP
+            </p>
+          </div>
         </div>
         <div
           class="glass-strong rounded-2xl px-6 py-5 shadow-lg animate-form-scale-in"
@@ -3285,11 +4765,187 @@ exports[`Visual Regression — LoginPage > renders the login form 1`] = `
                 auth.create_account
               </a>
             </p>
-            <p
-              class="mt-2 text-center text-2xs text-content-quaternary"
+          </div>
+        </div>
+        <div
+          class="mt-3 animate-stagger-in"
+          style="animation-delay: 500ms;"
+        >
+          <div
+            class="glass-strong rounded-2xl shadow-lg overflow-hidden"
+          >
+            <button
+              class="flex w-full items-center justify-center gap-2 px-5 py-2.5 text-sm text-content-secondary hover:text-oe-blue transition-all"
+              type="button"
             >
-              auth.demo_hint
-            </p>
+              <svg
+                class="lucide lucide-zap text-oe-blue"
+                fill="none"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"
+                />
+              </svg>
+              <span
+                class="font-semibold"
+              >
+                auth.demo_access
+              </span>
+              <svg
+                class="lucide lucide-chevron-down text-content-tertiary transition-transform duration-200 rotate-180"
+                fill="none"
+                height="14"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m6 9 6 6 6-6"
+                />
+              </svg>
+            </button>
+            <div
+              class="border-t border-border-light/60 px-3 py-2.5 space-y-1.5 animate-stagger-in"
+            >
+              <button
+                class="flex w-full items-center gap-3 rounded-xl border border-border-light/50 bg-surface-secondary/50 px-3.5 py-2.5 text-left transition-all hover:border-oe-blue/40 hover:bg-oe-blue/[0.05] hover:shadow-sm disabled:opacity-50 group"
+                type="button"
+              >
+                <div
+                  class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-500 text-white text-sm font-bold shadow-sm"
+                >
+                  A
+                </div>
+                <div
+                  class="flex-1 min-w-0"
+                >
+                  <div
+                    class="text-[13px] font-semibold text-content-primary"
+                  >
+                    Admin
+                  </div>
+                  <div
+                    class="text-[11px] text-content-tertiary truncate"
+                  >
+                    demo@openestimator.io
+                     · 
+                    auth.demo_role_admin
+                  </div>
+                </div>
+                <svg
+                  class="lucide lucide-chevron-down text-content-quaternary -rotate-90 group-hover:text-oe-blue transition-colors shrink-0"
+                  fill="none"
+                  height="15"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="15"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m6 9 6 6 6-6"
+                  />
+                </svg>
+              </button>
+              <button
+                class="flex w-full items-center gap-3 rounded-xl border border-border-light/50 bg-surface-secondary/50 px-3.5 py-2.5 text-left transition-all hover:border-oe-blue/40 hover:bg-oe-blue/[0.05] hover:shadow-sm disabled:opacity-50 group"
+                type="button"
+              >
+                <div
+                  class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white text-sm font-bold shadow-sm"
+                >
+                  S
+                </div>
+                <div
+                  class="flex-1 min-w-0"
+                >
+                  <div
+                    class="text-[13px] font-semibold text-content-primary"
+                  >
+                    Sarah Chen
+                  </div>
+                  <div
+                    class="text-[11px] text-content-tertiary truncate"
+                  >
+                    estimator@openestimator.io
+                     · 
+                    auth.demo_role_estimator
+                  </div>
+                </div>
+                <svg
+                  class="lucide lucide-chevron-down text-content-quaternary -rotate-90 group-hover:text-oe-blue transition-colors shrink-0"
+                  fill="none"
+                  height="15"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="15"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m6 9 6 6 6-6"
+                  />
+                </svg>
+              </button>
+              <button
+                class="flex w-full items-center gap-3 rounded-xl border border-border-light/50 bg-surface-secondary/50 px-3.5 py-2.5 text-left transition-all hover:border-oe-blue/40 hover:bg-oe-blue/[0.05] hover:shadow-sm disabled:opacity-50 group"
+                type="button"
+              >
+                <div
+                  class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-500 text-white text-sm font-bold shadow-sm"
+                >
+                  M
+                </div>
+                <div
+                  class="flex-1 min-w-0"
+                >
+                  <div
+                    class="text-[13px] font-semibold text-content-primary"
+                  >
+                    Thomas Müller
+                  </div>
+                  <div
+                    class="text-[11px] text-content-tertiary truncate"
+                  >
+                    manager@openestimator.io
+                     · 
+                    auth.demo_role_manager
+                  </div>
+                </div>
+                <svg
+                  class="lucide lucide-chevron-down text-content-quaternary -rotate-90 group-hover:text-oe-blue transition-colors shrink-0"
+                  fill="none"
+                  height="15"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="15"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m6 9 6 6 6-6"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
         <div
@@ -3334,11 +4990,11 @@ exports[`Visual Regression — LoginPage > renders the login form 1`] = `
           >
             <a
               class="hover:text-content-secondary transition-colors"
-              href="https://datadrivenconstruction.io"
+              href="https://OpenConstructionERP.com"
               rel="noopener noreferrer"
               target="_blank"
             >
-              datadrivenconstruction.io
+              OpenConstructionERP.com
             </a>
             <span>
               ·
@@ -3362,142 +5018,156 @@ exports[`Visual Regression — LoginPage > renders the login form 1`] = `
 exports[`Visual Regression — Logo > Logo — large with animation 1`] = `
 <div>
   <div
-    class="h-14 w-14 relative animate-pulse-glow"
+    class="h-10 w-10 relative shrink-0"
+    style="animation: oeLogoFloat 3s ease-in-out 1.2s infinite, oeLogoGlow 3s ease-in-out 1.2s infinite;"
   >
     <svg
       class="w-full h-full"
       fill="none"
-      viewBox="0 0 32 32"
+      viewBox="0 0 512 512"
       xmlns="http://www.w3.org/2000/svg"
     >
+      <defs>
+        <lineargradient
+          id="oe-lg-lg-a"
+          x1="0%"
+          x2="100%"
+          y1="0%"
+          y2="100%"
+        >
+          <stop
+            offset="0%"
+            stop-color="#0066ff"
+          />
+          <stop
+            offset="100%"
+            stop-color="#5856d6"
+          />
+        </lineargradient>
+      </defs>
       <rect
-        class="origin-center"
-        fill="#2563eb"
-        height="25"
-        rx="5"
-        style="animation: scaleIn 400ms cubic-bezier(0.34,1.56,0.64,1) both;"
-        width="22"
-        x="1"
-        y="5"
+        fill="url(#oe-lg-lg-a)"
+        height="448"
+        rx="96"
+        style="animation: oeBgScale 450ms cubic-bezier(0.34,1.56,0.64,1) both;"
+        width="448"
+        x="32"
+        y="32"
       />
       <rect
-        class="origin-center"
-        fill="white"
-        height="5.5"
-        opacity="0.95"
-        rx="2"
-        style="animation: scaleIn 450ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 80ms;"
-        width="15.5"
-        x="4.5"
-        y="7.5"
+        fill="#fff"
+        height="114"
+        opacity=".85"
+        rx="6"
+        style="transform-origin: bottom; animation: oeBarGrow 500ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 120ms;"
+        width="42"
+        x="102"
+        y="296"
       />
-      <text
-        fill="#2563eb"
-        font-family="system-ui"
-        font-size="4"
-        font-weight="700"
-        text-anchor="end"
-        x="18"
-        y="11.8"
+      <rect
+        fill="#fff"
+        height="177"
+        opacity=".95"
+        rx="6"
+        style="transform-origin: bottom; animation: oeBarGrow 500ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 200ms;"
+        width="42"
+        x="162"
+        y="233"
+      />
+      <rect
+        fill="#fff"
+        height="234"
+        opacity=".85"
+        rx="6"
+        style="transform-origin: bottom; animation: oeBarGrow 500ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 280ms;"
+        width="42"
+        x="222"
+        y="176"
+      />
+      <rect
+        fill="#fff"
+        height="260"
+        opacity=".9"
+        rx="8"
+        style="animation: oeBuildingSlide 600ms cubic-bezier(0.22,1,0.36,1) both; animation-delay: 300ms;"
+        width="128"
+        x="282"
+        y="150"
+      />
+      <g
+        style="animation: oeBuildingSlide 600ms cubic-bezier(0.22,1,0.36,1) both; animation-delay: 300ms;"
       >
-        1.2M
-      </text>
-      <circle
-        class="origin-center"
-        cx="7.5"
-        cy="17"
-        fill="white"
-        opacity="0.3"
-        r="1.2"
-        style="animation: scaleIn 350ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 150ms;"
-      />
-      <circle
-        class="origin-center"
-        cx="12"
-        cy="17"
-        fill="white"
-        opacity="0.3"
-        r="1.2"
-        style="animation: scaleIn 350ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 190ms;"
-      />
-      <circle
-        class="origin-center"
-        cx="16.5"
-        cy="17"
-        fill="white"
-        opacity="0.3"
-        r="1.2"
-        style="animation: scaleIn 350ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 230ms;"
-      />
-      <circle
-        class="origin-center"
-        cx="7.5"
-        cy="21"
-        fill="white"
-        opacity="0.3"
-        r="1.2"
-        style="animation: scaleIn 350ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 270ms;"
-      />
-      <circle
-        class="origin-center"
-        cx="12"
-        cy="21"
-        fill="white"
-        opacity="0.3"
-        r="1.2"
-        style="animation: scaleIn 350ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 310ms;"
-      />
-      <circle
-        class="origin-center"
-        cx="16.5"
-        cy="21"
-        fill="white"
-        opacity="0.3"
-        r="1.2"
-        style="animation: scaleIn 350ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 350ms;"
-      />
-      <rect
-        class="origin-center"
-        fill="#f59e0b"
-        height="2"
-        opacity="0.9"
-        rx="1"
-        style="animation: scaleIn 350ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 420ms;"
-        width="14.5"
-        x="5"
-        y="25"
-      />
-      <circle
-        class="origin-center"
-        cx="24.5"
-        cy="7"
-        fill="#f59e0b"
-        r="6.5"
-        style="animation: scaleIn 400ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 480ms;"
-      />
-      <path
-        d="M24.5 2.5 L29 6 L20 6 Z"
-        fill="white"
-        opacity="0.95"
-      />
-      <rect
-        fill="white"
-        height="4.5"
-        opacity="0.95"
-        rx="0.6"
-        width="6"
-        x="21.5"
-        y="6"
-      />
-      <rect
-        fill="#f59e0b"
-        height="3"
-        opacity="0.5"
-        rx="0.4"
-        width="3"
-        x="23"
-        y="7.5"
-      />
+        <rect
+          fill="url(#oe-lg-lg-a)"
+          height="28"
+          opacity=".5"
+          rx="4"
+          style="animation: oeWindowFade 400ms ease both; animation-delay: 550ms;"
+          width="26"
+          x="304"
+          y="182"
+        />
+        <rect
+          fill="url(#oe-lg-lg-a)"
+          height="28"
+          opacity=".5"
+          rx="4"
+          style="animation: oeWindowFade 400ms ease both; animation-delay: 600ms;"
+          width="26"
+          x="362"
+          y="182"
+        />
+        <rect
+          fill="url(#oe-lg-lg-a)"
+          height="28"
+          opacity=".5"
+          rx="4"
+          style="animation: oeWindowFade 400ms ease both; animation-delay: 650ms;"
+          width="26"
+          x="304"
+          y="226"
+        />
+        <rect
+          fill="url(#oe-lg-lg-a)"
+          height="28"
+          opacity=".5"
+          rx="4"
+          style="animation: oeWindowFade 400ms ease both; animation-delay: 700ms;"
+          width="26"
+          x="362"
+          y="226"
+        />
+        <rect
+          fill="url(#oe-lg-lg-a)"
+          height="28"
+          opacity=".45"
+          rx="4"
+          style="animation: oeWindowFade 400ms ease both; animation-delay: 750ms;"
+          width="26"
+          x="304"
+          y="272"
+        />
+        <rect
+          fill="url(#oe-lg-lg-a)"
+          height="28"
+          opacity=".45"
+          rx="4"
+          style="animation: oeWindowFade 400ms ease both; animation-delay: 800ms;"
+          width="26"
+          x="362"
+          y="272"
+        />
+        <rect
+          fill="url(#oe-lg-lg-a)"
+          height="82"
+          opacity=".55"
+          rx="4"
+          style="animation: oeWindowFade 400ms ease both; animation-delay: 850ms;"
+          width="34"
+          x="329"
+          y="328"
+        />
+      </g>
     </svg>
   </div>
 </div>
@@ -3506,131 +5176,75 @@ exports[`Visual Regression — Logo > Logo — large with animation 1`] = `
 exports[`Visual Regression — Logo > Logo — small 1`] = `
 <div>
   <div
-    class="h-8 w-8 relative"
+    class="h-6 w-6 relative shrink-0"
   >
     <svg
       class="w-full h-full"
       fill="none"
-      viewBox="0 0 32 32"
+      viewBox="0 0 512 512"
       xmlns="http://www.w3.org/2000/svg"
     >
+      <defs>
+        <lineargradient
+          id="oe-lg-sm-s"
+          x1="0%"
+          x2="100%"
+          y1="0%"
+          y2="100%"
+        >
+          <stop
+            offset="0%"
+            stop-color="#0066ff"
+          />
+          <stop
+            offset="100%"
+            stop-color="#5856d6"
+          />
+        </lineargradient>
+      </defs>
       <rect
-        class=""
-        fill="#2563eb"
-        height="25"
-        rx="5"
-        width="22"
-        x="1"
-        y="5"
-      />
-      <rect
-        class=""
-        fill="white"
-        height="5.5"
-        opacity="0.95"
-        rx="2"
-        width="15.5"
-        x="4.5"
-        y="7.5"
-      />
-      <text
-        fill="#2563eb"
-        font-family="system-ui"
-        font-size="4"
-        font-weight="700"
-        text-anchor="end"
-        x="18"
-        y="11.8"
-      >
-        1.2M
-      </text>
-      <circle
-        class=""
-        cx="7.5"
-        cy="17"
-        fill="white"
-        opacity="0.3"
-        r="1.2"
-      />
-      <circle
-        class=""
-        cx="12"
-        cy="17"
-        fill="white"
-        opacity="0.3"
-        r="1.2"
-      />
-      <circle
-        class=""
-        cx="16.5"
-        cy="17"
-        fill="white"
-        opacity="0.3"
-        r="1.2"
-      />
-      <circle
-        class=""
-        cx="7.5"
-        cy="21"
-        fill="white"
-        opacity="0.3"
-        r="1.2"
-      />
-      <circle
-        class=""
-        cx="12"
-        cy="21"
-        fill="white"
-        opacity="0.3"
-        r="1.2"
-      />
-      <circle
-        class=""
-        cx="16.5"
-        cy="21"
-        fill="white"
-        opacity="0.3"
-        r="1.2"
+        fill="url(#oe-lg-sm-s)"
+        height="448"
+        rx="96"
+        width="448"
+        x="32"
+        y="32"
       />
       <rect
-        class=""
-        fill="#f59e0b"
-        height="2"
-        opacity="0.9"
-        rx="1"
-        width="14.5"
-        x="5"
-        y="25"
-      />
-      <circle
-        class=""
-        cx="24.5"
-        cy="7"
-        fill="#f59e0b"
-        r="6.5"
-      />
-      <path
-        d="M24.5 2.5 L29 6 L20 6 Z"
-        fill="white"
-        opacity="0.95"
+        fill="#fff"
+        height="114"
+        opacity=".85"
+        rx="6"
+        width="42"
+        x="102"
+        y="296"
       />
       <rect
-        fill="white"
-        height="4.5"
-        opacity="0.95"
-        rx="0.6"
-        width="6"
-        x="21.5"
-        y="6"
+        fill="#fff"
+        height="177"
+        opacity=".95"
+        rx="6"
+        width="42"
+        x="162"
+        y="233"
       />
       <rect
-        fill="#f59e0b"
-        height="3"
-        opacity="0.5"
-        rx="0.4"
-        width="3"
-        x="23"
-        y="7.5"
+        fill="#fff"
+        height="234"
+        opacity=".85"
+        rx="6"
+        width="42"
+        x="222"
+        y="176"
+      />
+      <rect
+        fill="#fff"
+        height="260"
+        opacity=".9"
+        rx="8"
+        width="128"
+        x="282"
+        y="150"
       />
     </svg>
   </div>
@@ -3640,150 +5254,160 @@ exports[`Visual Regression — Logo > Logo — small 1`] = `
 exports[`Visual Regression — Logo > LogoWithText — default 1`] = `
 <div>
   <div
-    class="flex items-center gap-3"
+    class="flex items-center gap-2"
   >
     <div
-      class="h-10 w-10 relative"
+      class="h-7 w-7 relative shrink-0"
     >
       <svg
         class="w-full h-full"
         fill="none"
-        viewBox="0 0 32 32"
+        viewBox="0 0 512 512"
         xmlns="http://www.w3.org/2000/svg"
       >
+        <defs>
+          <lineargradient
+            id="oe-lg-md-s"
+            x1="0%"
+            x2="100%"
+            y1="0%"
+            y2="100%"
+          >
+            <stop
+              offset="0%"
+              stop-color="#0066ff"
+            />
+            <stop
+              offset="100%"
+              stop-color="#5856d6"
+            />
+          </lineargradient>
+        </defs>
         <rect
-          class=""
-          fill="#2563eb"
-          height="25"
-          rx="5"
-          width="22"
-          x="1"
-          y="5"
-        />
-        <rect
-          class=""
-          fill="white"
-          height="5.5"
-          opacity="0.95"
-          rx="2"
-          width="15.5"
-          x="4.5"
-          y="7.5"
-        />
-        <text
-          fill="#2563eb"
-          font-family="system-ui"
-          font-size="4"
-          font-weight="700"
-          text-anchor="end"
-          x="18"
-          y="11.8"
-        >
-          1.2M
-        </text>
-        <circle
-          class=""
-          cx="7.5"
-          cy="17"
-          fill="white"
-          opacity="0.3"
-          r="1.2"
-        />
-        <circle
-          class=""
-          cx="12"
-          cy="17"
-          fill="white"
-          opacity="0.3"
-          r="1.2"
-        />
-        <circle
-          class=""
-          cx="16.5"
-          cy="17"
-          fill="white"
-          opacity="0.3"
-          r="1.2"
-        />
-        <circle
-          class=""
-          cx="7.5"
-          cy="21"
-          fill="white"
-          opacity="0.3"
-          r="1.2"
-        />
-        <circle
-          class=""
-          cx="12"
-          cy="21"
-          fill="white"
-          opacity="0.3"
-          r="1.2"
-        />
-        <circle
-          class=""
-          cx="16.5"
-          cy="21"
-          fill="white"
-          opacity="0.3"
-          r="1.2"
+          fill="url(#oe-lg-md-s)"
+          height="448"
+          rx="96"
+          width="448"
+          x="32"
+          y="32"
         />
         <rect
-          class=""
-          fill="#f59e0b"
-          height="2"
-          opacity="0.9"
-          rx="1"
-          width="14.5"
-          x="5"
-          y="25"
-        />
-        <circle
-          class=""
-          cx="24.5"
-          cy="7"
-          fill="#f59e0b"
-          r="6.5"
-        />
-        <path
-          d="M24.5 2.5 L29 6 L20 6 Z"
-          fill="white"
-          opacity="0.95"
+          fill="#fff"
+          height="114"
+          opacity=".85"
+          rx="6"
+          width="42"
+          x="102"
+          y="296"
         />
         <rect
-          fill="white"
-          height="4.5"
-          opacity="0.95"
-          rx="0.6"
-          width="6"
-          x="21.5"
-          y="6"
+          fill="#fff"
+          height="177"
+          opacity=".95"
+          rx="6"
+          width="42"
+          x="162"
+          y="233"
         />
         <rect
-          fill="#f59e0b"
-          height="3"
-          opacity="0.5"
-          rx="0.4"
-          width="3"
-          x="23"
-          y="7.5"
+          fill="#fff"
+          height="234"
+          opacity=".85"
+          rx="6"
+          width="42"
+          x="222"
+          y="176"
         />
+        <rect
+          fill="#fff"
+          height="260"
+          opacity=".9"
+          rx="8"
+          width="128"
+          x="282"
+          y="150"
+        />
+        <g>
+          <rect
+            fill="url(#oe-lg-md-s)"
+            height="28"
+            opacity=".5"
+            rx="4"
+            width="26"
+            x="304"
+            y="182"
+          />
+          <rect
+            fill="url(#oe-lg-md-s)"
+            height="28"
+            opacity=".5"
+            rx="4"
+            width="26"
+            x="362"
+            y="182"
+          />
+          <rect
+            fill="url(#oe-lg-md-s)"
+            height="28"
+            opacity=".5"
+            rx="4"
+            width="26"
+            x="304"
+            y="226"
+          />
+          <rect
+            fill="url(#oe-lg-md-s)"
+            height="28"
+            opacity=".5"
+            rx="4"
+            width="26"
+            x="362"
+            y="226"
+          />
+          <rect
+            fill="url(#oe-lg-md-s)"
+            height="28"
+            opacity=".45"
+            rx="4"
+            width="26"
+            x="304"
+            y="272"
+          />
+          <rect
+            fill="url(#oe-lg-md-s)"
+            height="28"
+            opacity=".45"
+            rx="4"
+            width="26"
+            x="362"
+            y="272"
+          />
+          <rect
+            fill="url(#oe-lg-md-s)"
+            height="82"
+            opacity=".55"
+            rx="4"
+            width="34"
+            x="329"
+            y="328"
+          />
+        </g>
       </svg>
     </div>
     <span
-      class="text-base font-semibold text-content-primary tracking-tight whitespace-nowrap"
+      class="text-[17px] leading-none font-extrabold text-content-primary whitespace-nowrap tracking-tight"
+      style="font-family: "Plus Jakarta Sans", system-ui, sans-serif; letter-spacing: -0.02em;"
     >
       Open
       <span
         class="text-oe-blue"
       >
-        Estimator
+        Construction
       </span>
       <span
-        class="text-content-tertiary"
+        class="text-content-quaternary font-semibold"
       >
-        .io
+        ERP
       </span>
     </span>
   </div>
@@ -3793,145 +5417,155 @@ exports[`Visual Regression — Logo > LogoWithText — default 1`] = `
 exports[`Visual Regression — Logo > LogoWithText — without version 1`] = `
 <div>
   <div
-    class="flex items-center gap-3"
+    class="flex items-center gap-2"
   >
     <div
-      class="h-10 w-10 relative"
+      class="h-7 w-7 relative shrink-0"
     >
       <svg
         class="w-full h-full"
         fill="none"
-        viewBox="0 0 32 32"
+        viewBox="0 0 512 512"
         xmlns="http://www.w3.org/2000/svg"
       >
+        <defs>
+          <lineargradient
+            id="oe-lg-md-s"
+            x1="0%"
+            x2="100%"
+            y1="0%"
+            y2="100%"
+          >
+            <stop
+              offset="0%"
+              stop-color="#0066ff"
+            />
+            <stop
+              offset="100%"
+              stop-color="#5856d6"
+            />
+          </lineargradient>
+        </defs>
         <rect
-          class=""
-          fill="#2563eb"
-          height="25"
-          rx="5"
-          width="22"
-          x="1"
-          y="5"
-        />
-        <rect
-          class=""
-          fill="white"
-          height="5.5"
-          opacity="0.95"
-          rx="2"
-          width="15.5"
-          x="4.5"
-          y="7.5"
-        />
-        <text
-          fill="#2563eb"
-          font-family="system-ui"
-          font-size="4"
-          font-weight="700"
-          text-anchor="end"
-          x="18"
-          y="11.8"
-        >
-          1.2M
-        </text>
-        <circle
-          class=""
-          cx="7.5"
-          cy="17"
-          fill="white"
-          opacity="0.3"
-          r="1.2"
-        />
-        <circle
-          class=""
-          cx="12"
-          cy="17"
-          fill="white"
-          opacity="0.3"
-          r="1.2"
-        />
-        <circle
-          class=""
-          cx="16.5"
-          cy="17"
-          fill="white"
-          opacity="0.3"
-          r="1.2"
-        />
-        <circle
-          class=""
-          cx="7.5"
-          cy="21"
-          fill="white"
-          opacity="0.3"
-          r="1.2"
-        />
-        <circle
-          class=""
-          cx="12"
-          cy="21"
-          fill="white"
-          opacity="0.3"
-          r="1.2"
-        />
-        <circle
-          class=""
-          cx="16.5"
-          cy="21"
-          fill="white"
-          opacity="0.3"
-          r="1.2"
+          fill="url(#oe-lg-md-s)"
+          height="448"
+          rx="96"
+          width="448"
+          x="32"
+          y="32"
         />
         <rect
-          class=""
-          fill="#f59e0b"
-          height="2"
-          opacity="0.9"
-          rx="1"
-          width="14.5"
-          x="5"
-          y="25"
-        />
-        <circle
-          class=""
-          cx="24.5"
-          cy="7"
-          fill="#f59e0b"
-          r="6.5"
-        />
-        <path
-          d="M24.5 2.5 L29 6 L20 6 Z"
-          fill="white"
-          opacity="0.95"
+          fill="#fff"
+          height="114"
+          opacity=".85"
+          rx="6"
+          width="42"
+          x="102"
+          y="296"
         />
         <rect
-          fill="white"
-          height="4.5"
-          opacity="0.95"
-          rx="0.6"
-          width="6"
-          x="21.5"
-          y="6"
+          fill="#fff"
+          height="177"
+          opacity=".95"
+          rx="6"
+          width="42"
+          x="162"
+          y="233"
         />
         <rect
-          fill="#f59e0b"
-          height="3"
-          opacity="0.5"
-          rx="0.4"
-          width="3"
-          x="23"
-          y="7.5"
+          fill="#fff"
+          height="234"
+          opacity=".85"
+          rx="6"
+          width="42"
+          x="222"
+          y="176"
         />
+        <rect
+          fill="#fff"
+          height="260"
+          opacity=".9"
+          rx="8"
+          width="128"
+          x="282"
+          y="150"
+        />
+        <g>
+          <rect
+            fill="url(#oe-lg-md-s)"
+            height="28"
+            opacity=".5"
+            rx="4"
+            width="26"
+            x="304"
+            y="182"
+          />
+          <rect
+            fill="url(#oe-lg-md-s)"
+            height="28"
+            opacity=".5"
+            rx="4"
+            width="26"
+            x="362"
+            y="182"
+          />
+          <rect
+            fill="url(#oe-lg-md-s)"
+            height="28"
+            opacity=".5"
+            rx="4"
+            width="26"
+            x="304"
+            y="226"
+          />
+          <rect
+            fill="url(#oe-lg-md-s)"
+            height="28"
+            opacity=".5"
+            rx="4"
+            width="26"
+            x="362"
+            y="226"
+          />
+          <rect
+            fill="url(#oe-lg-md-s)"
+            height="28"
+            opacity=".45"
+            rx="4"
+            width="26"
+            x="304"
+            y="272"
+          />
+          <rect
+            fill="url(#oe-lg-md-s)"
+            height="28"
+            opacity=".45"
+            rx="4"
+            width="26"
+            x="362"
+            y="272"
+          />
+          <rect
+            fill="url(#oe-lg-md-s)"
+            height="82"
+            opacity=".55"
+            rx="4"
+            width="34"
+            x="329"
+            y="328"
+          />
+        </g>
       </svg>
     </div>
     <span
-      class="text-base font-semibold text-content-primary tracking-tight whitespace-nowrap"
+      class="text-[17px] leading-none font-extrabold text-content-primary whitespace-nowrap tracking-tight"
+      style="font-family: "Plus Jakarta Sans", system-ui, sans-serif; letter-spacing: -0.02em;"
     >
       Open
       <span
         class="text-oe-blue"
       >
-        Estimator
+        Construction
       </span>
     </span>
   </div>
@@ -3947,19 +5581,19 @@ exports[`Visual Regression — NotFoundPage > renders the 404 page with navigati
       class="max-w-md text-center"
     >
       <div
-        class="mb-6 text-8xl font-bold text-content-quaternary select-none"
+        class="mb-6 text-9xl font-extrabold bg-gradient-to-r from-oe-blue to-violet-500 bg-clip-text text-transparent select-none animate-fade-in"
       >
         404
       </div>
       <h1
         class="mb-2 text-xl font-semibold text-content-primary"
       >
-        Page not found
+        error.not_found
       </h1>
       <p
         class="mb-8 text-sm text-content-secondary"
       >
-        The page you are looking for does not exist or has been moved. Check the URL or go back to the dashboard.
+        error.not_found_desc
       </p>
       <div
         class="flex items-center justify-center gap-3"
@@ -3986,7 +5620,7 @@ exports[`Visual Regression — NotFoundPage > renders the 404 page with navigati
               d="M19 12H5"
             />
           </svg>
-          Go back
+          error.go_back
         </button>
         <a
           class="inline-flex items-center gap-2 rounded-lg bg-oe-blue px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-oe-blue-dark"
@@ -4011,7 +5645,7 @@ exports[`Visual Regression — NotFoundPage > renders the 404 page with navigati
               d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
             />
           </svg>
-          Dashboard
+          error.go_dashboard
         </a>
       </div>
     </div>
