@@ -25,7 +25,7 @@ class TestSettingsDefaults:
         )
 
     def test_app_name_default(self, settings):
-        assert settings.app_name == "OpenEstimator.io"
+        assert settings.app_name == "OpenConstructionERP"
 
     def test_app_version_default(self, settings):
         assert settings.app_version == "0.1.0"
