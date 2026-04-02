@@ -1344,7 +1344,7 @@ function FiveDDashboard({ project }: { project: Project }) {
                   </select>
                 )}
                 <Button variant="primary" size="sm" loading={generateBudget.isPending}
-                  onClick={() => generateBudget.mutate(selectedBoqId || boqs[0]?.id)}>
+                  onClick={() => generateBudget.mutate(selectedBoqId || (boqs[0]?.id ?? ''))}>
                   {t('costmodel.generate', { defaultValue: 'Generate' })}
                 </Button>
               </div>

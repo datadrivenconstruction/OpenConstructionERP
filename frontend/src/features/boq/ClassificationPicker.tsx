@@ -389,7 +389,7 @@ export function ClassificationPicker({
       {value ? (
         <span className="truncate max-w-[180px]">
           <span className="font-mono">{value}</span>
-          {selectedLabel && <span className="ml-1 text-content-tertiary">– {selectedLabel.split('/')[0].trim()}</span>}
+          {selectedLabel && <span className="ml-1 text-content-tertiary">– {(selectedLabel.split('/')[0] ?? '').trim()}</span>}
         </span>
       ) : (
         <span>{t('boq.select_classification', { defaultValue: 'Classification...' })}</span>

@@ -350,10 +350,13 @@ MARKETPLACE_MODULES: list[MarketplaceModule] = [
         price="Free",
     ),
     # ── Vector Indices (11) ──────────────────────────────────────────────
+    # These require `pip install sentence-transformers` to enable semantic
+    # vector search across 55,000+ cost items. Without this, text-based
+    # search is used as fallback. DDC-CWICR-OE-2026.
     MarketplaceModule(
         id="vector-usa-usd",
         name="Vector Index: USA (USD)",
-        description="Pre-built semantic vector index for CWICR US database. Enables AI-powered cost item search, assembly suggestions, and automatic classification.",
+        description="Semantic vector index for 55K+ CWICR US cost items. Enables AI-powered fuzzy search by description — find 'reinforced concrete slab' even if the DB entry says 'cast-in-place structural concrete'. Requires: pip install sentence-transformers.",
         category="vector_index",
         icon="Sparkles",
         version="1.2.0",
@@ -366,7 +369,7 @@ MARKETPLACE_MODULES: list[MarketplaceModule] = [
     MarketplaceModule(
         id="vector-uk-gbp",
         name="Vector Index: UK (GBP)",
-        description="Pre-built semantic vector index for CWICR UK database. Enables AI-powered cost item search, assembly suggestions, and automatic classification.",
+        description="Semantic vector index for 55K+ CWICR UK cost items (NRM 1/2). Smart fuzzy search — match AI estimates to real BCIS-aligned rates. Requires: pip install sentence-transformers.",
         category="vector_index",
         icon="Sparkles",
         version="1.2.0",
@@ -379,7 +382,7 @@ MARKETPLACE_MODULES: list[MarketplaceModule] = [
     MarketplaceModule(
         id="vector-de-berlin",
         name="Vector Index: Germany (Berlin)",
-        description="Pre-built semantic vector index for CWICR Germany database. Enables AI-powered cost item search, assembly suggestions, and DIN 276 auto-classification.",
+        description="Semantic vector index for 55K+ CWICR DACH cost items (DIN 276). Smart fuzzy search — match AI estimates to real BKI-aligned market rates. Requires: pip install sentence-transformers.",
         category="vector_index",
         icon="Sparkles",
         version="1.2.0",

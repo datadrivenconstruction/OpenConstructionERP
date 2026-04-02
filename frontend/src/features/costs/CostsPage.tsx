@@ -31,7 +31,7 @@ import {
   TrendingUp,
   Trash2,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Skeleton, InfoHint, SkeletonTable, CountryFlag, Breadcrumb } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, InfoHint, SkeletonTable, CountryFlag, Breadcrumb } from '@/shared/ui';
 import { apiGet, apiPost, apiDelete, triggerDownload } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
@@ -532,7 +532,7 @@ export function CostsPage() {
       ? rawItems.filter((i) => recentItems.some((r) => r.id === i.id))
       : rawItems;
   const total = specialTab ? items.length : rawTotal;
-  const hasMore = specialTab ? false : offset + PAGE_SIZE < rawTotal;
+  // hasMore: specialTab ? false : offset + PAGE_SIZE < rawTotal — for future load-more UI
 
   // Client-side column sorting
   const sortedItems = useMemo(() => {
@@ -607,9 +607,7 @@ export function CostsPage() {
     }
   }, []);
 
-  const handleLoadMore = useCallback(() => {
-    setOffset((prev) => prev + PAGE_SIZE);
-  }, []);
+  // handleLoadMore for future pagination: () => setOffset(prev => prev + PAGE_SIZE)
 
   const toggleSelect = useCallback((id: string) => {
     setSelectedIds((prev) => {

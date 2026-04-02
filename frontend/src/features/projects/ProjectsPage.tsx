@@ -102,13 +102,18 @@ export function ProjectsPage() {
     queryFn: async () => {
       if (!projects || projects.length === 0) return [];
 
-      // Single API call to fetch ALL BOQs, then group client-side
-      let allBoqs: BOQBasic[];
-      try {
-        allBoqs = await apiGet<BOQBasic[]>('/v1/boq/boqs/');
-      } catch {
-        return projects.map((p) => ({ projectId: p.id, boqCount: 0, totalValue: 0 }));
-      }
+      // Fetch BOQs per project (endpoint requires project_id)
+      const perProject = await Promise.all(
+        projects.map(async (p) => {
+          try {
+            const boqs = await apiGet<BOQBasic[]>(`/v1/boq/boqs/?project_id=${p.id}`);
+            return { projectId: p.id, boqs };
+          } catch {
+            return { projectId: p.id, boqs: [] as BOQBasic[] };
+          }
+        }),
+      );
+      const allBoqs = perProject.flatMap((pp) => pp.boqs);
 
       // Group BOQs by project_id
       const boqsByProject = new Map<string, BOQBasic[]>();

@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft,
   Upload,
   FileSpreadsheet,
   CheckCircle2,
@@ -833,11 +832,14 @@ function LoadedDatabasesSection() {
 
 interface VectorStatus {
   connected: boolean;
+  backend?: string;
   engine?: string;
   url?: string;
   error?: string;
   collections?: string[];
   cost_collection?: { vectors_count: number; points_count: number; status: string } | null;
+  can_restore_snapshots?: boolean;
+  can_generate_locally?: boolean;
 }
 
 interface VectorRegionStat {
@@ -891,56 +893,69 @@ function VectorDatabaseSection() {
     (vectorRegionStats ?? []).map((r) => [r.region, r.count]),
   );
 
-  // Load vectors for a specific region: try GitHub first, fallback to local generation
+  // Load vectors for a specific region: route based on backend type
   const handleLoadVectors = useCallback(
     async (db: CWICRDatabase) => {
       setLoadingRegion(db.id);
       setLastResult(null);
       try {
-        // Try pre-built vectors from GitHub first
-        const data = await apiPost<Record<string, unknown>>(`/v1/costs/vector/load-github/${db.id}`);
-        const indexed = (data.indexed as number) ?? 0;
-        const duration = (data.duration_seconds as number) ?? 0;
-        setLastResult({ region: db.id, indexed, duration });
-        addToast({
-          type: 'success',
-          title: `${db.name} vectors loaded`,
-          message: `${indexed.toLocaleString()} vectors indexed in ${duration}s`,
-        });
-      } catch (err) {
-        console.error('GitHub vector load failed, falling back to local generation:', err);
-        // GitHub vectors not available — generate locally for this region
-        try {
-          const token = useAuthStore.getState().accessToken;
-          const res = await fetch(`/api/v1/costs/vector/index?region=${encodeURIComponent(db.id)}`, {
-            method: 'POST',
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
+        if (vectorStatus?.can_restore_snapshots) {
+          // Qdrant: restore pre-built 3072d snapshot from GitHub
+          const data = await apiPost<Record<string, unknown>>(`/v1/costs/vector/restore-snapshot/${db.id}`);
+          const indexed = (data.indexed as number) ?? (data.restored ? 1 : 0);
+          const duration = (data.duration_seconds as number) ?? 0;
+          setLastResult({ region: db.id, indexed, duration });
+          addToast({
+            type: 'success',
+            title: `${db.name} snapshot restored`,
+            message: `Qdrant 3072d vectors restored in ${duration}s`,
           });
-          if (res.ok) {
-            const data = await res.json();
+        } else {
+          // LanceDB: try pre-built vectors from GitHub first
+          try {
+            const data = await apiPost<Record<string, unknown>>(`/v1/costs/vector/load-github/${db.id}`);
             const indexed = (data.indexed as number) ?? 0;
             const duration = (data.duration_seconds as number) ?? 0;
             setLastResult({ region: db.id, indexed, duration });
             addToast({
               type: 'success',
-              title: `${db.name} vectors generated`,
-              message: `${indexed.toLocaleString()} vectors indexed locally in ${duration}s`,
+              title: `${db.name} vectors loaded`,
+              message: `${indexed.toLocaleString()} vectors indexed in ${duration}s`,
             });
-          } else {
-            const err = await res.json().catch(() => ({ detail: 'Indexing failed' }));
-            addToast({
-              type: 'error',
-              title: `Failed to index ${db.name} vectors`,
-              message: err.detail ?? 'Vector generation failed',
+          } catch (err) {
+            console.error('GitHub vector load failed, falling back to local generation:', err);
+            // GitHub vectors not available — generate locally for this region
+            const token = useAuthStore.getState().accessToken;
+            const res = await fetch(`/api/v1/costs/vector/index?region=${encodeURIComponent(db.id)}`, {
+              method: 'POST',
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
             });
+            if (res.ok) {
+              const data = await res.json();
+              const indexed = (data.indexed as number) ?? 0;
+              const duration = (data.duration_seconds as number) ?? 0;
+              setLastResult({ region: db.id, indexed, duration });
+              addToast({
+                type: 'success',
+                title: `${db.name} vectors generated`,
+                message: `${indexed.toLocaleString()} vectors indexed locally in ${duration}s`,
+              });
+            } else {
+              const errData = await res.json().catch(() => ({ detail: 'Indexing failed' }));
+              addToast({
+                type: 'error',
+                title: `Failed to index ${db.name} vectors`,
+                message: errData.detail ?? 'Vector generation failed',
+              });
+            }
           }
-        } catch {
-          addToast({
-            type: 'error',
-            title: `Failed to index ${db.name} vectors`,
-            message: t('common.connection_error', { defaultValue: 'Connection error' }),
-          });
         }
+      } catch (err) {
+        addToast({
+          type: 'error',
+          title: `Failed to load ${db.name} vectors`,
+          message: err instanceof Error ? err.message : t('common.connection_error', { defaultValue: 'Connection error' }),
+        });
       } finally {
         refetchStatus();
         refetchVectorRegions();
@@ -948,7 +963,7 @@ function VectorDatabaseSection() {
         setLoadingRegion(null);
       }
     },
-    [addToast, refetchStatus, refetchVectorRegions, queryClient, t],
+    [addToast, refetchStatus, refetchVectorRegions, queryClient, t, vectorStatus?.can_restore_snapshots],
   );
 
   // Generate vectors locally for all regions
@@ -999,10 +1014,17 @@ function VectorDatabaseSection() {
                 CWICR Vector Database — AI Semantic Search
               </h3>
               {isConnected ? (
-                <span className="flex items-center gap-1 text-2xs font-medium text-semantic-success">
-                  <span className="h-1.5 w-1.5 rounded-full bg-semantic-success" />
-                  Ready
-                </span>
+                <>
+                  <span className="flex items-center gap-1 text-2xs font-medium text-semantic-success">
+                    <span className="h-1.5 w-1.5 rounded-full bg-semantic-success" />
+                    Ready
+                  </span>
+                  {vectorStatus?.backend === 'qdrant' ? (
+                    <Badge variant="success" size="sm" className="text-2xs px-1.5 py-0">Qdrant (3072d)</Badge>
+                  ) : (
+                    <Badge variant="blue" size="sm" className="text-2xs px-1.5 py-0">LanceDB (384d)</Badge>
+                  )}
+                </>
               ) : (
                 <span className="flex items-center gap-1 text-2xs font-medium text-content-quaternary">
                   <span className="h-1.5 w-1.5 rounded-full bg-content-quaternary" />
@@ -1011,7 +1033,9 @@ function VectorDatabaseSection() {
               )}
             </div>
             <p className="text-xs text-content-tertiary">
-              55,719 vectors per region &middot; 384d embeddings &middot; by Data Driven Construction
+              55,719 vectors per region &middot;{' '}
+              {vectorStatus?.backend === 'qdrant' ? '3072d embeddings (text-embedding-3-large)' : '384d embeddings (all-MiniLM-L6-v2)'}{' '}
+              &middot; by Data Driven Construction
             </p>
           </div>
         </div>
@@ -1025,12 +1049,19 @@ function VectorDatabaseSection() {
         {/* Not connected state */}
         {!isConnected ? (
           <div className="rounded-xl border border-amber-200/40 bg-amber-50/30 dark:bg-amber-500/5 dark:border-amber-500/10 p-4">
-            <p className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-1">
+            <p className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-2">
               Vector search not available
             </p>
-            <p className="text-xs text-content-tertiary">
-              Install <code className="text-2xs bg-surface-secondary px-1 py-0.5 rounded">pip install lancedb sentence-transformers</code> to enable AI semantic search. No Docker required.
-            </p>
+            <div className="space-y-2 text-xs text-content-tertiary">
+              <div>
+                <strong className="text-content-secondary">Option A — Qdrant (best quality, 3072d):</strong><br/>
+                <code className="text-2xs bg-surface-secondary px-1 py-0.5 rounded">docker run -p 6333:6333 qdrant/qdrant</code>
+              </div>
+              <div>
+                <strong className="text-content-secondary">Option B — LanceDB (lightweight, 384d):</strong><br/>
+                <code className="text-2xs bg-surface-secondary px-1 py-0.5 rounded">pip install lancedb sentence-transformers</code>
+              </div>
+            </div>
           </div>
         ) : (
           <>
@@ -1151,7 +1182,9 @@ function VectorDatabaseSection() {
                     : 'Generate All Regions'}
               </Button>
               <span className="text-2xs text-content-tertiary">
-                Model: all-MiniLM-L6-v2 (384d) &middot; Runs on your machine &middot; No API key
+                {vectorStatus?.backend === 'qdrant'
+                  ? 'Model: text-embedding-3-large (3072d) \u00b7 Qdrant snapshots from GitHub'
+                  : 'Model: all-MiniLM-L6-v2 (384d) \u00b7 Runs on your machine \u00b7 No API key'}
               </span>
             </div>
           </>
@@ -1161,13 +1194,27 @@ function VectorDatabaseSection() {
       {/* Tech info strip */}
       <div className="px-6 py-2.5 bg-surface-secondary/50 border-t border-border-light">
         <div className="flex items-center gap-4 text-2xs text-content-quaternary">
-          <span>LanceDB embedded</span>
-          <span>&middot;</span>
-          <span>FastEmbed ONNX</span>
-          <span>&middot;</span>
-          <span>384d cosine similarity</span>
-          <span>&middot;</span>
-          <span>No Docker required</span>
+          {vectorStatus?.backend === 'qdrant' ? (
+            <>
+              <span>Qdrant</span>
+              <span>&middot;</span>
+              <span>text-embedding-3-large</span>
+              <span>&middot;</span>
+              <span>3072d cosine similarity</span>
+              <span>&middot;</span>
+              <span>Snapshot restore</span>
+            </>
+          ) : (
+            <>
+              <span>LanceDB embedded</span>
+              <span>&middot;</span>
+              <span>FastEmbed ONNX</span>
+              <span>&middot;</span>
+              <span>384d cosine similarity</span>
+              <span>&middot;</span>
+              <span>No Docker required</span>
+            </>
+          )}
         </div>
       </div>
     </Card>
@@ -1339,11 +1386,11 @@ export function ImportDatabasePage() {
         </div>
       </Card>
 
+      {/* Vector Database section — shown prominently */}
+      <VectorDatabaseSection />
+
       {/* Loaded Databases section */}
       <LoadedDatabasesSection />
-
-      {/* Vector Database section */}
-      <VectorDatabaseSection />
 
       {/* Divider */}
       <div className="flex items-center gap-3 mb-6">

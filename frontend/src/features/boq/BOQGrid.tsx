@@ -120,8 +120,8 @@ export function parseClipboardNumber(raw: string): number {
     // Could be "1,5" (decimal) or "1,000" (thousand sep).
     // Heuristic: if exactly 3 digits after the last comma, treat as thousand sep.
     const parts = cleaned.split(',');
-    const lastPart = parts[parts.length - 1];
-    if (parts.length === 2 && lastPart.length === 3 && parts[0].length <= 3) {
+    const lastPart = parts[parts.length - 1] ?? '';
+    if (parts.length === 2 && lastPart.length === 3 && (parts[0] ?? '').length <= 3) {
       // Ambiguous — but "1,000" is more likely thousand-separated in BOQ context
       cleaned = cleaned.replace(/,/g, '');
     } else {
@@ -217,7 +217,7 @@ export interface BOQGridProps {
   footerRows: FooterRow[];
   onSelectionChanged?: (selectedIds: string[]) => void;
   onRemoveResource?: (positionId: string, resourceIndex: number) => void;
-  onUpdateResource?: (positionId: string, resourceIndex: number, field: string, value: number) => void;
+  onUpdateResource?: (positionId: string, resourceIndex: number, field: string, value: number | string) => void;
   onSaveResourceToCatalog?: (positionId: string, resourceIndex: number) => void;
   onOpenCostDbForPosition?: (positionId: string) => void;
   onOpenCatalogForPosition?: (positionId: string) => void;
@@ -247,10 +247,10 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   onUpdatePosition,
   onDeletePosition,
   onAddPosition,
-  onSelectSuggestion,
+  onSelectSuggestion: _onSelectSuggestion,
   onSaveToDatabase,
   onAddComment,
-  onFormulaApplied,
+  onFormulaApplied: _onFormulaApplied,
   onReorderSections,
   onReorderPositions,
   collapsedSections,
@@ -356,7 +356,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   );
 
   /* ── Context for column formatters + section group + resources + actions */
-  const gridContext: FullGridContext = useMemo(
+  const gridContext = useMemo(
     () => ({
       currencySymbol,
       currencyCode,
@@ -386,7 +386,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       onShowContextMenu: showContextMenu,
       anomalyMap,
       onApplyAnomalySuggestion,
-    }),
+    }) as FullGridContext,
     [currencySymbol, currencyCode, locale, fmt, t, collapsedSections, onToggleSection, onAddPosition,
      expandedPositions, toggleResources, onRemoveResource, onUpdateResource,
      onSaveResourceToCatalog, onOpenCostDbForPosition, onOpenCatalogForPosition,
@@ -423,7 +423,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
 
     let resTotal = 0;
     for (let i = 0; i < resources.length; i++) {
-      const r = resources[i];
+      const r = resources[i]!;
       const rTotal = r.total ?? r.quantity * r.unit_rate;
       resTotal += rTotal;
       const resRow: ResourceRow = {
@@ -721,7 +721,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       // Search across columns (and rows if we wrap around)
       for (let attempts = 0; attempts < allColumns.length * 2; attempts++) {
         const col = allColumns[colIdx];
-        const colId = col?.getColId();
+        const colId = col?.getColId() ?? '';
         if (col && !NON_EDITABLE_FIELDS.has(colId)) {
           return { rowIndex, column: col, rowPinned: nextCellPosition.rowPinned };
         }
@@ -887,13 +887,14 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
           const targetRowIdx = focusedCell.rowIndex + rowOffset;
           if (targetRowIdx >= totalRowCount) break;
 
-          const cells = clipboardRows[rowOffset].split('\t');
+          const cells = clipboardRows[rowOffset]!.split('\t');
           for (let colOffset = 0; colOffset < cells.length; colOffset++) {
             const targetColIdx = startColIdx + colOffset;
             if (targetColIdx >= allColumns.length) break;
 
-            const targetColId = allColumns[targetColIdx].getColId();
-            const applied = applyCellPaste(api, targetRowIdx, targetColId, cells[colOffset]);
+            const targetCol = allColumns[targetColIdx]!;
+            const targetColId = targetCol.getColId();
+            const applied = applyCellPaste(api, targetRowIdx, targetColId, cells[colOffset] ?? '');
             if (applied) pastedCount++;
           }
         }
@@ -924,11 +925,12 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
             const rowNode = api.getDisplayedRowAtIndex(targetRowIdx);
             if (rowNode) flashRowNodes.push(rowNode);
 
-            const cells = clipboardRows[rowOffset].split('\t');
+            const cells = clipboardRows[rowOffset]!.split('\t');
             for (let colOffset = 0; colOffset < cells.length; colOffset++) {
               const targetColIdx = startColIdx + colOffset;
               if (targetColIdx >= allColumns.length) break;
-              if (rowOffset === 0) flashColumns.push(allColumns[targetColIdx]);
+              const col = allColumns[targetColIdx];
+              if (rowOffset === 0 && col) flashColumns.push(col);
             }
           }
           if (flashRowNodes.length > 0) {
@@ -1002,7 +1004,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       >
         <AgGridReact
           ref={gridRef}
-          rowData={rowData}
+          rowData={rowData as Record<string, unknown>[]}
           columnDefs={columnDefs}
           defaultColDef={defaultColDef}
           context={gridContext}
@@ -1058,11 +1060,12 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
           >
             {/* — Position context menu — */}
             {contextMenu.type === 'position' && (() => {
-              const d = contextMenu.data;
-              const hasResources = Array.isArray(d.metadata?.resources) && (d.metadata.resources as unknown[]).length > 0;
+              const d = contextMenu.data as Record<string, unknown>;
+              const meta = d.metadata as Record<string, unknown> | undefined;
+              const hasResources = Array.isArray(meta?.resources) && (meta!.resources as unknown[]).length > 0;
               const isExpanded = expandedPositions.has(d.id as string);
-              const cmtCount = countComments(d.metadata as Record<string, unknown> | undefined);
-              const costItemId = d.metadata?.cost_item_id as string | undefined;
+              const cmtCount = countComments(meta);
+              const costItemId = meta?.cost_item_id as string | undefined;
               return <>
                 {/* Resources section */}
                 {hasResources && (

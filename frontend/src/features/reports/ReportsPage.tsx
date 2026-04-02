@@ -737,7 +737,7 @@ export function ReportsPage() {
   );
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 p-6">
+    <div className="mx-auto max-w-content space-y-6">
       <Breadcrumb
         items={[
           { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
@@ -959,9 +959,10 @@ export function ReportsPage() {
                 htmlParts.push('<h2>Cost Breakdown by Category</h2>');
                 try {
                   const dashboard = await getDashboard();
-                  if (dashboard.categories && dashboard.categories.length > 0) {
+                  const categories = (dashboard as unknown as Record<string, unknown>).categories as Array<Record<string, unknown>> | undefined;
+                  if (categories && categories.length > 0) {
                     htmlParts.push('<table><thead><tr><th>Category</th><th style="text-align:right">Planned</th><th style="text-align:right">Actual</th><th style="text-align:right">Variance</th></tr></thead><tbody>');
-                    for (const cat of dashboard.categories) {
+                    for (const cat of categories) {
                       const v = Number(cat.planned || 0) - Number(cat.actual || 0);
                       htmlParts.push(`<tr><td>${cat.category || cat.name || 'Unknown'}</td><td style="text-align:right">${Number(cat.planned || 0).toLocaleString()}</td><td style="text-align:right">${Number(cat.actual || 0).toLocaleString()}</td><td style="text-align:right;color:${v >= 0 ? '#166534' : '#991b1b'}">${v >= 0 ? '+' : ''}${v.toLocaleString()}</td></tr>`);
                     }

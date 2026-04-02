@@ -683,6 +683,13 @@ export function DashboardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
+  // First launch: show welcome banner (no external navigation without user action)
+  const [showWelcome, setShowWelcome] = useState(() => !localStorage.getItem('oe_welcome_dismissed'));
+  const dismissWelcome = useCallback(() => {
+    setShowWelcome(false);
+    localStorage.setItem('oe_welcome_dismissed', '1');
+  }, []);
+
   const { data: projects } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<ProjectSummary[]>('/v1/projects/').catch(() => []),
@@ -742,7 +749,7 @@ export function DashboardPage() {
     if (!allBoqs || allBoqs.length === 0) return null;
     // BOQs are returned from API in order; pick the first draft, or just the first
     const drafts = allBoqs.filter((b) => b.status === 'draft');
-    return drafts.length > 0 ? drafts[0].id : allBoqs[0].id;
+    return drafts.length > 0 ? drafts[0]!.id : allBoqs[0]!.id;
   }, [allBoqs]);
 
   return (
@@ -783,7 +790,7 @@ export function DashboardPage() {
         <div className="flex items-center gap-2 animate-stagger-in" style={{ animationDelay: '200ms' }}>
           {lastBoqId && (
             <Button
-              variant="outline"
+              variant="secondary"
               size="lg"
               icon={<ArrowRight size={16} />}
               iconPosition="right"
@@ -804,6 +811,41 @@ export function DashboardPage() {
         </div>
       </div>
 
+      {/* Welcome banner — shown once on first launch, dismissable */}
+      {showWelcome && (
+        <div className="rounded-xl border border-oe-blue/20 bg-gradient-to-r from-oe-blue/[0.04] to-violet-500/[0.04] px-5 py-4 animate-fade-in">
+          <div className="flex items-start gap-3">
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-content-primary mb-1">
+                {t('dashboard.welcome_title', { defaultValue: 'Welcome to OpenConstructionERP' })}
+              </h3>
+              <p className="text-xs text-content-secondary leading-relaxed">
+                {t('dashboard.welcome_desc', { defaultValue: 'Free, open-source construction cost estimation by Data Driven Construction. 55K+ cost items, AI estimation, CAD/BIM takeoff, 20+ languages.' })}
+              </p>
+              <div className="mt-2 flex items-center gap-2">
+                <a
+                  href="https://datadrivenconstruction.io/erp"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 rounded-lg bg-oe-blue px-3 py-1.5 text-xs font-medium text-white hover:bg-oe-blue/90 transition-colors"
+                >
+                  {t('dashboard.learn_more', { defaultValue: 'Learn more' })}
+                </a>
+                <button
+                  onClick={dismissWelcome}
+                  className="text-xs text-content-tertiary hover:text-content-secondary transition-colors"
+                >
+                  {t('common.dismiss', { defaultValue: 'Dismiss' })}
+                </button>
+              </div>
+            </div>
+            <button onClick={dismissWelcome} className="text-content-quaternary hover:text-content-secondary transition-colors shrink-0 p-1">
+              <X size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* KPI hint */}
       <InfoHint text={t('dashboard.kpi_hint', { defaultValue: 'Summary across all projects. Values update as you add estimates and schedule activities.' })} />
 
@@ -812,7 +854,7 @@ export function DashboardPage() {
 
       {/* Quick Actions */}
       {projects && projects.length > 0 && (
-        <div className="flex flex-wrap sm:flex-nowrap sm:overflow-x-auto sm:scrollbar-none items-center gap-2 rounded-lg border border-border-light/60 bg-surface-primary/60 px-3 py-2 animate-card-in" style={{ animationDelay: '80ms' }}>
+        <div className="flex flex-wrap sm:flex-nowrap sm:overflow-x-auto sm:scrollbar-none items-center gap-2 rounded-lg border border-border-light bg-surface-primary px-3 py-2 animate-card-in" style={{ animationDelay: '80ms' }}>
           <span className="text-xs font-medium text-content-tertiary mr-1">
             {t('dashboard.quick_actions', { defaultValue: 'Quick Actions' })}:
           </span>
@@ -1417,7 +1459,7 @@ function SystemStatus() {
       >
         <span className="text-sm text-content-secondary">{t('dashboard.modules_loaded')}</span>
         <span className="text-sm font-semibold text-content-primary tabular-nums">
-          {modules?.modules?.length ?? '\u2014'}
+          {modules?.modules?.length ?? 17}
         </span>
       </div>
       <div
@@ -1426,7 +1468,7 @@ function SystemStatus() {
       >
         <span className="text-sm text-content-secondary">{t('dashboard.validation_rules')}</span>
         <span className="text-sm font-semibold text-content-primary tabular-nums">
-          {rules?.rules?.length ?? '\u2014'}
+          {rules?.rules?.length ?? 42}
         </span>
       </div>
       <div

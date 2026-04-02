@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 COST_TABLE = "cost_items"
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 EMBEDDING_DIM = 384
+QDRANT_SNAPSHOT_DIM = 3072  # Dimension for pre-built Qdrant snapshots from GitHub
 
 
 # ── Embedding ──────────────────────────────────────────────────────────────
@@ -165,6 +166,10 @@ def _lancedb_status() -> dict[str, Any]:
             }
         else:
             info["cost_collection"] = None
+        info["can_restore_snapshots"] = _get_qdrant() is not None
+        info["can_generate_locally"] = get_embedder() is not None
+        info["embedding_dim"] = EMBEDDING_DIM
+        info["backend"] = "lancedb"
         return info
     except Exception as exc:
         return {"connected": False, "engine": "lancedb", "error": str(exc)}
@@ -231,20 +236,30 @@ def _lancedb_search(
 # ── Qdrant (server mode) ──────────────────────────────────────────────────
 
 
-@lru_cache(maxsize=1)
+_qdrant_instance: Any = None
+_qdrant_tried: bool = False
+
+
 def _get_qdrant():
     """Get Qdrant client (only used when VECTOR_BACKEND=qdrant)."""
+    global _qdrant_instance, _qdrant_tried
+    if _qdrant_instance is not None:
+        return _qdrant_instance
+    if _qdrant_tried:
+        return None
+    _qdrant_tried = True
     try:
         from qdrant_client import QdrantClient
         from app.config import get_settings
 
         url = get_settings().qdrant_url or "http://localhost:6333"
-        client = QdrantClient(url=url, timeout=5)
+        client = QdrantClient(url=url, timeout=2, check_compatibility=False)
         client.get_collections()
+        _qdrant_instance = client
         logger.info("Connected to Qdrant at %s", url)
         return client
     except Exception as exc:
-        logger.warning("Qdrant not available: %s", exc)
+        logger.info("Qdrant not available: %s", exc)
         return None
 
 
@@ -275,6 +290,10 @@ def vector_status() -> dict[str, Any]:
                 }
             else:
                 info["cost_collection"] = None
+            info["can_restore_snapshots"] = True
+            info["can_generate_locally"] = get_embedder() is not None
+            info["embedding_dim"] = QDRANT_SNAPSHOT_DIM
+            info["backend"] = "qdrant"
             return info
         except Exception as exc:
             return {"connected": False, "engine": "qdrant", "error": str(exc)}
@@ -293,7 +312,7 @@ def vector_index(items: list[dict]) -> int:
         # Ensure collection
         collections = [c.name for c in client.get_collections().collections]
         if COST_TABLE not in collections:
-            client.create_collection(COST_TABLE, vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE))
+            client.create_collection(COST_TABLE, vectors_config=VectorParams(size=QDRANT_SNAPSHOT_DIM, distance=Distance.COSINE))
 
         points = [
             PointStruct(id=it["id"], vector=it["vector"], payload={k: v for k, v in it.items() if k not in ("id", "vector")})

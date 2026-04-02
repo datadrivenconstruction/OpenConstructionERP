@@ -2,11 +2,15 @@
 
 import io
 import uuid
+from pathlib import Path
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.takeoff.models import TakeoffDocument
 from app.modules.takeoff.repository import TakeoffRepository
+
+# Directory where uploaded PDF files are stored on disk
+_TAKEOFF_DOCUMENTS_DIR = Path.home() / ".openestimator" / "takeoff_documents"
 
 
 def _extract_pdf_pages(content: bytes) -> list[dict]:
@@ -101,7 +105,14 @@ class TakeoffService:
         page_data = _extract_pdf_pages(content)
         full_text = "\n\n".join(p["text"] for p in page_data if p["text"])
 
+        # Save the PDF file to disk so it can be retrieved later for viewing
+        _TAKEOFF_DOCUMENTS_DIR.mkdir(parents=True, exist_ok=True)
+        doc_id = uuid.uuid4()
+        file_path = _TAKEOFF_DOCUMENTS_DIR / f"{doc_id}.pdf"
+        file_path.write_bytes(content)
+
         doc = TakeoffDocument(
+            id=doc_id,
             filename=filename,
             pages=page_count,
             size_bytes=size_bytes,
@@ -111,6 +122,7 @@ class TakeoffService:
             project_id=uuid.UUID(project_id) if project_id else None,
             extracted_text=full_text,
             page_data=page_data,
+            file_path=str(file_path),
         )
 
         return await self.repo.create(doc)
@@ -155,13 +167,31 @@ class TakeoffService:
                         qty = 1.0
 
                     idx += 1
+                    clean_desc = desc.strip()
+                    clean_unit = unit.strip() or "pcs"
+
+                    # Compute confidence based on data quality
+                    has_real_qty = qty_str.strip() != "" and qty > 0
+                    has_description = bool(clean_desc) and clean_desc.lower() not in (
+                        "item", "position", "pos", "n/a", "-", "",
+                    )
+
+                    if not has_description:
+                        confidence = 0.4
+                    elif not has_real_qty:
+                        confidence = 0.5
+                    elif has_description and has_real_qty and clean_unit:
+                        confidence = 0.85
+                    else:
+                        confidence = 0.6
+
                     elements.append({
                         "id": f"ext_{idx}",
                         "category": "general",
-                        "description": desc.strip() or f"Item {idx}",
+                        "description": clean_desc or f"Item {idx}",
                         "quantity": qty,
-                        "unit": unit.strip() or "pcs",
-                        "confidence": 0.6,
+                        "unit": clean_unit,
+                        "confidence": confidence,
                     })
 
         categories: dict = {}

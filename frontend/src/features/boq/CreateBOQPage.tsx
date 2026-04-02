@@ -2,7 +2,6 @@ import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
 import { Button, Input, Card, Breadcrumb } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { boqApi } from './api';

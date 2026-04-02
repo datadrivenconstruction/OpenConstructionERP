@@ -6,8 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import {
   Search, Plus, Layers, ChevronDown, ChevronLeft, ChevronRight, MoreHorizontal,
   Copy, Trash2, Download, ExternalLink, FileSpreadsheet, X, Sparkles, Loader2,
-  Wrench, Hammer, Zap, HardHat, PaintBucket, Home, Mountain,
-  ChevronUp,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, InfoHint, SkeletonGrid } from '@/shared/ui';
 import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
@@ -52,7 +50,7 @@ const UNIT_OPTIONS = ['m', 'm2', 'm3', 'kg', 't', 'pcs', 'lsum', 'h', 'set', 'lm
 
 /* Templates removed — assemblies are managed via New/AI Generate/Clone/Save from BOQ */
 
-/* Category icon map — used on assembly cards */
+/* Category icon map — reserved for future assembly card rendering
 const CATEGORY_ICON_MAP: Record<string, React.ReactNode> = {
   concrete: <HardHat size={16} />,
   masonry: <Hammer size={16} />,
@@ -62,7 +60,7 @@ const CATEGORY_ICON_MAP: Record<string, React.ReactNode> = {
   roofing: <Home size={16} />,
   earthwork: <Mountain size={16} />,
   mep: <Zap size={16} />,
-};
+}; */
 
 /* -- Helpers -------------------------------------------------------------- */
 

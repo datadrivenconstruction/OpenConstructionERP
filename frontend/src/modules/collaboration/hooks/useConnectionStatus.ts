@@ -62,16 +62,18 @@ export function useConnectionStatus(provider: ProviderType | null): ConnectionSt
       updatePeerCount(provider);
     };
 
-    provider.on('synced', onSynced);
-    provider.on('status', onStatus);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const p = provider as any;
+    p.on('synced', onSynced);
+    p.on('status', onStatus);
     provider.awareness.on('change', onPeersChange);
 
     // Initial peer count read
     updatePeerCount(provider);
 
     return () => {
-      provider.off('synced', onSynced);
-      provider.off('status', onStatus);
+      p.off('synced', onSynced);
+      p.off('status', onStatus);
       provider.awareness.off('change', onPeersChange);
     };
   }, [provider, updatePeerCount]);

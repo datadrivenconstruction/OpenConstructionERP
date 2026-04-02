@@ -1,5 +1,5 @@
 import type { ColDef, ValueFormatterParams } from 'ag-grid-community';
-import { fmtWithCurrency, getUnitsForLocale } from '../boqHelpers';
+import { fmtWithCurrency } from '../boqHelpers';
 
 export interface BOQColumnContext {
   currencySymbol: string;

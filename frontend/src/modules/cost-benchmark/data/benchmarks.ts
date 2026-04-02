@@ -147,9 +147,9 @@ export function calculatePercentile(value: number, range: BenchmarkRange): numbe
   ];
 
   for (let i = 1; i < points.length; i++) {
-    if (value <= points[i].val) {
-      const prev = points[i - 1];
-      const curr = points[i];
+    const curr = points[i]!;
+    if (value <= curr.val) {
+      const prev = points[i - 1]!;
       const ratio = (value - prev.val) / (curr.val - prev.val);
       return prev.pct + ratio * (curr.pct - prev.pct);
     }

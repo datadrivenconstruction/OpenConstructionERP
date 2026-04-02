@@ -250,8 +250,8 @@ export function runSimulation(
   for (let i = 0; i < iterations; i++) {
     let total = 0;
     for (let j = 0; j < params.length; j++) {
-      const cost = samplePositionCost(params[j], rand);
-      positionSums[j][i] = cost;
+      const cost = samplePositionCost(params[j]!, rand);
+      positionSums[j]![i] = cost;
       total += cost;
     }
     totals[i] = total;
@@ -261,7 +261,7 @@ export function runSimulation(
   const sorted = Array.from(totals).sort((a, b) => a - b);
 
   // Percentiles
-  const pct = (p: number) => sorted[Math.floor((p / 100) * (iterations - 1))];
+  const pct = (p: number) => sorted[Math.floor((p / 100) * (iterations - 1))] ?? 0;
   const percentiles = {
     p5: pct(5),
     p10: pct(10),
@@ -275,11 +275,11 @@ export function runSimulation(
 
   // Mean and standard deviation
   let sum = 0;
-  for (let i = 0; i < iterations; i++) sum += totals[i];
+  for (let i = 0; i < iterations; i++) sum += totals[i]!;
   const mean = sum / iterations;
 
   let variance = 0;
-  for (let i = 0; i < iterations; i++) variance += (totals[i] - mean) ** 2;
+  for (let i = 0; i < iterations; i++) variance += (totals[i]! - mean) ** 2;
   const stdDev = Math.sqrt(variance / iterations);
 
   // Contingency
@@ -287,8 +287,8 @@ export function runSimulation(
   const contingencyPct = baseTotal > 0 ? (contingency / baseTotal) * 100 : 0;
 
   // Histogram
-  const histMin = sorted[0];
-  const histMax = sorted[sorted.length - 1];
+  const histMin = sorted[0] ?? 0;
+  const histMax = sorted[sorted.length - 1] ?? 0;
   const binWidth = (histMax - histMin) / bins || 1;
   const histogram: HistogramBin[] = [];
   for (let b = 0; b < bins; b++) {
@@ -296,7 +296,7 @@ export function runSimulation(
     const binEnd = binStart + binWidth;
     let count = 0;
     for (let i = 0; i < iterations; i++) {
-      if (totals[i] >= binStart && (b === bins - 1 ? totals[i] <= binEnd : totals[i] < binEnd)) {
+      if (totals[i]! >= binStart && (b === bins - 1 ? totals[i]! <= binEnd : totals[i]! < binEnd)) {
         count++;
       }
     }
@@ -312,10 +312,11 @@ export function runSimulation(
   const totalVariance = variance / iterations;
   const riskDrivers: RiskDriver[] = params.map((param, j) => {
     let posSum = 0;
-    for (let i = 0; i < iterations; i++) posSum += positionSums[j][i];
+    const posSums = positionSums[j]!;
+    for (let i = 0; i < iterations; i++) posSum += posSums[i]!;
     const posMean = posSum / iterations;
     let posVar = 0;
-    for (let i = 0; i < iterations; i++) posVar += (positionSums[j][i] - posMean) ** 2;
+    for (let i = 0; i < iterations; i++) posVar += (posSums[i]! - posMean) ** 2;
     posVar /= iterations;
 
     return {

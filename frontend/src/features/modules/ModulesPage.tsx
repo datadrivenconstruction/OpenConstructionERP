@@ -20,6 +20,7 @@ import {
   Clock,
   AlertTriangle,
   Trash2,
+  Info,
   type LucideIcon,
 } from 'lucide-react';
 import { Card, Badge, Button, Input, InfoHint } from '@/shared/ui';
@@ -392,11 +393,24 @@ export function ModulesPage() {
         }
         setInstallingId(mod.id);
         try {
-          const result = await apiPost<{ indexed: number; database: string; duration_seconds: number }>(`/v1/costs/vector/load-github/${dbId}`);
+          // Check what vector backend is available
+          const status = await apiGet<{ backend: string; connected: boolean; can_restore_snapshots: boolean; can_generate_locally: boolean }>('/v1/costs/vector/status');
+
+          let result;
+          if (status.can_restore_snapshots) {
+            // Qdrant: restore pre-built 3072d snapshot from GitHub
+            result = await apiPost<{ restored?: boolean; indexed?: number; database?: string; duration_seconds?: number }>(`/v1/costs/vector/restore-snapshot/${dbId}`);
+          } else if (status.connected) {
+            // LanceDB: generate or load vectors
+            result = await apiPost<{ restored?: boolean; indexed?: number; database?: string; duration_seconds?: number }>(`/v1/costs/vector/load-github/${dbId}`);
+          } else {
+            throw new Error('No vector database available. Install LanceDB (pip install lancedb) or start Qdrant (docker run -p 6333:6333 qdrant/qdrant)');
+          }
+
           addToast({
             type: 'success',
             title: t('marketplace.vector_imported', { defaultValue: 'Vector index loaded' }),
-            message: t('marketplace.vector_imported_message', { defaultValue: '{{count}} vectors indexed for {{db}} in {{sec}}s.', count: result.indexed, db: result.database, sec: result.duration_seconds }),
+            message: `${result.indexed || result.restored ? 'Vectors ready' : 'Restored'} for ${dbId}`,
           });
           queryClient.invalidateQueries({ queryKey: ['marketplace'] });
           queryClient.invalidateQueries({ queryKey: ['vector-status'] });
@@ -1102,6 +1116,19 @@ function MarketplaceCard({ module: mod, index, isInstalling, onInstall, isDemoIn
           <p className="mt-2 text-xs text-content-secondary line-clamp-2 leading-relaxed">
             {mod.description}
           </p>
+
+          {/* Vector Index prerequisite hint */}
+          {mod.category === 'vector_index' && !mod.installed && (
+            <div className="mt-2 flex items-start gap-1.5 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200/50 dark:border-purple-800/30 px-2.5 py-1.5">
+              <Info size={12} className="text-purple-500 shrink-0 mt-0.5" />
+              <div className="text-2xs text-purple-700 dark:text-purple-300 leading-relaxed">
+                <strong>Option A:</strong> Qdrant + Snapshot (best quality, 3072d):<br/>
+                <code className="font-mono bg-purple-100 dark:bg-purple-800/40 px-1 rounded text-[10px]">docker run -p 6333:6333 qdrant/qdrant</code><br/>
+                <strong>Option B:</strong> LanceDB (lightweight, 384d):<br/>
+                <code className="font-mono bg-purple-100 dark:bg-purple-800/40 px-1 rounded text-[10px]">pip install lancedb sentence-transformers</code>
+              </div>
+            </div>
+          )}
 
           {/* Tags & price */}
           <div className="mt-3 flex items-center gap-1.5 flex-wrap">
