@@ -990,8 +990,9 @@ function ProjectsList({ projects }: { projects?: ProjectSummary[] }) {
           <button
             onClick={() => installDemoMutation.mutate()}
             disabled={installDemoMutation.isPending}
-            className="group flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30 disabled:opacity-60"
+            className="group relative flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30 disabled:opacity-60"
           >
+            <span className="absolute top-2 left-2 flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue text-white text-2xs font-bold">1</span>
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-110">
               {installDemoMutation.isPending ? (
                 <Loader2 size={20} className="animate-spin" strokeWidth={1.5} />
@@ -1010,8 +1011,9 @@ function ProjectsList({ projects }: { projects?: ProjectSummary[] }) {
           {/* Create First Project */}
           <button
             onClick={() => navigate('/projects/new')}
-            className="group flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30"
+            className="group relative flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30"
           >
+            <span className="absolute top-2 left-2 flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue text-white text-2xs font-bold">2</span>
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-110">
               <FolderPlus size={20} strokeWidth={1.5} />
             </div>
@@ -1026,8 +1028,9 @@ function ProjectsList({ projects }: { projects?: ProjectSummary[] }) {
           {/* Import Existing BOQ */}
           <button
             onClick={() => navigate('/ai-estimate')}
-            className="group flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30"
+            className="group relative flex flex-col items-center gap-2 rounded-xl border border-border-light bg-surface-primary p-5 text-center transition-all duration-normal ease-oe hover:border-oe-blue/40 hover:bg-oe-blue-subtle/30"
           >
+            <span className="absolute top-2 left-2 flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue text-white text-2xs font-bold">3</span>
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-110">
               <Upload size={20} strokeWidth={1.5} />
             </div>

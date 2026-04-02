@@ -133,7 +133,7 @@ export function BOQToolbar({
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+    <div className="sticky top-0 z-20 bg-surface-primary flex flex-wrap items-center gap-x-3 gap-y-2 pb-2">
       {/* ── Row-group: Quality + Undo/Redo ─────────────────────────────── */}
       <div className="flex items-center gap-1.5">
         {hasPositions && qualityScoreRing}

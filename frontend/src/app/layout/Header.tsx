@@ -76,6 +76,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
         {onMenuClick && (
           <button
             onClick={onMenuClick}
+            aria-label={t('common.open_menu', { defaultValue: 'Open menu' })}
             className="flex h-9 w-9 items-center justify-center rounded-lg text-content-secondary hover:bg-surface-secondary lg:hidden"
           >
             <Menu size={20} />
@@ -113,6 +114,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
         {/* Mobile search icon */}
         <button
           onClick={openCommandPalette}
+          aria-label={t('common.search', { defaultValue: 'Search' })}
           className="flex sm:hidden h-8 w-8 items-center justify-center rounded-lg text-content-secondary hover:bg-surface-secondary"
         >
           <Search size={17} />
