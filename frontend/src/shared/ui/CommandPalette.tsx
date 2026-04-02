@@ -446,7 +446,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
 
           {results.map((group) => (
             <div key={group.title} className="mb-1 last:mb-0">
-              <div className="px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wider text-content-tertiary">
+              <div className="px-3 pt-2 pb-1 text-2xs font-semibold uppercase tracking-wider text-content-quaternary">
                 {group.title}
               </div>
               {group.items.map((item) => {

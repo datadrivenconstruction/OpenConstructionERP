@@ -425,6 +425,7 @@ function SidebarItem({ item, label, onClick, badge: numericBadge }: { item: NavI
         to={item.to}
         end={item.to === '/'}
         onClick={onClick}
+        title={label}
         {...(item.tourId ? { 'data-tour': item.tourId } : {})}
         className={({ isActive }) =>
           clsx(
