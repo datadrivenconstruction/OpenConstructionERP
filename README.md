@@ -172,4 +172,4 @@ For commercial licensing (without AGPL obligations), contact [info@datadrivencon
 
 **Artem Boiko** — [datadrivenconstruction.io](https://datadrivenconstruction.io)
 
-Author of CWICR (55K+ cost items, 9 languages) and cad2db pipeline. Building open-source tools for the global construction industry.
+Author of CWICR (55K+ cost items, 9 languages) and cad2data pipeline. Building open-source tools for the global construction industry.

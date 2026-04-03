@@ -105,7 +105,7 @@ export function AboutPage() {
             <a href="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN-pipeline-with-conversion-validation-qto" target="_blank" rel="noopener noreferrer" className="rounded-xl border border-border-light bg-surface-secondary/30 p-4 text-center hover:border-oe-blue/40 hover:bg-oe-blue/[0.03] transition-all group">
               <div className="text-2xl font-bold text-content-primary group-hover:text-oe-blue transition-colors">cad2data</div>
               <div className="text-xs text-content-tertiary mt-1">
-                {t('about.ddc_cad2db', { defaultValue: 'CAD/BIM pipeline — RVT, IFC, DWG, DGN to structured quantities' })}
+                {t('about.ddc_cad2data', { defaultValue: 'CAD/BIM pipeline — RVT, IFC, DWG, DGN to structured quantities' })}
               </div>
               <div className="mt-2 text-2xs text-oe-blue opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
                 <ExternalLink size={10} /> GitHub
@@ -139,11 +139,11 @@ export function AboutPage() {
                 {t('about.founder_role', { defaultValue: 'Consultant for Automation & Data in Construction' })}
               </p>
               <p className="mt-3 text-sm text-content-secondary leading-relaxed">
-                {t('about.founder_bio', { defaultValue: 'Consultant specializing in automation, data engineering, and AI for the construction industry. Author of open-source tools — CWICR (construction cost database, 55,000+ items, 11 regional databases, 9 languages), cad2db (CAD/BIM data extraction pipeline for RVT, IFC, DWG, DGN), and DDC Community Toolkit. Creator of OpenConstructionERP. Founder of Data Driven Construction — bringing modern technology, AI, and open data standards to the global construction industry.' })}
+                {t('about.founder_bio', { defaultValue: 'Consultant specializing in automation, data engineering, and AI for the construction industry. Author of open-source tools — CWICR (construction cost database, 55,000+ items, 11 regional databases, 9 languages), cad2data (CAD/BIM data extraction pipeline for RVT, IFC, DWG, DGN), and DDC Community Toolkit. Creator of OpenConstructionERP. Founder of Data Driven Construction — bringing modern technology, AI, and open data standards to the global construction industry.' })}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Badge variant="blue" size="sm">Automation & Data</Badge>
-                <Badge variant="blue" size="sm">CWICR & cad2db author</Badge>
+                <Badge variant="blue" size="sm">CWICR & cad2data author</Badge>
                 <Badge variant="blue" size="sm">AI & construction</Badge>
                 <Badge variant="blue" size="sm">Open-source advocate</Badge>
               </div>

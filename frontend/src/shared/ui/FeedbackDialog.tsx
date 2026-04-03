@@ -20,7 +20,7 @@ const CATEGORIES: { key: FeedbackCategory; icon: typeof Bug; labelKey: string; d
 ];
 
 const GITHUB_ISSUES_URL =
-  'https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR/issues/new';
+  'https://github.com/datadrivenconstruction/OpenConstructionERP/issues/new';
 
 export function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
   const { t } = useTranslation();

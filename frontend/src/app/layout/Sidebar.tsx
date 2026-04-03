@@ -70,6 +70,16 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
+    id: 'databases',
+    labelKey: 'nav.group_databases',
+    defaultOpen: true,
+    items: [
+      { labelKey: 'costs.title', to: '/costs', icon: Database, tourId: 'costs' },
+      { labelKey: 'nav.assemblies', to: '/assemblies', icon: Layers },
+      { labelKey: 'catalog.title', to: '/catalog', icon: Boxes },
+    ],
+  },
+  {
     id: 'takeoff',
     labelKey: 'nav.group_takeoff',
     defaultOpen: true,
@@ -79,16 +89,6 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.ai_estimate', to: '/ai-estimate', icon: Sparkles },
       { labelKey: 'nav.ai_advisor', to: '/advisor', icon: MessageSquare },
       { labelKey: 'nav.cad_takeoff', to: '/cad-takeoff', icon: Box },
-    ],
-  },
-  {
-    id: 'databases',
-    labelKey: 'nav.group_databases',
-    defaultOpen: true,
-    items: [
-      { labelKey: 'costs.title', to: '/costs', icon: Database, tourId: 'costs' },
-      { labelKey: 'nav.assemblies', to: '/assemblies', icon: Layers },
-      { labelKey: 'catalog.title', to: '/catalog', icon: Boxes },
     ],
   },
   {
@@ -292,7 +292,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             <span className="text-2xs">OpenConstructionERP.com</span>
           </a>
           <a
-            href="https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR"
+            href="https://github.com/datadrivenconstruction/OpenConstructionERP"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-content-quaternary hover:text-content-secondary hover:bg-surface-secondary/50 transition-all"
