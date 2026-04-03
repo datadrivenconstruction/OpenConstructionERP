@@ -183,7 +183,7 @@ Open **http://localhost:5173** — requires Python 3.12+ and Node.js 20+. Uses S
 
 ```bash
 pip install -e ./backend
-openestimate serve --open
+openconstructionerp serve --open
 ```
 
 ### Demo Accounts
@@ -210,7 +210,7 @@ Three demo accounts are created automatically on first start:
 | UI | Tailwind CSS / AG Grid | Professional data grid, responsive design, dark mode |
 | AI | Any LLM via REST API | Anthropic, OpenAI, Gemini, Mistral, Groq, DeepSeek |
 | Vector Search | LanceDB (embedded) / Qdrant | Semantic cost item search, 384d or 3072d embeddings |
-| CAD/BIM | DDC Community Converters | RVT, IFC, DWG, DGN → structured quantities |
+| CAD/BIM | [DDC cad2data](https://github.com/datadrivenconstruction) | RVT, IFC, DWG, DGN → structured quantities |
 | i18n | i18next + 21 language packs | Full RTL support (Arabic), locale-aware formatting |
 
 ## Architecture
@@ -230,7 +230,7 @@ Three demo accounts are created automatically on first start:
 ├──────────────────────────────────────────────────┤
 │  Database (PostgreSQL / SQLite)                  │
 │  Vector DB (LanceDB / Qdrant)                    │
-│  CAD Converters (DDC Toolkit)                    │
+│  CAD Converters (DDC cad2data)                   │
 └──────────────────────────────────────────────────┘
 ```
 
@@ -244,6 +244,17 @@ OpenConstructionERP is built and maintained by the community. If you find it use
 - 💬 **[Join Discussions](https://t.me/datadrivenconstruction)** — ask questions, share ideas, help others
 - 🐛 **[Report issues](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)** — help us improve
 - 💼 **[Professional consulting](https://datadrivenconstruction.io/contact-support/)** — custom deployment, training, enterprise support
+
+## Security
+
+OpenConstructionERP includes security hardening for production deployments:
+- Path traversal protection on all file download endpoints
+- CORS wildcard blocking in production mode
+- Bounded input validation on bulk price operations
+- Generic error responses to prevent account enumeration
+- Production startup checks for secrets, credentials, and database configuration
+
+Report vulnerabilities via [GitHub Issues](https://github.com/datadrivenconstruction/OpenConstructionERP/issues) (private reports supported).
 
 ## Contributing
 
