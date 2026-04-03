@@ -23,7 +23,7 @@
     "ag-grid-react": "^32.3.0",
     "clsx": "^2.1.0",
     "date-fns": "^4.1.0",
-    "i18next": "^24.2.0",
+    "i18next": "^26.0.3",
     "i18next-browser-languagedetector": "^8.0.0",
     "i18next-http-backend": "^3.0.0",
     "jspdf": "^4.2.1",
