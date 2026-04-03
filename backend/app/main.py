@@ -89,7 +89,12 @@ async def _seed_demo_account() -> None:
     - demo@openestimator.io / DemoPass1234!  (role=admin)
     - 5 projects: residential-berlin, office-london, medical-us,
       school-paris, warehouse-dubai (each with 2 BOQs: detailed + budget)
+
+    Disable with SEED_DEMO=false in production.
     """
+    if os.environ.get("SEED_DEMO", "true").lower() in ("false", "0", "no"):
+        return
+
     from app.database import async_session_factory
     from app.modules.users.models import User
     from app.modules.users.service import hash_password
@@ -605,7 +610,7 @@ def create_app() -> FastAPI:
             "Starting %s v%s (%s)", settings.app_name, settings.app_version, settings.app_env
         )
 
-        # Validate JWT secret
+        # Validate secrets and configuration for production
         _insecure_secrets = {"change-me-in-production", "openestimate-local-dev-key", ""}
         if settings.jwt_secret in _insecure_secrets:
             if settings.is_production:
@@ -617,6 +622,12 @@ def create_app() -> FastAPI:
             logger.warning(
                 "JWT_SECRET is using default dev key — set JWT_SECRET env var for production."
             )
+
+        if settings.is_production:
+            if "minioadmin" in (settings.s3_access_key + settings.s3_secret_key):
+                logger.warning("S3 credentials are using development defaults")
+            if "localhost" in settings.database_url:
+                logger.warning("DATABASE_URL points to localhost in production")
 
         # Load translations (20 languages)
         from app.core.i18n import load_translations
