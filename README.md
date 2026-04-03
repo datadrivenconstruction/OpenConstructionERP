@@ -35,6 +35,45 @@ Construction cost estimation software is expensive, closed-source, and locked to
 | **AI-powered** | Connect any LLM provider (Anthropic, OpenAI, Gemini, Mistral, Groq, DeepSeek) for smart estimation. |
 | **55,000+ cost items** | CWICR database with 11 regional pricing databases (DACH, UK, US, France, Spain, Brazil, Russia, UAE, China, India, Canada). |
 
+### How It Compares
+
+| Capability | OpenConstructionERP | RIB iTWO | Exactal CostX | Sage Estimating | Bluebeam |
+|:-----------|:---:|:---:|:---:|:---:|:---:|
+| **Open source** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Self-hosted / offline** | ✅ | ❌ | ❌ | ⚠️ | ❌ |
+| **Price** | Free | ~€500/mo | ~€300/mo | ~€200/mo | ~€30/mo |
+| **AI estimation** | ✅ 7 LLM providers | ❌ | ❌ | ❌ | ❌ |
+| **Languages** | 21 | 5 | 3 | 2 | 8 |
+| **Regional standards** | 20 | 4 | 3 | 2 | — |
+| **BOQ editor** | ✅ | ✅ | ✅ | ✅ | ❌ |
+| **CAD/BIM takeoff** | ✅ RVT IFC DWG DGN | ✅ | ✅ | ❌ | ✅ PDF only |
+| **4D/5D planning** | ✅ | ✅ | ❌ | ❌ | ❌ |
+| **Cost database included** | ✅ 55K items | ❌ extra cost | ❌ extra cost | ❌ extra cost | ❌ |
+| **Validation engine** | ✅ 42 rules | ⚠️ limited | ❌ | ❌ | ❌ |
+| **API access** | ✅ REST API | ⚠️ limited | ❌ | ❌ | ❌ |
+
+---
+
+### Complete Estimation Workflow
+
+OpenConstructionERP covers the full lifecycle — from first sketch to final tender submission:
+
+```
+  Upload              Convert            Validate           Estimate           Tender
+ ┌────────┐        ┌──────────┐       ┌───────────┐      ┌──────────┐      ┌──────────┐
+ │PDF/CAD │───────▶│ Extract  │──────▶│ 42 rules  │─────▶│BOQ Editor│─────▶│ Bid Pkgs │
+ │Photo   │        │quantities│       │ DIN/NRM/  │      │ + AI     │      │ Compare  │
+ │Text    │        │ + AI     │       │ MasterFmt │      │ + Costs  │      │ Award    │
+ └────────┘        └──────────┘       └───────────┘      └──────────┘      └──────────┘
+                                                               │
+                                                         ┌─────┴──────┐
+                                                         │ 4D Schedule│
+                                                         │ 5D Costs   │
+                                                         │ Risk Reg.  │
+                                                         │ Reports    │
+                                                         └────────────┘
+```
+
 ---
 
 ⭐ <b>If you want to see new updates and database versions and if you find our tools useful please give our repositories a star to see more similar applications for the construction industry.</b>
