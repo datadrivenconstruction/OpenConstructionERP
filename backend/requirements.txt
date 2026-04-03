@@ -129,7 +129,7 @@ openai==2.15.0
 opencv-python-headless==4.13.0.92
 openpyxl==3.1.5
 packaging==25.0
-pandas==2.2.3
+pandas==3.0.2
 paramiko==4.0.0
 passlib==1.7.4
 patch-ng==1.19.0
