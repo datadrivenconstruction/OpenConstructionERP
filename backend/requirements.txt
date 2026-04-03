@@ -147,7 +147,7 @@ portalocker==3.2.0
 proglog==0.1.12
 propcache==0.4.1
 proto-plus==1.27.0
-protobuf==5.29.5
+protobuf==5.29.6
 psutil==7.2.1
 psycopg2-binary==2.9.11
 py7zr==1.1.2
