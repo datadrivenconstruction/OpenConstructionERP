@@ -90,6 +90,7 @@ test-screenshots/
 !frontend/public/og-image.png
 !frontend/public/*.jpg
 !frontend/public/*.jpeg
+!docs/screenshots/*.png
 
 # QA test scripts (contain demo credentials)
 backend/qa_*.py
