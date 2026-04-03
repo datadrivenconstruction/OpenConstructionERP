@@ -1,0 +1,113 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+
+# Node
+node_modules/
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+*.sqlite3
+openestimate.db*
+
+# Docker volumes
+pg_data/
+minio_data/
+qdrant_data/
+
+# Testing
+htmlcov/
+.coverage
+coverage.xml
+.pytest_cache/
+frontend/test-results/
+frontend/e2e-results/
+*.trace.zip
+
+# Build
+*.tar.gz
+*.whl
+frontend/stats.html
+
+# Logs
+*.log
+logs/
+
+# Generated
+backend/locales/
+i18n-audit/
+translation_keys.txt
+
+# Claude Code / MCP
+.claude/
+.mcp.json
+.playwright-mcp/
+
+# QA / Dev artifacts
+screenshots/
+qa-tests/
+ux-review/
+QA_*.md
+UX_*.md
+TESTING_PLAN.md
+TAKEOFF_TESTING_PLAN.md
+IMPROVEMENTS_TODO.md
+AUDIT_*.md
+REVIEW_PROGRESS.md
+test-screenshots/
+
+# Dev screenshots & images
+*.png
+*.jpeg
+*.jpg
+!frontend/public/favicon.png
+!frontend/public/logo.png
+!frontend/public/og-image.png
+!frontend/public/*.jpg
+!frontend/public/*.jpeg
+
+# QA test scripts (contain demo credentials)
+backend/qa_*.py
+backend/tmp_*.json
+
+# LanceDB local data
+lancedb_data/
+*.lance
+
+# Cached data
+*.parquet
+~/.openestimator/
+
+# Desktop build
+desktop/dist/
+desktop/build/
+desktop/src-tauri/target/
+desktop/src-tauri/binaries/
+
+# Backup files
+*.backup.*

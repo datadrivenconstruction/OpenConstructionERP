@@ -1,0 +1,71 @@
+"""Alembic migration environment.
+
+Auto-discovers all module models via Base.metadata.
+"""
+
+from logging.config import fileConfig
+
+from alembic import context
+from sqlalchemy import pool
+from sqlalchemy.engine import Connection
+from sqlalchemy import create_engine
+
+from app.config import get_settings
+from app.database import Base
+
+# Import all module models so they're registered with Base.metadata.
+# This is done automatically by the module loader at runtime,
+# but we need it here for autogenerate to work.
+from app.modules.users import models as _users  # noqa: F401
+from app.modules.projects import models as _projects  # noqa: F401
+from app.modules.boq import models as _boq  # noqa: F401
+from app.modules.costs import models as _costs  # noqa: F401
+from app.modules.assemblies import models as _asm  # noqa: F401
+from app.modules.schedule import models as _sched  # noqa: F401
+from app.modules.costmodel import models as _cm  # noqa: F401
+from app.modules.ai import models as _ai  # noqa: F401
+from app.modules.tendering import models as _tender  # noqa: F401
+from app.modules.catalog import models as _catalog  # noqa: F401
+from app.modules.takeoff import models as _takeoff  # noqa: F401
+
+config = context.config
+settings = get_settings()
+
+# Render UUID columns properly for autogenerate
+def render_item(type_, obj, autogen_context):
+    """Custom render for UUID type."""
+    if type_ == "type" and hasattr(obj, "__class__") and obj.__class__.__name__ == "GUID":
+        return "sa.String(36)"
+    return False
+
+if config.config_file_name is not None:
+    fileConfig(config.config_file_name)
+
+target_metadata = Base.metadata
+
+
+def run_migrations_offline() -> None:
+    url = settings.database_sync_url
+    context.configure(
+        url=url,
+        target_metadata=target_metadata,
+        literal_binds=True,
+        dialect_opts={"paramstyle": "named"},
+    )
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+def run_migrations_online() -> None:
+    connectable = create_engine(settings.database_sync_url, poolclass=pool.NullPool)
+
+    with connectable.connect() as connection:
+        context.configure(connection=connection, target_metadata=target_metadata)
+        with context.begin_transaction():
+            context.run_migrations()
+
+
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    run_migrations_online()

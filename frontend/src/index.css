@@ -1,0 +1,1225 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── OpenEstimate Design System ─────────────────────────────────────────── */
+/* Apple-inspired. Clean, spacious, precise. */
+
+:root {
+  /* Brand */
+  --oe-blue: #0071e3;
+  --oe-blue-hover: #0077ed;
+  --oe-blue-active: #006edb;
+  --oe-blue-dark: #005bb5;
+  --oe-blue-subtle: #e8f2fe;
+
+  /* Surfaces */
+  --oe-bg: #ffffff;
+  --oe-bg-secondary: #f5f5f7;
+  --oe-bg-tertiary: #fbfbfd;
+  --oe-bg-elevated: #ffffff;
+
+  /* Borders */
+  --oe-border: #d2d2d7;
+  --oe-border-light: #e8e8ed;
+  --oe-border-focus: var(--oe-blue);
+
+  /* Text */
+  --oe-text-primary: #1d1d1f;
+  --oe-text-secondary: #6e6e73;
+  --oe-text-tertiary: #86868b;
+  --oe-text-quaternary: #aeaeb2;
+  --oe-text-inverse: #ffffff;
+
+  /* Semantic */
+  --oe-success: #34c759;
+  --oe-success-bg: #ecfdf3;
+  --oe-warning: #ff9f0a;
+  --oe-warning-bg: #fff8ec;
+  --oe-error: #ff3b30;
+  --oe-error-bg: #fef2f2;
+  --oe-info: #5ac8fa;
+  --oe-info-bg: #eff9fe;
+
+  /* Shadows — Apple uses very subtle, layered shadows */
+  --oe-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --oe-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --oe-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --oe-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+  --oe-shadow-xl: 0 24px 80px rgba(0, 0, 0, 0.14), 0 8px 24px rgba(0, 0, 0, 0.08);
+
+  /* Radius */
+  --oe-radius-xs: 4px;
+  --oe-radius-sm: 8px;
+  --oe-radius-md: 12px;
+  --oe-radius-lg: 16px;
+  --oe-radius-xl: 20px;
+  --oe-radius-full: 9999px;
+
+  /* Spacing scale — 4px base */
+  --oe-space-1: 4px;
+  --oe-space-2: 8px;
+  --oe-space-3: 12px;
+  --oe-space-4: 16px;
+  --oe-space-5: 20px;
+  --oe-space-6: 24px;
+  --oe-space-8: 32px;
+  --oe-space-10: 40px;
+  --oe-space-12: 48px;
+  --oe-space-16: 64px;
+
+  /* Typography */
+  --oe-font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+    'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --oe-font-mono: 'SF Mono', SFMono-Regular, ui-monospace, 'Cascadia Code', Menlo, Monaco,
+    Consolas, monospace;
+
+  /* Transitions */
+  --oe-transition-fast: 120ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  --oe-transition-normal: 200ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  --oe-transition-slow: 350ms cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  /* Layout */
+  --oe-sidebar-width: 232px;
+  --oe-header-height: 52px;
+  --oe-content-max-width: 1440px;
+}
+
+/* ── Dark Mode ─────────────────────────────────────────────────────────── */
+
+.dark {
+  /* Brand — slightly brighter for dark backgrounds */
+  --oe-blue: #3b82f6;
+  --oe-blue-hover: #60a5fa;
+  --oe-blue-active: #2563eb;
+  --oe-blue-dark: #1d4ed8;
+  --oe-blue-subtle: rgba(59, 130, 246, 0.15);
+
+  /* Surfaces — deep blue-gray palette */
+  --oe-bg: #0f1117;
+  --oe-bg-secondary: #161822;
+  --oe-bg-tertiary: #1a1d2b;
+  --oe-bg-elevated: #1e2130;
+
+  /* Borders — subtle, low-contrast */
+  --oe-border: #2a2d3e;
+  --oe-border-light: #232638;
+  --oe-border-focus: var(--oe-blue);
+
+  /* Text — high contrast on dark */
+  --oe-text-primary: #f0f0f5;
+  --oe-text-secondary: #a0a3b5;
+  --oe-text-tertiary: #6b6e80;
+  --oe-text-quaternary: #4a4d5e;
+  --oe-text-inverse: #0f1117;
+
+  /* Semantic — adjusted for dark backgrounds */
+  --oe-success: #22c55e;
+  --oe-success-bg: rgba(34, 197, 94, 0.12);
+  --oe-warning: #f59e0b;
+  --oe-warning-bg: rgba(245, 158, 11, 0.12);
+  --oe-error: #ef4444;
+  --oe-error-bg: rgba(239, 68, 68, 0.12);
+  --oe-info: #38bdf8;
+  --oe-info-bg: rgba(56, 189, 248, 0.12);
+
+  /* Shadows — darker, more spread for depth on dark surfaces */
+  --oe-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --oe-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --oe-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2);
+  --oe-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --oe-shadow-xl: 0 24px 80px rgba(0, 0, 0, 0.6), 0 8px 24px rgba(0, 0, 0, 0.4);
+
+  color-scheme: dark;
+}
+
+/* ── Base ────────────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Smooth background/color transition when toggling theme */
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition: background-color 300ms ease, color 200ms ease, border-color 200ms ease,
+    box-shadow 200ms ease !important;
+  transition-delay: 0s !important;
+}
+
+body {
+  margin: 0;
+  font-family: var(--oe-font-sans);
+  color: var(--oe-text-primary);
+  background: var(--oe-bg-secondary);
+  line-height: 1.47059;
+  letter-spacing: -0.022em;
+}
+
+[dir='rtl'] {
+  direction: rtl;
+  text-align: right;
+}
+
+/* ── RTL Layout Mirroring ────────────────────────────────────────────────── */
+
+/* Sidebar: move from left edge to right edge in RTL */
+[dir='rtl'] .oe-sidebar {
+  left: auto;
+  right: 0;
+}
+
+/* Invert the off-screen slide animation for RTL */
+[dir='rtl'] .oe-sidebar.-translate-x-full,
+[dir='rtl'] .oe-sidebar.\-translate-x-full {
+  transform: translateX(100%);
+}
+
+/* Main content area: swap padding sides in RTL */
+[dir='rtl'] .lg\:pl-sidebar {
+  padding-left: 0;
+  padding-right: var(--oe-sidebar-width);
+}
+
+/* Print helper: swap padding side */
+[dir='rtl'] .pl-sidebar {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Form inputs: align text to right in RTL contexts */
+[dir='rtl'] input[type='text'],
+[dir='rtl'] input[type='email'],
+[dir='rtl'] input[type='password'],
+[dir='rtl'] input[type='search'],
+[dir='rtl'] input[type='number'],
+[dir='rtl'] input[type='tel'],
+[dir='rtl'] textarea,
+[dir='rtl'] select {
+  text-align: right;
+}
+
+/* Flex rows that use gap: they inherit direction naturally, but rows with
+   explicit margin helpers need logical equivalents below. */
+
+/* ml-auto → margin-inline-start: auto in RTL (already correct via logical props,
+   but when ml-auto is used for badge push, we need to ensure it works) */
+[dir='rtl'] .ml-auto {
+  margin-left: unset;
+  margin-right: auto;
+}
+
+/* Tailwind mr-auto → flip in RTL */
+[dir='rtl'] .mr-auto {
+  margin-right: unset;
+  margin-left: auto;
+}
+
+/* Icons and chevrons that indicate directionality */
+[dir='rtl'] .lucide-chevron-right,
+[dir='rtl'] .lucide-arrow-right,
+[dir='rtl'] .lucide-chevron-left,
+[dir='rtl'] .lucide-arrow-left {
+  transform: scaleX(-1);
+}
+
+/* RTL-aware border radius: pill/rounded-l and rounded-r swap sides */
+[dir='rtl'] .rounded-l-lg { border-radius: 0 var(--oe-radius-md) var(--oe-radius-md) 0; }
+[dir='rtl'] .rounded-r-lg { border-radius: var(--oe-radius-md) 0 0 var(--oe-radius-md); }
+[dir='rtl'] .rounded-l-full { border-radius: 0 var(--oe-radius-full) var(--oe-radius-full) 0; }
+[dir='rtl'] .rounded-r-full { border-radius: var(--oe-radius-full) 0 0 var(--oe-radius-full); }
+
+/* Border side swaps */
+[dir='rtl'] .border-l { border-left: none; border-right-width: 1px; }
+[dir='rtl'] .border-r { border-right: none; border-left-width: 1px; }
+[dir='rtl'] .border-l-2 { border-left: none; border-right-width: 2px; }
+[dir='rtl'] .border-r-2 { border-right: none; border-left-width: 2px; }
+
+/* Padding side swaps for common Tailwind utilities used in the codebase */
+[dir='rtl'] .pl-4 { padding-left: 0; padding-right: 1rem; }
+[dir='rtl'] .pr-4 { padding-right: 0; padding-left: 1rem; }
+[dir='rtl'] .pl-3 { padding-left: 0; padding-right: 0.75rem; }
+[dir='rtl'] .pr-3 { padding-right: 0; padding-left: 0.75rem; }
+[dir='rtl'] .pl-6 { padding-left: 0; padding-right: 1.5rem; }
+[dir='rtl'] .pr-6 { padding-right: 0; padding-left: 1.5rem; }
+[dir='rtl'] .pl-8 { padding-left: 0; padding-right: 2rem; }
+[dir='rtl'] .pr-8 { padding-right: 0; padding-left: 2rem; }
+[dir='rtl'] .pl-10 { padding-left: 0; padding-right: 2.5rem; }
+[dir='rtl'] .pr-10 { padding-right: 0; padding-left: 2.5rem; }
+
+/* Margin side swaps */
+[dir='rtl'] .ml-2 { margin-left: 0; margin-right: 0.5rem; }
+[dir='rtl'] .mr-2 { margin-right: 0; margin-left: 0.5rem; }
+[dir='rtl'] .ml-3 { margin-left: 0; margin-right: 0.75rem; }
+[dir='rtl'] .mr-3 { margin-right: 0; margin-left: 0.75rem; }
+[dir='rtl'] .ml-4 { margin-left: 0; margin-right: 1rem; }
+[dir='rtl'] .mr-4 { margin-right: 0; margin-left: 1rem; }
+
+/* Left/right positioned elements */
+[dir='rtl'] .left-0 { left: auto; right: 0; }
+[dir='rtl'] .right-0 { right: auto; left: 0; }
+[dir='rtl'] .left-4 { left: auto; right: 1rem; }
+[dir='rtl'] .right-4 { right: auto; left: 1rem; }
+[dir='rtl'] .left-3 { left: auto; right: 0.75rem; }
+[dir='rtl'] .right-3 { right: auto; left: 0.75rem; }
+
+/* Text alignment */
+[dir='rtl'] .text-left { text-align: right; }
+[dir='rtl'] .text-right { text-align: left; }
+
+/* AG Grid RTL support */
+[dir='rtl'] .ag-theme-alpine {
+  direction: rtl;
+}
+
+/* Arabic font: use a system font stack that includes Arabic-script fonts */
+[dir='rtl'] body,
+[dir='rtl'] html {
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    'SF Arabic',
+    'Geeza Pro',
+    'Arabic UI Text',
+    'Noto Sans Arabic',
+    'Segoe UI',
+    Tahoma,
+    Arial,
+    sans-serif;
+}
+
+/* ── Typography — Apple SF Pro scale ─────────────────────────────────────── */
+
+h1 {
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.13;
+  letter-spacing: -0.04em;
+}
+
+h2 {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -0.03em;
+}
+
+h3 {
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.21;
+  letter-spacing: -0.02em;
+}
+
+h4 {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.31;
+  letter-spacing: -0.015em;
+}
+
+/* ── Scrollbar — thin, subtle ──────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+  background-clip: content-box;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  background-clip: content-box;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+  background-clip: content-box;
+}
+
+/* ── Focus — accessible, Apple-style ring ────────────────────────────────── */
+
+:focus-visible {
+  outline: 3px solid var(--oe-blue);
+  outline-offset: 2px;
+  border-radius: var(--oe-radius-xs);
+}
+
+/* ── Selection ─────────────────────────────────────────────────────────── */
+
+::selection {
+  background: var(--oe-blue);
+  color: white;
+}
+
+/* ── AG Grid premium overrides ─────────────────────────────────────────── */
+
+.ag-theme-alpine {
+  --ag-font-family: var(--oe-font-sans);
+  --ag-font-size: 13px;
+  --ag-row-height: 40px;
+  --ag-header-height: 44px;
+  --ag-header-foreground-color: var(--oe-text-secondary);
+  --ag-header-background-color: var(--oe-bg-tertiary);
+  --ag-border-color: var(--oe-border-light);
+  --ag-row-border-color: var(--oe-border-light);
+  --ag-selected-row-background-color: var(--oe-blue-subtle);
+  --ag-range-selection-border-color: var(--oe-blue);
+  --ag-range-selection-background-color: rgba(0, 113, 227, 0.08);
+  --ag-cell-horizontal-padding: 16px;
+}
+
+.dark .ag-theme-alpine {
+  --ag-background-color: var(--oe-bg);
+  --ag-header-background-color: var(--oe-bg-tertiary);
+  --ag-header-foreground-color: var(--oe-text-secondary);
+  --ag-foreground-color: var(--oe-text-primary);
+  --ag-border-color: var(--oe-border-light);
+  --ag-row-border-color: var(--oe-border-light);
+  --ag-secondary-foreground-color: var(--oe-text-secondary);
+  --ag-selected-row-background-color: var(--oe-blue-subtle);
+  --ag-odd-row-background-color: var(--oe-bg-secondary);
+  --ag-range-selection-background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* ── AG Grid cell vertical alignment ─────────────────────────────────── */
+/* Ensure ALL cells vertically center their content, not just checkbox/actions.
+   The ag-cell-wrapper inside already uses flex, but the cell itself must also
+   be flex so the wrapper is centered within the full row-height cell. */
+.ag-theme-quartz .ag-cell {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Ensure ordinal/pos column text doesn't overflow into description column */
+.ag-theme-quartz .ag-cell .ag-cell-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── AG Grid drag handle column ───────────────────────────────────────── */
+
+.oe-drag-handle-cell {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+}
+
+/* Row drag handle icon — visible on hover only */
+.ag-theme-quartz .ag-row .ag-drag-handle {
+  opacity: 0;
+  cursor: grab;
+  transition: opacity 0.15s ease;
+}
+
+.ag-theme-quartz .ag-row:hover .ag-drag-handle {
+  opacity: 0.5;
+}
+
+.ag-theme-quartz .ag-row:hover .ag-drag-handle:hover {
+  opacity: 1;
+}
+
+/* Active dragging cursor */
+.ag-theme-quartz .ag-row-dragging .ag-drag-handle {
+  opacity: 1;
+  cursor: grabbing;
+}
+
+/* Highlight the drop target row */
+.ag-theme-quartz .ag-row-drag-over {
+  background-color: var(--ag-range-selection-background-color, rgba(0, 113, 227, 0.08));
+}
+
+/* ── AG Grid full-width section group rows ────────────────────────── */
+
+.ag-theme-quartz .ag-full-width-row.oe-section-group-row {
+  border-top: 2px solid var(--oe-border, #e0e0e0);
+  border-bottom: 1px solid var(--oe-border-light, #eee);
+  background: var(--oe-bg-secondary, #f8f9fa);
+}
+
+.dark .ag-theme-quartz .ag-full-width-row.oe-section-group-row {
+  background: var(--oe-bg-secondary, #1e293b);
+  border-top-color: var(--oe-border, #374151);
+}
+
+.ag-theme-quartz .ag-full-width-row.oe-section-group-row:hover {
+  background: var(--oe-bg-tertiary, #f0f2f5);
+}
+
+.dark .ag-theme-quartz .ag-full-width-row.oe-section-group-row:hover {
+  background: var(--oe-bg-tertiary, #273344);
+}
+
+/* ── Premium Visual Polish ──────────────────────────────────────────── */
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ── Glass morphism ────────────────────────────────────────────────── */
+
+.glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.dark .glass {
+  background: rgba(15, 17, 23, 0.72);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.dark .glass-strong {
+  background: rgba(15, 17, 23, 0.85);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Animated gradient text ────────────────────────────────────────── */
+
+.gradient-text {
+  background: linear-gradient(
+    135deg,
+    var(--oe-blue) 0%,
+    #5856d6 25%,
+    var(--oe-blue) 50%,
+    #5856d6 75%,
+    var(--oe-blue) 100%
+  );
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientText 6s ease-in-out infinite;
+}
+
+@keyframes gradientText {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* ── Button shimmer effect ─────────────────────────────────────────── */
+
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.2) 45%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.2) 55%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  opacity: 0;
+  transition: opacity 300ms ease;
+  pointer-events: none;
+}
+
+.btn-shimmer:hover::after {
+  opacity: 1;
+  animation: btnShimmer 2s ease-in-out infinite;
+}
+
+@keyframes btnShimmer {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
+/* ── Stagger utilities ─────────────────────────────────────────────── */
+
+.stagger-1 { animation-delay: 60ms; }
+.stagger-2 { animation-delay: 120ms; }
+.stagger-3 { animation-delay: 180ms; }
+.stagger-4 { animation-delay: 240ms; }
+.stagger-5 { animation-delay: 300ms; }
+.stagger-6 { animation-delay: 360ms; }
+.stagger-7 { animation-delay: 420ms; }
+.stagger-8 { animation-delay: 480ms; }
+
+/* ── Table row stagger animation ───────────────────────────────────── */
+
+@keyframes staggerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: staggerFadeIn 400ms cubic-bezier(0.25, 0.1, 0.25, 1) both;
+}
+
+tbody tr {
+  animation: staggerFadeIn 300ms ease both;
+}
+tbody tr:nth-child(1)  { animation-delay: 0ms; }
+tbody tr:nth-child(2)  { animation-delay: 30ms; }
+tbody tr:nth-child(3)  { animation-delay: 60ms; }
+tbody tr:nth-child(4)  { animation-delay: 90ms; }
+tbody tr:nth-child(5)  { animation-delay: 120ms; }
+tbody tr:nth-child(6)  { animation-delay: 150ms; }
+tbody tr:nth-child(7)  { animation-delay: 180ms; }
+tbody tr:nth-child(8)  { animation-delay: 210ms; }
+tbody tr:nth-child(9)  { animation-delay: 240ms; }
+tbody tr:nth-child(10) { animation-delay: 270ms; }
+tbody tr:nth-child(11) { animation-delay: 300ms; }
+tbody tr:nth-child(12) { animation-delay: 330ms; }
+tbody tr:nth-child(13) { animation-delay: 360ms; }
+tbody tr:nth-child(14) { animation-delay: 390ms; }
+tbody tr:nth-child(15) { animation-delay: 420ms; }
+tbody tr:nth-child(16) { animation-delay: 450ms; }
+tbody tr:nth-child(17) { animation-delay: 480ms; }
+tbody tr:nth-child(18) { animation-delay: 510ms; }
+tbody tr:nth-child(19) { animation-delay: 540ms; }
+tbody tr:nth-child(20) { animation-delay: 570ms; }
+
+/* ── Pulse glow for active elements ──────────────────────────────── */
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 113, 227, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(0, 113, 227, 0);
+  }
+}
+
+/* ── Smooth number counter animation ─────────────────────────────── */
+
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Indeterminate progress bar ──────────────────────────────────── */
+
+@keyframes indeterminate {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+
+/* ── Subtle float for decorative elements ────────────────────────── */
+
+@keyframes floatGentle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* ── Gradient shift for backgrounds ──────────────────────────────── */
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* ── Live status dot ───────────────────────────────────────────────── */
+
+.live-dot {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--oe-success);
+  animation: pulseLive 2s ease-in-out infinite;
+}
+
+.live-dot::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background-color: var(--oe-success);
+  opacity: 0.3;
+  animation: pulseLive 2s ease-in-out infinite;
+}
+
+@keyframes pulseLive {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.75);
+  }
+}
+
+/* ── Auth page background blobs ────────────────────────────────────── */
+
+.auth-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  will-change: transform;
+}
+
+/* ── Print styles — professional BOQ output ────────────────────────── */
+
+@media print {
+  /* Hide non-printable UI elements */
+  aside,
+  nav,
+  header,
+  .no-print,
+  button:not(.print-visible),
+  [data-no-print] {
+    display: none !important;
+  }
+
+  /* Full width for content — remove sidebar offset and padding */
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .pl-sidebar {
+    padding-left: 0 !important;
+  }
+
+  /* Professional table styling */
+  table {
+    width: 100% !important;
+    border-collapse: collapse;
+    font-size: 10pt;
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  /* Repeat table header on each printed page */
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+    font-weight: bold;
+    border-top: 2px solid #000;
+  }
+
+  th {
+    background: #f0f0f0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    border-bottom: 1.5px solid #333;
+    padding: 6pt 8pt;
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  td {
+    padding: 5pt 8pt;
+    border-bottom: 0.5pt solid #ddd;
+  }
+
+  /* Section header rows — bold background */
+  .section-row,
+  tr.group {
+    font-weight: bold;
+    background: #f0f0f0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Clean totals */
+  tfoot tr:last-child td {
+    border-top: 2pt solid #000;
+    padding-top: 8pt;
+    padding-bottom: 8pt;
+    font-size: 11pt;
+  }
+
+  /* Print header block — hidden on screen, visible on print */
+  .print-header {
+    display: block !important;
+    text-align: center;
+    margin-bottom: 16pt;
+    padding-bottom: 8pt;
+    border-bottom: 1pt solid #ccc;
+  }
+
+  .print-header h1 {
+    font-size: 16pt;
+    margin: 0 0 4pt;
+  }
+
+  .print-header p {
+    font-size: 9pt;
+    color: #666;
+    margin: 0;
+  }
+
+  /* Page setup */
+  @page {
+    margin: 15mm;
+    size: A4 landscape;
+  }
+
+  @page :first {
+    margin-top: 20mm;
+  }
+
+  /* Remove visual noise: animations, shadows, rounded corners */
+  * {
+    animation: none !important;
+    box-shadow: none !important;
+    transition: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Ensure links look like text */
+  a {
+    text-decoration: none !important;
+    color: black !important;
+  }
+
+  /* Remove background colors except where explicitly preserved */
+  *:not(th):not(.section-row):not(tr.group) {
+    background: transparent !important;
+  }
+
+  /* Badge — render as plain text in print */
+  [class*="badge"],
+  [class*="Badge"] {
+    border: 1px solid #999 !important;
+    background: transparent !important;
+    color: #333 !important;
+    font-size: 8pt;
+    padding: 1pt 4pt;
+    border-radius: 2pt;
+  }
+
+  /* Hide scrollbars */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Ensure overflow is visible so nothing gets clipped */
+  .overflow-x-auto,
+  .overflow-hidden,
+  .overflow-y-auto {
+    overflow: visible !important;
+  }
+
+  /* AG Grid — flatten for print */
+  .ag-root-wrapper {
+    border: none !important;
+    overflow: visible !important;
+  }
+
+  .ag-header {
+    background: #f0f0f0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    border-bottom: 1.5px solid #333 !important;
+  }
+
+  .ag-header-cell {
+    font-size: 8pt !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4pt 6pt !important;
+  }
+
+  .ag-row {
+    border-bottom: 0.5pt solid #ddd !important;
+    page-break-inside: avoid;
+  }
+
+  .ag-row.ag-row-group {
+    font-weight: bold;
+    background: #f0f0f0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .ag-cell {
+    font-size: 10pt !important;
+    padding: 4pt 6pt !important;
+    line-height: 1.4 !important;
+  }
+
+  .ag-pinned-bottom-container .ag-row {
+    font-weight: bold;
+    border-top: 2pt solid #000 !important;
+  }
+
+  /* Hide AG Grid scrollbars and toolbars in print */
+  .ag-body-horizontal-scroll,
+  .ag-body-vertical-scroll,
+  .ag-side-bar,
+  .ag-status-bar,
+  .ag-paging-panel {
+    display: none !important;
+  }
+}
+
+/* ── Accessibility — respect reduced motion ────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  .auth-blob {
+    animation: none !important;
+  }
+
+  .gradient-text {
+    animation: none !important;
+    background-position: 0% 50% !important;
+  }
+
+  .btn-shimmer::after {
+    display: none;
+  }
+
+  .live-dot,
+  .live-dot::before {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: scale(1) !important;
+  }
+}
+
+/* ── Utility: hide scrollbar ──────────────────────────────────────── */
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Auth Page — Construction Background ───────────────────────────── */
+/* LEFT: Animated estimation table filling left ~50% of viewport       */
+/* RIGHT: Dashboard cards (bar chart, donut, KPIs, S-curve, blueprint) */
+
+:root {
+  --oce-bp-color: rgba(0, 70, 210, 0.38);
+}
+
+.dark {
+  --oce-bp-color: rgba(100, 160, 255, 0.25);
+}
+
+.oce-auth-bg {
+  z-index: 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   LEFT SIDE — Animated Estimation Table
+   ═══════════════════════════════════════════════════════ */
+
+.oce-bg-table-wrap {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  /* Fill entire left half — generous sizing */
+  left: -30px;
+  top: -20px;
+  width: 52vw;
+  max-width: 720px;
+  height: 105vh;
+  /* 3D tilt for depth */
+  transform: perspective(1400px) rotateX(12deg) rotateY(2deg);
+  transform-origin: top left;
+  /* Fade out toward center — visible but not overpowering */
+  mask-image: radial-gradient(ellipse 70% 65% at 30% 45%, rgba(0,0,0,.85) 10%, rgba(0,0,0,.5) 35%, rgba(0,0,0,.15) 60%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 65% at 30% 45%, rgba(0,0,0,.85) 10%, rgba(0,0,0,.5) 35%, rgba(0,0,0,.15) 60%, transparent 80%);
+}
+
+.oce-table-grid {
+  display: grid;
+  grid-template-columns: 60px 200px 48px 70px 78px 90px 54px;
+  gap: 0;
+}
+
+.oce-cell {
+  height: 34px;
+  background: transparent;
+  border: 1px solid rgba(0, 80, 220, 0.06);
+  transition: background 0.7s, border-color 0.7s, color 0.5s;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  font-size: 11px;
+  color: transparent;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.oce-cell-right { justify-content: flex-end; }
+
+.oce-cell-header {
+  background: rgba(0, 80, 220, 0.05);
+  border-bottom: 1.5px solid rgba(0, 80, 220, 0.12);
+  height: 28px;
+  font-family: var(--oe-font-sans);
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(0, 80, 220, 0.4);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.oce-cell-pos {
+  font-size: 10px;
+  color: rgba(0, 80, 220, 0.3);
+  background: rgba(0, 80, 220, 0.02);
+  border-right: 1px solid rgba(0, 80, 220, 0.08);
+}
+
+.oce-cell-desc { font-family: var(--oe-font-sans); font-size: 11px; }
+.oce-cell-total { font-weight: 700; }
+
+.oce-cell-section {
+  background: rgba(0, 80, 220, 0.025);
+  border-top: 1.5px solid rgba(0, 80, 220, 0.08);
+  font-weight: 700;
+  font-family: var(--oe-font-sans);
+  font-size: 11px;
+}
+
+/* Cell activation levels — light / medium / high */
+.oce-cell.on   { background: rgba(0,80,220,.08);  border-color: rgba(0,80,220,.12); color: rgba(0,60,200,.38); }
+.oce-cell.on-m { background: rgba(0,80,220,.14);  border-color: rgba(0,80,220,.18); color: rgba(0,60,200,.52); }
+.oce-cell.on-h { background: rgba(0,80,220,.20);  border-color: rgba(0,80,220,.24); color: rgba(0,60,200,.68); }
+
+/* Dark mode */
+.dark .oce-cell { border-color: rgba(100,160,255,.04); }
+.dark .oce-cell-header { background: rgba(100,160,255,.03); border-bottom-color: rgba(100,160,255,.08); color: rgba(100,160,255,.3); }
+.dark .oce-cell-pos { color: rgba(100,160,255,.2); background: rgba(100,160,255,.015); border-right-color: rgba(100,160,255,.06); }
+.dark .oce-cell-section { background: rgba(100,160,255,.025); border-top-color: rgba(100,160,255,.08); }
+.dark .oce-cell.on   { background: rgba(100,160,255,.06); border-color: rgba(100,160,255,.08); color: rgba(100,160,255,.28); }
+.dark .oce-cell.on-m { background: rgba(100,160,255,.10); border-color: rgba(100,160,255,.13); color: rgba(100,160,255,.4); }
+.dark .oce-cell.on-h { background: rgba(100,160,255,.15); border-color: rgba(100,160,255,.18); color: rgba(100,160,255,.55); }
+
+/* ═══════════════════════════════════════════════════════
+   RIGHT SIDE — Dashboard Grid
+   Same visual treatment as the table: 3D tilt, mask fade
+   ═══════════════════════════════════════════════════════ */
+
+.oce-bg-dash-wrap {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  /* Fill right half — generous sizing, pushed to the edge */
+  right: 10px;
+  top: -10px;
+  width: 44vw;
+  max-width: 600px;
+  height: 105vh;
+  /* 3D tilt — mirrored from left, slightly more dramatic */
+  transform: perspective(1200px) rotateX(14deg) rotateY(-3deg);
+  transform-origin: top right;
+  /* Softer fade — let the dashboard be clearly visible */
+  mask-image: radial-gradient(ellipse 80% 75% at 75% 45%, rgba(0,0,0,.9) 20%, rgba(0,0,0,.55) 50%, rgba(0,0,0,.15) 75%, transparent 95%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 75% at 75% 45%, rgba(0,0,0,.9) 20%, rgba(0,0,0,.55) 50%, rgba(0,0,0,.15) 75%, transparent 95%);
+}
+
+.oce-bg-dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 4px;
+}
+
+.oce-dash-cell {
+  min-width: 0;
+}
+
+.oce-dash-cell svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Full-width cards span both columns */
+.oce-dash-wide {
+  grid-column: 1 / -1;
+}
+
+.dark .oce-bg-dash-wrap { opacity: 0.75; }
+
+/* ═══════════════════════════════════════════════════════
+   Responsive & Accessibility
+   ═══════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  .oce-bg-table-wrap {
+    width: 48vw;
+    left: -40px;
+  }
+  .oce-bg-dash-wrap {
+    width: 44vw;
+    right: -30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .oce-bg-table-wrap,
+  .oce-bg-dash-wrap {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oce-cell { transition: none; }
+}
+
+/* ── Logo Animations ───────────────────────────────────────────────── */
+
+@keyframes oeBgScale {
+  0% { transform: scale(0.5) rotate(-8deg); opacity: 0; }
+  60% { transform: scale(1.05) rotate(1deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes oeBarGrow {
+  0% { transform: scaleY(0) translateY(8px); opacity: 0; }
+  50% { transform: scaleY(1.12) translateY(-2px); opacity: 1; }
+  70% { transform: scaleY(0.95) translateY(0); opacity: 1; }
+  100% { transform: scaleY(1) translateY(0); opacity: 1; }
+}
+
+@keyframes oeBuildingSlide {
+  0% { transform: translateX(40px) translateY(10px) scale(0.9); opacity: 0; }
+  60% { transform: translateX(-4px) translateY(0) scale(1.02); opacity: 1; }
+  100% { transform: translateX(0) translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes oeWindowFade {
+  0% { opacity: 0; transform: scale(0.5); }
+  60% { opacity: 1; transform: scale(1.15); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes oeLogoFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes oeLogoGlow {
+  0%, 100% { filter: drop-shadow(0 0 0 transparent); }
+  50% { filter: drop-shadow(0 2px 8px rgba(0, 102, 255, 0.25)); }
+}
+
+/* ── Chat / iMessage Animations ──────────────────────────────────── */
+
+@keyframes oeMsgIn {
+  0% { opacity: 0; transform: translateY(12px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-msg-in {
+  animation: oeMsgIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes oeTypingDot {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-4px); }
+}

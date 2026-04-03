@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OpenEstimator — Construction + Calculation Logos (Light)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #f5f5f7; color: #1d1d1f; padding: 40px; }
+  h1 { text-align: center; font-size: 28px; margin-bottom: 8px; }
+  .subtitle { text-align: center; color: #86868b; margin-bottom: 48px; font-size: 14px; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; max-width: 1200px; margin: 0 auto; }
+  .card { background: #fff; border: 1px solid #e5e5ea; border-radius: 20px; padding: 32px 20px 20px; display: flex; flex-direction: column; align-items: center; transition: all 0.2s; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .card:hover { border-color: #0071e3; transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,113,227,0.12); }
+  .logo-wrap { width: 72px; height: 72px; margin-bottom: 16px; }
+  .logo-wrap svg { width: 100%; height: 100%; }
+  .card h3 { font-size: 14px; font-weight: 700; color: #1d1d1f; margin-bottom: 4px; text-align: center; }
+  .card p { font-size: 11px; color: #86868b; text-align: center; line-height: 1.5; }
+  .num { position: absolute; top: 10px; left: 14px; font-size: 10px; color: #c7c7cc; font-weight: 700; }
+  /* Sidebar preview */
+  .sidebar-preview { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding: 10px 14px; background: #f5f5f7; border-radius: 12px; width: 100%; }
+  .sidebar-preview .mini { width: 32px; height: 32px; flex-shrink: 0; }
+  .sidebar-preview .mini svg { width: 100%; height: 100%; }
+  .sidebar-preview .brand { font-size: 14px; font-weight: 600; color: #1d1d1f; white-space: nowrap; }
+  .sidebar-preview .brand b { font-weight: 700; color: #0071e3; }
+  .sidebar-preview .brand .dim { color: #86868b; font-weight: 500; }
+  /* Dark sidebar preview */
+  .sidebar-dark { background: #1c1c1e; }
+  .sidebar-dark .brand { color: #f5f5f7; }
+  .sidebar-dark .brand .dim { color: #636366; }
+  .section-label { grid-column: 1 / -1; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #86868b; border-bottom: 1px solid #e5e5ea; padding-bottom: 8px; margin-top: 20px; }
+  /* Large preview */
+  .large-row { grid-column: 1 / -1; display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; padding: 20px 0; }
+  .large-card { background: #fff; border: 1px solid #e5e5ea; border-radius: 24px; padding: 40px; display: flex; align-items: center; gap: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  .large-card svg { width: 56px; height: 56px; }
+  .large-card .brand { font-size: 22px; font-weight: 600; }
+  .large-card .brand b { color: #0071e3; font-weight: 700; }
+  .large-card .brand .dim { color: #86868b; }
+</style>
+</head>
+<body>
+
+<h1>Construction + Calculation — Light Background</h1>
+<p class="subtitle">Building icons merged with estimation/math elements. All on white/light.</p>
+
+<div class="grid">
+
+<div class="section-label">Building + Equals / Sum</div>
+
+<!-- 1. Building with = sign as floors -->
+<div class="card">
+  <span class="num">#1</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/>
+      <!-- Building body -->
+      <rect x="16" y="18" width="22" height="34" rx="2" fill="#0071e3" opacity="0.1"/>
+      <rect x="16" y="18" width="22" height="34" rx="2" stroke="#0071e3" stroke-width="2" fill="none"/>
+      <!-- Floor lines = equals -->
+      <line x1="20" y1="28" x2="34" y2="28" stroke="#0071e3" stroke-width="2" stroke-linecap="round"/>
+      <line x1="20" y1="36" x2="34" y2="36" stroke="#0071e3" stroke-width="2" stroke-linecap="round"/>
+      <line x1="20" y1="44" x2="34" y2="44" stroke="#0071e3" stroke-width="2" stroke-linecap="round"/>
+      <!-- Sigma on the right -->
+      <path d="M42 22 L52 22 L52 26 L46 26 L50 32 L46 38 L52 38 L52 42 L42 42 L48 32 Z" fill="#0071e3"/>
+      <!-- Roof -->
+      <path d="M12 18 L27 8 L42 18" stroke="#0071e3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+  </div>
+  <h3>Building + Sigma</h3>
+  <p>Building floors as lines, sigma for summation</p>
+  <div class="sidebar-preview"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/><rect x="16" y="18" width="22" height="34" rx="2" stroke="#0071e3" stroke-width="2" fill="none"/><line x1="20" y1="28" x2="34" y2="28" stroke="#0071e3" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="36" x2="34" y2="36" stroke="#0071e3" stroke-width="2" stroke-linecap="round"/><line x1="20" y1="44" x2="34" y2="44" stroke="#0071e3" stroke-width="2" stroke-linecap="round"/><path d="M42 22 L52 22 L52 26 L46 26 L50 32 L46 38 L52 38 L52 42 L42 42 L48 32 Z" fill="#0071e3"/><path d="M12 18 L27 8 L42 18" stroke="#0071e3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div><span class="brand">Open<b>Estimator</b><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 2. Crane + Calculator display -->
+<div class="card">
+  <span class="num">#2</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/>
+      <!-- Crane mast -->
+      <line x1="18" y1="54" x2="18" y2="12" stroke="#0071e3" stroke-width="3" stroke-linecap="round"/>
+      <!-- Crane boom -->
+      <line x1="18" y1="14" x2="48" y2="14" stroke="#0071e3" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- Crane cable -->
+      <line x1="42" y1="14" x2="42" y2="26" stroke="#0071e3" stroke-width="1.5" stroke-dasharray="2 2"/>
+      <!-- Calculator block hanging -->
+      <rect x="32" y="26" width="20" height="24" rx="3" fill="#0071e3" opacity="0.08" stroke="#0071e3" stroke-width="1.5"/>
+      <rect x="35" y="29" width="14" height="6" rx="1.5" fill="#0071e3" opacity="0.15"/>
+      <text x="46" y="34" text-anchor="end" fill="#0071e3" font-size="5" font-weight="700" font-family="system-ui">$</text>
+      <rect x="35" y="38" width="4" height="4" rx="1" fill="#0071e3" opacity="0.3"/>
+      <rect x="41" y="38" width="4" height="4" rx="1" fill="#0071e3" opacity="0.3"/>
+      <rect x="35" y="44" width="10" height="4" rx="1" fill="#0071e3" opacity="0.5"/>
+      <!-- Base -->
+      <line x1="10" y1="54" x2="26" y2="54" stroke="#0071e3" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- Counter jib -->
+      <line x1="18" y1="14" x2="10" y2="14" stroke="#0071e3" stroke-width="2" stroke-linecap="round"/>
+      <rect x="8" y="12" width="5" height="5" rx="1" fill="#0071e3" opacity="0.3"/>
+    </svg>
+  </div>
+  <h3>Crane + Calculator</h3>
+  <p>Tower crane lifting a calculator — engineering meets math</p>
+  <div class="sidebar-preview"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/><line x1="18" y1="54" x2="18" y2="12" stroke="#0071e3" stroke-width="3" stroke-linecap="round"/><line x1="18" y1="14" x2="48" y2="14" stroke="#0071e3" stroke-width="2.5" stroke-linecap="round"/><line x1="42" y1="14" x2="42" y2="26" stroke="#0071e3" stroke-width="1.5" stroke-dasharray="2 2"/><rect x="32" y="26" width="20" height="24" rx="3" fill="#0071e3" opacity="0.08" stroke="#0071e3" stroke-width="1.5"/><rect x="35" y="29" width="14" height="6" rx="1.5" fill="#0071e3" opacity="0.15"/><line x1="10" y1="54" x2="26" y2="54" stroke="#0071e3" stroke-width="2.5" stroke-linecap="round"/></svg></div><span class="brand">Open<b>Estimator</b><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 3. Roof outline + bar chart -->
+<div class="card">
+  <span class="num">#3</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/>
+      <!-- Roof -->
+      <path d="M8 30 L32 10 L56 30" stroke="#0071e3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- Bar chart under roof -->
+      <rect x="16" y="42" width="7" height="12" rx="1.5" fill="#0071e3" opacity="0.3"/>
+      <rect x="26" y="36" width="7" height="18" rx="1.5" fill="#0071e3" opacity="0.55"/>
+      <rect x="36" y="30" width="7" height="24" rx="1.5" fill="#0071e3" opacity="0.85"/>
+      <rect x="46" y="34" width="7" height="20" rx="1.5" fill="#0071e3" opacity="0.65"/>
+      <!-- Base line -->
+      <line x1="14" y1="56" x2="54" y2="56" stroke="#0071e3" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
+    </svg>
+  </div>
+  <h3>Roof + Bars</h3>
+  <p>House roof sheltering a cost chart</p>
+  <div class="sidebar-preview"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/><path d="M8 30 L32 10 L56 30" stroke="#0071e3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="16" y="42" width="7" height="12" rx="1.5" fill="#0071e3" opacity="0.3"/><rect x="26" y="36" width="7" height="18" rx="1.5" fill="#0071e3" opacity="0.55"/><rect x="36" y="30" width="7" height="24" rx="1.5" fill="#0071e3" opacity="0.85"/><rect x="46" y="34" width="7" height="20" rx="1.5" fill="#0071e3" opacity="0.65"/></svg></div><span class="brand">Open<b>Estimator</b><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 4. Blueprint ruler + = result -->
+<div class="card">
+  <span class="num">#4</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/>
+      <!-- L-shaped ruler -->
+      <rect x="10" y="10" width="8" height="44" rx="2" fill="#0071e3" opacity="0.12" stroke="#0071e3" stroke-width="1.5"/>
+      <line x1="10" y1="18" x2="15" y2="18" stroke="#0071e3" stroke-width="1" opacity="0.5"/>
+      <line x1="10" y1="26" x2="17" y2="26" stroke="#0071e3" stroke-width="1" opacity="0.5"/>
+      <line x1="10" y1="34" x2="15" y2="34" stroke="#0071e3" stroke-width="1" opacity="0.5"/>
+      <line x1="10" y1="42" x2="17" y2="42" stroke="#0071e3" stroke-width="1" opacity="0.5"/>
+      <!-- Horizontal ruler -->
+      <rect x="10" y="46" width="44" height="8" rx="2" fill="#0071e3" opacity="0.12" stroke="#0071e3" stroke-width="1.5"/>
+      <line x1="26" y1="46" x2="26" y2="51" stroke="#0071e3" stroke-width="1" opacity="0.5"/>
+      <line x1="34" y1="46" x2="34" y2="53" stroke="#0071e3" stroke-width="1" opacity="0.5"/>
+      <line x1="42" y1="46" x2="42" y2="51" stroke="#0071e3" stroke-width="1" opacity="0.5"/>
+      <!-- Result display -->
+      <rect x="24" y="16" width="28" height="22" rx="4" fill="#0071e3" opacity="0.06" stroke="#0071e3" stroke-width="1.5"/>
+      <text x="38" y="31" text-anchor="middle" fill="#0071e3" font-size="13" font-weight="800" font-family="system-ui">= $</text>
+    </svg>
+  </div>
+  <h3>L-Ruler + Result</h3>
+  <p>Architect's L-ruler with cost result</p>
+  <div class="sidebar-preview"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/><rect x="10" y="10" width="8" height="44" rx="2" fill="#0071e3" opacity="0.12" stroke="#0071e3" stroke-width="1.5"/><rect x="10" y="46" width="44" height="8" rx="2" fill="#0071e3" opacity="0.12" stroke="#0071e3" stroke-width="1.5"/><rect x="24" y="16" width="28" height="22" rx="4" fill="#0071e3" opacity="0.06" stroke="#0071e3" stroke-width="1.5"/><text x="38" y="31" text-anchor="middle" fill="#0071e3" font-size="13" font-weight="800" font-family="system-ui">= $</text></svg></div><span class="brand">Open<b>Estimator</b><span class="dim">.io</span></span></div>
+</div>
+
+<div class="section-label">Bricks / Blocks + Numbers</div>
+
+<!-- 5. Brick wall with numbers -->
+<div class="card">
+  <span class="num">#5</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/>
+      <!-- Brick rows -->
+      <rect x="10" y="38" width="14" height="8" rx="1.5" fill="#0071e3" opacity="0.2" stroke="#0071e3" stroke-width="1"/>
+      <rect x="26" y="38" width="14" height="8" rx="1.5" fill="#0071e3" opacity="0.3" stroke="#0071e3" stroke-width="1"/>
+      <rect x="42" y="38" width="12" height="8" rx="1.5" fill="#0071e3" opacity="0.4" stroke="#0071e3" stroke-width="1"/>
+      <rect x="10" y="48" width="20" height="8" rx="1.5" fill="#0071e3" opacity="0.5" stroke="#0071e3" stroke-width="1"/>
+      <rect x="32" y="48" width="22" height="8" rx="1.5" fill="#0071e3" opacity="0.7" stroke="#0071e3" stroke-width="1"/>
+      <!-- Stacking upward - fading -->
+      <rect x="18" y="28" width="14" height="8" rx="1.5" fill="#0071e3" opacity="0.15" stroke="#0071e3" stroke-width="1"/>
+      <rect x="34" y="28" width="14" height="8" rx="1.5" fill="#0071e3" opacity="0.2" stroke="#0071e3" stroke-width="1"/>
+      <!-- Sum at top -->
+      <text x="32" y="22" text-anchor="middle" fill="#0071e3" font-size="14" font-weight="800" font-family="system-ui">= $</text>
+    </svg>
+  </div>
+  <h3>Brick Wall + Sum</h3>
+  <p>Building up costs brick by brick</p>
+  <div class="sidebar-preview"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/><rect x="10" y="38" width="14" height="8" rx="1.5" fill="#0071e3" opacity="0.2" stroke="#0071e3" stroke-width="1"/><rect x="26" y="38" width="14" height="8" rx="1.5" fill="#0071e3" opacity="0.3" stroke="#0071e3" stroke-width="1"/><rect x="42" y="38" width="12" height="8" rx="1.5" fill="#0071e3" opacity="0.4" stroke="#0071e3" stroke-width="1"/><rect x="10" y="48" width="20" height="8" rx="1.5" fill="#0071e3" opacity="0.5" stroke="#0071e3" stroke-width="1"/><rect x="32" y="48" width="22" height="8" rx="1.5" fill="#0071e3" opacity="0.7" stroke="#0071e3" stroke-width="1"/><text x="32" y="22" text-anchor="middle" fill="#0071e3" font-size="14" font-weight="800" font-family="system-ui">= $</text></svg></div><span class="brand">Open<b>Estimator</b><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 6. Stacked cubes = cost blocks -->
+<div class="card">
+  <span class="num">#6</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/>
+      <!-- 3D blocks stacked -->
+      <!-- Bottom left -->
+      <polygon points="20,42 32,48 32,56 20,50" fill="#0071e3" opacity="0.6"/>
+      <polygon points="32,48 44,42 44,50 32,56" fill="#0071e3" opacity="0.4"/>
+      <polygon points="20,42 32,36 44,42 32,48" fill="#0071e3" opacity="0.2"/>
+      <!-- Top block -->
+      <polygon points="20,28 32,34 32,42 20,36" fill="#0071e3" opacity="0.8"/>
+      <polygon points="32,34 44,28 44,36 32,42" fill="#0071e3" opacity="0.55"/>
+      <polygon points="20,28 32,22 44,28 32,34" fill="#0071e3" opacity="0.3"/>
+      <!-- Right stacked -->
+      <polygon points="32,34 44,40 44,48 32,42" fill="#0071e3" opacity="0.45"/>
+      <polygon points="44,40 54,35 54,43 44,48" fill="#0071e3" opacity="0.3"/>
+      <polygon points="32,34 44,28 54,35 44,40" fill="#0071e3" opacity="0.15"/>
+      <!-- Plus sign -->
+      <text x="14" y="22" fill="#0071e3" font-size="10" font-weight="300" font-family="system-ui" opacity="0.5">+</text>
+    </svg>
+  </div>
+  <h3>3D Cost Blocks</h3>
+  <p>Isometric building blocks — stacking costs</p>
+  <div class="sidebar-preview"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/><polygon points="20,42 32,48 32,56 20,50" fill="#0071e3" opacity="0.6"/><polygon points="32,48 44,42 44,50 32,56" fill="#0071e3" opacity="0.4"/><polygon points="20,42 32,36 44,42 32,48" fill="#0071e3" opacity="0.2"/><polygon points="20,28 32,34 32,42 20,36" fill="#0071e3" opacity="0.8"/><polygon points="32,34 44,28 44,36 32,42" fill="#0071e3" opacity="0.55"/><polygon points="20,28 32,22 44,28 32,34" fill="#0071e3" opacity="0.3"/></svg></div><span class="brand">Open<b>Estimator</b><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 7. Hard hat + spreadsheet -->
+<div class="card">
+  <span class="num">#7</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/>
+      <!-- Hard hat -->
+      <path d="M14 32 C14 20 20 12 32 12 C44 12 50 20 50 32" stroke="#0071e3" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <rect x="12" y="30" width="40" height="5" rx="2.5" fill="#0071e3" opacity="0.9"/>
+      <!-- Table rows below hat -->
+      <rect x="14" y="40" width="36" height="4" rx="1" fill="#0071e3" opacity="0.15"/>
+      <rect x="14" y="46" width="24" height="4" rx="1" fill="#0071e3" opacity="0.1"/>
+      <rect x="40" y="46" width="10" height="4" rx="1" fill="#0071e3" opacity="0.25"/>
+      <rect x="14" y="52" width="36" height="4" rx="1" fill="#0071e3" opacity="0.35"/>
+      <text x="47" y="55.5" text-anchor="end" fill="#0071e3" font-size="3.5" font-weight="700" font-family="system-ui">TOTAL</text>
+    </svg>
+  </div>
+  <h3>Hard Hat + Table</h3>
+  <p>Safety helmet over a BOQ spreadsheet</p>
+  <div class="sidebar-preview"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/><path d="M14 32 C14 20 20 12 32 12 C44 12 50 20 50 32" stroke="#0071e3" stroke-width="2.5" stroke-linecap="round" fill="none"/><rect x="12" y="30" width="40" height="5" rx="2.5" fill="#0071e3" opacity="0.9"/><rect x="14" y="40" width="36" height="4" rx="1" fill="#0071e3" opacity="0.15"/><rect x="14" y="46" width="24" height="4" rx="1" fill="#0071e3" opacity="0.1"/><rect x="40" y="46" width="10" height="4" rx="1" fill="#0071e3" opacity="0.25"/><rect x="14" y="52" width="36" height="4" rx="1" fill="#0071e3" opacity="0.35"/></svg></div><span class="brand">Open<b>Estimator</b><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 8. Blueprint + pie chart -->
+<div class="card">
+  <span class="num">#8</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/>
+      <!-- Floor plan lines -->
+      <rect x="10" y="10" width="26" height="20" rx="1" fill="none" stroke="#0071e3" stroke-width="1.5" opacity="0.4"/>
+      <line x1="10" y1="20" x2="24" y2="20" stroke="#0071e3" stroke-width="1.5" opacity="0.4"/>
+      <line x1="24" y1="10" x2="24" y2="30" stroke="#0071e3" stroke-width="1.5" opacity="0.4"/>
+      <rect x="10" y="32" width="12" height="14" rx="1" fill="none" stroke="#0071e3" stroke-width="1.5" opacity="0.3"/>
+      <!-- Dimension arrows -->
+      <line x1="12" y1="50" x2="34" y2="50" stroke="#0071e3" stroke-width="1" opacity="0.3"/>
+      <text x="23" y="56" text-anchor="middle" fill="#0071e3" font-size="5" font-family="system-ui" opacity="0.4">12.5m</text>
+      <!-- Pie chart (cost breakdown) -->
+      <circle cx="46" cy="32" r="14" fill="none" stroke="#e5e5ea" stroke-width="1"/>
+      <path d="M46 18 A14 14 0 0 1 58 38 L46 32 Z" fill="#0071e3" opacity="0.7"/>
+      <path d="M58 38 A14 14 0 0 1 38 42 L46 32 Z" fill="#0071e3" opacity="0.4"/>
+      <path d="M38 42 A14 14 0 0 1 46 18 L46 32 Z" fill="#0071e3" opacity="0.2"/>
+    </svg>
+  </div>
+  <h3>Plan + Pie Chart</h3>
+  <p>Floor plan meets cost breakdown analysis</p>
+  <div class="sidebar-preview"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/><rect x="10" y="10" width="26" height="20" rx="1" fill="none" stroke="#0071e3" stroke-width="1.5" opacity="0.4"/><line x1="10" y1="20" x2="24" y2="20" stroke="#0071e3" stroke-width="1.5" opacity="0.4"/><line x1="24" y1="10" x2="24" y2="30" stroke="#0071e3" stroke-width="1.5" opacity="0.4"/><circle cx="46" cy="32" r="14" fill="none" stroke="#e5e5ea" stroke-width="1"/><path d="M46 18 A14 14 0 0 1 58 38 L46 32 Z" fill="#0071e3" opacity="0.7"/><path d="M58 38 A14 14 0 0 1 38 42 L46 32 Z" fill="#0071e3" opacity="0.4"/><path d="M38 42 A14 14 0 0 1 46 18 L46 32 Z" fill="#0071e3" opacity="0.2"/></svg></div><span class="brand">Open<b>Estimator</b><span class="dim">.io</span></span></div>
+</div>
+
+<div class="section-label">Minimal — Construction Meets Estimation</div>
+
+<!-- 9. Simple roof + = -->
+<div class="card">
+  <span class="num">#9</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/>
+      <path d="M12 32 L32 14 L52 32" stroke="#0071e3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <line x1="18" y1="42" x2="46" y2="42" stroke="#0071e3" stroke-width="3" stroke-linecap="round"/>
+      <line x1="18" y1="50" x2="46" y2="50" stroke="#0071e3" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <h3>Roof + Equals</h3>
+  <p>Ultra-minimal — roof line above equals sign</p>
+  <div class="sidebar-preview"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/><path d="M12 32 L32 14 L52 32" stroke="#0071e3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/><line x1="18" y1="42" x2="46" y2="42" stroke="#0071e3" stroke-width="3" stroke-linecap="round"/><line x1="18" y1="50" x2="46" y2="50" stroke="#0071e3" stroke-width="3" stroke-linecap="round"/></svg></div><span class="brand">Open<b>Estimator</b><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 10. Building silhouette + up arrow -->
+<div class="card">
+  <span class="num">#10</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/>
+      <!-- Building silhouette -->
+      <path d="M12 54 L12 28 L20 28 L20 22 L28 22 L28 16 L36 16 L36 22 L44 22 L44 28 L52 28 L52 54 Z" fill="#0071e3" opacity="0.12" stroke="#0071e3" stroke-width="1.5" stroke-linejoin="round"/>
+      <!-- Trend line -->
+      <polyline points="16,48 24,40 34,44 44,28 50,20" stroke="#0071e3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="50" cy="20" r="3" fill="#0071e3"/>
+      <!-- Arrow tip -->
+      <polyline points="46,18 50,14 54,20" stroke="#0071e3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+  </div>
+  <h3>Skyline + Trend</h3>
+  <p>City skyline with upward cost trend</p>
+  <div class="sidebar-preview"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/><path d="M12 54 L12 28 L20 28 L20 22 L28 22 L28 16 L36 16 L36 22 L44 22 L44 28 L52 28 L52 54 Z" fill="#0071e3" opacity="0.12" stroke="#0071e3" stroke-width="1.5" stroke-linejoin="round"/><polyline points="16,48 24,40 34,44 44,28 50,20" stroke="#0071e3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="50" cy="20" r="3" fill="#0071e3"/></svg></div><span class="brand">Open<b>Estimator</b><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 11. O with building inside -->
+<div class="card">
+  <span class="num">#11</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/>
+      <circle cx="32" cy="32" r="22" stroke="#0071e3" stroke-width="2.5" fill="none"/>
+      <!-- Mini building inside O -->
+      <rect x="24" y="28" width="16" height="18" rx="1" fill="#0071e3" opacity="0.12" stroke="#0071e3" stroke-width="1.5"/>
+      <path d="M22 28 L32 20 L42 28" stroke="#0071e3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- Windows = numbers -->
+      <rect x="27" y="32" width="4" height="4" rx="0.5" fill="#0071e3" opacity="0.4"/>
+      <rect x="33" y="32" width="4" height="4" rx="0.5" fill="#0071e3" opacity="0.4"/>
+      <rect x="27" y="39" width="4" height="7" rx="0.5" fill="#0071e3" opacity="0.5"/>
+      <rect x="33" y="39" width="4" height="4" rx="0.5" fill="#0071e3" opacity="0.4"/>
+    </svg>
+  </div>
+  <h3>O-Building</h3>
+  <p>House inside the O of Open</p>
+  <div class="sidebar-preview"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/><circle cx="32" cy="32" r="22" stroke="#0071e3" stroke-width="2.5" fill="none"/><rect x="24" y="28" width="16" height="18" rx="1" fill="#0071e3" opacity="0.12" stroke="#0071e3" stroke-width="1.5"/><path d="M22 28 L32 20 L42 28" stroke="#0071e3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="27" y="32" width="4" height="4" rx="0.5" fill="#0071e3" opacity="0.4"/><rect x="33" y="32" width="4" height="4" rx="0.5" fill="#0071e3" opacity="0.4"/></svg></div><span class="brand">Open<b>Estimator</b><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 12. Ruler + sigma minimal -->
+<div class="card">
+  <span class="num">#12</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/>
+      <!-- Vertical ruler line -->
+      <line x1="16" y1="10" x2="16" y2="54" stroke="#0071e3" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="16" y1="18" x2="22" y2="18" stroke="#0071e3" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+      <line x1="16" y1="26" x2="24" y2="26" stroke="#0071e3" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+      <line x1="16" y1="34" x2="22" y2="34" stroke="#0071e3" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+      <line x1="16" y1="42" x2="24" y2="42" stroke="#0071e3" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+      <!-- Sigma -->
+      <path d="M30 16 L50 16 L50 22 L40 22 L46 32 L40 42 L50 42 L50 48 L30 48 L40 32 Z" fill="#0071e3" opacity="0.85"/>
+    </svg>
+  </div>
+  <h3>Ruler + Sigma</h3>
+  <p>Measurement ruler next to sum symbol</p>
+  <div class="sidebar-preview"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#fff" stroke="#e5e5ea" stroke-width="1"/><line x1="16" y1="10" x2="16" y2="54" stroke="#0071e3" stroke-width="2.5" stroke-linecap="round"/><line x1="16" y1="18" x2="22" y2="18" stroke="#0071e3" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/><line x1="16" y1="26" x2="24" y2="26" stroke="#0071e3" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/><line x1="16" y1="34" x2="22" y2="34" stroke="#0071e3" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/><line x1="16" y1="42" x2="24" y2="42" stroke="#0071e3" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/><path d="M30 16 L50 16 L50 22 L40 22 L46 32 L40 42 L50 42 L50 48 L30 48 L40 32 Z" fill="#0071e3" opacity="0.85"/></svg></div><span class="brand">Open<b>Estimator</b><span class="dim">.io</span></span></div>
+</div>
+
+<div class="section-label">Filled Background Variants (Light Blue)</div>
+
+<!-- 13. Roof + Bars on light blue -->
+<div class="card">
+  <span class="num">#13</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#e8f2fc"/>
+      <path d="M10 30 L32 12 L54 30" stroke="#0071e3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <rect x="18" y="40" width="7" height="14" rx="1.5" fill="#0071e3" opacity="0.35"/>
+      <rect x="28" y="34" width="7" height="20" rx="1.5" fill="#0071e3" opacity="0.6"/>
+      <rect x="38" y="28" width="7" height="26" rx="1.5" fill="#0071e3" opacity="0.9"/>
+    </svg>
+  </div>
+  <h3>Roof + Bars (Tinted)</h3>
+  <p>Light blue tint background</p>
+  <div class="sidebar-preview"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#e8f2fc"/><path d="M10 30 L32 12 L54 30" stroke="#0071e3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="18" y="40" width="7" height="14" rx="1.5" fill="#0071e3" opacity="0.35"/><rect x="28" y="34" width="7" height="20" rx="1.5" fill="#0071e3" opacity="0.6"/><rect x="38" y="28" width="7" height="26" rx="1.5" fill="#0071e3" opacity="0.9"/></svg></div><span class="brand">Open<b>Estimator</b><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 14. Crane minimal on tint -->
+<div class="card">
+  <span class="num">#14</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#e8f2fc"/>
+      <!-- Crane -->
+      <line x1="20" y1="54" x2="20" y2="14" stroke="#0071e3" stroke-width="3" stroke-linecap="round"/>
+      <line x1="20" y1="16" x2="50" y2="16" stroke="#0071e3" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="44" y1="16" x2="44" y2="28" stroke="#0071e3" stroke-width="1.5"/>
+      <!-- BOQ block -->
+      <rect x="34" y="28" width="20" height="6" rx="1.5" fill="#0071e3" opacity="0.8"/>
+      <rect x="34" y="36" width="14" height="4" rx="1" fill="#0071e3" opacity="0.2"/>
+      <rect x="50" y="36" width="4" height="4" rx="1" fill="#0071e3" opacity="0.4"/>
+      <rect x="34" y="42" width="14" height="4" rx="1" fill="#0071e3" opacity="0.15"/>
+      <rect x="50" y="42" width="4" height="4" rx="1" fill="#0071e3" opacity="0.35"/>
+      <rect x="34" y="48" width="20" height="4" rx="1" fill="#0071e3" opacity="0.5"/>
+      <!-- Base -->
+      <line x1="12" y1="54" x2="28" y2="54" stroke="#0071e3" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <h3>Crane + BOQ</h3>
+  <p>Crane building a cost table row by row</p>
+  <div class="sidebar-preview"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#e8f2fc"/><line x1="20" y1="54" x2="20" y2="14" stroke="#0071e3" stroke-width="3" stroke-linecap="round"/><line x1="20" y1="16" x2="50" y2="16" stroke="#0071e3" stroke-width="2.5" stroke-linecap="round"/><line x1="44" y1="16" x2="44" y2="28" stroke="#0071e3" stroke-width="1.5"/><rect x="34" y="28" width="20" height="6" rx="1.5" fill="#0071e3" opacity="0.8"/><rect x="34" y="36" width="14" height="4" rx="1" fill="#0071e3" opacity="0.2"/><rect x="34" y="42" width="14" height="4" rx="1" fill="#0071e3" opacity="0.15"/><rect x="34" y="48" width="20" height="4" rx="1" fill="#0071e3" opacity="0.5"/><line x1="12" y1="54" x2="28" y2="54" stroke="#0071e3" stroke-width="2.5" stroke-linecap="round"/></svg></div><span class="brand">Open<b>Estimator</b><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 15. Building outline + grid -->
+<div class="card">
+  <span class="num">#15</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#f0f4f8"/>
+      <!-- Building outline left -->
+      <rect x="10" y="22" width="20" height="32" rx="2" fill="none" stroke="#0071e3" stroke-width="2"/>
+      <path d="M8 22 L20 12 L32 22" stroke="#0071e3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- Grid/table right -->
+      <rect x="36" y="12" width="20" height="42" rx="2" fill="none" stroke="#0071e3" stroke-width="1.5"/>
+      <line x1="36" y1="20" x2="56" y2="20" stroke="#0071e3" stroke-width="1.5"/>
+      <line x1="36" y1="28" x2="56" y2="28" stroke="#0071e3" stroke-width="1" opacity="0.4"/>
+      <line x1="36" y1="36" x2="56" y2="36" stroke="#0071e3" stroke-width="1" opacity="0.4"/>
+      <line x1="36" y1="44" x2="56" y2="44" stroke="#0071e3" stroke-width="1" opacity="0.4"/>
+      <line x1="48" y1="20" x2="48" y2="54" stroke="#0071e3" stroke-width="1" opacity="0.4"/>
+      <!-- Header cells -->
+      <rect x="37" y="13" width="10" height="6" rx="1" fill="#0071e3" opacity="0.15"/>
+      <rect x="49" y="13" width="6" height="6" rx="1" fill="#0071e3" opacity="0.15"/>
+      <!-- Arrow connecting them -->
+      <line x1="31" y1="32" x2="35" y2="32" stroke="#0071e3" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="2 2" opacity="0.4"/>
+    </svg>
+  </div>
+  <h3>Building + Grid</h3>
+  <p>Building connects to spreadsheet — measure to cost</p>
+  <div class="sidebar-preview"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#f0f4f8"/><rect x="10" y="22" width="20" height="32" rx="2" fill="none" stroke="#0071e3" stroke-width="2"/><path d="M8 22 L20 12 L32 22" stroke="#0071e3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><rect x="36" y="12" width="20" height="42" rx="2" fill="none" stroke="#0071e3" stroke-width="1.5"/><line x1="36" y1="20" x2="56" y2="20" stroke="#0071e3" stroke-width="1.5"/><line x1="48" y1="20" x2="48" y2="54" stroke="#0071e3" stroke-width="1" opacity="0.4"/></svg></div><span class="brand">Open<b>Estimator</b><span class="dim">.io</span></span></div>
+</div>
+
+<!-- 16. Minimal house/E merge -->
+<div class="card">
+  <span class="num">#16</span>
+  <div class="logo-wrap">
+    <svg viewBox="0 0 64 64" fill="none">
+      <rect width="64" height="64" rx="14" fill="#e8f2fc"/>
+      <!-- E that looks like a building -->
+      <line x1="16" y1="12" x2="16" y2="52" stroke="#0071e3" stroke-width="4" stroke-linecap="round"/>
+      <line x1="16" y1="12" x2="48" y2="12" stroke="#0071e3" stroke-width="4" stroke-linecap="round"/>
+      <line x1="16" y1="32" x2="40" y2="32" stroke="#0071e3" stroke-width="4" stroke-linecap="round"/>
+      <line x1="16" y1="52" x2="48" y2="52" stroke="#0071e3" stroke-width="4" stroke-linecap="round"/>
+      <!-- Windows on E (making it look like building) -->
+      <rect x="22" y="18" width="6" height="6" rx="1" fill="#0071e3" opacity="0.2"/>
+      <rect x="32" y="18" width="6" height="6" rx="1" fill="#0071e3" opacity="0.2"/>
+      <rect x="22" y="38" width="6" height="6" rx="1" fill="#0071e3" opacity="0.2"/>
+      <rect x="32" y="38" width="6" height="6" rx="1" fill="#0071e3" opacity="0.2"/>
+    </svg>
+  </div>
+  <h3>E-Building</h3>
+  <p>Letter E that IS a building — dual meaning</p>
+  <div class="sidebar-preview"><div class="mini"><svg viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="14" fill="#e8f2fc"/><line x1="16" y1="12" x2="16" y2="52" stroke="#0071e3" stroke-width="4" stroke-linecap="round"/><line x1="16" y1="12" x2="48" y2="12" stroke="#0071e3" stroke-width="4" stroke-linecap="round"/><line x1="16" y1="32" x2="40" y2="32" stroke="#0071e3" stroke-width="4" stroke-linecap="round"/><line x1="16" y1="52" x2="48" y2="52" stroke="#0071e3" stroke-width="4" stroke-linecap="round"/><rect x="22" y="18" width="6" height="6" rx="1" fill="#0071e3" opacity="0.2"/><rect x="32" y="18" width="6" height="6" rx="1" fill="#0071e3" opacity="0.2"/><rect x="22" y="38" width="6" height="6" rx="1" fill="#0071e3" opacity="0.2"/><rect x="32" y="38" width="6" height="6" rx="1" fill="#0071e3" opacity="0.2"/></svg></div><span class="brand">Open<b>Estimator</b><span class="dim">.io</span></span></div>
+</div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,107 @@
+import { lazy } from 'react';
+import { Building2 } from 'lucide-react';
+import type { ModuleManifest } from '../_types';
+
+const INExchangeModule = lazy(() => import('./INExchangeModule'));
+
+export const manifest: ModuleManifest = {
+  id: 'in-boq-exchange',
+  name: 'India BOQ Exchange',
+  description: 'Import/export BOQs in CPWD / IS 1200 / SOR format (Excel/CSV)',
+  version: '1.0.0',
+  icon: Building2,
+  category: 'regional',
+  defaultEnabled: false,
+  depends: ['boq'],
+  routes: [
+    {
+      path: '/in-boq-exchange',
+      title: 'India BOQ Exchange',
+      component: INExchangeModule,
+    },
+  ],
+  navItems: [
+    {
+      labelKey: 'nav.in_boq_exchange',
+      to: '/in-boq-exchange',
+      icon: Building2,
+      group: 'regional',
+      advancedOnly: true,
+    },
+  ],
+  searchEntries: [
+    {
+      label: 'India BOQ Import / Export',
+      path: '/in-boq-exchange',
+      keywords: [
+        'india',
+        'indian',
+        'cpwd',
+        'is 1200',
+        'sor',
+        'schedule of rates',
+        'dsr',
+        'delhi schedule',
+        'quantity surveyor',
+        'inr',
+        'rupee',
+      ],
+    },
+  ],
+  translations: {
+    en: {
+      'nav.in_boq_exchange': 'India BOQ Exchange',
+      'in.title': 'India BOQ Import / Export',
+      'in.subtitle': 'Exchange Bills of Quantities in CPWD / IS 1200 / SOR format (Excel / CSV)',
+      'in.tab_import': 'Import',
+      'in.tab_export': 'Export',
+      'in.import_complete': 'Indian BOQ import complete',
+      'in.export_complete': 'Indian BOQ export complete',
+      'in.info': 'CPWD (Central Public Works Department) and IS 1200 are the primary standards for construction measurement and BOQ pricing in India. Compatible with DSR (Delhi Schedule of Rates), SOR (Schedule of Rates), and standard Indian quantity surveying practices.',
+      'in.drop_file': 'Drop an Indian BOQ file here (Excel or CSV), or',
+      'in.browse': 'Browse files',
+      'in.formats_hint': 'Supported: .csv, .tsv, .xlsx (CPWD / IS 1200 / SOR-formatted BOQ)',
+      'in.classification': 'CPWD Section',
+      'in.export_format': 'Format',
+      'in.csv_format': 'CSV (Excel-compatible)',
+      'in.detailed': 'CPWD Detailed',
+      'in.summary': 'CPWD Summary',
+    },
+    hi: {
+      'nav.in_boq_exchange': '\u092D\u093E\u0930\u0924 BOQ \u0906\u0926\u093E\u0928-\u092A\u094D\u0930\u0926\u093E\u0928',
+      'in.title': '\u092D\u093E\u0930\u0924 BOQ \u0906\u092F\u093E\u0924 / \u0928\u093F\u0930\u094D\u092F\u093E\u0924',
+      'in.subtitle': 'CPWD / IS 1200 / SOR \u092A\u094D\u0930\u093E\u0930\u0942\u092A \u092E\u0947\u0902 \u092C\u093F\u0932 \u0911\u092B\u093C \u0915\u094D\u0935\u093E\u0902\u091F\u093F\u091F\u0940\u091C\u093C \u0915\u093E \u0906\u0926\u093E\u0928-\u092A\u094D\u0930\u0926\u093E\u0928 (Excel / CSV)',
+      'in.tab_import': '\u0906\u092F\u093E\u0924',
+      'in.tab_export': '\u0928\u093F\u0930\u094D\u092F\u093E\u0924',
+      'in.import_complete': '\u092D\u093E\u0930\u0924\u0940\u092F BOQ \u0906\u092F\u093E\u0924 \u092A\u0942\u0930\u094D\u0923',
+      'in.export_complete': '\u092D\u093E\u0930\u0924\u0940\u092F BOQ \u0928\u093F\u0930\u094D\u092F\u093E\u0924 \u092A\u0942\u0930\u094D\u0923',
+      'in.info': 'CPWD (\u0915\u0947\u0902\u0926\u094D\u0930\u0940\u092F \u0932\u094B\u0915 \u0928\u093F\u0930\u094D\u092E\u093E\u0923 \u0935\u093F\u092D\u093E\u0917) \u0914\u0930 IS 1200 \u092D\u093E\u0930\u0924 \u092E\u0947\u0902 \u0928\u093F\u0930\u094D\u092E\u093E\u0923 \u092E\u093E\u092A \u0914\u0930 BOQ \u092E\u0942\u0932\u094D\u092F \u0928\u093F\u0930\u094D\u0927\u093E\u0930\u0923 \u0915\u0947 \u092A\u094D\u0930\u093E\u0925\u092E\u093F\u0915 \u092E\u093E\u0928\u0915 \u0939\u0948\u0902\u0964 DSR (\u0926\u093F\u0932\u094D\u0932\u0940 \u0926\u0930 \u0905\u0928\u0941\u0938\u0942\u091A\u0940), SOR (\u0926\u0930 \u0905\u0928\u0941\u0938\u0942\u091A\u0940) \u0914\u0930 \u092E\u093E\u0928\u0915 \u092D\u093E\u0930\u0924\u0940\u092F \u092E\u093E\u0924\u094D\u0930\u093E \u0938\u0930\u094D\u0935\u0947\u0915\u094D\u0937\u0923 \u092A\u094D\u0930\u0925\u093E\u0913\u0902 \u0915\u0947 \u0905\u0928\u0941\u0915\u0942\u0932\u0964',
+      'in.drop_file': '\u092D\u093E\u0930\u0924\u0940\u092F BOQ \u092B\u093C\u093E\u0907\u0932 \u092F\u0939\u093E\u0901 \u0921\u094D\u0930\u0949\u092A \u0915\u0930\u0947\u0902 (Excel \u092F\u093E CSV), \u092F\u093E',
+      'in.browse': '\u092B\u093C\u093E\u0907\u0932\u0947\u0902 \u0916\u094B\u091C\u0947\u0902',
+      'in.formats_hint': '\u0938\u092E\u0930\u094D\u0925\u093F\u0924: .csv, .tsv, .xlsx (CPWD / IS 1200 / SOR \u092A\u094D\u0930\u093E\u0930\u0942\u092A BOQ)',
+      'in.classification': 'CPWD \u0905\u0928\u0941\u092D\u093E\u0917',
+      'in.export_format': '\u092A\u094D\u0930\u093E\u0930\u0942\u092A',
+      'in.csv_format': 'CSV (Excel-\u0938\u0902\u0917\u0924)',
+      'in.detailed': 'CPWD \u0935\u093F\u0938\u094D\u0924\u0943\u0924',
+      'in.summary': 'CPWD \u0938\u093E\u0930\u093E\u0902\u0936',
+    },
+    de: {
+      'nav.in_boq_exchange': 'Indien LV Austausch',
+      'in.title': 'Indien LV Import / Export',
+      'in.subtitle': 'Leistungsverzeichnis im CPWD / IS 1200 / SOR-Format austauschen (Excel / CSV)',
+      'in.tab_import': 'Importieren',
+      'in.tab_export': 'Exportieren',
+      'in.import_complete': 'Indisches LV-Import abgeschlossen',
+      'in.export_complete': 'Indisches LV-Export abgeschlossen',
+    },
+    ru: {
+      'nav.in_boq_exchange': 'Indija BOQ Obmen',
+      'in.title': 'Indija BOQ Import / Export',
+      'in.subtitle': 'Obmen dannymi smety v formate CPWD / IS 1200 / SOR (Excel / CSV)',
+      'in.tab_import': 'Import',
+      'in.tab_export': 'Eksport',
+      'in.import_complete': 'Indijskij import smety zavershyon',
+      'in.export_complete': 'Indijskij eksport smety zavershyon',
+    },
+  },
+};

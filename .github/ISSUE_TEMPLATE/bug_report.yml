@@ -1,0 +1,140 @@
+name: Bug Report
+description: Report a bug in OpenConstructionERP
+title: "[BUG] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug! Please fill out the details below so we can investigate.
+
+  - type: input
+    id: version
+    attributes:
+      label: App Version
+      description: What version of OpenConstructionERP are you using? (visible in Settings > About)
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which part of the application is affected?
+      options:
+        - BOQ Editor
+        - Resource Management
+        - Cost Database / Catalog
+        - Schedule (4D)
+        - Cost Model (5D)
+        - Risk Register
+        - Change Orders
+        - Tendering
+        - Validation
+        - Reports / Export
+        - Document Management
+        - Authentication / Users
+        - AI Features (Advisor, Quick Estimate, Smart Actions)
+        - Onboarding Wizard
+        - Settings / Backup & Restore
+        - UI / Frontend
+        - API / Backend
+        - Docker / Deployment
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: A clear description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this issue?
+      value: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened? Include any error messages.
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain the problem.
+
+  - type: textarea
+    id: error_report
+    attributes:
+      label: Error Report
+      description: |
+        If you have an error report file (downloaded via the Report Issue button in Settings),
+        please paste its contents here or attach the file.
+      render: json
+
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: Deployment Method
+      options:
+        - Docker (single image)
+        - Docker Compose
+        - pip install
+        - Desktop app (Tauri)
+        - Development (source)
+        - Cloud (Railway/Render/DO)
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, browser, Python/Node versions, etc.
+      placeholder: "OS: Windows 11, Browser: Chrome 130, Language: German"
+
+  - type: dropdown
+    id: language
+    attributes:
+      label: App Language
+      description: Which language was the app set to when the bug occurred?
+      options:
+        - English
+        - Deutsch
+        - Francais
+        - Espanol
+        - Portugues
+        - Russian
+        - Chinese
+        - Arabic
+        - Hindi
+        - Turkish
+        - Italian
+        - Dutch
+        - Polish
+        - Czech
+        - Japanese
+        - Korean
+        - Swedish
+        - Norwegian
+        - Danish
+        - Finnish
+        - Other
