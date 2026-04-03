@@ -14,7 +14,7 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 ![Cost Items](https://img.shields.io/badge/cost_items-55%2C000%2B-red)
 ![Standards](https://img.shields.io/badge/standards-20-blueviolet)
 
-<img src="docs/screenshots/02-dashboard.png" alt="OpenConstructionERP — Dashboard Overview" width="800" />
+<img src="docs/screenshots/hero-overview.jpg" alt="OpenConstructionERP — Dashboard Overview" width="800" />
 
 *100% open source · 55,000+ cost items · AI estimation · 21 languages · Self-hosted*
 
@@ -37,8 +37,8 @@ Construction cost estimation software is expensive, closed-source, and locked to
 
 ---
 
-If you find our tools useful, please give our repositories a star to see more similar applications for the construction industry.
-
+⭐ <b>If you want to see new updates and database versions and if you find our tools useful please give our repositories a star to see more similar applications for the construction industry.</b>
+Star OpenConstructionERP on GitHub and be instantly notified of new releases.
 <p align="center">
   <br>
   <img src="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN-pipeline-with-conversion-validation-qto/blob/main/DDC_in_additon/DDC_readme_content/OCE%20star%20GitHub.gif" width="100%"/>
@@ -49,9 +49,9 @@ If you find our tools useful, please give our repositories a star to see more si
 
 ## Key Features
 
-### Bill of Quantities (BOQ) Management
+### 📊 Bill of Quantities (BOQ) Management
 
-<img src="docs/screenshots/04-boq-list.png" alt="BOQ Editor — Create, manage and analyze Bills of Quantities" width="800" />
+<img src="docs/screenshots/feature-boq.jpg" alt="BOQ Editor — Create, manage and analyze Bills of Quantities" width="800" />
 
 Build professional cost estimates with a powerful BOQ editor:
 
@@ -59,13 +59,13 @@ Build professional cost estimates with a powerful BOQ editor:
 - **Inline editing** — Click any cell to edit. Tab between fields. Undo/redo with Ctrl+Z
 - **Resources & assemblies** — Link labor, materials, equipment to each position. Build reusable cost recipes
 - **Markups** — Overhead, profit, VAT, contingency — configure per project or use regional defaults
-- **Automatic calculations** — Quantity x unit rate = total. Section subtotals. Grand total with markups
+- **Automatic calculations** — Quantity × unit rate = total. Section subtotals. Grand total with markups
 - **Validation** — 42 built-in rules check for missing quantities, zero prices, duplicate items, and compliance with DIN 276, NRM, MasterFormat
 - **Export** — Download as Excel, CSV, PDF report, or GAEB XML (X83)
 
-### Cost Databases & Resource Catalog
+### 🗄️ Cost Databases & Resource Catalog
 
-<img src="docs/screenshots/05-costs.png" alt="Cost Database — 55,000+ items across 11 regions" width="800" />
+<img src="docs/screenshots/feature-databases.jpg" alt="Cost Database — 55,000+ items across 11 regions" width="800" />
 
 Access the world's construction pricing data:
 
@@ -75,9 +75,9 @@ Access the world's construction pricing data:
 - **Regional pricing** — Automatic price adjustment based on project location. Compare rates across regions
 - **Import your data** — Upload your own cost database from Excel, CSV, or connect via API
 
-### CAD/BIM Takeoff & AI Estimation
+### 🏗️ CAD/BIM Takeoff & AI Estimation
 
-<img src="docs/screenshots/07-ai-estimate.png" alt="CAD/BIM Takeoff and AI-powered estimation" width="800" />
+<img src="docs/screenshots/feature-takeoff-ai.jpg" alt="CAD/BIM Takeoff and AI-powered estimation" width="800" />
 
 Extract quantities from any source — drawings, models, text, or photos:
 
@@ -88,9 +88,7 @@ Extract quantities from any source — drawings, models, text, or photos:
 - **AI Cost Advisor** — Ask questions about pricing, materials, or estimation methodology. AI answers using your cost database as context
 - **Cost matching** — After AI generates an estimate, match each item against your CWICR database to replace AI-guessed rates with real market prices
 
-### 4D Scheduling & 5D Cost Model
-
-<img src="docs/screenshots/06-schedule.png" alt="4D Schedule — Gantt chart with critical path" width="800" />
+### 📅 4D Scheduling & 5D Cost Model
 
 Plan your project timeline and track costs over time:
 
@@ -100,40 +98,40 @@ Plan your project timeline and track costs over time:
 - **Budget tracking** — Set baselines, compare snapshots, run what-if scenarios
 - **Monte Carlo simulation** — Risk-adjusted schedule analysis with probability distributions
 
-### Tendering, Risk & Reporting
+### 📋 Tendering, Risk & Reporting
 
 Complete your estimation workflow:
 
 - **Tendering** — Create bid packages, distribute to subcontractors, collect and compare bids with side-by-side price mirror
 - **Change orders** — Track scope changes with cost and schedule impact analysis
-- **Risk register** — Probability x impact matrix, mitigation strategies, risk-adjusted contingency
+- **Risk register** — Probability × impact matrix, mitigation strategies, risk-adjusted contingency
 - **Reports** — Generate professional PDF reports, Excel exports, GAEB XML. 12 built-in templates
 - **Documents** — Centralized file management with version tracking and drag-and-drop upload
 
-### 20 Regional Standards
+### 🌍 20 Regional Standards
 
 | Standard | Region | Format |
 |----------|--------|--------|
-| DIN 276 / ONORM / SIA | Germany / Austria / Switzerland | Excel, CSV |
+| DIN 276 / ÖNORM / SIA | Germany / Austria / Switzerland | Excel, CSV |
 | NRM 1/2 (RICS) | United Kingdom | Excel, CSV |
 | CSI MasterFormat | United States / Canada | Excel, CSV |
 | GAEB DA XML 3.3 | DACH region | XML |
 | DPGF / DQE | France | Excel, CSV |
+| ГЭСН / ФЕР | Russia / CIS | Excel, CSV |
 | GB/T 50500 | China | Excel, CSV |
 | CPWD / IS 1200 | India | Excel, CSV |
+| Bayındırlık Birim Fiyat | Turkey | Excel, CSV |
+| 積算基準 (Sekisan) | Japan | Excel, CSV |
 | Computo Metrico / DEI | Italy | Excel, CSV |
 | STABU / RAW | Netherlands | Excel, CSV |
 | KNR / KNNR | Poland | Excel, CSV |
+| 표준품셈 | South Korea | Excel, CSV |
 | NS 3420 / AMA | Nordic countries | Excel, CSV |
-| URS / TSKP | Czech Republic / Slovakia | Excel, CSV |
+| ÚRS / TSKP | Czech Republic / Slovakia | Excel, CSV |
 | ACMM / ANZSMM | Australia / New Zealand | Excel, CSV |
 | CSI / CIQS | Canada | Excel, CSV |
 | FIDIC | UAE / GCC | Excel, CSV |
 | PBC / Base de Precios | Spain | Excel, CSV |
-| Bayindirlik Birim Fiyat | Turkey | Excel, CSV |
-| Sekisan | Japan | Excel, CSV |
-| South Korean Standard | South Korea | Excel, CSV |
-| GESN / FER | Russia / CIS | Excel, CSV |
 
 ---
 
@@ -149,7 +147,7 @@ curl -sSL https://raw.githubusercontent.com/datadrivenconstruction/OpenConstruct
 irm https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionERP/main/scripts/install.ps1 | iex
 ```
 
-Auto-detects Docker / Python / uv and runs at **http://localhost:8080**
+Auto-detects Docker / Python / uv → installs and runs at **http://localhost:8080**
 
 ### Option 1: Docker (recommended)
 
@@ -185,7 +183,7 @@ Open **http://localhost:5173** — requires Python 3.12+ and Node.js 20+. Uses S
 
 ```bash
 pip install -e ./backend
-openconstructionerp serve --open
+openestimate serve --open
 ```
 
 ### Demo Accounts
@@ -212,28 +210,28 @@ Three demo accounts are created automatically on first start:
 | UI | Tailwind CSS / AG Grid | Professional data grid, responsive design, dark mode |
 | AI | Any LLM via REST API | Anthropic, OpenAI, Gemini, Mistral, Groq, DeepSeek |
 | Vector Search | LanceDB (embedded) / Qdrant | Semantic cost item search, 384d or 3072d embeddings |
-| CAD/BIM | DDC Community Converters | RVT, IFC, DWG, DGN to structured quantities |
+| CAD/BIM | DDC Community Converters | RVT, IFC, DWG, DGN → structured quantities |
 | i18n | i18next + 21 language packs | Full RTL support (Arabic), locale-aware formatting |
 
 ## Architecture
 
 ```
-Frontend (React SPA)
-    TypeScript / Tailwind / AG Grid / PDF.js
-                   |
-                REST API
-                   |
-Backend (FastAPI)
-    17 auto-discovered modules / Plugin system
-    |-----------------------------------------|
-    | BOQ / Costs / Schedule / 5D / AI        |
-    | Takeoff / Tendering / Risk / Reports    |
-    | Catalog / Validation (42 rules)         |
-    |-----------------------------------------|
-                   |
-    Database (PostgreSQL / SQLite)
-    Vector DB (LanceDB / Qdrant)
-    CAD Converters (DDC cad2data)
+┌──────────────────────────────────────────────────┐
+│  Frontend (React SPA)                            │
+│  TypeScript · Tailwind · AG Grid · PDF.js        │
+└──────────────────┬───────────────────────────────┘
+                   │ REST API
+┌──────────────────┴───────────────────────────────┐
+│  Backend (FastAPI)                               │
+│  17 auto-discovered modules · Plugin system      │
+├──────────────────────────────────────────────────┤
+│  BOQ · Costs · Schedule · 5D · Validation · AI  │
+│  Takeoff · Tendering · Risk · Reports · Catalog  │
+├──────────────────────────────────────────────────┤
+│  Database (PostgreSQL / SQLite)                  │
+│  Vector DB (LanceDB / Qdrant)                    │
+│  CAD Converters (DDC Toolkit)                    │
+└──────────────────────────────────────────────────┘
 ```
 
 ---
@@ -242,10 +240,10 @@ Backend (FastAPI)
 
 OpenConstructionERP is built and maintained by the community. If you find it useful:
 
-- **[Star this repo](https://github.com/datadrivenconstruction/OpenConstructionERP)** — helps others discover the project
-- **[Join Discussions](https://t.me/datadrivenconstruction)** — ask questions, share ideas, help others
-- **[Report issues](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)** — help us improve
-- **[Professional consulting](https://datadrivenconstruction.io/contact-support/)** — custom deployment, training, enterprise support
+- ⭐ **[Star this repo](https://github.com/datadrivenconstruction/OpenConstructionERP)** — helps others discover the project
+- 💬 **[Join Discussions](https://t.me/datadrivenconstruction)** — ask questions, share ideas, help others
+- 🐛 **[Report issues](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)** — help us improve
+- 💼 **[Professional consulting](https://datadrivenconstruction.io/contact-support/)** — custom deployment, training, enterprise support
 
 ## Contributing
 
