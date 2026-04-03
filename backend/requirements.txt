@@ -203,7 +203,7 @@ scikit-learn==1.8.0
 scipy==1.17.0
 semantic-version==2.10.0
 sentence-transformers==5.2.0
-setuptools==80.10.1
+setuptools==82.0.1
 shapely==2.1.2
 shellingham==1.5.4
 six==1.17.0
