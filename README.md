@@ -133,6 +133,27 @@ Complete your estimation workflow:
 | FIDIC | UAE / GCC | Excel, CSV |
 | PBC / Base de Precios | Spain | Excel, CSV |
 
+### 🛡️ Validation & Compliance Engine
+
+Ensure your estimates meet regulatory standards before submission:
+
+- **42 built-in rules** across 13 rule sets — DIN 276, NRM, MasterFormat, GAEB, and universal BOQ quality checks
+- **Real-time validation** — Run checks with Ctrl+Shift+V. Each position gets a pass/warning/error indicator
+- **Quality score** — Overall BOQ quality percentage (0–100%) visible in the toolbar
+- **Drill-down** — Click any finding to jump directly to the affected BOQ position and fix it
+- **Custom rules** — Define project-specific validation rules via the rule builder or Python scripting
+
+### 🚀 Guided Onboarding
+
+Get productive in under 10 minutes:
+
+1. **Choose language** — Select from 21 languages. The entire UI switches instantly
+2. **Select region** — Determines default cost database, currency, and classification standard
+3. **Load cost database** — One-click import of CWICR pricing data for your region (55,000+ items)
+4. **Import resource catalog** — Materials, labor, equipment, and pre-built assemblies
+5. **Configure AI** *(optional)* — Enter an API key from any supported LLM provider
+6. **Create your first project** — Set name, region, standard, and start estimating
+
 ---
 
 ## Quick Start
