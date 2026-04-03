@@ -253,8 +253,6 @@ For commercial licensing without AGPL obligations, contact [info@datadrivenconst
 
 **Created by [Artem Boiko](https://www.linkedin.com/in/boikoartem/)** · [Data Driven Construction](https://datadrivenconstruction.io)
 
-Author of [CWICR](https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR) (55K+ cost items) and [cad2data](https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN-pipeline-with-conversion-validation-qto) pipeline.
-
 Building open-source tools for the global construction industry.
 
 [Website](https://datadrivenconstruction.io) · [LinkedIn](https://www.linkedin.com/in/boikoartem/) · [YouTube](https://www.youtube.com/@datadrivenconstruction) · [GitHub](https://github.com/datadrivenconstruction)
