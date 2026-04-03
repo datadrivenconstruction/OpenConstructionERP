@@ -772,7 +772,7 @@ export function DashboardPage() {
           </p>
           {/* Open-source banner */}
           <a
-            href="https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR"
+            href="https://github.com/datadrivenconstruction/OpenConstructionERP"
             target="_blank"
             rel="noopener noreferrer"
             className="mt-3 flex items-center gap-3 rounded-xl bg-gradient-to-r from-oe-blue/8 via-violet-500/8 to-emerald-500/8 border border-oe-blue/15 px-4 py-2.5 hover:shadow-md hover:border-oe-blue/30 transition-all animate-stagger-in"

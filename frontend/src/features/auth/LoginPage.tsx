@@ -374,7 +374,7 @@ export function LoginPage() {
             <div className="flex items-center justify-center gap-3">
               <a href="https://OpenConstructionERP.com" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">OpenConstructionERP.com</a>
               <span>·</span>
-              <a href="https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">GitHub</a>
+              <a href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">GitHub</a>
             </div>
           </div>
         </div>
@@ -514,7 +514,7 @@ export function LoginPage() {
               <div className="flex items-center gap-3 text-2xs text-content-quaternary">
                 <a href="/api/source" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">AGPL-3.0</a>
                 <a href="https://OpenConstructionERP.com" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">OpenConstructionERP.com</a>
-                <a href="https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">GitHub</a>
+                <a href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">GitHub</a>
               </div>
               <Button variant="primary" size="sm" onClick={() => setShowInfo(false)}>
                 {t('about.close', 'Got it')}
