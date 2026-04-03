@@ -30,8 +30,10 @@ class Settings(BaseSettings):
     allowed_origins: str = "http://localhost:5173"
 
     # ── Database ─────────────────────────────────────────────────────────
-    database_url: str = "postgresql+asyncpg://oe:oe@localhost:5432/openestimate"
-    database_sync_url: str = "postgresql://oe:oe@localhost:5432/openestimate"
+    # Default: SQLite (zero config, works out of the box)
+    # For production: set DATABASE_URL=postgresql+asyncpg://user:pass@host/db
+    database_url: str = "sqlite+aiosqlite:///./openestimate.db"
+    database_sync_url: str = "sqlite:///./openestimate.db"
     database_pool_size: int = 20
     database_max_overflow: int = 10
     database_echo: bool = False
