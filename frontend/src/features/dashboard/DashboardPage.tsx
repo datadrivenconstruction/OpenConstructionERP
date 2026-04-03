@@ -20,6 +20,7 @@ import {
   Download,
   X,
   Building2,
+  Star,
   Loader2,
   DollarSign,
   FileText,
@@ -812,36 +813,79 @@ export function DashboardPage() {
       </div>
 
       {/* Welcome banner — shown once on first launch, dismissable */}
+      {/* Welcome modal — first launch only */}
       {showWelcome && (
-        <div className="rounded-xl border border-oe-blue/20 bg-gradient-to-r from-oe-blue/[0.04] to-violet-500/[0.04] px-5 py-4 animate-fade-in">
-          <div className="flex items-start gap-3">
-            <div className="flex-1">
-              <h3 className="text-sm font-semibold text-content-primary mb-1">
-                {t('dashboard.welcome_title', { defaultValue: 'Welcome to OpenConstructionERP' })}
-              </h3>
-              <p className="text-xs text-content-secondary leading-relaxed">
-                {t('dashboard.welcome_desc', { defaultValue: 'Free, open-source construction cost estimation by Data Driven Construction. 55K+ cost items, AI estimation, CAD/BIM takeoff, 20+ languages.' })}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={dismissWelcome} />
+          <div className="relative w-full max-w-lg rounded-2xl border border-border-light bg-surface-elevated shadow-2xl overflow-hidden">
+            {/* Header gradient */}
+            <div className="bg-gradient-to-r from-oe-blue to-violet-600 px-6 py-5 text-white text-center">
+              <h2 className="text-lg font-bold">{t('dashboard.welcome_title', { defaultValue: 'Welcome to OpenConstructionERP' })}</h2>
+              <p className="mt-1 text-sm text-white/80">{t('dashboard.welcome_sub', { defaultValue: 'Free & open-source construction cost estimation' })}</p>
+            </div>
+
+            {/* Content */}
+            <div className="px-6 py-5">
+              <p className="text-sm text-content-secondary text-center mb-5 leading-relaxed">
+                {t('dashboard.welcome_body', { defaultValue: 'This project is built and maintained by the community. Your support helps us add new features, regional databases, and keep it free for everyone.' })}
               </p>
-              <div className="mt-2 flex items-center gap-2">
+
+              {/* 3 CTA cards */}
+              <div className="space-y-2.5">
                 <a
-                  href="https://datadrivenconstruction.io/erp"
+                  href="https://github.com/datadrivenconstruction/OpenConstructionERP"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 rounded-lg bg-oe-blue px-3 py-1.5 text-xs font-medium text-white hover:bg-oe-blue/90 transition-colors"
+                  className="flex items-center gap-3 rounded-xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/50 dark:bg-amber-900/10 px-4 py-3 hover:shadow-md transition-all group"
                 >
-                  {t('dashboard.learn_more', { defaultValue: 'Learn more' })}
+                  <Star size={22} className="text-amber-500 shrink-0 group-hover:scale-110 transition-transform" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-content-primary">{t('dashboard.welcome_star', { defaultValue: 'Star on GitHub' })}</div>
+                    <div className="text-2xs text-content-tertiary">{t('dashboard.welcome_star_desc', { defaultValue: 'Help others discover the project — takes 2 seconds' })}</div>
+                  </div>
+                  <ExternalLink size={14} className="text-content-quaternary shrink-0" />
                 </a>
-                <button
-                  onClick={dismissWelcome}
-                  className="text-xs text-content-tertiary hover:text-content-secondary transition-colors"
+
+                <a
+                  href="https://github.com/sponsors/datadrivenconstruction"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 rounded-xl border border-rose-200 dark:border-rose-800/40 bg-rose-50/50 dark:bg-rose-900/10 px-4 py-3 hover:shadow-md transition-all group"
                 >
-                  {t('common.dismiss', { defaultValue: 'Dismiss' })}
-                </button>
+                  <Sparkles size={22} className="text-rose-500 shrink-0 group-hover:scale-110 transition-transform" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-content-primary">{t('dashboard.welcome_sponsor', { defaultValue: 'Become a Sponsor' })}</div>
+                    <div className="text-2xs text-content-tertiary">{t('dashboard.welcome_sponsor_desc', { defaultValue: 'Fund new features and keep the project free for everyone' })}</div>
+                  </div>
+                  <ExternalLink size={14} className="text-content-quaternary shrink-0" />
+                </a>
+
+                <a
+                  href="https://datadrivenconstruction.io/contact-support/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 rounded-xl border border-oe-blue/20 dark:border-blue-800/40 bg-oe-blue/[0.03] dark:bg-blue-900/10 px-4 py-3 hover:shadow-md transition-all group"
+                >
+                  <Building2 size={22} className="text-oe-blue shrink-0 group-hover:scale-110 transition-transform" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-content-primary">{t('dashboard.welcome_consult', { defaultValue: 'Professional Consulting' })}</div>
+                    <div className="text-2xs text-content-tertiary">{t('dashboard.welcome_consult_desc', { defaultValue: 'Custom deployment, training, and enterprise solutions worldwide' })}</div>
+                  </div>
+                  <ExternalLink size={14} className="text-content-quaternary shrink-0" />
+                </a>
               </div>
             </div>
-            <button onClick={dismissWelcome} className="text-content-quaternary hover:text-content-secondary transition-colors shrink-0 p-1">
-              <X size={14} />
-            </button>
+
+            {/* Footer */}
+            <div className="px-6 py-3 border-t border-border-light bg-surface-secondary/30 flex items-center justify-between">
+              <span className="text-2xs text-content-quaternary">datadrivenconstruction.io</span>
+              <button
+                onClick={dismissWelcome}
+                className="rounded-lg bg-oe-blue px-4 py-1.5 text-sm font-medium text-white hover:bg-oe-blue/90 transition-colors"
+              >
+                {t('dashboard.welcome_start', { defaultValue: 'Get Started' })}
+              </button>
+            </div>
           </div>
         </div>
       )}
