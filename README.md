@@ -109,11 +109,20 @@ Open **http://localhost:8080** (~2 min first build)
 ```bash
 git clone https://github.com/datadrivenconstruction/OpenConstructionERP.git
 cd OpenConstructionERP
-make setup   # install Python + Node dependencies
-make dev     # start backend + frontend
+
+# Install dependencies
+cd backend && pip install -r requirements.txt && cd ..
+cd frontend && npm install && cd ..
+
+# Start (Linux/macOS)
+make dev
+
+# Start (Windows — two terminals)
+# Terminal 1: cd backend && uvicorn app.main:create_app --factory --reload --port 8000
+# Terminal 2: cd frontend && npm run dev
 ```
 
-Open **http://localhost:5173** — requires Python 3.12+ and Node.js 20+
+Open **http://localhost:5173** — requires Python 3.12+ and Node.js 20+. Uses SQLite by default.
 
 ### Option 3: pip install (standalone)
 

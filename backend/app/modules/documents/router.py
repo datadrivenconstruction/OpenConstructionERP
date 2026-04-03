@@ -23,7 +23,7 @@ from app.modules.documents.schemas import (
     DocumentSummary,
     DocumentUpdate,
 )
-from app.modules.documents.service import MAX_FILE_SIZE, DocumentService
+from app.modules.documents.service import MAX_FILE_SIZE, UPLOAD_BASE, DocumentService
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -148,9 +148,17 @@ async def download_document(
 ) -> FileResponse:
     """Download a document file."""
     doc = await service.get_document(document_id)
-    file_path = Path(doc.file_path)
+    file_path = Path(doc.file_path).resolve()
 
-    if not file_path.exists():
+    # Security: ensure resolved path is within the allowed upload directory
+    upload_base = Path(UPLOAD_BASE).resolve()
+    if not str(file_path).startswith(str(upload_base)):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied",
+        )
+
+    if not file_path.exists() or file_path.is_symlink():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="File not found on disk",

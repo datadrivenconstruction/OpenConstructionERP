@@ -814,8 +814,14 @@ async def download_document(
     if not doc.file_path:
         raise HTTPException(status_code=404, detail="PDF file not available for this document")
 
-    file_path = Path(doc.file_path)
-    if not file_path.exists():
+    file_path = Path(doc.file_path).resolve()
+
+    # Security: ensure resolved path is within the takeoff upload directory
+    allowed_base = (Path.home() / ".openestimator").resolve()
+    if not str(file_path).startswith(str(allowed_base)):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    if not file_path.exists() or file_path.is_symlink():
         raise HTTPException(status_code=404, detail="PDF file not found on disk")
 
     return FileResponse(

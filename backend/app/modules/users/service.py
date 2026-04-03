@@ -192,9 +192,11 @@ class UserService:
             )
 
         if not user.is_active:
+            # Return same generic error as invalid credentials to avoid
+            # revealing whether an account exists or its activation status
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Account is deactivated",
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password",
             )
 
         # Eagerly read fields before update_fields (which calls expire_all)

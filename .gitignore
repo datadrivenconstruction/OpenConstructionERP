@@ -101,7 +101,7 @@ lancedb_data/
 
 # Cached data
 *.parquet
-~/.openestimator/
+.openestimator/
 
 # Desktop build
 desktop/dist/

@@ -1,6 +1,7 @@
 services:
   postgres:
     image: pgduckdb/pgduckdb:16-main
+    restart: unless-stopped
     environment:
       POSTGRES_USER: oe
       POSTGRES_PASSWORD: oe
@@ -18,6 +19,7 @@ services:
 
   redis:
     image: redis:7-alpine
+    restart: unless-stopped
     ports:
       - "6379:6379"
     healthcheck:
@@ -28,6 +30,7 @@ services:
 
   minio:
     image: minio/minio:latest
+    restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: minioadmin
