@@ -193,7 +193,7 @@ rank-bm25==0.2.2
 referencing==0.37.0
 regex==2026.1.15
 reportlab==4.4.9
-requests==2.32.5
+requests==2.33.0
 requests-oauthlib==2.0.0
 rich==14.3.3
 rpds-py==0.30.0
