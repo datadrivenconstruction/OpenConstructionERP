@@ -684,7 +684,16 @@ export function DashboardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  // First launch: show welcome banner (no external navigation without user action)
+  // First launch: redirect to onboarding wizard
+  useEffect(() => {
+    try {
+      if (localStorage.getItem('oe_onboarding_completed') !== 'true') {
+        navigate('/onboarding', { replace: true });
+      }
+    } catch { /* storage unavailable */ }
+  }, [navigate]);
+
+  // Show welcome/support modal (after onboarding is done, first dashboard visit)
   const [showWelcome, setShowWelcome] = useState(() => !localStorage.getItem('oe_welcome_dismissed'));
   const dismissWelcome = useCallback(() => {
     setShowWelcome(false);
