@@ -231,6 +231,13 @@ async def adjust_prices(
     - Regional coefficient: factor=1.12 (Munich vs Berlin)
     - Discount: factor=0.95 (-5%)
     """
+    # Explicit validation — Query(gt=, le=) may not be enforced in all FastAPI versions
+    if factor <= 0 or factor > 10:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Factor must be between 0 (exclusive) and 10 (inclusive), got {factor}",
+        )
+
     from sqlalchemy import text
 
     filter_clauses = ["is_active = 1"]
