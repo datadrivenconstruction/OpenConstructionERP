@@ -70,6 +70,7 @@ translation_keys.txt
 
 # QA / Dev artifacts
 screenshots/
+!docs/screenshots/
 qa-tests/
 ux-review/
 QA_*.md
@@ -87,6 +88,7 @@ test-screenshots/
 *.jpg
 !frontend/public/favicon.png
 !frontend/public/logo.png
+!docs/screenshots/*.png
 !frontend/public/og-image.png
 !frontend/public/*.jpg
 !frontend/public/*.jpeg
