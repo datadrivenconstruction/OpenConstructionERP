@@ -233,6 +233,35 @@ export function AboutPage() {
         </div>
       </Card>
 
+      {/* Documentation */}
+      <Card className="animate-card-in" style={{ animationDelay: '240ms' }}>
+        <div className="p-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle">
+              <BookOpen size={20} className="text-oe-blue" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-lg font-semibold text-content-primary">
+                {t('about.docs_title', { defaultValue: 'Documentation' })}
+              </h2>
+              <p className="text-xs text-content-tertiary">
+                {t('about.docs_desc', { defaultValue: 'Installation guides, feature overview, API reference, and tutorials' })}
+              </p>
+            </div>
+            <a
+              href="https://openconstructionerp.com/docs.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-oe-blue/90 transition-colors"
+            >
+              <BookOpen size={14} />
+              {t('about.docs_open', { defaultValue: 'Open Docs' })}
+              <ExternalLink size={12} />
+            </a>
+          </div>
+        </div>
+      </Card>
+
       {/* Support the Project */}
       <Card className="animate-card-in overflow-hidden" style={{ animationDelay: '250ms' }}>
         <div className="relative">

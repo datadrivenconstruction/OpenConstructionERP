@@ -1,13 +1,41 @@
 [project]
-name = "openestimate"
-version = "0.1.0"
-description = "Open-source modular platform for construction cost estimation"
+name = "openconstructionerp"
+version = "0.2.0"
+description = "The #1 open-source platform for construction cost estimation — BOQ, 4D/5D, AI, CAD/BIM takeoff"
 license = "AGPL-3.0-or-later"
 requires-python = ">=3.12"
 authors = [
-    { name = "OpenEstimate Contributors" }
+    { name = "Artem Boiko", email = "info@datadrivenconstruction.io" }
+]
+maintainers = [
+    { name = "Data Driven Construction", email = "info@datadrivenconstruction.io" }
 ]
 readme = "README.md"
+keywords = [
+    "construction", "cost-estimation", "boq", "bill-of-quantities",
+    "quantity-surveying", "erp", "bim", "cad", "revit", "ifc",
+    "din276", "nrm", "masterformat", "gaeb", "cwicr",
+    "fastapi", "react", "open-source",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial",
+    "Topic :: Scientific/Engineering",
+    "Framework :: FastAPI",
+]
+
+[project.urls]
+Homepage = "https://datadrivenconstruction.io/erp"
+Documentation = "https://openconstructionerp.com/docs"
+Repository = "https://github.com/datadrivenconstruction/OpenConstructionERP"
+Issues = "https://github.com/datadrivenconstruction/OpenConstructionERP/issues"
+Changelog = "https://github.com/datadrivenconstruction/OpenConstructionERP/blob/main/CHANGELOG.md"
 
 dependencies = [
     # Web framework
@@ -39,6 +67,7 @@ dependencies = [
 
 [project.scripts]
 openestimate = "app.cli:main"
+openconstructionerp = "app.cli:main"
 
 [project.optional-dependencies]
 # PostgreSQL + Redis + S3 for production deployments
@@ -71,7 +100,7 @@ cv = [
 ]
 # Everything
 all = [
-    "openestimate[server,vector,ai,cv]",
+    "openconstructionerp[server,vector,ai,cv]",
 ]
 # Development tools
 dev = [

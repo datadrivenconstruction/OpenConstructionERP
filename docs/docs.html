@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Documentation - OpenConstructionERP</title>
+ <meta name="description" content="OpenConstructionERP documentation - installation guide, feature overview, screenshots, and API reference.">
+ <link rel="canonical" href="https://openconstructionerp.com/docs">
+ <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+ <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+ <style>
+ *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+ :root{--blue:#2563eb;--blue-light:#eff6ff;--violet:#7c3aed;--g50:#f9fafb;--g100:#f3f4f6;--g200:#e5e7eb;--g500:#6b7280;--g600:#4b5563;--g700:#374151;--g800:#1f2937;--g900:#111827;--green:#059669}
+ html{scroll-behavior:smooth;scroll-padding-top:70px}body{font-family:'Inter',system-ui,sans-serif;color:var(--g800);line-height:1.6;background:#fff}
+ h1,h2,h3,h4{font-family:'Plus Jakarta Sans','Inter',sans-serif;font-weight:700;line-height:1.2}
+ a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
+ code{font-family:'JetBrains Mono',monospace;background:var(--g100);padding:2px 6px;border-radius:4px;font-size:.875em}
+ pre{background:var(--g900);color:#e5e7eb;padding:20px 24px;border-radius:12px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.875rem;line-height:1.7;margin:16px 0}
+ pre code{background:none;padding:0;color:inherit}
+ img{max-width:100%;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,.08)}
+ .ctr{max-width:900px;margin:0 auto;padding:0 24px}
+ .nav{background:#fff;border-bottom:1px solid var(--g200);position:sticky;top:0;z-index:50;backdrop-filter:blur(8px)}
+ .nav-i{max-width:900px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;justify-content:space-between}
+ .nav-l{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:1.15rem;color:var(--g900);letter-spacing:-0.01em}
+ .nav-l span{color:var(--blue)}
+ .nav-r{display:flex;gap:20px;font-size:.875rem;font-weight:500}.nav-r a{color:var(--g600)}.nav-r a:hover{color:var(--blue);text-decoration:none}
+ .hero{background:linear-gradient(135deg,var(--blue-light) 0%,#f5f3ff 50%,#fff 100%);padding:64px 0 48px;text-align:center}
+ .hero h1{font-size:2.5rem;color:var(--g900);margin-bottom:12px}
+ .hero h1 span{background:linear-gradient(135deg,var(--blue),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+ .hero p{font-size:1.1rem;color:var(--g500);max-width:600px;margin:0 auto}
+ .bdg{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;font-size:.75rem;font-weight:600}
+ .bdg-b{background:var(--blue-light);color:var(--blue)}.bdg-g{background:#ecfdf5;color:var(--green)}
+ .toc{background:var(--g50);border:1px solid var(--g200);border-radius:12px;padding:24px 28px;margin:32px 0}
+ .toc h3{font-size:.875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);margin-bottom:12px}
+ .toc ol{padding-left:20px}.toc li{margin:6px 0;font-size:.9rem}.toc a{color:var(--g700);font-weight:500}
+ section{padding:48px 0;border-bottom:1px solid var(--g100)}section:last-child{border-bottom:none}
+ section h2{font-size:1.75rem;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+ section h3{font-size:1.25rem;margin:24px 0 8px;color:var(--g700)}
+ section p{color:var(--g600);margin:8px 0}
+ section ul{padding-left:20px;margin:8px 0}section li{margin:4px 0;color:var(--g600)}section li strong{color:var(--g800)}
+ .ss{margin:24px 0;border:1px solid var(--g200);border-radius:12px;overflow:hidden}
+ .ss img{border-radius:0;box-shadow:none;display:block}
+ .ss-c{background:var(--g50);padding:10px 16px;font-size:.8rem;color:var(--g500);text-align:center;border-top:1px solid var(--g200)}
+ .g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+ @media(max-width:640px){.g2{grid-template-columns:1fr}.hero h1{font-size:1.75rem}}
+ .cd{background:var(--g50);border:1px solid var(--g200);border-radius:12px;padding:20px}
+ .cd h4{font-size:1rem;margin-bottom:6px}.cd p{font-size:.875rem}
+ table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.875rem}
+ th{background:var(--g50);text-align:left;padding:10px 12px;font-weight:600;border-bottom:2px solid var(--g200)}
+ td{padding:10px 12px;border-bottom:1px solid var(--g100)}
+ .ft{background:var(--g900);color:var(--g200);padding:40px 0;text-align:center;margin-top:48px}.ft a{color:var(--blue)}.ft p{font-size:.875rem;margin:4px 0}
+ .st{display:flex;gap:16px;margin:16px 0;align-items:flex-start}
+ .st-n{background:var(--blue);color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.875rem;flex-shrink:0}
+ .st-c{flex:1}.st-c h4{font-size:.95rem;margin-bottom:4px}.st-c p{font-size:.875rem}
+ 
+/* Sidebar */
+.sidebar{position:fixed;top:56px;left:0;bottom:0;width:260px;background:var(--g50);border-right:1px solid var(--g200);overflow-y:auto;padding:20px 0;z-index:90;font-size:.84rem}
+.sidebar::-webkit-scrollbar{width:4px}.sidebar::-webkit-scrollbar-thumb{background:var(--g300);border-radius:4px}
+.sb-sec{padding:0 16px;margin-bottom:20px}
+.sb-t{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--g400);padding:0 8px;margin-bottom:6px}
+.sb-a{display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:8px;color:var(--g600);font-weight:500;transition:all .15s;text-decoration:none}
+.sb-a:hover{background:var(--blue);color:#fff;text-decoration:none}.sb-a svg{flex-shrink:0;opacity:.7}.sb-a:hover svg{opacity:1}.sb-a.act svg{opacity:1}
+.sb-a.act{background:var(--blue);color:#fff}
+.sb-a .em{font-size:.95rem;width:20px;text-align:center}
+.sb-sub{padding-left:36px}
+.sb-sub a{display:block;padding:4px 8px;border-radius:6px;color:var(--g500);font-size:.8rem;font-weight:400;text-decoration:none}
+.sb-sub a:hover{color:var(--blue);background:var(--bl)}
+/* Adjust main content for sidebar */
+.ctr{max-width:860px;margin-left:284px;padding:0 24px}
+@media(max-width:900px){.sidebar{display:none}.ctr{margin-left:auto}}
+
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+ <div class="sb-sec">
+ <div class="sb-t">Getting Started</div>
+ <a href="#overview" class="sb-a"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg> Overview</a>
+ <a href="#install" class="sb-a"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg> Installation</a>
+ <div class="sb-sub">
+ <a href="#install-oneline">One-Line Install</a>
+ <a href="#install-docker">Docker</a>
+ <a href="#install-local">Local Dev</a>
+ </div>
+ </div>
+ <div class="sb-sec">
+ <div class="sb-t">Core Features</div>
+ <a href="#boq" class="sb-a"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg> BOQ Editor</a>
+ <div class="sb-sub">
+ <a href="#boq-structure">Structure & Editing</a>
+ <a href="#boq-validation">Validation</a>
+ <a href="#boq-export">Export & Import</a>
+ <a href="#boq-shortcuts">Shortcuts</a>
+ </div>
+ <a href="#costs" class="sb-a"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg> Cost Database</a>
+ <div class="sb-sub">
+ <a href="#costs-regions">Regional Databases</a>
+ <a href="#costs-vector">Vector Search</a>
+ </div>
+ <a href="#takeoff" class="sb-a"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg> CAD/BIM Takeoff</a>
+ <div class="sb-sub">
+ <a href="#takeoff-formats">Supported Formats</a>
+ <a href="#takeoff-qto">QTO Grouping</a>
+ <a href="#takeoff-pdf">PDF Measurements</a>
+ </div>
+ <a href="#ai" class="sb-a"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg> AI Estimation</a>
+ <div class="sb-sub">
+ <a href="#ai-providers">Providers</a>
+ <a href="#ai-quick">Quick Estimate</a>
+ <a href="#ai-matching">Cost Matching</a>
+ <a href="#ai-advisor">AI Advisor</a>
+ </div>
+ </div>
+ <div class="sb-sec">
+ <div class="sb-t">Planning</div>
+ <a href="#planning" class="sb-a"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg> 4D Schedule</a>
+ <a href="#planning" class="sb-a"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></svg> 5D Cost Model</a>
+ </div>
+ <div class="sb-sec">
+ <div class="sb-t">Configuration</div>
+ <a href="#settings" class="sb-a"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.5a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7V20a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.5a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg> Settings</a>
+ <a href="#api" class="sb-a"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg> API Reference</a>
+ </div>
+ <div class="sb-sec">
+ <div class="sb-t">Community</div>
+ <a href="#support" class="sb-a"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> Support</a>
+ </div>
+</aside>
+
+<script>
+// Active section highlighting on scroll
+const sbl=document.querySelectorAll('.sb-a');
+const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){sbl.forEach(l=>l.classList.remove('act'));const id=e.target.id;const l=document.querySelector('.sb-a[href="#'+id+'"]');if(l)l.classList.add('act');}});},{rootMargin:'-70px 0px -60% 0px'});
+document.querySelectorAll('section[id]').forEach(s=>obs.observe(s));
+
+// Handle ALL sidebar link clicks with smooth scroll
+document.querySelectorAll('.sidebar a').forEach(a=>{
+  a.addEventListener('click',function(e){
+    const href=this.getAttribute('href');
+    if(!href||!href.startsWith('#'))return;
+    e.preventDefault();
+    const target=document.querySelector(href);
+    if(target){
+      const y=target.getBoundingClientRect().top+window.scrollY-72;
+      window.scrollTo({top:y,behavior:'smooth'});
+      history.pushState(null,null,href);
+    }
+  });
+});
+</script>
+
+<nav class="nav"><div class="nav-i"><a href="/" class="nav-l">OpenConstructionERP</a><div class="nav-r"><a href="/">Home</a><a href="/docs.html" style="color:var(--blue)">Docs</a><a href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank">GitHub</a><a href="/contact.html">Contact</a></div></div></nav>
+
+<div class="hero"><div class="ctr"><div style="margin-bottom:16px"><span class="bdg bdg-b">v0.2.0</span> <span class="bdg bdg-g">Open Source</span></div><h1><span>Documentation</span></h1><p>Everything you need to install, configure, and use OpenConstructionERP for professional construction cost estimation.</p></div></div>
+
+<div class="ctr">
+<div class="toc" style="margin-left:0"><h3>Contents</h3><ol><li><a href="#overview">Platform Overview</a></li><li><a href="#install">Installation Guide</a></li><li><a href="#boq">BOQ Editor</a></li><li><a href="#costs">Cost Database</a></li><li><a href="#takeoff">CAD/BIM &amp; PDF Takeoff</a></li><li><a href="#ai">AI Estimation</a></li><li><a href="#planning">4D Schedule &amp; 5D Cost Model</a></li><li><a href="#settings">Configuration</a></li><li><a href="#api">API Reference</a></li><li><a href="#support">Support</a></li></ol></div>
+
+<section id="overview"><h2>Platform Overview</h2><p>OpenConstructionERP is a complete construction cost estimation and project management platform that runs entirely on your machine. It replaces expensive enterprise tools like iTWO, CostX, Sage Estimating, and Bluebeam with an open, self-hosted alternative. The platform covers the entire estimation workflow — from initial feasibility studies and quantity takeoff to detailed BOQ preparation, tendering, and bid comparison. All your data stays on your server. No cloud dependency, no subscriptions, no per-seat fees.</p><div class="ss"><img src="/doc-01-dashboard.png" alt="Dashboard"><div class="ss-c">Dashboard with project KPIs, Getting Started steps, recent projects, and system status panel</div></div><div class="g2"><div class="cd"><h4>BOQ Management</h4><p>Hierarchical Bills of Quantities with sections, positions, resources, assemblies, and automatic markups.</p></div><div class="cd"><h4>55K+ Cost Items</h4><p>CWICR database with 11 regional pricing sets covering DACH, UK, US, France, Spain, Brazil, Russia, UAE, China, India, Canada.</p></div><div class="cd"><h4>AI Estimation</h4><p>Generate BOQ from text, photos, PDFs, Excel, or CAD/BIM models using any LLM provider.</p></div><div class="cd"><h4>CAD/BIM Takeoff</h4><p>Extract quantities from Revit, IFC, AutoCAD, MicroStation via DDC converters.</p></div><div class="cd"><h4>4D/5D Planning</h4><p>Gantt scheduling with CPM, Earned Value Management, S-curve, Monte Carlo simulation.</p></div><div class="cd"><h4>21 Languages</h4><p>Full UI translation with RTL support. 20 regional standards (DIN 276, NRM, MasterFormat, GAEB, etc.).</p></div></div></section>
+
+<section id="first-steps">
+<h2>First Steps After Installation</h2>
+<p>After installing OpenConstructionERP, follow these steps to set up your first project and create your first cost estimate. The entire process takes about 10 minutes.</p>
+
+<h3 id="fs-login">Step 1: Log In</h3>
+<p>Open your browser and navigate to <code>http://localhost:5173</code> (local development) or <code>http://localhost:8080</code> (Docker). You will see the login page with a "Demo Access" panel. Click on <strong>Admin</strong> to log in instantly with the demo account, or enter your own credentials if you registered a new account.</p>
+
+<h3 id="fs-onboarding">Step 2: Complete Onboarding</h3>
+<p>On first login, the onboarding wizard guides you through initial setup:</p>
+<ol>
+<li><strong>Choose your language</strong> &mdash; Select from 21 available languages. The entire UI switches immediately.</li>
+<li><strong>Select your region</strong> &mdash; This determines which cost database and classification standard are used by default (e.g., DIN 276 for Germany, NRM for UK, MasterFormat for US).</li>
+<li><strong>Configure AI (optional)</strong> &mdash; If you want AI estimation features, enter an API key from any supported provider (Anthropic, OpenAI, Gemini, etc.). You can skip this and add it later in Settings.</li>
+<li><strong>Load cost database</strong> &mdash; The system offers to download and import the CWICR cost database for your selected region (55,719 items). This takes about 30 seconds.</li>
+</ol>
+
+<h3 id="fs-project">Step 3: Create Your First Project</h3>
+<p>Click <strong>New Project</strong> on the Dashboard or navigate to Projects. Fill in:</p>
+<ul>
+<li><strong>Project name</strong> &mdash; e.g., "Residential Building Berlin-Mitte"</li>
+<li><strong>Description</strong> &mdash; Brief scope description</li>
+<li><strong>Region</strong> &mdash; Determines currency and default classification standard</li>
+<li><strong>Classification standard</strong> &mdash; DIN 276, NRM 1/2, MasterFormat, or custom</li>
+</ul>
+<p>After creating the project, you are redirected to the project detail page where you can start adding BOQs.</p>
+
+<h3 id="fs-boq">Step 4: Create Your First BOQ</h3>
+<p>From the project page, click <strong>New Estimate</strong>. Give it a name (e.g., "Cost Estimate v1") and optionally choose a template. The BOQ editor opens with an empty grid ready for your first position.</p>
+
+<h3 id="fs-position">Step 5: Add Positions</h3>
+<p>In the BOQ editor, click <strong>Add Position</strong> or press Enter on an empty row. Fill in:</p>
+<ul>
+<li><strong>Ordinal</strong> &mdash; Position number (e.g., "01.001")</li>
+<li><strong>Description</strong> &mdash; What work is being done (e.g., "Reinforced concrete C30/37 for foundation slab")</li>
+<li><strong>Unit</strong> &mdash; Measurement unit (m3, m2, m, kg, pcs, lsum)</li>
+<li><strong>Quantity</strong> &mdash; How much (e.g., 86.4)</li>
+<li><strong>Unit Rate</strong> &mdash; Price per unit (e.g., 295.00 EUR)</li>
+</ul>
+<p>The <strong>Total</strong> column calculates automatically (Quantity x Unit Rate). You can also search the cost database by clicking the database icon next to any position to find and apply a rate from the 55,000+ CWICR items.</p>
+</section>
+
+<section id="install"><h2>Installation Guide</h2><p>OpenConstructionERP is designed to be easy to install regardless of your technical background. Choose the method that matches your setup — all options take less than 5 minutes. The application uses SQLite by default, so you do not need to install or configure any database server. Everything works out of the box.</p><h3 id="install-oneline">Option A: One-Line Install</h3><pre><code># Linux / macOS
+curl -sSL https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionERP/main/scripts/install.sh | bash
+
+# Windows (PowerShell)
+irm https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionERP/main/scripts/install.ps1 | iex</code></pre><p>Auto-detects Docker / Python / uv and runs at <code>http://localhost:8080</code></p><h3 id="install-docker">Option B: Docker</h3><pre><code>git clone https://github.com/datadrivenconstruction/OpenConstructionERP.git
+cd OpenConstructionERP
+make quickstart</code></pre><p>Opens at <code>http://localhost:8080</code> (~2 min first build).</p><h3 id="install-local">Option C: Local Development</h3><pre><code>git clone https://github.com/datadrivenconstruction/OpenConstructionERP.git
+cd OpenConstructionERP
+
+# Backend (SQLite, zero config)
+cd backend &amp;&amp; pip install -r requirements.txt
+uvicorn app.main:create_app --factory --reload --port 8000
+
+# Frontend (new terminal)
+cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend: <code>http://localhost:8000</code> / Frontend: <code>http://localhost:5173</code></p><h3 id="install-demo">Demo Accounts</h3><table><tr><th>Account</th><th>Email</th><th>Password</th><th>Role</th></tr><tr><td>Admin</td><td><code>demo@openestimator.io</code></td><td><code>DemoPass1234!</code></td><td>Full access</td></tr><tr><td>Estimator</td><td><code>estimator@openestimator.io</code></td><td><code>DemoPass1234!</code></td><td>Estimator</td></tr><tr><td>Manager</td><td><code>manager@openestimator.io</code></td><td><code>DemoPass1234!</code></td><td>Manager</td></tr></table><p>5 demo projects (Berlin, London, New York, Paris, Dubai) with complete BOQs, schedules, and cost models.</p></section>
+
+<section id="boq"><h2>BOQ Editor</h2><p>The Bill of Quantities editor is where you spend most of your time. It provides a professional, spreadsheet-like interface powered by AG Grid with construction-specific features built in — hierarchical sections, resource linking, assembly recipes, and automatic markup calculations. Every change is tracked with full undo/redo support. 42 validation rules run automatically in the background, catching errors like missing quantities, zero prices, duplicate positions, and classification compliance issues before they become problems.</p><div class="ss"><img src="/doc-02-boq-list.png" alt="BOQ Editor"><div class="ss-c">Bill of Quantities overview showing 11 estimates across 5 projects with stats: 424 positions, 232.6M total value</div></div><ul><li id="boq-structure"><strong>Hierarchical structure</strong> - Sections, positions, sub-positions with drag-and-drop</li><li id="boq-editing"><strong>Inline editing</strong> - Click any cell to edit. Tab between fields. Undo/redo</li><li><strong>Resources &amp; assemblies</strong> - Link labor, materials, equipment. Build reusable recipes</li><li id="boq-export"><strong>Markups</strong> - Overhead, profit, VAT, contingency per project or regional defaults</li><li id="boq-validation"><strong>Validation</strong> - 42 rules check for missing quantities, zero prices, compliance</li><li><strong>Export</strong> - Excel, CSV, PDF report, GAEB XML (X83)</li></ul><h3 id="boq-sections">Working with Sections</h3>
+<p>Sections organize your BOQ into logical groups (e.g., "300 Structure", "400 HVAC"). To create a section:</p>
+<ol>
+<li>Click <strong>Add Section</strong> in the toolbar</li>
+<li>Enter the section name and optional DIN 276/NRM classification code</li>
+<li>All positions added after a section header belong to that section</li>
+<li>Each section shows its own subtotal at the bottom</li>
+</ol>
+<p>You can collapse/expand sections to focus on specific trades. Drag sections to reorder the entire BOQ structure.</p>
+
+<h3 id="boq-resources">Linking Resources</h3>
+<p>Each BOQ position can have linked resources that break down the unit rate into components:</p>
+<ul>
+<li><strong>Materials</strong> &mdash; Concrete, steel, bricks, insulation (from Resource Catalog)</li>
+<li><strong>Labor</strong> &mdash; Worker hours by trade (formworker, electrician, plumber)</li>
+<li><strong>Equipment</strong> &mdash; Crane hours, excavator, concrete pump</li>
+</ul>
+<p>To add resources: expand a position row, click "Add Resource", search the catalog, set the quantity factor (e.g., 120 kg rebar per m3 concrete). The position unit rate updates automatically from the sum of its resources.</p>
+
+<h3 id="boq-markups">Configuring Markups</h3>
+<p>Markups are applied after the net total (sum of all positions). Common markups include:</p>
+<ul>
+<li><strong>Overhead</strong> &mdash; Company overhead costs (typically 8-15%)</li>
+<li><strong>Profit</strong> &mdash; Contractor profit margin (typically 5-12%)</li>
+<li><strong>Contingency</strong> &mdash; Risk reserve for unforeseen costs (typically 5-10%)</li>
+<li><strong>VAT/Tax</strong> &mdash; Value Added Tax (19% in Germany, 20% in UK, varies by country)</li>
+</ul>
+<p>Click <strong>Add Markup</strong> in the toolbar. You can set regional defaults or customize per project. Markups can be percentage-based or fixed amounts, and they compound in order (overhead first, then profit on the overhead-inclusive amount, then VAT on the total).</p>
+
+<h3 id="boq-validation-detail">Running Validation</h3>
+<p>Press <strong>Ctrl+Shift+V</strong> or click the shield icon in the toolbar to run validation. The system checks your BOQ against the selected rule sets and shows results inline:</p>
+<ul>
+<li>Positions with errors get a red dot</li>
+<li>Positions with warnings get a yellow dot</li>
+<li>The validation score (%) appears in the toolbar</li>
+<li>Click any dot to see the specific issue and fix it</li>
+</ul>
+
+<h3 id="boq-import-detail">Importing Data</h3>
+<p>The BOQ editor supports importing from multiple sources:</p>
+<ul>
+<li><strong>Excel/CSV</strong> &mdash; Click Import, select your file. The wizard maps your columns (description, quantity, unit, rate) to BOQ fields. Preview before committing.</li>
+<li><strong>GAEB XML</strong> &mdash; Import German-standard tender files directly. Positions, sections, and rates are preserved.</li>
+<li><strong>Paste from clipboard</strong> &mdash; Copy rows from Excel, click "Paste" in the toolbar. The system detects columns automatically.</li>
+<li><strong>AI Smart Import</strong> &mdash; Upload any PDF, photo, or CAD file. AI extracts BOQ positions with quantities and rates.</li>
+</ul>
+
+<h3 id="boq-shortcuts">Keyboard Shortcuts</h3><table><tr><th>Shortcut</th><th>Action</th></tr><tr><td><code>Ctrl+K</code></td><td>Command palette</td></tr><tr><td><code>Ctrl+N</code></td><td>New project</td></tr><tr><td><code>Ctrl+Shift+V</code></td><td>Run validation</td></tr><tr><td><code>Ctrl+Z / Y</code></td><td>Undo / Redo</td></tr></table></section>
+
+<section id="costs"><h2>Cost Database</h2><p>Access the largest open-source construction cost database in the world. The CWICR database contains 55,000+ cost items with descriptions in up to 9 languages, organized by trade (earthworks, concrete, masonry, steel, roofing, facades, HVAC, electrical, plumbing, finishing, landscaping). Each item includes a unit of measurement, base rate for the specified region, classification codes (DIN 276, NRM, MasterFormat), and component breakdown (materials, labor, equipment) when available.</p><div class="ss"><img src="/doc-03-costs.png" alt="Cost Database"><div class="ss-c">Cost Database with Germany/DACH selected showing 55,719 items with German descriptions, rates, and classification</div></div><table><tr><th id="costs-regions">Region</th><th>Currency</th><th>Standard</th><th>Items</th></tr><tr><td>Germany (DACH)</td><td>EUR</td><td>DIN 276</td><td>55,719</td></tr><tr><td>United Kingdom</td><td>GBP</td><td>NRM 1/2</td><td>55,719</td></tr><tr><td>United States</td><td>USD</td><td>MasterFormat</td><td>55,719</td></tr><tr><td>France</td><td>EUR</td><td>Batiprix</td><td>55,719</td></tr><tr><td>Russia</td><td>RUB</td><td>GESN</td><td>55,719</td></tr><tr><td>UAE</td><td>AED</td><td>Local</td><td>55,719</td></tr><tr><td>China</td><td>CNY</td><td>GB/T</td><td>55,719</td></tr><tr><td>India</td><td>INR</td><td>CPWD</td><td>55,719</td></tr></table><h3 id="costs-howto">How to Use the Cost Database</h3>
+<p>The cost database is designed for two main workflows:</p>
+
+<h4>Workflow A: Browse and Apply to BOQ</h4>
+<ol>
+<li>Navigate to <strong>Databases &rarr; Cost Database</strong></li>
+<li>Select your region tab (e.g., "Germany / DACH")</li>
+<li>Search for a cost item by typing in the search bar (e.g., "concrete foundation")</li>
+<li>Click the star icon to add frequently used items to your Favorites</li>
+<li>In the BOQ editor, click the database icon next to any position to search and apply a rate</li>
+</ol>
+
+<h4>Workflow B: Import Your Own Database</h4>
+<ol>
+<li>Navigate to <strong>Databases &rarr; Cost Database &rarr; Import Database</strong></li>
+<li>Prepare an Excel or CSV file with columns: Code, Description, Unit, Rate, Currency</li>
+<li>Upload the file and map columns in the import wizard</li>
+<li>Preview the data before committing</li>
+<li>Your imported items appear alongside CWICR data with your custom source tag</li>
+</ol>
+
+<h4>Understanding Cost Item Structure</h4>
+<p>Each cost item contains:</p>
+<ul>
+<li><strong>Code</strong> &mdash; Unique identifier (e.g., KADX_KAME_KAKAME_KAME)</li>
+<li><strong>Description</strong> &mdash; Work item name in up to 9 languages</li>
+<li><strong>Unit</strong> &mdash; Unit of measurement (m2, m3, t, pcs, etc.)</li>
+<li><strong>Rate</strong> &mdash; Price per unit in the regional currency</li>
+<li><strong>Components</strong> &mdash; Breakdown into materials, labor, equipment (when available)</li>
+<li><strong>Classification</strong> &mdash; DIN 276, NRM, MasterFormat codes for cross-referencing</li>
+</ul>
+
+<h3 id="costs-vector">Vector Search</h3><p>Enable semantic search to find cost items by meaning, not just exact keyword matches. When you search for "concrete wall", the system also finds items like "reinforced partition C30/37, 24cm with formwork" — even though the exact words do not appear. This is powered by sentence-transformer embeddings that convert descriptions into numerical vectors and find the closest matches in multi-dimensional space. Two vector database backends are supported: LanceDB (embedded, runs in-process like SQLite, 384-dimensional embeddings) and Qdrant (production server with pre-built 3072-dimensional snapshots downloadable from GitHub).</p></section>
+
+<section id="takeoff"><h2>CAD/BIM &amp; PDF Takeoff</h2><p>Extract quantities directly from your project drawings and models — no manual counting required. Upload Revit, IFC, AutoCAD, or MicroStation files and the system extracts every building element with volumes, areas, and lengths. For PDF drawings, open them directly in the browser and use calibrated measurement tools to take off distances, areas, and element counts. All extracted quantities can be transferred to a BOQ for pricing.</p><div class="ss"><img src="/doc-05-takeoff.png" alt="CAD/BIM Takeoff"><div class="ss-c">PDF Takeoff with 4-step workflow (Upload, AI Analysis, Review, Add to BOQ), project/BOQ selector, and drag-drop upload zone</div></div><table><tr><th id="takeoff-formats">Format</th><th>Software</th><th>Converter</th></tr><tr><td>.rvt / .rfa</td><td>Revit</td><td>DDC RvtExporter</td></tr><tr><td>.ifc</td><td>IFC (any BIM)</td><td>DDC IfcExporter</td></tr><tr><td>.dwg / .dxf</td><td>AutoCAD</td><td>DDC DwgExporter</td></tr><tr><td>.dgn</td><td>MicroStation</td><td>DDC DgnExporter</td></tr></table><h3 id="takeoff-workflow">CAD/BIM Takeoff: Step by Step</h3>
+<ol>
+<li>Navigate to <strong>Takeoff &rarr; CAD/BIM Takeoff</strong></li>
+<li>Drag and drop your CAD/BIM file (.rvt, .ifc, .dwg, .dgn) onto the upload area</li>
+<li>Wait for the DDC converter to extract elements (30-60 seconds for typical files)</li>
+<li>The system shows available columns and suggests grouping presets:
+  <ul>
+  <li><strong>Standard Revit QTO</strong> &mdash; Group by Category + Type Name, sum Volume/Area/Count</li>
+  <li><strong>Detailed</strong> &mdash; Add Level for per-floor breakdown</li>
+  <li><strong>By Family</strong> &mdash; Group by Revit Family for procurement lists</li>
+  <li><strong>Custom</strong> &mdash; Choose any combination of the 1200+ extracted columns</li>
+  </ul>
+</li>
+<li>Click <strong>Apply Grouping</strong> to see the quantity table</li>
+<li>Review the grouped results &mdash; filter out empty groups, delete irrelevant categories, sort by volume</li>
+<li>Click <strong>Save as BOQ</strong> to transfer quantities to a Bill of Quantities for pricing</li>
+</ol>
+
+<h3 id="takeoff-pdf-workflow">PDF Takeoff: Step by Step</h3>
+<ol>
+<li>Navigate to <strong>Takeoff &rarr; PDF Takeoff</strong></li>
+<li>Upload your PDF construction drawing</li>
+<li>The system extracts text and tables from the PDF automatically</li>
+<li>Click <strong>Analyze with AI</strong> to extract construction elements with quantities</li>
+<li>Or switch to the <strong>Measurements</strong> tab for manual takeoff:
+  <ul>
+  <li>Set the drawing scale (click two known points and enter the real distance, or select a preset like 1:100)</li>
+  <li>Select <strong>Distance</strong> tool and click two points to measure length</li>
+  <li>Select <strong>Area</strong> tool and click corners of a polygon to measure area</li>
+  <li>Select <strong>Count</strong> tool and click on elements to count them</li>
+  </ul>
+</li>
+<li>All measurements are saved and can be exported to a BOQ</li>
+</ol>
+
+<h3 id="takeoff-qto2">QTO Grouping Presets</h3><ul><li><strong>Standard Revit QTO</strong> - Category + Type Name (volume, area, count)</li><li><strong>Detailed + Level</strong> - Per-floor breakdown</li><li><strong>By Family</strong> - For procurement and ordering</li><li><strong>Custom</strong> - Choose any columns</li></ul></section>
+
+<section id="ai"><h2>AI Estimation</h2><p>Connect any LLM provider to generate construction cost estimates from plain text descriptions, building photos, scanned PDFs, Excel spreadsheets, or CAD/BIM models. The AI system creates complete BOQ positions with quantities and market-rate pricing. After generation, you can match each item against the CWICR cost database to replace AI-estimated rates with verified regional market prices. AI features are entirely opt-in — the platform works fully without them.</p><div class="ss"><img src="/doc-04-ai-estimate.png" alt="AI Estimate"><div class="ss-c">AI Estimate page with text input, location/currency/standard selectors, and 5 input modes: Text, Photo, PDF, Excel, Paste</div></div><table><tr><th id="ai-providers">Provider</th><th>Models</th><th>Features</th></tr><tr><td>Anthropic</td><td>Claude Sonnet / Opus</td><td>Text, vision, documents</td></tr><tr><td>OpenAI</td><td>GPT-4o</td><td>Text, vision, documents</td></tr><tr><td>Google</td><td>Gemini Pro</td><td>Text, vision</td></tr><tr><td>Mistral / Groq / DeepSeek</td><td>Various</td><td>Text</td></tr></table><div id="ai-quick" class="st"><div class="st-n">1</div><div class="st-c"><h4>Quick Estimate</h4><p>Describe your project in plain text and AI generates 15-30 BOQ items with quantities and market rates.</p></div></div><div class="st"><div class="st-n">2</div><div class="st-c"><h4>Cost DB Matching</h4><p>Match AI estimates against CWICR database to replace guessed rates with real market prices.</p></div></div><div class="st"><div class="st-n">3</div><div class="st-c"><h4>AI Cost Advisor</h4><p>Chat with AI about costs, materials, and pricing using your cost database as context.</p>
+<div class="ss"><img src="/doc-advisor.png" alt="AI Cost Advisor"><div class="ss-c">AI Cost Advisor chat with suggested questions, region selector, and CWICR database integration</div></div>
+<p></p></div></div></section>
+
+<section id="planning"><h2>4D Schedule &amp; 5D Cost Model</h2>
+<p>Plan your construction project timeline and track costs over time with integrated scheduling and financial modeling tools.</p>
+
+<h3 id="schedule-detail">4D Schedule</h3>
+<p>The scheduling module provides a professional Gantt chart for managing your construction timeline. Create activities, set durations, define dependencies, and the system automatically calculates the critical path showing which activities must not be delayed.</p>
+<ul>
+<li><strong>Activity types</strong> &mdash; Tasks, milestones, and summary activities with WBS codes for structured breakdown</li>
+<li><strong>Dependencies</strong> &mdash; Finish-to-Start (FS), Start-to-Start (SS), Finish-to-Finish (FF), and Start-to-Finish (SF) relationships between activities</li>
+<li><strong>Critical path</strong> &mdash; Automatic CPM calculation with visual highlighting. Activities on the critical path are marked with a "CP" badge</li>
+<li><strong>Auto-generate from BOQ</strong> &mdash; Select a BOQ and set total project duration. The system creates one activity per section with cost-proportional durations and sequential dependencies</li>
+<li><strong>Progress tracking</strong> &mdash; Update activity status (completed/in-progress/pending) and track actual vs planned dates</li>
+<li><strong>Monte Carlo simulation</strong> &mdash; Run probabilistic analysis with optimistic/pessimistic ranges to get risk-adjusted completion dates with confidence levels</li>
+</ul>
+
+<h3 id="costmodel-detail">5D Cost Model</h3>
+<p>The cost model connects your BOQ data to the project timeline, giving you a time-phased view of construction costs with Earned Value Management metrics.</p>
+<ul><li>Gantt chart with drag-and-drop, dependencies (FS/FF/SS/SF), critical path</li><li>Auto-generate activities from BOQ sections</li><li>Earned Value Management: SPI, CPI, EAC, VAC</li><li>S-curve (planned vs actual), budget snapshots, cash flow</li><li>Monte Carlo simulation for risk-adjusted scheduling</li></ul></section>
+
+<section id="tendering">
+<h2>Tendering &amp; Bid Management</h2>
+<p>Manage the complete procurement workflow from creating bid packages to comparing proposals and awarding contracts to subcontractors.</p>
+<h3 id="tender-create">Creating a Tender Package</h3>
+<p>Navigate to Procurement, select a project, and click "Create Package". Specify the package name, scope description, submission deadline, and select which BOQ positions to include. You can create multiple packages per project (e.g., structural works, MEP, finishing).</p>
+<h3 id="tender-bids">Managing Bids</h3>
+<p>Add bids from subcontractors with company name, contact details, and quoted prices for each BOQ position. The system supports multiple bids per package for side-by-side comparison.</p>
+<h3 id="tender-compare">Bid Comparison</h3>
+<p>The price mirror shows all bids in a comparison table with unit rates and totals per position. Visual indicators highlight the lowest and highest bids. Export the comparison as CSV for stakeholder review.</p>
+<h3 id="tender-award">Award Process</h3>
+<p>Mark the winning bid with the Award button and add justification notes. Package status tracks through: Draft, Issued, Collecting, Evaluating, Awarded, Closed.</p>
+</section>
+
+<section id="risk-section">
+<h2>Risk Register</h2>
+<p>Identify, assess, and manage project risks using a probability-impact matrix. Quantify risk exposure and plan mitigation strategies for each identified risk.</p>
+<h3 id="risk-matrix">Risk Assessment Matrix</h3>
+<p>The matrix displays all risks on a probability (0.1-0.9) vs impact (low/medium/high/critical) grid with color coding. Each risk shows its calculated exposure score (probability multiplied by impact cost).</p>
+<h3 id="risk-manage">Managing Risks</h3>
+<p>For each risk, document: unique code (R-001), title, category (technical, financial, schedule, regulatory, environmental, safety), mitigation strategy, contingency plan, risk owner, cost impact, and schedule impact in days. Track status through: Identified, Assessed, Mitigating, Closed, or Occurred.</p>
+</section>
+
+<section id="changeorders-section">
+<h2>Change Orders</h2>
+<p>Track scope changes and their impact on project cost and schedule. Change orders provide an audit trail of all modifications made after the initial estimate.</p>
+<h3 id="co-workflow">Change Order Workflow</h3>
+<p>Create a change order with code (CO-001), title, and reason category (client request, design change, unforeseen condition, regulatory). Add line items specifying affected BOQ positions with original and new quantities/rates. The system calculates cost deltas automatically. Status moves through: Draft, Submitted, Under Review, Approved/Rejected.</p>
+</section>
+
+<section id="validation-section">
+<h2>Validation &amp; Quality Checks</h2>
+<div class="ss"><img src="/doc-validation.png" alt="Validation"><div class="ss-c">Validation page - select project and BOQ, run quality checks against configurable rule sets</div></div>
+<p>Run automated quality checks on your BOQs to catch errors before they become problems. The validation engine applies 42 configurable rules against your estimate data.</p>
+<h3 id="val-rules">Rule Sets</h3>
+<ul>
+<li><strong>BOQ Quality</strong> &mdash; Missing quantities, zero prices, duplicate positions, unrealistic unit rates, empty descriptions</li>
+<li><strong>DIN 276 Compliance</strong> &mdash; Cost group hierarchy, required KG codes, completeness per level</li>
+<li><strong>GAEB Format</strong> &mdash; Structure validation for GAEB XML export (X83)</li>
+<li><strong>NRM Compliance</strong> &mdash; NRM 1/2 element structure and measurement rules</li>
+<li><strong>MasterFormat</strong> &mdash; CSI division structure and code format</li>
+</ul>
+<h3 id="val-results">Understanding Results</h3>
+<p>Each validation produces a quality score (0-100%) with color-coded findings: Errors (red, must fix), Warnings (yellow, should review), Info (blue, suggestions). Click any finding to navigate directly to the affected BOQ position.</p>
+</section>
+
+<section id="reports-section">
+<h2>Reports &amp; Export</h2>
+<div class="ss"><img src="/doc-reports.png" alt="Reports"><div class="ss-c">Reports page with 9 export formats: BOQ (PDF/Excel), Cost Report, GAEB XML, Validation, Schedule, 5D Cost, Tendering, Change Orders, Risk Register</div></div>
+<p>Generate professional documents from your project data for stakeholders, clients, and regulatory compliance.</p>
+<ul>
+<li><strong>BOQ Report (PDF)</strong> &mdash; Complete Bill of Quantities with sections, positions, subtotals, markups, and grand total</li>
+<li><strong>BOQ Export (Excel)</strong> &mdash; Full data in .xlsx with formulas, formatting, and section grouping</li>
+<li><strong>Cost Report (PDF)</strong> &mdash; Summary by trade, category, or classification standard</li>
+<li><strong>GAEB XML (X83)</strong> &mdash; Standard German/Austrian tender format for electronic submission</li>
+<li><strong>CSV Export</strong> &mdash; Raw data for import into other tools or spreadsheets</li>
+</ul>
+</section>
+
+<section id="documents-section">
+<h2>Document Management</h2>
+<div class="ss"><img src="/doc-documents.png" alt="Documents"><div class="ss-c">Document management with drag-drop upload, category filters (Drawing, Contract, Specification, Photo), tags, and file preview</div></div>
+<p>Centralize all project documents. Upload drawings, contracts, specifications, and photos with automatic categorization and search.</p>
+<ul>
+<li><strong>Upload</strong> &mdash; Drag and drop files up to 100 MB (PDF, images, Office, CAD)</li>
+<li><strong>Categories</strong> &mdash; Drawings, contracts, specifications, photos, correspondence</li>
+<li><strong>Tags</strong> &mdash; Custom tags for flexible filtering</li>
+<li><strong>Preview</strong> &mdash; View PDFs and images directly in the browser</li>
+<li><strong>Version tracking</strong> &mdash; Upload dates, file sizes, uploader identity</li>
+</ul>
+</section>
+
+<section id="analytics-section">
+<h2>Analytics Dashboard</h2>
+<div class="ss"><img src="/doc-analytics.png" alt="Analytics"><div class="ss-c">Cross-project analytics with KPI cards (Total Budget 125.6M, Variance 63.4M), project comparison table with budget/actual/variance per region</div></div>
+<p>View cross-project budget performance. The dashboard aggregates financial data across all projects to identify trends, variances, and at-risk budgets.</p>
+<ul>
+<li><strong>Project table</strong> &mdash; Sortable list: budget, actual spend, variance, percentage, status</li>
+<li><strong>KPI cards</strong> &mdash; Total portfolio value, average variance, projects on/over budget</li>
+<li><strong>Regional filter</strong> &mdash; Compare performance across markets (DACH, UK, US, Gulf)</li>
+<li><strong>Status filter</strong> &mdash; Focus on over-budget projects for attention</li>
+</ul>
+</section>
+
+<section id="settings"><h2>Configuration</h2><div class="ss"><img src="/doc-06-settings.png" alt="Settings"><div class="ss-c">Settings page with profile management, Simple/Advanced interface mode toggle, and module configuration</div></div><table><tr><th>Variable</th><th>Default</th><th>Description</th></tr><tr><td><code>DATABASE_URL</code></td><td>sqlite:///./openestimate.db</td><td>Database (SQLite or PostgreSQL)</td></tr><tr><td><code>JWT_SECRET</code></td><td>dev-key</td><td>JWT secret (change in production!)</td></tr><tr><td><code>SEED_DEMO</code></td><td>true</td><td>Create demo accounts</td></tr><tr><td><code>VECTOR_BACKEND</code></td><td>lancedb</td><td>Vector search backend</td></tr></table></section>
+
+<section id="api"><h2>API Reference</h2><p>OpenConstructionERP exposes a comprehensive REST API that powers the frontend and can be used for integrations, automation, and custom workflows. Every action available in the UI — creating projects, editing BOQs, running AI estimates, searching costs — is available as an API endpoint. Interactive Swagger documentation with try-it-out buttons is available at <code>/api/docs</code> when running the backend.</p><table><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr><tr><td>POST</td><td><code>/api/v1/users/auth/login</code></td><td>Login</td></tr><tr><td>GET</td><td><code>/api/v1/projects/</code></td><td>List projects</td></tr><tr><td>GET</td><td><code>/api/v1/boq/boqs/?project_id=...</code></td><td>List BOQs</td></tr><tr><td>GET</td><td><code>/api/v1/costs/?q=concrete</code></td><td>Search costs</td></tr><tr><td>POST</td><td><code>/api/v1/ai/quick-estimate</code></td><td>AI estimation</td></tr><tr><td>POST</td><td><code>/api/v1/takeoff/cad-extract</code></td><td>CAD extraction</td></tr><tr><td>GET</td><td><code>/api/health</code></td><td>Health check</td></tr></table></section>
+
+<section id="support"><h2>Support &amp; Contributing</h2><div class="g2"><div class="cd"><h4>Star on GitHub</h4><p><a href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank">Star the repository</a> to help others discover the project.</p></div><div class="cd"><h4>Report Issues</h4><p><a href="https://github.com/datadrivenconstruction/OpenConstructionERP/issues" target="_blank">Open an issue</a> on GitHub.</p></div><div class="cd"><h4>Discussions</h4><p><a href="https://t.me/datadrivenconstruction" target="_blank">Join Telegram community</a> to ask questions.</p></div><div class="cd"><h4>Consulting</h4><p><a href="https://datadrivenconstruction.io/contact-support/" target="_blank">Contact us</a> for deployment and training.</p></div></div><p><strong>License:</strong> AGPL-3.0. Commercial licensing: <a href="mailto:info@datadrivenconstruction.io">info@datadrivenconstruction.io</a></p></section>
+</div>
+
+<div class="ft"><div class="ctr"><p><strong>OpenConstructionERP</strong></p><p>Created by <a href="https://www.linkedin.com/in/boikoartem/" target="_blank">Artem Boiko</a> / <a href="https://datadrivenconstruction.io" target="_blank">Data Driven Construction</a></p><p style="margin-top:12px;font-size:.75rem;color:#6b7280">2026 Data Driven Construction. AGPL-3.0</p></div></div>
+</body>
+</html>

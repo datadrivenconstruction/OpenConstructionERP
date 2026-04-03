@@ -215,7 +215,9 @@ async def delete_catalog_region(
 async def adjust_prices(
     session: SessionDep,
     _user_id: CurrentUserId,
-    factor: float = Query(..., description="Multiplication factor (e.g. 1.05 for +5%)"),
+    factor: float = Query(
+        ..., gt=0, le=10, description="Multiplication factor (e.g. 1.05 for +5%), must be 0 < f ≤ 10"
+    ),
     resource_type: str | None = Query(
         default=None, description="Filter by type: material, labor, equipment"
     ),

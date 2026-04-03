@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Search, ChevronDown, LogOut, User, Settings, Menu, MessageSquarePlus, FolderOpen, Bell, CheckCircle2, XCircle, AlertTriangle, Info, Trash2, Bug } from 'lucide-react';
+import { Search, ChevronDown, LogOut, User, Settings, Menu, MessageSquarePlus, FolderOpen, Bell, CheckCircle2, XCircle, AlertTriangle, Info, Trash2, Bug, BookOpen } from 'lucide-react';
 import clsx from 'clsx';
 import { SUPPORTED_LANGUAGES, getLanguageByCode } from '../i18n';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -189,6 +189,24 @@ export function Header({ title, onMenuClick }: HeaderProps) {
           <Bug size={14} />
           <span className="hidden lg:inline">{t('feedback.report_issue', { defaultValue: 'Report Issue' })}</span>
         </button>
+
+        {/* Documentation link */}
+        <a
+          href="https://openconstructionerp.com/docs.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={clsx(
+            'hidden sm:flex h-8 items-center gap-1.5 rounded-lg px-2.5',
+            'text-xs font-medium',
+            'text-oe-blue border border-oe-blue/20 bg-oe-blue/[0.04]',
+            'transition-all duration-fast ease-oe',
+            'hover:bg-oe-blue/10 hover:border-oe-blue/40',
+          )}
+          title={t('nav.docs', { defaultValue: 'Documentation' })}
+        >
+          <BookOpen size={14} />
+          <span className="hidden lg:inline">{t('nav.docs', { defaultValue: 'Docs' })}</span>
+        </a>
 
         {/* Feedback — Variant A (optional file) + B (URL params) */}
         <button

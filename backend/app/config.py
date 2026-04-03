@@ -30,8 +30,10 @@ class Settings(BaseSettings):
     allowed_origins: str = "http://localhost:5173"
 
     # ── Database ─────────────────────────────────────────────────────────
-    database_url: str = "postgresql+asyncpg://oe:oe@localhost:5432/openestimate"
-    database_sync_url: str = "postgresql://oe:oe@localhost:5432/openestimate"
+    # Default: SQLite (zero config, works out of the box)
+    # For production: set DATABASE_URL=postgresql+asyncpg://user:pass@host/db
+    database_url: str = "sqlite+aiosqlite:///./openestimate.db"
+    database_sync_url: str = "sqlite:///./openestimate.db"
     database_pool_size: int = 20
     database_max_overflow: int = 10
     database_echo: bool = False
@@ -41,8 +43,8 @@ class Settings(BaseSettings):
 
     # ── Storage (S3/MinIO) ───────────────────────────────────────────────
     s3_endpoint: str = "http://localhost:9000"
-    s3_access_key: str = "minioadmin"
-    s3_secret_key: str = "minioadmin"
+    s3_access_key: str = ""
+    s3_secret_key: str = ""
     s3_bucket: str = "openestimate"
     s3_region: str = "us-east-1"
 
