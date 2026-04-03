@@ -4,12 +4,14 @@
 
 **The #1 open-source platform for construction cost estimation**
 
-[Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Community](https://github.com/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR/discussions)
+[Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Community](https://github.com/datadrivenconstruction/OpenConstructionERP/discussions)
 
 ![License](https://img.shields.io/badge/license-AGPL--3.0-blue)
 ![Version](https://img.shields.io/badge/version-0.2.0-green)
 ![Languages](https://img.shields.io/badge/languages-21-orange)
 ![Validation Rules](https://img.shields.io/badge/validation_rules-42-purple)
+
+<img src="docs/screenshots/hero-overview.jpg" alt="OpenConstructionERP — Dashboard" width="800" />
 
 </div>
 
@@ -28,12 +30,32 @@ Professional construction cost estimation for everyone — from solo quantity su
 
 ## Key Features
 
-### Estimation
+### BOQ & Cost Estimation
+
+<img src="docs/screenshots/feature-boq.jpg" alt="BOQ Editor & Management" width="800" />
 
 - **BOQ Editor** — Hierarchical Bill of Quantities with AG Grid, inline editing, resources, markups (overhead, profit, VAT)
 - **Cost Database** — 55K+ items across 11 regions (US, UK, DE, FR, ES, PT, RU, AE, CN, IN, CA)
 - **Resource Catalog** — 7,000+ materials, labor, equipment with catalog picker and assemblies
 - **Assemblies** — Reusable cost recipes with component breakdown
+
+### Databases & Resources
+
+<img src="docs/screenshots/feature-databases.jpg" alt="Cost Database & Resource Catalog" width="800" />
+
+- **CWICR Database** — 55,000+ cost items, 9 languages, 11 regional price databases
+- **Smart Search** — AI-powered semantic search with vector embeddings (LanceDB / Qdrant)
+- **Resource Management** — Materials, labor, equipment with multi-language descriptions
+- **Import/Export** — Excel, CSV, Parquet, API integration
+
+### CAD/BIM Takeoff & AI
+
+<img src="docs/screenshots/feature-takeoff-ai.jpg" alt="CAD/BIM Takeoff & AI Estimation" width="800" />
+
+- **CAD/BIM Takeoff** — Extract quantities from RVT, IFC, DWG, DGN via DDC converters
+- **PDF Takeoff** — Measure distances, areas, counts directly on construction drawings
+- **AI Quick Estimate** — Generate BOQ from text, photo, PDF, Excel, or CAD/BIM
+- **AI Cost Advisor** — Chat with AI about costs, materials, pricing
 
 ### Planning & Analysis
 
@@ -48,12 +70,6 @@ Professional construction cost estimation for everyone — from solo quantity su
 - **Change Orders** — Scope changes with cost and schedule impact tracking
 - **Reports** — PDF, Excel, GAEB XML, CSV export with 12 report templates
 - **Documents** — File management with drag-and-drop upload
-
-### AI Features
-
-- **AI Quick Estimate** — Generate BOQ from text, photo, PDF, Excel, or CAD/BIM
-- **AI Cost Advisor** — Chat with AI about costs, materials, pricing
-- **AI Smart Actions** — Enhance descriptions, suggest prerequisites, escalate rates, check scope
 
 ### Regional Standards (20 exchange modules)
 
