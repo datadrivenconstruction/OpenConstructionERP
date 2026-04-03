@@ -48,7 +48,8 @@ Construction cost estimation software is expensive, closed-source, and locked to
 | **BOQ editor** | ✅ | ✅ | ✅ | ✅ | ❌ |
 | **CAD/BIM takeoff** | ✅ RVT IFC DWG DGN | ✅ | ✅ | ❌ | ✅ PDF only |
 | **4D/5D planning** | ✅ | ✅ | ❌ | ❌ | ❌ |
-| **Cost database included** | ✅ 55K items | ❌ extra cost | ❌ extra cost | ❌ extra cost | ❌ |
+| **Cost database included** | ✅ 55K+ work items with base rates | ❌ extra cost | ❌ extra cost | ❌ extra cost | ❌ |
+| **Resource catalog** | ✅ 7K+ materials, labor, equipment with prices | ❌ extra cost | ❌ | ❌ | ❌ |
 | **Validation engine** | ✅ 42 rules | ⚠️ limited | ❌ | ❌ | ❌ |
 | **API access** | ✅ REST API | ⚠️ limited | ❌ | ❌ | ❌ |
 
