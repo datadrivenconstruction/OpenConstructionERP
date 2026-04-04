@@ -64,7 +64,7 @@ const CATEGORIES = [
 
 const PRIORITIES = ['must', 'should', 'may'] as const;
 
-const CONSTRAINT_TYPES = ['equals', 'min', 'max', 'range', 'contains'] as const;
+const CONSTRAINT_TYPES = ['equals', 'min', 'max', 'range', 'contains', 'regex'] as const;
 
 const UNITS = [
   'mm', 'm', 'm2', 'm3', 'kg', 'MPa', 'kN', 'kN/m2',
@@ -84,7 +84,7 @@ const ATTRIBUTE_SUGGESTIONS = [
   'material', 'coating', 'compressive_strength', 'tensile_strength',
 ];
 
-const STATUSES = ['open', 'verified', 'linked', 'failed'] as const;
+const STATUSES = ['open', 'verified', 'linked', 'conflict'] as const;
 
 const PRIORITY_COLORS: Record<string, 'error' | 'warning' | 'blue'> = {
   must: 'error',
@@ -96,7 +96,7 @@ const STATUS_COLORS: Record<string, 'neutral' | 'blue' | 'success' | 'warning' |
   open: 'neutral',
   verified: 'success',
   linked: 'blue',
-  failed: 'error',
+  conflict: 'error',
 };
 
 const GATE_DEFS = [
@@ -140,27 +140,33 @@ function GatePipeline({
         const score = gate?.score ?? 0;
 
         const statusIcon =
-          status === 'passed' ? (
+          status === 'pass' ? (
             <CheckCircle2 size={20} className="text-[#15803d]" />
-          ) : status === 'failed' ? (
+          ) : status === 'fail' ? (
             <XCircle size={20} className="text-semantic-error" />
+          ) : status === 'warning' ? (
+            <CheckCircle2 size={20} className="text-[#b45309]" />
           ) : (
             <Circle size={20} className="text-content-quaternary" />
           );
 
         const borderColor =
-          status === 'passed'
+          status === 'pass'
             ? 'border-[#15803d]/30'
-            : status === 'failed'
+            : status === 'fail'
               ? 'border-semantic-error/30'
-              : 'border-border';
+              : status === 'warning'
+                ? 'border-[#b45309]/30'
+                : 'border-border';
 
         const bgGlow =
-          status === 'passed'
+          status === 'pass'
             ? 'bg-green-50/50 dark:bg-green-950/20'
-            : status === 'failed'
+            : status === 'fail'
               ? 'bg-red-50/50 dark:bg-red-950/20'
-              : 'bg-surface-primary';
+              : status === 'warning'
+                ? 'bg-amber-50/50 dark:bg-amber-950/20'
+                : 'bg-surface-primary';
 
         return (
           <div key={def.number} className="relative">
@@ -206,11 +212,13 @@ function GatePipeline({
                     <span
                       className={clsx(
                         'text-xs font-bold tabular-nums',
-                        status === 'passed'
+                        status === 'pass'
                           ? 'text-[#15803d]'
-                          : status === 'failed'
+                          : status === 'fail'
                             ? 'text-semantic-error'
-                            : 'text-content-tertiary',
+                            : status === 'warning'
+                              ? 'text-[#b45309]'
+                              : 'text-content-tertiary',
                       )}
                     >
                       {Math.round(score * 100)}%
@@ -220,11 +228,13 @@ function GatePipeline({
                     <div
                       className={clsx(
                         'h-full rounded-full transition-all duration-500',
-                        status === 'passed'
+                        status === 'pass'
                           ? 'bg-[#15803d]'
-                          : status === 'failed'
+                          : status === 'fail'
                             ? 'bg-semantic-error'
-                            : 'bg-content-quaternary',
+                            : status === 'warning'
+                              ? 'bg-[#b45309]'
+                              : 'bg-content-quaternary',
                       )}
                       style={{ width: `${Math.round(score * 100)}%` }}
                     />
@@ -266,10 +276,14 @@ function StatsCards({ stats }: { stats: RequirementStats | undefined }) {
   const verifiedCount = stats?.by_status?.verified ?? 0;
   const linkedCount = stats?.by_status?.linked ?? 0;
 
+  const totalReqs = stats?.total_requirements ?? 0;
+  const linked = stats?.linked_count ?? 0;
+  const coveragePercent = totalReqs > 0 ? Math.round((linked / totalReqs) * 100) : 0;
+
   const items = [
     {
       label: t('requirements.stat_total', { defaultValue: 'Total Requirements' }),
-      value: stats?.total ?? 0,
+      value: totalReqs,
       cls: 'text-content-primary',
     },
     {
@@ -290,11 +304,11 @@ function StatsCards({ stats }: { stats: RequirementStats | undefined }) {
     },
     {
       label: t('requirements.stat_coverage', { defaultValue: 'Coverage' }),
-      value: `${Math.round(stats?.coverage_percent ?? 0)}%`,
+      value: `${coveragePercent}%`,
       cls:
-        (stats?.coverage_percent ?? 0) >= 80
+        coveragePercent >= 80
           ? 'text-[#15803d]'
-          : (stats?.coverage_percent ?? 0) >= 50
+          : coveragePercent >= 50
             ? 'text-[#b45309]'
             : 'text-semantic-error',
     },
@@ -384,7 +398,7 @@ interface RequirementFormData {
   unit: string;
   category: string;
   priority: string;
-  source_reference: string;
+  source_ref: string;
   notes: string;
 }
 
@@ -396,7 +410,7 @@ const EMPTY_FORM: RequirementFormData = {
   unit: 'mm',
   category: 'structural',
   priority: 'must',
-  source_reference: '',
+  source_ref: '',
   notes: '',
 };
 
@@ -583,8 +597,8 @@ function RequirementModal({
               {t('requirements.source_reference', { defaultValue: 'Source Reference' })}
             </label>
             <input
-              value={f.source_reference}
-              onChange={(e) => set('source_reference', e.target.value)}
+              value={f.source_ref}
+              onChange={(e) => set('source_ref', e.target.value)}
               placeholder={t('requirements.source_placeholder', {
                 defaultValue: 'e.g. Drawing A-101, Detail 3',
               })}
@@ -798,7 +812,7 @@ function ExpandedRow({ req }: { req: Requirement }) {
               {t('requirements.source_reference', { defaultValue: 'Source Reference' })}
             </p>
             <p className="text-content-primary">
-              {req.source_reference || t('common.none', { defaultValue: 'None' })}
+              {req.source_ref || t('common.none', { defaultValue: 'None' })}
             </p>
           </div>
           <div>
@@ -806,10 +820,10 @@ function ExpandedRow({ req }: { req: Requirement }) {
               {t('requirements.linked_position', { defaultValue: 'Linked BOQ Position' })}
             </p>
             <p className="text-content-primary">
-              {req.linked_position_label ? (
+              {req.linked_position_id ? (
                 <span className="inline-flex items-center gap-1">
                   <Link2 size={12} className="text-oe-blue" />
-                  {req.linked_position_label}
+                  {req.linked_position_id}
                 </span>
               ) : (
                 t('requirements.not_linked', { defaultValue: 'Not linked' })
@@ -884,13 +898,13 @@ export function RequirementsPage() {
   });
 
   const { data: stats } = useQuery({
-    queryKey: ['requirement-stats', currentSetId],
-    queryFn: () => fetchRequirementStats(currentSetId),
-    enabled: !!currentSetId,
+    queryKey: ['requirement-stats', projectId],
+    queryFn: () => fetchRequirementStats(projectId),
+    enabled: !!projectId,
   });
 
   const requirements = detail?.requirements || [];
-  const gates = detail?.gates || [];
+  const gates = detail?.gate_results || [];
 
   // Filtered requirements
   const filteredReqs = useMemo(() => {
@@ -983,7 +997,7 @@ export function RequirementsPage() {
         type: 'success',
         title: t('requirements.imported', {
           defaultValue: '{{count}} requirements imported',
-          count: result?.length ?? 0,
+          count: result?.requirements?.length ?? 0,
         }),
       });
     },
@@ -1000,15 +1014,15 @@ export function RequirementsPage() {
         const result = await runGate(currentSetId, gateNum);
         invalidateAll();
         addToast({
-          type: result.status === 'passed' ? 'success' : result.status === 'failed' ? 'error' : 'info',
+          type: result.status === 'pass' ? 'success' : result.status === 'fail' ? 'error' : result.status === 'warning' ? 'warning' : 'info',
           title: t('requirements.gate_result', {
             defaultValue: 'Gate {{num}}: {{status}}',
             num: gateNum,
             status: result.status,
           }),
           message:
-            result.issues.length > 0
-              ? result.issues.slice(0, 3).join('; ')
+            result.findings && result.findings.length > 0
+              ? result.findings.slice(0, 3).map((f) => f.message || f.detail || JSON.stringify(f)).join('; ')
               : undefined,
         });
       } catch (e) {
@@ -1354,7 +1368,7 @@ export function RequirementsPage() {
             unit: editingReq.unit,
             category: editingReq.category,
             priority: editingReq.priority,
-            source_reference: editingReq.source_reference,
+            source_ref: editingReq.source_ref,
             notes: editingReq.notes,
           }}
           onClose={() => setEditingReq(null)}
@@ -1431,7 +1445,9 @@ function RequirementRow({
                       ? '='
                       : req.constraint_type === 'range'
                         ? '\u2194'
-                        : '\u2283',
+                        : req.constraint_type === 'regex'
+                          ? '/./'
+                          : '\u2283',
             })}
           </span>
           {req.constraint_value}
@@ -1469,23 +1485,27 @@ function RequirementRow({
 
         {/* Confidence */}
         <td className="px-4 py-3 text-center">
-          <span
-            className={clsx(
-              'text-xs font-medium tabular-nums',
-              req.confidence >= 0.8
-                ? 'text-[#15803d]'
-                : req.confidence >= 0.5
-                  ? 'text-[#b45309]'
-                  : 'text-semantic-error',
-            )}
-          >
-            {Math.round(req.confidence * 100)}%
-          </span>
+          {req.confidence != null ? (
+            <span
+              className={clsx(
+                'text-xs font-medium tabular-nums',
+                req.confidence >= 0.8
+                  ? 'text-[#15803d]'
+                  : req.confidence >= 0.5
+                    ? 'text-[#b45309]'
+                    : 'text-semantic-error',
+              )}
+            >
+              {Math.round(req.confidence * 100)}%
+            </span>
+          ) : (
+            <span className="text-xs text-content-quaternary">-</span>
+          )}
         </td>
 
         {/* Source */}
         <td className="px-4 py-3 text-content-tertiary text-xs max-w-[120px] truncate">
-          {req.source_reference || '-'}
+          {req.source_ref || '-'}
         </td>
 
         {/* Actions */}
