@@ -1,33 +1,38 @@
 /**
  * API helpers for Markups & Annotations.
- *
- * All endpoints are prefixed with /v1/markups/.
+ * Endpoints prefixed with /v1/markups/.
  */
 
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
 
-/* ── Types ─────────────────────────────────────────────────────────────── */
+/* ── Types (matching backend schemas exactly) ────────────────────────── */
 
-export type MarkupType = 'cloud' | 'arrow' | 'text' | 'stamp' | 'measurement' | 'highlight' | 'freehand';
+export type MarkupType =
+  | 'cloud' | 'arrow' | 'text' | 'rectangle' | 'highlight'
+  | 'distance' | 'area' | 'count' | 'stamp' | 'polygon';
+
 export type MarkupStatus = 'active' | 'resolved' | 'archived';
 
 export interface Markup {
   id: string;
   project_id: string;
-  document_id: string;
-  document_name: string;
+  document_id: string | null;
   page: number;
   type: MarkupType;
-  label: string;
-  full_text: string;
-  author: string;
+  geometry: Record<string, unknown>;
+  text: string | null;
+  color: string;
+  line_width: number;
+  opacity: number;
   author_id: string;
   status: MarkupStatus;
-  measurement_value: string | null;
+  label: string | null;
+  measurement_value: number | null;
   measurement_unit: string | null;
-  geometry: Record<string, unknown> | null;
-  linked_position_id: string | null;
+  stamp_template_id: string | null;
+  linked_boq_position_id: string | null;
   metadata: Record<string, unknown>;
+  created_by: string;
   created_at: string;
   updated_at: string;
 }
@@ -35,12 +40,32 @@ export interface Markup {
 export interface StampTemplate {
   id: string;
   project_id: string | null;
+  owner_id: string;
   name: string;
-  label: string;
+  category: string;
+  text: string;
   color: string;
+  background_color: string | null;
   icon: string | null;
-  is_system: boolean;
+  include_date: boolean;
+  include_name: boolean;
+  is_active: boolean;
+  metadata: Record<string, unknown>;
   created_at: string;
+  updated_at: string;
+}
+
+export interface ScaleConfig {
+  id: string;
+  document_id: string;
+  page: number;
+  pixels_per_unit: number;
+  unit_label: string;
+  calibration_points: unknown;
+  real_distance: number;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface MarkupsSummary {
@@ -56,41 +81,33 @@ export interface MarkupFilters {
   status?: MarkupStatus | '';
   author_id?: string;
   document_id?: string;
+  page?: number;
 }
 
 export interface CreateMarkupPayload {
   project_id: string;
-  document_id: string;
-  page: number;
+  document_id?: string;
+  page?: number;
   type: MarkupType;
-  label: string;
-  full_text?: string;
-  measurement_value?: string;
-  measurement_unit?: string;
   geometry?: Record<string, unknown>;
-  linked_position_id?: string;
-  metadata?: Record<string, unknown>;
+  text?: string;
+  color?: string;
+  label?: string;
+  measurement_value?: number;
+  measurement_unit?: string;
+  stamp_template_id?: string;
 }
 
 export interface UpdateMarkupPayload {
-  label?: string;
-  full_text?: string;
+  text?: string;
+  color?: string;
   status?: MarkupStatus;
-  measurement_value?: string;
+  label?: string;
+  measurement_value?: number;
   measurement_unit?: string;
-  linked_position_id?: string | null;
-  metadata?: Record<string, unknown>;
 }
 
-export interface CreateStampTemplatePayload {
-  project_id?: string;
-  name: string;
-  label: string;
-  color: string;
-  icon?: string;
-}
-
-/* ── API Functions ─────────────────────────────────────────────────────── */
+/* ── Markups CRUD ─────────────────────────────────────────────────────── */
 
 export async function fetchMarkups(
   projectId: string,
@@ -102,6 +119,7 @@ export async function fetchMarkups(
   if (filters?.status) params.set('status', filters.status);
   if (filters?.author_id) params.set('author_id', filters.author_id);
   if (filters?.document_id) params.set('document_id', filters.document_id);
+  if (filters?.page) params.set('page', String(filters.page));
   return apiGet<Markup[]>(`/v1/markups/?${params.toString()}`);
 }
 
@@ -117,26 +135,48 @@ export async function deleteMarkup(id: string): Promise<void> {
   return apiDelete(`/v1/markups/${id}`);
 }
 
-export async function fetchStampTemplates(projectId: string): Promise<StampTemplate[]> {
-  return apiGet<StampTemplate[]>(`/v1/markups/stamps?project_id=${projectId}`);
+export async function linkMarkupToBoq(markupId: string, positionId: string): Promise<Markup> {
+  return apiPost<Markup>(`/v1/markups/${markupId}/link-to-boq`, { position_id: positionId });
 }
 
-export async function createStampTemplate(data: CreateStampTemplatePayload): Promise<StampTemplate> {
-  return apiPost<StampTemplate>('/v1/markups/stamps', data);
+/* ── Stamps ───────────────────────────────────────────────────────────── */
+
+export async function fetchStampTemplates(projectId?: string): Promise<StampTemplate[]> {
+  const params = projectId ? `?project_id=${projectId}` : '';
+  return apiGet<StampTemplate[]>(`/v1/markups/stamps/templates${params}`);
+}
+
+export async function createStampTemplate(data: {
+  name: string;
+  category?: string;
+  text: string;
+  color: string;
+  project_id?: string;
+}): Promise<StampTemplate> {
+  return apiPost<StampTemplate>('/v1/markups/stamps/templates', data);
+}
+
+export async function deleteStampTemplate(id: string): Promise<void> {
+  return apiDelete(`/v1/markups/stamps/templates/${id}`);
+}
+
+/* ── Scales ───────────────────────────────────────────────────────────── */
+
+export async function fetchScales(documentId: string): Promise<ScaleConfig[]> {
+  return apiGet<ScaleConfig[]>(`/v1/markups/scales/?document_id=${documentId}`);
+}
+
+/* ── Summary & Export ─────────────────────────────────────────────────── */
+
+export async function fetchMarkupsSummary(projectId: string): Promise<MarkupsSummary> {
+  return apiGet<MarkupsSummary>(`/v1/markups/summary?project_id=${projectId}`);
 }
 
 export async function exportMarkupsCSV(projectId: string): Promise<Blob> {
   const token = localStorage.getItem('oe_access_token');
-  const res = await fetch(`/api/v1/markups/export/csv?project_id=${projectId}`, {
-    headers: {
-      Authorization: token ? `Bearer ${token}` : '',
-      'X-DDC-Client': 'OE/1.0',
-    },
+  const res = await fetch(`/api/v1/markups/export?project_id=${projectId}&format=csv`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
   if (!res.ok) throw new Error(`Export failed: ${res.statusText}`);
   return res.blob();
-}
-
-export async function fetchMarkupsSummary(projectId: string): Promise<MarkupsSummary> {
-  return apiGet<MarkupsSummary>(`/v1/markups/summary?project_id=${projectId}`);
 }
