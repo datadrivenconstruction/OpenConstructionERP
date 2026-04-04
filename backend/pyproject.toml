@@ -1,6 +1,6 @@
 [project]
 name = "openconstructionerp"
-version = "0.2.1"
+version = "0.2.2"
 description = "The #1 open-source platform for construction cost estimation — BOQ, 4D/5D, AI, CAD/BIM takeoff"
 license = "AGPL-3.0-or-later"
 requires-python = ">=3.12"
@@ -123,10 +123,10 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["app"]
 
-# force-include is used only in Docker builds (Dockerfile copies frontend/dist)
-# For local dev: pip install -e . works without frontend build
-# [tool.hatch.build.targets.wheel.force-include]
-# "../frontend/dist" = "app/_frontend_dist"
+# Bundle pre-built frontend into the wheel for pip install
+# Build frontend first: cd frontend && npm run build
+[tool.hatch.build.targets.wheel.force-include]
+"../frontend/dist" = "app/_frontend_dist"
 
 [tool.ruff]
 target-version = "py312"
