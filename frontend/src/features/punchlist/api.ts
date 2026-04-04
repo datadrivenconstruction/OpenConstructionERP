@@ -106,33 +106,33 @@ export async function fetchPunchItems(
   if (filters?.status) params.set('status', filters.status);
   if (filters?.category) params.set('category', filters.category);
   if (filters?.assigned_to_id) params.set('assigned_to_id', filters.assigned_to_id);
-  return apiGet<PunchItem[]>(`/v1/punchlist/?${params.toString()}`);
+  return apiGet<PunchItem[]>(`/v1/punchlist/items?${params.toString()}`);
 }
 
 export async function createPunchItem(data: CreatePunchPayload): Promise<PunchItem> {
-  return apiPost<PunchItem>('/v1/punchlist/', data);
+  return apiPost<PunchItem>('/v1/punchlist/items', data);
 }
 
 export async function updatePunchItem(id: string, data: UpdatePunchPayload): Promise<PunchItem> {
-  return apiPatch<PunchItem>(`/v1/punchlist/${id}`, data);
+  return apiPatch<PunchItem>(`/v1/punchlist/items/${id}`, data);
 }
 
 export async function deletePunchItem(id: string): Promise<void> {
-  return apiDelete(`/v1/punchlist/${id}`);
+  return apiDelete(`/v1/punchlist/items/${id}`);
 }
 
 export async function transitionPunchStatus(
   id: string,
   newStatus: PunchStatus,
 ): Promise<PunchItem> {
-  return apiPost<PunchItem>(`/v1/punchlist/${id}/transition`, { status: newStatus });
+  return apiPost<PunchItem>(`/v1/punchlist/items/${id}/transition`, { new_status: newStatus });
 }
 
 export async function uploadPunchPhoto(id: string, file: File): Promise<{ url: string }> {
   const formData = new FormData();
   formData.append('file', file);
   const token = localStorage.getItem('oe_access_token');
-  const res = await fetch(`/api/v1/punchlist/${id}/photos`, {
+  const res = await fetch(`/api/v1/punchlist/items/${id}/photos`, {
     method: 'POST',
     headers: {
       Authorization: token ? `Bearer ${token}` : '',
