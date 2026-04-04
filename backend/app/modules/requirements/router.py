@@ -398,11 +398,7 @@ async def import_from_text(
     A new set is created with the imported requirements.
     """
     try:
-        # Get the referenced set to find the project_id
-        parent_set = await service.get_set(set_id)
-        project_id = parent_set.project_id
-
-        result_set = await service.import_from_text(project_id, data, user_id=user_id)
+        result_set = await service.import_from_text(set_id, data, user_id=user_id)
         return _set_to_detail(result_set)
     except HTTPException:
         raise
