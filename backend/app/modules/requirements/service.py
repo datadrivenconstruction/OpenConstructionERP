@@ -585,11 +585,11 @@ class RequirementsService:
 
     async def import_from_text(
         self,
-        project_id: uuid.UUID,
+        set_id: uuid.UUID,
         data: TextImportRequest,
         user_id: str = "",
     ) -> RequirementSet:
-        """Parse structured text into requirements and create a set.
+        """Parse structured text and add requirements to an EXISTING set.
 
         Expected text format (one requirement per line):
             entity | attribute | constraint_type | constraint_value | unit
@@ -598,15 +598,8 @@ class RequirementsService:
 
         Lines starting with '#' are comments. Empty lines are skipped.
         """
-        # Create the set
-        req_set = RequirementSet(
-            project_id=project_id,
-            name=data.set_name,
-            description=f"Imported from text ({len(data.text)} chars)",
-            source_type="specification",
-            created_by=user_id,
-        )
-        req_set = await self.set_repo.create(req_set)
+        req_set = await self.get_set(set_id)
+        set_id_val = req_set.id
 
         # Parse text
         items: list[Requirement] = []
@@ -644,7 +637,7 @@ class RequirementsService:
 
             items.append(
                 Requirement(
-                    requirement_set_id=req_set.id,
+                    requirement_set_id=set_id_val,
                     entity=entity,
                     attribute=attribute,
                     constraint_type=constraint_type,
@@ -674,9 +667,9 @@ class RequirementsService:
             len(parse_errors),
         )
 
-        # Refresh to load relationships
-        await self.session.refresh(req_set)
-        return req_set
+        # Commit and re-fetch to load all relationships cleanly
+        await self.session.commit()
+        return await self.get_set(set_id_val)
 
     # ── Statistics ───────────────────────────────────────────────────────
 
