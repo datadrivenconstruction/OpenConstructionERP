@@ -5,6 +5,39 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] — 2026-04-04
+
+### Fixed
+- **CRITICAL: pip install -e ./backend** — `[project.urls]` was placed before `dependencies` in pyproject.toml, breaking editable installs and PyPI builds
+- **CRITICAL: BOQ Duplication crash** — MissingGreenlet error when duplicating BOQ (eagerly capture ORM attributes before session expiry)
+- **CRITICAL: CWICR import 500 error** — ProcessPoolExecutor fails on Windows/uvicorn; replaced with asyncio.to_thread
+- **Security: Path traversal** — Document/takeoff download endpoints now resolve symlinks and sandbox-check paths
+- **Security: CORS** — Block wildcard `*` origins in production mode with warning
+- **Security: Login enumeration** — Deactivated accounts return same 401 as invalid credentials; password policy not revealed before auth
+- **Security: Catalog price factor** — Bounded to `0 < factor ≤ 10` with explicit validation
+- **Docker quickstart** — Dockerfile copies full backend (incl. README.md for hatchling), installs `[server]` extras, creates frontend/dist dir, uses development mode
+- **Alembic migration** — Replaced broken init migration (DROP non-existent tables) with no-op baseline
+- **Nginx** — Added CSP, HSTS, Permissions-Policy security headers
+- **35 test errors** — Marked standalone test_full_platform.py with pytest.mark.skip
+
+### Added
+- Version number (v0.2.0) displayed in sidebar footer
+- "Run Setup Wizard" link in welcome modal for re-onboarding
+- Competitor comparison table in README (vs iTWO, CostX, Sage, Bluebeam)
+- Estimation workflow diagram in README
+- Security section in README
+- Validation & Compliance and Guided Onboarding sections in README
+- Trademark disclaimer on comparison table
+
+### Changed
+- CLI command renamed from `openestimate` to `openconstructionerp`
+- DDC Toolkit → DDC cad2data in all references
+- README screenshots use real PNG files (not placeholder JPGs)
+
+### Removed
+- 11 development screenshot JPGs from repository root
+- Test failure PNG from frontend/test-results/
+
 ## [0.1.0] — 2026-03-30
 
 ### Added
