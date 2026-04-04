@@ -148,7 +148,7 @@ class ScaleConfigResponse(BaseModel):
     page: int = 1
     pixels_per_unit: float
     unit_label: str = "m"
-    calibration_points: dict[str, Any] = Field(default_factory=dict)
+    calibration_points: Any = Field(default_factory=dict)
     real_distance: float
     created_by: str = ""
     created_at: datetime
