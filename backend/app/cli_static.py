@@ -88,5 +88,12 @@ def mount_frontend(app: FastAPI) -> None:
     # SPA catch-all: any route not matched by /api/* or /assets/* → index.html
     @app.get("/{path:path}", include_in_schema=False)
     async def spa_fallback(path: str) -> FileResponse:
-        """Serve index.html for all frontend routes (SPA routing)."""
+        """Serve index.html for all frontend routes (SPA routing).
+
+        IMPORTANT: Skip /api/ paths — they must be handled by FastAPI routers.
+        Without this check, the catch-all would return index.html for API GET requests.
+        """
+        if path.startswith("api/") or path.startswith("api"):
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail="Not Found")
         return FileResponse(str(index_path))

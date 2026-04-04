@@ -61,6 +61,9 @@ const RiskRegisterPage = lazy(() =>
 const DocumentsPage = lazy(() =>
   import('@/features/documents/DocumentsPage').then((m) => ({ default: m.DocumentsPage }))
 );
+const RequirementsPage = lazy(() =>
+  import('@/features/requirements/RequirementsPage').then((m) => ({ default: m.RequirementsPage }))
+);
 
 function LoadingScreen() {
   return (
@@ -257,6 +260,8 @@ export default function App() {
         <Route path="/documents" element={<P title="Documents"><DocumentsPage /></P>} />
 
         <Route path="/risks" element={<P title="Risk Register"><RiskRegisterPage /></P>} />
+
+        <Route path="/requirements" element={<P title="Requirements & Quality Gates"><RequirementsPage /></P>} />
 
         <Route path="/modules" element={<P title="Modules"><ModulesPage /></P>} />
 

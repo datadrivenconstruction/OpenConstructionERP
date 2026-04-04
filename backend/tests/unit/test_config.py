@@ -28,7 +28,7 @@ class TestSettingsDefaults:
         assert settings.app_name == "OpenConstructionERP"
 
     def test_app_version_default(self, settings):
-        assert settings.app_version == "0.1.0"
+        assert settings.app_version == "0.2.2"
 
     def test_app_env_default(self, settings):
         assert settings.app_env == "development"
