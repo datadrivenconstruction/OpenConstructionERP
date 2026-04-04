@@ -6,7 +6,7 @@ import { Header } from './Header';
 import { FeedbackDialog, OnboardingTour } from '@/shared/ui';
 import { GlobalProgress } from '@/shared/ui/GlobalProgress';
 import { OfflineBanner } from '@/shared/ui/OfflineBanner';
-import { UpdateChecker } from '@/shared/ui/UpdateChecker';
+
 import { useSwipeGesture, useEdgeSwipe } from '@/shared/hooks/useSwipeGesture';
 import { useIsRTL } from '@/shared/hooks/useIsRTL';
 import { useOfflineSync } from '@/shared/hooks/useOnlineStatus';
@@ -48,7 +48,6 @@ export function AppLayout({ title, children }: AppLayoutProps) {
   return (
     <div className="min-h-screen bg-surface-secondary">
       <OfflineBanner />
-      <UpdateChecker />
       <GlobalProgress />
 
       {/* Mobile overlay */}

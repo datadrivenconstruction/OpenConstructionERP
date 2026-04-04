@@ -1,77 +1,78 @@
 /**
- * UpdateChecker — Shows update notification when a new version is available.
+ * UpdateNotification — Sidebar widget showing when a new version is available.
  *
- * In desktop mode (Tauri): uses tauri-plugin-updater to check GitHub Releases.
- * In browser mode: checks /api/system/status for version and compares with GitHub.
- *
- * UI: Small banner at top of page or badge on Settings, like Claude App.
+ * Checks GitHub Releases API for datadrivenconstruction/OpenConstructionERP.
+ * Shows a compact card in the sidebar with version, key changes, and update link.
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Download, X, CheckCircle2 } from 'lucide-react';
-import { Button } from './Button';
+import { ArrowUpCircle, X, ExternalLink, Gift, ChevronDown, ChevronUp } from 'lucide-react';
 
-const CURRENT_VERSION = '0.1.0';
+const CURRENT_VERSION = '0.2.1';
 const CHECK_INTERVAL = 4 * 60 * 60 * 1000; // 4 hours
-const GITHUB_API = 'https://api.github.com/repos/datadrivenconstruction/OpenConstructionEstimate-DDC-CWICR/releases/latest';
+const GITHUB_RELEASES_API =
+  'https://api.github.com/repos/datadrivenconstruction/OpenConstructionERP/releases/latest';
+const DISMISS_KEY = 'oe_update_dismissed_version';
 
-interface UpdateInfo {
+interface ReleaseInfo {
   version: string;
   notes: string;
   url: string;
+  publishedAt: string;
 }
 
-function isTauri(): boolean {
-  return !!(window as any).__TAURI__;
+/** Compare semver strings: returns true if a > b */
+function isNewer(a: string, b: string): boolean {
+  const pa = a.split('.').map(Number);
+  const pb = b.split('.').map(Number);
+  for (let i = 0; i < 3; i++) {
+    if ((pa[i] ?? 0) > (pb[i] ?? 0)) return true;
+    if ((pa[i] ?? 0) < (pb[i] ?? 0)) return false;
+  }
+  return false;
 }
 
-export function UpdateChecker() {
+/** Extract first 5 bullet points from markdown release notes */
+function extractHighlights(notes: string): string[] {
+  return notes
+    .split('\n')
+    .map((l) => l.replace(/^[-*]\s*/, '').trim())
+    .filter((l) => l.length > 5 && l.length < 200)
+    .slice(0, 5);
+}
+
+export function UpdateNotification() {
   const { t } = useTranslation();
-  const [update, setUpdate] = useState<UpdateInfo | null>(null);
+  const [release, setRelease] = useState<ReleaseInfo | null>(null);
   const [dismissed, setDismissed] = useState(false);
-  const [installing, setInstalling] = useState(false);
-  const [installed, setInstalled] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   const checkForUpdate = useCallback(async () => {
     try {
-      if (isTauri()) {
-        // Tauri native updater — dynamic import only in Tauri context
-        try {
-          const mod = await (Function('return import("@tauri-apps/plugin-updater")')() as Promise<any>);
-          const result = await mod.check();
-          if (result?.available) {
-            setUpdate({
-              version: result.version,
-              notes: result.body ?? '',
-              url: '',
-            });
-          }
-        } catch { /* Tauri plugin not available */ }
-      } else {
-        // Browser mode: check GitHub releases
-        const resp = await fetch(GITHUB_API);
-        if (resp.ok) {
-          const data = await resp.json();
-          const latest = (data.tag_name ?? '').replace(/^v/, '');
-          if (latest && latest !== CURRENT_VERSION) {
-            setUpdate({
-              version: latest,
-              notes: data.body ?? '',
-              url: data.html_url ?? '',
-            });
-          }
-        }
-      }
+      const resp = await fetch(GITHUB_RELEASES_API);
+      if (!resp.ok) return;
+      const data = await resp.json();
+      const latest = (data.tag_name ?? '').replace(/^v/, '');
+      if (!latest || !isNewer(latest, CURRENT_VERSION)) return;
+
+      // Check if user already dismissed this version
+      const dismissedVersion = localStorage.getItem(DISMISS_KEY);
+      if (dismissedVersion === latest) return;
+
+      setRelease({
+        version: latest,
+        notes: data.body ?? '',
+        url: data.html_url ?? `https://github.com/datadrivenconstruction/OpenConstructionERP/releases`,
+        publishedAt: data.published_at ?? '',
+      });
     } catch {
-      // Silent fail — update check is optional
+      // Silent fail
     }
   }, []);
 
   useEffect(() => {
-    // Check on mount (with 5s delay to not block startup)
-    const timer = setTimeout(checkForUpdate, 5000);
-    // Check periodically
+    const timer = setTimeout(checkForUpdate, 8000);
     const interval = setInterval(checkForUpdate, CHECK_INTERVAL);
     return () => {
       clearTimeout(timer);
@@ -79,69 +80,88 @@ export function UpdateChecker() {
     };
   }, [checkForUpdate]);
 
-  const handleInstall = useCallback(async () => {
-    if (!isTauri()) {
-      // Browser: open GitHub releases page
-      if (update?.url) window.open(update.url, '_blank');
-      return;
+  const handleDismiss = useCallback(() => {
+    setDismissed(true);
+    if (release) {
+      localStorage.setItem(DISMISS_KEY, release.version);
     }
+  }, [release]);
 
-    setInstalling(true);
-    try {
-      const updaterMod = await (Function('return import("@tauri-apps/plugin-updater")')() as Promise<any>);
-      const processMod = await (Function('return import("@tauri-apps/plugin-process")')() as Promise<any>);
-      const result = await updaterMod.check();
-      if (result?.available) {
-        await result.downloadAndInstall();
-        setInstalled(true);
-        setTimeout(() => processMod.relaunch(), 1500);
-      }
-    } catch {
-      setInstalling(false);
-    }
-  }, [update]);
+  if (!release || dismissed) return null;
 
-  if (!update || dismissed) return null;
+  const highlights = extractHighlights(release.notes);
+  const relativeDate = release.publishedAt
+    ? new Date(release.publishedAt).toLocaleDateString()
+    : '';
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-center px-4 py-2 bg-gradient-to-r from-oe-blue to-violet-600 text-white text-sm shadow-lg animate-slide-down">
-      <div className="flex items-center gap-3 max-w-2xl">
-        {installed ? (
-          <>
-            <CheckCircle2 size={16} />
-            <span className="font-medium">
-              {t('update.installed', { defaultValue: 'Update installed! Restarting...' })}
+    <div className="mx-2 mb-2 rounded-xl border border-emerald-200 dark:border-emerald-800/40 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/20 overflow-hidden animate-card-in">
+      {/* Header */}
+      <div className="flex items-center gap-2 px-3 py-2.5">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
+          <Gift size={14} className="text-emerald-600 dark:text-emerald-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300">
+              v{release.version}
             </span>
-          </>
-        ) : (
-          <>
-            <Download size={16} />
-            <span>
-              {t('update.available', {
-                defaultValue: 'OpenConstructionERP {{version}} is available',
-                version: update.version,
-              })}
+            <span className="text-2xs text-emerald-600/60 dark:text-emerald-400/50">
+              {t('update.new_available', { defaultValue: 'available' })}
             </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleInstall}
-              loading={installing}
-              className="!text-white !border-white/30 hover:!bg-white/10"
-            >
-              {isTauri()
-                ? t('update.install_restart', { defaultValue: 'Install & Restart' })
-                : t('update.view_release', { defaultValue: 'View Release' })
-              }
-            </Button>
-            <button
-              onClick={() => setDismissed(true)}
-              className="p-1 rounded hover:bg-white/10 transition-colors"
-            >
-              <X size={14} />
-            </button>
-          </>
-        )}
+          </div>
+          {relativeDate && (
+            <span className="text-2xs text-emerald-600/50 dark:text-emerald-400/40">
+              {relativeDate}
+            </span>
+          )}
+        </div>
+        <button
+          onClick={handleDismiss}
+          className="p-0.5 rounded text-emerald-400 hover:text-emerald-600 transition-colors"
+          title={t('common.dismiss', { defaultValue: 'Dismiss' })}
+        >
+          <X size={12} />
+        </button>
+      </div>
+
+      {/* Highlights (collapsible) */}
+      {highlights.length > 0 && (
+        <>
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="w-full flex items-center gap-1 px-3 py-1 text-2xs text-emerald-600/70 dark:text-emerald-400/60 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
+          >
+            {expanded ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
+            <span>{t('update.whats_new', { defaultValue: "What's new" })}</span>
+          </button>
+          {expanded && (
+            <div className="px-3 pb-2">
+              <ul className="space-y-0.5">
+                {highlights.map((h, i) => (
+                  <li key={i} className="flex items-start gap-1.5 text-2xs text-emerald-700/80 dark:text-emerald-300/70">
+                    <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-emerald-500/50" />
+                    <span>{h}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Update button */}
+      <div className="px-3 pb-2.5">
+        <a
+          href={release.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-1.5 w-full rounded-lg bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 text-xs font-medium text-white transition-colors"
+        >
+          <ArrowUpCircle size={13} />
+          {t('update.view_update', { defaultValue: 'View Update' })}
+          <ExternalLink size={10} />
+        </a>
       </div>
     </div>
   );
