@@ -75,12 +75,18 @@ async function request<TResponse>(
 
   let response: Response;
   try {
+    // 5 minute timeout for long operations (CWICR import, AI estimation, CAD conversion)
+    const controller = new AbortController();
+    const timeoutMs = method === 'GET' ? 60_000 : 300_000; // 1 min GET, 5 min POST
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
     response = await fetch(`${BASE_URL}${path}`, {
       ...init,
       method,
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
+      signal: init?.signal ?? controller.signal,
     });
+    clearTimeout(timeoutId);
   } catch (err) {
     // Log network errors
     logError(

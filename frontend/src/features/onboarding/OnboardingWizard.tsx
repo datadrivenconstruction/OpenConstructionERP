@@ -506,10 +506,14 @@ function StepCostDatabase({
 
       try {
         const token = useAuthStore.getState().accessToken;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000); // 5 min for large DB
         const res = await fetch(`/api/v1/costs/load-cwicr/${db.id}`, {
           method: 'POST',
           headers: token ? { Authorization: `Bearer ${token}` } : {},
+          signal: controller.signal,
         });
+        clearTimeout(timeoutId);
 
         if (res.ok) {
           const data = await res.json();
