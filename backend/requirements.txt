@@ -136,7 +136,7 @@ pdfplumber==0.11.9
 pefile==2024.8.26
 phpserialize==1.3
 pikepdf==10.3.0
-Pillow==12.2.0
+Pillow==11.3.0
 playwright==1.57.0
 pluggy==1.6.0
 polars==1.38.1

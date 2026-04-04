@@ -123,8 +123,10 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["app"]
 
-[tool.hatch.build.targets.wheel.force-include]
-"../frontend/dist" = "app/_frontend_dist"
+# force-include is used only in Docker builds (Dockerfile copies frontend/dist)
+# For local dev: pip install -e . works without frontend build
+# [tool.hatch.build.targets.wheel.force-include]
+# "../frontend/dist" = "app/_frontend_dist"
 
 [tool.ruff]
 target-version = "py312"

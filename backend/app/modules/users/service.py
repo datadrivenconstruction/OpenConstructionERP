@@ -185,7 +185,16 @@ class UserService:
         """
         user = await self.user_repo.get_by_email(data.email)
 
-        if user is None or not verify_password(data.password, user.hashed_password):
+        if user is None:
+            # Dummy bcrypt check to prevent timing side-channel (user enumeration)
+            # Without this, non-existent user returns ~0.2s, existing user ~0.5s (bcrypt)
+            verify_password(data.password, "$2b$12$LJ3m4ys3Lz0Y0u9DuMmDCeDhR5x.V5fHn/G8s8GD3EO2M4QRWQ.IO")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password",
+            )
+
+        if not verify_password(data.password, user.hashed_password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password",
