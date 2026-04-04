@@ -18,6 +18,7 @@ import {
   PenLine,
   Filter,
   Plus,
+  FileText,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
 import { apiGet } from '@/shared/lib/api';
@@ -47,6 +48,11 @@ interface Project {
   currency: string;
 }
 
+interface DocItem {
+  id: string;
+  name: string;
+}
+
 const MARKUP_TYPES: MarkupType[] = [
   'cloud',
   'arrow',
@@ -69,18 +75,45 @@ const TYPE_ICONS: Record<MarkupType, React.ElementType> = {
   freehand: PenLine,
 };
 
+const TYPE_LABELS: Record<MarkupType, string> = {
+  cloud: 'Cloud',
+  arrow: 'Arrow',
+  text: 'Text',
+  stamp: 'Stamp',
+  measurement: 'Measurement',
+  highlight: 'Highlight',
+  freehand: 'Freehand',
+};
+
 const STATUS_BADGE_VARIANT: Record<MarkupStatus, 'blue' | 'success' | 'neutral'> = {
   active: 'blue',
   resolved: 'success',
   archived: 'neutral',
 };
 
+const DEFAULT_STAMPS = [
+  { name: 'approved', label: 'Approved', color: 'green' },
+  { name: 'rejected', label: 'Rejected', color: 'red' },
+  { name: 'for_review', label: 'For Review', color: 'blue' },
+  { name: 'revised', label: 'Revised', color: 'purple' },
+  { name: 'final', label: 'Final', color: 'amber' },
+];
+
 const STAMP_COLORS: Record<string, string> = {
-  approved: 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-700',
-  rejected: 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900/30 dark:text-red-400 dark:border-red-700',
-  reviewed: 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700',
-  for_information: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700',
-  revised: 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700',
+  approved:
+    'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-700',
+  rejected:
+    'bg-red-100 text-red-800 border-red-300 dark:bg-red-900/30 dark:text-red-400 dark:border-red-700',
+  for_review:
+    'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700',
+  reviewed:
+    'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700',
+  for_information:
+    'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700',
+  revised:
+    'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-700',
+  final:
+    'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700',
 };
 
 /* ── Styling helpers ──────────────────────────────────────────────────── */
@@ -97,10 +130,10 @@ function StatsCards({ summary }: { summary: MarkupsSummary | undefined }) {
   const byType = summary?.by_type ?? {};
   const byStatus = summary?.by_status ?? {};
 
-  const typeBreakdown = MARKUP_TYPES
-    .filter((tp) => (byType[tp] ?? 0) > 0)
-    .map((tp) => `${byType[tp]} ${tp}`)
-    .join(', ') || '-';
+  const typeBreakdown =
+    MARKUP_TYPES.filter((tp) => (byType[tp] ?? 0) > 0)
+      .map((tp) => `${byType[tp]} ${tp}`)
+      .join(', ') || '-';
 
   const activeCount = byStatus['active'] ?? 0;
   const resolvedCount = byStatus['resolved'] ?? 0;
@@ -206,17 +239,23 @@ function StampTemplatesSection({
 }) {
   const { t } = useTranslation();
 
-  // Default system stamps when none from API
-  const displayStamps: Array<{ name: string; label: string; color: string }> =
-    stamps.length > 0
-      ? stamps.map((s) => ({ name: s.name, label: s.label, color: s.color }))
-      : [
-          { name: 'approved', label: 'Approved', color: 'green' },
-          { name: 'rejected', label: 'Rejected', color: 'red' },
-          { name: 'reviewed', label: 'Reviewed', color: 'blue' },
-          { name: 'for_information', label: 'For Information', color: 'amber' },
-          { name: 'revised', label: 'Revised', color: 'purple' },
-        ];
+  // Merge API stamps with defaults — always show predefined stamps
+  const apiStampMap = new Map(stamps.map((s) => [s.name, s]));
+  const displayStamps: Array<{ name: string; label: string; color: string }> = DEFAULT_STAMPS.map(
+    (def) => {
+      const apiStamp = apiStampMap.get(def.name);
+      return apiStamp
+        ? { name: apiStamp.name, label: apiStamp.label, color: apiStamp.color }
+        : def;
+    },
+  );
+
+  // Add any extra API stamps not in defaults
+  for (const s of stamps) {
+    if (!DEFAULT_STAMPS.some((d) => d.name === s.name)) {
+      displayStamps.push({ name: s.name, label: s.label, color: s.color });
+    }
+  }
 
   return (
     <div>
@@ -238,7 +277,7 @@ function StampTemplatesSection({
             <div
               key={stamp.name}
               className={clsx(
-                'flex flex-col items-center justify-center rounded-lg border-2 p-4 text-center transition-all hover:scale-105',
+                'flex flex-col items-center justify-center rounded-lg border-2 p-4 text-center transition-all hover:scale-105 cursor-pointer',
                 colorCls,
               )}
             >
@@ -265,6 +304,7 @@ export function MarkupsPage() {
   const [filterType, setFilterType] = useState<MarkupType | ''>('');
   const [filterStatus, setFilterStatus] = useState<MarkupStatus | ''>('');
   const [filterAuthor, setFilterAuthor] = useState('');
+  const [filterDocumentId, setFilterDocumentId] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
 
@@ -280,13 +320,21 @@ export function MarkupsPage() {
     [projects, projectId],
   );
 
+  // Fetch documents for the selected project (used in document filter dropdown)
+  const { data: documents = [] } = useQuery({
+    queryKey: ['documents-list', projectId],
+    queryFn: () => apiGet<DocItem[]>(`/v1/documents/?project_id=${projectId}`),
+    enabled: !!projectId,
+  });
+
   const { data: markups = [], isLoading } = useQuery({
-    queryKey: ['markups', projectId, filterType, filterStatus, filterAuthor],
+    queryKey: ['markups', projectId, filterType, filterStatus, filterAuthor, filterDocumentId],
     queryFn: () =>
       fetchMarkups(projectId, {
         type: filterType || undefined,
         status: filterStatus || undefined,
         author_id: filterAuthor || undefined,
+        document_id: filterDocumentId || undefined,
       }),
     enabled: !!projectId,
   });
@@ -415,8 +463,8 @@ export function MarkupsPage() {
           )}
         </div>
         <div className="flex items-center gap-3">
-          {/* Project selector */}
-          {projects.length > 1 && (
+          {/* Project selector — always shown when projects exist */}
+          {projects.length > 0 && (
             <select
               value={projectId}
               onChange={(e) => {
@@ -425,8 +473,11 @@ export function MarkupsPage() {
                   useProjectContextStore.getState().setActiveProject(p.id, p.name);
                 }
               }}
-              className={inputCls + ' max-w-[200px]'}
+              className={inputCls + ' max-w-[220px]'}
             >
+              <option value="" disabled>
+                {t('markups.select_project', { defaultValue: 'Select project...' })}
+              </option>
               {projects.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
@@ -434,6 +485,25 @@ export function MarkupsPage() {
               ))}
             </select>
           )}
+
+          {/* Document selector */}
+          {projectId && documents.length > 0 && (
+            <select
+              value={filterDocumentId}
+              onChange={(e) => setFilterDocumentId(e.target.value)}
+              className={inputCls + ' max-w-[200px]'}
+            >
+              <option value="">
+                {t('markups.all_documents', { defaultValue: 'All Documents' })}
+              </option>
+              {documents.map((doc) => (
+                <option key={doc.id} value={doc.id}>
+                  {doc.name}
+                </option>
+              ))}
+            </select>
+          )}
+
           <Button variant="secondary" size="sm" onClick={handleExportCSV} disabled={!projectId}>
             <Download size={16} className="mr-1.5" />
             {t('markups.export_csv', { defaultValue: 'Export CSV' })}
@@ -441,175 +511,193 @@ export function MarkupsPage() {
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="mt-6">
-        <StatsCards summary={summary} />
-      </div>
-
-      {/* Filter bar */}
-      <div className="mt-6 flex flex-col sm:flex-row sm:items-center gap-3">
-        {/* Search */}
-        <div className="relative flex-1 max-w-sm">
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-content-tertiary"
-          />
-          <input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t('markups.search', {
-              defaultValue: 'Search label, text, document...',
-            })}
-            className={inputCls + ' pl-9'}
-          />
-        </div>
-
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowFilters(!showFilters)}
-          className={showFilters ? 'text-oe-blue' : ''}
-        >
-          <Filter size={16} className="mr-1" />
-          {t('common.filters', { defaultValue: 'Filters' })}
-        </Button>
-      </div>
-
-      {/* Collapsible filters */}
-      {showFilters && (
-        <div className="mt-3 flex flex-wrap gap-3 animate-fade-in">
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value as MarkupType | '')}
-            className={inputCls + ' max-w-[160px]'}
-          >
-            <option value="">
-              {t('markups.all_types', { defaultValue: 'All Types' })}
-            </option>
-            {MARKUP_TYPES.map((tp) => (
-              <option key={tp} value={tp}>
-                {t(`markups.type_${tp}`, { defaultValue: tp.charAt(0).toUpperCase() + tp.slice(1) })}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value as MarkupStatus | '')}
-            className={inputCls + ' max-w-[160px]'}
-          >
-            <option value="">
-              {t('markups.all_statuses', { defaultValue: 'All Statuses' })}
-            </option>
-            {MARKUP_STATUSES.map((st) => (
-              <option key={st} value={st}>
-                {t(`markups.status_${st}`, {
-                  defaultValue: st.charAt(0).toUpperCase() + st.slice(1),
-                })}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={filterAuthor}
-            onChange={(e) => setFilterAuthor(e.target.value)}
-            className={inputCls + ' max-w-[180px]'}
-          >
-            <option value="">
-              {t('markups.all_authors', { defaultValue: 'All Authors' })}
-            </option>
-            {authors.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      {/* Table */}
-      <div className="mt-6">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-16">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" />
-          </div>
-        ) : filteredMarkups.length === 0 ? (
+      {/* Empty state: no project selected */}
+      {!projectId ? (
+        <div className="mt-12">
           <EmptyState
             icon={<PenTool size={40} className="text-content-quaternary" />}
-            title={t('markups.empty_title', { defaultValue: 'No markups found' })}
-            description={t('markups.empty_desc', {
+            title={t('markups.no_project_title', { defaultValue: 'No project selected' })}
+            description={t('markups.no_project_desc', {
               defaultValue:
-                'Markups and annotations from your project documents will appear here.',
+                'Select a project from the dropdown above to view and manage markups and annotations on your documents.',
             })}
           />
-        ) : (
-          <Card className="overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border-light bg-surface-secondary/50">
-                    <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-                      {t('markups.col_type', { defaultValue: 'Type' })}
-                    </th>
-                    <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-                      {t('markups.col_label', { defaultValue: 'Label / Text' })}
-                    </th>
-                    <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-                      {t('markups.col_document', { defaultValue: 'Document' })}
-                    </th>
-                    <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-                      {t('markups.col_page', { defaultValue: 'Page' })}
-                    </th>
-                    <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-                      {t('markups.col_author', { defaultValue: 'Author' })}
-                    </th>
-                    <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-                      {t('markups.col_status', { defaultValue: 'Status' })}
-                    </th>
-                    <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-                      {t('markups.col_measurement', { defaultValue: 'Measurement' })}
-                    </th>
-                    <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-                      {t('markups.col_date', { defaultValue: 'Date' })}
-                    </th>
-                    <th className="px-4 py-3 text-right text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
-                      {t('common.actions', { defaultValue: 'Actions' })}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border-light">
-                  {filteredMarkups.map((markup) => {
-                    const TypeIcon = TYPE_ICONS[markup.type] ?? PenTool;
-                    const isExpanded = expandedRowId === markup.id;
+        </div>
+      ) : (
+        <>
+          {/* Stats */}
+          <div className="mt-6">
+            <StatsCards summary={summary} />
+          </div>
 
-                    return (
-                      <MarkupTableRow
-                        key={markup.id}
-                        markup={markup}
-                        TypeIcon={TypeIcon}
-                        isExpanded={isExpanded}
-                        onToggleExpand={() =>
-                          setExpandedRowId(isExpanded ? null : markup.id)
-                        }
-                        onChangeStatus={(status) =>
-                          statusMut.mutate({ id: markup.id, status })
-                        }
-                        onDelete={() => delMut.mutate(markup.id)}
-                        t={t}
-                      />
-                    );
-                  })}
-                </tbody>
-              </table>
+          {/* Filter bar */}
+          <div className="mt-6 flex flex-col sm:flex-row sm:items-center gap-3">
+            {/* Search */}
+            <div className="relative flex-1 max-w-sm">
+              <Search
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-content-tertiary"
+              />
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t('markups.search', {
+                  defaultValue: 'Search label, text, document...',
+                })}
+                className={inputCls + ' pl-9'}
+              />
             </div>
-          </Card>
-        )}
-      </div>
 
-      {/* Stamp Templates */}
-      <div className="mt-8">
-        <StampTemplatesSection stamps={stamps} projectId={projectId} />
-      </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+              className={showFilters ? 'text-oe-blue' : ''}
+            >
+              <Filter size={16} className="mr-1" />
+              {t('common.filters', { defaultValue: 'Filters' })}
+            </Button>
+          </div>
+
+          {/* Collapsible filters */}
+          {showFilters && (
+            <div className="mt-3 flex flex-wrap gap-3 animate-fade-in">
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value as MarkupType | '')}
+                className={inputCls + ' max-w-[160px]'}
+              >
+                <option value="">
+                  {t('markups.all_types', { defaultValue: 'All Types' })}
+                </option>
+                {MARKUP_TYPES.map((tp) => (
+                  <option key={tp} value={tp}>
+                    {t(`markups.type_${tp}`, {
+                      defaultValue: TYPE_LABELS[tp],
+                    })}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value as MarkupStatus | '')}
+                className={inputCls + ' max-w-[160px]'}
+              >
+                <option value="">
+                  {t('markups.all_statuses', { defaultValue: 'All Statuses' })}
+                </option>
+                {MARKUP_STATUSES.map((st) => (
+                  <option key={st} value={st}>
+                    {t(`markups.status_${st}`, {
+                      defaultValue: st.charAt(0).toUpperCase() + st.slice(1),
+                    })}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={filterAuthor}
+                onChange={(e) => setFilterAuthor(e.target.value)}
+                className={inputCls + ' max-w-[180px]'}
+              >
+                <option value="">
+                  {t('markups.all_authors', { defaultValue: 'All Authors' })}
+                </option>
+                {authors.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Table */}
+          <div className="mt-6">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-16">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" />
+              </div>
+            ) : filteredMarkups.length === 0 ? (
+              <EmptyState
+                icon={<PenTool size={40} className="text-content-quaternary" />}
+                title={t('markups.empty_title', { defaultValue: 'No markups found' })}
+                description={t('markups.empty_desc', {
+                  defaultValue:
+                    'Select a project and start annotating documents. Markups and annotations will appear here.',
+                })}
+              />
+            ) : (
+              <Card className="overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border-light bg-surface-secondary/50">
+                        <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                          {t('markups.col_type', { defaultValue: 'Type' })}
+                        </th>
+                        <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                          {t('markups.col_label', { defaultValue: 'Label / Text' })}
+                        </th>
+                        <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                          {t('markups.col_document', { defaultValue: 'Document' })}
+                        </th>
+                        <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                          {t('markups.col_page', { defaultValue: 'Page' })}
+                        </th>
+                        <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                          {t('markups.col_author', { defaultValue: 'Author' })}
+                        </th>
+                        <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                          {t('markups.col_status', { defaultValue: 'Status' })}
+                        </th>
+                        <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                          {t('markups.col_measurement', { defaultValue: 'Measurement' })}
+                        </th>
+                        <th className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                          {t('markups.col_date', { defaultValue: 'Date' })}
+                        </th>
+                        <th className="px-4 py-3 text-right text-2xs font-semibold uppercase tracking-wider text-content-tertiary">
+                          {t('common.actions', { defaultValue: 'Actions' })}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border-light">
+                      {filteredMarkups.map((markup) => {
+                        const TypeIcon = TYPE_ICONS[markup.type] ?? PenTool;
+                        const isExpanded = expandedRowId === markup.id;
+
+                        return (
+                          <MarkupTableRow
+                            key={markup.id}
+                            markup={markup}
+                            TypeIcon={TypeIcon}
+                            isExpanded={isExpanded}
+                            onToggleExpand={() =>
+                              setExpandedRowId(isExpanded ? null : markup.id)
+                            }
+                            onChangeStatus={(status) =>
+                              statusMut.mutate({ id: markup.id, status })
+                            }
+                            onDelete={() => delMut.mutate(markup.id)}
+                            t={t}
+                          />
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            )}
+          </div>
+
+          {/* Stamp Templates */}
+          <div className="mt-8">
+            <StampTemplatesSection stamps={stamps} projectId={projectId} />
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -650,6 +738,19 @@ function MarkupTableRow({
       ? `${markup.measurement_value} ${markup.measurement_unit}`
       : '-';
 
+  // Resolve a more descriptive icon color per type
+  const typeColorCls: Record<MarkupType, string> = {
+    cloud: 'text-blue-500',
+    arrow: 'text-orange-500',
+    text: 'text-content-secondary',
+    stamp: 'text-purple-500',
+    measurement: 'text-emerald-600',
+    highlight: 'text-yellow-500',
+    freehand: 'text-pink-500',
+  };
+
+  const iconColor = typeColorCls[markup.type] ?? 'text-content-secondary';
+
   return (
     <>
       <tr
@@ -663,10 +764,10 @@ function MarkupTableRow({
             ) : (
               <ChevronRight size={14} className="text-content-tertiary shrink-0" />
             )}
-            <TypeIcon size={16} className="text-content-secondary shrink-0" />
+            <TypeIcon size={16} className={clsx('shrink-0', iconColor)} />
             <span className="text-xs text-content-secondary capitalize">
               {t(`markups.type_${markup.type}`, {
-                defaultValue: markup.type.charAt(0).toUpperCase() + markup.type.slice(1),
+                defaultValue: TYPE_LABELS[markup.type] ?? markup.type,
               })}
             </span>
           </div>
@@ -677,9 +778,12 @@ function MarkupTableRow({
           </span>
         </td>
         <td className="px-4 py-3">
-          <span className="text-sm text-content-secondary truncate max-w-[150px] block">
-            {markup.document_name}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <FileText size={14} className="text-content-tertiary shrink-0" />
+            <span className="text-sm text-content-secondary truncate max-w-[150px] block">
+              {markup.document_name}
+            </span>
+          </div>
         </td>
         <td className="px-4 py-3 text-sm text-content-secondary tabular-nums">
           {markup.page}
