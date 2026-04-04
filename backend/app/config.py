@@ -23,7 +23,7 @@ class Settings(BaseSettings):
 
     # ── App ──────────────────────────────────────────────────────────────
     app_name: str = "OpenConstructionERP"
-    app_version: str = "0.2.2"
+    app_version: str = "0.2.3"
     app_env: Literal["development", "staging", "production"] = "development"
     app_debug: bool = True
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
