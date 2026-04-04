@@ -32,7 +32,7 @@ class MarkupCreate(BaseModel):
     color: str = Field(default="#3b82f6", max_length=20)
     line_width: int = Field(default=2, ge=1, le=50)
     opacity: float = Field(default=1.0, ge=0.0, le=1.0)
-    author_id: str = Field(..., max_length=255)
+    author_id: str | None = Field(default=None, max_length=255)
     status: str = Field(
         default="active",
         pattern=r"^(active|resolved|archived)$",
