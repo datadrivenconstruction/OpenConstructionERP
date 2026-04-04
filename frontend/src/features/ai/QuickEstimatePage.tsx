@@ -2113,6 +2113,34 @@ export function QuickEstimatePage() {
             {/* ── Tab 5: CAD / BIM (direct extraction, no AI) ────── */}
             {activeTab === 'cad' && (
               <div>
+                {/* Converter status banner — always visible */}
+                {isCadRoute && convertersData && (
+                  <div className={clsx(
+                    'mb-4 rounded-xl border p-4 flex items-center justify-between',
+                    (convertersData.installed_count ?? 0) > 0
+                      ? 'border-[#15803d]/30 bg-[#15803d]/5'
+                      : 'border-amber-500/30 bg-amber-50 dark:bg-amber-900/10'
+                  )}>
+                    <div className="flex items-center gap-3">
+                      <div className={clsx(
+                        'flex h-10 w-10 items-center justify-center rounded-xl',
+                        (convertersData.installed_count ?? 0) > 0 ? 'bg-[#15803d]/10' : 'bg-amber-100 dark:bg-amber-900/20'
+                      )}>
+                        <HardDrive size={20} className={(convertersData.installed_count ?? 0) > 0 ? 'text-[#15803d]' : 'text-amber-600'} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-content-primary">
+                          {(convertersData.installed_count ?? 0) > 0
+                            ? t('ai.converters_ready', { defaultValue: `${convertersData.installed_count} of ${convertersData.total_count} converters installed`, installed: convertersData.installed_count, total: convertersData.total_count })
+                            : t('ai.converters_none', { defaultValue: 'No converters installed — install below to enable CAD/BIM import' })}
+                        </p>
+                        <p className="text-xs text-content-tertiary mt-0.5">
+                          {(convertersData.converters ?? []).filter((c: any) => c.installed).map((c: any) => c.name).join(', ') || t('ai.converters_hint', { defaultValue: 'Scroll down to install DDC converters for RVT, IFC, DWG, DGN' })}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 {!selectedFile ? (
                   <FileDropZone
                     accept={ACCEPT_MAP.cad as string}
