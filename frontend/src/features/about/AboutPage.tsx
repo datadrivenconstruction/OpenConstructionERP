@@ -30,7 +30,7 @@ export function AboutPage() {
           {t('about.tagline', { defaultValue: 'The #1 open-source platform for construction cost estimation' })}
         </p>
         <div className="mt-3 flex items-center justify-center gap-3 text-sm text-content-tertiary">
-          <span>v0.1.1</span>
+          <span>v0.2.1</span>
           <span>&middot;</span>
           <span>2026</span>
           <span>&middot;</span>
@@ -356,6 +356,46 @@ export function AboutPage() {
               </div>
             </div>
           </div>
+        </div>
+      </Card>
+
+      {/* Free Book */}
+      <Card className="animate-card-in" style={{ animationDelay: '300ms' }}>
+        <div className="p-6">
+          <div className="flex items-center gap-2 mb-3">
+            <BookOpen size={18} className="text-purple-500" />
+            <h2 className="text-lg font-semibold text-content-primary">
+              {t('about.book_title', { defaultValue: 'Free Book: Data Driven Construction' })}
+            </h2>
+            <Badge variant="success" size="sm">Free Download</Badge>
+          </div>
+          <p className="text-sm text-content-secondary leading-relaxed mb-4">
+            {t('about.book_desc', { defaultValue: 'A comprehensive guide to digital transformation in the construction industry. Learn about BIM workflows, cost estimation automation, AI in construction, data-driven decision making, and how to build efficient digital pipelines for construction projects.' })}
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+            <div className="rounded-lg border border-border-light bg-surface-secondary/30 p-3 text-center">
+              <div className="text-xs font-semibold text-content-primary">BIM & CAD Pipelines</div>
+              <div className="text-2xs text-content-tertiary mt-1">RVT, IFC, DWG, DGN conversion and data extraction</div>
+            </div>
+            <div className="rounded-lg border border-border-light bg-surface-secondary/30 p-3 text-center">
+              <div className="text-xs font-semibold text-content-primary">AI in Construction</div>
+              <div className="text-2xs text-content-tertiary mt-1">Machine learning for cost estimation and quantity takeoff</div>
+            </div>
+            <div className="rounded-lg border border-border-light bg-surface-secondary/30 p-3 text-center">
+              <div className="text-xs font-semibold text-content-primary">Cost Databases</div>
+              <div className="text-2xs text-content-tertiary mt-1">Building and managing construction pricing databases</div>
+            </div>
+          </div>
+          <a
+            href="https://datadrivenconstruction.io/books/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 transition-colors"
+          >
+            <BookOpen size={16} />
+            {t('about.book_download', { defaultValue: 'Download Free Book' })}
+            <ExternalLink size={14} />
+          </a>
         </div>
       </Card>
 

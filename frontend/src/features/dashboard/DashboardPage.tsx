@@ -887,7 +887,15 @@ export function DashboardPage() {
 
             {/* Footer */}
             <div className="px-6 py-3 border-t border-border-light bg-surface-secondary/30 flex items-center justify-between">
-              <span className="text-2xs text-content-quaternary">datadrivenconstruction.io</span>
+              <div className="flex items-center gap-3">
+                <span className="text-2xs text-content-quaternary">datadrivenconstruction.io</span>
+                <button
+                  onClick={() => { dismissWelcome(); navigate('/onboarding'); }}
+                  className="text-2xs text-oe-blue hover:text-oe-blue/80 transition-colors underline"
+                >
+                  {t('dashboard.run_setup', { defaultValue: 'Run Setup Wizard' })}
+                </button>
+              </div>
               <button
                 onClick={dismissWelcome}
                 className="rounded-lg bg-oe-blue px-4 py-1.5 text-sm font-medium text-white hover:bg-oe-blue/90 transition-colors"
