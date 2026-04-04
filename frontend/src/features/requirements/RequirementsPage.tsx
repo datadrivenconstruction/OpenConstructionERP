@@ -221,7 +221,7 @@ function GatePipeline({
                               : 'text-content-tertiary',
                       )}
                     >
-                      {Math.round(score * 100)}%
+                      {Math.round(Number(score))}%
                     </span>
                   </div>
                   <div className="h-1.5 w-full rounded-full bg-surface-secondary overflow-hidden">
@@ -236,7 +236,7 @@ function GatePipeline({
                               ? 'bg-[#b45309]'
                               : 'bg-content-quaternary',
                       )}
-                      style={{ width: `${Math.round(score * 100)}%` }}
+                      style={{ width: `${Math.round(Number(score))}%` }}
                     />
                   </div>
                 </div>
@@ -1066,6 +1066,20 @@ export function RequirementsPage() {
           )}
         </div>
         <div className="flex items-center gap-3">
+          {/* Project Selector */}
+          {projects.length > 0 && (
+            <select
+              value={projectId}
+              onChange={(e) => useProjectContextStore.getState().setActiveProjectId(e.target.value)}
+              className={inputCls + ' max-w-[220px]'}
+            >
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          )}
           {/* Set Selector */}
           {sets.length > 1 && (
             <select
