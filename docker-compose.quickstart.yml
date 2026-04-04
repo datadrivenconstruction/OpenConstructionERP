@@ -50,7 +50,7 @@ services:
       SERVE_FRONTEND: "true"
       ALLOWED_ORIGINS: "http://localhost:8080,http://localhost"
       # Defaults
-      APP_ENV: production
+      APP_ENV: development
       APP_DEBUG: "false"
       VECTOR_BACKEND: lancedb
     volumes:

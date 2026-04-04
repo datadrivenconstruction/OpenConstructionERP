@@ -1,16 +1,16 @@
-# OpenEstimate — Single Unified Docker Image
+# OpenConstructionERP — Single Unified Docker Image
 #
 # All-in-one image: FastAPI backend serves React frontend directly.
 # Uses SQLite by default — no external database needed.
 #
 # Usage:
-#   docker build -t openestimate -f deploy/docker/Dockerfile.unified .
-#   docker run -d -p 8080:8080 -v oe_data:/data openestimate
+#   docker build -t openconstructionerp -f deploy/docker/Dockerfile.unified .
+#   docker run -d -p 8080:8080 -v oe_data:/data openconstructionerp
 #
 # With PostgreSQL (override DATABASE_URL):
 #   docker run -d -p 8080:8080 \
 #     -e DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/dbname \
-#     openestimate
+#     openconstructionerp
 
 # ── Stage 1: Build frontend ──────────────────────────────────────────
 FROM node:20-alpine AS frontend-build
@@ -24,7 +24,7 @@ RUN npm run build
 # ── Stage 2: Production image ────────────────────────────────────────
 FROM python:3.12-slim
 
-# Install system dependencies (libpq for optional PostgreSQL support)
+# Install system dependencies (libpq for PostgreSQL support)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libpq-dev curl \
     && rm -rf /var/lib/apt/lists/*
@@ -34,15 +34,15 @@ RUN groupadd -r oe && useradd -r -g oe -d /app -s /sbin/nologin oe
 
 WORKDIR /app
 
-# Install Python dependencies
-COPY backend/pyproject.toml backend/
-RUN pip install --no-cache-dir ./backend
-
-# Copy backend source
+# Copy backend source first (includes pyproject.toml + README.md + all code)
 COPY backend/ backend/
 
-# Copy pre-built frontend into the package location
+# Create frontend dist directory for hatch force-include
+RUN mkdir -p /app/frontend/dist
 COPY --from=frontend-build /build/dist backend/app/_frontend_dist/
+
+# Install Python dependencies with server extras (asyncpg for PostgreSQL)
+RUN pip install --no-cache-dir "./backend[server]"
 
 # Copy data catalogs (for seed/enrichment)
 COPY data/ data/
@@ -63,7 +63,7 @@ ENV PYTHONUNBUFFERED=1 \
     DATABASE_SYNC_URL=sqlite:////data/openestimate.db \
     VECTOR_BACKEND=lancedb \
     VECTOR_DATA_DIR=/data/vectors \
-    APP_ENV=production \
+    APP_ENV=development \
     APP_DEBUG=false \
     JWT_SECRET=change-me-in-production \
     ALLOWED_ORIGINS=*
