@@ -1392,19 +1392,21 @@ async def load_cwicr_database(
     total_rows = len(df)
     logger.info("Raw data: %d rows", total_rows)
 
-    # Run ENTIRE pipeline (process + insert) in a separate PROCESS.
-    # ProcessPoolExecutor bypasses the GIL completely — event loop stays responsive.
-    import concurrent.futures
-
     from app.config import get_settings
     settings = get_settings()
     sqlite_url = settings.database_url
     db_file = sqlite_url.split("///")[-1] if "///" in sqlite_url else "openestimate.db"
 
-    loop = asyncio.get_event_loop()
-    with concurrent.futures.ProcessPoolExecutor(max_workers=1) as pool:
-        result_data = await loop.run_in_executor(
-            pool, _process_and_insert_cwicr, str(cwicr_path), db_id, db_file
+    # Run in thread to avoid blocking the event loop during heavy pandas + sqlite work.
+    try:
+        result_data = await asyncio.to_thread(
+            _process_and_insert_cwicr, str(cwicr_path), db_id, db_file
+        )
+    except Exception:
+        logger.exception("CWICR import failed for %s", db_id)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to import CWICR database '{db_id}'. Check server logs.",
         )
 
     duration = round(time.monotonic() - start, 1)
