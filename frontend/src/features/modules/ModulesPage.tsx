@@ -828,6 +828,99 @@ export function ModulesPage() {
         </div>
       )}
 
+      {/* ── Community Modules — Build Your Own ──────────────────── */}
+      <div className="mt-12 animate-card-in" style={{ animationDelay: '400ms' }}>
+        <Card>
+          <div className="relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/[0.05] via-indigo-500/[0.03] to-blue-500/[0.05]" />
+            <div className="relative p-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Plug size={20} className="text-purple-500" />
+                <h2 className="text-lg font-semibold text-content-primary">
+                  {t('modules.community_title', { defaultValue: 'Build Your Own Module' })}
+                </h2>
+              </div>
+
+              <p className="text-sm text-content-secondary leading-relaxed mb-4">
+                {t('modules.community_desc', { defaultValue: 'OpenConstructionERP has a modular plugin architecture. Anyone can create custom modules — cost databases, regional standards, CAD converters, analytics dashboards, integrations with external systems, or any other functionality. Your module will appear in this Modules section and can be installed by any user.' })}
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+                <div className="rounded-xl border border-border-light bg-surface-secondary/40 p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Database size={16} className="text-oe-blue" />
+                    <span className="text-xs font-semibold text-content-primary">
+                      {t('modules.community_type_data', { defaultValue: 'Data Modules' })}
+                    </span>
+                  </div>
+                  <p className="text-2xs text-content-tertiary">
+                    {t('modules.community_type_data_desc', { defaultValue: 'Regional cost databases, resource catalogs, material libraries, classification standards (DIN, NRM, SNIP, etc.)' })}
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-border-light bg-surface-secondary/40 p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Plug size={16} className="text-emerald-500" />
+                    <span className="text-xs font-semibold text-content-primary">
+                      {t('modules.community_type_integration', { defaultValue: 'Integrations' })}
+                    </span>
+                  </div>
+                  <p className="text-2xs text-content-tertiary">
+                    {t('modules.community_type_integration_desc', { defaultValue: 'Connect with SAP, Procore, MS Project, BIM 360, PlanRadar, Primavera, or any external system via API' })}
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-border-light bg-surface-secondary/40 p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <BarChart3 size={16} className="text-amber-500" />
+                    <span className="text-xs font-semibold text-content-primary">
+                      {t('modules.community_type_tools', { defaultValue: 'Tools & Analytics' })}
+                    </span>
+                  </div>
+                  <p className="text-2xs text-content-tertiary">
+                    {t('modules.community_type_tools_desc', { defaultValue: 'Custom reports, dashboards, calculators, format converters, AI models, or any specialized construction tool' })}
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-xl bg-surface-secondary/50 border border-border-light/40 p-4 mb-4">
+                <p className="text-xs text-content-secondary leading-relaxed">
+                  {t('modules.community_how', { defaultValue: 'Each module is a Python package with a manifest.py file. Create your module, test it locally, and share it with the community. Even if you just have an idea — send us a text description and we\'ll help you build it.' })}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <a
+                  href="mailto:info@datadrivenconstruction.io?subject=OpenConstructionERP%20Module%20Proposal"
+                  className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 transition-colors"
+                >
+                  <Package size={16} />
+                  {t('modules.community_submit_email', { defaultValue: 'Submit Module via Email' })}
+                </a>
+                <a
+                  href="https://github.com/datadrivenconstruction/OpenConstructionERP/issues/new?title=Module%20Proposal:%20&labels=module-proposal"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-lg border border-border-light bg-surface-secondary px-4 py-2 text-sm font-medium text-content-primary hover:bg-surface-secondary/80 transition-colors"
+                >
+                  <Info size={16} />
+                  {t('modules.community_submit_github', { defaultValue: 'Propose on GitHub' })}
+                </a>
+                <a
+                  href="https://t.me/datadrivenconstruction"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-lg border border-border-light bg-surface-secondary px-4 py-2 text-sm font-medium text-content-primary hover:bg-surface-secondary/80 transition-colors"
+                >
+                  <Globe size={16} />
+                  {t('modules.community_telegram', { defaultValue: 'Discuss in Telegram' })}
+                </a>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+
     </div>
   );
 }
