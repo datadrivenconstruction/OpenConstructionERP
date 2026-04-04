@@ -70,9 +70,17 @@ const KANBAN_COLUMNS: PunchStatus[] = ['open', 'in_progress', 'resolved', 'verif
 
 const PRIORITY_BADGE_VARIANT: Record<PunchPriority, 'neutral' | 'blue' | 'warning' | 'error'> = {
   low: 'neutral',
-  medium: 'blue',
-  high: 'warning',
+  medium: 'warning',
+  high: 'error',
   critical: 'error',
+};
+
+/** Extra CSS applied to priority badges to differentiate medium (yellow) from high (orange). */
+const PRIORITY_BADGE_CLS: Record<PunchPriority, string> = {
+  low: '',
+  medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+  high: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+  critical: '',
 };
 
 const STATUS_BADGE_VARIANT: Record<PunchStatus, 'error' | 'warning' | 'blue' | 'success' | 'neutral'> = {
@@ -209,11 +217,20 @@ function AddPunchModal({
 }) {
   const { t } = useTranslation();
   const [form, setForm] = useState<PunchFormData>(EMPTY_FORM);
+  const [touched, setTouched] = useState(false);
 
   const set = <K extends keyof PunchFormData>(key: K, value: PunchFormData[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
+  const titleError = touched && form.title.trim().length === 0;
   const canSubmit = form.title.trim().length > 0;
+
+  const handleSubmit = () => {
+    setTouched(true);
+    if (canSubmit) {
+      onSubmit(form);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in">
@@ -236,17 +253,22 @@ function AddPunchModal({
           {/* Title */}
           <div>
             <label className="block text-sm font-medium text-content-secondary mb-1">
-              {t('punch.field_title', { defaultValue: 'Title' })} *
+              {t('punch.field_title', { defaultValue: 'Title' })} <span className="text-semantic-error">*</span>
             </label>
             <input
               value={form.title}
-              onChange={(e) => set('title', e.target.value)}
+              onChange={(e) => { set('title', e.target.value); setTouched(true); }}
               placeholder={t('punch.title_placeholder', {
                 defaultValue: 'e.g. Missing fire seal on Level 3 penetration',
               })}
-              className={inputCls}
+              className={clsx(inputCls, titleError && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
               autoFocus
             />
+            {titleError && (
+              <p className="mt-1 text-xs text-semantic-error">
+                {t('punch.title_required', { defaultValue: 'Title is required' })}
+              </p>
+            )}
           </div>
 
           {/* Description */}
@@ -376,8 +398,8 @@ function AddPunchModal({
           </Button>
           <Button
             variant="primary"
-            onClick={() => onSubmit(form)}
-            disabled={!canSubmit || isPending}
+            onClick={handleSubmit}
+            disabled={isPending}
           >
             {isPending ? (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
@@ -416,14 +438,17 @@ function PunchKanbanCard({
     <Card
       className={clsx(
         'p-3 mb-2 hover:shadow-md transition-shadow',
-        isOverdue && 'border-l-4 border-l-semantic-error',
+        isOverdue && 'border-l-4 border-l-semantic-error bg-red-50/50 dark:bg-red-950/20',
       )}
     >
       <div className="flex items-start justify-between mb-2">
-        <h4 className="text-sm font-medium text-content-primary line-clamp-2 flex-1 mr-2">
+        <h4 className={clsx(
+          'text-sm font-medium line-clamp-2 flex-1 mr-2',
+          isOverdue ? 'text-semantic-error' : 'text-content-primary',
+        )}>
           {item.title}
         </h4>
-        <Badge variant={PRIORITY_BADGE_VARIANT[item.priority]} size="sm">
+        <Badge variant={PRIORITY_BADGE_VARIANT[item.priority]} size="sm" className={PRIORITY_BADGE_CLS[item.priority]}>
           {t(`punch.priority_${item.priority}`, {
             defaultValue: item.priority.charAt(0).toUpperCase() + item.priority.slice(1),
           })}
@@ -445,13 +470,18 @@ function PunchKanbanCard({
               isOverdue && 'text-semantic-error font-medium',
             )}
           >
-            <Calendar size={12} />
+            {isOverdue ? <AlertTriangle size={12} /> : <Calendar size={12} />}
             <span>
               {new Date(item.due_date).toLocaleDateString(undefined, {
                 month: 'short',
                 day: 'numeric',
               })}
             </span>
+            {isOverdue && (
+              <span className="text-2xs">
+                {t('punch.overdue', { defaultValue: 'Overdue' })}
+              </span>
+            )}
           </div>
         )}
         {item.photos_count > 0 && (
@@ -752,23 +782,28 @@ export function PunchListPage() {
         </div>
         <div className="flex items-center gap-3">
           {/* Project selector */}
-          {projects.length > 1 && (
-            <select
-              value={projectId}
-              onChange={(e) => {
-                const p = projects.find((pr) => pr.id === e.target.value);
-                if (p) {
-                  useProjectContextStore.getState().setActiveProject(p.id, p.name);
-                }
-              }}
-              className={inputCls + ' max-w-[200px]'}
-            >
-              {projects.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
+          {projects.length > 0 && (
+            <div>
+              <select
+                value={projectId}
+                onChange={(e) => {
+                  const p = projects.find((pr) => pr.id === e.target.value);
+                  if (p) {
+                    useProjectContextStore.getState().setActiveProject(p.id, p.name);
+                  }
+                }}
+                className={inputCls + ' max-w-[220px]'}
+              >
+                <option value="">
+                  {t('punch.select_project', { defaultValue: 'Select project...' })}
                 </option>
-              ))}
-            </select>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           )}
           <Button variant="primary" onClick={() => setShowAddModal(true)} disabled={!projectId}>
             <Plus size={16} className="mr-1.5" />
@@ -926,18 +961,45 @@ export function PunchListPage() {
 
       {/* Content */}
       <div className="mt-6">
-        {isLoading ? (
+        {!projectId ? (
+          <EmptyState
+            icon={<ListChecks size={40} className="text-content-quaternary" />}
+            title={t('punch.no_project_title', { defaultValue: 'No project selected' })}
+            description={t('punch.no_project_desc', {
+              defaultValue:
+                'Select a project from the dropdown above to view and manage punch list items.',
+            })}
+          />
+        ) : isLoading ? (
           <div className="flex items-center justify-center py-16">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" />
           </div>
         ) : filteredItems.length === 0 ? (
           <EmptyState
             icon={<ListChecks size={40} className="text-content-quaternary" />}
-            title={t('punch.empty_title', { defaultValue: 'No punch list items' })}
-            description={t('punch.empty_desc', {
-              defaultValue:
-                'Create punch list items to track deficiencies, snags, and outstanding work.',
-            })}
+            title={
+              searchQuery || filterPriority || filterStatus || filterCategory || filterAssignee
+                ? t('punch.no_results_title', { defaultValue: 'No matching items' })
+                : t('punch.empty_title', { defaultValue: 'No punch list items' })
+            }
+            description={
+              searchQuery || filterPriority || filterStatus || filterCategory || filterAssignee
+                ? t('punch.no_results_desc', {
+                    defaultValue: 'Try adjusting your search or filter criteria.',
+                  })
+                : t('punch.empty_desc', {
+                    defaultValue:
+                      'Create punch list items to track deficiencies, snags, and outstanding work.',
+                  })
+            }
+            action={
+              !(searchQuery || filterPriority || filterStatus || filterCategory || filterAssignee)
+                ? {
+                    label: t('punch.new_item', { defaultValue: 'New Item' }),
+                    onClick: () => setShowAddModal(true),
+                  }
+                : undefined
+            }
           />
         ) : viewMode === 'kanban' ? (
           <KanbanView
@@ -1040,7 +1102,12 @@ function PunchTableRow({
   }, [item.due_date]);
 
   return (
-    <tr className="hover:bg-surface-secondary/50 transition-colors">
+    <tr className={clsx(
+      'transition-colors',
+      isOverdue
+        ? 'bg-red-50/40 hover:bg-red-50/70 dark:bg-red-950/10 dark:hover:bg-red-950/20'
+        : 'hover:bg-surface-secondary/50',
+    )}>
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
           {isOverdue && (
@@ -1057,7 +1124,7 @@ function PunchTableRow({
         )}
       </td>
       <td className="px-4 py-3">
-        <Badge variant={PRIORITY_BADGE_VARIANT[item.priority]} size="sm">
+        <Badge variant={PRIORITY_BADGE_VARIANT[item.priority]} size="sm" className={PRIORITY_BADGE_CLS[item.priority]}>
           {t(`punch.priority_${item.priority}`, {
             defaultValue: item.priority.charAt(0).toUpperCase() + item.priority.slice(1),
           })}
