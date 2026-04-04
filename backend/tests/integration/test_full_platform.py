@@ -18,6 +18,12 @@ import asyncio
 import json
 import sys
 import time
+
+import pytest
+
+# This file is a standalone test script, not pytest-compatible.
+# It requires a running server and custom fixtures (api, suite) not in conftest.
+pytestmark = pytest.mark.skip(reason="Standalone test script — requires running server, not pytest fixtures")
 import uuid
 from dataclasses import dataclass, field
 from typing import Any

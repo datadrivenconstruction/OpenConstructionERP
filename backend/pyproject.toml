@@ -30,13 +30,6 @@ classifiers = [
     "Framework :: FastAPI",
 ]
 
-[project.urls]
-Homepage = "https://datadrivenconstruction.io/erp"
-Documentation = "https://openconstructionerp.com/docs"
-Repository = "https://github.com/datadrivenconstruction/OpenConstructionERP"
-Issues = "https://github.com/datadrivenconstruction/OpenConstructionERP/issues"
-Changelog = "https://github.com/datadrivenconstruction/OpenConstructionERP/blob/main/CHANGELOG.md"
-
 dependencies = [
     # Web framework
     "fastapi>=0.115.0",
@@ -68,6 +61,13 @@ dependencies = [
 [project.scripts]
 openestimate = "app.cli:main"
 openconstructionerp = "app.cli:main"
+
+[project.urls]
+Homepage = "https://datadrivenconstruction.io/erp"
+Documentation = "https://openconstructionerp.com/docs"
+Repository = "https://github.com/datadrivenconstruction/OpenConstructionERP"
+Issues = "https://github.com/datadrivenconstruction/OpenConstructionERP/issues"
+Changelog = "https://github.com/datadrivenconstruction/OpenConstructionERP/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 # PostgreSQL + Redis + S3 for production deployments
