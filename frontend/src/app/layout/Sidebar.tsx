@@ -28,13 +28,13 @@ import {
   FileEdit,
   BarChart3,
   ShieldAlert,
-  Download,
   type LucideIcon,
 } from 'lucide-react';
 import { useModuleStore } from '@/stores/useModuleStore';
+import { UpdateNotification } from '@/shared/ui/UpdateChecker';
 import { useViewModeStore } from '@/stores/useViewModeStore';
 import { getModuleNavItems } from '@/modules/_registry';
-import { apiGet } from '@/shared/lib/api';
+
 
 interface NavItem {
   labelKey: string;
@@ -312,74 +312,6 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         </div>
       </div>
     </aside>
-  );
-}
-
-function UpdateNotification() {
-  const { t } = useTranslation();
-  const [update, setUpdate] = useState<{
-    latest_version: string;
-    release_url: string;
-    download_url: string;
-    release_notes: string;
-  } | null>(null);
-  const [dismissed, setDismissed] = useState(false);
-
-  useEffect(() => {
-    const dismissedVersion = localStorage.getItem('oe_dismissed_update');
-
-    apiGet<Record<string, unknown>>('/system/version-check')
-      .then((data) => {
-        if (data.update_available && data.latest_version !== dismissedVersion) {
-          setUpdate({
-            latest_version: data.latest_version as string,
-            release_url: data.release_url as string,
-            download_url: data.download_url as string,
-            release_notes: data.release_notes as string,
-          });
-        }
-      })
-      .catch(() => {}); // Silent fail
-  }, []);
-
-  if (!update || dismissed) return null;
-
-  return (
-    <div className="mx-3 mb-3 rounded-xl border border-oe-blue/30 bg-gradient-to-br from-oe-blue-subtle/50 to-blue-50 dark:from-oe-blue/10 dark:to-blue-900/20 p-3 animate-fade-in">
-      <div className="flex items-start gap-2">
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-oe-blue text-white">
-          <Sparkles size={14} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-oe-blue">
-              v{update.latest_version}
-            </span>
-            <button
-              onClick={() => {
-                setDismissed(true);
-                localStorage.setItem('oe_dismissed_update', update.latest_version);
-              }}
-              className="p-0.5 rounded text-content-tertiary hover:text-content-secondary"
-            >
-              <X size={12} />
-            </button>
-          </div>
-          <p className="text-[11px] text-content-secondary mt-0.5 line-clamp-2">
-            {t('update.new_version_available', { defaultValue: 'New version available' })}
-          </p>
-          <a
-            href={update.download_url || update.release_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-2 flex items-center justify-center gap-1.5 rounded-lg bg-oe-blue px-3 py-1.5 text-[11px] font-medium text-white hover:bg-oe-blue/90 transition-colors"
-          >
-            <Download size={12} />
-            {t('update.download', { defaultValue: 'Download Update' })}
-          </a>
-        </div>
-      </div>
-    </div>
   );
 }
 
