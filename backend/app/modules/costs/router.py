@@ -814,6 +814,21 @@ async def list_categories(
     return cats
 
 
+# ── Available CWICR databases ─────────────────────────────────────────────
+
+
+@router.get("/available-databases")
+async def list_available_databases() -> list[dict]:
+    """List all available CWICR regional databases with their IDs.
+
+    Use these IDs with POST /load-cwicr/{db_id} to import cost data.
+    """
+    return [
+        {"id": db_id, "folder": folder.split("/")[0].replace("___DDC_CWICR", "")}
+        for db_id, folder in _GITHUB_CWICR_FILES.items()
+    ]
+
+
 # ── Get by ID ─────────────────────────────────────────────────────────────
 
 
