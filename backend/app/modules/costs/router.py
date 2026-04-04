@@ -108,6 +108,7 @@ async def autocomplete_cost_items(
                 return False
         return isinstance(comps, list) and len(comps) > 0
 
+    cwicr_work_item_count_result = len(items)
     sorted_items = sorted(
         items,
         key=lambda it: (0 if _has_components(it) else 1, it.code),

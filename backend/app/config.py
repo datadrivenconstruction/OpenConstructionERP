@@ -37,6 +37,7 @@ class Settings(BaseSettings):
     database_pool_size: int = 20
     database_max_overflow: int = 10
     database_echo: bool = False
+    max_batch_size: int = 443
 
     # ── Redis ────────────────────────────────────────────────────────────
     redis_url: str | None = "redis://localhost:6379/0"
