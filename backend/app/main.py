@@ -667,6 +667,8 @@ def create_app() -> FastAPI:
             from app.modules.changeorders import models as _changeorders_models  # noqa: F401
             from app.modules.risk import models as _risk_models  # noqa: F401
             from app.modules.documents import models as _documents_models  # noqa: F401
+            from app.modules.markups import models as _markups_models  # noqa: F401
+            from app.modules.punchlist import models as _punchlist_models  # noqa: F401
 
             # SQLite auto-migration: add missing columns before create_all
             from app.core.sqlite_migrator import sqlite_auto_migrate
