@@ -55,6 +55,7 @@ export interface MarkupFilters {
   type?: MarkupType | '';
   status?: MarkupStatus | '';
   author_id?: string;
+  document_id?: string;
 }
 
 export interface CreateMarkupPayload {
@@ -100,6 +101,7 @@ export async function fetchMarkups(
   if (filters?.type) params.set('type', filters.type);
   if (filters?.status) params.set('status', filters.status);
   if (filters?.author_id) params.set('author_id', filters.author_id);
+  if (filters?.document_id) params.set('document_id', filters.document_id);
   return apiGet<Markup[]>(`/v1/markups/?${params.toString()}`);
 }
 
