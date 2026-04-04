@@ -158,6 +158,38 @@ Complete your estimation workflow:
 - **Reports** — Generate professional PDF reports, Excel exports, GAEB XML. 12 built-in templates
 - **Documents** — Centralized file management with version tracking and drag-and-drop upload
 
+### 📝 Requirements & Quality Gates
+
+Track and validate construction requirements with the EAC (Entity-Attribute-Constraint) system:
+
+- **EAC Triplets** — Capture requirements as structured data: Entity (wall), Attribute (fire_rating), Constraint (≥ F90)
+- **4 Quality Gates** — Completeness → Consistency → Coverage → Compliance. Run sequentially to validate requirements
+- **BOQ Traceability** — Link each requirement to BOQ positions for full traceability from spec to estimate
+- **Bulk Import** — Import requirements from structured text (pipe-delimited format)
+- **Categories** — Structural, fire safety, thermal, acoustic, waterproofing, electrical, mechanical, architectural
+
+### ✏️ PDF Markups & Annotations
+
+Annotate construction drawings and documents directly in the browser:
+
+- **10 markup types** — Cloud, arrow, text, rectangle, highlight, polygon, distance, area, count, stamp
+- **Custom stamps** — Approved, Rejected, For Review, Revised, Final + create your own with logo and date
+- **Scale calibration** — Set real-world scale per page for accurate measurements
+- **Markups List** — Table view of all annotations with filters, search, and CSV export
+- **BOQ Integration** — Link measurements directly to BOQ positions (quantity = measured value)
+
+### ✅ Punch List
+
+Track construction deficiencies from discovery to resolution:
+
+- **5-stage workflow** — Open → In Progress → Resolved → Verified → Closed
+- **Location pins** — Mark exact position on PDF drawings (x/y coordinates)
+- **Priority levels** — Low, Medium, High, Critical with color coding
+- **Photo attachments** — Upload photos of deficiencies from the field
+- **Categories** — Structural, mechanical, electrical, architectural, fire safety, plumbing, finishing
+- **PDF Export** — Generate punch list reports for stakeholder review
+- **Verification control** — Different user must verify (not the resolver)
+
 ### 🌍 20 Regional Standards
 
 | Standard | Region | Format |
@@ -296,10 +328,11 @@ Three demo accounts are created automatically on first start:
                    │ REST API
 ┌──────────────────┴───────────────────────────────┐
 │  Backend (FastAPI)                               │
-│  17 auto-discovered modules · Plugin system      │
+│  20 auto-discovered modules · Plugin system      │
 ├──────────────────────────────────────────────────┤
 │  BOQ · Costs · Schedule · 5D · Validation · AI  │
 │  Takeoff · Tendering · Risk · Reports · Catalog  │
+│  Requirements · Markups · Punch List             │
 ├──────────────────────────────────────────────────┤
 │  Database (PostgreSQL / SQLite)                  │
 │  Vector DB (LanceDB / Qdrant)                    │
