@@ -1539,16 +1539,23 @@ class BOQService:
             HTTPException 404 if source BOQ not found.
         """
         source_boq = await self.get_boq(boq_id)
+        # Eagerly capture all source attributes to avoid MissingGreenlet
+        source_project_id = source_boq.project_id
+        source_name = source_boq.name
+        source_description = source_boq.description
+        source_metadata = dict(source_boq.metadata_) if source_boq.metadata_ else {}
 
         # Create the new BOQ shell
         new_boq = BOQ(
-            project_id=source_boq.project_id,
-            name=f"{source_boq.name} (Copy)",
-            description=source_boq.description,
+            project_id=source_project_id,
+            name=f"{source_name} (Copy)",
+            description=source_description,
             status="draft",
-            metadata_=dict(source_boq.metadata_) if source_boq.metadata_ else {},
+            metadata_=source_metadata,
         )
         new_boq = await self.boq_repo.create(new_boq)
+        # Eagerly capture ID to avoid MissingGreenlet if session expires attributes
+        new_boq_id = new_boq.id
 
         # Copy positions — first pass: create all with old parent_id recorded
         positions, _ = await self.position_repo.list_for_boq(boq_id)
@@ -1557,7 +1564,7 @@ class BOQService:
         new_positions: list[Position] = []
         for pos in positions:
             new_pos = Position(
-                boq_id=new_boq.id,
+                boq_id=new_boq_id,
                 parent_id=None,  # will be remapped after insert
                 ordinal=pos.ordinal,
                 description=pos.description,
@@ -1593,7 +1600,7 @@ class BOQService:
         new_markups: list[BOQMarkup] = []
         for markup in markups:
             new_markup = BOQMarkup(
-                boq_id=new_boq.id,
+                boq_id=new_boq_id,
                 name=markup.name,
                 markup_type=markup.markup_type,
                 category=markup.category,
@@ -1613,14 +1620,16 @@ class BOQService:
             "boq.boq.duplicated",
             {
                 "source_boq_id": str(boq_id),
-                "new_boq_id": str(new_boq.id),
-                "project_id": str(source_boq.project_id),
+                "new_boq_id": str(new_boq_id),
+                "project_id": str(source_project_id),
             },
             source_module="oe_boq",
         )
 
-        logger.info("BOQ duplicated: %s → %s", boq_id, new_boq.id)
-        return new_boq
+        logger.info("BOQ duplicated: %s → %s", boq_id, new_boq_id)
+
+        # Re-fetch to ensure all attributes are loaded for serialization
+        return await self.get_boq(new_boq_id)
 
     async def duplicate_position(self, position_id: uuid.UUID) -> Position:
         """Duplicate a single position within the same BOQ.

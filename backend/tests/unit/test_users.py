@@ -509,9 +509,10 @@ class TestLoginRequestSchema:
         with pytest.raises(ValidationError):
             LoginRequest(email="invalid", password="password123")
 
-    def test_password_too_short(self):
-        with pytest.raises(ValidationError):
-            LoginRequest(email="user@example.com", password="short")
+    def test_short_password_accepted(self):
+        """LoginRequest accepts short passwords — policy is not revealed before auth."""
+        data = LoginRequest(email="user@example.com", password="short")
+        assert data.password == "short"
 
     def test_password_min_length(self):
         data = LoginRequest(email="user@example.com", password="12345678")

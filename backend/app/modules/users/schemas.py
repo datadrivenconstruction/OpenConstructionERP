@@ -10,10 +10,14 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class LoginRequest(BaseModel):
-    """User login request."""
+    """User login request.
+
+    No min_length on password — validation of password format before credential
+    check would reveal the password policy to unauthenticated users.
+    """
 
     email: EmailStr
-    password: str = Field(..., min_length=8, max_length=128)
+    password: str = Field(..., min_length=1, max_length=128)
 
 
 class TokenResponse(BaseModel):
