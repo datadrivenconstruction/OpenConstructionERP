@@ -209,6 +209,10 @@ class GateResultRepository:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
+    async def get_by_id(self, result_id: uuid.UUID) -> GateResult | None:
+        """Get gate result by ID."""
+        return await self.session.get(GateResult, result_id)
+
     async def list_for_set(self, set_id: uuid.UUID) -> list[GateResult]:
         """List all gate results for a requirement set."""
         stmt = (

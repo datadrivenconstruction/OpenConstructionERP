@@ -295,6 +295,9 @@ class RequirementsService:
         else:
             gate_status, score, findings = "skipped", 0.0, []
 
+        # Eagerly capture gate_status before any DB writes expire the ORM object
+        current_gate_status = dict(req_set.gate_status or {})
+
         result = GateResult(
             requirement_set_id=set_id,
             gate_number=gate_number,
@@ -304,12 +307,14 @@ class RequirementsService:
             findings=findings,
             executed_by=user_id,
         )
-        result = await self.gate_repo.create(result)
+        await self.gate_repo.create(result)
 
         # Update gate_status on the set
-        current_gate_status = dict(req_set.gate_status or {})
         current_gate_status[f"gate{gate_number}"] = gate_status
         await self.set_repo.update_fields(set_id, gate_status=current_gate_status)
+
+        # Re-fetch to get all attributes loaded
+        result = await self.gate_repo.get_by_id(result.id)
 
         logger.info(
             "Gate %d (%s) executed for set %s: %s (score=%.1f)",
