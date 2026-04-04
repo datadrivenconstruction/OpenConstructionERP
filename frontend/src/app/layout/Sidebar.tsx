@@ -28,6 +28,7 @@ import {
   FileEdit,
   BarChart3,
   ShieldAlert,
+  ClipboardCheck,
   type LucideIcon,
 } from 'lucide-react';
 import { useModuleStore } from '@/stores/useModuleStore';
@@ -123,6 +124,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.analytics', to: '/analytics', icon: BarChart3 },
       { labelKey: 'nav.risk_register', to: '/risks', icon: ShieldAlert },
       { labelKey: 'nav.documents', to: '/documents', icon: FolderOpen },
+      { labelKey: 'nav.requirements', to: '/requirements', icon: ClipboardCheck },
       // sustainability + cost-benchmark injected dynamically from module registry
     ],
   },
