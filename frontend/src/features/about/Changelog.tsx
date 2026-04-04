@@ -13,6 +13,24 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.2.1',
+    date: '2026-04-04',
+    changes: [
+      'Security: Path traversal protection on document downloads, CORS hardening, login enumeration fix',
+      'Fix: BOQ duplication crash (MissingGreenlet) — now works correctly',
+      'Fix: CWICR cost database import 500 error on Windows (ProcessPoolExecutor → asyncio.to_thread)',
+      'Fix: pip install -e ./backend broken (pyproject.toml structure)',
+      'Fix: Docker quickstart — Dockerfile, migration, asyncpg, APP_ENV',
+      'New: Competitor comparison table in README (vs iTWO, CostX, Sage, Bluebeam)',
+      'New: Free DDC book section on About page',
+      'New: Setup Wizard link in welcome modal for re-onboarding',
+      'New: Version number displayed in sidebar (v0.2.1)',
+      'New: Nginx CSP, HSTS, Permissions-Policy security headers',
+      'Updated: 9 vulnerable dependencies (aiohttp, cryptography, pillow, etc.)',
+      'Removed: streamlit and dev screenshot artifacts from repository',
+    ],
+  },
+  {
     version: '0.1.1',
     date: '2026-04-01',
     changes: [
