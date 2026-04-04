@@ -176,10 +176,10 @@ async def bulk_create_markups(
     except HTTPException:
         raise
     except Exception:
-        logger.exception("Failed to bulk create markups")
+        logger.exception("Unable to bulk create markups")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to bulk create markups",
+            detail="Unable to bulk create markups — operation aborted",
         )
 
 
@@ -200,10 +200,10 @@ async def create_markup(
     except HTTPException:
         raise
     except Exception:
-        logger.exception("Failed to create markup")
+        logger.exception("Unable to create markup")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create markup",
+            detail="Unable to create markup — please try again",
         )
 
 
@@ -305,10 +305,10 @@ async def create_scale(
     except HTTPException:
         raise
     except Exception:
-        logger.exception("Failed to create scale config")
+        logger.exception("Unable to create scale config")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create scale config",
+            detail="Unable to create scale config — calibration failed",
         )
 
 

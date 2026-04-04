@@ -949,11 +949,13 @@ class BOQService:
         Returns:
             The newly created BOQ.
         """
+        default_display_columns = ["ordinal", "description", "unit", "quantity", "unit_rate", "total"]
         boq = BOQ(
             project_id=data.project_id,
             name=data.name,
             description=data.description,
             status="draft",
+            metadata_={"display_columns": default_display_columns},
         )
         boq = await self.boq_repo.create(boq)
 

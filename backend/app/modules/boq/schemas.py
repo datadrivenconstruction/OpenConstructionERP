@@ -41,7 +41,11 @@ class BOQUpdate(BaseModel):
 class BOQResponse(BaseModel):
     """BOQ returned from the API."""
 
-    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        json_schema_extra={"x-build": "oe-443"},
+    )
 
     id: UUID
     project_id: UUID

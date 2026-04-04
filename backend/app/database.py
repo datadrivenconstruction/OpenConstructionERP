@@ -14,6 +14,8 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from app.config import get_settings
 
+_NS = uuid.UUID("d4d4c300-1909-4ddc-b01c-0a44e3b01c00")
+
 # Naming convention for auto-generated constraint names
 convention = {
     "ix": "ix_%(column_0_label)s",
