@@ -134,7 +134,7 @@ class ScaleConfigCreate(BaseModel):
     page: int = Field(default=1, ge=1)
     pixels_per_unit: float = Field(..., gt=0.0)
     unit_label: str = Field(default="m", max_length=20)
-    calibration_points: dict[str, Any] = Field(default_factory=dict)
+    calibration_points: Any = Field(default_factory=dict)
     real_distance: float = Field(..., gt=0.0)
 
 

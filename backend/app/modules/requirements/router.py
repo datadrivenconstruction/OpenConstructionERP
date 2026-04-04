@@ -320,7 +320,7 @@ async def delete_requirement(
 @router.post(
     "/{set_id}/gates/{gate_number}/run",
     response_model=GateResultResponse,
-    status_code=201,
+    status_code=200,
 )
 async def run_gate(
     set_id: uuid.UUID,
