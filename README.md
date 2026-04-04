@@ -250,11 +250,27 @@ make dev
 
 Open **http://localhost:5173** — requires Python 3.12+ and Node.js 20+. Uses SQLite by default — zero configuration needed.
 
-### Option 3: pip install (standalone)
+### Option 3: pip install from PyPI
 
 ```bash
+pip install openconstructionerp
+openconstructionerp serve --port 8000
+```
+
+Installs the backend API server from [PyPI](https://pypi.org/project/openconstructionerp/). Uses SQLite, starts with demo data. For the full UI, also run the frontend:
+
+```bash
+git clone https://github.com/datadrivenconstruction/OpenConstructionERP.git
+cd OpenConstructionERP/frontend && npm install && npm run dev
+```
+
+### Option 4: pip install from source (editable)
+
+```bash
+git clone https://github.com/datadrivenconstruction/OpenConstructionERP.git
+cd OpenConstructionERP
 pip install -e ./backend
-openconstructionerp serve --open
+openconstructionerp serve --port 8000
 ```
 
 ### Demo Accounts
