@@ -308,13 +308,15 @@ class RequirementsService:
             executed_by=user_id,
         )
         await self.gate_repo.create(result)
+        result_id = result.id  # Capture before session expires attributes
 
         # Update gate_status on the set
         current_gate_status[f"gate{gate_number}"] = gate_status
         await self.set_repo.update_fields(set_id, gate_status=current_gate_status)
 
-        # Re-fetch to get all attributes loaded
-        result = await self.gate_repo.get_by_id(result.id)
+        # Commit and re-fetch fresh object for serialization
+        await self.session.commit()
+        result = await self.gate_repo.get_by_id(result_id)
 
         logger.info(
             "Gate %d (%s) executed for set %s: %s (score=%.1f)",
