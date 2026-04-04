@@ -695,18 +695,19 @@ def create_app() -> FastAPI:
 
         logger.info("Application started successfully")
 
+        # ── Frontend Static Files (CLI / single-image mode) ──────────────
+        # MUST be mounted AFTER all module routers to avoid /{path:path}
+        # catch-all intercepting /api/* GET requests.
+        if os.environ.get("SERVE_FRONTEND", "").lower() in ("1", "true", "yes"):
+            from app.cli_static import mount_frontend
+            mount_frontend(app)
+
     @app.on_event("shutdown")
     async def shutdown() -> None:
         logger.info("Shutting down %s", settings.app_name)
         from app.database import engine
 
         await engine.dispose()
-
-    # ── Frontend Static Files (CLI / single-image mode) ──────────────
-    if os.environ.get("SERVE_FRONTEND", "").lower() in ("1", "true", "yes"):
-        from app.cli_static import mount_frontend
-
-        mount_frontend(app)
 
     return app
 
