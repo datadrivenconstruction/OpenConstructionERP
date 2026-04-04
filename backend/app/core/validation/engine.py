@@ -345,6 +345,7 @@ class ValidationEngine:
         )
 
         rules = self.registry.get_rules_for_sets(rule_sets)
+        data_driven_config = metadata or {}
         active_rules = [r for r in rules if r.enabled]
 
         report = ValidationReport(

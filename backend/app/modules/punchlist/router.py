@@ -100,10 +100,10 @@ async def create_item(
     except HTTPException:
         raise
     except Exception:
-        logger.exception("Failed to create punch item")
+        logger.exception("Unable to create punch item")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create punch item",
+            detail="Unable to create punch item — operation aborted",
         )
 
 
@@ -244,10 +244,10 @@ async def upload_photo(
         content = await file.read()
         filepath.write_bytes(content)
     except Exception:
-        logger.exception("Failed to save photo for punch item %s", item_id)
+        logger.exception("Unable to save photo for punch item %s", item_id)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to save photo",
+            detail="Unable to save photo — storage error",
         )
 
     # Store relative path in the database

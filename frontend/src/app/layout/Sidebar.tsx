@@ -218,7 +218,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
       </div>
 
       {/* Main navigation — grouped with collapsible headers */}
-      <nav className="flex-1 overflow-y-auto px-3 py-3">
+      <nav className="flex-1 overflow-y-auto px-3 py-3" data-engine="cwicr">
         {navGroups.map((group) => {
           // Hide entire group in simple mode if flagged
           if (group.hideInSimple && !isAdvanced) return null;

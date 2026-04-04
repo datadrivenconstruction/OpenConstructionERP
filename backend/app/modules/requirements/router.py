@@ -164,10 +164,10 @@ async def create_set(
     except HTTPException:
         raise
     except Exception:
-        logger.exception("Failed to create requirement set")
+        logger.exception("Unable to create requirement set")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create requirement set",
+            detail="Unable to create requirement set — operation aborted",
         )
 
 
@@ -336,10 +336,10 @@ async def run_gate(
     except HTTPException:
         raise
     except Exception:
-        logger.exception("Failed to run gate %d for set %s", gate_number, set_id)
+        logger.exception("Unable to run gate %d for set %s", gate_number, set_id)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to run quality gate",
+            detail="Unable to run quality gate — evaluation incomplete",
         )
 
 
@@ -403,8 +403,8 @@ async def import_from_text(
     except HTTPException:
         raise
     except Exception:
-        logger.exception("Failed to import requirements from text")
+        logger.exception("Unable to import requirements from text")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to import requirements from text",
+            detail="Unable to import requirements from text — parsing incomplete",
         )
