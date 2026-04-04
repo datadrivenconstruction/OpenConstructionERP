@@ -1485,17 +1485,17 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
     # Filter out empty rows, then group resources by rate_code
     _LABOR_UNITS = {"hrs", "h", "person-hour", "person-hours", "man-hours"}
     res_cols = ["rate_code", "resource_name", "resource_code", "resource_unit",
-                "resource_quantity", "resource_price_per_unit_eur_current",
-                "resource_cost_eur", "row_type", "is_machine", "is_material"]
+                "resource_quantity", "resource_price_per_unit_current",
+                "resource_cost", "row_type", "is_machine", "is_material"]
     available_res_cols = [c for c in res_cols if c in df.columns]
 
     resources_by_code: dict[str, list[dict]] = {}
-    if "resource_name" in df.columns and "resource_cost_eur" in df.columns:
+    if "resource_name" in df.columns and "resource_cost" in df.columns:
         # Filter rows that have resource data (non-empty name, non-zero cost)
         res_df = df[available_res_cols].copy()
         res_df = res_df[res_df["resource_name"].fillna("").str.len() > 0]
-        if "resource_cost_eur" in res_df.columns:
-            res_df = res_df[res_df["resource_cost_eur"].fillna(0).astype(float).abs() > 0.001]
+        if "resource_cost" in res_df.columns:
+            res_df = res_df[res_df["resource_cost"].fillna(0).astype(float).abs() > 0.001]
         if "row_type" in res_df.columns:
             res_df = res_df[res_df["row_type"].fillna("") != "Scope of work"]
 
@@ -1521,8 +1521,8 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
                     "code": _safe_str(r.get("resource_code", ""))[:50],
                     "unit": res_unit[:20],
                     "quantity": round(_safe_float(r.get("resource_quantity", 0)), 4),
-                    "unit_rate": round(_safe_float(r.get("resource_price_per_unit_eur_current", 0)), 2),
-                    "cost": round(_safe_float(r.get("resource_cost_eur", 0)), 2),
+                    "unit_rate": round(_safe_float(r.get("resource_price_per_unit_current", 0)), 2),
+                    "cost": round(_safe_float(r.get("resource_cost", 0)), 2),
                     "type": ctype,
                 })
             resources_by_code[str(rc)] = comps
