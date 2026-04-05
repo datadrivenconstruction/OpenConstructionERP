@@ -11,6 +11,16 @@ Routes:
     POST   /documents/{doc_id}/analyze          — AI analysis of extracted text
     GET    /documents/{doc_id}/download          — download the stored PDF file
     DELETE /documents/{doc_id}                  — delete a document
+
+    POST   /measurements                       — create measurement
+    GET    /measurements                        — list measurements (filtered)
+    GET    /measurements/summary                — stats by group/type
+    GET    /measurements/export                 — export measurements as CSV/JSON
+    POST   /measurements/bulk                   — bulk create measurements
+    GET    /measurements/{id}                   — get single measurement
+    PATCH  /measurements/{id}                   — update measurement
+    DELETE /measurements/{id}                   — delete measurement
+    POST   /measurements/{id}/link-to-boq       — link measurement to BOQ position
 """
 
 import logging
@@ -26,7 +36,15 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
-from app.modules.takeoff.schemas import TakeoffDocumentResponse
+from app.modules.takeoff.schemas import (
+    LinkToBoqRequest,
+    TakeoffDocumentResponse,
+    TakeoffMeasurementBulkCreate,
+    TakeoffMeasurementCreate,
+    TakeoffMeasurementResponse,
+    TakeoffMeasurementSummary,
+    TakeoffMeasurementUpdate,
+)
 from app.modules.takeoff.service import TakeoffService
 
 logger = logging.getLogger(__name__)
@@ -988,3 +1006,255 @@ async def delete_document(
         raise HTTPException(status_code=404, detail="Document not found")
 
     await service.delete_document(doc_id)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Measurement endpoints
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def _measurement_to_response(item: object) -> TakeoffMeasurementResponse:
+    """Build a TakeoffMeasurementResponse from an ORM object."""
+    return TakeoffMeasurementResponse(
+        id=item.id,  # type: ignore[attr-defined]
+        project_id=item.project_id,  # type: ignore[attr-defined]
+        document_id=item.document_id,  # type: ignore[attr-defined]
+        page=item.page,  # type: ignore[attr-defined]
+        type=item.type,  # type: ignore[attr-defined]
+        group_name=item.group_name,  # type: ignore[attr-defined]
+        group_color=item.group_color,  # type: ignore[attr-defined]
+        annotation=item.annotation,  # type: ignore[attr-defined]
+        points=item.points or [],  # type: ignore[attr-defined]
+        measurement_value=item.measurement_value,  # type: ignore[attr-defined]
+        measurement_unit=item.measurement_unit,  # type: ignore[attr-defined]
+        depth=item.depth,  # type: ignore[attr-defined]
+        volume=item.volume,  # type: ignore[attr-defined]
+        perimeter=item.perimeter,  # type: ignore[attr-defined]
+        count_value=item.count_value,  # type: ignore[attr-defined]
+        scale_pixels_per_unit=item.scale_pixels_per_unit,  # type: ignore[attr-defined]
+        linked_boq_position_id=item.linked_boq_position_id,  # type: ignore[attr-defined]
+        metadata=getattr(item, "metadata_", {}),  # type: ignore[attr-defined]
+        created_by=item.created_by,  # type: ignore[attr-defined]
+        created_at=item.created_at,  # type: ignore[attr-defined]
+        updated_at=item.updated_at,  # type: ignore[attr-defined]
+    )
+
+
+# ── Summary (must be before /{measurement_id} to avoid route collision) ──
+
+
+@router.get(
+    "/measurements/summary",
+    response_model=TakeoffMeasurementSummary,
+    dependencies=[Depends(RequirePermission("takeoff.read"))],
+)
+async def measurement_summary(
+    project_id: _uuid.UUID = Query(...),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: TakeoffService = Depends(_get_service),
+) -> TakeoffMeasurementSummary:
+    """Aggregated measurement stats for a project."""
+    data = await service.get_measurement_summary(project_id)
+    return TakeoffMeasurementSummary(**data)
+
+
+# ── Export ───────────────────────────────────────────────────────────────
+
+
+@router.get(
+    "/measurements/export",
+    dependencies=[Depends(RequirePermission("takeoff.read"))],
+)
+async def export_measurements(
+    project_id: _uuid.UUID = Query(...),
+    format: str = Query(default="csv", pattern="^(csv|json)$"),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: TakeoffService = Depends(_get_service),
+) -> Any:
+    """Export measurements for a project.
+
+    Supported formats: csv, json.
+    CSV returns a downloadable text response; JSON returns a list of dicts.
+    """
+    rows = await service.export_measurements(project_id, fmt=format)
+
+    if format == "csv":
+        import csv
+        import io
+
+        if not rows:
+            return {"csv": "", "count": 0}
+
+        output = io.StringIO()
+        writer = csv.DictWriter(output, fieldnames=list(rows[0].keys()))
+        writer.writeheader()
+        writer.writerows(rows)
+        csv_text = output.getvalue()
+        return {"csv": csv_text, "count": len(rows)}
+
+    return {"measurements": rows, "count": len(rows)}
+
+
+# ── Bulk create ──────────────────────────────────────────────────────────
+
+
+@router.post(
+    "/measurements/bulk",
+    response_model=list[TakeoffMeasurementResponse],
+    status_code=201,
+    dependencies=[Depends(RequirePermission("takeoff.create"))],
+)
+async def bulk_create_measurements(
+    data: TakeoffMeasurementBulkCreate,
+    user_id: CurrentUserId,
+    service: TakeoffService = Depends(_get_service),
+) -> list[TakeoffMeasurementResponse]:
+    """Bulk create measurements (e.g. importing from localStorage)."""
+    try:
+        items = await service.bulk_create_measurements(
+            data.measurements, created_by=user_id
+        )
+        return [_measurement_to_response(i) for i in items]
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Failed to bulk create measurements")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to bulk create measurements",
+        )
+
+
+# ── Create ───────────────────────────────────────────────────────────────
+
+
+@router.post(
+    "/measurements",
+    response_model=TakeoffMeasurementResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("takeoff.create"))],
+)
+async def create_measurement(
+    data: TakeoffMeasurementCreate,
+    user_id: CurrentUserId,
+    service: TakeoffService = Depends(_get_service),
+) -> TakeoffMeasurementResponse:
+    """Create a new takeoff measurement."""
+    try:
+        item = await service.create_measurement(data, created_by=user_id)
+        return _measurement_to_response(item)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Failed to create measurement")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create measurement",
+        )
+
+
+# ── List ─────────────────────────────────────────────────────────────────
+
+
+@router.get(
+    "/measurements",
+    response_model=list[TakeoffMeasurementResponse],
+    dependencies=[Depends(RequirePermission("takeoff.read"))],
+)
+async def list_measurements(
+    project_id: _uuid.UUID = Query(...),
+    document_id: str | None = Query(default=None),
+    page: int | None = Query(default=None, ge=1),
+    group: str | None = Query(default=None),
+    type: str | None = Query(default=None),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=200, ge=1, le=500),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: TakeoffService = Depends(_get_service),
+) -> list[TakeoffMeasurementResponse]:
+    """List measurements for a project with optional filters."""
+    items = await service.list_measurements(
+        project_id,
+        document_id=document_id,
+        page=page,
+        group_name=group,
+        measurement_type=type,
+        offset=offset,
+        limit=limit,
+    )
+    return [_measurement_to_response(i) for i in items]
+
+
+# ── Get single ───────────────────────────────────────────────────────────
+
+
+@router.get(
+    "/measurements/{measurement_id}",
+    response_model=TakeoffMeasurementResponse,
+    dependencies=[Depends(RequirePermission("takeoff.read"))],
+)
+async def get_measurement(
+    measurement_id: _uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: TakeoffService = Depends(_get_service),
+) -> TakeoffMeasurementResponse:
+    """Get a single measurement by ID."""
+    item = await service.get_measurement(measurement_id)
+    return _measurement_to_response(item)
+
+
+# ── Update ───────────────────────────────────────────────────────────────
+
+
+@router.patch(
+    "/measurements/{measurement_id}",
+    response_model=TakeoffMeasurementResponse,
+    dependencies=[Depends(RequirePermission("takeoff.update"))],
+)
+async def update_measurement(
+    measurement_id: _uuid.UUID,
+    data: TakeoffMeasurementUpdate,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: TakeoffService = Depends(_get_service),
+) -> TakeoffMeasurementResponse:
+    """Update a measurement."""
+    item = await service.update_measurement(measurement_id, data)
+    return _measurement_to_response(item)
+
+
+# ── Delete ───────────────────────────────────────────────────────────────
+
+
+@router.delete(
+    "/measurements/{measurement_id}",
+    status_code=204,
+    dependencies=[Depends(RequirePermission("takeoff.delete"))],
+)
+async def delete_measurement(
+    measurement_id: _uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: TakeoffService = Depends(_get_service),
+) -> None:
+    """Delete a measurement."""
+    await service.delete_measurement(measurement_id)
+
+
+# ── Link to BOQ ──────────────────────────────────────────────────────────
+
+
+@router.post(
+    "/measurements/{measurement_id}/link-to-boq",
+    response_model=TakeoffMeasurementResponse,
+    dependencies=[Depends(RequirePermission("takeoff.update"))],
+)
+async def link_measurement_to_boq(
+    measurement_id: _uuid.UUID,
+    data: LinkToBoqRequest,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: TakeoffService = Depends(_get_service),
+) -> TakeoffMeasurementResponse:
+    """Link a measurement to a BOQ position."""
+    item = await service.link_measurement_to_boq(
+        measurement_id, data.boq_position_id
+    )
+    return _measurement_to_response(item)
