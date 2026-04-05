@@ -16,6 +16,7 @@ const makeMeasurement = (id: string, page = 1) => ({
   label: 'D1',
   annotation: `Distance ${id}`,
   page,
+  group: 'General',
 });
 
 const defaultScale = { pixelsPerUnit: 100, unitLabel: 'm' };
