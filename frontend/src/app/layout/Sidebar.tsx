@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { LogoWithText } from '@/shared/ui';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
@@ -13,6 +13,7 @@ import {
   Boxes,
   ShieldCheck,
   FileText,
+  FileSearch,
   FileBarChart,
   Package,
   Settings,
@@ -20,7 +21,6 @@ import {
   TrendingUp,
   ChevronDown,
   Ruler,
-  ScanLine,
   Sparkles,
   MessageSquare,
   Box,
@@ -88,7 +88,8 @@ const navGroups: NavGroup[] = [
     defaultOpen: true,
     items: [
       { labelKey: 'nav.takeoff_overview', to: '/quantities', icon: Ruler },
-      { labelKey: 'nav.pdf_takeoff', to: '/takeoff', icon: ScanLine },
+      { labelKey: 'nav.measurements', to: '/takeoff?tab=measurements', icon: Ruler },
+      { labelKey: 'nav.documents_ai', to: '/takeoff?tab=documents', icon: FileSearch },
       { labelKey: 'nav.ai_estimate', to: '/ai-estimate', icon: Sparkles },
       { labelKey: 'nav.ai_advisor', to: '/advisor', icon: MessageSquare },
       { labelKey: 'nav.cad_takeoff', to: '/cad-takeoff', icon: Box },
@@ -359,16 +360,34 @@ function NavGroupSection({
 
 function SidebarItem({ item, label, onClick, badge: numericBadge }: { item: NavItem; label: string; onClick?: () => void; badge?: number }) {
   const Icon = item.icon;
+  const location = useLocation();
+
+  // For links with query params (e.g. /takeoff?tab=measurements), check both
+  // pathname and query string to determine active state. Without this, all
+  // links sharing the same pathname would appear active simultaneously.
+  const hasQuery = item.to.includes('?');
+  const computeActive = (routerIsActive: boolean): boolean => {
+    if (!hasQuery) return routerIsActive;
+    const [pathname, queryString] = item.to.split('?');
+    if (location.pathname !== pathname) return false;
+    const itemParams = new URLSearchParams(queryString);
+    const currentParams = new URLSearchParams(location.search);
+    for (const [key, value] of itemParams.entries()) {
+      if (currentParams.get(key) !== value) return false;
+    }
+    return true;
+  };
 
   return (
       <NavLink
         to={item.to}
-        end={item.to === '/'}
+        end={item.to === '/' || hasQuery}
         onClick={onClick}
         title={label}
         {...(item.tourId ? { 'data-tour': item.tourId } : {})}
-        className={({ isActive }) =>
-          clsx(
+        className={({ isActive: routerIsActive }) => {
+          const isActive = computeActive(routerIsActive);
+          return clsx(
             'flex items-center gap-3 rounded-lg px-3 py-2',
             'text-sm font-medium transition-all duration-fast ease-oe',
             item.highlight && !isActive
@@ -376,8 +395,8 @@ function SidebarItem({ item, label, onClick, badge: numericBadge }: { item: NavI
               : isActive
                 ? 'bg-oe-blue-subtle text-oe-blue'
                 : 'text-content-secondary hover:bg-surface-secondary hover:text-content-primary',
-          )
-        }
+          );
+        }}
       >
         <Icon size={18} strokeWidth={1.75} className="shrink-0" />
         <span className="truncate">{label}</span>
