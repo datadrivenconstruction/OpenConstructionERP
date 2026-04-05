@@ -5,6 +5,7 @@ Endpoints:
     GET    /?project_id=X                             — List sets for project
     GET    /{set_id}                                  — Get set with requirements
     DELETE /{set_id}                                  — Delete set
+    GET    /{set_id}/export                           — Export requirements (CSV/JSON)
     POST   /{set_id}/requirements                     — Add requirement
     PATCH  /{set_id}/requirements/{req_id}            — Update requirement
     DELETE /{set_id}/requirements/{req_id}            — Delete requirement
@@ -16,10 +17,13 @@ Endpoints:
     GET    /stats?project_id=X                        — Requirement statistics
 """
 
+import csv
+import io
 import logging
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import JSONResponse, StreamingResponse
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.requirements.schemas import (
@@ -205,6 +209,63 @@ async def get_set(
     """Get a requirement set with all its requirements and gate results."""
     item = await service.get_set(set_id)
     return _set_to_detail(item)
+
+
+# ── Export requirements ─────────────────────────────────────────────────────
+
+_EXPORT_COLUMNS = [
+    "entity",
+    "attribute",
+    "constraint_type",
+    "constraint_value",
+    "unit",
+    "category",
+    "priority",
+    "status",
+    "confidence",
+    "source_ref",
+    "notes",
+]
+
+
+@router.get("/{set_id}/export")
+async def export_requirements(
+    set_id: uuid.UUID,
+    format: str = Query(default="csv", pattern="^(csv|json)$"),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: RequirementsService = Depends(_get_service),
+) -> StreamingResponse | JSONResponse:
+    """Export all requirements for a set as CSV or JSON."""
+    item = await service.get_set(set_id)
+    reqs = getattr(item, "requirements", [])
+    rows = [_req_to_response(r) for r in reqs]
+
+    if format == "json":
+        data = [
+            {col: getattr(r, col, "") for col in _EXPORT_COLUMNS}
+            for r in rows
+        ]
+        return JSONResponse(
+            content=data,
+            headers={
+                "Content-Disposition": f'attachment; filename="requirements_{set_id}.json"',
+            },
+        )
+
+    # CSV
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(_EXPORT_COLUMNS)
+    for r in rows:
+        writer.writerow([getattr(r, col, "") for col in _EXPORT_COLUMNS])
+    buf.seek(0)
+    return StreamingResponse(
+        iter([buf.getvalue()]),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f'attachment; filename="requirements_{set_id}.csv"',
+        },
+    )
 
 
 # ── Delete set ──────────────────────────────────────────────────────────────
