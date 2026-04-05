@@ -29,8 +29,10 @@ import {
   BarChart3,
   ShieldAlert,
   ClipboardCheck,
+  ClipboardList,
   PenTool,
   ListChecks,
+  Camera,
   type LucideIcon,
 } from 'lucide-react';
 import { useModuleStore } from '@/stores/useModuleStore';
@@ -127,9 +129,11 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.analytics', to: '/analytics', icon: BarChart3 },
       { labelKey: 'nav.risk_register', to: '/risks', icon: ShieldAlert },
       { labelKey: 'nav.documents', to: '/documents', icon: FolderOpen },
+      { labelKey: 'nav.photos', to: '/photos', icon: Camera },
       { labelKey: 'nav.requirements', to: '/requirements', icon: ClipboardCheck },
       { labelKey: 'nav.markups', to: '/markups', icon: PenTool },
       { labelKey: 'nav.punchlist', to: '/punchlist', icon: ListChecks },
+      { labelKey: 'nav.field_reports', to: '/field-reports', icon: ClipboardList },
       // sustainability + cost-benchmark injected dynamically from module registry
     ],
   },
