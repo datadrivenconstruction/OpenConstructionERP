@@ -1945,9 +1945,9 @@ export function BOQEditorPage() {
       />
 
       {/* ── Header bar ─────────────────────────────────────────────────── */}
-      <div className="mb-6 space-y-3">
+      <div className="mb-4 space-y-2">
         <div className="flex items-center gap-3 min-w-0">
-          <h1 className="text-2xl font-bold text-content-primary truncate">{boq.name}</h1>
+          <h1 className="text-xl font-bold text-content-primary truncate">{boq.name}</h1>
           <Badge
             variant={
               boq.status === 'final' ? 'success' : boq.status === 'draft' ? 'blue' : 'neutral'
@@ -2009,15 +2009,12 @@ export function BOQEditorPage() {
         />
       </div>
 
-      {/* ── Toolbar hint ─────────────────────────────────────────────────── */}
-      <div className="mb-5">
-        <InfoHint text={t('boq.toolbar_hint', { defaultValue: 'Use the toolbar to add sections and positions, import from cost database or assemblies, export to GAEB/PDF/Excel, or run AI estimation. Net = sum of position totals. Markups are applied as percentages. Grand Total = Net + Markups + VAT.' })} />
-      </div>
-
-      {/* ── Tips panel ──────────────────────────────────────────────────── */}
-      <div className="mb-5">
-        <TipsPanel tips={tips} t={t} />
-      </div>
+      {/* ── Tips panel (collapsed by default, compact) ──────────────── */}
+      {tips.length > 0 && !hasPositions && (
+        <div className="mb-3">
+          <TipsPanel tips={tips} t={t} />
+        </div>
+      )}
 
       {/* ── BOQ Table (AG Grid) ───────────────────────────────────────── */}
       {hasPositions ? (
