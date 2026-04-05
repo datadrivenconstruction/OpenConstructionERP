@@ -26,6 +26,8 @@ from app.modules.fieldreports.schemas import (
     FieldReportResponse,
     FieldReportSummary,
     FieldReportUpdate,
+    LinkDocumentsRequest,
+    LinkedDocumentResponse,
 )
 from app.modules.fieldreports.service import FieldReportService
 
@@ -65,6 +67,7 @@ def _report_to_response(report: object) -> FieldReportResponse:
         status=report.status,  # type: ignore[attr-defined]
         approved_by=report.approved_by,  # type: ignore[attr-defined]
         approved_at=report.approved_at,  # type: ignore[attr-defined]
+        document_ids=report.document_ids or [],  # type: ignore[attr-defined]
         created_by=report.created_by,  # type: ignore[attr-defined]
         metadata=getattr(report, "metadata_", {}),  # type: ignore[attr-defined]
         created_at=report.created_at,  # type: ignore[attr-defined]
@@ -218,6 +221,64 @@ async def approve_report(
     """Approve a submitted report."""
     report = await service.approve_report(report_id, user_id)
     return _report_to_response(report)
+
+
+# ── Link documents ──────────────────────────────────────────────────────────
+
+
+@router.post("/reports/{report_id}/link-documents", response_model=FieldReportResponse)
+async def link_documents(
+    report_id: uuid.UUID,
+    data: LinkDocumentsRequest,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("fieldreports.update")),
+    service: FieldReportService = Depends(_get_service),
+) -> FieldReportResponse:
+    """Link one or more documents to a field report.
+
+    Merges the provided document_ids with any already linked, avoiding
+    duplicates.
+    """
+    report = await service.link_documents(report_id, data.document_ids)
+    return _report_to_response(report)
+
+
+@router.get("/reports/{report_id}/documents", response_model=list[LinkedDocumentResponse])
+async def get_linked_documents(
+    report_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: FieldReportService = Depends(_get_service),
+) -> list[LinkedDocumentResponse]:
+    """Return the documents linked to a field report.
+
+    Looks up each document_id in the documents module and returns basic
+    metadata for each.
+    """
+    report = await service.get_report(report_id)
+    doc_ids = report.document_ids or []
+
+    if not doc_ids:
+        return []
+
+    from sqlalchemy import select
+
+    from app.modules.documents.models import Document
+
+    stmt = select(Document).where(Document.id.in_([uuid.UUID(d) for d in doc_ids]))
+    result = await session.execute(stmt)
+    docs = result.scalars().all()
+
+    return [
+        LinkedDocumentResponse(
+            id=doc.id,  # type: ignore[attr-defined]
+            name=doc.name,  # type: ignore[attr-defined]
+            category=doc.category,  # type: ignore[attr-defined]
+            file_size=doc.file_size,  # type: ignore[attr-defined]
+            mime_type=doc.mime_type,  # type: ignore[attr-defined]
+        )
+        for doc in docs
+    ]
 
 
 # ── PDF Export ───────────────────────────────────────────────────────────────

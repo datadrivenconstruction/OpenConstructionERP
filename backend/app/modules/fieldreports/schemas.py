@@ -130,6 +130,7 @@ class FieldReportResponse(BaseModel):
     status: str = "draft"
     approved_by: str | None = None
     approved_at: datetime | None = None
+    document_ids: list[str] = Field(default_factory=list)
     created_by: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
@@ -147,3 +148,28 @@ class FieldReportSummary(BaseModel):
     by_type: dict[str, int] = Field(default_factory=dict)
     total_workforce_hours: float = 0.0
     total_delay_hours: float = 0.0
+
+
+# ── Link documents schema ─────────────────────────────────────────────
+
+
+class LinkDocumentsRequest(BaseModel):
+    """Request body for linking documents to a field report."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    document_ids: list[str] = Field(
+        ..., min_length=1, description="List of document UUIDs to link"
+    )
+
+
+class LinkedDocumentResponse(BaseModel):
+    """Minimal document reference returned from the linked-documents endpoint."""
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    name: str
+    category: str = "other"
+    file_size: int = 0
+    mime_type: str = ""

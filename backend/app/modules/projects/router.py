@@ -149,6 +149,267 @@ async def delete_project(
         raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
+# ── Project Dashboard (cross-module aggregation) ───────────────────────
+
+
+@router.get("/{project_id}/dashboard")
+async def project_dashboard(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    service: ProjectService = Depends(_get_service),
+) -> dict:
+    """Cross-module dashboard — aggregated KPIs for a single project.
+
+    Queries every module (BOQ, requirements, markups, punch list,
+    field reports, photos, measurements, documents, schedule, risk,
+    change orders) in one API call to give a full project overview.
+    """
+    from datetime import date, timedelta
+
+    from sqlalchemy import Float, func, select
+    from sqlalchemy.sql.expression import cast
+
+    from app.modules.boq.models import BOQ, BOQMarkup, Position
+    from app.modules.changeorders.models import ChangeOrder
+    from app.modules.documents.models import Document, ProjectPhoto
+    from app.modules.fieldreports.models import FieldReport
+    from app.modules.markups.models import Markup
+    from app.modules.punchlist.models import PunchItem
+    from app.modules.requirements.models import Requirement, RequirementSet
+    from app.modules.risk.models import RiskItem
+    from app.modules.schedule.models import Activity, Schedule
+    from app.modules.takeoff.models import TakeoffMeasurement
+
+    # Verify ownership / admin access
+    await _verify_project_owner(service, project_id, user_id, payload)
+
+    # ── BOQ ──────────────────────────────────────────────────────────
+    boq_count = (
+        await session.execute(
+            select(func.count(BOQ.id)).where(BOQ.project_id == project_id)
+        )
+    ).scalar_one()
+
+    boq_ids_result = await session.execute(
+        select(BOQ.id).where(BOQ.project_id == project_id)
+    )
+    boq_ids = [row[0] for row in boq_ids_result.all()]
+
+    position_count = 0
+    boq_total_value = 0.0
+    markups_from_boq = 0
+    if boq_ids:
+        position_count = (
+            await session.execute(
+                select(func.count(Position.id)).where(Position.boq_id.in_(boq_ids))
+            )
+        ).scalar_one()
+
+        total_result = (
+            await session.execute(
+                select(func.sum(cast(Position.total, Float))).where(
+                    Position.boq_id.in_(boq_ids)
+                )
+            )
+        ).scalar_one()
+        boq_total_value = round(total_result or 0.0, 2)
+
+        markups_from_boq = (
+            await session.execute(
+                select(func.count(BOQMarkup.id)).where(
+                    BOQMarkup.boq_id.in_(boq_ids)
+                )
+            )
+        ).scalar_one()
+
+    # ── Requirements ─────────────────────────────────────────────────
+    requirement_sets = (
+        await session.execute(
+            select(func.count(RequirementSet.id)).where(
+                RequirementSet.project_id == project_id
+            )
+        )
+    ).scalar_one()
+
+    req_set_ids_result = await session.execute(
+        select(RequirementSet.id).where(RequirementSet.project_id == project_id)
+    )
+    req_set_ids = [row[0] for row in req_set_ids_result.all()]
+
+    requirements_total = 0
+    requirements_coverage = 0
+    if req_set_ids:
+        requirements_total = (
+            await session.execute(
+                select(func.count(Requirement.id)).where(
+                    Requirement.requirement_set_id.in_(req_set_ids)
+                )
+            )
+        ).scalar_one()
+
+        linked_count = (
+            await session.execute(
+                select(func.count(Requirement.id)).where(
+                    Requirement.requirement_set_id.in_(req_set_ids),
+                    Requirement.linked_position_id.isnot(None),
+                )
+            )
+        ).scalar_one()
+        requirements_coverage = (
+            round(linked_count / requirements_total * 100)
+            if requirements_total > 0
+            else 0
+        )
+
+    # ── Markups (drawing annotations) ────────────────────────────────
+    markups_count = (
+        await session.execute(
+            select(func.count(Markup.id)).where(Markup.project_id == project_id)
+        )
+    ).scalar_one()
+
+    # ── Punch List ───────────────────────────────────────────────────
+    punch_rows = (
+        await session.execute(
+            select(PunchItem.status, func.count(PunchItem.id))
+            .where(PunchItem.project_id == project_id)
+            .group_by(PunchItem.status)
+        )
+    ).all()
+    punch_items = {
+        "open": 0,
+        "in_progress": 0,
+        "resolved": 0,
+        "verified": 0,
+        "closed": 0,
+    }
+    for row_status, cnt in punch_rows:
+        if row_status in punch_items:
+            punch_items[row_status] = cnt
+
+    # ── Field Reports ────────────────────────────────────────────────
+    field_reports_total = (
+        await session.execute(
+            select(func.count(FieldReport.id)).where(
+                FieldReport.project_id == project_id
+            )
+        )
+    ).scalar_one()
+
+    week_ago = date.today() - timedelta(days=7)
+    field_reports_this_week = (
+        await session.execute(
+            select(func.count(FieldReport.id)).where(
+                FieldReport.project_id == project_id,
+                FieldReport.report_date >= week_ago,
+            )
+        )
+    ).scalar_one()
+
+    # ── Photos ───────────────────────────────────────────────────────
+    photos_count = (
+        await session.execute(
+            select(func.count(ProjectPhoto.id)).where(
+                ProjectPhoto.project_id == project_id
+            )
+        )
+    ).scalar_one()
+
+    # ── Measurements ─────────────────────────────────────────────────
+    measurements_count = (
+        await session.execute(
+            select(func.count(TakeoffMeasurement.id)).where(
+                TakeoffMeasurement.project_id == project_id
+            )
+        )
+    ).scalar_one()
+
+    # ── Documents ────────────────────────────────────────────────────
+    documents_count = (
+        await session.execute(
+            select(func.count(Document.id)).where(
+                Document.project_id == project_id
+            )
+        )
+    ).scalar_one()
+
+    # ── Schedule ─────────────────────────────────────────────────────
+    sched_ids_result = await session.execute(
+        select(Schedule.id).where(Schedule.project_id == project_id)
+    )
+    sched_ids = [row[0] for row in sched_ids_result.all()]
+
+    schedule_activities = 0
+    if sched_ids:
+        schedule_activities = (
+            await session.execute(
+                select(func.count(Activity.id)).where(
+                    Activity.schedule_id.in_(sched_ids)
+                )
+            )
+        ).scalar_one()
+
+    # ── Risk ─────────────────────────────────────────────────────────
+    risk_total = (
+        await session.execute(
+            select(func.count(RiskItem.id)).where(
+                RiskItem.project_id == project_id
+            )
+        )
+    ).scalar_one()
+
+    risk_high = (
+        await session.execute(
+            select(func.count(RiskItem.id)).where(
+                RiskItem.project_id == project_id,
+                RiskItem.impact_severity == "high",
+            )
+        )
+    ).scalar_one()
+
+    # ── Change Orders ────────────────────────────────────────────────
+    co_total = (
+        await session.execute(
+            select(func.count(ChangeOrder.id)).where(
+                ChangeOrder.project_id == project_id
+            )
+        )
+    ).scalar_one()
+
+    co_approved = (
+        await session.execute(
+            select(func.count(ChangeOrder.id)).where(
+                ChangeOrder.project_id == project_id,
+                ChangeOrder.status == "approved",
+            )
+        )
+    ).scalar_one()
+
+    return {
+        "project_id": str(project_id),
+        "boq_count": boq_count,
+        "boq_total_value": boq_total_value,
+        "position_count": position_count,
+        "requirement_sets": requirement_sets,
+        "requirements_total": requirements_total,
+        "requirements_coverage": requirements_coverage,
+        "markups_count": markups_count + markups_from_boq,
+        "punch_items": punch_items,
+        "field_reports": {
+            "total": field_reports_total,
+            "this_week": field_reports_this_week,
+        },
+        "photos_count": photos_count,
+        "measurements_count": measurements_count,
+        "documents_count": documents_count,
+        "schedule_activities": schedule_activities,
+        "risks": {"total": risk_total, "high": risk_high},
+        "change_orders": {"total": co_total, "approved": co_approved},
+    }
+
+
 # ── Cross-Project Analytics ─────────────────────────────────────────────
 
 

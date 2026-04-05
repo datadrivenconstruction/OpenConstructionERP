@@ -89,6 +89,14 @@ class FieldReport(Base):
         DateTime(timezone=True), nullable=True
     )
 
+    # Linked documents (cross-module references to oe_documents_document)
+    document_ids: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
+    )
+
     # Standard fields
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
