@@ -18,9 +18,14 @@ import {
   Link2,
   Filter,
   Edit3,
+  Download,
+  FileSpreadsheet,
+  FileJson,
+  FileText,
+  AlertCircle,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
-import { apiGet } from '@/shared/lib/api';
+import { apiGet, triggerDownload } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import {
@@ -34,6 +39,9 @@ import {
   deleteRequirement,
   runGate,
   importFromText,
+  exportRequirementsCSV,
+  exportRequirementsExcel,
+  exportRequirementsJSON,
 } from './api';
 import type {
   Requirement,
@@ -1056,48 +1064,40 @@ export function RequirementsPage() {
       />
 
       {/* Header */}
-      <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
+      <div className="mt-4 space-y-3">
+        <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-content-primary">
             {t('requirements.title', { defaultValue: 'Requirements & Quality Gates' })}
           </h1>
-          {project && (
-            <p className="mt-1 text-sm text-content-secondary">{project.name}</p>
-          )}
+          <Button variant="primary" size="sm" onClick={() => setShowCreateSet(true)} disabled={!projectId}>
+            <Plus size={14} className="mr-1" />
+            {t('requirements.new_set', { defaultValue: 'New Set' })}
+          </Button>
         </div>
-        <div className="flex items-center gap-3">
-          {/* Project Selector */}
+        {/* Selectors row */}
+        <div className="flex flex-wrap items-center gap-2">
           {projects.length > 0 && (
             <select
               value={projectId}
               onChange={(e) => useProjectContextStore.getState().setActiveProjectId(e.target.value)}
-              className={inputCls + ' max-w-[220px]'}
+              className={inputCls + ' !h-8 !text-xs max-w-[200px]'}
             >
               {projects.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
+                <option key={p.id} value={p.id}>{p.name}</option>
               ))}
             </select>
           )}
-          {/* Set Selector */}
-          {sets.length > 1 && (
+          {sets.length > 0 && (
             <select
               value={currentSetId}
               onChange={(e) => setActiveSetId(e.target.value)}
-              className={inputCls + ' max-w-[200px]'}
+              className={inputCls + ' !h-8 !text-xs max-w-[200px]'}
             >
               {sets.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
+                <option key={s.id} value={s.id}>{s.name}</option>
               ))}
             </select>
           )}
-          <Button variant="primary" onClick={() => setShowCreateSet(true)} disabled={!projectId}>
-            <Plus size={16} className="mr-1.5" />
-            {t('requirements.new_set', { defaultValue: 'New Requirement Set' })}
-          </Button>
         </div>
       </div>
 
