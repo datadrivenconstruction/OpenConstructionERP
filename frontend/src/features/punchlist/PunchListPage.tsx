@@ -83,6 +83,14 @@ const PRIORITY_BADGE_CLS: Record<PunchPriority, string> = {
   critical: '',
 };
 
+/** Left-edge stripe colors for Kanban cards, keyed by priority. */
+const PRIORITY_STRIPE_CLS: Record<PunchPriority, string> = {
+  low: 'border-l-gray-300 dark:border-l-gray-600',
+  medium: 'border-l-yellow-400 dark:border-l-yellow-500',
+  high: 'border-l-orange-500 dark:border-l-orange-400',
+  critical: 'border-l-red-500 dark:border-l-red-400',
+};
+
 const STATUS_BADGE_VARIANT: Record<PunchStatus, 'error' | 'warning' | 'blue' | 'success' | 'neutral'> = {
   open: 'error',
   in_progress: 'warning',
@@ -234,7 +242,7 @@ function AddPunchModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in">
-      <div className="w-full max-w-lg bg-surface-primary rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-2xl bg-surface-primary rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <h2 className="text-lg font-semibold text-content-primary">
@@ -250,7 +258,7 @@ function AddPunchModal({
 
         {/* Form */}
         <div className="px-6 py-4 space-y-4">
-          {/* Title */}
+          {/* Title — full width */}
           <div>
             <label className="block text-sm font-medium text-content-secondary mb-1">
               {t('punch.field_title', { defaultValue: 'Title' })} <span className="text-semantic-error">*</span>
@@ -271,7 +279,7 @@ function AddPunchModal({
             )}
           </div>
 
-          {/* Description */}
+          {/* Description — full width */}
           <div>
             <label className="block text-sm font-medium text-content-secondary mb-1">
               {t('punch.field_description', { defaultValue: 'Description' })}
@@ -279,7 +287,7 @@ function AddPunchModal({
             <textarea
               value={form.description}
               onChange={(e) => set('description', e.target.value)}
-              rows={3}
+              rows={2}
               className={textareaCls}
               placeholder={t('punch.description_placeholder', {
                 defaultValue: 'Provide details about the issue...',
@@ -287,12 +295,12 @@ function AddPunchModal({
             />
           </div>
 
-          {/* Priority */}
+          {/* Priority — inline colored radio buttons in one row */}
           <div>
             <label className="block text-sm font-medium text-content-secondary mb-2">
               {t('punch.field_priority', { defaultValue: 'Priority' })}
             </label>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               {PRIORITIES.map((p) => (
                 <label key={p} className="relative cursor-pointer">
                   <input
@@ -305,7 +313,7 @@ function AddPunchModal({
                   />
                   <div
                     className={clsx(
-                      'rounded-lg border px-3 py-2 text-center text-sm font-medium transition-all',
+                      'rounded-lg border px-3 py-1.5 text-center text-sm font-medium transition-all',
                       PRIORITY_RADIO_COLORS[p],
                     )}
                   >
@@ -318,76 +326,82 @@ function AddPunchModal({
             </div>
           </div>
 
-          {/* Category */}
-          <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
-              {t('punch.field_category', { defaultValue: 'Category' })}
-            </label>
-            <select
-              value={form.category}
-              onChange={(e) => set('category', e.target.value as PunchCategory)}
-              className={inputCls}
-            >
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {t(`punch.category_${c}`, {
-                    defaultValue: c
-                      .split('_')
-                      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                      .join(' '),
-                  })}
+          {/* Two-column grid: Category + Assigned To */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Category */}
+            <div>
+              <label className="block text-sm font-medium text-content-secondary mb-1">
+                {t('punch.field_category', { defaultValue: 'Category' })}
+              </label>
+              <select
+                value={form.category}
+                onChange={(e) => set('category', e.target.value as PunchCategory)}
+                className={inputCls}
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {t(`punch.category_${c}`, {
+                      defaultValue: c
+                        .split('_')
+                        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                        .join(' '),
+                    })}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Assigned To */}
+            <div>
+              <label className="block text-sm font-medium text-content-secondary mb-1">
+                {t('punch.field_assigned_to', { defaultValue: 'Assigned To' })}
+              </label>
+              <select
+                value={form.assigned_to_id}
+                onChange={(e) => set('assigned_to_id', e.target.value)}
+                className={inputCls}
+              >
+                <option value="">
+                  {t('punch.unassigned', { defaultValue: 'Unassigned' })}
                 </option>
-              ))}
-            </select>
+                {teamMembers.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          {/* Assigned To */}
-          <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
-              {t('punch.field_assigned_to', { defaultValue: 'Assigned To' })}
-            </label>
-            <select
-              value={form.assigned_to_id}
-              onChange={(e) => set('assigned_to_id', e.target.value)}
-              className={inputCls}
-            >
-              <option value="">
-                {t('punch.unassigned', { defaultValue: 'Unassigned' })}
-              </option>
-              {teamMembers.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Two-column grid: Due Date + Location */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Due Date */}
+            <div>
+              <label className="block text-sm font-medium text-content-secondary mb-1">
+                {t('punch.field_due_date', { defaultValue: 'Due Date' })}
+              </label>
+              <input
+                type="date"
+                value={form.due_date}
+                onChange={(e) => set('due_date', e.target.value)}
+                className={inputCls}
+              />
+            </div>
 
-          {/* Due Date */}
-          <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
-              {t('punch.field_due_date', { defaultValue: 'Due Date' })}
-            </label>
-            <input
-              type="date"
-              value={form.due_date}
-              onChange={(e) => set('due_date', e.target.value)}
-              className={inputCls}
-            />
-          </div>
-
-          {/* Location */}
-          <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
-              {t('punch.field_location', { defaultValue: 'Location' })}
-            </label>
-            <input
-              value={form.location}
-              onChange={(e) => set('location', e.target.value)}
-              placeholder={t('punch.location_placeholder', {
-                defaultValue: 'e.g. Building A, Level 3, Room 305',
-              })}
-              className={inputCls}
-            />
+            {/* Location */}
+            <div>
+              <label className="block text-sm font-medium text-content-secondary mb-1">
+                {t('punch.field_location', { defaultValue: 'Location' })}
+              </label>
+              <input
+                value={form.location}
+                onChange={(e) => set('location', e.target.value)}
+                placeholder={t('punch.location_placeholder', {
+                  defaultValue: 'e.g. Building A, Level 3, Room 305',
+                })}
+                className={inputCls}
+              />
+            </div>
           </div>
         </div>
 
@@ -437,64 +451,74 @@ function PunchKanbanCard({
   return (
     <Card
       className={clsx(
-        'p-3 mb-2 hover:shadow-md transition-shadow',
-        isOverdue && 'border-l-4 border-l-semantic-error bg-red-50/50 dark:bg-red-950/20',
+        'p-3 mb-2 hover:shadow-md transition-shadow border-l-4',
+        PRIORITY_STRIPE_CLS[item.priority],
+        isOverdue && 'bg-red-50/40 dark:bg-red-950/15',
       )}
     >
-      <div className="flex items-start justify-between mb-2">
-        <h4 className={clsx(
-          'text-sm font-medium line-clamp-2 flex-1 mr-2',
-          isOverdue ? 'text-semantic-error' : 'text-content-primary',
-        )}>
-          {item.title}
-        </h4>
-        <Badge variant={PRIORITY_BADGE_VARIANT[item.priority]} size="sm" className={PRIORITY_BADGE_CLS[item.priority]}>
-          {t(`punch.priority_${item.priority}`, {
-            defaultValue: item.priority.charAt(0).toUpperCase() + item.priority.slice(1),
-          })}
-        </Badge>
-      </div>
+      {/* Title — bold, clamped to 2 lines */}
+      <h4 className={clsx(
+        'text-sm font-semibold line-clamp-2',
+        isOverdue ? 'text-semantic-error' : 'text-content-primary',
+      )}>
+        {item.title}
+      </h4>
 
-      {/* Assignee + Due Date */}
-      <div className="flex items-center gap-3 text-xs text-content-tertiary mt-2">
-        {item.assigned_to_name && (
-          <div className="flex items-center gap-1">
-            <User size={12} />
-            <span className="truncate max-w-[80px]">{item.assigned_to_name}</span>
-          </div>
-        )}
-        {item.due_date && (
-          <div
-            className={clsx(
-              'flex items-center gap-1',
-              isOverdue && 'text-semantic-error font-medium',
-            )}
-          >
-            {isOverdue ? <AlertTriangle size={12} /> : <Calendar size={12} />}
-            <span>
-              {new Date(item.due_date).toLocaleDateString(undefined, {
-                month: 'short',
-                day: 'numeric',
-              })}
+      {/* Description — truncated single line */}
+      {item.description && (
+        <p className="text-xs text-content-tertiary mt-1 line-clamp-1">
+          {item.description}
+        </p>
+      )}
+
+      {/* Bottom row: avatar + due date */}
+      <div className="flex items-center justify-between mt-3 text-xs text-content-tertiary">
+        {/* Assignee avatar */}
+        <div className="flex items-center gap-1.5">
+          {item.assigned_to_name ? (
+            <>
+              <div className="h-5 w-5 rounded-full bg-oe-blue/10 text-oe-blue flex items-center justify-center text-2xs font-semibold shrink-0">
+                {item.assigned_to_name.charAt(0).toUpperCase()}
+              </div>
+              <span className="truncate max-w-[80px]">{item.assigned_to_name}</span>
+            </>
+          ) : (
+            <span className="text-content-quaternary">
+              {t('punch.unassigned', { defaultValue: 'Unassigned' })}
             </span>
-            {isOverdue && (
-              <span className="text-2xs">
-                {t('punch.overdue', { defaultValue: 'Overdue' })}
+          )}
+        </div>
+
+        {/* Due date + overdue + photos */}
+        <div className="flex items-center gap-2">
+          {item.photos_count > 0 && (
+            <div className="flex items-center gap-0.5">
+              <Camera size={11} />
+              <span>{item.photos_count}</span>
+            </div>
+          )}
+          {item.due_date && (
+            <div
+              className={clsx(
+                'flex items-center gap-1',
+                isOverdue && 'text-semantic-error font-medium',
+              )}
+            >
+              {isOverdue ? <AlertTriangle size={11} /> : <Calendar size={11} />}
+              <span>
+                {new Date(item.due_date).toLocaleDateString(undefined, {
+                  month: 'short',
+                  day: 'numeric',
+                })}
               </span>
-            )}
-          </div>
-        )}
-        {item.photos_count > 0 && (
-          <div className="flex items-center gap-1">
-            <Camera size={12} />
-            <span>{item.photos_count}</span>
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Transition buttons */}
       {transitions.length > 0 && (
-        <div className="flex items-center gap-1 mt-3 pt-2 border-t border-border-light">
+        <div className="flex items-center gap-1 mt-2.5 pt-2 border-t border-border-light">
           {transitions.map((tr) => {
             const Icon = tr.icon;
             return (
@@ -769,44 +793,40 @@ export function PunchListPage() {
         ]}
       />
 
-      {/* Header */}
-      <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-content-primary flex items-center gap-2">
-            <ListChecks size={24} className="text-oe-blue" />
-            {t('punch.title', { defaultValue: 'Punch List' })}
-          </h1>
-          {project && (
-            <p className="mt-1 text-sm text-content-secondary">{project.name}</p>
-          )}
-        </div>
-        <div className="flex items-center gap-3">
+      {/* ── Header: single compact row ─────────────────────────────────── */}
+      <div className="mt-3 flex items-center justify-between gap-3 flex-wrap">
+        {/* Left: title */}
+        <h1 className="text-lg font-bold text-content-primary flex items-center gap-2 shrink-0">
+          <ListChecks size={20} className="text-oe-blue" />
+          {t('punch.title', { defaultValue: 'Punch List' })}
+        </h1>
+
+        {/* Right: controls */}
+        <div className="flex items-center gap-2 flex-wrap">
           {/* Project selector */}
           {projects.length > 0 && (
-            <div>
-              <select
-                value={projectId}
-                onChange={(e) => {
-                  const p = projects.find((pr) => pr.id === e.target.value);
-                  if (p) {
-                    useProjectContextStore.getState().setActiveProject(p.id, p.name);
-                  }
-                }}
-                className={inputCls + ' max-w-[220px]'}
-              >
-                <option value="">
-                  {t('punch.select_project', { defaultValue: 'Select project...' })}
+            <select
+              value={projectId}
+              onChange={(e) => {
+                const p = projects.find((pr) => pr.id === e.target.value);
+                if (p) {
+                  useProjectContextStore.getState().setActiveProject(p.id, p.name);
+                }
+              }}
+              className={inputCls + ' !h-8 !text-xs max-w-[180px]'}
+            >
+              <option value="" disabled>
+                {t('punch.select_project', { defaultValue: 'Project...' })}
+              </option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
                 </option>
-                {projects.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+              ))}
+            </select>
           )}
-          <Button variant="primary" onClick={() => setShowAddModal(true)} disabled={!projectId}>
-            <Plus size={16} className="mr-1.5" />
+          <Button variant="primary" size="sm" onClick={() => setShowAddModal(true)} disabled={!projectId}>
+            <Plus size={14} className="mr-1" />
             {t('punch.new_item', { defaultValue: 'New Item' })}
           </Button>
         </div>

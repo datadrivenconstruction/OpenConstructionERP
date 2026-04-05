@@ -739,14 +739,15 @@ function ExportDropdown({
         size="sm"
         onClick={() => setOpen(!open)}
         disabled={exporting || requirements.length === 0}
+        className="shrink-0"
       >
         {exporting ? (
-          <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-oe-blue border-t-transparent mr-1.5" />
+          <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-oe-blue border-t-transparent sm:mr-1.5" />
         ) : (
-          <Download size={14} className="mr-1.5" />
+          <Download size={14} className="sm:mr-1.5" />
         )}
-        {t('requirements.export', { defaultValue: 'Export' })}
-        <ChevronDown size={12} className="ml-1" />
+        <span className="hidden sm:inline">{t('requirements.export', { defaultValue: 'Export' })}</span>
+        <ChevronDown size={12} className="ml-0.5 sm:ml-1" />
       </Button>
       {open && (
         <>
@@ -1662,24 +1663,21 @@ export function RequirementsPage() {
         ]}
       />
 
-      {/* Header */}
-      <div className="mt-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-content-primary">
-            {t('requirements.title', { defaultValue: 'Requirements & Quality Gates' })}
-          </h1>
-          <Button variant="primary" size="sm" onClick={() => setShowCreateSet(true)} disabled={!projectId}>
-            <Plus size={14} className="mr-1" />
-            {t('requirements.new_set', { defaultValue: 'New Set' })}
-          </Button>
-        </div>
-        {/* Selectors row */}
-        <div className="flex flex-wrap items-center gap-2">
+      {/* ── Header: single compact row ─────────────────────────────────── */}
+      <div className="mt-3 flex items-center justify-between gap-3 flex-wrap">
+        {/* Left: title */}
+        <h1 className="text-lg font-bold text-content-primary flex items-center gap-2 shrink-0">
+          <ClipboardCheck size={20} className="text-oe-blue" />
+          {t('requirements.title', { defaultValue: 'Requirements & Quality Gates' })}
+        </h1>
+
+        {/* Right: selectors + New Set */}
+        <div className="flex items-center gap-2 flex-wrap">
           {projects.length > 0 && (
             <select
               value={projectId}
               onChange={(e) => useProjectContextStore.getState().setActiveProjectId(e.target.value)}
-              className={inputCls + ' !h-8 !text-xs max-w-[200px]'}
+              className={inputCls + ' !h-8 !text-xs max-w-[180px]'}
             >
               {projects.map((p) => (
                 <option key={p.id} value={p.id}>{p.name}</option>
@@ -1690,13 +1688,17 @@ export function RequirementsPage() {
             <select
               value={currentSetId}
               onChange={(e) => setActiveSetId(e.target.value)}
-              className={inputCls + ' !h-8 !text-xs max-w-[200px]'}
+              className={inputCls + ' !h-8 !text-xs max-w-[180px]'}
             >
               {sets.map((s) => (
                 <option key={s.id} value={s.id}>{s.name}</option>
               ))}
             </select>
           )}
+          <Button variant="primary" size="sm" onClick={() => setShowCreateSet(true)} disabled={!projectId}>
+            <Plus size={14} className="mr-1" />
+            {t('requirements.new_set', { defaultValue: 'New Set' })}
+          </Button>
         </div>
       </div>
 
@@ -1712,11 +1714,11 @@ export function RequirementsPage() {
         <StatsCards stats={stats} />
       </div>
 
-      {/* Toolbar */}
+      {/* Toolbar — single row, no wrapping */}
       {currentSetId && (
-        <div className="mt-6 flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="mt-6 flex items-center gap-2 flex-nowrap overflow-x-auto">
           {/* Search */}
-          <div className="relative flex-1 max-w-sm">
+          <div className="relative flex-1 min-w-[180px] max-w-sm">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-content-tertiary" />
             <input
               value={searchQuery}
@@ -1733,31 +1735,34 @@ export function RequirementsPage() {
             variant={showFilters ? 'secondary' : 'ghost'}
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
+            className="shrink-0"
           >
-            <Filter size={14} className="mr-1.5" />
-            {t('common.filters', { defaultValue: 'Filters' })}
+            <Filter size={14} className="mr-1.5 sm:mr-1" />
+            <span className="hidden sm:inline">{t('common.filters', { defaultValue: 'Filters' })}</span>
             {(filterCategory || filterPriority || filterStatus) && (
-              <span className="ml-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-oe-blue text-white text-2xs">
+              <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-oe-blue text-white text-2xs">
                 {[filterCategory, filterPriority, filterStatus].filter(Boolean).length}
               </span>
             )}
           </Button>
 
-          <div className="flex items-center gap-2 sm:ml-auto">
-            <ExportDropdown
-              setId={currentSetId}
-              requirements={requirements}
-              setName={currentSet?.name || 'requirements'}
-            />
-            <Button variant="ghost" size="sm" onClick={() => setShowImport(true)}>
-              <Upload size={14} className="mr-1.5" />
-              {t('requirements.import', { defaultValue: 'Import' })}
-            </Button>
-            <Button variant="primary" size="sm" onClick={() => setShowAddReq(true)}>
-              <Plus size={14} className="mr-1.5" />
-              {t('requirements.add', { defaultValue: 'Add Requirement' })}
-            </Button>
-          </div>
+          {/* Spacer */}
+          <div className="flex-1 min-w-0" />
+
+          {/* Action buttons: icon-only on mobile, icon+text on desktop */}
+          <ExportDropdown
+            setId={currentSetId}
+            requirements={requirements}
+            setName={currentSet?.name || 'requirements'}
+          />
+          <Button variant="ghost" size="sm" onClick={() => setShowImport(true)} className="shrink-0">
+            <Upload size={14} className="sm:mr-1.5" />
+            <span className="hidden sm:inline">{t('requirements.import', { defaultValue: 'Import' })}</span>
+          </Button>
+          <Button variant="primary" size="sm" onClick={() => setShowAddReq(true)} className="shrink-0">
+            <Plus size={14} className="sm:mr-1.5" />
+            <span className="hidden sm:inline">{t('requirements.add', { defaultValue: 'Add Requirement' })}</span>
+          </Button>
         </div>
       )}
 
