@@ -518,11 +518,41 @@ function RequirementModal({
               <input
                 value={f.constraint_value}
                 onChange={(e) => set('constraint_value', e.target.value)}
-                placeholder={t('requirements.value_placeholder', {
-                  defaultValue: 'e.g. 200, C30/37, F90',
-                })}
-                className={inputCls}
+                placeholder={
+                  f.constraint_type === 'regex'
+                    ? t('requirements.regex_placeholder', {
+                        defaultValue: 'e.g. ^F[0-9]+$',
+                      })
+                    : t('requirements.value_placeholder', {
+                        defaultValue: 'e.g. 200, C30/37, F90',
+                      })
+                }
+                className={clsx(inputCls, f.constraint_type === 'regex' && 'font-mono')}
               />
+              {f.constraint_type === 'regex' && (
+                <p className="mt-1 text-2xs text-content-tertiary">
+                  {t('requirements.regex_hint', {
+                    defaultValue:
+                      'Enter a regular expression pattern, e.g. ^F[0-9]+$',
+                  })}
+                  {f.constraint_value && (() => {
+                    try {
+                      new RegExp(f.constraint_value);
+                      return (
+                        <span className="ml-2 text-[#15803d]">
+                          {t('requirements.regex_valid', { defaultValue: 'Valid pattern' })}
+                        </span>
+                      );
+                    } catch {
+                      return (
+                        <span className="ml-2 text-semantic-error">
+                          {t('requirements.regex_invalid', { defaultValue: 'Invalid pattern' })}
+                        </span>
+                      );
+                    }
+                  })()}
+                </p>
+              )}
             </div>
           </div>
 
@@ -652,29 +682,320 @@ function RequirementModal({
   );
 }
 
-/* ── Import From Text Modal ───────────────────────────────────────────── */
+/* ── Export Dropdown ──────────────────────────────────────────────────── */
 
-function ImportTextModal({
-  onClose,
-  onImport,
-  isPending,
+function ExportDropdown({
+  setId,
+  requirements,
+  setName,
 }: {
-  onClose: () => void;
-  onImport: (text: string) => void;
-  isPending: boolean;
+  setId: string;
+  requirements: Requirement[];
+  setName: string;
 }) {
   const { t } = useTranslation();
-  const [text, setText] = useState('');
+  const addToast = useToastStore((s) => s.addToast);
+  const [open, setOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  const handleExport = useCallback(
+    async (format: 'csv' | 'excel' | 'json') => {
+      setExporting(true);
+      try {
+        const safeName = setName.replace(/[^a-zA-Z0-9_-]/g, '_') || 'requirements';
+        if (format === 'csv') {
+          const blob = await exportRequirementsCSV(setId, requirements);
+          triggerDownload(blob, `${safeName}.csv`);
+        } else if (format === 'excel') {
+          const blob = await exportRequirementsExcel(setId, requirements);
+          triggerDownload(blob, `${safeName}.xls`);
+        } else {
+          const json = await exportRequirementsJSON(setId, requirements);
+          const blob = new Blob([json], { type: 'application/json' });
+          triggerDownload(blob, `${safeName}.json`);
+        }
+        addToast({
+          type: 'success',
+          title: t('requirements.exported', { defaultValue: 'Requirements exported' }),
+        });
+      } catch (e) {
+        addToast({
+          type: 'error',
+          title: t('common.error', { defaultValue: 'Error' }),
+          message: e instanceof Error ? e.message : String(e),
+        });
+      } finally {
+        setExporting(false);
+        setOpen(false);
+      }
+    },
+    [setId, requirements, setName, addToast, t],
+  );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div className="relative">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => setOpen(!open)}
+        disabled={exporting || requirements.length === 0}
+      >
+        {exporting ? (
+          <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-oe-blue border-t-transparent mr-1.5" />
+        ) : (
+          <Download size={14} className="mr-1.5" />
+        )}
+        {t('requirements.export', { defaultValue: 'Export' })}
+        <ChevronDown size={12} className="ml-1" />
+      </Button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-full mt-1 z-40 w-48 rounded-lg border border-border bg-surface-primary shadow-lg overflow-hidden animate-card-in">
+            <button
+              onClick={() => handleExport('csv')}
+              className="flex items-center gap-2.5 w-full px-3 py-2.5 text-sm text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+            >
+              <FileText size={15} className="text-content-tertiary" />
+              {t('requirements.export_csv', { defaultValue: 'Export CSV' })}
+            </button>
+            <button
+              onClick={() => handleExport('excel')}
+              className="flex items-center gap-2.5 w-full px-3 py-2.5 text-sm text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+            >
+              <FileSpreadsheet size={15} className="text-content-tertiary" />
+              {t('requirements.export_excel', { defaultValue: 'Export Excel' })}
+            </button>
+            <button
+              onClick={() => handleExport('json')}
+              className="flex items-center gap-2.5 w-full px-3 py-2.5 text-sm text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+            >
+              <FileJson size={15} className="text-content-tertiary" />
+              {t('requirements.export_json', { defaultValue: 'Export JSON' })}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ── Import Modal (Tabs: Text / CSV / JSON) ──────────────────────────── */
+
+type ImportTab = 'text' | 'csv' | 'json';
+
+interface ParsedImportRow {
+  entity: string;
+  attribute: string;
+  constraint_type: string;
+  constraint_value: string;
+  unit: string;
+  category: string;
+  priority: string;
+  source_ref: string;
+  notes: string;
+}
+
+function parseCSVContent(content: string): ParsedImportRow[] {
+  const lines = content.split('\n').map((l) => l.trim()).filter(Boolean);
+  if (lines.length < 2) return [];
+  const headerLine = lines[0];
+  const headers = headerLine.split(',').map((h) => h.trim().toLowerCase().replace(/^["']|["']$/g, ''));
+
+  const entityIdx = headers.indexOf('entity');
+  const attributeIdx = headers.indexOf('attribute');
+  const constraintValueIdx = headers.indexOf('constraint_value');
+  if (entityIdx < 0 || attributeIdx < 0 || constraintValueIdx < 0) return [];
+
+  const getCol = (row: string[], idx: number) => (idx >= 0 && idx < row.length ? row[idx].replace(/^["']|["']$/g, '').trim() : '');
+
+  const result: ParsedImportRow[] = [];
+  for (let i = 1; i < lines.length; i++) {
+    // Simple CSV parse (handles quoted fields with commas)
+    const row = parseCSVLine(lines[i]);
+    const entity = getCol(row, entityIdx);
+    const attribute = getCol(row, attributeIdx);
+    const constraintValue = getCol(row, constraintValueIdx);
+    if (!entity || !attribute || !constraintValue) continue;
+
+    result.push({
+      entity,
+      attribute,
+      constraint_type: getCol(row, headers.indexOf('constraint_type')) || 'equals',
+      constraint_value: constraintValue,
+      unit: getCol(row, headers.indexOf('unit')) || '',
+      category: getCol(row, headers.indexOf('category')) || 'structural',
+      priority: getCol(row, headers.indexOf('priority')) || 'must',
+      source_ref: getCol(row, headers.indexOf('source_ref')) || '',
+      notes: getCol(row, headers.indexOf('notes')) || '',
+    });
+  }
+  return result;
+}
+
+function parseCSVLine(line: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"' && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else if (ch === '"') {
+        inQuotes = false;
+      } else {
+        current += ch;
+      }
+    } else {
+      if (ch === '"') {
+        inQuotes = true;
+      } else if (ch === ',') {
+        result.push(current);
+        current = '';
+      } else {
+        current += ch;
+      }
+    }
+  }
+  result.push(current);
+  return result;
+}
+
+function parseJSONContent(content: string): ParsedImportRow[] {
+  try {
+    const data = JSON.parse(content);
+    if (!Array.isArray(data)) return [];
+    return data
+      .filter(
+        (item: Record<string, unknown>) =>
+          typeof item === 'object' &&
+          item !== null &&
+          typeof item.entity === 'string' &&
+          typeof item.attribute === 'string' &&
+          (typeof item.constraint_value === 'string' || typeof item.constraint_value === 'number'),
+      )
+      .map((item: Record<string, unknown>) => ({
+        entity: String(item.entity || ''),
+        attribute: String(item.attribute || ''),
+        constraint_type: String(item.constraint_type || 'equals'),
+        constraint_value: String(item.constraint_value || ''),
+        unit: String(item.unit || ''),
+        category: String(item.category || 'structural'),
+        priority: String(item.priority || 'must'),
+        source_ref: String(item.source_ref || ''),
+        notes: String(item.notes || ''),
+      }));
+  } catch {
+    return [];
+  }
+}
+
+function ImportModal({
+  onClose,
+  onImportText,
+  onImportRows,
+  isTextPending,
+  isRowsPending,
+}: {
+  onClose: () => void;
+  onImportText: (text: string) => void;
+  onImportRows: (rows: AddRequirementPayload[]) => void;
+  isTextPending: boolean;
+  isRowsPending: boolean;
+}) {
+  const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState<ImportTab>('text');
+  const [text, setText] = useState('');
+  const [csvContent, setCsvContent] = useState('');
+  const [jsonContent, setJsonContent] = useState('');
+  const [csvParsed, setCsvParsed] = useState<ParsedImportRow[]>([]);
+  const [jsonParsed, setJsonParsed] = useState<ParsedImportRow[]>([]);
+  const [parseError, setParseError] = useState('');
+
+  const handleFileUpload = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>, type: 'csv' | 'json') => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      setParseError('');
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const content = ev.target?.result as string;
+        if (type === 'csv') {
+          setCsvContent(content);
+          const parsed = parseCSVContent(content);
+          setCsvParsed(parsed);
+          if (content.trim() && parsed.length === 0) {
+            setParseError(
+              t('requirements.csv_parse_error', {
+                defaultValue:
+                  'Could not parse CSV. Required headers: entity, attribute, constraint_value',
+              }),
+            );
+          }
+        } else {
+          setJsonContent(content);
+          const parsed = parseJSONContent(content);
+          setJsonParsed(parsed);
+          if (content.trim() && parsed.length === 0) {
+            setParseError(
+              t('requirements.json_parse_error', {
+                defaultValue:
+                  'Could not parse JSON. Expected an array of objects with entity, attribute, constraint_value fields.',
+              }),
+            );
+          }
+        }
+      };
+      reader.readAsText(file);
+    },
+    [t],
+  );
+
+  const handleImportParsed = useCallback(
+    (rows: ParsedImportRow[]) => {
+      onImportRows(
+        rows.map((r) => ({
+          entity: r.entity,
+          attribute: r.attribute,
+          constraint_type: r.constraint_type,
+          constraint_value: r.constraint_value,
+          unit: r.unit,
+          category: r.category,
+          priority: r.priority,
+          source_ref: r.source_ref,
+          notes: r.notes,
+        })),
+      );
+    },
+    [onImportRows],
+  );
+
+  const tabCls = (tab: ImportTab) =>
+    clsx(
+      'px-4 py-2 text-sm font-medium border-b-2 transition-colors',
+      activeTab === tab
+        ? 'border-oe-blue text-oe-blue'
+        : 'border-transparent text-content-tertiary hover:text-content-secondary hover:border-border',
+    );
+
+  const previewRows = activeTab === 'csv' ? csvParsed : jsonParsed;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      onClick={onClose}
+    >
       <div
-        className="w-full max-w-lg rounded-xl bg-surface-primary p-6 shadow-xl border border-border"
+        className="w-full max-w-2xl rounded-xl bg-surface-primary p-6 shadow-xl border border-border max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-semibold text-content-primary">
-            {t('requirements.import_text', { defaultValue: 'Import from Text' })}
+            {t('requirements.import_requirements', {
+              defaultValue: 'Import Requirements',
+            })}
           </h2>
           <button
             onClick={onClose}
@@ -683,35 +1004,290 @@ function ImportTextModal({
             <X size={18} />
           </button>
         </div>
-        <p className="text-sm text-content-tertiary mb-3">
-          {t('requirements.import_text_desc', {
-            defaultValue:
-              'Paste requirement specifications. Each line should follow the format: entity | attribute | constraint_type | value | unit | category | priority',
-          })}
-        </p>
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          rows={10}
-          placeholder={t('requirements.import_placeholder', {
-            defaultValue: 'wall | thickness | min | 200 | mm | structural | must\nroof | u_value | max | 0.20 | W/m\u00B2K | thermal | must',
-          })}
-          className={textareaCls + ' font-mono text-xs'}
-        />
-        <div className="mt-4 flex justify-end gap-3">
-          <Button variant="ghost" onClick={onClose}>
-            {t('common.cancel', { defaultValue: 'Cancel' })}
-          </Button>
-          <Button
-            variant="primary"
-            disabled={!text.trim() || isPending}
-            onClick={() => onImport(text)}
-          >
-            {isPending
-              ? t('common.importing', { defaultValue: 'Importing...' })
-              : t('common.import', { defaultValue: 'Import' })}
-          </Button>
+
+        {/* Tabs */}
+        <div className="flex border-b border-border mb-4">
+          <button className={tabCls('text')} onClick={() => { setActiveTab('text'); setParseError(''); }}>
+            <FileText size={14} className="inline mr-1.5 -mt-0.5" />
+            {t('requirements.tab_text', { defaultValue: 'From Text' })}
+          </button>
+          <button className={tabCls('csv')} onClick={() => { setActiveTab('csv'); setParseError(''); }}>
+            <FileSpreadsheet size={14} className="inline mr-1.5 -mt-0.5" />
+            {t('requirements.tab_csv', { defaultValue: 'From CSV' })}
+          </button>
+          <button className={tabCls('json')} onClick={() => { setActiveTab('json'); setParseError(''); }}>
+            <FileJson size={14} className="inline mr-1.5 -mt-0.5" />
+            {t('requirements.tab_json', { defaultValue: 'From JSON' })}
+          </button>
         </div>
+
+        {/* Text tab (existing) */}
+        {activeTab === 'text' && (
+          <div>
+            <p className="text-sm text-content-tertiary mb-3">
+              {t('requirements.import_text_desc', {
+                defaultValue:
+                  'Paste requirement specifications. Each line should follow the format: entity | attribute | constraint_type | value | unit | category | priority',
+              })}
+            </p>
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              rows={10}
+              placeholder={t('requirements.import_placeholder', {
+                defaultValue:
+                  'wall | thickness | min | 200 | mm | structural | must\nroof | u_value | max | 0.20 | W/m\u00B2K | thermal | must',
+              })}
+              className={textareaCls + ' font-mono text-xs'}
+            />
+            <div className="mt-4 flex justify-end gap-3">
+              <Button variant="ghost" onClick={onClose}>
+                {t('common.cancel', { defaultValue: 'Cancel' })}
+              </Button>
+              <Button
+                variant="primary"
+                disabled={!text.trim() || isTextPending}
+                onClick={() => onImportText(text)}
+              >
+                {isTextPending
+                  ? t('common.importing', { defaultValue: 'Importing...' })
+                  : t('common.import', { defaultValue: 'Import' })}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* CSV tab */}
+        {activeTab === 'csv' && (
+          <div>
+            <p className="text-sm text-content-tertiary mb-3">
+              {t('requirements.import_csv_desc', {
+                defaultValue:
+                  'Upload a CSV file with headers. Required columns: entity, attribute, constraint_value. Optional: constraint_type, unit, category, priority, source_ref, notes.',
+              })}
+            </p>
+            <label className="flex items-center justify-center w-full h-24 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-oe-blue/50 hover:bg-surface-secondary/30 transition-colors">
+              <div className="text-center">
+                <Upload size={20} className="mx-auto mb-1 text-content-tertiary" />
+                <span className="text-sm text-content-tertiary">
+                  {csvContent
+                    ? t('requirements.csv_loaded', {
+                        defaultValue: '{{count}} rows parsed',
+                        count: csvParsed.length,
+                      })
+                    : t('requirements.click_to_upload_csv', {
+                        defaultValue: 'Click to upload CSV file',
+                      })}
+                </span>
+              </div>
+              <input
+                type="file"
+                accept=".csv,text/csv"
+                className="hidden"
+                onChange={(e) => handleFileUpload(e, 'csv')}
+              />
+            </label>
+
+            {parseError && (
+              <div className="mt-3 flex items-start gap-2 text-sm text-semantic-error bg-semantic-error-bg border border-semantic-error/20 rounded-lg px-3 py-2">
+                <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                {parseError}
+              </div>
+            )}
+
+            {/* Preview table */}
+            {csvParsed.length > 0 && (
+              <div className="mt-4">
+                <p className="text-xs font-medium text-content-secondary mb-2">
+                  {t('requirements.preview', {
+                    defaultValue: 'Preview ({{count}} rows)',
+                    count: csvParsed.length,
+                  })}
+                </p>
+                <div className="max-h-48 overflow-auto border border-border rounded-lg">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="bg-surface-secondary/50 border-b border-border">
+                        <th className="px-2 py-1.5 text-left font-medium text-content-secondary">
+                          {t('requirements.entity', { defaultValue: 'Entity' })}
+                        </th>
+                        <th className="px-2 py-1.5 text-left font-medium text-content-secondary">
+                          {t('requirements.attribute', { defaultValue: 'Attribute' })}
+                        </th>
+                        <th className="px-2 py-1.5 text-left font-medium text-content-secondary">
+                          {t('requirements.constraint_type', { defaultValue: 'Type' })}
+                        </th>
+                        <th className="px-2 py-1.5 text-left font-medium text-content-secondary">
+                          {t('requirements.constraint_value', { defaultValue: 'Value' })}
+                        </th>
+                        <th className="px-2 py-1.5 text-left font-medium text-content-secondary">
+                          {t('requirements.unit', { defaultValue: 'Unit' })}
+                        </th>
+                        <th className="px-2 py-1.5 text-left font-medium text-content-secondary">
+                          {t('requirements.priority', { defaultValue: 'Priority' })}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {csvParsed.slice(0, 10).map((row, idx) => (
+                        <tr key={idx} className="border-b border-border last:border-0">
+                          <td className="px-2 py-1 text-content-primary">{row.entity}</td>
+                          <td className="px-2 py-1 text-content-secondary font-mono">{row.attribute}</td>
+                          <td className="px-2 py-1 text-content-secondary">{row.constraint_type}</td>
+                          <td className="px-2 py-1 text-content-primary tabular-nums">{row.constraint_value}</td>
+                          <td className="px-2 py-1 text-content-secondary">{row.unit}</td>
+                          <td className="px-2 py-1 text-content-secondary">{row.priority}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {csvParsed.length > 10 && (
+                    <p className="text-2xs text-content-tertiary text-center py-1.5">
+                      {t('requirements.and_more', {
+                        defaultValue: '... and {{count}} more',
+                        count: csvParsed.length - 10,
+                      })}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-4 flex justify-end gap-3">
+              <Button variant="ghost" onClick={onClose}>
+                {t('common.cancel', { defaultValue: 'Cancel' })}
+              </Button>
+              <Button
+                variant="primary"
+                disabled={csvParsed.length === 0 || isRowsPending}
+                onClick={() => handleImportParsed(csvParsed)}
+              >
+                {isRowsPending
+                  ? t('common.importing', { defaultValue: 'Importing...' })
+                  : t('requirements.import_count', {
+                      defaultValue: 'Import {{count}} requirements',
+                      count: csvParsed.length,
+                    })}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* JSON tab */}
+        {activeTab === 'json' && (
+          <div>
+            <p className="text-sm text-content-tertiary mb-3">
+              {t('requirements.import_json_desc', {
+                defaultValue:
+                  'Upload a JSON file containing an array of requirement objects. Each object must have: entity, attribute, constraint_value.',
+              })}
+            </p>
+            <label className="flex items-center justify-center w-full h-24 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-oe-blue/50 hover:bg-surface-secondary/30 transition-colors">
+              <div className="text-center">
+                <Upload size={20} className="mx-auto mb-1 text-content-tertiary" />
+                <span className="text-sm text-content-tertiary">
+                  {jsonContent
+                    ? t('requirements.json_loaded', {
+                        defaultValue: '{{count}} items parsed',
+                        count: jsonParsed.length,
+                      })
+                    : t('requirements.click_to_upload_json', {
+                        defaultValue: 'Click to upload JSON file',
+                      })}
+                </span>
+              </div>
+              <input
+                type="file"
+                accept=".json,application/json"
+                className="hidden"
+                onChange={(e) => handleFileUpload(e, 'json')}
+              />
+            </label>
+
+            {parseError && (
+              <div className="mt-3 flex items-start gap-2 text-sm text-semantic-error bg-semantic-error-bg border border-semantic-error/20 rounded-lg px-3 py-2">
+                <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                {parseError}
+              </div>
+            )}
+
+            {/* Preview table */}
+            {jsonParsed.length > 0 && (
+              <div className="mt-4">
+                <p className="text-xs font-medium text-content-secondary mb-2">
+                  {t('requirements.preview', {
+                    defaultValue: 'Preview ({{count}} rows)',
+                    count: jsonParsed.length,
+                  })}
+                </p>
+                <div className="max-h-48 overflow-auto border border-border rounded-lg">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="bg-surface-secondary/50 border-b border-border">
+                        <th className="px-2 py-1.5 text-left font-medium text-content-secondary">
+                          {t('requirements.entity', { defaultValue: 'Entity' })}
+                        </th>
+                        <th className="px-2 py-1.5 text-left font-medium text-content-secondary">
+                          {t('requirements.attribute', { defaultValue: 'Attribute' })}
+                        </th>
+                        <th className="px-2 py-1.5 text-left font-medium text-content-secondary">
+                          {t('requirements.constraint_type', { defaultValue: 'Type' })}
+                        </th>
+                        <th className="px-2 py-1.5 text-left font-medium text-content-secondary">
+                          {t('requirements.constraint_value', { defaultValue: 'Value' })}
+                        </th>
+                        <th className="px-2 py-1.5 text-left font-medium text-content-secondary">
+                          {t('requirements.unit', { defaultValue: 'Unit' })}
+                        </th>
+                        <th className="px-2 py-1.5 text-left font-medium text-content-secondary">
+                          {t('requirements.priority', { defaultValue: 'Priority' })}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {jsonParsed.slice(0, 10).map((row, idx) => (
+                        <tr key={idx} className="border-b border-border last:border-0">
+                          <td className="px-2 py-1 text-content-primary">{row.entity}</td>
+                          <td className="px-2 py-1 text-content-secondary font-mono">{row.attribute}</td>
+                          <td className="px-2 py-1 text-content-secondary">{row.constraint_type}</td>
+                          <td className="px-2 py-1 text-content-primary tabular-nums">{row.constraint_value}</td>
+                          <td className="px-2 py-1 text-content-secondary">{row.unit}</td>
+                          <td className="px-2 py-1 text-content-secondary">{row.priority}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {jsonParsed.length > 10 && (
+                    <p className="text-2xs text-content-tertiary text-center py-1.5">
+                      {t('requirements.and_more', {
+                        defaultValue: '... and {{count}} more',
+                        count: jsonParsed.length - 10,
+                      })}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-4 flex justify-end gap-3">
+              <Button variant="ghost" onClick={onClose}>
+                {t('common.cancel', { defaultValue: 'Cancel' })}
+              </Button>
+              <Button
+                variant="primary"
+                disabled={jsonParsed.length === 0 || isRowsPending}
+                onClick={() => handleImportParsed(jsonParsed)}
+              >
+                {isRowsPending
+                  ? t('common.importing', { defaultValue: 'Importing...' })
+                  : t('requirements.import_count', {
+                      defaultValue: 'Import {{count}} requirements',
+                      count: jsonParsed.length,
+                    })}
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1013,6 +1589,29 @@ export function RequirementsPage() {
       addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: e.message }),
   });
 
+  const bulkImportMut = useMutation({
+    mutationFn: async (rows: AddRequirementPayload[]) => {
+      const results = [];
+      for (const row of rows) {
+        results.push(await addRequirement(currentSetId, row));
+      }
+      return results;
+    },
+    onSuccess: (results) => {
+      invalidateAll();
+      setShowImport(false);
+      addToast({
+        type: 'success',
+        title: t('requirements.imported', {
+          defaultValue: '{{count}} requirements imported',
+          count: results.length,
+        }),
+      });
+    },
+    onError: (e: Error) =>
+      addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: e.message }),
+  });
+
   // Run gate handler
   const handleRunGate = useCallback(
     async (gateNum: number) => {
@@ -1145,6 +1744,11 @@ export function RequirementsPage() {
           </Button>
 
           <div className="flex items-center gap-2 sm:ml-auto">
+            <ExportDropdown
+              setId={currentSetId}
+              requirements={requirements}
+              setName={currentSet?.name || 'requirements'}
+            />
             <Button variant="ghost" size="sm" onClick={() => setShowImport(true)}>
               <Upload size={14} className="mr-1.5" />
               {t('requirements.import', { defaultValue: 'Import' })}
@@ -1392,10 +1996,12 @@ export function RequirementsPage() {
       )}
 
       {showImport && (
-        <ImportTextModal
+        <ImportModal
           onClose={() => setShowImport(false)}
-          onImport={(text) => importMut.mutate(text)}
-          isPending={importMut.isPending}
+          onImportText={(text) => importMut.mutate(text)}
+          onImportRows={(rows) => bulkImportMut.mutate(rows)}
+          isTextPending={importMut.isPending}
+          isRowsPending={bulkImportMut.isPending}
         />
       )}
     </div>
