@@ -54,11 +54,6 @@ import type {
 
 /* ── Constants ─────────────────────────────────────────────────────────── */
 
-interface Project {
-  id: string;
-  name: string;
-}
-
 const REPORT_TYPES: ReportType[] = ['daily', 'inspection', 'safety', 'concrete_pour'];
 const WEATHER_CONDITIONS: WeatherCondition[] = ['clear', 'cloudy', 'rain', 'snow', 'fog', 'storm'];
 
@@ -135,9 +130,10 @@ export function FieldReportsPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
-  const activeProject = useProjectContextStore((s) => s.activeProject);
+  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+  const activeProjectName = useProjectContextStore((s) => s.activeProjectName);
 
-  const projectId = activeProject?.id ?? '';
+  const projectId = activeProjectId ?? '';
 
   // View mode: calendar vs list
   const [view, setView] = useState<'calendar' | 'list'>('calendar');
@@ -311,7 +307,7 @@ export function FieldReportsPage() {
     return (
       <div className="p-6">
         <EmptyState
-          icon={ClipboardList}
+          icon={<ClipboardList size={48} />}
           title={t('fieldreports.no_project', { defaultValue: 'Select a project' })}
           description={t('fieldreports.no_project_desc', { defaultValue: 'Choose a project from the sidebar to view field reports.' })}
         />
@@ -349,7 +345,7 @@ export function FieldReportsPage() {
               {t('fieldreports.title', { defaultValue: 'Field Reports' })}
             </h1>
             <p className="text-sm text-content-tertiary">
-              {activeProject?.name ?? ''}
+              {activeProjectName}
             </p>
           </div>
         </div>
@@ -561,7 +557,7 @@ export function FieldReportsPage() {
           {listReports.length === 0 ? (
             <div className="p-8">
               <EmptyState
-                icon={ClipboardList}
+                icon={<ClipboardList size={48} />}
                 title={
                   statusFilter || typeFilter
                     ? t('fieldreports.no_match', { defaultValue: 'No matching reports' })
