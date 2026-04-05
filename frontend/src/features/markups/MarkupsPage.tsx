@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
@@ -834,6 +835,7 @@ function MarkupTableRow({
 
 export function MarkupsPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
@@ -1049,15 +1051,27 @@ export function MarkupsPage() {
             </select>
           )}
 
-          {/* Add Markup (primary) */}
+          {/* Open PDF Viewer for visual annotations */}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => navigate('/takeoff?tab=measurements')}
+            className="shrink-0 whitespace-nowrap"
+          >
+            <PenTool size={14} className="mr-1 shrink-0" />
+            <span>{t('markups.annotate_pdf', { defaultValue: 'Annotate on PDF' })}</span>
+          </Button>
+
+          {/* Add Markup (data only) */}
           <Button
             variant="primary"
             size="sm"
             onClick={() => setShowAddModal(true)}
             disabled={!projectId}
-            icon={<Plus size={14} />}
+            className="shrink-0 whitespace-nowrap"
           >
-            {t('markups.add_markup', { defaultValue: 'Add Markup' })}
+            <Plus size={14} className="mr-1 shrink-0" />
+            <span>{t('markups.add_markup', { defaultValue: 'Add Markup' })}</span>
           </Button>
 
           {/* Export (ghost) */}
