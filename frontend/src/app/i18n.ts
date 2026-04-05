@@ -9084,7 +9084,7 @@ const fallbackResources = {
       'nav.requirements': 'Требования',
       'nav.templates': 'Шаблоны',
       'requirements.title': 'Требования и контрольные точки качества',
-      'requirements.gate_label': 'Точка {{num}}',
+      'requirements.gate_label': 'Этап {{num}}',
       'requirements.score': 'Оценка',
       'requirements.run': 'Запустить',
       'requirements.stat_total': 'Всего требований',
