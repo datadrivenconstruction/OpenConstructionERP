@@ -383,9 +383,9 @@ export function FieldReportsPage() {
             </button>
           </div>
 
-          <Button size="sm" onClick={handleOpenNew}>
-            <Plus size={16} className="mr-1.5" />
-            {t('fieldreports.new_report', { defaultValue: 'New Report' })}
+          <Button size="sm" onClick={handleOpenNew} className="shrink-0 whitespace-nowrap">
+            <Plus size={16} className="mr-1.5 shrink-0" />
+            <span>{t('fieldreports.new_report', { defaultValue: 'New Report' })}</span>
           </Button>
         </div>
       </div>
@@ -562,13 +562,25 @@ export function FieldReportsPage() {
             <div className="p-8">
               <EmptyState
                 icon={ClipboardList}
-                title={t('fieldreports.empty', { defaultValue: 'No field reports yet' })}
-                description={t('fieldreports.empty_desc', { defaultValue: 'Create your first daily field report to track site activities.' })}
+                title={
+                  statusFilter || typeFilter
+                    ? t('fieldreports.no_match', { defaultValue: 'No matching reports' })
+                    : t('fieldreports.empty', { defaultValue: 'No field reports yet' })
+                }
+                description={
+                  statusFilter || typeFilter
+                    ? t('fieldreports.no_match_desc', { defaultValue: 'Try adjusting your status or type filters.' })
+                    : t('fieldreports.empty_desc', { defaultValue: 'Create your first daily field report to track site activities.' })
+                }
                 action={
-                  <Button size="sm" onClick={handleOpenNew}>
-                    <Plus size={16} className="mr-1.5" />
-                    {t('fieldreports.new_report', { defaultValue: 'New Report' })}
-                  </Button>
+                  statusFilter || typeFilter
+                    ? undefined
+                    : (
+                      <Button size="sm" onClick={handleOpenNew}>
+                        <Plus size={16} className="mr-1.5 shrink-0" />
+                        <span>{t('fieldreports.new_report', { defaultValue: 'New Report' })}</span>
+                      </Button>
+                    )
                 }
               />
             </div>
@@ -1185,15 +1197,15 @@ function ReportModal({
         <div className="flex items-center justify-between border-t border-border-light px-6 py-4">
           <div className="flex items-center gap-2">
             {isEdit && report?.status === 'draft' && (
-              <Button size="sm" variant="outline" onClick={() => onSubmit(report.id)}>
-                <Send size={15} className="mr-1.5" />
-                {t('fieldreports.submit', { defaultValue: 'Submit for Approval' })}
+              <Button size="sm" variant="secondary" onClick={() => onSubmit(report.id)}>
+                <Send size={15} className="mr-1.5 shrink-0" />
+                <span>{t('fieldreports.submit', { defaultValue: 'Submit for Approval' })}</span>
               </Button>
             )}
             {isEdit && report?.status === 'submitted' && (
-              <Button size="sm" variant="outline" onClick={() => onApprove(report.id)}>
-                <CheckCircle2 size={15} className="mr-1.5" />
-                {t('fieldreports.approve', { defaultValue: 'Approve' })}
+              <Button size="sm" variant="secondary" onClick={() => onApprove(report.id)}>
+                <CheckCircle2 size={15} className="mr-1.5 shrink-0" />
+                <span>{t('fieldreports.approve', { defaultValue: 'Approve' })}</span>
               </Button>
             )}
           </div>

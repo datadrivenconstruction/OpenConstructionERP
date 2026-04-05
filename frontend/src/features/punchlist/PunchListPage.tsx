@@ -416,11 +416,11 @@ function AddPunchModal({
             disabled={isPending}
           >
             {isPending ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2" />
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
             ) : (
-              <Plus size={16} className="mr-1.5" />
+              <Plus size={16} className="mr-1.5 shrink-0" />
             )}
-            {t('punch.create_item', { defaultValue: 'Create Item' })}
+            <span>{t('punch.create_item', { defaultValue: 'Create Item' })}</span>
           </Button>
         </div>
       </div>
@@ -858,10 +858,10 @@ export function PunchListPage() {
             variant="ghost"
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
-            className={showFilters ? 'text-oe-blue' : ''}
+            className={clsx('shrink-0', showFilters && 'text-oe-blue')}
           >
-            <Filter size={16} className="mr-1" />
-            {t('common.filters', { defaultValue: 'Filters' })}
+            <Filter size={16} className="mr-1 shrink-0" />
+            <span>{t('common.filters', { defaultValue: 'Filters' })}</span>
           </Button>
 
           {/* View toggle */}

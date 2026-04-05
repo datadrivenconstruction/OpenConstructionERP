@@ -905,9 +905,9 @@ export function PhotoGalleryPage() {
             </p>
           </div>
         </div>
-        <Button onClick={() => setShowUpload(!showUpload)} size="sm">
-          <Upload size={16} className="mr-2" />
-          {t('photos.upload_photos', { defaultValue: 'Upload Photos' })}
+        <Button onClick={() => setShowUpload(!showUpload)} size="sm" className="shrink-0">
+          <Upload size={16} className="mr-2 shrink-0" />
+          <span>{t('photos.upload_photos', { defaultValue: 'Upload Photos' })}</span>
         </Button>
       </div>
 
@@ -980,15 +980,29 @@ export function PhotoGalleryPage() {
       ) : photoList.length === 0 && viewMode === 'grid' ? (
         <EmptyState
           icon={<ImageIcon size={48} />}
-          title={t('photos.empty_title', { defaultValue: 'No photos yet' })}
-          description={t('photos.empty_description', {
-            defaultValue: 'Upload photos to document your project progress, site conditions, and more.',
-          })}
+          title={
+            searchQuery || category !== 'all'
+              ? t('photos.no_match_title', { defaultValue: 'No matching photos' })
+              : t('photos.empty_title', { defaultValue: 'No photos yet' })
+          }
+          description={
+            searchQuery || category !== 'all'
+              ? t('photos.no_match_description', {
+                  defaultValue: 'Try adjusting your search or category filter.',
+                })
+              : t('photos.empty_description', {
+                  defaultValue: 'Upload photos to document your project progress, site conditions, and more.',
+                })
+          }
           action={
-            <Button onClick={() => setShowUpload(true)} size="sm" variant="secondary">
-              <Upload size={16} className="mr-2" />
-              {t('photos.upload_first', { defaultValue: 'Upload your first photo' })}
-            </Button>
+            searchQuery || category !== 'all'
+              ? undefined
+              : (
+                <Button onClick={() => setShowUpload(true)} size="sm" variant="secondary">
+                  <Upload size={16} className="mr-2 shrink-0" />
+                  <span>{t('photos.upload_first', { defaultValue: 'Upload your first photo' })}</span>
+                </Button>
+              )
           }
         />
       ) : viewMode === 'grid' ? (
@@ -1040,6 +1054,12 @@ export function PhotoGalleryPage() {
               description={t('photos.empty_description', {
                 defaultValue: 'Upload photos to document your project progress, site conditions, and more.',
               })}
+              action={
+                <Button onClick={() => setShowUpload(true)} size="sm" variant="secondary">
+                  <Upload size={16} className="mr-2 shrink-0" />
+                  <span>{t('photos.upload_first', { defaultValue: 'Upload your first photo' })}</span>
+                </Button>
+              }
             />
           )}
         </div>

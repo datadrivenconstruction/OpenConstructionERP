@@ -258,7 +258,7 @@ function GatePipeline({
                   {runningGate === def.number ? (
                     <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" />
                   ) : (
-                    <Play size={14} className="mr-1" />
+                    <Play size={14} className="mr-1 shrink-0" />
                   )}
                   {t('requirements.run', { defaultValue: 'Run' })}
                 </Button>
@@ -1696,24 +1696,39 @@ export function RequirementsPage() {
               ))}
             </select>
           )}
-          <Button variant="primary" size="sm" onClick={() => setShowCreateSet(true)} disabled={!projectId}>
-            <Plus size={14} className="mr-1" />
+          <Button variant="primary" size="sm" onClick={() => setShowCreateSet(true)} disabled={!projectId} className="shrink-0">
+            <Plus size={14} className="mr-1 shrink-0" />
             {t('requirements.new_set', { defaultValue: 'New Set' })}
           </Button>
         </div>
       </div>
 
+      {/* No project selected */}
+      {!projectId && (
+        <div className="mt-6">
+          <EmptyState
+            icon={<ClipboardCheck size={24} />}
+            title={t('requirements.no_project', { defaultValue: 'No project selected' })}
+            description={t('requirements.no_project_desc', {
+              defaultValue: 'Select a project from the dropdown above to view and manage requirements and quality gates.',
+            })}
+          />
+        </div>
+      )}
+
       {/* Gate Pipeline */}
-      {currentSetId && (
+      {projectId && currentSetId && (
         <div className="mt-6">
           <GatePipeline gates={gates} onRunGate={handleRunGate} runningGate={runningGate} />
         </div>
       )}
 
       {/* Stats */}
+      {projectId && (
       <div className="mt-6">
         <StatsCards stats={stats} />
       </div>
+      )}
 
       {/* Toolbar — single row, no wrapping */}
       {currentSetId && (
@@ -1828,6 +1843,7 @@ export function RequirementsPage() {
       )}
 
       {/* Requirements Table */}
+      {projectId && (
       <div className="mt-4">
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
@@ -1962,6 +1978,7 @@ export function RequirementsPage() {
           </Card>
         )}
       </div>
+      )}
 
       {/* Modals */}
       {showCreateSet && projectId && (

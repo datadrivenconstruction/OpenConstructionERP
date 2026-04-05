@@ -111,6 +111,7 @@ export async function fetchRequirementSetDetail(setId: string): Promise<Requirem
 }
 
 export async function fetchRequirementStats(projectId: string): Promise<RequirementStats> {
+  if (!projectId) return { total_requirements: 0, total_sets: 0, by_priority: {}, by_status: {}, by_category: {}, linked_count: 0, unlinked_count: 0 };
   return apiGet<RequirementStats>(`/v1/requirements/stats?project_id=${projectId}`);
 }
 
