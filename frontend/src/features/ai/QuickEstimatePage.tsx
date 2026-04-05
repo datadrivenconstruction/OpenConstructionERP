@@ -2,7 +2,7 @@
 // CWICR AI Estimation Engine
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 // DDC-CWICR-OE-2026
-import { useState, useCallback, useRef, useEffect, useMemo, type FormEvent } from 'react';
+import React, { useState, useCallback, useRef, useEffect, useMemo, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
@@ -37,11 +37,12 @@ import {
   HardDrive,
   Star,
   Database,
+  Plus,
 } from 'lucide-react';
 import clsx from 'clsx';
 import { Card, CardContent, Button, Badge } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
-import { aiApi, type QuickEstimateRequest, type EstimateJobResponse, type EstimateItem, type CadExtractResponse, type EnrichResult, type EnrichedItem, type CadColumnsResponse, type CadGroupResponse } from './api';
+import { aiApi, type QuickEstimateRequest, type EstimateJobResponse, type EstimateItem, type CadExtractResponse, type EnrichResult, type EnrichedItem, type CadColumnsResponse, type CadGroupResponse, type CadDynamicGroup } from './api';
 import { apiGet, apiPost } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 
@@ -1128,11 +1129,22 @@ export function QuickEstimatePage() {
   const [showCustom, setShowCustom] = useState(false);
   const [hideEmptyGroups, setHideEmptyGroups] = useState(true);
   const [deletedGroupKeys, setDeletedGroupKeys] = useState<Set<string>>(new Set());
+  const [treeViewMode, setTreeViewMode] = useState(false);
+  const [expandedTreeNodes, setExpandedTreeNodes] = useState<Set<string>>(new Set());
+  const [elementDetailGroup, setElementDetailGroup] = useState<CadDynamicGroup | null>(null);
+  const [elementDetailData, setElementDetailData] = useState<CadGroupElementsResponse | null>(null);
+  const [elementDetailLoading, setElementDetailLoading] = useState(false);
 
   // Cost DB enrichment state
   const [enrichRegion, setEnrichRegion] = useState('DE_BERLIN');
   const [enrichResult, setEnrichResult] = useState<EnrichResult | null>(null);
   const [enriching, setEnriching] = useState(false);
+
+  // CAD BOQ creation state
+  const [cadBOQProjectId, setCadBOQProjectId] = useState('');
+  const [cadBOQName, setCadBOQName] = useState('CAD Import');
+  const [cadBOQCreating, setCadBOQCreating] = useState(false);
+  const [cadExporting, setCadExporting] = useState(false);
 
   // Check if AI is configured
   const { data: aiSettings } = useQuery({
@@ -1551,6 +1563,34 @@ export function QuickEstimatePage() {
     );
   }, []);
 
+  // ── Fetch element detail when a group row is clicked ──────────────────
+  useEffect(() => {
+    if (!elementDetailGroup || !cadColumnsData?.session_id) {
+      setElementDetailData(null);
+      return;
+    }
+    let cancelled = false;
+    setElementDetailLoading(true);
+    setElementDetailData(null);
+    aiApi.cadGroupElements({
+      session_id: cadColumnsData.session_id,
+      group_key: elementDetailGroup.key_parts,
+    }).then((data) => {
+      if (!cancelled) setElementDetailData(data);
+    }).catch((err) => {
+      if (!cancelled) {
+        addToast({
+          type: 'error',
+          title: t('ai.cad_elements_failed', { defaultValue: 'Failed to load elements' }),
+          message: err instanceof Error ? err.message : 'Unknown error',
+        });
+      }
+    }).finally(() => {
+      if (!cancelled) setElementDetailLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [elementDetailGroup, cadColumnsData?.session_id, addToast, t]);
+
   const handlePasteSubmit = useCallback(() => {
     if (!pasteText.trim()) return;
 
@@ -1645,6 +1685,9 @@ export function QuickEstimatePage() {
     setSelectedSumCols([]);
     setDeletedGroupKeys(new Set());
     setHideEmptyGroups(true);
+    setTreeViewMode(false);
+    setExpandedTreeNodes(new Set());
+    setElementDetailGroup(null);
     setDescription('');
     setLocation('');
     setCurrency('');
@@ -1692,6 +1735,55 @@ export function QuickEstimatePage() {
     }
     return { count, sums };
   }, [filteredGroups]);
+
+  // ── Tree view data (hierarchical grouping by first group_by column) ──
+  interface TreeNode {
+    parentKey: string;
+    parentLabel: string;
+    children: CadDynamicGroup[];
+    count: number;
+    sums: Record<string, number>;
+  }
+
+  const treeData = useMemo((): TreeNode[] => {
+    if (!cadGroupResult || (cadGroupResult.group_by || []).length < 2) return [];
+    const firstCol = cadGroupResult.group_by[0];
+    const nodeMap = new Map<string, TreeNode>();
+
+    for (const g of filteredGroups) {
+      const parentVal = g.key_parts[firstCol] || '(empty)';
+      if (!nodeMap.has(parentVal)) {
+        nodeMap.set(parentVal, {
+          parentKey: parentVal,
+          parentLabel: firstCol === 'category' ? parentVal.replace(/^OST_/, '') : parentVal,
+          children: [],
+          count: 0,
+          sums: {},
+        });
+      }
+      const node = nodeMap.get(parentVal)!;
+      node.children.push(g);
+      node.count += g.count;
+      for (const [k, v] of Object.entries(g.sums || {})) {
+        node.sums[k] = (node.sums[k] || 0) + v;
+      }
+    }
+    return Array.from(nodeMap.values());
+  }, [filteredGroups, cadGroupResult]);
+
+  const canShowTreeView = (cadGroupResult?.group_by || []).length >= 2;
+
+  const toggleTreeNode = useCallback((key: string) => {
+    setExpandedTreeNodes((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  }, []);
 
   const handleSaveQtoAsBOQ = useCallback(async () => {
     if (!filteredGroups.length) return;
@@ -1742,6 +1834,94 @@ export function QuickEstimatePage() {
       message: t('ai.qto_saved_msg', { defaultValue: '{{count}} positions prepared for BOQ import', count: items.length }),
     });
   }, [filteredGroups, cadColumnsData, cadGroupResult, addToast, t]);
+
+  // ── Create BOQ from CAD QTO (server-side) ───────────────────────────
+
+  const handleCreateBOQ = useCallback(async () => {
+    if (!cadColumnsData?.session_id || !cadBOQProjectId || !filteredGroups.length) return;
+    setCadBOQCreating(true);
+    try {
+      const result = await aiApi.createBOQFromCadQTO({
+        session_id: cadColumnsData.session_id,
+        project_id: cadBOQProjectId,
+        boq_name: cadBOQName || 'CAD Import',
+        group_by: cadGroupResult?.group_by || [],
+        sum_columns: cadGroupResult?.sum_columns || [],
+      });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['boqs'] });
+      addToast({
+        type: 'success',
+        title: t('ai.boq_created', { defaultValue: 'BOQ created successfully' }),
+        message: t('ai.boq_created_msg', {
+          defaultValue: '{{count}} positions added',
+          count: result.position_count,
+        }),
+      });
+      navigate(`/boq/${result.boq_id}`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to create BOQ';
+      // Handle session expiry
+      if (msg.includes('expired') || msg.includes('not found')) {
+        addToast({
+          type: 'error',
+          title: t('ai.session_expired', { defaultValue: 'Session expired' }),
+          message: t('ai.session_expired_msg', { defaultValue: 'Please re-upload the CAD file and try again.' }),
+        });
+      } else {
+        addToast({
+          type: 'error',
+          title: t('ai.boq_create_failed', { defaultValue: 'Failed to create BOQ' }),
+          message: msg,
+        });
+      }
+    } finally {
+      setCadBOQCreating(false);
+    }
+  }, [cadColumnsData?.session_id, cadBOQProjectId, cadBOQName, cadGroupResult, filteredGroups, addToast, t, navigate, queryClient]);
+
+  // ── Export CAD QTO as Excel ────────────────────────────────────────────
+
+  const handleExportExcel = useCallback(async () => {
+    if (!cadColumnsData?.session_id) return;
+    setCadExporting(true);
+    try {
+      await aiApi.exportCadGroupExcel({
+        session_id: cadColumnsData.session_id,
+        group_by: cadGroupResult?.group_by || [],
+        sum_columns: cadGroupResult?.sum_columns || [],
+      });
+      addToast({
+        type: 'success',
+        title: t('ai.excel_exported', { defaultValue: 'Excel exported' }),
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Export failed';
+      if (msg.includes('expired') || msg.includes('not found')) {
+        addToast({
+          type: 'error',
+          title: t('ai.session_expired', { defaultValue: 'Session expired' }),
+          message: t('ai.session_expired_msg', { defaultValue: 'Please re-upload the CAD file and try again.' }),
+        });
+      } else {
+        addToast({
+          type: 'error',
+          title: t('ai.export_failed', { defaultValue: 'Export failed' }),
+          message: msg,
+        });
+      }
+    } finally {
+      setCadExporting(false);
+    }
+  }, [cadColumnsData?.session_id, cadGroupResult, addToast, t]);
+
+  // ── Project list for BOQ creation ─────────────────────────────────────
+
+  const { data: cadProjectsList } = useQuery({
+    queryKey: ['projects-list-simple-cad'],
+    queryFn: () => apiGet<ProjectSummary[]>('/v1/projects/?page_size=100'),
+    enabled: !!cadGroupResult,
+  });
 
   // ── Render ────────────────────────────────────────────────────────────
 
@@ -2430,12 +2610,18 @@ export function QuickEstimatePage() {
                 <div className="flex flex-wrap gap-1.5">
                   {(cadColumnsData.columns?.grouping || []).map(col => {
                     const isSelected = (selectedGroupBy || []).includes(col);
+                    const conf = cadColumnsData.confidence?.[col];
                     return (
                       <button key={col} type="button" onClick={() => toggleGroupByCol(col)}
-                        className={clsx('rounded-md px-2.5 py-1 text-2xs font-medium transition-colors',
+                        className={clsx('rounded-md px-2.5 py-1 text-2xs font-medium transition-colors inline-flex items-center gap-1',
                           isSelected ? 'bg-oe-blue text-white' : 'border border-border-light bg-surface-secondary text-content-tertiary hover:text-content-primary'
                         )}>
                         {col}
+                        {conf != null && (
+                          <span className={clsx('text-2xs', isSelected ? 'opacity-70' : 'text-content-quaternary')}>
+                            {Math.round(conf * 100)}%
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -2447,12 +2633,18 @@ export function QuickEstimatePage() {
                   {(cadColumnsData.columns?.quantity || []).map(col => {
                     const isSelected = (selectedSumCols || []).includes(col);
                     const unit = cadColumnsData.unit_labels?.[col];
+                    const conf = cadColumnsData.confidence?.[col];
                     return (
                       <button key={col} type="button" onClick={() => toggleSumCol(col)}
-                        className={clsx('rounded-md px-2.5 py-1 text-2xs font-medium transition-colors',
+                        className={clsx('rounded-md px-2.5 py-1 text-2xs font-medium transition-colors inline-flex items-center gap-1',
                           isSelected ? 'bg-emerald-500 text-white' : 'border border-border-light bg-surface-secondary text-content-tertiary hover:text-content-primary'
                         )}>
                         {col}{unit ? ` (${unit})` : ''}
+                        {conf != null && (
+                          <span className={clsx('text-2xs', isSelected ? 'opacity-70' : 'text-content-quaternary')}>
+                            {Math.round(conf * 100)}%
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -2563,7 +2755,7 @@ export function QuickEstimatePage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => { setCadGroupResult(null); setDeletedGroupKeys(new Set()); }}
+              onClick={() => { setCadGroupResult(null); setDeletedGroupKeys(new Set()); setTreeViewMode(false); setExpandedTreeNodes(new Set()); setElementDetailGroup(null); }}
               icon={<RotateCcw size={14} />}
             >
               {t('ai.cad_change_grouping', { defaultValue: 'Change Grouping' })}
@@ -2586,6 +2778,31 @@ export function QuickEstimatePage() {
                 <button onClick={() => setDeletedGroupKeys(new Set())} className="text-xs text-oe-blue hover:underline">
                   {t('ai.cad_restore_removed', { defaultValue: 'Restore {{count}} removed', count: deletedGroupKeys.size })}
                 </button>
+              </>
+            )}
+            {canShowTreeView && (
+              <>
+                <span className="text-border">|</span>
+                <div className="inline-flex rounded-md border border-border-light overflow-hidden">
+                  <button
+                    onClick={() => setTreeViewMode(false)}
+                    className={clsx(
+                      'px-2.5 py-0.5 text-xs font-medium transition-colors',
+                      !treeViewMode ? 'bg-oe-blue text-white' : 'bg-surface-secondary text-content-tertiary hover:text-content-primary',
+                    )}
+                  >
+                    {t('ai.cad_view_flat', { defaultValue: 'Flat' })}
+                  </button>
+                  <button
+                    onClick={() => { setTreeViewMode(true); setExpandedTreeNodes(new Set(treeData.map(n => n.parentKey))); }}
+                    className={clsx(
+                      'px-2.5 py-0.5 text-xs font-medium transition-colors',
+                      treeViewMode ? 'bg-oe-blue text-white' : 'bg-surface-secondary text-content-tertiary hover:text-content-primary',
+                    )}
+                  >
+                    {t('ai.cad_view_tree', { defaultValue: 'Tree' })}
+                  </button>
+                </div>
               </>
             )}
           </div>
@@ -2616,50 +2833,146 @@ export function QuickEstimatePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredGroups
-                    .sort((a, b) => {
-                      // Sort by first sum column descending (volume first)
-                      const firstSumCol = (cadGroupResult.sum_columns || []).find(c => c !== 'count') || 'count';
-                      return (b.sums[firstSumCol] || 0) - (a.sums[firstSumCol] || 0);
-                    })
-                    .map((g) => {
-                      const hasQty = Object.values(g.sums || {}).some(v => v > 0);
-                      // Clean category names: remove OST_ prefix
-                      const cleanValue = (col: string, val: string) => {
-                        if (!val || val === '(empty)') return '-';
-                        if (col === 'category') return val.replace(/^OST_/, '');
-                        return val;
-                      };
-                      return (
-                        <tr key={g.key} className={clsx(
-                          'border-b border-border-light/30 hover:bg-surface-secondary/20 transition-colors',
-                          !hasQty && 'opacity-40',
-                        )}>
-                          <td className="px-2 py-1.5">
-                            <button onClick={() => setDeletedGroupKeys(prev => new Set(prev).add(g.key))}
-                              className="text-content-quaternary hover:text-red-500 transition-colors" title={t('ai.cad_remove_group', { defaultValue: 'Remove' })}>
-                              <X size={12} />
-                            </button>
-                          </td>
-                          {(cadGroupResult.group_by || []).map((col) => (
-                            <td key={col} className="px-4 py-1.5 text-sm text-content-primary font-medium">
-                              {cleanValue(col, g.key_parts[col] || '')}
+                  {(() => {
+                    const cleanValue = (col: string, val: string) => {
+                      if (!val || val === '(empty)') return '-';
+                      if (col === 'category') return val.replace(/^OST_/, '');
+                      return val;
+                    };
+                    const firstSumCol = (cadGroupResult.sum_columns || []).find(c => c !== 'count') || 'count';
+                    const groupByCols = cadGroupResult.group_by || [];
+                    const sumCols = cadGroupResult.sum_columns || [];
+
+                    if (treeViewMode && canShowTreeView) {
+                      // ── Tree view ──
+                      const sortedTree = [...treeData].sort((a, b) => (b.sums[firstSumCol] || 0) - (a.sums[firstSumCol] || 0));
+                      return sortedTree.map((node) => {
+                        const isExpanded = expandedTreeNodes.has(node.parentKey);
+                        const sortedChildren = [...node.children].sort((a, b) => (b.sums[firstSumCol] || 0) - (a.sums[firstSumCol] || 0));
+                        return (
+                          <React.Fragment key={`tree-${node.parentKey}`}>
+                            {/* Parent row */}
+                            <tr
+                              className="border-b border-border-light/30 bg-surface-secondary/40 hover:bg-surface-secondary/60 cursor-pointer transition-colors"
+                              onClick={() => toggleTreeNode(node.parentKey)}
+                            >
+                              <td className="px-2 py-2">
+                                {isExpanded
+                                  ? <ChevronDown size={14} className="text-content-tertiary" />
+                                  : <ChevronRight size={14} className="text-content-tertiary" />
+                                }
+                              </td>
+                              <td className="px-4 py-2 text-sm text-content-primary font-semibold">
+                                {node.parentLabel}
+                              </td>
+                              {groupByCols.slice(1).map((col) => (
+                                <td key={col} className="px-4 py-2 text-xs text-content-quaternary italic">
+                                  {node.children.length} {t('ai.cad_sub_groups', { defaultValue: 'sub-groups' })}
+                                </td>
+                              ))}
+                              {sumCols.map((col) => (
+                                <td key={col} className="px-4 py-2 text-right font-mono text-sm font-semibold text-content-primary">
+                                  {(node.sums[col] || 0) > 0
+                                    ? (node.sums[col] || 0).toLocaleString(getIntlLocale(), { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+                                    : '-'}
+                                </td>
+                              ))}
+                              <td className="px-4 py-2 text-right font-mono text-sm font-semibold text-content-primary">
+                                {node.count}
+                              </td>
+                            </tr>
+                            {/* Child rows */}
+                            {isExpanded && sortedChildren.map((g) => {
+                              const hasQty = Object.values(g.sums || {}).some(v => v > 0);
+                              return (
+                                <tr
+                                  key={g.key}
+                                  className={clsx(
+                                    'border-b border-border-light/20 hover:bg-surface-secondary/20 cursor-pointer transition-colors',
+                                    !hasQty && 'opacity-40',
+                                  )}
+                                  onClick={() => setElementDetailGroup(g)}
+                                >
+                                  <td className="px-2 py-1.5">
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); setDeletedGroupKeys(prev => new Set(prev).add(g.key)); }}
+                                      className="text-content-quaternary hover:text-red-500 transition-colors"
+                                      title={t('ai.cad_remove_group', { defaultValue: 'Remove' })}
+                                    >
+                                      <X size={12} />
+                                    </button>
+                                  </td>
+                                  <td className="px-4 py-1.5 text-sm text-content-secondary pl-10">
+                                    <span className="text-border mr-1.5">|--</span>
+                                    {cleanValue(groupByCols[0], g.key_parts[groupByCols[0]] || '')}
+                                  </td>
+                                  {groupByCols.slice(1).map((col) => (
+                                    <td key={col} className="px-4 py-1.5 text-sm text-content-primary font-medium">
+                                      {cleanValue(col, g.key_parts[col] || '')}
+                                    </td>
+                                  ))}
+                                  {sumCols.map((col) => (
+                                    <td key={col} className={clsx(
+                                      'px-4 py-1.5 text-right font-mono text-sm',
+                                      (g.sums[col] ?? 0) > 0 ? 'text-content-primary font-medium' : 'text-content-quaternary',
+                                    )}>
+                                      {g.sums[col] != null && g.sums[col] > 0
+                                        ? g.sums[col].toLocaleString(getIntlLocale(), { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+                                        : '-'}
+                                    </td>
+                                  ))}
+                                  <td className="px-4 py-1.5 text-right font-mono text-sm font-medium text-content-primary">{g.count}</td>
+                                </tr>
+                              );
+                            })}
+                          </React.Fragment>
+                        );
+                      });
+                    }
+
+                    // ── Flat view (default) ──
+                    return filteredGroups
+                      .sort((a, b) => (b.sums[firstSumCol] || 0) - (a.sums[firstSumCol] || 0))
+                      .map((g) => {
+                        const hasQty = Object.values(g.sums || {}).some(v => v > 0);
+                        return (
+                          <tr
+                            key={g.key}
+                            className={clsx(
+                              'border-b border-border-light/30 hover:bg-surface-secondary/20 cursor-pointer transition-colors',
+                              !hasQty && 'opacity-40',
+                            )}
+                            onClick={() => setElementDetailGroup(g)}
+                          >
+                            <td className="px-2 py-1.5">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setDeletedGroupKeys(prev => new Set(prev).add(g.key)); }}
+                                className="text-content-quaternary hover:text-red-500 transition-colors"
+                                title={t('ai.cad_remove_group', { defaultValue: 'Remove' })}
+                              >
+                                <X size={12} />
+                              </button>
                             </td>
-                          ))}
-                          {(cadGroupResult.sum_columns || []).map((col) => (
-                            <td key={col} className={clsx(
-                              'px-4 py-1.5 text-right font-mono text-sm',
-                              (g.sums[col] ?? 0) > 0 ? 'text-content-primary font-medium' : 'text-content-quaternary',
-                            )}>
-                              {g.sums[col] != null && g.sums[col] > 0
-                                ? g.sums[col].toLocaleString(getIntlLocale(), { minimumFractionDigits: 0, maximumFractionDigits: 2 })
-                                : '-'}
-                            </td>
-                          ))}
-                          <td className="px-4 py-1.5 text-right font-mono text-sm font-medium text-content-primary">{g.count}</td>
-                        </tr>
-                      );
-                    })}
+                            {groupByCols.map((col) => (
+                              <td key={col} className="px-4 py-1.5 text-sm text-content-primary font-medium">
+                                {cleanValue(col, g.key_parts[col] || '')}
+                              </td>
+                            ))}
+                            {sumCols.map((col) => (
+                              <td key={col} className={clsx(
+                                'px-4 py-1.5 text-right font-mono text-sm',
+                                (g.sums[col] ?? 0) > 0 ? 'text-content-primary font-medium' : 'text-content-quaternary',
+                              )}>
+                                {g.sums[col] != null && g.sums[col] > 0
+                                  ? g.sums[col].toLocaleString(getIntlLocale(), { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+                                  : '-'}
+                              </td>
+                            ))}
+                            <td className="px-4 py-1.5 text-right font-mono text-sm font-medium text-content-primary">{g.count}</td>
+                          </tr>
+                        );
+                      });
+                  })()}
                 </tbody>
                 <tfoot>
                   <tr className="border-t-2 border-oe-blue/20 bg-oe-blue-subtle/30">
@@ -2687,22 +3000,169 @@ export function QuickEstimatePage() {
           </Card>
 
           {/* Save as BOQ + Action buttons */}
-          <div className="flex items-center gap-3 pt-3 border-t border-border-light">
-            <Button variant="primary" size="sm" onClick={handleSaveQtoAsBOQ} disabled={!filteredGroups.length} icon={<Save size={14} />}>
-              {t('ai.cad_save_boq', { defaultValue: 'Save as BOQ ({{count}} positions)', count: filteredGroups.length })}
-            </Button>
-            <span className="text-xs text-content-tertiary">
-              {t('ai.cad_save_boq_hint', { defaultValue: 'Creates BOQ positions from grouped quantities' })}
-            </span>
-            <div className="flex-1" />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleReset}
-              icon={<RotateCcw size={14} />}
-            >
-              {t('ai.new_extract', { defaultValue: 'New Extraction' })}
-            </Button>
+          <div className="space-y-3 pt-3 border-t border-border-light">
+            {/* Project selector + BOQ name */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <select
+                value={cadBOQProjectId}
+                onChange={(e) => setCadBOQProjectId(e.target.value)}
+                className="h-8 rounded-md border border-border-light bg-surface-primary px-2 text-sm text-content-primary focus:border-oe-blue focus:ring-1 focus:ring-oe-blue"
+              >
+                <option value="">{t('ai.select_project', { defaultValue: '-- Select project --' })}</option>
+                {(cadProjectsList || []).map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+              <input
+                type="text"
+                value={cadBOQName}
+                onChange={(e) => setCadBOQName(e.target.value)}
+                placeholder={t('ai.boq_name_placeholder', { defaultValue: 'BOQ name' })}
+                className="h-8 w-48 rounded-md border border-border-light bg-surface-primary px-2 text-sm text-content-primary focus:border-oe-blue focus:ring-1 focus:ring-oe-blue"
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <Button variant="primary" size="sm" onClick={handleCreateBOQ} disabled={!filteredGroups.length || !cadBOQProjectId || cadBOQCreating} loading={cadBOQCreating} icon={<Plus size={14} />}>
+                {t('ai.cad_create_boq', { defaultValue: 'Create BOQ' })}
+              </Button>
+              <Button variant="secondary" size="sm" onClick={handleExportExcel} disabled={!filteredGroups.length || cadExporting} loading={cadExporting} icon={<FileSpreadsheet size={14} />}>
+                {t('ai.cad_export_excel', { defaultValue: 'Export Excel' })}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleSaveQtoAsBOQ} disabled={!filteredGroups.length} icon={<Save size={14} />}>
+                {t('ai.cad_save_boq', { defaultValue: 'Save as BOQ ({{count}} positions)', count: filteredGroups.length })}
+              </Button>
+              <div className="flex-1" />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleReset}
+                icon={<RotateCcw size={14} />}
+              >
+                {t('ai.new_extract', { defaultValue: 'New Extraction' })}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Element Detail Panel (slide-over) */}
+      {elementDetailGroup && (
+        <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setElementDetailGroup(null)}>
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-w-3xl bg-surface-primary shadow-2xl border-l border-border-light overflow-hidden flex flex-col animate-slide-in-right"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border-light bg-surface-secondary/30">
+              <div>
+                <h3 className="text-sm font-semibold text-content-primary">
+                  {t('ai.cad_element_detail', { defaultValue: 'Element Detail' })}
+                </h3>
+                <p className="text-xs text-content-tertiary mt-0.5">
+                  {Object.entries(elementDetailGroup.key_parts).map(([k, v]) =>
+                    `${k}: ${v}`
+                  ).join(' / ')}
+                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant="blue" size="sm">
+                    {elementDetailGroup.count} {t('ai.cad_elements', { defaultValue: 'elements' })}
+                  </Badge>
+                  {elementDetailData?.truncated && (
+                    <Badge variant="warning" size="sm">
+                      {t('ai.cad_truncated', { defaultValue: 'Showing first 500' })}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={() => setElementDetailGroup(null)}
+                className="p-1.5 rounded-md text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            {/* Content */}
+            <div className="flex-1 overflow-auto">
+              {elementDetailLoading && (
+                <div className="flex items-center justify-center py-16">
+                  <Loader2 size={24} className="animate-spin text-oe-blue" />
+                  <span className="ml-2 text-sm text-content-secondary">
+                    {t('ai.cad_loading_elements', { defaultValue: 'Loading elements...' })}
+                  </span>
+                </div>
+              )}
+              {elementDetailData && !elementDetailLoading && (
+                <table className="w-full text-xs">
+                  <thead className="sticky top-0 z-10">
+                    <tr className="border-b border-border-light bg-surface-secondary/80 backdrop-blur">
+                      <th className="px-3 py-2 text-left font-semibold text-content-tertiary uppercase tracking-wide w-10">#</th>
+                      {elementDetailData.columns.map((col) => (
+                        <th
+                          key={col}
+                          className={clsx(
+                            'px-3 py-2 font-semibold text-content-tertiary uppercase tracking-wide whitespace-nowrap',
+                            col in (elementDetailData.totals || {}) ? 'text-right' : 'text-left',
+                          )}
+                        >
+                          {col}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {elementDetailData.elements.map((el, idx) => (
+                      <tr key={idx} className="border-b border-border-light/20 hover:bg-surface-secondary/20 transition-colors">
+                        <td className="px-3 py-1.5 text-content-quaternary font-mono">{idx + 1}</td>
+                        {elementDetailData.columns.map((col) => {
+                          const val = el[col];
+                          const isNumeric = col in (elementDetailData.totals || {});
+                          return (
+                            <td
+                              key={col}
+                              className={clsx(
+                                'px-3 py-1.5 whitespace-nowrap max-w-[200px] truncate',
+                                isNumeric ? 'text-right font-mono text-content-primary' : 'text-content-secondary',
+                              )}
+                              title={val != null ? String(val) : ''}
+                            >
+                              {val === null || val === undefined || val === 'None' || val === ''
+                                ? '-'
+                                : typeof val === 'number'
+                                  ? val.toLocaleString(getIntlLocale(), { maximumFractionDigits: 4 })
+                                  : String(val)}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="border-t-2 border-oe-blue/20 bg-oe-blue-subtle/30 sticky bottom-0">
+                      <td className="px-3 py-2 font-bold text-xs text-content-primary uppercase">
+                        {t('ai.cad_total', { defaultValue: 'Total' })}
+                      </td>
+                      {elementDetailData.columns.map((col) => {
+                        const total = elementDetailData.totals?.[col];
+                        return (
+                          <td
+                            key={col}
+                            className={clsx(
+                              'px-3 py-2',
+                              total != null ? 'text-right font-mono font-bold text-oe-blue' : '',
+                            )}
+                          >
+                            {total != null
+                              ? total.toLocaleString(getIntlLocale(), { minimumFractionDigits: 0, maximumFractionDigits: 4 })
+                              : ''}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  </tfoot>
+                </table>
+              )}
+            </div>
           </div>
         </div>
       )}

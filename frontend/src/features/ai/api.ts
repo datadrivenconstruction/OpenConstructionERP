@@ -222,7 +222,66 @@ export const aiApi = {
   /** Group CAD elements by selected columns and sum quantities. */
   cadGroup: (data: CadGroupRequest) =>
     apiPost<CadGroupResponse, CadGroupRequest>('/v1/takeoff/cad-group', data),
+
+  /** Get individual elements for a specific group. */
+  cadGroupElements: (data: CadGroupElementsRequest) =>
+    apiPost<CadGroupElementsResponse, CadGroupElementsRequest>('/v1/takeoff/cad-group/elements', data),
+
+  /** Create a BOQ directly from grouped CAD QTO data. */
+  createBOQFromCadQTO: (data: CreateBOQFromCadQTORequest) =>
+    apiPost<CreateBOQFromCadQTOResponse, CreateBOQFromCadQTORequest>(
+      '/v1/takeoff/cad-group/create-boq',
+      data,
+    ),
+
+  /** Export grouped CAD QTO results as Excel. */
+  exportCadGroupExcel: async (params: {
+    session_id: string;
+    group_by: string[];
+    sum_columns: string[];
+  }): Promise<void> => {
+    const query = new URLSearchParams({
+      session_id: params.session_id,
+      group_by: params.group_by.join(','),
+      sum_columns: params.sum_columns.join(','),
+      format: 'xlsx',
+    });
+    const res = await fetch(`/api/v1/takeoff/cad-group/export?${query.toString()}`, {
+      method: 'GET',
+      headers: { ...getAuthHeaders() },
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(body.detail || 'Export failed');
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const disposition = res.headers.get('Content-Disposition') || '';
+    const filenameMatch = disposition.match(/filename="?([^"]+)"?/);
+    a.download = filenameMatch?.[1] || `cad-qto-export.xlsx`;
+    a.click();
+    URL.revokeObjectURL(url);
+  },
 };
+
+// ── CAD BOQ creation types ────────────────────────────────────────────────────
+
+export interface CreateBOQFromCadQTORequest {
+  session_id: string;
+  project_id: string;
+  boq_name: string;
+  group_by: string[];
+  sum_columns: string[];
+}
+
+export interface CreateBOQFromCadQTOResponse {
+  boq_id: string;
+  project_id: string;
+  position_count: number;
+  boq_name: string;
+}
 
 // ── CAD quantity extraction types ───────────────────────────────────────────
 
@@ -280,6 +339,7 @@ export interface CadColumnsResponse {
     sum_columns: string[];
   }>;
   unit_labels: Record<string, string>;
+  confidence: Record<string, number>;
 }
 
 export interface CadGroupRequest {
@@ -301,6 +361,20 @@ export interface CadGroupResponse {
   sum_columns: string[];
   groups: CadDynamicGroup[];
   grand_totals: Record<string, number>;
+}
+
+export interface CadGroupElementsRequest {
+  session_id: string;
+  group_key: Record<string, string>;
+}
+
+export interface CadGroupElementsResponse {
+  group_key: Record<string, string>;
+  total_elements: number;
+  columns: string[];
+  elements: Record<string, any>[];
+  totals: Record<string, number>;
+  truncated: boolean;
 }
 
 /** Result returned by the BOQ smart import endpoint. */
