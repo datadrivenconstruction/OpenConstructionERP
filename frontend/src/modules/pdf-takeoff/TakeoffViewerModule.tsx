@@ -31,6 +31,11 @@ import {
   FileSpreadsheet,
   ChevronDown,
   ChevronUp,
+  Cloud,
+  ArrowUpRight,
+  Type,
+  Square,
+  Highlighter,
 } from 'lucide-react';
 import { useToastStore } from '../../stores/useToastStore';
 import { boqApi, type CreatePositionData } from '../../features/boq/api';
@@ -56,7 +61,21 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
 
 /* ── Types ─────────────────────────────────────────────────────────── */
 
-type MeasureTool = 'select' | 'distance' | 'polyline' | 'area' | 'volume' | 'count';
+type MeasureTool = 'select' | 'distance' | 'polyline' | 'area' | 'volume' | 'count'
+  | 'cloud' | 'arrow' | 'text' | 'rectangle' | 'highlight';
+
+/** Annotation-specific tool types */
+type AnnotationToolType = 'cloud' | 'arrow' | 'text' | 'rectangle' | 'highlight';
+
+const ANNOTATION_TOOLS: AnnotationToolType[] = ['cloud', 'arrow', 'text', 'rectangle', 'highlight'];
+
+/** Check if a tool is an annotation tool */
+const isAnnotationTool = (tool: MeasureTool): tool is AnnotationToolType =>
+  (ANNOTATION_TOOLS as string[]).includes(tool);
+
+/** Check if a measurement type is an annotation type */
+const isAnnotationType = (type: string): boolean =>
+  (ANNOTATION_TOOLS as string[]).includes(type);
 
 interface Point {
   x: number;
@@ -65,7 +84,8 @@ interface Point {
 
 interface Measurement {
   id: string;
-  type: 'distance' | 'polyline' | 'area' | 'volume' | 'count';
+  type: 'distance' | 'polyline' | 'area' | 'volume' | 'count'
+    | 'cloud' | 'arrow' | 'text' | 'rectangle' | 'highlight';
   points: Point[];
   value: number;
   unit: string;
@@ -75,7 +95,36 @@ interface Measurement {
   group: string; // Measurement group (e.g. "General", "Structural")
   depth?: number; // Depth in real units, only for volume type
   area?: number; // Area in real units, only for volume type
+  text?: string; // Text content for text annotations
+  color?: string; // Color for annotation tools
+  width?: number; // Width for rectangle/highlight
+  height?: number; // Height for rectangle/highlight
 }
+
+/* ── Annotation Colors ───────────────────────────────────────────── */
+
+interface AnnotationColor {
+  name: string;
+  value: string;
+}
+
+const ANNOTATION_COLORS: AnnotationColor[] = [
+  { name: 'Red', value: '#EF4444' },
+  { name: 'Blue', value: '#3B82F6' },
+  { name: 'Green', value: '#22C55E' },
+  { name: 'Orange', value: '#F59E0B' },
+  { name: 'Purple', value: '#8B5CF6' },
+  { name: 'Yellow', value: '#FACC15' },
+];
+
+/** Default colors for each annotation tool */
+const DEFAULT_ANNOTATION_COLORS: Record<AnnotationToolType, string> = {
+  cloud: '#EF4444',
+  arrow: '#3B82F6',
+  text: '#000000',
+  rectangle: '#22C55E',
+  highlight: '#FACC15',
+};
 
 /* ── Measurement Groups ───────────────────────────────────────────── */
 
@@ -152,7 +201,15 @@ export default function TakeoffViewerModule() {
   const [pendingVolumePoints, setPendingVolumePoints] = useState<Point[]>([]);
 
   // Annotation auto-numbering counters (type -> next index)
-  const annotationCounterRef = useRef<Record<string, number>>({ distance: 0, polyline: 0, area: 0, volume: 0, count: 0 });
+  const annotationCounterRef = useRef<Record<string, number>>({ distance: 0, polyline: 0, area: 0, volume: 0, count: 0, cloud: 0, arrow: 0, text: 0, rectangle: 0, highlight: 0 });
+
+  // Annotation markup state
+  const [annotationColor, setAnnotationColor] = useState('#EF4444');
+  const [showTextInput, setShowTextInput] = useState(false);
+  const [textInputPos, setTextInputPos] = useState<Point>({ x: 0, y: 0 });
+  const [textInputValue, setTextInputValue] = useState('');
+  const [rectStartPoint, setRectStartPoint] = useState<Point | null>(null);
+  const [isDraggingRect, setIsDraggingRect] = useState(false);
 
   // Inline editing state for annotations in the measurement list
   const [editingAnnotationId, setEditingAnnotationId] = useState<string | null>(null);
@@ -197,9 +254,12 @@ export default function TakeoffViewerModule() {
       setActivePoints([]);
       undoStackRef.current = [];
       setUndoCount(0);
-      annotationCounterRef.current = { distance: 0, polyline: 0, area: 0, volume: 0, count: 0 };
+      annotationCounterRef.current = { distance: 0, polyline: 0, area: 0, volume: 0, count: 0, cloud: 0, arrow: 0, text: 0, rectangle: 0, highlight: 0 };
       setShowVolumeDepthInput(false);
       setPendingVolumePoints([]);
+      setShowTextInput(false);
+      setRectStartPoint(null);
+      setIsDraggingRect(false);
     } catch (err) {
       console.error('Failed to load PDF:', err);
     } finally {
@@ -279,7 +339,7 @@ export default function TakeoffViewerModule() {
     };
 
     // Draw completed measurements on current page (respecting group visibility)
-    for (const m of measurements.filter((m) => m.page === currentPage && !hiddenGroups.has(m.group))) {
+    for (const m of measurements.filter((m) => m.page === currentPage && !hiddenGroups.has(m.group) && !(isAnnotationType(m.type) && hiddenGroups.has('__annotations__')))) {
       const color = GROUP_COLOR_MAP[m.group] || '#3B82F6';
       ctx.strokeStyle = color;
       ctx.fillStyle = color;
@@ -378,6 +438,148 @@ export default function TakeoffViewerModule() {
           );
         }
       }
+
+      /* ── Annotation markup rendering ────────────────────────────── */
+
+      const annoColor = m.color || color;
+
+      if (m.type === 'cloud' && m.points.length >= 3) {
+        // Revision cloud: draw scalloped arcs between consecutive points (closed polygon)
+        ctx.strokeStyle = annoColor;
+        ctx.lineWidth = 2.5 * dpr;
+        ctx.beginPath();
+        const pts = m.points;
+        for (let i = 0; i < pts.length; i++) {
+          const pA = pts[i]!;
+          const pB = pts[(i + 1) % pts.length]!;
+          const ax = pA.x * dpr * zoom;
+          const ay = pA.y * dpr * zoom;
+          const bx = pB.x * dpr * zoom;
+          const by = pB.y * dpr * zoom;
+          const segLen = Math.sqrt((bx - ax) ** 2 + (by - ay) ** 2);
+          const arcCount = Math.max(2, Math.round(segLen / (18 * dpr)));
+          for (let j = 0; j < arcCount; j++) {
+            const t0 = j / arcCount;
+            const t1 = (j + 1) / arcCount;
+            const x0 = ax + (bx - ax) * t0;
+            const y0 = ay + (by - ay) * t0;
+            const x1 = ax + (bx - ax) * t1;
+            const y1 = ay + (by - ay) * t1;
+            const cpx = (x0 + x1) / 2;
+            const cpy = (y0 + y1) / 2;
+            // Perpendicular offset for the bump
+            const dx = x1 - x0;
+            const dy = y1 - y0;
+            const bumpSize = 6 * dpr;
+            // Determine outward direction using centroid
+            const centX = pts.reduce((s, p) => s + p.x, 0) / pts.length * dpr * zoom;
+            const centY = pts.reduce((s, p) => s + p.y, 0) / pts.length * dpr * zoom;
+            const midToCentX = centX - cpx;
+            const midToCentY = centY - cpy;
+            const perpX = -dy;
+            const perpY = dx;
+            // Bump outward (away from centroid)
+            const dot = perpX * midToCentX + perpY * midToCentY;
+            const sign = dot > 0 ? -1 : 1;
+            const len = Math.sqrt(perpX * perpX + perpY * perpY) || 1;
+            const offX = (sign * perpX / len) * bumpSize;
+            const offY = (sign * perpY / len) * bumpSize;
+            ctx.moveTo(x0, y0);
+            ctx.quadraticCurveTo(cpx + offX, cpy + offY, x1, y1);
+          }
+        }
+        ctx.stroke();
+        ctx.lineWidth = 2 * dpr;
+        // Semi-transparent fill
+        ctx.fillStyle = annoColor;
+        ctx.globalAlpha = 0.06;
+        ctx.beginPath();
+        ctx.moveTo(pts[0]!.x * dpr * zoom, pts[0]!.y * dpr * zoom);
+        for (let i = 1; i < pts.length; i++) {
+          ctx.lineTo(pts[i]!.x * dpr * zoom, pts[i]!.y * dpr * zoom);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        // Annotation label at centroid
+        const centroidX = pts.reduce((s, p) => s + p.x, 0) / pts.length * dpr * zoom;
+        const centroidY = pts.reduce((s, p) => s + p.y, 0) / pts.length * dpr * zoom;
+        drawAnnotationLabel(m.annotation, centroidX, centroidY, annoColor);
+      }
+
+      if (m.type === 'arrow' && m.points.length === 2) {
+        const p0 = m.points[0]!;
+        const p1 = m.points[1]!;
+        const x0 = p0.x * dpr * zoom;
+        const y0 = p0.y * dpr * zoom;
+        const x1 = p1.x * dpr * zoom;
+        const y1 = p1.y * dpr * zoom;
+        // Line
+        ctx.strokeStyle = annoColor;
+        ctx.lineWidth = 2.5 * dpr;
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x1, y1);
+        ctx.stroke();
+        // Arrowhead at end point
+        const angle = Math.atan2(y1 - y0, x1 - x0);
+        const headLen = 12 * dpr;
+        ctx.fillStyle = annoColor;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x1 - headLen * Math.cos(angle - Math.PI / 6), y1 - headLen * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(x1 - headLen * Math.cos(angle + Math.PI / 6), y1 - headLen * Math.sin(angle + Math.PI / 6));
+        ctx.closePath();
+        ctx.fill();
+        ctx.lineWidth = 2 * dpr;
+        // Annotation label near start
+        drawAnnotationLabel(m.annotation, x0 + 8 * dpr, y0 - 8 * dpr, annoColor);
+      }
+
+      if (m.type === 'text' && m.points.length >= 1) {
+        const p = m.points[0]!;
+        const tx = p.x * dpr * zoom;
+        const ty = p.y * dpr * zoom;
+        const textContent = m.text || m.annotation;
+        const fontSize = 14 * dpr;
+        ctx.font = `bold ${fontSize}px sans-serif`;
+        ctx.fillStyle = annoColor;
+        ctx.fillText(textContent, tx, ty);
+      }
+
+      if (m.type === 'rectangle' && m.points.length === 2) {
+        const p0 = m.points[0]!;
+        const p1 = m.points[1]!;
+        const rx = Math.min(p0.x, p1.x) * dpr * zoom;
+        const ry = Math.min(p0.y, p1.y) * dpr * zoom;
+        const rw = Math.abs(p1.x - p0.x) * dpr * zoom;
+        const rh = Math.abs(p1.y - p0.y) * dpr * zoom;
+        ctx.strokeStyle = annoColor;
+        ctx.lineWidth = 2.5 * dpr;
+        ctx.strokeRect(rx, ry, rw, rh);
+        ctx.lineWidth = 2 * dpr;
+        // Annotation label at top-left
+        drawAnnotationLabel(m.annotation, rx, ry - 4 * dpr, annoColor);
+      }
+
+      if (m.type === 'highlight' && m.points.length === 2) {
+        const p0 = m.points[0]!;
+        const p1 = m.points[1]!;
+        const rx = Math.min(p0.x, p1.x) * dpr * zoom;
+        const ry = Math.min(p0.y, p1.y) * dpr * zoom;
+        const rw = Math.abs(p1.x - p0.x) * dpr * zoom;
+        const rh = Math.abs(p1.y - p0.y) * dpr * zoom;
+        ctx.fillStyle = annoColor;
+        ctx.globalAlpha = 0.25;
+        ctx.fillRect(rx, ry, rw, rh);
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = annoColor;
+        ctx.lineWidth = 1 * dpr;
+        ctx.strokeRect(rx, ry, rw, rh);
+        ctx.lineWidth = 2 * dpr;
+        // Annotation label at top-left
+        drawAnnotationLabel(m.annotation, rx, ry - 4 * dpr, annoColor);
+      }
     }
 
     // Draw active points (in-progress measurement)
@@ -424,6 +626,42 @@ export default function TakeoffViewerModule() {
           lastPt.y * dpr * zoom - 8 * dpr,
         );
       }
+      // In-progress cloud: draw connecting lines between placed points
+      if (activePoints.length >= 2 && activeTool === 'cloud') {
+        ctx.strokeStyle = annotationColor;
+        ctx.setLineDash([4 * dpr, 4 * dpr]);
+        ctx.beginPath();
+        ctx.moveTo(activePoints[0]!.x * dpr * zoom, activePoints[0]!.y * dpr * zoom);
+        for (let i = 1; i < activePoints.length; i++) {
+          ctx.lineTo(activePoints[i]!.x * dpr * zoom, activePoints[i]!.y * dpr * zoom);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      // In-progress arrow: show dashed line from start
+      if (activePoints.length === 1 && activeTool === 'arrow') {
+        // Just show the start dot (already drawn above)
+      }
+    }
+
+    // In-progress rectangle/highlight drag preview
+    if (rectStartPoint && isDraggingRect && activePoints.length === 1) {
+      const p0 = rectStartPoint;
+      const p1 = activePoints[0]!;
+      const rx = Math.min(p0.x, p1.x) * dpr * zoom;
+      const ry = Math.min(p0.y, p1.y) * dpr * zoom;
+      const rw = Math.abs(p1.x - p0.x) * dpr * zoom;
+      const rh = Math.abs(p1.y - p0.y) * dpr * zoom;
+      if (activeTool === 'highlight') {
+        ctx.fillStyle = annotationColor;
+        ctx.globalAlpha = 0.2;
+        ctx.fillRect(rx, ry, rw, rh);
+        ctx.globalAlpha = 1;
+      }
+      ctx.strokeStyle = annotationColor;
+      ctx.setLineDash([4 * dpr, 4 * dpr]);
+      ctx.strokeRect(rx, ry, rw, rh);
+      ctx.setLineDash([]);
     }
 
     // Scale reference line
@@ -444,7 +682,7 @@ export default function TakeoffViewerModule() {
         ctx.stroke();
       }
     }
-  }, [measurements, activePoints, currentPage, zoom, settingScale, scalePoints, activeTool, hiddenGroups, scale]);
+  }, [measurements, activePoints, currentPage, zoom, settingScale, scalePoints, activeTool, hiddenGroups, scale, annotationColor, rectStartPoint, isDraggingRect]);
 
   /* ── Canvas click handler ────────────────────────────────────────── */
 
@@ -455,14 +693,20 @@ export default function TakeoffViewerModule() {
 
   /** Generate a default annotation for a new measurement (e.g. "Distance 1", "Area 2"). */
   const nextAnnotation = useCallback(
-    (type: 'distance' | 'polyline' | 'area' | 'volume' | 'count') => {
+    (type: string) => {
       annotationCounterRef.current[type] = (annotationCounterRef.current[type] || 0) + 1;
       const n = annotationCounterRef.current[type];
       if (type === 'distance') return t('takeoff.distance_n', { defaultValue: 'Distance {{n}}', n });
       if (type === 'polyline') return t('takeoff.polyline_n', { defaultValue: 'Polyline {{n}}', n });
       if (type === 'area') return t('takeoff.area_n', { defaultValue: 'Area {{n}}', n });
       if (type === 'volume') return t('takeoff.volume_n', { defaultValue: 'Volume {{n}}', n });
-      return t('takeoff.count_n', { defaultValue: 'Count {{n}}', n });
+      if (type === 'count') return t('takeoff.count_n', { defaultValue: 'Count {{n}}', n });
+      if (type === 'cloud') return t('takeoff.cloud_n', { defaultValue: 'Cloud {{n}}', n });
+      if (type === 'arrow') return t('takeoff.arrow_n', { defaultValue: 'Arrow {{n}}', n });
+      if (type === 'text') return t('takeoff.text_n', { defaultValue: 'Text {{n}}', n });
+      if (type === 'rectangle') return t('takeoff.rectangle_n', { defaultValue: 'Rectangle {{n}}', n });
+      if (type === 'highlight') return t('takeoff.highlight_n', { defaultValue: 'Highlight {{n}}', n });
+      return `${type} ${n}`;
     },
     [t],
   );
@@ -664,9 +908,82 @@ export default function TakeoffViewerModule() {
           pushUndo({ kind: 'add_count_point', measurementId: newId, point, wasNew: true, previousMeasurement: null });
           return [...prev, newMeasurement];
         });
+        return;
+      }
+
+      /* ── Annotation tool click handlers ──────────────────────────── */
+
+      if (activeTool === 'cloud') {
+        pushUndo({ kind: 'add_point', tool: 'cloud', point });
+        setActivePoints((prev) => [...prev, point]);
+        return;
+      }
+
+      if (activeTool === 'arrow') {
+        const newPoints = [...activePoints, point];
+        setActivePoints(newPoints);
+        if (newPoints.length === 2) {
+          const newMeasurement: Measurement = {
+            id: `m_${Date.now()}`,
+            type: 'arrow',
+            points: newPoints,
+            value: 0,
+            unit: '',
+            label: '',
+            annotation: nextAnnotation('arrow'),
+            page: currentPage,
+            group: activeGroup,
+            color: annotationColor,
+          };
+          pushUndo({ kind: 'complete_measurement', measurement: newMeasurement, previousActivePoints: [...activePoints] });
+          setMeasurements((prev) => [...prev, newMeasurement]);
+          setActivePoints([]);
+        } else {
+          pushUndo({ kind: 'add_point', tool: 'arrow', point });
+        }
+        return;
+      }
+
+      if (activeTool === 'text') {
+        // Show inline text input at click position
+        setTextInputPos(point);
+        setTextInputValue('');
+        setShowTextInput(true);
+        return;
+      }
+
+      if (activeTool === 'rectangle' || activeTool === 'highlight') {
+        if (!rectStartPoint) {
+          // First click — set start corner
+          setRectStartPoint(point);
+          setActivePoints([point]);
+          pushUndo({ kind: 'add_point', tool: activeTool, point });
+        } else {
+          // Second click — complete rectangle
+          const newMeasurement: Measurement = {
+            id: `m_${Date.now()}`,
+            type: activeTool,
+            points: [rectStartPoint, point],
+            value: 0,
+            unit: '',
+            label: '',
+            annotation: nextAnnotation(activeTool),
+            page: currentPage,
+            group: activeGroup,
+            color: annotationColor,
+            width: Math.abs(point.x - rectStartPoint.x),
+            height: Math.abs(point.y - rectStartPoint.y),
+          };
+          pushUndo({ kind: 'complete_measurement', measurement: newMeasurement, previousActivePoints: [rectStartPoint] });
+          setMeasurements((prev) => [...prev, newMeasurement]);
+          setRectStartPoint(null);
+          setIsDraggingRect(false);
+          setActivePoints([]);
+        }
+        return;
       }
     },
-    [activeTool, activePoints, scale, currentPage, countLabel, settingScale, scalePoints, zoom, pushUndo, nextAnnotation, activeGroup],
+    [activeTool, activePoints, scale, currentPage, countLabel, settingScale, scalePoints, zoom, pushUndo, nextAnnotation, activeGroup, annotationColor, rectStartPoint],
   );
 
   // Keep the ref in sync so touch handler can call it
@@ -731,7 +1048,27 @@ export default function TakeoffViewerModule() {
       setActivePoints([]);
       return;
     }
-  }, [activeTool, activePoints, scale, currentPage, pushUndo, nextAnnotation, activeGroup]);
+
+    // Cloud: close cloud polygon with double-click (need at least 3 points)
+    if (activeTool === 'cloud' && activePoints.length >= 3) {
+      const newMeasurement: Measurement = {
+        id: `m_${Date.now()}`,
+        type: 'cloud',
+        points: [...activePoints],
+        value: 0,
+        unit: '',
+        label: '',
+        annotation: nextAnnotation('cloud'),
+        page: currentPage,
+        group: activeGroup,
+        color: annotationColor,
+      };
+      pushUndo({ kind: 'complete_measurement', measurement: newMeasurement, previousActivePoints: [...activePoints] });
+      setMeasurements((prev) => [...prev, newMeasurement]);
+      setActivePoints([]);
+      return;
+    }
+  }, [activeTool, activePoints, scale, currentPage, pushUndo, nextAnnotation, activeGroup, annotationColor]);
 
   /** Confirm volume depth and create the volume measurement */
   const handleVolumeDepthConfirm = useCallback(() => {
@@ -763,13 +1100,16 @@ export default function TakeoffViewerModule() {
     setPendingVolumePoints([]);
   }, [volumeDepthValue, pendingVolumePoints, scale, currentPage, pushUndo, nextAnnotation, activeGroup]);
 
-  /** Right-click to finish polyline (alternative to double-click) */
+  /** Right-click to finish polyline/cloud (alternative to double-click) */
   const handleCanvasContextMenu = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
       if (activeTool === 'polyline' && activePoints.length >= 2) {
         e.preventDefault();
         handleCanvasDblClick(); // Reuse the double-click finish logic
       } else if (activeTool === 'volume' && activePoints.length >= 3) {
+        e.preventDefault();
+        handleCanvasDblClick();
+      } else if (activeTool === 'cloud' && activePoints.length >= 3) {
         e.preventDefault();
         handleCanvasDblClick();
       } else if (activeTool !== 'select') {
@@ -779,6 +1119,49 @@ export default function TakeoffViewerModule() {
     },
     [activeTool, activePoints, handleCanvasDblClick],
   );
+
+  /* ── Mouse move for rectangle/highlight drag preview ──────────────── */
+
+  const handleCanvasMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      if ((activeTool === 'rectangle' || activeTool === 'highlight') && rectStartPoint) {
+        const rect = overlayRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        const x = (e.clientX - rect.left) / zoom;
+        const y = (e.clientY - rect.top) / zoom;
+        setActivePoints([{ x, y }]);
+        setIsDraggingRect(true);
+      }
+    },
+    [activeTool, rectStartPoint, zoom],
+  );
+
+  /* ── Confirm text annotation ──────────────────────────────────────── */
+
+  const handleTextConfirm = useCallback(() => {
+    const trimmed = textInputValue.trim();
+    if (!trimmed) {
+      setShowTextInput(false);
+      return;
+    }
+    const newMeasurement: Measurement = {
+      id: `m_${Date.now()}`,
+      type: 'text',
+      points: [textInputPos],
+      value: 0,
+      unit: '',
+      label: '',
+      annotation: nextAnnotation('text'),
+      text: trimmed,
+      page: currentPage,
+      group: activeGroup,
+      color: annotationColor,
+    };
+    pushUndo({ kind: 'complete_measurement', measurement: newMeasurement, previousActivePoints: [] });
+    setMeasurements((prev) => [...prev, newMeasurement]);
+    setShowTextInput(false);
+    setTextInputValue('');
+  }, [textInputValue, textInputPos, currentPage, activeGroup, annotationColor, pushUndo, nextAnnotation]);
 
   /* ── Scale dialog confirm ────────────────────────────────────────── */
 
@@ -801,6 +1184,7 @@ export default function TakeoffViewerModule() {
     setMeasurements((ms) =>
       ms.map((m) => {
         if (m.type === 'count') return m; // counts are scale-independent
+        if (isAnnotationType(m.type)) return m; // annotations are scale-independent
         if (m.type === 'distance' && m.points.length === 2) {
           const dist = pixelDistance(m.points[0]!.x, m.points[0]!.y, m.points[1]!.x, m.points[1]!.y);
           const realDist = toRealDistance(dist, scale);
@@ -988,7 +1372,8 @@ export default function TakeoffViewerModule() {
     setIsExporting(true);
     try {
       let ordinalCounter = 1;
-      for (const m of measurements) {
+      const exportableMeasurements = measurements.filter((m) => !isAnnotationType(m.type));
+      for (const m of exportableMeasurements) {
         const unitMap: Record<string, string> = { m: 'm', 'm\u00B2': 'm2', 'm\u00B3': 'm3', pcs: 'pcs' };
         const posData: CreatePositionData = {
           boq_id: selectedBoqId,
@@ -1014,11 +1399,15 @@ export default function TakeoffViewerModule() {
     setActivePoints([]);
     undoStackRef.current = [];
     setUndoCount(0);
-    annotationCounterRef.current = { distance: 0, polyline: 0, area: 0, volume: 0, count: 0 };
+    annotationCounterRef.current = { distance: 0, polyline: 0, area: 0, volume: 0, count: 0, cloud: 0, arrow: 0, text: 0, rectangle: 0, highlight: 0 };
     setEditingAnnotationId(null);
     setEditingAnnotationValue('');
     setShowVolumeDepthInput(false);
     setPendingVolumePoints([]);
+    setShowTextInput(false);
+    setTextInputValue('');
+    setRectStartPoint(null);
+    setIsDraggingRect(false);
     clearPersisted();
   }, [clearPersisted]);
 
@@ -1186,7 +1575,7 @@ export default function TakeoffViewerModule() {
               ] as const).map(({ tool, icon: Icon, label }) => (
                 <button
                   key={tool}
-                  onClick={() => { setActiveTool(tool); setActivePoints([]); }}
+                  onClick={() => { setActiveTool(tool); setActivePoints([]); setRectStartPoint(null); setIsDraggingRect(false); setShowTextInput(false); }}
                   className={`flex items-center gap-1 px-2 py-1.5 rounded text-xs transition-colors ${
                     activeTool === tool
                       ? 'bg-oe-blue text-white'
@@ -1198,6 +1587,43 @@ export default function TakeoffViewerModule() {
                 >
                   <Icon size={14} />
                   <span className="hidden sm:inline">{label}</span>
+                </button>
+              ))}
+
+              {/* Annotation tools divider */}
+              <span className="w-px h-5 bg-border mx-1" />
+
+              {/* Annotation markup tools */}
+              {([
+                { tool: 'cloud' as MeasureTool, icon: Cloud, label: t('takeoff_viewer.tool_cloud', { defaultValue: 'Cloud' }) },
+                { tool: 'arrow' as MeasureTool, icon: ArrowUpRight, label: t('takeoff_viewer.tool_arrow', { defaultValue: 'Arrow' }) },
+                { tool: 'text' as MeasureTool, icon: Type, label: t('takeoff_viewer.tool_text', { defaultValue: 'Text' }) },
+                { tool: 'rectangle' as MeasureTool, icon: Square, label: t('takeoff_viewer.tool_rectangle', { defaultValue: 'Rectangle' }) },
+                { tool: 'highlight' as MeasureTool, icon: Highlighter, label: t('takeoff_viewer.tool_highlight', { defaultValue: 'Highlight' }) },
+              ] as const).map(({ tool, icon: Icon, label }) => (
+                <button
+                  key={tool}
+                  onClick={() => {
+                    setActiveTool(tool);
+                    setActivePoints([]);
+                    setRectStartPoint(null);
+                    setIsDraggingRect(false);
+                    setShowTextInput(false);
+                    // Set default color for this annotation tool type
+                    if (isAnnotationTool(tool)) {
+                      setAnnotationColor(DEFAULT_ANNOTATION_COLORS[tool]);
+                    }
+                  }}
+                  className={`flex items-center gap-1 px-2 py-1.5 rounded text-xs transition-colors ${
+                    activeTool === tool
+                      ? 'bg-orange-500 text-white'
+                      : 'hover:bg-surface-secondary text-content-secondary'
+                  }`}
+                  title={label}
+                  aria-label={label}
+                  aria-pressed={activeTool === tool}
+                >
+                  <Icon size={14} />
                 </button>
               ))}
 
@@ -1253,6 +1679,7 @@ export default function TakeoffViewerModule() {
                 onClick={handleCanvasClick}
                 onDoubleClick={handleCanvasDblClick}
                 onContextMenu={handleCanvasContextMenu}
+                onMouseMove={handleCanvasMouseMove}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
@@ -1262,6 +1689,37 @@ export default function TakeoffViewerModule() {
                   {scalePoints.length === 0
                     ? t('takeoff_viewer.scale_click_first', { defaultValue: 'Click first point of known dimension' })
                     : t('takeoff_viewer.scale_click_second', { defaultValue: 'Click second point' })}
+                </div>
+              )}
+              {/* Inline text input overlay for text annotation tool */}
+              {showTextInput && (
+                <div
+                  className="absolute z-10"
+                  style={{
+                    left: `${textInputPos.x * zoom}px`,
+                    top: `${textInputPos.y * zoom}px`,
+                  }}
+                >
+                  <input
+                    type="text"
+                    value={textInputValue}
+                    onChange={(e) => setTextInputValue(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleTextConfirm();
+                      if (e.key === 'Escape') { setShowTextInput(false); setTextInputValue(''); }
+                    }}
+                    onBlur={handleTextConfirm}
+                    autoFocus
+                    placeholder={t('takeoff_viewer.text_placeholder', { defaultValue: 'Type annotation text...' })}
+                    className="rounded border-2 bg-white/95 dark:bg-gray-800/95 px-2 py-1 text-sm font-medium outline-none shadow-lg min-w-[150px]"
+                    style={{ borderColor: annotationColor, color: annotationColor }}
+                  />
+                </div>
+              )}
+              {/* Cloud tool hint */}
+              {activeTool === 'cloud' && activePoints.length > 0 && (
+                <div className="absolute top-2 left-2 bg-orange-500/90 text-white px-3 py-1.5 rounded-lg text-xs font-medium">
+                  {t('takeoff_viewer.cloud_hint', { defaultValue: 'Click points to define cloud shape. Double-click or right-click to finish.' })}
                 </div>
               )}
             </div>
@@ -1327,11 +1785,36 @@ export default function TakeoffViewerModule() {
               </div>
             )}
 
+            {/* Annotation color picker (when annotation tool active) */}
+            {isAnnotationTool(activeTool) && (
+              <div className="rounded-lg border border-border bg-surface-primary p-3">
+                <label className="text-xs font-medium text-content-tertiary block mb-1.5">
+                  {t('takeoff_viewer.annotation_color', { defaultValue: 'Annotation Color' })}
+                </label>
+                <div className="flex items-center gap-1.5">
+                  {ANNOTATION_COLORS.map((c) => (
+                    <button
+                      key={c.value}
+                      onClick={() => setAnnotationColor(c.value)}
+                      className={`h-6 w-6 rounded-full border-2 transition-all ${
+                        annotationColor === c.value
+                          ? 'border-content-primary scale-110'
+                          : 'border-transparent hover:scale-105'
+                      }`}
+                      style={{ backgroundColor: c.value }}
+                      title={c.name}
+                      aria-label={c.name}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Measurements list (grouped) */}
             <div className="rounded-lg border border-border bg-surface-primary p-3">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-semibold text-content-primary">
-                  {t('takeoff_viewer.measurements', { defaultValue: 'Measurements' })} ({pageMeasurements.length})
+                  {t('takeoff_viewer.measurements', { defaultValue: 'Measurements' })} ({pageMeasurements.filter((m) => !isAnnotationType(m.type)).length})
                 </p>
                 {fileName && (
                   <div className="flex items-center gap-1.5">
@@ -1359,7 +1842,10 @@ export default function TakeoffViewerModule() {
               )}
 
               <div className="space-y-2 max-h-[400px] overflow-auto">
+                {/* Measurement groups (non-annotation types) */}
                 {Object.entries(groupedPageMeasurements).map(([groupName, groupMs]) => {
+                  const measurementOnly = groupMs.filter((m) => !isAnnotationType(m.type));
+                  if (measurementOnly.length === 0) return null;
                   const groupColor = GROUP_COLOR_MAP[groupName] || '#3B82F6';
                   const isHidden = hiddenGroups.has(groupName);
                   const isCollapsed = collapsedGroups.has(groupName);
@@ -1378,7 +1864,7 @@ export default function TakeoffViewerModule() {
                           style={{ backgroundColor: groupColor }}
                         />
                         <span className="text-2xs font-semibold text-content-secondary flex-1 uppercase tracking-wider">
-                          {groupName} ({groupMs.length})
+                          {groupName} ({measurementOnly.length})
                         </span>
                         <button
                           onClick={() => toggleGroupVisibility(groupName)}
@@ -1394,7 +1880,7 @@ export default function TakeoffViewerModule() {
                       {/* Group measurements */}
                       {!isCollapsed && (
                         <div className="space-y-1 pl-2">
-                          {groupMs.map((m) => (
+                          {measurementOnly.map((m) => (
                             <div
                               key={m.id}
                               className="rounded-lg bg-surface-secondary px-2.5 py-2 group/item"
@@ -1449,6 +1935,104 @@ export default function TakeoffViewerModule() {
                     </div>
                   );
                 })}
+
+                {/* Annotations section */}
+                {(() => {
+                  const annotations = pageMeasurements.filter((m) => isAnnotationType(m.type));
+                  if (annotations.length === 0) return null;
+                  const annoCollapsed = collapsedGroups.has('__annotations__');
+                  const annoHidden = hiddenGroups.has('__annotations__');
+                  return (
+                    <div>
+                      <div className="flex items-center gap-1.5 mb-1 mt-2 pt-2 border-t border-border">
+                        <button
+                          onClick={() => toggleGroupCollapse('__annotations__')}
+                          className="p-0.5 rounded hover:bg-surface-secondary text-content-tertiary transition-colors"
+                        >
+                          {annoCollapsed ? <ChevronDown size={10} /> : <ChevronUp size={10} />}
+                        </button>
+                        <Cloud size={10} className="text-orange-500 shrink-0" />
+                        <span className="text-2xs font-semibold text-content-secondary flex-1 uppercase tracking-wider">
+                          {t('takeoff_viewer.annotations', { defaultValue: 'Annotations' })} ({annotations.length})
+                        </span>
+                        <button
+                          onClick={() => toggleGroupVisibility('__annotations__')}
+                          className="p-0.5 rounded hover:bg-surface-secondary text-content-tertiary transition-colors"
+                          title={annoHidden
+                            ? t('takeoff_viewer.show_annotations', { defaultValue: 'Show annotations' })
+                            : t('takeoff_viewer.hide_annotations', { defaultValue: 'Hide annotations' })
+                          }
+                        >
+                          {annoHidden ? <EyeOff size={10} /> : <Eye size={10} />}
+                        </button>
+                      </div>
+                      {!annoCollapsed && (
+                        <div className="space-y-1 pl-2">
+                          {annotations.map((m) => {
+                            const TypeIcon = m.type === 'cloud' ? Cloud
+                              : m.type === 'arrow' ? ArrowUpRight
+                              : m.type === 'text' ? Type
+                              : m.type === 'rectangle' ? Square
+                              : Highlighter;
+                            return (
+                              <div
+                                key={m.id}
+                                className="rounded-lg bg-surface-secondary px-2.5 py-2 group/item"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <TypeIcon
+                                    size={12}
+                                    className="shrink-0"
+                                    style={{ color: m.color || '#EF4444' }}
+                                  />
+                                  <div className="flex-1 min-w-0">
+                                    {editingAnnotationId === m.id ? (
+                                      <input
+                                        type="text"
+                                        value={editingAnnotationValue}
+                                        onChange={(e) => setEditingAnnotationValue(e.target.value)}
+                                        onBlur={commitEditAnnotation}
+                                        onKeyDown={(e) => {
+                                          if (e.key === 'Enter') commitEditAnnotation();
+                                          if (e.key === 'Escape') {
+                                            setEditingAnnotationId(null);
+                                            setEditingAnnotationValue('');
+                                          }
+                                        }}
+                                        autoFocus
+                                        className="w-full rounded border border-oe-blue bg-surface-primary px-1.5 py-0.5 text-xs font-medium text-content-primary outline-none"
+                                        placeholder={t('takeoff.add_label', { defaultValue: 'Add label...' })}
+                                      />
+                                    ) : (
+                                      <button
+                                        onClick={() => startEditAnnotation(m)}
+                                        className="flex items-center gap-1 text-xs font-medium text-content-primary truncate hover:text-oe-blue transition-colors w-full text-left"
+                                        title={t('takeoff.add_label', { defaultValue: 'Add label...' })}
+                                      >
+                                        <span className="truncate">
+                                          {m.type === 'text' ? (m.text || m.annotation) : m.annotation}
+                                        </span>
+                                        <Pencil size={10} className="shrink-0 opacity-0 group-hover/item:opacity-60 transition-opacity" />
+                                      </button>
+                                    )}
+                                    <p className="text-2xs text-content-tertiary capitalize">{m.type}</p>
+                                  </div>
+                                  <button
+                                    onClick={() => deleteMeasurement(m.id)}
+                                    className="opacity-0 group-hover/item:opacity-100 text-content-tertiary hover:text-semantic-error transition-all shrink-0"
+                                    aria-label={t('takeoff_viewer.delete_annotation', { defaultValue: 'Delete annotation' })}
+                                  >
+                                    <Trash2 size={12} />
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
 
@@ -1476,7 +2060,7 @@ export default function TakeoffViewerModule() {
               <Info className="h-4 w-4 mt-0.5 shrink-0" />
               <p>
                 {t('takeoff_viewer.help_extended', {
-                  defaultValue: 'Set the scale first by clicking "Scale" and marking a known dimension. Use Distance, Polyline, Area, Volume, or Count tools. Double-click to finish polylines and close polygons. Right panel groups measurements by category.',
+                  defaultValue: 'Set the scale first by clicking "Scale" and marking a known dimension. Use Distance, Polyline, Area, Volume, or Count tools for measurements. Use Cloud, Arrow, Text, Rectangle, or Highlight tools for annotations. Double-click to finish polylines, clouds, and close polygons. Right panel groups measurements and annotations separately.',
                 })}
               </p>
             </div>
