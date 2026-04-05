@@ -188,7 +188,7 @@ interface PunchFormData {
   description: string;
   priority: PunchPriority;
   category: PunchCategory;
-  assigned_to_id: string;
+  assigned_to: string;
   due_date: string;
   document_id: string;
   location: string;
@@ -199,7 +199,7 @@ const EMPTY_FORM: PunchFormData = {
   description: '',
   priority: 'medium',
   category: 'general',
-  assigned_to_id: '',
+  assigned_to: '',
   due_date: '',
   document_id: '',
   location: '',
@@ -357,8 +357,8 @@ function AddPunchModal({
                 {t('punch.field_assigned_to', { defaultValue: 'Assigned To' })}
               </label>
               <select
-                value={form.assigned_to_id}
-                onChange={(e) => set('assigned_to_id', e.target.value)}
+                value={form.assigned_to}
+                onChange={(e) => set('assigned_to', e.target.value)}
                 className={inputCls}
               >
                 <option value="">
@@ -475,12 +475,12 @@ function PunchKanbanCard({
       <div className="flex items-center justify-between mt-3 text-xs text-content-tertiary">
         {/* Assignee avatar */}
         <div className="flex items-center gap-1.5">
-          {item.assigned_to_name ? (
+          {item.assigned_to ? (
             <>
               <div className="h-5 w-5 rounded-full bg-oe-blue/10 text-oe-blue flex items-center justify-center text-2xs font-semibold shrink-0">
-                {item.assigned_to_name.charAt(0).toUpperCase()}
+                {item.assigned_to.charAt(0).toUpperCase()}
               </div>
-              <span className="truncate max-w-[80px]">{item.assigned_to_name}</span>
+              <span className="truncate max-w-[80px]">{item.assigned_to}</span>
             </>
           ) : (
             <span className="text-content-quaternary">
@@ -491,10 +491,10 @@ function PunchKanbanCard({
 
         {/* Due date + overdue + photos */}
         <div className="flex items-center gap-2">
-          {item.photos_count > 0 && (
+          {(item.photos || []).length > 0 && (
             <div className="flex items-center gap-0.5">
               <Camera size={11} />
-              <span>{item.photos_count}</span>
+              <span>{(item.photos || []).length}</span>
             </div>
           )}
           {item.due_date && (
@@ -658,7 +658,7 @@ export function PunchListPage() {
         priority: filterPriority || undefined,
         status: filterStatus || undefined,
         category: filterCategory || undefined,
-        assigned_to_id: filterAssignee || undefined,
+        assigned_to: filterAssignee || undefined,
       }),
     enabled: !!projectId,
   });
@@ -683,8 +683,7 @@ export function PunchListPage() {
       (item) =>
         item.title.toLowerCase().includes(q) ||
         item.description.toLowerCase().includes(q) ||
-        (item.location && item.location.toLowerCase().includes(q)) ||
-        (item.assigned_to_name && item.assigned_to_name.toLowerCase().includes(q)),
+        (item.assigned_to && item.assigned_to.toLowerCase().includes(q)),
     );
   }, [punchItems, searchQuery]);
 
@@ -760,10 +759,9 @@ export function PunchListPage() {
         description: formData.description || undefined,
         priority: formData.priority,
         category: formData.category,
-        assigned_to_id: formData.assigned_to_id || undefined,
+        assigned_to: formData.assigned_to || undefined,
         due_date: formData.due_date || undefined,
         document_id: formData.document_id || undefined,
-        location: formData.location || undefined,
       });
     },
     [createMut, projectId],
@@ -1137,9 +1135,9 @@ function PunchTableRow({
             {item.title}
           </span>
         </div>
-        {item.location && (
+        {(item.location_x != null || item.location_y != null) && (
           <p className="text-xs text-content-tertiary mt-0.5 truncate max-w-[250px]">
-            {item.location}
+            {`(${item.location_x ?? '-'}, ${item.location_y ?? '-'})`}
           </p>
         )}
       </td>
@@ -1170,13 +1168,13 @@ function PunchTableRow({
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
-          {item.assigned_to_name ? (
+          {item.assigned_to ? (
             <>
               <div className="h-6 w-6 rounded-full bg-oe-blue/10 text-oe-blue flex items-center justify-center text-xs font-semibold shrink-0">
-                {item.assigned_to_name.charAt(0).toUpperCase()}
+                {item.assigned_to.charAt(0).toUpperCase()}
               </div>
               <span className="text-sm text-content-secondary truncate max-w-[100px]">
-                {item.assigned_to_name}
+                {item.assigned_to}
               </span>
             </>
           ) : (
@@ -1203,10 +1201,10 @@ function PunchTableRow({
         )}
       </td>
       <td className="px-4 py-3 text-sm text-content-secondary tabular-nums">
-        {item.photos_count > 0 ? (
+        {(item.photos || []).length > 0 ? (
           <div className="flex items-center gap-1">
             <Camera size={14} className="text-content-tertiary" />
-            {item.photos_count}
+            {(item.photos || []).length}
           </div>
         ) : (
           '-'
@@ -1233,7 +1231,6 @@ function PunchTableRow({
           <button
             onClick={() => onDelete(item.id)}
             className="inline-flex items-center rounded-md p-1 text-content-quaternary hover:text-semantic-error hover:bg-red-50 transition-colors"
-            title={t('common.delete', { defaultValue: 'Delete' })}
             title={t('common.delete', { defaultValue: 'Delete' })}
           >
             <Trash2 size={13} />

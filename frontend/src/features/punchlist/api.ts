@@ -29,30 +29,29 @@ export interface PunchItem {
   description: string;
   priority: PunchPriority;
   status: PunchStatus;
-  category: PunchCategory;
-  assigned_to_id: string | null;
-  assigned_to_name: string | null;
+  category: PunchCategory | null;
+  assigned_to: string | null;
   due_date: string | null;
   document_id: string | null;
-  document_name: string | null;
   page: number | null;
-  photos_count: number;
-  location: string | null;
+  location_x: number | null;
+  location_y: number | null;
+  photos: string[];
+  trade: string | null;
+  resolution_notes: string | null;
+  verified_by: string | null;
   metadata: Record<string, unknown>;
-  created_by: string;
-  created_by_name: string;
+  created_by: string | null;
   created_at: string;
   updated_at: string;
   resolved_at: string | null;
   verified_at: string | null;
-  closed_at: string | null;
 }
 
 export interface PunchSummary {
   total: number;
   by_status: Record<string, number>;
   by_priority: Record<string, number>;
-  by_category: Record<string, number>;
   overdue: number;
 }
 
@@ -61,19 +60,21 @@ export interface PunchFilters {
   priority?: PunchPriority | '';
   status?: PunchStatus | '';
   category?: PunchCategory | '';
-  assigned_to_id?: string;
+  assigned_to?: string;
 }
 
 export interface CreatePunchPayload {
   project_id: string;
   title: string;
   description?: string;
-  priority: PunchPriority;
-  category: PunchCategory;
-  assigned_to_id?: string;
+  priority?: PunchPriority;
+  category?: PunchCategory;
+  assigned_to?: string;
   due_date?: string;
   document_id?: string;
-  location?: string;
+  location_x?: number | null;
+  location_y?: number | null;
+  trade?: string;
 }
 
 export interface UpdatePunchPayload {
@@ -81,10 +82,13 @@ export interface UpdatePunchPayload {
   description?: string;
   priority?: PunchPriority;
   category?: PunchCategory;
-  assigned_to_id?: string | null;
+  assigned_to?: string | null;
   due_date?: string | null;
   document_id?: string | null;
-  location?: string;
+  location_x?: number | null;
+  location_y?: number | null;
+  trade?: string | null;
+  resolution_notes?: string | null;
 }
 
 export interface TeamMember {
@@ -106,7 +110,7 @@ export async function fetchPunchItems(
   if (filters?.priority) params.set('priority', filters.priority);
   if (filters?.status) params.set('status', filters.status);
   if (filters?.category) params.set('category', filters.category);
-  if (filters?.assigned_to_id) params.set('assigned_to_id', filters.assigned_to_id);
+  if (filters?.assigned_to) params.set('assigned_to', filters.assigned_to);
   return apiGet<PunchItem[]>(`/v1/punchlist/items?${params.toString()}`);
 }
 
