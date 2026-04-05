@@ -21,6 +21,9 @@ Routes:
     PATCH  /measurements/{id}                   — update measurement
     DELETE /measurements/{id}                   — delete measurement
     POST   /measurements/{id}/link-to-boq       — link measurement to BOQ position
+
+    POST   /cad-group/create-boq               — create BOQ from grouped CAD QTO
+    GET    /cad-group/export                    — export grouped QTO as Excel
 """
 
 import logging
@@ -28,14 +31,17 @@ import shutil
 import time as _time
 import uuid as _uuid
 import zipfile
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, status
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel, Field
+from sqlalchemy import delete, select
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.modules.takeoff.models import CadExtractionSession
 from app.modules.takeoff.schemas import (
     LinkToBoqRequest,
     TakeoffDocumentResponse,
@@ -446,17 +452,87 @@ async def cad_extract(
 
 # ── CAD interactive grouping (two-step flow) ──────────────────────────────
 
-# In-memory cache for CAD extraction sessions (5 min TTL)
+# In-memory cache kept as fast fallback; primary storage is the database.
 _cad_sessions: dict[str, dict] = {}
-_CAD_SESSION_TTL = 300  # 5 minutes
+_CAD_SESSION_TTL = 86400  # 24 hours (was 5 minutes)
 
 
-def _cleanup_sessions() -> None:
+def _cleanup_memory_sessions() -> None:
     """Remove expired CAD extraction sessions from the in-memory cache."""
     now = _time.time()
     expired = [k for k, v in _cad_sessions.items() if now - v["created"] > _CAD_SESSION_TTL]
     for k in expired:
         del _cad_sessions[k]
+
+
+async def _cleanup_db_sessions(session: Any) -> None:
+    """Remove expired CAD extraction sessions from the database."""
+    now = datetime.now(timezone.utc)
+    await session.execute(
+        delete(CadExtractionSession).where(CadExtractionSession.expires_at < now)
+    )
+
+
+async def _save_session_to_db(
+    session: Any,
+    session_id: str,
+    elements: list[dict],
+    filename: str,
+    file_format: str,
+    columns_metadata: dict | None = None,
+    user_id: str = "",
+    extraction_time: float = 0,
+) -> None:
+    """Persist a CAD extraction session to the database."""
+    expires_at = datetime.now(timezone.utc) + timedelta(seconds=_CAD_SESSION_TTL)
+    db_session = CadExtractionSession(
+        session_id=session_id,
+        user_id=user_id,
+        filename=filename,
+        file_format=file_format,
+        element_count=len(elements),
+        extraction_time=extraction_time,
+        elements_data=elements,
+        columns_metadata=columns_metadata or {},
+        expires_at=expires_at,
+        created_by=user_id,
+    )
+    session.add(db_session)
+    await session.flush()
+
+
+async def _get_session_from_db(session: Any, session_id: str) -> dict | None:
+    """Retrieve a CAD extraction session from the database.
+
+    Returns a dict matching the old in-memory format, or None if not found / expired.
+    """
+    now = datetime.now(timezone.utc)
+    result = await session.execute(
+        select(CadExtractionSession).where(
+            CadExtractionSession.session_id == session_id,
+            CadExtractionSession.expires_at > now,
+        )
+    )
+    row = result.scalar_one_or_none()
+    if row is None:
+        return None
+    return {
+        "elements": row.elements_data or [],
+        "filename": row.filename,
+        "format": row.file_format,
+        "created": row.created_at.timestamp() if row.created_at else _time.time(),
+        "columns_metadata": row.columns_metadata or {},
+    }
+
+
+async def _get_cad_session(session: Any, session_id: str) -> dict | None:
+    """Look up a CAD session from memory first, then fall back to database."""
+    # Fast path: in-memory
+    mem = _cad_sessions.get(session_id)
+    if mem is not None:
+        return mem
+    # Slow path: database
+    return await _get_session_from_db(session, session_id)
 
 
 class CadGroupRequest(BaseModel):
@@ -473,6 +549,8 @@ class CadGroupRequest(BaseModel):
 )
 async def cad_columns(
     file: UploadFile = File(..., description="CAD/BIM file (.rvt, .ifc, .dwg, .dgn)"),
+    session: SessionDep = None,  # type: ignore[assignment]
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
 ) -> dict[str, Any]:
     """Upload a CAD file and analyze its columns for interactive grouping.
 
@@ -574,14 +652,29 @@ async def cad_columns(
     duration_ms = int((time.monotonic() - start_time) * 1000)
 
     # Cleanup expired sessions, then store new one
-    _cleanup_sessions()
+    _cleanup_memory_sessions()
     session_id = str(_uuid.uuid4())
     _cad_sessions[session_id] = {
         "elements": real_elements,
         "filename": filename,
         "format": ext,
         "created": _time.time(),
+        "columns_metadata": columns,
     }
+
+    # Persist to database for durability
+    if session is not None:
+        await _cleanup_db_sessions(session)
+        await _save_session_to_db(
+            session=session,
+            session_id=session_id,
+            elements=real_elements,
+            filename=filename,
+            file_format=ext,
+            columns_metadata=columns,
+            user_id=user_id or "",
+            extraction_time=duration_ms / 1000.0,
+        )
 
     # Preview: pick elements that have actual quantity data (volume > 0 or area > 0)
     def _has_quantity(el: dict) -> bool:
@@ -619,6 +712,7 @@ async def cad_columns(
         "suggested_quantities": columns.get("suggested_quantities", []),
         "presets": columns.get("presets", {}),
         "unit_labels": columns.get("unit_labels", {}),
+        "confidence": columns.get("confidence", {}),
         "preview": preview_candidates,
     }
 
@@ -629,21 +723,22 @@ async def cad_columns(
 )
 async def cad_group(
     body: CadGroupRequest,
+    db_session: SessionDep = None,  # type: ignore[assignment]
 ) -> dict[str, Any]:
     """Group previously uploaded CAD elements by user-selected columns.
 
     Step 2 of the two-step interactive QTO flow. Requires a valid
     ``session_id`` from a prior ``POST /cad-columns`` call.
 
-    The session is kept alive in memory for 5 minutes. If it expires,
-    the user must re-upload the file.
+    Sessions are stored in the database and expire after 24 hours.
+    If expired, the user must re-upload the file.
     """
     from app.modules.boq.cad_import import group_cad_elements_dynamic
 
-    _cleanup_sessions()
+    _cleanup_memory_sessions()
 
-    session = _cad_sessions.get(body.session_id)
-    if not session:
+    cad_session = await _get_cad_session(db_session, body.session_id)
+    if not cad_session:
         raise HTTPException(
             status_code=404,
             detail=(
@@ -652,7 +747,7 @@ async def cad_group(
             ),
         )
 
-    elements: list[dict] = session["elements"]
+    elements: list[dict] = cad_session["elements"]
 
     # Validate that requested columns actually exist in the data
     all_columns: set[str] = set()
@@ -677,10 +772,384 @@ async def cad_group(
     grouped = group_cad_elements_dynamic(elements, body.group_by, body.sum_columns)
 
     return {
-        "filename": session["filename"],
-        "format": session["format"],
+        "filename": cad_session["filename"],
+        "format": cad_session["format"],
         **grouped,
     }
+
+
+# ── Element detail view for a specific group ──────────────────────────────
+
+
+class CadGroupElementsRequest(BaseModel):
+    """Request body for the ``POST /cad-group/elements`` endpoint."""
+
+    session_id: str = Field(..., description="Session ID returned by /cad-columns")
+    group_key: dict[str, str] = Field(
+        ...,
+        description='Key-value pairs identifying the group (e.g. {"category": "Walls", "type name": "Exterior Wall"})',
+    )
+
+
+@router.post(
+    "/cad-group/elements",
+    dependencies=[Depends(RequirePermission("takeoff.read"))],
+)
+async def get_group_elements(
+    body: CadGroupElementsRequest,
+) -> dict[str, Any]:
+    """Get individual elements for a specific group.
+
+    Returns all raw elements matching the provided ``group_key`` filter,
+    allowing users to inspect what makes up each grouped row.
+    """
+    _cleanup_sessions()
+
+    session = _cad_sessions.get(body.session_id)
+    if not session:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                "Session not found or expired. "
+                "Please re-upload the CAD file via POST /cad-columns."
+            ),
+        )
+
+    elements: list[dict] = session["elements"]
+
+    # Filter elements matching all key-value pairs in group_key
+    matching: list[dict] = []
+    for el in elements:
+        match = True
+        for col, expected in body.group_key.items():
+            raw = el.get(col)
+            val = str(raw).strip() if raw is not None else ""
+            normalized = val if val and val != "None" else "(empty)"
+            if normalized != expected:
+                match = False
+                break
+        if match:
+            matching.append(el)
+
+    # Discover all column names across matching elements
+    all_cols: list[str] = []
+    seen: set[str] = set()
+    for el in matching:
+        for k in el:
+            if k not in seen:
+                seen.add(k)
+                all_cols.append(k)
+
+    # Compute totals for numeric columns
+    totals: dict[str, float] = {}
+    for col in all_cols:
+        numeric_sum = 0.0
+        is_numeric = False
+        for el in matching:
+            val = el.get(col)
+            if val is not None:
+                try:
+                    numeric_sum += float(val)
+                    is_numeric = True
+                except (ValueError, TypeError):
+                    pass
+        if is_numeric:
+            totals[col] = round(numeric_sum, 4)
+
+    return {
+        "group_key": body.group_key,
+        "total_elements": len(matching),
+        "columns": all_cols,
+        "elements": matching[:500],  # Limit to 500 elements for performance
+        "totals": totals,
+        "truncated": len(matching) > 500,
+    }
+
+
+# ── Create BOQ from CAD QTO ───────────────────────────────────────────────
+
+
+class CreateBOQFromCadRequest(BaseModel):
+    """Request body for creating a BOQ from grouped CAD QTO data."""
+
+    session_id: str = Field(..., description="Session ID from /cad-columns")
+    project_id: str = Field(..., description="Project UUID to create BOQ in")
+    boq_name: str = Field(default="CAD Import", description="Name for the new BOQ")
+    group_by: list[str] = Field(default_factory=list, description="Columns used for grouping")
+    sum_columns: list[str] = Field(default_factory=list, description="Columns used for summing")
+
+
+@router.post(
+    "/cad-group/create-boq",
+    dependencies=[Depends(RequirePermission("takeoff.create"))],
+)
+async def create_boq_from_cad_qto(
+    body: CreateBOQFromCadRequest,
+    db_session: SessionDep = None,  # type: ignore[assignment]
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+) -> dict[str, Any]:
+    """Create a BOQ directly from grouped CAD QTO data.
+
+    Retrieves the cached CAD session, runs grouping using the provided
+    (or stored) column selections, creates a new BOQ in the specified
+    project, and adds positions for each group.
+    """
+    import uuid
+
+    from app.modules.boq.cad_import import group_cad_elements_dynamic
+    from app.modules.boq.models import BOQ, Position
+
+    cad_session = await _get_cad_session(db_session, body.session_id)
+    if not cad_session:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                "CAD session not found or expired. "
+                "Please re-upload the CAD file."
+            ),
+        )
+
+    elements: list[dict] = cad_session["elements"]
+
+    # Use provided grouping or fall back to stored metadata
+    group_by = body.group_by
+    sum_columns = body.sum_columns
+    if not group_by:
+        stored = cad_session.get("columns_metadata", {})
+        group_by = stored.get("suggested_grouping", [])
+    if not sum_columns:
+        stored = cad_session.get("columns_metadata", {})
+        sum_columns = stored.get("suggested_quantities", [])
+
+    if not group_by:
+        raise HTTPException(
+            status_code=400,
+            detail="No grouping columns specified and no defaults available.",
+        )
+
+    grouped = group_cad_elements_dynamic(elements, group_by, sum_columns)
+    groups = grouped.get("groups", [])
+
+    # Determine unit labels from stored metadata
+    stored_meta = cad_session.get("columns_metadata", {})
+    unit_labels: dict[str, str] = stored_meta.get("unit_labels", {})
+
+    # Create BOQ
+    project_uuid = uuid.UUID(body.project_id)
+    boq = BOQ(
+        project_id=project_uuid,
+        name=body.boq_name,
+        description=f"Auto-generated from CAD file: {cad_session['filename']}",
+        status="draft",
+        metadata_={"source": "cad_qto", "cad_filename": cad_session["filename"]},
+    )
+    db_session.add(boq)
+    await db_session.flush()
+
+    # Create positions from groups
+    position_count = 0
+    for idx, group in enumerate(groups):
+        # Skip empty groups
+        sums = group.get("sums", {})
+        count = group.get("count", 0)
+        if count == 0 and all(v == 0 for v in sums.values()):
+            continue
+
+        # Build description from group key parts
+        key_parts = group.get("key_parts", {})
+        parts = []
+        for col, val in key_parts.items():
+            cleaned = str(val or "").strip()
+            if col == "category":
+                cleaned = cleaned.replace("OST_", "")
+            if cleaned:
+                parts.append(cleaned)
+        description = " — ".join(parts) if parts else group.get("key", f"Group {idx + 1}")
+
+        # Determine best unit and quantity (volume > area > length > count)
+        unit = "pcs"
+        quantity = float(count)
+        for col_name in ["volume", "area", "length"]:
+            if col_name in sums and sums[col_name] > 0:
+                unit = unit_labels.get(col_name, col_name)
+                quantity = round(sums[col_name], 4)
+                break
+
+        ordinal = f"{idx + 1:03d}"
+
+        position = Position(
+            boq_id=boq.id,
+            ordinal=ordinal,
+            description=description,
+            unit=unit,
+            quantity=str(quantity),
+            unit_rate="0",
+            total="0",
+            source="cad_import",
+            sort_order=idx,
+            metadata_={
+                "cad_source": "cad_qto",
+                "cad_count": count,
+                "cad_sums": sums,
+            },
+        )
+        db_session.add(position)
+        position_count += 1
+
+    await db_session.flush()
+
+    logger.info(
+        "Created BOQ '%s' with %d positions from CAD QTO session %s",
+        body.boq_name,
+        position_count,
+        body.session_id,
+    )
+
+    return {
+        "boq_id": str(boq.id),
+        "project_id": body.project_id,
+        "position_count": position_count,
+        "boq_name": body.boq_name,
+    }
+
+
+# ── Export grouped CAD QTO as Excel ───────────────────────────────────────
+
+
+@router.get(
+    "/cad-group/export",
+    dependencies=[Depends(RequirePermission("takeoff.read"))],
+)
+async def export_cad_group(
+    session_id: str = Query(..., description="Session ID from /cad-columns"),
+    group_by: str = Query(default="", description="Comma-separated grouping columns"),
+    sum_columns: str = Query(default="", description="Comma-separated sum columns"),
+    format: str = Query(default="xlsx", pattern="^(xlsx)$"),
+    db_session: SessionDep = None,  # type: ignore[assignment]
+) -> StreamingResponse:
+    """Export grouped QTO results as an Excel spreadsheet.
+
+    Retrieves the CAD session, runs grouping, and returns an xlsx file
+    with headers, data rows, and a bold grand-total row.
+    """
+    import io
+
+    from app.modules.boq.cad_import import group_cad_elements_dynamic
+
+    cad_session = await _get_cad_session(db_session, session_id)
+    if not cad_session:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                "CAD session not found or expired. "
+                "Please re-upload the CAD file."
+            ),
+        )
+
+    elements: list[dict] = cad_session["elements"]
+
+    # Parse column lists
+    group_by_list = [c.strip() for c in group_by.split(",") if c.strip()] if group_by else []
+    sum_columns_list = [c.strip() for c in sum_columns.split(",") if c.strip()] if sum_columns else []
+
+    # Fall back to stored metadata
+    if not group_by_list:
+        stored = cad_session.get("columns_metadata", {})
+        group_by_list = stored.get("suggested_grouping", [])
+    if not sum_columns_list:
+        stored = cad_session.get("columns_metadata", {})
+        sum_columns_list = stored.get("suggested_quantities", [])
+
+    if not group_by_list:
+        raise HTTPException(
+            status_code=400,
+            detail="No grouping columns specified.",
+        )
+
+    grouped = group_cad_elements_dynamic(elements, group_by_list, sum_columns_list)
+    groups = grouped.get("groups", [])
+    grand_totals = grouped.get("grand_totals", {})
+
+    # Build Excel workbook
+    try:
+        import openpyxl
+        from openpyxl.styles import Alignment, Font
+    except ImportError:
+        raise HTTPException(
+            status_code=500,
+            detail="openpyxl is not installed. Cannot generate Excel export.",
+        )
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "QTO Export"
+
+    # Determine column order
+    all_sum_cols = [c for c in sum_columns_list if c != "count"]
+    header = list(group_by_list) + all_sum_cols + ["Count"]
+
+    # Write header
+    bold_font = Font(bold=True)
+    for col_idx, col_name in enumerate(header, 1):
+        cell = ws.cell(row=1, column=col_idx, value=col_name.replace("_", " ").title())
+        cell.font = bold_font
+
+    # Write data rows
+    for row_idx, group in enumerate(groups, 2):
+        key_parts = group.get("key_parts", {})
+        sums = group.get("sums", {})
+        count = group.get("count", 0)
+
+        col_idx = 1
+        for gc in group_by_list:
+            val = str(key_parts.get(gc, "")).replace("OST_", "")
+            ws.cell(row=row_idx, column=col_idx, value=val)
+            col_idx += 1
+        for sc in all_sum_cols:
+            ws.cell(row=row_idx, column=col_idx, value=round(sums.get(sc, 0), 4))
+            col_idx += 1
+        ws.cell(row=row_idx, column=col_idx, value=count)
+
+    # Grand total row
+    total_row = len(groups) + 2
+    col_idx = 1
+    total_cell = ws.cell(row=total_row, column=col_idx, value="TOTAL")
+    total_cell.font = bold_font
+    col_idx = len(group_by_list) + 1
+    for sc in all_sum_cols:
+        cell = ws.cell(row=total_row, column=col_idx, value=round(grand_totals.get(sc, 0), 4))
+        cell.font = bold_font
+        col_idx += 1
+    total_count = grand_totals.get("count", sum(g.get("count", 0) for g in groups))
+    cell = ws.cell(row=total_row, column=col_idx, value=total_count)
+    cell.font = bold_font
+
+    # Auto-fit column widths
+    for col_cells in ws.columns:
+        max_len = 0
+        col_letter = col_cells[0].column_letter  # type: ignore[union-attr]
+        for cell in col_cells:
+            try:
+                cell_len = len(str(cell.value or ""))
+                if cell_len > max_len:
+                    max_len = cell_len
+            except Exception:
+                pass
+        ws.column_dimensions[col_letter].width = min(max_len + 4, 50)
+
+    # Write to buffer
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    filename_base = cad_session.get("filename", "export").rsplit(".", 1)[0]
+    download_name = f"{filename_base}_qto.xlsx"
+
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{download_name}"'},
+    )
 
 
 MAX_PDF_SIZE = 50 * 1024 * 1024  # 50 MB

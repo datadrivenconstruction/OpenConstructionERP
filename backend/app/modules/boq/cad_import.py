@@ -454,6 +454,7 @@ def get_available_columns(elements: list[dict], file_format: str = "rvt") -> dic
             "suggested_quantities": [],
             "presets": {},
             "unit_labels": {},
+            "confidence": {},
         }
 
     # Collect all unique column names across every element
@@ -660,6 +661,15 @@ def get_available_columns(elements: list[dict], file_format: str = "rvt") -> dic
     # Remove presets with empty group_by
     presets = {k: v for k, v in presets.items() if v["group_by"]}
 
+    # Confidence scoring: for each column, calculate % of elements with non-null values
+    confidence: dict[str, float] = {}
+    for col in all_columns:
+        non_null = sum(
+            1 for elem in elements
+            if elem.get(col) not in (None, "", "nan", "NaN")
+        )
+        confidence[col] = round(non_null / len(elements), 2) if elements else 0
+
     # Unit labels for quantity columns (+ "count" which is always available)
     unit_labels: dict[str, str] = {"count": "pcs"}
     for col in quantity_cols:
@@ -685,6 +695,7 @@ def get_available_columns(elements: list[dict], file_format: str = "rvt") -> dic
         "suggested_quantities": suggested_quantities,
         "presets": presets,
         "unit_labels": unit_labels,
+        "confidence": confidence,
     }
 
 
