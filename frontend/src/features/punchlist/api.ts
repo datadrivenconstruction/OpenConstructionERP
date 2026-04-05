@@ -100,6 +100,7 @@ export async function fetchPunchItems(
   projectId: string,
   filters?: PunchFilters,
 ): Promise<PunchItem[]> {
+  if (!projectId) return [];
   const params = new URLSearchParams({ project_id: projectId });
   if (filters?.search) params.set('search', filters.search);
   if (filters?.priority) params.set('priority', filters.priority);

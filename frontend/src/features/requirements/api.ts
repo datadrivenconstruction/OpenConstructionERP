@@ -102,6 +102,7 @@ export interface UpdateRequirementPayload {
 /* ── API Functions ─────────────────────────────────────────────────────── */
 
 export async function fetchRequirementSets(projectId: string): Promise<RequirementSet[]> {
+  if (!projectId) return [];
   return apiGet<RequirementSet[]>(`/v1/requirements/?project_id=${projectId}`);
 }
 
@@ -162,4 +163,113 @@ export async function linkToPosition(
 
 export async function importFromText(setId: string, text: string): Promise<RequirementSetDetail> {
   return apiPost<RequirementSetDetail>(`/v1/requirements/${setId}/import/text`, { text });
+}
+
+/* ── Export Functions ─────────────────────────────────────────────────────── */
+
+const EXPORT_COLUMNS = [
+  'entity',
+  'attribute',
+  'constraint_type',
+  'constraint_value',
+  'unit',
+  'category',
+  'priority',
+  'status',
+  'confidence',
+  'source_ref',
+  'notes',
+] as const;
+
+/**
+ * Export requirements as CSV.
+ * Tries the backend endpoint first; falls back to client-side generation.
+ */
+export async function exportRequirementsCSV(
+  setId: string,
+  requirements?: Requirement[],
+): Promise<Blob> {
+  try {
+    const res = await fetch(`/api/v1/requirements/${setId}/export?format=csv`, {
+      headers: {
+        Authorization: `Bearer ${getStoredToken()}`,
+        'X-DDC-Client': 'OE/1.0',
+      },
+    });
+    if (res.ok) {
+      return await res.blob();
+    }
+  } catch {
+    // fall through to client-side
+  }
+
+  // Client-side fallback
+  const reqs = requirements ?? (await fetchRequirementSetDetail(setId)).requirements;
+  const header = EXPORT_COLUMNS.join(',');
+  const rows = reqs.map((r) =>
+    EXPORT_COLUMNS.map((col) => {
+      const val = String(r[col as keyof Requirement] ?? '');
+      // Escape CSV values containing commas, quotes, or newlines
+      if (val.includes(',') || val.includes('"') || val.includes('\n')) {
+        return `"${val.replace(/"/g, '""')}"`;
+      }
+      return val;
+    }).join(','),
+  );
+  const csv = [header, ...rows].join('\n');
+  return new Blob([csv], { type: 'text/csv;charset=utf-8' });
+}
+
+/**
+ * Export requirements as Excel (CSV with .xlsx-friendly formatting).
+ * Uses CSV with BOM for Excel compatibility.
+ */
+export async function exportRequirementsExcel(
+  setId: string,
+  requirements?: Requirement[],
+): Promise<Blob> {
+  const reqs = requirements ?? (await fetchRequirementSetDetail(setId)).requirements;
+  const header = EXPORT_COLUMNS.join('\t');
+  const rows = reqs.map((r) =>
+    EXPORT_COLUMNS.map((col) => {
+      const val = String(r[col as keyof Requirement] ?? '');
+      return val.replace(/\t/g, ' ');
+    }).join('\t'),
+  );
+  const tsv = '\uFEFF' + [header, ...rows].join('\n');
+  return new Blob([tsv], {
+    type: 'application/vnd.ms-excel;charset=utf-8',
+  });
+}
+
+/**
+ * Export requirements as formatted JSON string.
+ */
+export async function exportRequirementsJSON(
+  setId: string,
+  requirements?: Requirement[],
+): Promise<string> {
+  const reqs = requirements ?? (await fetchRequirementSetDetail(setId)).requirements;
+  const data = reqs.map((r) => {
+    const obj: Record<string, unknown> = {};
+    for (const col of EXPORT_COLUMNS) {
+      obj[col] = r[col as keyof Requirement] ?? '';
+    }
+    return obj;
+  });
+  return JSON.stringify(data, null, 2);
+}
+
+/** Helper to read the stored auth token. */
+function getStoredToken(): string {
+  try {
+    const raw = localStorage.getItem('auth-storage');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return parsed?.state?.accessToken ?? '';
+    }
+  } catch {
+    // ignore
+  }
+  return '';
 }
