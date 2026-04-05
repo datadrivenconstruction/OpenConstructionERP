@@ -825,9 +825,9 @@ export function PunchListPage() {
               ))}
             </select>
           )}
-          <Button variant="primary" size="sm" onClick={() => setShowAddModal(true)} disabled={!projectId}>
-            <Plus size={14} className="mr-1" />
-            {t('punch.new_item', { defaultValue: 'New Item' })}
+          <Button variant="primary" size="sm" onClick={() => setShowAddModal(true)} disabled={!projectId} className="whitespace-nowrap">
+            <Plus size={14} className="mr-1 shrink-0" />
+            <span>{t('punch.new_item', { defaultValue: 'New Item' })}</span>
           </Button>
         </div>
       </div>
@@ -1213,33 +1213,31 @@ function PunchTableRow({
         )}
       </td>
       <td className="px-4 py-3 text-right">
-        <div className="flex items-center justify-end gap-1">
+        <div className="flex items-center justify-end gap-1 flex-nowrap">
           {transitions.map((tr) => {
             const Icon = tr.icon;
             return (
-              <Button
+              <button
                 key={tr.next}
-                variant="ghost"
-                size="sm"
                 onClick={() => onTransition(item.id, tr.next)}
                 title={t(tr.labelKey, { defaultValue: tr.defaultLabel })}
+                className="inline-flex items-center gap-1 whitespace-nowrap rounded-md px-2 py-1 text-xs text-content-secondary hover:text-content-primary hover:bg-surface-secondary transition-colors"
               >
-                <Icon size={14} className="mr-1" />
-                <span className="hidden lg:inline">
+                <Icon size={12} className="shrink-0" />
+                <span className="hidden xl:inline">
                   {t(tr.labelKey, { defaultValue: tr.defaultLabel })}
                 </span>
-              </Button>
+              </button>
             );
           })}
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
             onClick={() => onDelete(item.id)}
-            className="text-semantic-error hover:text-semantic-error"
+            className="inline-flex items-center rounded-md p-1 text-content-quaternary hover:text-semantic-error hover:bg-red-50 transition-colors"
+            title={t('common.delete', { defaultValue: 'Delete' })}
             title={t('common.delete', { defaultValue: 'Delete' })}
           >
-            <Trash2 size={14} />
-          </Button>
+            <Trash2 size={13} />
+          </button>
         </div>
       </td>
     </tr>
