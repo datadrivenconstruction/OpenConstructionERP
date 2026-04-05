@@ -1,5 +1,6 @@
-import { useState, useCallback, useRef, useMemo, lazy, Suspense } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import clsx from 'clsx';
 import {
@@ -662,9 +663,20 @@ type TakeoffTab = 'documents' | 'measurements';
 export function TakeoffPage() {
   const { t } = useTranslation();
 
-  /* ── Tab state ─────────────────────────────────────────────────────── */
+  /* ── Tab state (synced with ?tab= query parameter from sidebar) ──── */
 
-  const [activeTab, setActiveTab] = useState<TakeoffTab>('documents');
+  const [searchParams] = useSearchParams();
+  const tabFromUrl = searchParams.get('tab');
+  const initialTab: TakeoffTab =
+    tabFromUrl === 'measurements' || tabFromUrl === 'documents' ? tabFromUrl : 'documents';
+  const [activeTab, setActiveTab] = useState<TakeoffTab>(initialTab);
+
+  // Keep tab in sync when navigating via sidebar links
+  useEffect(() => {
+    if (tabFromUrl === 'measurements' || tabFromUrl === 'documents') {
+      setActiveTab(tabFromUrl);
+    }
+  }, [tabFromUrl]);
 
   /* ── State ──────────────────────────────────────────────────────────── */
 
