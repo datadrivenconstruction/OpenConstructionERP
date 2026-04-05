@@ -39,7 +39,7 @@ import {
   type PhotoItem,
   type PhotoCategory,
   type PhotoFilters,
-  type PhotoTimelineGroup,
+  type PhotoTimelineGroup as _PhotoTimelineGroup,
   type PhotoUpdatePayload,
 } from './api';
 
@@ -433,7 +433,7 @@ function EditPhotoModal({
                 placeholder={t('photos.add_tag', { defaultValue: 'Add tag...' })}
                 className="flex-1 rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary placeholder-content-quaternary focus:border-oe-blue focus:ring-1 focus:ring-oe-blue/30 outline-none"
               />
-              <Button size="sm" variant="outline" onClick={handleAddTag}>
+              <Button size="sm" variant="secondary" onClick={handleAddTag}>
                 {t('common.add', { defaultValue: 'Add' })}
               </Button>
             </div>
@@ -454,7 +454,7 @@ function EditPhotoModal({
 
         {/* Actions */}
         <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-border-light bg-surface-primary">
-          <Button variant="outline" size="sm" onClick={onClose}>
+          <Button variant="secondary" size="sm" onClick={onClose}>
             {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
           <Button size="sm" onClick={handleSubmit}>
@@ -547,7 +547,7 @@ function ConfirmDeleteDialog({
           })}
         </p>
         <div className="flex justify-end gap-2">
-          <Button variant="outline" size="sm" onClick={onCancel}>
+          <Button variant="secondary" size="sm" onClick={onCancel}>
             {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
           <Button size="sm" variant="danger" onClick={onConfirm}>
@@ -866,7 +866,7 @@ export function PhotoGalleryPage() {
     return (
       <div className="space-y-6 p-6 max-w-7xl mx-auto">
         <EmptyState
-          icon={Camera}
+          icon={<Camera size={48} />}
           title={t('photos.no_project', { defaultValue: 'No project selected' })}
           description={t('photos.select_project', {
             defaultValue: 'Select a project from the header to view its photo documentation.',
@@ -979,13 +979,13 @@ export function PhotoGalleryPage() {
         </div>
       ) : photoList.length === 0 && viewMode === 'grid' ? (
         <EmptyState
-          icon={ImageIcon}
+          icon={<ImageIcon size={48} />}
           title={t('photos.empty_title', { defaultValue: 'No photos yet' })}
           description={t('photos.empty_description', {
             defaultValue: 'Upload photos to document your project progress, site conditions, and more.',
           })}
           action={
-            <Button onClick={() => setShowUpload(true)} size="sm" variant="outline">
+            <Button onClick={() => setShowUpload(true)} size="sm" variant="secondary">
               <Upload size={16} className="mr-2" />
               {t('photos.upload_first', { defaultValue: 'Upload your first photo' })}
             </Button>
@@ -1035,7 +1035,7 @@ export function PhotoGalleryPage() {
           ))}
           {(!timeline || timeline.length === 0) && (
             <EmptyState
-              icon={ImageIcon}
+              icon={<ImageIcon size={48} />}
               title={t('photos.empty_title', { defaultValue: 'No photos yet' })}
               description={t('photos.empty_description', {
                 defaultValue: 'Upload photos to document your project progress, site conditions, and more.',
