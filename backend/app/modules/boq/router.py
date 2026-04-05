@@ -69,6 +69,9 @@ from app.modules.boq.schemas import (
     CheckScopeRequest,
     CheckScopeResponse,
     ClassificationSuggestion,
+    ClassifiedElement,
+    ClassifyElementsRequest,
+    ClassifyElementsResponse,
     ClassifyRequest,
     ClassifyResponse,
     CostItemSearchRequest,
@@ -452,6 +455,67 @@ async def classify_position(
     ]
 
     return ClassifyResponse(suggestions=suggestions)
+
+
+# ── Deterministic CAD Element Classification ──────────────────────────────
+
+
+@router.post(
+    "/boqs/classify-elements",
+    response_model=ClassifyElementsResponse,
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def classify_elements(
+    data: ClassifyElementsRequest,
+) -> ClassifyElementsResponse:
+    """Map CAD/BIM element categories to classification codes.
+
+    Uses deterministic lookup tables to map Revit/IFC category names
+    (e.g. ``"Walls"``, ``"Doors"``) to classification codes in the
+    requested standard (DIN 276, NRM, or MasterFormat).
+
+    This is a fast, offline operation — no AI or database access required.
+    Useful for initial classification of CAD-extracted elements before
+    importing them into a BOQ.
+
+    Args:
+        data: ClassifyElementsRequest with elements list and standard.
+
+    Returns:
+        ClassifyElementsResponse with classified elements and counts.
+    """
+    from app.modules.cad.classification_mapper import map_category_to_standard
+
+    classified: list[ClassifiedElement] = []
+    mapped_count = 0
+
+    for elem in data.elements:
+        code = map_category_to_standard(elem.category, data.standard)
+        # Merge existing classification with the new mapping
+        merged_classification = dict(elem.classification)
+        was_mapped = False
+        if code:
+            merged_classification[data.standard] = code
+            was_mapped = True
+            mapped_count += 1
+
+        classified.append(
+            ClassifiedElement(
+                id=elem.id,
+                category=elem.category,
+                classification=merged_classification,
+                mapped=was_mapped,
+            )
+        )
+
+    total = len(data.elements)
+    return ClassifyElementsResponse(
+        elements=classified,
+        standard=data.standard,
+        total=total,
+        mapped_count=mapped_count,
+        unmapped_count=total - mapped_count,
+    )
 
 
 # ── AI Cost Finder (vector search) ────────────────────────────────────────
