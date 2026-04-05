@@ -1664,15 +1664,16 @@ export function RequirementsPage() {
       />
 
       {/* ── Header: single compact row ─────────────────────────────────── */}
-      <div className="mt-3 flex items-center justify-between gap-3 flex-wrap">
+      <div className="mt-3 flex items-center justify-between gap-2 overflow-x-auto">
         {/* Left: title */}
-        <h1 className="text-lg font-bold text-content-primary flex items-center gap-2 shrink-0">
-          <ClipboardCheck size={20} className="text-oe-blue" />
-          {t('requirements.title', { defaultValue: 'Requirements & Quality Gates' })}
+        <h1 className="text-lg font-bold text-content-primary flex items-center gap-2 shrink-0 whitespace-nowrap">
+          <ClipboardCheck size={18} className="text-oe-blue shrink-0" />
+          <span className="hidden sm:inline">{t('requirements.title', { defaultValue: 'Requirements & Quality Gates' })}</span>
+          <span className="sm:hidden">{t('requirements.title_short', { defaultValue: 'Requirements' })}</span>
         </h1>
 
         {/* Right: selectors + New Set */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 shrink-0">
           {projects.length > 0 && (
             <select
               value={projectId}
