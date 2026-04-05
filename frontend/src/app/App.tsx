@@ -61,6 +61,9 @@ const RiskRegisterPage = lazy(() =>
 const DocumentsPage = lazy(() =>
   import('@/features/documents/DocumentsPage').then((m) => ({ default: m.DocumentsPage }))
 );
+const PhotoGalleryPage = lazy(() =>
+  import('@/features/documents/PhotoGalleryPage').then((m) => ({ default: m.PhotoGalleryPage }))
+);
 const RequirementsPage = lazy(() =>
   import('@/features/requirements/RequirementsPage').then((m) => ({ default: m.RequirementsPage }))
 );
@@ -69,6 +72,9 @@ const MarkupsPage = lazy(() =>
 );
 const PunchListPage = lazy(() =>
   import('@/features/punchlist/PunchListPage').then((m) => ({ default: m.PunchListPage }))
+);
+const FieldReportsPage = lazy(() =>
+  import('@/features/fieldreports/FieldReportsPage').then((m) => ({ default: m.FieldReportsPage }))
 );
 
 function LoadingScreen() {
@@ -264,6 +270,7 @@ export default function App() {
 
         <Route path="/changeorders" element={<P title="Change Orders"><ChangeOrdersPage /></P>} />
         <Route path="/documents" element={<P title="Documents"><DocumentsPage /></P>} />
+        <Route path="/photos" element={<P title="Project Photos"><PhotoGalleryPage /></P>} />
 
         <Route path="/risks" element={<P title="Risk Register"><RiskRegisterPage /></P>} />
 
@@ -271,6 +278,7 @@ export default function App() {
 
         <Route path="/markups" element={<P title="Markups"><MarkupsPage /></P>} />
         <Route path="/punchlist" element={<P title="Punch List"><PunchListPage /></P>} />
+        <Route path="/field-reports" element={<P title="Field Reports"><FieldReportsPage /></P>} />
 
         <Route path="/modules" element={<P title="Modules"><ModulesPage /></P>} />
 
