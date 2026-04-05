@@ -42,7 +42,7 @@ import {
 import clsx from 'clsx';
 import { Card, CardContent, Button, Badge } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
-import { aiApi, type QuickEstimateRequest, type EstimateJobResponse, type EstimateItem, type CadExtractResponse, type EnrichResult, type EnrichedItem, type CadColumnsResponse, type CadGroupResponse, type CadDynamicGroup } from './api';
+import { aiApi, type QuickEstimateRequest, type EstimateJobResponse, type EstimateItem, type CadExtractResponse, type EnrichResult, type EnrichedItem, type CadColumnsResponse, type CadGroupResponse, type CadDynamicGroup, type CadGroupElementsResponse } from './api';
 import { apiGet, apiPost } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 

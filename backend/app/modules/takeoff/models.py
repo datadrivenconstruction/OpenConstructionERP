@@ -1,16 +1,47 @@
 """Takeoff ORM models.
 
 Tables:
-    oe_takeoff_document     — uploaded PDF documents for quantity takeoff
-    oe_takeoff_measurement  — measurement annotations (distance, area, count, etc.)
+    oe_takeoff_document        — uploaded PDF documents for quantity takeoff
+    oe_takeoff_measurement     — measurement annotations (distance, area, count, etc.)
+    oe_takeoff_cad_session     — persistent CAD extraction sessions (replaces in-memory cache)
 """
 
 import uuid
+from datetime import datetime
 
-from sqlalchemy import Float, ForeignKey, Integer, JSON, String, Text
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, JSON, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
+
+
+class CadExtractionSession(Base):
+    """Persistent storage for CAD file extraction sessions.
+
+    Replaces the in-memory ``_cad_sessions`` dict to survive server restarts
+    and support multi-process deployments.  Sessions expire after 24 hours.
+    """
+
+    __tablename__ = "oe_takeoff_cad_session"
+
+    session_id: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    user_id: Mapped[str] = mapped_column(String(255), default="")
+    filename: Mapped[str] = mapped_column(String(500), nullable=False)
+    file_format: Mapped[str] = mapped_column(String(20), nullable=False)  # rvt, ifc, dwg, dgn
+    element_count: Mapped[int] = mapped_column(Integer, default=0)
+    extraction_time: Mapped[float] = mapped_column(Float, default=0)
+    elements_data: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON, nullable=False, default=list, server_default="[]"
+    )
+    columns_metadata: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        JSON, nullable=False, default=dict, server_default="{}"
+    )
+    project_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_by: Mapped[str] = mapped_column(String(255), default="")
+
+    def __repr__(self) -> str:
+        return f"<CadExtractionSession {self.session_id} ({self.filename})>"
 
 
 class TakeoffDocument(Base):
