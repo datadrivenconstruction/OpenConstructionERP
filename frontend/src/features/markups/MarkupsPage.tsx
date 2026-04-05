@@ -1212,15 +1212,29 @@ export function MarkupsPage() {
             ) : filteredMarkups.length === 0 ? (
               <EmptyState
                 icon={<PenTool size={36} className="text-content-quaternary" />}
-                title={t('markups.empty_title', { defaultValue: 'No markups yet' })}
-                description={t('markups.empty_desc', {
-                  defaultValue:
-                    'Create your first markup to start annotating documents. Use clouds, arrows, text, and measurement tools to collaborate with your team.',
-                })}
-                action={{
-                  label: t('markups.add_first', { defaultValue: 'Add First Markup' }),
-                  onClick: () => setShowAddModal(true),
-                }}
+                title={
+                  searchQuery || filterType || filterStatus
+                    ? t('markups.no_match_title', { defaultValue: 'No matching markups' })
+                    : t('markups.empty_title', { defaultValue: 'No markups yet' })
+                }
+                description={
+                  searchQuery || filterType || filterStatus
+                    ? t('markups.no_match_desc', {
+                        defaultValue: 'Try adjusting your search or filter criteria.',
+                      })
+                    : t('markups.empty_desc', {
+                        defaultValue:
+                          'Create your first markup to start annotating documents. Use clouds, arrows, text, and measurement tools to collaborate with your team.',
+                      })
+                }
+                action={
+                  searchQuery || filterType || filterStatus
+                    ? undefined
+                    : {
+                        label: t('markups.add_first', { defaultValue: 'Add First Markup' }),
+                        onClick: () => setShowAddModal(true),
+                      }
+                }
               />
             ) : viewMode === 'list' ? (
               /* ── List View (Table) ─────────────────────────────────────── */

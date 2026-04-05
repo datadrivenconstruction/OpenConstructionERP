@@ -150,9 +150,11 @@ export async function uploadPunchPhoto(id: string, file: File): Promise<{ url: s
 }
 
 export async function fetchPunchSummary(projectId: string): Promise<PunchSummary> {
+  if (!projectId) return { total: 0, by_status: {}, by_priority: {}, overdue: 0 };
   return apiGet<PunchSummary>(`/v1/punchlist/summary?project_id=${projectId}`);
 }
 
 export async function fetchTeamMembers(projectId: string): Promise<TeamMember[]> {
+  if (!projectId) return [];
   return apiGet<TeamMember[]>(`/v1/projects/${projectId}/members`);
 }

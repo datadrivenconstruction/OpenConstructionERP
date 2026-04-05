@@ -113,6 +113,7 @@ export async function fetchMarkups(
   projectId: string,
   filters?: MarkupFilters,
 ): Promise<Markup[]> {
+  if (!projectId) return [];
   const params = new URLSearchParams({ project_id: projectId });
   if (filters?.search) params.set('search', filters.search);
   if (filters?.type) params.set('type', filters.type);
@@ -169,6 +170,7 @@ export async function fetchScales(documentId: string): Promise<ScaleConfig[]> {
 /* ── Summary & Export ─────────────────────────────────────────────────── */
 
 export async function fetchMarkupsSummary(projectId: string): Promise<MarkupsSummary> {
+  if (!projectId) return { total: 0, by_type: {}, by_status: {}, by_author: {} };
   return apiGet<MarkupsSummary>(`/v1/markups/summary?project_id=${projectId}`);
 }
 
