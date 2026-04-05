@@ -121,3 +121,18 @@ class PunchListSummary(BaseModel):
     by_status: dict[str, int] = Field(default_factory=dict)
     by_priority: dict[str, int] = Field(default_factory=dict)
     overdue: int = 0
+
+
+# ── Pin-to-sheet schema ────────────────────────────────────────────────
+
+
+class PinToSheetRequest(BaseModel):
+    """Request body for pinning a punch item to a document sheet location."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    sheet_id: str | None = Field(default=None, description="Sheet UUID (optional if document_id provided)")
+    document_id: str | None = Field(default=None, description="Document UUID (optional if sheet_id provided)")
+    page: int = Field(..., ge=1, description="Page number on the document/sheet")
+    location_x: float = Field(..., ge=0.0, le=1.0, description="Normalised X coordinate (0.0–1.0)")
+    location_y: float = Field(..., ge=0.0, le=1.0, description="Normalised Y coordinate (0.0–1.0)")

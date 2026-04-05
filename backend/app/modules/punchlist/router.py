@@ -21,6 +21,7 @@ from fastapi.responses import Response
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.punchlist.schemas import (
+    PinToSheetRequest,
     PunchItemCreate,
     PunchItemResponse,
     PunchItemUpdate,
@@ -208,6 +209,39 @@ async def transition_status(
         pass  # verify permission enforced below via separate check if needed
 
     item = await service.transition_status(item_id, data, user_id)
+    return _item_to_response(item)
+
+
+# ── Pin to sheet ─────────────────────────────────────────────────────────────
+
+
+@router.post("/items/{item_id}/pin-to-sheet", response_model=PunchItemResponse)
+async def pin_to_sheet(
+    item_id: uuid.UUID,
+    data: PinToSheetRequest,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("punchlist.update")),
+    service: PunchListService = Depends(_get_service),
+) -> PunchItemResponse:
+    """Pin a punch item to a specific location on a document sheet.
+
+    Updates the punch item's document_id, page, location_x, and location_y
+    fields so the item is visually anchored on a drawing sheet.
+    """
+    if data.sheet_id is None and data.document_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Either sheet_id or document_id must be provided",
+        )
+
+    item = await service.pin_to_sheet(
+        item_id,
+        sheet_id=data.sheet_id,
+        document_id=data.document_id,
+        page=data.page,
+        location_x=data.location_x,
+        location_y=data.location_y,
+    )
     return _item_to_response(item)
 
 

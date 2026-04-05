@@ -213,6 +213,48 @@ class PunchListService:
         )
         return item
 
+    # ── Pin to sheet ──────────────────────────────────────────────────────
+
+    async def pin_to_sheet(
+        self,
+        item_id: uuid.UUID,
+        *,
+        sheet_id: str | None = None,
+        document_id: str | None = None,
+        page: int,
+        location_x: float,
+        location_y: float,
+    ) -> PunchItem:
+        """Pin a punch item to a location on a document sheet.
+
+        Updates document_id, page, location_x, and location_y on the item.
+        If sheet_id is given but document_id is not, sheet_id is stored as
+        the document_id (sheets are a logical subset of documents).
+        """
+        item = await self.get_item(item_id)
+
+        effective_doc_id = document_id or sheet_id
+
+        update_fields: dict[str, Any] = {
+            "document_id": effective_doc_id,
+            "page": page,
+            "location_x": location_x,
+            "location_y": location_y,
+        }
+
+        await self.repo.update_fields(item_id, **update_fields)
+        await self.session.refresh(item)
+
+        logger.info(
+            "Punch item pinned to sheet: %s -> doc=%s page=%d (%.2f, %.2f)",
+            item_id,
+            effective_doc_id,
+            page,
+            location_x,
+            location_y,
+        )
+        return item
+
     # ── Photos ────────────────────────────────────────────────────────────
 
     async def add_photo(self, item_id: uuid.UUID, photo_path: str) -> PunchItem:

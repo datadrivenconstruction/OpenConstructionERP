@@ -203,6 +203,30 @@ class FieldReportService:
         logger.info("Field report approved: %s by %s", report_id, user_id)
         return report
 
+    # ── Link documents ─────────────────────────────────────────────────────
+
+    async def link_documents(
+        self,
+        report_id: uuid.UUID,
+        document_ids: list[str],
+    ) -> FieldReport:
+        """Link documents to a field report (merge, deduplicate)."""
+        report = await self.get_report(report_id)
+
+        existing = list(report.document_ids or [])
+        merged = list(dict.fromkeys(existing + document_ids))  # preserve order, deduplicate
+
+        await self.repo.update_fields(report_id, document_ids=merged)
+        await self.session.refresh(report)
+
+        logger.info(
+            "Documents linked to field report %s: %s (total=%d)",
+            report_id,
+            document_ids,
+            len(merged),
+        )
+        return report
+
     # ── Weather (optional) ────────────────────────────────────────────────
 
     async def get_weather(
