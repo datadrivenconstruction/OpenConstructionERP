@@ -35,6 +35,9 @@ from app.modules.documents.schemas import (
     PhotoResponse,
     PhotoTimelineGroup,
     PhotoUpdate,
+    SheetResponse,
+    SheetUpdate,
+    SheetVersionHistory,
 )
 from app.modules.documents.service import (
     MAX_FILE_SIZE,
@@ -42,6 +45,7 @@ from app.modules.documents.service import (
     UPLOAD_BASE,
     DocumentService,
     PhotoService,
+    SheetService,
 )
 
 router = APIRouter()
@@ -142,86 +146,10 @@ async def list_documents(
     return [_doc_to_response(d) for d in docs]
 
 
-# ── Get ──────────────────────────────────────────────────────────────────────
-
-
-@router.get("/{document_id}", response_model=DocumentResponse)
-async def get_document(
-    document_id: uuid.UUID,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
-    service: DocumentService = Depends(_get_service),
-) -> DocumentResponse:
-    """Get a single document metadata."""
-    doc = await service.get_document(document_id)
-    return _doc_to_response(doc)
-
-
-# ── Download ─────────────────────────────────────────────────────────────────
-
-
-@router.get("/{document_id}/download")
-async def download_document(
-    document_id: uuid.UUID,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
-    service: DocumentService = Depends(_get_service),
-) -> FileResponse:
-    """Download a document file."""
-    doc = await service.get_document(document_id)
-    file_path = Path(doc.file_path).resolve()
-
-    # Security: ensure resolved path is within the allowed upload directory
-    upload_base = Path(UPLOAD_BASE).resolve()
-    if not str(file_path).startswith(str(upload_base)):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access denied",
-        )
-
-    if not file_path.exists() or file_path.is_symlink():
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="File not found on disk",
-        )
-
-    return FileResponse(
-        path=str(file_path),
-        filename=doc.name,
-        media_type=doc.mime_type or "application/octet-stream",
-    )
-
-
-# ── Update ───────────────────────────────────────────────────────────────────
-
-
-@router.patch("/{document_id}", response_model=DocumentResponse)
-async def update_document(
-    document_id: uuid.UUID,
-    data: DocumentUpdate,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
-    _perm: None = Depends(RequirePermission("documents.update")),
-    service: DocumentService = Depends(_get_service),
-) -> DocumentResponse:
-    """Update document metadata."""
-    doc = await service.update_document(document_id, data)
-    return _doc_to_response(doc)
-
-
-# ── Delete ───────────────────────────────────────────────────────────────────
-
-
-@router.delete("/{document_id}", status_code=204)
-async def delete_document(
-    document_id: uuid.UUID,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
-    _perm: None = Depends(RequirePermission("documents.delete")),
-    service: DocumentService = Depends(_get_service),
-) -> None:
-    """Delete a document and its file."""
-    await service.delete_document(document_id)
-
-
 # ══════════════════════════════════════════════════════════════════════════
 # Photo Gallery endpoints
+# NOTE: These MUST come BEFORE /{document_id} parametric routes to avoid
+#       FastAPI matching "/photos" as a document_id (route shadowing).
 # ══════════════════════════════════════════════════════════════════════════
 
 
@@ -458,3 +386,243 @@ async def delete_photo(
 ) -> None:
     """Delete a photo and its file."""
     await service.delete_photo(photo_id)
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# Sheet Management endpoints
+# NOTE: These MUST come BEFORE /{document_id} parametric routes.
+# ══════════════════════════════════════════════════════════════════════════
+
+
+def _get_sheet_service(session: SessionDep) -> SheetService:
+    return SheetService(session)
+
+
+def _sheet_to_response(sheet: object) -> SheetResponse:
+    """Build a SheetResponse from a Sheet ORM object."""
+    return SheetResponse(
+        id=sheet.id,  # type: ignore[attr-defined]
+        project_id=sheet.project_id,  # type: ignore[attr-defined]
+        document_id=sheet.document_id,  # type: ignore[attr-defined]
+        page_number=sheet.page_number,  # type: ignore[attr-defined]
+        sheet_number=sheet.sheet_number,  # type: ignore[attr-defined]
+        sheet_title=sheet.sheet_title,  # type: ignore[attr-defined]
+        discipline=sheet.discipline,  # type: ignore[attr-defined]
+        revision=sheet.revision,  # type: ignore[attr-defined]
+        revision_date=sheet.revision_date,  # type: ignore[attr-defined]
+        scale=sheet.scale,  # type: ignore[attr-defined]
+        is_current=sheet.is_current,  # type: ignore[attr-defined]
+        previous_version_id=sheet.previous_version_id,  # type: ignore[attr-defined]
+        thumbnail_path=sheet.thumbnail_path,  # type: ignore[attr-defined]
+        metadata=getattr(sheet, "metadata_", {}),  # type: ignore[attr-defined]
+        created_by=sheet.created_by,  # type: ignore[attr-defined]
+        created_at=sheet.created_at,  # type: ignore[attr-defined]
+        updated_at=sheet.updated_at,  # type: ignore[attr-defined]
+    )
+
+
+# ── List sheets ────────────────────────────────────────────────────────
+
+
+@router.get("/sheets", response_model=list[SheetResponse])
+async def list_sheets(
+    project_id: uuid.UUID = Query(...),
+    discipline: str | None = Query(default=None),
+    revision: str | None = Query(default=None),
+    document_id: str | None = Query(default=None),
+    current_only: bool = Query(default=False),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=500),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: SheetService = Depends(_get_sheet_service),
+) -> list[SheetResponse]:
+    """List sheets for a project with optional filters."""
+    sheets, _ = await service.list_sheets(
+        project_id,
+        offset=offset,
+        limit=limit,
+        discipline=discipline,
+        revision=revision,
+        document_id=document_id,
+        current_only=current_only,
+    )
+    return [_sheet_to_response(s) for s in sheets]
+
+
+# ── Distinct disciplines ───────────────────────────────────────────────
+
+
+@router.get("/sheets/disciplines", response_model=list[str])
+async def list_disciplines(
+    project_id: uuid.UUID = Query(...),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: SheetService = Depends(_get_sheet_service),
+) -> list[str]:
+    """List distinct discipline values for a project."""
+    return await service.get_disciplines(project_id)
+
+
+# ── Split PDF into sheets ──────────────────────────────────────────────
+
+
+@router.post("/sheets/split-pdf", response_model=list[SheetResponse], status_code=201)
+async def split_pdf(
+    project_id: uuid.UUID = Query(...),
+    file: UploadFile = File(...),
+    content_length: int | None = Header(default=None),
+    user_id: CurrentUserId = "",  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("documents.create")),
+    service: SheetService = Depends(_get_sheet_service),
+) -> list[SheetResponse]:
+    """Upload a multi-page PDF and auto-split into individual sheets.
+
+    Extracts text from each page to detect sheet number, title, scale,
+    and revision. Auto-detects discipline from sheet number prefix.
+    Generates thumbnails for each page.
+    """
+    if content_length is not None and content_length > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"File too large. Maximum size is {MAX_FILE_SIZE // (1024 * 1024)}MB.",
+        )
+    try:
+        sheets = await service.split_pdf_to_sheets(project_id, file, user_id)
+        return [_sheet_to_response(s) for s in sheets]
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Failed to split PDF into sheets")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to split PDF into sheets",
+        )
+
+
+# ── Get single sheet ───────────────────────────────────────────────────
+
+
+@router.get("/sheets/{sheet_id}", response_model=SheetResponse)
+async def get_sheet(
+    sheet_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: SheetService = Depends(_get_sheet_service),
+) -> SheetResponse:
+    """Get a single sheet's metadata."""
+    sheet = await service.get_sheet(sheet_id)
+    return _sheet_to_response(sheet)
+
+
+# ── Update sheet ───────────────────────────────────────────────────────
+
+
+@router.patch("/sheets/{sheet_id}", response_model=SheetResponse)
+async def update_sheet(
+    sheet_id: uuid.UUID,
+    data: SheetUpdate,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("documents.update")),
+    service: SheetService = Depends(_get_sheet_service),
+) -> SheetResponse:
+    """Update sheet metadata (discipline, title, revision, etc.)."""
+    sheet = await service.update_sheet(sheet_id, data)
+    return _sheet_to_response(sheet)
+
+
+# ── Version history ────────────────────────────────────────────────────
+
+
+@router.get("/sheets/{sheet_id}/versions", response_model=SheetVersionHistory)
+async def get_sheet_versions(
+    sheet_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: SheetService = Depends(_get_sheet_service),
+) -> SheetVersionHistory:
+    """Get version history for a sheet."""
+    result = await service.get_version_history(sheet_id)
+    return SheetVersionHistory(
+        current=_sheet_to_response(result["current"]),
+        history=[_sheet_to_response(s) for s in result["history"]],
+    )
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# Document CRUD by ID (parametric routes — MUST be after /photos/* and /sheets/* routes)
+# ══════════════════════════════════════════════════════════════════════════
+
+
+# ── Get ──────────────────────────────────────────────────────────────────────
+
+
+@router.get("/{document_id}", response_model=DocumentResponse)
+async def get_document(
+    document_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: DocumentService = Depends(_get_service),
+) -> DocumentResponse:
+    """Get a single document metadata."""
+    doc = await service.get_document(document_id)
+    return _doc_to_response(doc)
+
+
+# ── Download ─────────────────────────────────────────────────────────────────
+
+
+@router.get("/{document_id}/download")
+async def download_document(
+    document_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: DocumentService = Depends(_get_service),
+) -> FileResponse:
+    """Download a document file."""
+    doc = await service.get_document(document_id)
+    file_path = Path(doc.file_path).resolve()
+
+    # Security: ensure resolved path is within the allowed upload directory
+    upload_base = Path(UPLOAD_BASE).resolve()
+    if not str(file_path).startswith(str(upload_base)):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied",
+        )
+
+    if not file_path.exists() or file_path.is_symlink():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="File not found on disk",
+        )
+
+    return FileResponse(
+        path=str(file_path),
+        filename=doc.name,
+        media_type=doc.mime_type or "application/octet-stream",
+    )
+
+
+# ── Update ───────────────────────────────────────────────────────────────────
+
+
+@router.patch("/{document_id}", response_model=DocumentResponse)
+async def update_document(
+    document_id: uuid.UUID,
+    data: DocumentUpdate,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("documents.update")),
+    service: DocumentService = Depends(_get_service),
+) -> DocumentResponse:
+    """Update document metadata."""
+    doc = await service.update_document(document_id, data)
+    return _doc_to_response(doc)
+
+
+# ── Delete ───────────────────────────────────────────────────────────────────
+
+
+@router.delete("/{document_id}", status_code=204)
+async def delete_document(
+    document_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("documents.delete")),
+    service: DocumentService = Depends(_get_service),
+) -> None:
+    """Delete a document and its file."""
+    await service.delete_document(document_id)
