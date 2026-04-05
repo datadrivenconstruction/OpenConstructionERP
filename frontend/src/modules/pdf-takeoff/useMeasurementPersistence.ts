@@ -9,7 +9,8 @@ interface Point {
 
 interface Measurement {
   id: string;
-  type: 'distance' | 'polyline' | 'area' | 'volume' | 'count';
+  type: 'distance' | 'polyline' | 'area' | 'volume' | 'count'
+    | 'cloud' | 'arrow' | 'text' | 'rectangle' | 'highlight';
   points: Point[];
   value: number;
   unit: string;
@@ -19,6 +20,10 @@ interface Measurement {
   group: string;
   depth?: number;
   area?: number;
+  text?: string;
+  color?: string;
+  width?: number;
+  height?: number;
 }
 
 interface ScaleConfig {
