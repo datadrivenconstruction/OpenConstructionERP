@@ -799,20 +799,20 @@ interface ParsedImportRow {
 function parseCSVContent(content: string): ParsedImportRow[] {
   const lines = content.split('\n').map((l) => l.trim()).filter(Boolean);
   if (lines.length < 2) return [];
-  const headerLine = lines[0];
-  const headers = headerLine.split(',').map((h) => h.trim().toLowerCase().replace(/^["']|["']$/g, ''));
+  const headerLine = lines[0] ?? '';
+  const headers = headerLine.split(',').map((h: string) => h.trim().toLowerCase().replace(/^["']|["']$/g, ''));
 
   const entityIdx = headers.indexOf('entity');
   const attributeIdx = headers.indexOf('attribute');
   const constraintValueIdx = headers.indexOf('constraint_value');
   if (entityIdx < 0 || attributeIdx < 0 || constraintValueIdx < 0) return [];
 
-  const getCol = (row: string[], idx: number) => (idx >= 0 && idx < row.length ? row[idx].replace(/^["']|["']$/g, '').trim() : '');
+  const getCol = (row: string[], idx: number) => (idx >= 0 && idx < row.length ? (row[idx] ?? '').replace(/^["']|["']$/g, '').trim() : '');
 
   const result: ParsedImportRow[] = [];
   for (let i = 1; i < lines.length; i++) {
     // Simple CSV parse (handles quoted fields with commas)
-    const row = parseCSVLine(lines[i]);
+    const row = parseCSVLine(lines[i] ?? '');
     const entity = getCol(row, entityIdx);
     const attribute = getCol(row, attributeIdx);
     const constraintValue = getCol(row, constraintValueIdx);
@@ -980,7 +980,7 @@ function ImportModal({
         : 'border-transparent text-content-tertiary hover:text-content-secondary hover:border-border',
     );
 
-  const previewRows = activeTab === 'csv' ? csvParsed : jsonParsed;
+  const _previewRows = activeTab === 'csv' ? csvParsed : jsonParsed;
 
   return (
     <div
@@ -1457,7 +1457,7 @@ export function RequirementsPage() {
   });
 
   const projectId = activeProjectId || projects[0]?.id || '';
-  const project = useMemo(
+  const _project = useMemo(
     () => projects.find((p) => p.id === projectId),
     [projects, projectId],
   );
