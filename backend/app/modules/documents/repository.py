@@ -5,11 +5,12 @@ No business logic — pure data access.
 """
 
 import uuid
+from datetime import datetime
 
 from sqlalchemy import func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.documents.models import Document
+from app.modules.documents.models import Document, ProjectPhoto
 
 
 class DocumentRepository:
@@ -101,3 +102,74 @@ class DocumentRepository:
         cat_rows = (await self.session.execute(cat_stmt)).all()
 
         return total_count, total_size, list(cat_rows)
+
+
+class PhotoRepository:
+    """Data access for ProjectPhoto models."""
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def get_by_id(self, photo_id: uuid.UUID) -> ProjectPhoto | None:
+        """Get photo by ID."""
+        return await self.session.get(ProjectPhoto, photo_id)
+
+    async def create(self, photo: ProjectPhoto) -> ProjectPhoto:
+        """Insert a new photo."""
+        self.session.add(photo)
+        await self.session.flush()
+        return photo
+
+    async def list_for_project(
+        self,
+        project_id: uuid.UUID,
+        *,
+        offset: int = 0,
+        limit: int = 100,
+        category: str | None = None,
+        tag: str | None = None,
+        date_from: datetime | None = None,
+        date_to: datetime | None = None,
+        search: str | None = None,
+    ) -> tuple[list[ProjectPhoto], int]:
+        """List photos for a project with filters."""
+        base = select(ProjectPhoto).where(ProjectPhoto.project_id == project_id)
+
+        if category is not None:
+            base = base.where(ProjectPhoto.category == category)
+        if search is not None:
+            pattern = f"%{search}%"
+            base = base.where(
+                or_(
+                    ProjectPhoto.caption.ilike(pattern),
+                    ProjectPhoto.filename.ilike(pattern),
+                )
+            )
+        if date_from is not None:
+            base = base.where(ProjectPhoto.created_at >= date_from)
+        if date_to is not None:
+            base = base.where(ProjectPhoto.created_at <= date_to)
+        # Tag filtering handled in service layer for JSON compatibility
+
+        count_stmt = select(func.count()).select_from(base.subquery())
+        total = (await self.session.execute(count_stmt)).scalar_one()
+
+        stmt = base.order_by(ProjectPhoto.created_at.desc()).offset(offset).limit(limit)
+        result = await self.session.execute(stmt)
+        items = list(result.scalars().all())
+
+        return items, total
+
+    async def update_fields(self, photo_id: uuid.UUID, **fields: object) -> None:
+        """Update specific fields on a photo."""
+        stmt = update(ProjectPhoto).where(ProjectPhoto.id == photo_id).values(**fields)
+        await self.session.execute(stmt)
+        await self.session.flush()
+        self.session.expire_all()
+
+    async def delete(self, photo_id: uuid.UUID) -> None:
+        """Hard delete a photo."""
+        item = await self.get_by_id(photo_id)
+        if item is not None:
+            await self.session.delete(item)
+            await self.session.flush()
