@@ -1030,14 +1030,16 @@ export function MarkupsPage() {
           )}
 
           {/* Document selector */}
-          {projectId && documents.length > 0 && (
+          {projectId && (
             <select
               value={filterDocumentId}
               onChange={(e) => setFilterDocumentId(e.target.value)}
               className={selectCls + ' max-w-[170px]'}
             >
               <option value="">
-                {t('markups.all_documents', { defaultValue: 'All Docs' })}
+                {documents.length > 0
+                  ? t('markups.all_documents', { defaultValue: 'All Docs' })
+                  : t('markups.no_documents', { defaultValue: 'No documents — upload in Documents' })}
               </option>
               {documents.map((doc) => (
                 <option key={doc.id} value={doc.id}>
