@@ -88,8 +88,8 @@ const navGroups: NavGroup[] = [
     defaultOpen: true,
     items: [
       { labelKey: 'nav.takeoff_overview', to: '/quantities', icon: Ruler },
-      { labelKey: 'nav.measurements', to: '/takeoff?tab=measurements', icon: Ruler },
-      { labelKey: 'nav.documents_ai', to: '/takeoff?tab=documents', icon: FileSearch },
+      { labelKey: 'nav.pdf_measurements', to: '/takeoff?tab=measurements', icon: Ruler },
+      { labelKey: 'nav.pdf_documents', to: '/takeoff?tab=documents', icon: FileSearch },
       { labelKey: 'nav.ai_estimate', to: '/ai-estimate', icon: Sparkles },
       { labelKey: 'nav.ai_advisor', to: '/advisor', icon: MessageSquare },
       { labelKey: 'nav.cad_takeoff', to: '/cad-takeoff', icon: Box },
