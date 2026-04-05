@@ -228,13 +228,13 @@ _EXPORT_COLUMNS = [
 ]
 
 
-@router.get("/{set_id}/export")
+@router.get("/{set_id}/export", response_model=None)
 async def export_requirements(
     set_id: uuid.UUID,
     format: str = Query(default="csv", pattern="^(csv|json)$"),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: RequirementsService = Depends(_get_service),
-) -> StreamingResponse | JSONResponse:
+):
     """Export all requirements for a set as CSV or JSON."""
     item = await service.get_set(set_id)
     reqs = getattr(item, "requirements", [])
