@@ -92,6 +92,7 @@ export async function uploadPhoto(
     taken_at?: string;
   },
 ): Promise<PhotoItem> {
+  if (!projectId) throw new Error('projectId is required');
   const formData = new FormData();
   formData.append('file', file);
   if (metadata.category) formData.append('category', metadata.category);

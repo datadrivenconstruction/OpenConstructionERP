@@ -152,7 +152,8 @@ export async function approveFieldReport(id: string): Promise<FieldReport> {
   return apiPost<FieldReport>(`/v1/fieldreports/reports/${id}/approve`, {});
 }
 
-export async function fetchFieldReportSummary(projectId: string): Promise<FieldReportSummary> {
+export async function fetchFieldReportSummary(projectId: string): Promise<FieldReportSummary | null> {
+  if (!projectId) return null;
   return apiGet<FieldReportSummary>(`/v1/fieldreports/reports/summary?project_id=${projectId}`);
 }
 
@@ -160,6 +161,7 @@ export async function fetchFieldReportCalendar(
   projectId: string,
   month: string,
 ): Promise<FieldReport[]> {
+  if (!projectId) return [];
   return apiGet<FieldReport[]>(
     `/v1/fieldreports/reports/calendar?project_id=${projectId}&month=${month}`,
   );
