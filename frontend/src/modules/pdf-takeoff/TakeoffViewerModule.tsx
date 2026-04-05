@@ -24,6 +24,13 @@ import {
   Pencil,
   Save,
   HardDriveDownload,
+  Route,
+  Box,
+  Eye,
+  EyeOff,
+  FileSpreadsheet,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { useToastStore } from '../../stores/useToastStore';
 import { boqApi, type CreatePositionData } from '../../features/boq/api';
@@ -49,7 +56,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
 
 /* ── Types ─────────────────────────────────────────────────────────── */
 
-type MeasureTool = 'select' | 'distance' | 'area' | 'count';
+type MeasureTool = 'select' | 'distance' | 'polyline' | 'area' | 'volume' | 'count';
 
 interface Point {
   x: number;
@@ -58,14 +65,39 @@ interface Point {
 
 interface Measurement {
   id: string;
-  type: 'distance' | 'area' | 'count';
+  type: 'distance' | 'polyline' | 'area' | 'volume' | 'count';
   points: Point[];
   value: number;
   unit: string;
   label: string;
   annotation: string; // User-provided text label (e.g. "Living room wall")
   page: number;
+  group: string; // Measurement group (e.g. "General", "Structural")
+  depth?: number; // Depth in real units, only for volume type
+  area?: number; // Area in real units, only for volume type
 }
+
+/* ── Measurement Groups ───────────────────────────────────────────── */
+
+interface MeasurementGroup {
+  name: string;
+  color: string;
+}
+
+const MEASUREMENT_GROUPS: MeasurementGroup[] = [
+  { name: 'General', color: '#3B82F6' },
+  { name: 'Structural', color: '#EF4444' },
+  { name: 'Electrical', color: '#F59E0B' },
+  { name: 'Plumbing', color: '#8B5CF6' },
+  { name: 'HVAC', color: '#06B6D4' },
+  { name: 'Finishing', color: '#22C55E' },
+  { name: 'Excavation', color: '#92400E' },
+  { name: 'Concrete', color: '#6B7280' },
+];
+
+const GROUP_COLOR_MAP: Record<string, string> = Object.fromEntries(
+  MEASUREMENT_GROUPS.map((g) => [g.name, g.color]),
+);
 
 /** Describes a reversible measurement operation for the undo stack. */
 type UndoOperation =
@@ -109,8 +141,18 @@ export default function TakeoffViewerModule() {
   // Touch state for pinch-to-zoom
   const touchStateRef = useRef<{ initialDistance: number; initialZoom: number } | null>(null);
 
+  // Measurement groups
+  const [activeGroup, setActiveGroup] = useState('General');
+  const [hiddenGroups, setHiddenGroups] = useState<Set<string>>(new Set());
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+
+  // Volume depth input
+  const [showVolumeDepthInput, setShowVolumeDepthInput] = useState(false);
+  const [volumeDepthValue, setVolumeDepthValue] = useState('1');
+  const [pendingVolumePoints, setPendingVolumePoints] = useState<Point[]>([]);
+
   // Annotation auto-numbering counters (type -> next index)
-  const annotationCounterRef = useRef<Record<string, number>>({ distance: 0, area: 0, count: 0 });
+  const annotationCounterRef = useRef<Record<string, number>>({ distance: 0, polyline: 0, area: 0, volume: 0, count: 0 });
 
   // Inline editing state for annotations in the measurement list
   const [editingAnnotationId, setEditingAnnotationId] = useState<string | null>(null);
@@ -155,7 +197,9 @@ export default function TakeoffViewerModule() {
       setActivePoints([]);
       undoStackRef.current = [];
       setUndoCount(0);
-      annotationCounterRef.current = { distance: 0, area: 0, count: 0 };
+      annotationCounterRef.current = { distance: 0, polyline: 0, area: 0, volume: 0, count: 0 };
+      setShowVolumeDepthInput(false);
+      setPendingVolumePoints([]);
     } catch (err) {
       console.error('Failed to load PDF:', err);
     } finally {
@@ -234,9 +278,9 @@ export default function TakeoffViewerModule() {
       ctx.lineWidth = 2 * dpr;
     };
 
-    // Draw completed measurements on current page
-    for (const m of measurements.filter((m) => m.page === currentPage)) {
-      const color = m.type === 'distance' ? '#3b82f6' : m.type === 'area' ? '#10b981' : '#f59e0b';
+    // Draw completed measurements on current page (respecting group visibility)
+    for (const m of measurements.filter((m) => m.page === currentPage && !hiddenGroups.has(m.group))) {
+      const color = GROUP_COLOR_MAP[m.group] || '#3B82F6';
       ctx.strokeStyle = color;
       ctx.fillStyle = color;
 
@@ -256,7 +300,43 @@ export default function TakeoffViewerModule() {
         drawAnnotationLabel(m.annotation, mx, my - 14 * dpr, color);
       }
 
-      if (m.type === 'area' && m.points.length >= 3) {
+      if (m.type === 'polyline' && m.points.length >= 2) {
+        // Draw connected line segments
+        const p0 = m.points[0]!;
+        ctx.beginPath();
+        ctx.moveTo(p0.x * dpr * zoom, p0.y * dpr * zoom);
+        for (let i = 1; i < m.points.length; i++) {
+          const pt = m.points[i]!;
+          ctx.lineTo(pt.x * dpr * zoom, pt.y * dpr * zoom);
+        }
+        ctx.stroke();
+        // Draw segment midpoint labels
+        for (let i = 0; i < m.points.length - 1; i++) {
+          const pa = m.points[i]!;
+          const pb = m.points[i + 1]!;
+          const segDist = pixelDistance(pa.x, pa.y, pb.x, pb.y);
+          const segReal = toRealDistance(segDist, scale);
+          const smx = ((pa.x + pb.x) / 2) * dpr * zoom;
+          const smy = ((pa.y + pb.y) / 2) * dpr * zoom - 6 * dpr;
+          ctx.font = `${10 * dpr}px sans-serif`;
+          ctx.fillText(formatMeasurement(segReal, scale.unitLabel), smx, smy);
+        }
+        // Draw points
+        for (const p of m.points) {
+          ctx.beginPath();
+          ctx.arc(p.x * dpr * zoom, p.y * dpr * zoom, 3 * dpr, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        // Total label near first point
+        const fp = m.points[0]!;
+        const totalLx = fp.x * dpr * zoom;
+        const totalLy = fp.y * dpr * zoom - 12 * dpr;
+        ctx.font = `${12 * dpr}px sans-serif`;
+        ctx.fillText(m.label, totalLx, totalLy);
+        drawAnnotationLabel(m.annotation, totalLx, totalLy - 14 * dpr, color);
+      }
+
+      if ((m.type === 'area' || m.type === 'volume') && m.points.length >= 3) {
         const firstPt = m.points[0]!;
         ctx.beginPath();
         ctx.moveTo(firstPt.x * dpr * zoom, firstPt.y * dpr * zoom);
@@ -309,7 +389,7 @@ export default function TakeoffViewerModule() {
         ctx.arc(p.x * dpr * zoom, p.y * dpr * zoom, 4 * dpr, 0, Math.PI * 2);
         ctx.fill();
       }
-      if (activePoints.length >= 2 && activeTool === 'area') {
+      if (activePoints.length >= 2 && (activeTool === 'area' || activeTool === 'volume')) {
         const ap0 = activePoints[0]!;
         ctx.beginPath();
         ctx.moveTo(ap0.x * dpr * zoom, ap0.y * dpr * zoom);
@@ -318,6 +398,31 @@ export default function TakeoffViewerModule() {
           ctx.lineTo(apt.x * dpr * zoom, apt.y * dpr * zoom);
         }
         ctx.stroke();
+      }
+      if (activePoints.length >= 2 && activeTool === 'polyline') {
+        const ap0 = activePoints[0]!;
+        ctx.beginPath();
+        ctx.moveTo(ap0.x * dpr * zoom, ap0.y * dpr * zoom);
+        for (let i = 1; i < activePoints.length; i++) {
+          const apt = activePoints[i]!;
+          ctx.lineTo(apt.x * dpr * zoom, apt.y * dpr * zoom);
+        }
+        ctx.stroke();
+        // Show cumulative distance label while drawing
+        let totalPx = 0;
+        for (let i = 0; i < activePoints.length - 1; i++) {
+          const pa = activePoints[i]!;
+          const pb = activePoints[i + 1]!;
+          totalPx += pixelDistance(pa.x, pa.y, pb.x, pb.y);
+        }
+        const totalReal = toRealDistance(totalPx, scale);
+        const lastPt = activePoints[activePoints.length - 1]!;
+        ctx.font = `${12 * dpr}px sans-serif`;
+        ctx.fillText(
+          formatMeasurement(totalReal, scale.unitLabel),
+          lastPt.x * dpr * zoom + 8 * dpr,
+          lastPt.y * dpr * zoom - 8 * dpr,
+        );
       }
     }
 
@@ -339,7 +444,7 @@ export default function TakeoffViewerModule() {
         ctx.stroke();
       }
     }
-  }, [measurements, activePoints, currentPage, zoom, settingScale, scalePoints, activeTool]);
+  }, [measurements, activePoints, currentPage, zoom, settingScale, scalePoints, activeTool, hiddenGroups, scale]);
 
   /* ── Canvas click handler ────────────────────────────────────────── */
 
@@ -350,11 +455,13 @@ export default function TakeoffViewerModule() {
 
   /** Generate a default annotation for a new measurement (e.g. "Distance 1", "Area 2"). */
   const nextAnnotation = useCallback(
-    (type: 'distance' | 'area' | 'count') => {
+    (type: 'distance' | 'polyline' | 'area' | 'volume' | 'count') => {
       annotationCounterRef.current[type] = (annotationCounterRef.current[type] || 0) + 1;
       const n = annotationCounterRef.current[type];
       if (type === 'distance') return t('takeoff.distance_n', { defaultValue: 'Distance {{n}}', n });
+      if (type === 'polyline') return t('takeoff.polyline_n', { defaultValue: 'Polyline {{n}}', n });
       if (type === 'area') return t('takeoff.area_n', { defaultValue: 'Area {{n}}', n });
+      if (type === 'volume') return t('takeoff.volume_n', { defaultValue: 'Volume {{n}}', n });
       return t('takeoff.count_n', { defaultValue: 'Count {{n}}', n });
     },
     [t],
@@ -501,6 +608,7 @@ export default function TakeoffViewerModule() {
             label: formatMeasurement(realDist, scale.unitLabel),
             annotation: nextAnnotation('distance'),
             page: currentPage,
+            group: activeGroup,
           };
           pushUndo({ kind: 'complete_measurement', measurement: newMeasurement, previousActivePoints: [...activePoints] });
           setMeasurements((prev) => [...prev, newMeasurement]);
@@ -511,8 +619,20 @@ export default function TakeoffViewerModule() {
         return;
       }
 
+      if (activeTool === 'polyline') {
+        pushUndo({ kind: 'add_point', tool: 'polyline', point });
+        setActivePoints((prev) => [...prev, point]);
+        return;
+      }
+
       if (activeTool === 'area') {
         pushUndo({ kind: 'add_point', tool: 'area', point });
+        setActivePoints((prev) => [...prev, point]);
+        return;
+      }
+
+      if (activeTool === 'volume') {
+        pushUndo({ kind: 'add_point', tool: 'volume', point });
         setActivePoints((prev) => [...prev, point]);
         return;
       }
@@ -539,39 +659,126 @@ export default function TakeoffViewerModule() {
             label: countLabel,
             annotation: nextAnnotation('count'),
             page: currentPage,
+            group: activeGroup,
           };
           pushUndo({ kind: 'add_count_point', measurementId: newId, point, wasNew: true, previousMeasurement: null });
           return [...prev, newMeasurement];
         });
       }
     },
-    [activeTool, activePoints, scale, currentPage, countLabel, settingScale, scalePoints, zoom, pushUndo, nextAnnotation],
+    [activeTool, activePoints, scale, currentPage, countLabel, settingScale, scalePoints, zoom, pushUndo, nextAnnotation, activeGroup],
   );
 
   // Keep the ref in sync so touch handler can call it
   handleCanvasClickRef.current = handleCanvasClick;
 
-  /** Double-click to close an area polygon */
+  /** Double-click to close an area/volume polygon or finish a polyline */
   const handleCanvasDblClick = useCallback(() => {
-    if (activeTool !== 'area' || activePoints.length < 3) return;
-    const pixArea = polygonAreaPixels(activePoints);
+    // Polyline: finish with double-click (need at least 2 points)
+    if (activeTool === 'polyline' && activePoints.length >= 2) {
+      let totalPx = 0;
+      for (let i = 0; i < activePoints.length - 1; i++) {
+        const pa = activePoints[i]!;
+        const pb = activePoints[i + 1]!;
+        totalPx += pixelDistance(pa.x, pa.y, pb.x, pb.y);
+      }
+      const totalReal = toRealDistance(totalPx, scale);
+      const newMeasurement: Measurement = {
+        id: `m_${Date.now()}`,
+        type: 'polyline',
+        points: [...activePoints],
+        value: totalReal,
+        unit: scale.unitLabel,
+        label: formatMeasurement(totalReal, scale.unitLabel),
+        annotation: nextAnnotation('polyline'),
+        page: currentPage,
+        group: activeGroup,
+      };
+      pushUndo({ kind: 'complete_measurement', measurement: newMeasurement, previousActivePoints: [...activePoints] });
+      setMeasurements((prev) => [...prev, newMeasurement]);
+      setActivePoints([]);
+      return;
+    }
+
+    // Area: close polygon with double-click
+    if (activeTool === 'area' && activePoints.length >= 3) {
+      const pixArea = polygonAreaPixels(activePoints);
+      const realArea = toRealArea(pixArea, scale);
+      const perimPx = polygonPerimeterPixels(activePoints);
+      const realPerim = toRealDistance(perimPx, scale);
+      const newMeasurement: Measurement = {
+        id: `m_${Date.now()}`,
+        type: 'area',
+        points: [...activePoints],
+        value: realArea,
+        unit: `${scale.unitLabel}\u00B2`,
+        label: `${formatMeasurement(realArea, scale.unitLabel + '\u00B2')} (P: ${formatMeasurement(realPerim, scale.unitLabel)})`,
+        annotation: nextAnnotation('area'),
+        page: currentPage,
+        group: activeGroup,
+      };
+      pushUndo({ kind: 'complete_measurement', measurement: newMeasurement, previousActivePoints: [...activePoints] });
+      setMeasurements((prev) => [...prev, newMeasurement]);
+      setActivePoints([]);
+      return;
+    }
+
+    // Volume: close polygon then prompt for depth
+    if (activeTool === 'volume' && activePoints.length >= 3) {
+      setPendingVolumePoints([...activePoints]);
+      setVolumeDepthValue('1');
+      setShowVolumeDepthInput(true);
+      setActivePoints([]);
+      return;
+    }
+  }, [activeTool, activePoints, scale, currentPage, pushUndo, nextAnnotation, activeGroup]);
+
+  /** Confirm volume depth and create the volume measurement */
+  const handleVolumeDepthConfirm = useCallback(() => {
+    const depth = parseFloat(volumeDepthValue);
+    if (isNaN(depth) || depth <= 0 || pendingVolumePoints.length < 3) {
+      setShowVolumeDepthInput(false);
+      setPendingVolumePoints([]);
+      return;
+    }
+    const pixArea = polygonAreaPixels(pendingVolumePoints);
     const realArea = toRealArea(pixArea, scale);
-    const perimPx = polygonPerimeterPixels(activePoints);
-    const realPerim = toRealDistance(perimPx, scale);
+    const volume = realArea * depth;
     const newMeasurement: Measurement = {
       id: `m_${Date.now()}`,
-      type: 'area',
-      points: [...activePoints],
-      value: realArea,
-      unit: `${scale.unitLabel}²`,
-      label: `${formatMeasurement(realArea, scale.unitLabel + '²')} (P: ${formatMeasurement(realPerim, scale.unitLabel)})`,
-      annotation: nextAnnotation('area'),
+      type: 'volume',
+      points: [...pendingVolumePoints],
+      value: volume,
+      unit: `${scale.unitLabel}\u00B3`,
+      label: `V = ${formatMeasurement(volume, scale.unitLabel + '\u00B3')} (A: ${formatMeasurement(realArea, scale.unitLabel + '\u00B2')} \u00D7 D: ${formatMeasurement(depth, scale.unitLabel)})`,
+      annotation: nextAnnotation('volume'),
       page: currentPage,
+      group: activeGroup,
+      depth,
+      area: realArea,
     };
-    pushUndo({ kind: 'complete_measurement', measurement: newMeasurement, previousActivePoints: [...activePoints] });
+    pushUndo({ kind: 'complete_measurement', measurement: newMeasurement, previousActivePoints: [] });
     setMeasurements((prev) => [...prev, newMeasurement]);
-    setActivePoints([]);
-  }, [activeTool, activePoints, scale, currentPage, pushUndo, nextAnnotation]);
+    setShowVolumeDepthInput(false);
+    setPendingVolumePoints([]);
+  }, [volumeDepthValue, pendingVolumePoints, scale, currentPage, pushUndo, nextAnnotation, activeGroup]);
+
+  /** Right-click to finish polyline (alternative to double-click) */
+  const handleCanvasContextMenu = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      if (activeTool === 'polyline' && activePoints.length >= 2) {
+        e.preventDefault();
+        handleCanvasDblClick(); // Reuse the double-click finish logic
+      } else if (activeTool === 'volume' && activePoints.length >= 3) {
+        e.preventDefault();
+        handleCanvasDblClick();
+      } else if (activeTool !== 'select') {
+        // Prevent context menu while using measurement tools
+        e.preventDefault();
+      }
+    },
+    [activeTool, activePoints, handleCanvasDblClick],
+  );
 
   /* ── Scale dialog confirm ────────────────────────────────────────── */
 
@@ -599,12 +806,34 @@ export default function TakeoffViewerModule() {
           const realDist = toRealDistance(dist, scale);
           return { ...m, value: realDist, unit: scale.unitLabel, label: formatMeasurement(realDist, scale.unitLabel) };
         }
+        if (m.type === 'polyline' && m.points.length >= 2) {
+          let totalPx = 0;
+          for (let i = 0; i < m.points.length - 1; i++) {
+            const pa = m.points[i]!;
+            const pb = m.points[i + 1]!;
+            totalPx += pixelDistance(pa.x, pa.y, pb.x, pb.y);
+          }
+          const totalReal = toRealDistance(totalPx, scale);
+          return { ...m, value: totalReal, unit: scale.unitLabel, label: formatMeasurement(totalReal, scale.unitLabel) };
+        }
         if (m.type === 'area' && m.points.length >= 3) {
           const pixArea = polygonAreaPixels(m.points);
           const realArea = toRealArea(pixArea, scale);
           const perimPx = polygonPerimeterPixels(m.points);
           const realPerim = toRealDistance(perimPx, scale);
-          return { ...m, value: realArea, unit: `${scale.unitLabel}²`, label: `${formatMeasurement(realArea, scale.unitLabel + '²')} (P: ${formatMeasurement(realPerim, scale.unitLabel)})` };
+          return { ...m, value: realArea, unit: `${scale.unitLabel}\u00B2`, label: `${formatMeasurement(realArea, scale.unitLabel + '\u00B2')} (P: ${formatMeasurement(realPerim, scale.unitLabel)})` };
+        }
+        if (m.type === 'volume' && m.points.length >= 3 && m.depth != null) {
+          const pixArea = polygonAreaPixels(m.points);
+          const realArea = toRealArea(pixArea, scale);
+          const volume = realArea * m.depth;
+          return {
+            ...m,
+            value: volume,
+            area: realArea,
+            unit: `${scale.unitLabel}\u00B3`,
+            label: `V = ${formatMeasurement(volume, scale.unitLabel + '\u00B3')} (A: ${formatMeasurement(realArea, scale.unitLabel + '\u00B2')} \u00D7 D: ${formatMeasurement(m.depth, scale.unitLabel)})`,
+          };
         }
         return m;
       }),
@@ -628,6 +857,97 @@ export default function TakeoffViewerModule() {
     () => measurements.filter((m) => m.page === currentPage),
     [measurements, currentPage],
   );
+
+  /** Group page measurements by their group name */
+  const groupedPageMeasurements = useMemo(() => {
+    const groups: Record<string, Measurement[]> = {};
+    for (const m of pageMeasurements) {
+      const g = m.group || 'General';
+      if (!groups[g]) groups[g] = [];
+      groups[g]!.push(m);
+    }
+    return groups;
+  }, [pageMeasurements]);
+
+  /** Toggle visibility of a measurement group */
+  const toggleGroupVisibility = useCallback((groupName: string) => {
+    setHiddenGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(groupName)) {
+        next.delete(groupName);
+      } else {
+        next.add(groupName);
+      }
+      return next;
+    });
+  }, []);
+
+  /** Toggle collapse of a measurement group in sidebar */
+  const toggleGroupCollapse = useCallback((groupName: string) => {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(groupName)) {
+        next.delete(groupName);
+      } else {
+        next.add(groupName);
+      }
+      return next;
+    });
+  }, []);
+
+  /** Export measurements to CSV */
+  const handleExportCSV = useCallback(() => {
+    if (measurements.length === 0) return;
+    const rows: string[] = ['Group,Type,Annotation,Value,Unit,Page'];
+    // Group measurements by group name for subtotals
+    const byGroup: Record<string, Measurement[]> = {};
+    for (const m of measurements) {
+      const g = m.group || 'General';
+      if (!byGroup[g]) byGroup[g] = [];
+      byGroup[g]!.push(m);
+    }
+    for (const [groupName, groupMs] of Object.entries(byGroup)) {
+      for (const m of groupMs) {
+        const escapeCsv = (s: string) => `"${s.replace(/"/g, '""')}"`;
+        rows.push(
+          [
+            escapeCsv(groupName),
+            escapeCsv(m.type),
+            escapeCsv(m.annotation),
+            m.value.toFixed(3),
+            escapeCsv(m.unit),
+            String(m.page),
+          ].join(','),
+        );
+      }
+      // Add subtotal row for group
+      const distMs = groupMs.filter((m) => m.type === 'distance' || m.type === 'polyline');
+      const areaMs = groupMs.filter((m) => m.type === 'area');
+      const volMs = groupMs.filter((m) => m.type === 'volume');
+      const countMs = groupMs.filter((m) => m.type === 'count');
+      if (distMs.length > 0) {
+        rows.push(`"${groupName} - Subtotal","distance","Total distance",${distMs.reduce((s, m) => s + m.value, 0).toFixed(3)},"${distMs[0]!.unit}",""`);
+      }
+      if (areaMs.length > 0) {
+        rows.push(`"${groupName} - Subtotal","area","Total area",${areaMs.reduce((s, m) => s + m.value, 0).toFixed(3)},"${areaMs[0]!.unit}",""`);
+      }
+      if (volMs.length > 0) {
+        rows.push(`"${groupName} - Subtotal","volume","Total volume",${volMs.reduce((s, m) => s + m.value, 0).toFixed(3)},"${volMs[0]!.unit}",""`);
+      }
+      if (countMs.length > 0) {
+        rows.push(`"${groupName} - Subtotal","count","Total count",${countMs.reduce((s, m) => s + m.value, 0).toFixed(0)},"pcs",""`);
+      }
+    }
+    const csvContent = rows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `takeoff-measurements-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    addToast({ type: 'success', title: t('takeoff.csv_exported', { defaultValue: 'Measurements exported to CSV' }) });
+  }, [measurements, addToast, t]);
 
   const deleteMeasurement = useCallback((id: string) => {
     setMeasurements((prev) => {
@@ -669,7 +989,7 @@ export default function TakeoffViewerModule() {
     try {
       let ordinalCounter = 1;
       for (const m of measurements) {
-        const unitMap: Record<string, string> = { m: 'm', 'm²': 'm2', pcs: 'pcs' };
+        const unitMap: Record<string, string> = { m: 'm', 'm\u00B2': 'm2', 'm\u00B3': 'm3', pcs: 'pcs' };
         const posData: CreatePositionData = {
           boq_id: selectedBoqId,
           ordinal: `TK.${String(ordinalCounter++).padStart(3, '0')}`,
@@ -694,9 +1014,11 @@ export default function TakeoffViewerModule() {
     setActivePoints([]);
     undoStackRef.current = [];
     setUndoCount(0);
-    annotationCounterRef.current = { distance: 0, area: 0, count: 0 };
+    annotationCounterRef.current = { distance: 0, polyline: 0, area: 0, volume: 0, count: 0 };
     setEditingAnnotationId(null);
     setEditingAnnotationValue('');
+    setShowVolumeDepthInput(false);
+    setPendingVolumePoints([]);
     clearPersisted();
   }, [clearPersisted]);
 
@@ -857,7 +1179,9 @@ export default function TakeoffViewerModule() {
               {([
                 { tool: 'select' as MeasureTool, icon: MousePointer2, label: t('takeoff_viewer.tool_select', { defaultValue: 'Select' }) },
                 { tool: 'distance' as MeasureTool, icon: Minus, label: t('takeoff_viewer.tool_distance', { defaultValue: 'Distance' }) },
+                { tool: 'polyline' as MeasureTool, icon: Route, label: t('takeoff_viewer.tool_polyline', { defaultValue: 'Polyline' }) },
                 { tool: 'area' as MeasureTool, icon: Pentagon, label: t('takeoff_viewer.tool_area', { defaultValue: 'Area' }) },
+                { tool: 'volume' as MeasureTool, icon: Box, label: t('takeoff_viewer.tool_volume', { defaultValue: 'Volume' }) },
                 { tool: 'count' as MeasureTool, icon: Hash, label: t('takeoff_viewer.tool_count', { defaultValue: 'Count' }) },
               ] as const).map(({ tool, icon: Icon, label }) => (
                 <button
@@ -928,6 +1252,7 @@ export default function TakeoffViewerModule() {
                 style={{ cursor: activeTool === 'select' ? 'default' : 'crosshair' }}
                 onClick={handleCanvasClick}
                 onDoubleClick={handleCanvasDblClick}
+                onContextMenu={handleCanvasContextMenu}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
@@ -965,6 +1290,28 @@ export default function TakeoffViewerModule() {
               </div>
             </div>
 
+            {/* Active group selector */}
+            <div className="rounded-lg border border-border bg-surface-primary p-3">
+              <label className="text-xs font-medium text-content-tertiary block mb-1">
+                {t('takeoff_viewer.active_group', { defaultValue: 'Active Group' })}
+              </label>
+              <div className="flex items-center gap-2">
+                <span
+                  className="h-3 w-3 rounded-full shrink-0"
+                  style={{ backgroundColor: GROUP_COLOR_MAP[activeGroup] || '#3B82F6' }}
+                />
+                <select
+                  value={activeGroup}
+                  onChange={(e) => setActiveGroup(e.target.value)}
+                  className="flex-1 rounded border border-border bg-surface-secondary px-2 py-1 text-xs text-content-primary"
+                >
+                  {MEASUREMENT_GROUPS.map((g) => (
+                    <option key={g.name} value={g.name}>{g.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
             {/* Count label (when count tool active) */}
             {activeTool === 'count' && (
               <div className="rounded-lg border border-border bg-surface-primary p-3">
@@ -980,7 +1327,7 @@ export default function TakeoffViewerModule() {
               </div>
             )}
 
-            {/* Measurements list */}
+            {/* Measurements list (grouped) */}
             <div className="rounded-lg border border-border bg-surface-primary p-3">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-semibold text-content-primary">
@@ -1011,77 +1358,125 @@ export default function TakeoffViewerModule() {
                 </p>
               )}
 
-              <div className="space-y-1.5 max-h-[400px] overflow-auto">
-                {pageMeasurements.map((m) => (
-                  <div
-                    key={m.id}
-                    className="rounded-lg bg-surface-secondary px-2.5 py-2 group"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`h-2 w-2 rounded-full shrink-0 ${
-                          m.type === 'distance' ? 'bg-blue-500' : m.type === 'area' ? 'bg-emerald-500' : 'bg-amber-500'
-                        }`}
-                      />
-                      <div className="flex-1 min-w-0">
-                        {editingAnnotationId === m.id ? (
-                          <input
-                            type="text"
-                            value={editingAnnotationValue}
-                            onChange={(e) => setEditingAnnotationValue(e.target.value)}
-                            onBlur={commitEditAnnotation}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') commitEditAnnotation();
-                              if (e.key === 'Escape') {
-                                setEditingAnnotationId(null);
-                                setEditingAnnotationValue('');
-                              }
-                            }}
-                            autoFocus
-                            className="w-full rounded border border-oe-blue bg-surface-primary px-1.5 py-0.5 text-xs font-medium text-content-primary outline-none"
-                            placeholder={t('takeoff.add_label', { defaultValue: 'Add label...' })}
-                          />
-                        ) : (
-                          <button
-                            onClick={() => startEditAnnotation(m)}
-                            className="flex items-center gap-1 text-xs font-medium text-content-primary truncate hover:text-oe-blue transition-colors w-full text-left"
-                            title={t('takeoff.add_label', { defaultValue: 'Add label...' })}
-                          >
-                            <span className="truncate">{m.annotation}</span>
-                            <Pencil size={10} className="shrink-0 opacity-0 group-hover:opacity-60 transition-opacity" />
-                          </button>
-                        )}
-                        <p className="text-2xs text-content-tertiary capitalize">{m.type}: {m.label}</p>
+              <div className="space-y-2 max-h-[400px] overflow-auto">
+                {Object.entries(groupedPageMeasurements).map(([groupName, groupMs]) => {
+                  const groupColor = GROUP_COLOR_MAP[groupName] || '#3B82F6';
+                  const isHidden = hiddenGroups.has(groupName);
+                  const isCollapsed = collapsedGroups.has(groupName);
+                  return (
+                    <div key={groupName}>
+                      {/* Group header */}
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <button
+                          onClick={() => toggleGroupCollapse(groupName)}
+                          className="p-0.5 rounded hover:bg-surface-secondary text-content-tertiary transition-colors"
+                        >
+                          {isCollapsed ? <ChevronDown size={10} /> : <ChevronUp size={10} />}
+                        </button>
+                        <span
+                          className="h-2.5 w-2.5 rounded-full shrink-0"
+                          style={{ backgroundColor: groupColor }}
+                        />
+                        <span className="text-2xs font-semibold text-content-secondary flex-1 uppercase tracking-wider">
+                          {groupName} ({groupMs.length})
+                        </span>
+                        <button
+                          onClick={() => toggleGroupVisibility(groupName)}
+                          className="p-0.5 rounded hover:bg-surface-secondary text-content-tertiary transition-colors"
+                          title={isHidden
+                            ? t('takeoff_viewer.show_group', { defaultValue: 'Show group' })
+                            : t('takeoff_viewer.hide_group', { defaultValue: 'Hide group' })
+                          }
+                        >
+                          {isHidden ? <EyeOff size={10} /> : <Eye size={10} />}
+                        </button>
                       </div>
-                      <button
-                        onClick={() => deleteMeasurement(m.id)}
-                        className="opacity-0 group-hover:opacity-100 text-content-tertiary hover:text-semantic-error transition-all shrink-0"
-                        aria-label={t('takeoff_viewer.delete_measurement', { defaultValue: 'Delete measurement' })}
-                      >
-                        <Trash2 size={12} />
-                      </button>
+                      {/* Group measurements */}
+                      {!isCollapsed && (
+                        <div className="space-y-1 pl-2">
+                          {groupMs.map((m) => (
+                            <div
+                              key={m.id}
+                              className="rounded-lg bg-surface-secondary px-2.5 py-2 group/item"
+                            >
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className="h-2 w-2 rounded-full shrink-0"
+                                  style={{ backgroundColor: groupColor }}
+                                />
+                                <div className="flex-1 min-w-0">
+                                  {editingAnnotationId === m.id ? (
+                                    <input
+                                      type="text"
+                                      value={editingAnnotationValue}
+                                      onChange={(e) => setEditingAnnotationValue(e.target.value)}
+                                      onBlur={commitEditAnnotation}
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter') commitEditAnnotation();
+                                        if (e.key === 'Escape') {
+                                          setEditingAnnotationId(null);
+                                          setEditingAnnotationValue('');
+                                        }
+                                      }}
+                                      autoFocus
+                                      className="w-full rounded border border-oe-blue bg-surface-primary px-1.5 py-0.5 text-xs font-medium text-content-primary outline-none"
+                                      placeholder={t('takeoff.add_label', { defaultValue: 'Add label...' })}
+                                    />
+                                  ) : (
+                                    <button
+                                      onClick={() => startEditAnnotation(m)}
+                                      className="flex items-center gap-1 text-xs font-medium text-content-primary truncate hover:text-oe-blue transition-colors w-full text-left"
+                                      title={t('takeoff.add_label', { defaultValue: 'Add label...' })}
+                                    >
+                                      <span className="truncate">{m.annotation}</span>
+                                      <Pencil size={10} className="shrink-0 opacity-0 group-hover/item:opacity-60 transition-opacity" />
+                                    </button>
+                                  )}
+                                  <p className="text-2xs text-content-tertiary capitalize">{m.type}: {m.label}</p>
+                                </div>
+                                <button
+                                  onClick={() => deleteMeasurement(m.id)}
+                                  className="opacity-0 group-hover/item:opacity-100 text-content-tertiary hover:text-semantic-error transition-all shrink-0"
+                                  aria-label={t('takeoff_viewer.delete_measurement', { defaultValue: 'Delete measurement' })}
+                                >
+                                  <Trash2 size={12} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
-            {/* Export to BOQ button */}
+            {/* Export buttons */}
             {measurements.length > 0 && (
-              <button
-                onClick={openExportDialog}
-                className="w-full rounded-lg bg-oe-blue px-3 py-2 text-xs font-semibold text-white hover:bg-oe-blue/90 transition-colors"
-              >
-                {t('takeoff_viewer.export_to_boq', { defaultValue: 'Export {{count}} measurements to BOQ', count: measurements.length })}
-              </button>
+              <div className="space-y-1.5">
+                <button
+                  onClick={openExportDialog}
+                  className="w-full rounded-lg bg-oe-blue px-3 py-2 text-xs font-semibold text-white hover:bg-oe-blue/90 transition-colors"
+                >
+                  {t('takeoff_viewer.export_to_boq', { defaultValue: 'Export {{count}} measurements to BOQ', count: measurements.length })}
+                </button>
+                <button
+                  onClick={handleExportCSV}
+                  className="w-full rounded-lg border border-border bg-surface-secondary px-3 py-2 text-xs font-semibold text-content-primary hover:bg-surface-tertiary transition-colors flex items-center justify-center gap-1.5"
+                >
+                  <FileSpreadsheet size={14} />
+                  {t('takeoff_viewer.export_excel', { defaultValue: 'Export Excel (CSV)' })}
+                </button>
+              </div>
             )}
 
             {/* Help */}
             <div className="flex items-start gap-2 text-xs text-content-quaternary">
               <Info className="h-4 w-4 mt-0.5 shrink-0" />
               <p>
-                {t('takeoff_viewer.help', {
-                  defaultValue: 'Set the scale first by clicking "Scale" and marking a known dimension. Then use Distance, Area, or Count tools to measure. Double-click to close area polygons.',
+                {t('takeoff_viewer.help_extended', {
+                  defaultValue: 'Set the scale first by clicking "Scale" and marking a known dimension. Use Distance, Polyline, Area, Volume, or Count tools. Double-click to finish polylines and close polygons. Right panel groups measurements by category.',
                 })}
               </p>
             </div>
@@ -1125,6 +1520,54 @@ export default function TakeoffViewerModule() {
                 className="px-3 py-1.5 rounded-lg bg-oe-blue text-white text-xs font-medium hover:bg-oe-blue-hover transition-colors"
               >
                 {t('common.apply', { defaultValue: 'Apply' })}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Volume depth input dialog */}
+      {showVolumeDepthInput && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="w-80 rounded-xl border border-border bg-surface-elevated p-5 shadow-lg">
+            <h3 className="text-sm font-semibold text-content-primary mb-3">
+              {t('takeoff_viewer.volume_depth_title', { defaultValue: 'Enter Depth for Volume' })}
+            </h3>
+            <p className="text-xs text-content-tertiary mb-3">
+              {t('takeoff_viewer.volume_depth_desc', {
+                defaultValue: 'The polygon area has been captured. Enter the depth to calculate volume:',
+              })}
+            </p>
+            <div className="flex items-center gap-2 mb-4">
+              <input
+                type="number"
+                value={volumeDepthValue}
+                onChange={(e) => setVolumeDepthValue(e.target.value)}
+                className="flex-1 rounded border border-border bg-surface-secondary px-2 py-1.5 text-sm text-content-primary"
+                min={0}
+                step={0.01}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleVolumeDepthConfirm();
+                  if (e.key === 'Escape') {
+                    setShowVolumeDepthInput(false);
+                    setPendingVolumePoints([]);
+                  }
+                }}
+              />
+              <span className="text-sm text-content-secondary">{scale.unitLabel}</span>
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => { setShowVolumeDepthInput(false); setPendingVolumePoints([]); }}
+                className="px-3 py-1.5 rounded-lg text-xs text-content-secondary hover:bg-surface-secondary transition-colors"
+              >
+                {t('common.cancel', { defaultValue: 'Cancel' })}
+              </button>
+              <button
+                onClick={handleVolumeDepthConfirm}
+                className="px-3 py-1.5 rounded-lg bg-oe-blue text-white text-xs font-medium hover:bg-oe-blue-hover transition-colors"
+              >
+                {t('takeoff_viewer.calculate_volume', { defaultValue: 'Calculate Volume' })}
               </button>
             </div>
           </div>

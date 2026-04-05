@@ -9,13 +9,16 @@ interface Point {
 
 interface Measurement {
   id: string;
-  type: 'distance' | 'area' | 'count';
+  type: 'distance' | 'polyline' | 'area' | 'volume' | 'count';
   points: Point[];
   value: number;
   unit: string;
   label: string;
   annotation: string;
   page: number;
+  group: string;
+  depth?: number;
+  area?: number;
 }
 
 interface ScaleConfig {
