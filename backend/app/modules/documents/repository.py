@@ -10,7 +10,7 @@ from datetime import datetime
 from sqlalchemy import func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.documents.models import Document, ProjectPhoto
+from app.modules.documents.models import Document, ProjectPhoto, Sheet
 
 
 class DocumentRepository:
@@ -173,3 +173,129 @@ class PhotoRepository:
         if item is not None:
             await self.session.delete(item)
             await self.session.flush()
+
+
+class SheetRepository:
+    """Data access for Sheet models."""
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def get_by_id(self, sheet_id: uuid.UUID) -> Sheet | None:
+        """Get sheet by ID."""
+        return await self.session.get(Sheet, sheet_id)
+
+    async def create(self, sheet: Sheet) -> Sheet:
+        """Insert a new sheet."""
+        self.session.add(sheet)
+        await self.session.flush()
+        return sheet
+
+    async def create_many(self, sheets: list[Sheet]) -> list[Sheet]:
+        """Insert multiple sheets at once."""
+        self.session.add_all(sheets)
+        await self.session.flush()
+        return sheets
+
+    async def list_for_project(
+        self,
+        project_id: uuid.UUID,
+        *,
+        offset: int = 0,
+        limit: int = 100,
+        discipline: str | None = None,
+        revision: str | None = None,
+        document_id: str | None = None,
+        current_only: bool = False,
+    ) -> tuple[list[Sheet], int]:
+        """List sheets for a project with pagination and filters."""
+        base = select(Sheet).where(Sheet.project_id == project_id)
+
+        if discipline is not None:
+            base = base.where(Sheet.discipline == discipline)
+        if revision is not None:
+            base = base.where(Sheet.revision == revision)
+        if document_id is not None:
+            base = base.where(Sheet.document_id == document_id)
+        if current_only:
+            base = base.where(Sheet.is_current.is_(True))
+
+        count_stmt = select(func.count()).select_from(base.subquery())
+        total = (await self.session.execute(count_stmt)).scalar_one()
+
+        stmt = base.order_by(Sheet.page_number.asc()).offset(offset).limit(limit)
+        result = await self.session.execute(stmt)
+        items = list(result.scalars().all())
+
+        return items, total
+
+    async def update_fields(self, sheet_id: uuid.UUID, **fields: object) -> None:
+        """Update specific fields on a sheet."""
+        stmt = update(Sheet).where(Sheet.id == sheet_id).values(**fields)
+        await self.session.execute(stmt)
+        await self.session.flush()
+        self.session.expire_all()
+
+    async def delete(self, sheet_id: uuid.UUID) -> None:
+        """Hard delete a sheet."""
+        item = await self.get_by_id(sheet_id)
+        if item is not None:
+            await self.session.delete(item)
+            await self.session.flush()
+
+    async def distinct_disciplines(self, project_id: uuid.UUID) -> list[str]:
+        """Return distinct discipline values for a project."""
+        stmt = (
+            select(Sheet.discipline)
+            .where(Sheet.project_id == project_id)
+            .where(Sheet.discipline.isnot(None))
+            .distinct()
+            .order_by(Sheet.discipline)
+        )
+        result = await self.session.execute(stmt)
+        return [row[0] for row in result.all()]
+
+    async def get_version_chain(self, sheet_id: uuid.UUID) -> list[Sheet]:
+        """Get all versions of a sheet by following previous_version_id links.
+
+        Returns sheets ordered from oldest to newest.
+        """
+        current = await self.get_by_id(sheet_id)
+        if current is None:
+            return []
+
+        chain = [current]
+
+        # Walk backwards through previous versions
+        visited: set[uuid.UUID] = {current.id}
+        node = current
+        while node.previous_version_id is not None:
+            if node.previous_version_id in visited:
+                break  # Prevent infinite loops
+            prev = await self.get_by_id(node.previous_version_id)
+            if prev is None:
+                break
+            visited.add(prev.id)
+            chain.append(prev)
+            node = prev
+
+        # Walk forwards: find sheets that reference the current sheet
+        # (or any sheet in the chain) as their previous_version_id
+        forward_ids = {s.id for s in chain}
+        while True:
+            stmt = (
+                select(Sheet)
+                .where(Sheet.previous_version_id.in_(forward_ids))
+                .where(Sheet.id.notin_(forward_ids))
+            )
+            result = await self.session.execute(stmt)
+            newer = list(result.scalars().all())
+            if not newer:
+                break
+            for s in newer:
+                forward_ids.add(s.id)
+                chain.append(s)
+
+        # Sort by page_number then created_at to get chronological order
+        chain.sort(key=lambda s: (s.created_at,))
+        return chain

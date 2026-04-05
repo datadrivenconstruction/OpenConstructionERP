@@ -5,6 +5,7 @@ Stateless service layer. Handles:
 - File upload/download management
 - Summary aggregation
 - Photo gallery CRUD
+- Sheet management (PDF split, OCR detection)
 """
 
 import logging
@@ -19,9 +20,9 @@ from typing import Any
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.documents.models import Document, ProjectPhoto
-from app.modules.documents.repository import DocumentRepository, PhotoRepository
-from app.modules.documents.schemas import DocumentUpdate, PhotoUpdate
+from app.modules.documents.models import Document, ProjectPhoto, Sheet
+from app.modules.documents.repository import DocumentRepository, PhotoRepository, SheetRepository
+from app.modules.documents.schemas import DocumentUpdate, PhotoUpdate, SheetUpdate
 
 logger = logging.getLogger(__name__)
 
@@ -425,3 +426,308 @@ class PhotoService:
                 logger.info("Photo file removed: %s", file_path)
         except Exception:
             logger.warning("Failed to remove photo file: %s", file_path_str)
+
+
+# ── Discipline prefix mapping ────────────────────────────────────────────
+
+DISCIPLINE_PREFIX_MAP: dict[str, str] = {
+    "A": "Architectural",
+    "S": "Structural",
+    "M": "Mechanical",
+    "E": "Electrical",
+    "P": "Plumbing",
+    "C": "Civil",
+    "L": "Landscape",
+}
+
+# Base directory for sheet thumbnails
+SHEET_THUMB_BASE = Path.home() / ".openestimator" / "sheets"
+
+
+def detect_discipline_from_sheet_number(sheet_number: str | None) -> str | None:
+    """Auto-detect discipline from sheet number prefix.
+
+    Common AEC convention: first letter indicates discipline.
+    E.g., "A-201" -> Architectural, "S-100" -> Structural.
+    """
+    if not sheet_number:
+        return None
+    prefix = sheet_number.strip()[0].upper()
+    return DISCIPLINE_PREFIX_MAP.get(prefix)
+
+
+def detect_sheet_info(page_text: str) -> dict[str, str | None]:
+    """Extract sheet number, title, scale, and revision from page text.
+
+    Uses simple regex patterns on extracted text to find common title block fields.
+    Does NOT rely on external OCR services — works on already-extracted text.
+
+    Returns:
+        Dict with keys: sheet_number, sheet_title, scale, revision
+    """
+    result: dict[str, str | None] = {
+        "sheet_number": None,
+        "sheet_title": None,
+        "scale": None,
+        "revision": None,
+    }
+
+    if not page_text:
+        return result
+
+    # Sheet number patterns: "A-201", "S-100", "M001", "E-2.01", "SHEET: A-201"
+    sheet_num_patterns = [
+        r"(?:SHEET\s*(?:NO\.?|NUMBER|#|:)\s*)([A-Z]\s*[-.]?\s*\d[\w.-]*)",
+        r"(?:DWG\s*(?:NO\.?|#|:)\s*)([A-Z]?\s*[-.]?\s*\d[\w.-]*)",
+        r"\b([A-Z]-\d{2,4}(?:\.\d+)?)\b",
+        r"\b([A-Z]\d{3,4})\b",
+    ]
+    for pattern in sheet_num_patterns:
+        match = re.search(pattern, page_text, re.IGNORECASE)
+        if match:
+            result["sheet_number"] = match.group(1).strip()
+            break
+
+    # Sheet title patterns: "TITLE: Floor Plan", "SHEET TITLE: ..."
+    title_patterns = [
+        r"(?:SHEET\s*TITLE|TITLE)\s*[:=]\s*(.+?)(?:\n|$)",
+        r"(?:DRAWING\s*TITLE)\s*[:=]\s*(.+?)(?:\n|$)",
+    ]
+    for pattern in title_patterns:
+        match = re.search(pattern, page_text, re.IGNORECASE)
+        if match:
+            title = match.group(1).strip()
+            if len(title) > 2:
+                result["sheet_title"] = title[:500]
+            break
+
+    # Scale patterns: "1:100", "1/4\" = 1'-0\"", "SCALE: 1:50"
+    scale_patterns = [
+        r"(?:SCALE)\s*[:=]\s*([\d/:\"'\-\s]+\S*)",
+        r"\b(1\s*:\s*\d{1,4})\b",
+        r"(1/\d+\"\s*=\s*1'[\s-]*0\")",
+    ]
+    for pattern in scale_patterns:
+        match = re.search(pattern, page_text, re.IGNORECASE)
+        if match:
+            result["scale"] = match.group(1).strip()[:50]
+            break
+
+    # Revision patterns: "REV A", "REVISION: 3", "Rev. B"
+    rev_patterns = [
+        r"(?:REV(?:ISION)?\.?\s*(?:NO\.?|#|:)?\s*)([A-Z0-9]+)",
+    ]
+    for pattern in rev_patterns:
+        match = re.search(pattern, page_text, re.IGNORECASE)
+        if match:
+            result["revision"] = match.group(1).strip()[:50]
+            break
+
+    return result
+
+
+class SheetService:
+    """Business logic for drawing sheet operations."""
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+        self.repo = SheetRepository(session)
+
+    # ── Read ───────────────────────────────────────────────────────────────
+
+    async def get_sheet(self, sheet_id: uuid.UUID) -> Sheet:
+        """Get sheet by ID. Raises 404 if not found."""
+        sheet = await self.repo.get_by_id(sheet_id)
+        if sheet is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Sheet not found",
+            )
+        return sheet
+
+    async def list_sheets(
+        self,
+        project_id: uuid.UUID,
+        *,
+        offset: int = 0,
+        limit: int = 100,
+        discipline: str | None = None,
+        revision: str | None = None,
+        document_id: str | None = None,
+        current_only: bool = False,
+    ) -> tuple[list[Sheet], int]:
+        """List sheets for a project with filters."""
+        return await self.repo.list_for_project(
+            project_id,
+            offset=offset,
+            limit=limit,
+            discipline=discipline,
+            revision=revision,
+            document_id=document_id,
+            current_only=current_only,
+        )
+
+    async def get_disciplines(self, project_id: uuid.UUID) -> list[str]:
+        """Return distinct discipline values for a project."""
+        return await self.repo.distinct_disciplines(project_id)
+
+    async def get_version_history(self, sheet_id: uuid.UUID) -> dict[str, Any]:
+        """Get version history for a sheet.
+
+        Returns the current sheet and all historical revisions.
+        """
+        current = await self.get_sheet(sheet_id)
+        chain = await self.repo.get_version_chain(sheet_id)
+        # Remove current sheet from history list
+        history = [s for s in chain if s.id != current.id]
+        return {"current": current, "history": history}
+
+    # ── Update ─────────────────────────────────────────────────────────────
+
+    async def update_sheet(
+        self,
+        sheet_id: uuid.UUID,
+        data: SheetUpdate,
+    ) -> Sheet:
+        """Update sheet metadata fields."""
+        sheet = await self.get_sheet(sheet_id)
+
+        fields = data.model_dump(exclude_unset=True)
+        if "metadata" in fields:
+            fields["metadata_"] = fields.pop("metadata")
+
+        if not fields:
+            return sheet
+
+        await self.repo.update_fields(sheet_id, **fields)
+        await self.session.refresh(sheet)
+
+        logger.info("Sheet updated: %s (fields=%s)", sheet_id, list(fields.keys()))
+        return sheet
+
+    # ── Split PDF ──────────────────────────────────────────────────────────
+
+    async def split_pdf_to_sheets(
+        self,
+        project_id: uuid.UUID,
+        file: UploadFile,
+        user_id: str,
+    ) -> list[Sheet]:
+        """Upload a multi-page PDF, split into individual sheets.
+
+        For each page:
+        1. Extract text using pdfplumber
+        2. Detect sheet number, title, scale, revision from text
+        3. Auto-detect discipline from sheet number prefix
+        4. Save page thumbnail as PNG
+        5. Create Sheet record in database
+
+        Returns:
+            List of created Sheet records.
+        """
+        try:
+            import pdfplumber
+        except ImportError:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="pdfplumber is not installed. Install with: pip install pdfplumber",
+            )
+
+        # Read uploaded file
+        raw_name = file.filename or "untitled.pdf"
+        safe_name = _sanitize_filename(raw_name)
+
+        content = await file.read()
+        if len(content) > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail=f"File too large. Maximum size is {MAX_FILE_SIZE // (1024 * 1024)}MB.",
+            )
+
+        # Save the original PDF to uploads
+        file_uuid = uuid.uuid4().hex[:12]
+        upload_dir = UPLOAD_BASE / str(project_id)
+        upload_dir.mkdir(parents=True, exist_ok=True)
+        pdf_path = upload_dir / f"{file_uuid}_{safe_name}"
+        pdf_path.write_bytes(content)
+
+        # Also create a Document record for the uploaded PDF
+        doc_repo = DocumentRepository(self.session)
+        document = Document(
+            project_id=project_id,
+            name=safe_name,
+            category="drawing",
+            file_size=len(content),
+            mime_type="application/pdf",
+            file_path=str(pdf_path),
+            uploaded_by=user_id,
+        )
+        document = await doc_repo.create(document)
+        document_id = str(document.id)
+
+        # Create thumbnail directory
+        thumb_dir = SHEET_THUMB_BASE / str(project_id)
+        thumb_dir.mkdir(parents=True, exist_ok=True)
+
+        sheets: list[Sheet] = []
+
+        try:
+            with pdfplumber.open(str(pdf_path)) as pdf:
+                for page_idx, page in enumerate(pdf.pages):
+                    page_number = page_idx + 1
+
+                    # Extract text for sheet info detection
+                    page_text = page.extract_text() or ""
+
+                    # Detect sheet info from text
+                    info = detect_sheet_info(page_text)
+                    sheet_number = info["sheet_number"]
+                    discipline = detect_discipline_from_sheet_number(sheet_number)
+
+                    # Generate thumbnail
+                    thumbnail_path_str: str | None = None
+                    try:
+                        page_image = page.to_image(resolution=72)
+                        thumb_filename = f"{file_uuid}_page_{page_number}.png"
+                        thumb_path = thumb_dir / thumb_filename
+                        page_image.save(str(thumb_path), format="PNG")
+                        thumbnail_path_str = str(thumb_path)
+                    except Exception:
+                        logger.warning(
+                            "Failed to generate thumbnail for page %d of %s",
+                            page_number,
+                            safe_name,
+                        )
+
+                    sheet = Sheet(
+                        project_id=project_id,
+                        document_id=document_id,
+                        page_number=page_number,
+                        sheet_number=sheet_number,
+                        sheet_title=info["sheet_title"],
+                        discipline=discipline,
+                        revision=info["revision"],
+                        scale=info["scale"],
+                        is_current=True,
+                        thumbnail_path=thumbnail_path_str,
+                        created_by=user_id,
+                    )
+                    sheets.append(sheet)
+
+        except Exception as exc:
+            logger.exception("Failed to process PDF: %s", safe_name)
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Failed to process PDF file: {exc}",
+            )
+
+        if sheets:
+            sheets = await self.repo.create_many(sheets)
+
+        logger.info(
+            "PDF split into %d sheets: %s for project %s",
+            len(sheets),
+            safe_name,
+            project_id,
+        )
+        return sheets

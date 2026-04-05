@@ -102,3 +102,52 @@ class PhotoTimelineGroup(BaseModel):
 
     date: str
     photos: list[PhotoResponse]
+
+
+# ── Sheet schemas ──────────────────────────────────────────────────────
+
+
+class SheetUpdate(BaseModel):
+    """Partial update for a drawing sheet."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    sheet_number: str | None = Field(default=None, max_length=100)
+    sheet_title: str | None = Field(default=None, max_length=500)
+    discipline: str | None = Field(default=None, max_length=100)
+    revision: str | None = Field(default=None, max_length=50)
+    revision_date: datetime | None = None
+    scale: str | None = Field(default=None, max_length=50)
+    is_current: bool | None = None
+    metadata: dict[str, Any] | None = None
+
+
+class SheetResponse(BaseModel):
+    """Sheet returned from the API."""
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    project_id: UUID
+    document_id: str = ""
+    page_number: int
+    sheet_number: str | None = None
+    sheet_title: str | None = None
+    discipline: str | None = None
+    revision: str | None = None
+    revision_date: datetime | None = None
+    scale: str | None = None
+    is_current: bool = True
+    previous_version_id: UUID | None = None
+    thumbnail_path: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    created_by: str = ""
+    created_at: datetime
+    updated_at: datetime
+
+
+class SheetVersionHistory(BaseModel):
+    """Version history for a sheet — list of all revisions."""
+
+    current: SheetResponse
+    history: list[SheetResponse] = Field(default_factory=list)
