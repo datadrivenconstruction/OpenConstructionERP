@@ -601,6 +601,32 @@ def get_available_columns(elements: list[dict], file_format: str = "rvt") -> dic
                     if c in available_qty
                 ],
             },
+            "by_storey": {
+                "label": "By Building Storey",
+                "description": "Building Storey + Category + Type — storey-first breakdown",
+                "group_by": [
+                    c
+                    for c in ["level", "category", "type name", "type"]
+                    if c in grouping_cols
+                ][:3],
+                "sum_columns": [
+                    c
+                    for c in ["volume", "area", "length", "count"]
+                    if c in available_qty
+                ],
+            },
+            "by_material": {
+                "label": "By Material",
+                "description": "Material + Category — material-first grouping for procurement",
+                "group_by": [
+                    c
+                    for c in ["material", "category"]
+                    if c in grouping_cols
+                ][:2],
+                "sum_columns": [
+                    c for c in ["volume", "area", "count"] if c in available_qty
+                ],
+            },
             "summary": {
                 "label": "Quick Summary",
                 "description": "Category only — high-level element count",

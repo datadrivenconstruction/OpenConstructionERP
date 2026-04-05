@@ -688,6 +688,51 @@ class ClassifyResponse(BaseModel):
     suggestions: list[ClassificationSuggestion] = Field(default_factory=list)
 
 
+# ── CAD Element Classification schemas ─────────────────────────────────────
+
+
+class CADElementInput(BaseModel):
+    """A single CAD/BIM element for classification mapping."""
+
+    id: str | None = None
+    category: str = Field(..., min_length=1, max_length=255)
+    classification: dict[str, str] = Field(default_factory=dict)
+
+
+class ClassifyElementsRequest(BaseModel):
+    """Request body for deterministic CAD element classification mapping.
+
+    Takes a list of CAD elements (with Revit/IFC categories) and maps them
+    to the requested construction classification standard using lookup tables.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    elements: list[CADElementInput] = Field(..., min_length=1, max_length=10000)
+    standard: str = Field(
+        default="din276", pattern=r"^(din276|nrm|masterformat)$"
+    )
+
+
+class ClassifiedElement(BaseModel):
+    """A CAD element with classification codes added."""
+
+    id: str | None = None
+    category: str
+    classification: dict[str, str] = Field(default_factory=dict)
+    mapped: bool = False
+
+
+class ClassifyElementsResponse(BaseModel):
+    """Response for CAD element classification mapping."""
+
+    elements: list[ClassifiedElement] = Field(default_factory=list)
+    standard: str
+    total: int = 0
+    mapped_count: int = 0
+    unmapped_count: int = 0
+
+
 # ── AI Rate Suggestion schemas ─────────────────────────────────────────────
 
 
