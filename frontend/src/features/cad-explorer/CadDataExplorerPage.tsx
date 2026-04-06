@@ -24,9 +24,7 @@ import {
   Hash,
   Box,
   Ruler,
-  Search,
   X,
-  Download,
 } from 'lucide-react';
 import { Button, Card, Badge, Breadcrumb, EmptyState } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
@@ -36,8 +34,6 @@ import {
   fetchElements,
   aggregate,
   type DescribeResponse,
-  type ValueCountsResponse,
-  type ElementsResponse,
   type AggregateResponse,
   type AggregateGroup,
 } from './api';
@@ -55,9 +51,6 @@ const TABS: { id: TabId; icon: React.ElementType; label: string }[] = [
 
 const AGG_FUNCTIONS = ['sum', 'avg', 'min', 'max', 'count'];
 
-const UNIT_ICONS: Record<string, React.ElementType> = {
-  'm³': Box, 'm²': Ruler, 'm': Ruler, 'pcs': Hash, 'kg': Hash,
-};
 
 /* ── Helpers ───────────────────────────────────────────────────────────── */
 
@@ -691,14 +684,284 @@ function DescribeTab({ sessionId, describe }: { sessionId: string; describe: Des
   );
 }
 
-/* ── Main Page ─────────────────────────────────────────────────────────── */
+/* ── Converter Status (compact) ─────────────────────────────────────────── */
 
-import React from 'react';
+import React, { useRef } from 'react';
+import { Upload, FileUp, Loader2, CheckCircle2, Sparkles, Settings, AlertCircle } from 'lucide-react';
+import { apiGet } from '@/shared/lib/api';
+
+function ConverterStatus() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { data } = useQuery({
+    queryKey: ['cad-converters-status'],
+    queryFn: () => apiGet<{ converters: { id: string; name: string; extensions: string[]; installed: boolean }[] }>('/v1/takeoff/converters'),
+    staleTime: 60000,
+  });
+
+  if (!data?.converters) return null;
+
+  const installed = data.converters.filter((c) => c.installed);
+  const notInstalled = data.converters.filter((c) => !c.installed);
+
+  return (
+    <Card className="p-4">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-xs font-semibold text-content-primary flex items-center gap-1.5">
+          <Settings size={13} className="text-content-tertiary" />
+          {t('explorer.converters', { defaultValue: 'CAD Converters' })}
+        </h3>
+        <span className="text-2xs text-content-quaternary">
+          {installed.length}/{data.converters.length} {t('explorer.installed', { defaultValue: 'installed' })}
+        </span>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {data.converters.map((c) => (
+          <div
+            key={c.id}
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-2xs font-medium border ${
+              c.installed
+                ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800'
+                : 'bg-surface-secondary text-content-tertiary border-border-light'
+            }`}
+          >
+            {c.installed ? <CheckCircle2 size={11} /> : <AlertCircle size={11} />}
+            {c.name}
+            <span className="opacity-60">({c.extensions.join(', ')})</span>
+          </div>
+        ))}
+      </div>
+      {notInstalled.length > 0 && (
+        <p className="mt-2 text-2xs text-content-quaternary">
+          {t('explorer.install_hint', { defaultValue: 'Missing converters can be installed in' })}{' '}
+          <button onClick={() => navigate('/cad-takeoff')} className="text-oe-blue hover:underline">
+            {t('explorer.cad_takeoff_page', { defaultValue: 'CAD/BIM Takeoff' })}
+          </button>
+        </p>
+      )}
+    </Card>
+  );
+}
+
+/* ── Upload & Convert Zone ──────────────────────────────────────────────── */
+
+const CAD_ACCEPT = '.rvt,.ifc,.dwg,.dgn,.dxf,.rfa';
+const CAD_FORMATS = ['RVT', 'IFC', 'DWG', 'DGN', 'DXF', 'RFA'];
+const FORMAT_COLORS: Record<string, string> = {
+  RVT: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+  IFC: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+  DWG: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
+  DGN: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+  DXF: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
+  RFA: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300',
+};
+
+function UploadConvertZone({
+  onSessionReady,
+}: {
+  onSessionReady: (sessionId: string) => void;
+}) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [fileName, setFileName] = useState('');
+  const [fileSizeMB, setFileSizeMB] = useState(0);
+  const [elapsed, setElapsed] = useState(0);
+  const [done, setDone] = useState(false);
+  const elapsedRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const estimatedTotal = Math.max(30, (fileSizeMB / 50) * 60);
+  const progressPct = uploading ? Math.min(95, (elapsed / estimatedTotal) * 100) : done ? 100 : 0;
+  const remaining = Math.max(0, Math.round(estimatedTotal - elapsed));
+
+  const handleFile = useCallback(async (file: File) => {
+    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+    if (!['rvt', 'ifc', 'dwg', 'dgn', 'dxf', 'rfa'].includes(ext)) {
+      addToast({ type: 'warning', title: t('explorer.invalid_format', { defaultValue: 'Unsupported file format. Use RVT, IFC, DWG, or DGN.' }) });
+      return;
+    }
+    if (file.size > 100 * 1024 * 1024) {
+      addToast({ type: 'warning', title: t('explorer.file_too_large', { defaultValue: 'File exceeds 100 MB limit.' }) });
+      return;
+    }
+
+    setFileName(file.name);
+    setFileSizeMB(file.size / (1024 * 1024));
+    setUploading(true);
+    setElapsed(0);
+    setDone(false);
+
+    const start = Date.now();
+    elapsedRef.current = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 1000);
+
+    try {
+      // Use the cadColumns API from the AI module
+      const { useAuthStore } = await import('@/stores/useAuthStore');
+      const token = useAuthStore.getState().accessToken;
+      const form = new FormData();
+      form.append('file', file);
+
+      const res = await fetch('/api/v1/takeoff/cad-columns', {
+        method: 'POST',
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          'X-DDC-Client': 'OE/1.0',
+          Accept: 'application/json',
+        },
+        body: form,
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({ detail: res.statusText }));
+        throw new Error(body.detail || 'Conversion failed');
+      }
+
+      const data = await res.json();
+      if (elapsedRef.current) clearInterval(elapsedRef.current);
+      setUploading(false);
+      setDone(true);
+
+      addToast({
+        type: 'success',
+        title: t('explorer.conversion_complete', { defaultValue: 'Conversion complete' }),
+        message: t('explorer.elements_detected', { defaultValue: '{{count}} elements detected', count: data.total_elements }),
+      });
+
+      // Navigate to explorer with session
+      setTimeout(() => onSessionReady(data.session_id), 500);
+    } catch (err) {
+      if (elapsedRef.current) clearInterval(elapsedRef.current);
+      setUploading(false);
+      addToast({
+        type: 'error',
+        title: t('explorer.conversion_failed', { defaultValue: 'Conversion failed' }),
+        message: err instanceof Error ? err.message : 'Unknown error',
+      });
+    }
+  }, [addToast, t, onSessionReady]);
+
+  return (
+    <div className="space-y-6">
+      {/* Hero section */}
+      <div className="text-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-oe-blue-subtle">
+          <Database size={28} className="text-oe-blue" />
+        </div>
+        <h2 className="text-xl font-bold text-content-primary">
+          {t('explorer.hero_title', { defaultValue: 'CAD-BIM Data Explorer' })}
+        </h2>
+        <p className="mt-2 text-sm text-content-secondary max-w-lg mx-auto">
+          {t('explorer.hero_desc', {
+            defaultValue: 'Upload a 3D model or drawing to extract all elements into a searchable, filterable, pivotable data table — like a spreadsheet for your BIM data.',
+          })}
+        </p>
+      </div>
+
+      {/* Upload zone */}
+      <div
+        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
+        onClick={() => !uploading && inputRef.current?.click()}
+        className={`relative border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all ${
+          uploading ? 'pointer-events-none border-oe-blue/40 bg-oe-blue-subtle/20' :
+          dragOver ? 'border-oe-blue bg-oe-blue-subtle/20 scale-[1.01]' :
+          'border-border-light hover:border-oe-blue/40 hover:bg-surface-secondary/30'
+        }`}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept={CAD_ACCEPT}
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ''; }}
+          className="hidden"
+        />
+
+        {uploading ? (
+          <div className="space-y-4">
+            <div className="flex items-center justify-center gap-3">
+              <Loader2 size={24} className="text-oe-blue animate-spin" />
+              <div className="text-left">
+                <p className="text-sm font-semibold text-content-primary">
+                  {t('explorer.converting', { defaultValue: 'Converting {{name}}...', name: fileName })}
+                </p>
+                <p className="text-xs text-content-tertiary">
+                  {remaining > 0
+                    ? t('explorer.remaining', { defaultValue: '~{{time}}s remaining — extracting elements and detecting columns', time: remaining })
+                    : t('explorer.finalizing', { defaultValue: 'Finalizing...' })}
+                </p>
+              </div>
+              <div className="text-right shrink-0">
+                <span className="text-lg font-bold text-oe-blue tabular-nums">{Math.round(progressPct)}%</span>
+                <p className="text-2xs text-content-quaternary tabular-nums">{elapsed}s / ~{Math.round(estimatedTotal)}s</p>
+              </div>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-surface-secondary">
+              <div
+                className="h-full rounded-full bg-oe-blue transition-all duration-1000 ease-linear"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+          </div>
+        ) : done ? (
+          <div className="flex items-center justify-center gap-3">
+            <CheckCircle2 size={24} className="text-green-500" />
+            <p className="text-sm font-semibold text-green-600">
+              {t('explorer.done', { defaultValue: 'Conversion complete! Loading explorer...' })}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <FileUp size={40} className="mx-auto text-content-tertiary" />
+            <div>
+              <p className="text-sm font-medium text-content-primary">
+                {t('explorer.drop_cad', { defaultValue: 'Drop your CAD/BIM file here' })}
+              </p>
+              <p className="text-xs text-content-tertiary mt-1">
+                {t('explorer.or_click', { defaultValue: 'or click to browse — max 100 MB' })}
+              </p>
+            </div>
+            <div className="flex items-center justify-center gap-2 mt-3">
+              {CAD_FORMATS.map((fmt) => (
+                <span key={fmt} className={`px-2 py-0.5 rounded-md text-2xs font-bold ${FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600'}`}>
+                  .{fmt.toLowerCase()}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Features grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          { icon: Table2, title: t('explorer.feat_table', { defaultValue: 'Data Table' }), desc: t('explorer.feat_table_desc', { defaultValue: 'Sort, filter, paginate all elements' }) },
+          { icon: Layers, title: t('explorer.feat_pivot', { defaultValue: 'Pivot & Group' }), desc: t('explorer.feat_pivot_desc', { defaultValue: 'Group by any column, aggregate sums' }) },
+          { icon: BarChart3, title: t('explorer.feat_charts', { defaultValue: 'Visualize' }), desc: t('explorer.feat_charts_desc', { defaultValue: 'Bar and pie charts by category' }) },
+          { icon: Sparkles, title: t('explorer.feat_describe', { defaultValue: 'Statistics' }), desc: t('explorer.feat_describe_desc', { defaultValue: 'Column stats like df.describe()' }) },
+        ].map(({ icon: Icon, title, desc }) => (
+          <Card key={title} className="p-4 text-center">
+            <Icon size={20} className="mx-auto text-oe-blue mb-2" />
+            <p className="text-xs font-semibold text-content-primary">{title}</p>
+            <p className="text-2xs text-content-tertiary mt-0.5">{desc}</p>
+          </Card>
+        ))}
+      </div>
+
+      {/* Converter status */}
+      <ConverterStatus />
+    </div>
+  );
+}
+
+/* ── Main Page ─────────────────────────────────────────────────────────── */
 
 export function CadDataExplorerPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const sessionId = searchParams.get('session') || '';
   const [activeTab, setActiveTab] = useState<TabId>('table');
 
@@ -708,20 +971,19 @@ export function CadDataExplorerPage() {
     enabled: !!sessionId,
   });
 
+  const handleSessionReady = useCallback((newSessionId: string) => {
+    setSearchParams({ session: newSessionId });
+  }, [setSearchParams]);
+
   if (!sessionId) {
     return (
-      <div className="max-w-5xl mx-auto px-6 py-6">
+      <div className="max-w-4xl mx-auto px-6 py-6">
         <Breadcrumb items={[
           { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
-          { label: t('explorer.title', { defaultValue: 'Data Explorer' }) },
+          { label: t('explorer.title', { defaultValue: 'CAD-BIM Explorer' }) },
         ]} />
-        <div className="mt-8">
-          <EmptyState
-            icon={<Database size={36} />}
-            title={t('explorer.no_session', { defaultValue: 'No data loaded' })}
-            description={t('explorer.no_session_desc', { defaultValue: 'Upload a CAD/BIM file on the CAD Takeoff page first, then click "Open in Data Explorer".' })}
-            action={{ label: t('explorer.go_to_cad', { defaultValue: 'Go to CAD Takeoff' }), onClick: () => navigate('/cad-takeoff') }}
-          />
+        <div className="mt-4">
+          <UploadConvertZone onSessionReady={handleSessionReady} />
         </div>
       </div>
     );
@@ -750,9 +1012,15 @@ export function CadDataExplorerPage() {
             )}
           </div>
         </div>
-        <Button variant="ghost" size="sm" onClick={() => navigate('/cad-takeoff')}>
-          {t('explorer.back_to_cad', { defaultValue: 'Back to CAD Takeoff' })}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" size="sm" onClick={() => { setSearchParams({}); }}>
+            <Upload size={13} className="mr-1" />
+            <span>{t('explorer.new_file', { defaultValue: 'New File' })}</span>
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => navigate('/cad-takeoff')}>
+            {t('explorer.back_to_cad', { defaultValue: 'Back to QTO' })}
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
