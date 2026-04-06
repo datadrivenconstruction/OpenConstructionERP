@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   FolderPlus, FolderOpen, ArrowRight, MoreHorizontal, Copy, Trash2, Archive, ExternalLink,
   Search, ChevronDown, ArrowUpDown, Star,
@@ -13,6 +13,7 @@ import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { type BOQWithPositions } from '../boq/api';
+import { CreateProjectModal } from './CreateProjectPage';
 
 interface BOQBasic {
   id: string;
@@ -57,7 +58,17 @@ const currencyFmt = new Intl.NumberFormat(getIntlLocale(), {
 
 export function ProjectsPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Create project modal
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  useEffect(() => {
+    const state = location.state as { openCreateModal?: boolean } | null;
+    if (state?.openCreateModal) {
+      setCreateModalOpen(true);
+      window.history.replaceState({}, '');
+    }
+  }, [location.state]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(() => {
@@ -260,7 +271,7 @@ export function ProjectsPage() {
         <Button
           variant="primary"
           icon={<FolderPlus size={16} />}
-          onClick={() => navigate('/projects/new')}
+          onClick={() => setCreateModalOpen(true)}
         >
           {t('projects.new_project')}
         </Button>
@@ -428,7 +439,7 @@ export function ProjectsPage() {
           })}
           action={{
             label: t('projects.new_project', { defaultValue: 'Create Project' }),
-            onClick: () => navigate('/projects/new'),
+            onClick: () => setCreateModalOpen(true),
           }}
         />
       ) : (
@@ -522,6 +533,11 @@ export function ProjectsPage() {
           </div>
         </>
       )}
+
+      <CreateProjectModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+      />
     </div>
   );
 }

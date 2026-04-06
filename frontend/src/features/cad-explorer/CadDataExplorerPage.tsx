@@ -1204,76 +1204,59 @@ function UploadConvertZone({
   }, [addToast, t, onSessionReady, addQueueTask, updateQueueTask]);
 
   return (
-    <div className="space-y-5">
-      {/* Compact header + upload zone in one card */}
-      <Card className="overflow-hidden">
-        <div
-          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-          onDragLeave={() => setDragOver(false)}
-          onDrop={(e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
-          onClick={() => !uploading && inputRef.current?.click()}
-          className={`p-6 cursor-pointer transition-all ${
-            uploading ? 'pointer-events-none bg-oe-blue-subtle/10' :
-            dragOver ? 'bg-oe-blue-subtle/20 scale-[1.005]' :
-            'hover:bg-surface-secondary/30'
-          }`}
-        >
-          <input ref={inputRef} type="file" accept={CAD_ACCEPT} onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ''; }} className="hidden" />
+    <div>
+      <div
+        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
+        onClick={() => !uploading && inputRef.current?.click()}
+        className={`relative rounded-2xl border-2 border-dashed transition-all cursor-pointer ${
+          uploading ? 'pointer-events-none border-oe-blue/40 bg-oe-blue-subtle/5' :
+          dragOver ? 'border-oe-blue bg-oe-blue-subtle/10 scale-[1.005] shadow-lg shadow-oe-blue/10' :
+          'border-border-light hover:border-oe-blue/50 hover:bg-surface-secondary/20'
+        }`}
+      >
+        <input ref={inputRef} type="file" accept={CAD_ACCEPT} onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ''; }} className="hidden" />
 
-          {uploading ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-4">
-                <Loader2 size={20} className="text-oe-blue animate-spin shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-content-primary truncate">{t('explorer.converting', { defaultValue: 'Converting {{name}}...', name: fileName })}</p>
-                  <p className="text-2xs text-content-tertiary">{remaining > 0 ? `~${remaining}s remaining` : 'Finalizing...'}</p>
-                </div>
-                <span className="text-lg font-bold text-oe-blue tabular-nums shrink-0">{Math.round(progressPct)}%</span>
-              </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-secondary">
-                <div className="h-full rounded-full bg-oe-blue transition-all duration-1000" style={{ width: `${progressPct}%` }} />
-              </div>
-            </div>
-          ) : done ? (
-            <div className="flex items-center justify-center gap-2 py-2">
-              <CheckCircle2 size={18} className="text-green-500" />
-              <p className="text-sm font-medium text-green-600">{t('explorer.done', { defaultValue: 'Conversion complete! Loading...' })}</p>
-            </div>
-          ) : (
-            <div className="flex items-center gap-5">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-oe-blue-subtle shrink-0">
-                <FileUp size={24} className="text-oe-blue" />
-              </div>
+        {uploading ? (
+          <div className="px-6 py-5 space-y-3">
+            <div className="flex items-center gap-4">
+              <Loader2 size={20} className="text-oe-blue animate-spin shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-content-primary">{t('explorer.drop_cad', { defaultValue: 'Drop a CAD/BIM file to start exploring' })}</p>
-                <p className="text-xs text-content-tertiary mt-0.5">{t('explorer.or_click', { defaultValue: 'or click to browse — extract elements into a data table with pivot, charts, and statistics' })}</p>
-                <div className="flex items-center gap-1.5 mt-2">
-                  {CAD_FORMATS.map((fmt) => (
-                    <span key={fmt} className={`px-1.5 py-0.5 rounded text-2xs font-bold ${FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600'}`}>.{fmt.toLowerCase()}</span>
-                  ))}
-                  <span className="text-2xs text-content-quaternary ml-2">{t('explorer.max_size', { defaultValue: 'max 100 MB' })}</span>
-                </div>
+                <p className="text-sm font-semibold text-content-primary truncate">{t('explorer.converting', { defaultValue: 'Converting {{name}}...', name: fileName })}</p>
+                <p className="text-2xs text-content-tertiary">{remaining > 0 ? `~${remaining}s remaining` : 'Finalizing...'}</p>
               </div>
+              <span className="text-lg font-bold text-oe-blue tabular-nums shrink-0">{Math.round(progressPct)}%</span>
             </div>
-          )}
-        </div>
-      </Card>
-
-      {/* What you get — compact feature pills */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-2xs font-semibold text-content-tertiary uppercase tracking-wide">{t('explorer.features', { defaultValue: 'Features' })}:</span>
-        {[
-          { icon: Table2, label: t('explorer.feat_table', { defaultValue: 'Data Table' }) },
-          { icon: Layers, label: t('explorer.feat_pivot', { defaultValue: 'Pivot & Group' }) },
-          { icon: BarChart3, label: t('explorer.feat_charts', { defaultValue: 'Charts' }) },
-          { icon: Sparkles, label: t('explorer.feat_describe', { defaultValue: 'Statistics' }) },
-          { icon: DownloadIcon, label: t('explorer.feat_export', { defaultValue: 'CSV Export' }) },
-          { icon: SearchIcon, label: t('explorer.feat_search', { defaultValue: 'Search' }) },
-        ].map(({ icon: Icon, label }) => (
-          <span key={label} className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-surface-secondary text-2xs font-medium text-content-secondary">
-            <Icon size={11} className="text-oe-blue" /> {label}
-          </span>
-        ))}
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-secondary">
+              <div className="h-full rounded-full bg-oe-blue transition-all duration-1000" style={{ width: `${progressPct}%` }} />
+            </div>
+          </div>
+        ) : done ? (
+          <div className="flex items-center justify-center gap-2 px-6 py-5">
+            <CheckCircle2 size={18} className="text-green-500" />
+            <p className="text-sm font-medium text-green-600">{t('explorer.done', { defaultValue: 'Conversion complete! Loading...' })}</p>
+          </div>
+        ) : (
+          <div className="px-6 py-5 flex items-center gap-5">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-oe-blue-subtle shrink-0">
+              <FileUp size={22} className="text-oe-blue" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-content-primary">
+                {t('explorer.drop_cad', { defaultValue: 'Drop a CAD/BIM file to explore' })}
+              </p>
+              <p className="text-xs text-content-tertiary mt-0.5">
+                {t('explorer.or_click', { defaultValue: 'or click to browse — data table, pivot, charts & statistics' })}
+              </p>
+            </div>
+            <div className="hidden sm:flex items-center gap-1.5 shrink-0">
+              {CAD_FORMATS.map((fmt) => (
+                <span key={fmt} className={`px-1.5 py-0.5 rounded text-2xs font-bold ${FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600'}`}>.{fmt.toLowerCase()}</span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1470,7 +1453,7 @@ export function CadDataExplorerPage() {
     };
 
     return (
-      <div className="max-w-content mx-auto px-4 py-4 space-y-6 animate-fade-in">
+      <div className="max-w-content mx-auto px-4 py-4 space-y-5 animate-fade-in">
         <Breadcrumb items={[
           { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
           { label: t('explorer.title', { defaultValue: 'CAD-BIM Explorer' }) },
@@ -1479,19 +1462,18 @@ export function CadDataExplorerPage() {
         {/* Upload zone */}
         <UploadConvertZone onSessionReady={handleSessionReady} />
 
-        {/* Recent sessions as cards grid */}
+        {/* Recent sessions — compact table */}
         {recentSessions.length > 0 && (
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-content-primary flex items-center gap-2">
-                <Clock size={15} className="text-content-tertiary" />
-                {t('explorer.recent_models', { defaultValue: 'Recent CAD/BIM Models' })}
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-xs font-semibold text-content-tertiary uppercase tracking-wider">
+                {t('explorer.recent_models', { defaultValue: 'Recent Models' })}
               </h2>
-              <span className="text-2xs text-content-quaternary">
+              <span className="text-2xs text-content-quaternary tabular-nums">
                 {allSessions.length} {t('explorer.total_analyses', { defaultValue: 'total' })}
               </span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="rounded-xl border border-border-light bg-surface-elevated overflow-hidden divide-y divide-border-light">
               {recentSessions.map((s) => {
                 const fmt = (s.file_format || '').toUpperCase();
                 const timeAgo = s.created_at ? (() => {
@@ -1504,38 +1486,28 @@ export function CadDataExplorerPage() {
                 })() : '';
 
                 return (
-                  <Card
+                  <button
                     key={s.session_id}
-                    hoverable
-                    className="cursor-pointer transition-all hover:shadow-md"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-surface-hover transition-colors group"
                     onClick={() => setSearchParams({ session: s.session_id })}
                   >
-                    <div className="p-4">
-                      <div className="flex items-start justify-between gap-2 mb-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle shrink-0">
-                          <Database size={18} className="text-oe-blue" />
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <span className={`px-2 py-0.5 rounded-md text-2xs font-bold ${FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600'}`}>
-                            {fmt}
-                          </span>
-                          {s.is_permanent ? (
-                            <Badge variant="success" size="sm">{t('explorer.saved', { defaultValue: 'Saved' })}</Badge>
-                          ) : (
-                            <Badge variant="neutral" size="sm">24h</Badge>
-                          )}
-                        </div>
-                      </div>
-                      <h3 className="text-sm font-semibold text-content-primary truncate mb-1">
-                        {s.display_name}
-                      </h3>
-                      <div className="flex items-center gap-3 text-2xs text-content-tertiary">
-                        <span className="tabular-nums">{s.element_count.toLocaleString()} {t('explorer.elements', { defaultValue: 'elements' })}</span>
-                        <span>{s.extraction_time.toFixed(1)}s</span>
-                        {timeAgo && <span className="text-content-quaternary">{timeAgo}</span>}
-                      </div>
-                    </div>
-                  </Card>
+                    <span className={`px-1.5 py-0.5 rounded text-2xs font-bold shrink-0 ${FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>
+                      {fmt || '?'}
+                    </span>
+                    <span className="text-sm font-medium text-content-primary truncate flex-1">
+                      {s.display_name}
+                    </span>
+                    <span className="text-2xs text-content-tertiary tabular-nums shrink-0">
+                      {s.element_count.toLocaleString()} el.
+                    </span>
+                    {s.is_permanent && (
+                      <Save size={12} className="text-green-500 shrink-0" />
+                    )}
+                    <span className="text-2xs text-content-quaternary tabular-nums shrink-0 w-12 text-right">
+                      {timeAgo}
+                    </span>
+                    <ChevronRight size={14} className="text-content-quaternary shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </button>
                 );
               })}
             </div>

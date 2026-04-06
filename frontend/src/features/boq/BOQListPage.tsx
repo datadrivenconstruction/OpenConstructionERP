@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Table, Table2, ArrowRight, Copy, Trash2, Plus,
   Search, ArrowUpDown, ChevronDown, GitCompareArrows, X, Loader2,
@@ -14,6 +14,8 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useModuleStore } from '@/stores/useModuleStore';
 import { PresenceAvatars } from '@/modules/collaboration/components/PresenceAvatars';
 import { usePresenceStore } from '@/modules/collaboration/hooks/usePresence';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { CreateBOQModal } from './CreateBOQPage';
 
 interface Project {
   id: string;
@@ -290,8 +292,25 @@ type SortField = 'name' | 'total' | 'positions' | 'date';
 export function BOQListPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
+  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+
+  // Create BOQ modal
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [createModalProjectId, setCreateModalProjectId] = useState<string | undefined>();
+
+  // Handle redirect from /projects/:id/boq/new route
+  useEffect(() => {
+    const state = location.state as { openCreateModal?: boolean; projectId?: string } | null;
+    if (state?.openCreateModal) {
+      setCreateModalProjectId(state.projectId);
+      setCreateModalOpen(true);
+      // Clear location state so modal doesn't re-open on navigation
+      window.history.replaceState({}, '');
+    }
+  }, [location.state]);
 
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -302,6 +321,7 @@ export function BOQListPage() {
     } catch { return ''; }
   });
   const [projectFilter, setProjectFilter] = useState(() => {
+    if (activeProjectId) return activeProjectId;
     try {
       const saved = JSON.parse(localStorage.getItem('oe_boq_filters') ?? '{}');
       return saved.project ?? '';
@@ -547,7 +567,11 @@ export function BOQListPage() {
           <Button
             variant="primary"
             icon={<Plus size={16} />}
-            onClick={() => navigate('/projects')}
+            onClick={() => {
+              const pid = activeProjectId || projectFilter || (projects && projects.length === 1 ? projects[0]!.id : undefined) || undefined;
+              setCreateModalProjectId(pid);
+              setCreateModalOpen(true);
+            }}
           >
             {t('boq.new_estimate', { defaultValue: 'New Estimate' })}
           </Button>
@@ -878,6 +902,13 @@ export function BOQListPage() {
           onClose={exitCompareMode}
         />
       )}
+
+      {/* Create BOQ modal */}
+      <CreateBOQModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        defaultProjectId={createModalProjectId}
+      />
     </div>
   );
 }

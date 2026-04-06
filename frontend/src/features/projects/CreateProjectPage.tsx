@@ -1,8 +1,9 @@
-import { useState, type FormEvent, type ChangeEvent } from 'react';
+import { useState, useEffect, type FormEvent, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Button, Input, Card, InfoHint, Breadcrumb } from '@/shared/ui';
+import { X, FolderPlus } from 'lucide-react';
+import { Button, Input, InfoHint } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { projectsApi, type CreateProjectData } from './api';
 
@@ -220,9 +221,14 @@ const LANGUAGES = [
   { value: 'fi', label: 'Suomi' },
 ];
 
-// ── Component ─────────────────────────────────────────────────────────────
+// ── Modal ─────────────────────────────────────────────────────────────────
 
-export function CreateProjectPage() {
+interface CreateProjectModalProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -237,17 +243,28 @@ export function CreateProjectPage() {
     locale: 'en',
   });
 
-  // Custom value inputs shown when "__custom__" is selected
   const [customRegion, setCustomRegion] = useState('');
   const [customStandard, setCustomStandard] = useState('');
   const [customCurrency, setCustomCurrency] = useState('');
   const [regionalFactor, setRegionalFactor] = useState<number>(1.0);
+
+  // Reset form when modal opens
+  useEffect(() => {
+    if (open) {
+      setForm({ name: '', description: '', region: '', classification_standard: '', currency: '', locale: 'en' });
+      setCustomRegion('');
+      setCustomStandard('');
+      setCustomCurrency('');
+      setRegionalFactor(1.0);
+    }
+  }, [open]);
 
   const mutation = useMutation({
     mutationFn: projectsApi.create,
     onSuccess: (project) => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       addToast({ type: 'success', title: t('toasts.project_created', { defaultValue: 'Project created' }) });
+      onClose();
       navigate(`/projects/${project.id}`);
     },
     onError: (error: Error) => {
@@ -259,7 +276,6 @@ export function CreateProjectPage() {
     e.preventDefault();
     if (!form.name.trim()) return;
 
-    // Resolve custom values before submitting
     const data: CreateProjectData = {
       ...form,
       region: form.region === '__custom__' ? customRegion : form.region,
@@ -277,168 +293,202 @@ export function CreateProjectPage() {
   const set = (field: keyof CreateProjectData, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
+  if (!open) return null;
+
   return (
-    <div className="max-w-2xl mx-auto animate-fade-in">
-      <Breadcrumb
-        className="mb-4"
-        items={[
-          { label: t('projects.title', 'Projects'), to: '/projects' },
-          { label: t('projects.new_project', 'New Project') },
-        ]}
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
+        onClick={onClose}
       />
 
-      <h1 className="text-2xl font-bold text-content-primary mb-4">
-        {t('projects.new_project')}
-      </h1>
+      {/* Modal */}
+      <div className="relative w-full max-w-2xl mx-4 max-h-[90vh] rounded-2xl bg-surface-elevated border border-border-light shadow-2xl animate-fade-in flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-primary/10">
+              <FolderPlus size={20} className="text-accent-primary" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-content-primary">
+                {t('projects.new_project', { defaultValue: 'New Project' })}
+              </h2>
+              <p className="text-xs text-content-tertiary">
+                {t('projects.create_subtitle', { defaultValue: 'Set up a new construction project' })}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-hover transition-colors"
+          >
+            <X size={18} />
+          </button>
+        </div>
 
-      {/* Field-level hints */}
-      <InfoHint className="mb-6" text={t('projects.create_hint', { defaultValue: 'Region determines available cost databases and VAT rates. Classification standard defines the cost structure: DIN 276 for DACH countries, NRM for UK, MasterFormat for US/Canada, UniFormat for Oceania. Currency sets all pricing in the BOQ.' })} />
+        {/* Body — scrollable */}
+        <div className="overflow-y-auto px-6 pb-6 flex-1">
+          <InfoHint className="mb-5" text={t('projects.create_hint', { defaultValue: 'Region determines available cost databases and VAT rates. Classification standard defines the cost structure: DIN 276 for DACH countries, NRM for UK, MasterFormat for US/Canada, UniFormat for Oceania. Currency sets all pricing in the BOQ.' })} />
 
-      <Card>
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <Input
-            label={t('projects.project_name')}
-            value={form.name}
-            onChange={(e) => set('name', e.target.value)}
-            placeholder={t('projects.project_name_placeholder', {
-              defaultValue: 'e.g. Office Tower Downtown',
-            })}
-            required
-            autoFocus
-          />
-
-          <div>
-            <label className="text-sm font-medium text-content-primary block mb-1.5">
-              {t('projects.description', { defaultValue: 'Description' })}
-            </label>
-            <textarea
-              value={form.description}
-              onChange={(e) => set('description', e.target.value)}
-              placeholder={t('projects.description_placeholder', {
-                defaultValue: 'Project description, scope, notes...',
+          <form id="create-project-form" onSubmit={handleSubmit} className="space-y-4">
+            <Input
+              label={t('projects.project_name')}
+              value={form.name}
+              onChange={(e) => set('name', e.target.value)}
+              placeholder={t('projects.project_name_placeholder', {
+                defaultValue: 'e.g. Office Tower Downtown',
               })}
-              rows={3}
-              className="w-full rounded-lg border border-border px-3 py-2.5 text-sm text-content-primary placeholder:text-content-tertiary bg-surface-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent transition-all duration-fast ease-oe hover:border-content-tertiary resize-none"
+              required
+              autoFocus
             />
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <GroupedSelectField
-                label={t('projects.region', { defaultValue: 'Region' })}
-                value={form.region ?? ''}
-                groups={REGION_GROUPS}
-                placeholder={t('projects.select_region', { defaultValue: '-- Select region --' })}
-                onChange={(v) => set('region', v)}
+              <label className="text-sm font-medium text-content-primary block mb-1.5">
+                {t('projects.description', { defaultValue: 'Description' })}
+              </label>
+              <textarea
+                value={form.description}
+                onChange={(e) => set('description', e.target.value)}
+                placeholder={t('projects.description_placeholder', {
+                  defaultValue: 'Project description, scope, notes...',
+                })}
+                rows={2}
+                className="w-full rounded-lg border border-border px-3 py-2.5 text-sm text-content-primary placeholder:text-content-tertiary bg-surface-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent transition-all duration-fast ease-oe hover:border-content-tertiary resize-none"
               />
-              {form.region === '__custom__' && (
-                <input
-                  type="text"
-                  value={customRegion}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => setCustomRegion(e.target.value)}
-                  placeholder={t('projects.enter_custom_region', {
-                    defaultValue: 'Enter custom region...',
-                  })}
-                  className="mt-2 h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
-                />
-              )}
             </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <GroupedSelectField
+                  label={t('projects.region', { defaultValue: 'Region' })}
+                  value={form.region ?? ''}
+                  groups={REGION_GROUPS}
+                  placeholder={t('projects.select_region', { defaultValue: '-- Select region --' })}
+                  onChange={(v) => set('region', v)}
+                />
+                {form.region === '__custom__' && (
+                  <input
+                    type="text"
+                    value={customRegion}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setCustomRegion(e.target.value)}
+                    placeholder={t('projects.enter_custom_region', {
+                      defaultValue: 'Enter custom region...',
+                    })}
+                    className="mt-2 h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                  />
+                )}
+              </div>
+              <div>
+                <GroupedSelectField
+                  label={t('projects.classification_standard', {
+                    defaultValue: 'Classification Standard',
+                  })}
+                  value={form.classification_standard ?? ''}
+                  groups={STANDARD_GROUPS}
+                  placeholder={t('projects.select_standard', {
+                    defaultValue: '-- Select standard --',
+                  })}
+                  onChange={(v) => set('classification_standard', v)}
+                />
+                {form.classification_standard === '__custom__' && (
+                  <input
+                    type="text"
+                    value={customStandard}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setCustomStandard(e.target.value)}
+                    placeholder={t('projects.enter_custom_standard', {
+                      defaultValue: 'Enter custom standard...',
+                    })}
+                    className="mt-2 h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                  />
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <GroupedSelectField
+                  label={t('projects.currency', { defaultValue: 'Currency' })}
+                  value={form.currency ?? ''}
+                  groups={CURRENCY_GROUPS}
+                  placeholder={t('projects.select_currency', {
+                    defaultValue: '-- Select currency --',
+                  })}
+                  onChange={(v) => set('currency', v)}
+                />
+                {form.currency === '__custom__' && (
+                  <input
+                    type="text"
+                    value={customCurrency}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setCustomCurrency(e.target.value)}
+                    placeholder={t('projects.enter_custom_currency', {
+                      defaultValue: 'e.g. XAF',
+                    })}
+                    maxLength={10}
+                    className="mt-2 h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+                  />
+                )}
+              </div>
+              <SelectField
+                label={t('projects.language', { defaultValue: 'Language' })}
+                value={form.locale ?? 'en'}
+                options={LANGUAGES}
+                onChange={(v) => set('locale', v)}
+              />
+            </div>
+
+            {/* Regional price coefficient */}
             <div>
-              <GroupedSelectField
-                label={t('projects.classification_standard', {
-                  defaultValue: 'Classification Standard',
-                })}
-                value={form.classification_standard ?? ''}
-                groups={STANDARD_GROUPS}
-                placeholder={t('projects.select_standard', {
-                  defaultValue: '-- Select standard --',
-                })}
-                onChange={(v) => set('classification_standard', v)}
+              <label className="mb-1.5 block text-sm font-medium text-content-secondary">
+                {t('projects.regional_factor', { defaultValue: 'Regional Factor' })}
+              </label>
+              <input
+                type="number"
+                min="0.5"
+                max="2.0"
+                step="0.01"
+                value={regionalFactor}
+                onChange={(e) => setRegionalFactor(parseFloat(e.target.value) || 1.0)}
+                placeholder="1.00"
+                className="h-10 w-full max-w-[200px] rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary tabular-nums placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
               />
-              {form.classification_standard === '__custom__' && (
-                <input
-                  type="text"
-                  value={customStandard}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => setCustomStandard(e.target.value)}
-                  placeholder={t('projects.enter_custom_standard', {
-                    defaultValue: 'Enter custom standard...',
-                  })}
-                  className="mt-2 h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
-                />
-              )}
+              <p className="mt-1 text-xs text-content-tertiary">
+                {t('projects.regional_factor_hint', { defaultValue: 'Multiply all rates by this factor (e.g. Munich = 1.12, Berlin = 1.05)' })}
+              </p>
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <GroupedSelectField
-                label={t('projects.currency', { defaultValue: 'Currency' })}
-                value={form.currency ?? ''}
-                groups={CURRENCY_GROUPS}
-                placeholder={t('projects.select_currency', {
-                  defaultValue: '-- Select currency --',
-                })}
-                onChange={(v) => set('currency', v)}
-              />
-              {form.currency === '__custom__' && (
-                <input
-                  type="text"
-                  value={customCurrency}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => setCustomCurrency(e.target.value)}
-                  placeholder={t('projects.enter_custom_currency', {
-                    defaultValue: 'e.g. XAF',
-                  })}
-                  maxLength={10}
-                  className="mt-2 h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
-                />
-              )}
-            </div>
-            <SelectField
-              label={t('projects.language', { defaultValue: 'Language' })}
-              value={form.locale ?? 'en'}
-              options={LANGUAGES}
-              onChange={(v) => set('locale', v)}
-            />
-          </div>
+            {mutation.error && (
+              <div className="rounded-lg bg-semantic-error-bg px-3 py-2 text-sm text-semantic-error">
+                {(mutation.error as Error).message || t('projects.create_error', { defaultValue: 'Failed to create project' })}
+              </div>
+            )}
+          </form>
+        </div>
 
-          {/* Regional price coefficient */}
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-content-secondary">
-              {t('projects.regional_factor', { defaultValue: 'Regional Factor' })}
-            </label>
-            <input
-              type="number"
-              min="0.5"
-              max="2.0"
-              step="0.01"
-              value={regionalFactor}
-              onChange={(e) => setRegionalFactor(parseFloat(e.target.value) || 1.0)}
-              placeholder="1.00"
-              className="h-10 w-full max-w-[200px] rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary tabular-nums placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
-            />
-            <p className="mt-1 text-xs text-content-tertiary">
-              {t('projects.regional_factor_hint', { defaultValue: 'Multiply all rates by this factor (e.g. Munich = 1.12, Berlin = 1.05)' })}
-            </p>
-          </div>
-
-          {mutation.error && (
-            <div className="rounded-lg bg-semantic-error-bg px-3 py-2 text-sm text-semantic-error">
-              {(mutation.error as Error).message || t('projects.create_error', { defaultValue: 'Failed to create project' })}
-            </div>
-          )}
-
-          <div className="flex items-center justify-end gap-3 pt-2">
-            <Button variant="secondary" type="button" onClick={() => navigate('/projects')}>
-              {t('common.cancel')}
-            </Button>
-            <Button variant="primary" type="submit" loading={mutation.isPending}>
-              {t('common.create')}
-            </Button>
-          </div>
-        </form>
-      </Card>
+        {/* Footer — fixed */}
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light shrink-0">
+          <Button variant="secondary" type="button" onClick={onClose}>
+            {t('common.cancel')}
+          </Button>
+          <Button variant="primary" type="submit" form="create-project-form" loading={mutation.isPending}>
+            {t('common.create')}
+          </Button>
+        </div>
+      </div>
     </div>
   );
+}
+
+// Route compat — redirect to /projects and open modal
+export function CreateProjectPage() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    navigate('/projects', { state: { openCreateModal: true }, replace: true });
+  }, [navigate]);
+
+  return null;
 }
 
 // ── Grouped Select (with <optgroup>) ──────────────────────────────────────

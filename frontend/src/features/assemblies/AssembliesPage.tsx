@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { triggerDownload } from '@/shared/lib/api';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Search, Plus, Layers, ChevronDown, ChevronLeft, ChevronRight, MoreHorizontal,
   Copy, Trash2, Download, ExternalLink, FileSpreadsheet, X, Sparkles, Loader2,
@@ -17,6 +17,7 @@ import {
   type AssemblySearchResponse,
   type AIGeneratedAssembly,
 } from './api';
+import { CreateAssemblyModal } from './CreateAssemblyPage';
 
 /* -- Constants ------------------------------------------------------------ */
 
@@ -81,8 +82,19 @@ function downloadFile(content: string, filename: string, mimeType: string) {
 export function AssembliesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
+
+  // Create assembly modal
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  useEffect(() => {
+    const state = location.state as { openCreateModal?: boolean } | null;
+    if (state?.openCreateModal) {
+      setCreateModalOpen(true);
+      window.history.replaceState({}, '');
+    }
+  }, [location.state]);
 
   const PAGE_SIZE = 50;
 
@@ -233,7 +245,7 @@ export function AssembliesPage() {
           <Button
             variant="primary"
             icon={<Plus size={16} />}
-            onClick={() => navigate('/assemblies/new')}
+            onClick={() => setCreateModalOpen(true)}
           >
             {t('assemblies.new_assembly', 'New Assembly')}
           </Button>
@@ -315,7 +327,7 @@ export function AssembliesPage() {
             !query && !category
               ? {
                   label: t('assemblies.new_assembly', { defaultValue: 'Create Assembly' }),
-                  onClick: () => navigate('/assemblies/new'),
+                  onClick: () => setCreateModalOpen(true),
                 }
               : undefined
           }
@@ -431,6 +443,11 @@ export function AssembliesPage() {
           }}
         />
       )}
+
+      <CreateAssemblyModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+      />
     </div>
   );
 }

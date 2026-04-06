@@ -1,3 +1,3 @@
 export { AssembliesPage } from './AssembliesPage';
 export { AssemblyEditorPage } from './AssemblyEditorPage';
-export { CreateAssemblyPage } from './CreateAssemblyPage';
+export { CreateAssemblyPage, CreateAssemblyModal } from './CreateAssemblyPage';

@@ -1,9 +1,9 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
-import { Button, Input, Card } from '@/shared/ui';
+import { X, Layers } from 'lucide-react';
+import { Button, Input } from '@/shared/ui';
 import { assembliesApi, type CreateAssemblyData } from './api';
 
 /* -- Constants ------------------------------------------------------------ */
@@ -59,9 +59,14 @@ const STANDARDS = [
   { value: 'uniclass', key: 'assemblies.std_uniclass', defaultLabel: 'Uniclass' },
 ];
 
-/* -- Component ------------------------------------------------------------ */
+/* -- Modal ---------------------------------------------------------------- */
 
-export function CreateAssemblyPage() {
+interface CreateAssemblyModalProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+export function CreateAssemblyModal({ open, onClose }: CreateAssemblyModalProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -77,10 +82,21 @@ export function CreateAssemblyPage() {
     bid_factor: '1.00',
   });
 
+  useEffect(() => {
+    if (open) {
+      setForm({
+        code: '', name: '', unit: 'm2', category: 'general',
+        classificationStandard: '', classificationCode: '',
+        currency: 'EUR', bid_factor: '1.00',
+      });
+    }
+  }, [open]);
+
   const mutation = useMutation({
     mutationFn: (data: CreateAssemblyData) => assembliesApi.create(data),
     onSuccess: (assembly) => {
       queryClient.invalidateQueries({ queryKey: ['assemblies'] });
+      onClose();
       navigate(`/assemblies/${assembly.id}`);
     },
   });
@@ -111,147 +127,154 @@ export function CreateAssemblyPage() {
   const selectClass =
     'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary cursor-pointer appearance-none';
 
+  if (!open) return null;
+
   return (
-    <div className="max-w-2xl mx-auto animate-fade-in">
-      <button
-        onClick={() => navigate('/assemblies')}
-        className="mb-4 flex items-center gap-1.5 text-sm text-content-secondary hover:text-content-primary transition-colors"
-      >
-        <ArrowLeft size={14} />
-        {t('assemblies.title', 'Assemblies')}
-      </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
+        onClick={onClose}
+      />
 
-      <h1 className="text-2xl font-bold text-content-primary mb-6">
-        {t('assemblies.new_assembly', 'New Assembly')}
-      </h1>
+      <div className="relative w-full max-w-2xl mx-4 max-h-[90vh] rounded-2xl bg-surface-elevated border border-border-light shadow-2xl animate-fade-in flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-primary/10">
+              <Layers size={20} className="text-accent-primary" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-content-primary">
+                {t('assemblies.new_assembly', { defaultValue: 'New Assembly' })}
+              </h2>
+              <p className="text-xs text-content-tertiary">
+                {t('assemblies.create_subtitle', { defaultValue: 'Create a reusable cost assembly' })}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-hover transition-colors"
+          >
+            <X size={18} />
+          </button>
+        </div>
 
-      <Card>
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Code & Name */}
-          <div className="grid grid-cols-3 gap-4">
-            <Input
-              label={t('assemblies.code', { defaultValue: 'Code' })}
-              value={form.code}
-              onChange={(e) => set('code', e.target.value)}
-              placeholder={t('assemblies.code_placeholder', { defaultValue: 'e.g. ASM-001' })}
-              required
-              autoFocus
-            />
-            <div className="col-span-2">
+        {/* Body */}
+        <div className="overflow-y-auto px-6 pb-6 flex-1">
+          <form id="create-assembly-form" onSubmit={handleSubmit} className="space-y-4">
+            {/* Code & Name */}
+            <div className="grid grid-cols-3 gap-4">
               <Input
-                label={t('assemblies.name', { defaultValue: 'Name' })}
-                value={form.name}
-                onChange={(e) => set('name', e.target.value)}
-                placeholder={t('assemblies.name_placeholder', { defaultValue: 'e.g. Reinforced Concrete Wall C30/37' })}
+                label={t('assemblies.code', { defaultValue: 'Code' })}
+                value={form.code}
+                onChange={(e) => set('code', e.target.value)}
+                placeholder={t('assemblies.code_placeholder', { defaultValue: 'e.g. ASM-001' })}
                 required
+                autoFocus
+              />
+              <div className="col-span-2">
+                <Input
+                  label={t('assemblies.name', { defaultValue: 'Name' })}
+                  value={form.name}
+                  onChange={(e) => set('name', e.target.value)}
+                  placeholder={t('assemblies.name_placeholder', { defaultValue: 'e.g. Reinforced Concrete Wall C30/37' })}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Unit & Category */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium text-content-primary">{t('assemblies.unit', { defaultValue: 'Unit' })}</label>
+                <select value={form.unit} onChange={(e) => set('unit', e.target.value)} className={selectClass}>
+                  {UNITS.map((u) => (
+                    <option key={u.value} value={u.value}>{t(u.key, { defaultValue: u.defaultLabel })}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium text-content-primary">{t('assemblies.category', { defaultValue: 'Category' })}</label>
+                <select value={form.category} onChange={(e) => set('category', e.target.value)} className={selectClass}>
+                  {CATEGORIES.map((c) => (
+                    <option key={c.value} value={c.value}>{t(c.key, { defaultValue: c.defaultLabel })}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Classification */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium text-content-primary">
+                  {t('assemblies.classification_standard', { defaultValue: 'Classification Standard' })}
+                </label>
+                <select value={form.classificationStandard} onChange={(e) => set('classificationStandard', e.target.value)} className={selectClass}>
+                  <option value="">{t('assemblies.none', { defaultValue: '-- None --' })}</option>
+                  {STANDARDS.map((s) => (
+                    <option key={s.value} value={s.value}>{t(s.key, { defaultValue: s.defaultLabel })}</option>
+                  ))}
+                </select>
+              </div>
+              <Input
+                label={t('assemblies.classification_code', { defaultValue: 'Classification Code' })}
+                value={form.classificationCode}
+                onChange={(e) => set('classificationCode', e.target.value)}
+                placeholder={t('assemblies.classification_code_placeholder', { defaultValue: 'e.g. 330' })}
+                disabled={!form.classificationStandard}
               />
             </div>
-          </div>
 
-          {/* Unit & Category */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-content-primary">{t('assemblies.unit', { defaultValue: 'Unit' })}</label>
-              <select
-                value={form.unit}
-                onChange={(e) => set('unit', e.target.value)}
-                className={selectClass}
-              >
-                {UNITS.map((u) => (
-                  <option key={u.value} value={u.value}>
-                    {t(u.key, { defaultValue: u.defaultLabel })}
-                  </option>
-                ))}
-              </select>
+            {/* Currency & Bid Factor */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium text-content-primary">{t('assemblies.currency', { defaultValue: 'Currency' })}</label>
+                <select value={form.currency} onChange={(e) => set('currency', e.target.value)} className={selectClass}>
+                  {CURRENCIES.map((c) => (
+                    <option key={c.value} value={c.value}>{c.label}</option>
+                  ))}
+                </select>
+              </div>
+              <Input
+                label={t('assemblies.bid_factor', { defaultValue: 'Bid Factor' })}
+                type="number"
+                value={form.bid_factor}
+                onChange={(e) => set('bid_factor', e.target.value)}
+                placeholder="1.00"
+                hint={t('assemblies.bid_factor_hint', { defaultValue: 'Multiplier applied to the total rate (1.00 = no markup)' })}
+              />
             </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-content-primary">{t('assemblies.category', { defaultValue: 'Category' })}</label>
-              <select
-                value={form.category}
-                onChange={(e) => set('category', e.target.value)}
-                className={selectClass}
-              >
-                {CATEGORIES.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {t(c.key, { defaultValue: c.defaultLabel })}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
 
-          {/* Classification */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-content-primary">
-                {t('assemblies.classification_standard', { defaultValue: 'Classification Standard' })}
-              </label>
-              <select
-                value={form.classificationStandard}
-                onChange={(e) => set('classificationStandard', e.target.value)}
-                className={selectClass}
-              >
-                <option value="">{t('assemblies.none', { defaultValue: '-- None --' })}</option>
-                {STANDARDS.map((s) => (
-                  <option key={s.value} value={s.value}>
-                    {t(s.key, { defaultValue: s.defaultLabel })}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <Input
-              label={t('assemblies.classification_code', { defaultValue: 'Classification Code' })}
-              value={form.classificationCode}
-              onChange={(e) => set('classificationCode', e.target.value)}
-              placeholder={t('assemblies.classification_code_placeholder', { defaultValue: 'e.g. 330' })}
-              disabled={!form.classificationStandard}
-            />
-          </div>
+            {mutation.error && (
+              <div className="rounded-lg bg-semantic-error-bg px-3 py-2 text-sm text-semantic-error">
+                {(mutation.error as Error).message || t('assemblies.create_failed', { defaultValue: 'Failed to create assembly' })}
+              </div>
+            )}
+          </form>
+        </div>
 
-          {/* Currency & Bid Factor */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-content-primary">{t('assemblies.currency', { defaultValue: 'Currency' })}</label>
-              <select
-                value={form.currency}
-                onChange={(e) => set('currency', e.target.value)}
-                className={selectClass}
-              >
-                {CURRENCIES.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <Input
-              label={t('assemblies.bid_factor', { defaultValue: 'Bid Factor' })}
-              type="number"
-              value={form.bid_factor}
-              onChange={(e) => set('bid_factor', e.target.value)}
-              placeholder="1.00"
-              hint={t('assemblies.bid_factor_hint', { defaultValue: 'Multiplier applied to the total rate (1.00 = no markup)' })}
-            />
-          </div>
-
-          {/* Error */}
-          {mutation.error && (
-            <div className="rounded-lg bg-semantic-error-bg px-3 py-2 text-sm text-semantic-error">
-              {(mutation.error as Error).message || t('assemblies.create_failed', { defaultValue: 'Failed to create assembly' })}
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-2">
-            <Button variant="secondary" type="button" onClick={() => navigate('/assemblies')}>
-              {t('common.cancel', 'Cancel')}
-            </Button>
-            <Button variant="primary" type="submit" loading={mutation.isPending}>
-              {t('common.create', 'Create')}
-            </Button>
-          </div>
-        </form>
-      </Card>
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light shrink-0">
+          <Button variant="secondary" type="button" onClick={onClose}>
+            {t('common.cancel', 'Cancel')}
+          </Button>
+          <Button variant="primary" type="submit" form="create-assembly-form" loading={mutation.isPending}>
+            {t('common.create', 'Create')}
+          </Button>
+        </div>
+      </div>
     </div>
   );
+}
+
+// Route compat
+export function CreateAssemblyPage() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    navigate('/assemblies', { state: { openCreateModal: true }, replace: true });
+  }, [navigate]);
+
+  return null;
 }

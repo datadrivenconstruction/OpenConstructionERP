@@ -118,7 +118,7 @@ export function CostBreakdownPanel({ boqId, locale = 'de-DE' }: { boqId: string;
   // Only show loading skeleton on very first load (no data yet)
   if (isLoading && !data) {
     return (
-      <div className="border border-border rounded-lg bg-surface-primary p-4">
+      <div className="rounded-xl border border-border-light bg-surface-elevated shadow-xs p-4">
         <div className="flex items-center gap-2 text-xs text-content-tertiary animate-pulse">
           <TrendingUp size={14} />
           {t('boq.cost_breakdown_loading', { defaultValue: 'Loading cost breakdown...' })}
@@ -132,11 +132,11 @@ export function CostBreakdownPanel({ boqId, locale = 'de-DE' }: { boqId: string;
   }
 
   return (
-    <div className="border border-border rounded-lg bg-surface-primary overflow-hidden">
+    <div className="rounded-xl border border-border-light bg-surface-elevated shadow-xs overflow-hidden">
       {/* ── Header ──────────────────────────────────────────────────── */}
       <button
         type="button"
-        className="flex items-center justify-between w-full px-4 py-3 text-left hover:bg-surface-secondary/50 transition-colors"
+        className="flex items-center justify-between w-full px-5 py-3.5 text-left hover:bg-surface-secondary/50 transition-colors"
         onClick={() => setCollapsed((prev) => !prev)}
       >
         <div className="flex items-center gap-2">
