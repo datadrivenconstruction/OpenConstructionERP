@@ -606,6 +606,20 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
         const api = gridApiRef.current;
         if (!api) return;
 
+        // Determine the new parent section (closest section above the drop target)
+        let newParentId: string | null = null;
+        const overIndex = event.overNode?.rowIndex ?? 0;
+        api.forEachNode((node) => {
+          if (node.data?._isSection && (node.rowIndex ?? 0) <= overIndex) {
+            newParentId = node.data.id;
+          }
+        });
+
+        // If parent changed, update position's parent_id first
+        if (newParentId && movedData.parent_id !== newParentId && onUpdatePosition) {
+          onUpdatePosition(movedData.id, { parent_id: newParentId }, { parent_id: movedData.parent_id });
+        }
+
         // Collect the current row order from the grid (excluding footer and section rows)
         const reorderedIds: string[] = [];
         api.forEachNode((node) => {
@@ -619,7 +633,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
         }
       }
     },
-    [onReorderSections, onReorderPositions],
+    [onReorderSections, onReorderPositions, onUpdatePosition],
   );
 
   /* ── Column resize → persist widths to localStorage ──────────── */

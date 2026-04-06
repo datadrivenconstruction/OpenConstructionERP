@@ -133,7 +133,7 @@ export function BOQToolbar({
   };
 
   return (
-    <div className="sticky top-0 z-20 bg-surface-primary flex flex-wrap items-center gap-x-3 gap-y-2 pb-2">
+    <div className="sticky top-0 z-20 bg-surface-primary flex flex-wrap items-center gap-x-2 gap-y-2 px-1 py-2 border-b border-border-light mb-3">
       {/* ── Row-group: Quality + Undo/Redo ─────────────────────────────── */}
       <div className="flex items-center gap-1.5">
         {hasPositions && qualityScoreRing}
@@ -218,7 +218,7 @@ export function BOQToolbar({
 
       {/* ── Row-group: Quality & AI ─────────────────────────────────────── */}
       <div className="flex items-center gap-1.5">
-        <span className="text-2xs font-medium text-content-quaternary uppercase tracking-wider hidden lg:inline mr-0.5">{t('boq.toolbar_quality', { defaultValue: 'Quality' })}</span>
+        <span className="text-2xs font-medium text-content-quaternary uppercase tracking-wider hidden lg:inline ml-1 mr-1">{t('boq.toolbar_quality', { defaultValue: 'Quality' })}</span>
         {/* Validate: checks data quality, completeness, DIN 276 compliance */}
         <div className="relative group/validate">
           <Button
