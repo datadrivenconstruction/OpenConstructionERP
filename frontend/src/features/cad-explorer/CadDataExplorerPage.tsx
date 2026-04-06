@@ -40,6 +40,11 @@ import {
   type AggregateGroup,
 } from './api';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { Download as DownloadIcon, Columns3, Search as SearchIcon } from 'lucide-react';
+import React, { useRef } from 'react';
+import { Upload, FileUp, Loader2, CheckCircle2, Sparkles, Settings, AlertCircle, FolderOpen } from 'lucide-react';
+import { apiGet, apiPost } from '@/shared/lib/api';
+import { Trash2 as TrashIcon, Clock, FileText, ExternalLink } from 'lucide-react';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -112,8 +117,6 @@ function StatsCards({ data }: { data: DescribeResponse }) {
 }
 
 /* ── Data Table Tab ────────────────────────────────────────────────────── */
-
-import { Download as DownloadIcon, Columns3, Search as SearchIcon } from 'lucide-react';
 
 function DataTableTab({ sessionId, describe }: { sessionId: string; describe: DescribeResponse }) {
   const { t } = useTranslation();
@@ -1052,10 +1055,6 @@ function DescribeTab({ sessionId, describe }: { sessionId: string; describe: Des
 
 /* ── Converter Status (compact) ─────────────────────────────────────────── */
 
-import React, { useRef } from 'react';
-import { Upload, FileUp, Loader2, CheckCircle2, Sparkles, Settings, AlertCircle, FolderOpen } from 'lucide-react';
-import { apiGet, apiPost } from '@/shared/lib/api';
-
 /* ── Create BOQ from Pivot Modal ─────────────────────────────────────── */
 
 interface PivotBOQModalProps {
@@ -1524,8 +1523,6 @@ function UploadConvertZone({
 }
 
 /* ── Saved Sessions List ────────────────────────────────────────────────── */
-
-import { Trash2 as TrashIcon, Clock, FileText, ExternalLink } from 'lucide-react';
 
 function SavedSessionsList({ onOpen }: { onOpen: (sessionId: string) => void }) {
   const { t } = useTranslation();
