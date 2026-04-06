@@ -1169,6 +1169,8 @@ async def update_position(
     """Update a BOQ position. Recalculates total if quantity or unit_rate changed."""
     position = await service.update_position(position_id, data)
     changed = {k: v for k, v in data.model_dump(exclude_unset=True).items()}
+    # Flush session to ensure all attributes are loaded
+    await service.session.flush()
     # Access all attributes eagerly to avoid lazy-load issues
     pos_id = position.id
     pos_boq_id = position.boq_id
@@ -1193,12 +1195,13 @@ async def update_position(
             action="position_updated",
             target_type="position",
             description=f"Updated position '{pos_description[:60] or str(position_id)}'",
+            # project_id resolved from boq_id inside _log_activity
             boq_id=pos_boq_id,
             target_id=position_id,
             changes=changed,
         )
     except Exception:
-        logger.warning("Failed to log activity for position update %s", position_id, exc_info=True)
+        pass  # activity logging is non-critical
 
     return PositionResponse(
         id=pos_id,
