@@ -1169,33 +1169,53 @@ async def update_position(
     """Update a BOQ position. Recalculates total if quantity or unit_rate changed."""
     position = await service.update_position(position_id, data)
     changed = {k: v for k, v in data.model_dump(exclude_unset=True).items()}
-    await _log_activity(
-        service,
-        user_id=user_id,
-        action="position_updated",
-        target_type="position",
-        description=f"Updated position '{position.description[:60] if position.description else position_id}'",
-        boq_id=position.boq_id,
-        target_id=position_id,
-        changes=changed,
-    )
-    # Build response directly from attributes to avoid lazy-load greenlet issues
+    # Access all attributes eagerly to avoid lazy-load issues
+    pos_id = position.id
+    pos_boq_id = position.boq_id
+    pos_parent_id = position.parent_id
+    pos_ordinal = position.ordinal or ""
+    pos_description = position.description or ""
+    pos_unit = position.unit or ""
+    pos_quantity = float(position.quantity) if position.quantity else 0.0
+    pos_unit_rate = float(position.unit_rate) if position.unit_rate else 0.0
+    pos_total = float(position.total) if position.total else 0.0
+    pos_classification = position.classification if isinstance(position.classification, dict) else {}
+    pos_source = position.source or "manual"
+    pos_confidence = float(position.confidence) if position.confidence else None
+    pos_cad_element_ids = position.cad_element_ids if isinstance(position.cad_element_ids, list) else []
+    pos_validation_status = position.validation_status or "pending"
+    pos_metadata = position.metadata_ if isinstance(position.metadata_, dict) else {}
+
+    try:
+        await _log_activity(
+            service,
+            user_id=user_id,
+            action="position_updated",
+            target_type="position",
+            description=f"Updated position '{pos_description[:60] or str(position_id)}'",
+            boq_id=pos_boq_id,
+            target_id=position_id,
+            changes=changed,
+        )
+    except Exception:
+        logger.warning("Failed to log activity for position update %s", position_id, exc_info=True)
+
     return PositionResponse(
-        id=position.id,
-        boq_id=position.boq_id,
-        parent_id=position.parent_id,
-        ordinal=position.ordinal,
-        description=position.description,
-        unit=position.unit,
-        quantity=float(position.quantity) if position.quantity else 0.0,
-        unit_rate=float(position.unit_rate) if position.unit_rate else 0.0,
-        total=float(position.total) if position.total else 0.0,
-        classification=position.classification if isinstance(position.classification, dict) else {},
-        source=position.source or "manual",
-        confidence=float(position.confidence) if position.confidence else None,
-        cad_element_ids=position.cad_element_ids if isinstance(position.cad_element_ids, list) else [],
-        validation_status=position.validation_status or "pending",
-        metadata=position.metadata_ if isinstance(position.metadata_, dict) else {},
+        id=pos_id,
+        boq_id=pos_boq_id,
+        parent_id=pos_parent_id,
+        ordinal=pos_ordinal,
+        description=pos_description,
+        unit=pos_unit,
+        quantity=pos_quantity,
+        unit_rate=pos_unit_rate,
+        total=pos_total,
+        classification=pos_classification,
+        source=pos_source,
+        confidence=pos_confidence,
+        cad_element_ids=pos_cad_element_ids,
+        validation_status=pos_validation_status,
+        metadata=pos_metadata,
         sort_order=position.sort_order or 0,
         created_at=position.created_at,
         updated_at=position.updated_at,
