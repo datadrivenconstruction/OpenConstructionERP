@@ -1212,8 +1212,8 @@ export function CadDataExplorerPage() {
     <div className="max-w-7xl mx-auto px-6 py-6 space-y-4">
       <Breadcrumb items={[
         { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
-        { label: t('nav.cad_takeoff', { defaultValue: 'CAD Takeoff' }), to: '/cad-takeoff' },
-        { label: t('explorer.title', { defaultValue: 'Data Explorer' }) },
+        { label: t('nav.documents', { defaultValue: 'Documents' }), to: '/documents' },
+        { label: t('explorer.title', { defaultValue: 'CAD-BIM Explorer' }) },
       ]} />
 
       {/* Header */}
