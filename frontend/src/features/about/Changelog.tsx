@@ -13,6 +13,21 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.4.0',
+    date: '2026-04-06',
+    changes: [
+      'New: Modal dialogs for creating BOQ, Projects, and Assemblies — no more separate pages',
+      'New: BOQ list auto-filters by active project from header context',
+      'New: Data Explorer landing redesign — dashed dropzone, compact session list',
+      'New: Table of contents navigation in GitHub README',
+      'New: Privacy Policy and Terms of Service pages',
+      'Fix: New BOQ not appearing in list after creation (cache invalidation)',
+      'Fix: CostBreakdownPanel styling — consistent rounded borders and shadows',
+      'Fix: Data Explorer landing — professional compact layout for recent models',
+      'Cleanup: Removed 76 test/smoke projects from seed database',
+    ],
+  },
+  {
     version: '0.2.1',
     date: '2026-04-04',
     changes: [

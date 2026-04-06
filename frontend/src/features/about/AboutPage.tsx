@@ -30,7 +30,7 @@ export function AboutPage() {
           {t('about.tagline', { defaultValue: 'The #1 open-source platform for construction cost estimation' })}
         </p>
         <div className="mt-3 flex items-center justify-center gap-3 text-sm text-content-tertiary">
-          <span>v0.2.1</span>
+          <span>v0.4.0</span>
           <span>&middot;</span>
           <span>2026</span>
           <span>&middot;</span>

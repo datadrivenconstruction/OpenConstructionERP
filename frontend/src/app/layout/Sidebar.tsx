@@ -327,7 +327,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
 
         {/* Version + AGPL notice */}
         <div className="px-3 pb-2 text-center">
-          <span className="text-2xs text-content-quaternary/50">v0.2.1</span>
+          <span className="text-2xs text-content-quaternary/50">v0.4.0</span>
           <span className="text-2xs text-content-quaternary/30 mx-1">·</span>
           <a href="/api/source" target="_blank" className="text-2xs text-content-quaternary/40 hover:text-content-quaternary transition-colors">
             AGPL-3.0

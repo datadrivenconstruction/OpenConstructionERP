@@ -153,7 +153,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
             // Variant B: Open form with URL params
             const params = new URLSearchParams({
               report: 'true',
-              app_version: '0.1.0',
+              app_version: '0.4.0',
               error_count: String(getErrorCount()),
               platform: navigator.userAgent.includes('Win') ? 'Windows' : navigator.userAgent.includes('Mac') ? 'macOS' : 'Linux',
             });
@@ -227,7 +227,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
             // Variant B: Open feedback form with params
             const params = new URLSearchParams({
               feedback: 'true',
-              app_version: '0.1.0',
+              app_version: '0.4.0',
               error_count: String(getErrorCount()),
             });
             window.open(`https://openconstructionerp.com/contact.html?${params}`, '_blank');
