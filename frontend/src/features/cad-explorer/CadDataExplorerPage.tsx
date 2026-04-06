@@ -338,16 +338,18 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
                   </tr>
                 ))
               ) : displayRows.map((row, idx) => (
-                <tr key={idx} className="border-b border-border-light hover:bg-surface-secondary/30">
-                  <td className="px-2 py-1.5 text-center text-content-quaternary tabular-nums">
+                <tr key={idx} className={`border-b border-border-light hover:bg-surface-secondary/30 ${idx % 2 === 0 ? '' : 'bg-surface-secondary/10'}`}>
+                  <td className="px-2 py-1.5 text-center text-content-quaternary tabular-nums text-2xs">
                     {page * pageSize + idx + 1}
                   </td>
                   {visibleCols.map((col) => {
                     const val = row[col];
                     const isNum = typeof val === 'number';
+                    const isNull = val == null || val === '' || val === 'None';
+                    const isSearch = globalSearch && val != null && String(val).toLowerCase().includes(globalSearch.toLowerCase());
                     return (
-                      <td key={col} className={`px-2 py-1.5 ${isNum ? 'text-right tabular-nums' : ''} text-content-primary truncate max-w-[180px]`}>
-                        {val == null ? <span className="text-content-quaternary">—</span> : isNum ? formatNumber(val) : String(val)}
+                      <td key={col} className={`px-2 py-1.5 ${isNum ? 'text-right tabular-nums' : ''} truncate max-w-[180px] ${isNull ? 'bg-amber-50/30 dark:bg-amber-900/5' : ''} ${isSearch ? 'bg-yellow-100 dark:bg-yellow-900/20 font-medium' : 'text-content-primary'}`}>
+                        {isNull ? <span className="text-content-quaternary italic text-2xs">null</span> : isNum ? formatNumber(val) : String(val)}
                       </td>
                     );
                   })}
@@ -357,6 +359,24 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
           </table>
         </div>
       </Card>
+
+      {/* Page summary: sum of visible numeric cols for current page */}
+      {displayRows.length > 0 && (
+        <div className="flex items-center gap-4 text-2xs text-content-tertiary px-1">
+          <span className="font-medium text-content-secondary">{t('explorer.page_summary', { defaultValue: 'Page totals:' })}</span>
+          {visibleCols.filter((col) => {
+            const first = displayRows.find((r) => r[col] != null);
+            return first && typeof first[col] === 'number';
+          }).slice(0, 5).map((col) => {
+            const sum = displayRows.reduce((s, r) => s + (typeof r[col] === 'number' ? (r[col] as number) : 0), 0);
+            return sum > 0 ? (
+              <span key={col} className="tabular-nums">
+                <span className="text-content-quaternary">{col}:</span> <span className="font-medium text-content-primary">{formatNumber(sum)}</span>
+              </span>
+            ) : null;
+          })}
+        </div>
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (
@@ -408,9 +428,15 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
   // Top quantity columns (shown as buttons)
   const topNumericCols = useMemo(() => numericCols.slice(0, 10), [numericCols]);
 
-  const [groupBy, setGroupBy] = useState<string[]>(
-    stringCols.length > 0 ? [stringCols[0]!.name] : [],
-  );
+  // Default: prefer 'category', then 'type name', then first available
+  const [groupBy, setGroupBy] = useState<string[]>(() => {
+    const preferred = ['category', 'type name', 'family', 'level'];
+    for (const p of preferred) {
+      const found = stringCols.find((c) => c.name.toLowerCase() === p);
+      if (found) return [found.name];
+    }
+    return stringCols.length > 0 ? [stringCols[0]!.name] : [];
+  });
   // Allow multiple aggregate columns — auto-select exact matches first
   const [aggCols, setAggCols] = useState<string[]>(() => {
     const defaults: string[] = [];
@@ -692,7 +718,10 @@ function ChartsTab({ sessionId, describe }: { sessionId: string; describe: Descr
     })
     .slice(0, 20), [describe]);
 
-  const [chartGroupBy, setChartGroupBy] = useState(stringCols[0]?.name || '');
+  const [chartGroupBy, setChartGroupBy] = useState(() => {
+    const cat = stringCols.find((c) => c.name.toLowerCase() === 'category');
+    return cat?.name || stringCols[0]?.name || '';
+  });
   const [chartValue, setChartValue] = useState(
     numericCols.find((c) => c.name.toLowerCase() === 'volume')?.name || numericCols[0]?.name || '',
   );
