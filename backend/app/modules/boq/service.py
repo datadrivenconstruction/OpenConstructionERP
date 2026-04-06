@@ -948,7 +948,19 @@ class BOQService:
 
         Returns:
             The newly created BOQ.
+
+        Raises:
+            HTTPException: If the referenced project does not exist.
         """
+        # Validate project exists
+        from app.modules.projects.models import Project
+
+        result = await self.session.execute(
+            select(Project.id).where(Project.id == data.project_id)
+        )
+        if result.scalar_one_or_none() is None:
+            raise HTTPException(status_code=404, detail="Project not found")
+
         default_display_columns = ["ordinal", "description", "unit", "quantity", "unit_rate", "total"]
         boq = BOQ(
             project_id=data.project_id,
@@ -1716,10 +1728,11 @@ class BOQService:
         grand_total = Decimal("0")
 
         for pos in positions:
-            total_val = _str_to_float(pos.total)
-            grand_total += Decimal(str(total_val))
-
             position_responses.append(_build_position_response(pos))
+            # Exclude section headers from grand total (sections have no unit)
+            if not _is_section(pos):
+                total_val = _str_to_float(pos.total)
+                grand_total += Decimal(str(total_val))
 
         return BOQWithPositions(
             id=boq.id,

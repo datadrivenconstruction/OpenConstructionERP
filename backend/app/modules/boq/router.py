@@ -1109,21 +1109,48 @@ async def bulk_add_positions(
         existing_count = 0
 
     results: list[PositionResponse] = []
+    errors: list[dict[str, Any]] = []
     for idx, item in enumerate(items):
-        ordinal = item.get("ordinal", f"{existing_count + idx + 1:03d}")
-        pos_data = PositionCreate(
-            boq_id=boq_id,
-            ordinal=ordinal,
-            description=item.get("description", ""),
-            unit=item.get("unit", "pcs"),
-            quantity=float(item.get("quantity", 0)),
-            unit_rate=float(item.get("unit_rate", 0)),
-            source=item.get("source", "takeoff"),
-            classification=item.get("classification", {}),
-            metadata=item.get("metadata", {}),
+        try:
+            ordinal = item.get("ordinal", f"{existing_count + idx + 1:03d}")
+            description = str(item.get("description", "")).strip()
+            if not description:
+                description = f"Position {existing_count + idx + 1}"
+
+            quantity = 0.0
+            try:
+                quantity = float(item.get("quantity", 0))
+            except (ValueError, TypeError):
+                quantity = 0.0
+
+            unit_rate = 0.0
+            try:
+                unit_rate = float(item.get("unit_rate", 0))
+            except (ValueError, TypeError):
+                unit_rate = 0.0
+
+            pos_data = PositionCreate(
+                boq_id=boq_id,
+                ordinal=ordinal,
+                description=description,
+                unit=item.get("unit", "pcs"),
+                quantity=quantity,
+                unit_rate=unit_rate,
+                source=item.get("source", "takeoff"),
+                classification=item.get("classification", {}),
+                metadata=item.get("metadata", {}),
+            )
+            position = await service.add_position(pos_data)
+            results.append(_position_to_response(position))
+        except Exception as exc:
+            logger.warning("Bulk import: item %d failed: %s", idx, exc)
+            errors.append({"index": idx, "error": str(exc)})
+
+    if not results and errors:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"All {len(errors)} items failed to import. First error: {errors[0]['error']}",
         )
-        position = await service.add_position(pos_data)
-        results.append(_position_to_response(position))
 
     return results
 
