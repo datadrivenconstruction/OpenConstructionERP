@@ -147,11 +147,29 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       headerName: t('boq.unit_rate', { defaultValue: 'Unit Rate' }),
       field: 'unit_rate',
       width: 110,
-      editable: (params) => !params.data?._isSection && !params.data?._isFooter,
+      editable: (params) => {
+        if (params.data?._isSection || params.data?._isFooter) return false;
+        // If position has resources, unit_rate is derived from resources — not editable
+        const res = params.data?.metadata?.resources;
+        if (Array.isArray(res) && res.length > 0) return false;
+        return true;
+      },
       valueFormatter: currencyFormatter,
-      cellClass: 'text-right tabular-nums text-xs',
+      cellClass: (params) => {
+        const base = 'text-right tabular-nums text-xs';
+        const res = params.data?.metadata?.resources;
+        if (Array.isArray(res) && res.length > 0) return `${base} text-content-tertiary`;
+        return base;
+      },
       headerClass: 'ag-right-aligned-header',
       type: 'numericColumn',
+      tooltipValueGetter: (params) => {
+        const res = params.data?.metadata?.resources;
+        if (Array.isArray(res) && res.length > 0) {
+          return t('boq.rate_from_resources', { defaultValue: 'Rate is calculated from resources. Edit individual resources to change.' });
+        }
+        return undefined;
+      },
     },
     {
       headerName: t('boq.total', { defaultValue: 'Total' }),

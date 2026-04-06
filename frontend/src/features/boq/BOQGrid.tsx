@@ -574,24 +574,27 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       const update: UpdatePositionData = { [field]: newValue };
       const old: UpdatePositionData = { [field]: oldValue };
 
-      // For quantity, parse formulas and scale resources proportionally
+      // For quantity, scale resources proportionally if they exist
       if (field === 'quantity') {
         const parsedNew = typeof newValue === 'number' ? newValue : parseFloat(newValue) || 0;
         const parsedOld = typeof oldValue === 'number' ? oldValue : parseFloat(oldValue) || 0;
         update.quantity = parsedNew;
         old.quantity = parsedOld;
 
-        // Scale resource quantities proportionally
         const meta = data.metadata as Record<string, unknown> | undefined;
         const resources = meta?.resources;
         if (Array.isArray(resources) && resources.length > 0 && parsedOld > 0 && parsedNew !== parsedOld) {
           const ratio = parsedNew / parsedOld;
-          const scaled = (resources as Array<Record<string, unknown>>).map((r) => ({
-            ...r,
-            quantity: Math.round(((r.quantity as number) || 0) * ratio * 10000) / 10000,
-            total: Math.round(((r.quantity as number) || 0) * ratio * ((r.unit_rate as number) || 0) * 100) / 100,
-          }));
+          const scaled = (resources as Array<Record<string, unknown>>).map((r) => {
+            const newResQty = Math.round(((r.quantity as number) || 0) * ratio * 10000) / 10000;
+            const resRate = (r.unit_rate as number) || 0;
+            return { ...r, quantity: newResQty, total: Math.round(newResQty * resRate * 100) / 100 };
+          });
+          // Derive unit_rate from scaled resources
+          const resourceTotal = scaled.reduce((sum, r) => sum + ((r.total as number) || 0), 0);
+          const derivedRate = parsedNew > 0 ? Math.round(resourceTotal / parsedNew * 10000) / 10000 : 0;
           update.metadata = { ...meta, resources: scaled };
+          update.unit_rate = derivedRate;
         }
       }
 

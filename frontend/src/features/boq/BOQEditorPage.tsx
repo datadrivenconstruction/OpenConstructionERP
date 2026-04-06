@@ -1144,15 +1144,16 @@ export function BOQEditorPage() {
       const rRate = (resources[resourceIndex].unit_rate as number) ?? 0;
       resources[resourceIndex].total = Math.round(rQty * rRate * 100) / 100;
       const newMeta = { ...pos.metadata, resources };
-      // Recalculate position unit_rate from all resources
-      let computedRate = 0;
+      // Recalculate position unit_rate = sum(resource totals) / position quantity
+      let resourceTotal = 0;
       for (const r of resources) {
-        computedRate += ((r.quantity as number) ?? 0) * ((r.unit_rate as number) ?? 0);
+        resourceTotal += ((r.quantity as number) ?? 0) * ((r.unit_rate as number) ?? 0);
       }
-      computedRate = Math.round(computedRate * 100) / 100;
+      const posQty = pos.quantity || 1;
+      const derivedUnitRate = Math.round((resourceTotal / posQty) * 10000) / 10000;
       updateMutation.mutate({
         id: positionId,
-        data: { unit_rate: computedRate, metadata: newMeta },
+        data: { unit_rate: derivedUnitRate, metadata: newMeta },
       });
     },
     [boq?.positions, updateMutation],

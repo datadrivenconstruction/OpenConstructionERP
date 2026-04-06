@@ -1209,9 +1209,27 @@ class BOQService:
         if "metadata" in fields:
             fields["metadata_"] = fields.pop("metadata")
 
-        # Recalculate total if quantity or unit_rate changed
+        # If metadata contains resources, derive unit_rate from resource totals
+        meta = fields.get("metadata_", None)
+        if meta is None and "metadata" in fields:
+            meta = fields.get("metadata")
         new_quantity = fields.get("quantity", position.quantity)
         new_unit_rate = fields.get("unit_rate", position.unit_rate)
+
+        if meta and isinstance(meta, dict) and isinstance(meta.get("resources"), list):
+            resources = meta["resources"]
+            if resources:
+                resource_total = sum(
+                    float(r.get("quantity", 0)) * float(r.get("unit_rate", 0))
+                    for r in resources
+                    if isinstance(r, dict)
+                )
+                qty_float = _str_to_float(new_quantity)
+                if qty_float > 0:
+                    new_unit_rate = str(round(resource_total / qty_float, 4))
+                    fields["unit_rate"] = new_unit_rate
+
+        # Recalculate total
         fields["total"] = _compute_total(
             _str_to_float(new_quantity), _str_to_float(new_unit_rate)
         )
