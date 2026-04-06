@@ -114,7 +114,8 @@ export function BOQEditorPage() {
 
   // Custom columns from BOQ metadata
   const boqCustomColumns = useMemo(() => {
-    const meta = boq?.metadata ?? (boq as unknown as Record<string, unknown>)?.metadata_;
+    const raw = boq as unknown as Record<string, unknown> | undefined;
+    const meta = raw?.metadata ?? raw?.metadata_;
     if (!meta || typeof meta !== 'object') return [];
     return (meta as Record<string, unknown>).custom_columns as import('./grid/columnDefs').CustomColumnDef[] ?? [];
   }, [boq]);

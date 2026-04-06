@@ -1513,6 +1513,7 @@ function UploadConvertZone({
 /* ── Saved Sessions List (integrated into landing page) ─────────────── */
 /* Kept as reference — session list is now rendered directly in CadDataExplorerPage */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function _SavedSessionsList({ onOpen }: { onOpen: (sessionId: string) => void }) {
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
