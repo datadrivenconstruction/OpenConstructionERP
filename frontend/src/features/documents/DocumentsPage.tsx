@@ -11,6 +11,8 @@ import { apiGet, apiDelete, apiPatch } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { useNavigate } from 'react-router-dom';
+import { listSessions, type SavedSession } from '../cad-explorer/api';
 
 /* ── Types ───────────────────────────────────────────────────────────── */
 
@@ -242,6 +244,7 @@ export function DocumentsPage() {
   } | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
   const projectId = activeProjectId;
 
   /* ── Data fetching ──────────────────────────────────────────────────── */
@@ -255,6 +258,14 @@ export function DocumentsPage() {
       if (debouncedQuery.trim()) params.set('search', debouncedQuery.trim());
       return apiGet<DocItem[]>(`/v1/documents/?${params.toString()}`);
     },
+    enabled: !!projectId,
+  });
+
+  /* ── CAD/BIM models (saved sessions) ─────────────────────────────────── */
+
+  const { data: cadSessions = [] } = useQuery({
+    queryKey: ['cad-saved-sessions', projectId],
+    queryFn: () => listSessions(projectId || undefined),
     enabled: !!projectId,
   });
 
@@ -661,6 +672,55 @@ export function DocumentsPage() {
         </div>
         <SortDropdown value={sortBy} onChange={setSortBy} />
       </div>
+
+      {/* ── CAD/BIM Models ──────────────────────────────────────────────── */}
+      {cadSessions.length > 0 && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-semibold text-content-primary flex items-center gap-1.5">
+              <HardDrive size={13} className="text-oe-blue" />
+              {t('documents.cad_models', { defaultValue: 'CAD/BIM Models' })}
+              <Badge variant="blue" size="sm">{cadSessions.length}</Badge>
+            </h3>
+            <button onClick={() => navigate('/data-explorer')} className="text-2xs text-oe-blue hover:underline">
+              {t('documents.open_explorer', { defaultValue: 'Open Explorer' })}
+            </button>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {cadSessions.map((s) => {
+              const fmt = (s.file_format || '').toUpperCase();
+              const fmtColor: Record<string, string> = {
+                RVT: 'bg-blue-100 text-blue-700', IFC: 'bg-green-100 text-green-700',
+                DWG: 'bg-orange-100 text-orange-700', DGN: 'bg-purple-100 text-purple-700',
+              };
+              return (
+                <Card
+                  key={s.session_id}
+                  padding="none"
+                  hoverable
+                  className="cursor-pointer"
+                  onClick={() => navigate(`/data-explorer?session=${s.session_id}`)}
+                >
+                  <div className="flex items-center gap-3 p-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-oe-blue-subtle shrink-0">
+                      <HardDrive size={18} className="text-oe-blue" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-content-primary truncate">{s.display_name}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className={`px-1.5 py-0.5 rounded text-2xs font-bold ${fmtColor[fmt] || 'bg-gray-100 text-gray-600'}`}>{fmt}</span>
+                        <span className="text-2xs text-content-tertiary">{s.element_count.toLocaleString()} elements</span>
+                        {s.created_at && <span className="text-2xs text-content-quaternary">{new Date(s.created_at).toLocaleDateString()}</span>}
+                      </div>
+                    </div>
+                    <ChevronDown size={14} className="text-content-tertiary -rotate-90 shrink-0" />
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* ── Documents grid ──────────────────────────────────────────────── */}
       {isLoading ? (
