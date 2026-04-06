@@ -27,7 +27,6 @@ import {
 import { Button, Card, Badge, Breadcrumb, EmptyState } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { useUploadQueueStore } from '@/stores/useUploadQueueStore';
-import { boqApi, type CreatePositionData } from '@/features/boq/api';
 import {
   describeSession,
   valueCounts,
@@ -1127,7 +1126,7 @@ function CreateBOQFromPivotModal({ open, onClose, groups, groupByColumns, aggCol
           ?? group.results[`avg_${quantityCol}`]
           ?? group.count;
 
-        await boqApi.addPosition({
+        await apiPost(`/v1/boq/boqs/${boqId}/positions`, {
           boq_id: boqId,
           ordinal: String(ordinal).padStart(2, '0') + '.001',
           description: description || `Group ${ordinal}`,
@@ -1141,7 +1140,7 @@ function CreateBOQFromPivotModal({ open, onClose, groups, groupByColumns, aggCol
             cad_element_count: group.count,
             cad_aggregations: group.results,
           },
-        } as CreatePositionData);
+        });
         ordinal++;
       }
 
