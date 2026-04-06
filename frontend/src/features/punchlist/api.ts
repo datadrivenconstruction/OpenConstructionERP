@@ -14,6 +14,7 @@ export type PunchCategory =
   | 'structural'
   | 'mechanical'
   | 'electrical'
+  | 'architectural'
   | 'plumbing'
   | 'finishing'
   | 'fire_safety'
@@ -133,7 +134,7 @@ export async function transitionPunchStatus(
   return apiPost<PunchItem>(`/v1/punchlist/items/${id}/transition`, { new_status: newStatus });
 }
 
-export async function uploadPunchPhoto(id: string, file: File): Promise<{ url: string }> {
+export async function uploadPunchPhoto(id: string, file: File): Promise<PunchItem> {
   const formData = new FormData();
   formData.append('file', file);
   const token = localStorage.getItem('oe_access_token');

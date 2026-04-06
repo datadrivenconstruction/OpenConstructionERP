@@ -1,5 +1,4 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
@@ -49,6 +48,7 @@ import type {
   MarkupsSummary,
   CreateMarkupPayload,
 } from './api';
+import { InlinePdfAnnotator } from './InlinePdfAnnotator';
 
 /* ── Constants ─────────────────────────────────────────────────────────── */
 
@@ -835,7 +835,6 @@ function MarkupTableRow({
 
 export function MarkupsPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
@@ -850,6 +849,11 @@ export function MarkupsPage() {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [showAddModal, setShowAddModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [annotateDocId, setAnnotateDocId] = useState<string | null>(null);
+  const [annotateStamp, setAnnotateStamp] = useState<string | undefined>(undefined);
+  const [showCustomStampForm, setShowCustomStampForm] = useState(false);
+  const [customStampName, setCustomStampName] = useState('');
+  const [customStampColor, setCustomStampColor] = useState('#3B82F6');
 
   // Data queries
   const { data: projects = [] } = useQuery({
@@ -1006,8 +1010,8 @@ export function MarkupsPage() {
           {t('markups.title', { defaultValue: 'Markups & Annotations' })}
         </h1>
 
-        {/* Right: controls */}
-        <div className="flex items-center gap-2 flex-wrap">
+        {/* Right: controls — single row, no wrap */}
+        <div className="flex items-center gap-1.5 shrink-0">
           {/* Project selector */}
           {projects.length > 0 && (
             <select
@@ -1018,7 +1022,7 @@ export function MarkupsPage() {
                   useProjectContextStore.getState().setActiveProject(p.id, p.name);
                 }
               }}
-              className={selectCls + ' max-w-[180px]'}
+              className={selectCls + ' max-w-[150px]'}
             >
               <option value="" disabled>
                 {t('markups.select_project', { defaultValue: 'Project...' })}
@@ -1036,12 +1040,12 @@ export function MarkupsPage() {
             <select
               value={filterDocumentId}
               onChange={(e) => setFilterDocumentId(e.target.value)}
-              className={selectCls + ' max-w-[170px]'}
+              className={selectCls + ' max-w-[140px]'}
             >
               <option value="">
                 {documents.length > 0
                   ? t('markups.all_documents', { defaultValue: 'All Docs' })
-                  : t('markups.no_documents', { defaultValue: 'No documents — upload in Documents' })}
+                  : t('markups.no_documents', { defaultValue: 'No docs' })}
               </option>
               {documents.map((doc) => (
                 <option key={doc.id} value={doc.id}>
@@ -1051,38 +1055,44 @@ export function MarkupsPage() {
             </select>
           )}
 
-          {/* Open PDF Viewer for visual annotations */}
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => navigate('/takeoff?tab=measurements')}
-            className="shrink-0 whitespace-nowrap"
-          >
-            <PenTool size={14} className="mr-1 shrink-0" />
-            <span>{t('markups.annotate_pdf', { defaultValue: 'Annotate on PDF' })}</span>
-          </Button>
+          {/* Open inline PDF annotator — icon-only on small screens */}
+          {documents.length > 0 && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setAnnotateDocId(filterDocumentId || documents[0]?.id || null)}
+              disabled={!projectId || documents.length === 0}
+              className="shrink-0 whitespace-nowrap"
+              title={t('markups.annotate_pdf', { defaultValue: 'Annotate on PDF' })}
+            >
+              <PenTool size={14} />
+              <span className="hidden lg:inline ml-1">{t('markups.annotate_pdf', { defaultValue: 'Annotate' })}</span>
+            </Button>
+          )}
 
-          {/* Add Markup (data only) */}
+          {/* Add Markup */}
           <Button
             variant="primary"
             size="sm"
             onClick={() => setShowAddModal(true)}
             disabled={!projectId}
             className="shrink-0 whitespace-nowrap"
+            title={t('markups.add_markup', { defaultValue: 'Add Markup' })}
           >
-            <Plus size={14} className="mr-1 shrink-0" />
-            <span>{t('markups.add_markup', { defaultValue: 'Add Markup' })}</span>
+            <Plus size={14} />
+            <span className="hidden lg:inline ml-1">{t('markups.add_markup', { defaultValue: 'Add' })}</span>
           </Button>
 
-          {/* Export (ghost) */}
+          {/* Export — icon only */}
           <Button
             variant="ghost"
             size="sm"
             onClick={handleExportCSV}
             disabled={!projectId}
             icon={<Download size={14} />}
+            title={t('markups.export', { defaultValue: 'Export' })}
           >
-            {t('markups.export', { defaultValue: 'Export' })}
+            <span className="hidden lg:inline">{t('markups.export', { defaultValue: 'Export' })}</span>
           </Button>
         </div>
       </div>
@@ -1111,6 +1121,20 @@ export function MarkupsPage() {
           <div className="mt-3">
             <StatsBar summary={summary} />
           </div>
+
+          {/* ── Inline PDF Annotator ──────────────────────────────────────── */}
+          {annotateDocId && (
+            <div className="mt-3">
+              <InlinePdfAnnotator
+                documentId={annotateDocId}
+                documentName={documents.find((d) => d.id === annotateDocId)?.name || 'Document'}
+                projectId={projectId}
+                onClose={() => { setAnnotateDocId(null); setAnnotateStamp(undefined); }}
+                onMarkupCreated={invalidateAll}
+                activeStamp={annotateStamp}
+              />
+            </div>
+          )}
 
           {/* ── Filter / Search / View Toggle ──────────────────────────────── */}
           <div className="mt-3 flex items-center gap-2 flex-wrap">
@@ -1334,23 +1358,33 @@ export function MarkupsPage() {
                   STAMP_BADGE_COLORS[stamp.color] ??
                   'bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-900/30 dark:text-gray-400 dark:border-gray-600';
                 return (
-                  <span
+                  <button
                     key={stamp.name}
+                    onClick={() => {
+                      if (documents.length > 0) {
+                        setAnnotateStamp(stamp.name);
+                        setAnnotateDocId(filterDocumentId || documents[0]?.id || null);
+                      } else {
+                        addToast({
+                          type: 'info',
+                          title: t('markups.upload_doc_first', { defaultValue: 'Upload a document first to place stamps on it.' }),
+                        });
+                      }
+                    }}
                     className={clsx(
-                      'inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-xs font-medium cursor-pointer hover:opacity-80 transition-opacity',
+                      'inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-xs font-medium cursor-pointer hover:opacity-80 hover:scale-105 transition-all',
                       colorCls,
                     )}
+                    title={t('markups.click_to_place_stamp', { defaultValue: 'Click to place this stamp on a document' })}
                   >
                     <Stamp size={11} />
                     {t(`markups.stamp_${stamp.name}`, { defaultValue: stamp.label })}
-                  </span>
+                  </button>
                 );
               })}
               <button
                 className="text-xs text-oe-blue hover:underline ml-1"
-                onClick={() => {
-                  /* Future: inline custom stamp form */
-                }}
+                onClick={() => setShowCustomStampForm(true)}
                 disabled={!projectId}
               >
                 + {t('markups.custom_stamp', { defaultValue: 'Custom' })}
@@ -1368,6 +1402,86 @@ export function MarkupsPage() {
         documents={documents}
         onCreated={invalidateAll}
       />
+
+      {/* ── Custom Stamp Form ──────────────────────────────────────────── */}
+      {showCustomStampForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowCustomStampForm(false)}>
+          <div className="w-full max-w-sm mx-4 rounded-xl bg-surface-elevated shadow-xl border border-border-light p-5" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-sm font-semibold text-content-primary mb-4">
+              {t('markups.create_custom_stamp', { defaultValue: 'Create Custom Stamp' })}
+            </h3>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-content-secondary mb-1">
+                  {t('markups.stamp_text', { defaultValue: 'Stamp Text' })}
+                </label>
+                <input
+                  value={customStampName}
+                  onChange={(e) => setCustomStampName(e.target.value)}
+                  placeholder={t('markups.stamp_text_placeholder', { defaultValue: 'e.g. CHECKED, HOLD, RFI...' })}
+                  className="h-8 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-content-secondary mb-1">
+                  {t('markups.stamp_color', { defaultValue: 'Color' })}
+                </label>
+                <div className="flex gap-2">
+                  {PRESET_COLORS.map((c) => (
+                    <button
+                      key={c.value}
+                      onClick={() => setCustomStampColor(c.value)}
+                      className={clsx(
+                        'w-7 h-7 rounded-full border-2 transition-all',
+                        customStampColor === c.value ? 'border-content-primary scale-110 ring-2 ring-offset-1 ring-oe-blue/40' : 'border-transparent hover:scale-105',
+                      )}
+                      style={{ backgroundColor: c.value }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setShowCustomStampForm(false)}>
+                {t('common.cancel', { defaultValue: 'Cancel' })}
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                disabled={!customStampName.trim()}
+                onClick={async () => {
+                  if (!customStampName.trim()) return;
+                  try {
+                    const { createStampTemplate } = await import('./api');
+                    await createStampTemplate({
+                      name: customStampName.trim().toLowerCase().replace(/\s+/g, '_'),
+                      text: customStampName.trim().toUpperCase(),
+                      color: customStampColor,
+                      project_id: projectId || undefined,
+                    });
+                    addToast({
+                      type: 'success',
+                      title: t('markups.stamp_created', { defaultValue: 'Stamp created' }),
+                    });
+                    qc.invalidateQueries({ queryKey: ['stamp-templates'] });
+                    setShowCustomStampForm(false);
+                    setCustomStampName('');
+                  } catch (err) {
+                    addToast({
+                      type: 'error',
+                      title: t('common.error', { defaultValue: 'Error' }),
+                      message: err instanceof Error ? err.message : '',
+                    });
+                  }
+                }}
+              >
+                {t('common.create', { defaultValue: 'Create' })}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Delete Confirm Dialog ──────────────────────────────────────── */}
       <ConfirmDialog

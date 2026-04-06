@@ -253,14 +253,14 @@ function GatePipeline({
                   size="sm"
                   onClick={() => onRunGate(def.number)}
                   disabled={runningGate !== null}
-                  className="shrink-0"
+                  className="shrink-0 whitespace-nowrap"
                 >
                   {runningGate === def.number ? (
-                    <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" />
+                    <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-oe-blue border-t-transparent mr-1 shrink-0" />
                   ) : (
                     <Play size={14} className="mr-1 shrink-0" />
                   )}
-                  {t('requirements.run', { defaultValue: 'Run' })}
+                  <span className="whitespace-nowrap">{t('requirements.run', { defaultValue: 'Run' })}</span>
                 </Button>
               </div>
             </Card>
@@ -739,15 +739,15 @@ function ExportDropdown({
         size="sm"
         onClick={() => setOpen(!open)}
         disabled={exporting || requirements.length === 0}
-        className="shrink-0"
+        className="shrink-0 whitespace-nowrap"
       >
         {exporting ? (
-          <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-oe-blue border-t-transparent sm:mr-1.5" />
+          <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-oe-blue border-t-transparent mr-1.5 shrink-0" />
         ) : (
-          <Download size={14} className="sm:mr-1.5" />
+          <Download size={14} className="mr-1.5 shrink-0" />
         )}
-        <span className="hidden sm:inline">{t('requirements.export', { defaultValue: 'Export' })}</span>
-        <ChevronDown size={12} className="ml-0.5 sm:ml-1" />
+        <span className="whitespace-nowrap">{t('requirements.export', { defaultValue: 'Export' })}</span>
+        <ChevronDown size={12} className="ml-1 shrink-0" />
       </Button>
       {open && (
         <>
@@ -980,8 +980,6 @@ function ImportModal({
         ? 'border-oe-blue text-oe-blue'
         : 'border-transparent text-content-tertiary hover:text-content-secondary hover:border-border',
     );
-
-  const _previewRows = activeTab === 'csv' ? csvParsed : jsonParsed;
 
   return (
     <div
@@ -1458,10 +1456,6 @@ export function RequirementsPage() {
   });
 
   const projectId = activeProjectId || projects[0]?.id || '';
-  const _project = useMemo(
-    () => projects.find((p) => p.id === projectId),
-    [projects, projectId],
-  );
 
   const { data: sets = [], isLoading: setsLoading } = useQuery({
     queryKey: ['requirement-sets', projectId],
@@ -1677,7 +1671,10 @@ export function RequirementsPage() {
           {projects.length > 0 && (
             <select
               value={projectId}
-              onChange={(e) => useProjectContextStore.getState().setActiveProjectId(e.target.value)}
+              onChange={(e) => {
+                const p = projects.find((p) => p.id === e.target.value);
+                if (p) useProjectContextStore.getState().setActiveProject(p.id, p.name);
+              }}
               className={inputCls + ' !h-8 !text-xs max-w-[180px]'}
             >
               {projects.map((p) => (
@@ -1696,9 +1693,9 @@ export function RequirementsPage() {
               ))}
             </select>
           )}
-          <Button variant="primary" size="sm" onClick={() => setShowCreateSet(true)} disabled={!projectId} className="shrink-0">
+          <Button variant="primary" size="sm" onClick={() => setShowCreateSet(true)} disabled={!projectId} className="shrink-0 whitespace-nowrap">
             <Plus size={14} className="mr-1 shrink-0" />
-            {t('requirements.new_set', { defaultValue: 'New Set' })}
+            <span className="whitespace-nowrap">{t('requirements.new_set', { defaultValue: 'New Set' })}</span>
           </Button>
         </div>
       </div>
@@ -1751,10 +1748,10 @@ export function RequirementsPage() {
             variant={showFilters ? 'secondary' : 'ghost'}
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
-            className="shrink-0"
+            className="shrink-0 whitespace-nowrap"
           >
-            <Filter size={14} className="mr-1.5 sm:mr-1" />
-            <span className="hidden sm:inline">{t('common.filters', { defaultValue: 'Filters' })}</span>
+            <Filter size={14} className="mr-1.5 shrink-0" />
+            <span className="whitespace-nowrap">{t('common.filters', { defaultValue: 'Filters' })}</span>
             {(filterCategory || filterPriority || filterStatus) && (
               <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-oe-blue text-white text-2xs">
                 {[filterCategory, filterPriority, filterStatus].filter(Boolean).length}
@@ -1771,13 +1768,13 @@ export function RequirementsPage() {
             requirements={requirements}
             setName={currentSet?.name || 'requirements'}
           />
-          <Button variant="ghost" size="sm" onClick={() => setShowImport(true)} className="shrink-0">
-            <Upload size={14} className="sm:mr-1.5" />
-            <span className="hidden sm:inline">{t('requirements.import', { defaultValue: 'Import' })}</span>
+          <Button variant="ghost" size="sm" onClick={() => setShowImport(true)} className="shrink-0 whitespace-nowrap">
+            <Upload size={14} className="mr-1.5 shrink-0" />
+            <span className="whitespace-nowrap">{t('requirements.import', { defaultValue: 'Import' })}</span>
           </Button>
-          <Button variant="primary" size="sm" onClick={() => setShowAddReq(true)} className="shrink-0">
-            <Plus size={14} className="sm:mr-1.5" />
-            <span className="hidden sm:inline">{t('requirements.add', { defaultValue: 'Add Requirement' })}</span>
+          <Button variant="primary" size="sm" onClick={() => setShowAddReq(true)} className="shrink-0 whitespace-nowrap">
+            <Plus size={14} className="mr-1.5 shrink-0" />
+            <span className="whitespace-nowrap">{t('requirements.add', { defaultValue: 'Add Requirement' })}</span>
           </Button>
         </div>
       )}

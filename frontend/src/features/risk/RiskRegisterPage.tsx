@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ShieldAlert, Plus, ChevronRight, ArrowLeft, DollarSign,
-  AlertTriangle, Shield, Trash2, X,
+  AlertTriangle, Shield, Trash2, X, Search, Filter,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog } from '@/shared/ui';
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
@@ -41,6 +41,8 @@ const STATUSES = ['identified', 'assessed', 'mitigating', 'closed', 'occurred'];
 const PROB_LEVELS = ['0.9', '0.7', '0.5', '0.3', '0.1'];
 const PROB_LABELS: Record<string, string> = { '0.9': 'Very High', '0.7': 'High', '0.5': 'Medium', '0.3': 'Low', '0.1': 'Very Low' };
 const IMPACT_LEVELS = ['low', 'medium', 'high', 'critical'];
+
+const selectCls = 'h-8 rounded-lg border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-colors pr-7 appearance-none cursor-pointer';
 
 function fmtCur(n: number, c = 'EUR') {
   const s = /^[A-Z]{3}$/.test(c) ? c : 'EUR';
@@ -284,6 +286,11 @@ export function RiskRegisterPage() {
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
   const [showCreate, setShowCreate] = useState(false);
   const [selectedRiskId, setSelectedRiskId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
   const { data: projects = [] } = useQuery({ queryKey: ['projects'], queryFn: () => apiGet<Project[]>('/v1/projects/') });
   const projectId = activeProjectId || projects[0]?.id || '';
@@ -295,28 +302,59 @@ export function RiskRegisterPage() {
 
   const delMut = useMutation({
     mutationFn: (id: string) => apiDelete(`/v1/risk/${id}`),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['risks'] }); qc.invalidateQueries({ queryKey: ['risk-summary'] }); qc.invalidateQueries({ queryKey: ['risk-matrix'] }); addToast({ type: 'success', title: t('risk.deleted', { defaultValue: 'Risk deleted' }) }); },
-    onError: (e: Error) => addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: e.message }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['risks'] }); qc.invalidateQueries({ queryKey: ['risk-summary'] }); qc.invalidateQueries({ queryKey: ['risk-matrix'] }); setDeleteTarget(null); addToast({ type: 'success', title: t('risk.deleted', { defaultValue: 'Risk deleted' }) }); },
+    onError: (e: Error) => { setDeleteTarget(null); addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: e.message }); },
   });
 
   const refresh = useCallback(() => { qc.invalidateQueries({ queryKey: ['risks'] }); qc.invalidateQueries({ queryKey: ['risk-summary'] }); qc.invalidateQueries({ queryKey: ['risk-matrix'] }); }, [qc]);
 
+  // Client-side filtering
+  const filteredRisks = useMemo(() => {
+    let result = risks;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter((r) => r.title.toLowerCase().includes(q) || r.code.toLowerCase().includes(q) || r.description.toLowerCase().includes(q));
+    }
+    if (filterCategory) result = result.filter((r) => r.category === filterCategory);
+    if (filterStatus) result = result.filter((r) => r.status === filterStatus);
+    return result;
+  }, [risks, searchQuery, filterCategory, filterStatus]);
+
   if (selectedRiskId) return <div className="mx-auto max-w-5xl px-6 py-6"><DetailView riskId={selectedRiskId} onBack={() => setSelectedRiskId(null)} /></div>;
 
   const currency = project?.currency || summary?.currency || 'EUR';
+  const hasRisks = (summary?.total_risks ?? 0) > 0;
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-6">
       <Breadcrumb items={[{ label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' }, { label: t('nav.risk_register', { defaultValue: 'Risk Register' }) }]} />
 
-      <div className="mt-4 flex items-center justify-between">
+      <div className="mt-4 flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-content-primary">{t('nav.risk_register', { defaultValue: 'Risk Register' })}</h1>
           {project && <p className="mt-1 text-sm text-content-secondary">{project.name}</p>}
         </div>
-        <Button variant="primary" onClick={() => setShowCreate(true)} disabled={!projectId}>
-          <Plus size={16} className="mr-1.5" />{t('risk.new', { defaultValue: 'Add Risk' })}
-        </Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Project selector */}
+          {projects.length > 0 && (
+            <select
+              value={projectId}
+              onChange={(e) => {
+                const p = projects.find((pr) => pr.id === e.target.value);
+                if (p) useProjectContextStore.getState().setActiveProject(p.id, p.name);
+              }}
+              className={selectCls + ' max-w-[180px]'}
+            >
+              <option value="" disabled>{t('risk.select_project', { defaultValue: 'Project...' })}</option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          )}
+          <Button variant="primary" onClick={() => setShowCreate(true)} disabled={!projectId}>
+            <Plus size={16} className="mr-1.5" />{t('risk.new', { defaultValue: 'Add Risk' })}
+          </Button>
+        </div>
       </div>
 
       {summary && (
@@ -340,13 +378,59 @@ export function RiskRegisterPage() {
         </div>
       )}
 
-      {matrixData?.cells && matrixData.cells.length > 0 && <div className="mt-6"><RiskMatrix cells={matrixData.cells} /></div>}
+      {/* Only show matrix when there are actual risks */}
+      {hasRisks && matrixData?.cells && <div className="mt-6"><RiskMatrix cells={matrixData.cells} /></div>}
 
-      <div className="mt-6">
+      {/* Search & filter bar (only when there are risks) */}
+      {risks.length > 0 && (
+        <div className="mt-4 flex items-center gap-2 flex-wrap">
+          <div className="relative flex-1 min-w-[200px] max-w-xs">
+            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-content-tertiary" />
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t('risk.search', { defaultValue: 'Search risks...' })}
+              className="h-8 w-full rounded-lg border border-border bg-surface-primary pl-8 pr-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+            />
+          </div>
+          <Button variant="ghost" size="sm" onClick={() => setShowFilters(!showFilters)} className={showFilters ? 'text-oe-blue' : ''} icon={<Filter size={14} />}>
+            {t('common.filters', { defaultValue: 'Filters' })}
+          </Button>
+        </div>
+      )}
+
+      {showFilters && (
+        <div className="mt-2 flex items-center gap-2 flex-wrap animate-fade-in">
+          <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className={selectCls + ' max-w-[150px]'}>
+            <option value="">{t('risk.all_categories', { defaultValue: 'All Categories' })}</option>
+            {CATEGORIES.map((c) => <option key={c} value={c}>{t(`risk.cat_${c}`, { defaultValue: c })}</option>)}
+          </select>
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className={selectCls + ' max-w-[150px]'}>
+            <option value="">{t('risk.all_statuses', { defaultValue: 'All Statuses' })}</option>
+            {STATUSES.map((s) => <option key={s} value={s}>{t(`risk.status_${s}`, { defaultValue: s })}</option>)}
+          </select>
+          {(filterCategory || filterStatus) && (
+            <button onClick={() => { setFilterCategory(''); setFilterStatus(''); }} className="text-xs text-oe-blue hover:underline">
+              {t('risk.clear_filters', { defaultValue: 'Clear' })}
+            </button>
+          )}
+        </div>
+      )}
+
+      <div className="mt-4">
         {isLoading ? (
           <div className="flex items-center justify-center py-20"><div className="h-6 w-6 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" /></div>
-        ) : risks.length === 0 ? (
-          <Card><EmptyState icon={<ShieldAlert size={24} />} title={t('risk.empty', { defaultValue: 'No risks registered' })} description={t('risk.empty_desc', { defaultValue: 'Add risks to track potential issues and mitigation strategies' })} action={{ label: t('risk.new', { defaultValue: 'Add Risk' }), onClick: () => setShowCreate(true) }} /></Card>
+        ) : filteredRisks.length === 0 ? (
+          <Card><EmptyState
+            icon={<ShieldAlert size={24} />}
+            title={searchQuery || filterCategory || filterStatus
+              ? t('risk.no_match', { defaultValue: 'No matching risks' })
+              : t('risk.empty', { defaultValue: 'No risks registered' })}
+            description={searchQuery || filterCategory || filterStatus
+              ? t('risk.no_match_desc', { defaultValue: 'Try adjusting your search or filters.' })
+              : t('risk.empty_desc', { defaultValue: 'Add risks to track potential issues and mitigation strategies' })}
+            action={searchQuery || filterCategory || filterStatus ? undefined : { label: t('risk.new', { defaultValue: 'Add Risk' }), onClick: () => setShowCreate(true) }}
+          /></Card>
         ) : (
           <Card className="overflow-hidden">
             <div className="overflow-x-auto">
@@ -360,7 +444,7 @@ export function RiskRegisterPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {risks.map((r) => (
+                  {filteredRisks.map((r) => (
                     <tr key={r.id} className="border-b border-border last:border-0 hover:bg-surface-secondary/30 cursor-pointer" onClick={() => setSelectedRiskId(r.id)}>
                       <td className="px-4 py-3 font-mono text-xs text-content-secondary">{r.code}</td>
                       <td className="px-4 py-3 text-content-primary font-medium max-w-[200px] truncate">{r.title}</td>
@@ -372,7 +456,7 @@ export function RiskRegisterPage() {
                       <td className="px-4 py-3 text-content-secondary text-xs truncate max-w-[100px]">{r.owner_name || '-'}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
-                          <button onClick={(e) => { e.stopPropagation(); delMut.mutate(r.id); }} className="text-content-tertiary hover:text-semantic-error transition-colors p-1" title={t('common.delete', { defaultValue: 'Delete' })}><Trash2 size={14} /></button>
+                          <button onClick={(e) => { e.stopPropagation(); setDeleteTarget(r.id); }} className="text-content-tertiary hover:text-semantic-error transition-colors p-1" title={t('common.delete', { defaultValue: 'Delete' })}><Trash2 size={14} /></button>
                           <ChevronRight size={14} className="text-content-tertiary" />
                         </div>
                       </td>
@@ -386,6 +470,19 @@ export function RiskRegisterPage() {
       </div>
 
       {showCreate && projectId && <CreateDialog projectId={projectId} currency={currency} onClose={() => setShowCreate(false)} onCreated={refresh} />}
+
+      {/* Delete confirmation dialog */}
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onConfirm={() => deleteTarget && delMut.mutate(deleteTarget)}
+        onCancel={() => setDeleteTarget(null)}
+        title={t('risk.delete_title', { defaultValue: 'Delete Risk' })}
+        message={t('risk.delete_message', { defaultValue: 'This risk will be permanently removed. This action cannot be undone.' })}
+        confirmLabel={t('common.delete', { defaultValue: 'Delete' })}
+        cancelLabel={t('common.cancel', { defaultValue: 'Cancel' })}
+        variant="danger"
+        loading={delMut.isPending}
+      />
     </div>
   );
 }

@@ -42,6 +42,7 @@ import {
 import clsx from 'clsx';
 import { Card, CardContent, Button, Badge } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { aiApi, type QuickEstimateRequest, type EstimateJobResponse, type EstimateItem, type CadExtractResponse, type EnrichResult, type EnrichedItem, type CadColumnsResponse, type CadGroupResponse, type CadDynamicGroup, type CadGroupElementsResponse } from './api';
 import { apiGet, apiPost } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
@@ -176,8 +177,20 @@ function ShimmerRow() {
   );
 }
 
-function LoadingState() {
+function LoadingState({ isCad, fileName }: { isCad?: boolean; fileName?: string }) {
   const { t } = useTranslation();
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    const start = Date.now();
+    const timer = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  const title = isCad
+    ? t('ai.converting_cad', { defaultValue: 'Converting CAD file...' })
+    : t('ai.analyzing', { defaultValue: 'AI is analyzing your input...' });
+  const subtitle = isCad
+    ? t('ai.cad_processing_hint', { defaultValue: 'Extracting elements, detecting columns. This may take 30-60 seconds for large files.' })
+    : t('ai.generating', { defaultValue: 'Generating cost breakdown and quantities' });
   return (
     <div className="animate-card-in" style={{ animationDelay: '100ms' }}>
       <Card>
@@ -186,13 +199,13 @@ function LoadingState() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-oe-blue-subtle">
               <Sparkles size={16} className="text-oe-blue animate-pulse" />
             </div>
-            <div>
-              <p className="text-sm font-semibold text-content-primary">
-                {t('ai.analyzing', { defaultValue: 'AI is analyzing your input...' })}
-              </p>
-              <p className="text-xs text-content-tertiary">
-                {t('ai.generating', { defaultValue: 'Generating cost breakdown and quantities' })}
-              </p>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-content-primary">{title}</p>
+              <p className="text-xs text-content-tertiary">{subtitle}</p>
+            </div>
+            <div className="text-xs text-content-quaternary tabular-nums shrink-0">
+              {elapsed > 0 && `${elapsed}s`}
+              {fileName && <span className="ml-2 text-content-tertiary">{fileName}</span>}
             </div>
           </div>
           <div className="h-1 w-full overflow-hidden rounded-full bg-surface-secondary">
@@ -1141,7 +1154,8 @@ export function QuickEstimatePage() {
   const [enriching, setEnriching] = useState(false);
 
   // CAD BOQ creation state
-  const [cadBOQProjectId, setCadBOQProjectId] = useState('');
+  const globalProjectId = useProjectContextStore((s) => s.activeProjectId);
+  const [cadBOQProjectId, setCadBOQProjectId] = useState(globalProjectId || '');
   const [cadBOQName, setCadBOQName] = useState('CAD Import');
   const [cadBOQCreating, setCadBOQCreating] = useState(false);
   const [cadExporting, setCadExporting] = useState(false);
@@ -1747,7 +1761,7 @@ export function QuickEstimatePage() {
 
   const treeData = useMemo((): TreeNode[] => {
     if (!cadGroupResult || (cadGroupResult.group_by || []).length < 2) return [];
-    const firstCol = cadGroupResult.group_by[0];
+    const firstCol = cadGroupResult.group_by[0]!;
     const nodeMap = new Map<string, TreeNode>();
 
     for (const g of filteredGroups) {
@@ -1964,49 +1978,67 @@ export function QuickEstimatePage() {
 
       {/* AI Status Banner */}
       {aiSettings && !isConfigured ? (
-        /* ── NOT CONFIGURED — prominent setup card ─── */
-        <div
-          className="animate-card-in rounded-2xl border-2 border-dashed border-oe-blue/30 bg-gradient-to-br from-oe-blue-subtle/60 to-surface-elevated p-6 text-center"
-          style={{ animationDelay: '50ms' }}
-        >
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-oe-blue/10">
-            <Sparkles size={28} className="text-oe-blue" />
-          </div>
-          <h3 className="text-lg font-bold text-content-primary">
-            {t('ai.setup_required_title', { defaultValue: 'Connect your AI to get started' })}
-          </h3>
-          <p className="mt-2 text-sm text-content-secondary max-w-md mx-auto">
-            {t('ai.setup_required_desc', {
-              defaultValue: 'Add your API key for Anthropic Claude, OpenAI, or Google Gemini to generate estimates from text, photos, PDFs, and CAD files.',
-            })}
-          </p>
-          <div className="mt-5 flex items-center justify-center gap-3">
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={() => navigate('/settings')}
-              icon={<ArrowRight size={16} />}
-              iconPosition="right"
-              className="btn-shimmer"
-            >
-              {t('ai.configure_ai', { defaultValue: 'Configure AI Provider' })}
+        isCadRoute ? (
+          /* ── CAD route: compact AI info (AI is optional here) ─── */
+          <div
+            className="animate-card-in flex items-center gap-3 rounded-xl border border-border-light bg-surface-secondary/50 px-4 py-2.5"
+            style={{ animationDelay: '50ms' }}
+          >
+            <Sparkles size={16} className="text-content-tertiary shrink-0" />
+            <p className="text-xs text-content-secondary flex-1">
+              {t('ai.cad_ai_optional', {
+                defaultValue: 'AI is optional for CAD/BIM takeoff. Quantity extraction works without AI. Connect an AI provider in Settings for automatic cost enrichment.',
+              })}
+            </p>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/settings')} className="shrink-0 whitespace-nowrap text-2xs">
+              {t('ai.setup_ai', { defaultValue: 'Setup AI' })}
             </Button>
           </div>
-          <div className="mt-4 flex items-center justify-center gap-4 text-xs text-content-tertiary">
-            <span className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-content-tertiary" />
-              Anthropic Claude
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-content-tertiary" />
-              OpenAI GPT-4
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-content-tertiary" />
-              Google Gemini
-            </span>
+        ) : (
+          /* ── AI Estimate route: prominent setup card ─── */
+          <div
+            className="animate-card-in rounded-2xl border-2 border-dashed border-oe-blue/30 bg-gradient-to-br from-oe-blue-subtle/60 to-surface-elevated p-6 text-center"
+            style={{ animationDelay: '50ms' }}
+          >
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-oe-blue/10">
+              <Sparkles size={28} className="text-oe-blue" />
+            </div>
+            <h3 className="text-lg font-bold text-content-primary">
+              {t('ai.setup_required_title', { defaultValue: 'Connect your AI to get started' })}
+            </h3>
+            <p className="mt-2 text-sm text-content-secondary max-w-md mx-auto">
+              {t('ai.setup_required_desc', {
+                defaultValue: 'Add your API key for Anthropic Claude, OpenAI, or Google Gemini to generate estimates from text, photos, PDFs, and CAD files.',
+              })}
+            </p>
+            <div className="mt-5 flex items-center justify-center gap-3">
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={() => navigate('/settings')}
+                icon={<ArrowRight size={16} />}
+                iconPosition="right"
+                className="btn-shimmer"
+              >
+                {t('ai.configure_ai', { defaultValue: 'Configure AI Provider' })}
+              </Button>
+            </div>
+            <div className="mt-4 flex items-center justify-center gap-4 text-xs text-content-tertiary">
+              <span className="flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-content-tertiary" />
+                Anthropic Claude
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-content-tertiary" />
+                OpenAI GPT-4
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-content-tertiary" />
+                Google Gemini
+              </span>
+            </div>
           </div>
-        </div>
+        )
       ) : aiSettings && isConfigured ? (
         /* ── CONFIGURED — green status bar ─── */
         <div
@@ -2489,7 +2521,7 @@ export function QuickEstimatePage() {
       </Card>
 
       {/* Loading state */}
-      {isPending && <LoadingState />}
+      {isPending && <LoadingState isCad={isCadRoute} fileName={selectedFile?.name} />}
 
       {/* Error state */}
       {isError && (
@@ -2618,7 +2650,7 @@ export function QuickEstimatePage() {
                         )}>
                         {col}
                         {conf != null && (
-                          <span className={clsx('text-2xs', isSelected ? 'opacity-70' : 'text-content-quaternary')}>
+                          <span className={clsx('text-2xs', isSelected ? 'opacity-70' : 'text-content-quaternary')} title={t('ai.confidence_tooltip', { defaultValue: 'Column detection confidence — higher % = more reliable data' })}>
                             {Math.round(conf * 100)}%
                           </span>
                         )}
@@ -2628,7 +2660,7 @@ export function QuickEstimatePage() {
                 </div>
               </div>
               <div>
-                <label className="text-xs font-medium text-content-secondary mb-2 block">Sum quantities</label>
+                <label className="text-xs font-medium text-content-secondary mb-2 block">{t('ai.sum_quantities', { defaultValue: 'Sum quantities' })}</label>
                 <div className="flex flex-wrap gap-1.5">
                   {(cadColumnsData.columns?.quantity || []).map(col => {
                     const isSelected = (selectedSumCols || []).includes(col);
@@ -2641,7 +2673,7 @@ export function QuickEstimatePage() {
                         )}>
                         {col}{unit ? ` (${unit})` : ''}
                         {conf != null && (
-                          <span className={clsx('text-2xs', isSelected ? 'opacity-70' : 'text-content-quaternary')}>
+                          <span className={clsx('text-2xs', isSelected ? 'opacity-70' : 'text-content-quaternary')} title={t('ai.confidence_tooltip', { defaultValue: 'Column detection confidence — higher % = more reliable data' })}>
                             {Math.round(conf * 100)}%
                           </span>
                         )}
@@ -2904,7 +2936,7 @@ export function QuickEstimatePage() {
                                   </td>
                                   <td className="px-4 py-1.5 text-sm text-content-secondary pl-10">
                                     <span className="text-border mr-1.5">|--</span>
-                                    {cleanValue(groupByCols[0], g.key_parts[groupByCols[0]] || '')}
+                                    {cleanValue(groupByCols[0]!, g.key_parts[groupByCols[0]!] || '')}
                                   </td>
                                   {groupByCols.slice(1).map((col) => (
                                     <td key={col} className="px-4 py-1.5 text-sm text-content-primary font-medium">

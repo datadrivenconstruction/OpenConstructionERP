@@ -86,7 +86,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ) : (
           <>
             {icon && iconPosition === 'left' && <span className="shrink-0">{icon}</span>}
-            {children && <span>{children}</span>}
+            {children && <span className="inline-flex items-center">{children}</span>}
             {icon && iconPosition === 'right' && <span className="shrink-0">{icon}</span>}
           </>
         )}

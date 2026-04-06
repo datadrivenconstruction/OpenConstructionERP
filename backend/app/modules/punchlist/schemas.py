@@ -34,7 +34,7 @@ class PunchItemCreate(BaseModel):
     due_date: datetime | None = None
     category: str | None = Field(
         default=None,
-        pattern=r"^(structural|mechanical|electrical|architectural|fire_safety|plumbing|finishing)$",
+        pattern=r"^(structural|mechanical|electrical|architectural|fire_safety|plumbing|finishing|hvac|exterior|landscaping|general)$",
     )
     trade: str | None = Field(default=None, max_length=100)
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -59,7 +59,7 @@ class PunchItemUpdate(BaseModel):
     due_date: datetime | None = None
     category: str | None = Field(
         default=None,
-        pattern=r"^(structural|mechanical|electrical|architectural|fire_safety|plumbing|finishing)$",
+        pattern=r"^(structural|mechanical|electrical|architectural|fire_safety|plumbing|finishing|hvac|exterior|landscaping|general)$",
     )
     trade: str | None = Field(default=None, max_length=100)
     resolution_notes: str | None = None

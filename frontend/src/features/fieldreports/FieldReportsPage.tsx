@@ -16,7 +16,6 @@ import {
   CloudFog,
   CloudLightning,
   Users,
-  Clock,
   FileText,
   CheckCircle2,
   Send,
@@ -43,7 +42,6 @@ import {
 } from './api';
 import type {
   FieldReport,
-  FieldReportSummary,
   ReportType,
   ReportStatus,
   WeatherCondition,
@@ -183,12 +181,12 @@ export function FieldReportsPage() {
     mutationFn: createFieldReport,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['fieldreports'] });
-      addToast({ type: 'success', message: t('fieldreports.created', { defaultValue: 'Field report created' }) });
+      addToast({ type: 'success', title: '', message: t('fieldreports.created', { defaultValue: 'Field report created' }) });
       setShowModal(false);
       setEditingReport(null);
     },
     onError: () => {
-      addToast({ type: 'error', message: t('fieldreports.create_error', { defaultValue: 'Failed to create report' }) });
+      addToast({ type: 'error', title: '', message: t('fieldreports.create_error', { defaultValue: 'Failed to create report' }) });
     },
   });
 
@@ -197,12 +195,12 @@ export function FieldReportsPage() {
       updateFieldReport(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['fieldreports'] });
-      addToast({ type: 'success', message: t('fieldreports.updated', { defaultValue: 'Field report updated' }) });
+      addToast({ type: 'success', title: '', message: t('fieldreports.updated', { defaultValue: 'Field report updated' }) });
       setShowModal(false);
       setEditingReport(null);
     },
     onError: () => {
-      addToast({ type: 'error', message: t('fieldreports.update_error', { defaultValue: 'Failed to update report' }) });
+      addToast({ type: 'error', title: '', message: t('fieldreports.update_error', { defaultValue: 'Failed to update report' }) });
     },
   });
 
@@ -210,7 +208,7 @@ export function FieldReportsPage() {
     mutationFn: deleteFieldReport,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['fieldreports'] });
-      addToast({ type: 'success', message: t('fieldreports.deleted', { defaultValue: 'Field report deleted' }) });
+      addToast({ type: 'success', title: '', message: t('fieldreports.deleted', { defaultValue: 'Field report deleted' }) });
     },
   });
 
@@ -218,7 +216,7 @@ export function FieldReportsPage() {
     mutationFn: submitFieldReport,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['fieldreports'] });
-      addToast({ type: 'success', message: t('fieldreports.submitted', { defaultValue: 'Report submitted for approval' }) });
+      addToast({ type: 'success', title: '', message: t('fieldreports.submitted', { defaultValue: 'Report submitted for approval' }) });
     },
   });
 
@@ -226,7 +224,7 @@ export function FieldReportsPage() {
     mutationFn: approveFieldReport,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['fieldreports'] });
-      addToast({ type: 'success', message: t('fieldreports.approved', { defaultValue: 'Report approved' }) });
+      addToast({ type: 'success', title: '', message: t('fieldreports.approved', { defaultValue: 'Report approved' }) });
     },
   });
 
@@ -322,8 +320,6 @@ export function FieldReportsPage() {
     month: 'long',
   });
 
-  const reports = view === 'calendar' ? calendarReports : listReports;
-
   return (
     <div className="flex flex-col gap-6 p-6">
       {/* Breadcrumb */}
@@ -380,8 +376,8 @@ export function FieldReportsPage() {
           </div>
 
           <Button size="sm" onClick={handleOpenNew} className="shrink-0 whitespace-nowrap">
-            <Plus size={16} className="mr-1.5 shrink-0" />
-            <span>{t('fieldreports.new_report', { defaultValue: 'New Report' })}</span>
+            <Plus size={14} className="mr-1.5 shrink-0" />
+            <span className="whitespace-nowrap">{t('fieldreports.new_report', { defaultValue: 'New Report' })}</span>
           </Button>
         </div>
       </div>
@@ -469,7 +465,7 @@ export function FieldReportsPage() {
                   onClick={() => {
                     if (cell.day === null) return;
                     if (cell.reports.length > 0) {
-                      handleOpenEdit(cell.reports[0]);
+                      handleOpenEdit(cell.reports[0]!);
                     } else {
                       setEditingReport(null);
                       setShowModal(true);
@@ -572,9 +568,9 @@ export function FieldReportsPage() {
                   statusFilter || typeFilter
                     ? undefined
                     : (
-                      <Button size="sm" onClick={handleOpenNew}>
-                        <Plus size={16} className="mr-1.5 shrink-0" />
-                        <span>{t('fieldreports.new_report', { defaultValue: 'New Report' })}</span>
+                      <Button size="sm" onClick={handleOpenNew} className="shrink-0 whitespace-nowrap">
+                        <Plus size={14} className="mr-1.5 shrink-0" />
+                        <span className="whitespace-nowrap">{t('fieldreports.new_report', { defaultValue: 'New Report' })}</span>
                       </Button>
                     )
                 }
@@ -803,7 +799,7 @@ function ReportModal({
     report?.temperature_c != null ? String(report.temperature_c) : '',
   );
   const [windSpeed, setWindSpeed] = useState(report?.wind_speed ?? '');
-  const [precipitation, setPrecipitation] = useState(report?.precipitation ?? '');
+  const [precipitation, _setPrecipitation] = useState(report?.precipitation ?? '');
   const [humidity, setHumidity] = useState<string>(
     report?.humidity != null ? String(report.humidity) : '',
   );
@@ -884,8 +880,6 @@ function ReportModal({
     onCreate,
     onUpdate,
   ]);
-
-  const WeatherIcon = WEATHER_ICONS[weatherCondition] || Sun;
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 pt-12 backdrop-blur-sm">
@@ -1193,15 +1187,15 @@ function ReportModal({
         <div className="flex items-center justify-between border-t border-border-light px-6 py-4">
           <div className="flex items-center gap-2">
             {isEdit && report?.status === 'draft' && (
-              <Button size="sm" variant="secondary" onClick={() => onSubmit(report.id)}>
-                <Send size={15} className="mr-1.5 shrink-0" />
-                <span>{t('fieldreports.submit', { defaultValue: 'Submit for Approval' })}</span>
+              <Button size="sm" variant="secondary" onClick={() => onSubmit(report.id)} className="shrink-0 whitespace-nowrap">
+                <Send size={14} className="mr-1.5 shrink-0" />
+                <span className="whitespace-nowrap">{t('fieldreports.submit', { defaultValue: 'Submit for Approval' })}</span>
               </Button>
             )}
             {isEdit && report?.status === 'submitted' && (
-              <Button size="sm" variant="secondary" onClick={() => onApprove(report.id)}>
-                <CheckCircle2 size={15} className="mr-1.5 shrink-0" />
-                <span>{t('fieldreports.approve', { defaultValue: 'Approve' })}</span>
+              <Button size="sm" variant="secondary" onClick={() => onApprove(report.id)} className="shrink-0 whitespace-nowrap">
+                <CheckCircle2 size={14} className="mr-1.5 shrink-0" />
+                <span className="whitespace-nowrap">{t('fieldreports.approve', { defaultValue: 'Approve' })}</span>
               </Button>
             )}
           </div>

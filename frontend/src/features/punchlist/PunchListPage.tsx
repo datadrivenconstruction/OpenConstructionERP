@@ -17,7 +17,6 @@ import {
   CheckCircle2,
   ShieldCheck,
   XCircle,
-  User,
   AlertTriangle,
   Clock,
 } from 'lucide-react';
@@ -57,6 +56,7 @@ const CATEGORIES: PunchCategory[] = [
   'structural',
   'mechanical',
   'electrical',
+  'architectural',
   'plumbing',
   'finishing',
   'fire_safety',
@@ -527,10 +527,10 @@ function PunchKanbanCard({
                 variant="ghost"
                 size="sm"
                 onClick={() => onTransition(item.id, tr.next)}
-                className="text-xs"
+                className="text-xs shrink-0 whitespace-nowrap"
               >
-                <Icon size={12} className="mr-1" />
-                {t(tr.labelKey, { defaultValue: tr.defaultLabel })}
+                <Icon size={12} className="mr-1 shrink-0" />
+                <span className="whitespace-nowrap">{t(tr.labelKey, { defaultValue: tr.defaultLabel })}</span>
               </Button>
             );
           })}
@@ -646,10 +646,6 @@ export function PunchListPage() {
   });
 
   const projectId = activeProjectId || projects[0]?.id || '';
-  const project = useMemo(
-    () => projects.find((p) => p.id === projectId),
-    [projects, projectId],
-  );
 
   const { data: punchItems = [], isLoading } = useQuery({
     queryKey: ['punchlist', projectId, filterPriority, filterStatus, filterCategory, filterAssignee],
@@ -792,7 +788,7 @@ export function PunchListPage() {
       />
 
       {/* ── Header: single compact row ─────────────────────────────────── */}
-      <div className="mt-3 flex items-center justify-between gap-3 flex-wrap">
+      <div className="mt-3 flex items-center justify-between gap-3 flex-nowrap overflow-x-auto">
         {/* Left: title */}
         <h1 className="text-lg font-bold text-content-primary flex items-center gap-2 shrink-0">
           <ListChecks size={20} className="text-oe-blue" />
@@ -800,7 +796,7 @@ export function PunchListPage() {
         </h1>
 
         {/* Right: controls */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 shrink-0">
           {/* Project selector */}
           {projects.length > 0 && (
             <select
@@ -823,9 +819,9 @@ export function PunchListPage() {
               ))}
             </select>
           )}
-          <Button variant="primary" size="sm" onClick={() => setShowAddModal(true)} disabled={!projectId} className="whitespace-nowrap">
+          <Button variant="primary" size="sm" onClick={() => setShowAddModal(true)} disabled={!projectId} className="shrink-0 whitespace-nowrap">
             <Plus size={14} className="mr-1 shrink-0" />
-            <span>{t('punch.new_item', { defaultValue: 'New Item' })}</span>
+            <span className="whitespace-nowrap">{t('punch.new_item', { defaultValue: 'New Item' })}</span>
           </Button>
         </div>
       </div>
@@ -858,10 +854,10 @@ export function PunchListPage() {
             variant="ghost"
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
-            className={clsx('shrink-0', showFilters && 'text-oe-blue')}
+            className={clsx('shrink-0 whitespace-nowrap', showFilters && 'text-oe-blue')}
           >
-            <Filter size={16} className="mr-1 shrink-0" />
-            <span>{t('common.filters', { defaultValue: 'Filters' })}</span>
+            <Filter size={14} className="mr-1.5 shrink-0" />
+            <span className="whitespace-nowrap">{t('common.filters', { defaultValue: 'Filters' })}</span>
           </Button>
 
           {/* View toggle */}
@@ -1159,12 +1155,14 @@ function PunchTableRow({
         </Badge>
       </td>
       <td className="px-4 py-3 text-sm text-content-secondary">
-        {t(`punch.category_${item.category}`, {
-          defaultValue: item.category
-            .split('_')
-            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-            .join(' '),
-        })}
+        {item.category
+          ? t(`punch.category_${item.category}`, {
+              defaultValue: item.category
+                .split('_')
+                .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                .join(' '),
+            })
+          : '-'}
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">

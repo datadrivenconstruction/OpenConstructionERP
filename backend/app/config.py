@@ -85,6 +85,11 @@ class Settings(BaseSettings):
 
     @computed_field  # type: ignore[prop-decorator]
     @property
+    def jwt_secret_is_default(self) -> bool:
+        return self.jwt_secret == "openestimate-local-dev-key"
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
     def cors_origins(self) -> list[str]:
         return [o.strip() for o in self.allowed_origins.split(",")]
 

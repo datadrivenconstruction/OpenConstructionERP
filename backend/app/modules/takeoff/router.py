@@ -803,7 +803,7 @@ async def get_group_elements(
     Returns all raw elements matching the provided ``group_key`` filter,
     allowing users to inspect what makes up each grouped row.
     """
-    _cleanup_sessions()
+    _cleanup_memory_sessions()
 
     session = _cad_sessions.get(body.session_id)
     if not session:

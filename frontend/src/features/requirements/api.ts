@@ -5,6 +5,7 @@
  */
 
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -193,7 +194,7 @@ export async function exportRequirementsCSV(
   try {
     const res = await fetch(`/api/v1/requirements/${setId}/export?format=csv`, {
       headers: {
-        Authorization: `Bearer ${getStoredToken()}`,
+        Authorization: `Bearer ${useAuthStore.getState().accessToken ?? ''}`,
         'X-DDC-Client': 'OE/1.0',
       },
     });
@@ -261,16 +262,3 @@ export async function exportRequirementsJSON(
   return JSON.stringify(data, null, 2);
 }
 
-/** Helper to read the stored auth token. */
-function getStoredToken(): string {
-  try {
-    const raw = localStorage.getItem('auth-storage');
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      return parsed?.state?.accessToken ?? '';
-    }
-  } catch {
-    // ignore
-  }
-  return '';
-}
