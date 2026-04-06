@@ -161,7 +161,7 @@ function renderCoverPage(
   const itemCount = options.positions.filter((p) => !isSection(p)).length;
   const sectionCount = buildSectionGroups(options.positions).sections.length;
   const resourceCount = options.positions.reduce((sum, p) => {
-    const meta = p.metadata ?? (p as Record<string, unknown>).metadata_;
+    const meta = p.metadata ?? (p as unknown as Record<string, unknown>).metadata_;
     const res = meta && Array.isArray((meta as Record<string, unknown>).resources)
       ? ((meta as Record<string, unknown>).resources as unknown[]).length : 0;
     return sum + res;
@@ -355,7 +355,7 @@ function renderBOQTables(
         formatCurrency(p.total, options.currency, locale),
       ]);
       // Add resource sub-rows
-      const meta = p.metadata ?? (p as Record<string, unknown>).metadata_;
+      const meta = p.metadata ?? (p as unknown as Record<string, unknown>).metadata_;
       const resources = (meta && Array.isArray((meta as Record<string, unknown>).resources))
         ? (meta as Record<string, unknown>).resources as Array<{ name: string; type: string; unit: string; quantity: number; unit_rate: number; total?: number }>
         : [];

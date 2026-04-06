@@ -22,7 +22,6 @@ import {
   Ruler,
   Sparkles,
   MessageSquare,
-  Box,
   X,
   FileEdit,
   ShieldAlert,
