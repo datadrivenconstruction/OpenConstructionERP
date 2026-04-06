@@ -130,18 +130,16 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       field: 'quantity',
       width: 100,
       editable: (params) => !params.data?._isSection && !params.data?._isFooter,
-      cellEditor: 'formulaCellEditor',
+      cellEditor: 'agNumberCellEditor',
+      cellEditorParams: { min: 0, precision: 4 },
       valueFormatter: currencyFormatter,
+      valueParser: (params) => {
+        const val = parseFloat(params.newValue);
+        return isNaN(val) ? params.oldValue : val;
+      },
       cellClass: 'text-right tabular-nums text-xs',
       headerClass: 'ag-right-aligned-header',
       type: 'numericColumn',
-      tooltipValueGetter: (params) => {
-        const formula = params.data?.metadata?.formula;
-        if (formula && typeof formula === 'string') {
-          return `${t('boq.formula', { defaultValue: 'Formula' })}: ${formula}`;
-        }
-        return undefined;
-      },
     },
     {
       headerName: t('boq.unit_rate', { defaultValue: 'Unit Rate' }),
@@ -149,10 +147,15 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       width: 110,
       editable: (params) => {
         if (params.data?._isSection || params.data?._isFooter) return false;
-        // If position has resources, unit_rate is derived from resources — not editable
         const res = params.data?.metadata?.resources;
         if (Array.isArray(res) && res.length > 0) return false;
         return true;
+      },
+      cellEditor: 'agNumberCellEditor',
+      cellEditorParams: { min: 0, precision: 2 },
+      valueParser: (params) => {
+        const val = parseFloat(params.newValue);
+        return isNaN(val) ? params.oldValue : val;
       },
       valueFormatter: currencyFormatter,
       cellClass: (params) => {
