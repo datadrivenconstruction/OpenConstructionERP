@@ -640,7 +640,7 @@ export function SettingsPage() {
   });
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-content mx-auto space-y-6">
       <Breadcrumb items={[
         { label: t('nav.dashboard', 'Dashboard'), to: '/' },
         { label: t('nav.settings', 'Settings') },
@@ -650,6 +650,12 @@ export function SettingsPage() {
         <h1 className="text-2xl font-bold text-content-primary">{t('nav.settings', 'Settings')}</h1>
         <p className="mt-1 text-sm text-content-secondary">{t('settings.subtitle', { defaultValue: 'Manage your account and preferences' })}</p>
       </div>
+
+      {/* ── Two-column grid on wide screens ──────────────────────────── */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+
+      {/* Left column */}
+      <div className="space-y-6">
 
       {/* Profile */}
       <Card className="animate-card-in" style={{ animationDelay: '100ms' }}>
@@ -736,15 +742,11 @@ export function SettingsPage() {
       {/* Interface Mode */}
       <InterfaceModeCard animationDelay="150ms" />
 
-      {/* AI Configuration */}
-      <InfoHint className="animate-card-in" style={{ animationDelay: '140ms' }} text={t('settings.ai_guidance', { defaultValue: 'AI features (estimation, takeoff analysis, semantic search) require an API key. Anthropic Claude is recommended for best accuracy. Keys are stored encrypted and never leave your server.' })} />
-      <AIConfigurationCard animationDelay="200ms" />
-
       {/* Language */}
       <Card className="animate-card-in" style={{ animationDelay: '250ms' }}>
         <CardHeader title={t('settings.language_title', { defaultValue: 'Language & Region' })} subtitle={t('settings.language_subtitle', { defaultValue: 'Choose your preferred language' })} />
         <CardContent>
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-2">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
             {SUPPORTED_LANGUAGES.map((lang) => {
               const isActive = i18n.language === lang.code;
               return (
@@ -752,10 +754,9 @@ export function SettingsPage() {
                   key={lang.code}
                   onClick={() => {
                     i18n.changeLanguage(lang.code);
-                    // Persist language preference to backend profile
                     apiPatch('/v1/users/me', { locale: lang.code }).then(() => {
                       queryClient.invalidateQueries({ queryKey: ['me'] });
-                    }).catch(() => { /* silent — localStorage already persists the choice */ });
+                    }).catch(() => {});
                   }}
                   aria-pressed={isActive}
                   aria-label={`${lang.name} (${lang.code})`}
@@ -776,6 +777,15 @@ export function SettingsPage() {
 
       {/* Appearance */}
       <AppearanceCard animationDelay="300ms" />
+
+      </div>{/* End left column */}
+
+      {/* Right column */}
+      <div className="space-y-6">
+
+      {/* AI Configuration */}
+      <InfoHint className="animate-card-in" style={{ animationDelay: '140ms' }} text={t('settings.ai_guidance', { defaultValue: 'AI features (estimation, takeoff analysis, semantic search) require an API key. Anthropic Claude is recommended for best accuracy. Keys are stored encrypted and never leave your server.' })} />
+      <AIConfigurationCard animationDelay="200ms" />
 
       {/* Translation Manager */}
       <div className="animate-card-in" style={{ animationDelay: '350ms' }}>
@@ -819,8 +829,11 @@ export function SettingsPage() {
         </CardContent>
       </Card>
 
+      </div>{/* End right column */}
+      </div>{/* End two-column grid */}
+
       {/* About link */}
-      <div className="mt-6 text-center">
+      <div className="mt-2 text-center">
         <Link to="/about" className="text-sm text-content-tertiary hover:text-oe-blue transition-colors">
           {t('settings.about_link', { defaultValue: 'About OpenConstructionERP' })} →
         </Link>
