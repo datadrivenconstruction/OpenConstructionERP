@@ -22,16 +22,66 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 
 ---
 
-## Table of Contents
+<details open>
+<summary><h2>Table of Contents</h2></summary>
 
-| | | |
-|---|---|---|
-| [Why OpenConstructionERP?](#why-openconstructionerp) | [Key Features](#key-features) | [Quick Start](#quick-start) |
-| [BOQ Management](#-bill-of-quantities-boq-management) | [Cost Databases](#%EF%B8%8F-cost-databases--resource-catalog) | [CAD/BIM & AI](#%EF%B8%8F-cadbim-takeoff--ai-estimation) |
-| [4D/5D Planning](#-4d-scheduling--5d-cost-model) | [Tendering & Risk](#-tendering-risk--reporting) | [Requirements](#-requirements--quality-gates) |
-| [PDF Markups](#%EF%B8%8F-pdf-markups--annotations) | [Punch List](#-punch-list) | [20 Standards](#-20-regional-standards) |
-| [Validation Engine](#%EF%B8%8F-validation--compliance-engine) | [Onboarding](#-guided-onboarding) | [Tech Stack](#tech-stack) |
-| [Architecture](#architecture) | [Security](#security) | [Contributing](#contributing) |
+<table>
+<tr>
+<td width="33%">
+
+**Getting Started**
+- [Why OpenConstructionERP?](#why-openconstructionerp)
+- [Quick Start](#quick-start)
+- [Demo Accounts](#demo-accounts)
+
+</td>
+<td width="33%">
+
+**Core Modules**
+- [BOQ Management](#-bill-of-quantities-boq-management)
+- [Cost Databases & Catalog](#%EF%B8%8F-cost-databases--resource-catalog)
+- [CAD/BIM & AI Estimation](#%EF%B8%8F-cadbim-takeoff--ai-estimation)
+
+</td>
+<td width="33%">
+
+**Planning & Delivery**
+- [4D Scheduling & 5D Cost](#-4d-scheduling--5d-cost-model)
+- [Tendering, Risk & Reports](#-tendering-risk--reporting)
+- [Requirements & Quality](#-requirements--quality-gates)
+
+</td>
+</tr>
+<tr>
+<td>
+
+**Field Tools**
+- [PDF Markups & Annotations](#%EF%B8%8F-pdf-markups--annotations)
+- [Punch List](#-punch-list)
+- [Validation Engine](#%EF%B8%8F-validation--compliance-engine)
+
+</td>
+<td>
+
+**Standards & Regions**
+- [20 Regional Standards](#-20-regional-standards)
+- [Guided Onboarding](#-guided-onboarding)
+- [Key Features Overview](#key-features)
+
+</td>
+<td>
+
+**Technical**
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [Security](#security)
+- [Contributing](#contributing)
+
+</td>
+</tr>
+</table>
+
+</details>
 
 ---
 
