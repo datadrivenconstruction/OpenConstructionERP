@@ -2292,13 +2292,17 @@ def _parse_rows_from_csv(content_bytes: bytes) -> list[dict[str, Any]]:
     return rows
 
 
-def _parse_rows_from_excel(content_bytes: bytes) -> list[dict[str, Any]]:
+def _parse_rows_from_excel(
+    content_bytes: bytes,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Parse rows from an Excel (.xlsx) file using openpyxl.
 
     Reads the first (active) worksheet. The first row is treated as headers.
 
     Returns:
-        List of dicts mapping canonical column names to cell values.
+        Tuple of (rows, import_metadata).
+        rows: List of dicts mapping canonical column names to cell values.
+        import_metadata: Original file structure info for round-trip export.
     """
     from openpyxl import load_workbook
 
@@ -2307,11 +2311,14 @@ def _parse_rows_from_excel(content_bytes: bytes) -> list[dict[str, Any]]:
     if ws is None:
         raise ValueError("Excel file has no worksheets")
 
+    sheet_names = wb.sheetnames
+
     rows_iter = ws.iter_rows(values_only=True)
     raw_headers = next(rows_iter, None)
     if not raw_headers:
         raise ValueError("Excel file is empty or has no header row")
 
+    original_columns = [str(h) if h is not None else "" for h in raw_headers]
     column_map: dict[int, str] = {}
     for idx, hdr in enumerate(raw_headers):
         if hdr is not None:
@@ -2330,7 +2337,15 @@ def _parse_rows_from_excel(content_bytes: bytes) -> list[dict[str, Any]]:
             rows.append(row)
 
     wb.close()
-    return rows
+
+    import_metadata = {
+        "original_columns": original_columns,
+        "column_mapping": {str(k): v for k, v in column_map.items()},
+        "sheet_names": sheet_names,
+        "total_rows": len(rows),
+    }
+
+    return rows, import_metadata
 
 
 @router.post(
@@ -2385,9 +2400,10 @@ async def import_boq_excel(
         )
 
     # Parse rows based on file type
+    import_meta: dict[str, Any] = {}
     try:
         if filename.endswith(".xlsx"):
-            rows = _parse_rows_from_excel(content)
+            rows, import_meta = _parse_rows_from_excel(content)
         else:
             rows = _parse_rows_from_csv(content)
     except ValueError as exc:
@@ -2453,7 +2469,13 @@ async def import_boq_excel(
             if class_value:
                 classification["code"] = class_value
 
-            # Create position via service
+            # Create position via service (with import metadata for round-trip)
+            pos_metadata: dict[str, Any] = {}
+            if import_meta:
+                pos_metadata["import_source"] = file.filename or "excel"
+                pos_metadata["import_row_index"] = row_idx
+                pos_metadata["original_columns"] = import_meta.get("original_columns", [])
+
             position_data = PositionCreate(
                 boq_id=boq_id,
                 ordinal=ordinal,
@@ -2463,6 +2485,7 @@ async def import_boq_excel(
                 unit_rate=unit_rate,
                 classification=classification,
                 source="excel_import",
+                metadata=pos_metadata,
             )
             await service.add_position(position_data)
             imported += 1
@@ -2477,6 +2500,25 @@ async def import_boq_excel(
                 "Import error at row %d for BOQ %s: %s", row_idx, boq_id, exc
             )
 
+    # Save import metadata at BOQ level for round-trip export
+    if imported > 0 and import_meta:
+        try:
+            boq = await service.get_boq(boq_id)
+            meta = dict(boq.metadata_) if isinstance(boq.metadata_, dict) else {}
+            meta["last_import"] = {
+                "source_filename": file.filename,
+                "source_format": "xlsx" if filename.endswith(".xlsx") else "csv",
+                "original_columns": import_meta.get("original_columns", []),
+                "column_mapping": import_meta.get("column_mapping", {}),
+                "total_imported": imported,
+                "import_date": __import__("datetime").datetime.utcnow().isoformat(),
+            }
+            boq.metadata_ = meta
+            await service.session.flush()
+            await service.session.commit()
+        except Exception:
+            logger.warning("Failed to save import metadata for BOQ %s", boq_id, exc_info=True)
+
     logger.info(
         "BOQ import complete for %s: imported=%d, skipped=%d, errors=%d",
         boq_id, imported, skipped, len(errors),
@@ -2487,6 +2529,8 @@ async def import_boq_excel(
         "skipped": skipped,
         "errors": errors,
         "total_rows": len(rows),
+        "source_format": import_meta.get("source_format", "unknown") if import_meta else "unknown",
+        "original_columns": import_meta.get("original_columns", []) if import_meta else [],
     }
 
 
@@ -2554,7 +2598,7 @@ def _extract_from_excel_for_smart(content: bytes) -> dict[str, Any]:
         Dict with ``text``, ``structured`` flag, and optionally ``rows``.
     """
     try:
-        rows = _parse_rows_from_excel(content)
+        rows, _meta = _parse_rows_from_excel(content)
         if rows:
             # Check if we have enough structure for a direct import
             has_description = any(r.get("description") for r in rows)
