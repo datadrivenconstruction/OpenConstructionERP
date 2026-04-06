@@ -227,6 +227,9 @@ export function LoginPage() {
           </div>
           <p className="text-[10px] text-content-quaternary/40">
             Created by Artem Boiko &middot; 2026 &middot; OpenConstructionERP
+            &middot; <a href="/privacy-policy.html" className="hover:text-content-tertiary">Privacy</a>
+            &middot; <a href="/terms.html" className="hover:text-content-tertiary">Terms</a>
+            &middot; <a href="mailto:info@datadrivenconstruction.io" className="hover:text-content-tertiary">info@datadrivenconstruction.io</a>
           </p>
         </div>
       </div>
