@@ -1706,7 +1706,13 @@ export function CadDataExplorerPage() {
   });
 
   if (!sessionId) {
-    const recentSessions = allSessions.slice(0, 6);
+    const recentSessions = allSessions.slice(0, 12);
+    const deleteSessionMutation = useMutation({
+      mutationFn: (sessionId: string) => deleteSession(sessionId),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['cad-all-sessions'] });
+      },
+    });
     const FORMAT_COLORS: Record<string, string> = {
       RVT: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
       IFC: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
@@ -1767,6 +1773,21 @@ export function CadDataExplorerPage() {
                     )}
                     <span className="text-2xs text-content-quaternary tabular-nums shrink-0 w-12 text-right">
                       {timeAgo}
+                    </span>
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm(t('explorer.delete_session_confirm', { defaultValue: 'Delete this analysis? This cannot be undone.' }))) {
+                          deleteSessionMutation.mutate(s.session_id);
+                        }
+                      }}
+                      onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.click(); }}
+                      className="shrink-0 h-6 w-6 flex items-center justify-center rounded-md text-content-quaternary hover:text-semantic-error hover:bg-semantic-error-bg opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                      title={t('common.delete', { defaultValue: 'Delete' })}
+                    >
+                      <X size={14} />
                     </span>
                     <ChevronRight size={14} className="text-content-quaternary shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </button>
