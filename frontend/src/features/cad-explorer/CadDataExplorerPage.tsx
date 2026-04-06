@@ -1028,13 +1028,19 @@ export function CadDataExplorerPage() {
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" />
         </div>
       ) : error ? (
-        <Card className="p-6 text-center">
-          <p className="text-sm text-semantic-error mb-2">{t('explorer.load_error', { defaultValue: 'Failed to load session data' })}</p>
-          <p className="text-xs text-content-tertiary mb-4">{t('explorer.session_expired_hint', { defaultValue: 'The CAD session may have expired (24h limit). Please re-upload the file.' })}</p>
-          <Button variant="primary" size="sm" onClick={() => navigate('/cad-takeoff')}>
-            {t('explorer.reupload', { defaultValue: 'Re-upload CAD File' })}
-          </Button>
-        </Card>
+        /* Session expired or invalid — show upload zone to re-upload */
+        <div className="space-y-4">
+          <Card className="p-4 border-amber-200 bg-amber-50/50 dark:bg-amber-900/10 dark:border-amber-800">
+            <div className="flex items-center gap-3">
+              <AlertCircle size={18} className="text-amber-600 shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-content-primary">{t('explorer.session_expired_title', { defaultValue: 'Session expired or not found' })}</p>
+                <p className="text-xs text-content-tertiary">{t('explorer.session_expired_desc', { defaultValue: 'CAD sessions are valid for 24 hours. Upload your file again to continue.' })}</p>
+              </div>
+            </div>
+          </Card>
+          <UploadConvertZone onSessionReady={handleSessionReady} />
+        </div>
       ) : describe ? (
         <>
           <StatsCards data={describe} />
