@@ -574,10 +574,31 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       const update: UpdatePositionData = { [field]: newValue };
       const old: UpdatePositionData = { [field]: oldValue };
 
-      // For quantity, parse formulas
+      // For quantity, parse formulas and scale resources proportionally
       if (field === 'quantity' && typeof newValue === 'number') {
         update.quantity = newValue;
         old.quantity = typeof oldValue === 'number' ? oldValue : parseFloat(oldValue) || 0;
+
+        // Scale resource quantities proportionally
+        const oldQty = old.quantity || 0;
+        const newQty = newValue;
+        const meta = data.metadata ?? data.metadata_;
+        const resources = meta && Array.isArray((meta as Record<string, unknown>).resources)
+          ? [...(meta as Record<string, unknown>).resources as Array<Record<string, unknown>>]
+          : null;
+
+        if (resources && resources.length > 0 && oldQty > 0 && newQty !== oldQty) {
+          const ratio = newQty / oldQty;
+          const scaledResources = resources.map((r) => ({
+            ...r,
+            quantity: Math.round(((r.quantity as number) || 0) * ratio * 10000) / 10000,
+            total: undefined, // recalculate
+          }));
+          update.metadata = {
+            ...(meta as Record<string, unknown>),
+            resources: scaledResources,
+          };
+        }
       }
 
       onUpdatePosition(data.id, update, old);
