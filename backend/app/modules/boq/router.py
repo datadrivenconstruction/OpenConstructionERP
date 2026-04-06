@@ -1168,13 +1168,7 @@ async def update_position(
 ) -> PositionResponse:
     """Update a BOQ position. Recalculates total if quantity or unit_rate changed."""
     position = await service.update_position(position_id, data)
-    # Build response using the helper (avoids lazy-load issues)
-    response = _position_to_response(position)
-    return response
-        sort_order=position.sort_order or 0,
-        created_at=position.created_at,
-        updated_at=position.updated_at,
-    )
+    return _position_to_response(position)
 
 
 @router.delete(
