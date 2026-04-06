@@ -9,7 +9,7 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 [Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Discussions](https://t.me/datadrivenconstruction) · [Report Bug](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 
 ![License](https://img.shields.io/badge/license-AGPL--3.0-blue)
-![Version](https://img.shields.io/badge/version-0.2.0-green)
+![Version](https://img.shields.io/badge/version-0.4.0-green)
 ![Languages](https://img.shields.io/badge/languages-21-orange)
 ![Cost Items](https://img.shields.io/badge/cost_items-55%2C000%2B-red)
 ![Standards](https://img.shields.io/badge/standards-20-blueviolet)
@@ -19,6 +19,19 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 *100% open source · 55,000+ cost items · AI estimation · 21 languages · Self-hosted*
 
 </div>
+
+---
+
+## Table of Contents
+
+| | | |
+|---|---|---|
+| [Why OpenConstructionERP?](#why-openconstructionerp) | [Key Features](#key-features) | [Quick Start](#quick-start) |
+| [BOQ Management](#-bill-of-quantities-boq-management) | [Cost Databases](#%EF%B8%8F-cost-databases--resource-catalog) | [CAD/BIM & AI](#%EF%B8%8F-cadbim-takeoff--ai-estimation) |
+| [4D/5D Planning](#-4d-scheduling--5d-cost-model) | [Tendering & Risk](#-tendering-risk--reporting) | [Requirements](#-requirements--quality-gates) |
+| [PDF Markups](#%EF%B8%8F-pdf-markups--annotations) | [Punch List](#-punch-list) | [20 Standards](#-20-regional-standards) |
+| [Validation Engine](#%EF%B8%8F-validation--compliance-engine) | [Onboarding](#-guided-onboarding) | [Tech Stack](#tech-stack) |
+| [Architecture](#architecture) | [Security](#security) | [Contributing](#contributing) |
 
 ---
 
