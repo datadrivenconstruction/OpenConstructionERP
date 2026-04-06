@@ -38,7 +38,7 @@ class CadExtractionSession(Base):
     )
     project_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     display_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    is_permanent: Mapped[bool] = mapped_column(default=False)
+    is_permanent: Mapped[bool] = mapped_column(default=False, server_default="0")
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     created_by: Mapped[str] = mapped_column(String(255), default="")
 
