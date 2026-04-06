@@ -293,22 +293,34 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
       return scoreB - scoreA;
     }), [describe]);
 
-  // Only numeric columns for aggregation
-  const numericCols = useMemo(() => describe.columns
-    .filter((c) => c.dtype === 'number' && c.non_null > 0)
-    .sort((a, b) => b.non_null - a.non_null), [describe]);
+  // Numeric columns for aggregation — prioritize quantity keywords
+  const QUANTITY_KEYWORDS = ['volume', 'area', 'length', 'count', 'width', 'height', 'depth', 'weight', 'mass', 'perimeter', 'thickness'];
+  const numericCols = useMemo(() => {
+    const all = describe.columns.filter((c) => c.dtype === 'number' && c.non_null > 0);
+    // Score: keyword match + high non_null + non-zero sum
+    return all.sort((a, b) => {
+      const aKey = QUANTITY_KEYWORDS.some((k) => a.name.toLowerCase() === k) ? 10000 : QUANTITY_KEYWORDS.some((k) => a.name.toLowerCase().includes(k)) ? 5000 : 0;
+      const bKey = QUANTITY_KEYWORDS.some((k) => b.name.toLowerCase() === k) ? 10000 : QUANTITY_KEYWORDS.some((k) => b.name.toLowerCase().includes(k)) ? 5000 : 0;
+      const aScore = aKey + a.non_null + ((a.sum ?? 0) > 0 ? 1000 : 0);
+      const bScore = bKey + b.non_null + ((b.sum ?? 0) > 0 ? 1000 : 0);
+      return bScore - aScore;
+    });
+  }, [describe]);
+
+  // Top quantity columns (shown as buttons)
+  const topNumericCols = useMemo(() => numericCols.slice(0, 10), [numericCols]);
 
   const [groupBy, setGroupBy] = useState<string[]>(
     stringCols.length > 0 ? [stringCols[0]!.name] : [],
   );
-  // Allow multiple aggregate columns
+  // Allow multiple aggregate columns — auto-select exact matches first
   const [aggCols, setAggCols] = useState<string[]>(() => {
     const defaults: string[] = [];
     for (const name of ['volume', 'area', 'length', 'count']) {
-      const found = numericCols.find((c) => c.name.toLowerCase().includes(name));
-      if (found) defaults.push(found.name);
+      const exact = numericCols.find((c) => c.name.toLowerCase() === name);
+      if (exact) defaults.push(exact.name);
     }
-    return defaults.length > 0 ? defaults : numericCols.slice(0, 2).map((c) => c.name);
+    return defaults.length > 0 ? defaults : topNumericCols.slice(0, 3).map((c) => c.name);
   });
   const [aggFn, setAggFn] = useState('sum');
   const [result, setResult] = useState<AggregateResponse | null>(null);
@@ -422,7 +434,7 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
               {t('explorer.sum_columns', { defaultValue: 'Sum Columns' })} ({aggCols.length})
             </label>
             <div className="flex gap-1.5 flex-wrap">
-              {numericCols.slice(0, 15).map((col) => (
+              {topNumericCols.map((col) => (
                 <button
                   key={col.name}
                   onClick={() => toggleAggCol(col.name)}
@@ -431,10 +443,23 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
                       ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm'
                       : 'border-border-light bg-surface-secondary text-content-tertiary hover:text-content-primary hover:border-border'
                   }`}
+                  title={`${col.non_null} non-null, sum=${formatNumber(col.sum)}`}
                 >
                   {col.name}
                 </button>
               ))}
+              {numericCols.length > 10 && (
+                <select
+                  value=""
+                  onChange={(e) => { if (e.target.value) toggleAggCol(e.target.value); }}
+                  className="px-2 py-1 rounded-lg text-2xs border border-border-light bg-surface-secondary text-content-tertiary cursor-pointer"
+                >
+                  <option value="">+{numericCols.length - 10} {t('explorer.more_columns', { defaultValue: 'more' })}</option>
+                  {numericCols.slice(10).map((col) => (
+                    <option key={col.name} value={col.name}>{col.name} ({col.non_null} values)</option>
+                  ))}
+                </select>
+              )}
             </div>
           </div>
           <div className="shrink-0 flex items-center gap-2">
@@ -553,14 +578,20 @@ function ChartsTab({ sessionId, describe }: { sessionId: string; describe: Descr
   const stringCols = describe.columns
     .filter((c) => c.dtype === 'string' && c.non_null > 0 && c.unique < 100)
     .sort((a, b) => b.non_null - a.non_null);
-  // Only numeric for values
-  const numericCols = describe.columns
+  // Only useful numeric for values — same keyword priority as Pivot
+  const QTY_KEYS = ['volume', 'area', 'length', 'count', 'width', 'height', 'depth', 'weight', 'mass', 'perimeter'];
+  const numericCols = useMemo(() => describe.columns
     .filter((c) => c.dtype === 'number' && c.non_null > 0)
-    .sort((a, b) => b.non_null - a.non_null);
+    .sort((a, b) => {
+      const aK = QTY_KEYS.some((k) => a.name.toLowerCase() === k) ? 10000 : QTY_KEYS.some((k) => a.name.toLowerCase().includes(k)) ? 5000 : 0;
+      const bK = QTY_KEYS.some((k) => b.name.toLowerCase() === k) ? 10000 : QTY_KEYS.some((k) => b.name.toLowerCase().includes(k)) ? 5000 : 0;
+      return (bK + b.non_null) - (aK + a.non_null);
+    })
+    .slice(0, 20), [describe]);
 
   const [chartGroupBy, setChartGroupBy] = useState(stringCols[0]?.name || '');
   const [chartValue, setChartValue] = useState(
-    numericCols.find((c) => c.name.toLowerCase().includes('volume'))?.name || numericCols[0]?.name || '',
+    numericCols.find((c) => c.name.toLowerCase() === 'volume')?.name || numericCols[0]?.name || '',
   );
   const [chartType, setChartType] = useState<'bar' | 'pie'>('bar');
   const [chartData, setChartData] = useState<AggregateResponse | null>(null);
