@@ -17,7 +17,7 @@ import {
   Building2,
   Boxes,
   Loader2,
-  Clock,
+  Settings,
   AlertTriangle,
   Trash2,
   Info,
@@ -438,8 +438,11 @@ export function ModulesPage() {
         }
         break;
       }
-      // language, converter, analytics, integration categories show
-      // static badges (Included / Built-in / Coming Soon) — no install action.
+      case 'integration':
+        navigate('/settings');
+        break;
+      // language, converter, analytics categories show
+      // static badges (Included / Built-in) — no install action.
     }
   }
 
@@ -1239,7 +1242,7 @@ function MarketplaceCard({ module: mod, index, isInstalling, onInstall, isDemoIn
 
             <div className="flex-1" />
 
-            {!isLanguage && !isIntegration && (
+            {!isLanguage && (
               <Badge variant="success" size="sm">
                 {t('marketplace.free', { defaultValue: 'Free' })}
               </Badge>
@@ -1260,12 +1263,11 @@ function MarketplaceCard({ module: mod, index, isInstalling, onInstall, isDemoIn
                 <Check size={10} className="mr-0.5" />
                 {t('marketplace.builtin', { defaultValue: 'Built-in' })}
               </Badge>
-            ) : /* Integrations are coming soon */
+            ) : /* Integrations require configuration */
             isIntegration ? (
-              <Badge variant="neutral" size="sm">
-                <Clock size={10} className="mr-0.5" />
-                {t('marketplace.coming_soon', { defaultValue: 'Coming Soon' })}
-              </Badge>
+              <Button variant="secondary" size="sm" icon={<Settings size={14} />} onClick={onInstall}>
+                {t('marketplace.requires_setup', { defaultValue: 'Configure' })}
+              </Button>
             ) : /* Installed states for installable categories */
             mod.installed && mod.category === 'cost_database' ? (
               <Button variant="secondary" size="sm" icon={<Check size={14} />} onClick={onInstall}>
@@ -1334,9 +1336,10 @@ function getInstalledModuleBadge(
     case 'language':
       return { type: 'badge', label: t('marketplace.included', { defaultValue: 'Included' }), subtitle: t('marketplace.included', { defaultValue: 'Included' }) };
     case 'analytics':
-    case 'integration':
     case 'converter':
       return { type: 'badge', label: t('marketplace.builtin', { defaultValue: 'Built-in' }), subtitle: t('marketplace.builtin', { defaultValue: 'Built-in' }) };
+    case 'integration':
+      return { type: 'manage', label: t('marketplace.configure', { defaultValue: 'Configure' }), subtitle: t('marketplace.requires_setup', { defaultValue: 'Requires Setup' }) };
     case 'resource_catalog':
       return { type: 'badge', label: t('marketplace.imported', { defaultValue: 'Imported' }), subtitle: t('marketplace.imported', { defaultValue: 'Imported' }) };
     case 'vector_index':

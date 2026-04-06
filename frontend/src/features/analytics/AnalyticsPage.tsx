@@ -13,8 +13,11 @@ import {
   ChevronUp,
   ChevronDown,
   Download,
+  BarChart3,
+  Search,
+  Database,
 } from 'lucide-react';
-import { Breadcrumb, Button, Card, Badge, Skeleton } from '@/shared/ui';
+import { Breadcrumb, Button, Card, Badge, Skeleton, EmptyState } from '@/shared/ui';
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
@@ -173,6 +176,47 @@ export function AnalyticsPage() {
     );
   }
 
+  /* ── No data at all — guide the user ────────────────────────────────── */
+  if (!data || data.total_projects === 0) {
+    return (
+      <div className="space-y-6">
+        <Breadcrumb
+          items={[
+            { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
+            { label: t('analytics.title', { defaultValue: 'Analytics' }) },
+          ]}
+          className="mb-4"
+        />
+        <EmptyState
+          icon={<BarChart3 size={28} />}
+          title={t('analytics.empty_title', { defaultValue: 'No analytics data yet' })}
+          description={t('analytics.empty_description', {
+            defaultValue:
+              'Analytics are generated from your projects and cost data. Create a project or import a cost database to get started.',
+          })}
+          action={
+            <div className="flex items-center gap-3">
+              <Button
+                variant="primary"
+                icon={<FolderOpen size={14} />}
+                onClick={() => navigate('/projects')}
+              >
+                {t('analytics.action_create_project', { defaultValue: 'Create a Project' })}
+              </Button>
+              <Button
+                variant="secondary"
+                icon={<Database size={14} />}
+                onClick={() => navigate('/costs')}
+              >
+                {t('analytics.action_import_costs', { defaultValue: 'Import Cost Database' })}
+              </Button>
+            </div>
+          }
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
@@ -308,11 +352,32 @@ export function AnalyticsPage() {
           </span>
         </div>
         {sortedProjects.length === 0 ? (
-          <div className="px-6 py-12 text-center text-content-tertiary text-sm">
-            {t('analytics.no_projects', {
-              defaultValue: 'No projects found. Create a project to see analytics.',
+          <EmptyState
+            icon={<Search size={24} />}
+            title={t('analytics.no_matching_projects', {
+              defaultValue: 'No matching projects',
             })}
-          </div>
+            description={t('analytics.no_matching_projects_hint', {
+              defaultValue:
+                'Try adjusting your search query or filters to find projects.',
+            })}
+            action={
+              (search || regionFilter || statusFilter) ? (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setSearch('');
+                    setRegionFilter('');
+                    setStatusFilter('');
+                  }}
+                >
+                  {t('analytics.clear_filters', { defaultValue: 'Clear Filters' })}
+                </Button>
+              ) : undefined
+            }
+            className="py-12"
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

@@ -28,6 +28,25 @@ const CHANGELOG: ChangelogEntry[] = [
     ],
   },
   {
+    version: '0.3.0',
+    date: '2026-04-05',
+    changes: [
+      'New: Data Explorer — global search, column picker, CSV export, data quality indicators',
+      'New: Persistent CAD analyses — save to project, list, reopen, delete',
+      'New: Global upload queue with background CAD conversion and header indicator',
+      'New: Field Reports module — daily logs, weather, workforce tracking, PDF export',
+      'New: Photo Gallery module — upload, EXIF metadata, GPS, categories, lightbox',
+      'New: Markups & Annotations module + Punch List module (20 modules total)',
+      'New: Requirements export (CSV/Excel/JSON) and import (CSV/JSON) with regex validation',
+      'New: PDF Takeoff split into two sidebar menus — Measurements + Documents & AI',
+      'New: 60+ missing translation keys added across all 21 languages',
+      'Fix: Pivot/Charts — smart column selection, quantity keywords prioritized',
+      'Fix: BOQ editor — hide tips when positions exist, compact header spacing',
+      'Fix: Markups, Punch List, and Requirements pages — API paths, types, and validation',
+      'Refactor: Complete markups page redesign — compact, professional, functional',
+    ],
+  },
+  {
     version: '0.2.1',
     date: '2026-04-04',
     changes: [

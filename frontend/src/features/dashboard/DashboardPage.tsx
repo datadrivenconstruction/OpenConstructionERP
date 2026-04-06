@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { apiGet, apiPost } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
+import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import {
   FolderPlus,
   ArrowRight,
@@ -68,6 +69,13 @@ interface OnboardingStep {
   done: boolean;
   disabled: boolean;
   onClick: () => void;
+}
+
+interface SystemStatusData {
+  api: { status: string; version: string };
+  database: { status: string; engine?: string; error?: string };
+  vector_db: { status: string; engine: string; collections?: number; vectors?: number };
+  ai: { providers: { name: string; configured: boolean }[]; configured: boolean };
 }
 
 interface DemoCatalogEntry {
@@ -296,10 +304,12 @@ function OnboardingSteps({
   projects,
   regionStats,
   boqs,
+  vectorCount,
 }: {
   projects?: ProjectSummary[];
   regionStats?: RegionStat[];
   boqs?: BOQWithTotal[];
+  vectorCount?: number;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -308,6 +318,10 @@ function OnboardingSteps({
   const hasDatabase = Boolean(regionStats && regionStats.length > 0);
   const hasProjects = Boolean(projects && projects.length > 0);
   const hasBoqs = Boolean(boqs && boqs.length > 0);
+  const hasVectors = Boolean(vectorCount && vectorCount > 0);
+  const hasQuantities = Boolean(
+    boqs && boqs.some((b) => b.positions && b.positions.some((p) => p.total > 0)),
+  );
 
   const aiConfigured = (() => {
     try {
@@ -317,9 +331,16 @@ function OnboardingSteps({
     }
   })();
 
-  const completedCount = [hasDatabase, hasDatabase, aiConfigured, hasProjects, hasBoqs].filter(
-    Boolean,
-  ).length;
+  const completedCount = [
+    hasDatabase,
+    hasVectors,
+    aiConfigured,
+    hasProjects,
+    hasBoqs,
+    hasQuantities,
+  ].filter(Boolean).length;
+
+  const TOTAL_STEPS = 6;
 
   const steps: OnboardingStep[] = [
     {
@@ -344,7 +365,7 @@ function OnboardingSteps({
       descDefault: 'Generate vector embeddings for semantic cost matching',
       buttonKey: 'dashboard.configure',
       buttonDefault: 'Configure',
-      done: hasDatabase,
+      done: hasVectors,
       disabled: !hasDatabase,
       onClick: () => navigate('/costs/import'),
     },
@@ -387,6 +408,25 @@ function OnboardingSteps({
       disabled: !hasProjects,
       onClick: () => navigate(hasProjects ? '/projects' : '/projects/new'),
     },
+    {
+      id: 6,
+      icon: <BarChart3 size={22} strokeWidth={1.5} />,
+      titleKey: 'dashboard.step_set_quantities',
+      titleDefault: 'Set Quantities',
+      descKey: 'dashboard.step_set_quantities_desc',
+      descDefault: 'Add quantities and unit rates to your BOQ positions',
+      buttonKey: 'dashboard.open_boq',
+      buttonDefault: 'Open BOQ',
+      done: hasQuantities,
+      disabled: !hasBoqs,
+      onClick: () => {
+        if (boqs && boqs.length > 0) {
+          navigate(`/boq/${boqs[0]!.id}`);
+        } else {
+          navigate('/projects');
+        }
+      },
+    },
   ];
 
   return (
@@ -404,7 +444,7 @@ function OnboardingSteps({
             {t('dashboard.getting_started', { defaultValue: 'Getting Started' })}
           </h2>
           <Badge variant="blue" size="sm">
-            {completedCount}/5
+            {completedCount}/{TOTAL_STEPS}
           </Badge>
         </div>
       </div>
@@ -418,7 +458,7 @@ function OnboardingSteps({
           <div
             className="h-full rounded-full transition-all duration-slow ease-oe"
             style={{
-              width: `${(completedCount / 5) * 100}%`,
+              width: `${(completedCount / TOTAL_STEPS) * 100}%`,
               background: 'linear-gradient(90deg, var(--oe-blue), #5856d6)',
             }}
           />
@@ -426,7 +466,7 @@ function OnboardingSteps({
       </div>
 
       {/* Step cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {steps.map((step, index) => (
           <div
             key={step.id}
@@ -712,6 +752,16 @@ export function DashboardPage() {
     retry: false,
   });
 
+  // Fetch system status for vector DB count (used in onboarding steps)
+  const { data: systemStatus } = useQuery({
+    queryKey: ['system-status'],
+    queryFn: () => fetch('/api/system/status').then((r) => r.json()) as Promise<SystemStatusData>,
+    retry: false,
+    staleTime: 30_000,
+  });
+
+  const vectorCount = systemStatus?.vector_db?.vectors ?? 0;
+
   // Fetch all BOQs across projects for KPI ribbon + analytics
   const { data: allBoqs } = useQuery({
     queryKey: ['dashboard-all-boqs', projects?.map((p) => p.id).join(',')],
@@ -955,7 +1005,7 @@ export function DashboardPage() {
       )}
 
       {/* Onboarding Steps */}
-      <OnboardingSteps projects={projects} regionStats={regionStats} boqs={allBoqs} />
+      <OnboardingSteps projects={projects} regionStats={regionStats} boqs={allBoqs} vectorCount={vectorCount} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Recent Projects — staggered card entrance */}
@@ -1402,13 +1452,6 @@ function StatusDonut({
 
 /* ── System Status ────────────────────────────────────────────────────── */
 
-interface SystemStatusData {
-  api: { status: string; version: string };
-  database: { status: string; engine?: string; error?: string };
-  vector_db: { status: string; engine: string; collections?: number; vectors?: number };
-  ai: { providers: { name: string; configured: boolean }[]; configured: boolean };
-}
-
 function StatusDot({ status }: { status: 'connected' | 'healthy' | 'offline' | 'error' | string }) {
   const color =
     status === 'connected' || status === 'healthy'
@@ -1523,7 +1566,7 @@ function SystemStatus() {
       >
         <span className="text-sm text-content-secondary">{t('dashboard.modules_loaded')}</span>
         <span className="text-sm font-semibold text-content-primary tabular-nums">
-          {modules?.modules?.length ?? 17}
+          {modules?.modules?.length ?? '\u2014'}
         </span>
       </div>
       <div
@@ -1532,7 +1575,7 @@ function SystemStatus() {
       >
         <span className="text-sm text-content-secondary">{t('dashboard.validation_rules')}</span>
         <span className="text-sm font-semibold text-content-primary tabular-nums">
-          {rules?.rules?.length ?? 42}
+          {rules?.rules?.length ?? '\u2014'}
         </span>
       </div>
       <div
@@ -1540,7 +1583,7 @@ function SystemStatus() {
         style={{ animationDelay: '760ms' }}
       >
         <span className="text-sm text-content-secondary">{t('dashboard.languages')}</span>
-        <span className="text-sm font-semibold text-content-primary tabular-nums">20</span>
+        <span className="text-sm font-semibold text-content-primary tabular-nums">{SUPPORTED_LANGUAGES.length}</span>
       </div>
     </div>
   );

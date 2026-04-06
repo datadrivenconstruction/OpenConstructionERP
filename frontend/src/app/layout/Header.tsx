@@ -588,17 +588,29 @@ function ProjectSwitcher() {
   const activeProjectName = useProjectContextStore((s) => s.activeProjectName);
   const setActiveProject = useProjectContextStore((s) => s.setActiveProject);
   const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const ref = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const { data: projects } = useQuery({
     queryKey: ['projects-switcher'],
-    queryFn: () => apiGet<Array<{ id: string; name: string }>>('/v1/projects/?limit=20'),
+    queryFn: () => apiGet<Array<{ id: string; name: string }>>('/v1/projects/?limit=200'),
     staleTime: 60_000,
     enabled: open,
   });
 
+  const MAX_VISIBLE = 20;
+  const filteredProjects = (projects ?? []).filter((p) =>
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+  const visibleProjects = filteredProjects.slice(0, MAX_VISIBLE);
+  const remainingCount = filteredProjects.length - visibleProjects.length;
+
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setSearchQuery('');
+      return;
+    }
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
@@ -614,6 +626,12 @@ function ProjectSwitcher() {
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [open]);
+
+  useEffect(() => {
+    if (open && searchRef.current) {
+      searchRef.current.focus();
+    }
+  }, [open, projects]);
 
   return (
     <div className="relative hidden sm:block" ref={ref}>
@@ -640,8 +658,28 @@ function ProjectSwitcher() {
               {t('schedule.switch_project', { defaultValue: 'Switch Project' })}
             </p>
           </div>
+          <div className="px-2 py-1.5 border-b border-border-light">
+            <div className="relative">
+              <Search size={13} className="absolute left-2 top-1/2 -translate-y-1/2 text-content-quaternary pointer-events-none" />
+              <input
+                ref={searchRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t('common.search', { defaultValue: 'Search...' })}
+                className="w-full rounded-md border border-border-light bg-surface-secondary pl-7 pr-2 py-1 text-xs text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-1 focus:ring-oe-blue/40 focus:border-oe-blue/40"
+              />
+            </div>
+          </div>
           <div className="max-h-60 overflow-y-auto py-1">
-            {projects?.map((p) => (
+            {visibleProjects.length === 0 && (
+              <p className="px-3 py-2 text-xs text-content-tertiary text-center">
+                {searchQuery
+                  ? t('common.no_results', { defaultValue: 'No projects found' })
+                  : t('projects.none', { defaultValue: 'No projects yet' })}
+              </p>
+            )}
+            {visibleProjects.map((p) => (
               <button
                 key={p.id}
                 onClick={() => { setActiveProject(p.id, p.name); setOpen(false); }}
@@ -656,6 +694,11 @@ function ProjectSwitcher() {
                 <span className="truncate">{p.name}</span>
               </button>
             ))}
+            {remainingCount > 0 && (
+              <p className="px-3 py-1.5 text-2xs text-content-tertiary text-center">
+                {t('common.n_more', { count: remainingCount, defaultValue: '{{count}} more...' })}
+              </p>
+            )}
           </div>
           {activeProjectId && (
             <div className="border-t border-border-light px-3 py-2">

@@ -750,7 +750,13 @@ export function SettingsPage() {
               return (
                 <button
                   key={lang.code}
-                  onClick={() => i18n.changeLanguage(lang.code)}
+                  onClick={() => {
+                    i18n.changeLanguage(lang.code);
+                    // Persist language preference to backend profile
+                    apiPatch('/v1/users/me', { locale: lang.code }).then(() => {
+                      queryClient.invalidateQueries({ queryKey: ['me'] });
+                    }).catch(() => { /* silent — localStorage already persists the choice */ });
+                  }}
                   aria-pressed={isActive}
                   aria-label={`${lang.name} (${lang.code})`}
                   className={`flex flex-col items-center gap-1 rounded-xl px-3 py-3 text-center transition-all duration-normal ease-oe ${
@@ -815,9 +821,9 @@ export function SettingsPage() {
 
       {/* About link */}
       <div className="mt-6 text-center">
-        <a href="/about" className="text-sm text-content-tertiary hover:text-oe-blue transition-colors">
+        <Link to="/about" className="text-sm text-content-tertiary hover:text-oe-blue transition-colors">
           {t('settings.about_link', { defaultValue: 'About OpenConstructionERP' })} →
-        </a>
+        </Link>
       </div>
     </div>
   );

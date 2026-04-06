@@ -18,6 +18,9 @@ import {
   ShieldAlert,
   FileEdit,
   Table2,
+  PieChart,
+  ClipboardCheck,
+  LineChart,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { Breadcrumb, InfoHint } from '@/shared/ui';
@@ -78,15 +81,16 @@ const REPORT_CARDS: ReportCard[] = [
     id: 'cost_report',
     titleKey: 'reports.cost_report',
     descriptionKey: 'reports.cost_report_desc',
-    icon: BarChart3,
+    icon: PieChart,
     formats: [
       {
-        label: 'PDF',
-        extension: 'pdf',
-        endpoint: 'export/pdf',
-        mediaType: 'application/pdf',
+        label: 'CSV',
+        extension: 'csv',
+        endpoint: '',
+        mediaType: 'text/csv',
       },
     ],
+    customHandler: downloadCostReport,
   },
   {
     id: 'gaeb_xml',
@@ -106,15 +110,16 @@ const REPORT_CARDS: ReportCard[] = [
     id: 'validation_report',
     titleKey: 'reports.validation_report',
     descriptionKey: 'reports.validation_report_desc',
-    icon: ShieldCheck,
+    icon: ClipboardCheck,
     formats: [
       {
-        label: 'PDF',
-        extension: 'pdf',
-        endpoint: 'export/pdf',
-        mediaType: 'application/pdf',
+        label: 'CSV',
+        extension: 'csv',
+        endpoint: '',
+        mediaType: 'text/csv',
       },
     ],
+    customHandler: downloadValidationReport,
   },
   {
     id: 'schedule_report',
@@ -150,7 +155,7 @@ const REPORT_CARDS: ReportCard[] = [
     id: 'tender_comparison',
     titleKey: 'reports.tender_comparison',
     descriptionKey: 'reports.tender_comparison_desc',
-    icon: BarChart3,
+    icon: Table2,
     formats: [{ label: 'CSV', extension: 'csv', endpoint: '', mediaType: 'text/csv' }],
     customHandler: downloadTenderComparisonReport,
   },
@@ -182,7 +187,7 @@ const REPORT_CARDS: ReportCard[] = [
     id: 'progress_report',
     titleKey: 'reports.progress_report',
     descriptionKey: 'reports.progress_report_desc',
-    icon: TrendingUp,
+    icon: LineChart,
     formats: [{ label: 'HTML', extension: 'html', endpoint: '', mediaType: 'text/html' }],
     customHandler: downloadProgressReport,
   },
@@ -207,11 +212,165 @@ function fmtDate(d: string | null | undefined): string {
 }
 
 /**
+ * Cost Report — fetch cost model dashboard data and generate a CSV with budget,
+ * committed, actual, forecast, and variance breakdown.
+ */
+async function downloadCostReport(projectId: string, projectName: string): Promise<void> {
+  let dashboard: Awaited<ReturnType<typeof costModelApi.getDashboard>>;
+  try {
+    dashboard = await costModelApi.getDashboard(projectId);
+  } catch {
+    throw new Error(
+      'No cost model data available for this project. ' +
+        'Create a cost model with budget items first.',
+    );
+  }
+
+  const csvLines: string[] = [];
+  csvLines.push('Cost Report');
+  csvLines.push(`Project,${projectName}`);
+  csvLines.push(`Generated,${new Date().toISOString()}`);
+  csvLines.push('');
+  csvLines.push('Summary');
+  csvLines.push(`Total Budget,${dashboard.total_budget}`);
+  csvLines.push(`Total Committed,${dashboard.total_committed}`);
+  csvLines.push(`Total Actual,${dashboard.total_actual}`);
+  csvLines.push(`Total Forecast,${dashboard.total_forecast}`);
+  csvLines.push(`Variance,${dashboard.variance}`);
+  csvLines.push(`Variance %,${dashboard.variance_pct}`);
+  csvLines.push(`SPI,${dashboard.spi}`);
+  csvLines.push(`CPI,${dashboard.cpi}`);
+  csvLines.push(`Status,${dashboard.status}`);
+  csvLines.push(`Currency,${dashboard.currency}`);
+
+  // Include category breakdown if available
+  const categories = (dashboard as unknown as Record<string, unknown>).categories as
+    | Array<Record<string, unknown>>
+    | undefined;
+  if (categories && categories.length > 0) {
+    csvLines.push('');
+    csvLines.push('Cost Breakdown by Category');
+    csvLines.push('Category,Planned,Actual,Variance');
+    for (const cat of categories) {
+      const planned = Number(cat.planned || 0);
+      const actual = Number(cat.actual || 0);
+      csvLines.push(
+        `${cat.category || cat.name || 'Unknown'},${planned.toFixed(2)},${actual.toFixed(2)},${(planned - actual).toFixed(2)}`,
+      );
+    }
+  }
+
+  downloadBlob(csvLines.join('\n'), `${projectName}_cost_report.csv`, 'text/csv');
+}
+
+/**
+ * Validation Report — run BOQ validation via the backend validate endpoint and
+ * generate a CSV report with all rule results.
+ *
+ * Requires a BOQ to be selected. When called from the report card (which only
+ * passes projectId), we fetch the first BOQ for the project and validate that.
+ */
+async function downloadValidationReport(projectId: string, projectName: string): Promise<void> {
+  // Find the first BOQ for this project
+  let boqs: Array<{ id: string; name: string }>;
+  try {
+    boqs = await boqApi.list(projectId);
+  } catch {
+    throw new Error('Could not load BOQs for this project.');
+  }
+
+  if (boqs.length === 0) {
+    throw new Error(
+      'No BOQs found for this project. Create a BOQ first to run validation.',
+    );
+  }
+
+  const boq = boqs[0]!;
+
+  // Call the validate endpoint
+  let report: {
+    boq_id: string;
+    boq_name: string;
+    total_positions: number;
+    score: number;
+    status: string;
+    summary: { total: number; passed: number; warnings: number; errors: number; info: number };
+    results: Array<{
+      rule_id: string;
+      rule_name: string;
+      severity: string;
+      status: string;
+      message: string;
+      element_ref?: string;
+    }>;
+  };
+  try {
+    report = await apiGet(`/v1/boq/boqs/${boq.id}/validate`);
+  } catch (err) {
+    // The validate endpoint is POST, so use fetch directly
+    const token = useAuthStore.getState().accessToken;
+    const resp = await fetch(`/api/v1/boq/boqs/${boq.id}/validate`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!resp.ok) {
+      const errText = await resp.text().catch(() => '');
+      throw new Error(`Validation failed (${resp.status}): ${errText || (err instanceof Error ? err.message : 'Unknown error')}`);
+    }
+    report = await resp.json();
+  }
+
+  const csvLines: string[] = [];
+  csvLines.push('Validation Report');
+  csvLines.push(`Project,${projectName}`);
+  csvLines.push(`BOQ,${report.boq_name || boq.name}`);
+  csvLines.push(`Generated,${new Date().toISOString()}`);
+  csvLines.push('');
+  csvLines.push('Summary');
+  csvLines.push(`Total Positions,${report.total_positions}`);
+  csvLines.push(`Score,${typeof report.score === 'number' ? (report.score * 100).toFixed(1) + '%' : 'N/A'}`);
+  csvLines.push(`Status,${report.status}`);
+  csvLines.push(`Rules Checked,${report.summary?.total ?? 0}`);
+  csvLines.push(`Passed,${report.summary?.passed ?? 0}`);
+  csvLines.push(`Warnings,${report.summary?.warnings ?? 0}`);
+  csvLines.push(`Errors,${report.summary?.errors ?? 0}`);
+  csvLines.push('');
+
+  if (report.results && report.results.length > 0) {
+    csvLines.push('Detailed Results');
+    csvLines.push('Rule ID,Rule Name,Severity,Status,Message,Element');
+    for (const r of report.results) {
+      csvLines.push(
+        [
+          r.rule_id,
+          `"${(r.rule_name || '').replace(/"/g, '""')}"`,
+          r.severity,
+          r.status,
+          `"${(r.message || '').replace(/"/g, '""')}"`,
+          r.element_ref || '',
+        ].join(','),
+      );
+    }
+  } else {
+    csvLines.push('No validation issues found.');
+  }
+
+  downloadBlob(csvLines.join('\n'), `${projectName}_validation_report.csv`, 'text/csv');
+}
+
+/**
  * Schedule Report — fetch schedules and activities, then generate a plain-text
  * summary and trigger a download.
  */
 async function downloadScheduleReport(projectId: string, projectName: string): Promise<void> {
-  const schedules = await scheduleApi.listSchedules(projectId);
+  let schedules: Awaited<ReturnType<typeof scheduleApi.listSchedules>>;
+  try {
+    schedules = await scheduleApi.listSchedules(projectId);
+  } catch {
+    throw new Error(
+      'Could not load schedule data for this project. Create a schedule first.',
+    );
+  }
 
   const lines: string[] = [
     `Schedule Report — ${projectName}`,
@@ -278,10 +437,20 @@ async function downloadScheduleReport(projectId: string, projectName: string): P
  * 5D Report — fetch dashboard data and S-curve, then generate a CSV download.
  */
 async function download5DReport(projectId: string, projectName: string): Promise<void> {
-  const [dashboard, sCurveData] = await Promise.all([
-    costModelApi.getDashboard(projectId),
-    costModelApi.getSCurve(projectId),
-  ]);
+  let dashboard: Awaited<ReturnType<typeof costModelApi.getDashboard>>;
+  let sCurveData: Awaited<ReturnType<typeof costModelApi.getSCurve>>;
+
+  try {
+    [dashboard, sCurveData] = await Promise.all([
+      costModelApi.getDashboard(projectId),
+      costModelApi.getSCurve(projectId),
+    ]);
+  } catch {
+    throw new Error(
+      'No 5D cost model data available for this project. ' +
+        'Create a cost model with budget and schedule data first.',
+    );
+  }
 
   const csvLines: string[] = [];
 
@@ -305,9 +474,13 @@ async function download5DReport(projectId: string, projectName: string): Promise
 
   // S-Curve data section
   csvLines.push('S-Curve Data');
-  csvLines.push('Period,Planned,Earned,Actual');
-  for (const point of sCurveData.periods) {
-    csvLines.push(`${point.period},${point.planned},${point.earned},${point.actual}`);
+  if (sCurveData.periods && sCurveData.periods.length > 0) {
+    csvLines.push('Period,Planned,Earned,Actual');
+    for (const point of sCurveData.periods) {
+      csvLines.push(`${point.period},${point.planned},${point.earned},${point.actual}`);
+    }
+  } else {
+    csvLines.push('No S-curve period data available yet.');
   }
 
   downloadBlob(csvLines.join('\n'), `${projectName}_5d_report.csv`, 'text/csv');
@@ -318,9 +491,18 @@ async function download5DReport(projectId: string, projectName: string): Promise
  * then generate a CSV download.
  */
 async function downloadTenderComparisonReport(projectId: string, projectName: string): Promise<void> {
-  const packages = await apiGet<Array<{
+  let packages: Array<{
     id: string; name: string; status: string; bid_count: number; deadline: string | null;
-  }>>(`/v1/tendering/packages/?project_id=${projectId}`);
+  }>;
+  try {
+    packages = await apiGet<Array<{
+      id: string; name: string; status: string; bid_count: number; deadline: string | null;
+    }>>(`/v1/tendering/packages/?project_id=${projectId}`);
+  } catch {
+    throw new Error(
+      'No tender packages available for this project. Create tender packages first.',
+    );
+  }
 
   const csvLines: string[] = [];
   csvLines.push('Tender Comparison Report');
@@ -370,18 +552,27 @@ async function downloadTenderComparisonReport(projectId: string, projectName: st
  * download with cumulative cost and schedule impact.
  */
 async function downloadChangeOrderReport(projectId: string, projectName: string): Promise<void> {
-  const [orders, summary] = await Promise.all([
-    apiGet<Array<{
-      id: string; code: string; title: string; description: string;
-      reason_category: string; status: string; cost_impact: number;
-      schedule_impact_days: number; currency: string; item_count: number;
-      created_at: string; submitted_at: string | null; approved_at: string | null;
-    }>>(`/v1/changeorders/?project_id=${projectId}`),
-    apiGet<{
-      total_orders: number; approved_count: number; rejected_count: number;
-      total_cost_impact: number; total_schedule_impact_days: number; currency: string;
-    }>(`/v1/changeorders/summary?project_id=${projectId}`),
-  ]);
+  let orders: Array<{
+    id: string; code: string; title: string; description: string;
+    reason_category: string; status: string; cost_impact: number;
+    schedule_impact_days: number; currency: string; item_count: number;
+    created_at: string; submitted_at: string | null; approved_at: string | null;
+  }>;
+  let summary: {
+    total_orders: number; approved_count: number; rejected_count: number;
+    total_cost_impact: number; total_schedule_impact_days: number; currency: string;
+  };
+
+  try {
+    [orders, summary] = await Promise.all([
+      apiGet<typeof orders>(`/v1/changeorders/?project_id=${projectId}`),
+      apiGet<typeof summary>(`/v1/changeorders/summary?project_id=${projectId}`),
+    ]);
+  } catch {
+    throw new Error(
+      'No change order data available for this project. Create change orders first.',
+    );
+  }
 
   const csvLines: string[] = [];
   csvLines.push('Change Order Register');
@@ -464,7 +655,21 @@ async function downloadRiskRegisterReport(projectId: string, projectName: string
  * actual cumulative and per-period spending.
  */
 async function downloadCashFlowReport(projectId: string, projectName: string): Promise<void> {
-  const sCurve = await costModelApi.getSCurve(projectId);
+  let sCurve: Awaited<ReturnType<typeof costModelApi.getSCurve>>;
+  try {
+    sCurve = await costModelApi.getSCurve(projectId);
+  } catch {
+    throw new Error(
+      'No cash flow data available for this project. ' +
+        'Create a cost model with S-curve data first.',
+    );
+  }
+
+  if (!sCurve.periods || sCurve.periods.length === 0) {
+    throw new Error(
+      'No S-curve period data found. Add budget periods to generate a cash flow report.',
+    );
+  }
 
   const csvLines: string[] = [];
   csvLines.push('Cash Flow Forecast');
