@@ -190,7 +190,7 @@ export function useMeasurementPersistence({
       // Try server first if project is available
       if (projectId) {
         try {
-          const serverData = await takeoffApi.list(projectId, fileName);
+          const serverData = await takeoffApi.list(projectId, fileName ?? undefined);
           if (!cancelled && serverData.length > 0) {
             hasPersistedRef.current = true;
             setSyncedToServer(true);
@@ -204,7 +204,7 @@ export function useMeasurementPersistence({
 
       // Fallback to localStorage
       if (!cancelled) {
-        const data = loadFromStorage(fileName);
+        const data = loadFromStorage(fileName!);
         if (data) {
           hasPersistedRef.current = true;
           setMeasurements(data.measurements);

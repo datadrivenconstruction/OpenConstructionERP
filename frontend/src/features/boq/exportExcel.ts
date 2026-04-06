@@ -32,17 +32,6 @@ export interface ExportOptions {
 
 /* ── Helpers ──────────────────────────────────────────────────────────── */
 
-function computeColumnWidths(rows: (string | number | null | undefined)[][]): XLSX.ColInfo[] {
-  const widths: number[] = [];
-  for (const row of rows) {
-    for (let i = 0; i < row.length; i++) {
-      const cellLen = String(row[i] ?? '').length;
-      widths[i] = Math.max(widths[i] ?? 0, cellLen);
-    }
-  }
-  return widths.map((w) => ({ wch: Math.min(Math.max(w + 2, 10), 60) }));
-}
-
 const CURRENCY_FMT = '#,##0.00';
 
 interface Resource {
@@ -56,7 +45,7 @@ interface Resource {
 }
 
 function getResources(pos: Position): Resource[] {
-  const meta = pos.metadata ?? (pos as Record<string, unknown>).metadata_;
+  const meta = pos.metadata ?? (pos as unknown as Record<string, unknown>).metadata_;
   if (!meta || !Array.isArray((meta as Record<string, unknown>).resources)) return [];
   return (meta as Record<string, unknown>).resources as Resource[];
 }

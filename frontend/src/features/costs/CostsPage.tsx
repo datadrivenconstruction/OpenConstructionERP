@@ -1191,7 +1191,7 @@ function AddToBOQModal({
   // Auto-select first BOQ when list loads
   useEffect(() => {
     if (boqs && boqs.length > 0 && !boqId) {
-      setBoqId(boqs[0].id);
+      setBoqId(boqs[0]!.id);
     }
   }, [boqs, boqId]);
 
