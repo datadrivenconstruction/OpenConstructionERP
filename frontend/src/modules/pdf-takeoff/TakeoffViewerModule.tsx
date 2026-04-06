@@ -227,6 +227,7 @@ export default function TakeoffViewerModule() {
   const [selectedProjectId, setSelectedProjectId] = useState('');
   const [selectedBoqId, setSelectedBoqId] = useState('');
   const [isExporting, setIsExporting] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   // Document persistence
   const [fileName, setFileName] = useState<string | null>(null);
@@ -262,10 +263,27 @@ export default function TakeoffViewerModule() {
       setIsDraggingRect(false);
     } catch (err) {
       console.error('Failed to load PDF:', err);
+      addToast({
+        type: 'error',
+        title: t('takeoff_viewer.pdf_load_failed', { defaultValue: 'Failed to load PDF' }),
+        message: err instanceof Error ? err.message : t('takeoff_viewer.pdf_load_error_hint', { defaultValue: 'The file may be corrupted or not a valid PDF.' }),
+      });
     } finally {
       setIsLoading(false);
     }
   }, []);
+
+  /* ── Warn on unsaved changes (tab close / navigation) ────────────── */
+
+  useEffect(() => {
+    if (measurements.length === 0) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [measurements.length]);
 
   /* ── Render page to canvas ───────────────────────────────────────── */
 
@@ -1166,12 +1184,18 @@ export default function TakeoffViewerModule() {
   /* ── Scale dialog confirm ────────────────────────────────────────── */
 
   const handleScaleConfirm = useCallback(() => {
-    if (scaleRefPixels > 0 && scaleRefReal > 0) {
-      setScale(deriveScale(scaleRefPixels, scaleRefReal));
+    if (scaleRefPixels <= 0 || scaleRefReal <= 0) {
+      addToast({
+        type: 'warning',
+        title: t('takeoff_viewer.scale_invalid', { defaultValue: 'Invalid scale value' }),
+        message: t('takeoff_viewer.scale_must_be_positive', { defaultValue: 'Reference distance must be greater than zero.' }),
+      });
+      return;
     }
+    setScale(deriveScale(scaleRefPixels, scaleRefReal));
     setShowScaleDialog(false);
     setScalePoints([]);
-  }, [scaleRefPixels, scaleRefReal]);
+  }, [scaleRefPixels, scaleRefReal, addToast, t]);
 
   /* ── Recalculate measurements when scale changes ───────────────── */
 
@@ -1350,10 +1374,15 @@ export default function TakeoffViewerModule() {
     try {
       const projects = await apiGet<{ id: string; name: string }[]>('/v1/projects/');
       setExportProjects(projects);
-    } catch {
+    } catch (err) {
       setExportProjects([]);
+      addToast({
+        type: 'error',
+        title: t('takeoff.load_projects_failed', { defaultValue: 'Failed to load projects' }),
+        message: err instanceof Error ? err.message : '',
+      });
     }
-  }, []);
+  }, [addToast, t]);
 
   const handleProjectChange = useCallback(async (projectId: string) => {
     setSelectedProjectId(projectId);
@@ -1362,8 +1391,13 @@ export default function TakeoffViewerModule() {
     try {
       const boqs = await apiGet<{ id: string; name: string }[]>(`/v1/boq/boqs/?project_id=${projectId}`);
       setExportBoqs(boqs);
-    } catch {
+    } catch (err) {
       setExportBoqs([]);
+      addToast({
+        type: 'error',
+        title: t('takeoff.load_boqs_failed', { defaultValue: 'Failed to load BOQ list' }),
+        message: err instanceof Error ? err.message : '',
+      });
     }
   }, []);
 
@@ -1387,8 +1421,12 @@ export default function TakeoffViewerModule() {
       }
       addToast({ type: 'success', title: t('takeoff.added_to_boq_success', { defaultValue: 'Measurements exported to BOQ' }) });
       setShowExportDialog(false);
-    } catch {
-      addToast({ type: 'error', title: t('common.error', { defaultValue: 'Export failed' }) });
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: t('takeoff.export_failed', { defaultValue: 'Export to BOQ failed' }),
+        message: err instanceof Error ? err.message : t('takeoff.export_error_hint', { defaultValue: 'Check your connection and try again.' }),
+      });
     } finally {
       setIsExporting(false);
     }
@@ -1654,7 +1692,7 @@ export default function TakeoffViewerModule() {
               </button>
 
               {/* Clear */}
-              <button onClick={clearAll} className="p-1.5 rounded hover:bg-surface-secondary text-content-tertiary transition-colors" title={t('takeoff_viewer.clear_all', { defaultValue: 'Clear all' })} aria-label={t('takeoff_viewer.clear_all', { defaultValue: 'Clear all' })}>
+              <button onClick={() => measurements.length > 0 ? setShowClearConfirm(true) : undefined} className="p-1.5 rounded hover:bg-surface-secondary text-content-tertiary transition-colors" title={t('takeoff_viewer.clear_all', { defaultValue: 'Clear all' })} aria-label={t('takeoff_viewer.clear_all', { defaultValue: 'Clear all' })}>
                 <Trash2 size={14} />
               </button>
 
@@ -2221,6 +2259,30 @@ export default function TakeoffViewerModule() {
                 {isExporting
                   ? t('common.exporting', { defaultValue: 'Exporting...' })
                   : t('takeoff_viewer.export_count', { defaultValue: 'Export {{count}} positions', count: measurements.length })}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Clear All Confirmation */}
+      {showClearConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setShowClearConfirm(false)}>
+          <div className="w-full max-w-sm mx-4 rounded-xl bg-surface-elevated shadow-xl border border-border-light p-5" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-sm font-semibold text-content-primary mb-2">
+              {t('takeoff_viewer.clear_confirm_title', { defaultValue: 'Clear all measurements?' })}
+            </h3>
+            <p className="text-xs text-content-secondary mb-4">
+              {t('takeoff_viewer.clear_confirm_message', {
+                defaultValue: 'All {{count}} measurement(s) and annotations will be permanently removed. This cannot be undone.',
+                count: measurements.length,
+              })}
+            </p>
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setShowClearConfirm(false)} className="px-3 py-1.5 rounded-lg text-xs font-medium text-content-secondary hover:bg-surface-secondary transition-colors">
+                {t('common.cancel', { defaultValue: 'Cancel' })}
+              </button>
+              <button onClick={() => { clearAll(); setShowClearConfirm(false); }} className="px-3 py-1.5 rounded-lg text-xs font-medium bg-red-500 text-white hover:bg-red-600 transition-colors">
+                {t('takeoff_viewer.clear_all', { defaultValue: 'Clear All' })}
               </button>
             </div>
           </div>

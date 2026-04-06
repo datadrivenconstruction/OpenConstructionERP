@@ -4,6 +4,7 @@
  */
 
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 /* ── Types (matching backend schemas exactly) ────────────────────────── */
 
@@ -175,9 +176,9 @@ export async function fetchMarkupsSummary(projectId: string): Promise<MarkupsSum
 }
 
 export async function exportMarkupsCSV(projectId: string): Promise<Blob> {
-  const token = localStorage.getItem('oe_access_token');
+  const token = useAuthStore.getState().accessToken;
   const res = await fetch(`/api/v1/markups/export?project_id=${projectId}&format=csv`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    headers: token ? { Authorization: `Bearer ${token}`, 'X-DDC-Client': 'OE/1.0' } : { 'X-DDC-Client': 'OE/1.0' },
   });
   if (!res.ok) throw new Error(`Export failed: ${res.statusText}`);
   return res.blob();

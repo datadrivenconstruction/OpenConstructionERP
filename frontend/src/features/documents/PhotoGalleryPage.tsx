@@ -25,8 +25,10 @@ import {
   Clock,
   ChevronDown,
   Image as ImageIcon,
+  CheckSquare,
 } from 'lucide-react';
 import { Card, Button, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
+import { apiGet } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import {
@@ -471,19 +473,29 @@ function EditPhotoModal({
 function PhotoCard({
   photo,
   onClick,
+  selected,
+  onToggleSelect,
+  selectMode,
 }: {
   photo: PhotoItem;
   onClick: () => void;
+  selected?: boolean;
+  onToggleSelect?: () => void;
+  selectMode?: boolean;
 }) {
   const { t } = useTranslation();
 
   return (
     <div
-      className="group relative aspect-square rounded-xl overflow-hidden cursor-pointer border border-border-light bg-surface-secondary hover:border-oe-blue/30 transition-all shadow-sm hover:shadow-md"
-      onClick={onClick}
+      className={`group relative aspect-square rounded-xl overflow-hidden cursor-pointer border bg-surface-secondary transition-all shadow-sm hover:shadow-md ${
+        selected
+          ? 'border-oe-blue ring-2 ring-oe-blue/40'
+          : 'border-border-light hover:border-oe-blue/30'
+      }`}
+      onClick={selectMode ? onToggleSelect : onClick}
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectMode ? onToggleSelect?.() : onClick(); } }}
       aria-label={photo.caption || photo.filename}
     >
       <img
@@ -492,6 +504,26 @@ function PhotoCard({
         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         loading="lazy"
       />
+
+      {/* Selection checkbox */}
+      {(selectMode || selected) && (
+        <div className="absolute top-2 right-2 z-10">
+          <div
+            className={`h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors ${
+              selected
+                ? 'bg-oe-blue border-oe-blue text-white'
+                : 'bg-white/80 border-white/60 backdrop-blur-sm'
+            }`}
+            onClick={(e) => { e.stopPropagation(); onToggleSelect?.(); }}
+          >
+            {selected && (
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2 6L5 9L10 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Category badge */}
       <div className="absolute top-2 left-2">
@@ -765,7 +797,7 @@ export function PhotoGalleryPage() {
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
-  const activeProjectName = useProjectContextStore((s) => s.activeProjectName);
+
 
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearch = useDebounce(searchQuery, 300);
@@ -782,7 +814,18 @@ export function PhotoGalleryPage() {
   // Delete state
   const [deleteTarget, setDeleteTarget] = useState<PhotoItem | null>(null);
 
-  const projectId = activeProjectId;
+  // Batch selection state
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [batchDeleting, setBatchDeleting] = useState(false);
+
+  // Projects list for selector
+  const { data: projects = [] } = useQuery({
+    queryKey: ['projects'],
+    queryFn: () => apiGet<{ id: string; name: string }[]>('/v1/projects/'),
+  });
+
+  const projectId = activeProjectId || projects[0]?.id || '';
 
   /* ── Data fetching ──────────────────────────────────────────────────── */
 
@@ -860,6 +903,69 @@ export function PhotoGalleryPage() {
     updateMutation.mutate({ id, data });
   }, [updateMutation]);
 
+  // Batch selection helpers
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const selectAll = useCallback(() => {
+    setSelectedIds(new Set(photoList.map((p) => p.id)));
+  }, [photoList]);
+
+  const deselectAll = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
+
+  const exitSelectMode = useCallback(() => {
+    setSelectMode(false);
+    setSelectedIds(new Set());
+  }, []);
+
+  const handleBatchDelete = useCallback(async () => {
+    if (selectedIds.size === 0) return;
+    setBatchDeleting(true);
+    let ok = 0;
+    let fail = 0;
+    for (const id of selectedIds) {
+      try {
+        await deletePhoto(id);
+        ok++;
+      } catch {
+        fail++;
+      }
+    }
+    setBatchDeleting(false);
+    if (ok > 0) {
+      addToast({
+        type: 'success',
+        title: t('photos.batch_deleted', { defaultValue: '{{count}} photo(s) deleted', count: ok }),
+      });
+    }
+    if (fail > 0) {
+      addToast({
+        type: 'error',
+        title: t('photos.batch_delete_failed', { defaultValue: '{{count}} photo(s) failed to delete', count: fail }),
+      });
+    }
+    queryClient.invalidateQueries({ queryKey: ['photos'] });
+    queryClient.invalidateQueries({ queryKey: ['photos-timeline'] });
+    exitSelectMode();
+  }, [selectedIds, addToast, t, queryClient, exitSelectMode]);
+
+  // Stats
+  const categoryStats = useMemo(() => {
+    const stats: Record<string, number> = {};
+    for (const p of photoList) {
+      stats[p.category] = (stats[p.category] || 0) + 1;
+    }
+    return stats;
+  }, [photoList]);
+
   /* ── Render ─────────────────────────────────────────────────────────── */
 
   if (!projectId) {
@@ -882,7 +988,6 @@ export function PhotoGalleryPage() {
       <Breadcrumb
         items={[
           { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
-          { label: activeProjectName || t('photos.project', { defaultValue: 'Project' }), to: `/projects/${projectId}` },
           { label: t('photos.title', { defaultValue: 'Project Photos' }) },
         ]}
       />
@@ -905,11 +1010,83 @@ export function PhotoGalleryPage() {
             </p>
           </div>
         </div>
-        <Button onClick={() => setShowUpload(!showUpload)} size="sm" className="shrink-0">
-          <Upload size={16} className="mr-2 shrink-0" />
-          <span>{t('photos.upload_photos', { defaultValue: 'Upload Photos' })}</span>
-        </Button>
+        <div className="flex items-center gap-2 shrink-0 flex-nowrap">
+          {/* Project selector */}
+          {projects.length > 0 && (
+            <select
+              value={projectId}
+              onChange={(e) => {
+                const p = projects.find((pr) => pr.id === e.target.value);
+                if (p) useProjectContextStore.getState().setActiveProject(p.id, p.name);
+              }}
+              className="h-8 rounded-lg border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-colors pr-7 appearance-none cursor-pointer max-w-[180px]"
+            >
+              <option value="" disabled>{t('photos.select_project', { defaultValue: 'Select project...' })}</option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          )}
+          {/* Select mode toggle */}
+          {photoList.length > 0 && !selectMode && (
+            <Button variant="ghost" size="sm" onClick={() => setSelectMode(true)} className="shrink-0 whitespace-nowrap">
+              <CheckSquare size={14} className="mr-1.5 shrink-0" />
+              <span className="whitespace-nowrap">{t('photos.select', { defaultValue: 'Select' })}</span>
+            </Button>
+          )}
+          <Button onClick={() => setShowUpload(!showUpload)} size="sm" disabled={!projectId} className="shrink-0 whitespace-nowrap">
+            <Upload size={14} className="mr-1.5 shrink-0" />
+            <span className="whitespace-nowrap">{t('photos.upload_photos', { defaultValue: 'Upload Photos' })}</span>
+          </Button>
+        </div>
       </div>
+
+      {/* Batch selection bar */}
+      {selectMode && (
+        <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-oe-blue-subtle/30 border border-oe-blue/20">
+          <span className="text-sm font-medium text-content-primary">
+            {selectedIds.size > 0
+              ? t('photos.selected_count', { defaultValue: '{{count}} selected', count: selectedIds.size })
+              : t('photos.select_photos', { defaultValue: 'Click photos to select' })}
+          </span>
+          <div className="flex items-center gap-1.5 ml-auto">
+            <Button variant="ghost" size="sm" onClick={selectedIds.size === photoList.length ? deselectAll : selectAll}>
+              {selectedIds.size === photoList.length
+                ? t('photos.deselect_all', { defaultValue: 'Deselect All' })
+                : t('photos.select_all', { defaultValue: 'Select All' })}
+            </Button>
+            {selectedIds.size > 0 && (
+              <Button variant="danger" size="sm" onClick={handleBatchDelete} loading={batchDeleting} className="shrink-0 whitespace-nowrap">
+                <Trash2 size={14} className="mr-1 shrink-0" />
+                <span className="whitespace-nowrap">{t('photos.delete_selected', { defaultValue: 'Delete ({{count}})', count: selectedIds.size })}</span>
+              </Button>
+            )}
+            <Button variant="ghost" size="sm" onClick={exitSelectMode} className="shrink-0 whitespace-nowrap">
+              <X size={14} className="mr-1 shrink-0" />
+              <span className="whitespace-nowrap">{t('common.cancel', { defaultValue: 'Cancel' })}</span>
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Stats summary (only when there are photos) */}
+      {photoList.length > 0 && Object.keys(categoryStats).length > 0 && !selectMode && (
+        <div className="flex items-center gap-2 flex-wrap text-xs">
+          <span className="font-semibold text-content-primary bg-surface-secondary px-2 py-1 rounded-md">
+            {t('photos.total', { defaultValue: 'Total' })}: {photoList.length}
+          </span>
+          <span className="text-border-light select-none">|</span>
+          {Object.entries(categoryStats).map(([cat, count]) => (
+            <span
+              key={cat}
+              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-medium ${CATEGORY_COLORS[cat as PhotoCategory] || 'bg-gray-100 text-gray-600'}`}
+            >
+              {t(`photos.cat_${cat}`, { defaultValue: cat })}
+              <span className="font-bold">{count}</span>
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* Upload zone */}
       {showUpload && (
@@ -1013,6 +1190,9 @@ export function PhotoGalleryPage() {
               key={photo.id}
               photo={photo}
               onClick={() => setLightboxIndex(idx)}
+              selectMode={selectMode}
+              selected={selectedIds.has(photo.id)}
+              onToggleSelect={() => toggleSelect(photo.id)}
             />
           ))}
         </div>
@@ -1041,6 +1221,9 @@ export function PhotoGalleryPage() {
                       key={photo.id}
                       photo={photo}
                       onClick={() => setLightboxIndex(globalIdx >= 0 ? globalIdx : 0)}
+                      selectMode={selectMode}
+                      selected={selectedIds.has(photo.id)}
+                      onToggleSelect={() => toggleSelect(photo.id)}
                     />
                   );
                 })}

@@ -10,7 +10,7 @@ Usage:
     cd backend
     python test_all_modules.py
 
-Requires: server running on http://localhost:8004
+Requires: server running on http://localhost:8000
 """
 
 import json
@@ -24,7 +24,7 @@ import httpx
 
 # ── Configuration ──────────────────────────────────────────────────────────────
 
-BASE_URL = "http://localhost:8004"
+BASE_URL = "http://localhost:8000"
 DEMO_EMAIL = "demo@openestimator.io"
 DEMO_PASSWORD = "DemoPass1234!"
 

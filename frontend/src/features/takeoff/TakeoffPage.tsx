@@ -20,10 +20,11 @@ import {
   Ruler,
 } from 'lucide-react';
 
-import { Button, Card, Badge, Input, Skeleton } from '@/shared/ui';
+import { Button, Card, Badge, Input, Skeleton, Breadcrumb } from '@/shared/ui';
 import { apiGet, apiPost } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
 const TakeoffViewerModule = lazy(() => import('@/modules/pdf-takeoff/TakeoffViewerModule'));
 
@@ -680,7 +681,8 @@ export function TakeoffPage() {
 
   /* ── State ──────────────────────────────────────────────────────────── */
 
-  const [selectedProjectId, setSelectedProjectId] = useState('');
+  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+  const selectedProjectId = activeProjectId ?? '';
   const [selectedBoqId, setSelectedBoqId] = useState('');
   const [documents, setDocuments] = useState<UploadedDocument[]>([]);
   const [addToBOQSuccess, setAddToBOQSuccess] = useState<string | null>(null);
@@ -818,10 +820,18 @@ export function TakeoffPage() {
 
   /* ── Callbacks ──────────────────────────────────────────────────────── */
 
-  const handleProjectChange = useCallback((projectId: string) => {
-    setSelectedProjectId(projectId);
-    setSelectedBoqId('');
-  }, []);
+  const handleProjectChange = useCallback(
+    (projectId: string) => {
+      const name = (projects || []).find((p) => p.id === projectId)?.name ?? '';
+      if (projectId) {
+        useProjectContextStore.getState().setActiveProject(projectId, name);
+      } else {
+        useProjectContextStore.getState().clearProject();
+      }
+      setSelectedBoqId('');
+    },
+    [projects],
+  );
 
   const handleBoqChange = useCallback((boqId: string) => {
     setSelectedBoqId(boqId);
@@ -1005,6 +1015,14 @@ export function TakeoffPage() {
 
   return (
     <div className="max-w-content mx-auto animate-fade-in">
+      <Breadcrumb
+        items={[
+          { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
+          { label: t('takeoff.title', { defaultValue: 'Quantity Takeoff' }) },
+        ]}
+        className="mb-4"
+      />
+
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3">

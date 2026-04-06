@@ -5,6 +5,7 @@
  */
 
 import { apiGet, apiPatch, apiDelete } from '@/shared/lib/api';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -102,11 +103,11 @@ export async function uploadPhoto(
   if (metadata.tags?.length) formData.append('tags', metadata.tags.join(','));
   if (metadata.taken_at) formData.append('taken_at', metadata.taken_at);
 
-  const token = localStorage.getItem('oe_access_token');
+  const token = useAuthStore.getState().accessToken;
   const res = await fetch(`/api/v1/documents/photos/upload?project_id=${projectId}`, {
     method: 'POST',
     headers: {
-      Authorization: token ? `Bearer ${token}` : '',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       'X-DDC-Client': 'OE/1.0',
     },
     body: formData,

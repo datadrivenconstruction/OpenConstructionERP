@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 // lucide-react icons used by sub-components (BOQToolbar, BOQGrid, etc.) — none needed directly here
 import { Database, Download, ExternalLink, X, Sparkles, AlertTriangle as WarnTriangle } from 'lucide-react';
-import { Button, Badge, InfoHint, Breadcrumb } from '@/shared/ui';
+import { Button, Badge, Breadcrumb } from '@/shared/ui';
 import { useProgressStore } from '@/shared/ui/GlobalProgress';
 import { apiGet, apiPost, triggerDownload } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
