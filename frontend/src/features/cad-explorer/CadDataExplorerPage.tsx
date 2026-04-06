@@ -5,28 +5,21 @@
  * Reads session_id from URL query parameter.
  */
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Table2,
-  BarChart3,
-  PieChart,
-  FileSpreadsheet,
-  Database,
-  Filter,
-  ArrowUpDown,
-  ChevronDown,
-  ChevronRight,
-  ChevronLeft,
-  Layers,
-  X,
-  Save,
+  Table2, BarChart3, PieChart, FileSpreadsheet, Database, Filter,
+  ArrowUpDown, ChevronDown, ChevronRight, ChevronLeft, Layers, X, Save,
+  Download as DownloadIcon, Columns3, Search as SearchIcon,
+  Upload, FileUp, Loader2, CheckCircle2, Sparkles, Settings, AlertCircle, FolderOpen,
+  Trash2 as TrashIcon, Clock, FileText, ExternalLink,
 } from 'lucide-react';
 import { Button, Card, Badge, Breadcrumb, EmptyState } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { useUploadQueueStore } from '@/stores/useUploadQueueStore';
+import { apiGet, apiPost } from '@/shared/lib/api';
 import {
   describeSession,
   valueCounts,
@@ -40,11 +33,6 @@ import {
   type AggregateGroup,
 } from './api';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
-import { Download as DownloadIcon, Columns3, Search as SearchIcon } from 'lucide-react';
-import React, { useRef } from 'react';
-import { Upload, FileUp, Loader2, CheckCircle2, Sparkles, Settings, AlertCircle, FolderOpen } from 'lucide-react';
-import { apiGet, apiPost } from '@/shared/lib/api';
-import { Trash2 as TrashIcon, Clock, FileText, ExternalLink } from 'lucide-react';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
