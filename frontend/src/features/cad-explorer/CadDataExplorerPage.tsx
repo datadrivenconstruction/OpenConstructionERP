@@ -128,6 +128,30 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
   const [globalSearch, setGlobalSearch] = useState('');
   const [showColumnPicker, setShowColumnPicker] = useState(false);
   const [hiddenCols, setHiddenCols] = useState<Set<string>>(new Set());
+  const [heatmapEnabled, setHeatmapEnabled] = useState(false);
+
+  // Pre-compute min/max for numeric columns (for heatmap)
+  const colStats = useMemo(() => {
+    if (!data?.rows || !heatmapEnabled) return new Map<string, { min: number; max: number }>();
+    const stats = new Map<string, { min: number; max: number }>();
+    for (const col of describe.columns.filter((c) => c.dtype === 'number')) {
+      if (col.min != null && col.max != null && col.max > col.min) {
+        stats.set(col.name, { min: col.min, max: col.max });
+      }
+    }
+    return stats;
+  }, [data?.rows, heatmapEnabled, describe.columns]);
+
+  function heatmapBg(col: string, val: unknown): string {
+    if (!heatmapEnabled || typeof val !== 'number') return '';
+    const s = colStats.get(col);
+    if (!s) return '';
+    const ratio = Math.max(0, Math.min(1, (val - s.min) / (s.max - s.min)));
+    // low=blue, high=green
+    if (ratio < 0.33) return 'bg-blue-50/40 dark:bg-blue-900/10';
+    if (ratio < 0.66) return 'bg-emerald-50/40 dark:bg-emerald-900/10';
+    return 'bg-emerald-100/60 dark:bg-emerald-900/20';
+  }
 
   const { data, isLoading } = useQuery({
     queryKey: ['cad-elements', sessionId, page, pageSize, sortBy, sortOrder, activeFilter],
@@ -290,6 +314,20 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
           )}
         </div>
 
+        {/* Heatmap toggle */}
+        <button
+          onClick={() => setHeatmapEnabled((v) => !v)}
+          className={`h-7 px-2 rounded-md border text-xs flex items-center gap-1 transition-colors ${
+            heatmapEnabled
+              ? 'border-oe-blue bg-oe-blue/10 text-oe-blue'
+              : 'border-border bg-surface-primary text-content-secondary hover:bg-surface-secondary'
+          }`}
+          title={t('explorer.heatmap', { defaultValue: 'Toggle value heatmap' })}
+        >
+          <BarChart3 size={13} />
+          {t('explorer.heatmap_short', { defaultValue: 'Heatmap' })}
+        </button>
+
         {/* Export CSV */}
         <button
           onClick={handleExportCSV}
@@ -348,7 +386,7 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
                     const isNull = val == null || val === '' || val === 'None';
                     const isSearch = globalSearch && val != null && String(val).toLowerCase().includes(globalSearch.toLowerCase());
                     return (
-                      <td key={col} className={`px-2 py-1.5 ${isNum ? 'text-right tabular-nums' : ''} truncate max-w-[180px] ${isNull ? 'bg-amber-50/30 dark:bg-amber-900/5' : ''} ${isSearch ? 'bg-yellow-100 dark:bg-yellow-900/20 font-medium' : 'text-content-primary'}`}>
+                      <td key={col} className={`px-2 py-1.5 ${isNum ? 'text-right tabular-nums' : ''} truncate max-w-[180px] ${isNull ? 'bg-amber-50/30 dark:bg-amber-900/5' : ''} ${isSearch ? 'bg-yellow-100 dark:bg-yellow-900/20 font-medium' : 'text-content-primary'} ${heatmapBg(col, val)}`}>
                         {isNull ? <span className="text-content-quaternary italic text-2xs">null</span> : isNum ? formatNumber(val) : String(val)}
                       </td>
                     );
@@ -686,6 +724,20 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
             <span className="text-2xs text-content-quaternary">
               {sortedGroups.length} {t('explorer.groups', { defaultValue: 'groups' })} · {result.total_count.toLocaleString()} {t('explorer.elements', { defaultValue: 'elements' })} · {t('explorer.click_header_sort', { defaultValue: 'Click column headers to sort' })}
             </span>
+            <button
+              onClick={() => {
+                if (!sortedGroups.length) return;
+                const header = [...groupBy, 'Count', ...aggCols.map((c) => `${aggFn}_${c}`)].join(',');
+                const rows = sortedGroups.map((g) =>
+                  [...groupBy.map((c) => `"${(g.key[c] || '').replace(/"/g, '""')}"`), g.count, ...aggCols.map((c) => g.results[`${aggFn}_${c}`] ?? g.results[c] ?? 0)].join(',')
+                );
+                const blob = new Blob([header + '\n' + rows.join('\n')], { type: 'text/csv' });
+                const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'pivot_export.csv'; a.click();
+              }}
+              className="h-7 px-2 rounded-md border border-border bg-surface-primary text-xs text-content-secondary hover:bg-surface-secondary flex items-center gap-1 shrink-0"
+            >
+              <DownloadIcon size={13} /> CSV
+            </button>
             <Button variant="primary" size="sm" onClick={() => setShowCreateBOQ(true)} className="shrink-0 whitespace-nowrap">
               {t('explorer.create_boq_from_pivot', { defaultValue: 'Create BOQ' })}
             </Button>

@@ -1688,7 +1688,7 @@ export function CostModelPage() {
   // Project selector view
   return (
     <div className="max-w-content mx-auto animate-fade-in">
-      <Breadcrumb items={[{ label: t('nav.dashboard', 'Dashboard'), to: '/' }, { label: t('nav.costmodel', '5D Cost Model') }]} className="mb-4" />
+      <Breadcrumb items={[{ label: t('nav.dashboard', 'Dashboard'), to: '/' }, { label: t('nav.costmodel', { defaultValue: '5D Cost Model' }) }]} className="mb-4" />
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-content-primary">
           {t('costmodel.title', '5D Cost Model')}

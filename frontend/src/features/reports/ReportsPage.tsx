@@ -27,7 +27,7 @@ import { Breadcrumb, InfoHint } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
-import { apiGet, triggerDownload } from '@/shared/lib/api';
+import { apiGet, apiPost, triggerDownload } from '@/shared/lib/api';
 import { projectsApi, type Project } from '@/features/projects/api';
 import { boqApi, type BOQ } from '@/features/boq/api';
 import { scheduleApi } from '@/features/schedule/api';
@@ -287,8 +287,8 @@ async function downloadValidationReport(projectId: string, projectName: string):
 
   const boq = boqs[0]!;
 
-  // Call the validate endpoint
-  let report: {
+  // Call the validate endpoint (POST /boqs/{boq_id}/validate)
+  type ValidationReport = {
     boq_id: string;
     boq_name: string;
     total_positions: number;
@@ -304,20 +304,13 @@ async function downloadValidationReport(projectId: string, projectName: string):
       element_ref?: string;
     }>;
   };
+  let report: ValidationReport;
   try {
-    report = await apiGet(`/v1/boq/boqs/${boq.id}/validate`);
+    report = await apiPost<ValidationReport>(`/v1/boq/boqs/${boq.id}/validate`, {});
   } catch (err) {
-    // The validate endpoint is POST, so use fetch directly
-    const token = useAuthStore.getState().accessToken;
-    const resp = await fetch(`/api/v1/boq/boqs/${boq.id}/validate`, {
-      method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
-    if (!resp.ok) {
-      const errText = await resp.text().catch(() => '');
-      throw new Error(`Validation failed (${resp.status}): ${errText || (err instanceof Error ? err.message : 'Unknown error')}`);
-    }
-    report = await resp.json();
+    throw new Error(
+      `Validation failed: ${err instanceof Error ? err.message : 'Unknown error'}`,
+    );
   }
 
   const csvLines: string[] = [];
