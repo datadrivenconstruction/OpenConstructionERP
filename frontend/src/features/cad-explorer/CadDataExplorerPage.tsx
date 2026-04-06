@@ -275,9 +275,19 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
 
 function PivotTab({ sessionId, describe }: { sessionId: string; describe: DescribeResponse }) {
   const { t } = useTranslation();
-  // Only show useful columns: string cols with < 200 unique values and > 30% non-null
-  const stringCols = describe.columns.filter((c) => c.dtype === 'string' && c.unique < 200 && c.non_null > describe.total_elements * 0.3);
-  const numericCols = describe.columns.filter((c) => c.dtype === 'number' && c.non_null > describe.total_elements * 0.1);
+  // All text columns for grouping, sorted: useful first (low cardinality + high non-null)
+  const stringCols = describe.columns
+    .filter((c) => c.dtype === 'string' && c.non_null > 0)
+    .sort((a, b) => {
+      // Priority: fewer unique + more non-null = better grouping column
+      const scoreA = (a.unique < 100 ? 1000 : 0) + a.non_null;
+      const scoreB = (b.unique < 100 ? 1000 : 0) + b.non_null;
+      return scoreB - scoreA;
+    });
+  // Only numeric columns for aggregation
+  const numericCols = describe.columns
+    .filter((c) => c.dtype === 'number' && c.non_null > 0)
+    .sort((a, b) => b.non_null - a.non_null);
 
   const [groupBy, setGroupBy] = useState<string[]>(
     stringCols.length > 0 ? [stringCols[0]!.name] : [],
@@ -332,8 +342,9 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
             <label className="text-2xs font-medium text-content-tertiary uppercase tracking-wide block mb-1">
               {t('explorer.group_by', { defaultValue: 'Group By' })}
             </label>
-            <div className="flex gap-1.5 flex-wrap max-h-20 overflow-y-auto">
-              {stringCols.slice(0, 20).map((col) => (
+            <div className="flex gap-1.5 flex-wrap">
+              {/* Show top 10 as quick buttons */}
+              {stringCols.slice(0, 10).map((col) => (
                 <button
                   key={col.name}
                   onClick={() => setGroupBy((prev) =>
@@ -348,6 +359,19 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
                   {col.name}
                 </button>
               ))}
+              {/* More columns dropdown */}
+              {stringCols.length > 10 && (
+                <select
+                  value=""
+                  onChange={(e) => { if (e.target.value) setGroupBy((prev) => prev.includes(e.target.value) ? prev : [...prev, e.target.value]); e.target.value = ''; }}
+                  className="px-2 py-1 rounded-md text-2xs border border-border-light bg-surface-secondary text-content-tertiary cursor-pointer"
+                >
+                  <option value="">+ {stringCols.length - 10} {t('explorer.more', { defaultValue: 'more...' })}</option>
+                  {stringCols.slice(10).map((col) => (
+                    <option key={col.name} value={col.name}>{col.name} ({col.unique} unique)</option>
+                  ))}
+                </select>
+              )}
             </div>
           </div>
           <div>
@@ -453,8 +477,14 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
 
 function ChartsTab({ sessionId, describe }: { sessionId: string; describe: DescribeResponse }) {
   const { t } = useTranslation();
-  const stringCols = describe.columns.filter((c) => c.dtype === 'string' && c.unique < 200 && c.non_null > describe.total_elements * 0.3);
-  const numericCols = describe.columns.filter((c) => c.dtype === 'number' && c.non_null > describe.total_elements * 0.1);
+  // For charts: text columns with reasonable cardinality (< 100 unique for good visualization)
+  const stringCols = describe.columns
+    .filter((c) => c.dtype === 'string' && c.non_null > 0 && c.unique < 100)
+    .sort((a, b) => b.non_null - a.non_null);
+  // Only numeric for values
+  const numericCols = describe.columns
+    .filter((c) => c.dtype === 'number' && c.non_null > 0)
+    .sort((a, b) => b.non_null - a.non_null);
 
   const [chartGroupBy, setChartGroupBy] = useState(stringCols[0]?.name || '');
   const [chartValue, setChartValue] = useState(
