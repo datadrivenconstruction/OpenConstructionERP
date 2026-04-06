@@ -25,9 +25,9 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 <details open>
 <summary><h2>Table of Contents</h2></summary>
 
-<table>
+<table width="100%">
 <tr>
-<td width="33%">
+<td width="33%" valign="top">
 
 **Getting Started**
 - [Why OpenConstructionERP?](#why-openconstructionerp)
@@ -35,7 +35,7 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 - [Demo Accounts](#demo-accounts)
 
 </td>
-<td width="33%">
+<td width="33%" valign="top">
 
 **Core Modules**
 - [BOQ Management](#-bill-of-quantities-boq-management)
@@ -43,7 +43,7 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 - [CAD/BIM & AI Estimation](#%EF%B8%8F-cadbim-takeoff--ai-estimation)
 
 </td>
-<td width="33%">
+<td width="33%" valign="top">
 
 **Planning & Delivery**
 - [4D Scheduling & 5D Cost](#-4d-scheduling--5d-cost-model)
@@ -53,7 +53,7 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 </td>
 </tr>
 <tr>
-<td>
+<td valign="top">
 
 **Field Tools**
 - [PDF Markups & Annotations](#%EF%B8%8F-pdf-markups--annotations)
@@ -61,7 +61,7 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 - [Validation Engine](#%EF%B8%8F-validation--compliance-engine)
 
 </td>
-<td>
+<td valign="top">
 
 **Standards & Regions**
 - [20 Regional Standards](#-20-regional-standards)
@@ -69,7 +69,7 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 - [Key Features Overview](#key-features)
 
 </td>
-<td>
+<td valign="top">
 
 **Technical**
 - [Tech Stack](#tech-stack)
