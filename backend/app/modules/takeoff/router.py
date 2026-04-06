@@ -1592,14 +1592,22 @@ async def cad_data_save(
 )
 async def cad_data_list_sessions(
     project_id: str | None = Query(default=None),
+    saved_only: bool = Query(default=False),
     db_session: SessionDep = None,  # type: ignore[assignment]
 ) -> list[dict[str, Any]]:
-    """List saved (permanent) CAD sessions, optionally filtered by project."""
+    """List CAD sessions. By default shows all non-expired. Use saved_only=true for permanent only."""
     from sqlalchemy import select
 
-    stmt = select(CadExtractionSession).where(
-        CadExtractionSession.is_permanent == True  # noqa: E712
-    )
+    now = datetime.now(timezone.utc)
+    stmt = select(CadExtractionSession)
+    if saved_only:
+        stmt = stmt.where(CadExtractionSession.is_permanent == True)  # noqa: E712
+    else:
+        # Show permanent + non-expired temporary
+        stmt = stmt.where(
+            (CadExtractionSession.is_permanent == True) |  # noqa: E712
+            (CadExtractionSession.expires_at > now)
+        )
     if project_id:
         stmt = stmt.where(CadExtractionSession.project_id == project_id)
     stmt = stmt.order_by(CadExtractionSession.created_at.desc())
@@ -1616,6 +1624,7 @@ async def cad_data_list_sessions(
             "element_count": row.element_count,
             "extraction_time": row.extraction_time,
             "project_id": row.project_id,
+            "is_permanent": bool(row.is_permanent),
             "created_at": row.created_at.isoformat() if row.created_at else None,
         }
         for row in rows

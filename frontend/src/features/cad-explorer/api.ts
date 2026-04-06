@@ -121,6 +121,7 @@ export interface SavedSession {
   element_count: number;
   extraction_time: number;
   project_id: string | null;
+  is_permanent: boolean;
   created_at: string | null;
 }
 
@@ -136,9 +137,12 @@ export async function saveSession(
   });
 }
 
-export async function listSessions(projectId?: string): Promise<SavedSession[]> {
-  const qs = projectId ? `?project_id=${projectId}` : '';
-  return apiGet<SavedSession[]>(`/v1/takeoff/cad-data/sessions${qs}`);
+export async function listSessions(projectId?: string, savedOnly = false): Promise<SavedSession[]> {
+  const params = new URLSearchParams();
+  if (projectId) params.set('project_id', projectId);
+  if (savedOnly) params.set('saved_only', 'true');
+  const qs = params.toString();
+  return apiGet<SavedSession[]>(`/v1/takeoff/cad-data/sessions${qs ? `?${qs}` : ''}`);
 }
 
 export async function deleteSession(sessionId: string): Promise<void> {

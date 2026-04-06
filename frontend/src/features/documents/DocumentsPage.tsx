@@ -670,10 +670,16 @@ export function DocumentsPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-content-primary truncate">{s.display_name}</p>
-                      <div className="flex items-center gap-2 mt-0.5">
+                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                         <span className={`px-1.5 py-0.5 rounded text-2xs font-bold ${fmtColor[fmt] || 'bg-gray-100 text-gray-600'}`}>{fmt}</span>
                         <span className="text-2xs text-content-tertiary">{s.element_count.toLocaleString()} elements</span>
+                        <span className="text-2xs text-content-quaternary">{s.extraction_time.toFixed(1)}s</span>
                         {s.created_at && <span className="text-2xs text-content-quaternary">{new Date(s.created_at).toLocaleDateString()}</span>}
+                        {s.is_permanent ? (
+                          <Badge variant="success" size="sm">{t('documents.saved', { defaultValue: 'Saved' })}</Badge>
+                        ) : (
+                          <Badge variant="neutral" size="sm">{t('documents.temporary', { defaultValue: '24h' })}</Badge>
+                        )}
                       </div>
                     </div>
                     <ChevronDown size={14} className="text-content-tertiary -rotate-90 shrink-0" />
