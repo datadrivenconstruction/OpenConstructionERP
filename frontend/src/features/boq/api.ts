@@ -187,6 +187,57 @@ export function groupPositionsIntoSections(positions: Position[]): {
   return { sections, ungrouped };
 }
 
+/* ── Hierarchical tree builder (multi-level BOQ) ─────────────────────── */
+
+export interface HierarchyNode {
+  position: Position;
+  level: number;
+  children: HierarchyNode[];
+  subtotal: number;
+}
+
+/**
+ * Build a recursive tree from flat positions list.
+ * Supports unlimited nesting depth via parent_id references.
+ * Sections and positions can appear at any level.
+ */
+export function buildHierarchy(positions: Position[]): HierarchyNode[] {
+  const sorted = [...positions].sort((a, b) => {
+    if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order;
+    return a.ordinal.localeCompare(b.ordinal, undefined, { numeric: true });
+  });
+
+  const posMap = new Map<string, Position>();
+  for (const p of sorted) posMap.set(p.id, p);
+
+  function buildChildren(parentId: string | null, level: number): HierarchyNode[] {
+    const children = sorted.filter((p) => p.parent_id === parentId);
+    return children.map((pos) => {
+      const childNodes = buildChildren(pos.id, level + 1);
+      const subtotal = isSection(pos)
+        ? childNodes.reduce((sum, c) => sum + c.subtotal, 0)
+        : pos.total;
+      return { position: pos, level, children: childNodes, subtotal };
+    });
+  }
+
+  return buildChildren(null, 0);
+}
+
+/**
+ * Get the depth (level) of a position in the hierarchy.
+ * Follows parent_id chain up to root.
+ */
+export function getPositionDepth(pos: Position, posMap: Map<string, Position>): number {
+  let depth = 0;
+  let current = pos;
+  while (current.parent_id && posMap.has(current.parent_id)) {
+    depth++;
+    current = posMap.get(current.parent_id)!;
+  }
+  return depth;
+}
+
 /* ── Activity types ──────────────────────────────────────────────────── */
 
 export type ActivityAction =
