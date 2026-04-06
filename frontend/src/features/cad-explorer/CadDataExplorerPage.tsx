@@ -27,6 +27,7 @@ import {
 import { Button, Card, Badge, Breadcrumb, EmptyState } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { useUploadQueueStore } from '@/stores/useUploadQueueStore';
+import { boqApi, type CreatePositionData } from '@/features/boq/api';
 import {
   describeSession,
   valueCounts,
@@ -1055,7 +1056,6 @@ function DescribeTab({ sessionId, describe }: { sessionId: string; describe: Des
 import React, { useRef } from 'react';
 import { Upload, FileUp, Loader2, CheckCircle2, Sparkles, Settings, AlertCircle, FolderOpen } from 'lucide-react';
 import { apiGet, apiPost } from '@/shared/lib/api';
-import { boqApi, type CreatePositionData } from '@/features/boq/api';
 
 /* ── Create BOQ from Pivot Modal ─────────────────────────────────────── */
 
