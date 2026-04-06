@@ -710,35 +710,52 @@ function ConverterStatus() {
         <h3 className="text-xs font-semibold text-content-primary flex items-center gap-1.5">
           <Settings size={13} className="text-content-tertiary" />
           {t('explorer.converters', { defaultValue: 'CAD Converters' })}
+          <span className="text-2xs text-content-quaternary font-normal ml-1">
+            — {t('explorer.converters_desc', { defaultValue: 'DDC Community converters for extracting BIM element data' })}
+          </span>
         </h3>
-        <span className="text-2xs text-content-quaternary">
+        <Badge variant={installed.length === data.converters.length ? 'success' : 'warning'} size="sm">
           {installed.length}/{data.converters.length} {t('explorer.installed', { defaultValue: 'installed' })}
-        </span>
+        </Badge>
       </div>
       <div className="flex flex-wrap gap-2">
         {data.converters.map((c) => (
           <div
             key={c.id}
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-2xs font-medium border ${
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-2xs font-medium border transition-colors ${
               c.installed
                 ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800'
-                : 'bg-surface-secondary text-content-tertiary border-border-light'
+                : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800 cursor-pointer hover:bg-amber-100'
             }`}
+            onClick={!c.installed ? () => navigate('/cad-takeoff') : undefined}
+            title={!c.installed ? t('explorer.click_to_install', { defaultValue: 'Click to install this converter' }) : undefined}
           >
-            {c.installed ? <CheckCircle2 size={11} /> : <AlertCircle size={11} />}
-            {c.name}
-            <span className="opacity-60">({c.extensions.join(', ')})</span>
+            {c.installed ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
+            <span className="font-semibold">{c.name}</span>
+            <span className="opacity-60">{c.extensions.join(', ')}</span>
+            {!c.installed && (
+              <span className="ml-1 underline text-2xs">{t('explorer.install', { defaultValue: 'Install' })}</span>
+            )}
           </div>
         ))}
       </div>
-      {notInstalled.length > 0 && (
-        <p className="mt-2 text-2xs text-content-quaternary">
-          {t('explorer.install_hint', { defaultValue: 'Missing converters can be installed in' })}{' '}
-          <button onClick={() => navigate('/cad-takeoff')} className="text-oe-blue hover:underline">
-            {t('explorer.cad_takeoff_page', { defaultValue: 'CAD/BIM Takeoff' })}
-          </button>
-        </p>
-      )}
+      <div className="mt-3 flex items-center gap-3 text-2xs text-content-quaternary">
+        {notInstalled.length > 0 && (
+          <span className="flex items-center gap-1">
+            <AlertCircle size={10} />
+            {t('explorer.install_converters_hint', { defaultValue: 'Click on a missing converter to install it, or go to' })}{' '}
+            <button onClick={() => navigate('/cad-takeoff')} className="text-oe-blue hover:underline ml-0.5">
+              {t('explorer.cad_takeoff_page', { defaultValue: 'CAD/BIM Takeoff' })}
+            </button>
+          </span>
+        )}
+        <span className="flex items-center gap-1 ml-auto">
+          {t('explorer.powered_by', { defaultValue: 'Powered by' })}{' '}
+          <a href="https://github.com/nicrahner/community-converters" target="_blank" rel="noopener noreferrer" className="text-oe-blue hover:underline">
+            DDC Community Converters
+          </a>
+        </span>
+      </div>
     </Card>
   );
 }
