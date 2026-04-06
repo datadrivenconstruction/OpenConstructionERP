@@ -11,6 +11,7 @@ import { apiGet, apiDelete, apiPatch } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { useUploadQueueStore } from '@/stores/useUploadQueueStore';
 import { useNavigate } from 'react-router-dom';
 import { listSessions, type SavedSession } from '../cad-explorer/api';
 
@@ -233,15 +234,7 @@ export function DocumentsPage() {
   const [editForm, setEditForm] = useState({ category: '', description: '', tagInput: '', tags: [] as string[] });
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Upload state
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<{
-    current: number;
-    total: number;
-    fileName: string;
-    successCount: number;
-    failCount: number;
-  } | null>(null);
+  // Upload state (progress shown in FloatingQueuePanel)
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -309,7 +302,10 @@ export function DocumentsPage() {
     },
   });
 
-  /* ── Upload handler ─────────────────────────────────────────────────── */
+  /* ── Upload handler (background queue) ───────────────────────────────── */
+
+  const addQueueTask = useUploadQueueStore((s) => s.addTask);
+  const updateQueueTask = useUploadQueueStore((s) => s.updateTask);
 
   const handleUpload = useCallback(async (files: FileList | File[]) => {
     if (!projectId) return;
@@ -334,75 +330,78 @@ export function DocumentsPage() {
     const validFiles = fileArray.filter((f) => f.size <= MAX_FILE_SIZE_BYTES);
     if (validFiles.length === 0) return;
 
-    setUploading(true);
     const token = useAuthStore.getState().accessToken;
-    let successCount = 0;
-    let failCount = 0;
+    const cat = category === 'all' ? 'other' : category;
 
-    for (let i = 0; i < validFiles.length; i++) {
-      const file = validFiles[i]!;
-      setUploadProgress({
-        current: i + 1,
-        total: validFiles.length,
-        fileName: file.name,
-        successCount,
-        failCount,
+    // Add each file to the global queue and upload in background
+    for (const file of validFiles) {
+      const taskId = crypto.randomUUID();
+
+      addQueueTask({
+        id: taskId,
+        type: 'file_upload',
+        filename: file.name,
+        status: 'processing',
+        progress: 0,
+        message: t('documents.uploading', { defaultValue: 'Uploading...' }),
       });
 
-      const formData = new FormData();
-      formData.append('file', file);
+      // Fire-and-forget: upload runs in background
+      (async () => {
+        try {
+          const formData = new FormData();
+          formData.append('file', file);
 
-      try {
-        const headers: Record<string, string> = {};
-        if (token) headers['Authorization'] = `Bearer ${token}`;
+          const headers: Record<string, string> = { 'X-DDC-Client': 'OE/1.0' };
+          if (token) headers['Authorization'] = `Bearer ${token}`;
 
-        const response = await fetch(
-          `/api/v1/documents/upload?project_id=${projectId}&category=${category === 'all' ? 'other' : category}`,
-          { method: 'POST', headers, body: formData },
-        );
+          // Simulate progress based on file size
+          const estimatedMs = Math.max(2000, (file.size / (1024 * 1024)) * 500);
+          const progressTimer = setInterval(() => {
+            const task = useUploadQueueStore.getState().tasks.find((t) => t.id === taskId);
+            if (task && task.status === 'processing' && task.progress < 90) {
+              updateQueueTask(taskId, { progress: task.progress + 5 });
+            }
+          }, estimatedMs / 18);
 
-        if (!response.ok) {
-          let detail = file.name;
-          try {
-            const body = await response.json();
-            if (body?.detail) detail = `${file.name}: ${body.detail}`;
-          } catch {
-            // ignore parse error
+          const response = await fetch(
+            `/api/v1/documents/upload?project_id=${projectId}&category=${cat}`,
+            { method: 'POST', headers, body: formData },
+          );
+
+          clearInterval(progressTimer);
+
+          if (!response.ok) {
+            let detail = file.name;
+            try { const body = await response.json(); if (body?.detail) detail = body.detail; } catch { /* */ }
+            updateQueueTask(taskId, { status: 'error', error: detail, completedAt: Date.now() });
+          } else {
+            updateQueueTask(taskId, {
+              status: 'completed',
+              progress: 100,
+              message: t('documents.uploaded', { defaultValue: 'Uploaded' }),
+              completedAt: Date.now(),
+            });
+            queryClient.invalidateQueries({ queryKey: ['documents'] });
           }
-          addToast({ type: 'error', title: t('documents.upload_failed', { defaultValue: 'Upload failed' }), message: detail });
-          failCount++;
-        } else {
-          successCount++;
+        } catch (err) {
+          updateQueueTask(taskId, {
+            status: 'error',
+            error: err instanceof Error ? err.message : 'Upload failed',
+            completedAt: Date.now(),
+          });
         }
-      } catch {
-        addToast({ type: 'error', title: t('documents.upload_failed', { defaultValue: 'Upload failed' }), message: file.name });
-        failCount++;
-      }
+      })();
     }
 
-    // Summary toast for multi-file uploads
-    if (validFiles.length > 1) {
-      addToast({
-        type: failCount > 0 ? 'warning' : 'success',
-        title: t('documents.upload_summary', { defaultValue: 'Upload complete' }),
-        message: t('documents.upload_summary_detail', {
-          defaultValue: '{{success}} succeeded, {{fail}} failed out of {{total}} files',
-          success: successCount,
-          fail: failCount,
-          total: validFiles.length,
-        }),
-      });
-    } else if (validFiles.length === 1 && successCount === 1) {
-      addToast({ type: 'success', title: t('documents.uploaded', { defaultValue: 'Uploaded' }), message: validFiles[0]!.name });
-    }
-
-    setUploading(false);
-    setUploadProgress(null);
-    queryClient.invalidateQueries({ queryKey: ['documents'] });
+    addToast({
+      type: 'info',
+      title: t('documents.upload_queued', { defaultValue: '{{count}} file(s) queued for upload', count: validFiles.length }),
+    });
 
     // Reset input so re-selecting the same file works
     if (fileInputRef.current) fileInputRef.current.value = '';
-  }, [projectId, category, addToast, t, queryClient]);
+  }, [projectId, category, addToast, t, queryClient, addQueueTask, updateQueueTask]);
 
   /* ── Drag & Drop ────────────────────────────────────────────────────── */
 
@@ -551,8 +550,7 @@ export function DocumentsPage() {
           <Button
             variant="primary"
             size="sm"
-            icon={uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-            disabled={uploading}
+            icon={<Upload size={14} />}
             onClick={() => fileInputRef.current?.click()}
           >
             {t('documents.upload', { defaultValue: 'Upload Files' })}
@@ -571,41 +569,6 @@ export function DocumentsPage() {
             <HardDrive size={13} />
             {t('documents.total_size', { defaultValue: '{{size}} total', size: formatSize(stats.totalSize) })}
           </span>
-        </div>
-      )}
-
-      {/* ── Upload progress bar ─────────────────────────────────────────── */}
-      {uploadProgress && (
-        <div className="mb-4 rounded-lg border border-border-light bg-surface-primary px-4 py-3">
-          <div className="flex items-center justify-between text-xs mb-2">
-            <span className="text-content-secondary flex items-center gap-1.5">
-              <Loader2 size={13} className="animate-spin text-oe-blue" />
-              {t('documents.uploading_file', {
-                defaultValue: 'Uploading {{current}} of {{total}}: {{name}}',
-                current: uploadProgress.current,
-                total: uploadProgress.total,
-                name: uploadProgress.fileName,
-              })}
-            </span>
-            <span className="text-content-tertiary flex items-center gap-2">
-              {uploadProgress.successCount > 0 && (
-                <span className="flex items-center gap-0.5 text-semantic-success">
-                  <CheckCircle2 size={12} /> {uploadProgress.successCount}
-                </span>
-              )}
-              {uploadProgress.failCount > 0 && (
-                <span className="flex items-center gap-0.5 text-semantic-error">
-                  <XCircle size={12} /> {uploadProgress.failCount}
-                </span>
-              )}
-            </span>
-          </div>
-          <div className="h-1.5 bg-surface-secondary rounded-full overflow-hidden">
-            <div
-              className="h-full bg-oe-blue rounded-full transition-all duration-300"
-              style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
-            />
-          </div>
         </div>
       )}
 
