@@ -256,10 +256,10 @@ export function DocumentsPage() {
 
   /* ── CAD/BIM models (saved sessions) ─────────────────────────────────── */
 
+  // Show ALL CAD sessions (including ones without project_id)
   const { data: cadSessions = [] } = useQuery({
-    queryKey: ['cad-saved-sessions', projectId],
-    queryFn: () => listSessions(projectId || undefined),
-    enabled: !!projectId,
+    queryKey: ['cad-saved-sessions'],
+    queryFn: () => listSessions(),
   });
 
   /* ── Sorted documents ───────────────────────────────────────────────── */
