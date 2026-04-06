@@ -72,29 +72,40 @@ function formatNumber(n: number | null | undefined): string {
 
 function StatsCards({ data }: { data: DescribeResponse }) {
   const { t } = useTranslation();
-  const numericCols = data.columns.filter((c) => c.dtype === 'number');
-  const stringCols = data.columns.filter((c) => c.dtype === 'string');
+  const numericCols = data.columns.filter((c) => c.dtype === 'number' && c.non_null > 0);
+  const stringCols = data.columns.filter((c) => c.dtype === 'string' && c.non_null > 0);
   const totalVolume = numericCols.find((c) => c.name.toLowerCase().includes('volume'))?.sum;
   const totalArea = numericCols.find((c) => c.name.toLowerCase().includes('area'))?.sum;
+  const categories = data.columns.find((c) => c.name.toLowerCase() === 'category');
+  const formatBadge = data.format ? data.format.toUpperCase() : '';
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3">
       <Card className="p-3">
-        <p className="text-2xs text-content-tertiary uppercase tracking-wide">{t('explorer.elements', { defaultValue: 'Elements' })}</p>
+        <div className="flex items-center justify-between">
+          <p className="text-2xs text-content-tertiary uppercase tracking-wide">{t('explorer.elements', { defaultValue: 'Elements' })}</p>
+          {formatBadge && <Badge variant="blue" size="sm">{formatBadge}</Badge>}
+        </div>
         <p className="text-lg font-bold text-content-primary tabular-nums">{data.total_elements.toLocaleString()}</p>
       </Card>
       <Card className="p-3">
         <p className="text-2xs text-content-tertiary uppercase tracking-wide">{t('explorer.columns', { defaultValue: 'Columns' })}</p>
-        <p className="text-lg font-bold text-content-primary tabular-nums">{data.total_columns}</p>
+        <p className="text-lg font-bold text-content-primary tabular-nums">{stringCols.length + numericCols.length}</p>
         <p className="text-2xs text-content-quaternary">{stringCols.length} text · {numericCols.length} numeric</p>
       </Card>
-      {totalVolume != null && (
+      {categories && (
+        <Card className="p-3">
+          <p className="text-2xs text-content-tertiary uppercase tracking-wide">{t('explorer.categories', { defaultValue: 'Categories' })}</p>
+          <p className="text-lg font-bold text-content-primary tabular-nums">{categories.unique}</p>
+        </Card>
+      )}
+      {totalVolume != null && totalVolume > 0 && (
         <Card className="p-3">
           <p className="text-2xs text-content-tertiary uppercase tracking-wide">{t('explorer.total_volume', { defaultValue: 'Total Volume' })}</p>
           <p className="text-lg font-bold text-oe-blue tabular-nums">{formatNumber(totalVolume)} m³</p>
         </Card>
       )}
-      {totalArea != null && (
+      {totalArea != null && totalArea > 0 && (
         <Card className="p-3">
           <p className="text-2xs text-content-tertiary uppercase tracking-wide">{t('explorer.total_area', { defaultValue: 'Total Area' })}</p>
           <p className="text-lg font-bold text-oe-blue tabular-nums">{formatNumber(totalArea)} m²</p>
@@ -1227,7 +1238,7 @@ export function CadDataExplorerPage() {
 
   if (!sessionId) {
     return (
-      <div className="max-w-4xl mx-auto px-6 py-6 space-y-6">
+      <div className="max-w-content mx-auto px-4 py-4 space-y-5 animate-fade-in">
         <Breadcrumb items={[
           { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
           { label: t('explorer.title', { defaultValue: 'CAD-BIM Explorer' }) },
@@ -1239,7 +1250,7 @@ export function CadDataExplorerPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-6 space-y-4">
+    <div className="max-w-content mx-auto px-4 py-4 space-y-4 animate-fade-in">
       <Breadcrumb items={[
         { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
         { label: t('nav.documents', { defaultValue: 'Documents' }), to: '/documents' },
@@ -1247,31 +1258,31 @@ export function CadDataExplorerPage() {
       ]} />
 
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle shrink-0">
             <Database size={20} className="text-oe-blue" />
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-content-primary">{t('explorer.title', { defaultValue: 'CAD Data Explorer' })}</h1>
+          <div className="min-w-0">
+            <h1 className="text-lg font-bold text-content-primary">{t('explorer.title', { defaultValue: 'CAD-BIM Explorer' })}</h1>
             {describe && (
-              <p className="text-xs text-content-tertiary">
-                {describe.filename} · {describe.total_elements.toLocaleString()} elements{describe.format ? ` · ${describe.format.toUpperCase()}` : ''}
+              <p className="text-xs text-content-tertiary truncate">
+                {describe.filename} · {describe.total_elements.toLocaleString()} {t('explorer.elements', { defaultValue: 'elements' })}{describe.format ? ` · ${describe.format.toUpperCase()}` : ''} · {describe.total_columns} {t('explorer.columns', { defaultValue: 'columns' })}
               </p>
             )}
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="primary" size="sm" onClick={() => setShowSaveDialog(true)}>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <Button variant="primary" size="sm" onClick={() => setShowSaveDialog(true)} className="shrink-0 whitespace-nowrap">
             <Save size={13} className="mr-1" />
-            <span>{t('explorer.save_analysis', { defaultValue: 'Save Analysis' })}</span>
+            <span>{t('explorer.save_analysis', { defaultValue: 'Save' })}</span>
           </Button>
-          <Button variant="secondary" size="sm" onClick={() => { setSearchParams({}); }}>
+          <Button variant="secondary" size="sm" onClick={() => { setSearchParams({}); }} className="shrink-0 whitespace-nowrap">
             <Upload size={13} className="mr-1" />
-            <span>{t('explorer.new_file', { defaultValue: 'New File' })}</span>
+            <span className="hidden sm:inline">{t('explorer.new_file', { defaultValue: 'New File' })}</span>
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => navigate('/cad-takeoff')}>
-            {t('explorer.back_to_cad', { defaultValue: 'Back to QTO' })}
+          <Button variant="ghost" size="sm" onClick={() => navigate('/documents')} className="shrink-0 whitespace-nowrap">
+            <span className="hidden sm:inline">{t('explorer.documents', { defaultValue: 'Documents' })}</span>
           </Button>
         </div>
       </div>
