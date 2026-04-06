@@ -2,10 +2,11 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Search, ChevronDown, LogOut, User, Settings, Menu, MessageSquarePlus, FolderOpen, Bell, CheckCircle2, XCircle, AlertTriangle, Info, Trash2, Bug, BookOpen } from 'lucide-react';
+import { Search, ChevronDown, LogOut, User, Settings, Menu, MessageSquarePlus, FolderOpen, Bell, CheckCircle2, XCircle, AlertTriangle, Info, Trash2, Bug, BookOpen, Loader2, Upload } from 'lucide-react';
 import clsx from 'clsx';
 import { SUPPORTED_LANGUAGES, getLanguageByCode } from '../i18n';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useUploadQueueStore } from '@/stores/useUploadQueueStore';
 import { useToastStore, type HistoryEntry } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { CountryFlag } from '@/shared/ui';
@@ -246,6 +247,9 @@ export function Header({ title, onMenuClick }: HeaderProps) {
           <MessageSquarePlus size={14} strokeWidth={1.75} />
           <span className="hidden sm:inline">{t('feedback.title', { defaultValue: 'Feedback' })}</span>
         </button>
+
+        {/* Upload queue indicator */}
+        <UploadQueueIndicator />
 
         {/* Notification bell */}
         <NotificationBell />
@@ -663,6 +667,122 @@ function ProjectSwitcher() {
               </button>
             </div>
           )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Upload Queue Indicator ────────────────────────────────────────────── */
+
+function UploadQueueIndicator() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const tasks = useUploadQueueStore((s) => s.tasks);
+  const removeTask = useUploadQueueStore((s) => s.removeTask);
+  const clearCompleted = useUploadQueueStore((s) => s.clearCompleted);
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const activeTasks = tasks.filter((t) => t.status === 'processing' || t.status === 'queued');
+  const completedTasks = tasks.filter((t) => t.status === 'completed');
+  const errorTasks = tasks.filter((t) => t.status === 'error');
+  const totalActive = activeTasks.length;
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  if (tasks.length === 0) return null;
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className={clsx(
+          'relative flex h-8 w-8 items-center justify-center rounded-lg transition-colors',
+          totalActive > 0 ? 'text-oe-blue bg-oe-blue-subtle' : 'text-content-tertiary hover:bg-surface-secondary',
+        )}
+        title={t('queue.title', { defaultValue: 'Upload Queue' })}
+      >
+        {totalActive > 0 ? (
+          <Loader2 size={16} className="animate-spin" />
+        ) : (
+          <Upload size={16} />
+        )}
+        {(totalActive > 0 || errorTasks.length > 0) && (
+          <span className={`absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white ${
+            errorTasks.length > 0 ? 'bg-semantic-error' : 'bg-oe-blue'
+          }`}>
+            {totalActive || errorTasks.length}
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-full mt-2 w-80 rounded-xl border border-border-light bg-surface-elevated shadow-xl z-50 overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border-light">
+            <h3 className="text-xs font-semibold text-content-primary">
+              {t('queue.title', { defaultValue: 'Processing Queue' })}
+            </h3>
+            {completedTasks.length > 0 && (
+              <button onClick={clearCompleted} className="text-2xs text-oe-blue hover:underline">
+                {t('queue.clear_done', { defaultValue: 'Clear completed' })}
+              </button>
+            )}
+          </div>
+          <div className="max-h-64 overflow-y-auto">
+            {tasks.length === 0 ? (
+              <p className="px-4 py-6 text-center text-xs text-content-tertiary">
+                {t('queue.empty', { defaultValue: 'No tasks' })}
+              </p>
+            ) : (
+              tasks.map((task) => (
+                <div key={task.id} className="flex items-center gap-3 px-4 py-2.5 border-b border-border-light last:border-0 hover:bg-surface-secondary/30">
+                  <div className="shrink-0">
+                    {task.status === 'processing' && <Loader2 size={14} className="text-oe-blue animate-spin" />}
+                    {task.status === 'queued' && <Upload size={14} className="text-content-tertiary" />}
+                    {task.status === 'completed' && <CheckCircle2 size={14} className="text-green-500" />}
+                    {task.status === 'error' && <XCircle size={14} className="text-semantic-error" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-content-primary truncate">{task.filename}</p>
+                    <div className="flex items-center gap-2">
+                      {task.status === 'processing' && (
+                        <>
+                          <div className="flex-1 h-1 bg-surface-secondary rounded-full overflow-hidden">
+                            <div className="h-full bg-oe-blue rounded-full transition-all duration-500" style={{ width: `${task.progress}%` }} />
+                          </div>
+                          <span className="text-2xs text-content-quaternary tabular-nums">{Math.round(task.progress)}%</span>
+                        </>
+                      )}
+                      {task.status === 'completed' && task.resultUrl && (
+                        <button onClick={() => { navigate(task.resultUrl!); setOpen(false); }} className="text-2xs text-oe-blue hover:underline">
+                          {t('queue.open_result', { defaultValue: 'Open' })}
+                        </button>
+                      )}
+                      {task.status === 'error' && (
+                        <p className="text-2xs text-semantic-error truncate">{task.error || 'Failed'}</p>
+                      )}
+                      {task.message && task.status === 'processing' && (
+                        <p className="text-2xs text-content-quaternary truncate">{task.message}</p>
+                      )}
+                    </div>
+                  </div>
+                  {(task.status === 'completed' || task.status === 'error') && (
+                    <button onClick={() => removeTask(task.id)} className="shrink-0 p-1 rounded hover:bg-surface-secondary text-content-quaternary">
+                      <XCircle size={12} />
+                    </button>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
         </div>
       )}
     </div>
