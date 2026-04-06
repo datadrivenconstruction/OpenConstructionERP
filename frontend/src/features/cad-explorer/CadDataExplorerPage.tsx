@@ -21,9 +21,6 @@ import {
   ChevronRight,
   ChevronLeft,
   Layers,
-  Hash,
-  Box,
-  Ruler,
   X,
   Save,
 } from 'lucide-react';
@@ -41,7 +38,6 @@ import {
   type DescribeResponse,
   type AggregateResponse,
   type AggregateGroup,
-  type SavedSession,
 } from './api';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
@@ -286,200 +282,265 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
 
 function PivotTab({ sessionId, describe }: { sessionId: string; describe: DescribeResponse }) {
   const { t } = useTranslation();
-  // All text columns for grouping, sorted: useful first (low cardinality + high non-null)
-  const stringCols = describe.columns
+  const addToast = useToastStore((s) => s.addToast);
+
+  // All text columns for grouping, sorted by usefulness
+  const stringCols = useMemo(() => describe.columns
     .filter((c) => c.dtype === 'string' && c.non_null > 0)
     .sort((a, b) => {
-      // Priority: fewer unique + more non-null = better grouping column
       const scoreA = (a.unique < 100 ? 1000 : 0) + a.non_null;
       const scoreB = (b.unique < 100 ? 1000 : 0) + b.non_null;
       return scoreB - scoreA;
-    });
+    }), [describe]);
+
   // Only numeric columns for aggregation
-  const numericCols = describe.columns
+  const numericCols = useMemo(() => describe.columns
     .filter((c) => c.dtype === 'number' && c.non_null > 0)
-    .sort((a, b) => b.non_null - a.non_null);
+    .sort((a, b) => b.non_null - a.non_null), [describe]);
 
   const [groupBy, setGroupBy] = useState<string[]>(
     stringCols.length > 0 ? [stringCols[0]!.name] : [],
   );
-  const [aggCol, setAggCol] = useState(numericCols[0]?.name || '');
+  // Allow multiple aggregate columns
+  const [aggCols, setAggCols] = useState<string[]>(() => {
+    const defaults: string[] = [];
+    for (const name of ['volume', 'area', 'length', 'count']) {
+      const found = numericCols.find((c) => c.name.toLowerCase().includes(name));
+      if (found) defaults.push(found.name);
+    }
+    return defaults.length > 0 ? defaults : numericCols.slice(0, 2).map((c) => c.name);
+  });
   const [aggFn, setAggFn] = useState('sum');
   const [result, setResult] = useState<AggregateResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [sortCol, setSortCol] = useState<string | null>(null);
+  const [sortDesc, setSortDesc] = useState(true);
 
-  const handlePivot = useCallback(async () => {
-    if (groupBy.length === 0 || !aggCol) return;
+  // Auto-run pivot on first render and when groupBy/aggCols change
+  const runPivot = useCallback(async () => {
+    if (groupBy.length === 0 || aggCols.length === 0) return;
     setLoading(true);
     try {
-      const data = await aggregate(sessionId, groupBy, { [aggCol]: aggFn, count: 'sum' });
+      const aggs: Record<string, string> = {};
+      for (const col of aggCols) aggs[col] = aggFn;
+      const data = await aggregate(sessionId, groupBy, aggs);
       setResult(data);
       setExpanded(new Set());
-    } catch {
-      // error handled by API layer
+      setSortCol(aggCols[0] || null);
+    } catch (err) {
+      addToast({ type: 'error', title: t('explorer.pivot_failed', { defaultValue: 'Pivot failed' }), message: err instanceof Error ? err.message : '' });
     } finally {
       setLoading(false);
     }
-  }, [sessionId, groupBy, aggCol, aggFn]);
+  }, [sessionId, groupBy, aggCols, aggFn, addToast, t]);
 
-  const toggleGroup = useCallback((key: string) => {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
+  // Auto-run on mount
+  useEffect(() => { runPivot(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const toggleGroupBy = useCallback((col: string) => {
+    setGroupBy((prev) => prev.includes(col) ? prev.filter((c) => c !== col) : [...prev, col]);
   }, []);
 
-  // Group results into a tree by first group-by column
+  const toggleAggCol = useCallback((col: string) => {
+    setAggCols((prev) => prev.includes(col) ? prev.filter((c) => c !== col) : [...prev, col]);
+  }, []);
+
+  const toggleExpand = useCallback((key: string) => {
+    setExpanded((prev) => { const next = new Set(prev); next.has(key) ? next.delete(key) : next.add(key); return next; });
+  }, []);
+
+  // Sort results
+  const sortedGroups = useMemo(() => {
+    if (!result) return [];
+    const groups = [...result.groups];
+    if (sortCol) {
+      groups.sort((a, b) => {
+        const va = a.results[sortCol] ?? 0;
+        const vb = b.results[sortCol] ?? 0;
+        return sortDesc ? vb - va : va - vb;
+      });
+    }
+    return groups;
+  }, [result, sortCol, sortDesc]);
+
+  // Tree grouping for multi-level
   const tree = useMemo(() => {
-    if (!result || groupBy.length < 2) return null;
+    if (groupBy.length < 2) return null;
     const map = new Map<string, AggregateGroup[]>();
-    for (const g of result.groups) {
+    for (const g of sortedGroups) {
       const parentKey = g.key[groupBy[0]!] || '(empty)';
       if (!map.has(parentKey)) map.set(parentKey, []);
       map.get(parentKey)!.push(g);
     }
     return map;
-  }, [result, groupBy]);
+  }, [sortedGroups, groupBy]);
 
   return (
     <div className="space-y-4">
       {/* Controls */}
-      <Card className="p-4">
-        <div className="flex items-end gap-4 flex-wrap">
-          <div>
-            <label className="text-2xs font-medium text-content-tertiary uppercase tracking-wide block mb-1">
-              {t('explorer.group_by', { defaultValue: 'Group By' })}
+      <Card className="p-4 space-y-3">
+        {/* Row 1: Group By */}
+        <div>
+          <label className="text-2xs font-semibold text-content-secondary uppercase tracking-wide mb-1.5 block">
+            {t('explorer.group_by', { defaultValue: 'Group By' })} ({groupBy.length} {t('explorer.selected', { defaultValue: 'selected' })})
+          </label>
+          <div className="flex gap-1.5 flex-wrap">
+            {stringCols.slice(0, 12).map((col) => (
+              <button
+                key={col.name}
+                onClick={() => toggleGroupBy(col.name)}
+                className={`px-2.5 py-1 rounded-lg text-2xs font-medium transition-all border whitespace-nowrap ${
+                  groupBy.includes(col.name)
+                    ? 'bg-oe-blue text-white border-oe-blue shadow-sm'
+                    : 'border-border-light bg-surface-secondary text-content-tertiary hover:text-content-primary hover:border-border'
+                }`}
+              >
+                {col.name}
+                {groupBy.includes(col.name) && <span className="ml-1 opacity-70">×</span>}
+              </button>
+            ))}
+            {stringCols.length > 12 && (
+              <select
+                value=""
+                onChange={(e) => { if (e.target.value) toggleGroupBy(e.target.value); }}
+                className="px-2 py-1 rounded-lg text-2xs border border-border-light bg-surface-secondary text-content-tertiary cursor-pointer"
+              >
+                <option value="">+{stringCols.length - 12} {t('explorer.more_columns', { defaultValue: 'more' })}</option>
+                {stringCols.slice(12).map((col) => (
+                  <option key={col.name} value={col.name}>{col.name} ({col.unique})</option>
+                ))}
+              </select>
+            )}
+          </div>
+        </div>
+
+        {/* Row 2: Sum Columns + Function + Apply */}
+        <div className="flex items-end gap-3 flex-wrap">
+          <div className="flex-1">
+            <label className="text-2xs font-semibold text-content-secondary uppercase tracking-wide mb-1.5 block">
+              {t('explorer.sum_columns', { defaultValue: 'Sum Columns' })} ({aggCols.length})
             </label>
             <div className="flex gap-1.5 flex-wrap">
-              {/* Show top 10 as quick buttons */}
-              {stringCols.slice(0, 10).map((col) => (
+              {numericCols.slice(0, 15).map((col) => (
                 <button
                   key={col.name}
-                  onClick={() => setGroupBy((prev) =>
-                    prev.includes(col.name) ? prev.filter((c) => c !== col.name) : [...prev, col.name]
-                  )}
-                  className={`px-2 py-1 rounded-md text-2xs font-medium transition-colors border whitespace-nowrap ${
-                    groupBy.includes(col.name)
-                      ? 'bg-oe-blue text-white border-oe-blue'
-                      : 'border-border-light bg-surface-secondary text-content-tertiary hover:text-content-primary'
+                  onClick={() => toggleAggCol(col.name)}
+                  className={`px-2.5 py-1 rounded-lg text-2xs font-medium transition-all border whitespace-nowrap ${
+                    aggCols.includes(col.name)
+                      ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm'
+                      : 'border-border-light bg-surface-secondary text-content-tertiary hover:text-content-primary hover:border-border'
                   }`}
                 >
                   {col.name}
                 </button>
               ))}
-              {/* More columns dropdown */}
-              {stringCols.length > 10 && (
-                <select
-                  value=""
-                  onChange={(e) => { if (e.target.value) setGroupBy((prev) => prev.includes(e.target.value) ? prev : [...prev, e.target.value]); e.target.value = ''; }}
-                  className="px-2 py-1 rounded-md text-2xs border border-border-light bg-surface-secondary text-content-tertiary cursor-pointer"
-                >
-                  <option value="">+ {stringCols.length - 10} {t('explorer.more', { defaultValue: 'more...' })}</option>
-                  {stringCols.slice(10).map((col) => (
-                    <option key={col.name} value={col.name}>{col.name} ({col.unique} unique)</option>
-                  ))}
-                </select>
-              )}
             </div>
           </div>
-          <div>
-            <label className="text-2xs font-medium text-content-tertiary uppercase tracking-wide block mb-1">
-              {t('explorer.aggregate', { defaultValue: 'Aggregate' })}
-            </label>
-            <div className="flex gap-1.5">
-              <select value={aggCol} onChange={(e) => setAggCol(e.target.value)} className="h-7 rounded-md border border-border bg-surface-primary px-2 text-xs">
-                {numericCols.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
-              </select>
-              <select value={aggFn} onChange={(e) => setAggFn(e.target.value)} className="h-7 rounded-md border border-border bg-surface-primary px-2 text-xs">
-                {AGG_FUNCTIONS.map((fn) => <option key={fn} value={fn}>{fn.toUpperCase()}</option>)}
-              </select>
-            </div>
+          <div className="shrink-0 flex items-center gap-2">
+            <select value={aggFn} onChange={(e) => setAggFn(e.target.value)} className="h-8 rounded-lg border border-border bg-surface-primary px-2.5 text-xs font-medium">
+              {AGG_FUNCTIONS.map((fn) => <option key={fn} value={fn}>{fn.toUpperCase()}</option>)}
+            </select>
+            <Button variant="primary" size="sm" onClick={runPivot} disabled={groupBy.length === 0 || aggCols.length === 0 || loading} loading={loading}>
+              {t('explorer.apply_pivot', { defaultValue: 'Apply' })}
+            </Button>
           </div>
-          <Button variant="primary" size="sm" onClick={handlePivot} disabled={groupBy.length === 0 || loading} loading={loading}>
-            {t('explorer.apply_pivot', { defaultValue: 'Apply Pivot' })}
-          </Button>
         </div>
       </Card>
 
       {/* Results */}
-      {result && (
+      {loading ? (
+        <div className="flex items-center justify-center py-12"><div className="h-5 w-5 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" /></div>
+      ) : result && sortedGroups.length > 0 ? (
         <Card padding="none" className="overflow-hidden">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-b border-border bg-surface-secondary/50">
-                {groupBy.map((col) => (
-                  <th key={col} className="px-3 py-2 text-left text-2xs font-semibold text-content-tertiary uppercase">{col}</th>
-                ))}
-                <th className="px-3 py-2 text-right text-2xs font-semibold text-content-tertiary uppercase">{t('explorer.count', { defaultValue: 'Count' })}</th>
-                <th className="px-3 py-2 text-right text-2xs font-semibold text-content-tertiary uppercase">{aggFn}({aggCol})</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tree ? (
-                // Tree view for multi-level grouping
-                Array.from(tree.entries()).map(([parentKey, children]) => {
-                  const isOpen = expanded.has(parentKey);
-                  const parentTotal = children.reduce((s, g) => s + (g.results[aggCol] ?? 0), 0);
-                  const parentCount = children.reduce((s, g) => s + g.count, 0);
-                  return (
-                    <React.Fragment key={parentKey}>
-                      <tr
-                        className="border-b border-border-light bg-surface-secondary/20 cursor-pointer hover:bg-surface-secondary/40"
-                        onClick={() => toggleGroup(parentKey)}
-                      >
-                        <td className="px-3 py-2 font-medium text-content-primary">
-                          <span className="inline-flex items-center gap-1">
-                            {isOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-                            {parentKey}
-                            <Badge variant="neutral" size="sm">{children.length}</Badge>
-                          </span>
-                        </td>
-                        {groupBy.slice(1).map((col) => (
-                          <td key={col} className="px-3 py-2 text-content-tertiary">—</td>
-                        ))}
-                        <td className="px-3 py-2 text-right font-semibold text-content-primary tabular-nums">{parentCount.toLocaleString()}</td>
-                        <td className="px-3 py-2 text-right font-semibold text-oe-blue tabular-nums">{formatNumber(parentTotal)}</td>
-                      </tr>
-                      {isOpen && children.map((g, i) => (
-                        <tr key={i} className="border-b border-border-light">
-                          <td className="px-3 py-1.5 pl-8 text-content-tertiary">{g.key[groupBy[0]!]}</td>
-                          {groupBy.slice(1).map((col) => (
-                            <td key={col} className="px-3 py-1.5 text-content-secondary">{g.key[col] || '—'}</td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-border bg-surface-secondary/50">
+                  {groupBy.map((col) => (
+                    <th key={col} className="px-3 py-2.5 text-left text-2xs font-semibold text-content-tertiary uppercase tracking-wide">{col}</th>
+                  ))}
+                  <th
+                    className="px-3 py-2.5 text-right text-2xs font-semibold text-content-tertiary uppercase tracking-wide cursor-pointer hover:text-content-primary select-none"
+                    onClick={() => { setSortCol(null); setSortDesc((d) => !d); }}
+                  >
+                    {t('explorer.count', { defaultValue: 'Count' })}
+                  </th>
+                  {aggCols.map((col) => (
+                    <th
+                      key={col}
+                      className="px-3 py-2.5 text-right text-2xs font-semibold text-content-tertiary uppercase tracking-wide cursor-pointer hover:text-content-primary select-none"
+                      onClick={() => { setSortCol(col); setSortDesc((d) => sortCol === col ? !d : true); }}
+                    >
+                      <span className="inline-flex items-center gap-1">
+                        {aggFn}({col})
+                        {sortCol === col && <ArrowUpDown size={10} className={sortDesc ? '' : 'rotate-180'} />}
+                      </span>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {tree ? (
+                  Array.from(tree.entries()).map(([parentKey, children]) => {
+                    const isOpen = expanded.has(parentKey);
+                    const parentCount = children.reduce((s, g) => s + g.count, 0);
+                    return (
+                      <React.Fragment key={parentKey}>
+                        <tr className="border-b border-border-light bg-surface-secondary/20 cursor-pointer hover:bg-surface-secondary/40" onClick={() => toggleExpand(parentKey)}>
+                          <td className="px-3 py-2 font-medium text-content-primary">
+                            <span className="inline-flex items-center gap-1">
+                              {isOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                              {parentKey}
+                              <Badge variant="neutral" size="sm">{children.length}</Badge>
+                            </span>
+                          </td>
+                          {groupBy.slice(1).map((col) => <td key={col} className="px-3 py-2 text-content-tertiary">—</td>)}
+                          <td className="px-3 py-2 text-right font-semibold tabular-nums">{parentCount.toLocaleString()}</td>
+                          {aggCols.map((col) => (
+                            <td key={col} className="px-3 py-2 text-right font-semibold text-oe-blue tabular-nums">
+                              {formatNumber(children.reduce((s, g) => s + (g.results[col] ?? 0), 0))}
+                            </td>
                           ))}
-                          <td className="px-3 py-1.5 text-right tabular-nums text-content-secondary">{g.count.toLocaleString()}</td>
-                          <td className="px-3 py-1.5 text-right tabular-nums text-content-primary">{formatNumber(g.results[aggCol])}</td>
                         </tr>
-                      ))}
-                    </React.Fragment>
-                  );
-                })
-              ) : (
-                // Flat view
-                result.groups.map((g, i) => (
-                  <tr key={i} className="border-b border-border-light hover:bg-surface-secondary/30">
-                    {groupBy.map((col) => (
-                      <td key={col} className="px-3 py-2 text-content-primary">{g.key[col] || '—'}</td>
-                    ))}
-                    <td className="px-3 py-2 text-right tabular-nums text-content-secondary">{g.count.toLocaleString()}</td>
-                    <td className="px-3 py-2 text-right tabular-nums font-medium text-content-primary">{formatNumber(g.results[aggCol])}</td>
-                  </tr>
-                ))
-              )}
-              {/* Totals row */}
-              <tr className="bg-surface-secondary/60 font-semibold">
-                <td className="px-3 py-2 text-content-primary" colSpan={groupBy.length}>
-                  {t('explorer.total', { defaultValue: 'Total' })}
-                </td>
-                <td className="px-3 py-2 text-right tabular-nums text-content-primary">{result.total_count.toLocaleString()}</td>
-                <td className="px-3 py-2 text-right tabular-nums text-oe-blue">{formatNumber(result.totals[aggCol])}</td>
-              </tr>
-            </tbody>
-          </table>
+                        {isOpen && children.map((g, i) => (
+                          <tr key={i} className="border-b border-border-light">
+                            <td className="px-3 py-1.5 pl-8 text-content-quaternary">{g.key[groupBy[0]!]}</td>
+                            {groupBy.slice(1).map((col) => <td key={col} className="px-3 py-1.5 text-content-secondary">{g.key[col] || '—'}</td>)}
+                            <td className="px-3 py-1.5 text-right tabular-nums text-content-secondary">{g.count.toLocaleString()}</td>
+                            {aggCols.map((col) => <td key={col} className="px-3 py-1.5 text-right tabular-nums">{formatNumber(g.results[col])}</td>)}
+                          </tr>
+                        ))}
+                      </React.Fragment>
+                    );
+                  })
+                ) : (
+                  sortedGroups.map((g, i) => (
+                    <tr key={i} className="border-b border-border-light hover:bg-surface-secondary/30">
+                      {groupBy.map((col) => <td key={col} className="px-3 py-2 text-content-primary">{g.key[col] || '—'}</td>)}
+                      <td className="px-3 py-2 text-right tabular-nums text-content-secondary">{g.count.toLocaleString()}</td>
+                      {aggCols.map((col) => <td key={col} className="px-3 py-2 text-right tabular-nums font-medium">{formatNumber(g.results[col])}</td>)}
+                    </tr>
+                  ))
+                )}
+                {/* Totals */}
+                <tr className="bg-surface-secondary/60 font-semibold border-t-2 border-border">
+                  <td className="px-3 py-2.5 text-content-primary" colSpan={groupBy.length}>{t('explorer.total', { defaultValue: 'Total' })}</td>
+                  <td className="px-3 py-2.5 text-right tabular-nums">{result.total_count.toLocaleString()}</td>
+                  {aggCols.map((col) => <td key={col} className="px-3 py-2.5 text-right tabular-nums text-oe-blue">{formatNumber(result.totals[col])}</td>)}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="px-4 py-2 bg-surface-secondary/30 text-2xs text-content-quaternary border-t border-border-light">
+            {sortedGroups.length} {t('explorer.groups', { defaultValue: 'groups' })} · {result.total_count.toLocaleString()} {t('explorer.elements', { defaultValue: 'elements' })} · {t('explorer.click_header_sort', { defaultValue: 'Click column headers to sort' })}
+          </div>
         </Card>
-      )}
+      ) : result && sortedGroups.length === 0 ? (
+        <Card className="p-6 text-center">
+          <p className="text-sm text-content-tertiary">{t('explorer.no_groups', { defaultValue: 'No groups found. Try different columns.' })}</p>
+        </Card>
+      ) : null}
     </div>
   );
 }
