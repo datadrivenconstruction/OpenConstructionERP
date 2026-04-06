@@ -1705,14 +1705,15 @@ export function CadDataExplorerPage() {
     enabled: !sessionId,
   });
 
+  const deleteSessionMutation = useMutation({
+    mutationFn: (sid: string) => deleteSession(sid),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cad-all-sessions'] });
+    },
+  });
+
   if (!sessionId) {
     const recentSessions = allSessions.slice(0, 12);
-    const deleteSessionMutation = useMutation({
-      mutationFn: (sessionId: string) => deleteSession(sessionId),
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['cad-all-sessions'] });
-      },
-    });
     const FORMAT_COLORS: Record<string, string> = {
       RVT: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
       IFC: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
