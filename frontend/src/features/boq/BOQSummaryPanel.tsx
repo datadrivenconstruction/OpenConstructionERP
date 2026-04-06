@@ -498,7 +498,7 @@ export function EmptyBOQOnboarding({
               </div>
 
               {/* Action button */}
-              {step.action && step.onClick && !step.complete && i === completedCount && (
+              {step.action && step.onClick && !step.complete && (
                 <Button
                   variant="primary"
                   size="sm"

@@ -28,6 +28,16 @@ export function AppLayout({ title, children }: AppLayoutProps) {
     document.title = title ? `${title} | OpenConstructionERP` : 'OpenConstructionERP';
   }, [title]);
 
+  // Lock body scroll when mobile sidebar is open
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [sidebarOpen]);
+
   // Auto-replay offline mutations when coming back online
   useOfflineSync();
 

@@ -178,11 +178,25 @@ export function BOQEditorPage() {
     queryClient.invalidateQueries({ queryKey: ['boq-activity', boqId] });
   }, [queryClient, boqId]);
 
+  const [newPositionId, setNewPositionId] = useState<string | null>(null);
+
   const addMutation = useMutation({
     mutationFn: (data: CreatePositionData) => boqApi.addPosition(data),
     onSuccess: (addedPosition) => {
       invalidateAll();
-      addToast({ type: 'success', title: t('boq.position_added', { defaultValue: 'Position added' }) });
+      // Highlight new position and scroll to it
+      setNewPositionId(addedPosition.id);
+      setTimeout(() => setNewPositionId(null), 3000);
+      // Scroll grid to new position after data refetches
+      setTimeout(() => {
+        const gridApi = boqGridRef.current;
+        if (gridApi) {
+          try {
+            (gridApi as unknown as { clearSelection: () => void }).clearSelection();
+          } catch { /* ignore */ }
+        }
+      }, 500);
+      addToast({ type: 'success', title: t('boq.position_added', { defaultValue: 'Position added' }), message: t('boq.click_to_edit', { defaultValue: 'Click any cell to edit' }) });
       // Record undo entry for the newly added position (skip if triggered by undo/redo)
       if (!isUndoRedoInProgressRef.current) {
         undoStackRef.current.push({
@@ -1951,6 +1965,7 @@ export function BOQEditorPage() {
       <Breadcrumb
         className="mb-5"
         items={[
+          ...(project ? [{ label: project.name, to: `/projects/${project.id}` }] : []),
           { label: t('boq.title', 'Bill of Quantities'), to: '/boq' },
           { label: boq.name },
         ]}
@@ -2043,7 +2058,7 @@ export function BOQEditorPage() {
           onReorderPositions={handleReorderPositions}
           collapsedSections={collapsedSections}
           onToggleSection={toggleSection}
-          highlightPositionId={undefined}
+          highlightPositionId={newPositionId ?? undefined}
           currencySymbol={currencySymbol}
           currencyCode={currencyCode}
           locale={locale}
