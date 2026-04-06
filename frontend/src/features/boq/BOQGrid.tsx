@@ -276,6 +276,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   anomalyMap,
   onApplyAnomalySuggestion,
   onSaveAsAssembly,
+  customColumns,
 }, ref) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -397,7 +398,6 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   );
 
   /* ── Column defs (standard + custom) ─────────────────────────────── */
-  const customColumns = (props as BOQGridProps).customColumns;
   const columnDefs = useMemo(() => {
     const defs = getColumnDefs({ currencySymbol, currencyCode, locale, fmt, t });
     // Override ordinal column with custom renderer
