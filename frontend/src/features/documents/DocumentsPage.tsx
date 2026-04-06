@@ -13,7 +13,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useUploadQueueStore } from '@/stores/useUploadQueueStore';
 import { useNavigate } from 'react-router-dom';
-import { listSessions, type SavedSession } from '../cad-explorer/api';
+import { listSessions } from '../cad-explorer/api';
 
 /* ── Types ───────────────────────────────────────────────────────────── */
 

@@ -13,7 +13,7 @@ import {
   Table2, BarChart3, PieChart, FileSpreadsheet, Database, Filter,
   ArrowUpDown, ChevronDown, ChevronRight, ChevronLeft, Layers, X, Save,
   Download as DownloadIcon, Columns3, Search as SearchIcon,
-  Upload, FileUp, Loader2, CheckCircle2, Sparkles, Settings, AlertCircle, FolderOpen,
+  Upload, FileUp, Loader2, CheckCircle2, Settings, AlertCircle, FolderOpen,
   Trash2 as TrashIcon, Clock, FileText, ExternalLink,
 } from 'lucide-react';
 import { Button, Card, Badge, Breadcrumb, EmptyState } from '@/shared/ui';
@@ -1078,7 +1078,7 @@ function CreateBOQFromPivotModal({ open, onClose, groups, groupByColumns, aggCol
 
   // Auto-select first BOQ
   React.useEffect(() => {
-    if (boqs && boqs.length > 0 && !boqId) setBoqId(boqs[0].id);
+    if (boqs && boqs.length > 0 && !boqId) setBoqId(boqs[0]!.id);
   }, [boqs, boqId]);
 
   // Detect quantity column from aggregation results
@@ -1248,7 +1248,6 @@ function CreateBOQFromPivotModal({ open, onClose, groups, groupByColumns, aggCol
 
 function ConverterStatus() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { data } = useQuery({
     queryKey: ['cad-converters-status'],
     queryFn: () => apiGet<{ converters: { id: string; name: string; extensions: string[]; installed: boolean }[] }>('/v1/takeoff/converters'),
@@ -1511,9 +1510,10 @@ function UploadConvertZone({
   );
 }
 
-/* ── Saved Sessions List ────────────────────────────────────────────────── */
+/* ── Saved Sessions List (integrated into landing page) ─────────────── */
+/* Kept as reference — session list is now rendered directly in CadDataExplorerPage */
 
-function SavedSessionsList({ onOpen }: { onOpen: (sessionId: string) => void }) {
+function _SavedSessionsList({ onOpen }: { onOpen: (sessionId: string) => void }) {
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
   const queryClient = useQueryClient();

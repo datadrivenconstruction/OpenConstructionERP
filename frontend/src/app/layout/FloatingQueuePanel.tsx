@@ -30,7 +30,7 @@ export function FloatingQueuePanel() {
 
   const activeTasks = tasks.filter((t) => t.status === 'processing' || t.status === 'queued');
   const completedTasks = tasks.filter((t) => t.status === 'completed');
-  const _errorTasks = tasks.filter((t) => t.status === 'error'); // reserved for future error panel
+  // Error tasks available via: tasks.filter(t => t.status === 'error')
 
   // Don't render if no tasks at all
   if (tasks.length === 0) return null;
