@@ -1147,7 +1147,7 @@ export function BOQEditorPage() {
       // Recalculate position unit_rate = sum(resource totals) / position quantity
       let resourceTotal = 0;
       for (const r of resources) {
-        resourceTotal += ((r.quantity as number) ?? 0) * ((r.unit_rate as number) ?? 0);
+        resourceTotal += (r.total as number) ?? (((r.quantity as number) ?? 0) * ((r.unit_rate as number) ?? 0));
       }
       const posQty = pos.quantity || 1;
       const derivedUnitRate = Math.round((resourceTotal / posQty) * 10000) / 10000;
