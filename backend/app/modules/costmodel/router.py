@@ -441,9 +441,9 @@ async def run_monte_carlo(
         "min": results[0],
         "max": results[-1],
         "mean": round(mean, 2),
-        "p50": results[int(n * 0.50)],
-        "p80": results[int(n * 0.80)],
-        "p95": results[int(n * 0.95)],
+        "p50": results[min(int(n * 0.50), n - 1)],
+        "p80": results[min(int(n * 0.80), n - 1)],
+        "p95": results[min(int(n * 0.95), n - 1)],
         "std_dev": round((sum((r - mean) ** 2 for r in results) / n) ** 0.5, 2),
         "histogram": histogram,
     }
