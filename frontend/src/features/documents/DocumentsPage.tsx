@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Upload, FileText, Image, FileSpreadsheet, File, Trash2, Download,
   Search, X, Loader2, FolderOpen, ChevronDown, HardDrive, Eye,
-  CheckCircle2, XCircle, MoreHorizontal, Pencil, Tag,
+  CheckCircle2, XCircle, MoreHorizontal, Pencil, Tag, Ruler,
 } from 'lucide-react';
 import { Card, Button, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
 import { apiGet, apiDelete, apiPatch } from '@/shared/lib/api';
@@ -837,6 +837,16 @@ export function DocumentsPage() {
                               >
                                 <Eye size={14} className="text-content-tertiary" />
                                 {t('documents.preview', { defaultValue: 'Preview' })}
+                              </button>
+                            )}
+                            {previewKind === 'pdf' && (
+                              <button
+                                role="menuitem"
+                                onClick={() => { setOpenMenuId(null); navigate(`/takeoff?doc=${doc.id}&name=${encodeURIComponent(doc.name)}`); }}
+                                className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
+                              >
+                                <Ruler size={14} className="text-oe-blue" />
+                                {t('documents.open_in_takeoff', { defaultValue: 'Measure & Takeoff' })}
                               </button>
                             )}
                             <a

@@ -36,8 +36,10 @@ import {
   Type,
   Square,
   Highlighter,
+  Loader2,
 } from 'lucide-react';
 import { useToastStore } from '../../stores/useToastStore';
+import { useProjectContextStore } from '../../stores/useProjectContextStore';
 import { boqApi, type CreatePositionData } from '../../features/boq/api';
 import { apiGet } from '../../shared/lib/api';
 import { useMeasurementPersistence } from './useMeasurementPersistence';
@@ -229,14 +231,16 @@ export default function TakeoffViewerModule() {
   const [isExporting, setIsExporting] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
-  // Document persistence
+  // Document persistence + server sync
   const [fileName, setFileName] = useState<string | null>(null);
-  const { hasPersistedData, saveNow, clearPersisted } = useMeasurementPersistence({
+  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+  const { hasPersistedData, saveNow, clearPersisted, syncing, syncedToServer } = useMeasurementPersistence({
     fileName,
     measurements,
     setMeasurements: (ms) => setMeasurements(ms),
     scale,
     setScale: (s) => setScale(s),
+    projectId: activeProjectId,
   });
 
   /* ── Load PDF ────────────────────────────────────────────────────── */
@@ -1856,12 +1860,22 @@ export default function TakeoffViewerModule() {
                 </p>
                 {fileName && (
                   <div className="flex items-center gap-1.5">
-                    {hasPersistedData && (
-                      <span className="text-[10px] text-semantic-success flex items-center gap-0.5">
-                        <HardDriveDownload className="h-3 w-3" />
-                        {t('takeoff_viewer.saved', { defaultValue: 'Saved' })}
+                    {syncing ? (
+                      <span className="text-[10px] text-oe-blue flex items-center gap-0.5 animate-pulse">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        {t('takeoff_viewer.syncing', { defaultValue: 'Syncing...' })}
                       </span>
-                    )}
+                    ) : syncedToServer ? (
+                      <span className="text-[10px] text-semantic-success flex items-center gap-0.5">
+                        <Cloud className="h-3 w-3" />
+                        {t('takeoff_viewer.synced', { defaultValue: 'Synced' })}
+                      </span>
+                    ) : hasPersistedData ? (
+                      <span className="text-[10px] text-amber-500 flex items-center gap-0.5">
+                        <HardDriveDownload className="h-3 w-3" />
+                        {t('takeoff_viewer.local_only', { defaultValue: 'Local' })}
+                      </span>
+                    ) : null}
                     <button
                       onClick={saveNow}
                       className="p-1 rounded hover:bg-surface-secondary text-content-tertiary transition-colors"
