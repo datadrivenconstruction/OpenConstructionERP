@@ -1204,115 +1204,77 @@ function UploadConvertZone({
   }, [addToast, t, onSessionReady, addQueueTask, updateQueueTask]);
 
   return (
-    <div className="space-y-6">
-      {/* Hero section */}
-      <div className="text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-oe-blue-subtle">
-          <Database size={28} className="text-oe-blue" />
+    <div className="space-y-5">
+      {/* Compact header + upload zone in one card */}
+      <Card className="overflow-hidden">
+        <div
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={(e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
+          onClick={() => !uploading && inputRef.current?.click()}
+          className={`p-6 cursor-pointer transition-all ${
+            uploading ? 'pointer-events-none bg-oe-blue-subtle/10' :
+            dragOver ? 'bg-oe-blue-subtle/20 scale-[1.005]' :
+            'hover:bg-surface-secondary/30'
+          }`}
+        >
+          <input ref={inputRef} type="file" accept={CAD_ACCEPT} onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ''; }} className="hidden" />
+
+          {uploading ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-4">
+                <Loader2 size={20} className="text-oe-blue animate-spin shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-content-primary truncate">{t('explorer.converting', { defaultValue: 'Converting {{name}}...', name: fileName })}</p>
+                  <p className="text-2xs text-content-tertiary">{remaining > 0 ? `~${remaining}s remaining` : 'Finalizing...'}</p>
+                </div>
+                <span className="text-lg font-bold text-oe-blue tabular-nums shrink-0">{Math.round(progressPct)}%</span>
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-secondary">
+                <div className="h-full rounded-full bg-oe-blue transition-all duration-1000" style={{ width: `${progressPct}%` }} />
+              </div>
+            </div>
+          ) : done ? (
+            <div className="flex items-center justify-center gap-2 py-2">
+              <CheckCircle2 size={18} className="text-green-500" />
+              <p className="text-sm font-medium text-green-600">{t('explorer.done', { defaultValue: 'Conversion complete! Loading...' })}</p>
+            </div>
+          ) : (
+            <div className="flex items-center gap-5">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-oe-blue-subtle shrink-0">
+                <FileUp size={24} className="text-oe-blue" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-content-primary">{t('explorer.drop_cad', { defaultValue: 'Drop a CAD/BIM file to start exploring' })}</p>
+                <p className="text-xs text-content-tertiary mt-0.5">{t('explorer.or_click', { defaultValue: 'or click to browse — extract elements into a data table with pivot, charts, and statistics' })}</p>
+                <div className="flex items-center gap-1.5 mt-2">
+                  {CAD_FORMATS.map((fmt) => (
+                    <span key={fmt} className={`px-1.5 py-0.5 rounded text-2xs font-bold ${FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600'}`}>.{fmt.toLowerCase()}</span>
+                  ))}
+                  <span className="text-2xs text-content-quaternary ml-2">{t('explorer.max_size', { defaultValue: 'max 100 MB' })}</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-        <h2 className="text-xl font-bold text-content-primary">
-          {t('explorer.hero_title', { defaultValue: 'CAD-BIM Data Explorer' })}
-        </h2>
-        <p className="mt-2 text-sm text-content-secondary max-w-lg mx-auto">
-          {t('explorer.hero_desc', {
-            defaultValue: 'Upload a 3D model or drawing to extract all elements into a searchable, filterable, pivotable data table — like a spreadsheet for your BIM data.',
-          })}
-        </p>
-      </div>
+      </Card>
 
-      {/* Upload zone */}
-      <div
-        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={(e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
-        onClick={() => !uploading && inputRef.current?.click()}
-        className={`relative border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all ${
-          uploading ? 'pointer-events-none border-oe-blue/40 bg-oe-blue-subtle/20' :
-          dragOver ? 'border-oe-blue bg-oe-blue-subtle/20 scale-[1.01]' :
-          'border-border-light hover:border-oe-blue/40 hover:bg-surface-secondary/30'
-        }`}
-      >
-        <input
-          ref={inputRef}
-          type="file"
-          accept={CAD_ACCEPT}
-          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ''; }}
-          className="hidden"
-        />
-
-        {uploading ? (
-          <div className="space-y-4">
-            <div className="flex items-center justify-center gap-3">
-              <Loader2 size={24} className="text-oe-blue animate-spin" />
-              <div className="text-left">
-                <p className="text-sm font-semibold text-content-primary">
-                  {t('explorer.converting', { defaultValue: 'Converting {{name}}...', name: fileName })}
-                </p>
-                <p className="text-xs text-content-tertiary">
-                  {remaining > 0
-                    ? t('explorer.remaining', { defaultValue: '~{{time}}s remaining — extracting elements and detecting columns', time: remaining })
-                    : t('explorer.finalizing', { defaultValue: 'Finalizing...' })}
-                </p>
-              </div>
-              <div className="text-right shrink-0">
-                <span className="text-lg font-bold text-oe-blue tabular-nums">{Math.round(progressPct)}%</span>
-                <p className="text-2xs text-content-quaternary tabular-nums">{elapsed}s / ~{Math.round(estimatedTotal)}s</p>
-              </div>
-            </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-surface-secondary">
-              <div
-                className="h-full rounded-full bg-oe-blue transition-all duration-1000 ease-linear"
-                style={{ width: `${progressPct}%` }}
-              />
-            </div>
-          </div>
-        ) : done ? (
-          <div className="flex items-center justify-center gap-3">
-            <CheckCircle2 size={24} className="text-green-500" />
-            <p className="text-sm font-semibold text-green-600">
-              {t('explorer.done', { defaultValue: 'Conversion complete! Loading explorer...' })}
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <FileUp size={40} className="mx-auto text-content-tertiary" />
-            <div>
-              <p className="text-sm font-medium text-content-primary">
-                {t('explorer.drop_cad', { defaultValue: 'Drop your CAD/BIM file here' })}
-              </p>
-              <p className="text-xs text-content-tertiary mt-1">
-                {t('explorer.or_click', { defaultValue: 'or click to browse — max 100 MB' })}
-              </p>
-            </div>
-            <div className="flex items-center justify-center gap-2 mt-3">
-              {CAD_FORMATS.map((fmt) => (
-                <span key={fmt} className={`px-2 py-0.5 rounded-md text-2xs font-bold ${FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600'}`}>
-                  .{fmt.toLowerCase()}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Features grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      {/* What you get — compact feature pills */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="text-2xs font-semibold text-content-tertiary uppercase tracking-wide">{t('explorer.features', { defaultValue: 'Features' })}:</span>
         {[
-          { icon: Table2, title: t('explorer.feat_table', { defaultValue: 'Data Table' }), desc: t('explorer.feat_table_desc', { defaultValue: 'Sort, filter, paginate all elements' }) },
-          { icon: Layers, title: t('explorer.feat_pivot', { defaultValue: 'Pivot & Group' }), desc: t('explorer.feat_pivot_desc', { defaultValue: 'Group by any column, aggregate sums' }) },
-          { icon: BarChart3, title: t('explorer.feat_charts', { defaultValue: 'Visualize' }), desc: t('explorer.feat_charts_desc', { defaultValue: 'Bar and pie charts by category' }) },
-          { icon: Sparkles, title: t('explorer.feat_describe', { defaultValue: 'Statistics' }), desc: t('explorer.feat_describe_desc', { defaultValue: 'Column stats like df.describe()' }) },
-        ].map(({ icon: Icon, title, desc }) => (
-          <Card key={title} className="p-4 text-center">
-            <Icon size={20} className="mx-auto text-oe-blue mb-2" />
-            <p className="text-xs font-semibold text-content-primary">{title}</p>
-            <p className="text-2xs text-content-tertiary mt-0.5">{desc}</p>
-          </Card>
+          { icon: Table2, label: t('explorer.feat_table', { defaultValue: 'Data Table' }) },
+          { icon: Layers, label: t('explorer.feat_pivot', { defaultValue: 'Pivot & Group' }) },
+          { icon: BarChart3, label: t('explorer.feat_charts', { defaultValue: 'Charts' }) },
+          { icon: Sparkles, label: t('explorer.feat_describe', { defaultValue: 'Statistics' }) },
+          { icon: DownloadIcon, label: t('explorer.feat_export', { defaultValue: 'CSV Export' }) },
+          { icon: SearchIcon, label: t('explorer.feat_search', { defaultValue: 'Search' }) },
+        ].map(({ icon: Icon, label }) => (
+          <span key={label} className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-surface-secondary text-2xs font-medium text-content-secondary">
+            <Icon size={11} className="text-oe-blue" /> {label}
+          </span>
         ))}
       </div>
-
-      {/* Converter status */}
-      <ConverterStatus />
     </div>
   );
 }
