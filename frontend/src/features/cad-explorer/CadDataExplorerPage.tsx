@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { Button, Card, Badge, Breadcrumb, EmptyState } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
+import { useUploadQueueStore } from '@/stores/useUploadQueueStore';
 import {
   describeSession,
   valueCounts,
@@ -799,6 +800,9 @@ function UploadConvertZone({
   const progressPct = uploading ? Math.min(95, (elapsed / estimatedTotal) * 100) : done ? 100 : 0;
   const remaining = Math.max(0, Math.round(estimatedTotal - elapsed));
 
+  const addQueueTask = useUploadQueueStore((s) => s.addTask);
+  const updateQueueTask = useUploadQueueStore((s) => s.updateTask);
+
   const handleFile = useCallback(async (file: File) => {
     const ext = file.name.split('.').pop()?.toLowerCase() || '';
     if (!['rvt', 'ifc', 'dwg', 'dgn', 'dxf', 'rfa'].includes(ext)) {
@@ -810,17 +814,38 @@ function UploadConvertZone({
       return;
     }
 
+    const taskId = crypto.randomUUID();
+    const sizeMB = file.size / (1024 * 1024);
+    const estimatedSec = Math.max(30, (sizeMB / 50) * 60);
+
     setFileName(file.name);
-    setFileSizeMB(file.size / (1024 * 1024));
+    setFileSizeMB(sizeMB);
     setUploading(true);
     setElapsed(0);
     setDone(false);
 
+    // Add to global queue (visible in header even if user navigates away)
+    addQueueTask({
+      id: taskId,
+      type: 'cad_convert',
+      filename: file.name,
+      status: 'processing',
+      progress: 0,
+      message: t('explorer.converting_msg', { defaultValue: 'Converting...' }),
+    });
+
     const start = Date.now();
-    elapsedRef.current = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 1000);
+    elapsedRef.current = setInterval(() => {
+      const sec = Math.floor((Date.now() - start) / 1000);
+      setElapsed(sec);
+      const pct = Math.min(95, (sec / estimatedSec) * 100);
+      updateQueueTask(taskId, {
+        progress: pct,
+        message: `${Math.round(pct)}% — ~${Math.max(0, Math.round(estimatedSec - sec))}s`,
+      });
+    }, 1000);
 
     try {
-      // Use the cadColumns API from the AI module
       const { useAuthStore } = await import('@/stores/useAuthStore');
       const token = useAuthStore.getState().accessToken;
       const form = new FormData();
@@ -846,24 +871,40 @@ function UploadConvertZone({
       setUploading(false);
       setDone(true);
 
+      updateQueueTask(taskId, {
+        status: 'completed',
+        progress: 100,
+        message: `${data.total_elements} elements`,
+        resultSessionId: data.session_id,
+        resultUrl: `/data-explorer?session=${data.session_id}`,
+        completedAt: Date.now(),
+      });
+
       addToast({
         type: 'success',
         title: t('explorer.conversion_complete', { defaultValue: 'Conversion complete' }),
         message: t('explorer.elements_detected', { defaultValue: '{{count}} elements detected', count: data.total_elements }),
       });
 
-      // Navigate to explorer with session
       setTimeout(() => onSessionReady(data.session_id), 500);
     } catch (err) {
       if (elapsedRef.current) clearInterval(elapsedRef.current);
       setUploading(false);
+
+      updateQueueTask(taskId, {
+        status: 'error',
+        progress: 0,
+        error: err instanceof Error ? err.message : 'Unknown error',
+        completedAt: Date.now(),
+      });
+
       addToast({
         type: 'error',
         title: t('explorer.conversion_failed', { defaultValue: 'Conversion failed' }),
         message: err instanceof Error ? err.message : 'Unknown error',
       });
     }
-  }, [addToast, t, onSessionReady]);
+  }, [addToast, t, onSessionReady, addQueueTask, updateQueueTask]);
 
   return (
     <div className="space-y-6">
