@@ -202,3 +202,55 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
     },
   ];
 }
+
+/* ── Custom column definitions from BOQ metadata ──────────────────────── */
+
+export interface CustomColumnDef {
+  name: string;
+  display_name: string;
+  column_type: 'text' | 'number' | 'date' | 'select';
+  options?: string[];
+  sort_order: number;
+}
+
+export function getCustomColumnDefs(customColumns: CustomColumnDef[]): ColDef[] {
+  return customColumns
+    .sort((a, b) => a.sort_order - b.sort_order)
+    .map((col) => {
+      const base: ColDef = {
+        headerName: col.display_name,
+        field: `_custom_${col.name}`,
+        colId: `custom_${col.name}`,
+        width: col.column_type === 'text' ? 140 : 100,
+        editable: (params) => !params.data?._isSection && !params.data?._isFooter,
+        cellClass: col.column_type === 'number' ? 'text-right tabular-nums text-xs' : 'text-xs',
+        headerClass: col.column_type === 'number' ? 'ag-right-aligned-header' : '',
+        valueGetter: (params) => {
+          const cf = params.data?.metadata?.custom_fields;
+          return cf?.[col.name] ?? '';
+        },
+        valueSetter: (params) => {
+          if (!params.data) return false;
+          if (!params.data.metadata) params.data.metadata = {};
+          if (!params.data.metadata.custom_fields) params.data.metadata.custom_fields = {};
+          params.data.metadata.custom_fields[col.name] = params.newValue;
+          return true;
+        },
+      };
+
+      if (col.column_type === 'number') {
+        base.cellEditor = 'agNumberCellEditor';
+        base.valueParser = (params) => {
+          const val = parseFloat(params.newValue);
+          return isNaN(val) ? '' : val;
+        };
+      } else if (col.column_type === 'select' && col.options?.length) {
+        base.cellEditor = 'agSelectCellEditor';
+        base.cellEditorParams = { values: ['', ...col.options] };
+      } else {
+        base.cellEditor = 'agTextCellEditor';
+      }
+
+      return base;
+    });
+}

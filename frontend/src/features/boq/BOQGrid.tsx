@@ -47,7 +47,7 @@ import {
   type CostAutocompleteItem,
   groupPositionsIntoSections,
 } from './api';
-import { getColumnDefs } from './grid/columnDefs';
+import { getColumnDefs, getCustomColumnDefs } from './grid/columnDefs';
 import {
   FormulaCellEditor,
   AutocompleteCellEditor,
@@ -233,6 +233,8 @@ export interface BOQGridProps {
   onApplyAnomalySuggestion?: (positionId: string, suggestedRate: number) => void;
   /** Save a BOQ position as a reusable assembly */
   onSaveAsAssembly?: (positionId: string) => void;
+  /** Custom column definitions from BOQ metadata */
+  customColumns?: import('./grid/columnDefs').CustomColumnDef[];
 }
 
 /** Imperative handle exposed by BOQGrid for external control (e.g. clearing selection). */
@@ -394,7 +396,8 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
      onDuplicatePosition, showContextMenu, anomalyMap, onApplyAnomalySuggestion],
   );
 
-  /* ── Column defs (stable — only depends on translation function) ── */
+  /* ── Column defs (standard + custom) ─────────────────────────────── */
+  const customColumns = (props as BOQGridProps).customColumns;
   const columnDefs = useMemo(() => {
     const defs = getColumnDefs({ currencySymbol, currencyCode, locale, fmt, t });
     // Override ordinal column with custom renderer
@@ -406,8 +409,18 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
         return { component: OrdinalCellRenderer };
       };
     }
+    // Insert custom columns before _actions column
+    if (customColumns && customColumns.length > 0) {
+      const actionsIdx = defs.findIndex((c) => c.field === '_actions');
+      const customDefs = getCustomColumnDefs(customColumns);
+      if (actionsIdx >= 0) {
+        defs.splice(actionsIdx, 0, ...customDefs);
+      } else {
+        defs.push(...customDefs);
+      }
+    }
     return defs;
-  }, [currencySymbol, currencyCode, locale, fmt, t]);
+  }, [currencySymbol, currencyCode, locale, fmt, t, customColumns]);
 
   /* ── Helper: insert resource sub-rows after an expanded position ── */
   const insertResourceRows = useCallback((rows: GridRow[], pos: Position) => {
@@ -596,6 +609,16 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
           update.metadata = { ...meta, resources: scaled };
           update.unit_rate = derivedRate;
         }
+      }
+
+      // Handle custom column changes — store in metadata.custom_fields
+      if (field?.startsWith('_custom_')) {
+        const colName = field.replace('_custom_', '');
+        const meta = (data.metadata as Record<string, unknown>) ?? {};
+        const customFields = { ...((meta.custom_fields as Record<string, unknown>) ?? {}), [colName]: newValue };
+        const updatedMeta = { ...meta, custom_fields: customFields };
+        onUpdatePosition(data.id, { metadata: updatedMeta }, {});
+        return;
       }
 
       onUpdatePosition(data.id, update, old);

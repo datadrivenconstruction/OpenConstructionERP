@@ -3846,3 +3846,95 @@ async def get_cost_risk(
         histogram=histogram,
         risk_drivers=risk_drivers,
     )
+
+
+# ── Custom Column Definitions ────────────────────────────────────────────────
+
+
+@router.get(
+    "/boqs/{boq_id}/columns",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def list_custom_columns(
+    boq_id: uuid.UUID,
+    service: BOQService = Depends(_get_service),
+) -> list[dict]:
+    """List custom column definitions for a BOQ."""
+    boq = await service.get_boq(boq_id)
+    meta = boq.metadata_ if isinstance(boq.metadata_, dict) else {}
+    return meta.get("custom_columns", [])
+
+
+@router.post(
+    "/boqs/{boq_id}/columns",
+    status_code=201,
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def add_custom_column(
+    boq_id: uuid.UUID,
+    data: dict = Body(...),
+    service: BOQService = Depends(_get_service),
+) -> dict:
+    """Add a custom column definition to a BOQ.
+
+    Body: {"name": "supplier", "display_name": "Supplier", "column_type": "text", "options": []}
+    """
+    name = data.get("name", "").strip().lower().replace(" ", "_")
+    if not name or not name.isidentifier():
+        raise HTTPException(400, "Invalid column name — use alphanumeric + underscore")
+
+    reserved = {"ordinal", "description", "unit", "quantity", "unit_rate", "total", "id", "parent_id"}
+    if name in reserved:
+        raise HTTPException(400, f"Column name '{name}' is reserved")
+
+    display_name = data.get("display_name", name.replace("_", " ").title())
+    column_type = data.get("column_type", "text")
+    if column_type not in ("text", "number", "date", "select"):
+        raise HTTPException(400, "column_type must be: text, number, date, or select")
+
+    options = data.get("options", [])
+
+    boq = await service.get_boq(boq_id)
+    meta = dict(boq.metadata_) if isinstance(boq.metadata_, dict) else {}
+    columns: list[dict] = meta.get("custom_columns", [])
+
+    # Check uniqueness
+    if any(c["name"] == name for c in columns):
+        raise HTTPException(400, f"Column '{name}' already exists")
+
+    col_def = {
+        "name": name,
+        "display_name": display_name,
+        "column_type": column_type,
+        "options": options,
+        "sort_order": len(columns),
+    }
+    columns.append(col_def)
+    meta["custom_columns"] = columns
+
+    boq.metadata_ = meta
+    await service.session.flush()
+    await service.session.commit()
+
+    return col_def
+
+
+@router.delete(
+    "/boqs/{boq_id}/columns/{column_name}",
+    status_code=204,
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def delete_custom_column(
+    boq_id: uuid.UUID,
+    column_name: str,
+    service: BOQService = Depends(_get_service),
+) -> None:
+    """Remove a custom column definition (data in positions preserved)."""
+    boq = await service.get_boq(boq_id)
+    meta = dict(boq.metadata_) if isinstance(boq.metadata_, dict) else {}
+    columns: list[dict] = meta.get("custom_columns", [])
+    meta["custom_columns"] = [c for c in columns if c["name"] != column_name]
+
+    boq.metadata_ = meta
+    await service.session.flush()
+    await service.session.commit()

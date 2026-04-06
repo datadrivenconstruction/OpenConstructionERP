@@ -111,6 +111,13 @@ export function BOQEditorPage() {
   const currencySymbol = useMemo(() => getCurrencySymbol(project?.currency), [project?.currency]);
   const currencyCode = useMemo(() => getCurrencyCode(project?.currency), [project?.currency]);
   const locale = useMemo(() => getLocaleForRegion(project?.region), [project?.region]);
+
+  // Custom columns from BOQ metadata
+  const boqCustomColumns = useMemo(() => {
+    const meta = boq?.metadata ?? (boq as unknown as Record<string, unknown>)?.metadata_;
+    if (!meta || typeof meta !== 'object') return [];
+    return (meta as Record<string, unknown>).custom_columns as import('./grid/columnDefs').CustomColumnDef[] ?? [];
+  }, [boq]);
   const fmt = useMemo(
     () => createFormatter(locale),
     [locale],
@@ -2054,6 +2061,7 @@ export function BOQEditorPage() {
           anomalyMap={anomalyMap}
           onApplyAnomalySuggestion={handleApplyAnomalySuggestion}
           onSaveAsAssembly={handleSaveAsAssembly}
+          customColumns={boqCustomColumns}
         /></div>
       ) : (
         <div className="rounded-xl border border-border-light bg-surface-elevated shadow-xs overflow-hidden p-8">
