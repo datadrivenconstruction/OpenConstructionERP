@@ -177,7 +177,7 @@ function ShimmerRow() {
   );
 }
 
-function LoadingState({ isCad, fileName }: { isCad?: boolean; fileName?: string }) {
+function LoadingState({ isCad, fileName, fileSizeMB }: { isCad?: boolean; fileName?: string; fileSizeMB?: number }) {
   const { t } = useTranslation();
   const [elapsed, setElapsed] = useState(0);
   useEffect(() => {
@@ -185,12 +185,23 @@ function LoadingState({ isCad, fileName }: { isCad?: boolean; fileName?: string 
     const timer = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Estimated progress for CAD: ~1 min per 50 MB, minimum 30s
+  const estimatedTotal = isCad && fileSizeMB ? Math.max(30, (fileSizeMB / 50) * 60) : 0;
+  const progressPct = estimatedTotal > 0 ? Math.min(95, (elapsed / estimatedTotal) * 100) : 0;
+  const remaining = estimatedTotal > 0 ? Math.max(0, Math.round(estimatedTotal - elapsed)) : 0;
+
   const title = isCad
     ? t('ai.converting_cad', { defaultValue: 'Converting CAD file...' })
     : t('ai.analyzing', { defaultValue: 'AI is analyzing your input...' });
-  const subtitle = isCad
-    ? t('ai.cad_processing_hint', { defaultValue: 'Extracting elements, detecting columns. This may take 30-60 seconds for large files.' })
-    : t('ai.generating', { defaultValue: 'Generating cost breakdown and quantities' });
+  const subtitle = isCad && estimatedTotal > 0
+    ? remaining > 0
+      ? t('ai.cad_progress_hint', { defaultValue: '~{{remaining}}s remaining — extracting elements and detecting columns', remaining })
+      : t('ai.cad_finalizing', { defaultValue: 'Finalizing extraction...' })
+    : isCad
+      ? t('ai.cad_processing_hint', { defaultValue: 'Extracting elements, detecting columns. This may take 30-60 seconds for large files.' })
+      : t('ai.generating', { defaultValue: 'Generating cost breakdown and quantities' });
+
   return (
     <div className="animate-card-in" style={{ animationDelay: '100ms' }}>
       <Card>
@@ -204,12 +215,22 @@ function LoadingState({ isCad, fileName }: { isCad?: boolean; fileName?: string 
               <p className="text-xs text-content-tertiary">{subtitle}</p>
             </div>
             <div className="text-xs text-content-quaternary tabular-nums shrink-0">
+              {isCad && estimatedTotal > 0 && (
+                <span className="font-semibold text-oe-blue mr-2">{Math.round(progressPct)}%</span>
+              )}
               {elapsed > 0 && `${elapsed}s`}
-              {fileName && <span className="ml-2 text-content-tertiary">{fileName}</span>}
+              {fileName && <span className="ml-2 text-content-tertiary truncate max-w-[120px] inline-block align-bottom">{fileName}</span>}
             </div>
           </div>
-          <div className="h-1 w-full overflow-hidden rounded-full bg-surface-secondary">
-            <div className="h-full w-1/3 animate-shimmer rounded-full bg-oe-blue opacity-60 bg-[length:200%_100%]" />
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-secondary">
+            {isCad && estimatedTotal > 0 ? (
+              <div
+                className="h-full rounded-full bg-oe-blue transition-all duration-1000 ease-linear"
+                style={{ width: `${progressPct}%` }}
+              />
+            ) : (
+              <div className="h-full w-1/3 animate-shimmer rounded-full bg-oe-blue opacity-60 bg-[length:200%_100%]" />
+            )}
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -2521,7 +2542,7 @@ export function QuickEstimatePage() {
       </Card>
 
       {/* Loading state */}
-      {isPending && <LoadingState isCad={isCadRoute} fileName={selectedFile?.name} />}
+      {isPending && <LoadingState isCad={isCadRoute} fileName={selectedFile?.name} fileSizeMB={selectedFile ? selectedFile.size / (1024 * 1024) : undefined} />}
 
       {/* Error state */}
       {isError && (
@@ -2571,9 +2592,20 @@ export function QuickEstimatePage() {
               <Badge variant="blue" size="sm">{cadColumnsData.total_elements.toLocaleString()} elements</Badge>
               <Badge variant="neutral" size="sm">{cadColumnsData.format.toUpperCase()}</Badge>
             </div>
-            <span className="text-2xs text-content-quaternary">
-              Extracted in {(cadColumnsData.duration_ms / 1000).toFixed(1)}s
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-2xs text-content-quaternary">
+                {t('ai.extracted_in', { defaultValue: 'Extracted in {{time}}s', time: (cadColumnsData.duration_ms / 1000).toFixed(1) })}
+              </span>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => navigate(`/data-explorer?session=${cadColumnsData.session_id}`)}
+                className="shrink-0 whitespace-nowrap"
+              >
+                <Database size={13} className="mr-1" />
+                <span>{t('ai.open_data_explorer', { defaultValue: 'Data Explorer' })}</span>
+              </Button>
+            </div>
           </div>
 
           {/* Preset Buttons */}

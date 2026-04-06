@@ -24,6 +24,11 @@ Routes:
 
     POST   /cad-group/create-boq               — create BOQ from grouped CAD QTO
     GET    /cad-group/export                    — export grouped QTO as Excel
+
+    POST   /cad-data/describe                   — DataFrame-like describe of CAD session
+    POST   /cad-data/value-counts               — value counts for a single column
+    GET    /cad-data/elements                    — paginated element table with sort/filter
+    POST   /cad-data/aggregate                   — group-by aggregation on CAD elements
 """
 
 import logging
@@ -33,6 +38,7 @@ import uuid as _uuid
 import zipfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from statistics import mean as _mean
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, status
@@ -1150,6 +1156,381 @@ async def export_cad_group(
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f'attachment; filename="{download_name}"'},
     )
+
+
+# ── CAD Data Explorer ────────────────────────────────────────────────────
+
+
+class CadDataDescribeRequest(BaseModel):
+    """Request body for the ``POST /cad-data/describe`` endpoint."""
+
+    session_id: str = Field(..., description="Session ID returned by /cad-columns")
+
+
+class CadDataValueCountsRequest(BaseModel):
+    """Request body for the ``POST /cad-data/value-counts`` endpoint."""
+
+    session_id: str = Field(..., description="Session ID returned by /cad-columns")
+    column: str = Field(..., description="Column name to count values for")
+    limit: int = Field(default=50, ge=1, le=500, description="Max number of distinct values")
+
+
+class CadDataAggregateRequest(BaseModel):
+    """Request body for the ``POST /cad-data/aggregate`` endpoint."""
+
+    session_id: str = Field(..., description="Session ID returned by /cad-columns")
+    group_by: list[str] = Field(..., min_length=1, description="Columns to group by")
+    aggregations: dict[str, str] = Field(
+        ...,
+        description=(
+            "Mapping of column -> aggregation function. "
+            "Supported: sum, avg, mean, min, max, count."
+        ),
+    )
+
+
+def _is_numeric(value: Any) -> bool:
+    """Return True if *value* can be converted to a float."""
+    if value is None:
+        return False
+    try:
+        float(value)
+        return True
+    except (ValueError, TypeError):
+        return False
+
+
+def _to_float(value: Any) -> float:
+    """Convert *value* to float, raising on failure."""
+    return float(value)
+
+
+def _collect_column_names(elements: list[dict]) -> list[str]:
+    """Return a stable list of all column names across *elements*."""
+    seen: set[str] = set()
+    columns: list[str] = []
+    for el in elements:
+        for k in el:
+            if k not in seen:
+                seen.add(k)
+                columns.append(k)
+    return columns
+
+
+@router.post(
+    "/cad-data/describe",
+    dependencies=[Depends(RequirePermission("takeoff.read"))],
+)
+async def cad_data_describe(
+    body: CadDataDescribeRequest,
+    db_session: SessionDep = None,  # type: ignore[assignment]
+) -> dict[str, Any]:
+    """Return a DataFrame-like describe of the CAD session data.
+
+    For each column, reports dtype, non-null count, unique count, and
+    summary statistics (min/max/mean/sum for numbers, top/top_freq for strings).
+    """
+    _cleanup_memory_sessions()
+
+    cad_session = await _get_cad_session(db_session, body.session_id)
+    if not cad_session:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                "Session not found or expired. "
+                "Please re-upload the CAD file via POST /cad-columns."
+            ),
+        )
+
+    elements: list[dict] = cad_session["elements"]
+    all_columns = _collect_column_names(elements)
+
+    columns_info: list[dict[str, Any]] = []
+    for col in all_columns:
+        values = [el.get(col) for el in elements]
+        non_null = [v for v in values if v is not None]
+        non_null_count = len(non_null)
+
+        # Determine if column is numeric
+        numeric_vals: list[float] = []
+        for v in non_null:
+            if _is_numeric(v):
+                numeric_vals.append(_to_float(v))
+
+        is_numeric_col = len(numeric_vals) > len(non_null) * 0.5 and numeric_vals
+
+        unique_vals = set(str(v) for v in non_null)
+        unique_count = len(unique_vals)
+
+        col_info: dict[str, Any] = {
+            "name": col,
+            "dtype": "number" if is_numeric_col else "string",
+            "non_null": non_null_count,
+            "unique": unique_count,
+        }
+
+        if is_numeric_col:
+            col_info["min"] = round(min(numeric_vals), 4)
+            col_info["max"] = round(max(numeric_vals), 4)
+            col_info["mean"] = round(_mean(numeric_vals), 4)
+            col_info["sum"] = round(sum(numeric_vals), 4)
+        else:
+            # Find the most common value
+            freq: dict[str, int] = {}
+            for v in non_null:
+                key = str(v)
+                freq[key] = freq.get(key, 0) + 1
+            if freq:
+                top_value = max(freq, key=freq.get)  # type: ignore[arg-type]
+                col_info["top"] = top_value
+                col_info["top_freq"] = freq[top_value]
+
+        columns_info.append(col_info)
+
+    return {
+        "filename": cad_session.get("filename", ""),
+        "total_elements": len(elements),
+        "total_columns": len(all_columns),
+        "columns": columns_info,
+    }
+
+
+@router.post(
+    "/cad-data/value-counts",
+    dependencies=[Depends(RequirePermission("takeoff.read"))],
+)
+async def cad_data_value_counts(
+    body: CadDataValueCountsRequest,
+    db_session: SessionDep = None,  # type: ignore[assignment]
+) -> dict[str, Any]:
+    """Return value counts for a single column, sorted by frequency descending."""
+    _cleanup_memory_sessions()
+
+    cad_session = await _get_cad_session(db_session, body.session_id)
+    if not cad_session:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                "Session not found or expired. "
+                "Please re-upload the CAD file via POST /cad-columns."
+            ),
+        )
+
+    elements: list[dict] = cad_session["elements"]
+
+    # Validate column exists
+    all_columns = _collect_column_names(elements)
+    if body.column not in all_columns:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown column: '{body.column}'. Available: {sorted(all_columns)}",
+        )
+
+    # Count values
+    freq: dict[str, int] = {}
+    for el in elements:
+        raw = el.get(body.column)
+        key = str(raw) if raw is not None else "(null)"
+        freq[key] = freq.get(key, 0) + 1
+
+    total = len(elements)
+    sorted_values = sorted(freq.items(), key=lambda kv: kv[1], reverse=True)
+
+    values = [
+        {
+            "value": val,
+            "count": cnt,
+            "percentage": round(cnt / total * 100, 1) if total else 0,
+        }
+        for val, cnt in sorted_values[: body.limit]
+    ]
+
+    return {
+        "column": body.column,
+        "total": total,
+        "values": values,
+    }
+
+
+@router.get(
+    "/cad-data/elements",
+    dependencies=[Depends(RequirePermission("takeoff.read"))],
+)
+async def cad_data_elements(
+    session_id: str = Query(..., description="Session ID from /cad-columns"),
+    offset: int = Query(default=0, ge=0, description="Number of rows to skip"),
+    limit: int = Query(default=100, ge=1, le=1000, description="Max rows to return"),
+    sort_by: str | None = Query(default=None, description="Column to sort by"),
+    sort_order: str = Query(default="asc", pattern="^(asc|desc)$", description="Sort direction"),
+    filter_column: str | None = Query(default=None, description="Column to filter on"),
+    filter_value: str | None = Query(default=None, description="Value to match (equality)"),
+    db_session: SessionDep = None,  # type: ignore[assignment]
+) -> dict[str, Any]:
+    """Return a paginated, sortable, filterable table of CAD elements."""
+    _cleanup_memory_sessions()
+
+    cad_session = await _get_cad_session(db_session, session_id)
+    if not cad_session:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                "Session not found or expired. "
+                "Please re-upload the CAD file via POST /cad-columns."
+            ),
+        )
+
+    elements: list[dict] = cad_session["elements"]
+    all_columns = _collect_column_names(elements)
+
+    # --- Filter ---
+    if filter_column and filter_value is not None:
+        if filter_column not in all_columns:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unknown filter column: '{filter_column}'. Available: {sorted(all_columns)}",
+            )
+        elements = [
+            el for el in elements
+            if str(el.get(filter_column, "")) == filter_value
+        ]
+
+    # --- Sort ---
+    if sort_by is not None:
+        if sort_by not in all_columns:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unknown sort column: '{sort_by}'. Available: {sorted(all_columns)}",
+            )
+        reverse = sort_order == "desc"
+
+        def _sort_key(el: dict) -> tuple:
+            v = el.get(sort_by)
+            if v is None:
+                # None sorts last regardless of direction
+                return (1, "")
+            if _is_numeric(v):
+                return (0, _to_float(v))
+            return (0, str(v).lower())
+
+        elements = sorted(elements, key=_sort_key, reverse=reverse)
+
+    total = len(elements)
+    page = elements[offset : offset + limit]
+
+    return {
+        "total": total,
+        "offset": offset,
+        "limit": limit,
+        "columns": all_columns,
+        "rows": page,
+    }
+
+
+_SUPPORTED_AGG_FUNCS = {"sum", "avg", "mean", "min", "max", "count"}
+
+
+@router.post(
+    "/cad-data/aggregate",
+    dependencies=[Depends(RequirePermission("takeoff.read"))],
+)
+async def cad_data_aggregate(
+    body: CadDataAggregateRequest,
+    db_session: SessionDep = None,  # type: ignore[assignment]
+) -> dict[str, Any]:
+    """Aggregate CAD element data by grouping columns.
+
+    Supported aggregation functions: sum, avg (alias: mean), min, max, count.
+    ``count`` ignores the column values and counts elements in each group.
+    """
+    _cleanup_memory_sessions()
+
+    cad_session = await _get_cad_session(db_session, body.session_id)
+    if not cad_session:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                "Session not found or expired. "
+                "Please re-upload the CAD file via POST /cad-columns."
+            ),
+        )
+
+    elements: list[dict] = cad_session["elements"]
+    all_columns_set: set[str] = set()
+    for el in elements:
+        all_columns_set.update(el.keys())
+
+    # Validate group_by columns
+    missing_group = [c for c in body.group_by if c not in all_columns_set]
+    if missing_group:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown grouping column(s): {missing_group}. Available: {sorted(all_columns_set)}",
+        )
+
+    # Validate aggregation specs
+    for col, func in body.aggregations.items():
+        func_lower = func.lower()
+        if func_lower not in _SUPPORTED_AGG_FUNCS:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    f"Unsupported aggregation function '{func}' for column '{col}'. "
+                    f"Supported: {sorted(_SUPPORTED_AGG_FUNCS)}"
+                ),
+            )
+        if func_lower != "count" and col not in all_columns_set:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Unknown aggregation column: '{col}'. Available: {sorted(all_columns_set)}",
+            )
+
+    # --- Build groups ---
+    groups_map: dict[tuple, list[dict]] = {}
+    for el in elements:
+        key = tuple(str(el.get(c, "")) for c in body.group_by)
+        groups_map.setdefault(key, []).append(el)
+
+    def _aggregate(vals: list[dict], col: str, func: str) -> float:
+        func = func.lower()
+        if func == "count":
+            return len(vals)
+        numeric = []
+        for el in vals:
+            v = el.get(col)
+            if _is_numeric(v):
+                numeric.append(_to_float(v))
+        if not numeric:
+            return 0.0
+        if func == "sum":
+            return round(sum(numeric), 4)
+        if func in ("avg", "mean"):
+            return round(_mean(numeric), 4)
+        if func == "min":
+            return round(min(numeric), 4)
+        if func == "max":
+            return round(max(numeric), 4)
+        return 0.0
+
+    result_groups: list[dict[str, Any]] = []
+    for key_tuple, group_elements in groups_map.items():
+        key_dict = {c: v for c, v in zip(body.group_by, key_tuple)}
+        results: dict[str, float] = {}
+        for col, func in body.aggregations.items():
+            results[col] = _aggregate(group_elements, col, func)
+        result_groups.append({"key": key_dict, "results": results})
+
+    # Sort groups by first group_by column for stable output
+    result_groups.sort(key=lambda g: tuple(g["key"].get(c, "") for c in body.group_by))
+
+    # --- Compute totals across all elements ---
+    totals: dict[str, float] = {}
+    for col, func in body.aggregations.items():
+        totals[col] = _aggregate(elements, col, func)
+
+    return {
+        "groups": result_groups,
+        "totals": totals,
+    }
 
 
 MAX_PDF_SIZE = 50 * 1024 * 1024  # 50 MB

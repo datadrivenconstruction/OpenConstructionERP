@@ -37,6 +37,9 @@ const SchedulePage = lazy(() =>
 const TakeoffPage = lazy(() =>
   import('@/features/takeoff/TakeoffPage').then((m) => ({ default: m.TakeoffPage }))
 );
+const CadDataExplorerPage = lazy(() =>
+  import('@/features/cad-explorer/CadDataExplorerPage').then((m) => ({ default: m.CadDataExplorerPage }))
+);
 const TenderingPage = lazy(() =>
   import('@/features/tendering/TenderingPage').then((m) => ({ default: m.TenderingPage }))
 );
@@ -234,6 +237,7 @@ export default function App() {
         <Route path="/ai-estimate" element={<P title="AI Quick Estimate"><QuickEstimatePage /></P>} />
         <Route path="/advisor" element={<P title="AI Cost Advisor"><AdvisorPage /></P>} />
         <Route path="/cad-takeoff" element={<P title="CAD/BIM Takeoff"><QuickEstimatePage /></P>} />
+        <Route path="/data-explorer" element={<P title="Data Explorer"><CadDataExplorerPage /></P>} />
 
         <Route path="/projects" element={<P title="Projects"><ProjectsPage /></P>} />
         <Route path="/projects/new" element={<P title="New Project"><CreateProjectPage /></P>} />
