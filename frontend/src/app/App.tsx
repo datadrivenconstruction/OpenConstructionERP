@@ -237,7 +237,7 @@ export default function App() {
 
         <Route path="/ai-estimate" element={<P title="AI Quick Estimate"><QuickEstimatePage /></P>} />
         <Route path="/advisor" element={<P title="AI Cost Advisor"><AdvisorPage /></P>} />
-        <Route path="/cad-takeoff" element={<P title="CAD/BIM Takeoff"><QuickEstimatePage /></P>} />
+        <Route path="/cad-takeoff" element={<Navigate to="/data-explorer" replace />} />
         <Route path="/data-explorer" element={<P title="Data Explorer"><CadDataExplorerPage /></P>} />
 
         <Route path="/projects" element={<P title="Projects"><ProjectsPage /></P>} />

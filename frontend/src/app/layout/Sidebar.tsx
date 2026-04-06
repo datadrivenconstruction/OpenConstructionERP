@@ -90,7 +90,6 @@ const navGroups: NavGroup[] = [
     items: [
       { labelKey: 'nav.takeoff_overview', to: '/quantities', icon: Ruler },
       { labelKey: 'nav.pdf_measurements', to: '/takeoff?tab=measurements', icon: Ruler },
-      { labelKey: 'nav.cad_takeoff', to: '/cad-takeoff', icon: Box },
       { labelKey: 'nav.cad_bim_explorer', to: '/data-explorer', icon: TableProperties },
     ],
   },

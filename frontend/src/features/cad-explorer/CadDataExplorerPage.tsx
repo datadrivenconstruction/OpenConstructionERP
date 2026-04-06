@@ -452,6 +452,7 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [sortCol, setSortCol] = useState<string | null>(null);
   const [sortDesc, setSortDesc] = useState(true);
+  const [showCreateBOQ, setShowCreateBOQ] = useState(false);
 
   // Auto-run pivot on first render and when groupBy/aggCols change
   const runPivot = useCallback(async () => {
@@ -685,7 +686,7 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
             <span className="text-2xs text-content-quaternary">
               {sortedGroups.length} {t('explorer.groups', { defaultValue: 'groups' })} · {result.total_count.toLocaleString()} {t('explorer.elements', { defaultValue: 'elements' })} · {t('explorer.click_header_sort', { defaultValue: 'Click column headers to sort' })}
             </span>
-            <Button variant="secondary" size="sm" onClick={() => navigate(`/cad-takeoff`)} className="shrink-0 whitespace-nowrap">
+            <Button variant="primary" size="sm" onClick={() => setShowCreateBOQ(true)} className="shrink-0 whitespace-nowrap">
               {t('explorer.create_boq_from_pivot', { defaultValue: 'Create BOQ' })}
             </Button>
           </div>
@@ -695,6 +696,15 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
           <p className="text-sm text-content-tertiary">{t('explorer.no_groups', { defaultValue: 'No groups found. Try different columns.' })}</p>
         </Card>
       ) : null}
+
+      {/* Create BOQ Modal */}
+      <CreateBOQFromPivotModal
+        open={showCreateBOQ}
+        onClose={() => setShowCreateBOQ(false)}
+        groups={sortedGroups}
+        groupByColumns={groupBy}
+        aggColumns={aggCols}
+      />
     </div>
   );
 }
@@ -991,8 +1001,211 @@ function DescribeTab({ sessionId, describe }: { sessionId: string; describe: Des
 /* ── Converter Status (compact) ─────────────────────────────────────────── */
 
 import React, { useRef } from 'react';
-import { Upload, FileUp, Loader2, CheckCircle2, Sparkles, Settings, AlertCircle } from 'lucide-react';
-import { apiGet } from '@/shared/lib/api';
+import { Upload, FileUp, Loader2, CheckCircle2, Sparkles, Settings, AlertCircle, FolderOpen } from 'lucide-react';
+import { apiGet, apiPost } from '@/shared/lib/api';
+import { boqApi, type CreatePositionData } from '@/features/boq/api';
+
+/* ── Create BOQ from Pivot Modal ─────────────────────────────────────── */
+
+interface PivotBOQModalProps {
+  open: boolean;
+  onClose: () => void;
+  groups: AggregateGroup[];
+  groupByColumns: string[];
+  aggColumns: string[];
+}
+
+function CreateBOQFromPivotModal({ open, onClose, groups, groupByColumns, aggColumns }: PivotBOQModalProps) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const addToast = useToastStore((s) => s.addToast);
+  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+
+  const [projectId, setProjectId] = React.useState(activeProjectId ?? '');
+  const [boqId, setBoqId] = React.useState('');
+  const [creating, setCreating] = React.useState(false);
+
+  const { data: projects } = useQuery({
+    queryKey: ['projects'],
+    queryFn: () => apiGet<{ id: string; name: string }[]>('/v1/projects/'),
+    enabled: open,
+  });
+
+  const { data: boqs } = useQuery({
+    queryKey: ['boqs', projectId],
+    queryFn: () => apiGet<{ id: string; name: string; status: string }[]>(`/v1/boq/boqs/?project_id=${projectId}`),
+    enabled: open && !!projectId,
+  });
+
+  // Auto-select first BOQ
+  React.useEffect(() => {
+    if (boqs && boqs.length > 0 && !boqId) setBoqId(boqs[0].id);
+  }, [boqs, boqId]);
+
+  // Detect quantity column from aggregation results
+  const quantityCol = React.useMemo(() => {
+    const qtyKeywords = ['volume', 'area', 'length', 'quantity', 'count', 'weight', 'mass'];
+    for (const col of aggColumns) {
+      if (qtyKeywords.some((kw) => col.toLowerCase().includes(kw))) return col;
+    }
+    return aggColumns[0] || 'count';
+  }, [aggColumns]);
+
+  const unitGuess = React.useMemo(() => {
+    const col = quantityCol.toLowerCase();
+    if (col.includes('volume')) return 'm\u00B3';
+    if (col.includes('area')) return 'm\u00B2';
+    if (col.includes('length')) return 'm';
+    if (col.includes('weight') || col.includes('mass')) return 'kg';
+    return 'pcs';
+  }, [quantityCol]);
+
+  const handleCreate = React.useCallback(async () => {
+    if (!boqId || groups.length === 0) return;
+    setCreating(true);
+    try {
+      let ordinal = 1;
+      for (const group of groups) {
+        const description = groupByColumns
+          .map((col) => group.key[col] || '')
+          .filter(Boolean)
+          .join(' — ');
+
+        const quantity = group.results[`sum_${quantityCol}`]
+          ?? group.results[`avg_${quantityCol}`]
+          ?? group.count;
+
+        await boqApi.addPosition({
+          boq_id: boqId,
+          ordinal: String(ordinal).padStart(2, '0') + '.001',
+          description: description || `Group ${ordinal}`,
+          unit: unitGuess,
+          quantity: Math.round(quantity * 100) / 100,
+          unit_rate: 0,
+          classification: {},
+          source: 'cad_import',
+          metadata: {
+            cad_group_key: group.key,
+            cad_element_count: group.count,
+            cad_aggregations: group.results,
+          },
+        } as CreatePositionData);
+        ordinal++;
+      }
+
+      addToast({
+        type: 'success',
+        title: t('explorer.boq_created_success', { defaultValue: '{{count}} positions created in BOQ', count: groups.length }),
+      });
+      onClose();
+      navigate(`/boq/${boqId}`);
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: t('explorer.boq_create_failed', { defaultValue: 'Failed to create BOQ positions' }),
+        message: err instanceof Error ? err.message : 'Unknown error',
+      });
+    } finally {
+      setCreating(false);
+    }
+  }, [boqId, groups, groupByColumns, quantityCol, unitGuess, addToast, onClose, navigate, t]);
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={onClose} />
+      <div className="relative w-full max-w-lg mx-4 rounded-2xl bg-surface-elevated border border-border-light shadow-2xl animate-fade-in">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 pt-6 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-primary/10">
+              <Table2 size={20} className="text-accent-primary" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-content-primary">
+                {t('explorer.create_boq_title', { defaultValue: 'Create BOQ from Pivot' })}
+              </h2>
+              <p className="text-xs text-content-tertiary">
+                {t('explorer.create_boq_subtitle', { defaultValue: '{{count}} groups will become BOQ positions', count: groups.length })}
+              </p>
+            </div>
+          </div>
+          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-hover transition-colors">
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 pb-6 space-y-4">
+          {/* Project selector */}
+          <div>
+            <label className="text-xs font-medium text-content-secondary mb-1.5 flex items-center gap-1.5">
+              <FolderOpen size={12} />
+              {t('common.project', { defaultValue: 'Project' })}
+            </label>
+            <select
+              value={projectId}
+              onChange={(e) => { setProjectId(e.target.value); setBoqId(''); }}
+              className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+            >
+              <option value="">{t('projects.select_project', { defaultValue: 'Select project...' })}</option>
+              {projects?.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </div>
+
+          {/* BOQ selector */}
+          {projectId && (
+            <div>
+              <label className="text-xs font-medium text-content-secondary mb-1.5 flex items-center gap-1.5">
+                <Table2 size={12} />
+                {t('boq.title', { defaultValue: 'Bill of Quantities' })}
+              </label>
+              <select
+                value={boqId}
+                onChange={(e) => setBoqId(e.target.value)}
+                className="h-10 w-full appearance-none rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
+              >
+                <option value="">{t('boq.select_boq', { defaultValue: 'Select BOQ...' })}</option>
+                {boqs?.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+              </select>
+            </div>
+          )}
+
+          {/* Preview */}
+          <div className="rounded-lg border border-border-light bg-surface-secondary/30 p-3 max-h-40 overflow-y-auto">
+            <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider mb-2">
+              {t('explorer.positions_preview', { defaultValue: 'Positions Preview' })}
+            </p>
+            <div className="space-y-1">
+              {groups.slice(0, 8).map((g, i) => {
+                const desc = groupByColumns.map((col) => g.key[col] || '').filter(Boolean).join(' — ');
+                const qty = g.results[`sum_${quantityCol}`] ?? g.results[`avg_${quantityCol}`] ?? g.count;
+                return (
+                  <div key={i} className="flex items-center justify-between text-xs">
+                    <span className="text-content-primary truncate flex-1 mr-2">{desc || `Group ${i + 1}`}</span>
+                    <span className="text-content-tertiary tabular-nums shrink-0">{Math.round(qty * 100) / 100} {unitGuess}</span>
+                  </div>
+                );
+              })}
+              {groups.length > 8 && (
+                <p className="text-2xs text-content-quaternary">+{groups.length - 8} {t('common.more', { defaultValue: 'more' })}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <Button variant="secondary" onClick={onClose}>{t('common.cancel')}</Button>
+            <Button variant="primary" onClick={handleCreate} loading={creating} disabled={!boqId || groups.length === 0}>
+              {t('explorer.create_positions', { defaultValue: 'Create {{count}} Positions', count: groups.length })}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function ConverterStatus() {
   const { t } = useTranslation();
@@ -1031,14 +1244,14 @@ function ConverterStatus() {
                 ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800'
                 : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800 cursor-pointer hover:bg-amber-100'
             }`}
-            onClick={!c.installed ? () => navigate('/modules') : undefined}
-            title={!c.installed ? t('explorer.click_to_install', { defaultValue: 'Click to install this converter' }) : undefined}
+            onClick={!c.installed ? () => window.open('https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN-pipeline-with-conversion-validation-qto', '_blank') : undefined}
+            title={!c.installed ? t('explorer.requires_external', { defaultValue: 'External tool — click for setup instructions' }) : undefined}
           >
             {c.installed ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
             <span className="font-semibold">{c.name}</span>
             <span className="opacity-60">{c.extensions.join(', ')}</span>
             {!c.installed && (
-              <span className="ml-1 underline text-2xs">{t('explorer.install', { defaultValue: 'Install' })}</span>
+              <span className="ml-1 underline text-2xs">{t('explorer.setup_guide', { defaultValue: 'Setup Guide' })}</span>
             )}
           </div>
         ))}
@@ -1047,10 +1260,7 @@ function ConverterStatus() {
         {notInstalled.length > 0 && (
           <span className="flex items-center gap-1">
             <AlertCircle size={10} />
-            {t('explorer.install_converters_hint', { defaultValue: 'Missing converters can be installed in' })}{' '}
-            <button onClick={() => navigate('/modules')} className="text-oe-blue hover:underline ml-0.5">
-              {t('explorer.modules_page', { defaultValue: 'Modules' })}
-            </button>
+            {t('explorer.converters_external_hint', { defaultValue: 'CAD converters require DDC cad2data tools installed on your server' })}
           </span>
         )}
         <span className="flex items-center gap-1 ml-auto">

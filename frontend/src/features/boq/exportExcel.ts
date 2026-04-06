@@ -34,7 +34,7 @@ export interface ExportOptions {
 
 /* ── Column definitions ───────────────────────────────────────────────── */
 
-const BOQ_COLUMNS = ['Ordinal', 'Description', 'Unit', 'Quantity', 'Unit Rate', 'Total'];
+const BOQ_COLUMNS = ['Ordinal', 'Description', 'Unit', 'Quantity', 'Unit Rate', 'Total', 'Type', 'Code'];
 const SUMMARY_COLUMNS = ['Section', 'Subtotal'];
 
 /* ── Helpers ──────────────────────────────────────────────────────────── */
@@ -64,18 +64,52 @@ export function buildBOQSheet(options: ExportOptions): {
   const { positions, boqTitle, markupTotals, netTotal, vatRate, vatAmount, grossTotal } = options;
   const grouped = groupPositionsIntoSections(positions);
 
+  interface Resource {
+    name: string;
+    code?: string;
+    type: string;
+    unit: string;
+    quantity: number;
+    unit_rate: number;
+    total?: number;
+  }
+
+  function getResources(pos: Position): Resource[] {
+    const meta = pos.metadata ?? (pos as Record<string, unknown>).metadata_;
+    if (!meta || !Array.isArray((meta as Record<string, unknown>).resources)) return [];
+    return (meta as Record<string, unknown>).resources as Resource[];
+  }
+
+  function pushResourceRows(pos: Position) {
+    const resources = getResources(pos);
+    for (const r of resources) {
+      const rTotal = r.total ?? r.quantity * r.unit_rate;
+      rows.push([
+        null,
+        `    ${r.name}`,
+        r.unit,
+        r.quantity,
+        r.unit_rate,
+        rTotal,
+        r.type || '',
+        r.code || '',
+      ]);
+    }
+  }
+
   const rows: (string | number | null)[][] = [];
   const merges: XLSX.Range[] = [];
   const sectionRowIndices: number[] = [];
   const headerRowIndices: number[] = [];
   const summaryRowIndices: number[] = [];
+  const colCount = BOQ_COLUMNS.length;
 
   // Title row
-  rows.push([boqTitle, null, null, null, null, null]);
-  merges.push({ s: { r: 0, c: 0 }, e: { r: 0, c: 5 } });
+  rows.push([boqTitle, ...Array(colCount - 1).fill(null)]);
+  merges.push({ s: { r: 0, c: 0 }, e: { r: 0, c: colCount - 1 } });
 
   // Empty separator row
-  rows.push([null, null, null, null, null, null]);
+  rows.push(Array(colCount).fill(null));
 
   // Header row
   headerRowIndices.push(rows.length);
@@ -85,7 +119,7 @@ export function buildBOQSheet(options: ExportOptions): {
   for (const group of grouped.sections) {
     const sectionRowIdx = rows.length;
     sectionRowIndices.push(sectionRowIdx);
-    // Section header — merged across all columns
+    // Section header — merged across description columns
     rows.push([
       group.section.ordinal,
       group.section.description,
@@ -93,6 +127,8 @@ export function buildBOQSheet(options: ExportOptions): {
       null,
       null,
       group.subtotal,
+      null,
+      null,
     ]);
     merges.push({ s: { r: sectionRowIdx, c: 1 }, e: { r: sectionRowIdx, c: 4 } });
 
@@ -104,44 +140,48 @@ export function buildBOQSheet(options: ExportOptions): {
         child.quantity,
         child.unit_rate,
         child.total,
+        null,
+        null,
       ]);
+      pushResourceRows(child);
     }
   }
 
   // Ungrouped positions
   for (const pos of grouped.ungrouped) {
     if (isSection(pos)) continue;
-    rows.push([pos.ordinal, pos.description, pos.unit, pos.quantity, pos.unit_rate, pos.total]);
+    rows.push([pos.ordinal, pos.description, pos.unit, pos.quantity, pos.unit_rate, pos.total, null, null]);
+    pushResourceRows(pos);
   }
 
   // Empty separator
-  rows.push([null, null, null, null, null, null]);
+  rows.push(Array(colCount).fill(null));
 
   // Summary: Direct Cost
   const directCost = positions
     .filter((p) => !isSection(p))
     .reduce((sum, p) => sum + p.total, 0);
   summaryRowIndices.push(rows.length);
-  rows.push([null, 'Direct Cost', null, null, null, directCost]);
+  rows.push([null, 'Direct Cost', null, null, null, directCost, null, null]);
 
   // Markup lines
   for (const m of markupTotals) {
     summaryRowIndices.push(rows.length);
-    rows.push([null, `${m.name} (${m.percentage}%)`, null, null, null, m.amount]);
+    rows.push([null, `${m.name} (${m.percentage}%)`, null, null, null, m.amount, null, null]);
   }
 
   // Net Total
   summaryRowIndices.push(rows.length);
-  rows.push([null, 'Net Total', null, null, null, netTotal]);
+  rows.push([null, 'Net Total', null, null, null, netTotal, null, null]);
 
   // VAT
   summaryRowIndices.push(rows.length);
   const vatLabel = vatRate > 0 ? `VAT (${(vatRate * 100).toFixed(0)}%)` : 'VAT (0%)';
-  rows.push([null, vatLabel, null, null, null, vatAmount]);
+  rows.push([null, vatLabel, null, null, null, vatAmount, null, null]);
 
   // Gross Total
   summaryRowIndices.push(rows.length);
-  rows.push([null, 'Gross Total', null, null, null, grossTotal]);
+  rows.push([null, 'Gross Total', null, null, null, grossTotal, null, null]);
 
   // Build worksheet
   const ws = XLSX.utils.aoa_to_sheet(rows);

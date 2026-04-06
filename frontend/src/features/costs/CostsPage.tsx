@@ -35,6 +35,7 @@ import { Button, Card, Badge, EmptyState, InfoHint, SkeletonTable, CountryFlag, 
 import { apiGet, apiPost, apiDelete, triggerDownload } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useCostDatabaseStore, REGION_MAP } from '@/stores/useCostDatabaseStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { EscalationCalculator } from './EscalationCalculator';
@@ -1158,8 +1159,9 @@ function AddToBOQModal({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const addToast = useToastStore((s) => s.addToast);
+  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
 
-  const [projectId, setProjectId] = useState('');
+  const [projectId, setProjectId] = useState(activeProjectId ?? '');
   const [boqId, setBoqId] = useState('');
   const [isAdding, setIsAdding] = useState(false);
 
@@ -1185,6 +1187,13 @@ function AddToBOQModal({
     enabled: !!projectId,
     retry: false,
   });
+
+  // Auto-select first BOQ when list loads
+  useEffect(() => {
+    if (boqs && boqs.length > 0 && !boqId) {
+      setBoqId(boqs[0].id);
+    }
+  }, [boqs, boqId]);
 
   // Fetch sections for selected BOQ
   const { data: sections } = useQuery({

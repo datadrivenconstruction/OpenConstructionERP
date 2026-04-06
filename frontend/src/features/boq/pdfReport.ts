@@ -297,14 +297,33 @@ function renderBOQTables(
     doc.text(labelLines, 15, currentY);
     currentY += labelLines.length * 5 + 2;
 
-    const body = children.map((p) => [
-      p.ordinal,
-      p.description,
-      p.unit,
-      formatNumber(p.quantity, locale),
-      formatCurrency(p.unit_rate, options.currency, locale),
-      formatCurrency(p.total, options.currency, locale),
-    ]);
+    const body: string[][] = [];
+    for (const p of children) {
+      body.push([
+        p.ordinal,
+        p.description,
+        p.unit,
+        formatNumber(p.quantity, locale),
+        formatCurrency(p.unit_rate, options.currency, locale),
+        formatCurrency(p.total, options.currency, locale),
+      ]);
+      // Add resource sub-rows
+      const meta = p.metadata ?? (p as Record<string, unknown>).metadata_;
+      const resources = (meta && Array.isArray((meta as Record<string, unknown>).resources))
+        ? (meta as Record<string, unknown>).resources as Array<{ name: string; type: string; unit: string; quantity: number; unit_rate: number; total?: number }>
+        : [];
+      for (const r of resources) {
+        const rTotal = r.total ?? r.quantity * r.unit_rate;
+        body.push([
+          '',
+          `  \u2514 ${r.name}`,
+          r.unit,
+          formatNumber(r.quantity, locale),
+          formatCurrency(r.unit_rate, options.currency, locale),
+          formatCurrency(rTotal, options.currency, locale),
+        ]);
+      }
+    }
 
     autoTable(doc, {
       startY: currentY,

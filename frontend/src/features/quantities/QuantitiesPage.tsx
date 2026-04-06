@@ -141,7 +141,7 @@ const methods: MethodCard[] = [
     gradient:
       'from-emerald-500/10 to-teal-500/10 hover:from-emerald-500/15 hover:to-teal-500/15',
     iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-500',
-    route: '/cad-takeoff',
+    route: '/data-explorer',
     badgeKey: 'quantities.badge_cad',
     badgeColor:
       'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
@@ -909,7 +909,7 @@ export function QuantitiesPage() {
             })}
           </p>
           <button
-            onClick={() => navigate('/cad-takeoff')}
+            onClick={() => navigate('/data-explorer')}
             className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-oe-blue/10 px-3 py-1.5 text-xs font-medium text-oe-blue hover:bg-oe-blue/20 transition-colors"
           >
             <Box size={14} />

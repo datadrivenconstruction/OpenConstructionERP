@@ -888,7 +888,7 @@ const CONVERTER_COLORS: Record<string, { bg: string; border: string; icon: strin
   dgn: { bg: 'from-purple-500/8 to-violet-500/8', border: 'border-purple-200 dark:border-purple-900/30', icon: 'bg-gradient-to-br from-purple-500 to-violet-500' },
 };
 
-// ── Full Converter Section (for /cad-takeoff) ──────────────────────────────
+// ── Full Converter Section (for /data-explorer) ──────────────────────────────
 
 interface CadConverterSectionProps {
   converters: { id: string; name: string; description: string; engine: string; extensions: string[]; exe: string; version: string; size_mb: number; installed: boolean; path: string | null }[];
@@ -1127,7 +1127,7 @@ export function QuickEstimatePage() {
   // Active tab — read initial value from ?tab= URL param
   const [searchParams] = useSearchParams();
   const routeLocation = useLocation();
-  const isCadRoute = routeLocation.pathname === '/cad-takeoff';
+  const isCadRoute = routeLocation.pathname === '/data-explorer';
   const initialTab = isCadRoute ? 'cad' : ((searchParams.get('tab') as InputTab | null) ?? 'text');
   const [activeTab, setActiveTab] = useState<InputTab>(
     ['text', 'photo', 'pdf', 'excel', 'cad', 'paste'].includes(initialTab) ? initialTab : 'text',
@@ -1218,7 +1218,7 @@ export function QuickEstimatePage() {
     enabled: activeTab === 'cad' || isCadRoute,
   });
 
-  // ── Converter install/uninstall state (for /cad-takeoff route) ──────
+  // ── Converter install/uninstall state (for /data-explorer route) ──────
   const [installingId, setInstallingId] = useState<string | null>(null);
   const [installElapsed, setInstallElapsed] = useState(0);
   const [installResult, setInstallResult] = useState<{ message: string } | null>(null);
@@ -2086,7 +2086,7 @@ export function QuickEstimatePage() {
         </div>
       ) : null}
 
-      {/* Source type selector (hidden on /cad-takeoff) */}
+      {/* Source type selector (hidden on /data-explorer) */}
       {!isCadRoute && (
       <div className="animate-card-in" style={{ animationDelay: '100ms' }}>
         {/* Horizontal tab pills — single row */}
@@ -2394,7 +2394,7 @@ export function QuickEstimatePage() {
                 )}
                 {/* ── DDC Converter Modules ─────────────────────── */}
                 {isCadRoute ? (
-                  /* Full converter management UI on /cad-takeoff */
+                  /* Full converter management UI on /data-explorer */
                   <CadConverterSection
                     converters={convertersData?.converters ?? []}
                     installedCount={convertersData?.installed_count ?? 0}
@@ -2453,7 +2453,7 @@ export function QuickEstimatePage() {
                           })}
                         </p>
                         <Link
-                          to="/cad-takeoff"
+                          to="/data-explorer"
                           className="mt-1 inline-flex items-center gap-1 font-medium text-oe-blue hover:underline"
                         >
                           {t('ai.cad_manage_converters', { defaultValue: 'Manage Converters' })}
