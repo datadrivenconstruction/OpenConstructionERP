@@ -121,6 +121,20 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
   const [hiddenCols, setHiddenCols] = useState<Set<string>>(new Set());
   const [heatmapEnabled, setHeatmapEnabled] = useState(false);
 
+  const { data, isLoading } = useQuery({
+    queryKey: ['cad-elements', sessionId, page, pageSize, sortBy, sortOrder, activeFilter],
+    queryFn: () => fetchElements(sessionId, {
+      offset: page * pageSize,
+      limit: pageSize,
+      sort_by: sortBy || undefined,
+      sort_order: sortOrder,
+      filter_column: activeFilter?.col || undefined,
+      filter_value: activeFilter?.val || undefined,
+    }),
+  });
+
+  const totalPages = data ? Math.ceil(data.total / pageSize) : 0;
+
   // Pre-compute min/max for numeric columns (for heatmap)
   const colStats = useMemo(() => {
     if (!data?.rows || !heatmapEnabled) return new Map<string, { min: number; max: number }>();
@@ -138,25 +152,10 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
     const s = colStats.get(col);
     if (!s) return '';
     const ratio = Math.max(0, Math.min(1, (val - s.min) / (s.max - s.min)));
-    // low=blue, high=green
     if (ratio < 0.33) return 'bg-blue-50/40 dark:bg-blue-900/10';
     if (ratio < 0.66) return 'bg-emerald-50/40 dark:bg-emerald-900/10';
     return 'bg-emerald-100/60 dark:bg-emerald-900/20';
   }
-
-  const { data, isLoading } = useQuery({
-    queryKey: ['cad-elements', sessionId, page, pageSize, sortBy, sortOrder, activeFilter],
-    queryFn: () => fetchElements(sessionId, {
-      offset: page * pageSize,
-      limit: pageSize,
-      sort_by: sortBy || undefined,
-      sort_order: sortOrder,
-      filter_column: activeFilter?.col || undefined,
-      filter_value: activeFilter?.val || undefined,
-    }),
-  });
-
-  const totalPages = data ? Math.ceil(data.total / pageSize) : 0;
 
   // Smart column selection: priority columns first, then rest
   const allCols = useMemo(() => {
