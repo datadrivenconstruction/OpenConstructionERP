@@ -3,7 +3,7 @@
  * Endpoints prefixed with /v1/takeoff/cad-data/.
  */
 
-import { apiGet, apiPost } from '@/shared/lib/api';
+import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -109,4 +109,38 @@ export async function aggregate(
     group_by: groupBy,
     aggregations,
   });
+}
+
+/* ── Session Management ────────────────────────────────────────────────── */
+
+export interface SavedSession {
+  session_id: string;
+  display_name: string;
+  filename: string;
+  file_format: string;
+  element_count: number;
+  extraction_time: number;
+  project_id: string | null;
+  created_at: string | null;
+}
+
+export async function saveSession(
+  sessionId: string,
+  projectId: string,
+  displayName: string,
+): Promise<{ status: string; session_id: string }> {
+  return apiPost('/v1/takeoff/cad-data/save', {
+    session_id: sessionId,
+    project_id: projectId,
+    display_name: displayName,
+  });
+}
+
+export async function listSessions(projectId?: string): Promise<SavedSession[]> {
+  const qs = projectId ? `?project_id=${projectId}` : '';
+  return apiGet<SavedSession[]>(`/v1/takeoff/cad-data/sessions${qs}`);
+}
+
+export async function deleteSession(sessionId: string): Promise<void> {
+  return apiDelete(`/v1/takeoff/cad-data/sessions/${sessionId}`);
 }

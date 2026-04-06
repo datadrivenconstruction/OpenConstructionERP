@@ -472,10 +472,13 @@ def _cleanup_memory_sessions() -> None:
 
 
 async def _cleanup_db_sessions(session: Any) -> None:
-    """Remove expired CAD extraction sessions from the database."""
+    """Remove expired CAD extraction sessions from the database (skip permanent)."""
     now = datetime.now(timezone.utc)
     await session.execute(
-        delete(CadExtractionSession).where(CadExtractionSession.expires_at < now)
+        delete(CadExtractionSession).where(
+            CadExtractionSession.expires_at < now,
+            CadExtractionSession.is_permanent == False,  # noqa: E712
+        )
     )
 
 
@@ -1532,6 +1535,115 @@ async def cad_data_aggregate(
         "groups": result_groups,
         "totals": totals,
     }
+
+
+# ── CAD Data Explorer: Session Management (save, list, delete) ─────────────
+
+
+class CadDataSaveRequest(BaseModel):
+    """Save a CAD session permanently to a project."""
+    session_id: str
+    project_id: str
+    display_name: str
+
+
+@router.post(
+    "/cad-data/save",
+    dependencies=[Depends(RequirePermission("takeoff.create"))],
+)
+async def cad_data_save(
+    body: CadDataSaveRequest,
+    db_session: SessionDep = None,  # type: ignore[assignment]
+) -> dict[str, Any]:
+    """Mark a CAD session as permanent and link it to a project."""
+    _cleanup_memory_sessions()
+
+    cad_session = await _get_cad_session(db_session, body.session_id)
+    if not cad_session:
+        raise HTTPException(status_code=404, detail="Session not found or expired.")
+
+    # Update the database record
+    from sqlalchemy import update as sa_update
+    stmt = (
+        sa_update(CadExtractionSession)
+        .where(CadExtractionSession.session_id == body.session_id)
+        .values(
+            project_id=body.project_id,
+            display_name=body.display_name,
+            is_permanent=True,
+            expires_at=datetime.now(timezone.utc) + timedelta(days=365 * 10),
+        )
+    )
+    await db_session.execute(stmt)
+    await db_session.commit()
+
+    return {
+        "status": "saved",
+        "session_id": body.session_id,
+        "project_id": body.project_id,
+        "display_name": body.display_name,
+    }
+
+
+@router.get(
+    "/cad-data/sessions",
+    dependencies=[Depends(RequirePermission("takeoff.read"))],
+)
+async def cad_data_list_sessions(
+    project_id: str | None = Query(default=None),
+    db_session: SessionDep = None,  # type: ignore[assignment]
+) -> list[dict[str, Any]]:
+    """List saved (permanent) CAD sessions, optionally filtered by project."""
+    from sqlalchemy import select
+
+    stmt = select(CadExtractionSession).where(
+        CadExtractionSession.is_permanent == True  # noqa: E712
+    )
+    if project_id:
+        stmt = stmt.where(CadExtractionSession.project_id == project_id)
+    stmt = stmt.order_by(CadExtractionSession.created_at.desc())
+
+    result = await db_session.execute(stmt)
+    rows = result.scalars().all()
+
+    return [
+        {
+            "session_id": row.session_id,
+            "display_name": row.display_name or row.filename,
+            "filename": row.filename,
+            "file_format": row.file_format,
+            "element_count": row.element_count,
+            "extraction_time": row.extraction_time,
+            "project_id": row.project_id,
+            "created_at": row.created_at.isoformat() if row.created_at else None,
+        }
+        for row in rows
+    ]
+
+
+@router.delete(
+    "/cad-data/sessions/{session_id}",
+    dependencies=[Depends(RequirePermission("takeoff.delete"))],
+    status_code=204,
+)
+async def cad_data_delete_session(
+    session_id: str,
+    db_session: SessionDep = None,  # type: ignore[assignment]
+) -> None:
+    """Delete a saved CAD session."""
+    from sqlalchemy import delete as sa_delete
+
+    stmt = sa_delete(CadExtractionSession).where(
+        CadExtractionSession.session_id == session_id
+    )
+    result = await db_session.execute(stmt)
+    await db_session.commit()
+
+    if result.rowcount == 0:  # type: ignore[union-attr]
+        raise HTTPException(status_code=404, detail="Session not found.")
+
+    # Also remove from memory cache
+    _cad_sessions.pop(session_id, None)
 
 
 MAX_PDF_SIZE = 50 * 1024 * 1024  # 50 MB

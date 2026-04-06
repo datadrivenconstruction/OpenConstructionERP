@@ -8,7 +8,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Table2,
   BarChart3,
@@ -25,6 +25,7 @@ import {
   Box,
   Ruler,
   X,
+  Save,
 } from 'lucide-react';
 import { Button, Card, Badge, Breadcrumb, EmptyState } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
@@ -33,10 +34,15 @@ import {
   valueCounts,
   fetchElements,
   aggregate,
+  saveSession,
+  listSessions,
+  deleteSession,
   type DescribeResponse,
   type AggregateResponse,
   type AggregateGroup,
+  type SavedSession,
 } from './api';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -973,14 +979,169 @@ function UploadConvertZone({
   );
 }
 
+/* ── Saved Sessions List ────────────────────────────────────────────────── */
+
+import { Trash2 as TrashIcon, Clock, FileText, ExternalLink } from 'lucide-react';
+
+function SavedSessionsList({ onOpen }: { onOpen: (sessionId: string) => void }) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+  const queryClient = useQueryClient();
+  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+
+  const { data: sessions = [], isLoading: sessionsLoading } = useQuery({
+    queryKey: ['cad-saved-sessions', activeProjectId],
+    queryFn: () => listSessions(activeProjectId || undefined),
+  });
+
+  const delMut = useMutation({
+    mutationFn: deleteSession,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cad-saved-sessions'] });
+      addToast({ type: 'success', title: t('explorer.session_deleted', { defaultValue: 'Analysis deleted' }) });
+    },
+  });
+
+  if (sessionsLoading) return <div className="flex justify-center py-6"><div className="h-5 w-5 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" /></div>;
+  if (sessions.length === 0) return null;
+
+  return (
+    <Card className="p-4">
+      <h3 className="text-xs font-semibold text-content-primary mb-3 flex items-center gap-1.5">
+        <Clock size={13} className="text-content-tertiary" />
+        {t('explorer.saved_analyses', { defaultValue: 'Saved Analyses' })}
+        <Badge variant="neutral" size="sm">{sessions.length}</Badge>
+      </h3>
+      <div className="divide-y divide-border-light">
+        {sessions.map((s) => (
+          <div
+            key={s.session_id}
+            className="flex items-center gap-3 py-2.5 cursor-pointer hover:bg-surface-secondary/30 rounded-lg px-2 -mx-2 transition-colors"
+            onClick={() => onOpen(s.session_id)}
+          >
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle shrink-0">
+              <FileText size={16} className="text-oe-blue" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-content-primary truncate">{s.display_name}</p>
+              <p className="text-2xs text-content-tertiary">
+                {s.filename} · {s.element_count.toLocaleString()} elements · {s.file_format.toUpperCase()}
+                {s.created_at && ` · ${new Date(s.created_at).toLocaleDateString()}`}
+              </p>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={(e) => { e.stopPropagation(); onOpen(s.session_id); }}
+                className="p-1.5 rounded-md hover:bg-surface-secondary text-oe-blue"
+                title={t('explorer.open', { defaultValue: 'Open' })}
+              >
+                <ExternalLink size={14} />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); delMut.mutate(s.session_id); }}
+                className="p-1.5 rounded-md hover:bg-surface-secondary text-content-tertiary hover:text-semantic-error"
+                title={t('common.delete', { defaultValue: 'Delete' })}
+              >
+                <TrashIcon size={14} />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+/* ── Save Dialog ───────────────────────────────────────────────────────── */
+
+function SaveDialog({
+  sessionId,
+  filename,
+  onClose,
+  onSaved,
+}: {
+  sessionId: string;
+  filename: string;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+
+  const { data: projects = [] } = useQuery({
+    queryKey: ['projects'],
+    queryFn: () => apiGet<{ id: string; name: string }[]>('/v1/projects/'),
+  });
+
+  const [name, setName] = useState(filename.replace(/\.[^.]+$/, '') + ' — Analysis');
+  const [projectId, setProjectId] = useState(activeProjectId || '');
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = useCallback(async () => {
+    if (!name.trim() || !projectId) return;
+    setSaving(true);
+    try {
+      await saveSession(sessionId, projectId, name.trim());
+      addToast({ type: 'success', title: t('explorer.saved', { defaultValue: 'Analysis saved permanently' }) });
+      onSaved();
+      onClose();
+    } catch (err) {
+      addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: err instanceof Error ? err.message : '' });
+    } finally {
+      setSaving(false);
+    }
+  }, [sessionId, projectId, name, addToast, t, onSaved, onClose]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+      <div className="w-full max-w-md mx-4 rounded-xl bg-surface-elevated shadow-xl border border-border-light p-5" onClick={(e) => e.stopPropagation()}>
+        <h3 className="text-sm font-semibold text-content-primary mb-4">
+          {t('explorer.save_analysis', { defaultValue: 'Save Analysis' })}
+        </h3>
+        <div className="space-y-3">
+          <div>
+            <label className="block text-xs font-medium text-content-secondary mb-1">{t('explorer.analysis_name', { defaultValue: 'Name' })}</label>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="h-8 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              autoFocus
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-content-secondary mb-1">{t('explorer.project', { defaultValue: 'Project' })}</label>
+            <select
+              value={projectId}
+              onChange={(e) => setProjectId(e.target.value)}
+              className="h-8 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+            >
+              <option value="" disabled>{t('explorer.select_project', { defaultValue: 'Select project...' })}</option>
+              {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </div>
+        </div>
+        <div className="mt-4 flex justify-end gap-2">
+          <Button variant="ghost" size="sm" onClick={onClose}>{t('common.cancel', { defaultValue: 'Cancel' })}</Button>
+          <Button variant="primary" size="sm" onClick={handleSave} disabled={!name.trim() || !projectId || saving} loading={saving}>
+            {t('explorer.save_permanently', { defaultValue: 'Save Permanently' })}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Main Page ─────────────────────────────────────────────────────────── */
 
 export function CadDataExplorerPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const sessionId = searchParams.get('session') || '';
   const [activeTab, setActiveTab] = useState<TabId>('table');
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
 
   const { data: describe, isLoading, error } = useQuery({
     queryKey: ['cad-describe', sessionId],
@@ -994,14 +1155,13 @@ export function CadDataExplorerPage() {
 
   if (!sessionId) {
     return (
-      <div className="max-w-4xl mx-auto px-6 py-6">
+      <div className="max-w-4xl mx-auto px-6 py-6 space-y-6">
         <Breadcrumb items={[
           { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
           { label: t('explorer.title', { defaultValue: 'CAD-BIM Explorer' }) },
         ]} />
-        <div className="mt-4">
-          <UploadConvertZone onSessionReady={handleSessionReady} />
-        </div>
+        <UploadConvertZone onSessionReady={handleSessionReady} />
+        <SavedSessionsList onOpen={(sid) => setSearchParams({ session: sid })} />
       </div>
     );
   }
@@ -1030,6 +1190,10 @@ export function CadDataExplorerPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="primary" size="sm" onClick={() => setShowSaveDialog(true)}>
+            <Save size={13} className="mr-1" />
+            <span>{t('explorer.save_analysis', { defaultValue: 'Save Analysis' })}</span>
+          </Button>
           <Button variant="secondary" size="sm" onClick={() => { setSearchParams({}); }}>
             <Upload size={13} className="mr-1" />
             <span>{t('explorer.new_file', { defaultValue: 'New File' })}</span>
@@ -1087,6 +1251,16 @@ export function CadDataExplorerPage() {
           {activeTab === 'describe' && <DescribeTab sessionId={sessionId} describe={describe} />}
         </>
       ) : null}
+
+      {/* Save dialog */}
+      {showSaveDialog && describe && (
+        <SaveDialog
+          sessionId={sessionId}
+          filename={describe.filename}
+          onClose={() => setShowSaveDialog(false)}
+          onSaved={() => queryClient.invalidateQueries({ queryKey: ['cad-saved-sessions'] })}
+        />
+      )}
     </div>
   );
 }
