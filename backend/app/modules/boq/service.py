@@ -698,15 +698,13 @@ def _str_to_float(value: str | None) -> float:
 
 
 def _is_section(position: Position) -> bool:
-    """Determine whether a position is a section header.
+    """Determine whether a position is a section/sub-section header.
 
-    A section is a top-level position (parent_id is None) whose unit is empty
-    or the sentinel value ``"section"`` and whose quantity and unit_rate are
-    both zero.  This distinguishes section headers from real line items that
-    happen to have no parent.
+    A section is any position whose unit is empty or ``"section"``
+    and whose quantity and unit_rate are both zero.
+    Sections can exist at any depth (top-level or nested under another section).
+    This enables multi-level BOQ hierarchies (3-4+ levels).
     """
-    if position.parent_id is not None:
-        return False
     unit = (position.unit or "").strip().lower()
     qty = _str_to_float(position.quantity)
     rate = _str_to_float(position.unit_rate)
