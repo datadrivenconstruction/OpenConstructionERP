@@ -575,29 +575,23 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       const old: UpdatePositionData = { [field]: oldValue };
 
       // For quantity, parse formulas and scale resources proportionally
-      if (field === 'quantity' && typeof newValue === 'number') {
-        update.quantity = newValue;
-        old.quantity = typeof oldValue === 'number' ? oldValue : parseFloat(oldValue) || 0;
+      if (field === 'quantity') {
+        const parsedNew = typeof newValue === 'number' ? newValue : parseFloat(newValue) || 0;
+        const parsedOld = typeof oldValue === 'number' ? oldValue : parseFloat(oldValue) || 0;
+        update.quantity = parsedNew;
+        old.quantity = parsedOld;
 
         // Scale resource quantities proportionally
-        const oldQty = old.quantity || 0;
-        const newQty = newValue;
-        const meta = data.metadata ?? data.metadata_;
-        const resources = meta && Array.isArray((meta as Record<string, unknown>).resources)
-          ? [...(meta as Record<string, unknown>).resources as Array<Record<string, unknown>>]
-          : null;
-
-        if (resources && resources.length > 0 && oldQty > 0 && newQty !== oldQty) {
-          const ratio = newQty / oldQty;
-          const scaledResources = resources.map((r) => ({
+        const meta = data.metadata as Record<string, unknown> | undefined;
+        const resources = meta?.resources;
+        if (Array.isArray(resources) && resources.length > 0 && parsedOld > 0 && parsedNew !== parsedOld) {
+          const ratio = parsedNew / parsedOld;
+          const scaled = (resources as Array<Record<string, unknown>>).map((r) => ({
             ...r,
             quantity: Math.round(((r.quantity as number) || 0) * ratio * 10000) / 10000,
-            total: undefined, // recalculate
+            total: Math.round(((r.quantity as number) || 0) * ratio * ((r.unit_rate as number) || 0) * 100) / 100,
           }));
-          update.metadata = {
-            ...(meta as Record<string, unknown>),
-            resources: scaledResources,
-          };
+          update.metadata = { ...meta, resources: scaled };
         }
       }
 

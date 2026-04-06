@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 import type { ICellRendererParams } from 'ag-grid-community';
 import {
   ChevronDown,
@@ -381,7 +381,9 @@ function InlineTextInput({
 
 /* ── Editable Resource Row ───────────────────────────────────────── */
 
-function EditableResourceRow({ data, ctx }: { data: Record<string, unknown>; ctx: FullGridContext }) {
+interface ColWidths { leftPad: number; unit: number; quantity: number; unitRate: number; total: number; actions: number }
+
+function EditableResourceRow({ data, ctx, colWidths }: { data: Record<string, unknown>; ctx: FullGridContext; colWidths: ColWidths }) {
   const badge = RESOURCE_TYPE_BADGE[(data._resourceType as string)] ?? RESOURCE_TYPE_BADGE.other ?? { bg: 'bg-gray-100 text-gray-600', label: '?' };
   const qty = (data._resourceQty as number) ?? 0;
   const rate = (data._resourceRate as number) ?? 0;
@@ -406,9 +408,9 @@ function EditableResourceRow({ data, ctx }: { data: Record<string, unknown>; ctx
 
   return (
     <div
-      className="flex items-center w-full h-full pr-3 gap-2 select-none group/res text-[11px]
+      className="flex items-center w-full h-full gap-2 select-none group/res text-[11px]
                   bg-surface-secondary/40 border-b border-border-light/50"
-      style={{ paddingLeft: '186px' }}
+      style={{ paddingLeft: `${colWidths.leftPad}px`, paddingRight: '4px' }}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -432,28 +434,28 @@ function EditableResourceRow({ data, ctx }: { data: Record<string, unknown>; ctx
         </span>
       )}
 
-      {/* Unit — editable, aligned to grid Unit column (80px) */}
-      <span className="shrink-0 text-center text-content-tertiary" style={{ width: '80px' }}>
+      {/* Unit — aligned to grid Unit column */}
+      <span className="shrink-0 text-center text-content-tertiary" style={{ width: `${colWidths.unit}px` }}>
         <InlineTextInput value={data._resourceUnit as string} onCommit={(v: string) => ctx.onUpdateResource?.(posId, resIdx, 'unit', v)} className="w-full text-[11px] text-center" />
       </span>
 
-      {/* Quantity — editable, aligned to grid Qty column (100px) */}
-      <span className="shrink-0 text-right tabular-nums text-content-secondary" style={{ width: '100px' }}>
+      {/* Quantity — aligned to grid Qty column */}
+      <span className="shrink-0 text-right tabular-nums text-content-secondary" style={{ width: `${colWidths.quantity}px` }}>
         <InlineNumberInput value={qty} onCommit={handleQtyChange} fmt={ctx.fmt} className="w-full text-[11px]" />
       </span>
 
-      {/* Rate — editable, aligned to grid Unit Rate column (110px) */}
-      <span className="shrink-0 text-right tabular-nums text-content-secondary" style={{ width: '110px' }}>
+      {/* Rate — aligned to grid Unit Rate column */}
+      <span className="shrink-0 text-right tabular-nums text-content-secondary" style={{ width: `${colWidths.unitRate}px` }}>
         <InlineNumberInput value={rate} onCommit={handleRateChange} fmt={ctx.fmt} className="w-full text-[11px]" />
       </span>
 
-      {/* Total — auto-calculated, aligned to grid Total column (130px) */}
-      <span className="shrink-0 text-right tabular-nums font-medium text-content-primary" style={{ width: '130px' }}>
+      {/* Total — aligned to grid Total column */}
+      <span className="shrink-0 text-right tabular-nums font-medium text-content-primary" style={{ width: `${colWidths.total}px` }}>
         {formattedTotal}
       </span>
 
-      {/* Actions — aligned to grid Actions column (44px) */}
-      <span className="shrink-0 flex items-center justify-center gap-0.5" style={{ width: '44px' }}>
+      {/* Actions — aligned to grid Actions column */}
+      <span className="shrink-0 flex items-center justify-center gap-0.5" style={{ width: `${colWidths.actions}px` }}>
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -485,14 +487,28 @@ function EditableResourceRow({ data, ctx }: { data: Record<string, unknown>; ctx
 /* ── Resource Full-Width Renderer ──────────────────────────────────── */
 
 export function ResourceFullWidthRenderer(params: ICellRendererParams) {
-  const { data, context } = params;
+  const { data, context, api } = params;
   const ctx = context as FullGridContext | undefined;
+
+  // Read actual column widths from the grid for perfect alignment
+  const colWidths = useMemo(() => {
+    const getW = (id: string) => api?.getColumn(id)?.getActualWidth() ?? 0;
+    const leftPad = getW('_drag') + getW('_checkbox') + getW('ordinal');
+    return {
+      leftPad,
+      unit: getW('unit'),
+      quantity: getW('quantity'),
+      unitRate: getW('unit_rate'),
+      total: getW('total'),
+      actions: getW('_actions'),
+    };
+  }, [api]);
 
   if (!ctx) return null;
 
   // Resource sub-row
   if (data?._isResource) {
-    return <EditableResourceRow data={data} ctx={ctx} />;
+    return <EditableResourceRow data={data} ctx={ctx} colWidths={colWidths} />;
   }
 
   // "Add resource" row
@@ -501,7 +517,7 @@ export function ResourceFullWidthRenderer(params: ICellRendererParams) {
       <div
         className="flex items-center w-full h-full pr-3 gap-2 select-none
                     bg-surface-secondary/20 border-b border-border-light/30"
-        style={{ paddingLeft: '186px' }}
+        style={{ paddingLeft: `${colWidths.leftPad}px` }}
         onContextMenu={(e) => {
           e.preventDefault();
           e.stopPropagation();
