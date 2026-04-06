@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Upload, FileText, Image, FileSpreadsheet, File, Trash2, Download,
   Search, X, Loader2, FolderOpen, ChevronDown, HardDrive, Eye,
-  CheckCircle2, XCircle, MoreHorizontal, Pencil, Tag, Ruler,
+  MoreHorizontal, Pencil, Tag, Ruler,
 } from 'lucide-react';
 import { Card, Button, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
 import { apiGet, apiDelete, apiPatch } from '@/shared/lib/api';

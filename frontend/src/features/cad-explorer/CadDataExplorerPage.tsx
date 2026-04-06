@@ -269,9 +269,11 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
         </div>
 
         {activeFilter && (
-          <Badge variant="blue" size="sm" className="cursor-pointer" onClick={() => setActiveFilter(null)}>
-            {activeFilter.col}="{activeFilter.val}" <X size={10} className="ml-1 inline" />
-          </Badge>
+          <button onClick={() => setActiveFilter(null)} className="cursor-pointer">
+            <Badge variant="blue" size="sm">
+              {activeFilter.col}=&quot;{activeFilter.val}&quot; <X size={10} className="ml-1 inline" />
+            </Badge>
+          </button>
         )}
 
         {/* Spacer */}

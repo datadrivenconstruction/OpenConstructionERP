@@ -17,7 +17,6 @@ import {
   X,
   ExternalLink,
   FileUp,
-  Layers,
 } from 'lucide-react';
 import { useUploadQueueStore } from '@/stores/useUploadQueueStore';
 
@@ -31,7 +30,7 @@ export function FloatingQueuePanel() {
 
   const activeTasks = tasks.filter((t) => t.status === 'processing' || t.status === 'queued');
   const completedTasks = tasks.filter((t) => t.status === 'completed');
-  const errorTasks = tasks.filter((t) => t.status === 'error');
+  const _errorTasks = tasks.filter((t) => t.status === 'error'); // reserved for future error panel
 
   // Don't render if no tasks at all
   if (tasks.length === 0) return null;
