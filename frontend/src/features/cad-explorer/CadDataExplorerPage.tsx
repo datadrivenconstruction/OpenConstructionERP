@@ -1024,7 +1024,7 @@ export function CadDataExplorerPage() {
             <h1 className="text-lg font-bold text-content-primary">{t('explorer.title', { defaultValue: 'CAD Data Explorer' })}</h1>
             {describe && (
               <p className="text-xs text-content-tertiary">
-                {describe.filename} · {describe.total_elements.toLocaleString()} elements · {describe.format.toUpperCase()}
+                {describe.filename} · {describe.total_elements.toLocaleString()} elements{describe.format ? ` · ${describe.format.toUpperCase()}` : ''}
               </p>
             )}
           </div>

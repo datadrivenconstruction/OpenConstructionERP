@@ -1289,6 +1289,7 @@ async def cad_data_describe(
 
     return {
         "filename": cad_session.get("filename", ""),
+        "format": cad_session.get("format", ""),
         "total_elements": len(elements),
         "total_columns": len(all_columns),
         "columns": columns_info,

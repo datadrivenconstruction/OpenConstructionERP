@@ -2516,17 +2516,50 @@ export function QuickEstimatePage() {
                   </span>
                 )}
               </div>
-              <div className="flex flex-col items-end gap-1">
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="lg"
-                  loading={isPending}
-                  disabled={!canSubmit}
-                  icon={activeTab === 'cad' ? <Layers size={18} /> : <Sparkles size={18} />}
-                >
-                  {submitLabel}
-                </Button>
+              <div className="flex flex-col items-end gap-2">
+                {isCadRoute ? (
+                  /* CAD route: two prominent buttons */
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      size="lg"
+                      loading={isPending}
+                      disabled={!canSubmit}
+                      icon={<Layers size={18} />}
+                      className="px-6"
+                    >
+                      {submitLabel}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="lg"
+                      disabled={!canSubmit}
+                      icon={<Database size={18} />}
+                      className="px-6"
+                      onClick={() => {
+                        if (selectedFile) {
+                          // Upload via Data Explorer page
+                          navigate('/data-explorer');
+                        }
+                      }}
+                    >
+                      {t('ai.open_explorer', { defaultValue: 'Data Explorer' })}
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="lg"
+                    loading={isPending}
+                    disabled={!canSubmit}
+                    icon={<Sparkles size={18} />}
+                  >
+                    {submitLabel}
+                  </Button>
+                )}
                 {!canSubmit && !isPending && (
                   <span className="text-2xs text-content-tertiary">
                     {activeTab === 'text'
