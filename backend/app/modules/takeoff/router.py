@@ -1521,7 +1521,7 @@ async def cad_data_aggregate(
         results: dict[str, float] = {}
         for col, func in body.aggregations.items():
             results[col] = _aggregate(group_elements, col, func)
-        result_groups.append({"key": key_dict, "results": results})
+        result_groups.append({"key": key_dict, "results": results, "count": len(group_elements)})
 
     # Sort groups by first group_by column for stable output
     result_groups.sort(key=lambda g: tuple(g["key"].get(c, "") for c in body.group_by))
@@ -1534,6 +1534,7 @@ async def cad_data_aggregate(
     return {
         "groups": result_groups,
         "totals": totals,
+        "total_count": len(elements),
     }
 
 

@@ -275,8 +275,9 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
 
 function PivotTab({ sessionId, describe }: { sessionId: string; describe: DescribeResponse }) {
   const { t } = useTranslation();
-  const stringCols = describe.columns.filter((c) => c.dtype === 'string');
-  const numericCols = describe.columns.filter((c) => c.dtype === 'number');
+  // Only show useful columns: string cols with < 200 unique values and > 30% non-null
+  const stringCols = describe.columns.filter((c) => c.dtype === 'string' && c.unique < 200 && c.non_null > describe.total_elements * 0.3);
+  const numericCols = describe.columns.filter((c) => c.dtype === 'number' && c.non_null > describe.total_elements * 0.1);
 
   const [groupBy, setGroupBy] = useState<string[]>(
     stringCols.length > 0 ? [stringCols[0]!.name] : [],
@@ -331,14 +332,14 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
             <label className="text-2xs font-medium text-content-tertiary uppercase tracking-wide block mb-1">
               {t('explorer.group_by', { defaultValue: 'Group By' })}
             </label>
-            <div className="flex gap-1.5">
-              {stringCols.map((col) => (
+            <div className="flex gap-1.5 flex-wrap max-h-20 overflow-y-auto">
+              {stringCols.slice(0, 20).map((col) => (
                 <button
                   key={col.name}
                   onClick={() => setGroupBy((prev) =>
                     prev.includes(col.name) ? prev.filter((c) => c !== col.name) : [...prev, col.name]
                   )}
-                  className={`px-2 py-1 rounded-md text-2xs font-medium transition-colors border ${
+                  className={`px-2 py-1 rounded-md text-2xs font-medium transition-colors border whitespace-nowrap ${
                     groupBy.includes(col.name)
                       ? 'bg-oe-blue text-white border-oe-blue'
                       : 'border-border-light bg-surface-secondary text-content-tertiary hover:text-content-primary'
@@ -452,8 +453,8 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
 
 function ChartsTab({ sessionId, describe }: { sessionId: string; describe: DescribeResponse }) {
   const { t } = useTranslation();
-  const stringCols = describe.columns.filter((c) => c.dtype === 'string');
-  const numericCols = describe.columns.filter((c) => c.dtype === 'number');
+  const stringCols = describe.columns.filter((c) => c.dtype === 'string' && c.unique < 200 && c.non_null > describe.total_elements * 0.3);
+  const numericCols = describe.columns.filter((c) => c.dtype === 'number' && c.non_null > describe.total_elements * 0.1);
 
   const [chartGroupBy, setChartGroupBy] = useState(stringCols[0]?.name || '');
   const [chartValue, setChartValue] = useState(
@@ -467,7 +468,7 @@ function ChartsTab({ sessionId, describe }: { sessionId: string; describe: Descr
     if (!chartGroupBy || !chartValue) return;
     setLoading(true);
     try {
-      const data = await aggregate(sessionId, [chartGroupBy], { [chartValue]: 'sum', count: 'sum' });
+      const data = await aggregate(sessionId, [chartGroupBy], { [chartValue]: 'sum' });
       setChartData(data);
     } catch { /* */ } finally { setLoading(false); }
   }, [sessionId, chartGroupBy, chartValue]);

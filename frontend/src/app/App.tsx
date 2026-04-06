@@ -16,6 +16,7 @@ import { SettingsPage } from '@/features/settings';
 import { AboutPage } from '@/features/about/AboutPage';
 import { QuickEstimatePage } from '@/features/ai';
 import { Logo, ShortcutsDialog, CommandPalette, ToastContainer, ErrorBoundary, NotFoundPage } from '@/shared/ui';
+import { FloatingQueuePanel } from './layout/FloatingQueuePanel';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useThemeStore } from '@/stores/useThemeStore';
 import { ddcVerifyIntegrity } from '@/shared/lib/ddc-integrity';
@@ -296,6 +297,7 @@ export default function App() {
         <Route path="*" element={isAuthenticated ? <P title="Not Found"><NotFoundPage /></P> : <Navigate to="/login" replace />} />
       </Routes>
       <ToastContainer />
+      <FloatingQueuePanel />
       {/* DDC-CWICR-OE */}
       <span aria-hidden="true" style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
         {'\u200B\u200C\u200D\u200B\u200C\u200D\u200B'}
