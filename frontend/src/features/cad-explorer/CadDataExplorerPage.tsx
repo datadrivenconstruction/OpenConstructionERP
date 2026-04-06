@@ -113,8 +113,11 @@ function StatsCards({ data }: { data: DescribeResponse }) {
 
 /* ── Data Table Tab ────────────────────────────────────────────────────── */
 
+import { Download as DownloadIcon, Columns3, Search as SearchIcon } from 'lucide-react';
+
 function DataTableTab({ sessionId, describe }: { sessionId: string; describe: DescribeResponse }) {
   const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
   const [page, setPage] = useState(0);
   const [pageSize] = useState(50);
   const [sortBy, setSortBy] = useState<string>('');
@@ -122,6 +125,9 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
   const [filterCol, setFilterCol] = useState('');
   const [filterVal, setFilterVal] = useState('');
   const [activeFilter, setActiveFilter] = useState<{ col: string; val: string } | null>(null);
+  const [globalSearch, setGlobalSearch] = useState('');
+  const [showColumnPicker, setShowColumnPicker] = useState(false);
+  const [hiddenCols, setHiddenCols] = useState<Set<string>>(new Set());
 
   const { data, isLoading } = useQuery({
     queryKey: ['cad-elements', sessionId, page, pageSize, sortBy, sortOrder, activeFilter],
@@ -136,11 +142,12 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
   });
 
   const totalPages = data ? Math.ceil(data.total / pageSize) : 0;
-  const visibleCols = useMemo(() => {
+
+  // Smart column selection: priority columns first, then rest
+  const allCols = useMemo(() => {
     if (!data?.columns) return [];
-    // Show max 12 columns, prioritize grouping + quantity
-    const priority = ['category', 'type name', 'family', 'level', 'material', 'volume', 'area', 'length', 'count'];
-    const sorted = [...data.columns].sort((a, b) => {
+    const priority = ['category', 'type name', 'family', 'family name', 'level', 'material', 'workset', 'volume', 'area', 'length', 'count', 'width', 'height', 'depth'];
+    return [...data.columns].sort((a, b) => {
       const ai = priority.indexOf(a.toLowerCase());
       const bi = priority.indexOf(b.toLowerCase());
       if (ai >= 0 && bi >= 0) return ai - bi;
@@ -148,8 +155,44 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
       if (bi >= 0) return 1;
       return 0;
     });
-    return sorted.slice(0, 12);
   }, [data?.columns]);
+
+  const visibleCols = useMemo(() => {
+    const cols = allCols.filter((c) => !hiddenCols.has(c));
+    return cols.slice(0, 15); // max 15 visible
+  }, [allCols, hiddenCols]);
+
+  // Client-side global search on visible rows
+  const displayRows = useMemo(() => {
+    if (!data?.rows) return [];
+    if (!globalSearch.trim()) return data.rows;
+    const q = globalSearch.toLowerCase();
+    return data.rows.filter((row) =>
+      Object.values(row).some((v) => v != null && String(v).toLowerCase().includes(q))
+    );
+  }, [data?.rows, globalSearch]);
+
+  // Export current view to CSV
+  const handleExportCSV = useCallback(() => {
+    if (!data?.rows || data.rows.length === 0) return;
+    const cols = visibleCols;
+    const header = cols.join(',');
+    const rows = displayRows.map((row) =>
+      cols.map((col) => {
+        const val = String(row[col] ?? '');
+        return val.includes(',') || val.includes('"') || val.includes('\n') ? `"${val.replace(/"/g, '""')}"` : val;
+      }).join(',')
+    );
+    const csv = [header, ...rows].join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `cad-data-export.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    addToast({ type: 'success', title: t('explorer.exported', { defaultValue: 'Exported to CSV' }) });
+  }, [data?.rows, visibleCols, displayRows, addToast, t]);
 
   const handleSort = useCallback((col: string) => {
     if (sortBy === col) {
@@ -170,40 +213,95 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
 
   return (
     <div className="space-y-3">
-      {/* Filter bar */}
+      {/* Toolbar */}
       <div className="flex items-center gap-2 flex-wrap">
-        <Filter size={14} className="text-content-tertiary" />
-        <select
-          value={filterCol}
-          onChange={(e) => setFilterCol(e.target.value)}
-          className="h-7 rounded-md border border-border bg-surface-primary px-2 text-xs"
-        >
-          <option value="">{t('explorer.filter_column', { defaultValue: 'Column...' })}</option>
-          {describe.columns.filter((c) => c.dtype === 'string').map((c) => (
-            <option key={c.name} value={c.name}>{c.name}</option>
-          ))}
-        </select>
-        <span className="text-2xs text-content-tertiary">=</span>
-        <input
-          value={filterVal}
-          onChange={(e) => setFilterVal(e.target.value)}
-          placeholder={t('explorer.filter_value', { defaultValue: 'Value...' })}
-          className="h-7 rounded-md border border-border bg-surface-primary px-2 text-xs w-32"
-          onKeyDown={(e) => e.key === 'Enter' && applyFilter()}
-        />
-        <Button variant="ghost" size="sm" onClick={applyFilter} disabled={!filterCol || !filterVal}>
-          {t('common.apply', { defaultValue: 'Apply' })}
-        </Button>
+        {/* Global search */}
+        <div className="relative flex-1 min-w-[180px] max-w-xs">
+          <SearchIcon size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-content-tertiary" />
+          <input
+            value={globalSearch}
+            onChange={(e) => setGlobalSearch(e.target.value)}
+            placeholder={t('explorer.search_all', { defaultValue: 'Search all columns...' })}
+            className="h-7 w-full rounded-md border border-border bg-surface-primary pl-7 pr-2 text-xs focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue outline-none"
+          />
+          {globalSearch && (
+            <button onClick={() => setGlobalSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-content-quaternary hover:text-content-secondary">
+              <X size={12} />
+            </button>
+          )}
+        </div>
+
+        {/* Column filter */}
+        <div className="flex items-center gap-1">
+          <Filter size={13} className="text-content-tertiary" />
+          <select value={filterCol} onChange={(e) => setFilterCol(e.target.value)} className="h-7 rounded-md border border-border bg-surface-primary px-1.5 text-xs max-w-[120px]">
+            <option value="">{t('explorer.filter_by', { defaultValue: 'Filter...' })}</option>
+            {describe.columns.filter((c) => c.dtype === 'string' && c.unique < 200).map((c) => (
+              <option key={c.name} value={c.name}>{c.name}</option>
+            ))}
+          </select>
+          {filterCol && (
+            <input
+              value={filterVal}
+              onChange={(e) => setFilterVal(e.target.value)}
+              placeholder="="
+              className="h-7 rounded-md border border-border bg-surface-primary px-1.5 text-xs w-24"
+              onKeyDown={(e) => e.key === 'Enter' && applyFilter()}
+            />
+          )}
+          {filterCol && filterVal && (
+            <button onClick={applyFilter} className="h-7 px-2 rounded-md text-2xs font-medium bg-oe-blue text-white">OK</button>
+          )}
+        </div>
+
         {activeFilter && (
-          <button onClick={() => setActiveFilter(null)} className="text-xs text-oe-blue hover:underline flex items-center gap-1">
-            <X size={12} /> {t('explorer.clear_filter', { defaultValue: 'Clear' })}
+          <Badge variant="blue" size="sm" className="cursor-pointer" onClick={() => setActiveFilter(null)}>
+            {activeFilter.col}="{activeFilter.val}" <X size={10} className="ml-1 inline" />
+          </Badge>
+        )}
+
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Column picker */}
+        <div className="relative">
+          <button
+            onClick={() => setShowColumnPicker(!showColumnPicker)}
+            className="h-7 px-2 rounded-md border border-border bg-surface-primary text-xs text-content-secondary hover:bg-surface-secondary flex items-center gap-1"
+            title={t('explorer.columns_settings', { defaultValue: 'Show/Hide Columns' })}
+          >
+            <Columns3 size={13} /> {visibleCols.length}/{allCols.length}
           </button>
-        )}
-        {activeFilter && (
-          <Badge variant="blue" size="sm">{activeFilter.col} = "{activeFilter.val}"</Badge>
-        )}
-        <span className="ml-auto text-2xs text-content-tertiary tabular-nums">
-          {data?.total.toLocaleString() ?? '...'} {t('explorer.rows', { defaultValue: 'rows' })}
+          {showColumnPicker && (
+            <div className="absolute right-0 top-full mt-1 w-56 max-h-64 overflow-y-auto rounded-lg border border-border-light bg-surface-elevated shadow-xl z-20 p-2">
+              <p className="text-2xs font-semibold text-content-tertiary uppercase px-2 py-1 mb-1">{t('explorer.visible_columns', { defaultValue: 'Visible Columns' })}</p>
+              {allCols.slice(0, 30).map((col) => (
+                <label key={col} className="flex items-center gap-2 px-2 py-1 rounded hover:bg-surface-secondary cursor-pointer text-xs">
+                  <input
+                    type="checkbox"
+                    checked={!hiddenCols.has(col)}
+                    onChange={() => setHiddenCols((prev) => { const next = new Set(prev); next.has(col) ? next.delete(col) : next.add(col); return next; })}
+                    className="rounded border-border text-oe-blue focus:ring-oe-blue/30"
+                  />
+                  <span className="truncate text-content-secondary">{col}</span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Export CSV */}
+        <button
+          onClick={handleExportCSV}
+          className="h-7 px-2 rounded-md border border-border bg-surface-primary text-xs text-content-secondary hover:bg-surface-secondary flex items-center gap-1"
+          title={t('explorer.export_csv', { defaultValue: 'Export CSV' })}
+        >
+          <DownloadIcon size={13} /> CSV
+        </button>
+
+        {/* Row count */}
+        <span className="text-2xs text-content-tertiary tabular-nums shrink-0">
+          {globalSearch ? `${displayRows.length}/` : ''}{data?.total.toLocaleString() ?? '...'} {t('explorer.rows', { defaultValue: 'rows' })}
         </span>
       </div>
 
@@ -239,7 +337,7 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
                     </td>
                   </tr>
                 ))
-              ) : (data?.rows ?? []).map((row, idx) => (
+              ) : displayRows.map((row, idx) => (
                 <tr key={idx} className="border-b border-border-light hover:bg-surface-secondary/30">
                   <td className="px-2 py-1.5 text-center text-content-quaternary tabular-nums">
                     {page * pageSize + idx + 1}
@@ -557,8 +655,13 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
               </tbody>
             </table>
           </div>
-          <div className="px-4 py-2 bg-surface-secondary/30 text-2xs text-content-quaternary border-t border-border-light">
-            {sortedGroups.length} {t('explorer.groups', { defaultValue: 'groups' })} · {result.total_count.toLocaleString()} {t('explorer.elements', { defaultValue: 'elements' })} · {t('explorer.click_header_sort', { defaultValue: 'Click column headers to sort' })}
+          <div className="flex items-center justify-between px-4 py-2 bg-surface-secondary/30 border-t border-border-light">
+            <span className="text-2xs text-content-quaternary">
+              {sortedGroups.length} {t('explorer.groups', { defaultValue: 'groups' })} · {result.total_count.toLocaleString()} {t('explorer.elements', { defaultValue: 'elements' })} · {t('explorer.click_header_sort', { defaultValue: 'Click column headers to sort' })}
+            </span>
+            <Button variant="secondary" size="sm" onClick={() => navigate(`/cad-takeoff`)} className="shrink-0 whitespace-nowrap">
+              {t('explorer.create_boq_from_pivot', { defaultValue: 'Create BOQ' })}
+            </Button>
           </div>
         </Card>
       ) : result && sortedGroups.length === 0 ? (
@@ -745,8 +848,39 @@ function DescribeTab({ sessionId, describe }: { sessionId: string; describe: Des
     enabled: !!selectedCol,
   });
 
+  // Data quality score
+  const qualityScore = useMemo(() => {
+    const totalCells = describe.columns.length * describe.total_elements;
+    const filledCells = describe.columns.reduce((s, c) => s + c.non_null, 0);
+    return totalCells > 0 ? (filledCells / totalCells) * 100 : 0;
+  }, [describe]);
+  const lowCoverageCols = useMemo(() =>
+    describe.columns.filter((c) => c.non_null < describe.total_elements * 0.1 && c.non_null > 0).length,
+  [describe]);
+
   return (
     <div className="space-y-4">
+      {/* Data quality summary */}
+      <div className="grid grid-cols-3 gap-3">
+        <Card className="p-3">
+          <p className="text-2xs text-content-tertiary uppercase">{t('explorer.data_completeness', { defaultValue: 'Data Completeness' })}</p>
+          <p className={`text-lg font-bold tabular-nums ${qualityScore > 50 ? 'text-green-600' : qualityScore > 20 ? 'text-amber-600' : 'text-red-500'}`}>
+            {qualityScore.toFixed(1)}%
+          </p>
+        </Card>
+        <Card className="p-3">
+          <p className="text-2xs text-content-tertiary uppercase">{t('explorer.useful_columns', { defaultValue: 'Useful Columns' })}</p>
+          <p className="text-lg font-bold text-content-primary tabular-nums">
+            {describe.columns.filter((c) => c.non_null > describe.total_elements * 0.5).length}
+            <span className="text-xs text-content-quaternary font-normal ml-1">/ {describe.total_columns}</span>
+          </p>
+        </Card>
+        <Card className="p-3">
+          <p className="text-2xs text-content-tertiary uppercase">{t('explorer.sparse_columns', { defaultValue: 'Sparse (<10%)' })}</p>
+          <p className="text-lg font-bold text-amber-600 tabular-nums">{lowCoverageCols}</p>
+        </Card>
+      </div>
+
       {/* Column statistics table */}
       <Card padding="none" className="overflow-hidden">
         <div className="px-4 py-3 border-b border-border-light bg-surface-secondary/30">
