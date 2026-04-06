@@ -408,7 +408,7 @@ function EditableResourceRow({ data, ctx }: { data: Record<string, unknown>; ctx
     <div
       className="flex items-center w-full h-full pr-3 gap-2 select-none group/res text-[11px]
                   bg-surface-secondary/40 border-b border-border-light/50"
-      style={{ paddingLeft: '160px' }}
+      style={{ paddingLeft: '186px' }}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -501,7 +501,7 @@ export function ResourceFullWidthRenderer(params: ICellRendererParams) {
       <div
         className="flex items-center w-full h-full pr-3 gap-2 select-none
                     bg-surface-secondary/20 border-b border-border-light/30"
-        style={{ paddingLeft: '160px' }}
+        style={{ paddingLeft: '186px' }}
         onContextMenu={(e) => {
           e.preventDefault();
           e.stopPropagation();
