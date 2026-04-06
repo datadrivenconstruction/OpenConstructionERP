@@ -727,7 +727,7 @@ function ConverterStatus() {
                 ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800'
                 : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800 cursor-pointer hover:bg-amber-100'
             }`}
-            onClick={!c.installed ? () => navigate('/cad-takeoff') : undefined}
+            onClick={!c.installed ? () => navigate('/modules') : undefined}
             title={!c.installed ? t('explorer.click_to_install', { defaultValue: 'Click to install this converter' }) : undefined}
           >
             {c.installed ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
@@ -743,16 +743,16 @@ function ConverterStatus() {
         {notInstalled.length > 0 && (
           <span className="flex items-center gap-1">
             <AlertCircle size={10} />
-            {t('explorer.install_converters_hint', { defaultValue: 'Click on a missing converter to install it, or go to' })}{' '}
-            <button onClick={() => navigate('/cad-takeoff')} className="text-oe-blue hover:underline ml-0.5">
-              {t('explorer.cad_takeoff_page', { defaultValue: 'CAD/BIM Takeoff' })}
+            {t('explorer.install_converters_hint', { defaultValue: 'Missing converters can be installed in' })}{' '}
+            <button onClick={() => navigate('/modules')} className="text-oe-blue hover:underline ml-0.5">
+              {t('explorer.modules_page', { defaultValue: 'Modules' })}
             </button>
           </span>
         )}
         <span className="flex items-center gap-1 ml-auto">
           {t('explorer.powered_by', { defaultValue: 'Powered by' })}{' '}
-          <a href="https://github.com/nicrahner/community-converters" target="_blank" rel="noopener noreferrer" className="text-oe-blue hover:underline">
-            DDC Community Converters
+          <a href="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN" target="_blank" rel="noopener noreferrer" className="text-oe-blue hover:underline">
+            DDC cad2data Converters
           </a>
         </span>
       </div>
