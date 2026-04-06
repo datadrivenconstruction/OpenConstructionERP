@@ -838,6 +838,9 @@ export function BOQEditorPage() {
           }));
           exportBOQToExcel({
             boqTitle: boq?.name ?? 'BOQ',
+            projectName: project?.name,
+            classificationStandard: project?.classification_standard,
+            region: project?.region,
             currency: (boq as unknown as Record<string, unknown>)?.currency as string ?? '\u20ac',
             positions,
             markupTotals: markupTotalsForExport,
