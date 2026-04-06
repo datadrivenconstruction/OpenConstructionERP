@@ -96,6 +96,27 @@ async def _verify_schedule_owner(
     return schedule
 
 
+def _normalize_dependencies(deps: list | None) -> list[dict]:
+    """Normalize dependencies to list[dict].
+
+    Seeded/legacy data may store dependencies as plain UUID strings
+    (e.g. ["uuid"]) instead of the expected dict format
+    (e.g. [{"activity_id": "uuid", "type": "FS", "lag_days": 0}]).
+    This helper ensures a consistent dict format is always returned.
+    """
+    if not deps:
+        return []
+    result: list[dict] = []
+    for dep in deps:
+        if isinstance(dep, str):
+            result.append({"activity_id": dep, "type": "FS", "lag_days": 0})
+        elif isinstance(dep, dict):
+            result.append(dep)
+        else:
+            result.append({"activity_id": str(dep), "type": "FS", "lag_days": 0})
+    return result
+
+
 def _activity_to_response(activity: object) -> ActivityResponse:
     """Convert an Activity ORM model to an ActivityResponse schema."""
     return ActivityResponse(
@@ -111,7 +132,7 @@ def _activity_to_response(activity: object) -> ActivityResponse:
         progress_pct=_str_to_float(activity.progress_pct),
         status=activity.status,
         activity_type=activity.activity_type,
-        dependencies=activity.dependencies or [],
+        dependencies=_normalize_dependencies(activity.dependencies),
         resources=activity.resources or [],
         boq_position_ids=activity.boq_position_ids or [],
         color=activity.color,

@@ -28,6 +28,25 @@ async def _safe_publish(name: str, data: dict, source_module: str = '') -> None:
         await event_bus.publish(name, data, source_module=source_module)
     except Exception:
         _logger_ev.debug('Event publish skipped: %s', name)
+
+
+def _normalize_deps(deps: list | None) -> list[dict]:
+    """Normalize dependencies to list[dict].
+
+    Seeded/legacy data may store dependencies as plain UUID strings.
+    This ensures a consistent dict format for Pydantic schemas.
+    """
+    if not deps:
+        return []
+    result: list[dict] = []
+    for dep in deps:
+        if isinstance(dep, str):
+            result.append({"activity_id": dep, "type": "FS", "lag_days": 0})
+        elif isinstance(dep, dict):
+            result.append(dep)
+        else:
+            result.append({"activity_id": str(dep), "type": "FS", "lag_days": 0})
+    return result
 from app.modules.schedule.models import Activity, Schedule, WorkOrder
 from app.modules.schedule.repository import (
     ActivityRepository,
@@ -442,6 +461,11 @@ class ScheduleService:
         """
         activity = await self.get_activity(activity_id)
 
+        # Capture schedule_id before update_fields() calls expire_all(),
+        # which would invalidate the ORM object and trigger a sync lazy-load
+        # (MissingGreenlet) when accessing activity.schedule_id afterwards.
+        schedule_id_str = str(activity.schedule_id)
+
         fields = data.model_dump(exclude_unset=True)
 
         # Convert float values to strings for storage
@@ -484,7 +508,7 @@ class ScheduleService:
                 "schedule.activity.updated",
                 {
                     "activity_id": str(activity_id),
-                    "schedule_id": str(activity.schedule_id),
+                    "schedule_id": schedule_id_str,
                     "fields": list(fields.keys()),
                 },
                 source_module="oe_schedule",
@@ -862,7 +886,7 @@ class ScheduleService:
                     end_date=str(act.end_date),
                     duration_days=duration,
                     progress_pct=progress,
-                    dependencies=act.dependencies or [],
+                    dependencies=_normalize_deps(act.dependencies),
                     parent_id=act.parent_id,
                     color=act.color,
                     boq_position_ids=act.boq_position_ids or [],
@@ -1450,7 +1474,7 @@ class ScheduleService:
                 "name": a.name or "",
                 "duration_days": a.duration_days or 0,
                 "activity_type": a.activity_type or "task",
-                "dependencies": list(a.dependencies or []),
+                "dependencies": _normalize_deps(a.dependencies),
                 "color": a.color or "#0071e3",
             })
 

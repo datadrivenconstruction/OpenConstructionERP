@@ -518,6 +518,11 @@ class CostModelService:
                 detail="Budget line not found",
             )
 
+        # Capture project_id before update_fields() calls expire_all(),
+        # which would invalidate the ORM object and trigger a sync lazy-load
+        # (MissingGreenlet) when accessing line.project_id afterwards.
+        project_id_str = str(line.project_id)
+
         fields = data.model_dump(exclude_unset=True)
 
         # Convert float values to strings for storage
@@ -540,7 +545,7 @@ class CostModelService:
                 "costmodel.budget_line.updated",
                 {
                     "line_id": str(line_id),
-                    "project_id": str(line.project_id),
+                    "project_id": project_id_str,
                     "fields": list(fields.keys()),
                 },
                 source_module="oe_costmodel",
