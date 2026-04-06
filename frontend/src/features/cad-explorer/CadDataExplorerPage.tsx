@@ -1491,15 +1491,97 @@ export function CadDataExplorerPage() {
     setSearchParams({ session: newSessionId });
   }, [setSearchParams]);
 
+  // Load all sessions for landing page
+  const { data: allSessions = [] } = useQuery({
+    queryKey: ['cad-all-sessions'],
+    queryFn: () => listSessions(),
+    enabled: !sessionId,
+  });
+
   if (!sessionId) {
+    const recentSessions = allSessions.slice(0, 6);
+    const FORMAT_COLORS: Record<string, string> = {
+      RVT: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+      IFC: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
+      DWG: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
+      DGN: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
+    };
+
     return (
-      <div className="max-w-content mx-auto px-4 py-4 space-y-5 animate-fade-in">
+      <div className="max-w-content mx-auto px-4 py-4 space-y-6 animate-fade-in">
         <Breadcrumb items={[
           { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
           { label: t('explorer.title', { defaultValue: 'CAD-BIM Explorer' }) },
         ]} />
+
+        {/* Upload zone */}
         <UploadConvertZone onSessionReady={handleSessionReady} />
-        <SavedSessionsList onOpen={(sid) => setSearchParams({ session: sid })} />
+
+        {/* Recent sessions as cards grid */}
+        {recentSessions.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-content-primary flex items-center gap-2">
+                <Clock size={15} className="text-content-tertiary" />
+                {t('explorer.recent_models', { defaultValue: 'Recent CAD/BIM Models' })}
+              </h2>
+              <span className="text-2xs text-content-quaternary">
+                {allSessions.length} {t('explorer.total_analyses', { defaultValue: 'total' })}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {recentSessions.map((s) => {
+                const fmt = (s.file_format || '').toUpperCase();
+                const timeAgo = s.created_at ? (() => {
+                  const diff = Date.now() - new Date(s.created_at).getTime();
+                  const mins = Math.floor(diff / 60000);
+                  if (mins < 60) return `${mins}m ago`;
+                  const hrs = Math.floor(mins / 60);
+                  if (hrs < 24) return `${hrs}h ago`;
+                  return `${Math.floor(hrs / 24)}d ago`;
+                })() : '';
+
+                return (
+                  <Card
+                    key={s.session_id}
+                    hoverable
+                    className="cursor-pointer transition-all hover:shadow-md"
+                    onClick={() => setSearchParams({ session: s.session_id })}
+                  >
+                    <div className="p-4">
+                      <div className="flex items-start justify-between gap-2 mb-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle shrink-0">
+                          <Database size={18} className="text-oe-blue" />
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className={`px-2 py-0.5 rounded-md text-2xs font-bold ${FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600'}`}>
+                            {fmt}
+                          </span>
+                          {s.is_permanent ? (
+                            <Badge variant="success" size="sm">{t('explorer.saved', { defaultValue: 'Saved' })}</Badge>
+                          ) : (
+                            <Badge variant="neutral" size="sm">24h</Badge>
+                          )}
+                        </div>
+                      </div>
+                      <h3 className="text-sm font-semibold text-content-primary truncate mb-1">
+                        {s.display_name}
+                      </h3>
+                      <div className="flex items-center gap-3 text-2xs text-content-tertiary">
+                        <span className="tabular-nums">{s.element_count.toLocaleString()} {t('explorer.elements', { defaultValue: 'elements' })}</span>
+                        <span>{s.extraction_time.toFixed(1)}s</span>
+                        {timeAgo && <span className="text-content-quaternary">{timeAgo}</span>}
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Converter status */}
+        <ConverterStatus />
       </div>
     );
   }
