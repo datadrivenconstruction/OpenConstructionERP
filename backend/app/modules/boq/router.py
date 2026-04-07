@@ -165,15 +165,20 @@ async def _verify_project_owner_for_boq(
     user_id: str,
     payload: dict | None = None,
 ) -> None:
-    """Verify the current user owns the given project. Admins bypass."""
-    if payload and payload.get("role") == "admin":
-        return
+    """Verify the current user owns the given project. Admins bypass.
+
+    Treats archived (soft-deleted) projects as 404 — no operations on
+    archived projects are permitted via this gateway.
+    """
+    is_admin = bool(payload and payload.get("role") == "admin")
     from app.modules.projects.repository import ProjectRepository
 
     project_repo = ProjectRepository(session)
     project = await project_repo.get_by_id(project_id)
-    if project is None:
+    if project is None or project.status == "archived":
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    if is_admin:
+        return
     if str(project.owner_id) != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -1800,19 +1805,35 @@ async def export_boq_excel(
     boq_id: uuid.UUID,
     service: BOQService = Depends(_get_service),
 ) -> StreamingResponse:
-    """Export BOQ positions as an Excel (xlsx) file with formatting."""
+    """Export BOQ positions as an Excel (xlsx) file with formatting.
+
+    The header layout includes:
+      1. Standard columns (Pos, Description, Unit, Quantity, Rate, Total, Classification)
+      2. Any custom columns the user has defined (from `boq.metadata_.custom_columns`)
+         — values come from `position.metadata_.custom_fields`
+
+    This guarantees that data added through the Custom Columns dialog
+    survives a round-trip through Excel.
+    """
     from openpyxl import Workbook
     from openpyxl.styles import Alignment, Font, numbers
     from openpyxl.utils import get_column_letter
 
     boq_data = await service.get_boq_with_positions(boq_id)
+    boq_obj = await service.get_boq(boq_id)
+
+    # ── Custom column definitions from BOQ metadata ──────────────────────
+    boq_meta = boq_obj.metadata_ if isinstance(boq_obj.metadata_, dict) else {}
+    custom_columns: list[dict] = boq_meta.get("custom_columns", [])
+    # Sort by sort_order (defensive — backend assigns it on insert)
+    custom_columns = sorted(custom_columns, key=lambda c: c.get("sort_order", 0))
 
     wb = Workbook()
     ws = wb.active
     ws.title = "BOQ"
 
-    # ── Header row ────────────────────────────────────────────────────────
-    headers = [
+    # ── Header row: standard + custom ────────────────────────────────────
+    standard_headers = [
         "Pos.",
         "Description",
         "Unit",
@@ -1821,6 +1842,8 @@ async def export_boq_excel(
         "Total",
         "Classification",
     ]
+    custom_headers = [c.get("display_name", c.get("name", "")) for c in custom_columns]
+    headers = standard_headers + custom_headers
     bold_font = Font(bold=True)
 
     for col_idx, header in enumerate(headers, start=1):
@@ -1829,6 +1852,7 @@ async def export_boq_excel(
 
     # ── Position rows ─────────────────────────────────────────────────────
     number_format = numbers.FORMAT_NUMBER_COMMA_SEPARATED1  # #,##0.00
+    n_standard = len(standard_headers)
 
     for row_idx, pos in enumerate(boq_data.positions, start=2):
         ws.cell(row=row_idx, column=1, value=pos.ordinal)
@@ -1849,6 +1873,28 @@ async def export_boq_excel(
             column=7,
             value=_get_classification_code(pos.classification),
         )
+
+        # ── Custom column values ─────────────────────────────────────────
+        # Look up `position.metadata_.custom_fields[col_name]` for each
+        # custom column. Missing values render as empty cells.
+        if custom_columns:
+            pos_meta_raw = getattr(pos, "metadata", None) or getattr(pos, "metadata_", None) or {}
+            custom_fields = (
+                pos_meta_raw.get("custom_fields", {})
+                if isinstance(pos_meta_raw, dict)
+                else {}
+            )
+            for offset, col_def in enumerate(custom_columns):
+                col_name = col_def.get("name", "")
+                col_type = col_def.get("column_type", "text")
+                value = custom_fields.get(col_name, "") if isinstance(custom_fields, dict) else ""
+                cell = ws.cell(row=row_idx, column=n_standard + 1 + offset, value=value)
+                if col_type == "number" and value not in (None, ""):
+                    try:
+                        cell.value = float(value)
+                        cell.number_format = number_format
+                    except (TypeError, ValueError):
+                        pass  # Keep as text fallback
 
     # ── Grand total row ───────────────────────────────────────────────────
     total_row = len(boq_data.positions) + 2
@@ -3938,25 +3984,32 @@ async def add_custom_column(
 
     options = data.get("options", [])
 
+    from sqlalchemy.orm.attributes import flag_modified
+
     boq = await service.get_boq(boq_id)
-    meta = dict(boq.metadata_) if isinstance(boq.metadata_, dict) else {}
-    columns: list[dict] = meta.get("custom_columns", [])
+    # Build a fresh metadata dict with a fresh list — both via deep copy so
+    # SQLAlchemy doesn't see "same identity = no change". We then explicitly
+    # flag_modified to defeat the JSON column's value-based dirty detection
+    # which otherwise misses nested mutations.
+    existing_meta = boq.metadata_ if isinstance(boq.metadata_, dict) else {}
+    existing_columns = list(existing_meta.get("custom_columns", []))
 
     # Check uniqueness
-    if any(c["name"] == name for c in columns):
+    if any(c.get("name") == name for c in existing_columns):
         raise HTTPException(400, f"Column '{name}' already exists")
 
     col_def = {
         "name": name,
         "display_name": display_name,
         "column_type": column_type,
-        "options": options,
-        "sort_order": len(columns),
+        "options": list(options),
+        "sort_order": len(existing_columns),
     }
-    columns.append(col_def)
-    meta["custom_columns"] = columns
+    new_columns = [*existing_columns, col_def]
+    new_meta = {**existing_meta, "custom_columns": new_columns}
 
-    boq.metadata_ = meta
+    boq.metadata_ = new_meta
+    flag_modified(boq, "metadata_")
     await service.session.flush()
     await service.session.commit()
 
@@ -3974,11 +4027,115 @@ async def delete_custom_column(
     service: BOQService = Depends(_get_service),
 ) -> None:
     """Remove a custom column definition (data in positions preserved)."""
-    boq = await service.get_boq(boq_id)
-    meta = dict(boq.metadata_) if isinstance(boq.metadata_, dict) else {}
-    columns: list[dict] = meta.get("custom_columns", [])
-    meta["custom_columns"] = [c for c in columns if c["name"] != column_name]
+    from sqlalchemy.orm.attributes import flag_modified
 
-    boq.metadata_ = meta
+    boq = await service.get_boq(boq_id)
+    existing_meta = boq.metadata_ if isinstance(boq.metadata_, dict) else {}
+    existing_columns = list(existing_meta.get("custom_columns", []))
+    new_columns = [c for c in existing_columns if c.get("name") != column_name]
+    new_meta = {**existing_meta, "custom_columns": new_columns}
+
+    boq.metadata_ = new_meta
+    flag_modified(boq, "metadata_")
     await service.session.flush()
     await service.session.commit()
+
+
+# ── Renumber positions (gap-of-10 ordinal scheme) ───────────────────────────
+
+
+@router.post(
+    "/boqs/{boq_id}/renumber",
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def renumber_positions(
+    boq_id: uuid.UUID,
+    service: BOQService = Depends(_get_service),
+) -> dict:
+    """Renumber every position in a BoQ using a professional gap-of-10 scheme.
+
+    The output ordinals look like:
+
+        01            ← top-level section
+        01.10         ← first position in section 01
+        01.20         ← second position in section 01
+        01.30         ← …
+        02            ← next section
+        02.10
+        02.20
+
+    The gap of 10 mirrors what RIB iTWO and BRZ produce by default — it lets
+    estimators *insert* a position later (e.g. ``01.15``) without renumbering
+    everything else, which is why every German tender uses this style.
+
+    Positions are processed in their current ``sort_order`` so the user's
+    drag-and-drop order is preserved. Only the ``ordinal`` field is rewritten.
+    """
+    boq_data = await service.get_boq_with_positions(boq_id)
+    positions = list(boq_data.positions)
+
+    def _is_section(pos: object) -> bool:
+        """Mirror the canonical frontend isSection check (api.ts:136).
+
+        Sections are stored with EITHER unit="" (demo seed convention) OR
+        unit="section" (create_section endpoint convention) — handle both.
+        """
+        u = (getattr(pos, "unit", "") or "").strip().lower()
+        return u == "" or u == "section"
+
+    # Build hierarchy by parent_id. Top-level positions have parent_id=None.
+    by_parent: dict[str | None, list] = {}
+    for p in positions:
+        key = str(p.parent_id) if p.parent_id else None
+        by_parent.setdefault(key, []).append(p)
+
+    # Sort each group by sort_order so renumber matches the on-screen order.
+    for key in by_parent:
+        by_parent[key].sort(key=lambda x: (x.sort_order or 0, x.ordinal or ""))
+
+    updates: list[tuple[uuid.UUID, str]] = []  # (id, new_ordinal)
+    section_idx = 0
+
+    def _walk(parent_key: str | None, parent_ordinal: str | None) -> None:
+        """Walk one branch of the hierarchy and assign ordinals."""
+        nonlocal section_idx
+        children = by_parent.get(parent_key, [])
+        # First pass: figure out which children are sections (unit empty) vs leaf positions.
+        # Sections at top level get 01, 02, 03; child positions get parent.10, parent.20, ...
+        leaf_idx = 0
+        for child in children:
+            is_section = _is_section(child)
+            if is_section:
+                if parent_key is None:
+                    # Top-level section
+                    section_idx += 1
+                    new_ord = f"{section_idx:02d}"
+                else:
+                    # Nested section (rare) — number as parent.NN
+                    leaf_idx += 1
+                    new_ord = f"{parent_ordinal}.{leaf_idx * 10:02d}"
+            else:
+                leaf_idx += 1
+                if parent_ordinal:
+                    new_ord = f"{parent_ordinal}.{leaf_idx * 10:02d}"
+                else:
+                    # Top-level leaf without a parent section: 0010, 0020, …
+                    new_ord = f"{leaf_idx * 10:04d}"
+            updates.append((child.id, new_ord))
+            # Recurse into children of this node
+            _walk(str(child.id), new_ord)
+
+    _walk(None, None)
+
+    # Apply via repository
+    n_updated = 0
+    for pos_id, new_ordinal in updates:
+        await service.position_repo.update_fields(pos_id, ordinal=new_ordinal)
+        n_updated += 1
+
+    await service.session.commit()
+
+    return {
+        "renumbered": n_updated,
+        "scheme": "gap-of-10",
+    }

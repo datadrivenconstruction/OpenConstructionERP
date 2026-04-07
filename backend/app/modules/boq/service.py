@@ -1207,30 +1207,56 @@ class BOQService:
         if "metadata" in fields:
             fields["metadata_"] = fields.pop("metadata")
 
-        # If metadata contains resources, derive unit_rate from resource totals
+        # If metadata contains resources, derive unit_rate from resource totals.
+        #
+        # IMPORTANT: only re-derive when this update was *triggered by* a change
+        # to quantity or to the resources themselves. Otherwise — for example
+        # when the user edits an unrelated custom column and the frontend
+        # echoes back the existing metadata — we'd silently rewrite unit_rate
+        # and total even though nothing meaningful changed.
         meta = fields.get("metadata_", None)
         if meta is None and "metadata" in fields:
             meta = fields.get("metadata")
         new_quantity = fields.get("quantity", position.quantity)
         new_unit_rate = fields.get("unit_rate", position.unit_rate)
 
+        # Heuristic: a "resource-driven" update is one where either (a) the
+        # quantity changed (resources scale with qty), or (b) the resources
+        # list itself differs from what's currently stored. Pure metadata
+        # patches that just touch custom_fields/notes/etc. should NOT trigger
+        # a recalculation.
+        triggered_by_qty = "quantity" in fields
+        triggered_by_resources = False
         if meta and isinstance(meta, dict) and isinstance(meta.get("resources"), list):
-            resources = meta["resources"]
-            if resources:
-                resource_total = sum(
-                    float(r.get("quantity", 0)) * float(r.get("unit_rate", 0))
-                    for r in resources
-                    if isinstance(r, dict)
-                )
-                qty_float = _str_to_float(new_quantity)
-                if qty_float > 0:
-                    new_unit_rate = str(round(resource_total / qty_float, 4))
-                    fields["unit_rate"] = new_unit_rate
+            existing_meta = position.metadata_ if isinstance(position.metadata_, dict) else {}
+            existing_resources = existing_meta.get("resources") if isinstance(existing_meta, dict) else None
+            if existing_resources != meta["resources"]:
+                triggered_by_resources = True
 
-        # Recalculate total
-        fields["total"] = _compute_total(
-            _str_to_float(new_quantity), _str_to_float(new_unit_rate)
-        )
+        if (
+            (triggered_by_qty or triggered_by_resources)
+            and meta and isinstance(meta, dict)
+            and isinstance(meta.get("resources"), list)
+            and meta["resources"]
+        ):
+            resources = meta["resources"]
+            resource_total = sum(
+                float(r.get("quantity", 0)) * float(r.get("unit_rate", 0))
+                for r in resources
+                if isinstance(r, dict)
+            )
+            qty_float = _str_to_float(new_quantity)
+            if qty_float > 0:
+                new_unit_rate = str(round(resource_total / qty_float, 4))
+                fields["unit_rate"] = new_unit_rate
+
+        # Recalculate total only when something pricing-related actually changed.
+        # A pure metadata patch (e.g. setting a custom column value) leaves the
+        # existing total intact.
+        if "quantity" in fields or "unit_rate" in fields or triggered_by_resources:
+            fields["total"] = _compute_total(
+                _str_to_float(new_quantity), _str_to_float(new_unit_rate)
+            )
 
         if fields:
             await self.position_repo.update_fields(position_id, **fields)

@@ -480,6 +480,29 @@ h4 {
   background: var(--oe-bg-tertiary, #273344);
 }
 
+/* ── Unpriced position rows (qty>0 but rate=0) ───────────────────────
+   Highlights positions that still need a unit rate so users can spot
+   incomplete work at a glance. The amber tint is subtle in light mode
+   and slightly stronger in dark mode for visibility. */
+
+.ag-theme-quartz .ag-row.oe-unpriced-row {
+  background: rgba(245, 158, 11, 0.06); /* amber-500/6% */
+  box-shadow: inset 3px 0 0 rgba(245, 158, 11, 0.7);
+}
+
+.ag-theme-quartz .ag-row.oe-unpriced-row:hover {
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.dark .ag-theme-quartz .ag-row.oe-unpriced-row {
+  background: rgba(245, 158, 11, 0.1);
+  box-shadow: inset 3px 0 0 rgba(251, 191, 36, 0.8);
+}
+
+.dark .ag-theme-quartz .ag-row.oe-unpriced-row:hover {
+  background: rgba(245, 158, 11, 0.18);
+}
+
 /* ── Premium Visual Polish ──────────────────────────────────────────── */
 
 /* Smooth scroll behavior */

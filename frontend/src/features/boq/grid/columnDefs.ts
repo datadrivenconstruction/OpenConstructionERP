@@ -210,12 +210,13 @@ export interface CustomColumnDef {
   display_name: string;
   column_type: 'text' | 'number' | 'date' | 'select';
   options?: string[];
-  sort_order: number;
+  sort_order?: number;
 }
 
 export function getCustomColumnDefs(customColumns: CustomColumnDef[]): ColDef[] {
   return customColumns
-    .sort((a, b) => a.sort_order - b.sort_order)
+    .slice()
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
     .map((col) => {
       const base: ColDef = {
         headerName: col.display_name,

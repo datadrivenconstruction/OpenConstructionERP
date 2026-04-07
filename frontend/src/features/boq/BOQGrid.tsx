@@ -537,6 +537,15 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     // Add 'group' to regular position rows so hover actions (save/delete) appear on hover
     if (!params.data?._isSection && !params.data?._isFooter && !params.data?._isResource && !params.data?._isAddResource) {
       classes.push('group');
+
+      // Highlight unpriced positions (unit_rate is 0/empty) so the user can
+      // see at a glance what still needs work. Skip resource sub-rows and
+      // section headers — only real position rows.
+      const rate = Number(params.data?.unit_rate ?? 0);
+      const qty = Number(params.data?.quantity ?? 0);
+      if ((!rate || rate === 0) && qty > 0) {
+        classes.push('oe-unpriced-row');
+      }
     }
     return classes.join(' ');
   }, []);

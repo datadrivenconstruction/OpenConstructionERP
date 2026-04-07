@@ -69,6 +69,7 @@ import { QualityScoreRing, TipsPanel, QuickAddFAB, EmptyBOQOnboarding, ExportWar
 import { ActivityPanel } from './ActivityPanel';
 import { CostDatabaseSearchModal, AssemblyPickerModal } from './BOQModals';
 import { CatalogPickerModal, type CatalogResource } from './CatalogPickerModal';
+import { CustomColumnsDialog } from './CustomColumnsDialog';
 
 /* ── Re-exports for tests ────────────────────────────────────────────── */
 
@@ -227,6 +228,43 @@ export function BOQEditorPage() {
     onSuccess: () => invalidateAll(),
   });
 
+  const renumberMutation = useMutation({
+    mutationFn: () => boqApi.renumberPositions(boqId!),
+    onSuccess: (result) => {
+      invalidateAll();
+      addToast({
+        type: 'success',
+        title: t('boq.renumber_done', {
+          defaultValue: '{{count}} positions renumbered',
+          count: result.renumbered,
+        }),
+        message: t('boq.renumber_done_hint', {
+          defaultValue: 'Using gap-of-10 scheme — you can now insert positions like 01.15 between 01.10 and 01.20',
+        }),
+      });
+    },
+    onError: (err) => {
+      addToast({
+        type: 'error',
+        title: t('boq.renumber_failed', { defaultValue: 'Renumber failed' }),
+        message: err instanceof Error ? err.message : '',
+      });
+    },
+  });
+
+  const handleRenumber = useCallback(() => {
+    if (
+      window.confirm(
+        t('boq.renumber_confirm', {
+          defaultValue:
+            'Renumber all positions using the gap-of-10 scheme (01.10, 01.20, …)?\n\nThis overwrites any manually edited position numbers but keeps the current order. The gap-of-10 lets you insert new positions later (e.g. 01.15) without renumbering everything else.',
+        }),
+      )
+    ) {
+      renumberMutation.mutate();
+    }
+  }, [renumberMutation, t]);
+
   /**
    * Wrap deleteMutation with a 5-second deferred delete.
    * Optimistically removes the position from the UI and shows an undo toast.
@@ -364,6 +402,7 @@ export function BOQEditorPage() {
   const [costDbModalOpen, setCostDbModalOpen] = useState(false);
   const [assemblyModalOpen, setAssemblyModalOpen] = useState(false);
   const [excelPasteOpen, setExcelPasteOpen] = useState(false);
+  const [customColumnsOpen, setCustomColumnsOpen] = useState(false);
   const [isExcelPasteImporting, setIsExcelPasteImporting] = useState(false);
   /** When set, the cost DB modal adds a resource to this position instead of creating a new position. */
   const [costDbForPositionId, setCostDbForPositionId] = useState<string | null>(null);
@@ -800,28 +839,53 @@ export function BOQEditorPage() {
       if (!boqId) return;
       const allPositions = boq?.positions ?? [];
 
-      // Determine the parent section for ordinal generation
+      /* Generate the next ordinal using a "gap-of-10" scheme matching what
+       * RIB iTWO and BRZ produce by default:
+       *
+       *   01.10, 01.20, 01.30, …            ← child positions
+       *   01, 02, 03, …                     ← top-level sections
+       *   0010, 0020, …                     ← top-level positions (no section)
+       *
+       * The +10 gap lets the user later insert 01.15 between 01.10 and 01.20
+       * without renumbering everything. We look at the LARGEST existing
+       * sibling ordinal (parsed) and add 10 — that way ordinals stay sorted
+       * even if previous ones were manually edited. */
+
+      const nextChildOrdinal = (parentOrdinal: string, siblings: Position[]): string => {
+        // Pick the largest numeric suffix among siblings (e.g. "01.30" → 30)
+        let maxSuffix = 0;
+        const prefix = `${parentOrdinal}.`;
+        for (const sib of siblings) {
+          if (!sib.ordinal?.startsWith(prefix)) continue;
+          const suffix = parseInt(sib.ordinal.slice(prefix.length), 10);
+          if (!isNaN(suffix) && suffix > maxSuffix) maxSuffix = suffix;
+        }
+        const nextSuffix = maxSuffix + 10;
+        return `${parentOrdinal}.${String(nextSuffix).padStart(2, '0')}`;
+      };
+
       let ordinal: string;
 
       if (parentId) {
         const parentSection = allPositions.find((p) => p.id === parentId);
         const parentOrdinal = parentSection?.ordinal ?? '01';
-        const childCount = allPositions.filter((p) => p.parent_id === parentId).length;
-        ordinal = `${parentOrdinal}.${String(childCount + 1)}`;
+        const siblings = allPositions.filter((p) => p.parent_id === parentId);
+        ordinal = nextChildOrdinal(parentOrdinal, siblings);
       } else {
         // Add to last section, or generate top-level ordinal
         const lastSection = grouped.sections[grouped.sections.length - 1];
         if (lastSection) {
           parentId = lastSection.section.id;
-          const childCount = lastSection.children.length;
-          ordinal = `${lastSection.section.ordinal}.${String(childCount + 1)}`;
+          ordinal = nextChildOrdinal(lastSection.section.ordinal, lastSection.children);
         } else {
-          // No sections — generate a unique top-level ordinal
-          const maxOrdinal = allPositions.reduce((max, p) => {
-            const num = parseInt(p.ordinal, 10);
-            return !isNaN(num) && num > max ? num : max;
-          }, 0);
-          ordinal = String(maxOrdinal + 1).padStart(3, '0');
+          // No sections — generate a unique top-level ordinal in 4-digit gap-of-10
+          let maxTop = 0;
+          for (const p of allPositions) {
+            const num = parseInt(p.ordinal ?? '', 10);
+            if (!isNaN(num) && num > maxTop) maxTop = num;
+          }
+          const next = (Math.floor(maxTop / 10) + 1) * 10;
+          ordinal = String(next).padStart(4, '0');
         }
       }
 
@@ -2030,6 +2094,10 @@ export function BOQEditorPage() {
           onCancelAnomalies={isCheckingAnomalies ? handleCancelAnomalies : undefined}
           anomalyCount={anomalyMap.size}
           onAcceptAllAnomalies={anomalyMap.size > 0 ? handleAcceptAllAnomalies : undefined}
+          onManageColumns={() => setCustomColumnsOpen(true)}
+          customColumnCount={boqCustomColumns.length}
+          onRenumber={handleRenumber}
+          isRenumbering={renumberMutation.isPending}
           hasPositions={hasPositions}
           qualityBreakdown={qualityBreakdown}
           qualityScoreRing={<QualityScoreRing score={qualityBreakdown.score} breakdown={qualityBreakdown} t={t} />}
@@ -2391,6 +2459,16 @@ export function BOQEditorPage() {
         onImport={handleExcelPaste}
         loading={isExcelPasteImporting}
       />
+
+      {/* ── Custom Columns Manager ────────────────────────────────── */}
+      {boqId && (
+        <CustomColumnsDialog
+          open={customColumnsOpen}
+          onClose={() => setCustomColumnsOpen(false)}
+          boqId={boqId}
+          positions={boq?.positions}
+        />
+      )}
 
       {/* ── Section Name Modal ────────────────────────────────────── */}
       {showSectionModal && (

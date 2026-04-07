@@ -18,6 +18,8 @@ import {
   Undo2,
   Redo2,
   Clock,
+  Columns3,
+  ListOrdered,
   FileSpreadsheet,
   FileText,
   FileDown,
@@ -71,6 +73,12 @@ export interface BOQToolbarProps {
   onToggleSmartPanel: () => void;
   // Excel paste
   onPasteFromExcel?: () => void;
+  // Custom columns
+  onManageColumns?: () => void;
+  customColumnCount?: number;
+  // Renumber positions (gap-of-10 scheme)
+  onRenumber?: () => void;
+  isRenumbering?: boolean;
   // Quality
   hasPositions: boolean;
   qualityBreakdown: QualityBreakdown;
@@ -110,6 +118,10 @@ export function BOQToolbar({
   smartPanelOpen,
   onToggleSmartPanel,
   onPasteFromExcel,
+  onManageColumns,
+  customColumnCount,
+  onRenumber,
+  isRenumbering,
   hasPositions,
   qualityScoreRing,
 }: BOQToolbarProps) {
@@ -212,6 +224,42 @@ export function BOQToolbar({
             </div>
           )}
         </div>
+        {onManageColumns && (
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<Columns3 size={15} />}
+            onClick={onManageColumns}
+            title={t('boq.manage_columns', { defaultValue: 'Manage custom columns' })}
+          >
+            <span className="hidden xl:inline">
+              {t('boq.columns', { defaultValue: 'Columns' })}
+            </span>
+            {customColumnCount != null && customColumnCount > 0 && (
+              <span className="ml-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-oe-blue/15 px-1 text-2xs font-semibold text-oe-blue tabular-nums">
+                {customColumnCount}
+              </span>
+            )}
+          </Button>
+        )}
+        {onRenumber && (
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<ListOrdered size={15} className={isRenumbering ? 'animate-pulse text-oe-blue' : ''} />}
+            onClick={onRenumber}
+            disabled={isRenumbering}
+            title={t('boq.renumber_tip', {
+              defaultValue: 'Renumber all positions using a gap-of-10 scheme (01.10, 01.20, …) so future inserts don\'t require renumbering everything.',
+            })}
+          >
+            <span className="hidden xl:inline">
+              {isRenumbering
+                ? t('boq.renumbering', { defaultValue: 'Renumbering…' })
+                : t('boq.renumber', { defaultValue: 'Renumber' })}
+            </span>
+          </Button>
+        )}
       </div>
 
       <div className="w-px h-6 bg-border-light hidden sm:block" />

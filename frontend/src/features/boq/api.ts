@@ -735,7 +735,34 @@ export const boqApi = {
     region?: string;
     locale?: string;
   }) => apiPost<EscalateRateResponse>('/v1/boq/boqs/escalate-rate', data),
+
+  /* Custom Columns — manage user-defined fields per BOQ */
+  listCustomColumns: (boqId: string) =>
+    apiGet<CustomColumnDef[]>(`/v1/boq/boqs/${boqId}/columns`),
+  addCustomColumn: (boqId: string, data: CustomColumnDef) =>
+    apiPost<CustomColumnDef, CustomColumnDef>(`/v1/boq/boqs/${boqId}/columns`, data),
+  deleteCustomColumn: (boqId: string, columnName: string) =>
+    apiDelete<void>(`/v1/boq/boqs/${boqId}/columns/${columnName}`),
+
+  /* Renumber positions using gap-of-10 professional scheme (01, 01.10, 01.20...) */
+  renumberPositions: (boqId: string) =>
+    apiPost<{ renumbered: number; scheme: string }>(`/v1/boq/boqs/${boqId}/renumber`),
 };
+
+/**
+ * Custom column definition stored in BOQ `metadata.custom_columns`.
+ *
+ * `sort_order` is assigned by the backend on insert (= current count) so the
+ * client can omit it; on read it is always populated. The grid keeps columns
+ * sorted by this value.
+ */
+export interface CustomColumnDef {
+  name: string;
+  display_name: string;
+  column_type: 'text' | 'number' | 'date' | 'select';
+  options?: string[];
+  sort_order?: number;
+}
 
 /* ── LLM AI feature types ───────────────────────────────────────────── */
 
