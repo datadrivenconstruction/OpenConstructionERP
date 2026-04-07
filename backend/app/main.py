@@ -710,6 +710,7 @@ def create_app() -> FastAPI:
             from app.modules.tendering import models as _tendering_models  # noqa: F401
             from app.modules.transmittals import models as _transmittals_models  # noqa: F401
             from app.modules.users import models as _users_models  # noqa: F401
+            from app.modules.validation import models as _validation_models  # noqa: F401
 
             migrated = await sqlite_auto_migrate(engine, Base)
             if migrated:

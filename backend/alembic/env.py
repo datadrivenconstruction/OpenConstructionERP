@@ -45,6 +45,7 @@ from app.modules.tasks import models as _tasks  # noqa: F401
 from app.modules.teams import models as _teams  # noqa: F401
 from app.modules.tendering import models as _tender  # noqa: F401
 from app.modules.transmittals import models as _transmittals  # noqa: F401
+from app.modules.validation import models as _validation  # noqa: F401
 
 from app.modules.notifications import models as _notifications  # noqa: F401
 
