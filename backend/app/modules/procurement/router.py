@@ -3,12 +3,15 @@
 Endpoints:
     GET    /                           — List purchase orders
     POST   /                           — Create PO (auth required)
-    GET    /{id}                       — Get single PO
-    PATCH  /{id}                       — Update PO (auth required)
-    POST   /{id}/issue                 — Issue PO (auth required)
     GET    /goods-receipts             — List goods receipts
     POST   /goods-receipts             — Create GR (auth required)
     POST   /goods-receipts/{id}/confirm — Confirm GR (auth required)
+    GET    /{id}                       — Get single PO
+    PATCH  /{id}                       — Update PO (auth required)
+    POST   /{id}/issue                 — Issue PO (auth required)
+
+NOTE: Fixed-path routes (/goods-receipts) are registered BEFORE the parametric
+/{po_id} route so that FastAPI does not try to parse "goods-receipts" as a UUID.
 """
 
 import uuid
@@ -34,7 +37,7 @@ def _get_service(session: SessionDep) -> ProcurementService:
     return ProcurementService(session)
 
 
-# ── Purchase Orders ──────────────────────────────────────────────────────────
+# ── Purchase Orders (list / create) ─────────────────────────────────────────
 
 
 @router.get("/", response_model=POListResponse)
@@ -74,41 +77,7 @@ async def create_purchase_order(
     return POResponse.model_validate(po)
 
 
-@router.get("/{po_id}", response_model=POResponse)
-async def get_purchase_order(
-    po_id: uuid.UUID,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
-    service: ProcurementService = Depends(_get_service),
-) -> POResponse:
-    """Get a single purchase order by ID."""
-    po = await service.get_po(po_id)
-    return POResponse.model_validate(po)
-
-
-@router.patch("/{po_id}", response_model=POResponse)
-async def update_purchase_order(
-    po_id: uuid.UUID,
-    data: POUpdate,
-    user_id: CurrentUserId,
-    service: ProcurementService = Depends(_get_service),
-) -> POResponse:
-    """Update a purchase order."""
-    po = await service.update_po(po_id, data)
-    return POResponse.model_validate(po)
-
-
-@router.post("/{po_id}/issue", response_model=POResponse)
-async def issue_purchase_order(
-    po_id: uuid.UUID,
-    user_id: CurrentUserId,
-    service: ProcurementService = Depends(_get_service),
-) -> POResponse:
-    """Issue a purchase order."""
-    po = await service.issue_po(po_id)
-    return POResponse.model_validate(po)
-
-
-# ── Goods Receipts ───────────────────────────────────────────────────────────
+# ── Goods Receipts (MUST be before /{po_id}) ────────────────────────────────
 
 
 @router.get("/goods-receipts", response_model=GRListResponse)
@@ -150,3 +119,40 @@ async def confirm_goods_receipt(
     """Confirm a goods receipt."""
     gr = await service.confirm_goods_receipt(gr_id)
     return GRResponse.model_validate(gr)
+
+
+# ── PO by ID (parametric routes LAST) ───────────────────────────────────────
+
+
+@router.get("/{po_id}", response_model=POResponse)
+async def get_purchase_order(
+    po_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: ProcurementService = Depends(_get_service),
+) -> POResponse:
+    """Get a single purchase order by ID."""
+    po = await service.get_po(po_id)
+    return POResponse.model_validate(po)
+
+
+@router.patch("/{po_id}", response_model=POResponse)
+async def update_purchase_order(
+    po_id: uuid.UUID,
+    data: POUpdate,
+    user_id: CurrentUserId,
+    service: ProcurementService = Depends(_get_service),
+) -> POResponse:
+    """Update a purchase order."""
+    po = await service.update_po(po_id, data)
+    return POResponse.model_validate(po)
+
+
+@router.post("/{po_id}/issue", response_model=POResponse)
+async def issue_purchase_order(
+    po_id: uuid.UUID,
+    user_id: CurrentUserId,
+    service: ProcurementService = Depends(_get_service),
+) -> POResponse:
+    """Issue a purchase order."""
+    po = await service.issue_po(po_id)
+    return POResponse.model_validate(po)

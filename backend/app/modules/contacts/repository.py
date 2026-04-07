@@ -23,8 +23,17 @@ class ContactRepository:
         return await self.session.get(Contact, contact_id)
 
     async def get_by_email(self, email: str) -> Contact | None:
-        """Get contact by primary email."""
-        stmt = select(Contact).where(Contact.primary_email == email.lower())
+        """Get first active contact by primary email.
+
+        Returns the first match (preferring active contacts) so duplicate
+        emails in legacy data do not raise MultipleResultsFound.
+        """
+        stmt = (
+            select(Contact)
+            .where(Contact.primary_email == email.lower())
+            .order_by(Contact.is_active.desc(), Contact.created_at.desc())
+            .limit(1)
+        )
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 

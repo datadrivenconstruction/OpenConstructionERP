@@ -51,9 +51,19 @@ class TaskService:
         logger.info("Task created: %s (%s) for project %s", task.title[:40], data.task_type, data.project_id)
         return task
 
-    async def get_task(self, task_id: uuid.UUID) -> Task:
+    async def get_task(
+        self,
+        task_id: uuid.UUID,
+        current_user_id: str | None = None,
+    ) -> Task:
         task = await self.repo.get_by_id(task_id)
         if task is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Task not found",
+            )
+        # Enforce private task visibility
+        if task.is_private and task.created_by != current_user_id:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Task not found",
@@ -64,6 +74,7 @@ class TaskService:
         self,
         project_id: uuid.UUID,
         *,
+        current_user_id: str | None = None,
         offset: int = 0,
         limit: int = 50,
         task_type: str | None = None,
@@ -73,6 +84,7 @@ class TaskService:
     ) -> tuple[list[Task], int]:
         return await self.repo.list_for_project(
             project_id,
+            current_user_id=current_user_id,
             offset=offset,
             limit=limit,
             task_type=task_type,
@@ -101,8 +113,9 @@ class TaskService:
         self,
         task_id: uuid.UUID,
         data: TaskUpdate,
+        current_user_id: str | None = None,
     ) -> Task:
-        task = await self.get_task(task_id)
+        task = await self.get_task(task_id, current_user_id=current_user_id)
 
         if task.status == "completed":
             raise HTTPException(
@@ -127,8 +140,12 @@ class TaskService:
         logger.info("Task updated: %s (fields=%s)", task_id, list(fields.keys()))
         return task
 
-    async def delete_task(self, task_id: uuid.UUID) -> None:
-        await self.get_task(task_id)
+    async def delete_task(
+        self,
+        task_id: uuid.UUID,
+        current_user_id: str | None = None,
+    ) -> None:
+        await self.get_task(task_id, current_user_id=current_user_id)
         await self.repo.delete(task_id)
         logger.info("Task deleted: %s", task_id)
 
@@ -136,9 +153,10 @@ class TaskService:
         self,
         task_id: uuid.UUID,
         result: str | None = None,
+        current_user_id: str | None = None,
     ) -> Task:
         """Mark a task as completed with optional result."""
-        task = await self.get_task(task_id)
+        task = await self.get_task(task_id, current_user_id=current_user_id)
         if task.status == "completed":
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

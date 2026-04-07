@@ -65,6 +65,9 @@ def _incident_to_response(item: object) -> IncidentResponse:
 
 
 def _observation_to_response(item: object) -> ObservationResponse:
+    from app.modules.safety.service import _compute_risk_tier
+
+    risk_score = item.risk_score  # type: ignore[attr-defined]
     return ObservationResponse(
         id=item.id,  # type: ignore[attr-defined]
         project_id=item.project_id,  # type: ignore[attr-defined]
@@ -74,7 +77,8 @@ def _observation_to_response(item: object) -> ObservationResponse:
         location=item.location,  # type: ignore[attr-defined]
         severity=item.severity,  # type: ignore[attr-defined]
         likelihood=item.likelihood,  # type: ignore[attr-defined]
-        risk_score=item.risk_score,  # type: ignore[attr-defined]
+        risk_score=risk_score,
+        risk_tier=_compute_risk_tier(risk_score),
         immediate_action=item.immediate_action,  # type: ignore[attr-defined]
         corrective_action=item.corrective_action,  # type: ignore[attr-defined]
         status=item.status,  # type: ignore[attr-defined]

@@ -7,6 +7,7 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.events import event_bus
 from app.modules.safety.models import SafetyIncident, SafetyObservation
 from app.modules.safety.repository import IncidentRepository, ObservationRepository
 from app.modules.safety.schemas import (
@@ -17,6 +18,20 @@ from app.modules.safety.schemas import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _compute_risk_tier(risk_score: int) -> str:
+    """Derive risk tier from risk_score.
+
+    Tiers: low (1-5), medium (6-10), high (11-15), critical (16-25).
+    """
+    if risk_score >= 16:
+        return "critical"
+    if risk_score >= 11:
+        return "high"
+    if risk_score >= 6:
+        return "medium"
+    return "low"
 
 
 class SafetyService:
@@ -127,7 +142,10 @@ class SafetyService:
         data: ObservationCreate,
         user_id: str | None = None,
     ) -> SafetyObservation:
-        """Create a new safety observation with computed risk score."""
+        """Create a new safety observation with computed risk score and tier.
+
+        Emits ``safety.observation.high_risk`` event when risk_score > 15.
+        """
         observation_number = await self.observation_repo.next_observation_number(
             data.project_id
         )
@@ -150,11 +168,28 @@ class SafetyService:
         )
         observation = await self.observation_repo.create(observation)
         logger.info(
-            "Safety observation created: %s (%s) for project %s",
+            "Safety observation created: %s (%s, risk=%d) for project %s",
             observation_number,
             data.observation_type,
+            risk_score,
             data.project_id,
         )
+
+        # Emit high-risk event for notifications (cross-module handler)
+        if risk_score > 15:
+            await event_bus.publish(
+                "safety.observation.high_risk",
+                data={
+                    "project_id": str(data.project_id),
+                    "observation_id": str(observation.id),
+                    "observation_number": observation_number,
+                    "risk_score": risk_score,
+                    "description": data.description[:200],
+                    "notify_user_ids": [],  # Populated by handler from project team
+                },
+                source_module="safety",
+            )
+
         return observation
 
     async def get_observation(self, observation_id: uuid.UUID) -> SafetyObservation:
@@ -205,7 +240,24 @@ class SafetyService:
 
         await self.observation_repo.update_fields(observation_id, **fields)
         await self.session.refresh(observation)
-        logger.info("Safety observation updated: %s", observation_id)
+
+        # Emit high-risk event if risk_score crossed the critical threshold
+        new_risk_score = fields.get("risk_score", observation.risk_score)
+        if new_risk_score > 15:
+            await event_bus.publish(
+                "safety.observation.high_risk",
+                data={
+                    "project_id": str(observation.project_id),
+                    "observation_id": str(observation_id),
+                    "observation_number": observation.observation_number,
+                    "risk_score": new_risk_score,
+                    "description": (observation.description or "")[:200],
+                    "notify_user_ids": [],
+                },
+                source_module="safety",
+            )
+
+        logger.info("Safety observation updated: %s (risk=%d)", observation_id, new_risk_score)
         return observation
 
     async def delete_observation(self, observation_id: uuid.UUID) -> None:

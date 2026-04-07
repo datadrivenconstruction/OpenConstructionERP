@@ -2,10 +2,11 @@
 
 Stateless service layer. Handles:
 - Document container CRUD
-- CDE state transitions (wip -> shared -> published -> archived)
-- Revision management with auto-numbering
+- CDE state transitions (wip -> shared -> published -> archived) via CDEStateMachine
+- Revision management with auto-numbering and content-addressable storage
 """
 
+import hashlib
 import logging
 import uuid
 from typing import Any
@@ -13,6 +14,8 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.cde_states import CDEStateMachine
+from app.core.events import event_bus
 from app.modules.cde.models import DocumentContainer, DocumentRevision
 from app.modules.cde.repository import ContainerRepository, RevisionRepository
 from app.modules.cde.schemas import (
@@ -24,13 +27,7 @@ from app.modules.cde.schemas import (
 
 logger = logging.getLogger(__name__)
 
-# Valid CDE state transitions per ISO 19650
-_VALID_TRANSITIONS: dict[str, list[str]] = {
-    "wip": ["shared"],
-    "shared": ["wip", "published"],
-    "published": ["archived"],
-    "archived": [],
-}
+_state_machine = CDEStateMachine()
 
 
 class CDEService:
@@ -48,7 +45,22 @@ class CDEService:
         data: ContainerCreate,
         user_id: str | None = None,
     ) -> DocumentContainer:
-        """Create a new document container."""
+        """Create a new document container.
+
+        Raises 409 if container_code already exists within the project.
+        """
+        existing = await self.container_repo.get_by_code_and_project(
+            data.project_id, data.container_code
+        )
+        if existing is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    f"Container code '{data.container_code}' already exists "
+                    f"in project {data.project_id}"
+                ),
+            )
+
         container = DocumentContainer(
             project_id=data.project_id,
             container_code=data.container_code,
@@ -142,8 +154,13 @@ class CDEService:
         self,
         container_id: uuid.UUID,
         data: StateTransitionRequest,
+        user_role: str = "editor",
     ) -> DocumentContainer:
-        """Transition a container's CDE state following ISO 19650 rules."""
+        """Transition a container's CDE state following ISO 19650 rules.
+
+        Uses the CDEStateMachine from core/cde_states.py to validate both
+        structural validity and role-based gate conditions.
+        """
         container = await self.get_container(container_id)
         current_state = container.cde_state
         target_state = data.target_state
@@ -154,14 +171,14 @@ class CDEService:
                 detail=f"Container is already in '{current_state}' state",
             )
 
-        allowed = _VALID_TRANSITIONS.get(current_state, [])
-        if target_state not in allowed:
+        # Validate via CDEStateMachine (checks allowed transitions + role gates)
+        allowed, reason = _state_machine.validate_transition(
+            current_state, target_state, user_role=user_role,
+        )
+        if not allowed:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    f"Invalid state transition: '{current_state}' -> '{target_state}'. "
-                    f"Allowed transitions: {allowed}"
-                ),
+                detail=reason,
             )
 
         await self.container_repo.update_fields(container_id, cde_state=target_state)
@@ -174,6 +191,21 @@ class CDEService:
             container_id,
             data.reason,
         )
+
+        # Emit event for cross-module handlers (audit, notifications)
+        await event_bus.publish(
+            "cde.container.promoted",
+            data={
+                "project_id": str(container.project_id),
+                "container_id": str(container_id),
+                "container_code": container.container_code,
+                "from_state": current_state,
+                "to_state": target_state,
+                "reason": data.reason,
+            },
+            source_module="cde",
+        )
+
         return container
 
     # ── Revision Management ───────────────────────────────────────────────
@@ -201,12 +233,18 @@ class CDEService:
         else:
             revision_code = f"C.{rev_number:02d}"
 
+        # Content-addressable storage: compute SHA-256 if not supplied
+        content_hash = data.content_hash
+        if not content_hash:
+            hash_input = f"{container_id}:{revision_code}:{data.file_name}:{data.file_size or ''}"
+            content_hash = hashlib.sha256(hash_input.encode()).hexdigest()
+
         revision = DocumentRevision(
             container_id=container_id,
             revision_code=revision_code,
             revision_number=rev_number,
             is_preliminary=data.is_preliminary,
-            content_hash=data.content_hash,
+            content_hash=content_hash,
             file_name=data.file_name,
             file_size=data.file_size,
             mime_type=data.mime_type,

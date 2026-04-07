@@ -4,10 +4,6 @@ Endpoints:
     GET    /                    — List invoices with filters
     POST   /                    — Create invoice (auth required)
     GET    /invoices/export      — Export invoices as Excel
-    GET    /{id}                — Get single invoice
-    PATCH  /{id}                — Update invoice (auth required)
-    POST   /{id}/approve        — Approve invoice (auth required)
-    POST   /{id}/pay            — Mark invoice as paid (auth required)
     GET    /payments             — List payments
     POST   /payments             — Create payment (auth required)
     GET    /budgets              — List budgets
@@ -17,6 +13,14 @@ Endpoints:
     GET    /budgets/export       — Export budgets as Excel
     GET    /evm                  — List EVM snapshots
     POST   /evm/snapshot         — Create EVM snapshot (auth required)
+    GET    /{id}                — Get single invoice
+    PATCH  /{id}                — Update invoice (auth required)
+    POST   /{id}/approve        — Approve invoice (auth required)
+    POST   /{id}/pay            — Mark invoice as paid (auth required)
+
+NOTE: Fixed-path routes (/payments, /budgets, /evm, /invoices/export) are
+registered BEFORE the parametric /{invoice_id} route so that FastAPI does not
+try to parse those path segments as UUIDs.
 """
 
 import csv
@@ -57,7 +61,7 @@ def _get_service(session: SessionDep) -> FinanceService:
     return FinanceService(session)
 
 
-# ── Invoices ─────────────────────────────────────────────────────────────────
+# ── Invoices (list / create) ───────────────────────────────────────────────
 
 
 @router.get("/", response_model=InvoiceListResponse)
@@ -169,52 +173,7 @@ async def export_invoices(
     )
 
 
-@router.get("/{invoice_id}", response_model=InvoiceResponse)
-async def get_invoice(
-    invoice_id: uuid.UUID,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
-    service: FinanceService = Depends(_get_service),
-) -> InvoiceResponse:
-    """Get a single invoice by ID."""
-    invoice = await service.get_invoice(invoice_id)
-    return InvoiceResponse.model_validate(invoice)
-
-
-@router.patch("/{invoice_id}", response_model=InvoiceResponse)
-async def update_invoice(
-    invoice_id: uuid.UUID,
-    data: InvoiceUpdate,
-    user_id: CurrentUserId,
-    service: FinanceService = Depends(_get_service),
-) -> InvoiceResponse:
-    """Update an invoice."""
-    invoice = await service.update_invoice(invoice_id, data)
-    return InvoiceResponse.model_validate(invoice)
-
-
-@router.post("/{invoice_id}/approve", response_model=InvoiceResponse)
-async def approve_invoice(
-    invoice_id: uuid.UUID,
-    user_id: CurrentUserId,
-    service: FinanceService = Depends(_get_service),
-) -> InvoiceResponse:
-    """Approve an invoice."""
-    invoice = await service.approve_invoice(invoice_id)
-    return InvoiceResponse.model_validate(invoice)
-
-
-@router.post("/{invoice_id}/pay", response_model=InvoiceResponse)
-async def pay_invoice(
-    invoice_id: uuid.UUID,
-    user_id: CurrentUserId,
-    service: FinanceService = Depends(_get_service),
-) -> InvoiceResponse:
-    """Mark invoice as paid."""
-    invoice = await service.pay_invoice(invoice_id)
-    return InvoiceResponse.model_validate(invoice)
-
-
-# ── Payments ─────────────────────────────────────────────────────────────────
+# ── Payments (MUST be before /{invoice_id}) ─────────────────────────────────
 
 
 @router.get("/payments", response_model=PaymentListResponse)
@@ -246,7 +205,7 @@ async def create_payment(
     return PaymentResponse.model_validate(payment)
 
 
-# ── Budgets ──────────────────────────────────────────────────────────────────
+# ── Budgets (MUST be before /{invoice_id}) ──────────────────────────────────
 
 
 @router.get("/budgets", response_model=BudgetListResponse)
@@ -658,7 +617,7 @@ async def update_budget(
     return BudgetResponse.model_validate(budget)
 
 
-# ── EVM ──────────────────────────────────────────────────────────────────────
+# ── EVM (MUST be before /{invoice_id}) ──────────────────────────────────────
 
 
 @router.get("/evm", response_model=EVMListResponse)
@@ -684,3 +643,51 @@ async def create_evm_snapshot(
     """Create an EVM snapshot."""
     snapshot = await service.create_evm_snapshot(data)
     return EVMSnapshotResponse.model_validate(snapshot)
+
+
+# ── Invoice by ID (parametric routes LAST) ──────────────────────────────────
+
+
+@router.get("/{invoice_id}", response_model=InvoiceResponse)
+async def get_invoice(
+    invoice_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: FinanceService = Depends(_get_service),
+) -> InvoiceResponse:
+    """Get a single invoice by ID."""
+    invoice = await service.get_invoice(invoice_id)
+    return InvoiceResponse.model_validate(invoice)
+
+
+@router.patch("/{invoice_id}", response_model=InvoiceResponse)
+async def update_invoice(
+    invoice_id: uuid.UUID,
+    data: InvoiceUpdate,
+    user_id: CurrentUserId,
+    service: FinanceService = Depends(_get_service),
+) -> InvoiceResponse:
+    """Update an invoice."""
+    invoice = await service.update_invoice(invoice_id, data)
+    return InvoiceResponse.model_validate(invoice)
+
+
+@router.post("/{invoice_id}/approve", response_model=InvoiceResponse)
+async def approve_invoice(
+    invoice_id: uuid.UUID,
+    user_id: CurrentUserId,
+    service: FinanceService = Depends(_get_service),
+) -> InvoiceResponse:
+    """Approve an invoice."""
+    invoice = await service.approve_invoice(invoice_id)
+    return InvoiceResponse.model_validate(invoice)
+
+
+@router.post("/{invoice_id}/pay", response_model=InvoiceResponse)
+async def pay_invoice(
+    invoice_id: uuid.UUID,
+    user_id: CurrentUserId,
+    service: FinanceService = Depends(_get_service),
+) -> InvoiceResponse:
+    """Mark invoice as paid."""
+    invoice = await service.pay_invoice(invoice_id)
+    return InvoiceResponse.model_validate(invoice)

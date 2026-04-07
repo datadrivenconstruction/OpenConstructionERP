@@ -22,6 +22,17 @@ class ContainerRepository:
         """Get container by ID."""
         return await self.session.get(DocumentContainer, container_id)
 
+    async def get_by_code_and_project(
+        self, project_id: uuid.UUID, container_code: str,
+    ) -> DocumentContainer | None:
+        """Get container by code within a project (uniqueness check)."""
+        stmt = select(DocumentContainer).where(
+            DocumentContainer.project_id == project_id,
+            DocumentContainer.container_code == container_code,
+        )
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
+
     async def list_for_project(
         self,
         project_id: uuid.UUID,

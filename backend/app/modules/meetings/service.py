@@ -3,7 +3,8 @@
 Stateless service layer. Handles:
 - Meeting CRUD
 - Auto-generated meeting numbers (MTG-001, MTG-002, ...)
-- Status transitions (draft -> completed)
+- Status transitions (draft -> scheduled -> in_progress -> completed)
+- Action item -> Task creation on meeting completion
 """
 
 import logging
@@ -13,6 +14,7 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.events import event_bus
 from app.modules.meetings.models import Meeting
 from app.modules.meetings.repository import MeetingRepository
 from app.modules.meetings.schemas import MeetingCreate, MeetingUpdate
@@ -143,8 +145,20 @@ class MeetingService:
 
     # ── Complete ──────────────────────────────────────────────────────────
 
-    async def complete_meeting(self, meeting_id: uuid.UUID) -> Meeting:
-        """Mark a meeting as completed."""
+    async def complete_meeting(
+        self,
+        meeting_id: uuid.UUID,
+        user_id: str | None = None,
+    ) -> Meeting:
+        """Mark a meeting as completed.
+
+        Only meetings with status ``scheduled`` or ``in_progress`` can be
+        completed.  A ``draft`` meeting must first be scheduled.
+
+        When the meeting contains open action items, corresponding tasks are
+        created automatically and a ``meeting.action_items_created`` event is
+        emitted for any additional subscribers.
+        """
         meeting = await self.get_meeting(meeting_id)
         if meeting.status == "completed":
             raise HTTPException(
@@ -156,8 +170,68 @@ class MeetingService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Cannot complete a cancelled meeting",
             )
+        if meeting.status == "draft":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot complete a draft meeting — schedule it first",
+            )
 
         await self.repo.update_fields(meeting_id, status="completed")
         await self.session.refresh(meeting)
         logger.info("Meeting completed: %s", meeting_id)
+
+        # Create tasks from open action items
+        action_items = meeting.action_items or []
+        open_actions = [
+            ai
+            for ai in action_items
+            if isinstance(ai, dict) and ai.get("status", "open") == "open"
+        ]
+        if open_actions:
+            try:
+                from app.modules.tasks.models import Task
+
+                for ai in open_actions:
+                    task = Task(
+                        project_id=meeting.project_id,
+                        task_type="task",
+                        title=ai.get("description", "Action item from meeting")[:500],
+                        description=(
+                            f"Auto-created from meeting {meeting.meeting_number}: "
+                            f"{meeting.title}"
+                        ),
+                        responsible_id=ai.get("owner_id"),
+                        due_date=ai.get("due_date"),
+                        meeting_id=str(meeting.id),
+                        status="open",
+                        priority="normal",
+                        is_private=False,
+                        created_by=user_id,
+                        metadata_={"source": "meeting_action_item"},
+                    )
+                    self.session.add(task)
+                await self.session.flush()
+                logger.info(
+                    "Created %d tasks from meeting %s action items",
+                    len(open_actions),
+                    meeting.meeting_number,
+                )
+            except Exception:
+                # Task creation is best-effort — don't fail the completion
+                logger.exception(
+                    "Failed to create tasks from meeting %s action items",
+                    meeting.meeting_number,
+                )
+
+            await event_bus.publish(
+                "meeting.action_items_created",
+                {
+                    "meeting_id": str(meeting.id),
+                    "project_id": str(meeting.project_id),
+                    "meeting_number": meeting.meeting_number,
+                    "action_items": open_actions,
+                },
+                source_module="meetings",
+            )
+
         return meeting

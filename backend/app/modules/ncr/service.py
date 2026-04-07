@@ -7,6 +7,7 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.events import event_bus
 from app.modules.ncr.models import NCR
 from app.modules.ncr.repository import NCRRepository
 from app.modules.ncr.schemas import NCRCreate, NCRUpdate
@@ -118,7 +119,12 @@ class NCRService:
         logger.info("NCR deleted: %s", ncr_id)
 
     async def close_ncr(self, ncr_id: uuid.UUID) -> NCR:
-        """Close an NCR after verification."""
+        """Close an NCR after verification.
+
+        Closing requires a corrective action to be recorded.  When the NCR
+        carries a ``cost_impact`` an event is emitted so the variations
+        module (or any subscriber) can create a corresponding variation order.
+        """
         ncr = await self.get_ncr(ncr_id)
         if ncr.status == "closed":
             raise HTTPException(
@@ -130,8 +136,29 @@ class NCRService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Cannot close a voided NCR",
             )
+        if not ncr.corrective_action:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot close an NCR without a corrective action",
+            )
 
         await self.repo.update_fields(ncr_id, status="closed")
         await self.session.refresh(ncr)
         logger.info("NCR closed: %s", ncr_id)
+
+        # Emit event for variation creation when cost impact exists
+        if ncr.cost_impact:
+            await event_bus.publish(
+                "ncr.closed_with_cost_impact",
+                {
+                    "ncr_id": str(ncr.id),
+                    "project_id": str(ncr.project_id),
+                    "ncr_number": ncr.ncr_number,
+                    "title": ncr.title,
+                    "cost_impact": ncr.cost_impact,
+                    "schedule_impact_days": ncr.schedule_impact_days,
+                },
+                source_module="ncr",
+            )
+
         return ncr

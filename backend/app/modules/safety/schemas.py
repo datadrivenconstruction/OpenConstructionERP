@@ -156,6 +156,7 @@ class ObservationResponse(BaseModel):
     severity: int = 1
     likelihood: int = 1
     risk_score: int = 1
+    risk_tier: str = "low"
     immediate_action: str | None = None
     corrective_action: str | None = None
     status: str = "open"

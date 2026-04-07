@@ -43,13 +43,27 @@ class NCRRepository:
         return list(result.scalars().all()), total
 
     async def next_ncr_number(self, project_id: uuid.UUID) -> str:
+        """Generate the next NCR number using MAX to avoid duplicates."""
+        from sqlalchemy import Integer as SAInteger
+        from sqlalchemy import cast
+        from sqlalchemy.sql import func as sqlfunc
+
         stmt = (
-            select(func.count())
-            .select_from(NCR)
+            select(
+                sqlfunc.coalesce(
+                    sqlfunc.max(
+                        cast(
+                            func.substr(NCR.ncr_number, 5),
+                            SAInteger,
+                        )
+                    ),
+                    0,
+                )
+            )
             .where(NCR.project_id == project_id)
         )
-        count = (await self.session.execute(stmt)).scalar_one()
-        return f"NCR-{count + 1:03d}"
+        max_num = (await self.session.execute(stmt)).scalar_one()
+        return f"NCR-{max_num + 1:03d}"
 
     async def create(self, ncr: NCR) -> NCR:
         self.session.add(ncr)

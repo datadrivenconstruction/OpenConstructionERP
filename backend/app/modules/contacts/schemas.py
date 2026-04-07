@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 # ── Create / Update ──────────────────────────────────────────────────────
 
@@ -33,6 +33,17 @@ class ContactCreate(BaseModel):
     primary_email: str | None = Field(default=None, max_length=255)
     primary_phone: str | None = Field(default=None, max_length=50)
     website: str | None = Field(default=None, max_length=500)
+
+    @field_validator("primary_email")
+    @classmethod
+    def validate_email_format(cls, v: str | None) -> str | None:
+        """Validate email has a basic valid format."""
+        if v is not None:
+            import re
+
+            if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", v):
+                raise ValueError(f"Invalid email format: {v}")
+        return v
 
     certifications: list[Any] = Field(default_factory=list)
     insurance: list[Any] = Field(default_factory=list)
@@ -74,6 +85,17 @@ class ContactUpdate(BaseModel):
     primary_email: str | None = Field(default=None, max_length=255)
     primary_phone: str | None = Field(default=None, max_length=50)
     website: str | None = Field(default=None, max_length=500)
+
+    @field_validator("primary_email")
+    @classmethod
+    def validate_email_format(cls, v: str | None) -> str | None:
+        """Validate email has a basic valid format."""
+        if v is not None:
+            import re
+
+            if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", v):
+                raise ValueError(f"Invalid email format: {v}")
+        return v
 
     certifications: list[Any] | None = None
     insurance: list[Any] | None = None

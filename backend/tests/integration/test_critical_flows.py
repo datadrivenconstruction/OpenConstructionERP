@@ -197,6 +197,7 @@ class TestContactsCRUD:
     async def test_create_contact(
         self, client: AsyncClient, auth_headers: dict[str, str]
     ) -> None:
+        unique = uuid.uuid4().hex[:8]
         resp = await client.post(
             "/api/v1/contacts/",
             json={
@@ -204,7 +205,7 @@ class TestContactsCRUD:
                 "company_name": "Test GmbH",
                 "first_name": "Max",
                 "last_name": "Mustermann",
-                "primary_email": "max@test-gmbh.de",
+                "primary_email": f"max-{unique}@test-gmbh.de",
                 "country_code": "DE",
             },
             headers=auth_headers,
@@ -228,6 +229,7 @@ class TestContactsCRUD:
     async def test_create_and_get_contact(
         self, client: AsyncClient, auth_headers: dict[str, str]
     ) -> None:
+        unique = uuid.uuid4().hex[:8]
         # Create
         resp = await client.post(
             "/api/v1/contacts/",
@@ -236,7 +238,7 @@ class TestContactsCRUD:
                 "company_name": "Bauherr AG",
                 "first_name": "Anna",
                 "last_name": "Schmidt",
-                "primary_email": "anna@bauherr.de",
+                "primary_email": f"anna-{unique}@bauherr.de",
             },
             headers=auth_headers,
         )

@@ -26,8 +26,20 @@ class SubmittalService:
         data: SubmittalCreate,
         user_id: str | None = None,
     ) -> Submittal:
-        """Create a new submittal with auto-generated number."""
+        """Create a new submittal with auto-generated number.
+
+        Ball-in-court defaults to the submitting organization's creator when
+        status is 'draft', or to the reviewer when status is 'submitted'.
+        """
         submittal_number = await self.repo.next_submittal_number(data.project_id)
+
+        # Auto-set ball_in_court based on initial status
+        ball_in_court = data.ball_in_court
+        if ball_in_court is None:
+            if data.status == "submitted" and data.reviewer_id:
+                ball_in_court = data.reviewer_id
+            elif user_id is not None:
+                ball_in_court = user_id
 
         submittal = Submittal(
             project_id=data.project_id,
@@ -36,7 +48,7 @@ class SubmittalService:
             spec_section=data.spec_section,
             submittal_type=data.submittal_type,
             status=data.status,
-            ball_in_court=data.ball_in_court,
+            ball_in_court=ball_in_court,
             current_revision=data.current_revision,
             submitted_by_org=data.submitted_by_org,
             reviewer_id=data.reviewer_id,
@@ -114,23 +126,42 @@ class SubmittalService:
         logger.info("Submittal deleted: %s", submittal_id)
 
     async def submit_submittal(self, submittal_id: uuid.UUID) -> Submittal:
-        """Move submittal from draft to submitted."""
+        """Move submittal from draft (or revise_and_resubmit) to submitted.
+
+        When resubmitting after a ``revise_and_resubmit`` decision the
+        ``current_revision`` is automatically incremented.
+        Ball-in-court moves to the reviewer.
+        """
         submittal = await self.get_submittal(submittal_id)
-        if submittal.status != "draft":
+        allowed = ("draft", "revise_and_resubmit")
+        if submittal.status not in allowed:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Can only submit from draft status, current: {submittal.status}",
+                detail=(
+                    f"Can only submit from draft or revise_and_resubmit status, "
+                    f"current: {submittal.status}"
+                ),
             )
 
         from datetime import UTC, datetime
 
-        await self.repo.update_fields(
-            submittal_id,
-            status="submitted",
-            date_submitted=datetime.now(UTC).strftime("%Y-%m-%d"),
-        )
+        fields: dict[str, Any] = {
+            "status": "submitted",
+            "date_submitted": datetime.now(UTC).strftime("%Y-%m-%d"),
+            "date_returned": None,
+        }
+
+        # Increment revision on resubmit
+        if submittal.status == "revise_and_resubmit":
+            fields["current_revision"] = submittal.current_revision + 1
+
+        # Ball-in-court moves to reviewer
+        if submittal.reviewer_id:
+            fields["ball_in_court"] = str(submittal.reviewer_id)
+
+        await self.repo.update_fields(submittal_id, **fields)
         await self.session.refresh(submittal)
-        logger.info("Submittal submitted: %s", submittal_id)
+        logger.info("Submittal submitted: %s (rev %s)", submittal_id, submittal.current_revision)
         return submittal
 
     async def review_submittal(
@@ -139,7 +170,12 @@ class SubmittalService:
         new_status: str,
         reviewer_id: str,
     ) -> Submittal:
-        """Review a submittal (approve, reject, etc.)."""
+        """Review a submittal (approve, reject, etc.).
+
+        Ball-in-court updates depend on the decision:
+        - ``approved`` / ``approved_as_noted``: stays with reviewer (done)
+        - ``revise_and_resubmit`` / ``rejected``: back to submitter
+        """
         submittal = await self.get_submittal(submittal_id)
         if submittal.status not in ("submitted", "under_review"):
             raise HTTPException(
@@ -149,10 +185,17 @@ class SubmittalService:
 
         from datetime import UTC, datetime
 
+        # Determine ball-in-court based on decision
+        if new_status in ("revise_and_resubmit", "rejected"):
+            ball = submittal.created_by
+        else:
+            ball = reviewer_id
+
         fields: dict[str, Any] = {
             "status": new_status,
             "reviewer_id": reviewer_id,
             "date_returned": datetime.now(UTC).strftime("%Y-%m-%d"),
+            "ball_in_court": ball,
         }
         await self.repo.update_fields(submittal_id, **fields)
         await self.session.refresh(submittal)
@@ -164,12 +207,20 @@ class SubmittalService:
         submittal_id: uuid.UUID,
         approver_id: str,
     ) -> Submittal:
-        """Final approval of a submittal."""
+        """Final approval of a submittal.
+
+        Only submittals that are currently ``submitted`` or ``under_review``
+        can receive final approval.  Ball-in-court is cleared on approval.
+        """
         submittal = await self.get_submittal(submittal_id)
-        if submittal.status in ("closed", "rejected"):
+        allowed = ("submitted", "under_review")
+        if submittal.status not in allowed:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Cannot approve submittal with status '{submittal.status}'",
+                detail=(
+                    f"Cannot approve submittal with status '{submittal.status}'. "
+                    f"Expected one of: {', '.join(allowed)}"
+                ),
             )
 
         from datetime import UTC, datetime
@@ -178,6 +229,7 @@ class SubmittalService:
             "status": "approved",
             "approver_id": approver_id,
             "date_returned": datetime.now(UTC).strftime("%Y-%m-%d"),
+            "ball_in_court": None,
         }
         await self.repo.update_fields(submittal_id, **fields)
         await self.session.refresh(submittal)

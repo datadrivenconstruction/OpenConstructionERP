@@ -4,9 +4,11 @@ Stateless service layer. Handles:
 - Contact CRUD
 - Search across name, company, email
 - Soft-delete (deactivate)
+- Email format validation and duplicate detection
 """
 
 import logging
+import re
 import uuid
 
 from fastapi import HTTPException, status
@@ -17,6 +19,17 @@ from app.modules.contacts.repository import ContactRepository
 from app.modules.contacts.schemas import ContactCreate, ContactUpdate
 
 logger = logging.getLogger(__name__)
+
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+def _validate_email_format(email: str | None) -> None:
+    """Validate email format. Raises 400 if invalid."""
+    if email is not None and not _EMAIL_RE.match(email):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid email format: {email}",
+        )
 
 
 class ContactService:
@@ -33,7 +46,26 @@ class ContactService:
         data: ContactCreate,
         user_id: str | None = None,
     ) -> Contact:
-        """Create a new contact."""
+        """Create a new contact.
+
+        Validates email format and checks for duplicate emails among active contacts.
+        """
+        # Validate email format
+        _validate_email_format(data.primary_email)
+
+        # Check for duplicate email among active contacts
+        normalised_email = data.primary_email.lower() if data.primary_email else None
+        if normalised_email:
+            existing = await self.repo.get_by_email(normalised_email)
+            if existing is not None and existing.is_active:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=(
+                        f"A contact with email '{normalised_email}' already exists "
+                        f"(id={existing.id})."
+                    ),
+                )
+
         contact = Contact(
             contact_type=data.contact_type,
             is_platform_user=data.is_platform_user,
@@ -45,7 +77,7 @@ class ContactService:
             vat_number=data.vat_number,
             country_code=data.country_code,
             address=data.address,
-            primary_email=data.primary_email.lower() if data.primary_email else None,
+            primary_email=normalised_email,
             primary_phone=data.primary_phone,
             website=data.website,
             certifications=data.certifications,
@@ -107,16 +139,34 @@ class ContactService:
         contact_id: uuid.UUID,
         data: ContactUpdate,
     ) -> Contact:
-        """Update contact fields."""
+        """Update contact fields.
+
+        Validates email format and checks for duplicate emails on update.
+        """
         contact = await self.get_contact(contact_id)
 
         fields = data.model_dump(exclude_unset=True)
         if "metadata" in fields:
             fields["metadata_"] = fields.pop("metadata")
 
-        # Normalise email to lowercase
+        # Validate and normalise email if being updated
         if "primary_email" in fields and fields["primary_email"] is not None:
+            _validate_email_format(fields["primary_email"])
             fields["primary_email"] = fields["primary_email"].lower()
+
+            # Check for duplicate email (skip if it's the same contact)
+            existing = await self.repo.get_by_email(fields["primary_email"])
+            if existing is not None and existing.id != contact_id and existing.is_active:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=(
+                        f"A contact with email '{fields['primary_email']}' already exists "
+                        f"(id={existing.id})."
+                    ),
+                )
+        elif "primary_email" in fields:
+            # Explicitly setting to None is OK (clearing the email)
+            pass
 
         if not fields:
             return contact

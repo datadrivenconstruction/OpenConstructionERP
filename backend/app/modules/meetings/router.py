@@ -719,8 +719,13 @@ async def complete_meeting(
     _perm: None = Depends(RequirePermission("meetings.update")),
     service: MeetingService = Depends(_get_service),
 ) -> MeetingResponse:
-    """Mark a meeting as completed."""
-    meeting = await service.complete_meeting(meeting_id)
+    """Mark a meeting as completed.
+
+    Requires status to be 'scheduled' or 'in_progress'.
+    Draft meetings must be scheduled first.
+    Open action items are automatically converted to tasks.
+    """
+    meeting = await service.complete_meeting(meeting_id, user_id=user_id)
     return _meeting_to_response(meeting)
 
 

@@ -69,14 +69,26 @@ class PurchaseOrderRepository:
         self.session.expire_all()
 
     async def next_po_number(self, project_id: uuid.UUID) -> str:
-        """Generate the next PO number for a project."""
+        """Generate the next PO number for a project.
+
+        Uses MAX of existing PO numbers to avoid race conditions where
+        COUNT-based generation would produce duplicates under concurrency.
+        """
         stmt = (
-            select(func.count())
-            .select_from(PurchaseOrder)
+            select(func.max(PurchaseOrder.po_number))
             .where(PurchaseOrder.project_id == project_id)
+            .where(PurchaseOrder.po_number.like("PO-%"))
         )
-        count = (await self.session.execute(stmt)).scalar_one()
-        return f"PO-{count + 1:03d}"
+        max_number = (await self.session.execute(stmt)).scalar_one_or_none()
+
+        if max_number:
+            try:
+                suffix = int(max_number.rsplit("-", 1)[-1])
+            except (ValueError, IndexError):
+                suffix = 0
+            return f"PO-{suffix + 1:03d}"
+
+        return "PO-001"
 
 
 class POItemRepository:

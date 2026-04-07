@@ -93,6 +93,10 @@ class TaskResponse(BaseModel):
     title: str
     description: str | None = None
     checklist: list[dict[str, Any]] = Field(default_factory=list)
+    checklist_progress: float = Field(
+        default=0.0,
+        description="Completion percentage of checklist items (0.0 - 100.0)",
+    )
     responsible_id: str | None = None
     persons_involved: list[str] = Field(default_factory=list)
     due_date: str | None = None

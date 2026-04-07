@@ -40,13 +40,27 @@ class SubmittalRepository:
         return list(result.scalars().all()), total
 
     async def next_submittal_number(self, project_id: uuid.UUID) -> str:
+        """Generate the next submittal number using MAX to avoid duplicates."""
+        from sqlalchemy import Integer as SAInteger
+        from sqlalchemy import cast
+        from sqlalchemy.sql import func as sqlfunc
+
         stmt = (
-            select(func.count())
-            .select_from(Submittal)
+            select(
+                sqlfunc.coalesce(
+                    sqlfunc.max(
+                        cast(
+                            func.substr(Submittal.submittal_number, 5),
+                            SAInteger,
+                        )
+                    ),
+                    0,
+                )
+            )
             .where(Submittal.project_id == project_id)
         )
-        count = (await self.session.execute(stmt)).scalar_one()
-        return f"SUB-{count + 1:03d}"
+        max_num = (await self.session.execute(stmt)).scalar_one()
+        return f"SUB-{max_num + 1:03d}"
 
     async def create(self, submittal: Submittal) -> Submittal:
         self.session.add(submittal)

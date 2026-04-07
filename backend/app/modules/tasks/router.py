@@ -35,14 +35,25 @@ def _get_service(session: SessionDep) -> TaskService:
     return TaskService(session)
 
 
+def _compute_checklist_progress(checklist: list | None) -> float:
+    """Return completion percentage (0.0 - 100.0) for a checklist."""
+    if not checklist:
+        return 0.0
+    total = len(checklist)
+    done = sum(1 for c in checklist if isinstance(c, dict) and c.get("completed"))
+    return round(done / total * 100, 1) if total > 0 else 0.0
+
+
 def _to_response(item: object) -> TaskResponse:
+    checklist = item.checklist or []  # type: ignore[attr-defined]
     return TaskResponse(
         id=item.id,  # type: ignore[attr-defined]
         project_id=item.project_id,  # type: ignore[attr-defined]
         task_type=item.task_type,  # type: ignore[attr-defined]
         title=item.title,  # type: ignore[attr-defined]
         description=item.description,  # type: ignore[attr-defined]
-        checklist=item.checklist or [],  # type: ignore[attr-defined]
+        checklist=checklist,
+        checklist_progress=_compute_checklist_progress(checklist),
         responsible_id=str(item.responsible_id) if item.responsible_id else None,  # type: ignore[attr-defined]
         persons_involved=item.persons_involved or [],  # type: ignore[attr-defined]
         due_date=item.due_date,  # type: ignore[attr-defined]
@@ -71,9 +82,13 @@ async def list_tasks(
     responsible_id: str | None = Query(default=None),
     service: TaskService = Depends(_get_service),
 ) -> list[TaskResponse]:
-    """List tasks for a project with optional filters."""
+    """List tasks for a project with optional filters.
+
+    Private tasks are only visible to their creator.
+    """
     tasks, _ = await service.list_tasks(
         project_id,
+        current_user_id=user_id,
         offset=offset,
         limit=limit,
         task_type=type_filter,
@@ -127,7 +142,9 @@ async def export_tasks(
     from openpyxl import Workbook
     from openpyxl.styles import Font
 
-    tasks, _ = await service.list_tasks(project_id, offset=0, limit=10000)
+    tasks, _ = await service.list_tasks(
+        project_id, current_user_id=user_id, offset=0, limit=10000
+    )
 
     wb = Workbook()
     ws = wb.active
@@ -190,8 +207,8 @@ async def get_task(
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: TaskService = Depends(_get_service),
 ) -> TaskResponse:
-    """Get a single task."""
-    task = await service.get_task(task_id)
+    """Get a single task. Private tasks are only visible to their creator."""
+    task = await service.get_task(task_id, current_user_id=user_id)
     return _to_response(task)
 
 
@@ -204,7 +221,7 @@ async def update_task(
     service: TaskService = Depends(_get_service),
 ) -> TaskResponse:
     """Update a task."""
-    task = await service.update_task(task_id, data)
+    task = await service.update_task(task_id, data, current_user_id=user_id)
     return _to_response(task)
 
 
@@ -216,7 +233,7 @@ async def delete_task(
     service: TaskService = Depends(_get_service),
 ) -> None:
     """Delete a task."""
-    await service.delete_task(task_id)
+    await service.delete_task(task_id, current_user_id=user_id)
 
 
 @router.post("/{task_id}/complete", response_model=TaskResponse)
@@ -229,5 +246,5 @@ async def complete_task(
 ) -> TaskResponse:
     """Mark a task as completed with optional result text."""
     result = body.result if body else None
-    task = await service.complete_task(task_id, result=result)
+    task = await service.complete_task(task_id, result=result, current_user_id=user_id)
     return _to_response(task)

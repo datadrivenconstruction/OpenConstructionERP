@@ -48,14 +48,27 @@ class MeetingRepository:
         return items, total
 
     async def next_meeting_number(self, project_id: uuid.UUID) -> str:
-        """Generate the next meeting number for a project (MTG-001, MTG-002, ...)."""
+        """Generate the next meeting number using MAX to avoid duplicates."""
+        from sqlalchemy import Integer as SAInteger
+        from sqlalchemy import cast
+        from sqlalchemy.sql import func as sqlfunc
+
         stmt = (
-            select(func.count())
-            .select_from(Meeting)
+            select(
+                sqlfunc.coalesce(
+                    sqlfunc.max(
+                        cast(
+                            func.substr(Meeting.meeting_number, 5),
+                            SAInteger,
+                        )
+                    ),
+                    0,
+                )
+            )
             .where(Meeting.project_id == project_id)
         )
-        count = (await self.session.execute(stmt)).scalar_one()
-        return f"MTG-{count + 1:03d}"
+        max_num = (await self.session.execute(stmt)).scalar_one()
+        return f"MTG-{max_num + 1:03d}"
 
     async def create(self, meeting: Meeting) -> Meeting:
         """Insert a new meeting."""

@@ -2,7 +2,7 @@
 
 import uuid
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.tasks.models import Task
@@ -21,6 +21,7 @@ class TaskRepository:
         self,
         project_id: uuid.UUID,
         *,
+        current_user_id: str | None = None,
         offset: int = 0,
         limit: int = 50,
         task_type: str | None = None,
@@ -29,6 +30,18 @@ class TaskRepository:
         responsible_id: str | None = None,
     ) -> tuple[list[Task], int]:
         base = select(Task).where(Task.project_id == project_id)
+
+        # Private task filtering: only the creator can see private tasks
+        if current_user_id is not None:
+            base = base.where(
+                or_(
+                    Task.is_private == False,  # noqa: E712
+                    Task.created_by == current_user_id,
+                )
+            )
+        else:
+            base = base.where(Task.is_private == False)  # noqa: E712
+
         if task_type is not None:
             base = base.where(Task.task_type == task_type)
         if status is not None:
@@ -53,8 +66,22 @@ class TaskRepository:
         limit: int = 50,
         status: str | None = None,
     ) -> tuple[list[Task], int]:
-        """List tasks assigned to a specific user (responsible_id)."""
-        base = select(Task).where(Task.responsible_id == user_id)
+        """List tasks assigned to or created by a specific user.
+
+        Private tasks are included only when the requesting user is the creator.
+        """
+        base = select(Task).where(
+            or_(
+                Task.responsible_id == user_id,
+                # Include private tasks created by this user
+                Task.created_by == user_id,
+            )
+        ).where(
+            or_(
+                Task.is_private == False,  # noqa: E712
+                Task.created_by == user_id,
+            )
+        )
         if status is not None:
             base = base.where(Task.status == status)
 

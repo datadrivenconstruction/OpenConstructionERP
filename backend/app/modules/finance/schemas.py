@@ -224,9 +224,19 @@ class BudgetResponse(BaseModel):
     committed: str = "0"
     actual: str = "0"
     forecast_final: str = "0"
+    variance: str = "0"
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+
+    def model_post_init(self, __context: Any) -> None:
+        """Compute variance = revised_budget - actual after deserialization."""
+        try:
+            revised = float(self.revised_budget)
+            actual = float(self.actual)
+            self.variance = str(revised - actual)
+        except (ValueError, TypeError):
+            self.variance = "0"
 
 
 class BudgetListResponse(BaseModel):

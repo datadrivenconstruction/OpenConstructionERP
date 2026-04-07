@@ -16,7 +16,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, Query
 
-from app.dependencies import CurrentUserId, SessionDep
+from app.dependencies import CurrentUserId, CurrentUserPayload, SessionDep
 from app.modules.cde.schemas import (
     ContainerCreate,
     ContainerResponse,
@@ -163,11 +163,17 @@ async def update_container(
 async def transition_state(
     container_id: uuid.UUID,
     data: StateTransitionRequest,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    user_payload: CurrentUserPayload,
     service: CDEService = Depends(_get_service),
 ) -> ContainerResponse:
-    """Transition a container's CDE state (wip -> shared -> published -> archived)."""
-    container = await service.transition_state(container_id, data)
+    """Transition a container's CDE state (wip -> shared -> published -> archived).
+
+    Role-based gate validation is performed via the ISO 19650 CDEStateMachine.
+    """
+    user_role = user_payload.get("role", "editor")
+    container = await service.transition_state(
+        container_id, data, user_role=user_role,
+    )
     return _container_to_response(container)
 
 

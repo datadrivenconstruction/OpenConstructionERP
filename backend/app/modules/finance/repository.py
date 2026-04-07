@@ -72,16 +72,31 @@ class InvoiceRepository:
     async def next_invoice_number(
         self, project_id: uuid.UUID, direction: str
     ) -> str:
-        """Generate the next invoice number for a project and direction."""
+        """Generate the next invoice number for a project and direction.
+
+        Uses MAX of existing invoice numbers to avoid race conditions where
+        COUNT-based generation would produce duplicates under concurrency.
+        Extracts the numeric suffix from the highest existing invoice number
+        and increments it.
+        """
         prefix = "INV-P" if direction == "payable" else "INV-R"
         stmt = (
-            select(func.count())
-            .select_from(Invoice)
+            select(func.max(Invoice.invoice_number))
             .where(Invoice.project_id == project_id)
             .where(Invoice.invoice_direction == direction)
+            .where(Invoice.invoice_number.like(f"{prefix}-%"))
         )
-        count = (await self.session.execute(stmt)).scalar_one()
-        return f"{prefix}-{count + 1:03d}"
+        max_number = (await self.session.execute(stmt)).scalar_one_or_none()
+
+        if max_number:
+            # Extract numeric suffix, e.g. "INV-P-003" -> 3
+            try:
+                suffix = int(max_number.rsplit("-", 1)[-1])
+            except (ValueError, IndexError):
+                suffix = 0
+            return f"{prefix}-{suffix + 1:03d}"
+
+        return f"{prefix}-001"
 
 
 class InvoiceLineItemRepository:

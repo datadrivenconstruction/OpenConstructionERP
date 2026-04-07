@@ -5,6 +5,7 @@ Stateless service layer.
 
 import logging
 import uuid
+from decimal import Decimal, InvalidOperation
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -34,6 +35,36 @@ from app.modules.finance.schemas import (
 
 logger = logging.getLogger(__name__)
 
+# ── Allowed status transitions ──────────────────────────────────────────────
+
+_INVOICE_STATUS_TRANSITIONS: dict[str, set[str]] = {
+    "draft": {"pending", "approved", "cancelled"},
+    "pending": {"approved", "cancelled", "draft"},
+    "approved": {"paid", "cancelled"},
+    "paid": set(),  # terminal
+    "cancelled": {"draft"},  # allow re-opening
+}
+
+_VALID_INVOICE_STATUSES = set(_INVOICE_STATUS_TRANSITIONS.keys())
+
+
+def _parse_decimal(value: str, field_name: str = "value") -> Decimal:
+    """Parse a string to Decimal, raising a clear error on failure."""
+    try:
+        return Decimal(value)
+    except (InvalidOperation, ValueError, TypeError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid numeric value for {field_name}: {value!r}",
+        ) from exc
+
+
+def _compute_invoice_total(subtotal: str, tax: str) -> str:
+    """Compute amount_total = amount_subtotal + tax_amount."""
+    s = _parse_decimal(subtotal, "amount_subtotal")
+    t = _parse_decimal(tax, "tax_amount")
+    return str(s + t)
+
 
 class FinanceService:
     """Business logic for finance operations."""
@@ -53,13 +84,29 @@ class FinanceService:
         data: InvoiceCreate,
         user_id: str | None = None,
     ) -> Invoice:
-        """Create a new invoice with optional line items."""
+        """Create a new invoice with optional line items.
+
+        Automatically computes amount_total = amount_subtotal + tax_amount.
+        """
+        # Validate initial status
+        if data.status not in _VALID_INVOICE_STATUSES:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"Invalid invoice status: '{data.status}'. "
+                    f"Allowed: {', '.join(sorted(_VALID_INVOICE_STATUSES))}"
+                ),
+            )
+
         # Auto-generate invoice number if not provided
         invoice_number = data.invoice_number
         if not invoice_number:
             invoice_number = await self.invoices.next_invoice_number(
                 data.project_id, data.invoice_direction
             )
+
+        # Server-side total computation: always override amount_total
+        computed_total = _compute_invoice_total(data.amount_subtotal, data.tax_amount)
 
         invoice = Invoice(
             project_id=data.project_id,
@@ -72,7 +119,7 @@ class FinanceService:
             amount_subtotal=data.amount_subtotal,
             tax_amount=data.tax_amount,
             retention_amount=data.retention_amount,
-            amount_total=data.amount_total,
+            amount_total=computed_total,
             tax_config_id=data.tax_config_id,
             status=data.status,
             payment_terms_days=data.payment_terms_days,
@@ -133,12 +180,46 @@ class FinanceService:
         invoice_id: uuid.UUID,
         data: InvoiceUpdate,
     ) -> Invoice:
-        """Update invoice fields and optionally replace line items."""
-        await self.get_invoice(invoice_id)  # 404 check
+        """Update invoice fields and optionally replace line items.
+
+        Validates status transitions and recomputes amount_total when
+        subtotal or tax are changed.
+        """
+        invoice = await self.get_invoice(invoice_id)  # 404 check
 
         fields = data.model_dump(exclude_unset=True, exclude={"line_items"})
         if "metadata" in fields:
             fields["metadata_"] = fields.pop("metadata")
+
+        # Validate status transition if status is being changed
+        if "status" in fields and fields["status"] is not None:
+            new_status = fields["status"]
+            if new_status not in _VALID_INVOICE_STATUSES:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        f"Invalid invoice status: '{new_status}'. "
+                        f"Allowed: {', '.join(sorted(_VALID_INVOICE_STATUSES))}"
+                    ),
+                )
+            allowed = _INVOICE_STATUS_TRANSITIONS.get(invoice.status, set())
+            if new_status != invoice.status and new_status not in allowed:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        f"Cannot transition invoice from '{invoice.status}' to '{new_status}'. "
+                        f"Allowed transitions: {', '.join(sorted(allowed)) or 'none'}"
+                    ),
+                )
+
+        # Recompute total if subtotal or tax changed
+        new_subtotal = fields.get("amount_subtotal", invoice.amount_subtotal)
+        new_tax = fields.get("tax_amount", invoice.tax_amount)
+        if "amount_subtotal" in fields or "tax_amount" in fields:
+            fields["amount_total"] = _compute_invoice_total(
+                new_subtotal or invoice.amount_subtotal,
+                new_tax or invoice.tax_amount,
+            )
 
         if fields:
             await self.invoices.update(invoice_id, **fields)
@@ -190,10 +271,13 @@ class FinanceService:
     async def pay_invoice(self, invoice_id: uuid.UUID) -> Invoice:
         """Transition invoice to paid status."""
         invoice = await self.get_invoice(invoice_id)
-        if invoice.status not in ("approved", "pending"):
+        if invoice.status != "approved":
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Cannot mark as paid invoice in status '{invoice.status}'",
+                detail=(
+                    f"Cannot mark as paid invoice in status '{invoice.status}'. "
+                    "Invoice must be approved first."
+                ),
             )
         await self.invoices.update(invoice_id, status="paid")
         updated = await self.invoices.get(invoice_id)
@@ -301,7 +385,28 @@ class FinanceService:
     # ── EVM ──────────────────────────────────────────────────────────────────
 
     async def create_evm_snapshot(self, data: EVMSnapshotCreate) -> EVMSnapshot:
-        """Create an EVM snapshot for a project."""
+        """Create an EVM snapshot for a project.
+
+        Computes derived metrics server-side:
+        - SV = EV - PV  (schedule variance)
+        - CV = EV - AC  (cost variance)
+        - SPI = EV / PV (schedule performance index, 0 if PV == 0)
+        - CPI = EV / AC (cost performance index, 0 if AC == 0)
+        """
+        ev = _parse_decimal(data.ev, "ev")
+        pv = _parse_decimal(data.pv, "pv")
+        ac = _parse_decimal(data.ac, "ac")
+
+        sv = ev - pv
+        cv = ev - ac
+        spi = (ev / pv) if pv != 0 else Decimal("0")
+        cpi = (ev / ac) if ac != 0 else Decimal("0")
+
+        # Round indices to 4 decimal places for readability, then normalize
+        # to remove trailing zeros (e.g. "0.9500" -> "0.95")
+        spi = spi.quantize(Decimal("0.0001")).normalize()
+        cpi = cpi.quantize(Decimal("0.0001")).normalize()
+
         snapshot = EVMSnapshot(
             project_id=data.project_id,
             snapshot_date=data.snapshot_date,
@@ -309,10 +414,10 @@ class FinanceService:
             pv=data.pv,
             ev=data.ev,
             ac=data.ac,
-            sv=data.sv,
-            cv=data.cv,
-            spi=data.spi,
-            cpi=data.cpi,
+            sv=str(sv),
+            cv=str(cv),
+            spi=str(spi),
+            cpi=str(cpi),
             metadata_=data.metadata,
         )
         snapshot = await self.evm.create(snapshot)

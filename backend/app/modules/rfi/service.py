@@ -2,6 +2,7 @@
 
 import logging
 import uuid
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -12,6 +13,19 @@ from app.modules.rfi.repository import RFIRepository
 from app.modules.rfi.schemas import RFICreate, RFIUpdate
 
 logger = logging.getLogger(__name__)
+
+_RFI_RESPONSE_DUE_DAYS = 14
+
+
+def _add_business_days(start: datetime, days: int) -> str:
+    """Return ISO date string after adding *days* business days to *start*."""
+    added = 0
+    current = start
+    while added < days:
+        current += timedelta(days=1)
+        if current.weekday() < 5:  # Mon-Fri
+            added += 1
+    return current.strftime("%Y-%m-%d")
 
 
 class RFIService:
@@ -26,8 +40,24 @@ class RFIService:
         data: RFICreate,
         user_id: str | None = None,
     ) -> RFI:
-        """Create a new RFI with auto-generated number."""
+        """Create a new RFI with auto-generated number.
+
+        Ball-in-court is automatically set to ``assigned_to`` when present.
+        Response due date defaults to 14 business days from today when the
+        status is ``open`` and no explicit due date is provided.
+        """
         rfi_number = await self.repo.next_rfi_number(data.project_id)
+
+        # Auto-set ball_in_court to assigned_to on creation
+        ball_in_court = data.ball_in_court
+        if ball_in_court is None and data.assigned_to is not None:
+            ball_in_court = data.assigned_to
+
+        # Auto-calculate response_due_date (14 business days) when status
+        # is 'open' and no explicit due date was given.
+        response_due_date = data.response_due_date
+        if response_due_date is None and data.status == "open":
+            response_due_date = _add_business_days(datetime.now(UTC), _RFI_RESPONSE_DUE_DAYS)
 
         rfi = RFI(
             project_id=data.project_id,
@@ -37,13 +67,13 @@ class RFIService:
             raised_by=data.raised_by,
             assigned_to=data.assigned_to,
             status=data.status,
-            ball_in_court=data.ball_in_court,
+            ball_in_court=ball_in_court,
             cost_impact=data.cost_impact,
             cost_impact_value=data.cost_impact_value,
             schedule_impact=data.schedule_impact,
             schedule_impact_days=data.schedule_impact_days,
             date_required=data.date_required,
-            response_due_date=data.response_due_date,
+            response_due_date=response_due_date,
             linked_drawing_ids=data.linked_drawing_ids,
             change_order_id=data.change_order_id,
             created_by=user_id,
@@ -94,6 +124,19 @@ class RFIService:
         if "metadata" in fields:
             fields["metadata_"] = fields.pop("metadata")
 
+        # When status transitions to 'open' and no response_due_date is set,
+        # auto-calculate it (14 business days from now).
+        new_status = fields.get("status")
+        if new_status == "open" and not rfi.response_due_date:
+            if "response_due_date" not in fields or fields["response_due_date"] is None:
+                fields["response_due_date"] = _add_business_days(
+                    datetime.now(UTC), _RFI_RESPONSE_DUE_DAYS
+                )
+
+        # Auto-update ball_in_court when assigned_to changes
+        if "assigned_to" in fields and "ball_in_court" not in fields:
+            fields["ball_in_court"] = fields["assigned_to"]
+
         if not fields:
             return rfi
 
@@ -113,7 +156,11 @@ class RFIService:
         official_response: str,
         responded_by: str,
     ) -> RFI:
-        """Record an official response to an RFI."""
+        """Record an official response to an RFI.
+
+        Ball-in-court automatically flips to ``raised_by`` so the originator
+        can review the answer.
+        """
         rfi = await self.get_rfi(rfi_id)
         if rfi.status in ("closed", "void"):
             raise HTTPException(
@@ -121,29 +168,37 @@ class RFIService:
                 detail=f"Cannot respond to an RFI with status '{rfi.status}'",
             )
 
-        from datetime import UTC, datetime
-
         await self.repo.update_fields(
             rfi_id,
             official_response=official_response,
             responded_by=responded_by,
             responded_at=datetime.now(UTC).strftime("%Y-%m-%d"),
             status="answered",
+            ball_in_court=str(rfi.raised_by),
         )
         await self.session.refresh(rfi)
         logger.info("RFI responded: %s by %s", rfi_id, responded_by)
         return rfi
 
     async def close_rfi(self, rfi_id: uuid.UUID) -> RFI:
-        """Close an RFI."""
+        """Close an RFI.
+
+        Requires an official response before closing to prevent
+        unanswered RFIs from being silently closed.
+        """
         rfi = await self.get_rfi(rfi_id)
         if rfi.status == "closed":
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="RFI is already closed",
             )
+        if not rfi.official_response:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot close an RFI without an official response",
+            )
 
-        await self.repo.update_fields(rfi_id, status="closed")
+        await self.repo.update_fields(rfi_id, status="closed", ball_in_court=None)
         await self.session.refresh(rfi)
         logger.info("RFI closed: %s", rfi_id)
         return rfi

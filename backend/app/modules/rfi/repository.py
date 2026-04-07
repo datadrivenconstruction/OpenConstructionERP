@@ -37,13 +37,28 @@ class RFIRepository:
         return list(result.scalars().all()), total
 
     async def next_rfi_number(self, project_id: uuid.UUID) -> str:
+        """Generate the next RFI number using MAX to avoid duplicates under concurrency."""
+        from sqlalchemy import Integer as SAInteger
+        from sqlalchemy import cast
+        from sqlalchemy.sql import func as sqlfunc
+
+        # Extract numeric suffix from existing RFI numbers (e.g. 'RFI-007' -> 7)
         stmt = (
-            select(func.count())
-            .select_from(RFI)
+            select(
+                sqlfunc.coalesce(
+                    sqlfunc.max(
+                        cast(
+                            func.substr(RFI.rfi_number, 5),
+                            SAInteger,
+                        )
+                    ),
+                    0,
+                )
+            )
             .where(RFI.project_id == project_id)
         )
-        count = (await self.session.execute(stmt)).scalar_one()
-        return f"RFI-{count + 1:03d}"
+        max_num = (await self.session.execute(stmt)).scalar_one()
+        return f"RFI-{max_num + 1:03d}"
 
     async def create(self, rfi: RFI) -> RFI:
         self.session.add(rfi)
