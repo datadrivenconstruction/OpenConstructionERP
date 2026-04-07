@@ -1,0 +1,1 @@
+export { BIMPage } from './BIMPage';

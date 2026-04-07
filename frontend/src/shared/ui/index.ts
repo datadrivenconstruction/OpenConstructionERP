@@ -74,3 +74,10 @@ export { NotificationBell } from './NotificationBell';
 
 export { CommentThread } from './CommentThread';
 export type { CommentThreadProps } from './CommentThread';
+
+export { GanttChart } from './Gantt';
+export type { GanttProps, GanttActivity } from './Gantt';
+export type { ViewMode as GanttViewMode } from './Gantt';
+
+export { BIMViewer, DisciplineToggle } from './BIMViewer';
+export type { BIMViewerProps, BIMViewMode } from './BIMViewer';

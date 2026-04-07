@@ -20,7 +20,8 @@ import {
   RotateCcw,
   Download,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Input, InfoHint, SkeletonTable, Breadcrumb } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Input, InfoHint, SkeletonTable, Breadcrumb, GanttChart as SVGGanttChart } from '@/shared/ui';
+import type { GanttActivity as SVGGanttActivity, GanttViewMode } from '@/shared/ui';
 import { apiGet, apiDelete } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
@@ -883,6 +884,7 @@ function ScheduleDetail({
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const [zoomLevel, setZoomLevel] = useState<ZoomLevel>('week');
+  const [viewMode, setViewMode] = useState<'table' | 'gantt'>('gantt');
   const [showAddActivity, setShowAddActivity] = useState(false);
   const [showGenerateBOQ, setShowGenerateBOQ] = useState(false);
   const [selectedBOQId, setSelectedBOQId] = useState('');
@@ -1047,6 +1049,23 @@ function ScheduleDetail({
     return activities;
   }, [ganttData, activityFilter, criticalActivityIds]);
 
+  // Map activities to SVG Gantt format
+  const svgGanttActivities = useMemo<SVGGanttActivity[]>(() => {
+    return filteredActivities.map((a) => ({
+      id: a.id,
+      name: a.name,
+      start: a.start_date,
+      end: a.end_date,
+      progress: a.progress_pct,
+      isCritical: criticalActivityIds?.has(a.id) ?? false,
+      isMilestone: a.activity_type === 'milestone',
+      isGroup: a.activity_type === 'summary',
+      parentId: a.parent_id,
+      dependencies: a.dependencies?.map((d) => d.activity_id) ?? [],
+      color: a.color || undefined,
+    }));
+  }, [filteredActivities, criticalActivityIds]);
+
   return (
     <div className="animate-fade-in">
       {/* Back button */}
@@ -1105,6 +1124,25 @@ function ScheduleDetail({
           )}
           {hasActivities && (
             <>
+              {/* View mode toggle: Table vs SVG Gantt */}
+              <div className="flex items-center gap-1 rounded-lg border border-border-light p-0.5">
+                {([
+                  { key: 'table' as const, label: t('schedule.view_table', 'Table') },
+                  { key: 'gantt' as const, label: t('schedule.view_gantt', 'Gantt') },
+                ]).map((v) => (
+                  <button
+                    key={v.key}
+                    onClick={() => setViewMode(v.key)}
+                    className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                      viewMode === v.key
+                        ? 'bg-oe-blue text-white'
+                        : 'text-content-secondary hover:bg-surface-secondary'
+                    }`}
+                  >
+                    {v.label}
+                  </button>
+                ))}
+              </div>
               <div className="flex items-center gap-1 rounded-lg border border-border-light p-0.5">
                 {(['day', 'week', 'month'] as const).map((level) => (
                   <button
@@ -1265,12 +1303,23 @@ function ScheduleDetail({
         {isLoading ? (
           <SkeletonTable rows={4} columns={4} />
         ) : ganttData ? (
-          <GanttChart
-            activities={filteredActivities}
-            onUpdateProgress={handleUpdateProgress}
-            criticalActivityIds={criticalActivityIds}
-            zoomLevel={zoomLevel}
-          />
+          viewMode === 'gantt' ? (
+            <SVGGanttChart
+              activities={svgGanttActivities}
+              viewMode={zoomLevel as GanttViewMode}
+              showBaseline={false}
+              showDependencies={true}
+              showCriticalPath={!!cpmResult}
+              todayLine={true}
+            />
+          ) : (
+            <GanttChart
+              activities={filteredActivities}
+              onUpdateProgress={handleUpdateProgress}
+              criticalActivityIds={criticalActivityIds}
+              zoomLevel={zoomLevel}
+            />
+          )
         ) : null}
       </div>
 

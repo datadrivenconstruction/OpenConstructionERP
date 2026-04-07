@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.62.0",
+    "@types/three": "^0.183.1",
     "ag-grid-community": "^32.3.0",
     "ag-grid-react": "^32.3.0",
     "clsx": "^2.1.0",
@@ -36,6 +37,7 @@
     "react-i18next": "^15.1.0",
     "react-router-dom": "^6.28.0",
     "recharts": "^3.8.1",
+    "three": "^0.183.2",
     "xlsx": "^0.18.5",
     "y-webrtc": "^10.3.0",
     "y-websocket": "^3.0.0",

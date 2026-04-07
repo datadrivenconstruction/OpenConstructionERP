@@ -119,6 +119,9 @@ const InspectionsPage = lazy(() =>
 const NCRPage = lazy(() =>
   import('@/features/ncr/NCRPage').then((m) => ({ default: m.NCRPage }))
 );
+const BIMPage = lazy(() =>
+  import('@/features/bim/BIMPage').then((m) => ({ default: m.BIMPage }))
+);
 
 function LoadingScreen() {
   return (
@@ -267,6 +270,8 @@ export default function App() {
         <Route path="/advisor" element={<P title="AI Cost Advisor"><AdvisorPage /></P>} />
         <Route path="/cad-takeoff" element={<Navigate to="/data-explorer" replace />} />
         <Route path="/data-explorer" element={<P title="Data Explorer"><CadDataExplorerPage /></P>} />
+        <Route path="/bim" element={<P title="BIM Viewer"><BIMPage /></P>} />
+        <Route path="/projects/:projectId/bim" element={<P title="BIM Viewer"><BIMPage /></P>} />
 
         <Route path="/projects" element={<P title="Projects"><ProjectsPage /></P>} />
         <Route path="/projects/new" element={<P title="New Project"><CreateProjectPage /></P>} />

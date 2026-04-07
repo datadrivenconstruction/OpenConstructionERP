@@ -11,6 +11,7 @@ import {
   Database,
   Layers,
   Boxes,
+  Box,
   ShieldCheck,
   FileText,
   FileBarChart,
@@ -100,6 +101,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.takeoff_overview', to: '/quantities', icon: Ruler },
       { labelKey: 'nav.pdf_measurements', to: '/takeoff?tab=measurements', icon: Ruler },
       { labelKey: 'nav.cad_bim_explorer', to: '/data-explorer', icon: TableProperties },
+      { labelKey: 'nav.bim_viewer', to: '/bim', icon: Box },
     ],
   },
   {
