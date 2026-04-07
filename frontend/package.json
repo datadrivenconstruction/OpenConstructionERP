@@ -12,7 +12,7 @@
     "test:e2e:ui": "npx playwright test --ui",
     "test:e2e:headed": "npx playwright test --headed",
     "test:e2e:report": "npx playwright show-report",
-    "lint": "eslint . --ext ts,tsx",
+    "lint": "eslint .",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
     "typecheck": "tsc --noEmit",
     "api:generate": "openapi-typescript http://localhost:8000/api/openapi.json -o src/shared/lib/api-types.ts"

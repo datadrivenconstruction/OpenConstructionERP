@@ -25,6 +25,15 @@ jobs:
           cache: pip
           cache-dependency-path: backend/pyproject.toml
 
+      - name: Create empty frontend dist (hatchling force-include)
+        # The backend wheel pulls in ../frontend/dist via force-include so a
+        # production install bundles the SPA. CI runs the backend job in
+        # parallel with the frontend job, so the dist directory may not exist
+        # yet — create an empty placeholder so the editable install succeeds.
+        run: |
+          mkdir -p ../frontend/dist
+          touch ../frontend/dist/.gitkeep
+
       - name: Install dependencies
         run: pip install -e ".[dev]"
 
