@@ -148,7 +148,7 @@
 3. **20 языков** — конкуренты имеют 2-3
 4. **Open source + self-hosted** — единственный в категории
 5. **CWICR 55K cost items бесплатно** — конкуренты берут $5K+/year за базы
-6. **Validation engine 15 rules** — только iTWO имеет что-то подобное
+6. **Validation engine 15 rules** — уникальная функция в open-source сегменте
 7. **Module marketplace architecture** — extensibility
 8. **Multi-standard** (DIN 276 + NRM + MasterFormat) — большинство конкурентов поддерживают только 1
 

@@ -667,7 +667,7 @@ export default function GAEBExchangeModule() {
         <Info className="h-4 w-4 mt-0.5 shrink-0" />
         <p>
           {t('gaeb.info', {
-            defaultValue: 'GAEB DA XML 3.3 is the standard exchange format for construction BOQs in DACH countries (Germany, Austria, Switzerland). X81 files contain tender specifications without prices. X83 files contain bid submissions with unit prices and totals. Compatible with iTWO, ORCA, California.pro, and other AVA software.',
+            defaultValue: 'GAEB DA XML 3.3 is the standard exchange format for construction BOQs in DACH countries (Germany, Austria, Switzerland). X81 files contain tender specifications without prices. X83 files contain bid submissions with unit prices and totals. Compatible with all major AVA software.',
           })}
         </p>
       </div>

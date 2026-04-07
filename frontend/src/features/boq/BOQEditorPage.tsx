@@ -842,8 +842,8 @@ export function BOQEditorPage() {
       if (!boqId) return;
       const allPositions = boq?.positions ?? [];
 
-      /* Generate the next ordinal using a "gap-of-10" scheme matching what
-       * RIB iTWO and BRZ produce by default:
+      /* Generate the next ordinal using the standard "gap-of-10" scheme
+       * common in German/Austrian AVA software:
        *
        *   01.10, 01.20, 01.30, …            ← child positions
        *   01, 02, 03, …                     ← top-level sections

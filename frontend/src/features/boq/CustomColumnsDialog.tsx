@@ -134,10 +134,10 @@ const PRESETS: ColumnPreset[] = [
   /* ── Professional presets matching established German/Austrian tools ─ */
 
   {
-    id: 'gaeb_itwo',
-    name: 'GAEB / iTWO Style',
+    id: 'gaeb_ava',
+    name: 'GAEB / AVA Style',
     description:
-      'Splits unit rate into Lohn / Material / Geräte / Sonstiges + risk markup — matches RIB iTWO and GAEB X83/X84',
+      'Splits unit rate into Lohn / Material / Geräte / Sonstiges + risk markup — matches GAEB X83/X84 standard',
     icon: FileCheck,
     iconClass: 'text-rose-600 bg-rose-500/10',
     columns: [
