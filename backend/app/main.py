@@ -264,6 +264,11 @@ def create_app() -> FastAPI:
 
     app.include_router(module_mgmt_router)
 
+    # Audit log API (admin-only)
+    from app.core.audit_router import router as audit_router
+
+    app.include_router(audit_router)
+
     @app.get("/api/health", tags=["System"])
     async def health_check() -> dict[str, Any]:
         return {
@@ -660,6 +665,7 @@ def create_app() -> FastAPI:
         # Auto-create tables for SQLite dev mode (PostgreSQL uses Alembic)
         if "sqlite" in settings.database_url:
             # SQLite auto-migration: add missing columns before create_all
+            from app.core import audit as _audit_core  # noqa: F401
             from app.core.sqlite_migrator import sqlite_auto_migrate
             from app.database import Base, engine
             from app.modules.ai import models as _ai_models  # noqa: F401
@@ -667,18 +673,22 @@ def create_app() -> FastAPI:
             from app.modules.boq import models as _boq_models  # noqa: F401
             from app.modules.catalog import models as _catalog_models  # noqa: F401
             from app.modules.changeorders import models as _changeorders_models  # noqa: F401
+            from app.modules.collaboration import models as _collaboration_models  # noqa: F401
+            from app.modules.contacts import models as _contacts_models  # noqa: F401
             from app.modules.costmodel import models as _cm_models  # noqa: F401
             from app.modules.costs import models as _costs_models  # noqa: F401
             from app.modules.documents import models as _documents_models  # noqa: F401
             from app.modules.fieldreports import models as _fieldreports_models  # noqa: F401
             from app.modules.i18n_foundation import models as _i18n_models  # noqa: F401
             from app.modules.markups import models as _markups_models  # noqa: F401
+            from app.modules.notifications import models as _notifications_models  # noqa: F401
             from app.modules.projects import models as _projects_models  # noqa: F401
             from app.modules.punchlist import models as _punchlist_models  # noqa: F401
             from app.modules.requirements import models as _requirements_models  # noqa: F401
             from app.modules.risk import models as _risk_models  # noqa: F401
             from app.modules.schedule import models as _sched_models  # noqa: F401
             from app.modules.takeoff import models as _takeoff_models  # noqa: F401
+            from app.modules.teams import models as _teams_models  # noqa: F401
             from app.modules.tendering import models as _tendering_models  # noqa: F401
             from app.modules.users import models as _users_models  # noqa: F401
 

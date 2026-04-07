@@ -14,6 +14,8 @@ from app.modules.ai import models as _ai  # noqa: F401
 from app.modules.assemblies import models as _asm  # noqa: F401
 from app.modules.boq import models as _boq  # noqa: F401
 from app.modules.catalog import models as _catalog  # noqa: F401
+from app.modules.collaboration import models as _collaboration  # noqa: F401
+from app.modules.contacts import models as _contacts  # noqa: F401
 from app.modules.changeorders import models as _changeorders  # noqa: F401
 from app.modules.costmodel import models as _cm  # noqa: F401
 from app.modules.costs import models as _costs  # noqa: F401
@@ -27,12 +29,18 @@ from app.modules.requirements import models as _requirements  # noqa: F401
 from app.modules.risk import models as _risk  # noqa: F401
 from app.modules.schedule import models as _sched  # noqa: F401
 from app.modules.takeoff import models as _takeoff  # noqa: F401
+from app.modules.teams import models as _teams  # noqa: F401
 from app.modules.tendering import models as _tender  # noqa: F401
+
+from app.modules.notifications import models as _notifications  # noqa: F401
 
 # Import all module models so they're registered with Base.metadata.
 # This is done automatically by the module loader at runtime,
 # but we need it here for autogenerate to work.
 from app.modules.users import models as _users  # noqa: F401
+
+# Core models (not in modules/)
+from app.core import audit as _audit_core  # noqa: F401
 
 config = context.config
 settings = get_settings()
