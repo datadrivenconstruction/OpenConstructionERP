@@ -4049,33 +4049,78 @@ async def delete_custom_column(
 # ── Renumber positions (gap-of-10 ordinal scheme) ───────────────────────────
 
 
+class RenumberRequest(BaseModel):
+    """Options for the renumber endpoint.
+
+    All fields are optional — omitting the body keeps the legacy behaviour
+    (gap-of-10 scheme, padded ordinals) so existing clients keep working.
+    """
+
+    scheme: Literal["gap10", "gap100", "sequential", "dotted"] = "gap10"
+    pad: bool = True
+
+
 @router.post(
     "/boqs/{boq_id}/renumber",
     dependencies=[Depends(RequirePermission("boq.update"))],
 )
 async def renumber_positions(
     boq_id: uuid.UUID,
+    options: RenumberRequest | None = None,
     service: BOQService = Depends(_get_service),
 ) -> dict:
-    """Renumber every position in a BoQ using a professional gap-of-10 scheme.
+    """Renumber every position in a BoQ using one of several professional schemes.
 
-    The output ordinals look like:
+    Supported schemes:
 
-        01            ← top-level section
-        01.10         ← first position in section 01
-        01.20         ← second position in section 01
-        01.30         ← …
-        02            ← next section
-        02.10
-        02.20
+    * ``gap10`` (default) — ``01, 01.10, 01.20, 01.30, 02, 02.10`` — leaves
+      room to insert ``01.15`` between two positions later without
+      renumbering everything else. Standard German tender output convention.
+    * ``gap100`` — ``01, 01.100, 01.200`` — same idea, even more headroom
+      for very large BOQs that may grow significantly post-tender.
+    * ``sequential`` — ``01, 01.01, 01.02, 01.03`` — compact and traditional;
+      good for fixed-scope BOQs that won't get extra positions later.
+    * ``dotted`` — ``1, 1.1, 1.2, 1.3`` — short-form decimal numbering
+      common in NRM-style measurement.
 
-    The gap of 10 mirrors what RIB iTWO and BRZ produce by default — it lets
-    estimators *insert* a position later (e.g. ``01.15``) without renumbering
-    everything else, which is why every German tender uses this style.
+    The ``pad`` option controls whether top-level section numbers are
+    zero-padded to two digits (``01`` vs ``1``).
 
     Positions are processed in their current ``sort_order`` so the user's
     drag-and-drop order is preserved. Only the ``ordinal`` field is rewritten.
     """
+    opts = options or RenumberRequest()
+
+    # Step (gap) per scheme. Sequential and dotted have step=1; gap10/gap100
+    # leave room to insert.
+    step_per_scheme: dict[str, int] = {
+        "gap10": 10,
+        "gap100": 100,
+        "sequential": 1,
+        "dotted": 1,
+    }
+    step = step_per_scheme[opts.scheme]
+    use_dotted = opts.scheme == "dotted"
+
+    def _fmt_section(idx: int) -> str:
+        if not opts.pad:
+            return str(idx)
+        return f"{idx:02d}"
+
+    def _fmt_leaf_value(parent_ord: str, value: int) -> str:
+        if use_dotted:
+            return f"{parent_ord}.{value}"
+        # Width: 2 digits for gap10/sequential, 3 digits for gap100
+        width = 3 if opts.scheme == "gap100" else 2
+        return f"{parent_ord}.{value:0{width}d}"
+
+    def _fmt_top_leaf(value: int) -> str:
+        # Top-level leaves without a parent section.
+        if use_dotted:
+            return str(value)
+        width = 4 if opts.scheme in ("gap10", "gap100") else 2
+        return f"{value:0{width}d}"
+
     boq_data = await service.get_boq_with_positions(boq_id)
     positions = list(boq_data.positions)
 
@@ -4105,29 +4150,23 @@ async def renumber_positions(
         """Walk one branch of the hierarchy and assign ordinals."""
         nonlocal section_idx
         children = by_parent.get(parent_key, [])
-        # First pass: figure out which children are sections (unit empty) vs leaf positions.
-        # Sections at top level get 01, 02, 03; child positions get parent.10, parent.20, ...
         leaf_idx = 0
         for child in children:
             is_section = _is_section(child)
             if is_section:
                 if parent_key is None:
-                    # Top-level section
                     section_idx += 1
-                    new_ord = f"{section_idx:02d}"
+                    new_ord = _fmt_section(section_idx)
                 else:
-                    # Nested section (rare) — number as parent.NN
                     leaf_idx += 1
-                    new_ord = f"{parent_ordinal}.{leaf_idx * 10:02d}"
+                    new_ord = _fmt_leaf_value(parent_ordinal or "", leaf_idx * step)
             else:
                 leaf_idx += 1
                 if parent_ordinal:
-                    new_ord = f"{parent_ordinal}.{leaf_idx * 10:02d}"
+                    new_ord = _fmt_leaf_value(parent_ordinal, leaf_idx * step)
                 else:
-                    # Top-level leaf without a parent section: 0010, 0020, …
-                    new_ord = f"{leaf_idx * 10:04d}"
+                    new_ord = _fmt_top_leaf(leaf_idx * step)
             updates.append((child.id, new_ord))
-            # Recurse into children of this node
             _walk(str(child.id), new_ord)
 
     _walk(None, None)
@@ -4142,5 +4181,5 @@ async def renumber_positions(
 
     return {
         "renumbered": n_updated,
-        "scheme": "gap-of-10",
+        "scheme": opts.scheme,
     }

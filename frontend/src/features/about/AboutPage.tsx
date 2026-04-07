@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Card, Button, Badge } from '@/shared/ui';
 import { APP_VERSION } from '@/shared/lib/version';
+import { UpdateNotification } from '@/shared/ui/UpdateChecker';
 import { Changelog } from './Changelog';
 
 export function AboutPage() {
@@ -17,6 +18,12 @@ export function AboutPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
+      {/* Update notification — always shown on About so users see it
+          when they navigate here looking for "what's new". */}
+      <div className="-mx-2">
+        <UpdateNotification forceShow hideDismiss />
+      </div>
+
       {/* Header */}
       <div className="text-center py-6">
         <div className="inline-flex items-center gap-2 mb-4">
