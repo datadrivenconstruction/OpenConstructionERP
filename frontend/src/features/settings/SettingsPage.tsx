@@ -176,7 +176,6 @@ const AI_PROVIDERS: ProviderInfo[] = [
     docsUrl: 'https://console.x.ai/',
     region: 'global',
   },
-  // ── China ───────────────────────────────────────────────────────────
   {
     id: 'zhipu',
     name: 'Zhipu AI (GLM)',
@@ -184,7 +183,7 @@ const AI_PROVIDERS: ProviderInfo[] = [
     descriptionDefault: 'GLM-4 — leading Chinese AI model for enterprise applications',
     keyPrefix: '',
     docsUrl: 'https://open.bigmodel.cn/usercenter/apikeys',
-    region: 'china',
+    region: 'global',
   },
   {
     id: 'baidu',
@@ -193,34 +192,18 @@ const AI_PROVIDERS: ProviderInfo[] = [
     descriptionDefault: 'ERNIE Bot — Baidu AI for Chinese language and enterprise tasks',
     keyPrefix: '',
     docsUrl: 'https://console.bce.baidu.com/qianfan/ais/console/applicationConsole/application',
-    region: 'china',
+    region: 'global',
   },
-  // ── Russia ──────────────────────────────────────────────────────────
   {
     id: 'yandex',
     name: 'Yandex GPT',
     description: 'settings.ai_desc_yandex',
-    descriptionDefault: 'YandexGPT — Russian AI model optimized for Russian language tasks',
+    descriptionDefault: 'YandexGPT — AI model optimized for Russian language tasks',
     keyPrefix: '',
     docsUrl: 'https://console.yandex.cloud/folders',
-    region: 'russia',
-  },
-  {
-    id: 'gigachat',
-    name: 'GigaChat (Sber)',
-    description: 'settings.ai_desc_gigachat',
-    descriptionDefault: 'GigaChat — Sberbank AI model for Russian enterprise use',
-    keyPrefix: '',
-    docsUrl: 'https://developers.sber.ru/studio/workspaces',
-    region: 'russia',
+    region: 'global',
   },
 ];
-
-const REGION_LABELS: Record<string, { i18nKey: string; defaultValue: string }> = {
-  global: { i18nKey: 'settings.ai_region_global', defaultValue: 'Global' },
-  china: { i18nKey: 'settings.ai_region_china', defaultValue: 'China' },
-  russia: { i18nKey: 'settings.ai_region_russia', defaultValue: 'Russia' },
-};
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -335,7 +318,7 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
         zhipu: 'zhipu', glm: 'zhipu',
         baidu: 'baidu', ernie: 'baidu',
         yandex: 'yandex',
-        gigachat: 'gigachat', sber: 'gigachat',
+        // gigachat removed
       };
       const matched = Object.entries(providerMap).find(([key]) => model.includes(key));
       if (matched) setSelectedProvider(matched[1]);
@@ -464,19 +447,8 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
             <label className="text-sm font-medium text-content-primary block mb-3">
               {t('settings.ai_provider', { defaultValue: 'AI Provider' })}
             </label>
-            {(['global', 'china', 'russia'] as const).map((region) => {
-              const regionProviders = AI_PROVIDERS.filter((p) => p.region === region);
-              if (regionProviders.length === 0) return null;
-              const regionLabel = REGION_LABELS[region] ?? { i18nKey: region, defaultValue: region };
-              return (
-                <div key={region} className="mb-4">
-                  {region !== 'global' && (
-                    <p className="text-xs font-medium text-content-tertiary uppercase tracking-wider mb-2 mt-3">
-                      {t(regionLabel.i18nKey, { defaultValue: regionLabel.defaultValue })}
-                    </p>
-                  )}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                    {regionProviders.map((provider) => {
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                    {AI_PROVIDERS.map((provider) => {
                       const isSelected = selectedProvider === provider.id;
                       const hasKey = isKeySetForProvider(settings, provider.id);
 
@@ -529,10 +501,7 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
                         </button>
                       );
                     })}
-                  </div>
-                </div>
-              );
-            })}
+            </div>
           </div>
 
           {/* API Key input */}

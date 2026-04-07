@@ -685,7 +685,7 @@ export function BIMPage() {
 
   // Auto-select first model
   useEffect(() => {
-    if (modelsQuery.data?.models?.length && !activeModelId) {
+    if (modelsQuery.data?.items?.length && !activeModelId) {
       const first = modelsQuery.data.models[0];
       if (first) setActiveModelId(first.id);
     }
@@ -698,7 +698,7 @@ export function BIMPage() {
     enabled: !!activeModelId,
   });
 
-  const elements: BIMElementData[] = elementsQuery.data?.elements ?? [];
+  const elements: BIMElementData[] = elementsQuery.data?.items ?? [];
 
   // Compute geometry URL if any elements have mesh_ref
   const geometryUrl = useMemo(() => {
@@ -879,7 +879,7 @@ export function BIMPage() {
               <div className="flex items-center justify-center py-6">
                 <Loader2 size={20} className="animate-spin text-content-tertiary" />
               </div>
-            ) : modelsQuery.data?.models?.length ? (
+            ) : modelsQuery.data?.items?.length ? (
               <div className="space-y-2">
                 {modelsQuery.data.models.map((model) => (
                   <ModelCard
@@ -1001,12 +1001,12 @@ export function BIMPage() {
               <EmptyState
                 icon={<Box size={28} />}
                 title={
-                  modelsQuery.data?.models?.length
+                  modelsQuery.data?.items?.length
                     ? t('bim.select_model', { defaultValue: 'Select a model' })
                     : t('bim.getting_started', { defaultValue: 'BIM Viewer' })
                 }
                 description={
-                  modelsQuery.data?.models?.length
+                  modelsQuery.data?.items?.length
                     ? t('bim.select_model_desc', { defaultValue: 'Choose a BIM model from the list to visualize it in 3D.' })
                     : t('bim.getting_started_desc', { defaultValue: 'Upload element data (CSV/Excel) and optional 3D geometry (DAE) from your CAD converter to visualize building models in 3D. Elements can be linked to BOQ positions for quantity verification.' })
                 }

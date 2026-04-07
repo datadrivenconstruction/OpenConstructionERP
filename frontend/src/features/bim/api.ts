@@ -15,12 +15,12 @@ import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
 /* ── Response Types ────────────────────────────────────────────────────── */
 
 export interface BIMModelsResponse {
-  models: BIMModelData[];
+  items: BIMModelData[];
   total: number;
 }
 
 export interface BIMElementsResponse {
-  elements: BIMElementData[];
+  items: BIMElementData[];
   total: number;
 }
 
