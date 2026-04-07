@@ -312,7 +312,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
       </nav>
 
       {/* Bottom navigation */}
-      <div className="border-t border-border-light px-3 py-3">
+      <div className="border-t border-border-light px-3 py-2">
         <ul className="space-y-0.5">
           {bottomNav.map((item) => (
             <li key={item.to}>
@@ -329,7 +329,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         <UpdateNotification />
 
         {/* DDC branding */}
-        <div className="mt-3 pt-3 border-t border-border-light px-1">
+        <div className="mt-2 pt-2 border-t border-border-light px-1">
           <a
             href="https://OpenConstructionERP.com"
             target="_blank"
@@ -376,12 +376,12 @@ function NavGroupSection({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="mb-1">
+    <div className="mb-0.5">
       <button
         onClick={onToggle}
         aria-expanded={!isCollapsed}
         aria-label={isCollapsed ? t('common.expand_section', { defaultValue: 'Expand {{label}}', label }) : t('common.collapse_section', { defaultValue: 'Collapse {{label}}', label })}
-        className="mt-4 mb-1 flex w-full items-center justify-between px-3 group cursor-pointer"
+        className="mt-2.5 mb-0.5 flex w-full items-center justify-between px-3 group cursor-pointer"
       >
         <span className="text-2xs font-medium uppercase tracking-wider text-content-tertiary group-hover:text-content-secondary transition-colors">
           {label}
@@ -429,8 +429,8 @@ function SidebarItem({ item, label, onClick, badge: numericBadge }: { item: NavI
         className={({ isActive: routerIsActive }) => {
           const isActive = computeActive(routerIsActive);
           return clsx(
-            'flex items-center gap-3 rounded-lg px-3 py-2',
-            'text-sm font-medium transition-all duration-fast ease-oe',
+            'flex items-center gap-2.5 rounded-lg px-3 py-1.5',
+            'text-[13px] font-medium transition-all duration-fast ease-oe',
             item.highlight && !isActive
               ? 'bg-gradient-to-r from-[#7c3aed]/10 to-[#0ea5e9]/10 text-[#6d28d9] hover:from-[#7c3aed]/15 hover:to-[#0ea5e9]/15'
               : isActive
@@ -439,7 +439,7 @@ function SidebarItem({ item, label, onClick, badge: numericBadge }: { item: NavI
           );
         }}
       >
-        <Icon size={18} strokeWidth={1.75} className="shrink-0" />
+        <Icon size={16} strokeWidth={1.75} className="shrink-0" />
         <span className="truncate">{label}</span>
         {numericBadge != null && numericBadge > 0 && (
           <span className="ms-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500 text-white text-2xs font-bold px-1">
