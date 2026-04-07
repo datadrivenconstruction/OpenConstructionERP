@@ -69,3 +69,5 @@ export type { DateDisplayProps } from './DateDisplay';
 
 export { QuantityDisplay } from './QuantityDisplay';
 export type { QuantityDisplayProps } from './QuantityDisplay';
+
+export { NotificationBell } from './NotificationBell';

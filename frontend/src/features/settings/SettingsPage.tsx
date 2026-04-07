@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { TranslationManager } from './TranslationManager';
 import { BackupRestore } from './BackupRestore';
+import { RegionalSettings } from './RegionalSettings';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Eye,
@@ -783,8 +784,11 @@ export function SettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Regional Settings */}
+      <RegionalSettings animationDelay="280ms" />
+
       {/* Appearance */}
-      <AppearanceCard animationDelay="300ms" />
+      <AppearanceCard animationDelay="330ms" />
 
       </div>{/* End left column */}
 

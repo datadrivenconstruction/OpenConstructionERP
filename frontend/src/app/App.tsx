@@ -80,6 +80,24 @@ const PunchListPage = lazy(() =>
 const FieldReportsPage = lazy(() =>
   import('@/features/fieldreports/FieldReportsPage').then((m) => ({ default: m.FieldReportsPage }))
 );
+const FinancePage = lazy(() =>
+  import('@/features/finance/FinancePage').then((m) => ({ default: m.FinancePage }))
+);
+const ProcurementPage = lazy(() =>
+  import('@/features/procurement/ProcurementPage').then((m) => ({ default: m.ProcurementPage }))
+);
+const SafetyPage = lazy(() =>
+  import('@/features/safety/SafetyPage').then((m) => ({ default: m.SafetyPage }))
+);
+const ContactsPage = lazy(() =>
+  import('@/features/contacts/ContactsPage').then((m) => ({ default: m.ContactsPage }))
+);
+const TasksPage = lazy(() =>
+  import('@/features/tasks/TasksPage').then((m) => ({ default: m.TasksPage }))
+);
+const RFIPage = lazy(() =>
+  import('@/features/rfi/RFIPage').then((m) => ({ default: m.RFIPage }))
+);
 
 function LoadingScreen() {
   return (
@@ -273,6 +291,21 @@ export default function App() {
         <Route path="/markups" element={<P title="Markups"><MarkupsPage /></P>} />
         <Route path="/punchlist" element={<P title="Punch List"><PunchListPage /></P>} />
         <Route path="/field-reports" element={<P title="Field Reports"><FieldReportsPage /></P>} />
+
+        <Route path="/finance" element={<P title="Finance"><FinancePage /></P>} />
+        <Route path="/projects/:projectId/finance" element={<P title="Finance"><FinancePage /></P>} />
+
+        <Route path="/procurement" element={<P title="Procurement"><ProcurementPage /></P>} />
+        <Route path="/projects/:projectId/procurement" element={<P title="Procurement"><ProcurementPage /></P>} />
+
+        <Route path="/safety" element={<P title="Safety"><SafetyPage /></P>} />
+        <Route path="/projects/:projectId/safety" element={<P title="Safety"><SafetyPage /></P>} />
+
+        <Route path="/contacts" element={<P title="Contacts"><ContactsPage /></P>} />
+        <Route path="/projects/:projectId/tasks" element={<P title="Tasks"><TasksPage /></P>} />
+        <Route path="/tasks" element={<P title="Tasks"><TasksPage /></P>} />
+        <Route path="/projects/:projectId/rfi" element={<P title="RFI"><RFIPage /></P>} />
+        <Route path="/rfi" element={<P title="RFI"><RFIPage /></P>} />
 
         <Route path="/modules" element={<P title="Modules"><ModulesPage /></P>} />
 

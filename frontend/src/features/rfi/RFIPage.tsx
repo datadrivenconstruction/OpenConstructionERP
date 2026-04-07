@@ -1,0 +1,902 @@
+import { useState, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useParams } from 'react-router-dom';
+import clsx from 'clsx';
+import {
+  HelpCircle,
+  Search,
+  Plus,
+  X,
+  ChevronDown,
+  ChevronRight,
+  DollarSign,
+  Clock,
+  FileText,
+} from 'lucide-react';
+import { Button, Card, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
+import { apiGet } from '@/shared/lib/api';
+import { useToastStore } from '@/stores/useToastStore';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import {
+  fetchRFIs,
+  createRFI,
+  respondToRFI,
+  closeRFI,
+  type RFI,
+  type RFIStatus,
+  type CreateRFIPayload,
+  type RespondRFIPayload,
+} from './api';
+
+/* ── Constants ─────────────────────────────────────────────────────────── */
+
+interface Project {
+  id: string;
+  name: string;
+}
+
+const STATUS_CONFIG: Record<
+  RFIStatus,
+  { variant: 'neutral' | 'blue' | 'success' | 'error' | 'warning'; cls: string }
+> = {
+  draft: { variant: 'neutral', cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
+  open: { variant: 'blue', cls: '' },
+  answered: { variant: 'success', cls: '' },
+  closed: { variant: 'neutral', cls: 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300' },
+  void: { variant: 'error', cls: '' },
+};
+
+const inputCls =
+  'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
+const textareaCls =
+  'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
+
+/* ── Helpers ───────────────────────────────────────────────────────────── */
+
+function daysOpen(createdAt: string, closedAt: string | null): number {
+  const start = new Date(createdAt);
+  const end = closedAt ? new Date(closedAt) : new Date();
+  return Math.max(0, Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+}
+
+/* ── Create RFI Modal ──────────────────────────────────────────────────── */
+
+interface RFIFormData {
+  subject: string;
+  question: string;
+  ball_in_court: string;
+  due_date: string;
+  cost_impact: boolean;
+  schedule_impact: boolean;
+}
+
+const EMPTY_FORM: RFIFormData = {
+  subject: '',
+  question: '',
+  ball_in_court: '',
+  due_date: '',
+  cost_impact: false,
+  schedule_impact: false,
+};
+
+function CreateRFIModal({
+  onClose,
+  onSubmit,
+  isPending,
+}: {
+  onClose: () => void;
+  onSubmit: (data: RFIFormData) => void;
+  isPending: boolean;
+}) {
+  const { t } = useTranslation();
+  const [form, setForm] = useState<RFIFormData>(EMPTY_FORM);
+  const [touched, setTouched] = useState(false);
+
+  const set = <K extends keyof RFIFormData>(key: K, value: RFIFormData[K]) =>
+    setForm((prev) => ({ ...prev, [key]: value }));
+
+  const subjectError = touched && form.subject.trim().length === 0;
+  const questionError = touched && form.question.trim().length === 0;
+  const canSubmit = form.subject.trim().length > 0 && form.question.trim().length > 0;
+
+  const handleSubmit = () => {
+    setTouched(true);
+    if (canSubmit) onSubmit(form);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in">
+      <div className="w-full max-w-2xl bg-surface-primary rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
+          <h2 className="text-lg font-semibold text-content-primary">
+            {t('rfi.new_rfi', { defaultValue: 'New RFI' })}
+          </h2>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Form */}
+        <div className="px-6 py-4 space-y-4">
+          {/* Subject */}
+          <div>
+            <label className="block text-sm font-medium text-content-secondary mb-1">
+              {t('rfi.field_subject', { defaultValue: 'Subject' })}{' '}
+              <span className="text-semantic-error">*</span>
+            </label>
+            <input
+              value={form.subject}
+              onChange={(e) => {
+                set('subject', e.target.value);
+                setTouched(true);
+              }}
+              placeholder={t('rfi.subject_placeholder', {
+                defaultValue: 'e.g. Clarification on foundation depth at Grid Line A-3',
+              })}
+              className={clsx(
+                inputCls,
+                subjectError &&
+                  'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+              )}
+              autoFocus
+            />
+            {subjectError && (
+              <p className="mt-1 text-xs text-semantic-error">
+                {t('rfi.subject_required', { defaultValue: 'Subject is required' })}
+              </p>
+            )}
+          </div>
+
+          {/* Question */}
+          <div>
+            <label className="block text-sm font-medium text-content-secondary mb-1">
+              {t('rfi.field_question', { defaultValue: 'Question' })}{' '}
+              <span className="text-semantic-error">*</span>
+            </label>
+            <textarea
+              value={form.question}
+              onChange={(e) => {
+                set('question', e.target.value);
+                setTouched(true);
+              }}
+              rows={3}
+              className={clsx(
+                textareaCls,
+                questionError &&
+                  'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+              )}
+              placeholder={t('rfi.question_placeholder', {
+                defaultValue: 'Describe your question in detail...',
+              })}
+            />
+            {questionError && (
+              <p className="mt-1 text-xs text-semantic-error">
+                {t('rfi.question_required', { defaultValue: 'Question is required' })}
+              </p>
+            )}
+          </div>
+
+          {/* Two-column: Ball in Court + Due Date */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-content-secondary mb-1">
+                {t('rfi.field_ball_in_court', { defaultValue: 'Ball in Court' })}
+              </label>
+              <input
+                value={form.ball_in_court}
+                onChange={(e) => set('ball_in_court', e.target.value)}
+                className={inputCls}
+                placeholder={t('rfi.bic_placeholder', {
+                  defaultValue: 'Person responsible for response',
+                })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-content-secondary mb-1">
+                {t('rfi.field_due_date', { defaultValue: 'Due Date' })}
+              </label>
+              <input
+                type="date"
+                value={form.due_date}
+                onChange={(e) => set('due_date', e.target.value)}
+                className={inputCls}
+              />
+            </div>
+          </div>
+
+          {/* Impact toggles */}
+          <div className="flex items-center gap-6">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={form.cost_impact}
+                onChange={() => set('cost_impact', !form.cost_impact)}
+                className="h-4 w-4 rounded border-border text-oe-blue focus:ring-oe-blue"
+              />
+              <span className="text-sm text-content-secondary flex items-center gap-1">
+                <DollarSign size={13} />
+                {t('rfi.cost_impact', { defaultValue: 'Cost Impact' })}
+              </span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={form.schedule_impact}
+                onChange={() => set('schedule_impact', !form.schedule_impact)}
+                className="h-4 w-4 rounded border-border text-oe-blue focus:ring-oe-blue"
+              />
+              <span className="text-sm text-content-secondary flex items-center gap-1">
+                <Clock size={13} />
+                {t('rfi.schedule_impact', { defaultValue: 'Schedule Impact' })}
+              </span>
+            </label>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
+          <Button variant="ghost" onClick={onClose} disabled={isPending}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button variant="primary" onClick={handleSubmit} disabled={isPending}>
+            {isPending ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
+            ) : (
+              <Plus size={16} className="mr-1.5 shrink-0" />
+            )}
+            <span>{t('rfi.create_rfi', { defaultValue: 'Create RFI' })}</span>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Respond Modal ─────────────────────────────────────────────────────── */
+
+function RespondModal({
+  rfi,
+  onClose,
+  onSubmit,
+  isPending,
+}: {
+  rfi: RFI;
+  onClose: () => void;
+  onSubmit: (data: RespondRFIPayload) => void;
+  isPending: boolean;
+}) {
+  const { t } = useTranslation();
+  const [response, setResponse] = useState('');
+
+  const handleSubmit = () => {
+    if (response.trim()) onSubmit({ response: response.trim() });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in">
+      <div className="w-full max-w-lg bg-surface-primary rounded-xl shadow-xl border border-border animate-card-in mx-4">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
+          <h2 className="text-lg font-semibold text-content-primary">
+            {t('rfi.respond_title', { defaultValue: 'Respond to RFI #{{number}}', number: rfi.rfi_number })}
+          </h2>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+          >
+            <X size={18} />
+          </button>
+        </div>
+        <div className="px-6 py-4 space-y-3">
+          <div className="rounded-lg bg-surface-secondary p-3">
+            <p className="text-xs text-content-tertiary mb-1">{t('rfi.original_question', { defaultValue: 'Question' })}</p>
+            <p className="text-sm text-content-primary">{rfi.question}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-content-secondary mb-1">
+              {t('rfi.field_response', { defaultValue: 'Response' })}
+            </label>
+            <textarea
+              value={response}
+              onChange={(e) => setResponse(e.target.value)}
+              rows={4}
+              className={textareaCls}
+              placeholder={t('rfi.response_placeholder', { defaultValue: 'Enter your response...' })}
+              autoFocus
+            />
+          </div>
+        </div>
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
+          <Button variant="ghost" onClick={onClose} disabled={isPending}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleSubmit}
+            disabled={isPending || !response.trim()}
+          >
+            {t('rfi.submit_response', { defaultValue: 'Submit Response' })}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── RFI Row (expandable) ──────────────────────────────────────────────── */
+
+function RFIRow({
+  rfi,
+  onRespond,
+  onClose,
+}: {
+  rfi: RFI;
+  onRespond: (rfi: RFI) => void;
+  onClose: (id: string) => void;
+}) {
+  const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(false);
+  const days = daysOpen(rfi.created_at, rfi.closed_at);
+  const isOverdue = rfi.due_date && rfi.status === 'open' && new Date(rfi.due_date) < new Date();
+  const statusCfg = STATUS_CONFIG[rfi.status] ?? STATUS_CONFIG.draft;
+
+  return (
+    <div className="border-b border-border-light last:border-b-0">
+      {/* Main row */}
+      <div
+        className={clsx(
+          'flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-surface-secondary/50 transition-colors',
+          expanded && 'bg-surface-secondary/30',
+        )}
+        onClick={() => setExpanded((prev) => !prev)}
+      >
+        <ChevronRight
+          size={14}
+          className={clsx(
+            'text-content-tertiary transition-transform shrink-0',
+            expanded && 'rotate-90',
+          )}
+        />
+
+        {/* RFI # */}
+        <span className="text-sm font-mono font-semibold text-content-secondary w-16 shrink-0">
+          #{rfi.rfi_number}
+        </span>
+
+        {/* Subject */}
+        <span className="text-sm text-content-primary truncate flex-1 min-w-0">
+          {rfi.subject}
+        </span>
+
+        {/* Status badge */}
+        <Badge variant={statusCfg.variant} size="sm" className={statusCfg.cls}>
+          {t(`rfi.status_${rfi.status}`, {
+            defaultValue: rfi.status.charAt(0).toUpperCase() + rfi.status.slice(1),
+          })}
+        </Badge>
+
+        {/* Ball in Court */}
+        <span className="text-xs text-content-tertiary w-28 truncate shrink-0 hidden md:block">
+          {rfi.ball_in_court_name || rfi.ball_in_court || '-'}
+        </span>
+
+        {/* Days Open */}
+        <span
+          className={clsx(
+            'text-xs w-16 text-right shrink-0 tabular-nums hidden sm:block',
+            isOverdue ? 'text-semantic-error font-semibold' : 'text-content-tertiary',
+          )}
+        >
+          {days}d
+        </span>
+
+        {/* Due Date */}
+        <span
+          className={clsx(
+            'text-xs w-20 shrink-0 hidden lg:block',
+            isOverdue ? 'text-semantic-error font-semibold' : 'text-content-tertiary',
+          )}
+        >
+          {rfi.due_date
+            ? new Date(rfi.due_date).toLocaleDateString(undefined, {
+                month: 'short',
+                day: 'numeric',
+              })
+            : '-'}
+        </span>
+
+        {/* Impact indicators */}
+        <div className="flex items-center gap-1.5 w-14 shrink-0 justify-end">
+          {rfi.cost_impact && (
+            <span title={t('rfi.cost_impact', { defaultValue: 'Cost Impact' })}>
+              <DollarSign size={13} className="text-amber-500" />
+            </span>
+          )}
+          {rfi.schedule_impact && (
+            <span title={t('rfi.schedule_impact', { defaultValue: 'Schedule Impact' })}>
+              <Clock size={13} className="text-orange-500" />
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Expanded detail */}
+      {expanded && (
+        <div className="px-4 pb-4 pl-12 space-y-3 animate-fade-in">
+          {/* Question */}
+          <div className="rounded-lg bg-surface-secondary p-3">
+            <p className="text-xs text-content-tertiary mb-1 font-medium uppercase tracking-wide">
+              {t('rfi.label_question', { defaultValue: 'Question' })}
+            </p>
+            <p className="text-sm text-content-primary whitespace-pre-wrap">{rfi.question}</p>
+          </div>
+
+          {/* Response */}
+          {rfi.response && (
+            <div className="rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-3">
+              <p className="text-xs text-green-700 dark:text-green-400 mb-1 font-medium uppercase tracking-wide">
+                {t('rfi.label_response', { defaultValue: 'Response' })}
+              </p>
+              <p className="text-sm text-content-primary whitespace-pre-wrap">{rfi.response}</p>
+              {rfi.responded_at && (
+                <p className="text-xs text-content-tertiary mt-2">
+                  {new Date(rfi.responded_at).toLocaleDateString(undefined, {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Linked drawings */}
+          {rfi.linked_drawings && rfi.linked_drawings.length > 0 && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <FileText size={13} className="text-content-tertiary" />
+              {rfi.linked_drawings.map((d, i) => (
+                <Badge key={i} variant="neutral" size="sm">
+                  {d}
+                </Badge>
+              ))}
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex items-center gap-2 pt-1">
+            {rfi.status === 'open' && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRespond(rfi);
+                }}
+              >
+                {t('rfi.action_respond', { defaultValue: 'Respond' })}
+              </Button>
+            )}
+            {(rfi.status === 'answered' || rfi.status === 'open') && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClose(rfi.id);
+                }}
+              >
+                {t('rfi.action_close', { defaultValue: 'Close RFI' })}
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Main Page ─────────────────────────────────────────────────────────── */
+
+export function RFIPage() {
+  const { t } = useTranslation();
+  const { projectId: routeProjectId } = useParams<{ projectId: string }>();
+  const qc = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
+  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+
+  // State
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [respondingRfi, setRespondingRfi] = useState<RFI | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<RFIStatus | ''>('');
+
+  // Data
+  const { data: projects = [] } = useQuery({
+    queryKey: ['projects'],
+    queryFn: () => apiGet<Project[]>('/v1/projects/'),
+  });
+
+  const projectId = routeProjectId || activeProjectId || projects[0]?.id || '';
+  const projectName = projects.find((p) => p.id === projectId)?.name || '';
+
+  const { data: rfis = [], isLoading } = useQuery({
+    queryKey: ['rfis', projectId, statusFilter],
+    queryFn: () =>
+      fetchRFIs({
+        project_id: projectId,
+        status: statusFilter || undefined,
+      }),
+    enabled: !!projectId,
+  });
+
+  // Client-side search
+  const filtered = useMemo(() => {
+    if (!searchQuery.trim()) return rfis;
+    const q = searchQuery.toLowerCase();
+    return rfis.filter(
+      (r) =>
+        r.subject.toLowerCase().includes(q) ||
+        r.question.toLowerCase().includes(q) ||
+        String(r.rfi_number).includes(q) ||
+        (r.ball_in_court_name && r.ball_in_court_name.toLowerCase().includes(q)),
+    );
+  }, [rfis, searchQuery]);
+
+  // Stats
+  const stats = useMemo(() => {
+    const total = rfis.length;
+    const open = rfis.filter((r) => r.status === 'open').length;
+    const overdue = rfis.filter(
+      (r) => r.status === 'open' && r.due_date && new Date(r.due_date) < new Date(),
+    ).length;
+    const avgDays =
+      rfis.length > 0
+        ? Math.round(rfis.reduce((sum, r) => sum + daysOpen(r.created_at, r.closed_at), 0) / rfis.length)
+        : 0;
+    return { total, open, overdue, avgDays };
+  }, [rfis]);
+
+  // Invalidation
+  const invalidateAll = useCallback(() => {
+    qc.invalidateQueries({ queryKey: ['rfis'] });
+  }, [qc]);
+
+  // Mutations
+  const createMut = useMutation({
+    mutationFn: (data: CreateRFIPayload) => createRFI(data),
+    onSuccess: () => {
+      invalidateAll();
+      setShowCreateModal(false);
+      addToast({
+        type: 'success',
+        title: t('rfi.created', { defaultValue: 'RFI created' }),
+      });
+    },
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('common.error', { defaultValue: 'Error' }),
+        message: e.message,
+      }),
+  });
+
+  const respondMut = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: RespondRFIPayload }) =>
+      respondToRFI(id, data),
+    onSuccess: () => {
+      invalidateAll();
+      setRespondingRfi(null);
+      addToast({
+        type: 'success',
+        title: t('rfi.responded', { defaultValue: 'Response submitted' }),
+      });
+    },
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('common.error', { defaultValue: 'Error' }),
+        message: e.message,
+      }),
+  });
+
+  const closeMut = useMutation({
+    mutationFn: (id: string) => closeRFI(id),
+    onSuccess: () => {
+      invalidateAll();
+      addToast({
+        type: 'success',
+        title: t('rfi.closed', { defaultValue: 'RFI closed' }),
+      });
+    },
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('common.error', { defaultValue: 'Error' }),
+        message: e.message,
+      }),
+  });
+
+  const handleCreateSubmit = useCallback(
+    (formData: RFIFormData) => {
+      createMut.mutate({
+        project_id: projectId,
+        subject: formData.subject,
+        question: formData.question,
+        ball_in_court: formData.ball_in_court || undefined,
+        due_date: formData.due_date || undefined,
+        cost_impact: formData.cost_impact,
+        schedule_impact: formData.schedule_impact,
+      });
+    },
+    [createMut, projectId],
+  );
+
+  const handleRespond = useCallback(
+    (rfi: RFI) => {
+      setRespondingRfi(rfi);
+    },
+    [],
+  );
+
+  const handleRespondSubmit = useCallback(
+    (data: RespondRFIPayload) => {
+      if (!respondingRfi) return;
+      respondMut.mutate({ id: respondingRfi.id, data });
+    },
+    [respondMut, respondingRfi],
+  );
+
+  const handleClose = useCallback(
+    (id: string) => {
+      closeMut.mutate(id);
+    },
+    [closeMut],
+  );
+
+  return (
+    <div className="mx-auto max-w-7xl px-6 py-6">
+      {/* Breadcrumb */}
+      <Breadcrumb
+        items={[
+          { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
+          ...(projectName
+            ? [{ label: projectName, to: `/projects/${projectId}` }]
+            : []),
+          { label: t('rfi.title', { defaultValue: 'RFIs' }) },
+        ]}
+      />
+
+      {/* Header */}
+      <div className="mt-3 flex items-center justify-between gap-3 flex-wrap">
+        <h1 className="text-lg font-bold text-content-primary flex items-center gap-2 shrink-0">
+          <HelpCircle size={20} className="text-oe-blue" />
+          {t('rfi.page_title', { defaultValue: 'Requests for Information' })}
+        </h1>
+
+        <div className="flex items-center gap-2 shrink-0">
+          {!routeProjectId && projects.length > 0 && (
+            <select
+              value={projectId}
+              onChange={(e) => {
+                const p = projects.find((pr) => pr.id === e.target.value);
+                if (p) {
+                  useProjectContextStore.getState().setActiveProject(p.id, p.name);
+                }
+              }}
+              className={inputCls + ' !h-8 !text-xs max-w-[180px]'}
+            >
+              <option value="" disabled>
+                {t('rfi.select_project', { defaultValue: 'Project...' })}
+              </option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          )}
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setShowCreateModal(true)}
+            disabled={!projectId}
+            className="shrink-0 whitespace-nowrap"
+          >
+            <Plus size={14} className="mr-1 shrink-0" />
+            <span>{t('rfi.new_rfi', { defaultValue: 'New RFI' })}</span>
+          </Button>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
+        <Card className="p-4 animate-card-in">
+          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+            {t('rfi.stat_total', { defaultValue: 'Total RFIs' })}
+          </p>
+          <p className="text-xl font-bold mt-1 tabular-nums text-content-primary">
+            {stats.total}
+          </p>
+        </Card>
+        <Card className="p-4 animate-card-in">
+          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+            {t('rfi.stat_open', { defaultValue: 'Open' })}
+          </p>
+          <p className="text-xl font-bold mt-1 tabular-nums text-oe-blue">{stats.open}</p>
+        </Card>
+        <Card className="p-4 animate-card-in">
+          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+            {t('rfi.stat_overdue', { defaultValue: 'Overdue' })}
+          </p>
+          <p
+            className={clsx(
+              'text-xl font-bold mt-1 tabular-nums',
+              stats.overdue > 0 ? 'text-semantic-error' : 'text-content-primary',
+            )}
+          >
+            {stats.overdue}
+          </p>
+        </Card>
+        <Card className="p-4 animate-card-in">
+          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+            {t('rfi.stat_avg_days', { defaultValue: 'Avg. Days Open' })}
+          </p>
+          <p className="text-xl font-bold mt-1 tabular-nums text-content-primary">
+            {stats.avgDays}
+          </p>
+        </Card>
+      </div>
+
+      {/* Toolbar */}
+      <div className="mt-6 flex flex-col sm:flex-row sm:items-center gap-3">
+        {/* Search */}
+        <div className="relative flex-1 max-w-sm">
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-content-tertiary"
+          />
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t('rfi.search_placeholder', {
+              defaultValue: 'Search RFIs...',
+            })}
+            className={inputCls + ' pl-9'}
+          />
+        </div>
+
+        {/* Status filter */}
+        <div className="relative">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as RFIStatus | '')}
+            className="h-10 appearance-none rounded-lg border border-border bg-surface-primary pl-3 pr-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-40"
+          >
+            <option value="">
+              {t('rfi.filter_all', { defaultValue: 'All Statuses' })}
+            </option>
+            {(['draft', 'open', 'answered', 'closed', 'void'] as RFIStatus[]).map((s) => (
+              <option key={s} value={s}>
+                {t(`rfi.status_${s}`, {
+                  defaultValue: s.charAt(0).toUpperCase() + s.slice(1),
+                })}
+              </option>
+            ))}
+          </select>
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-content-tertiary">
+            <ChevronDown size={14} />
+          </div>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="mt-6">
+        {isLoading ? (
+          <Card padding="none">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4 px-4 py-3 border-b border-border-light">
+                <div className="h-4 w-12 animate-pulse rounded bg-surface-tertiary" />
+                <div className="h-4 flex-1 animate-pulse rounded bg-surface-tertiary" />
+                <div className="h-5 w-16 animate-pulse rounded-full bg-surface-tertiary" />
+                <div className="h-4 w-20 animate-pulse rounded bg-surface-tertiary hidden md:block" />
+              </div>
+            ))}
+          </Card>
+        ) : filtered.length === 0 ? (
+          <EmptyState
+            icon={<HelpCircle size={24} strokeWidth={1.5} />}
+            title={
+              searchQuery || statusFilter
+                ? t('rfi.no_results', { defaultValue: 'No matching RFIs' })
+                : t('rfi.no_rfis', { defaultValue: 'No RFIs yet' })
+            }
+            description={
+              searchQuery || statusFilter
+                ? t('rfi.no_results_hint', {
+                    defaultValue: 'Try adjusting your search or filters',
+                  })
+                : t('rfi.no_rfis_hint', {
+                    defaultValue: 'Create your first Request for Information',
+                  })
+            }
+            action={
+              !searchQuery && !statusFilter
+                ? {
+                    label: t('rfi.new_rfi', { defaultValue: 'New RFI' }),
+                    onClick: () => setShowCreateModal(true),
+                  }
+                : undefined
+            }
+          />
+        ) : (
+          <>
+            <p className="mb-3 text-sm text-content-tertiary">
+              {t('rfi.showing_count', {
+                defaultValue: '{{count}} RFIs',
+                count: filtered.length,
+              })}
+            </p>
+            <Card padding="none">
+              {/* Table header */}
+              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border bg-surface-secondary/50 text-xs font-medium text-content-tertiary uppercase tracking-wide">
+                <span className="w-5" /> {/* Chevron space */}
+                <span className="w-16">#</span>
+                <span className="flex-1">
+                  {t('rfi.col_subject', { defaultValue: 'Subject' })}
+                </span>
+                <span className="w-20 text-center">
+                  {t('rfi.col_status', { defaultValue: 'Status' })}
+                </span>
+                <span className="w-28 hidden md:block">
+                  {t('rfi.col_bic', { defaultValue: 'Ball in Court' })}
+                </span>
+                <span className="w-16 text-right hidden sm:block">
+                  {t('rfi.col_days', { defaultValue: 'Days' })}
+                </span>
+                <span className="w-20 hidden lg:block">
+                  {t('rfi.col_due', { defaultValue: 'Due' })}
+                </span>
+                <span className="w-14 text-right">
+                  {t('rfi.col_impact', { defaultValue: 'Impact' })}
+                </span>
+              </div>
+
+              {/* Rows */}
+              {filtered.map((rfi) => (
+                <RFIRow
+                  key={rfi.id}
+                  rfi={rfi}
+                  onRespond={handleRespond}
+                  onClose={handleClose}
+                />
+              ))}
+            </Card>
+          </>
+        )}
+      </div>
+
+      {/* Create Modal */}
+      {showCreateModal && (
+        <CreateRFIModal
+          onClose={() => setShowCreateModal(false)}
+          onSubmit={handleCreateSubmit}
+          isPending={createMut.isPending}
+        />
+      )}
+
+      {/* Respond Modal */}
+      {respondingRfi && (
+        <RespondModal
+          rfi={respondingRfi}
+          onClose={() => setRespondingRfi(null)}
+          onSubmit={handleRespondSubmit}
+          isPending={respondMut.isPending}
+        />
+      )}
+    </div>
+  );
+}
