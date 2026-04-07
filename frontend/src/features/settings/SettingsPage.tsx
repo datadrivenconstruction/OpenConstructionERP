@@ -21,6 +21,7 @@ import {
   Save,
 } from 'lucide-react';
 import { Card, CardHeader, CardContent, CardFooter, Button, Badge, InfoHint, Skeleton, Breadcrumb } from '@/shared/ui';
+import { UpdateNotification } from '@/shared/ui/UpdateChecker';
 import { apiGet, apiPatch } from '@/shared/lib/api';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -645,6 +646,13 @@ export function SettingsPage() {
         { label: t('nav.dashboard', 'Dashboard'), to: '/' },
         { label: t('nav.settings', 'Settings') },
       ]} className="mb-2" />
+
+      {/* Update notification — surfaced in Settings so users see new
+          versions even if they dismissed the sidebar widget for the session. */}
+      <div className="-mx-2">
+        <UpdateNotification forceShow hideDismiss />
+      </div>
+
 
       <div className="animate-card-in" style={{ animationDelay: '0ms' }}>
         <h1 className="text-2xl font-bold text-content-primary">{t('nav.settings', 'Settings')}</h1>

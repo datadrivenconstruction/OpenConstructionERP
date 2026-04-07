@@ -744,9 +744,19 @@ export const boqApi = {
   deleteCustomColumn: (boqId: string, columnName: string) =>
     apiDelete<void>(`/v1/boq/boqs/${boqId}/columns/${columnName}`),
 
-  /* Renumber positions using gap-of-10 professional scheme (01, 01.10, 01.20...) */
-  renumberPositions: (boqId: string) =>
-    apiPost<{ renumbered: number; scheme: string }>(`/v1/boq/boqs/${boqId}/renumber`),
+  /* Renumber positions using one of several professional schemes.
+     - gap10:      01, 01.10, 01.20  (German tender default — leaves room to insert later)
+     - gap100:     01, 01.100, 01.200 (very large BOQs)
+     - sequential: 01, 01.01, 01.02  (compact, traditional)
+     - dotted:     1, 1.1, 1.2      (NRM-style short form) */
+  renumberPositions: (
+    boqId: string,
+    options?: { scheme?: 'gap10' | 'gap100' | 'sequential' | 'dotted'; pad?: boolean },
+  ) =>
+    apiPost<{ renumbered: number; scheme: string }>(
+      `/v1/boq/boqs/${boqId}/renumber`,
+      options ?? {},
+    ),
 };
 
 /**

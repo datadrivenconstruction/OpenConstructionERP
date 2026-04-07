@@ -70,6 +70,7 @@ import { ActivityPanel } from './ActivityPanel';
 import { CostDatabaseSearchModal, AssemblyPickerModal } from './BOQModals';
 import { CatalogPickerModal, type CatalogResource } from './CatalogPickerModal';
 import { CustomColumnsDialog } from './CustomColumnsDialog';
+import { RenumberDialog } from './RenumberDialog';
 
 /* ── Re-exports for tests ────────────────────────────────────────────── */
 
@@ -228,10 +229,14 @@ export function BOQEditorPage() {
     onSuccess: () => invalidateAll(),
   });
 
+  const [renumberDialogOpen, setRenumberDialogOpen] = useState(false);
+
   const renumberMutation = useMutation({
-    mutationFn: () => boqApi.renumberPositions(boqId!),
+    mutationFn: ({ scheme, pad }: { scheme: 'gap10' | 'gap100' | 'sequential' | 'dotted'; pad: boolean }) =>
+      boqApi.renumberPositions(boqId!, { scheme, pad }),
     onSuccess: (result) => {
       invalidateAll();
+      setRenumberDialogOpen(false);
       addToast({
         type: 'success',
         title: t('boq.renumber_done', {
@@ -239,7 +244,7 @@ export function BOQEditorPage() {
           count: result.renumbered,
         }),
         message: t('boq.renumber_done_hint', {
-          defaultValue: 'Using gap-of-10 scheme — you can now insert positions like 01.15 between 01.10 and 01.20',
+          defaultValue: 'Order preserved — only ordinals were rewritten. Undo with Ctrl+Z is not supported for renumber.',
         }),
       });
     },
@@ -253,17 +258,15 @@ export function BOQEditorPage() {
   });
 
   const handleRenumber = useCallback(() => {
-    if (
-      window.confirm(
-        t('boq.renumber_confirm', {
-          defaultValue:
-            'Renumber all positions using the gap-of-10 scheme (01.10, 01.20, …)?\n\nThis overwrites any manually edited position numbers but keeps the current order. The gap-of-10 lets you insert new positions later (e.g. 01.15) without renumbering everything else.',
-        }),
-      )
-    ) {
-      renumberMutation.mutate();
-    }
-  }, [renumberMutation, t]);
+    setRenumberDialogOpen(true);
+  }, []);
+
+  const handleRenumberApply = useCallback(
+    (scheme: 'gap10' | 'gap100' | 'sequential' | 'dotted', pad: boolean) => {
+      renumberMutation.mutate({ scheme, pad });
+    },
+    [renumberMutation],
+  );
 
   /**
    * Wrap deleteMutation with a 5-second deferred delete.
@@ -2469,6 +2472,20 @@ export function BOQEditorPage() {
           positions={boq?.positions}
         />
       )}
+
+      {/* ── Renumber Dialog (multi-scheme picker with live preview) ── */}
+      <RenumberDialog
+        open={renumberDialogOpen}
+        onClose={() => setRenumberDialogOpen(false)}
+        onApply={handleRenumberApply}
+        isApplying={renumberMutation.isPending}
+        samplePositions={(boq?.positions ?? []).slice(0, 30).map((p) => ({
+          ordinal: p.ordinal ?? '',
+          description: p.description ?? '',
+          unit: p.unit ?? '',
+          parent_id: p.parent_id ?? null,
+        }))}
+      />
 
       {/* ── Section Name Modal ────────────────────────────────────── */}
       {showSectionModal && (
