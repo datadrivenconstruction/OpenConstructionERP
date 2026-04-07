@@ -532,6 +532,14 @@ export function CDEPage() {
 
   const handleCreateSubmit = useCallback(
     (formData: CDEFormData) => {
+      if (!projectId) {
+        addToast({
+          type: 'error',
+          title: t('common.error', { defaultValue: 'Error' }),
+          message: t('cde.select_project_first', { defaultValue: 'Please select a project first' }),
+        });
+        return;
+      }
       createMut.mutate({
         project_id: projectId,
         container_code: formData.container_code,
@@ -541,7 +549,7 @@ export function CDEPage() {
         classification: formData.classification || undefined,
       });
     },
-    [createMut, projectId],
+    [createMut, projectId, addToast, t],
   );
 
   const handlePromote = useCallback(
