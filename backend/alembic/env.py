@@ -12,6 +12,7 @@ from app.config import get_settings
 from app.database import Base
 from app.modules.ai import models as _ai  # noqa: F401
 from app.modules.assemblies import models as _asm  # noqa: F401
+from app.modules.bim_hub import models as _bim_hub  # noqa: F401
 from app.modules.boq import models as _boq  # noqa: F401
 from app.modules.catalog import models as _catalog  # noqa: F401
 from app.modules.collaboration import models as _collaboration  # noqa: F401
@@ -32,6 +33,7 @@ from app.modules.ncr import models as _ncr  # noqa: F401
 from app.modules.procurement import models as _procurement  # noqa: F401
 from app.modules.projects import models as _projects  # noqa: F401
 from app.modules.punchlist import models as _punchlist  # noqa: F401
+from app.modules.reporting import models as _reporting  # noqa: F401
 from app.modules.requirements import models as _requirements  # noqa: F401
 from app.modules.rfi import models as _rfi  # noqa: F401
 from app.modules.risk import models as _risk  # noqa: F401

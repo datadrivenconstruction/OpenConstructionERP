@@ -670,6 +670,7 @@ def create_app() -> FastAPI:
             from app.database import Base, engine
             from app.modules.ai import models as _ai_models  # noqa: F401
             from app.modules.assemblies import models as _asm_models  # noqa: F401
+            from app.modules.bim_hub import models as _bim_hub_models  # noqa: F401
             from app.modules.boq import models as _boq_models  # noqa: F401
             from app.modules.catalog import models as _catalog_models  # noqa: F401
             from app.modules.cde import models as _cde_models  # noqa: F401
@@ -691,6 +692,7 @@ def create_app() -> FastAPI:
             from app.modules.procurement import models as _procurement_models  # noqa: F401
             from app.modules.projects import models as _projects_models  # noqa: F401
             from app.modules.punchlist import models as _punchlist_models  # noqa: F401
+            from app.modules.reporting import models as _reporting_models  # noqa: F401
             from app.modules.requirements import models as _requirements_models  # noqa: F401
             from app.modules.rfi import models as _rfi_models  # noqa: F401
             from app.modules.risk import models as _risk_models  # noqa: F401

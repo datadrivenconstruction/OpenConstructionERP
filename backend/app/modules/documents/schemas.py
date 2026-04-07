@@ -26,6 +26,22 @@ class DocumentUpdate(BaseModel):
     tags: list[str] | None = None
     metadata: dict[str, Any] | None = None
 
+    # Phase 17: CDE / revision-chain fields
+    cde_state: str | None = Field(
+        default=None,
+        pattern=r"^(wip|shared|published|archived)$",
+    )
+    suitability_code: str | None = Field(default=None, max_length=10)
+    revision_code: str | None = Field(default=None, max_length=20)
+    drawing_number: str | None = Field(default=None, max_length=100)
+    is_current_revision: bool | None = None
+    parent_document_id: UUID | None = None
+    security_classification: str | None = Field(default=None, max_length=50)
+    discipline: str | None = Field(
+        default=None,
+        pattern=r"^(architectural|structural|mechanical|electrical|plumbing|civil)$",
+    )
+
 
 class DocumentResponse(BaseModel):
     """Document returned from the API."""
@@ -45,6 +61,16 @@ class DocumentResponse(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+
+    # Phase 17: CDE / revision-chain fields
+    cde_state: str | None = None
+    suitability_code: str | None = None
+    revision_code: str | None = None
+    drawing_number: str | None = None
+    is_current_revision: bool | None = True
+    parent_document_id: UUID | None = None
+    security_classification: str | None = None
+    discipline: str | None = None
 
 
 # ── Summary schema ───────────────────────────────────────────────────────

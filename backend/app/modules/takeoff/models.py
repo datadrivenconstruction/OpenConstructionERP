@@ -42,6 +42,11 @@ class CadExtractionSession(Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     created_by: Mapped[str] = mapped_column(String(255), default="")
 
+    # Phase 17: session lifetime & BIM linkage
+    session_ttl_days: Mapped[int | None] = mapped_column(Integer, nullable=True, default=7)
+    is_persistent: Mapped[bool] = mapped_column(default=False, server_default="0")
+    bim_model_id: Mapped[str | None] = mapped_column(String(36), nullable=True, default=None)
+
     def __repr__(self) -> str:
         return f"<CadExtractionSession {self.session_id} ({self.filename})>"
 

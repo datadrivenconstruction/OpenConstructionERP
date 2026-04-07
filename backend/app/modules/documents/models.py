@@ -48,6 +48,35 @@ class Document(Base):
         server_default="{}",
     )
 
+    # ── Phase 17: CDE / revision-chain fields (all nullable for backward compat) ──
+    cde_state: Mapped[str | None] = mapped_column(
+        String(50), nullable=True, default=None,
+    )  # wip / shared / published / archived
+    suitability_code: Mapped[str | None] = mapped_column(
+        String(10), nullable=True, default=None,
+    )  # S0-S5
+    revision_code: Mapped[str | None] = mapped_column(
+        String(20), nullable=True, default=None,
+    )  # P.01.01 / C.01
+    drawing_number: Mapped[str | None] = mapped_column(
+        String(100), nullable=True, default=None,
+    )
+    is_current_revision: Mapped[bool | None] = mapped_column(
+        Boolean, nullable=True, default=True,
+    )
+    parent_document_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_documents_document.id", ondelete="SET NULL"),
+        nullable=True,
+        default=None,
+    )
+    security_classification: Mapped[str | None] = mapped_column(
+        String(50), nullable=True, default=None,
+    )
+    discipline: Mapped[str | None] = mapped_column(
+        String(50), nullable=True, default=None,
+    )  # architectural / structural / mechanical / electrical / plumbing / civil
+
     def __repr__(self) -> str:
         return f"<Document {self.name} ({self.category})>"
 
