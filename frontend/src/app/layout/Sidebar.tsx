@@ -71,23 +71,24 @@ interface NavGroup {
 
 // Navigation groups — collapsible sections
 const navGroups: NavGroup[] = [
+  // ── CORE (always visible) ──────────────────────────────────────────
+  {
+    id: 'overview',
+    labelKey: 'nav.group_overview',
+    defaultOpen: true,
+    items: [
+      { labelKey: 'nav.dashboard', to: '/', icon: LayoutDashboard },
+      { labelKey: 'projects.title', to: '/projects', icon: FolderOpen, tourId: 'projects' },
+      { labelKey: 'contacts.title', to: '/contacts', icon: Users },
+    ],
+  },
   {
     id: 'estimation',
     labelKey: 'nav.group_estimation',
     descriptionKey: 'nav.group_estimation_desc',
     defaultOpen: true,
     items: [
-      { labelKey: 'nav.dashboard', to: '/', icon: LayoutDashboard },
-      { labelKey: 'projects.title', to: '/projects', icon: FolderOpen, tourId: 'projects' },
       { labelKey: 'boq.title', to: '/boq', icon: Table2, tourId: 'boq' },
-      { labelKey: 'contacts.title', to: '/contacts', icon: Users },
-    ],
-  },
-  {
-    id: 'databases',
-    labelKey: 'nav.group_databases',
-    defaultOpen: true,
-    items: [
       { labelKey: 'costs.title', to: '/costs', icon: Database, tourId: 'costs' },
       { labelKey: 'nav.assemblies', to: '/assemblies', icon: Layers },
       { labelKey: 'catalog.title', to: '/catalog', icon: Boxes },
@@ -105,7 +106,7 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
-    id: 'ai_estimation',
+    id: 'ai',
     labelKey: 'nav.group_ai_estimation',
     defaultOpen: true,
     hideInSimple: true,
@@ -114,6 +115,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.ai_advisor', to: '/advisor', icon: MessageSquare },
     ],
   },
+  // ── PLANNING & CONTROL (advanced) ──────────────────────────────────
   {
     id: 'planning',
     labelKey: 'nav.group_planning',
@@ -123,27 +125,36 @@ const navGroups: NavGroup[] = [
     items: [
       { labelKey: 'schedule.title', to: '/schedule', icon: CalendarDays, moduleKey: 'schedule' },
       { labelKey: 'tasks.title', to: '/tasks', icon: ClipboardList },
-      { labelKey: 'meetings.title', to: '/meetings', icon: CalendarDays },
       { labelKey: 'nav.5d_cost_model', to: '/5d', icon: TrendingUp, moduleKey: '5d', advancedOnly: true },
     ],
   },
   {
-    id: 'procurement',
-    labelKey: 'nav.group_procurement',
-    descriptionKey: 'nav.group_procurement_desc',
+    id: 'finance',
+    labelKey: 'nav.group_finance',
     defaultOpen: false,
     hideInSimple: true,
     items: [
       { labelKey: 'finance.title', to: '/finance', icon: Wallet, advancedOnly: true },
+      { labelKey: 'procurement.title', to: '/procurement', icon: Package, advancedOnly: true },
       { labelKey: 'tendering.title', to: '/tendering', icon: FileText, moduleKey: 'tendering', advancedOnly: true },
+      { labelKey: 'nav.change_orders', to: '/changeorders', icon: FileEdit, advancedOnly: true },
+    ],
+  },
+  // ── COMMUNICATION ──────────────────────────────────────────────────
+  {
+    id: 'communication',
+    labelKey: 'nav.group_communication',
+    defaultOpen: false,
+    hideInSimple: true,
+    items: [
+      { labelKey: 'meetings.title', to: '/meetings', icon: CalendarDays },
       { labelKey: 'rfi.title', to: '/rfi', icon: HelpCircle, advancedOnly: true },
       { labelKey: 'submittals.title', to: '/submittals', icon: FileCheck, advancedOnly: true },
       { labelKey: 'transmittals.title', to: '/transmittals', icon: Send, advancedOnly: true },
-      { labelKey: 'procurement.title', to: '/procurement', icon: Package, advancedOnly: true },
-      { labelKey: 'nav.change_orders', to: '/changeorders', icon: FileEdit, advancedOnly: true },
-      { labelKey: 'nav.reports', to: '/reports', icon: FileBarChart, advancedOnly: true },
+      { labelKey: 'correspondence.title', to: '/correspondence', icon: Mail, advancedOnly: true },
     ],
   },
+  // ── DOCUMENTS ──────────────────────────────────────────────────────
   {
     id: 'documentation',
     labelKey: 'nav.group_documentation',
@@ -151,27 +162,37 @@ const navGroups: NavGroup[] = [
     hideInSimple: true,
     items: [
       { labelKey: 'nav.documents', to: '/documents', icon: FolderOpen },
-      { labelKey: 'correspondence.title', to: '/correspondence', icon: Mail },
       { labelKey: 'cde.title', to: '/cde', icon: Database },
       { labelKey: 'nav.photos', to: '/photos', icon: Camera },
       { labelKey: 'nav.markups', to: '/markups', icon: PenTool },
-      { labelKey: 'nav.field_reports', to: '/field-reports', icon: ClipboardList },
     ],
   },
+  // ── QUALITY & SAFETY ───────────────────────────────────────────────
   {
-    id: 'quality_risk',
-    labelKey: 'nav.group_quality_risk',
+    id: 'quality',
+    labelKey: 'nav.group_quality',
     defaultOpen: false,
     hideInSimple: true,
     items: [
       { labelKey: 'validation.title', to: '/validation', icon: ShieldCheck, moduleKey: 'validation' },
-      { labelKey: 'nav.requirements', to: '/requirements', icon: ClipboardCheck },
-      { labelKey: 'nav.punchlist', to: '/punchlist', icon: ListChecks },
-      { labelKey: 'nav.risk_register', to: '/risks', icon: ShieldAlert },
-      { labelKey: 'safety.title', to: '/safety', icon: HardHat },
       { labelKey: 'inspections.title', to: '/inspections', icon: ClipboardCheck },
       { labelKey: 'ncr.title', to: '/ncr', icon: AlertOctagon },
+      { labelKey: 'safety.title', to: '/safety', icon: HardHat },
+      { labelKey: 'nav.punchlist', to: '/punchlist', icon: ListChecks },
+      { labelKey: 'nav.risk_register', to: '/risks', icon: ShieldAlert },
       // sustainability + cost-benchmark injected dynamically from module registry
+    ],
+  },
+  // ── FIELD ──────────────────────────────────────────────────────────
+  {
+    id: 'field',
+    labelKey: 'nav.group_field',
+    defaultOpen: false,
+    hideInSimple: true,
+    items: [
+      { labelKey: 'nav.field_reports', to: '/field-reports', icon: ClipboardList },
+      { labelKey: 'nav.requirements', to: '/requirements', icon: ClipboardCheck },
+      { labelKey: 'nav.reports', to: '/reports', icon: FileBarChart, advancedOnly: true },
     ],
   },
   {
