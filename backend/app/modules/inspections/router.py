@@ -3,16 +3,19 @@
 Endpoints:
     GET    /                         - List inspections for a project
     POST   /                         - Create inspection
+    GET    /export                   - Export inspections as Excel
     GET    /{inspection_id}          - Get single inspection
     PATCH  /{inspection_id}          - Update inspection
     DELETE /{inspection_id}          - Delete inspection
     POST   /{inspection_id}/complete - Mark inspection as completed
 """
 
+import io
 import logging
 import uuid
 
 from fastapi import APIRouter, Depends, Query
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
@@ -91,6 +94,74 @@ async def create_inspection(
     """Create a new quality inspection."""
     inspection = await service.create_inspection(data, user_id=user_id)
     return _to_response(inspection)
+
+
+@router.get("/export")
+async def export_inspections(
+    project_id: uuid.UUID = Query(...),
+    session: SessionDep = None,  # type: ignore[assignment]
+    _user: CurrentUserId = None,  # type: ignore[assignment]
+) -> StreamingResponse:
+    """Export inspections for a project as Excel."""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font
+    from sqlalchemy import select
+
+    from app.modules.inspections.models import QualityInspection
+
+    result = await session.execute(
+        select(QualityInspection)
+        .where(QualityInspection.project_id == project_id)
+        .order_by(QualityInspection.inspection_number)
+        .limit(50000)
+    )
+    items = result.scalars().all()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Inspections"
+
+    headers = [
+        "Inspection #",
+        "Title",
+        "Type",
+        "Inspector",
+        "Date",
+        "Location",
+        "Status",
+        "Result",
+        "Checklist Items (pass/fail)",
+    ]
+    for col, h in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=h)
+        cell.font = Font(bold=True)
+
+    for row_idx, item in enumerate(items, 2):
+        ws.cell(row=row_idx, column=1, value=item.inspection_number)
+        ws.cell(row=row_idx, column=2, value=item.title)
+        ws.cell(row=row_idx, column=3, value=item.inspection_type)
+        ws.cell(row=row_idx, column=4, value=str(item.inspector_id) if item.inspector_id else "")
+        ws.cell(row=row_idx, column=5, value=item.inspection_date or "")
+        ws.cell(row=row_idx, column=6, value=item.location or "")
+        ws.cell(row=row_idx, column=7, value=item.status)
+        ws.cell(row=row_idx, column=8, value=item.result or "")
+        # Checklist pass/fail count
+        checklist = item.checklist_data or []
+        passed = sum(
+            1 for ci in checklist if isinstance(ci, dict) and ci.get("passed")
+        )
+        failed = len(checklist) - passed
+        ws.cell(row=row_idx, column=9, value=f"{passed}/{failed}")
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": 'attachment; filename="inspections.xlsx"'},
+    )
 
 
 @router.get("/{inspection_id}", response_model=InspectionResponse)

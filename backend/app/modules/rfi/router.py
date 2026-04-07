@@ -3,6 +3,7 @@
 Endpoints:
     GET    /                    - List RFIs for a project
     POST   /                    - Create RFI
+    GET    /export              - Export RFI log as Excel
     GET    /{rfi_id}            - Get single RFI
     PATCH  /{rfi_id}            - Update RFI
     DELETE /{rfi_id}            - Delete RFI
@@ -10,10 +11,13 @@ Endpoints:
     POST   /{rfi_id}/close      - Close RFI
 """
 
+import io
 import logging
 import uuid
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, Query
+from fastapi.responses import StreamingResponse
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.rfi.schemas import (
@@ -88,6 +92,97 @@ async def create_rfi(
 ) -> RFIResponse:
     rfi = await service.create_rfi(data, user_id=user_id)
     return _to_response(rfi)
+
+
+@router.get("/export")
+async def export_rfi_log(
+    project_id: uuid.UUID = Query(...),
+    session: SessionDep = None,  # type: ignore[assignment]
+    _user: CurrentUserId = None,  # type: ignore[assignment]
+) -> StreamingResponse:
+    """Export RFI log for a project as Excel."""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font
+    from sqlalchemy import select
+
+    from app.modules.rfi.models import RFI
+
+    result = await session.execute(
+        select(RFI)
+        .where(RFI.project_id == project_id)
+        .order_by(RFI.rfi_number)
+        .limit(50000)
+    )
+    items = result.scalars().all()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "RFI Log"
+
+    headers = [
+        "RFI #",
+        "Subject",
+        "Status",
+        "Raised By",
+        "Assigned To",
+        "Ball-in-Court",
+        "Date Required",
+        "Response Due",
+        "Days Open",
+        "Cost Impact",
+        "Schedule Impact",
+        "Response",
+    ]
+    for col, h in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=h)
+        cell.font = Font(bold=True)
+
+    now = datetime.now(UTC)
+    for row_idx, item in enumerate(items, 2):
+        ws.cell(row=row_idx, column=1, value=item.rfi_number)
+        ws.cell(row=row_idx, column=2, value=item.subject)
+        ws.cell(row=row_idx, column=3, value=item.status)
+        ws.cell(row=row_idx, column=4, value=str(item.raised_by) if item.raised_by else "")
+        ws.cell(row=row_idx, column=5, value=str(item.assigned_to) if item.assigned_to else "")
+        ws.cell(row=row_idx, column=6, value=str(item.ball_in_court) if item.ball_in_court else "")
+        ws.cell(row=row_idx, column=7, value=item.date_required or "")
+        ws.cell(row=row_idx, column=8, value=item.response_due_date or "")
+        # Days open: from created_at to now (or responded_at if closed)
+        days_open = 0
+        if item.created_at:
+            start = item.created_at if hasattr(item.created_at, "date") else now
+            end = now
+            if item.responded_at:
+                try:
+                    end = datetime.fromisoformat(str(item.responded_at))
+                except (ValueError, TypeError):
+                    end = now
+            try:
+                days_open = max(0, (end - start).days)
+            except TypeError:
+                days_open = 0
+        ws.cell(row=row_idx, column=9, value=days_open)
+        ws.cell(
+            row=row_idx,
+            column=10,
+            value=f"Yes ({item.cost_impact_value})" if item.cost_impact else "No",
+        )
+        ws.cell(
+            row=row_idx,
+            column=11,
+            value=f"Yes ({item.schedule_impact_days}d)" if item.schedule_impact else "No",
+        )
+        ws.cell(row=row_idx, column=12, value=item.official_response or "")
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": 'attachment; filename="rfi_log.xlsx"'},
+    )
 
 
 @router.get("/{rfi_id}", response_model=RFIResponse)

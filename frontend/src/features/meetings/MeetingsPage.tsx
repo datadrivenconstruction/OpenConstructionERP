@@ -15,12 +15,15 @@ import {
   Circle,
   XCircle,
   Clock,
+  FileDown,
+  Loader2,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
-import { apiGet } from '@/shared/lib/api';
+import { apiGet, triggerDownload } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { useAuthStore } from '@/stores/useAuthStore';
 import {
   fetchMeetings,
   createMeeting,
@@ -275,14 +278,48 @@ function CreateMeetingModal({
   );
 }
 
+/* -- Export helper --------------------------------------------------------- */
+
+async function downloadMeetingPdf(meetingId: string): Promise<void> {
+  const token = useAuthStore.getState().accessToken;
+  const headers: Record<string, string> = { Accept: 'application/pdf' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`/api/v1/meetings/${meetingId}/export/pdf`, {
+    method: 'GET',
+    headers,
+  });
+  if (!response.ok) {
+    let detail = 'Export failed';
+    try {
+      const body = await response.json();
+      detail = body.detail || detail;
+    } catch {
+      // ignore parse error
+    }
+    throw new Error(detail);
+  }
+
+  const blob = await response.blob();
+  const disposition = response.headers.get('Content-Disposition');
+  const filename = disposition?.match(/filename="?(.+)"?/)?.[1] || `meeting_${meetingId}.pdf`;
+  triggerDownload(blob, filename);
+}
+
 /* -- Meeting Row (expandable) ---------------------------------------------- */
 
 function MeetingRow({
   meeting,
   onComplete,
+  onExportPdf,
+  isExporting,
 }: {
   meeting: Meeting;
   onComplete: (id: string) => void;
+  onExportPdf: (id: string) => void;
+  isExporting: boolean;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
@@ -461,6 +498,22 @@ function MeetingRow({
                 {t('meetings.action_complete', { defaultValue: 'Complete Meeting' })}
               </Button>
             )}
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onExportPdf(meeting.id);
+              }}
+              disabled={isExporting}
+            >
+              {isExporting ? (
+                <Loader2 size={14} className="mr-1.5 animate-spin" />
+              ) : (
+                <FileDown size={14} className="mr-1.5" />
+              )}
+              {t('meetings.export_pdf', { defaultValue: 'Export PDF' })}
+            </Button>
           </div>
         </div>
       )}
@@ -565,6 +618,21 @@ export function MeetingsPage() {
       }),
   });
 
+  const exportPdfMut = useMutation({
+    mutationFn: (meetingId: string) => downloadMeetingPdf(meetingId),
+    onSuccess: () =>
+      addToast({
+        type: 'success',
+        title: t('meetings.export_success', { defaultValue: 'PDF exported' }),
+      }),
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('common.error', { defaultValue: 'Error' }),
+        message: e.message,
+      }),
+  });
+
   const handleCreateSubmit = useCallback(
     (formData: MeetingFormData) => {
       createMut.mutate({
@@ -584,6 +652,13 @@ export function MeetingsPage() {
       completeMut.mutate(id);
     },
     [completeMut],
+  );
+
+  const handleExportPdf = useCallback(
+    (id: string) => {
+      exportPdfMut.mutate(id);
+    },
+    [exportPdfMut],
   );
 
   return (
@@ -809,7 +884,13 @@ export function MeetingsPage() {
 
               {/* Rows */}
               {filtered.map((meeting) => (
-                <MeetingRow key={meeting.id} meeting={meeting} onComplete={handleComplete} />
+                <MeetingRow
+                  key={meeting.id}
+                  meeting={meeting}
+                  onComplete={handleComplete}
+                  onExportPdf={handleExportPdf}
+                  isExporting={exportPdfMut.isPending && exportPdfMut.variables === meeting.id}
+                />
               ))}
             </Card>
           </>
