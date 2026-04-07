@@ -148,12 +148,12 @@ def register_core_permissions() -> None:
     permission_registry.register_module_permissions(
         "system",
         {
+            "system.settings.read": Role.MANAGER,
+            "system.settings.write": Role.ADMIN,
             "system.modules.list": Role.VIEWER,
             "system.modules.install": Role.ADMIN,
             "system.modules.uninstall": Role.ADMIN,
-            "system.validation_rules.list": Role.VIEWER,
             "system.hooks.list": Role.ADMIN,
-            "system.settings.read": Role.MANAGER,
-            "system.settings.write": Role.ADMIN,
+            "system.validation_rules.list": Role.VIEWER,
         },
     )

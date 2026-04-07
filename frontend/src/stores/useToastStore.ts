@@ -22,7 +22,7 @@ export interface HistoryEntry {
   read: boolean;
 }
 
-const MAX_HISTORY = 20;
+const MAX_HISTORY = 23;
 
 interface ToastStore {
   toasts: Toast[];

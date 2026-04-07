@@ -132,7 +132,7 @@ class ValidationReport:
             total_weight += w
             if r.passed:
                 passed_weight += w
-        return round(passed_weight / total_weight, 3) if total_weight > 0 else 1.0
+        return round(passed_weight / total_weight, 4) if total_weight > 0 else 1.0
 
     def summary(self) -> dict[str, Any]:
         """Compact summary for API response."""

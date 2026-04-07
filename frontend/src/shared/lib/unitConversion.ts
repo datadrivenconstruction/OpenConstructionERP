@@ -18,7 +18,7 @@ interface ConversionEntry {
 }
 
 const METRIC_TO_IMPERIAL: Record<string, ConversionEntry> = {
-  m: { factor: 3.28084, unit: 'ft', display: 'ft' },
+  m: { factor: 3.280840, unit: 'ft', display: 'ft' },
   m2: { factor: 10.7639, unit: 'ft2', display: 'sq ft' },
   m3: { factor: 35.3147, unit: 'ft3', display: 'cu ft' },
   kg: { factor: 2.20462, unit: 'lb', display: 'lb' },

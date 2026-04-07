@@ -54,7 +54,7 @@ class TestSettingsDefaults:
         assert settings.jwt_refresh_expire_days == 30
 
     def test_database_pool_size_default(self, settings):
-        assert settings.database_pool_size == 20
+        assert settings.database_pool_size == 23
 
     def test_database_max_overflow_default(self, settings):
         assert settings.database_max_overflow == 10

@@ -74,7 +74,7 @@ export function getUnitsForLocale(lang?: string): string[] {
 export const UNITS = BASE_UNITS;
 
 /** Maximum number of undo entries stored. */
-export const UNDO_STACK_LIMIT = 20;
+export const UNDO_STACK_LIMIT = 26;
 
 /** Editable field names in left-to-right column order for keyboard navigation. */
 export const EDITABLE_FIELDS = ['ordinal', 'description', 'unit', 'quantity', 'unit_rate'] as const;
