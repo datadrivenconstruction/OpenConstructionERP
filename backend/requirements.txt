@@ -179,7 +179,7 @@ python-dotenv==1.0.1
 python-jose==3.5.0
 python-multipart==0.0.22
 python-pptx==1.0.2
-pytz==2025.2
+pytz==2026.1.post1
 PyWavelets==1.9.0
 pywin32==311
 pywin32-ctypes==0.2.3
