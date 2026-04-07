@@ -1,6 +1,6 @@
 """Internationalization system.
 
-21 languages built into core. Zero hardcoded strings.
+20 languages built into core. Zero hardcoded strings.
 New language = add a JSON file to locales/.
 
 Backend: returns translation keys or resolved strings.
@@ -50,7 +50,6 @@ SUPPORTED_LOCALES = [
     "no",  # Norwegian (Norsk)
     "da",  # Danish (Dansk)
     "fi",  # Finnish (Suomi)
-    "uk",  # Ukrainian (Українська)
 ]
 
 LOCALE_NAMES = {
@@ -74,7 +73,6 @@ LOCALE_NAMES = {
     "no": "Norsk",
     "da": "Dansk",
     "fi": "Suomi",
-    "uk": "Українська",
 }
 
 LOCALES_DIR = Path(__file__).parent.parent.parent / "locales"
@@ -3190,154 +3188,8 @@ def _generate_default_locales(locales_dir: Path) -> None:
         },
     }
 
-    # -------------------------------------------------------------------------
-    # Ukrainian (Українська) — Кошторисна справа terminology
-    # -------------------------------------------------------------------------
-    uk: dict[str, dict[str, str]] = {
-        "app": {
-            "name": "OpenConstructionERP",
-            "tagline": "Кошторисне програмне забезпечення з відкритим кодом",
-        },
-        "nav": {
-            "dashboard": "Панель керування",
-            "ai_estimate": "AI-кошторис",
-            "settings": "Налаштування",
-            "5d_cost_model": "5D модель вартості",
-            "templates": "Шаблони",
-        },
-        "common": {
-            "save": "Зберегти",
-            "cancel": "Скасувати",
-            "delete": "Видалити",
-            "edit": "Редагувати",
-            "create": "Створити",
-            "search": "Пошук",
-            "filter": "Фільтр",
-            "export": "Експорт",
-            "import": "Імпорт",
-            "loading": "Завантаження...",
-            "error": "Помилка",
-            "success": "Успішно",
-            "confirm": "Підтвердити",
-            "back": "Назад",
-            "next": "Далі",
-            "yes": "Так",
-            "no": "Ні",
-        },
-        "auth": {
-            "login": "Увійти",
-            "logout": "Вийти",
-            "email": "Електронна пошта",
-            "password": "Пароль",
-            "try_demo": "Спробувати демо-обліковий запис →",
-        },
-        "projects": {
-            "title": "Проєкти",
-            "new_project": "Новий проєкт",
-            "project_name": "Назва проєкту",
-            "no_projects": "Поки що немає проєктів",
-        },
-        "boq": {
-            "title": "Відомість обсягів робіт",
-            "position": "Позиція",
-            "ordinal": "Порядковий номер",
-            "description": "Опис",
-            "quantity": "Кількість",
-            "unit": "Одиниця",
-            "unit_rate": "Ціна за одиницю",
-            "total": "Всього",
-            "add_position": "Додати позицію",
-            "add_section": "Додати розділ",
-            "assembly": "Збірка",
-            "subtotal": "Підсумок",
-            "grand_total": "Загальна сума",
-            "direct_cost": "Прямі витрати",
-            "net_total": "Сума нетто",
-            "gross_total": "Сума брутто",
-            "vat": "ПДВ",
-            "add_markups": "Додати надбавки",
-            "validate": "Перевірити",
-            "export": "Експортувати",
-        },
-        "costs": {
-            "title": "База вартості",
-            "rate": "Розцінка",
-            "material": "Матеріал",
-            "labor": "Робота",
-            "equipment": "Обладнання",
-            "search_costs": "Пошук елементів вартості...",
-        },
-        "assemblies": {
-            "title": "Збірки",
-        },
-        "validation": {
-            "title": "Перевірка",
-            "passed": "Пройдено",
-            "warnings": "Попередження",
-            "errors": "Помилки",
-            "score": "Оцінка якості",
-            "run_validation": "Запустити перевірку",
-            "missing_quantity": "Позиція {position} не має кількості",
-            "missing_rate": "Позиція {position} не має ціни за одиницю",
-            "missing_description": "Позиція {position} не має опису",
-            "missing_classification": "Позиція {position} потребує коду класифікації",
-            "duplicate_ordinal": "Дублікат порядкового номера: {ordinal}",
-            "rate_anomaly": "Ціна за одиницю {rate} перевищує поріг ({threshold})",
-        },
-        "schedule": {
-            "title": "4D Графік",
-        },
-        "cad": {
-            "title": "Імпорт CAD",
-            "upload": "Завантажити файл CAD",
-            "supported_formats": "Підтримуються: DWG, DGN, RVT, IFC, PDF",
-            "converting": "Конвертація...",
-            "elements_found": "Знайдено {count} елементів",
-        },
-        "takeoff": {
-            "title": "Обмірювання",
-            "auto_detect": "Автовизначення",
-            "manual_measure": "Ручне вимірювання",
-            "confidence": "Достовірність",
-        },
-        "tendering": {
-            "title": "Тендери",
-            "create_tender": "Створити тендер",
-            "bid": "Пропозиція",
-            "award": "Перемога",
-        },
-        "modules": {
-            "title": "Модулі",
-            "installed": "Встановлені",
-            "available": "Доступні",
-            "install": "Встановити",
-            "uninstall": "Видалити",
-            "update": "Оновити",
-        },
-        "dashboard": {
-            "welcome": "Ласкаво просимо до OpenConstructionERP",
-            "subtitle": "Кошторисне програмне забезпечення з відкритим кодом",
-            "recent_projects": "Останні проєкти",
-            "system_status": "Стан системи",
-            "modules_loaded": "Завантажені модулі",
-            "validation_rules": "Правила перевірки",
-            "languages": "Мови",
-        },
-        "units": {
-            "m": "м",
-            "m2": "м²",
-            "m3": "м³",
-            "kg": "кг",
-            "t": "т",
-            "pcs": "шт",
-            "lsum": "комплект",
-            "h": "год",
-            "set": "компл",
-        },
-    }
-
     # -----------------------------------------------------------------
-    # Write all 21 locale files
+    # Write all 20 locale files
     # -----------------------------------------------------------------
     all_locales: dict[str, dict[str, dict[str, str]]] = {
         "en": en,
@@ -3360,7 +3212,6 @@ def _generate_default_locales(locales_dir: Path) -> None:
         "ja": ja,
         "ko": ko,
         "hi": hi,
-        "uk": uk,
     }
 
     for locale_code, data in all_locales.items():

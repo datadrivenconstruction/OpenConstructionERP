@@ -23,8 +23,8 @@ from app.core.i18n import (
 
 
 class TestSupportedLocales:
-    def test_21_locales_defined(self):
-        assert len(SUPPORTED_LOCALES) == 21
+    def test_20_locales_defined(self):
+        assert len(SUPPORTED_LOCALES) == 20
 
     def test_en_is_first(self):
         assert SUPPORTED_LOCALES[0] == "en"
