@@ -32,6 +32,14 @@ export interface BIMUploadResponse {
   has_geometry: boolean;
 }
 
+export interface BIMCadUploadResponse {
+  model_id: string;
+  name: string;
+  format: string;
+  file_size: number;
+  status: string;
+}
+
 /* ── API Functions ─────────────────────────────────────────────────────── */
 
 /** Fetch all BIM models for a project. */
@@ -85,6 +93,51 @@ export async function uploadBIMData(
   }
 
   const response = await fetch(`/api/v1/bim_hub/upload?${params.toString()}`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    let detail = 'Upload failed';
+    try {
+      const body = await response.json();
+      detail = body.detail || detail;
+    } catch {
+      // ignore parse errors
+    }
+    throw new Error(detail);
+  }
+
+  return response.json();
+}
+
+/** Upload a raw CAD file (RVT, IFC, DWG, DGN, FBX, OBJ, 3DS) for background processing. */
+export async function uploadCADFile(
+  projectId: string,
+  name: string,
+  discipline: string,
+  file: File,
+): Promise<BIMCadUploadResponse> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const params = new URLSearchParams({
+    project_id: projectId,
+    name,
+    discipline,
+  });
+
+  const token = useAuthStore.getState().accessToken;
+  const headers: HeadersInit = {
+    Accept: 'application/json',
+    'X-DDC-Client': 'OE/1.0',
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`/api/v1/bim_hub/upload-cad?${params.toString()}`, {
     method: 'POST',
     headers,
     body: formData,

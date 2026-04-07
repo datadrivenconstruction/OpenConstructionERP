@@ -25,6 +25,16 @@ class AISettingsUpdate(BaseModel):
     mistral_api_key: str | None = None
     groq_api_key: str | None = None
     deepseek_api_key: str | None = None
+    together_api_key: str | None = None
+    fireworks_api_key: str | None = None
+    perplexity_api_key: str | None = None
+    cohere_api_key: str | None = None
+    ai21_api_key: str | None = None
+    xai_api_key: str | None = None
+    zhipu_api_key: str | None = None
+    baidu_api_key: str | None = None
+    yandex_api_key: str | None = None
+    gigachat_api_key: str | None = None
     preferred_model: str | None = Field(default=None, max_length=100)
 
 
@@ -45,6 +55,16 @@ class AISettingsResponse(BaseModel):
     mistral_api_key_set: bool = False
     groq_api_key_set: bool = False
     deepseek_api_key_set: bool = False
+    together_api_key_set: bool = False
+    fireworks_api_key_set: bool = False
+    perplexity_api_key_set: bool = False
+    cohere_api_key_set: bool = False
+    ai21_api_key_set: bool = False
+    xai_api_key_set: bool = False
+    zhipu_api_key_set: bool = False
+    baidu_api_key_set: bool = False
+    yandex_api_key_set: bool = False
+    gigachat_api_key_set: bool = False
     preferred_model: str
     metadata: dict[str, Any] = Field(default_factory=dict, alias="metadata_")
     created_at: datetime

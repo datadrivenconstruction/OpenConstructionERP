@@ -35,6 +35,16 @@ interface Project {
   name: string;
 }
 
+/** Helper to read the CDE state from a container (backend returns `cde_state`). */
+function getContainerState(c: CDEContainer): CDEState {
+  return (c.cde_state ?? 'wip') as CDEState;
+}
+
+/** Helper to read the discipline from a container (backend returns `discipline_code`). */
+function getContainerDiscipline(c: CDEContainer): CDEDiscipline {
+  return (c.discipline_code ?? 'other') as CDEDiscipline;
+}
+
 const STATE_CONFIG: Record<
   CDEState,
   { variant: 'neutral' | 'blue' | 'success' | 'warning'; cls: string; label: string }
@@ -278,9 +288,11 @@ function ContainerRow({
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
-  const stateCfg = STATE_CONFIG[container.state] ?? STATE_CONFIG.wip;
+  const containerState = getContainerState(container);
+  const containerDiscipline = getContainerDiscipline(container);
+  const stateCfg = STATE_CONFIG[containerState] ?? STATE_CONFIG.wip;
   const disciplineCls =
-    DISCIPLINE_COLORS[container.discipline] ?? DISCIPLINE_COLORS.other;
+    DISCIPLINE_COLORS[containerDiscipline] ?? DISCIPLINE_COLORS.other;
 
   // Fetch revisions on expand
   const { data: revisions = [], isLoading: revisionsLoading } = useQuery({
@@ -290,8 +302,8 @@ function ContainerRow({
   });
 
   // Can promote if not archived
-  const canPromote = container.state !== 'archived';
-  const nextState = STATE_ORDER[STATE_ORDER.indexOf(container.state) + 1] as
+  const canPromote = containerState !== 'archived';
+  const nextState = STATE_ORDER[STATE_ORDER.indexOf(containerState) + 1] as
     | CDEState
     | undefined;
 
@@ -325,14 +337,14 @@ function ContainerRow({
 
         {/* Discipline badge */}
         <Badge variant="neutral" size="sm" className={clsx(disciplineCls, 'hidden md:inline-flex')}>
-          {t(`cde.discipline_${container.discipline}`, {
-            defaultValue: DISCIPLINE_LABELS[container.discipline],
+          {t(`cde.discipline_${containerDiscipline}`, {
+            defaultValue: DISCIPLINE_LABELS[containerDiscipline] ?? containerDiscipline,
           })}
         </Badge>
 
         {/* CDE State badge */}
         <Badge variant={stateCfg.variant} size="sm" className={stateCfg.cls}>
-          {t(`cde.state_${container.state}`, { defaultValue: stateCfg.label })}
+          {t(`cde.state_${containerState}`, { defaultValue: stateCfg.label })}
         </Badge>
 
         {/* Suitability Code */}
@@ -342,12 +354,12 @@ function ContainerRow({
 
         {/* Current Revision */}
         <span className="text-xs text-content-tertiary w-12 text-center shrink-0 tabular-nums hidden sm:block">
-          {container.current_revision}
+          {container.current_revision_id ? 'Rev' : '-'}
         </span>
 
         {/* Classification */}
         <span className="text-xs text-content-tertiary w-28 truncate shrink-0 hidden lg:block">
-          {container.classification || '-'}
+          {container.classification_code || '-'}
         </span>
       </div>
 
@@ -409,20 +421,17 @@ function ContainerRow({
 }
 
 function RevisionItem({ revision }: { revision: CDERevision }) {
-  const { t } = useTranslation();
-  const stateCfg = STATE_CONFIG[revision.status] ?? STATE_CONFIG.wip;
-
   return (
     <div className="flex items-center gap-3 rounded-lg bg-surface-secondary p-2.5 text-sm">
       <span className="font-mono font-semibold text-content-secondary w-12 shrink-0">
         {revision.revision_code}
       </span>
-      <DateDisplay value={revision.date} className="text-xs text-content-tertiary w-24 shrink-0" />
-      <Badge variant={stateCfg.variant} size="sm" className={stateCfg.cls}>
-        {t(`cde.state_${revision.status}`, { defaultValue: stateCfg.label })}
+      <DateDisplay value={revision.created_at} className="text-xs text-content-tertiary w-24 shrink-0" />
+      <Badge variant="neutral" size="sm">
+        {revision.status}
       </Badge>
-      {revision.filename && (
-        <span className="text-xs text-content-tertiary truncate">{revision.filename}</span>
+      {revision.file_name && (
+        <span className="text-xs text-content-tertiary truncate">{revision.file_name}</span>
       )}
       {revision.change_summary && (
         <span className="text-xs text-content-tertiary truncate flex-1">
@@ -474,7 +483,7 @@ export function CDEPage() {
       (c) =>
         c.container_code.toLowerCase().includes(q) ||
         c.title.toLowerCase().includes(q) ||
-        (c.classification && c.classification.toLowerCase().includes(q)),
+        (c.classification_code && c.classification_code.toLowerCase().includes(q)),
     );
   }, [containers, searchQuery]);
 
@@ -482,7 +491,7 @@ export function CDEPage() {
   const stateCounts = useMemo(() => {
     const counts: Record<string, number> = { all: containers.length };
     for (const s of STATE_ORDER) {
-      counts[s] = containers.filter((c) => c.state === s).length;
+      counts[s] = containers.filter((c) => getContainerState(c) === s).length;
     }
     return counts;
   }, [containers]);
@@ -544,9 +553,9 @@ export function CDEPage() {
         project_id: projectId,
         container_code: formData.container_code,
         title: formData.title,
-        discipline: formData.discipline,
+        discipline_code: formData.discipline,
         suitability_code: formData.suitability_code || undefined,
-        classification: formData.classification || undefined,
+        classification_code: formData.classification || undefined,
       });
     },
     [createMut, projectId, addToast, t],
@@ -554,7 +563,8 @@ export function CDEPage() {
 
   const handlePromote = useCallback(
     (container: CDEContainer) => {
-      const nextIdx = STATE_ORDER.indexOf(container.state) + 1;
+      const currentState = getContainerState(container);
+      const nextIdx = STATE_ORDER.indexOf(currentState) + 1;
       const nextState = STATE_ORDER[nextIdx];
       if (nextState) {
         transitionMut.mutate({ id: container.id, targetState: nextState });

@@ -535,6 +535,103 @@ async def upload_bim_data(
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Direct CAD file upload (RVT, IFC, DWG, DGN, FBX, OBJ, 3DS)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+_ALLOWED_CAD_EXTENSIONS = {".rvt", ".ifc", ".dwg", ".dgn", ".fbx", ".obj", ".3ds"}
+_CAD_MAX_SIZE = 500 * 1024 * 1024  # 500 MB
+
+
+@router.post("/upload-cad")
+async def upload_cad_file(
+    project_id: str = Query(..., description="Project UUID"),
+    name: str = Query(default="", max_length=255),
+    discipline: str = Query(default="architecture", max_length=50),
+    file: UploadFile = File(..., description="CAD file (RVT, IFC, DWG, DGN, FBX, OBJ, 3DS)"),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: BIMHubService = Depends(_get_service),
+) -> dict:
+    """Upload a raw CAD file for background processing.
+
+    The file is stored on disk at ``data/bim/{project_id}/{model_id}/original.{ext}``
+    and a BIMModel record is created with status="processing". A real CAD converter
+    service would pick it up asynchronously; for now the model stays in processing state.
+
+    Accepted extensions: .rvt, .ifc, .dwg, .dgn, .fbx, .obj, .3ds
+    Max size: 500 MB
+    """
+    filename = (file.filename or "").strip()
+    if not filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No filename provided.",
+        )
+
+    ext = pathlib.Path(filename).suffix.lower()
+    if ext not in _ALLOWED_CAD_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                f"Unsupported file type '{ext}'. "
+                f"Accepted: {', '.join(sorted(_ALLOWED_CAD_EXTENSIONS))}"
+            ),
+        )
+
+    content = await file.read()
+    if not content:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Uploaded file is empty.",
+        )
+    if len(content) > _CAD_MAX_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"File too large. Maximum size is {_CAD_MAX_SIZE // (1024 * 1024)} MB.",
+        )
+
+    # Auto-fill model name from filename
+    model_name = name or pathlib.Path(filename).stem
+
+    # Determine model format from extension (strip the dot)
+    model_format = ext.lstrip(".")
+
+    # Create BIM model record with processing status
+    from app.modules.bim_hub.schemas import BIMModelCreate
+
+    model_data = BIMModelCreate(
+        project_id=uuid.UUID(project_id),
+        name=model_name,
+        discipline=discipline,
+        model_format=model_format,
+        status="processing",
+    )
+    model = await service.create_model(model_data, user_id=user_id)
+    model_id = model.id
+
+    # Save CAD file to disk
+    cad_dir = _BIM_DATA_DIR / str(project_id) / str(model_id)
+    cad_dir.mkdir(parents=True, exist_ok=True)
+    cad_path = cad_dir / f"original{ext}"
+    cad_path.write_bytes(content)
+
+    logger.info(
+        "CAD file uploaded: %s (%s, %d bytes) -> model %s",
+        filename,
+        ext,
+        len(content),
+        model_id,
+    )
+
+    return {
+        "model_id": str(model_id),
+        "name": model_name,
+        "format": model_format,
+        "file_size": len(content),
+        "status": "processing",
+    }
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Geometry file serving
 # ═══════════════════════════════════════════════════════════════════════════════
 

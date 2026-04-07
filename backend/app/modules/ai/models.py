@@ -31,6 +31,16 @@ class AISettings(Base):
     mistral_api_key: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
     groq_api_key: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
     deepseek_api_key: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
+    together_api_key: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
+    fireworks_api_key: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
+    perplexity_api_key: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
+    cohere_api_key: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
+    ai21_api_key: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
+    xai_api_key: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
+    zhipu_api_key: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
+    baidu_api_key: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
+    yandex_api_key: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
+    gigachat_api_key: Mapped[str | None] = mapped_column(String(500), nullable=True, default=None)
     preferred_model: Mapped[str] = mapped_column(String(100), nullable=False, default="claude-sonnet")
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",

@@ -23,13 +23,20 @@ export interface CDERevision {
   id: string;
   container_id: string;
   revision_code: string;
-  date: string;
-  status: CDEState;
-  filename: string | null;
-  file_size: number | null;
+  revision_number: number;
+  is_preliminary: boolean;
+  status: string;
+  file_name: string;
+  file_size: string | null;
+  mime_type: string | null;
+  storage_key: string | null;
+  content_hash: string | null;
   change_summary: string | null;
+  approved_by: string | null;
   created_by: string | null;
+  metadata: Record<string, unknown>;
   created_at: string;
+  updated_at: string;
 }
 
 export interface CDEContainer {
@@ -37,13 +44,17 @@ export interface CDEContainer {
   project_id: string;
   container_code: string;
   title: string;
-  discipline: CDEDiscipline;
-  state: CDEState;
+  description: string | null;
+  discipline_code: CDEDiscipline | string | null;
+  cde_state: CDEState;
   suitability_code: string | null;
-  current_revision: string;
-  classification: string | null;
-  revision_count: number;
+  current_revision_id: string | null;
+  classification_code: string | null;
+  classification_system: string | null;
+  originator_code: string | null;
+  security_classification: string | null;
   created_by: string | null;
+  metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -57,9 +68,11 @@ export interface CreateCDEContainerPayload {
   project_id: string;
   container_code: string;
   title: string;
-  discipline: CDEDiscipline;
+  discipline_code?: CDEDiscipline | string;
   suitability_code?: string;
-  classification?: string;
+  classification_code?: string;
+  classification_system?: string;
+  description?: string;
 }
 
 export interface TransitionPayload {

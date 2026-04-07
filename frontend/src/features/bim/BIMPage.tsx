@@ -24,16 +24,18 @@ import {
   Upload,
   Database,
   FileBox,
+  FileUp,
   X,
   CheckCircle2,
   AlertCircle,
+  Clock,
 } from 'lucide-react';
 import { Button, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
 import { BIMViewer, DisciplineToggle } from '@/shared/ui/BIMViewer';
 import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
-import { fetchBIMModels, fetchBIMElements, uploadBIMData, getGeometryUrl } from './api';
+import { fetchBIMModels, fetchBIMElements, uploadBIMData, uploadCADFile, getGeometryUrl } from './api';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -218,8 +220,24 @@ function ModelCard({
         <span className="text-sm font-medium text-content-primary truncate">{model.name}</span>
       </div>
       <div className="flex items-center gap-2 mt-1">
-        <Badge variant={model.status === 'ready' ? 'success' : 'warning'} size="sm">
-          {model.status}
+        <Badge
+          variant={
+            model.status === 'ready'
+              ? 'success'
+              : model.status === 'processing'
+                ? 'warning'
+                : 'neutral'
+          }
+          size="sm"
+        >
+          {model.status === 'processing' ? (
+            <span className="flex items-center gap-1">
+              <Loader2 size={10} className="animate-spin" />
+              Processing...
+            </span>
+          ) : (
+            model.status
+          )}
         </Badge>
         <span className="text-2xs text-content-tertiary">{model.format?.toUpperCase()}</span>
         <span className="text-2xs text-content-quaternary truncate">{model.filename}</span>
@@ -230,6 +248,8 @@ function ModelCard({
 
 /* ── Upload Card ──────────────────────────────────────────────────────── */
 
+type UploadMode = 'cad' | 'data';
+
 function UploadCard({
   projectId,
   onUploadComplete,
@@ -238,19 +258,24 @@ function UploadCard({
   onUploadComplete: (modelId: string) => void;
 }) {
   const { t } = useTranslation();
+  const [uploadMode, setUploadMode] = useState<UploadMode>('cad');
   const [dataFile, setDataFile] = useState<File | null>(null);
+  const [cadFile, setCadFile] = useState<File | null>(null);
   const [geometryFile, setGeometryFile] = useState<File | null>(null);
   const [modelName, setModelName] = useState('');
   const [discipline, setDiscipline] = useState('architecture');
   const [uploading, setUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState<{
-    elementCount: number;
-    storeys: string[];
-    disciplines: string[];
-    hasGeometry: boolean;
+    elementCount?: number;
+    storeys?: string[];
+    disciplines?: string[];
+    hasGeometry?: boolean;
+    cadFormat?: string;
+    cadStatus?: string;
   } | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const dataInputRef = useRef<HTMLInputElement>(null);
+  const cadInputRef = useRef<HTMLInputElement>(null);
   const geoInputRef = useRef<HTMLInputElement>(null);
   const addToast = useToastStore((s) => s.addToast);
 
@@ -266,13 +291,34 @@ function UploadCard({
     }
   }, [modelName]);
 
+  const handleCadFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    setCadFile(file);
+    setUploadResult(null);
+    setUploadError(null);
+    if (file && !modelName) {
+      const baseName = file.name.replace(/\.(rvt|ifc|dwg|dgn|fbx|obj|3ds)$/i, '');
+      setModelName(baseName);
+    }
+  }, [modelName]);
+
   const handleGeoFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setGeometryFile(e.target.files?.[0] ?? null);
     setUploadResult(null);
     setUploadError(null);
   }, []);
 
-  const handleUpload = useCallback(async () => {
+  const resetForm = useCallback(() => {
+    setDataFile(null);
+    setCadFile(null);
+    setGeometryFile(null);
+    setModelName('');
+    if (dataInputRef.current) dataInputRef.current.value = '';
+    if (cadInputRef.current) cadInputRef.current.value = '';
+    if (geoInputRef.current) geoInputRef.current.value = '';
+  }, []);
+
+  const handleUploadData = useCallback(async () => {
     if (!dataFile) return;
 
     setUploading(true);
@@ -302,12 +348,7 @@ function UploadCard({
         }),
       });
       onUploadComplete(result.model_id);
-      // Reset form
-      setDataFile(null);
-      setGeometryFile(null);
-      setModelName('');
-      if (dataInputRef.current) dataInputRef.current.value = '';
-      if (geoInputRef.current) geoInputRef.current.value = '';
+      resetForm();
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setUploadError(msg);
@@ -319,7 +360,48 @@ function UploadCard({
     } finally {
       setUploading(false);
     }
-  }, [projectId, modelName, discipline, dataFile, geometryFile, onUploadComplete, addToast, t]);
+  }, [projectId, modelName, discipline, dataFile, geometryFile, onUploadComplete, addToast, t, resetForm]);
+
+  const handleUploadCad = useCallback(async () => {
+    if (!cadFile) return;
+
+    setUploading(true);
+    setUploadError(null);
+    setUploadResult(null);
+
+    try {
+      const result = await uploadCADFile(
+        projectId,
+        modelName || cadFile.name.replace(/\.[^.]+$/, ''),
+        discipline,
+        cadFile,
+      );
+      setUploadResult({
+        cadFormat: result.format.toUpperCase(),
+        cadStatus: result.status,
+      });
+      addToast({
+        type: 'success',
+        title: t('bim.cad_upload_success', { defaultValue: 'CAD file uploaded' }),
+        message: t('bim.cad_upload_success_desc', {
+          defaultValue: '{{format}} file uploaded. Processing will start shortly.',
+          format: result.format.toUpperCase(),
+        }),
+      });
+      onUploadComplete(result.model_id);
+      resetForm();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setUploadError(msg);
+      addToast({
+        type: 'error',
+        title: t('bim.upload_failed', { defaultValue: 'Upload failed' }),
+        message: msg,
+      });
+    } finally {
+      setUploading(false);
+    }
+  }, [projectId, modelName, discipline, cadFile, onUploadComplete, addToast, t, resetForm]);
 
   const disciplineOptions = [
     { value: 'architecture', label: t('bim.disc_architecture', { defaultValue: 'Architecture' }) },
@@ -343,73 +425,129 @@ function UploadCard({
           </h2>
         </div>
         <p className="text-xs text-content-tertiary mt-1">
-          {t('bim.upload_desc', {
+          {t('bim.upload_desc_full', {
             defaultValue:
-              'Upload element data (CSV/Excel) and optional 3D geometry (DAE/COLLADA) from your CAD converter.',
+              'Upload a raw CAD file directly, or pre-processed element data (CSV/Excel) with optional 3D geometry.',
           })}
         </p>
       </div>
 
       <div className="p-4 space-y-4">
-        {/* File drop zones */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {/* Data file (required) */}
-          <label
-            className="flex flex-col items-center gap-2 border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors hover:border-oe-blue hover:bg-oe-blue-subtle/30"
+        {/* Mode toggle */}
+        <div className="flex gap-2 p-1 bg-surface-secondary rounded-lg">
+          <button
+            onClick={() => setUploadMode('cad')}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-xs font-medium transition-colors ${
+              uploadMode === 'cad'
+                ? 'bg-surface-primary text-oe-blue shadow-sm'
+                : 'text-content-secondary hover:text-content-primary'
+            }`}
           >
-            <Database size={24} className="text-content-tertiary" />
-            <span className="text-xs font-medium text-content-primary">
-              {t('bim.upload_data_label', { defaultValue: 'Element Data (required)' })}
-            </span>
-            <span className="text-2xs text-content-tertiary">
-              {t('bim.upload_data_hint', { defaultValue: 'CSV or Excel from CAD converter' })}
-            </span>
-            <span className="text-2xs text-content-quaternary">
-              {t('bim.upload_data_columns', {
-                defaultValue: 'Columns: element_id, type, name, storey, area, volume, length',
-              })}
-            </span>
-            {dataFile && (
-              <Badge variant="blue" size="sm">
-                {dataFile.name}
-              </Badge>
-            )}
-            <input
-              ref={dataInputRef}
-              type="file"
-              accept=".csv,.xlsx,.xls"
-              className="hidden"
-              onChange={handleDataFileChange}
-            />
-          </label>
-
-          {/* Geometry file (optional) */}
-          <label
-            className="flex flex-col items-center gap-2 border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors hover:border-oe-blue hover:bg-oe-blue-subtle/30"
+            <FileUp size={14} />
+            {t('bim.mode_cad', { defaultValue: 'Direct CAD Upload' })}
+          </button>
+          <button
+            onClick={() => setUploadMode('data')}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-xs font-medium transition-colors ${
+              uploadMode === 'data'
+                ? 'bg-surface-primary text-oe-blue shadow-sm'
+                : 'text-content-secondary hover:text-content-primary'
+            }`}
           >
-            <FileBox size={24} className="text-content-tertiary" />
-            <span className="text-xs font-medium text-content-primary">
-              {t('bim.upload_geo_label', { defaultValue: '3D Geometry (optional)' })}
-            </span>
-            <span className="text-2xs text-content-tertiary">
-              {t('bim.upload_geo_hint', {
-                defaultValue: 'DAE/COLLADA file with matching element IDs',
-              })}
-            </span>
-            {geometryFile && (
-              <Badge variant="blue" size="sm">
-                {geometryFile.name}
-              </Badge>
-            )}
-            <input
-              ref={geoInputRef}
-              type="file"
-              accept=".dae,.glb,.gltf"
-              className="hidden"
-              onChange={handleGeoFileChange}
-            />
-          </label>
+            <Database size={14} />
+            {t('bim.mode_data', { defaultValue: 'Pre-processed Data' })}
+          </button>
         </div>
+
+        {uploadMode === 'cad' ? (
+          /* ── CAD file upload mode ────────────────────────────────────── */
+          <>
+            <label className="flex flex-col items-center gap-2 border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors hover:border-oe-blue hover:bg-oe-blue-subtle/30">
+              <FileUp size={28} className="text-content-tertiary" />
+              <span className="text-xs font-medium text-content-primary">
+                {t('bim.upload_cad_label', { defaultValue: 'CAD / BIM File' })}
+              </span>
+              <span className="text-2xs text-content-tertiary">
+                {t('bim.upload_cad_hint', {
+                  defaultValue: 'RVT, IFC, DWG, DGN, FBX, OBJ, 3DS (max 500 MB)',
+                })}
+              </span>
+              <span className="text-2xs text-content-quaternary">
+                {t('bim.upload_cad_note', {
+                  defaultValue: 'File will be queued for background processing by the CAD converter',
+                })}
+              </span>
+              {cadFile && (
+                <Badge variant="blue" size="sm">
+                  {cadFile.name} ({(cadFile.size / (1024 * 1024)).toFixed(1)} MB)
+                </Badge>
+              )}
+              <input
+                ref={cadInputRef}
+                type="file"
+                accept=".rvt,.ifc,.dwg,.dgn,.fbx,.obj,.3ds"
+                className="hidden"
+                onChange={handleCadFileChange}
+              />
+            </label>
+          </>
+        ) : (
+          /* ── Pre-processed data upload mode ──────────────────────────── */
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Data file (required) */}
+            <label className="flex flex-col items-center gap-2 border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors hover:border-oe-blue hover:bg-oe-blue-subtle/30">
+              <Database size={24} className="text-content-tertiary" />
+              <span className="text-xs font-medium text-content-primary">
+                {t('bim.upload_data_label', { defaultValue: 'Element Data (required)' })}
+              </span>
+              <span className="text-2xs text-content-tertiary">
+                {t('bim.upload_data_hint', { defaultValue: 'CSV or Excel from CAD converter' })}
+              </span>
+              <span className="text-2xs text-content-quaternary">
+                {t('bim.upload_data_columns', {
+                  defaultValue: 'Columns: element_id, type, name, storey, area, volume, length',
+                })}
+              </span>
+              {dataFile && (
+                <Badge variant="blue" size="sm">
+                  {dataFile.name}
+                </Badge>
+              )}
+              <input
+                ref={dataInputRef}
+                type="file"
+                accept=".csv,.xlsx,.xls"
+                className="hidden"
+                onChange={handleDataFileChange}
+              />
+            </label>
+
+            {/* Geometry file (optional) */}
+            <label className="flex flex-col items-center gap-2 border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors hover:border-oe-blue hover:bg-oe-blue-subtle/30">
+              <FileBox size={24} className="text-content-tertiary" />
+              <span className="text-xs font-medium text-content-primary">
+                {t('bim.upload_geo_label', { defaultValue: '3D Geometry (optional)' })}
+              </span>
+              <span className="text-2xs text-content-tertiary">
+                {t('bim.upload_geo_hint', {
+                  defaultValue: 'DAE/COLLADA file with matching element IDs',
+                })}
+              </span>
+              {geometryFile && (
+                <Badge variant="blue" size="sm">
+                  {geometryFile.name}
+                </Badge>
+              )}
+              <input
+                ref={geoInputRef}
+                type="file"
+                accept=".dae,.glb,.gltf"
+                className="hidden"
+                onChange={handleGeoFileChange}
+              />
+            </label>
+          </div>
+        )}
 
         {/* Options row */}
         <div className="flex flex-wrap gap-3 items-end">
@@ -446,8 +584,8 @@ function UploadCard({
           <Button
             variant="primary"
             size="sm"
-            onClick={handleUpload}
-            disabled={!dataFile || uploading}
+            onClick={uploadMode === 'cad' ? handleUploadCad : handleUploadData}
+            disabled={uploadMode === 'cad' ? !cadFile || uploading : !dataFile || uploading}
           >
             {uploading ? (
               <>
@@ -463,23 +601,23 @@ function UploadCard({
           </Button>
         </div>
 
-        {/* Upload result */}
-        {uploadResult && (
-          <div className="flex items-start gap-2 p-3 rounded-lg bg-green-50 border border-green-200">
-            <CheckCircle2 size={16} className="text-green-600 mt-0.5 shrink-0" />
-            <div className="text-xs text-green-800">
+        {/* Upload result — data mode */}
+        {uploadResult && uploadResult.elementCount != null && (
+          <div className="flex items-start gap-2 p-3 rounded-lg bg-green-50 border border-green-200 dark:bg-green-950/30 dark:border-green-800">
+            <CheckCircle2 size={16} className="text-green-600 dark:text-green-400 mt-0.5 shrink-0" />
+            <div className="text-xs text-green-800 dark:text-green-300">
               <p className="font-medium">
                 {t('bim.upload_result', {
                   defaultValue: '{{count}} elements imported',
                   count: uploadResult.elementCount,
                 })}
                 {uploadResult.hasGeometry && (
-                  <span className="ms-1 text-green-600">
+                  <span className="ms-1 text-green-600 dark:text-green-400">
                     {t('bim.upload_with_geometry', { defaultValue: '(with 3D geometry)' })}
                   </span>
                 )}
               </p>
-              {uploadResult.storeys.length > 0 && (
+              {uploadResult.storeys && uploadResult.storeys.length > 0 && (
                 <p className="mt-0.5">
                   {t('bim.upload_storeys', { defaultValue: 'Storeys:' })}{' '}
                   {uploadResult.storeys.join(', ')}
@@ -489,11 +627,31 @@ function UploadCard({
           </div>
         )}
 
+        {/* Upload result — CAD mode */}
+        {uploadResult && uploadResult.cadFormat && (
+          <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-50 border border-blue-200 dark:bg-blue-950/30 dark:border-blue-800">
+            <Clock size={16} className="text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+            <div className="text-xs text-blue-800 dark:text-blue-300">
+              <p className="font-medium">
+                {t('bim.cad_upload_queued', {
+                  defaultValue: '{{format}} file uploaded successfully',
+                  format: uploadResult.cadFormat,
+                })}
+              </p>
+              <p className="mt-0.5">
+                {t('bim.cad_processing_note', {
+                  defaultValue: 'The model is queued for processing. Elements will appear once the CAD converter finishes.',
+                })}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Upload error */}
         {uploadError && (
-          <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200">
-            <AlertCircle size={16} className="text-red-600 mt-0.5 shrink-0" />
-            <p className="text-xs text-red-800">{uploadError}</p>
+          <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200 dark:bg-red-950/30 dark:border-red-800">
+            <AlertCircle size={16} className="text-red-600 dark:text-red-400 mt-0.5 shrink-0" />
+            <p className="text-xs text-red-800 dark:text-red-300">{uploadError}</p>
           </div>
         )}
       </div>

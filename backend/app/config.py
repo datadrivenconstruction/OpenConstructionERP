@@ -79,6 +79,16 @@ class Settings(BaseSettings):
     mistral_api_key: str | None = None
     groq_api_key: str | None = None
     deepseek_api_key: str | None = None
+    together_api_key: str | None = None
+    fireworks_api_key: str | None = None
+    perplexity_api_key: str | None = None
+    cohere_api_key: str | None = None
+    ai21_api_key: str | None = None
+    xai_api_key: str | None = None
+    zhipu_api_key: str | None = None
+    baidu_api_key: str | None = None
+    yandex_api_key: str | None = None
+    gigachat_api_key: str | None = None
 
     # ── External Services ────────────────────────────────────────────────
     cad_converter_url: str | None = "http://localhost:8001"

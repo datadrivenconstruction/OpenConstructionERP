@@ -3,7 +3,24 @@ import { useAuthStore } from '@/stores/useAuthStore';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-export type AIProvider = 'anthropic' | 'openai' | 'gemini' | 'openrouter' | 'mistral' | 'groq' | 'deepseek';
+export type AIProvider =
+  | 'anthropic'
+  | 'openai'
+  | 'gemini'
+  | 'openrouter'
+  | 'mistral'
+  | 'groq'
+  | 'deepseek'
+  | 'together'
+  | 'fireworks'
+  | 'perplexity'
+  | 'cohere'
+  | 'ai21'
+  | 'xai'
+  | 'zhipu'
+  | 'baidu'
+  | 'yandex'
+  | 'gigachat';
 
 export type AIConnectionStatus = 'connected' | 'not_configured' | 'error';
 
@@ -17,6 +34,16 @@ export interface AISettings {
   mistral_api_key_set: boolean;
   groq_api_key_set: boolean;
   deepseek_api_key_set: boolean;
+  together_api_key_set: boolean;
+  fireworks_api_key_set: boolean;
+  perplexity_api_key_set: boolean;
+  cohere_api_key_set: boolean;
+  ai21_api_key_set: boolean;
+  xai_api_key_set: boolean;
+  zhipu_api_key_set: boolean;
+  baidu_api_key_set: boolean;
+  yandex_api_key_set: boolean;
+  gigachat_api_key_set: boolean;
   preferred_model: string;
   metadata_: Record<string, unknown>;
   created_at: string;
@@ -36,6 +63,16 @@ export interface AISettingsUpdate {
   mistral_api_key?: string | null;
   groq_api_key?: string | null;
   deepseek_api_key?: string | null;
+  together_api_key?: string | null;
+  fireworks_api_key?: string | null;
+  perplexity_api_key?: string | null;
+  cohere_api_key?: string | null;
+  ai21_api_key?: string | null;
+  xai_api_key?: string | null;
+  zhipu_api_key?: string | null;
+  baidu_api_key?: string | null;
+  yandex_api_key?: string | null;
+  gigachat_api_key?: string | null;
 }
 
 export interface AITestResult {

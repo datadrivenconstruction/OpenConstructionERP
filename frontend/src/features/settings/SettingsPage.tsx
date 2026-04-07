@@ -53,9 +53,11 @@ interface ProviderInfo {
   keyPrefix: string;
   docsUrl: string;
   recommended?: boolean;
+  region: 'global' | 'china' | 'russia';
 }
 
 const AI_PROVIDERS: ProviderInfo[] = [
+  // ── Global ──────────────────────────────────────────────────────────
   {
     id: 'anthropic',
     name: 'Anthropic Claude',
@@ -64,14 +66,16 @@ const AI_PROVIDERS: ProviderInfo[] = [
     keyPrefix: 'sk-ant-',
     docsUrl: 'https://console.anthropic.com/settings/keys',
     recommended: true,
+    region: 'global',
   },
   {
     id: 'openai',
     name: 'OpenAI GPT-4',
     description: 'settings.ai_desc_openai',
-    descriptionDefault: 'GPT-4o — strong general-purpose AI with broad knowledge',
+    descriptionDefault: 'GPT-4o / o1 — strong general-purpose AI with broad knowledge',
     keyPrefix: 'sk-',
     docsUrl: 'https://platform.openai.com/api-keys',
+    region: 'global',
   },
   {
     id: 'gemini',
@@ -80,14 +84,16 @@ const AI_PROVIDERS: ProviderInfo[] = [
     descriptionDefault: 'Gemini Pro — multimodal AI with Google ecosystem integration',
     keyPrefix: 'AI',
     docsUrl: 'https://aistudio.google.com/app/apikey',
+    region: 'global',
   },
   {
     id: 'openrouter',
     name: 'OpenRouter',
     description: 'settings.ai_desc_openrouter',
-    descriptionDefault: 'Access multiple AI models through a single API key',
+    descriptionDefault: 'Aggregator — access many AI models through a single API key',
     keyPrefix: 'sk-or-',
     docsUrl: 'https://openrouter.ai/keys',
+    region: 'global',
   },
   {
     id: 'mistral',
@@ -96,6 +102,7 @@ const AI_PROVIDERS: ProviderInfo[] = [
     descriptionDefault: 'Mistral Large — European AI with strong multilingual support',
     keyPrefix: '',
     docsUrl: 'https://console.mistral.ai/api-keys',
+    region: 'global',
   },
   {
     id: 'groq',
@@ -104,6 +111,7 @@ const AI_PROVIDERS: ProviderInfo[] = [
     descriptionDefault: 'Ultra-fast inference for Llama and Mixtral models',
     keyPrefix: 'gsk_',
     docsUrl: 'https://console.groq.com/keys',
+    region: 'global',
   },
   {
     id: 'deepseek',
@@ -112,8 +120,107 @@ const AI_PROVIDERS: ProviderInfo[] = [
     descriptionDefault: 'DeepSeek V3 — cost-effective AI with strong reasoning',
     keyPrefix: 'sk-',
     docsUrl: 'https://platform.deepseek.com/api_keys',
+    region: 'global',
+  },
+  {
+    id: 'together',
+    name: 'Together AI',
+    description: 'settings.ai_desc_together',
+    descriptionDefault: 'Open-source model hosting — Llama, Qwen, and more',
+    keyPrefix: '',
+    docsUrl: 'https://api.together.ai/settings/api-keys',
+    region: 'global',
+  },
+  {
+    id: 'fireworks',
+    name: 'Fireworks AI',
+    description: 'settings.ai_desc_fireworks',
+    descriptionDefault: 'Fast inference platform for open-source and fine-tuned models',
+    keyPrefix: '',
+    docsUrl: 'https://fireworks.ai/account/api-keys',
+    region: 'global',
+  },
+  {
+    id: 'perplexity',
+    name: 'Perplexity',
+    description: 'settings.ai_desc_perplexity',
+    descriptionDefault: 'AI with real-time internet search and citation support',
+    keyPrefix: 'pplx-',
+    docsUrl: 'https://www.perplexity.ai/settings/api',
+    region: 'global',
+  },
+  {
+    id: 'cohere',
+    name: 'Cohere',
+    description: 'settings.ai_desc_cohere',
+    descriptionDefault: 'Enterprise AI for RAG, search, and text generation',
+    keyPrefix: '',
+    docsUrl: 'https://dashboard.cohere.com/api-keys',
+    region: 'global',
+  },
+  {
+    id: 'ai21',
+    name: 'AI21 Labs (Jamba)',
+    description: 'settings.ai_desc_ai21',
+    descriptionDefault: 'Jamba — efficient large language model for enterprise use',
+    keyPrefix: '',
+    docsUrl: 'https://studio.ai21.com/account/api-key',
+    region: 'global',
+  },
+  {
+    id: 'xai',
+    name: 'xAI (Grok)',
+    description: 'settings.ai_desc_xai',
+    descriptionDefault: 'Grok — AI model with real-time knowledge',
+    keyPrefix: 'xai-',
+    docsUrl: 'https://console.x.ai/',
+    region: 'global',
+  },
+  // ── China ───────────────────────────────────────────────────────────
+  {
+    id: 'zhipu',
+    name: 'Zhipu AI (GLM)',
+    description: 'settings.ai_desc_zhipu',
+    descriptionDefault: 'GLM-4 — leading Chinese AI model for enterprise applications',
+    keyPrefix: '',
+    docsUrl: 'https://open.bigmodel.cn/usercenter/apikeys',
+    region: 'china',
+  },
+  {
+    id: 'baidu',
+    name: 'Baidu (ERNIE Bot)',
+    description: 'settings.ai_desc_baidu',
+    descriptionDefault: 'ERNIE Bot — Baidu AI for Chinese language and enterprise tasks',
+    keyPrefix: '',
+    docsUrl: 'https://console.bce.baidu.com/qianfan/ais/console/applicationConsole/application',
+    region: 'china',
+  },
+  // ── Russia ──────────────────────────────────────────────────────────
+  {
+    id: 'yandex',
+    name: 'Yandex GPT',
+    description: 'settings.ai_desc_yandex',
+    descriptionDefault: 'YandexGPT — Russian AI model optimized for Russian language tasks',
+    keyPrefix: '',
+    docsUrl: 'https://console.yandex.cloud/folders',
+    region: 'russia',
+  },
+  {
+    id: 'gigachat',
+    name: 'GigaChat (Sber)',
+    description: 'settings.ai_desc_gigachat',
+    descriptionDefault: 'GigaChat — Sberbank AI model for Russian enterprise use',
+    keyPrefix: '',
+    docsUrl: 'https://developers.sber.ru/studio/workspaces',
+    region: 'russia',
   },
 ];
+
+const REGION_LABELS: Record<string, { i18nKey: string; defaultValue: string }> = {
+  global: { i18nKey: 'settings.ai_region_global', defaultValue: 'Global' },
+  china: { i18nKey: 'settings.ai_region_china', defaultValue: 'China' },
+  russia: { i18nKey: 'settings.ai_region_russia', defaultValue: 'Russia' },
+};
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -219,6 +326,16 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
         mistral: 'mistral',
         groq: 'groq',
         deepseek: 'deepseek',
+        together: 'together',
+        fireworks: 'fireworks',
+        perplexity: 'perplexity',
+        cohere: 'cohere',
+        ai21: 'ai21', jamba: 'ai21',
+        xai: 'xai', grok: 'xai',
+        zhipu: 'zhipu', glm: 'zhipu',
+        baidu: 'baidu', ernie: 'baidu',
+        yandex: 'yandex',
+        gigachat: 'gigachat', sber: 'gigachat',
       };
       const matched = Object.entries(providerMap).find(([key]) => model.includes(key));
       if (matched) setSelectedProvider(matched[1]);
@@ -347,61 +464,75 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
             <label className="text-sm font-medium text-content-primary block mb-3">
               {t('settings.ai_provider', { defaultValue: 'AI Provider' })}
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 pt-1">
-              {AI_PROVIDERS.map((provider) => {
-                const isSelected = selectedProvider === provider.id;
-                const hasKey = isKeySetForProvider(settings, provider.id);
-
-                return (
-                  <button
-                    key={provider.id}
-                    type="button"
-                    onClick={() => handleProviderChange(provider.id)}
-                    aria-pressed={isSelected}
-                    aria-label={`${provider.name}${isSelected ? ` (${t('settings.ai_selected', { defaultValue: 'selected' })})` : ''}`}
-                    className={`relative flex flex-col items-start gap-1 rounded-xl px-4 py-3 text-left transition-all duration-normal ease-oe ${
-                      isSelected
-                        ? 'bg-oe-blue-subtle border-2 border-oe-blue ring-2 ring-oe-blue/10'
-                        : 'border-2 border-border-light hover:bg-surface-secondary hover:border-border'
-                    }`}
-                  >
-                    {provider.recommended && (
-                      <Badge variant="blue" size="sm" className="absolute -top-2.5 right-2 z-10">
-                        {t('settings.ai_recommended', { defaultValue: 'Recommended' })}
-                      </Badge>
-                    )}
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`h-3.5 w-3.5 rounded-full border-2 transition-colors duration-fast ${
-                          isSelected ? 'border-oe-blue bg-oe-blue' : 'border-content-tertiary bg-transparent'
-                        }`}
-                      >
-                        {isSelected && (
-                          <div className="flex h-full w-full items-center justify-center">
-                            <div className="h-1.5 w-1.5 rounded-full bg-white" />
-                          </div>
-                        )}
-                      </div>
-                      <span
-                        className={`text-sm font-semibold ${
-                          isSelected ? 'text-oe-blue' : 'text-content-primary'
-                        }`}
-                      >
-                        {provider.name}
-                      </span>
-                    </div>
-                    <p className="text-xs text-content-secondary pl-5.5 leading-relaxed">
-                      {t(provider.description, { defaultValue: provider.descriptionDefault })}
+            {(['global', 'china', 'russia'] as const).map((region) => {
+              const regionProviders = AI_PROVIDERS.filter((p) => p.region === region);
+              if (regionProviders.length === 0) return null;
+              const regionLabel = REGION_LABELS[region] ?? { i18nKey: region, defaultValue: region };
+              return (
+                <div key={region} className="mb-4">
+                  {region !== 'global' && (
+                    <p className="text-xs font-medium text-content-tertiary uppercase tracking-wider mb-2 mt-3">
+                      {t(regionLabel.i18nKey, { defaultValue: regionLabel.defaultValue })}
                     </p>
-                    {hasKey && (
-                      <Badge variant="success" size="sm" className="mt-1 ml-5.5">
-                        {t('settings.ai_key_set', { defaultValue: 'Key configured' })}
-                      </Badge>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+                  )}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                    {regionProviders.map((provider) => {
+                      const isSelected = selectedProvider === provider.id;
+                      const hasKey = isKeySetForProvider(settings, provider.id);
+
+                      return (
+                        <button
+                          key={provider.id}
+                          type="button"
+                          onClick={() => handleProviderChange(provider.id)}
+                          aria-pressed={isSelected}
+                          aria-label={`${provider.name}${isSelected ? ` (${t('settings.ai_selected', { defaultValue: 'selected' })})` : ''}`}
+                          className={`relative flex flex-col items-start gap-1 rounded-xl px-4 py-3 text-left transition-all duration-normal ease-oe ${
+                            isSelected
+                              ? 'bg-oe-blue-subtle border-2 border-oe-blue ring-2 ring-oe-blue/10'
+                              : 'border-2 border-border-light hover:bg-surface-secondary hover:border-border'
+                          }`}
+                        >
+                          {provider.recommended && (
+                            <Badge variant="blue" size="sm" className="absolute -top-2.5 right-2 z-10">
+                              {t('settings.ai_recommended', { defaultValue: 'Recommended' })}
+                            </Badge>
+                          )}
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={`h-3.5 w-3.5 rounded-full border-2 transition-colors duration-fast ${
+                                isSelected ? 'border-oe-blue bg-oe-blue' : 'border-content-tertiary bg-transparent'
+                              }`}
+                            >
+                              {isSelected && (
+                                <div className="flex h-full w-full items-center justify-center">
+                                  <div className="h-1.5 w-1.5 rounded-full bg-white" />
+                                </div>
+                              )}
+                            </div>
+                            <span
+                              className={`text-sm font-semibold ${
+                                isSelected ? 'text-oe-blue' : 'text-content-primary'
+                              }`}
+                            >
+                              {provider.name}
+                            </span>
+                          </div>
+                          <p className="text-xs text-content-secondary pl-5.5 leading-relaxed">
+                            {t(provider.description, { defaultValue: provider.descriptionDefault })}
+                          </p>
+                          {hasKey && (
+                            <Badge variant="success" size="sm" className="mt-1 ml-5.5">
+                              {t('settings.ai_key_set', { defaultValue: 'Key configured' })}
+                            </Badge>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           {/* API Key input */}

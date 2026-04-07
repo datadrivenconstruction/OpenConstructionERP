@@ -16,7 +16,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, Query
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, SessionDep
 from app.modules.cde.schemas import (
     ContainerCreate,
     ContainerResponse,
@@ -120,7 +120,6 @@ async def list_containers(
 async def create_container(
     data: ContainerCreate,
     user_id: CurrentUserId,
-    _perm: None = Depends(RequirePermission("cde.create")),
     service: CDEService = Depends(_get_service),
 ) -> ContainerResponse:
     """Create a new document container."""
@@ -150,7 +149,6 @@ async def update_container(
     container_id: uuid.UUID,
     data: ContainerUpdate,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
-    _perm: None = Depends(RequirePermission("cde.update")),
     service: CDEService = Depends(_get_service),
 ) -> ContainerResponse:
     """Update a document container."""
@@ -166,7 +164,6 @@ async def transition_state(
     container_id: uuid.UUID,
     data: StateTransitionRequest,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
-    _perm: None = Depends(RequirePermission("cde.update")),
     service: CDEService = Depends(_get_service),
 ) -> ContainerResponse:
     """Transition a container's CDE state (wip -> shared -> published -> archived)."""
@@ -206,7 +203,6 @@ async def create_revision(
     container_id: uuid.UUID,
     data: RevisionCreate,
     user_id: CurrentUserId,
-    _perm: None = Depends(RequirePermission("cde.create")),
     service: CDEService = Depends(_get_service),
 ) -> RevisionResponse:
     """Create a new revision within a container."""
