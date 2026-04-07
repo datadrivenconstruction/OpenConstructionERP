@@ -14,6 +14,28 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.9.0',
+    date: '2026-04-07',
+    changes: [
+      'New: 30 backend modules — contacts, finance, procurement, safety, inspections, tasks, RFI, submittals, NCR, meetings, CDE, transmittals, BIM Hub, reporting, and more',
+      'New: Internationalization foundation — multi-currency with 35 currencies, 198 countries, 30 work calendars, 70 tax configs, ECB exchange rates',
+      'New: Module System v2 — enable/disable modules at runtime with dependency checking',
+      'New: 13 frontend pages — Contacts, Tasks (Kanban), RFI, Finance, Procurement, Safety, Meetings, Inspections, NCR, Submittals, Correspondence, CDE, Transmittals',
+      'New: SVG Gantt chart — day/week/month zoom, dependency arrows, critical path highlighting, drag-to-reschedule',
+      'New: Three.js BIM Viewer — discipline coloring, raycaster selection, properties panel',
+      'New: Notification bell — API-backed with 30s polling, dropdown, mark-all-read',
+      'New: Threaded comments component — works on any entity, @mentions, nested replies',
+      'New: MoneyDisplay, DateDisplay, QuantityDisplay — locale-aware formatting components',
+      'New: Regional Settings — timezone, measurement system, paper size, date/number format, currency',
+      'New: CPM engine — forward/backward pass, float calculation, calendar-aware critical path',
+      'New: 8 regional packs (US, DACH, UK, Russia, Middle East, Asia-Pacific, India, LatAm)',
+      'New: 3 enterprise packs (approval workflows, deep EVM, RFQ bidding)',
+      'New: 568 translation keys across 20 languages with professional construction terminology',
+      'New: 50 integration tests for critical API flows',
+      'Fix: All pages now have consistent layout, modals, and spacing',
+    ],
+  },
+  {
     version: '0.8.0',
     date: '2026-04-07',
     changes: [

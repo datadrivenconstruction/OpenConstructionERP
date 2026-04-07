@@ -61,13 +61,24 @@ async def shared_auth(shared_client: AsyncClient) -> dict[str, str]:
     )
     assert reg_resp.status_code == 201, f"Registration failed: {reg_resp.text}"
 
-    resp = await shared_client.post(
-        "/api/v1/users/auth/login",
-        json={"email": email, "password": password},
-    )
-    data = resp.json()
-    token = data.get("access_token", "")
-    assert token, f"Login failed: {data}"
+    import asyncio
+
+    # Retry login up to 3 times with backoff to handle rate limiter
+    token = ""
+    for attempt in range(3):
+        resp = await shared_client.post(
+            "/api/v1/users/auth/login",
+            json={"email": email, "password": password},
+        )
+        data = resp.json()
+        token = data.get("access_token", "")
+        if token:
+            break
+        if "Too many login attempts" in data.get("detail", ""):
+            await asyncio.sleep(5 * (attempt + 1))
+            continue
+        break
+    assert token, f"Login failed after retries: {data}"
     return {"Authorization": f"Bearer {token}"}
 
 

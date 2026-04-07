@@ -5,6 +5,69 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] — 2026-04-07
+
+### Added — 30 new backend modules (Phase 9–22 master plan)
+- **Internationalization Foundation** — MoneyValue (35 currencies, Decimal arithmetic), LocalizedStr (JSONB multi-language), AcceptLanguage middleware, i18n_data (ISO constants for 30 countries), ECB exchange rate fetcher, 198 countries with 20-language translations, 30 work calendars, 70 tax configurations
+- **Module System v2** — enable/disable modules at runtime, persistent state, dependency tree API, admin REST endpoints
+- **Contacts Directory** — unified contacts for clients, subcontractors, suppliers, consultants with prequalification tracking
+- **Audit Log** — system-wide entity change tracking with admin API
+- **Notifications** — in-app notifications with i18n keys, unread count, mark-read, per-user listing
+- **Comments & Viewpoints** — threaded comments on any entity with @mentions, PDF/BIM viewpoints
+- **Teams** — project teams with membership roles and entity visibility grants
+- **Meetings** — meeting management with attendees, agenda, action items, auto-numbering
+- **CDE** — ISO 19650 Common Data Environment with 4-state workflow (WIP→Shared→Published→Archived)
+- **Transmittals** — formal document distribution with issue/lock, acknowledge/respond
+- **OpenCDE API** — BuildingSMART Foundation API 1.1 + BCF 3.0 compliance (13 endpoints)
+- **Finance** — invoices (payable/receivable), payments, project budgets with WBS, EVM snapshots
+- **Procurement** — purchase orders, goods receipts with quantity tracking
+- **Inspections** — quality inspections with checklists, pass/fail/partial results
+- **Safety** — incidents and observations with 5×5 risk scoring
+- **Tasks** — 5-type taxonomy (task/topic/information/decision/personal) with Kanban board
+- **RFI** — requests for information with ball-in-court, cost/schedule impact
+- **Submittals** — multi-stage review workflow (submit→review→approve)
+- **NCR** — non-conformance reports with root cause analysis
+- **Correspondence** — formal communication register
+- **BIM Hub** — BIM models, elements, BOQ links, quantity maps, model diffs
+- **Reporting** — KPI snapshots, 6 report templates, report generation
+- **8 Regional Packs** — US (AIA/CSI/RSMeans), DACH (DIN 276/GAEB/VOB/HOAI), UK (NRM2/JCT/NEC4/CIS), Russia (GESN/FER/KS-2), Middle East (FIDIC/Hijri/VAT GCC), Asia-Pacific, India, LatAm
+- **3 Enterprise Packs** — approval workflows, deep EVM (ETC/EAC/VAC/TCPI), RFQ bidding pipeline
+- **CPM Engine** — forward/backward pass, float calculation, critical path, calendar-aware
+
+### Added — Projects & BOQ expansion
+- Project: WBS, milestones, project code, type, phase, address, contract value, dates, budget
+- BOQ: estimate type, lock/unlock, revision chain, base date, WBS linkage
+
+### Added — 13 new frontend pages
+- Contacts, Tasks (Kanban), RFI, Finance (4 tabs), Procurement, Safety, Meetings, Inspections, NCR, Submittals, Correspondence, CDE, Transmittals
+
+### Added — Shared UI components
+- SVG Gantt chart (day/week/month zoom, task bars, dependency arrows, critical path, drag-to-reschedule)
+- Three.js BIM Viewer (discipline coloring, raycaster selection, properties panel)
+- NotificationBell (API-backed, 30s polling, dropdown, mark-read)
+- CommentThread (threaded, nested, @mentions, inline edit)
+- MoneyDisplay, DateDisplay, QuantityDisplay (locale-aware formatting)
+- Regional Settings page (timezone, measurement, paper, date/number format, currency)
+
+### Added — Inter-module event wiring
+- Meeting action items → auto-create tasks
+- Safety high-risk observation → notification to PM
+- Invoice paid → update project budget actuals
+- PO issued → update project budget committed
+- RFI/NCR cost impact → variation flagging
+
+### Added — i18n
+- 568 translation keys across 20 languages for all new modules
+- Professional construction terminology in DE, FR, ES, RU, ZH, AR, JA
+
+### Added — Testing
+- 50 integration tests covering critical API flows
+- Total: 697 backend tests passing
+
+### Fixed
+- Removed competitor product names from codebase
+- Standardized all new pages to match established layout patterns
+
 ## [0.8.0] — 2026-04-07
 
 ### Added — Professional BOQ features
