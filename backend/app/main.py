@@ -681,8 +681,12 @@ def create_app() -> FastAPI:
             from app.modules.costmodel import models as _cm_models  # noqa: F401
             from app.modules.costs import models as _costs_models  # noqa: F401
             from app.modules.documents import models as _documents_models  # noqa: F401
+
+            # Enterprise / feature-pack modules
+            from app.modules.enterprise_workflows import models as _enterprise_workflows_models  # noqa: F401
             from app.modules.fieldreports import models as _fieldreports_models  # noqa: F401
             from app.modules.finance import models as _finance_models  # noqa: F401
+            from app.modules.full_evm import models as _full_evm_models  # noqa: F401
             from app.modules.i18n_foundation import models as _i18n_models  # noqa: F401
             from app.modules.inspections import models as _inspections_models  # noqa: F401
             from app.modules.markups import models as _markups_models  # noqa: F401
@@ -695,6 +699,7 @@ def create_app() -> FastAPI:
             from app.modules.reporting import models as _reporting_models  # noqa: F401
             from app.modules.requirements import models as _requirements_models  # noqa: F401
             from app.modules.rfi import models as _rfi_models  # noqa: F401
+            from app.modules.rfq_bidding import models as _rfq_bidding_models  # noqa: F401
             from app.modules.risk import models as _risk_models  # noqa: F401
             from app.modules.safety import models as _safety_models  # noqa: F401
             from app.modules.schedule import models as _sched_models  # noqa: F401

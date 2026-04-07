@@ -48,6 +48,11 @@ from app.modules.transmittals import models as _transmittals  # noqa: F401
 
 from app.modules.notifications import models as _notifications  # noqa: F401
 
+# Enterprise / feature-pack modules
+from app.modules.enterprise_workflows import models as _enterprise_workflows  # noqa: F401
+from app.modules.full_evm import models as _full_evm  # noqa: F401
+from app.modules.rfq_bidding import models as _rfq_bidding  # noqa: F401
+
 # Import all module models so they're registered with Base.metadata.
 # This is done automatically by the module loader at runtime,
 # but we need it here for autogenerate to work.
