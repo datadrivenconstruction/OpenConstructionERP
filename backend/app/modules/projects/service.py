@@ -57,6 +57,21 @@ class ProjectService:
             locale=data.locale,
             validation_rule_sets=data.validation_rule_sets,
             owner_id=owner_id,
+            # Phase 12 expansion fields
+            project_code=data.project_code,
+            project_type=data.project_type,
+            phase=data.phase,
+            client_id=data.client_id,
+            parent_project_id=data.parent_project_id,
+            address=data.address,
+            contract_value=data.contract_value,
+            planned_start_date=data.planned_start_date,
+            planned_end_date=data.planned_end_date,
+            actual_start_date=data.actual_start_date,
+            actual_end_date=data.actual_end_date,
+            budget_estimate=data.budget_estimate,
+            contingency_pct=data.contingency_pct,
+            custom_fields=data.custom_fields,
         )
         project = await self.repo.create(project)
 

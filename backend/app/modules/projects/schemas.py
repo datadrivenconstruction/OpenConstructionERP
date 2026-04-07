@@ -43,6 +43,22 @@ class ProjectCreate(BaseModel):
     locale: str = Field(default="en", max_length=10)
     validation_rule_sets: list[str] = Field(default_factory=lambda: ["boq_quality"])
 
+    # Phase 12 expansion fields (all optional)
+    project_code: str | None = Field(default=None, max_length=50)
+    project_type: str | None = Field(default=None, max_length=50)
+    phase: str | None = Field(default=None, max_length=50)
+    client_id: str | None = Field(default=None, max_length=36)
+    parent_project_id: UUID | None = None
+    address: dict[str, Any] | None = None
+    contract_value: str | None = Field(default=None, max_length=50)
+    planned_start_date: str | None = Field(default=None, max_length=20)
+    planned_end_date: str | None = Field(default=None, max_length=20)
+    actual_start_date: str | None = Field(default=None, max_length=20)
+    actual_end_date: str | None = Field(default=None, max_length=20)
+    budget_estimate: str | None = Field(default=None, max_length=50)
+    contingency_pct: str | None = Field(default=None, max_length=10)
+    custom_fields: dict[str, Any] | None = None
+
 
 class ProjectUpdate(BaseModel):
     """Update project fields. All optional — only provided fields are updated."""
@@ -55,6 +71,23 @@ class ProjectUpdate(BaseModel):
     locale: str | None = Field(default=None, max_length=10)
     validation_rule_sets: list[str] | None = None
     metadata: dict[str, Any] | None = None
+
+    # Phase 12 expansion fields
+    project_code: str | None = Field(default=None, max_length=50)
+    project_type: str | None = Field(default=None, max_length=50)
+    phase: str | None = Field(default=None, max_length=50)
+    client_id: str | None = Field(default=None, max_length=36)
+    parent_project_id: UUID | None = None
+    address: dict[str, Any] | None = None
+    contract_value: str | None = Field(default=None, max_length=50)
+    planned_start_date: str | None = Field(default=None, max_length=20)
+    planned_end_date: str | None = Field(default=None, max_length=20)
+    actual_start_date: str | None = Field(default=None, max_length=20)
+    actual_end_date: str | None = Field(default=None, max_length=20)
+    budget_estimate: str | None = Field(default=None, max_length=50)
+    contingency_pct: str | None = Field(default=None, max_length=10)
+    custom_fields: dict[str, Any] | None = None
+    status: str | None = None
 
 
 # ── Response ──────────────────────────────────────────────────────────────
@@ -76,5 +109,128 @@ class ProjectResponse(BaseModel):
     status: str
     owner_id: UUID
     metadata_: dict[str, Any] = Field(alias="metadata_")
+    created_at: datetime
+    updated_at: datetime
+
+    # Phase 12 expansion fields
+    project_code: str | None = None
+    project_type: str | None = None
+    phase: str | None = None
+    client_id: str | None = None
+    parent_project_id: UUID | None = None
+    address: dict[str, Any] | None = None
+    contract_value: str | None = None
+    planned_start_date: str | None = None
+    planned_end_date: str | None = None
+    actual_start_date: str | None = None
+    actual_end_date: str | None = None
+    budget_estimate: str | None = None
+    contingency_pct: str | None = None
+    custom_fields: dict[str, Any] | None = None
+
+
+# ── WBS schemas ──────────────────────────────────────────────────────────
+
+
+class WBSCreate(BaseModel):
+    """Create a WBS node."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    parent_id: UUID | None = None
+    code: str = Field(..., min_length=1, max_length=50)
+    name: str = Field(..., min_length=1, max_length=255)
+    name_translations: dict[str, str] | None = None
+    level: int = Field(default=0, ge=0)
+    sort_order: int = Field(default=0, ge=0)
+    wbs_type: str = Field(default="cost", max_length=50)
+    planned_cost: str | None = Field(default=None, max_length=50)
+    planned_hours: str | None = Field(default=None, max_length=50)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class WBSUpdate(BaseModel):
+    """Partial update for a WBS node."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    parent_id: UUID | None = None
+    code: str | None = Field(default=None, min_length=1, max_length=50)
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    name_translations: dict[str, str] | None = None
+    level: int | None = Field(default=None, ge=0)
+    sort_order: int | None = Field(default=None, ge=0)
+    wbs_type: str | None = Field(default=None, max_length=50)
+    planned_cost: str | None = Field(default=None, max_length=50)
+    planned_hours: str | None = Field(default=None, max_length=50)
+    metadata: dict[str, Any] | None = None
+
+
+class WBSResponse(BaseModel):
+    """WBS node returned from the API."""
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    project_id: UUID
+    parent_id: UUID | None
+    code: str
+    name: str
+    name_translations: dict[str, str] | None = None
+    level: int
+    sort_order: int
+    wbs_type: str
+    planned_cost: str | None = None
+    planned_hours: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    created_at: datetime
+    updated_at: datetime
+
+
+# ── Milestone schemas ────────────────────────────────────────────────────
+
+
+class MilestoneCreate(BaseModel):
+    """Create a project milestone."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: str = Field(..., min_length=1, max_length=255)
+    milestone_type: str = Field(default="general", max_length=50)
+    planned_date: str | None = Field(default=None, max_length=20)
+    actual_date: str | None = Field(default=None, max_length=20)
+    status: str = Field(default="pending", max_length=50)
+    linked_payment_pct: str | None = Field(default=None, max_length=10)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class MilestoneUpdate(BaseModel):
+    """Partial update for a milestone."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    milestone_type: str | None = Field(default=None, max_length=50)
+    planned_date: str | None = Field(default=None, max_length=20)
+    actual_date: str | None = Field(default=None, max_length=20)
+    status: str | None = Field(default=None, max_length=50)
+    linked_payment_pct: str | None = Field(default=None, max_length=10)
+    metadata: dict[str, Any] | None = None
+
+
+class MilestoneResponse(BaseModel):
+    """Milestone returned from the API."""
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    project_id: UUID
+    name: str
+    milestone_type: str
+    planned_date: str | None = None
+    actual_date: str | None = None
+    status: str
+    linked_payment_pct: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime

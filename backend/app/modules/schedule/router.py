@@ -33,11 +33,14 @@ from app.modules.schedule.schemas import (
     ActivityCreate,
     ActivityResponse,
     ActivityUpdate,
+    CPMCalculateRequest,
     CriticalPathResponse,
     GanttData,
     GenerateFromBOQRequest,
     LinkPositionRequest,
     ProgressUpdateRequest,
+    RelationshipCreate,
+    RelationshipResponse,
     RiskAnalysisResponse,
     ScheduleCreate,
     ScheduleResponse,
@@ -140,6 +143,14 @@ def _activity_to_response(activity: object) -> ActivityResponse:
         metadata_=activity.metadata_,
         created_at=activity.created_at,
         updated_at=activity.updated_at,
+        # CPM fields (Phase 13)
+        early_start=getattr(activity, "early_start", None),
+        early_finish=getattr(activity, "early_finish", None),
+        late_start=getattr(activity, "late_start", None),
+        late_finish=getattr(activity, "late_finish", None),
+        total_float=getattr(activity, "total_float", None),
+        free_float=getattr(activity, "free_float", None),
+        is_critical=getattr(activity, "is_critical", False),
     )
 
 
@@ -499,3 +510,230 @@ async def update_work_order(
     """Update a work order."""
     work_order = await service.update_work_order(work_order_id, data)
     return _work_order_to_response(work_order)
+
+
+# ── Schedule Relationships (Phase 13) ───────────────────────────────────────
+
+
+@router.post(
+    "/schedules/{schedule_id}/relationships",
+    response_model=RelationshipResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
+async def create_relationship(
+    schedule_id: uuid.UUID,
+    data: RelationshipCreate,
+    session: SessionDep,
+) -> RelationshipResponse:
+    """Create a CPM dependency relationship between two activities."""
+    from app.modules.schedule.models import ScheduleRelationship
+
+    rel = ScheduleRelationship(
+        schedule_id=schedule_id,
+        predecessor_id=data.predecessor_id,
+        successor_id=data.successor_id,
+        relationship_type=data.relationship_type,
+        lag_days=data.lag_days,
+    )
+    session.add(rel)
+    await session.flush()
+    return RelationshipResponse.model_validate(rel)
+
+
+@router.get(
+    "/schedules/{schedule_id}/relationships",
+    response_model=list[RelationshipResponse],
+    dependencies=[Depends(RequirePermission("schedule.read"))],
+)
+async def list_relationships(
+    schedule_id: uuid.UUID,
+    session: SessionDep,
+) -> list[RelationshipResponse]:
+    """List all CPM relationships for a schedule."""
+    from sqlalchemy import select
+
+    from app.modules.schedule.models import ScheduleRelationship
+
+    stmt = select(ScheduleRelationship).where(
+        ScheduleRelationship.schedule_id == schedule_id
+    )
+    result = await session.execute(stmt)
+    rels = list(result.scalars().all())
+    return [RelationshipResponse.model_validate(r) for r in rels]
+
+
+@router.delete(
+    "/relationships/{relationship_id}",
+    status_code=204,
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
+async def delete_relationship(
+    relationship_id: uuid.UUID,
+    session: SessionDep,
+) -> None:
+    """Delete a schedule relationship."""
+    from sqlalchemy import delete
+
+    from app.modules.schedule.models import ScheduleRelationship
+
+    stmt = delete(ScheduleRelationship).where(
+        ScheduleRelationship.id == relationship_id
+    )
+    await session.execute(stmt)
+
+
+# ── CPM Calculation (Phase 13 — uses core/cpm.py engine) ────────────────────
+
+
+@router.post(
+    "/schedule/cpm/calculate",
+    response_model=CriticalPathResponse,
+    dependencies=[Depends(RequirePermission("schedule.read"))],
+)
+async def calculate_cpm_full(
+    schedule_id: uuid.UUID = Query(..., description="Schedule to run CPM on"),
+    body: CPMCalculateRequest | None = None,
+    session: SessionDep = None,
+    service: ScheduleService = Depends(_get_service),
+) -> CriticalPathResponse:
+    """Run full CPM calculation using the core engine and store results.
+
+    Reads activities and explicit ScheduleRelationship records (plus inline
+    dependency JSON) to build the network.  Runs forward/backward pass,
+    computes floats, identifies the critical path, persists CPM results on
+    each activity, and returns the full analysis.
+    """
+    from sqlalchemy import select
+
+    from app.core.cpm import calculate_cpm
+    from app.modules.schedule.models import ScheduleRelationship
+    from app.modules.schedule.schemas import CPMActivityResult
+
+    schedule = await service.get_schedule(schedule_id)
+    activities, _ = await service.list_activities_for_schedule(schedule_id, limit=5000)
+
+    if not activities:
+        raise HTTPException(status_code=404, detail="Schedule has no activities")
+
+    # Build activity dicts for CPM engine
+    act_dicts = []
+    for act in activities:
+        act_dicts.append({
+            "id": str(act.id),
+            "duration": act.duration_days or 0,
+            "name": act.name,
+        })
+
+    # Collect relationships from both ScheduleRelationship table and inline deps
+    rel_dicts: list[dict] = []
+
+    # 1. Explicit ScheduleRelationship records
+    rel_stmt = select(ScheduleRelationship).where(
+        ScheduleRelationship.schedule_id == schedule_id
+    )
+    rel_result = await session.execute(rel_stmt)
+    for r in rel_result.scalars().all():
+        rel_dicts.append({
+            "predecessor_id": str(r.predecessor_id),
+            "successor_id": str(r.successor_id),
+            "type": r.relationship_type,
+            "lag": r.lag_days,
+        })
+
+    # 2. Inline JSON dependencies from each activity
+    for act in activities:
+        deps = act.dependencies or []
+        for dep in deps:
+            if isinstance(dep, dict):
+                pred_id = dep.get("activity_id", "")
+                rel_dicts.append({
+                    "predecessor_id": str(pred_id),
+                    "successor_id": str(act.id),
+                    "type": dep.get("type", "FS"),
+                    "lag": dep.get("lag_days", 0),
+                })
+            elif isinstance(dep, str):
+                rel_dicts.append({
+                    "predecessor_id": dep,
+                    "successor_id": str(act.id),
+                    "type": "FS",
+                    "lag": 0,
+                })
+
+    # Deduplicate relationships by (pred, succ)
+    seen: set[tuple[str, str]] = set()
+    unique_rels: list[dict] = []
+    for r in rel_dicts:
+        key = (r["predecessor_id"], r["successor_id"])
+        if key not in seen:
+            seen.add(key)
+            unique_rels.append(r)
+
+    # Run CPM engine
+    calendar_dict = body.calendar if body else None
+    cpm_results = await calculate_cpm(
+        act_dicts,
+        unique_rels,
+        calendar=calendar_dict,
+        project_start_date=schedule.start_date,
+    )
+
+    # Build lookup from CPM results
+    cpm_map = {r["id"]: r for r in cpm_results}
+
+    # Persist CPM results on each activity and build response
+    all_cpm: list[CPMActivityResult] = []
+    critical_path: list[CPMActivityResult] = []
+    project_duration = 0
+
+    for act in activities:
+        aid = str(act.id)
+        cpm = cpm_map.get(aid)
+        if cpm is None:
+            continue
+
+        es = cpm["early_start"]
+        ef = cpm["early_finish"]
+        ls = cpm["late_start"]
+        lf = cpm["late_finish"]
+        tf = cpm["total_float"]
+        ff = cpm["free_float"]
+        is_crit = cpm["is_critical"]
+
+        # Persist to DB
+        await service.activity_repo.update_fields(
+            act.id,
+            early_start=str(es),
+            early_finish=str(ef),
+            late_start=str(ls),
+            late_finish=str(lf),
+            total_float=tf,
+            free_float=ff,
+            is_critical=is_crit,
+            color="#dc2626" if is_crit else "#0071e3",
+        )
+
+        project_duration = max(project_duration, ef)
+
+        result = CPMActivityResult(
+            activity_id=act.id,
+            name=act.name,
+            duration_days=act.duration_days or 0,
+            early_start=es,
+            early_finish=ef,
+            late_start=ls,
+            late_finish=lf,
+            total_float=tf,
+            is_critical=is_crit,
+        )
+        all_cpm.append(result)
+        if is_crit:
+            critical_path.append(result)
+
+    return CriticalPathResponse(
+        schedule_id=schedule_id,
+        project_duration_days=project_duration,
+        critical_path=critical_path,
+        all_activities=all_cpm,
+    )

@@ -24,6 +24,8 @@ class BOQCreate(BaseModel):
     project_id: UUID
     name: str = Field(..., min_length=1, max_length=255)
     description: str = ""
+    estimate_type: str | None = Field(default=None, max_length=50)
+    base_date: str | None = Field(default=None, max_length=20)
 
 
 class BOQUpdate(BaseModel):
@@ -35,6 +37,8 @@ class BOQUpdate(BaseModel):
     description: str | None = None
     status: str | None = Field(default=None, pattern=r"^(draft|final|archived)$")
     metadata: dict[str, Any] | None = None
+    estimate_type: str | None = Field(default=None, max_length=50)
+    base_date: str | None = Field(default=None, max_length=20)
 
 
 class BOQResponse(BaseModel):
@@ -54,6 +58,14 @@ class BOQResponse(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+
+    # Phase 12.2 lock & revision fields
+    estimate_type: str | None = None
+    is_locked: bool = False
+    parent_estimate_id: UUID | None = None
+    approved_by: str | None = None
+    approved_at: str | None = None
+    base_date: str | None = None
 
 
 class BOQListItem(BOQResponse):
@@ -83,6 +95,8 @@ class PositionCreate(BaseModel):
     confidence: float | None = Field(default=None, ge=0.0, le=1.0)
     cad_element_ids: list[str] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
+    wbs_id: str | None = None
+    cost_code_id: str | None = None
 
 
 class SectionCreate(BaseModel):
@@ -117,6 +131,8 @@ class PositionUpdate(BaseModel):
     validation_status: str | None = None
     metadata: dict[str, Any] | None = None
     sort_order: int | None = None
+    wbs_id: str | None = None
+    cost_code_id: str | None = None
 
 
 class PositionResponse(BaseModel):
@@ -142,6 +158,8 @@ class PositionResponse(BaseModel):
     sort_order: int
     created_at: datetime
     updated_at: datetime
+    wbs_id: str | None = None
+    cost_code_id: str | None = None
 
 
 # ── Markup schemas ────────────────────────────────────────────────────────────

@@ -190,6 +190,15 @@ class ActivityResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    # CPM result fields (Phase 13)
+    early_start: str | None = None
+    early_finish: str | None = None
+    late_start: str | None = None
+    late_finish: str | None = None
+    total_float: int | None = None
+    free_float: int | None = None
+    is_critical: bool = False
+
 
 class LinkPositionRequest(BaseModel):
     """Request body for linking a BOQ position to an activity."""
@@ -381,4 +390,43 @@ class RiskAnalysisResponse(BaseModel):
     activity_risks: list[dict[str, Any]] = Field(
         default_factory=list,
         description="Per-activity PERT estimates (optimistic, most_likely, pessimistic)",
+    )
+
+
+# ── Schedule Relationship schemas (Phase 13) ──────────────────────────────
+
+
+class RelationshipCreate(BaseModel):
+    """Create a CPM dependency relationship between two activities."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    predecessor_id: UUID
+    successor_id: UUID
+    relationship_type: str = Field(default="FS", pattern=r"^(FS|FF|SS|SF)$")
+    lag_days: int = Field(default=0)
+
+
+class RelationshipResponse(BaseModel):
+    """Schedule relationship returned from the API."""
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    schedule_id: UUID
+    predecessor_id: UUID
+    successor_id: UUID
+    relationship_type: str
+    lag_days: int
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    created_at: datetime
+    updated_at: datetime
+
+
+class CPMCalculateRequest(BaseModel):
+    """Request body for CPM calculation with optional work calendar override."""
+
+    calendar: dict[str, Any] | None = Field(
+        default=None,
+        description="Work calendar override: {work_days: [0-4], exceptions: []}",
     )

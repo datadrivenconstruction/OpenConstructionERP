@@ -1,0 +1,108 @@
+"""Tasks Pydantic schemas — request/response models."""
+
+from datetime import datetime
+from typing import Any
+from uuid import UUID
+
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class ChecklistItemEntry(BaseModel):
+    """A single checklist item within a task."""
+
+    id: str | None = None
+    text: str = Field(..., min_length=1, max_length=500)
+    completed: bool = False
+
+
+class TaskCreate(BaseModel):
+    """Create a new task."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    project_id: UUID
+    task_type: str = Field(
+        ...,
+        pattern=r"^(task|topic|information|decision|personal)$",
+    )
+    title: str = Field(..., min_length=1, max_length=500)
+    description: str | None = None
+    checklist: list[ChecklistItemEntry] = Field(default_factory=list)
+    responsible_id: str | None = None
+    persons_involved: list[str] = Field(default_factory=list)
+    due_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
+    milestone_id: str | None = None
+    meeting_id: str | None = None
+    status: str = Field(
+        default="draft",
+        pattern=r"^(draft|open|in_progress|completed)$",
+    )
+    priority: str = Field(
+        default="normal",
+        pattern=r"^(low|normal|high|urgent)$",
+    )
+    result: str | None = None
+    is_private: bool = False
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class TaskUpdate(BaseModel):
+    """Partial update for a task."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    task_type: str | None = Field(
+        default=None,
+        pattern=r"^(task|topic|information|decision|personal)$",
+    )
+    title: str | None = Field(default=None, min_length=1, max_length=500)
+    description: str | None = None
+    checklist: list[ChecklistItemEntry] | None = None
+    responsible_id: str | None = None
+    persons_involved: list[str] | None = None
+    due_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
+    milestone_id: str | None = None
+    meeting_id: str | None = None
+    status: str | None = Field(
+        default=None,
+        pattern=r"^(draft|open|in_progress|completed)$",
+    )
+    priority: str | None = Field(
+        default=None,
+        pattern=r"^(low|normal|high|urgent)$",
+    )
+    result: str | None = None
+    is_private: bool | None = None
+    metadata: dict[str, Any] | None = None
+
+
+class TaskCompleteRequest(BaseModel):
+    """Request body for completing a task."""
+
+    result: str | None = Field(default=None, max_length=2000)
+
+
+class TaskResponse(BaseModel):
+    """Task returned from the API."""
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    project_id: UUID
+    task_type: str
+    title: str
+    description: str | None = None
+    checklist: list[dict[str, Any]] = Field(default_factory=list)
+    responsible_id: str | None = None
+    persons_involved: list[str] = Field(default_factory=list)
+    due_date: str | None = None
+    milestone_id: str | None = None
+    meeting_id: str | None = None
+    status: str = "draft"
+    priority: str = "normal"
+    result: str | None = None
+    is_private: bool = False
+    created_by: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    created_at: datetime
+    updated_at: datetime

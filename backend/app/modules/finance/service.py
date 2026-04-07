@@ -1,0 +1,328 @@
+"""Finance service — business logic for invoicing, payments, budgets, and EVM.
+
+Stateless service layer.
+"""
+
+import logging
+import uuid
+
+from fastapi import HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.modules.finance.models import (
+    EVMSnapshot,
+    Invoice,
+    InvoiceLineItem,
+    Payment,
+    ProjectBudget,
+)
+from app.modules.finance.repository import (
+    BudgetRepository,
+    EVMSnapshotRepository,
+    InvoiceLineItemRepository,
+    InvoiceRepository,
+    PaymentRepository,
+)
+from app.modules.finance.schemas import (
+    BudgetCreate,
+    BudgetUpdate,
+    EVMSnapshotCreate,
+    InvoiceCreate,
+    InvoiceUpdate,
+    PaymentCreate,
+)
+
+logger = logging.getLogger(__name__)
+
+
+class FinanceService:
+    """Business logic for finance operations."""
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+        self.invoices = InvoiceRepository(session)
+        self.line_items = InvoiceLineItemRepository(session)
+        self.payments_repo = PaymentRepository(session)
+        self.budgets = BudgetRepository(session)
+        self.evm = EVMSnapshotRepository(session)
+
+    # ── Invoices ─────────────────────────────────────────────────────────────
+
+    async def create_invoice(
+        self,
+        data: InvoiceCreate,
+        user_id: str | None = None,
+    ) -> Invoice:
+        """Create a new invoice with optional line items."""
+        # Auto-generate invoice number if not provided
+        invoice_number = data.invoice_number
+        if not invoice_number:
+            invoice_number = await self.invoices.next_invoice_number(
+                data.project_id, data.invoice_direction
+            )
+
+        invoice = Invoice(
+            project_id=data.project_id,
+            contact_id=data.contact_id,
+            invoice_direction=data.invoice_direction,
+            invoice_number=invoice_number,
+            invoice_date=data.invoice_date,
+            due_date=data.due_date,
+            currency_code=data.currency_code,
+            amount_subtotal=data.amount_subtotal,
+            tax_amount=data.tax_amount,
+            retention_amount=data.retention_amount,
+            amount_total=data.amount_total,
+            tax_config_id=data.tax_config_id,
+            status=data.status,
+            payment_terms_days=data.payment_terms_days,
+            notes=data.notes,
+            created_by=uuid.UUID(user_id) if user_id else None,
+            metadata_=data.metadata,
+        )
+        invoice = await self.invoices.create(invoice)
+
+        # Create line items
+        for idx, item_data in enumerate(data.line_items):
+            item = InvoiceLineItem(
+                invoice_id=invoice.id,
+                description=item_data.description,
+                quantity=item_data.quantity,
+                unit=item_data.unit,
+                unit_rate=item_data.unit_rate,
+                amount=item_data.amount,
+                wbs_id=item_data.wbs_id,
+                cost_category=item_data.cost_category,
+                sort_order=item_data.sort_order if item_data.sort_order else idx,
+            )
+            await self.line_items.create(item)
+
+        logger.info("Invoice created: %s (%s)", invoice.invoice_number, invoice.invoice_direction)
+        return invoice
+
+    async def get_invoice(self, invoice_id: uuid.UUID) -> Invoice:
+        """Get invoice by ID. Raises 404 if not found."""
+        invoice = await self.invoices.get(invoice_id)
+        if invoice is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Invoice not found",
+            )
+        return invoice
+
+    async def list_invoices(
+        self,
+        *,
+        project_id: uuid.UUID | None = None,
+        direction: str | None = None,
+        invoice_status: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> tuple[list[Invoice], int]:
+        """List invoices with filters."""
+        return await self.invoices.list(
+            project_id=project_id,
+            direction=direction,
+            status=invoice_status,
+            limit=limit,
+            offset=offset,
+        )
+
+    async def update_invoice(
+        self,
+        invoice_id: uuid.UUID,
+        data: InvoiceUpdate,
+    ) -> Invoice:
+        """Update invoice fields and optionally replace line items."""
+        await self.get_invoice(invoice_id)  # 404 check
+
+        fields = data.model_dump(exclude_unset=True, exclude={"line_items"})
+        if "metadata" in fields:
+            fields["metadata_"] = fields.pop("metadata")
+
+        if fields:
+            await self.invoices.update(invoice_id, **fields)
+
+        # Replace line items if provided
+        if data.line_items is not None:
+            await self.line_items.delete_by_invoice(invoice_id)
+            for idx, item_data in enumerate(data.line_items):
+                item = InvoiceLineItem(
+                    invoice_id=invoice_id,
+                    description=item_data.description,
+                    quantity=item_data.quantity,
+                    unit=item_data.unit,
+                    unit_rate=item_data.unit_rate,
+                    amount=item_data.amount,
+                    wbs_id=item_data.wbs_id,
+                    cost_category=item_data.cost_category,
+                    sort_order=item_data.sort_order if item_data.sort_order else idx,
+                )
+                await self.line_items.create(item)
+
+        updated = await self.invoices.get(invoice_id)
+        if updated is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Invoice not found",
+            )
+        logger.info("Invoice updated: %s", invoice_id)
+        return updated
+
+    async def approve_invoice(self, invoice_id: uuid.UUID) -> Invoice:
+        """Transition invoice to approved status."""
+        invoice = await self.get_invoice(invoice_id)
+        if invoice.status not in ("draft", "pending"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Cannot approve invoice in status '{invoice.status}'",
+            )
+        await self.invoices.update(invoice_id, status="approved")
+        updated = await self.invoices.get(invoice_id)
+        if updated is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Invoice not found",
+            )
+        logger.info("Invoice approved: %s", invoice.invoice_number)
+        return updated
+
+    async def pay_invoice(self, invoice_id: uuid.UUID) -> Invoice:
+        """Transition invoice to paid status."""
+        invoice = await self.get_invoice(invoice_id)
+        if invoice.status not in ("approved", "pending"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Cannot mark as paid invoice in status '{invoice.status}'",
+            )
+        await self.invoices.update(invoice_id, status="paid")
+        updated = await self.invoices.get(invoice_id)
+        if updated is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Invoice not found",
+            )
+        logger.info("Invoice paid: %s", invoice.invoice_number)
+        return updated
+
+    # ── Payments ─────────────────────────────────────────────────────────────
+
+    async def create_payment(self, data: PaymentCreate) -> Payment:
+        """Record a payment against an invoice."""
+        await self.get_invoice(data.invoice_id)  # 404 check
+
+        payment = Payment(
+            invoice_id=data.invoice_id,
+            payment_date=data.payment_date,
+            amount=data.amount,
+            currency_code=data.currency_code,
+            exchange_rate_snapshot=data.exchange_rate_snapshot,
+            reference=data.reference,
+            metadata_=data.metadata,
+        )
+        payment = await self.payments_repo.create(payment)
+        logger.info("Payment recorded: %s for invoice %s", data.amount, data.invoice_id)
+        return payment
+
+    async def list_payments(
+        self,
+        *,
+        invoice_id: uuid.UUID | None = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> tuple[list[Payment], int]:
+        """List payments with optional invoice filter."""
+        return await self.payments_repo.list(
+            invoice_id=invoice_id, limit=limit, offset=offset
+        )
+
+    # ── Budgets ──────────────────────────────────────────────────────────────
+
+    async def create_budget(self, data: BudgetCreate) -> ProjectBudget:
+        """Create a project budget line."""
+        budget = ProjectBudget(
+            project_id=data.project_id,
+            wbs_id=data.wbs_id,
+            category=data.category,
+            original_budget=data.original_budget,
+            revised_budget=data.revised_budget,
+            committed=data.committed,
+            actual=data.actual,
+            forecast_final=data.forecast_final,
+            metadata_=data.metadata,
+        )
+        budget = await self.budgets.create(budget)
+        logger.info("Budget created: project=%s cat=%s", data.project_id, data.category)
+        return budget
+
+    async def get_budget(self, budget_id: uuid.UUID) -> ProjectBudget:
+        """Get budget by ID. Raises 404 if not found."""
+        budget = await self.budgets.get(budget_id)
+        if budget is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Budget not found",
+            )
+        return budget
+
+    async def list_budgets(
+        self,
+        *,
+        project_id: uuid.UUID | None = None,
+        category: str | None = None,
+    ) -> tuple[list[ProjectBudget], int]:
+        """List budgets with filters."""
+        return await self.budgets.list(project_id=project_id, category=category)
+
+    async def update_budget(
+        self,
+        budget_id: uuid.UUID,
+        data: BudgetUpdate,
+    ) -> ProjectBudget:
+        """Update budget fields."""
+        await self.get_budget(budget_id)  # 404 check
+
+        fields = data.model_dump(exclude_unset=True)
+        if "metadata" in fields:
+            fields["metadata_"] = fields.pop("metadata")
+
+        if fields:
+            await self.budgets.update(budget_id, **fields)
+
+        updated = await self.budgets.get(budget_id)
+        if updated is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Budget not found",
+            )
+        logger.info("Budget updated: %s", budget_id)
+        return updated
+
+    # ── EVM ──────────────────────────────────────────────────────────────────
+
+    async def create_evm_snapshot(self, data: EVMSnapshotCreate) -> EVMSnapshot:
+        """Create an EVM snapshot for a project."""
+        snapshot = EVMSnapshot(
+            project_id=data.project_id,
+            snapshot_date=data.snapshot_date,
+            bac=data.bac,
+            pv=data.pv,
+            ev=data.ev,
+            ac=data.ac,
+            sv=data.sv,
+            cv=data.cv,
+            spi=data.spi,
+            cpi=data.cpi,
+            metadata_=data.metadata,
+        )
+        snapshot = await self.evm.create(snapshot)
+        logger.info("EVM snapshot created: project=%s date=%s", data.project_id, data.snapshot_date)
+        return snapshot
+
+    async def list_evm_snapshots(
+        self,
+        *,
+        project_id: uuid.UUID | None = None,
+    ) -> tuple[list[EVMSnapshot], int]:
+        """List EVM snapshots for a project."""
+        return await self.evm.list(project_id=project_id)

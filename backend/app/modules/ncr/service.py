@@ -1,0 +1,137 @@
+"""NCR service — business logic for non-conformance report management."""
+
+import logging
+import uuid
+from typing import Any
+
+from fastapi import HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.modules.ncr.models import NCR
+from app.modules.ncr.repository import NCRRepository
+from app.modules.ncr.schemas import NCRCreate, NCRUpdate
+
+logger = logging.getLogger(__name__)
+
+
+class NCRService:
+    """Business logic for NCR operations."""
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+        self.repo = NCRRepository(session)
+
+    async def create_ncr(
+        self,
+        data: NCRCreate,
+        user_id: str | None = None,
+    ) -> NCR:
+        """Create a new NCR with auto-generated number."""
+        ncr_number = await self.repo.next_ncr_number(data.project_id)
+
+        ncr = NCR(
+            project_id=data.project_id,
+            ncr_number=ncr_number,
+            title=data.title,
+            description=data.description,
+            ncr_type=data.ncr_type,
+            severity=data.severity,
+            root_cause=data.root_cause,
+            root_cause_category=data.root_cause_category,
+            corrective_action=data.corrective_action,
+            preventive_action=data.preventive_action,
+            status=data.status,
+            cost_impact=data.cost_impact,
+            schedule_impact_days=data.schedule_impact_days,
+            location_description=data.location_description,
+            linked_inspection_id=data.linked_inspection_id,
+            change_order_id=data.change_order_id,
+            created_by=user_id,
+            metadata_=data.metadata,
+        )
+        ncr = await self.repo.create(ncr)
+        logger.info(
+            "NCR created: %s (%s/%s) for project %s",
+            ncr_number,
+            data.ncr_type,
+            data.severity,
+            data.project_id,
+        )
+        return ncr
+
+    async def get_ncr(self, ncr_id: uuid.UUID) -> NCR:
+        ncr = await self.repo.get_by_id(ncr_id)
+        if ncr is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="NCR not found",
+            )
+        return ncr
+
+    async def list_ncrs(
+        self,
+        project_id: uuid.UUID,
+        *,
+        offset: int = 0,
+        limit: int = 50,
+        ncr_type: str | None = None,
+        status_filter: str | None = None,
+        severity: str | None = None,
+    ) -> tuple[list[NCR], int]:
+        return await self.repo.list_for_project(
+            project_id,
+            offset=offset,
+            limit=limit,
+            ncr_type=ncr_type,
+            status=status_filter,
+            severity=severity,
+        )
+
+    async def update_ncr(
+        self,
+        ncr_id: uuid.UUID,
+        data: NCRUpdate,
+    ) -> NCR:
+        ncr = await self.get_ncr(ncr_id)
+
+        if ncr.status in ("closed", "void"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Cannot edit an NCR with status '{ncr.status}'",
+            )
+
+        fields: dict[str, Any] = data.model_dump(exclude_unset=True)
+        if "metadata" in fields:
+            fields["metadata_"] = fields.pop("metadata")
+
+        if not fields:
+            return ncr
+
+        await self.repo.update_fields(ncr_id, **fields)
+        await self.session.refresh(ncr)
+        logger.info("NCR updated: %s (fields=%s)", ncr_id, list(fields.keys()))
+        return ncr
+
+    async def delete_ncr(self, ncr_id: uuid.UUID) -> None:
+        await self.get_ncr(ncr_id)
+        await self.repo.delete(ncr_id)
+        logger.info("NCR deleted: %s", ncr_id)
+
+    async def close_ncr(self, ncr_id: uuid.UUID) -> NCR:
+        """Close an NCR after verification."""
+        ncr = await self.get_ncr(ncr_id)
+        if ncr.status == "closed":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="NCR is already closed",
+            )
+        if ncr.status == "void":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot close a voided NCR",
+            )
+
+        await self.repo.update_fields(ncr_id, status="closed")
+        await self.session.refresh(ncr)
+        logger.info("NCR closed: %s", ncr_id)
+        return ncr

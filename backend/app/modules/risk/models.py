@@ -38,6 +38,19 @@ class RiskItem(Base):
     owner_name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     response_cost: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     currency: Mapped[str] = mapped_column(String(10), nullable=False, default="EUR")
+
+    # Expanded risk scoring (Phase 16 enhancement)
+    probability_score: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    impact_score_cost: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    impact_score_time: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    risk_tier: Mapped[str | None] = mapped_column(String(20), nullable=True)
+
+    # Mitigation actions: [{description, responsible_id, due_date, status}]
+    mitigation_actions: Mapped[list | None] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=True,
+    )
+
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,

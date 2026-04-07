@@ -676,20 +676,29 @@ def create_app() -> FastAPI:
             from app.modules.changeorders import models as _changeorders_models  # noqa: F401
             from app.modules.collaboration import models as _collaboration_models  # noqa: F401
             from app.modules.contacts import models as _contacts_models  # noqa: F401
+            from app.modules.correspondence import models as _correspondence_models  # noqa: F401
             from app.modules.costmodel import models as _cm_models  # noqa: F401
             from app.modules.costs import models as _costs_models  # noqa: F401
             from app.modules.documents import models as _documents_models  # noqa: F401
             from app.modules.fieldreports import models as _fieldreports_models  # noqa: F401
+            from app.modules.finance import models as _finance_models  # noqa: F401
             from app.modules.i18n_foundation import models as _i18n_models  # noqa: F401
+            from app.modules.inspections import models as _inspections_models  # noqa: F401
             from app.modules.markups import models as _markups_models  # noqa: F401
             from app.modules.meetings import models as _meetings_models  # noqa: F401
+            from app.modules.ncr import models as _ncr_models  # noqa: F401
             from app.modules.notifications import models as _notifications_models  # noqa: F401
+            from app.modules.procurement import models as _procurement_models  # noqa: F401
             from app.modules.projects import models as _projects_models  # noqa: F401
             from app.modules.punchlist import models as _punchlist_models  # noqa: F401
             from app.modules.requirements import models as _requirements_models  # noqa: F401
+            from app.modules.rfi import models as _rfi_models  # noqa: F401
             from app.modules.risk import models as _risk_models  # noqa: F401
+            from app.modules.safety import models as _safety_models  # noqa: F401
             from app.modules.schedule import models as _sched_models  # noqa: F401
+            from app.modules.submittals import models as _submittals_models  # noqa: F401
             from app.modules.takeoff import models as _takeoff_models  # noqa: F401
+            from app.modules.tasks import models as _tasks_models  # noqa: F401
             from app.modules.teams import models as _teams_models  # noqa: F401
             from app.modules.tendering import models as _tendering_models  # noqa: F401
             from app.modules.transmittals import models as _transmittals_models  # noqa: F401

@@ -36,6 +36,17 @@ class ChangeOrder(Base):
     cost_impact: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     schedule_impact_days: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     currency: Mapped[str] = mapped_column(String(10), nullable=False, default="EUR")
+
+    # Variation fields (Phase 16 enhancement)
+    variation_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    cost_basis: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    contractor_submission_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    contractor_amount: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    engineer_amount: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    approved_amount: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    time_impact_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    approved_time_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,

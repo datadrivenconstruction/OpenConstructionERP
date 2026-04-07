@@ -47,6 +47,7 @@ import random
 import tempfile
 import uuid
 from collections.abc import Iterator
+from datetime import UTC
 from pathlib import Path
 from typing import Any, Literal
 
@@ -1041,6 +1042,65 @@ async def duplicate_position(
     """
     new_position = await service.duplicate_position(position_id)
     return _position_to_response(new_position)
+
+
+# ── Lock & Revision ──────────────────────────────────────────────────────────
+
+
+@router.post(
+    "/boqs/{boq_id}/lock",
+    response_model=BOQResponse,
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def lock_boq(
+    boq_id: uuid.UUID,
+    user_id: CurrentUserId,
+    service: BOQService = Depends(_get_service),
+) -> BOQResponse:
+    """Lock a BOQ to prevent further edits.
+
+    Sets is_locked=True, approved_by to the current user, approved_at to now.
+    """
+    from datetime import datetime
+
+    boq = await service.get_boq(boq_id)
+    now_iso = datetime.now(UTC).isoformat()
+    await service.repo.update_fields(
+        boq_id,
+        is_locked=True,
+        approved_by=user_id,
+        approved_at=now_iso,
+        status="final",
+    )
+    boq = await service.get_boq(boq_id)
+    return BOQResponse.model_validate(boq)
+
+
+@router.post(
+    "/boqs/{boq_id}/create-revision",
+    response_model=BOQResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("boq.create"))],
+)
+async def create_revision(
+    boq_id: uuid.UUID,
+    service: BOQService = Depends(_get_service),
+) -> BOQResponse:
+    """Create a new revision of a BOQ.
+
+    Duplicates the entire BOQ (positions + markups) and links the copy
+    back to the original via parent_estimate_id for revision tracking.
+    """
+    new_boq = await service.duplicate_boq(boq_id)
+    # Link the new BOQ to the original as its revision parent
+    await service.repo.update_fields(
+        new_boq.id,
+        parent_estimate_id=boq_id,
+        status="draft",
+        is_locked=False,
+    )
+    new_boq = await service.get_boq(new_boq.id)
+    return BOQResponse.model_validate(new_boq)
 
 
 # ── Position CRUD ─────────────────────────────────────────────────────────────

@@ -72,6 +72,20 @@ class FieldReport(Base):
     )
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
+    # Structured logs (Phase 15 enhancement)
+    workforce_log: Mapped[list | None] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=True,
+    )
+    equipment_log: Mapped[list | None] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=True,
+    )
+    weather_data: Mapped[dict | None] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=True,
+    )
+
     # Signature
     signature_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
     signature_data: Mapped[str | None] = mapped_column(Text, nullable=True)

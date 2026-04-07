@@ -31,6 +31,21 @@ class BOQ(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft")
+
+    # ── Phase 12.2 lock & revision fields ────────────────────────────────
+    estimate_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    is_locked: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="0"
+    )
+    parent_estimate_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_boq_boq.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    approved_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    approved_at: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    base_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
+
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,
@@ -95,6 +110,11 @@ class Position(Base):
         server_default="[]",
     )
     validation_status: Mapped[str] = mapped_column(String(50), nullable=False, default="pending")
+
+    # ── Phase 12.2 expansion fields ──────────────────────────────────────
+    wbs_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    cost_code_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,

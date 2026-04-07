@@ -14,7 +14,17 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.dependencies import CurrentUserId, CurrentUserPayload, SessionDep, SettingsDep
-from app.modules.projects.schemas import ProjectCreate, ProjectResponse, ProjectUpdate
+from app.modules.projects.schemas import (
+    MilestoneCreate,
+    MilestoneResponse,
+    MilestoneUpdate,
+    ProjectCreate,
+    ProjectResponse,
+    ProjectUpdate,
+    WBSCreate,
+    WBSResponse,
+    WBSUpdate,
+)
 from app.modules.projects.service import ProjectService
 
 router = APIRouter()
@@ -437,3 +447,238 @@ async def analytics_overview(
         "over_budget_count": over_budget_count,
         "projects": projects_data,
     }
+
+
+# ── WBS CRUD ─────────────────────────────────────────────────────────────
+
+
+@router.post("/{project_id}/wbs", response_model=WBSResponse, status_code=201)
+async def create_wbs_node(
+    project_id: uuid.UUID,
+    data: WBSCreate,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ProjectService = Depends(_get_service),
+) -> WBSResponse:
+    """Create a WBS node for a project."""
+    await _verify_project_owner(service, project_id, user_id, payload)
+
+    from app.modules.projects.models import ProjectWBS
+
+    node = ProjectWBS(
+        project_id=project_id,
+        parent_id=data.parent_id,
+        code=data.code,
+        name=data.name,
+        name_translations=data.name_translations,
+        level=data.level,
+        sort_order=data.sort_order,
+        wbs_type=data.wbs_type,
+        planned_cost=data.planned_cost,
+        planned_hours=data.planned_hours,
+        metadata_=data.metadata,
+    )
+    session.add(node)
+    await session.flush()
+    return WBSResponse.model_validate(node)
+
+
+@router.get("/{project_id}/wbs", response_model=list[WBSResponse])
+async def list_wbs_nodes(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ProjectService = Depends(_get_service),
+) -> list[WBSResponse]:
+    """List all WBS nodes for a project."""
+    await _verify_project_owner(service, project_id, user_id, payload)
+
+    from sqlalchemy import select
+
+    from app.modules.projects.models import ProjectWBS
+
+    stmt = (
+        select(ProjectWBS)
+        .where(ProjectWBS.project_id == project_id)
+        .order_by(ProjectWBS.sort_order)
+    )
+    result = await session.execute(stmt)
+    nodes = list(result.scalars().all())
+    return [WBSResponse.model_validate(n) for n in nodes]
+
+
+@router.patch("/{project_id}/wbs/{wbs_id}", response_model=WBSResponse)
+async def update_wbs_node(
+    project_id: uuid.UUID,
+    wbs_id: uuid.UUID,
+    data: WBSUpdate,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ProjectService = Depends(_get_service),
+) -> WBSResponse:
+    """Update a WBS node."""
+    await _verify_project_owner(service, project_id, user_id, payload)
+
+    from sqlalchemy import update
+
+    from app.modules.projects.models import ProjectWBS
+
+    fields = data.model_dump(exclude_unset=True)
+    if "metadata" in fields:
+        fields["metadata_"] = fields.pop("metadata")
+
+    if fields:
+        stmt = update(ProjectWBS).where(
+            ProjectWBS.id == wbs_id, ProjectWBS.project_id == project_id
+        ).values(**fields)
+        await session.execute(stmt)
+        await session.flush()
+
+    node = await session.get(ProjectWBS, wbs_id)
+    if node is None:
+        raise HTTPException(status_code=404, detail="WBS node not found")
+    return WBSResponse.model_validate(node)
+
+
+@router.delete("/{project_id}/wbs/{wbs_id}", status_code=204)
+async def delete_wbs_node(
+    project_id: uuid.UUID,
+    wbs_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ProjectService = Depends(_get_service),
+) -> None:
+    """Delete a WBS node."""
+    await _verify_project_owner(service, project_id, user_id, payload)
+
+    from sqlalchemy import delete
+
+    from app.modules.projects.models import ProjectWBS
+
+    stmt = delete(ProjectWBS).where(
+        ProjectWBS.id == wbs_id, ProjectWBS.project_id == project_id
+    )
+    await session.execute(stmt)
+
+
+# ── Milestone CRUD ───────────────────────────────────────────────────────
+
+
+@router.post(
+    "/{project_id}/milestones", response_model=MilestoneResponse, status_code=201
+)
+async def create_milestone(
+    project_id: uuid.UUID,
+    data: MilestoneCreate,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ProjectService = Depends(_get_service),
+) -> MilestoneResponse:
+    """Create a project milestone."""
+    await _verify_project_owner(service, project_id, user_id, payload)
+
+    from app.modules.projects.models import ProjectMilestone
+
+    milestone = ProjectMilestone(
+        project_id=project_id,
+        name=data.name,
+        milestone_type=data.milestone_type,
+        planned_date=data.planned_date,
+        actual_date=data.actual_date,
+        status=data.status,
+        linked_payment_pct=data.linked_payment_pct,
+        metadata_=data.metadata,
+    )
+    session.add(milestone)
+    await session.flush()
+    return MilestoneResponse.model_validate(milestone)
+
+
+@router.get("/{project_id}/milestones", response_model=list[MilestoneResponse])
+async def list_milestones(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ProjectService = Depends(_get_service),
+) -> list[MilestoneResponse]:
+    """List all milestones for a project."""
+    await _verify_project_owner(service, project_id, user_id, payload)
+
+    from sqlalchemy import select
+
+    from app.modules.projects.models import ProjectMilestone
+
+    stmt = (
+        select(ProjectMilestone)
+        .where(ProjectMilestone.project_id == project_id)
+        .order_by(ProjectMilestone.planned_date)
+    )
+    result = await session.execute(stmt)
+    milestones = list(result.scalars().all())
+    return [MilestoneResponse.model_validate(m) for m in milestones]
+
+
+@router.patch(
+    "/{project_id}/milestones/{milestone_id}", response_model=MilestoneResponse
+)
+async def update_milestone(
+    project_id: uuid.UUID,
+    milestone_id: uuid.UUID,
+    data: MilestoneUpdate,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ProjectService = Depends(_get_service),
+) -> MilestoneResponse:
+    """Update a project milestone."""
+    await _verify_project_owner(service, project_id, user_id, payload)
+
+    from sqlalchemy import update
+
+    from app.modules.projects.models import ProjectMilestone
+
+    fields = data.model_dump(exclude_unset=True)
+    if "metadata" in fields:
+        fields["metadata_"] = fields.pop("metadata")
+
+    if fields:
+        stmt = update(ProjectMilestone).where(
+            ProjectMilestone.id == milestone_id,
+            ProjectMilestone.project_id == project_id,
+        ).values(**fields)
+        await session.execute(stmt)
+        await session.flush()
+
+    milestone = await session.get(ProjectMilestone, milestone_id)
+    if milestone is None:
+        raise HTTPException(status_code=404, detail="Milestone not found")
+    return MilestoneResponse.model_validate(milestone)
+
+
+@router.delete("/{project_id}/milestones/{milestone_id}", status_code=204)
+async def delete_milestone(
+    project_id: uuid.UUID,
+    milestone_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ProjectService = Depends(_get_service),
+) -> None:
+    """Delete a project milestone."""
+    await _verify_project_owner(service, project_id, user_id, payload)
+
+    from sqlalchemy import delete
+
+    from app.modules.projects.models import ProjectMilestone
+
+    stmt = delete(ProjectMilestone).where(
+        ProjectMilestone.id == milestone_id,
+        ProjectMilestone.project_id == project_id,
+    )
+    await session.execute(stmt)
