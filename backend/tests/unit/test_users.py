@@ -434,10 +434,11 @@ class TestUserCreateSchema:
         assert len(password_errors) > 0
 
     def test_password_min_length_boundary(self):
-        """Exactly 8 characters should pass."""
+        """Exactly 8 characters should pass — must include at least one letter and one digit
+        per the v0.8.0 strong password policy."""
         data = UserCreate(
             email="user@example.com",
-            password="12345678",
+            password="passwd12",
             full_name="Test User",
         )
         assert len(data.password) == 8
@@ -452,10 +453,12 @@ class TestUserCreateSchema:
             )
 
     def test_password_max_length_boundary(self):
-        """Exactly 128 characters should pass."""
+        """Exactly 128 characters should pass — must include at least one letter and one
+        digit per the v0.8.0 strong password policy."""
+        password = "a" * 126 + "12"
         data = UserCreate(
             email="user@example.com",
-            password="a" * 128,
+            password=password,
             full_name="Test User",
         )
         assert len(data.password) == 128

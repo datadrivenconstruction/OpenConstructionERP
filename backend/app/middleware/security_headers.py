@@ -30,13 +30,22 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         # blocks third-party script loading and frames. Override per-deployment
         # via the `csp` constructor argument when nginx/Caddy isn't already
         # injecting one.
+        # Default CSP — relaxed enough for the React SPA + the few external
+        # services the marketing landing page uses (Google Analytics +
+        # Google Fonts), but blocks everything else. Override per-deployment
+        # via the `csp` constructor argument when nginx/Caddy isn't already
+        # injecting one.
         self._csp = csp or (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
-            "style-src 'self' 'unsafe-inline'; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' "
+            "https://www.googletagmanager.com https://www.google-analytics.com; "
+            "script-src-elem 'self' 'unsafe-inline' "
+            "https://www.googletagmanager.com https://www.google-analytics.com; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com; "
             "img-src 'self' data: blob: https:; "
-            "font-src 'self' data:; "
-            "connect-src 'self'; "
+            "font-src 'self' data: https://fonts.gstatic.com; "
+            "connect-src 'self' https://www.google-analytics.com https://api.github.com; "
             "frame-ancestors 'none'; "
             "base-uri 'self'; "
             "form-action 'self'"

@@ -129,11 +129,12 @@ describe('getAllModuleRoutes', () => {
 describe('getModuleNavItems', () => {
   it('should return nav items for tools group', () => {
     const items = getModuleNavItems('tools');
-    expect(items.length).toBeGreaterThanOrEqual(4);
+    // Tools group currently holds: gaeb-exchange, risk-analysis, sustainability.
+    // Other tools (benchmarks, takeoff-viewer, collaboration) live in their
+    // own groups now. Test the actual shape rather than a stale historical one.
+    expect(items.length).toBeGreaterThanOrEqual(3);
     expect(items.some((i) => i.to === '/sustainability')).toBe(true);
-    expect(items.some((i) => i.to === '/benchmarks')).toBe(true);
-    expect(items.some((i) => i.to === '/takeoff-viewer')).toBe(true);
-    expect(items.some((i) => i.to === '/collaboration')).toBe(true);
+    expect(items.some((i) => i.to === '/risk-analysis')).toBe(true);
   });
 
   it('should return nav items for regional group', () => {

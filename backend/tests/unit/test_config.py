@@ -26,7 +26,14 @@ class TestSettingsDefaults:
         assert settings.app_name == "OpenConstructionERP"
 
     def test_app_version_default(self, settings):
-        assert settings.app_version == "0.2.4"
+        # app_version is read from installed package metadata via
+        # importlib.metadata.version("openconstructionerp"), so the
+        # exact value depends on what's currently installed. Just
+        # verify it's populated and looks like a semver-shaped string.
+        import re
+
+        assert settings.app_version
+        assert re.match(r"^\d+\.\d+\.\d+", settings.app_version)
 
     def test_app_env_default(self, settings):
         assert settings.app_env == "development"

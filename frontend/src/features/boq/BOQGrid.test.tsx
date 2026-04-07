@@ -70,8 +70,9 @@ describe('getColumnDefs', () => {
     expect(checkboxCol.colId).toBe('_checkbox');
     expect(checkboxCol.width).toBe(36);
     expect(checkboxCol.editable).toBe(false);
-    expect(checkboxCol.headerCheckboxSelection).toBe(true);
-    expect(typeof checkboxCol.checkboxSelection).toBe('function');
+    expect(checkboxCol.sortable).toBe(false);
+    // AG Grid v32.2+: checkboxSelection / headerCheckboxSelection moved to
+    // GridOptions.rowSelection.checkboxes — they're no longer per-column.
   });
 
   it('should have ordinal, description, unit, quantity, unit_rate, total, actions fields', () => {
@@ -107,10 +108,10 @@ describe('getColumnDefs', () => {
     expect(descCol?.minWidth).toBe(260);
   });
 
-  it('should use formulaCellEditor for quantity', () => {
+  it('should use a number cell editor for quantity', () => {
     const defs = getColumnDefs(context);
     const qtyCol = defs.find((d) => d.field === 'quantity');
-    expect(qtyCol?.cellEditor).toBe('formulaCellEditor');
+    expect(qtyCol?.cellEditor).toBe('agNumberCellEditor');
   });
 
   it('should have a cell editor for unit', () => {

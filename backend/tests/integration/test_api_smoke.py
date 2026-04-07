@@ -82,11 +82,14 @@ async def test_register_and_login(client):
     import uuid
 
     unique_email = f"auth-{uuid.uuid4().hex[:6]}@smoke.io"
+    # Use a password that survives v0.8.0 strong-password policy:
+    # 8+ chars, has letters, has digits, not in the common-password blacklist.
+    test_password = f"SmokeTest{uuid.uuid4().hex[:6]}9"
     resp = await client.post(
         "/api/v1/users/auth/register",
         json={
             "email": unique_email,
-            "password": "password123",
+            "password": test_password,
             "full_name": "Auth User",
         },
     )
@@ -96,7 +99,7 @@ async def test_register_and_login(client):
 
     resp = await client.post(
         "/api/v1/users/auth/login",
-        json={"email": unique_email, "password": "password123"},
+        json={"email": unique_email, "password": test_password},
     )
     assert resp.status_code == 200
     assert "access_token" in resp.json()

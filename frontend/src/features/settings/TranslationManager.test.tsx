@@ -158,30 +158,39 @@ describe('TranslationManager', () => {
   // ── 5. Export button triggers download ────────────────────────────────────
 
   it('export button creates a download link and clicks it', () => {
-    renderComponent();
+    vi.useFakeTimers();
+    try {
+      renderComponent();
 
-    const createObjectURL = vi.fn(() => 'blob:fake-url');
-    const revokeObjectURL = vi.fn();
-    Object.defineProperty(URL, 'createObjectURL', { value: createObjectURL, configurable: true });
-    Object.defineProperty(URL, 'revokeObjectURL', { value: revokeObjectURL, configurable: true });
+      const createObjectURL = vi.fn(() => 'blob:fake-url');
+      const revokeObjectURL = vi.fn();
+      Object.defineProperty(URL, 'createObjectURL', { value: createObjectURL, configurable: true });
+      Object.defineProperty(URL, 'revokeObjectURL', { value: revokeObjectURL, configurable: true });
 
-    // Spy on createElement to capture anchor clicks
-    const clickSpy = vi.fn();
-    const origCreate = document.createElement.bind(document);
-    vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
-      const el = origCreate(tag);
-      if (tag === 'a') {
-        vi.spyOn(el as HTMLAnchorElement, 'click').mockImplementation(clickSpy);
-      }
-      return el;
-    });
+      // Spy on createElement to capture anchor clicks
+      const clickSpy = vi.fn();
+      const origCreate = document.createElement.bind(document);
+      vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
+        const el = origCreate(tag);
+        if (tag === 'a') {
+          vi.spyOn(el as HTMLAnchorElement, 'click').mockImplementation(clickSpy);
+        }
+        return el;
+      });
 
-    const exportBtn = screen.getByTestId('tm-export-btn');
-    fireEvent.click(exportBtn);
+      const exportBtn = screen.getByTestId('tm-export-btn');
+      fireEvent.click(exportBtn);
 
-    expect(createObjectURL).toHaveBeenCalledOnce();
-    expect(clickSpy).toHaveBeenCalledOnce();
-    expect(revokeObjectURL).toHaveBeenCalledWith('blob:fake-url');
+      expect(createObjectURL).toHaveBeenCalledOnce();
+      expect(clickSpy).toHaveBeenCalledOnce();
+      // triggerDownload() defers cleanup behind a 200ms setTimeout so the
+      // anchor isn't yanked out of the DOM before the browser fires the
+      // download. Advance fake timers to flush the cleanup.
+      vi.advanceTimersByTime(250);
+      expect(revokeObjectURL).toHaveBeenCalledWith('blob:fake-url');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   // ── 6. Reset restores default ─────────────────────────────────────────────
