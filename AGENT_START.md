@@ -61,7 +61,7 @@ Phase 22    v1.0.0 release
 - **Russian** for discussion (when Artem writes in Russian)
 - **Conventional Commits**: `feat:`, `fix:`, `refactor:`, `docs:`, `chore:`, `ci:`, `test:`
 - **NO Claude/Anthropic references** in commits, code, or PR bodies — history was rewritten to remove them
-- **NO hardcoded UI strings** — all via `useTranslation()` / i18n keys (21 languages)
+- **NO hardcoded UI strings** — all via `useTranslation()` / i18n keys (20 languages)
 - **NO IfcOpenShell, BCF libs, native IFC** — all CAD via ODA SDK + Rust reverse engineering
 - **BIM viewer = own** — Three.js + glTF/GLB, NOT xeokit or third-party
 - **Validation is mandatory** — no module without validation rules
