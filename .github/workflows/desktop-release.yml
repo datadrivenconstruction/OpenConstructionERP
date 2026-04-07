@@ -74,7 +74,7 @@ jobs:
              "desktop/src-tauri/binaries/openestimate-server-${{ matrix.target }}${{ matrix.ext }}"
 
       - name: Upload sidecar artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sidecar-${{ matrix.target }}
           path: desktop/src-tauri/binaries/
