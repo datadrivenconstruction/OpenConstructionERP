@@ -6,17 +6,21 @@ Endpoints:
     GET    /incidents/{id}              - Get single incident
     PATCH  /incidents/{id}              - Update incident
     DELETE /incidents/{id}              - Delete incident
+    GET    /incidents/export            - Export incidents as Excel
     GET    /observations                - List observations for a project
     POST   /observations                - Create observation
     GET    /observations/{id}           - Get single observation
     PATCH  /observations/{id}           - Update observation
     DELETE /observations/{id}           - Delete observation
+    GET    /observations/export         - Export observations as Excel
 """
 
+import io
 import logging
 import uuid
 
 from fastapi import APIRouter, Depends, Query
+from fastapi.responses import StreamingResponse
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.safety.schemas import (
@@ -115,6 +119,76 @@ async def create_incident(
     return _incident_to_response(incident)
 
 
+@router.get("/incidents/export")
+async def export_incidents(
+    project_id: uuid.UUID = Query(...),
+    session: SessionDep = None,  # type: ignore[assignment]
+    _user: CurrentUserId = None,  # type: ignore[assignment]
+) -> StreamingResponse:
+    """Export safety incidents for a project as Excel."""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font
+    from sqlalchemy import select
+
+    from app.modules.safety.models import SafetyIncident
+
+    result = await session.execute(
+        select(SafetyIncident)
+        .where(SafetyIncident.project_id == project_id)
+        .order_by(SafetyIncident.incident_number)
+        .limit(50000)
+    )
+    items = result.scalars().all()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Safety Incidents"
+
+    headers = [
+        "Incident #",
+        "Date",
+        "Type",
+        "Location",
+        "Description",
+        "Severity",
+        "Treatment",
+        "Days Lost",
+        "Root Cause",
+        "Status",
+        "Reported to Regulator",
+    ]
+    for col, h in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=h)
+        cell.font = Font(bold=True)
+
+    for row_idx, item in enumerate(items, 2):
+        ws.cell(row=row_idx, column=1, value=item.incident_number)
+        ws.cell(row=row_idx, column=2, value=item.incident_date)
+        ws.cell(row=row_idx, column=3, value=item.incident_type)
+        ws.cell(row=row_idx, column=4, value=item.location or "")
+        ws.cell(row=row_idx, column=5, value=item.description)
+        # Severity is stored in metadata or injured_person_details; use type as proxy
+        severity = ""
+        if isinstance(item.injured_person_details, dict):
+            severity = item.injured_person_details.get("severity", "")
+        ws.cell(row=row_idx, column=6, value=severity)
+        ws.cell(row=row_idx, column=7, value=item.treatment_type or "")
+        ws.cell(row=row_idx, column=8, value=item.days_lost)
+        ws.cell(row=row_idx, column=9, value=item.root_cause or "")
+        ws.cell(row=row_idx, column=10, value=item.status)
+        ws.cell(row=row_idx, column=11, value="Yes" if item.reported_to_regulator else "No")
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": 'attachment; filename="safety_incidents.xlsx"'},
+    )
+
+
 @router.get("/incidents/{incident_id}", response_model=IncidentResponse)
 async def get_incident(
     incident_id: uuid.UUID,
@@ -179,6 +253,80 @@ async def create_observation(
 ) -> ObservationResponse:
     observation = await service.create_observation(data, user_id=user_id)
     return _observation_to_response(observation)
+
+
+@router.get("/observations/export")
+async def export_observations(
+    project_id: uuid.UUID = Query(...),
+    session: SessionDep = None,  # type: ignore[assignment]
+    _user: CurrentUserId = None,  # type: ignore[assignment]
+) -> StreamingResponse:
+    """Export safety observations for a project as Excel."""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font
+    from sqlalchemy import select
+
+    from app.modules.safety.models import SafetyObservation
+
+    result = await session.execute(
+        select(SafetyObservation)
+        .where(SafetyObservation.project_id == project_id)
+        .order_by(SafetyObservation.observation_number)
+        .limit(50000)
+    )
+    items = result.scalars().all()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Safety Observations"
+
+    headers = [
+        "Observation #",
+        "Date",
+        "Type",
+        "Location",
+        "Description",
+        "Severity",
+        "Likelihood",
+        "Risk Score",
+        "Risk Tier",
+        "Status",
+        "Corrective Action",
+    ]
+    for col, h in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=h)
+        cell.font = Font(bold=True)
+
+    for row_idx, item in enumerate(items, 2):
+        ws.cell(row=row_idx, column=1, value=item.observation_number)
+        ws.cell(row=row_idx, column=2, value=str(item.created_at) if item.created_at else "")
+        ws.cell(row=row_idx, column=3, value=item.observation_type)
+        ws.cell(row=row_idx, column=4, value=item.location or "")
+        ws.cell(row=row_idx, column=5, value=item.description)
+        ws.cell(row=row_idx, column=6, value=item.severity)
+        ws.cell(row=row_idx, column=7, value=item.likelihood)
+        ws.cell(row=row_idx, column=8, value=item.risk_score)
+        # Risk tier derived from risk score
+        risk_tier = "Low"
+        if item.risk_score > 15:
+            risk_tier = "Critical"
+        elif item.risk_score > 10:
+            risk_tier = "High"
+        elif item.risk_score > 5:
+            risk_tier = "Medium"
+        ws.cell(row=row_idx, column=9, value=risk_tier)
+        ws.cell(row=row_idx, column=10, value=item.status)
+        ws.cell(row=row_idx, column=11, value=item.corrective_action or "")
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": 'attachment; filename="safety_observations.xlsx"'},
+    )
 
 
 @router.get("/observations/{observation_id}", response_model=ObservationResponse)

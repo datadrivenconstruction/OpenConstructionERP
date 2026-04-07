@@ -4,7 +4,8 @@
  * All endpoints are prefixed with /v1/tasks/.
  */
 
-import { apiGet, apiPost, apiPatch } from '@/shared/lib/api';
+import { apiGet, apiPost, apiPatch, triggerDownload } from '@/shared/lib/api';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -87,4 +88,32 @@ export async function updateTask(id: string, data: UpdateTaskPayload): Promise<T
 
 export async function completeTask(id: string): Promise<Task> {
   return apiPost<Task>(`/v1/tasks/${id}/complete`);
+}
+
+export async function exportTasks(projectId: string): Promise<void> {
+  const token = useAuthStore.getState().accessToken;
+  const headers: Record<string, string> = { Accept: 'application/octet-stream' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(
+    `/api/v1/tasks/export?project_id=${encodeURIComponent(projectId)}`,
+    { method: 'GET', headers },
+  );
+  if (!response.ok) {
+    let detail = 'Export failed';
+    try {
+      const body = await response.json();
+      detail = body.detail || detail;
+    } catch {
+      // ignore parse error
+    }
+    throw new Error(detail);
+  }
+
+  const blob = await response.blob();
+  const disposition = response.headers.get('Content-Disposition');
+  const filename = disposition?.match(/filename="?(.+)"?/)?.[1] || 'tasks_export.xlsx';
+  triggerDownload(blob, filename);
 }

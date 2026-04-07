@@ -3,6 +3,7 @@
 Endpoints:
     GET    /                    — List invoices with filters
     POST   /                    — Create invoice (auth required)
+    GET    /invoices/export      — Export invoices as Excel
     GET    /{id}                — Get single invoice
     PATCH  /{id}                — Update invoice (auth required)
     POST   /{id}/approve        — Approve invoice (auth required)
@@ -12,15 +13,24 @@ Endpoints:
     GET    /budgets              — List budgets
     POST   /budgets              — Create budget (auth required)
     PATCH  /budgets/{id}         — Update budget (auth required)
+    POST   /budgets/import/file  — Import budgets from Excel/CSV (auth required)
+    GET    /budgets/export       — Export budgets as Excel
     GET    /evm                  — List EVM snapshots
     POST   /evm/snapshot         — Create EVM snapshot (auth required)
 """
 
+import csv
+import io
+import logging
 import uuid
+from typing import Any
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from fastapi.responses import StreamingResponse
+from sqlalchemy import select
 
 from app.dependencies import CurrentUserId, SessionDep
+from app.modules.finance.models import Invoice, ProjectBudget
 from app.modules.finance.schemas import (
     BudgetCreate,
     BudgetListResponse,
@@ -40,6 +50,7 @@ from app.modules.finance.schemas import (
 from app.modules.finance.service import FinanceService
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 def _get_service(session: SessionDep) -> FinanceService:
@@ -84,6 +95,78 @@ async def create_invoice(
     """Create a new invoice."""
     invoice = await service.create_invoice(data, user_id=user_id)
     return InvoiceResponse.model_validate(invoice)
+
+
+# ── Export invoices as Excel ────────────────────────────────────────────────
+
+
+@router.get("/invoices/export")
+async def export_invoices(
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(...),
+    direction: str | None = Query(default=None),
+) -> StreamingResponse:
+    """Export invoices for a project as Excel file."""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font
+
+    stmt = select(Invoice).where(Invoice.project_id == project_id)
+    if direction:
+        stmt = stmt.where(Invoice.invoice_direction == direction)
+    stmt = stmt.limit(50000)
+
+    result = await session.execute(stmt)
+    items = result.scalars().all()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Invoices"
+
+    headers = [
+        "Invoice #",
+        "Direction",
+        "Date",
+        "Due Date",
+        "Vendor/Client",
+        "Subtotal",
+        "Tax",
+        "Total",
+        "Status",
+    ]
+    for i, h in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=i, value=h)
+        cell.font = Font(bold=True)
+
+    for row_idx, inv in enumerate(items, 2):
+        ws.cell(row=row_idx, column=1, value=inv.invoice_number)
+        ws.cell(row=row_idx, column=2, value=inv.invoice_direction)
+        ws.cell(row=row_idx, column=3, value=inv.invoice_date)
+        ws.cell(row=row_idx, column=4, value=inv.due_date)
+        ws.cell(row=row_idx, column=5, value=inv.contact_id or "")
+        try:
+            ws.cell(row=row_idx, column=6, value=float(inv.amount_subtotal))
+        except (ValueError, TypeError):
+            ws.cell(row=row_idx, column=6, value=0)
+        try:
+            ws.cell(row=row_idx, column=7, value=float(inv.tax_amount))
+        except (ValueError, TypeError):
+            ws.cell(row=row_idx, column=7, value=0)
+        try:
+            ws.cell(row=row_idx, column=8, value=float(inv.amount_total))
+        except (ValueError, TypeError):
+            ws.cell(row=row_idx, column=8, value=0)
+        ws.cell(row=row_idx, column=9, value=inv.status)
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": 'attachment; filename="invoices_export.xlsx"'},
+    )
 
 
 @router.get("/{invoice_id}", response_model=InvoiceResponse)
@@ -190,6 +273,377 @@ async def create_budget(
     """Create a project budget line."""
     budget = await service.create_budget(data)
     return BudgetResponse.model_validate(budget)
+
+
+# ── Budget import (CSV / Excel) ─────────────────────────────────────────────
+
+_BUDGET_COLUMN_ALIASES: dict[str, list[str]] = {
+    "wbs_id": [
+        "wbs_id",
+        "wbs code",
+        "wbs",
+        "code",
+        "wbs_code",
+    ],
+    "category": [
+        "category",
+        "cost category",
+        "kategorie",
+        "type",
+    ],
+    "original_budget": [
+        "original_budget",
+        "original budget",
+        "original",
+        "budget",
+        "amount",
+    ],
+    "notes": [
+        "notes",
+        "note",
+        "remarks",
+        "bemerkung",
+    ],
+}
+
+_ALLOWED_BUDGET_CATEGORIES = {
+    "labor",
+    "material",
+    "equipment",
+    "subcontractor",
+    "overhead",
+    "contingency",
+    "other",
+}
+
+
+def _match_budget_column(header: str) -> str | None:
+    """Match a header string to a canonical column name using the alias map."""
+    normalised = header.strip().lower()
+    for canonical, aliases in _BUDGET_COLUMN_ALIASES.items():
+        if normalised in aliases:
+            return canonical
+    return None
+
+
+def _safe_decimal_str(value: Any, default: str = "0") -> str:
+    """Parse a value to a decimal string, returning default on failure."""
+    if value is None:
+        return default
+    if isinstance(value, (int, float)):
+        return str(value)
+    text = str(value).strip()
+    if not text:
+        return default
+    # Handle European-style numbers: "1.234,56" -> "1234.56"
+    if "," in text and "." in text:
+        last_comma = text.rfind(",")
+        last_dot = text.rfind(".")
+        if last_comma > last_dot:
+            text = text.replace(".", "").replace(",", ".")
+        else:
+            text = text.replace(",", "")
+    elif "," in text:
+        text = text.replace(",", ".")
+    try:
+        float(text)  # validate
+        return text
+    except (ValueError, TypeError):
+        return default
+
+
+def _parse_budget_rows_from_csv(content_bytes: bytes) -> list[dict[str, Any]]:
+    """Parse rows from a CSV file for budget import."""
+    for encoding in ("utf-8-sig", "utf-8", "latin-1"):
+        try:
+            text = content_bytes.decode(encoding)
+            break
+        except UnicodeDecodeError:
+            continue
+    else:
+        raise ValueError("Unable to decode CSV file -- unsupported encoding")
+
+    sniffer = csv.Sniffer()
+    try:
+        dialect = sniffer.sniff(text[:4096], delimiters=",;\t|")
+    except csv.Error:
+        dialect = csv.excel  # type: ignore[assignment]
+
+    reader = csv.reader(io.StringIO(text), dialect)
+    raw_headers = next(reader, None)
+    if not raw_headers:
+        raise ValueError("CSV file is empty or has no header row")
+
+    column_map: dict[int, str] = {}
+    for idx, hdr in enumerate(raw_headers):
+        canonical = _match_budget_column(hdr)
+        if canonical:
+            column_map[idx] = canonical
+
+    rows: list[dict[str, Any]] = []
+    for raw_row in reader:
+        row: dict[str, Any] = {}
+        for idx, val in enumerate(raw_row):
+            canonical = column_map.get(idx)
+            if canonical:
+                row[canonical] = val.strip() if isinstance(val, str) else val
+        if row:
+            rows.append(row)
+
+    return rows
+
+
+def _parse_budget_rows_from_excel(content_bytes: bytes) -> list[dict[str, Any]]:
+    """Parse rows from an Excel (.xlsx) file for budget import."""
+    from openpyxl import load_workbook
+
+    wb = load_workbook(io.BytesIO(content_bytes), read_only=True, data_only=True)
+    ws = wb.active
+    if ws is None:
+        raise ValueError("Excel file has no worksheets")
+
+    rows_iter = ws.iter_rows(values_only=True)
+    raw_headers = next(rows_iter, None)
+    if not raw_headers:
+        raise ValueError("Excel file is empty or has no header row")
+
+    column_map: dict[int, str] = {}
+    for idx, hdr in enumerate(raw_headers):
+        if hdr is not None:
+            canonical = _match_budget_column(str(hdr))
+            if canonical:
+                column_map[idx] = canonical
+
+    rows: list[dict[str, Any]] = []
+    for raw_row in rows_iter:
+        row: dict[str, Any] = {}
+        for idx, val in enumerate(raw_row):
+            canonical = column_map.get(idx)
+            if canonical and val is not None:
+                row[canonical] = val
+        if row:
+            rows.append(row)
+
+    wb.close()
+    return rows
+
+
+@router.post("/budgets/import/file")
+async def import_budgets_file(
+    _user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(...),
+    file: UploadFile = File(..., description="Excel (.xlsx) or CSV (.csv) file"),
+    service: FinanceService = Depends(_get_service),
+) -> dict[str, Any]:
+    """Import project budgets from an Excel or CSV file upload.
+
+    Expected columns:
+    - **WBS Code** -- work breakdown structure code
+    - **Category** -- budget category (labor, material, equipment, etc.)
+    - **Original Budget** -- original budget amount
+    - **Notes** -- optional notes
+
+    Returns:
+        Summary with counts of imported, skipped, and error details per row.
+    """
+    # Validate file type
+    filename = (file.filename or "").lower()
+    if not filename.endswith((".xlsx", ".csv", ".xls")):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unsupported file type. Please upload an Excel (.xlsx) or CSV (.csv) file.",
+        )
+
+    # Read file content
+    content = await file.read()
+    if not content:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Uploaded file is empty.",
+        )
+
+    # Limit file size (10 MB)
+    if len(content) > 10 * 1024 * 1024:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="File too large. Maximum size is 10 MB.",
+        )
+
+    # Parse rows based on file type
+    try:
+        if filename.endswith(".xlsx") or filename.endswith(".xls"):
+            rows = _parse_budget_rows_from_excel(content)
+        else:
+            rows = _parse_budget_rows_from_csv(content)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to parse file: {exc}",
+        )
+    except Exception as exc:
+        logger.exception("Unexpected error parsing budget import file: %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to parse file. Please check the format and try again.",
+        )
+
+    if not rows:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No data rows found in file. Check that the first row contains column headers.",
+        )
+
+    # Convert rows to BudgetCreate objects and import
+    imported_count = 0
+    skipped = 0
+    errors: list[dict[str, Any]] = []
+
+    for row_idx, row in enumerate(rows, start=2):
+        try:
+            wbs_id = str(row.get("wbs_id", "")).strip() or None
+
+            # Parse category
+            category = str(row.get("category", "")).strip().lower() or None
+            if category and category not in _ALLOWED_BUDGET_CATEGORIES:
+                errors.append({
+                    "row": row_idx,
+                    "error": (
+                        f"Invalid category: '{category}'. "
+                        f"Allowed: {', '.join(sorted(_ALLOWED_BUDGET_CATEGORIES))}"
+                    ),
+                    "data": {k: str(v)[:100] for k, v in row.items()},
+                })
+                continue
+
+            # Parse amount
+            original_budget = _safe_decimal_str(row.get("original_budget"))
+
+            # Validate amount is a valid number
+            try:
+                float(original_budget)
+            except (ValueError, TypeError):
+                errors.append({
+                    "row": row_idx,
+                    "error": f"Invalid budget amount: {row.get('original_budget')}",
+                    "data": {k: str(v)[:100] for k, v in row.items()},
+                })
+                continue
+
+            # Skip rows with no data
+            if not wbs_id and not category and original_budget == "0":
+                skipped += 1
+                continue
+
+            data = BudgetCreate(
+                project_id=project_id,
+                wbs_id=wbs_id,
+                category=category,
+                original_budget=original_budget,
+                revised_budget=original_budget,  # default revised = original
+            )
+            await service.create_budget(data)
+            imported_count += 1
+
+        except Exception as exc:
+            errors.append({
+                "row": row_idx,
+                "error": str(exc),
+                "data": {k: str(v)[:100] for k, v in row.items()},
+            })
+            logger.warning("Budget import error at row %d: %s", row_idx, exc)
+
+    logger.info(
+        "Budget file import complete: imported=%d, skipped=%d, errors=%d",
+        imported_count,
+        skipped,
+        len(errors),
+    )
+
+    return {
+        "imported": imported_count,
+        "skipped": skipped,
+        "errors": errors,
+        "total_rows": len(rows),
+    }
+
+
+# ── Export budgets as Excel ──────────────────────────────────────────────────
+
+
+@router.get("/budgets/export")
+async def export_budgets(
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(...),
+) -> StreamingResponse:
+    """Export budgets for a project as Excel file."""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font
+
+    result = await session.execute(
+        select(ProjectBudget).where(ProjectBudget.project_id == project_id).limit(50000)
+    )
+    items = result.scalars().all()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Budgets"
+
+    headers = [
+        "WBS",
+        "Category",
+        "Original",
+        "Revised",
+        "Committed",
+        "Actual",
+        "Forecast",
+        "Variance",
+    ]
+    for i, h in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=i, value=h)
+        cell.font = Font(bold=True)
+
+    for row_idx, b in enumerate(items, 2):
+        ws.cell(row=row_idx, column=1, value=b.wbs_id or "")
+        ws.cell(row=row_idx, column=2, value=b.category or "")
+        try:
+            original = float(b.original_budget)
+        except (ValueError, TypeError):
+            original = 0.0
+        try:
+            revised = float(b.revised_budget)
+        except (ValueError, TypeError):
+            revised = 0.0
+        try:
+            committed = float(b.committed)
+        except (ValueError, TypeError):
+            committed = 0.0
+        try:
+            actual = float(b.actual)
+        except (ValueError, TypeError):
+            actual = 0.0
+        try:
+            forecast = float(b.forecast_final)
+        except (ValueError, TypeError):
+            forecast = 0.0
+        variance = revised - actual
+
+        ws.cell(row=row_idx, column=3, value=original)
+        ws.cell(row=row_idx, column=4, value=revised)
+        ws.cell(row=row_idx, column=5, value=committed)
+        ws.cell(row=row_idx, column=6, value=actual)
+        ws.cell(row=row_idx, column=7, value=forecast)
+        ws.cell(row=row_idx, column=8, value=variance)
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": 'attachment; filename="budgets_export.xlsx"'},
+    )
 
 
 @router.patch("/budgets/{budget_id}", response_model=BudgetResponse)

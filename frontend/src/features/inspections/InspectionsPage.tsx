@@ -13,12 +13,15 @@ import {
   CheckCircle2,
   XCircle,
   AlertTriangle,
+  Download,
+  Loader2,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
-import { apiGet } from '@/shared/lib/api';
+import { apiGet, triggerDownload } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { useAuthStore } from '@/stores/useAuthStore';
 import {
   fetchInspections,
   createInspection,
@@ -449,6 +452,33 @@ function InspectionRow({
   );
 }
 
+/* -- Export helper --------------------------------------------------------- */
+
+async function downloadExcelExport(url: string, fallbackFilename: string): Promise<void> {
+  const token = useAuthStore.getState().accessToken;
+  const headers: Record<string, string> = { Accept: 'application/octet-stream' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`/api${url}`, { method: 'GET', headers });
+  if (!response.ok) {
+    let detail = 'Export failed';
+    try {
+      const body = await response.json();
+      detail = body.detail || detail;
+    } catch {
+      // ignore parse error
+    }
+    throw new Error(detail);
+  }
+
+  const blob = await response.blob();
+  const disposition = response.headers.get('Content-Disposition');
+  const filename = disposition?.match(/filename="?(.+)"?/)?.[1] || fallbackFilename;
+  triggerDownload(blob, filename);
+}
+
 /* -- Main Page ------------------------------------------------------------- */
 
 export function InspectionsPage() {
@@ -558,6 +588,25 @@ export function InspectionsPage() {
     [createMut, projectId],
   );
 
+  const exportMut = useMutation({
+    mutationFn: () =>
+      downloadExcelExport(
+        `/v1/inspections/export?project_id=${projectId}`,
+        'inspections.xlsx',
+      ),
+    onSuccess: () =>
+      addToast({
+        type: 'success',
+        title: t('inspections.export_success', { defaultValue: 'Export complete' }),
+      }),
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('common.error', { defaultValue: 'Error' }),
+        message: e.message,
+      }),
+  });
+
   const handleComplete = useCallback(
     (id: string) => {
       completeMut.mutate(id);
@@ -605,6 +654,21 @@ export function InspectionsPage() {
               ))}
             </select>
           )}
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={
+              exportMut.isPending ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Download size={14} />
+              )
+            }
+            onClick={() => exportMut.mutate()}
+            disabled={exportMut.isPending || !projectId}
+          >
+            {t('common.export_excel', { defaultValue: 'Export Excel' })}
+          </Button>
           <Button
             variant="primary"
             onClick={() => setShowCreateModal(true)}

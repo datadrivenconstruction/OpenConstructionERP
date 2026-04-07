@@ -11,6 +11,8 @@ import {
   Calendar,
   CheckCircle2,
   User,
+  Download,
+  Loader2,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
 import { apiGet } from '@/shared/lib/api';
@@ -21,6 +23,7 @@ import {
   fetchTasks,
   createTask,
   completeTask,
+  exportTasks,
   type Task,
   type TaskType,
   type TaskStatus,
@@ -501,6 +504,22 @@ export function TasksPage() {
       }),
   });
 
+  const exportMut = useMutation({
+    mutationFn: () => exportTasks(projectId),
+    onSuccess: () =>
+      addToast({
+        type: 'success',
+        title: t('tasks.export_success', { defaultValue: 'Export complete' }),
+        message: t('tasks.export_success_msg', { defaultValue: 'Excel file downloaded.' }),
+      }),
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('tasks.export_failed', { defaultValue: 'Export failed' }),
+        message: e.message,
+      }),
+  });
+
   const completeMut = useMutation({
     mutationFn: (id: string) => completeTask(id),
     onSuccess: () => {
@@ -583,6 +602,21 @@ export function TasksPage() {
               ))}
             </select>
           )}
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={
+              exportMut.isPending ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Download size={14} />
+              )
+            }
+            onClick={() => exportMut.mutate()}
+            disabled={!projectId || exportMut.isPending}
+          >
+            {t('tasks.export', { defaultValue: 'Export' })}
+          </Button>
           <Button
             variant="primary"
             onClick={() => setShowAddModal(true)}

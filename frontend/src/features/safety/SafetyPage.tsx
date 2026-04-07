@@ -1,13 +1,16 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   ShieldAlert,
   Eye,
   Search,
   HardHat,
+  Download,
+  Loader2,
 } from 'lucide-react';
 import {
+  Button,
   Card,
   Badge,
   EmptyState,
@@ -15,8 +18,10 @@ import {
   SkeletonTable,
 } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
-import { apiGet } from '@/shared/lib/api';
+import { apiGet, triggerDownload } from '@/shared/lib/api';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { useToastStore } from '@/stores/useToastStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -150,6 +155,33 @@ function SeverityDots({ level, max = 5 }: { level: number; max?: number }) {
   );
 }
 
+/* ── Export helpers ───────────────────────────────────────────────────── */
+
+async function downloadExcelExport(url: string, fallbackFilename: string): Promise<void> {
+  const token = useAuthStore.getState().accessToken;
+  const headers: Record<string, string> = { Accept: 'application/octet-stream' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`/api${url}`, { method: 'GET', headers });
+  if (!response.ok) {
+    let detail = 'Export failed';
+    try {
+      const body = await response.json();
+      detail = body.detail || detail;
+    } catch {
+      // ignore parse error
+    }
+    throw new Error(detail);
+  }
+
+  const blob = await response.blob();
+  const disposition = response.headers.get('Content-Disposition');
+  const filename = disposition?.match(/filename="?(.+)"?/)?.[1] || fallbackFilename;
+  triggerDownload(blob, filename);
+}
+
 /* ── Main Page ────────────────────────────────────────────────────────── */
 
 export function SafetyPage() {
@@ -249,6 +281,26 @@ export function SafetyPage() {
 function IncidentsTab({ projectId }: { projectId: string }) {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
+  const addToast = useToastStore((s) => s.addToast);
+
+  const exportMut = useMutation({
+    mutationFn: () =>
+      downloadExcelExport(
+        `/v1/safety/incidents/export?project_id=${projectId}`,
+        'safety_incidents.xlsx',
+      ),
+    onSuccess: () =>
+      addToast({
+        type: 'success',
+        title: t('safety.export_success', { defaultValue: 'Export complete' }),
+      }),
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('common.error', { defaultValue: 'Error' }),
+        message: e.message,
+      }),
+  });
 
   const { data: incidents, isLoading } = useQuery({
     queryKey: ['safety-incidents', projectId],
@@ -288,9 +340,9 @@ function IncidentsTab({ projectId }: { projectId: string }) {
 
   return (
     <Card padding="none">
-      {/* Search */}
-      <div className="p-4 border-b border-border-light">
-        <div className="relative max-w-sm">
+      {/* Search + Export */}
+      <div className="p-4 border-b border-border-light flex items-center gap-3">
+        <div className="relative max-w-sm flex-1">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-content-tertiary">
             <Search size={16} />
           </div>
@@ -304,6 +356,21 @@ function IncidentsTab({ projectId }: { projectId: string }) {
             className="h-10 w-full rounded-lg border border-border bg-surface-primary pl-10 pr-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
           />
         </div>
+        <Button
+          variant="secondary"
+          size="sm"
+          icon={
+            exportMut.isPending ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : (
+              <Download size={14} />
+            )
+          }
+          onClick={() => exportMut.mutate()}
+          disabled={exportMut.isPending}
+        >
+          {t('common.export_excel', { defaultValue: 'Export Excel' })}
+        </Button>
       </div>
 
       {/* Table */}
@@ -402,6 +469,26 @@ function IncidentsTab({ projectId }: { projectId: string }) {
 function ObservationsTab({ projectId }: { projectId: string }) {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
+  const addToast = useToastStore((s) => s.addToast);
+
+  const exportMut = useMutation({
+    mutationFn: () =>
+      downloadExcelExport(
+        `/v1/safety/observations/export?project_id=${projectId}`,
+        'safety_observations.xlsx',
+      ),
+    onSuccess: () =>
+      addToast({
+        type: 'success',
+        title: t('safety.export_success', { defaultValue: 'Export complete' }),
+      }),
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('common.error', { defaultValue: 'Error' }),
+        message: e.message,
+      }),
+  });
 
   const { data: observations, isLoading } = useQuery({
     queryKey: ['safety-observations', projectId],
@@ -441,9 +528,9 @@ function ObservationsTab({ projectId }: { projectId: string }) {
 
   return (
     <Card padding="none">
-      {/* Search */}
-      <div className="p-4 border-b border-border-light">
-        <div className="relative max-w-sm">
+      {/* Search + Export */}
+      <div className="p-4 border-b border-border-light flex items-center gap-3">
+        <div className="relative max-w-sm flex-1">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-content-tertiary">
             <Search size={16} />
           </div>
@@ -457,6 +544,21 @@ function ObservationsTab({ projectId }: { projectId: string }) {
             className="h-10 w-full rounded-lg border border-border bg-surface-primary pl-10 pr-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
           />
         </div>
+        <Button
+          variant="secondary"
+          size="sm"
+          icon={
+            exportMut.isPending ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : (
+              <Download size={14} />
+            )
+          }
+          onClick={() => exportMut.mutate()}
+          disabled={exportMut.isPending}
+        >
+          {t('common.export_excel', { defaultValue: 'Export Excel' })}
+        </Button>
       </div>
 
       {/* Table */}

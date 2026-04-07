@@ -9,6 +9,10 @@ import {
   Search,
   ArrowUpRight,
   ArrowDownRight,
+  Download,
+  Upload,
+  Loader2,
+  X,
 } from 'lucide-react';
 import {
   Button,
@@ -20,9 +24,10 @@ import {
 } from '@/shared/ui';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
-import { apiGet, apiPatch } from '@/shared/lib/api';
+import { apiGet, apiPatch, triggerDownload } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -105,6 +110,68 @@ const INVOICE_STATUS_COLORS: Record<
   disputed: 'error',
   cancelled: 'neutral',
 };
+
+/* ── Export / Import helpers ──────────────────────────────────────────── */
+
+async function fetchBlobWithAuth(url: string, fallbackFilename: string): Promise<void> {
+  const token = useAuthStore.getState().accessToken;
+  const headers: Record<string, string> = { Accept: 'application/octet-stream' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const response = await fetch(url, { method: 'GET', headers });
+  if (!response.ok) {
+    let detail = 'Export failed';
+    try {
+      const body = await response.json();
+      detail = body.detail || detail;
+    } catch {
+      // ignore parse error
+    }
+    throw new Error(detail);
+  }
+
+  const blob = await response.blob();
+  const disposition = response.headers.get('Content-Disposition');
+  const filename = disposition?.match(/filename="?(.+)"?/)?.[1] || fallbackFilename;
+  triggerDownload(blob, filename);
+}
+
+interface BudgetImportResult {
+  imported: number;
+  skipped: number;
+  errors: { row: number; error: string; data: Record<string, string> }[];
+  total_rows: number;
+}
+
+async function importBudgetsFile(
+  file: File,
+  projectId: string,
+): Promise<BudgetImportResult> {
+  const token = useAuthStore.getState().accessToken;
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const headers: Record<string, string> = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const response = await fetch(
+    `/api/v1/finance/budgets/import/file?project_id=${encodeURIComponent(projectId)}`,
+    { method: 'POST', headers, body: formData },
+  );
+
+  if (!response.ok) {
+    let detail = 'Import failed';
+    try {
+      const body = await response.json();
+      detail = body.detail || detail;
+    } catch {
+      // ignore parse error
+    }
+    throw new Error(detail);
+  }
+
+  return response.json();
+}
 
 /* ── Main Page ────────────────────────────────────────────────────────── */
 
@@ -213,7 +280,48 @@ export function FinancePage() {
 
 function BudgetsTab({ projectId }: { projectId: string }) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
   const [search, setSearch] = useState('');
+  const [showImport, setShowImport] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importPending, setImportPending] = useState(false);
+  const [importResult, setImportResult] = useState<BudgetImportResult | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+
+  const exportBudgetsMut = useMutation({
+    mutationFn: () =>
+      fetchBlobWithAuth(
+        `/api/v1/finance/budgets/export?project_id=${encodeURIComponent(projectId)}`,
+        'budgets_export.xlsx',
+      ),
+    onSuccess: () =>
+      addToast({
+        type: 'success',
+        title: t('finance.export_success', { defaultValue: 'Export complete' }),
+      }),
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('finance.export_failed', { defaultValue: 'Export failed' }),
+        message: e.message,
+      }),
+  });
+
+  const handleBudgetImport = async () => {
+    if (!importFile) return;
+    setImportPending(true);
+    setImportError(null);
+    try {
+      const res = await importBudgetsFile(importFile, projectId);
+      setImportResult(res);
+      queryClient.invalidateQueries({ queryKey: ['finance-budgets', projectId] });
+    } catch (err: unknown) {
+      setImportError(err instanceof Error ? err.message : 'Import failed');
+    } finally {
+      setImportPending(false);
+    }
+  };
 
   const { data: budgets, isLoading } = useQuery({
     queryKey: ['finance-budgets', projectId],
@@ -262,10 +370,11 @@ function BudgetsTab({ projectId }: { projectId: string }) {
   }
 
   return (
+    <>
     <Card padding="none">
-      {/* Search */}
-      <div className="p-4 border-b border-border-light">
-        <div className="relative max-w-sm">
+      {/* Search + actions */}
+      <div className="p-4 border-b border-border-light flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="relative flex-1 max-w-sm">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-content-tertiary">
             <Search size={16} />
           </div>
@@ -278,6 +387,36 @@ function BudgetsTab({ projectId }: { projectId: string }) {
             })}
             className="h-10 w-full rounded-lg border border-border bg-surface-primary pl-10 pr-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
           />
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={
+              exportBudgetsMut.isPending ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Download size={14} />
+              )
+            }
+            onClick={() => exportBudgetsMut.mutate()}
+            disabled={exportBudgetsMut.isPending}
+          >
+            {t('finance.export', { defaultValue: 'Export' })}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<Upload size={14} />}
+            onClick={() => {
+              setShowImport(true);
+              setImportFile(null);
+              setImportResult(null);
+              setImportError(null);
+            }}
+          >
+            {t('finance.import', { defaultValue: 'Import' })}
+          </Button>
         </div>
       </div>
 
@@ -389,6 +528,105 @@ function BudgetsTab({ projectId }: { projectId: string }) {
         </table>
       </div>
     </Card>
+
+    {/* Budget Import Modal */}
+    {showImport && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+        <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
+            <h2 className="text-lg font-semibold text-content-primary">
+              {t('finance.import_budgets', { defaultValue: 'Import Budgets' })}
+            </h2>
+            <button
+              onClick={() => setShowImport(false)}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+            >
+              <X size={18} />
+            </button>
+          </div>
+          <div className="px-6 py-4 space-y-4">
+            <div
+              className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors cursor-pointer border-border hover:border-oe-blue/50"
+              onClick={() => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.xlsx,.csv,.xls';
+                input.onchange = (e) => {
+                  const f = (e.target as HTMLInputElement).files?.[0];
+                  if (f) setImportFile(f);
+                };
+                input.click();
+              }}
+            >
+              <Upload size={24} className="text-content-tertiary mb-2" />
+              <p className="text-sm text-content-secondary text-center">
+                {importFile
+                  ? importFile.name
+                  : t('finance.drop_budget_file', {
+                      defaultValue: 'Drop Excel or CSV file here, or click to browse',
+                    })}
+              </p>
+              <p className="text-xs text-content-quaternary mt-1">
+                {t('finance.budget_file_hint', {
+                  defaultValue: 'Columns: WBS Code, Category, Original Budget, Notes',
+                })}
+              </p>
+            </div>
+            {importError && (
+              <div className="rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 p-3 text-sm text-semantic-error">
+                {importError}
+              </div>
+            )}
+            {importResult && (
+              <div className="rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-3 text-sm text-content-primary space-y-1">
+                <p>
+                  {t('finance.import_result', {
+                    defaultValue: 'Imported: {{imported}}, Skipped: {{skipped}}, Errors: {{errors}}',
+                    imported: importResult.imported,
+                    skipped: importResult.skipped,
+                    errors: importResult.errors.length,
+                  })}
+                </p>
+                {importResult.errors.length > 0 && (
+                  <details className="text-xs text-content-tertiary">
+                    <summary className="cursor-pointer">
+                      {t('finance.show_errors', { defaultValue: 'Show error details' })}
+                    </summary>
+                    <ul className="mt-1 space-y-0.5 max-h-32 overflow-y-auto">
+                      {importResult.errors.slice(0, 20).map((err, i) => (
+                        <li key={i}>Row {err.row}: {err.error}</li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+              </div>
+            )}
+          </div>
+          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
+            <Button variant="ghost" onClick={() => setShowImport(false)}>
+              {importResult
+                ? t('common.close', { defaultValue: 'Close' })
+                : t('common.cancel', { defaultValue: 'Cancel' })}
+            </Button>
+            {!importResult && (
+              <Button
+                variant="primary"
+                onClick={handleBudgetImport}
+                disabled={!importFile || importPending}
+              >
+                {importPending ? (
+                  <Loader2 size={16} className="animate-spin mr-1.5" />
+                ) : (
+                  <Upload size={16} className="mr-1.5" />
+                )}
+                <span>{t('finance.import_btn', { defaultValue: 'Import' })}</span>
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
 
@@ -400,6 +638,25 @@ function InvoicesTab({ projectId }: { projectId: string }) {
   const addToast = useToastStore((s) => s.addToast);
   const [subTab, setSubTab] = useState<InvoiceSubTab>('payable');
   const [search, setSearch] = useState('');
+
+  const exportInvoicesMut = useMutation({
+    mutationFn: () =>
+      fetchBlobWithAuth(
+        `/api/v1/finance/invoices/export?project_id=${encodeURIComponent(projectId)}&direction=${subTab}`,
+        'invoices_export.xlsx',
+      ),
+    onSuccess: () =>
+      addToast({
+        type: 'success',
+        title: t('finance.export_success', { defaultValue: 'Export complete' }),
+      }),
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('finance.export_failed', { defaultValue: 'Export failed' }),
+        message: e.message,
+      }),
+  });
 
   const { data: invoices, isLoading } = useQuery({
     queryKey: ['finance-invoices', projectId, subTab],
@@ -456,28 +713,45 @@ function InvoicesTab({ projectId }: { projectId: string }) {
 
   return (
     <div className="space-y-4">
-      {/* Sub-tabs: Payable / Receivable */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => setSubTab('payable')}
-          className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-            subTab === 'payable'
-              ? 'bg-oe-blue-subtle text-oe-blue'
-              : 'text-content-tertiary hover:text-content-primary hover:bg-surface-secondary'
-          }`}
+      {/* Sub-tabs: Payable / Receivable + Export */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setSubTab('payable')}
+            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+              subTab === 'payable'
+                ? 'bg-oe-blue-subtle text-oe-blue'
+                : 'text-content-tertiary hover:text-content-primary hover:bg-surface-secondary'
+            }`}
+          >
+            {t('finance.payable', { defaultValue: 'Payable' })}
+          </button>
+          <button
+            onClick={() => setSubTab('receivable')}
+            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+              subTab === 'receivable'
+                ? 'bg-oe-blue-subtle text-oe-blue'
+                : 'text-content-tertiary hover:text-content-primary hover:bg-surface-secondary'
+            }`}
+          >
+            {t('finance.receivable', { defaultValue: 'Receivable' })}
+          </button>
+        </div>
+        <Button
+          variant="secondary"
+          size="sm"
+          icon={
+            exportInvoicesMut.isPending ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : (
+              <Download size={14} />
+            )
+          }
+          onClick={() => exportInvoicesMut.mutate()}
+          disabled={exportInvoicesMut.isPending}
         >
-          {t('finance.payable', { defaultValue: 'Payable' })}
-        </button>
-        <button
-          onClick={() => setSubTab('receivable')}
-          className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-            subTab === 'receivable'
-              ? 'bg-oe-blue-subtle text-oe-blue'
-              : 'text-content-tertiary hover:text-content-primary hover:bg-surface-secondary'
-          }`}
-        >
-          {t('finance.receivable', { defaultValue: 'Receivable' })}
-        </button>
+          {t('finance.export', { defaultValue: 'Export' })}
+        </Button>
       </div>
 
       <Card padding="none">

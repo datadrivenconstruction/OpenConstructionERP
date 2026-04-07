@@ -4,16 +4,19 @@ Endpoints:
     GET    /                    - List tasks for a project
     POST   /                    - Create task
     GET    /my-tasks             - List tasks for the current user
+    GET    /export               - Export tasks as Excel file
     GET    /{task_id}            - Get single task
     PATCH  /{task_id}            - Update task
     DELETE /{task_id}            - Delete task
     POST   /{task_id}/complete   - Mark task as completed
 """
 
+import io
 import logging
 import uuid
 
 from fastapi import APIRouter, Depends, Query
+from fastapi.responses import StreamingResponse
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.tasks.schemas import (
@@ -109,6 +112,76 @@ async def create_task(
     """Create a new task."""
     task = await service.create_task(data, user_id=user_id)
     return _to_response(task)
+
+
+# ── Export tasks as Excel ────────────────────────────────────────────────────
+
+
+@router.get("/export")
+async def export_tasks(
+    project_id: uuid.UUID = Query(...),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: TaskService = Depends(_get_service),
+) -> StreamingResponse:
+    """Export tasks for a project as Excel file."""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font
+
+    tasks, _ = await service.list_tasks(project_id, offset=0, limit=10000)
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Tasks"
+
+    headers = [
+        "Title",
+        "Type",
+        "Status",
+        "Priority",
+        "Assignee",
+        "Due Date",
+        "Created",
+        "Checklist Progress",
+    ]
+    for i, h in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=i, value=h)
+        cell.font = Font(bold=True)
+
+    for row_idx, task in enumerate(tasks, 2):
+        ws.cell(row=row_idx, column=1, value=task.title)  # type: ignore[attr-defined]
+        ws.cell(row=row_idx, column=2, value=task.task_type)  # type: ignore[attr-defined]
+        ws.cell(row=row_idx, column=3, value=task.status)  # type: ignore[attr-defined]
+        ws.cell(row=row_idx, column=4, value=task.priority)  # type: ignore[attr-defined]
+        ws.cell(
+            row=row_idx,
+            column=5,
+            value=str(task.responsible_id) if task.responsible_id else "",  # type: ignore[attr-defined]
+        )
+        ws.cell(row=row_idx, column=6, value=task.due_date)  # type: ignore[attr-defined]
+        ws.cell(
+            row=row_idx,
+            column=7,
+            value=str(task.created_at) if task.created_at else "",  # type: ignore[attr-defined]
+        )
+        # Checklist progress
+        checklist = task.checklist or []  # type: ignore[attr-defined]
+        total = len(checklist)
+        done = sum(1 for c in checklist if isinstance(c, dict) and c.get("completed"))
+        ws.cell(
+            row=row_idx,
+            column=8,
+            value=f"{done}/{total}" if total > 0 else "",
+        )
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": 'attachment; filename="tasks_export.xlsx"'},
+    )
 
 
 @router.get("/{task_id}", response_model=TaskResponse)

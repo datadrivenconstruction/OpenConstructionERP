@@ -15,16 +15,24 @@ import {
   ShieldAlert,
   ShieldX,
   Shield,
+  Upload,
+  Download,
+  Loader2,
+  FileDown,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, CountryFlag } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   fetchContacts,
   createContact,
+  importContactsFile,
+  exportContacts,
+  downloadContactsTemplate,
   type Contact,
   type ContactType,
   type PrequalificationStatus,
   type CreateContactPayload,
+  type ImportResult,
 } from './api';
 
 /* ── Constants ─────────────────────────────────────────────────────────── */
@@ -327,6 +335,179 @@ function AddContactModal({
   );
 }
 
+/* ── Import Contacts Modal ─────────────────────────────────────────────── */
+
+function ImportContactsModal({
+  onClose,
+  onSuccess,
+}: {
+  onClose: () => void;
+  onSuccess: (result: ImportResult) => void;
+}) {
+  const { t } = useTranslation();
+  const [file, setFile] = useState<File | null>(null);
+  const [dragActive, setDragActive] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<ImportResult | null>(null);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragActive(false);
+    const dropped = e.dataTransfer.files[0];
+    if (dropped) setFile(dropped);
+  }, []);
+
+  const handleImport = async () => {
+    if (!file) return;
+    setIsPending(true);
+    setError(null);
+    try {
+      const res = await importContactsFile(file);
+      setResult(res);
+      onSuccess(res);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Import failed');
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+      <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
+          <h2 className="text-lg font-semibold text-content-primary">
+            {t('contacts.import_contacts', { defaultValue: 'Import Contacts' })}
+          </h2>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 py-4 space-y-4">
+          {/* Drop zone */}
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragActive(true);
+            }}
+            onDragLeave={() => setDragActive(false)}
+            onDrop={handleDrop}
+            className={clsx(
+              'flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors cursor-pointer',
+              dragActive
+                ? 'border-oe-blue bg-oe-blue-subtle/20'
+                : 'border-border hover:border-oe-blue/50',
+            )}
+            onClick={() => {
+              const input = document.createElement('input');
+              input.type = 'file';
+              input.accept = '.xlsx,.csv,.xls';
+              input.onchange = (e) => {
+                const f = (e.target as HTMLInputElement).files?.[0];
+                if (f) setFile(f);
+              };
+              input.click();
+            }}
+          >
+            <Upload size={24} className="text-content-tertiary mb-2" />
+            <p className="text-sm text-content-secondary text-center">
+              {file
+                ? file.name
+                : t('contacts.drop_file', {
+                    defaultValue: 'Drop Excel or CSV file here, or click to browse',
+                  })}
+            </p>
+            <p className="text-xs text-content-quaternary mt-1">
+              {t('contacts.file_types', { defaultValue: '.xlsx, .csv — max 10 MB' })}
+            </p>
+          </div>
+
+          {/* Template download */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              downloadContactsTemplate();
+            }}
+            className="flex items-center gap-1.5 text-xs text-oe-blue hover:underline"
+          >
+            <FileDown size={13} />
+            {t('contacts.download_template', { defaultValue: 'Download import template' })}
+          </button>
+
+          {/* Error */}
+          {error && (
+            <div className="rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 p-3 text-sm text-semantic-error">
+              {error}
+            </div>
+          )}
+
+          {/* Result */}
+          {result && (
+            <div className="rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-3 text-sm text-content-primary space-y-1">
+              <p>
+                {t('contacts.import_result', {
+                  defaultValue: 'Imported: {{imported}}, Skipped: {{skipped}}, Errors: {{errors}}',
+                  imported: result.imported,
+                  skipped: result.skipped,
+                  errors: result.errors.length,
+                })}
+              </p>
+              {result.errors.length > 0 && (
+                <details className="text-xs text-content-tertiary">
+                  <summary className="cursor-pointer">
+                    {t('contacts.show_errors', { defaultValue: 'Show error details' })}
+                  </summary>
+                  <ul className="mt-1 space-y-0.5 max-h-32 overflow-y-auto">
+                    {result.errors.slice(0, 20).map((err, i) => (
+                      <li key={i}>
+                        {t('contacts.row_error', {
+                          defaultValue: 'Row {{row}}: {{error}}',
+                          row: err.row,
+                          error: err.error,
+                        })}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
+          <Button variant="ghost" onClick={onClose}>
+            {result
+              ? t('common.close', { defaultValue: 'Close' })
+              : t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          {!result && (
+            <Button
+              variant="primary"
+              onClick={handleImport}
+              disabled={!file || isPending}
+            >
+              {isPending ? (
+                <Loader2 size={16} className="animate-spin mr-1.5" />
+              ) : (
+                <Upload size={16} className="mr-1.5" />
+              )}
+              <span>{t('contacts.import_btn', { defaultValue: 'Import' })}</span>
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Contact Card ──────────────────────────────────────────────────────── */
 
 function ContactCard({ contact }: { contact: Contact }) {
@@ -404,6 +585,7 @@ export function ContactsPage() {
 
   // State
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<ContactType | ''>('');
   const [countryFilter, setCountryFilter] = useState('');
@@ -465,6 +647,23 @@ export function ContactsPage() {
       }),
   });
 
+  // Export mutation
+  const exportMut = useMutation({
+    mutationFn: exportContacts,
+    onSuccess: () =>
+      addToast({
+        type: 'success',
+        title: t('contacts.export_success', { defaultValue: 'Export complete' }),
+        message: t('contacts.export_success_msg', { defaultValue: 'Excel file downloaded.' }),
+      }),
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('contacts.export_failed', { defaultValue: 'Export failed' }),
+        message: e.message,
+      }),
+  });
+
   const handleCreateSubmit = useCallback(
     (formData: ContactFormData) => {
       createMut.mutate({
@@ -498,13 +697,38 @@ export function ContactsPage() {
         <h1 className="text-2xl font-bold text-content-primary">
           {t('contacts.page_title', { defaultValue: 'Contacts Directory' })}
         </h1>
-        <Button
-          variant="primary"
-          onClick={() => setShowAddModal(true)}
-          icon={<Plus size={16} />}
-        >
-          {t('contacts.add_contact', { defaultValue: 'Add Contact' })}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={
+              exportMut.isPending ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Download size={14} />
+              )
+            }
+            onClick={() => exportMut.mutate()}
+            disabled={exportMut.isPending}
+          >
+            {t('contacts.export', { defaultValue: 'Export' })}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<Upload size={14} />}
+            onClick={() => setShowImportModal(true)}
+          >
+            {t('contacts.import', { defaultValue: 'Import' })}
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => setShowAddModal(true)}
+            icon={<Plus size={16} />}
+          >
+            {t('contacts.add_contact', { defaultValue: 'Add Contact' })}
+          </Button>
+        </div>
       </div>
 
       {/* Filter bar */}
@@ -637,6 +861,16 @@ export function ContactsPage() {
           onClose={() => setShowAddModal(false)}
           onSubmit={handleCreateSubmit}
           isPending={createMut.isPending}
+        />
+      )}
+
+      {/* Import Modal */}
+      {showImportModal && (
+        <ImportContactsModal
+          onClose={() => setShowImportModal(false)}
+          onSuccess={() => {
+            qc.invalidateQueries({ queryKey: ['contacts'] });
+          }}
         />
       )}
     </div>
