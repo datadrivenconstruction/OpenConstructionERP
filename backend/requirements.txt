@@ -131,7 +131,7 @@ pandas==2.2.3
 paramiko==4.0.0
 passlib==1.7.4
 patch-ng==1.19.0
-pdfminer.six==20251230
+pdfminer.six==20260107
 pdfplumber==0.11.9
 pefile==2024.8.26
 phpserialize==1.3
