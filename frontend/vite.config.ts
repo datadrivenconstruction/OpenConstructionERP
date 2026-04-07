@@ -40,14 +40,18 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-ag-grid': ['ag-grid-community', 'ag-grid-react'],
-          'vendor-query': ['@tanstack/react-query'],
-          'vendor-i18n': ['i18next', 'react-i18next', 'i18next-browser-languagedetector', 'i18next-http-backend'],
-          'vendor-pdf': ['pdfjs-dist'],
-          'vendor-collab': ['yjs', 'y-webrtc'],
-          'vendor-charts': ['jspdf', 'jspdf-autotable', 'html2canvas'],
+        manualChunks(id) {
+          // Vendor chunks
+          if (id.includes('node_modules/react-dom/')) return 'vendor-react';
+          if (id.includes('node_modules/react/') || id.includes('node_modules/react-router-dom/')) return 'vendor-react';
+          if (id.includes('node_modules/ag-grid-')) return 'vendor-ag-grid';
+          if (id.includes('node_modules/@tanstack/react-query')) return 'vendor-query';
+          if (id.includes('node_modules/i18next') || id.includes('node_modules/react-i18next') || id.includes('node_modules/i18next-browser-languagedetector') || id.includes('node_modules/i18next-http-backend')) return 'vendor-i18n';
+          if (id.includes('node_modules/pdfjs-dist')) return 'vendor-pdf';
+          if (id.includes('node_modules/yjs') || id.includes('node_modules/y-webrtc')) return 'vendor-collab';
+          if (id.includes('node_modules/jspdf') || id.includes('node_modules/html2canvas')) return 'vendor-charts';
+          // i18n fallback translations — separate chunk (~2MB of translation data)
+          if (id.includes('i18n-fallbacks')) return 'i18n-data';
         },
       },
     },
