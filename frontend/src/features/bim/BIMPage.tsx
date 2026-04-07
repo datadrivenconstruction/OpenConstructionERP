@@ -409,9 +409,15 @@ export function BIMPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-content-tertiary py-4 text-center">
-                {t('bim.no_models', { defaultValue: 'No models uploaded yet' })}
-              </p>
+              <div className="py-6 px-4 text-center space-y-2">
+                <Box size={24} className="mx-auto text-content-quaternary" />
+                <p className="text-xs font-medium text-content-tertiary">
+                  {t('bim.no_models', { defaultValue: 'No models uploaded yet' })}
+                </p>
+                <p className="text-2xs text-content-quaternary">
+                  {t('bim.no_models_hint', { defaultValue: 'Upload CAD files in the Takeoff module to populate this view.' })}
+                </p>
+              </div>
             )}
           </div>
 
@@ -497,10 +503,16 @@ export function BIMPage() {
             <div className="flex items-center justify-center h-full bg-surface-secondary">
               <EmptyState
                 icon={<Box size={28} />}
-                title={t('bim.select_model', { defaultValue: 'Select a model' })}
-                description={t('bim.select_model_desc', {
-                  defaultValue: 'Choose a BIM model from the list to visualize it in 3D.',
-                })}
+                title={
+                  modelsQuery.data?.models?.length
+                    ? t('bim.select_model', { defaultValue: 'Select a model' })
+                    : t('bim.getting_started', { defaultValue: 'BIM Viewer' })
+                }
+                description={
+                  modelsQuery.data?.models?.length
+                    ? t('bim.select_model_desc', { defaultValue: 'Choose a BIM model from the list to visualize it in 3D.' })
+                    : t('bim.getting_started_desc', { defaultValue: 'Upload IFC, RVT, DWG, or DGN files via the Takeoff module to see your building models in 3D. Elements will be extracted automatically and can be linked to BOQ positions for quantity verification.' })
+                }
               />
             </div>
           )}
