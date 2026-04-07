@@ -610,6 +610,7 @@ export function CDEPage() {
             size="sm"
             onClick={() => setShowCreateModal(true)}
             disabled={!projectId}
+            title={!projectId ? t('cde.select_project_first', { defaultValue: 'Please select a project first' }) : undefined}
             className="shrink-0 whitespace-nowrap"
           >
             <Plus size={14} className="mr-1 shrink-0" />
@@ -669,9 +670,18 @@ export function CDEPage() {
         />
       </div>
 
+      {/* No project selected banner */}
+      {!projectId && (
+        <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
+          {t('cde.no_project_selected', {
+            defaultValue: 'Please select a project to view and manage CDE containers.',
+          })}
+        </div>
+      )}
+
       {/* Table */}
       <div>
-        {isLoading ? (
+        {!projectId ? null : isLoading ? (
           <Card padding="none">
             {Array.from({ length: 5 }).map((_, i) => (
               <div

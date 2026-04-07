@@ -113,7 +113,7 @@ export async function importContactsFile(file: File): Promise<ImportResult> {
 
 export async function exportContacts(): Promise<void> {
   const token = useAuthStore.getState().accessToken;
-  const headers: Record<string, string> = { Accept: 'application/octet-stream' };
+  const headers: Record<string, string> = {};
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
@@ -138,7 +138,7 @@ export async function exportContacts(): Promise<void> {
 
 export async function downloadContactsTemplate(): Promise<void> {
   const token = useAuthStore.getState().accessToken;
-  const headers: Record<string, string> = { Accept: 'application/octet-stream' };
+  const headers: Record<string, string> = {};
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }

@@ -16,7 +16,9 @@ import {
   XCircle,
   Clock,
   FileDown,
+  FileUp,
   Loader2,
+  Upload,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
@@ -28,6 +30,7 @@ import {
   fetchMeetings,
   createMeeting,
   completeMeeting,
+  importMeetingSummary,
   type Meeting,
   type MeetingType,
   type MeetingStatus,
@@ -271,6 +274,168 @@ function CreateMeetingModal({
               <Plus size={16} className="mr-1.5 shrink-0" />
             )}
             <span>{t('meetings.create_meeting', { defaultValue: 'Create Meeting' })}</span>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* -- Import Summary Modal -------------------------------------------------- */
+
+const ACCEPTED_TRANSCRIPT_FORMATS = '.txt,.vtt,.srt,.docx,.pdf';
+
+function ImportSummaryModal({
+  onClose,
+  onImport,
+  isPending,
+}: {
+  onClose: () => void;
+  onImport: (file: File) => void;
+  isPending: boolean;
+}) {
+  const { t } = useTranslation();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [dragOver, setDragOver] = useState(false);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragOver(false);
+      const file = e.dataTransfer.files[0];
+      if (file) setSelectedFile(file);
+    },
+    [],
+  );
+
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) setSelectedFile(file);
+  }, []);
+
+  const detectSource = (filename: string): string => {
+    const lower = filename.toLowerCase();
+    if (lower.includes('teams') || lower.includes('microsoft')) return 'Teams';
+    if (lower.includes('meet') || lower.includes('google')) return 'Google Meet';
+    if (lower.includes('zoom')) return 'Zoom';
+    return 'Other';
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+      <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
+          <h2 className="text-lg font-semibold text-content-primary">
+            {t('meetings.import_summary', { defaultValue: 'Import Meeting Summary' })}
+          </h2>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="px-6 py-4 space-y-4">
+          <p className="text-sm text-content-secondary">
+            {t('meetings.import_description', {
+              defaultValue:
+                'Upload a meeting transcript from Microsoft Teams, Google Meet, Zoom, or any other source. AI will extract attendees, agenda, action items, and decisions.',
+            })}
+          </p>
+
+          {/* Drop zone */}
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragOver(true);
+            }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={handleDrop}
+            className={clsx(
+              'border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer',
+              dragOver
+                ? 'border-oe-blue bg-oe-blue-subtle'
+                : selectedFile
+                  ? 'border-semantic-success bg-green-50 dark:bg-green-950/20'
+                  : 'border-border-light hover:border-oe-blue hover:bg-surface-secondary',
+            )}
+            onClick={() => document.getElementById('transcript-file-input')?.click()}
+          >
+            <input
+              id="transcript-file-input"
+              type="file"
+              accept={ACCEPTED_TRANSCRIPT_FORMATS}
+              className="hidden"
+              onChange={handleFileSelect}
+            />
+
+            {selectedFile ? (
+              <div className="space-y-2">
+                <CheckCircle2 size={32} className="mx-auto text-semantic-success" />
+                <p className="text-sm font-medium text-content-primary">{selectedFile.name}</p>
+                <p className="text-xs text-content-tertiary">
+                  {(selectedFile.size / 1024).toFixed(1)} KB
+                </p>
+                <Badge variant="blue" size="sm">
+                  {detectSource(selectedFile.name)}
+                </Badge>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Upload size={32} className="mx-auto text-content-tertiary" />
+                <p className="text-sm font-medium text-content-secondary">
+                  {t('meetings.drop_transcript', {
+                    defaultValue: 'Drop transcript file here or click to browse',
+                  })}
+                </p>
+                <p className="text-xs text-content-tertiary">
+                  {t('meetings.accepted_formats', {
+                    defaultValue: 'Accepted formats: .txt, .vtt, .srt, .docx, .pdf',
+                  })}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Format hints */}
+          <div className="rounded-lg bg-surface-secondary p-3">
+            <p className="text-xs text-content-tertiary font-medium uppercase tracking-wide mb-2">
+              {t('meetings.supported_sources', { defaultValue: 'Supported Sources' })}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { label: 'Microsoft Teams', cls: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
+                { label: 'Google Meet', cls: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
+                { label: 'Zoom', cls: 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400' },
+                { label: 'Other', cls: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' },
+              ].map((s) => (
+                <Badge key={s.label} variant="neutral" size="sm" className={s.cls}>
+                  {s.label}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
+          <Button variant="ghost" onClick={onClose} disabled={isPending}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => selectedFile && onImport(selectedFile)}
+            disabled={isPending || !selectedFile}
+          >
+            {isPending ? (
+              <Loader2 size={16} className="mr-1.5 animate-spin shrink-0" />
+            ) : (
+              <FileUp size={16} className="mr-1.5 shrink-0" />
+            )}
+            <span>{t('meetings.import_btn', { defaultValue: 'Import & Extract' })}</span>
           </Button>
         </div>
       </div>
@@ -532,6 +697,7 @@ export function MeetingsPage() {
 
   // State
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<MeetingType | ''>('');
   const [statusFilter, setStatusFilter] = useState<MeetingStatus | ''>('');
@@ -633,6 +799,31 @@ export function MeetingsPage() {
       }),
   });
 
+  const importMut = useMutation({
+    mutationFn: (file: File) => importMeetingSummary(projectId, file),
+    onSuccess: () => {
+      invalidateAll();
+      setShowImportModal(false);
+      addToast({
+        type: 'success',
+        title: t('meetings.import_success', { defaultValue: 'Meeting imported from transcript' }),
+      });
+    },
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('common.error', { defaultValue: 'Error' }),
+        message: e.message,
+      }),
+  });
+
+  const handleImport = useCallback(
+    (file: File) => {
+      importMut.mutate(file);
+    },
+    [importMut],
+  );
+
   const handleCreateSubmit = useCallback(
     (formData: MeetingFormData) => {
       createMut.mutate({
@@ -701,6 +892,14 @@ export function MeetingsPage() {
               ))}
             </select>
           )}
+          <Button
+            variant="secondary"
+            onClick={() => setShowImportModal(true)}
+            disabled={!projectId}
+            icon={<FileUp size={16} />}
+          >
+            {t('meetings.import_summary', { defaultValue: 'Import Summary' })}
+          </Button>
           <Button
             variant="primary"
             onClick={() => setShowCreateModal(true)}
@@ -903,6 +1102,15 @@ export function MeetingsPage() {
           onClose={() => setShowCreateModal(false)}
           onSubmit={handleCreateSubmit}
           isPending={createMut.isPending}
+        />
+      )}
+
+      {/* Import Summary Modal */}
+      {showImportModal && (
+        <ImportSummaryModal
+          onClose={() => setShowImportModal(false)}
+          onImport={handleImport}
+          isPending={importMut.isPending}
         />
       )}
     </div>

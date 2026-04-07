@@ -5,6 +5,7 @@
  */
 
 import { apiGet, apiPost, apiPatch } from '@/shared/lib/api';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 /* -- Types ----------------------------------------------------------------- */
 
@@ -102,4 +103,40 @@ export async function updateMeeting(
 
 export async function completeMeeting(id: string): Promise<Meeting> {
   return apiPost<Meeting>(`/v1/meetings/${id}/complete`);
+}
+
+export async function importMeetingSummary(
+  projectId: string,
+  file: File,
+): Promise<Meeting> {
+  const token = useAuthStore.getState().accessToken;
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(
+    `/api/v1/meetings/import-summary?project_id=${encodeURIComponent(projectId)}`,
+    {
+      method: 'POST',
+      headers,
+      body: formData,
+    },
+  );
+
+  if (!response.ok) {
+    let detail = 'Import failed';
+    try {
+      const body = await response.json();
+      detail = body.detail || detail;
+    } catch {
+      // ignore parse error
+    }
+    throw new Error(detail);
+  }
+
+  return response.json();
 }
