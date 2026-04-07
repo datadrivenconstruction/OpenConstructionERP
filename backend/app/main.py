@@ -672,6 +672,7 @@ def create_app() -> FastAPI:
             from app.modules.assemblies import models as _asm_models  # noqa: F401
             from app.modules.boq import models as _boq_models  # noqa: F401
             from app.modules.catalog import models as _catalog_models  # noqa: F401
+            from app.modules.cde import models as _cde_models  # noqa: F401
             from app.modules.changeorders import models as _changeorders_models  # noqa: F401
             from app.modules.collaboration import models as _collaboration_models  # noqa: F401
             from app.modules.contacts import models as _contacts_models  # noqa: F401
@@ -681,6 +682,7 @@ def create_app() -> FastAPI:
             from app.modules.fieldreports import models as _fieldreports_models  # noqa: F401
             from app.modules.i18n_foundation import models as _i18n_models  # noqa: F401
             from app.modules.markups import models as _markups_models  # noqa: F401
+            from app.modules.meetings import models as _meetings_models  # noqa: F401
             from app.modules.notifications import models as _notifications_models  # noqa: F401
             from app.modules.projects import models as _projects_models  # noqa: F401
             from app.modules.punchlist import models as _punchlist_models  # noqa: F401
@@ -690,6 +692,7 @@ def create_app() -> FastAPI:
             from app.modules.takeoff import models as _takeoff_models  # noqa: F401
             from app.modules.teams import models as _teams_models  # noqa: F401
             from app.modules.tendering import models as _tendering_models  # noqa: F401
+            from app.modules.transmittals import models as _transmittals_models  # noqa: F401
             from app.modules.users import models as _users_models  # noqa: F401
 
             migrated = await sqlite_auto_migrate(engine, Base)
@@ -702,6 +705,17 @@ def create_app() -> FastAPI:
 
         # Load all modules (triggers module on_startup hooks)
         await module_loader.load_all(app)
+
+        # Mount OpenCDE API at the spec-compliant prefix /api/v1/opencde
+        # (module loader auto-mounts at /api/v1/opencde_api)
+        try:
+            from app.modules.opencde_api.router import router as opencde_router
+
+            app.include_router(
+                opencde_router, prefix="/api/v1/opencde", tags=["OpenCDE API"]
+            )
+        except Exception:
+            logger.debug("OpenCDE API router not available (non-fatal)")
 
         # Register built-in validation rules
         from app.core.validation.rules import register_builtin_rules

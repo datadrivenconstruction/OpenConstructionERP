@@ -15,6 +15,7 @@ from app.modules.assemblies import models as _asm  # noqa: F401
 from app.modules.boq import models as _boq  # noqa: F401
 from app.modules.catalog import models as _catalog  # noqa: F401
 from app.modules.collaboration import models as _collaboration  # noqa: F401
+from app.modules.cde import models as _cde  # noqa: F401
 from app.modules.contacts import models as _contacts  # noqa: F401
 from app.modules.changeorders import models as _changeorders  # noqa: F401
 from app.modules.costmodel import models as _cm  # noqa: F401
@@ -23,6 +24,7 @@ from app.modules.documents import models as _documents  # noqa: F401
 from app.modules.fieldreports import models as _fieldreports  # noqa: F401
 from app.modules.i18n_foundation import models as _i18n  # noqa: F401
 from app.modules.markups import models as _markups  # noqa: F401
+from app.modules.meetings import models as _meetings  # noqa: F401
 from app.modules.projects import models as _projects  # noqa: F401
 from app.modules.punchlist import models as _punchlist  # noqa: F401
 from app.modules.requirements import models as _requirements  # noqa: F401
@@ -31,6 +33,7 @@ from app.modules.schedule import models as _sched  # noqa: F401
 from app.modules.takeoff import models as _takeoff  # noqa: F401
 from app.modules.teams import models as _teams  # noqa: F401
 from app.modules.tendering import models as _tender  # noqa: F401
+from app.modules.transmittals import models as _transmittals  # noqa: F401
 
 from app.modules.notifications import models as _notifications  # noqa: F401
 
