@@ -381,17 +381,21 @@ function ToggleSwitch({
       onClick={onToggle}
       disabled={disabled}
       className={clsx(
-        'relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0',
-        enabled ? 'bg-oe-blue' : 'bg-surface-tertiary',
-        disabled && 'opacity-60 cursor-not-allowed',
+        'group relative inline-flex h-[26px] w-[48px] shrink-0 cursor-pointer rounded-full p-[3px] transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/50',
+        enabled
+          ? 'bg-gradient-to-r from-oe-blue to-blue-500 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]'
+          : 'bg-gray-200 dark:bg-gray-700 shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)]',
+        disabled && 'opacity-50 cursor-not-allowed',
       )}
     >
       <span
         className={clsx(
-          'absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200',
-          enabled ? 'translate-x-[22px]' : 'translate-x-0.5',
+          'pointer-events-none flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-lg ring-0 transition-all duration-300 ease-in-out',
+          enabled ? 'translate-x-[22px] scale-[1.05]' : 'translate-x-0 scale-100',
         )}
-      />
+      >
+        {enabled && <Check size={11} className="text-oe-blue" strokeWidth={3} />}
+      </span>
     </button>
   );
 }
@@ -888,7 +892,7 @@ function StepModuleConfig({
       </div>
 
       {/* Module list grouped by category */}
-      <div className="mt-4 w-full max-w-2xl max-h-[440px] overflow-y-auto pr-1 space-y-5 scrollbar-thin">
+      <div className="mt-4 w-full max-w-2xl max-h-[50vh] overflow-y-auto pr-1 space-y-5 scrollbar-thin">
         {MODULE_GROUPS.map((group) => {
           const groupModules = ALL_MODULES.filter((m) => m.group === group.id);
           if (groupModules.length === 0) return null;
@@ -905,11 +909,11 @@ function StepModuleConfig({
                   return (
                     <div
                       key={mod.key}
-                      className="flex items-center justify-between py-3 px-4 border-b border-border-light last:border-b-0"
+                      className="flex items-center justify-between py-2.5 px-4 border-b border-border-light last:border-b-0 gap-3 overflow-hidden"
                     >
-                      <div className="flex-1 min-w-0 mr-3">
+                      <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-content-primary">
+                          <span className="text-sm font-medium text-content-primary truncate">
                             {t(mod.labelKey, { defaultValue: mod.key })}
                           </span>
                           {isCore && (
@@ -1158,6 +1162,9 @@ function StepDataSetup({
     onNext,
   ]);
 
+  // Show all regions
+  const [aiExpanded, setAiExpanded] = useState(false);
+
   return (
     <div className="flex flex-col items-center">
       <h2 className="text-2xl font-bold text-content-primary">
@@ -1169,40 +1176,53 @@ function StepDataSetup({
         })}
       </p>
 
-      {/* Three cards in a responsive grid */}
-      <div className="mt-6 w-full max-w-3xl grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Card 1: Cost Database */}
-        <div className="rounded-2xl border border-border-light bg-surface-elevated p-5 flex flex-col">
+      <div className="mt-6 w-full max-w-2xl space-y-4">
+        {/* Card 1: Cost Database — full width */}
+        <div className="rounded-2xl border border-border-light bg-surface-elevated p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue">
               <Database size={20} />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-content-primary">
+              <h3 className="text-base font-bold text-content-primary">
                 {t('onboarding.load_cost_db', { defaultValue: 'Load Cost Database' })}
               </h3>
-              <p className="text-2xs text-content-tertiary">
+              <p className="text-xs text-content-tertiary">
                 {t('onboarding.cost_db_optional', { defaultValue: '55,000+ pricing items' })}
               </p>
             </div>
           </div>
 
-          {/* Region dropdown */}
-          <select
-            value={selectedRegion}
-            onChange={(e) => setSelectedRegion(e.target.value)}
-            disabled={loadingDb || !!loadedDb}
-            className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all"
-          >
-            {CWICR_DATABASES.map((db) => (
-              <option key={db.id} value={db.id}>
-                {db.name} ({db.currency})
-              </option>
-            ))}
-          </select>
+          {/* All regions as selectable cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mb-3">
+            {CWICR_DATABASES.map((db) => {
+              const isSelected = selectedRegion === db.id;
+              return (
+                <button
+                  key={db.id}
+                  onClick={() => !loadingDb && !loadedDb && setSelectedRegion(db.id)}
+                  disabled={loadingDb || !!loadedDb}
+                  className={clsx(
+                    'flex items-center gap-2 rounded-xl px-3 py-2 text-left border transition-all duration-200',
+                    isSelected
+                      ? 'border-oe-blue bg-oe-blue-subtle/40 ring-2 ring-oe-blue/20 shadow-sm'
+                      : 'border-border-light bg-surface-primary hover:border-border hover:bg-surface-secondary',
+                    (loadingDb || !!loadedDb) && 'opacity-60 cursor-not-allowed',
+                  )}
+                >
+                  <CountryFlag code={db.flagId} size={18} className="shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs font-medium text-content-primary truncate">{db.name}</div>
+                    <div className="text-2xs text-content-quaternary">{db.currency}</div>
+                  </div>
+                  {isSelected && <Check size={14} className="text-oe-blue shrink-0" />}
+                </button>
+              );
+            })}
+          </div>
 
           {/* Load button / progress / success */}
-          <div className="mt-3 flex-1">
+          <div>
             {loadedDb ? (
               <div className="flex items-center gap-2 text-sm text-semantic-success">
                 <CheckCircle2 size={16} />
@@ -1225,151 +1245,162 @@ function StepDataSetup({
                 </div>
               </div>
             ) : (
-              <Button variant="secondary" size="sm" onClick={handleLoadDb} className="w-full">
+              <Button variant="secondary" size="sm" onClick={handleLoadDb}>
                 {t('onboarding.load_database', { defaultValue: 'Load Database' })}
               </Button>
             )}
           </div>
         </div>
 
-        {/* Card 2: Demo Project */}
-        <div className="rounded-2xl border border-border-light bg-surface-elevated p-5 flex flex-col">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue">
-              <FolderOpen size={20} />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-content-primary">
-                {t('onboarding.install_demo', { defaultValue: 'Install Demo Project' })}
-              </h3>
-              <p className="text-2xs text-content-tertiary">
-                {t('onboarding.demo_optional', { defaultValue: 'Sample project to explore' })}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between py-2">
-            <span className="text-sm text-content-primary">
-              {t('onboarding.install_demo_data', { defaultValue: 'Install demo data' })}
-            </span>
-            <ToggleSwitch
-              enabled={installDemo}
-              onToggle={() => setInstallDemo(!installDemo)}
-              disabled={demoInstalled}
-            />
-          </div>
-
-          <div className="mt-auto">
-            {demoInstalled ? (
-              <div className="flex items-center gap-2 text-sm text-semantic-success">
-                <CheckCircle2 size={16} />
-                <span className="font-medium">
-                  {t('onboarding.demo_installed', { defaultValue: 'Installed' })}
-                </span>
+        {/* Card 2: Demo Project — full width, simple toggle */}
+        <div className="rounded-2xl border border-border-light bg-surface-elevated p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue">
+                <FolderOpen size={20} />
               </div>
-            ) : installingDemo ? (
-              <div className="flex items-center gap-2 text-sm text-content-secondary">
-                <Loader2 size={14} className="animate-spin text-oe-blue" />
-                <span>{t('onboarding.installing', { defaultValue: 'Installing...' })}</span>
+              <div>
+                <h3 className="text-base font-bold text-content-primary">
+                  {t('onboarding.install_demo', { defaultValue: 'Install Demo Project' })}
+                </h3>
+                <p className="text-xs text-content-tertiary">
+                  {t('onboarding.demo_optional', { defaultValue: 'Sample project to explore' })}
+                </p>
               </div>
-            ) : null}
+            </div>
+            <div className="flex items-center gap-3">
+              {demoInstalled ? (
+                <div className="flex items-center gap-2 text-sm text-semantic-success">
+                  <CheckCircle2 size={16} />
+                  <span className="font-medium">
+                    {t('onboarding.demo_installed', { defaultValue: 'Installed' })}
+                  </span>
+                </div>
+              ) : installingDemo ? (
+                <div className="flex items-center gap-2 text-sm text-content-secondary">
+                  <Loader2 size={14} className="animate-spin text-oe-blue" />
+                </div>
+              ) : (
+                <ToggleSwitch
+                  enabled={installDemo}
+                  onToggle={() => setInstallDemo(!installDemo)}
+                />
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Card 3: AI Provider */}
-        <div className="rounded-2xl border border-border-light bg-surface-elevated p-5 flex flex-col">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue">
-              <Sparkles size={20} />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-content-primary">
-                {t('onboarding.connect_ai', { defaultValue: 'Connect AI' })}
-              </h3>
-              <p className="text-2xs text-content-tertiary">
-                {t('onboarding.ai_optional', { defaultValue: 'Smart estimation features' })}
-              </p>
-            </div>
-          </div>
-
-          {/* Provider selector */}
-          <select
-            value={selectedProvider}
-            onChange={(e) => {
-              setSelectedProvider(e.target.value as AIProvider);
-              setApiKey('');
-              setShowKey(false);
-            }}
-            className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all mb-2"
+        {/* Card 3: AI Provider — collapsible */}
+        <div className="rounded-2xl border border-border-light bg-surface-elevated">
+          <button
+            type="button"
+            onClick={() => setAiExpanded(!aiExpanded)}
+            className="w-full flex items-center justify-between p-6"
           >
-            {AI_PROVIDERS.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-                {p.recommended ? ' *' : ''}
-              </option>
-            ))}
-          </select>
-
-          {/* API key input */}
-          <div className="relative">
-            <input
-              type="text"
-              value={showKey ? apiKey : apiKey ? maskApiKey(apiKey) : ''}
-              onChange={(e) => {
-                if (showKey) {
-                  setApiKey(e.target.value);
-                } else {
-                  setApiKey(e.target.value);
-                  setShowKey(true);
-                }
-              }}
-              onFocus={() => {
-                if (apiKey && !showKey) setShowKey(true);
-              }}
-              placeholder={t('onboarding.api_key_placeholder', {
-                defaultValue: 'Paste API key...',
-              })}
-              className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 pr-8 font-mono text-xs text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all"
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue">
+                <Sparkles size={20} />
+              </div>
+              <div className="text-left">
+                <h3 className="text-base font-bold text-content-primary">
+                  {t('onboarding.connect_ai', { defaultValue: 'Connect AI Provider' })}
+                </h3>
+                <p className="text-xs text-content-tertiary">
+                  {t('onboarding.ai_optional', { defaultValue: 'Optional — smart estimation features' })}
+                </p>
+              </div>
+            </div>
+            <ArrowRight
+              size={16}
+              className={clsx(
+                'text-content-tertiary transition-transform duration-200 shrink-0',
+                aiExpanded && 'rotate-90',
+              )}
             />
-            <button
-              type="button"
-              onClick={() => setShowKey(!showKey)}
-              className="absolute inset-y-0 right-0 flex items-center px-2 text-content-tertiary hover:text-content-primary transition-colors"
-              tabIndex={-1}
-            >
-              {showKey ? <EyeOff size={14} /> : <Eye size={14} />}
-            </button>
-          </div>
+          </button>
 
-          {/* Test and docs link */}
-          <div className="mt-2 flex items-center justify-between">
-            <a
-              href={AI_PROVIDERS.find((p) => p.id === selectedProvider)?.docsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-2xs text-oe-blue hover:underline"
-            >
-              {t('onboarding.get_api_key', { defaultValue: 'Get key' })}
-              <ExternalLink size={10} />
-            </a>
-            {apiKey.trim() && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => testMutation.mutate()}
-                disabled={testMutation.isPending}
-                icon={
-                  testMutation.isPending ? (
-                    <Loader2 size={12} className="animate-spin" />
-                  ) : undefined
-                }
+          {aiExpanded && (
+            <div className="px-6 pb-6 pt-0 space-y-3">
+              {/* Provider selector */}
+              <select
+                value={selectedProvider}
+                onChange={(e) => {
+                  setSelectedProvider(e.target.value as AIProvider);
+                  setApiKey('');
+                  setShowKey(false);
+                }}
+                className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all"
               >
-                {testMutation.isPending
-                  ? t('onboarding.testing', { defaultValue: 'Testing...' })
-                  : t('onboarding.test', { defaultValue: 'Test' })}
-              </Button>
-            )}
-          </div>
+                {AI_PROVIDERS.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                    {p.recommended ? ' *' : ''}
+                  </option>
+                ))}
+              </select>
+
+              {/* API key input */}
+              <div className="relative">
+                <input
+                  type="text"
+                  value={showKey ? apiKey : apiKey ? maskApiKey(apiKey) : ''}
+                  onChange={(e) => {
+                    if (showKey) {
+                      setApiKey(e.target.value);
+                    } else {
+                      setApiKey(e.target.value);
+                      setShowKey(true);
+                    }
+                  }}
+                  onFocus={() => {
+                    if (apiKey && !showKey) setShowKey(true);
+                  }}
+                  placeholder={t('onboarding.api_key_placeholder', {
+                    defaultValue: 'Paste API key...',
+                  })}
+                  className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 pr-8 font-mono text-xs text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowKey(!showKey)}
+                  className="absolute inset-y-0 right-0 flex items-center px-2 text-content-tertiary hover:text-content-primary transition-colors"
+                  tabIndex={-1}
+                >
+                  {showKey ? <EyeOff size={14} /> : <Eye size={14} />}
+                </button>
+              </div>
+
+              {/* Test and docs link */}
+              <div className="flex items-center justify-between">
+                <a
+                  href={AI_PROVIDERS.find((p) => p.id === selectedProvider)?.docsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-2xs text-oe-blue hover:underline"
+                >
+                  {t('onboarding.get_api_key', { defaultValue: 'Get key' })}
+                  <ExternalLink size={10} />
+                </a>
+                {apiKey.trim() && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => testMutation.mutate()}
+                    disabled={testMutation.isPending}
+                    icon={
+                      testMutation.isPending ? (
+                        <Loader2 size={12} className="animate-spin" />
+                      ) : undefined
+                    }
+                  >
+                    {testMutation.isPending
+                      ? t('onboarding.testing', { defaultValue: 'Testing...' })
+                      : t('onboarding.test', { defaultValue: 'Test' })}
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -1384,7 +1415,7 @@ function StepDataSetup({
           {t('common.back', { defaultValue: 'Back' })}
         </Button>
         <Button variant="secondary" onClick={onNext}>
-          {t('onboarding.skip', { defaultValue: 'Skip' })}
+          {t('onboarding.skip', { defaultValue: 'Skip — set up later' })}
         </Button>
         <Button
           variant="primary"
@@ -1609,14 +1640,11 @@ export function OnboardingWizard() {
     }
   }, [quickStart, showModuleConfig]);
 
-  // Handle next from step 2 (profile) -- skip modules unless "configure individually"
+  // Handle next from step 2 (profile) -- ALWAYS show modules so user can review/customize
   const handleNextFromProfile = useCallback(() => {
-    if (showModuleConfig) {
-      setStep(3); // go to module config
-    } else {
-      setStep(4); // skip to data
-    }
-  }, [showModuleConfig]);
+    setShowModuleConfig(true);
+    setStep(3); // always go to module review
+  }, []);
 
   return (
     <div className="flex min-h-screen flex-col bg-surface-primary">
