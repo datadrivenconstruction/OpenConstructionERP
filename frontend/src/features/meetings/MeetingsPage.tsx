@@ -25,6 +25,11 @@ import {
   ArrowLeft,
   Sparkles,
   AlertCircle,
+  BarChart3,
+  PenTool,
+  HardHat,
+  Rocket,
+  MapPin,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, SkeletonTable } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -99,6 +104,48 @@ const MEETING_TYPES: MeetingType[] = [
   'closeout',
 ];
 
+const MEETING_TYPE_CARD_CONFIG: Record<
+  MeetingType,
+  { icon: React.ElementType; color: string; description: string }
+> = {
+  progress: {
+    icon: BarChart3,
+    color:
+      'text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-950/30 dark:border-blue-800',
+    description: 'Regular project progress review',
+  },
+  design: {
+    icon: PenTool,
+    color:
+      'text-purple-600 bg-purple-50 border-purple-200 dark:text-purple-400 dark:bg-purple-950/30 dark:border-purple-800',
+    description: 'Design coordination meeting',
+  },
+  safety: {
+    icon: HardHat,
+    color:
+      'text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800',
+    description: 'Safety toolbox talk / review',
+  },
+  subcontractor: {
+    icon: Users,
+    color:
+      'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800',
+    description: 'Subcontractor coordination',
+  },
+  kickoff: {
+    icon: Rocket,
+    color:
+      'text-green-600 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950/30 dark:border-green-800',
+    description: 'Project kickoff',
+  },
+  closeout: {
+    icon: CheckCircle2,
+    color:
+      'text-gray-600 bg-gray-50 border-gray-200 dark:text-gray-400 dark:bg-gray-800/50 dark:border-gray-700',
+    description: 'Project closeout / handover',
+  },
+};
+
 const MEETING_STATUSES: MeetingStatus[] = ['scheduled', 'in_progress', 'completed', 'cancelled'];
 
 /* -- Create Meeting Modal -------------------------------------------------- */
@@ -109,7 +156,15 @@ interface MeetingFormData {
   date: string;
   location: string;
   chairperson: string;
+  attendees: string;
 }
+
+const todayStr = () => {
+  const now = new Date();
+  // Format as YYYY-MM-DDTHH:mm for datetime-local
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+};
 
 const EMPTY_FORM: MeetingFormData = {
   title: '',
@@ -117,6 +172,7 @@ const EMPTY_FORM: MeetingFormData = {
   date: '',
   location: '',
   chairperson: '',
+  attendees: '',
 };
 
 function CreateMeetingModal({
@@ -131,7 +187,7 @@ function CreateMeetingModal({
   projectName?: string;
 }) {
   const { t } = useTranslation();
-  const [form, setForm] = useState<MeetingFormData>(EMPTY_FORM);
+  const [form, setForm] = useState<MeetingFormData>({ ...EMPTY_FORM, date: todayStr() });
   const [touched, setTouched] = useState(false);
 
   const set = <K extends keyof MeetingFormData>(key: K, value: MeetingFormData[K]) =>
@@ -182,7 +238,55 @@ function CreateMeetingModal({
         </div>
 
         {/* Form */}
-        <div className="px-6 py-4 space-y-4">
+        <div className="px-6 py-4 space-y-5">
+          {/* ── Meeting Type ── */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-2">
+              {t('meetings.field_type', { defaultValue: 'Meeting Type' })}
+            </label>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              {MEETING_TYPES.map((mt) => {
+                const cfg = MEETING_TYPE_CARD_CONFIG[mt];
+                const TypeIcon = cfg.icon;
+                const selected = form.meeting_type === mt;
+                return (
+                  <button
+                    key={mt}
+                    type="button"
+                    onClick={() => set('meeting_type', mt)}
+                    className={clsx(
+                      'flex flex-col items-center gap-1.5 rounded-lg border-2 px-2 py-2.5 text-center transition-all',
+                      selected
+                        ? cfg.color + ' ring-2 ring-oe-blue/30'
+                        : 'border-border bg-surface-primary text-content-tertiary hover:border-border-light hover:bg-surface-secondary',
+                    )}
+                  >
+                    <TypeIcon size={18} />
+                    <span className="text-2xs font-medium leading-tight">
+                      {t(`meetings.type_${mt}`, {
+                        defaultValue: mt.charAt(0).toUpperCase() + mt.slice(1),
+                      })}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-1.5 text-xs text-content-quaternary">
+              {t(`meetings.type_${form.meeting_type}_desc`, {
+                defaultValue: MEETING_TYPE_CARD_CONFIG[form.meeting_type].description,
+              })}
+            </p>
+          </div>
+
+          {/* ── Meeting Details Section ── */}
+          <div className="flex items-center gap-2 pt-2 pb-1">
+            <CalendarDays size={14} className="text-content-tertiary" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-content-tertiary">
+              {t('meetings.section_details', { defaultValue: 'Meeting Details' })}
+            </span>
+            <div className="flex-1 h-px bg-border-light" />
+          </div>
+
           {/* Title */}
           <div>
             <label className="block text-sm font-medium text-content-primary mb-1.5">
@@ -212,85 +316,99 @@ function CreateMeetingModal({
             )}
           </div>
 
-          {/* Two-column: Type + Date */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
-                {t('meetings.field_type', { defaultValue: 'Meeting Type' })}
-              </label>
-              <div className="relative">
-                <select
-                  value={form.meeting_type}
-                  onChange={(e) => set('meeting_type', e.target.value as MeetingType)}
-                  className={inputCls + ' appearance-none pr-9'}
-                >
-                  {MEETING_TYPES.map((mt) => (
-                    <option key={mt} value={mt}>
-                      {t(`meetings.type_${mt}`, {
-                        defaultValue: mt.charAt(0).toUpperCase() + mt.slice(1),
-                      })}
-                    </option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-content-tertiary">
-                  <ChevronDown size={14} />
-                </div>
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
-                {t('meetings.field_date', { defaultValue: 'Date' })}{' '}
-                <span className="text-semantic-error">*</span>
-              </label>
-              <input
-                type="datetime-local"
-                value={form.date}
-                onChange={(e) => {
-                  set('date', e.target.value);
-                  setTouched(true);
-                }}
-                className={clsx(
-                  inputCls,
-                  dateError &&
-                    'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
-                )}
-              />
-              {dateError && (
-                <p className="mt-1 text-xs text-semantic-error">
-                  {t('meetings.date_required', { defaultValue: 'Date is required' })}
-                </p>
-              )}
-            </div>
+          {/* ── Schedule Section ── */}
+          <div className="flex items-center gap-2 pt-2 pb-1">
+            <Clock size={14} className="text-content-tertiary" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-content-tertiary">
+              {t('meetings.section_schedule', { defaultValue: 'Schedule' })}
+            </span>
+            <div className="flex-1 h-px bg-border-light" />
           </div>
 
-          {/* Two-column: Location + Chairperson */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
-                {t('meetings.field_location', { defaultValue: 'Location' })}
-              </label>
-              <input
-                value={form.location}
-                onChange={(e) => set('location', e.target.value)}
-                className={inputCls}
-                placeholder={t('meetings.location_placeholder', {
-                  defaultValue: 'e.g. Site Office, Room 201',
-                })}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
-                {t('meetings.field_chairperson', { defaultValue: 'Chairperson' })}
-              </label>
-              <input
-                value={form.chairperson}
-                onChange={(e) => set('chairperson', e.target.value)}
-                className={inputCls}
-                placeholder={t('meetings.chairperson_placeholder', {
-                  defaultValue: 'Person chairing the meeting',
-                })}
-              />
-            </div>
+          {/* Date */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
+              {t('meetings.field_date', { defaultValue: 'Date & Time' })}{' '}
+              <span className="text-semantic-error">*</span>
+            </label>
+            <input
+              type="datetime-local"
+              value={form.date}
+              onChange={(e) => {
+                set('date', e.target.value);
+                setTouched(true);
+              }}
+              className={clsx(
+                inputCls,
+                dateError &&
+                  'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
+              )}
+            />
+            {dateError && (
+              <p className="mt-1 text-xs text-semantic-error">
+                {t('meetings.date_required', { defaultValue: 'Date is required' })}
+              </p>
+            )}
+          </div>
+
+          {/* ── Location Section ── */}
+          <div className="flex items-center gap-2 pt-2 pb-1">
+            <MapPin size={14} className="text-content-tertiary" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-content-tertiary">
+              {t('meetings.section_location', { defaultValue: 'Location' })}
+            </span>
+            <div className="flex-1 h-px bg-border-light" />
+          </div>
+
+          {/* Location */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
+              {t('meetings.field_location', { defaultValue: 'Location' })}
+            </label>
+            <input
+              value={form.location}
+              onChange={(e) => set('location', e.target.value)}
+              className={inputCls}
+              placeholder={t('meetings.location_placeholder', {
+                defaultValue: 'e.g., Site office, Room 301, Online',
+              })}
+            />
+          </div>
+
+          {/* Chairperson */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
+              {t('meetings.field_chairperson', { defaultValue: 'Chairperson' })}
+            </label>
+            <input
+              value={form.chairperson}
+              onChange={(e) => set('chairperson', e.target.value)}
+              className={inputCls}
+              placeholder={t('meetings.chairperson_placeholder', {
+                defaultValue: 'Meeting organizer',
+              })}
+            />
+          </div>
+
+          {/* Attendees */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
+              {t('meetings.field_attendees', { defaultValue: 'Attendees' })}
+            </label>
+            <textarea
+              value={form.attendees}
+              onChange={(e) => set('attendees', e.target.value)}
+              rows={3}
+              className="w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none"
+              placeholder={t('meetings.attendees_placeholder', {
+                defaultValue: 'One name per line',
+              })}
+            />
+            <p className="mt-1 text-xs text-content-quaternary">
+              {t('meetings.attendees_hint', {
+                defaultValue: 'Enter each attendee on a separate line. They will be added to the meeting.',
+              })}
+            </p>
           </div>
         </div>
 
@@ -1316,6 +1434,10 @@ export function MeetingsPage() {
         addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: t('common.select_project_first', { defaultValue: 'Please select a project first' }) });
         return;
       }
+      const attendeesList = formData.attendees
+        .split('\n')
+        .map((s) => s.trim())
+        .filter(Boolean);
       createMut.mutate({
         project_id: projectId,
         title: formData.title,
@@ -1323,6 +1445,7 @@ export function MeetingsPage() {
         date: formData.date,
         location: formData.location || undefined,
         chairperson: formData.chairperson || undefined,
+        attendees: attendeesList.length > 0 ? attendeesList : undefined,
       });
     },
     [createMut, projectId, addToast, t],

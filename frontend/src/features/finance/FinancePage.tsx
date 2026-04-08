@@ -9,6 +9,7 @@ import {
   BarChart3,
   Search,
   ArrowUpRight,
+  ArrowDownLeft,
   ArrowDownRight,
   Download,
   Upload,
@@ -323,7 +324,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
   const [importResult, setImportResult] = useState<BudgetImportResult | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
-  const [budgetForm, setBudgetForm] = useState({ wbs_code: '', category: '', original_budget: '' });
+  const [budgetForm, setBudgetForm] = useState({ wbs_code: '', category: '', original_budget: '', notes: '' });
   const [budgetErrors, setBudgetErrors] = useState<Record<string, string>>({});
   const budgetFirstRef = useRef<HTMLInputElement>(null);
 
@@ -357,17 +358,18 @@ function BudgetsTab({ projectId }: { projectId: string }) {
   }, [showCreate, showImport]);
 
   const createBudgetMut = useMutation({
-    mutationFn: (data: { wbs_id: string | null; category: string | null; original_budget: string }) =>
+    mutationFn: (data: { wbs_id: string | null; category: string | null; original_budget: string; notes: string | null }) =>
       apiPost('/v1/finance/budgets', {
         project_id: projectId,
         wbs_id: data.wbs_id,
         category: data.category,
         original_budget: data.original_budget,
+        notes: data.notes || undefined,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['finance-budgets', projectId] });
       setShowCreate(false);
-      setBudgetForm({ wbs_code: '', category: '', original_budget: '' });
+      setBudgetForm({ wbs_code: '', category: '', original_budget: '', notes: '' });
       addToast({ type: 'success', title: t('finance.budget_created', { defaultValue: 'Budget line created' }) });
     },
     onError: (e: Error) =>
@@ -407,6 +409,140 @@ function BudgetsTab({ projectId }: { projectId: string }) {
       setImportPending(false);
     }
   };
+
+  const BUDGET_CATEGORIES = [
+    { key: 'Material', label: t('finance.cat_material', { defaultValue: 'Material' }) },
+    { key: 'Labor', label: t('finance.cat_labor', { defaultValue: 'Labor' }) },
+    { key: 'Equipment', label: t('finance.cat_equipment', { defaultValue: 'Equipment' }) },
+    { key: 'Subcontract', label: t('finance.cat_subcontract', { defaultValue: 'Subcontract' }) },
+    { key: 'Overhead', label: t('finance.cat_overhead', { defaultValue: 'Overhead' }) },
+    { key: 'Other', label: t('finance.cat_other', { defaultValue: 'Other' }) },
+  ];
+
+  const renderBudgetModal = () => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+      <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('finance.new_budget', { defaultValue: 'New Budget Line' })}>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
+          <h2 className="text-lg font-semibold text-content-primary">
+            {t('finance.new_budget', { defaultValue: 'New Budget Line' })}
+          </h2>
+          <button
+            onClick={() => setShowCreate(false)}
+            aria-label={t('common.close', { defaultValue: 'Close' })}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+          >
+            <X size={18} />
+          </button>
+        </div>
+        <div className="px-6 py-5 space-y-5">
+          {/* Category — visual badges */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-2">
+              {t('finance.category', { defaultValue: 'Category' })} <span className="text-semantic-error">*</span>
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {BUDGET_CATEGORIES.map((cat) => (
+                <button
+                  key={cat.key}
+                  type="button"
+                  onClick={() => {
+                    setBudgetForm((p) => ({ ...p, category: cat.key }));
+                    if (budgetErrors.category) setBudgetErrors((prev) => { const next = { ...prev }; delete next.category; return next; });
+                  }}
+                  className={clsx(
+                    'rounded-full px-3.5 py-1.5 text-xs font-medium border transition-all',
+                    budgetForm.category === cat.key
+                      ? 'bg-oe-blue text-white border-oe-blue shadow-sm'
+                      : 'border-border text-content-secondary hover:border-oe-blue/40 hover:bg-surface-secondary',
+                  )}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+            {budgetErrors.category && <p className="mt-1.5 text-xs text-semantic-error">{budgetErrors.category}</p>}
+          </div>
+
+          {/* WBS Code */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
+              {t('finance.wbs', { defaultValue: 'WBS Code' })}
+            </label>
+            <input
+              ref={budgetFirstRef}
+              value={budgetForm.wbs_code}
+              onChange={(e) => setBudgetForm((p) => ({ ...p, wbs_code: e.target.value }))}
+              className={inputCls}
+              placeholder={t('finance.wbs_placeholder', { defaultValue: 'e.g., 01.02' })}
+            />
+          </div>
+
+          {/* Original Budget with currency */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
+              {t('finance.original', { defaultValue: 'Original Budget' })} <span className="text-semantic-error">*</span>
+            </label>
+            <div className="relative">
+              <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-xs text-content-tertiary font-medium">
+                EUR
+              </span>
+              <input
+                type="number"
+                step="0.01"
+                value={budgetForm.original_budget}
+                onChange={(e) => {
+                  setBudgetForm((p) => ({ ...p, original_budget: e.target.value }));
+                  if (budgetErrors.original_budget) setBudgetErrors((prev) => { const next = { ...prev }; delete next.original_budget; return next; });
+                }}
+                className={clsx(inputCls, 'pl-12', budgetErrors.original_budget && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
+                placeholder="0.00"
+              />
+            </div>
+            {budgetErrors.original_budget && <p className="mt-1 text-xs text-semantic-error">{budgetErrors.original_budget}</p>}
+          </div>
+
+          {/* Notes */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
+              {t('finance.notes', { defaultValue: 'Notes' })}
+            </label>
+            <textarea
+              value={budgetForm.notes}
+              onChange={(e) => setBudgetForm((p) => ({ ...p, notes: e.target.value }))}
+              rows={2}
+              className={clsx(inputCls, 'h-auto py-2.5 resize-none')}
+              placeholder={t('finance.budget_notes_placeholder', { defaultValue: 'Optional notes...' })}
+            />
+          </div>
+        </div>
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
+          <Button variant="ghost" onClick={() => setShowCreate(false)} disabled={createBudgetMut.isPending}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              if (!validateBudget()) return;
+              createBudgetMut.mutate({
+                wbs_id: budgetForm.wbs_code || null,
+                category: budgetForm.category,
+                original_budget: budgetForm.original_budget,
+                notes: budgetForm.notes || null,
+              });
+            }}
+            disabled={createBudgetMut.isPending}
+          >
+            {createBudgetMut.isPending ? (
+              <Loader2 size={16} className="animate-spin mr-1.5" />
+            ) : (
+              <Plus size={16} className="mr-1.5" />
+            )}
+            <span>{t('common.create', { defaultValue: 'Create' })}</span>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 
   const { data: budgets, isLoading } = useQuery({
     queryKey: ['finance-budgets', projectId],
@@ -484,94 +620,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
         />
 
         {/* New Budget Line Modal (also shown from empty state) */}
-        {showCreate && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-            <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4" role="dialog" aria-label={t('finance.new_budget', { defaultValue: 'New Budget Line' })}>
-              <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-                <h2 className="text-lg font-semibold text-content-primary">
-                  {t('finance.new_budget', { defaultValue: 'New Budget Line' })}
-                </h2>
-                <button
-                  onClick={() => setShowCreate(false)}
-                  aria-label={t('common.close', { defaultValue: 'Close' })}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-              <div className="px-6 py-4 space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-content-primary mb-1.5">
-                    {t('finance.wbs', { defaultValue: 'WBS Code' })}
-                  </label>
-                  <input
-                    ref={budgetFirstRef}
-                    value={budgetForm.wbs_code}
-                    onChange={(e) => setBudgetForm((p) => ({ ...p, wbs_code: e.target.value }))}
-                    className={inputCls}
-                    placeholder="e.g. 1.2.3"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-content-primary mb-1.5">
-                    {t('finance.category', { defaultValue: 'Category' })} <span className="text-semantic-error">*</span>
-                  </label>
-                  <input
-                    value={budgetForm.category}
-                    onChange={(e) => {
-                      setBudgetForm((p) => ({ ...p, category: e.target.value }));
-                      if (budgetErrors.category) setBudgetErrors((prev) => { const next = { ...prev }; delete next.category; return next; });
-                    }}
-                    className={clsx(inputCls, budgetErrors.category && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
-                    placeholder={t('finance.category_placeholder', { defaultValue: 'e.g. Structural Works' })}
-                  />
-                  {budgetErrors.category && <p className="mt-1 text-xs text-semantic-error">{budgetErrors.category}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-content-primary mb-1.5">
-                    {t('finance.original', { defaultValue: 'Original Budget' })} <span className="text-semantic-error">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={budgetForm.original_budget}
-                    onChange={(e) => {
-                      setBudgetForm((p) => ({ ...p, original_budget: e.target.value }));
-                      if (budgetErrors.original_budget) setBudgetErrors((prev) => { const next = { ...prev }; delete next.original_budget; return next; });
-                    }}
-                    className={clsx(inputCls, budgetErrors.original_budget && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
-                    placeholder="0.00"
-                  />
-                  {budgetErrors.original_budget && <p className="mt-1 text-xs text-semantic-error">{budgetErrors.original_budget}</p>}
-                </div>
-              </div>
-              <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
-                <Button variant="ghost" onClick={() => setShowCreate(false)} disabled={createBudgetMut.isPending}>
-                  {t('common.cancel', { defaultValue: 'Cancel' })}
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={() => {
-                    if (!validateBudget()) return;
-                    createBudgetMut.mutate({
-                      wbs_id: budgetForm.wbs_code || null,
-                      category: budgetForm.category,
-                      original_budget: budgetForm.original_budget,
-                    });
-                  }}
-                  disabled={createBudgetMut.isPending}
-                >
-                  {createBudgetMut.isPending ? (
-                    <Loader2 size={16} className="animate-spin mr-1.5" />
-                  ) : (
-                    <Plus size={16} className="mr-1.5" />
-                  )}
-                  <span>{t('common.create', { defaultValue: 'Create' })}</span>
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+        {showCreate && renderBudgetModal()}
       </div>
     );
   }
@@ -758,94 +807,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
     </Card>
 
     {/* New Budget Line Modal */}
-    {showCreate && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-        <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4" role="dialog" aria-label={t('finance.new_budget', { defaultValue: 'New Budget Line' })}>
-          <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
-            <h2 className="text-lg font-semibold text-content-primary">
-              {t('finance.new_budget', { defaultValue: 'New Budget Line' })}
-            </h2>
-            <button
-              onClick={() => setShowCreate(false)}
-              aria-label={t('common.close', { defaultValue: 'Close' })}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
-            >
-              <X size={18} />
-            </button>
-          </div>
-          <div className="px-6 py-4 space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
-                {t('finance.wbs', { defaultValue: 'WBS Code' })}
-              </label>
-              <input
-                ref={budgetFirstRef}
-                value={budgetForm.wbs_code}
-                onChange={(e) => setBudgetForm((p) => ({ ...p, wbs_code: e.target.value }))}
-                className={inputCls}
-                placeholder="e.g. 1.2.3"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
-                {t('finance.category', { defaultValue: 'Category' })} <span className="text-semantic-error">*</span>
-              </label>
-              <input
-                value={budgetForm.category}
-                onChange={(e) => {
-                  setBudgetForm((p) => ({ ...p, category: e.target.value }));
-                  if (budgetErrors.category) setBudgetErrors((prev) => { const next = { ...prev }; delete next.category; return next; });
-                }}
-                className={clsx(inputCls, budgetErrors.category && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
-                placeholder={t('finance.category_placeholder', { defaultValue: 'e.g. Structural Works' })}
-              />
-              {budgetErrors.category && <p className="mt-1 text-xs text-semantic-error">{budgetErrors.category}</p>}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
-                {t('finance.original', { defaultValue: 'Original Budget' })} <span className="text-semantic-error">*</span>
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                value={budgetForm.original_budget}
-                onChange={(e) => {
-                  setBudgetForm((p) => ({ ...p, original_budget: e.target.value }));
-                  if (budgetErrors.original_budget) setBudgetErrors((prev) => { const next = { ...prev }; delete next.original_budget; return next; });
-                }}
-                className={clsx(inputCls, budgetErrors.original_budget && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
-                placeholder="0.00"
-              />
-              {budgetErrors.original_budget && <p className="mt-1 text-xs text-semantic-error">{budgetErrors.original_budget}</p>}
-            </div>
-          </div>
-          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
-            <Button variant="ghost" onClick={() => setShowCreate(false)} disabled={createBudgetMut.isPending}>
-              {t('common.cancel', { defaultValue: 'Cancel' })}
-            </Button>
-            <Button
-              variant="primary"
-              onClick={() => {
-                if (!validateBudget()) return;
-                createBudgetMut.mutate({
-                  wbs_id: budgetForm.wbs_code || null,
-                  category: budgetForm.category,
-                  original_budget: budgetForm.original_budget,
-                });
-              }}
-              disabled={createBudgetMut.isPending}
-            >
-              {createBudgetMut.isPending ? (
-                <Loader2 size={16} className="animate-spin mr-1.5" />
-              ) : (
-                <Plus size={16} className="mr-1.5" />
-              )}
-              <span>{t('common.create', { defaultValue: 'Create' })}</span>
-            </Button>
-          </div>
-        </div>
-      </div>
-    )}
+    {showCreate && renderBudgetModal()}
 
     {/* Budget Import Modal */}
     {showImport && (
@@ -963,13 +925,19 @@ function InvoicesTab({ projectId }: { projectId: string }) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [showCreate, setShowCreate] = useState(false);
+
+  const todayStr = new Date().toISOString().split('T')[0];
+
   const [invoiceForm, setInvoiceForm] = useState({
     direction: 'payable' as 'payable' | 'receivable',
     counterparty: '',
     contact_id: '',
-    invoice_date: '',
+    invoice_date: todayStr,
     due_date: '',
+    subtotal: '',
+    tax: '',
     amount: '',
+    currency: 'EUR',
     description: '',
   });
   const [invoiceErrors, setInvoiceErrors] = useState<Record<string, string>>({});
@@ -985,8 +953,11 @@ function InvoicesTab({ projectId }: { projectId: string }) {
   const validateInvoice = (): boolean => {
     const e: Record<string, string> = {};
     if (!invoiceForm.invoice_date) e.invoice_date = t('validation.required', { defaultValue: 'This field is required' });
-    if (!invoiceForm.amount) e.amount = t('validation.required', { defaultValue: 'This field is required' });
-    else if (parseFloat(invoiceForm.amount) <= 0) e.amount = t('validation.positive_number', { defaultValue: 'Must be a positive number' });
+    if (!invoiceForm.subtotal && !invoiceForm.amount) e.subtotal = t('validation.required', { defaultValue: 'This field is required' });
+    else {
+      const total = invoiceForm.amount ? parseFloat(invoiceForm.amount) : (parseFloat(invoiceForm.subtotal || '0') + parseFloat(invoiceForm.tax || '0'));
+      if (total <= 0) e.subtotal = t('validation.positive_number', { defaultValue: 'Must be a positive number' });
+    }
     setInvoiceErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -1002,21 +973,28 @@ function InvoicesTab({ projectId }: { projectId: string }) {
   }, [showCreate]);
 
   const createInvoiceMut = useMutation({
-    mutationFn: (data: typeof invoiceForm) =>
-      apiPost('/v1/finance/', {
+    mutationFn: (data: typeof invoiceForm) => {
+      const sub = parseFloat(data.subtotal || '0');
+      const tax = parseFloat(data.tax || '0');
+      const total = data.amount ? parseFloat(data.amount) : sub + tax;
+      return apiPost('/v1/finance/', {
         project_id: projectId,
         contact_id: data.contact_id || undefined,
         invoice_direction: data.direction,
         invoice_date: data.invoice_date,
         due_date: data.due_date || undefined,
-        amount_total: data.amount,
-        amount_subtotal: data.amount,
+        amount_subtotal: String(sub),
+        tax_amount: String(tax),
+        amount_total: String(total),
+        currency_code: data.currency || 'EUR',
+        description: data.description || undefined,
         status: 'draft',
-      }),
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['finance-invoices', projectId] });
       setShowCreate(false);
-      setInvoiceForm({ direction: 'payable', counterparty: '', contact_id: '', invoice_date: '', due_date: '', amount: '', description: '' });
+      setInvoiceForm({ direction: 'payable', counterparty: '', contact_id: '', invoice_date: todayStr, due_date: '', subtotal: '', tax: '', amount: '', currency: 'EUR', description: '' });
       addToast({ type: 'success', title: t('finance.invoice_created', { defaultValue: 'Invoice created' }) });
     },
     onError: (e: Error) =>
@@ -1157,7 +1135,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
             size="sm"
             icon={<Plus size={14} />}
             onClick={() => {
-              setInvoiceForm((f) => ({ ...f, direction: subTab }));
+              setInvoiceForm({ direction: subTab, counterparty: '', contact_id: '', invoice_date: todayStr, due_date: '', subtotal: '', tax: '', amount: '', currency: 'EUR', description: '' });
               setInvoiceErrors({});
               setShowCreate(true);
             }}
@@ -1225,7 +1203,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
                   ? {
                       label: t('finance.new_invoice', { defaultValue: 'New Invoice' }),
                       onClick: () => {
-                        setInvoiceForm((f) => ({ ...f, direction: subTab }));
+                        setInvoiceForm({ direction: subTab, counterparty: '', contact_id: '', invoice_date: todayStr, due_date: '', subtotal: '', tax: '', amount: '', currency: 'EUR', description: '' });
                         setInvoiceErrors({});
                         setShowCreate(true);
                       },
@@ -1409,7 +1387,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
       {/* New Invoice Modal */}
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('finance.new_invoice', { defaultValue: 'New Invoice' })}>
+          <div className="w-full max-w-xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('finance.new_invoice', { defaultValue: 'New Invoice' })}>
             <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
               <div>
                 <h2 className="text-lg font-semibold text-content-primary">
@@ -1432,105 +1410,235 @@ function InvoicesTab({ projectId }: { projectId: string }) {
                 <X size={18} />
               </button>
             </div>
-            <div className="px-6 py-4 space-y-4">
-              {/* Direction */}
+            <div className="px-6 py-5 space-y-5">
+              {/* Direction — large visual cards */}
               <div>
-                <label className="block text-sm font-medium text-content-secondary mb-2">
+                <label className="block text-sm font-medium text-content-secondary mb-2.5">
                   {t('finance.direction', { defaultValue: 'Direction' })}
                 </label>
-                <div className="flex items-center gap-2">
-                  {(['payable', 'receivable'] as const).map((d) => (
-                    <button
-                      key={d}
-                      onClick={() => setInvoiceForm((f) => ({ ...f, direction: d }))}
-                      className={clsx(
-                        'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors border',
-                        invoiceForm.direction === d
-                          ? 'bg-oe-blue-subtle text-oe-blue border-oe-blue/30'
-                          : 'border-border text-content-tertiary hover:text-content-secondary',
-                      )}
-                    >
-                      {d === 'payable'
-                        ? t('finance.payable', { defaultValue: 'Payable' })
-                        : t('finance.receivable', { defaultValue: 'Receivable' })}
-                    </button>
-                  ))}
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setInvoiceForm((f) => ({ ...f, direction: 'payable' }))}
+                    className={clsx(
+                      'relative flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all',
+                      invoiceForm.direction === 'payable'
+                        ? 'border-red-400 bg-red-50 dark:bg-red-950/20 shadow-sm'
+                        : 'border-border hover:border-red-200 dark:hover:border-red-800 hover:bg-surface-secondary',
+                    )}
+                  >
+                    <div className={clsx(
+                      'flex h-10 w-10 items-center justify-center rounded-full',
+                      invoiceForm.direction === 'payable'
+                        ? 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400'
+                        : 'bg-surface-secondary text-content-tertiary',
+                    )}>
+                      <ArrowUpRight size={20} />
+                    </div>
+                    <span className={clsx(
+                      'text-sm font-semibold',
+                      invoiceForm.direction === 'payable' ? 'text-red-700 dark:text-red-300' : 'text-content-secondary',
+                    )}>
+                      {t('finance.payable', { defaultValue: 'Payable' })}
+                    </span>
+                    <span className="text-2xs text-content-tertiary text-center leading-tight">
+                      {t('finance.payable_desc', { defaultValue: 'Invoice you need to pay' })}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setInvoiceForm((f) => ({ ...f, direction: 'receivable' }))}
+                    className={clsx(
+                      'relative flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all',
+                      invoiceForm.direction === 'receivable'
+                        ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 shadow-sm'
+                        : 'border-border hover:border-emerald-200 dark:hover:border-emerald-800 hover:bg-surface-secondary',
+                    )}
+                  >
+                    <div className={clsx(
+                      'flex h-10 w-10 items-center justify-center rounded-full',
+                      invoiceForm.direction === 'receivable'
+                        ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400'
+                        : 'bg-surface-secondary text-content-tertiary',
+                    )}>
+                      <ArrowDownLeft size={20} />
+                    </div>
+                    <span className={clsx(
+                      'text-sm font-semibold',
+                      invoiceForm.direction === 'receivable' ? 'text-emerald-700 dark:text-emerald-300' : 'text-content-secondary',
+                    )}>
+                      {t('finance.receivable', { defaultValue: 'Receivable' })}
+                    </span>
+                    <span className="text-2xs text-content-tertiary text-center leading-tight">
+                      {t('finance.receivable_desc', { defaultValue: "Invoice you're sending" })}
+                    </span>
+                  </button>
                 </div>
               </div>
-              {/* Vendor / Client (contact search) */}
-              <div>
-                <label className="block text-sm font-medium text-content-primary mb-1.5">
-                  {invoiceForm.direction === 'payable'
-                    ? t('finance.vendor', { defaultValue: 'Vendor' })
-                    : t('finance.client', { defaultValue: 'Client' })}
-                </label>
-                <ContactSearchInput
-                  value={invoiceForm.counterparty}
-                  onChange={(id, name) => setInvoiceForm((f) => ({ ...f, counterparty: name, contact_id: id }))}
-                  placeholder={
-                    invoiceForm.direction === 'payable'
-                      ? t('finance.search_vendor', { defaultValue: 'Search vendor...' })
-                      : t('finance.search_client', { defaultValue: 'Search client...' })
-                  }
-                />
+
+              {/* ── Section: Invoice Details ── */}
+              <div className="pt-1">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-3">
+                  {t('finance.section_invoice_details', { defaultValue: 'Invoice Details' })}
+                </h3>
+                <div className="space-y-3">
+                  {/* Contact picker (vendor/client) */}
+                  <div>
+                    <label className="block text-sm font-medium text-content-primary mb-1.5">
+                      {invoiceForm.direction === 'payable'
+                        ? t('finance.vendor', { defaultValue: 'Vendor' })
+                        : t('finance.client', { defaultValue: 'Client' })}
+                    </label>
+                    <ContactSearchInput
+                      value={invoiceForm.counterparty}
+                      onChange={(id, name) => setInvoiceForm((f) => ({ ...f, counterparty: name, contact_id: id }))}
+                      placeholder={
+                        invoiceForm.direction === 'payable'
+                          ? t('finance.search_vendor', { defaultValue: 'Search vendor...' })
+                          : t('finance.search_client', { defaultValue: 'Search client...' })
+                      }
+                    />
+                  </div>
+                  {/* Invoice date */}
+                  <div>
+                    <label className="block text-sm font-medium text-content-primary mb-1.5">
+                      {t('finance.issue_date', { defaultValue: 'Invoice Date' })} <span className="text-semantic-error">*</span>
+                    </label>
+                    <input
+                      ref={invoiceDateRef}
+                      type="date"
+                      value={invoiceForm.invoice_date}
+                      onChange={(e) => {
+                        setInvoiceForm((f) => ({ ...f, invoice_date: e.target.value }));
+                        if (invoiceErrors.invoice_date) setInvoiceErrors((prev) => { const next = { ...prev }; delete next.invoice_date; return next; });
+                      }}
+                      className={clsx(inputCls, invoiceErrors.invoice_date && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
+                    />
+                    {invoiceErrors.invoice_date && <p className="mt-1 text-xs text-semantic-error">{invoiceErrors.invoice_date}</p>}
+                  </div>
+                </div>
               </div>
-              {/* Invoice date */}
-              <div>
-                <label className="block text-sm font-medium text-content-primary mb-1.5">
-                  {t('finance.issue_date', { defaultValue: 'Invoice Date' })} <span className="text-semantic-error">*</span>
-                </label>
-                <input
-                  ref={invoiceDateRef}
-                  type="date"
-                  value={invoiceForm.invoice_date}
-                  onChange={(e) => {
-                    setInvoiceForm((f) => ({ ...f, invoice_date: e.target.value }));
-                    if (invoiceErrors.invoice_date) setInvoiceErrors((prev) => { const next = { ...prev }; delete next.invoice_date; return next; });
-                  }}
-                  className={clsx(inputCls, invoiceErrors.invoice_date && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
-                />
-                {invoiceErrors.invoice_date && <p className="mt-1 text-xs text-semantic-error">{invoiceErrors.invoice_date}</p>}
+
+              {/* ── Section: Amounts ── */}
+              <div className="pt-1">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-3">
+                  {t('finance.section_amounts', { defaultValue: 'Amounts' })}
+                </h3>
+                <div className="space-y-3">
+                  {/* Currency */}
+                  <div>
+                    <label className="block text-sm font-medium text-content-primary mb-1.5">
+                      {t('finance.currency', { defaultValue: 'Currency' })}
+                    </label>
+                    <select
+                      value={invoiceForm.currency}
+                      onChange={(e) => setInvoiceForm((f) => ({ ...f, currency: e.target.value }))}
+                      className={inputCls}
+                    >
+                      <option value="EUR">EUR</option>
+                      <option value="USD">USD</option>
+                      <option value="GBP">GBP</option>
+                      <option value="CHF">CHF</option>
+                      <option value="PLN">PLN</option>
+                      <option value="CZK">CZK</option>
+                      <option value="SEK">SEK</option>
+                      <option value="NOK">NOK</option>
+                      <option value="DKK">DKK</option>
+                      <option value="AED">AED</option>
+                      <option value="SAR">SAR</option>
+                    </select>
+                  </div>
+                  {/* Subtotal */}
+                  <div>
+                    <label className="block text-sm font-medium text-content-primary mb-1.5">
+                      {t('finance.subtotal', { defaultValue: 'Subtotal' })} <span className="text-semantic-error">*</span>
+                    </label>
+                    <div className="relative">
+                      <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-xs text-content-tertiary font-medium">
+                        {invoiceForm.currency}
+                      </span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={invoiceForm.subtotal}
+                        onChange={(e) => {
+                          const sub = e.target.value;
+                          const tax = invoiceForm.tax || '0';
+                          const total = (parseFloat(sub || '0') + parseFloat(tax)).toFixed(2);
+                          setInvoiceForm((f) => ({ ...f, subtotal: sub, amount: total }));
+                          if (invoiceErrors.subtotal) setInvoiceErrors((prev) => { const next = { ...prev }; delete next.subtotal; return next; });
+                        }}
+                        className={clsx(inputCls, 'pl-12', invoiceErrors.subtotal && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
+                        placeholder="0.00"
+                      />
+                    </div>
+                    {invoiceErrors.subtotal && <p className="mt-1 text-xs text-semantic-error">{invoiceErrors.subtotal}</p>}
+                  </div>
+                  {/* Tax */}
+                  <div>
+                    <label className="block text-sm font-medium text-content-primary mb-1.5">
+                      {t('finance.tax', { defaultValue: 'Tax' })}
+                    </label>
+                    <div className="relative">
+                      <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-xs text-content-tertiary font-medium">
+                        {invoiceForm.currency}
+                      </span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={invoiceForm.tax}
+                        onChange={(e) => {
+                          const tax = e.target.value;
+                          const sub = invoiceForm.subtotal || '0';
+                          const total = (parseFloat(sub) + parseFloat(tax || '0')).toFixed(2);
+                          setInvoiceForm((f) => ({ ...f, tax, amount: total }));
+                        }}
+                        className={clsx(inputCls, 'pl-12')}
+                        placeholder="0.00"
+                      />
+                    </div>
+                  </div>
+                  {/* Total (auto-calculated, read-only) */}
+                  <div className="rounded-lg bg-surface-secondary/60 px-4 py-3 flex items-center justify-between">
+                    <span className="text-sm font-semibold text-content-primary">
+                      {t('finance.total', { defaultValue: 'Total' })}
+                    </span>
+                    <span className="text-base font-bold tabular-nums text-content-primary">
+                      {invoiceForm.currency} {(parseFloat(invoiceForm.subtotal || '0') + parseFloat(invoiceForm.tax || '0')).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
               </div>
-              {/* Due date */}
-              <div>
-                <label className="block text-sm font-medium text-content-primary mb-1.5">
-                  {t('finance.due_date', { defaultValue: 'Due Date' })}
-                </label>
-                <input
-                  type="date"
-                  value={invoiceForm.due_date}
-                  onChange={(e) => setInvoiceForm((f) => ({ ...f, due_date: e.target.value }))}
-                  className={inputCls}
-                />
+
+              {/* ── Section: Due Date ── */}
+              <div className="pt-1">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-3">
+                  {t('finance.section_due_date', { defaultValue: 'Due Date' })}
+                </h3>
+                <div>
+                  <label className="block text-sm font-medium text-content-primary mb-1.5">
+                    {t('finance.due_date', { defaultValue: 'Due Date' })}
+                  </label>
+                  <input
+                    type="date"
+                    value={invoiceForm.due_date}
+                    onChange={(e) => setInvoiceForm((f) => ({ ...f, due_date: e.target.value }))}
+                    className={inputCls}
+                  />
+                </div>
               </div>
-              {/* Amount */}
+
+              {/* Notes/Description */}
               <div>
                 <label className="block text-sm font-medium text-content-primary mb-1.5">
-                  {t('finance.amount', { defaultValue: 'Amount' })} <span className="text-semantic-error">*</span>
+                  {t('finance.notes', { defaultValue: 'Notes / Description' })}
                 </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={invoiceForm.amount}
-                  onChange={(e) => {
-                    setInvoiceForm((f) => ({ ...f, amount: e.target.value }));
-                    if (invoiceErrors.amount) setInvoiceErrors((prev) => { const next = { ...prev }; delete next.amount; return next; });
-                  }}
-                  className={clsx(inputCls, invoiceErrors.amount && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
-                  placeholder="0.00"
-                />
-                {invoiceErrors.amount && <p className="mt-1 text-xs text-semantic-error">{invoiceErrors.amount}</p>}
-              </div>
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-medium text-content-primary mb-1.5">
-                  {t('tasks.field_description', { defaultValue: 'Description' })}
-                </label>
-                <input
+                <textarea
                   value={invoiceForm.description}
                   onChange={(e) => setInvoiceForm((f) => ({ ...f, description: e.target.value }))}
-                  className={inputCls}
-                  placeholder={t('finance.invoice_desc_placeholder', { defaultValue: 'Optional description' })}
+                  rows={3}
+                  className={clsx(inputCls, 'h-auto py-2.5 resize-none')}
+                  placeholder={t('finance.invoice_desc_placeholder', { defaultValue: 'Optional description or notes...' })}
                 />
               </div>
             </div>

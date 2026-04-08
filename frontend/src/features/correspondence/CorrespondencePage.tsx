@@ -15,8 +15,11 @@ import {
   FileText,
   Cloud,
   Webhook,
+  Users,
+  CalendarDays,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, DateDisplay, SkeletonTable } from '@/shared/ui';
+import { ContactSearchInput } from '@/shared/ui/ContactSearchInput';
 import { apiGet } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -44,6 +47,36 @@ const TYPE_LABELS: Record<CorrespondenceType, string> = {
   other: 'Other',
 };
 
+const DIRECTION_CARD_CONFIG: Record<
+  CorrespondenceDirection,
+  { icon: React.ElementType; color: string; selectedColor: string; description: string }
+> = {
+  incoming: {
+    icon: ArrowDownLeft,
+    color: 'text-blue-600 dark:text-blue-400',
+    selectedColor:
+      'text-blue-600 bg-blue-50 border-blue-300 ring-2 ring-blue-200 dark:text-blue-400 dark:bg-blue-950/30 dark:border-blue-700 dark:ring-blue-800',
+    description: 'Received from external party',
+  },
+  outgoing: {
+    icon: ArrowUpRight,
+    color: 'text-green-600 dark:text-green-400',
+    selectedColor:
+      'text-green-600 bg-green-50 border-green-300 ring-2 ring-green-200 dark:text-green-400 dark:bg-green-950/30 dark:border-green-700 dark:ring-green-800',
+    description: 'Sent to external party',
+  },
+};
+
+const TYPE_BADGE_COLORS: Record<CorrespondenceType, string> = {
+  letter: 'text-purple-600 bg-purple-50 border-purple-200 dark:text-purple-400 dark:bg-purple-950/30 dark:border-purple-800',
+  email: 'text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-950/30 dark:border-blue-800',
+  notice: 'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800',
+  memo: 'text-gray-600 bg-gray-50 border-gray-200 dark:text-gray-400 dark:bg-gray-800/50 dark:border-gray-700',
+  other: 'text-gray-500 bg-gray-50 border-gray-200 dark:text-gray-400 dark:bg-gray-800/50 dark:border-gray-700',
+};
+
+const CORR_TYPES_LIST: CorrespondenceType[] = ['letter', 'email', 'notice', 'memo'];
+
 const inputCls =
   'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 const textareaCls =
@@ -56,18 +89,24 @@ interface CorrespondenceFormData {
   direction: CorrespondenceDirection;
   type: CorrespondenceType;
   from_contact: string;
+  from_display: string;
   to_contacts: string;
+  to_display: string;
   date_sent: string;
   date_received: string;
   notes: string;
 }
+
+const todayDate = () => new Date().toISOString().slice(0, 10);
 
 const EMPTY_FORM: CorrespondenceFormData = {
   subject: '',
   direction: 'outgoing',
   type: 'email',
   from_contact: '',
+  from_display: '',
   to_contacts: '',
+  to_display: '',
   date_sent: '',
   date_received: '',
   notes: '',
@@ -83,7 +122,11 @@ function CreateCorrespondenceModal({
   isPending: boolean;
 }) {
   const { t } = useTranslation();
-  const [form, setForm] = useState<CorrespondenceFormData>(EMPTY_FORM);
+  const [form, setForm] = useState<CorrespondenceFormData>({
+    ...EMPTY_FORM,
+    date_sent: todayDate(),
+    date_received: todayDate(),
+  });
   const [touched, setTouched] = useState(false);
 
   const set = <K extends keyof CorrespondenceFormData>(
@@ -92,8 +135,8 @@ function CreateCorrespondenceModal({
   ) => setForm((prev) => ({ ...prev, [key]: value }));
 
   const subjectError = touched && form.subject.trim().length === 0;
-  const fromError = touched && form.from_contact.trim().length === 0;
-  const canSubmit = form.subject.trim().length > 0 && form.from_contact.trim().length > 0;
+  const fromError = touched && (form.from_contact.trim().length === 0 && form.from_display.trim().length === 0);
+  const canSubmit = form.subject.trim().length > 0 && (form.from_contact.trim().length > 0 || form.from_display.trim().length > 0);
 
   const handleSubmit = () => {
     setTouched(true);
@@ -126,7 +169,84 @@ function CreateCorrespondenceModal({
         </div>
 
         {/* Form */}
-        <div className="px-6 py-4 space-y-4">
+        <div className="px-6 py-4 space-y-5">
+          {/* ── Direction Cards ── */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-2">
+              {t('correspondence.field_direction', { defaultValue: 'Direction' })}
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              {(['incoming', 'outgoing'] as CorrespondenceDirection[]).map((dir) => {
+                const cfg = DIRECTION_CARD_CONFIG[dir];
+                const DirIcon = cfg.icon;
+                const selected = form.direction === dir;
+                return (
+                  <button
+                    key={dir}
+                    type="button"
+                    onClick={() => set('direction', dir)}
+                    className={clsx(
+                      'flex items-center gap-3 rounded-lg border-2 px-4 py-3 transition-all text-left',
+                      selected
+                        ? cfg.selectedColor
+                        : 'border-border bg-surface-primary text-content-tertiary hover:border-border-light hover:bg-surface-secondary',
+                    )}
+                  >
+                    <DirIcon size={22} className="shrink-0" />
+                    <div>
+                      <span className="text-sm font-semibold block">
+                        {t(`correspondence.dir_${dir}`, {
+                          defaultValue: dir === 'incoming' ? 'Incoming' : 'Outgoing',
+                        })}
+                      </span>
+                      <span className="text-2xs opacity-70">
+                        {t(`correspondence.dir_${dir}_desc`, {
+                          defaultValue: cfg.description,
+                        })}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ── Type as visual badges ── */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-2">
+              {t('correspondence.field_type', { defaultValue: 'Type' })}
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {CORR_TYPES_LIST.map((tp) => {
+                const selected = form.type === tp;
+                return (
+                  <button
+                    key={tp}
+                    type="button"
+                    onClick={() => set('type', tp)}
+                    className={clsx(
+                      'inline-flex items-center rounded-full border-2 px-3.5 py-1.5 text-xs font-semibold transition-all',
+                      selected
+                        ? TYPE_BADGE_COLORS[tp] + ' ring-2 ring-oe-blue/30'
+                        : 'border-border bg-surface-primary text-content-tertiary hover:border-border-light hover:bg-surface-secondary',
+                    )}
+                  >
+                    {t(`correspondence.type_${tp}`, { defaultValue: TYPE_LABELS[tp] })}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ── Correspondence Details Section ── */}
+          <div className="flex items-center gap-2 pt-2 pb-1">
+            <Mail size={14} className="text-content-tertiary" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-content-tertiary">
+              {t('correspondence.section_details', { defaultValue: 'Correspondence Details' })}
+            </span>
+            <div className="flex-1 h-px bg-border-light" />
+          </div>
+
           {/* Subject */}
           <div>
             <label className="block text-sm font-medium text-content-primary mb-1.5">
@@ -156,74 +276,36 @@ function CreateCorrespondenceModal({
             )}
           </div>
 
-          {/* Two-column: Direction + Type */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
-                {t('correspondence.field_direction', { defaultValue: 'Direction' })}
-              </label>
-              <div className="relative">
-                <select
-                  value={form.direction}
-                  onChange={(e) => set('direction', e.target.value as CorrespondenceDirection)}
-                  className={inputCls + ' appearance-none pr-9'}
-                >
-                  <option value="incoming">
-                    {t('correspondence.dir_incoming', { defaultValue: 'Incoming' })}
-                  </option>
-                  <option value="outgoing">
-                    {t('correspondence.dir_outgoing', { defaultValue: 'Outgoing' })}
-                  </option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-content-tertiary">
-                  <ChevronDown size={14} />
-                </div>
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
-                {t('correspondence.field_type', { defaultValue: 'Type' })}
-              </label>
-              <div className="relative">
-                <select
-                  value={form.type}
-                  onChange={(e) => set('type', e.target.value as CorrespondenceType)}
-                  className={inputCls + ' appearance-none pr-9'}
-                >
-                  {(Object.keys(TYPE_LABELS) as CorrespondenceType[]).map((tp) => (
-                    <option key={tp} value={tp}>
-                      {t(`correspondence.type_${tp}`, { defaultValue: TYPE_LABELS[tp] })}
-                    </option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-content-tertiary">
-                  <ChevronDown size={14} />
-                </div>
-              </div>
-            </div>
+          {/* ── Parties Section ── */}
+          <div className="flex items-center gap-2 pt-2 pb-1">
+            <Users size={14} className="text-content-tertiary" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-content-tertiary">
+              {t('correspondence.section_parties', { defaultValue: 'Parties' })}
+            </span>
+            <div className="flex-1 h-px bg-border-light" />
           </div>
 
-          {/* Two-column: From + To */}
+          {/* From + To */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('correspondence.field_from', { defaultValue: 'From' })}{' '}
                 <span className="text-semantic-error">*</span>
               </label>
-              <input
+              <ContactSearchInput
                 value={form.from_contact}
-                onChange={(e) => {
-                  set('from_contact', e.target.value);
+                displayValue={form.from_display}
+                onChange={(contactId, displayName) => {
+                  setForm((prev) => ({
+                    ...prev,
+                    from_contact: displayName || contactId,
+                    from_display: displayName,
+                  }));
                   setTouched(true);
                 }}
                 placeholder={t('correspondence.from_placeholder', {
-                  defaultValue: 'Sender name or company',
+                  defaultValue: 'Search contacts or type name...',
                 })}
-                className={clsx(
-                  inputCls,
-                  fromError &&
-                    'border-semantic-error focus:ring-red-300 focus:border-semantic-error',
-                )}
               />
               {fromError && (
                 <p className="mt-1 text-xs text-semantic-error">
@@ -235,15 +317,30 @@ function CreateCorrespondenceModal({
               <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('correspondence.field_to', { defaultValue: 'To' })}
               </label>
-              <input
+              <ContactSearchInput
                 value={form.to_contacts}
-                onChange={(e) => set('to_contacts', e.target.value)}
+                displayValue={form.to_display}
+                onChange={(contactId, displayName) => {
+                  setForm((prev) => ({
+                    ...prev,
+                    to_contacts: displayName || contactId,
+                    to_display: displayName,
+                  }));
+                }}
                 placeholder={t('correspondence.to_placeholder', {
-                  defaultValue: 'Recipient(s), comma-separated',
+                  defaultValue: 'Search contacts or type name...',
                 })}
-                className={inputCls}
               />
             </div>
+          </div>
+
+          {/* ── Dates Section ── */}
+          <div className="flex items-center gap-2 pt-2 pb-1">
+            <CalendarDays size={14} className="text-content-tertiary" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-content-tertiary">
+              {t('correspondence.section_dates', { defaultValue: 'Dates' })}
+            </span>
+            <div className="flex-1 h-px bg-border-light" />
           </div>
 
           {/* Two-column: Date Sent + Date Received */}
@@ -569,8 +666,8 @@ export function CorrespondencePage() {
         subject: formData.subject,
         direction: formData.direction,
         type: formData.type,
-        from_contact: formData.from_contact,
-        to_contacts: formData.to_contacts
+        from_contact: formData.from_display || formData.from_contact,
+        to_contacts: (formData.to_display || formData.to_contacts)
           .split(',')
           .map((s) => s.trim())
           .filter(Boolean),

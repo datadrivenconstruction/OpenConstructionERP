@@ -14,6 +14,14 @@ import {
   X,
   ClipboardCheck,
   ListChecks,
+  Heart,
+  AlertTriangle,
+  Home,
+  Leaf,
+  Flame,
+  ThumbsUp,
+  UserX,
+  AlertOctagon,
 } from 'lucide-react';
 import {
   Button,
@@ -121,6 +129,85 @@ const OBS_STATUS_COLORS: Record<
   resolved: 'success',
   closed: 'neutral',
 };
+
+/* ── Card Config for Create Modals ────────────────────────────────────── */
+
+const INCIDENT_TYPE_CARDS: Record<
+  string,
+  { icon: React.ElementType; color: string; description: string }
+> = {
+  injury: {
+    icon: Heart,
+    color:
+      'text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800',
+    description: 'Worker injury',
+  },
+  near_miss: {
+    icon: AlertTriangle,
+    color:
+      'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800',
+    description: 'Close call',
+  },
+  property_damage: {
+    icon: Home,
+    color:
+      'text-orange-600 bg-orange-50 border-orange-200 dark:text-orange-400 dark:bg-orange-950/30 dark:border-orange-800',
+    description: 'Equipment/structure damage',
+  },
+  environmental: {
+    icon: Leaf,
+    color:
+      'text-green-600 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950/30 dark:border-green-800',
+    description: 'Spill or emission',
+  },
+  fire: {
+    icon: Flame,
+    color:
+      'text-rose-600 bg-rose-50 border-rose-200 dark:text-rose-400 dark:bg-rose-950/30 dark:border-rose-800',
+    description: 'Fire or explosion',
+  },
+};
+
+const INCIDENT_TYPES_LIST = ['injury', 'near_miss', 'property_damage', 'environmental', 'fire'];
+
+const TREATMENT_OPTIONS = [
+  { value: '', label: 'None' },
+  { value: 'first_aid', label: 'First Aid' },
+  { value: 'medical', label: 'Medical' },
+  { value: 'hospital', label: 'Hospital' },
+] as const;
+
+const OBS_TYPE_CARDS: Record<
+  string,
+  { icon: React.ElementType; color: string; description: string }
+> = {
+  positive: {
+    icon: ThumbsUp,
+    color:
+      'text-green-600 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950/30 dark:border-green-800',
+    description: 'Good safety practice observed',
+  },
+  unsafe_act: {
+    icon: UserX,
+    color:
+      'text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800',
+    description: 'Person doing something unsafe',
+  },
+  unsafe_condition: {
+    icon: AlertOctagon,
+    color:
+      'text-orange-600 bg-orange-50 border-orange-200 dark:text-orange-400 dark:bg-orange-950/30 dark:border-orange-800',
+    description: 'Hazardous condition found',
+  },
+  near_miss: {
+    icon: AlertTriangle,
+    color:
+      'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800',
+    description: 'Almost happened',
+  },
+};
+
+const OBS_TYPES_LIST = ['positive', 'unsafe_act', 'unsafe_condition', 'near_miss'];
 
 /* ── Helpers ──────────────────────────────────────────────────────────── */
 
@@ -324,6 +411,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
     severity: 'minor' as string,
     treatment_type: '' as string,
     location: '',
+    days_lost: 0,
   });
   const [incidentErrors, setIncidentErrors] = useState<Record<string, string>>({});
   const incidentDateRef = useRef<HTMLInputElement>(null);
@@ -373,6 +461,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
         severity: 'minor',
         treatment_type: '',
         location: '',
+        days_lost: 0,
       });
       addToast({ type: 'success', title: t('safety.incident_created', { defaultValue: 'Incident reported' }) });
     },
@@ -610,7 +699,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
     {/* New Incident Modal */}
     {showCreate && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-        <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('safety.new_incident', { defaultValue: 'New Incident' })}>
+        <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('safety.new_incident', { defaultValue: 'New Incident' })}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
             <h2 className="text-lg font-semibold text-content-primary">
               {t('safety.new_incident', { defaultValue: 'New Incident' })}
@@ -623,7 +712,55 @@ function IncidentsTab({ projectId }: { projectId: string }) {
               <X size={18} />
             </button>
           </div>
-          <div className="px-6 py-4 space-y-4">
+          <div className="px-6 py-4 space-y-5">
+            {/* ── Incident Type Cards ── */}
+            <div>
+              <label className="block text-sm font-medium text-content-primary mb-2">
+                {t('safety.type', { defaultValue: 'Incident Type' })}
+              </label>
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                {INCIDENT_TYPES_LIST.map((tp) => {
+                  const cfg = INCIDENT_TYPE_CARDS[tp]!;
+                  const TypeIcon = cfg.icon;
+                  const selected = incidentForm.incident_type === tp;
+                  return (
+                    <button
+                      key={tp}
+                      type="button"
+                      onClick={() => setIncidentForm((f) => ({ ...f, incident_type: tp }))}
+                      className={clsx(
+                        'flex flex-col items-center gap-1.5 rounded-lg border-2 px-2 py-2.5 text-center transition-all',
+                        selected
+                          ? cfg.color + ' ring-2 ring-oe-blue/30'
+                          : 'border-border bg-surface-primary text-content-tertiary hover:border-border-light hover:bg-surface-secondary',
+                      )}
+                    >
+                      <TypeIcon size={18} />
+                      <span className="text-2xs font-medium leading-tight">
+                        {t(`safety.type_${tp}`, {
+                          defaultValue: tp.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+                        })}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-1.5 text-xs text-content-quaternary">
+                {t(`safety.type_${incidentForm.incident_type}_desc`, {
+                  defaultValue: INCIDENT_TYPE_CARDS[incidentForm.incident_type]?.description || '',
+                })}
+              </p>
+            </div>
+
+            {/* ── Incident Details Section ── */}
+            <div className="flex items-center gap-2 pt-2 pb-1">
+              <ShieldAlert size={14} className="text-content-tertiary" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-content-tertiary">
+                {t('safety.section_incident_details', { defaultValue: 'Incident Details' })}
+              </span>
+              <div className="flex-1 h-px bg-border-light" />
+            </div>
+
             {/* Date */}
             <div>
               <label className="block text-sm font-medium text-content-primary mb-1.5">
@@ -641,28 +778,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
               />
               {incidentErrors.incident_date && <p className="mt-1 text-xs text-semantic-error">{incidentErrors.incident_date}</p>}
             </div>
-            {/* Type */}
-            <div>
-              <label className="block text-sm font-medium text-content-secondary mb-2">
-                {t('safety.type', { defaultValue: 'Type' })} <span className="text-semantic-error">*</span>
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {['near_miss', 'injury', 'property_damage', 'environmental', 'fire'].map((tp) => (
-                  <button
-                    key={tp}
-                    onClick={() => setIncidentForm((f) => ({ ...f, incident_type: tp }))}
-                    className={clsx(
-                      'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors border',
-                      incidentForm.incident_type === tp
-                        ? 'bg-oe-blue-subtle text-oe-blue border-oe-blue/30'
-                        : 'border-border text-content-tertiary hover:text-content-secondary',
-                    )}
-                  >
-                    {t(`safety.type_${tp}`, { defaultValue: tp.replace(/_/g, ' ') })}
-                  </button>
-                ))}
-              </div>
-            </div>
+
             {/* Description */}
             <div>
               <label className="block text-sm font-medium text-content-primary mb-1.5">
@@ -680,6 +796,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
               />
               {incidentErrors.description && <p className="mt-1 text-xs text-semantic-error">{incidentErrors.description}</p>}
             </div>
+
             {/* Location */}
             <div>
               <label className="block text-sm font-medium text-content-primary mb-1.5">
@@ -692,23 +809,70 @@ function IncidentsTab({ projectId }: { projectId: string }) {
                 placeholder={t('safety.location_placeholder', { defaultValue: 'e.g. Building A, Level 3' })}
               />
             </div>
-            {/* Treatment */}
-            <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
-                {t('safety.treatment', { defaultValue: 'Treatment' })}
-              </label>
-              <select
-                value={incidentForm.treatment_type}
-                onChange={(e) => setIncidentForm((f) => ({ ...f, treatment_type: e.target.value }))}
-                className={inputCls}
-              >
-                <option value="">{t('common.none', { defaultValue: 'None' })}</option>
-                <option value="first_aid">{t('safety.treatment_first_aid', { defaultValue: 'First Aid' })}</option>
-                <option value="medical">{t('safety.treatment_medical', { defaultValue: 'Medical' })}</option>
-                <option value="hospital">{t('safety.treatment_hospital', { defaultValue: 'Hospital' })}</option>
-                <option value="fatality">{t('safety.treatment_fatality', { defaultValue: 'Fatality' })}</option>
-              </select>
+
+            {/* ── Impact Section ── */}
+            <div className="flex items-center gap-2 pt-2 pb-1">
+              <Heart size={14} className="text-content-tertiary" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-content-tertiary">
+                {t('safety.section_impact', { defaultValue: 'Impact' })}
+              </span>
+              <div className="flex-1 h-px bg-border-light" />
             </div>
+
+            {/* Treatment Type - Visual Toggle */}
+            <div>
+              <label className="block text-sm font-medium text-content-primary mb-2">
+                {t('safety.treatment', { defaultValue: 'Treatment Type' })}
+              </label>
+              <div className="grid grid-cols-4 gap-2">
+                {TREATMENT_OPTIONS.map((opt) => {
+                  const selected = incidentForm.treatment_type === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setIncidentForm((f) => ({ ...f, treatment_type: opt.value }))}
+                      className={clsx(
+                        'flex items-center justify-center gap-1.5 rounded-lg border-2 px-3 py-2.5 transition-all text-center',
+                        selected
+                          ? opt.value === 'hospital'
+                            ? 'text-red-600 bg-red-50 border-red-200 ring-2 ring-red-300 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800'
+                            : opt.value === 'medical'
+                              ? 'text-orange-600 bg-orange-50 border-orange-200 ring-2 ring-orange-300 dark:text-orange-400 dark:bg-orange-950/30 dark:border-orange-800'
+                              : opt.value === 'first_aid'
+                                ? 'text-amber-600 bg-amber-50 border-amber-200 ring-2 ring-amber-300 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800'
+                                : 'text-gray-600 bg-gray-50 border-gray-200 ring-2 ring-gray-300 dark:text-gray-400 dark:bg-gray-800/50 dark:border-gray-700'
+                          : 'border-border bg-surface-primary text-content-tertiary hover:border-border-light hover:bg-surface-secondary',
+                      )}
+                    >
+                      <span className="text-xs font-semibold">
+                        {t(`safety.treatment_${opt.value || 'none'}`, { defaultValue: opt.label })}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Days Lost - only show if treatment is Medical or Hospital */}
+            {(incidentForm.treatment_type === 'medical' || incidentForm.treatment_type === 'hospital') && (
+              <div className="animate-fade-in">
+                <label className="block text-sm font-medium text-content-primary mb-1.5">
+                  {t('safety.days_lost', { defaultValue: 'Days Lost' })}
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={incidentForm.days_lost || ''}
+                  onChange={(e) => setIncidentForm((f) => ({ ...f, days_lost: Number(e.target.value) || 0 }))}
+                  className={inputCls + ' max-w-[120px]'}
+                  placeholder="0"
+                />
+                <p className="mt-1 text-xs text-content-quaternary">
+                  {t('safety.days_lost_hint', { defaultValue: 'Number of working days lost due to the incident' })}
+                </p>
+              </div>
+            )}
           </div>
           <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
             <Button variant="ghost" onClick={() => setShowCreate(false)} disabled={createMut.isPending}>
@@ -1003,7 +1167,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
     {/* New Observation Modal */}
     {showCreate && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-        <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('safety.new_observation', { defaultValue: 'New Observation' })}>
+        <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('safety.new_observation', { defaultValue: 'New Observation' })}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
             <h2 className="text-lg font-semibold text-content-primary">
               {t('safety.new_observation', { defaultValue: 'New Observation' })}
@@ -1016,29 +1180,46 @@ function ObservationsTab({ projectId }: { projectId: string }) {
               <X size={18} />
             </button>
           </div>
-          <div className="px-6 py-4 space-y-4">
-            {/* Type */}
+          <div className="px-6 py-4 space-y-5">
+            {/* ── Observation Type Cards ── */}
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-2">
-                {t('safety.type', { defaultValue: 'Type' })} <span className="text-semantic-error">*</span>
+              <label className="block text-sm font-medium text-content-primary mb-2">
+                {t('safety.type', { defaultValue: 'Observation Type' })}
               </label>
-              <div className="flex flex-wrap gap-2">
-                {['unsafe_act', 'unsafe_condition', 'positive', 'near_miss'].map((tp) => (
-                  <button
-                    key={tp}
-                    onClick={() => setObsForm((f) => ({ ...f, observation_type: tp }))}
-                    className={clsx(
-                      'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors border',
-                      obsForm.observation_type === tp
-                        ? 'bg-oe-blue-subtle text-oe-blue border-oe-blue/30'
-                        : 'border-border text-content-tertiary hover:text-content-secondary',
-                    )}
-                  >
-                    {t(`safety.obs_type_${tp}`, { defaultValue: tp.replace(/_/g, ' ') })}
-                  </button>
-                ))}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {OBS_TYPES_LIST.map((tp) => {
+                  const cfg = OBS_TYPE_CARDS[tp]!;
+                  const TypeIcon = cfg.icon;
+                  const selected = obsForm.observation_type === tp;
+                  return (
+                    <button
+                      key={tp}
+                      type="button"
+                      onClick={() => setObsForm((f) => ({ ...f, observation_type: tp }))}
+                      className={clsx(
+                        'flex flex-col items-center gap-1.5 rounded-lg border-2 px-2 py-2.5 text-center transition-all',
+                        selected
+                          ? cfg.color + ' ring-2 ring-oe-blue/30'
+                          : 'border-border bg-surface-primary text-content-tertiary hover:border-border-light hover:bg-surface-secondary',
+                      )}
+                    >
+                      <TypeIcon size={18} />
+                      <span className="text-2xs font-medium leading-tight">
+                        {t(`safety.obs_type_${tp}`, {
+                          defaultValue: tp.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+                        })}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
+              <p className="mt-1.5 text-xs text-content-quaternary">
+                {t(`safety.obs_type_${obsForm.observation_type}_desc`, {
+                  defaultValue: OBS_TYPE_CARDS[obsForm.observation_type]?.description || '',
+                })}
+              </p>
             </div>
+
             {/* Description */}
             <div>
               <label className="block text-sm font-medium text-content-primary mb-1.5">
@@ -1052,6 +1233,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
                 placeholder={t('safety.obs_desc_placeholder', { defaultValue: 'Describe the observation...' })}
               />
             </div>
+
             {/* Location */}
             <div>
               <label className="block text-sm font-medium text-content-primary mb-1.5">
@@ -1064,37 +1246,83 @@ function ObservationsTab({ projectId }: { projectId: string }) {
                 placeholder={t('safety.location_placeholder', { defaultValue: 'e.g. Building A, Level 3' })}
               />
             </div>
-            {/* Severity + Likelihood */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-content-primary mb-1.5">
-                  {t('safety.severity', { defaultValue: 'Severity' })} (1-5)
-                </label>
-                <select
-                  value={obsForm.severity}
-                  onChange={(e) => setObsForm((f) => ({ ...f, severity: Number(e.target.value) }))}
-                  className={inputCls}
-                >
+
+            {/* ── Severity Visual 1-5 Scale ── */}
+            <div>
+              <label className="block text-sm font-medium text-content-primary mb-2">
+                {t('safety.severity', { defaultValue: 'Severity' })}
+              </label>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   {[1, 2, 3, 4, 5].map((v) => (
-                    <option key={v} value={v}>{v}</option>
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={() => setObsForm((f) => ({ ...f, severity: v }))}
+                      className="p-0.5 transition-transform hover:scale-110"
+                      aria-label={`${t('safety.severity', { defaultValue: 'Severity' })} ${v}`}
+                    >
+                      <span
+                        className={clsx(
+                          'inline-block h-5 w-5 rounded-full transition-colors',
+                          v <= obsForm.severity
+                            ? obsForm.severity >= 4
+                              ? 'bg-red-500'
+                              : obsForm.severity >= 3
+                                ? 'bg-orange-400'
+                                : obsForm.severity >= 2
+                                  ? 'bg-yellow-400'
+                                  : 'bg-green-400'
+                            : 'bg-surface-tertiary',
+                        )}
+                      />
+                    </button>
                   ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-primary mb-1.5">
-                  {t('safety.likelihood', { defaultValue: 'Likelihood' })} (1-5)
-                </label>
-                <select
-                  value={obsForm.likelihood}
-                  onChange={(e) => setObsForm((f) => ({ ...f, likelihood: Number(e.target.value) }))}
-                  className={inputCls}
-                >
-                  {[1, 2, 3, 4, 5].map((v) => (
-                    <option key={v} value={v}>{v}</option>
-                  ))}
-                </select>
+                </div>
+                <span className="text-sm font-medium text-content-secondary ml-2">
+                  {obsForm.severity}/5
+                </span>
               </div>
             </div>
+
+            {/* ── Likelihood Visual 1-5 Scale ── */}
+            <div>
+              <label className="block text-sm font-medium text-content-primary mb-2">
+                {t('safety.likelihood', { defaultValue: 'Likelihood' })}
+              </label>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  {[1, 2, 3, 4, 5].map((v) => (
+                    <button
+                      key={v}
+                      type="button"
+                      onClick={() => setObsForm((f) => ({ ...f, likelihood: v }))}
+                      className="p-0.5 transition-transform hover:scale-110"
+                      aria-label={`${t('safety.likelihood', { defaultValue: 'Likelihood' })} ${v}`}
+                    >
+                      <span
+                        className={clsx(
+                          'inline-block h-5 w-5 rounded-full transition-colors',
+                          v <= obsForm.likelihood
+                            ? obsForm.likelihood >= 4
+                              ? 'bg-red-500'
+                              : obsForm.likelihood >= 3
+                                ? 'bg-orange-400'
+                                : obsForm.likelihood >= 2
+                                  ? 'bg-yellow-400'
+                                  : 'bg-green-400'
+                            : 'bg-surface-tertiary',
+                        )}
+                      />
+                    </button>
+                  ))}
+                </div>
+                <span className="text-sm font-medium text-content-secondary ml-2">
+                  {obsForm.likelihood}/5
+                </span>
+              </div>
+            </div>
+
             {/* Computed risk score */}
             <div className="rounded-lg bg-surface-secondary p-3">
               <div className="flex items-center justify-between">
