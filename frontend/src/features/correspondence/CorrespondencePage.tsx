@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   Mail,
@@ -434,11 +434,13 @@ function ConnectorCard({
   status,
   icon: Icon,
   description,
+  onSetup,
 }: {
   name: string;
   status: 'available' | 'coming_soon';
   icon: React.ElementType;
   description: string;
+  onSetup?: () => void;
 }) {
   const { t } = useTranslation();
   return (
@@ -459,6 +461,26 @@ function ConnectorCard({
         </Badge>
       </div>
       <p className="text-xs text-content-tertiary leading-relaxed">{description}</p>
+      <div className="mt-1">
+        {status === 'available' ? (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={onSetup}
+          >
+            {t('correspondence.setup_integration', { defaultValue: 'Set Up in Integrations' })}
+          </Button>
+        ) : (
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled
+            className="opacity-50 cursor-not-allowed"
+          >
+            {t('correspondence.connector_coming_soon', { defaultValue: 'Coming Soon' })}
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
@@ -468,6 +490,7 @@ function ConnectorCard({
 export function CorrespondencePage() {
   const { t } = useTranslation();
   const { projectId: routeProjectId } = useParams<{ projectId: string }>();
+  const navigate = useNavigate();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
@@ -622,6 +645,14 @@ export function CorrespondencePage() {
         </div>
       )}
 
+      {/* Integration hint */}
+      <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30 p-4 text-sm text-blue-800 dark:text-blue-300">
+        {t('correspondence.integration_hint', {
+          defaultValue:
+            'Configure email and webhook integrations in Settings \u2192 Integrations to auto-import correspondence.',
+        })}
+      </div>
+
       {/* Connectors */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <ConnectorCard
@@ -629,6 +660,7 @@ export function CorrespondencePage() {
           status="available"
           icon={Mail}
           description={t('correspondence.connector_email_desc', { defaultValue: 'Auto-import incoming/outgoing project emails' })}
+          onSetup={() => navigate('/integrations')}
         />
         <ConnectorCard
           name={t('correspondence.connector_m365', { defaultValue: 'Microsoft 365' })}
@@ -647,6 +679,7 @@ export function CorrespondencePage() {
           status="available"
           icon={Webhook}
           description={t('correspondence.connector_webhook_desc', { defaultValue: 'Receive correspondence via REST API' })}
+          onSetup={() => navigate('/integrations')}
         />
       </div>
 

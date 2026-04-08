@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Wallet,
@@ -15,6 +15,9 @@ import {
   Loader2,
   X,
   Plus,
+  Camera,
+  ChevronDown,
+  Lightbulb,
 } from 'lucide-react';
 import clsx from 'clsx';
 import {
@@ -310,6 +313,7 @@ export function FinancePage() {
 
 function BudgetsTab({ projectId }: { projectId: string }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const [search, setSearch] = useState('');
@@ -441,18 +445,146 @@ function BudgetsTab({ projectId }: { projectId: string }) {
 
   if (!budgets || budgets.length === 0) {
     return (
-      <EmptyState
-        icon={<Wallet size={28} strokeWidth={1.5} />}
-        title={t('finance.no_budgets', { defaultValue: 'No budgets yet' })}
-        description={t('finance.no_budgets_desc', {
-          defaultValue: 'Lock your BOQ estimate first to auto-generate budget lines. You can also create budget lines manually for each cost category.',
-        })}
-      />
+      <div className="space-y-4">
+        {/* BOQ tip */}
+        <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800 text-sm flex items-start gap-3">
+          <Lightbulb size={18} className="text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+          <div>
+            <strong className="text-blue-800 dark:text-blue-200">
+              {t('finance.boq_tip_title', { defaultValue: 'Tip:' })}
+            </strong>{' '}
+            <span className="text-blue-700 dark:text-blue-300">
+              {t('finance.boq_tip_desc', {
+                defaultValue:
+                  'Go to your BOQ \u2192 Lock the estimate \u2192 Click "Create Budget from Estimate" to auto-populate budget lines.',
+              })}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/boq')}
+              className="ml-2 text-blue-700 dark:text-blue-300 hover:text-blue-900"
+            >
+              {t('finance.go_to_boq', { defaultValue: 'Go to BOQ \u2192' })}
+            </Button>
+          </div>
+        </div>
+
+        <EmptyState
+          icon={<Wallet size={28} strokeWidth={1.5} />}
+          title={t('finance.no_budgets', { defaultValue: 'No budget lines yet' })}
+          description={t('finance.no_budgets_desc', {
+            defaultValue:
+              'Lock your BOQ estimate and click "Create Budget from Estimate" to automatically generate budget lines from your sections. You can also create budget lines manually.',
+          })}
+          action={{
+            label: t('finance.new_budget', { defaultValue: 'New Budget Line' }),
+            onClick: () => setShowCreate(true),
+          }}
+        />
+
+        {/* New Budget Line Modal (also shown from empty state) */}
+        {showCreate && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+            <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4" role="dialog" aria-label={t('finance.new_budget', { defaultValue: 'New Budget Line' })}>
+              <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
+                <h2 className="text-lg font-semibold text-content-primary">
+                  {t('finance.new_budget', { defaultValue: 'New Budget Line' })}
+                </h2>
+                <button
+                  onClick={() => setShowCreate(false)}
+                  aria-label={t('common.close', { defaultValue: 'Close' })}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="px-6 py-4 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-content-primary mb-1.5">
+                    {t('finance.wbs', { defaultValue: 'WBS Code' })}
+                  </label>
+                  <input
+                    ref={budgetFirstRef}
+                    value={budgetForm.wbs_code}
+                    onChange={(e) => setBudgetForm((p) => ({ ...p, wbs_code: e.target.value }))}
+                    className={inputCls}
+                    placeholder="e.g. 1.2.3"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-content-primary mb-1.5">
+                    {t('finance.category', { defaultValue: 'Category' })} <span className="text-semantic-error">*</span>
+                  </label>
+                  <input
+                    value={budgetForm.category}
+                    onChange={(e) => {
+                      setBudgetForm((p) => ({ ...p, category: e.target.value }));
+                      if (budgetErrors.category) setBudgetErrors((prev) => { const next = { ...prev }; delete next.category; return next; });
+                    }}
+                    className={clsx(inputCls, budgetErrors.category && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
+                    placeholder={t('finance.category_placeholder', { defaultValue: 'e.g. Structural Works' })}
+                  />
+                  {budgetErrors.category && <p className="mt-1 text-xs text-semantic-error">{budgetErrors.category}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-content-primary mb-1.5">
+                    {t('finance.original', { defaultValue: 'Original Budget' })} <span className="text-semantic-error">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={budgetForm.original_budget}
+                    onChange={(e) => {
+                      setBudgetForm((p) => ({ ...p, original_budget: e.target.value }));
+                      if (budgetErrors.original_budget) setBudgetErrors((prev) => { const next = { ...prev }; delete next.original_budget; return next; });
+                    }}
+                    className={clsx(inputCls, budgetErrors.original_budget && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
+                    placeholder="0.00"
+                  />
+                  {budgetErrors.original_budget && <p className="mt-1 text-xs text-semantic-error">{budgetErrors.original_budget}</p>}
+                </div>
+              </div>
+              <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
+                <Button variant="ghost" onClick={() => setShowCreate(false)} disabled={createBudgetMut.isPending}>
+                  {t('common.cancel', { defaultValue: 'Cancel' })}
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    if (!validateBudget()) return;
+                    createBudgetMut.mutate({
+                      wbs_id: budgetForm.wbs_code || null,
+                      category: budgetForm.category,
+                      original_budget: budgetForm.original_budget,
+                    });
+                  }}
+                  disabled={createBudgetMut.isPending}
+                >
+                  {createBudgetMut.isPending ? (
+                    <Loader2 size={16} className="animate-spin mr-1.5" />
+                  ) : (
+                    <Plus size={16} className="mr-1.5" />
+                  )}
+                  <span>{t('common.create', { defaultValue: 'Create' })}</span>
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     );
   }
 
   return (
     <>
+    {/* Explanatory text */}
+    <p className="text-sm text-content-secondary mb-4">
+      {t('finance.budgets_explanation', {
+        defaultValue: 'Project budget tracks original vs actual costs by WBS category. Variance is highlighted green when under budget, red when over.',
+      })}
+    </p>
+
     <Card padding="none">
       {/* Search + actions */}
       <div className="p-4 border-b border-border-light flex flex-col sm:flex-row sm:items-center gap-3">
@@ -829,6 +961,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
   const isManager = userRole === 'admin' || userRole === 'manager';
   const [subTab, setSubTab] = useState<InvoiceSubTab>('payable');
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('');
   const [showCreate, setShowCreate] = useState(false);
   const [invoiceForm, setInvoiceForm] = useState({
     direction: 'payable' as 'payable' | 'receivable',
@@ -920,14 +1053,28 @@ function InvoicesTab({ projectId }: { projectId: string }) {
 
   const filtered = useMemo(() => {
     if (!invoices) return [];
-    if (!search) return invoices;
-    const q = search.toLowerCase();
-    return invoices.filter(
-      (inv) =>
-        inv.invoice_number.toLowerCase().includes(q) ||
-        inv.counterparty_name.toLowerCase().includes(q),
-    );
-  }, [invoices, search]);
+    let result = invoices;
+    if (statusFilter) {
+      result = result.filter((inv) => inv.status === statusFilter);
+    }
+    if (search) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        (inv) =>
+          inv.invoice_number.toLowerCase().includes(q) ||
+          inv.counterparty_name.toLowerCase().includes(q),
+      );
+    }
+    return result;
+  }, [invoices, search, statusFilter]);
+
+  const invoiceTotals = useMemo(() => {
+    if (!filtered.length) return null;
+    const totalAmount = filtered.reduce((s, inv) => s + inv.amount, 0);
+    const totalPaid = filtered.filter((inv) => inv.status === 'paid').reduce((s, inv) => s + inv.amount, 0);
+    const currency = filtered[0]?.currency ?? 'EUR';
+    return { totalAmount, totalPaid, currency };
+  }, [filtered]);
 
   const approveMutation = useMutation({
     mutationFn: (invoiceId: string) =>
@@ -1021,9 +1168,9 @@ function InvoicesTab({ projectId }: { projectId: string }) {
       </div>
 
       <Card padding="none">
-        {/* Search */}
-        <div className="p-4 border-b border-border-light">
-          <div className="relative max-w-sm">
+        {/* Search + Status filter */}
+        <div className="p-4 border-b border-border-light flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="relative flex-1 max-w-sm">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-content-tertiary">
               <Search size={16} />
             </div>
@@ -1037,6 +1184,22 @@ function InvoicesTab({ projectId }: { projectId: string }) {
               className="h-10 w-full rounded-lg border border-border bg-surface-primary pl-10 pr-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
             />
           </div>
+          <div className="relative shrink-0">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="h-10 appearance-none rounded-lg border border-border bg-surface-primary pl-3 pr-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-36"
+            >
+              <option value="">{t('finance.filter_all_statuses', { defaultValue: 'All Statuses' })}</option>
+              <option value="draft">{t('finance.status_draft', { defaultValue: 'Draft' })}</option>
+              <option value="pending">{t('finance.status_pending', { defaultValue: 'Pending' })}</option>
+              <option value="approved">{t('finance.status_approved', { defaultValue: 'Approved' })}</option>
+              <option value="paid">{t('finance.status_paid', { defaultValue: 'Paid' })}</option>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-content-tertiary">
+              <ChevronDown size={14} />
+            </div>
+          </div>
         </div>
 
         {isLoading ? (
@@ -1045,12 +1208,30 @@ function InvoicesTab({ projectId }: { projectId: string }) {
           <div className="p-8">
             <EmptyState
               icon={<FileText size={28} strokeWidth={1.5} />}
-              title={t('finance.no_invoices', {
-                defaultValue: 'No invoices found',
-              })}
-              description={t('finance.no_invoices_desc', {
-                defaultValue: 'Invoices will appear here when created',
-              })}
+              title={
+                search || statusFilter
+                  ? t('finance.no_invoices_match', { defaultValue: 'No matching invoices' })
+                  : t('finance.no_invoices', { defaultValue: 'No invoices yet' })
+              }
+              description={
+                search || statusFilter
+                  ? t('finance.no_invoices_match_desc', { defaultValue: 'Try adjusting your search or status filter.' })
+                  : t('finance.no_invoices_desc', {
+                      defaultValue: 'Create your first invoice to start tracking payables and receivables.',
+                    })
+              }
+              action={
+                !search && !statusFilter
+                  ? {
+                      label: t('finance.new_invoice', { defaultValue: 'New Invoice' }),
+                      onClick: () => {
+                        setInvoiceForm((f) => ({ ...f, direction: subTab }));
+                        setInvoiceErrors({});
+                        setShowCreate(true);
+                      },
+                    }
+                  : undefined
+              }
             />
           </div>
         ) : (
@@ -1174,6 +1355,23 @@ function InvoicesTab({ projectId }: { projectId: string }) {
                     </tr>
                   ))}
                 </tbody>
+                {invoiceTotals && (
+                  <tfoot>
+                    <tr className="bg-surface-secondary/60 font-semibold">
+                      <td className="px-4 py-3 text-content-primary" colSpan={4}>
+                        {t('common.total', { defaultValue: 'Total' })}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <MoneyDisplay amount={invoiceTotals.totalAmount} currency={invoiceTotals.currency} />
+                      </td>
+                      <td className="px-4 py-3 text-center text-xs text-content-tertiary">
+                        {t('finance.total_paid', { defaultValue: 'Paid' })}:{' '}
+                        <MoneyDisplay amount={invoiceTotals.totalPaid} currency={invoiceTotals.currency} />
+                      </td>
+                      <td />
+                    </tr>
+                  </tfoot>
+                )}
               </table>
             </div>
 
@@ -1378,6 +1576,13 @@ function PaymentsTab({ projectId }: { projectId: string }) {
     select: (d): Payment[] => (Array.isArray(d) ? d : (d as any)?.items ?? []),
   });
 
+  const paymentTotals = useMemo(() => {
+    if (!payments || !payments.length) return null;
+    const total = payments.reduce((s, p) => s + p.amount, 0);
+    const currency = payments[0]?.currency ?? 'EUR';
+    return { total, currency };
+  }, [payments]);
+
   if (isLoading) return <SkeletonTable rows={5} columns={6} />;
 
   if (!payments || payments.length === 0) {
@@ -1386,7 +1591,8 @@ function PaymentsTab({ projectId }: { projectId: string }) {
         icon={<CreditCard size={28} strokeWidth={1.5} />}
         title={t('finance.no_payments', { defaultValue: 'No payments yet' })}
         description={t('finance.no_payments_desc', {
-          defaultValue: 'Payments will appear here once invoices are paid',
+          defaultValue:
+            'Payments are recorded automatically when you mark invoices as paid. Go to the Invoices tab to approve and pay invoices.',
         })}
       />
     );
@@ -1394,6 +1600,14 @@ function PaymentsTab({ projectId }: { projectId: string }) {
 
   return (
     <Card padding="none">
+      {/* Header bar */}
+      <div className="p-4 border-b border-border-light flex items-center justify-between">
+        <p className="text-sm text-content-secondary">
+          {t('finance.payments_explanation', {
+            defaultValue: 'Payment records are created when invoices are marked as paid.',
+          })}
+        </p>
+      </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -1452,6 +1666,19 @@ function PaymentsTab({ projectId }: { projectId: string }) {
               </tr>
             ))}
           </tbody>
+          {paymentTotals && (
+            <tfoot>
+              <tr className="bg-surface-secondary/60 font-semibold">
+                <td className="px-4 py-3 text-content-primary" colSpan={2}>
+                  {t('common.total', { defaultValue: 'Total' })}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <MoneyDisplay amount={paymentTotals.total} currency={paymentTotals.currency} />
+                </td>
+                <td colSpan={3} />
+              </tr>
+            </tfoot>
+          )}
         </table>
       </div>
     </Card>
@@ -1462,11 +1689,34 @@ function PaymentsTab({ projectId }: { projectId: string }) {
 
 function EVMTab({ projectId }: { projectId: string }) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
 
   const { data: evm, isLoading } = useQuery({
     queryKey: ['finance-evm', projectId],
     queryFn: () =>
       apiGet<EVMData>(`/v1/finance/evm?project_id=${projectId}`),
+  });
+
+  const snapshotMut = useMutation({
+    mutationFn: () =>
+      apiPost('/v1/finance/evm/snapshot', {
+        project_id: projectId,
+        snapshot_date: new Date().toISOString().split('T')[0],
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['finance-evm', projectId] });
+      addToast({
+        type: 'success',
+        title: t('finance.snapshot_created', { defaultValue: 'EVM snapshot created' }),
+      });
+    },
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('finance.snapshot_failed', { defaultValue: 'Snapshot failed' }),
+        message: e.message,
+      }),
   });
 
   if (isLoading) {
@@ -1484,14 +1734,20 @@ function EVMTab({ projectId }: { projectId: string }) {
 
   if (!evm) {
     return (
-      <EmptyState
-        icon={<BarChart3 size={28} strokeWidth={1.5} />}
-        title={t('finance.no_evm', { defaultValue: 'No EVM data available' })}
-        description={t('finance.no_evm_desc', {
-          defaultValue:
-            'Earned value data requires schedule and cost baseline setup',
-        })}
-      />
+      <div className="space-y-4">
+        <EmptyState
+          icon={<BarChart3 size={28} strokeWidth={1.5} />}
+          title={t('finance.no_evm', { defaultValue: 'No EVM data available' })}
+          description={t('finance.no_evm_desc', {
+            defaultValue:
+              'Earned value data requires budget lines and a cost baseline. Create budget lines first, then click "Create Snapshot" to calculate EVM metrics.',
+          })}
+          action={{
+            label: t('finance.create_snapshot', { defaultValue: 'Create Snapshot' }),
+            onClick: () => snapshotMut.mutate(),
+          }}
+        />
+      </div>
     );
   }
 
@@ -1572,10 +1828,27 @@ function EVMTab({ projectId }: { projectId: string }) {
 
   return (
     <div className="space-y-6">
-      {/* Data date */}
-      <div className="text-sm text-content-tertiary">
-        {t('finance.data_date', { defaultValue: 'Data Date' })}:{' '}
-        <DateDisplay value={evm.data_date} className="font-medium text-content-secondary" />
+      {/* Header: Data date + Create Snapshot */}
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-content-tertiary">
+          {t('finance.data_date', { defaultValue: 'Data Date' })}:{' '}
+          <DateDisplay value={evm.data_date} className="font-medium text-content-secondary" />
+        </div>
+        <Button
+          variant="secondary"
+          size="sm"
+          icon={
+            snapshotMut.isPending ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : (
+              <Camera size={14} />
+            )
+          }
+          onClick={() => snapshotMut.mutate()}
+          disabled={snapshotMut.isPending}
+        >
+          {t('finance.create_snapshot', { defaultValue: 'Create Snapshot' })}
+        </Button>
       </div>
 
       {/* KPI Cards */}

@@ -68,6 +68,13 @@ function isDataFile(filename: string): boolean {
   return DATA_EXTENSIONS.has(getFileExtension(filename));
 }
 
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+}
+
 /* ── Types ────────────────────────────────────────────────────────────── */
 
 interface TreeNode {
@@ -259,7 +266,7 @@ function ModelCard({
         isActive
           ? 'border-oe-blue bg-oe-blue-subtle'
           : 'border-border-light hover:border-border-medium hover:bg-surface-secondary'
-      }`}
+      } ${isProcessing ? 'border-l-4 border-l-amber-400' : ''}`}
     >
       <button onClick={onClick} className="w-full text-start p-3">
         <div className="flex items-center gap-2">
@@ -1338,6 +1345,59 @@ export function BIMPage() {
                   />
                 ))}
               </div>
+            ) : elements.length === 0 && activeModelId && activeModel?.status === 'processing' ? (
+              <div className="p-6 text-center">
+                <div className="mx-auto w-16 h-16 rounded-full bg-amber-50 flex items-center justify-center mb-4">
+                  <Loader2 size={28} className="text-amber-500 animate-spin" />
+                </div>
+                <h3 className="text-sm font-semibold text-content-primary mb-1">
+                  {t('bim.processing_model_title', { defaultValue: 'Processing Model' })}
+                </h3>
+                <p className="text-xs text-content-tertiary mb-3">
+                  {t('bim.processing_elements_hint', {
+                    defaultValue:
+                      'Your file is being converted. Elements will appear here once processing completes.',
+                  })}
+                </p>
+
+                {/* Progress steps */}
+                <div className="space-y-2 text-left max-w-xs mx-auto">
+                  <div className="flex items-center gap-2 text-xs">
+                    <CheckCircle2 size={14} className="text-green-500" />
+                    <span className="text-content-secondary">
+                      {t('bim.step_file_uploaded', { defaultValue: 'File uploaded' })}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <Loader2 size={14} className="text-amber-500 animate-spin" />
+                    <span className="text-content-secondary">
+                      {t('bim.step_converting', { defaultValue: 'Converting to elements...' })}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-content-quaternary">
+                    <div className="w-3.5 h-3.5 rounded-full border-2 border-border" />
+                    <span>
+                      {t('bim.step_extracting_geometry', {
+                        defaultValue: 'Extracting geometry',
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-content-quaternary">
+                    <div className="w-3.5 h-3.5 rounded-full border-2 border-border" />
+                    <span>
+                      {t('bim.step_ready_for_viewing', {
+                        defaultValue: 'Ready for viewing',
+                      })}
+                    </span>
+                  </div>
+                </div>
+
+                <p className="text-2xs text-content-quaternary mt-4">
+                  {t('bim.auto_refresh_hint', {
+                    defaultValue: 'Automatic refresh every 10 seconds',
+                  })}
+                </p>
+              </div>
             ) : elements.length === 0 && activeModelId ? (
               <p className="text-xs text-content-tertiary py-4 text-center">
                 {t('bim.no_elements', { defaultValue: 'No elements to display' })}
@@ -1352,7 +1412,32 @@ export function BIMPage() {
 
         {/* Right panel — 3D Viewer */}
         <div className="flex-1 min-w-0">
-          {activeModelId ? (
+          {activeModelId && activeModel?.status === 'processing' ? (
+            <div className="flex flex-col items-center justify-center h-full bg-surface-secondary">
+              <div className="text-center max-w-sm">
+                <div className="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center mb-4">
+                  <Box size={32} className="text-amber-600" />
+                </div>
+                <h2 className="text-lg font-semibold text-content-primary mb-2">
+                  {t('bim.model_processing_title', { defaultValue: 'Model Processing' })}
+                </h2>
+                <p className="text-sm text-content-secondary mb-4">
+                  {t('bim.model_processing_viewer_desc', {
+                    defaultValue:
+                      'Your {{format}} file is being processed. The 3D viewer will load automatically when elements are ready.',
+                    format: (activeModel.model_format || activeModel.format || '').toUpperCase(),
+                  })}
+                </p>
+                <div className="text-xs text-content-tertiary">
+                  {t('bim.model_processing_file_info', {
+                    defaultValue: 'File: {{name}} ({{size}})',
+                    name: activeModel.name,
+                    size: activeModel.file_size ? formatFileSize(activeModel.file_size) : '—',
+                  })}
+                </div>
+              </div>
+            </div>
+          ) : activeModelId ? (
             <BIMViewer
               modelId={activeModelId}
               projectId={projectId}
