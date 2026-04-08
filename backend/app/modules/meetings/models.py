@@ -55,7 +55,7 @@ class Meeting(Base):
     )
 
     minutes: Mapped[str | None] = mapped_column(Text, nullable=True)
-    status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft")
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft", index=True)
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",

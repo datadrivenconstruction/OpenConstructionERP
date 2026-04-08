@@ -30,7 +30,7 @@ class TenderPackage(Base):
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
-    status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft")
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft", index=True)
     deadline: Mapped[str | None] = mapped_column(String(20), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",

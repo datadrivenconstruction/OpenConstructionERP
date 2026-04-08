@@ -32,7 +32,7 @@ class RiskItem(Base):
     impact_schedule_days: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     impact_severity: Mapped[str] = mapped_column(String(20), nullable=False, default="medium")
     risk_score: Mapped[str] = mapped_column(String(10), nullable=False, default="0")
-    status: Mapped[str] = mapped_column(String(50), nullable=False, default="identified")
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="identified", index=True)
     mitigation_strategy: Mapped[str] = mapped_column(Text, nullable=False, default="")
     contingency_plan: Mapped[str] = mapped_column(Text, nullable=False, default="")
     owner_name: Mapped[str] = mapped_column(String(255), nullable=False, default="")

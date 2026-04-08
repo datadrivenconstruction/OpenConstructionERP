@@ -28,7 +28,7 @@ class RFI(Base):
     question: Mapped[str] = mapped_column(Text, nullable=False)
     raised_by: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False)
     assigned_to: Mapped[str | None] = mapped_column(GUID(), nullable=True)
-    status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft")
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft", index=True)
     ball_in_court: Mapped[str | None] = mapped_column(GUID(), nullable=True)
     official_response: Mapped[str | None] = mapped_column(Text, nullable=True)
     responded_by: Mapped[str | None] = mapped_column(GUID(), nullable=True)

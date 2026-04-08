@@ -10,7 +10,7 @@ Tables:
 
 import uuid
 
-from sqlalchemy import JSON, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import JSON, ForeignKey, Index, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import GUID, Base
@@ -20,6 +20,10 @@ class Invoice(Base):
     """A payable or receivable invoice linked to a project."""
 
     __tablename__ = "oe_finance_invoice"
+    __table_args__ = (
+        Index("ix_invoice_project_direction", "project_id", "invoice_direction"),
+        Index("ix_invoice_project_status", "project_id", "status"),
+    )
 
     project_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -27,7 +31,7 @@ class Invoice(Base):
         index=True,
     )
     contact_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
-    invoice_direction: Mapped[str] = mapped_column(String(20), nullable=False)
+    invoice_direction: Mapped[str] = mapped_column(String(20), nullable=False, index=True)
     invoice_number: Mapped[str] = mapped_column(String(50), nullable=False)
     invoice_date: Mapped[str] = mapped_column(String(20), nullable=False)
     due_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
@@ -37,7 +41,7 @@ class Invoice(Base):
     retention_amount: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     amount_total: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     tax_config_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
-    status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft")
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft", index=True)
     payment_terms_days: Mapped[str | None] = mapped_column(String(10), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
@@ -74,6 +78,7 @@ class InvoiceLineItem(Base):
         GUID(),
         ForeignKey("oe_finance_invoice.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
     description: Mapped[str] = mapped_column(String(500), nullable=False)
     quantity: Mapped[str] = mapped_column(String(50), nullable=False, default="1")
@@ -100,6 +105,7 @@ class Payment(Base):
         GUID(),
         ForeignKey("oe_finance_invoice.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
     payment_date: Mapped[str] = mapped_column(String(20), nullable=False)
     amount: Mapped[str] = mapped_column(String(50), nullable=False)

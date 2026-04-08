@@ -441,66 +441,34 @@ class FinanceService:
     ) -> dict:
         """Compute aggregated finance KPIs for a project or globally.
 
-        Returns totals for payable/receivable invoices, overdue amounts,
-        budget consumption, payment totals, and net cash flow.
+        Uses SQL-level aggregation for invoices, budgets, and payments
+        instead of loading all rows into Python — significantly faster
+        for projects with many financial records.
         """
-        from datetime import date
-
         from app.modules.finance.schemas import FinanceDashboardResponse
 
-        # ── Invoices ────────────────────────────────────────────────────
-        invoices, _ = await self.invoices.list(
-            project_id=project_id, limit=50000
+        # ── Invoices (SQL aggregation) ─────────────────────────────────
+        inv_agg = await self.invoices.aggregate_for_dashboard(
+            project_id=project_id,
         )
+        total_payable = inv_agg["total_payable"]
+        total_receivable = inv_agg["total_receivable"]
+        total_overdue = inv_agg["total_overdue"]
+        overdue_count = inv_agg["overdue_count"]
+        status_counts = inv_agg["status_counts"]
 
-        total_payable = Decimal("0")
-        total_receivable = Decimal("0")
-        total_overdue = Decimal("0")
-        overdue_count = 0
-        status_counts: dict[str, int] = {
-            "draft": 0, "pending": 0, "approved": 0, "paid": 0, "cancelled": 0,
-        }
-        today = date.today().isoformat()
-
-        for inv in invoices:
-            amount = _parse_decimal(inv.amount_total, "amount_total")
-            inv_status = inv.status or "draft"
-            if inv_status in status_counts:
-                status_counts[inv_status] += 1
-
-            if inv.invoice_direction == "payable":
-                if inv_status not in ("paid", "cancelled"):
-                    total_payable += amount
-            elif inv.invoice_direction == "receivable":
-                if inv_status not in ("paid", "cancelled"):
-                    total_receivable += amount
-
-            # Overdue check: has due_date, not paid/cancelled, past due
-            if (
-                inv.due_date
-                and inv.due_date < today
-                and inv_status not in ("paid", "cancelled")
-            ):
-                total_overdue += amount
-                overdue_count += 1
-
-        # ── Budgets ─────────────────────────────────────────────────────
-        budgets, _ = await self.budgets.list(project_id=project_id)
-
-        total_budget_original = Decimal("0")
-        total_budget_revised = Decimal("0")
-        total_committed = Decimal("0")
-        total_actual = Decimal("0")
-
-        for b in budgets:
-            total_budget_original += _parse_decimal(b.original_budget, "original_budget")
-            total_budget_revised += _parse_decimal(b.revised_budget, "revised_budget")
-            total_committed += _parse_decimal(b.committed, "committed")
-            total_actual += _parse_decimal(b.actual, "actual")
+        # ── Budgets (SQL aggregation) ──────────────────────────────────
+        budget_agg = await self.budgets.aggregate_for_dashboard(
+            project_id=project_id,
+        )
+        total_budget_original = budget_agg["total_budget_original"]
+        total_budget_revised = budget_agg["total_budget_revised"]
+        total_committed = budget_agg["total_committed"]
+        total_actual = budget_agg["total_actual"]
 
         total_variance = total_budget_revised - total_actual
         budget_consumed_pct = (
-            float(total_actual / total_budget_revised * 100)
+            total_actual / total_budget_revised * 100
             if total_budget_revised > 0
             else 0.0
         )
@@ -513,32 +481,28 @@ class FinanceService:
         else:
             warning_level = "normal"
 
-        # ── Payments ────────────────────────────────────────────────────
-        payments, _ = await self.payments_repo.list(limit=50000)
-
-        total_payments = Decimal("0")
-        for p in payments:
-            total_payments += _parse_decimal(p.amount, "amount")
+        # ── Payments (SQL aggregation) ─────────────────────────────────
+        total_payments = await self.payments_repo.aggregate_total()
 
         # Net cash flow: receivable payments received minus payable payments made
-        cash_flow_net = float(total_receivable - total_payable)
+        cash_flow_net = total_receivable - total_payable
 
         return FinanceDashboardResponse(
-            total_payable=round(float(total_payable), 2),
-            total_receivable=round(float(total_receivable), 2),
-            total_overdue=round(float(total_overdue), 2),
+            total_payable=round(total_payable, 2),
+            total_receivable=round(total_receivable, 2),
+            total_overdue=round(total_overdue, 2),
             overdue_count=overdue_count,
             invoices_draft=status_counts["draft"],
             invoices_pending=status_counts["pending"],
             invoices_approved=status_counts["approved"],
             invoices_paid=status_counts["paid"],
-            total_budget_original=round(float(total_budget_original), 2),
-            total_budget_revised=round(float(total_budget_revised), 2),
-            total_committed=round(float(total_committed), 2),
-            total_actual=round(float(total_actual), 2),
-            total_variance=round(float(total_variance), 2),
+            total_budget_original=round(total_budget_original, 2),
+            total_budget_revised=round(total_budget_revised, 2),
+            total_committed=round(total_committed, 2),
+            total_actual=round(total_actual, 2),
+            total_variance=round(total_variance, 2),
             budget_consumed_pct=round(budget_consumed_pct, 1),
             budget_warning_level=warning_level,
-            total_payments=round(float(total_payments), 2),
+            total_payments=round(total_payments, 2),
             cash_flow_net=round(cash_flow_net, 2),
         ).model_dump()

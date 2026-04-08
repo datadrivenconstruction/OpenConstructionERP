@@ -30,7 +30,7 @@ class PunchItem(Base):
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     priority: Mapped[str] = mapped_column(String(20), nullable=False, default="medium")
-    status: Mapped[str] = mapped_column(String(20), nullable=False, default="open")
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="open", index=True)
     assigned_to: Mapped[str | None] = mapped_column(String(36), nullable=True)
     due_date: Mapped[str | None] = mapped_column(DateTime(timezone=True), nullable=True)
     category: Mapped[str | None] = mapped_column(String(100), nullable=True)

@@ -227,6 +227,21 @@ def create_app() -> FastAPI:
         allow_headers=["Content-Type", "Authorization", "Accept", "Accept-Language"],
     )
 
+    # ── API Version header ──────────────────────────────────────────────
+    from starlette.middleware.base import BaseHTTPMiddleware
+    from starlette.requests import Request as StarletteRequest
+    from starlette.responses import Response as StarletteResponse
+
+    class APIVersionMiddleware(BaseHTTPMiddleware):
+        """Add X-API-Version response header to every API response."""
+
+        async def dispatch(self, request: StarletteRequest, call_next):  # noqa: ANN001, ANN201
+            response: StarletteResponse = await call_next(request)
+            response.headers["X-API-Version"] = settings.app_version
+            return response
+
+    app.add_middleware(APIVersionMiddleware)
+
     # ── DDC Fingerprint ──────────────────────────────────────────────────
     from app.middleware.fingerprint import DDCFingerprintMiddleware
 

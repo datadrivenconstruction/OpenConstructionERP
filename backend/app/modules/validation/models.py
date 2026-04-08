@@ -8,7 +8,7 @@ Tables:
 
 import uuid
 
-from sqlalchemy import JSON, Integer, String
+from sqlalchemy import JSON, Index, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -22,6 +22,9 @@ class ValidationReport(Base):
     """
 
     __tablename__ = "oe_validation_report"
+    __table_args__ = (
+        Index("ix_validation_target", "target_type", "target_id"),
+    )
 
     project_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -31,11 +34,13 @@ class ValidationReport(Base):
     target_type: Mapped[str] = mapped_column(
         String(50),
         nullable=False,
+        index=True,
         doc="Type of validated entity: boq, document, cad_import, tender",
     )
     target_id: Mapped[str] = mapped_column(
         String(36),
         nullable=False,
+        index=True,
         doc="UUID of the validated entity",
     )
     rule_set: Mapped[str] = mapped_column(
@@ -47,6 +52,7 @@ class ValidationReport(Base):
         String(50),
         nullable=False,
         default="pending",
+        index=True,
         doc="Overall status: pending, passed, warnings, errors",
     )
     score: Mapped[str | None] = mapped_column(

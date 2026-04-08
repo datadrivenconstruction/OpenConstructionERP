@@ -64,7 +64,13 @@ def _get_service(session: SessionDep) -> FinanceService:
 # ── Invoices (list / create) ───────────────────────────────────────────────
 
 
-@router.get("/", response_model=InvoiceListResponse)
+@router.get(
+    "/",
+    response_model=InvoiceListResponse,
+    summary="List invoices",
+    description="Retrieve a paginated list of invoices with optional filters by project, "
+    "direction (payable/receivable), and status.",
+)
 async def list_invoices(
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     project_id: uuid.UUID | None = Query(default=None),
@@ -90,7 +96,14 @@ async def list_invoices(
     )
 
 
-@router.post("/", response_model=InvoiceResponse, status_code=201)
+@router.post(
+    "/",
+    response_model=InvoiceResponse,
+    status_code=201,
+    summary="Create invoice",
+    description="Create a new invoice with optional line items. Set invoice_direction "
+    "to 'payable' (vendor invoices) or 'receivable' (client invoices).",
+)
 async def create_invoice(
     data: InvoiceCreate,
     user_id: CurrentUserId,
@@ -104,7 +117,13 @@ async def create_invoice(
 # ── Export invoices as Excel ────────────────────────────────────────────────
 
 
-@router.get("/invoices/export")
+@router.get(
+    "/invoices/export",
+    summary="Export invoices as Excel",
+    description="Download invoices for a project as an Excel (.xlsx) file. "
+    "Optionally filter by direction (payable/receivable).",
+    response_description="Excel file stream (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)",
+)
 async def export_invoices(
     session: SessionDep,
     _user_id: CurrentUserId,
@@ -176,7 +195,12 @@ async def export_invoices(
 # ── Payments (MUST be before /{invoice_id}) ─────────────────────────────────
 
 
-@router.get("/payments", response_model=PaymentListResponse)
+@router.get(
+    "/payments",
+    response_model=PaymentListResponse,
+    summary="List payments",
+    description="Retrieve a paginated list of payments, optionally filtered by invoice.",
+)
 async def list_payments(
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     invoice_id: uuid.UUID | None = Query(default=None),
@@ -194,7 +218,13 @@ async def list_payments(
     )
 
 
-@router.post("/payments", response_model=PaymentResponse, status_code=201)
+@router.post(
+    "/payments",
+    response_model=PaymentResponse,
+    status_code=201,
+    summary="Create payment",
+    description="Record a payment against an invoice. Updates the invoice's paid amount.",
+)
 async def create_payment(
     data: PaymentCreate,
     user_id: CurrentUserId,
@@ -208,7 +238,12 @@ async def create_payment(
 # ── Budgets (MUST be before /{invoice_id}) ──────────────────────────────────
 
 
-@router.get("/budgets", response_model=BudgetListResponse)
+@router.get(
+    "/budgets",
+    response_model=BudgetListResponse,
+    summary="List budgets",
+    description="Retrieve project budget lines with optional filters by project and cost category.",
+)
 async def list_budgets(
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     project_id: uuid.UUID | None = Query(default=None),
@@ -223,7 +258,13 @@ async def list_budgets(
     )
 
 
-@router.post("/budgets", response_model=BudgetResponse, status_code=201)
+@router.post(
+    "/budgets",
+    response_model=BudgetResponse,
+    status_code=201,
+    summary="Create budget line",
+    description="Create a project budget line for a specific WBS element and cost category.",
+)
 async def create_budget(
     data: BudgetCreate,
     user_id: CurrentUserId,
@@ -387,7 +428,13 @@ def _parse_budget_rows_from_excel(content_bytes: bytes) -> list[dict[str, Any]]:
     return rows
 
 
-@router.post("/budgets/import/file")
+@router.post(
+    "/budgets/import/file",
+    summary="Import budgets from file",
+    description="Upload an Excel (.xlsx) or CSV (.csv) file to bulk-import budget lines. "
+    "Column headers are auto-detected using flexible aliases (EN/DE). "
+    "Returns a summary with imported, skipped, and error counts per row.",
+)
 async def import_budgets_file(
     _user_id: CurrentUserId,
     project_id: uuid.UUID = Query(...),
@@ -529,7 +576,13 @@ async def import_budgets_file(
 # ── Export budgets as Excel ──────────────────────────────────────────────────
 
 
-@router.get("/budgets/export")
+@router.get(
+    "/budgets/export",
+    summary="Export budgets as Excel",
+    description="Download budgets for a project as an Excel (.xlsx) file with "
+    "original, revised, committed, actual, forecast, and variance columns.",
+    response_description="Excel file stream (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)",
+)
 async def export_budgets(
     session: SessionDep,
     _user_id: CurrentUserId,
@@ -605,7 +658,12 @@ async def export_budgets(
     )
 
 
-@router.patch("/budgets/{budget_id}", response_model=BudgetResponse)
+@router.patch(
+    "/budgets/{budget_id}",
+    response_model=BudgetResponse,
+    summary="Update budget line",
+    description="Partially update a budget line. Only provided fields are modified.",
+)
 async def update_budget(
     budget_id: uuid.UUID,
     data: BudgetUpdate,
@@ -620,7 +678,13 @@ async def update_budget(
 # ── EVM (MUST be before /{invoice_id}) ──────────────────────────────────────
 
 
-@router.get("/evm", response_model=EVMListResponse)
+@router.get(
+    "/evm",
+    response_model=EVMListResponse,
+    summary="List EVM snapshots",
+    description="List Earned Value Management snapshots for a project. "
+    "Each snapshot captures PV, EV, AC, SPI, CPI, and EAC at a point in time.",
+)
 async def list_evm_snapshots(
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     project_id: uuid.UUID | None = Query(default=None),
@@ -634,7 +698,14 @@ async def list_evm_snapshots(
     )
 
 
-@router.post("/evm/snapshot", response_model=EVMSnapshotResponse, status_code=201)
+@router.post(
+    "/evm/snapshot",
+    response_model=EVMSnapshotResponse,
+    status_code=201,
+    summary="Create EVM snapshot",
+    description="Capture a new Earned Value Management snapshot for a project. "
+    "Records planned value (PV), earned value (EV), actual cost (AC), and derived indices.",
+)
 async def create_evm_snapshot(
     data: EVMSnapshotCreate,
     user_id: CurrentUserId,
@@ -648,7 +719,14 @@ async def create_evm_snapshot(
 # ── Finance Dashboard ─────────────────────────────────────────────────────────
 
 
-@router.get("/dashboard")
+@router.get(
+    "/dashboard",
+    summary="Get finance dashboard",
+    description="Aggregated finance KPIs: payable, receivable, overdue totals, "
+    "budget utilisation, cash flow overview, and budget warning level "
+    "(normal / caution at 80%+ / critical at 95%+). "
+    "Optionally scope to a single project via project_id query parameter.",
+)
 async def finance_dashboard(
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     project_id: uuid.UUID | None = Query(default=None),
@@ -665,7 +743,12 @@ async def finance_dashboard(
 # ── Invoice by ID (parametric routes LAST) ──────────────────────────────────
 
 
-@router.get("/{invoice_id}", response_model=InvoiceResponse)
+@router.get(
+    "/{invoice_id}",
+    response_model=InvoiceResponse,
+    summary="Get invoice",
+    description="Retrieve a single invoice by its UUID, including line items and payment history.",
+)
 async def get_invoice(
     invoice_id: uuid.UUID,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -676,7 +759,12 @@ async def get_invoice(
     return InvoiceResponse.model_validate(invoice)
 
 
-@router.patch("/{invoice_id}", response_model=InvoiceResponse)
+@router.patch(
+    "/{invoice_id}",
+    response_model=InvoiceResponse,
+    summary="Update invoice",
+    description="Partially update an invoice. Only provided fields are modified.",
+)
 async def update_invoice(
     invoice_id: uuid.UUID,
     data: InvoiceUpdate,
@@ -688,7 +776,13 @@ async def update_invoice(
     return InvoiceResponse.model_validate(invoice)
 
 
-@router.post("/{invoice_id}/approve", response_model=InvoiceResponse)
+@router.post(
+    "/{invoice_id}/approve",
+    response_model=InvoiceResponse,
+    summary="Approve invoice",
+    description="Transition an invoice to 'approved' status. "
+    "Only invoices in 'draft' or 'submitted' status can be approved.",
+)
 async def approve_invoice(
     invoice_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -699,7 +793,12 @@ async def approve_invoice(
     return InvoiceResponse.model_validate(invoice)
 
 
-@router.post("/{invoice_id}/pay", response_model=InvoiceResponse)
+@router.post(
+    "/{invoice_id}/pay",
+    response_model=InvoiceResponse,
+    summary="Mark invoice as paid",
+    description="Transition an invoice to 'paid' status. Records the payment date.",
+)
 async def pay_invoice(
     invoice_id: uuid.UUID,
     user_id: CurrentUserId,

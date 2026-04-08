@@ -75,6 +75,7 @@ class BudgetLine(Base):
     category: Mapped[str] = mapped_column(
         String(100),
         nullable=False,
+        index=True,
         doc="material, labor, equipment, subcontractor, overhead, contingency",
     )
     description: Mapped[str] = mapped_column(String(500), nullable=False, default="")

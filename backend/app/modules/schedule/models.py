@@ -86,7 +86,7 @@ class Activity(Base):
     end_date: Mapped[str] = mapped_column(String(20), nullable=False)
     duration_days: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     progress_pct: Mapped[str] = mapped_column(String(10), nullable=False, default="0")
-    status: Mapped[str] = mapped_column(String(50), nullable=False, default="not_started")
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="not_started", index=True)
     activity_type: Mapped[str] = mapped_column(String(50), nullable=False, default="task")
     dependencies: Mapped[list] = mapped_column(  # type: ignore[assignment]
         JSON,

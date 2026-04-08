@@ -86,8 +86,13 @@ class AssemblyRepository:
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        # Fetch
-        stmt = base.order_by(Assembly.code).offset(offset).limit(limit)
+        # Fetch — skip eager loading of components for list queries
+        stmt = (
+            base.options(noload(Assembly.components))
+            .order_by(Assembly.code)
+            .offset(offset)
+            .limit(limit)
+        )
         result = await self.session.execute(stmt)
         assemblies = list(result.scalars().all())
 

@@ -201,6 +201,8 @@ def _work_order_to_response(wo: object) -> WorkOrderResponse:
     "/schedules/",
     response_model=ScheduleResponse,
     status_code=201,
+    summary="Create schedule",
+    description="Create a new schedule for a project. Verifies project ownership.",
     dependencies=[Depends(RequirePermission("schedule.create"))],
 )
 async def create_schedule(
@@ -225,6 +227,8 @@ async def create_schedule(
 @router.get(
     "/schedules/",
     response_model=list[ScheduleResponse],
+    summary="List schedules",
+    description="List all schedules for a project. Requires project_id query parameter.",
     dependencies=[Depends(RequirePermission("schedule.read"))],
 )
 async def list_schedules(
@@ -245,6 +249,7 @@ async def list_schedules(
 @router.get(
     "/schedules/{schedule_id}",
     response_model=ScheduleResponse,
+    summary="Get schedule",
     dependencies=[Depends(RequirePermission("schedule.read"))],
 )
 async def get_schedule(
@@ -263,6 +268,7 @@ async def get_schedule(
 @router.patch(
     "/schedules/{schedule_id}",
     response_model=ScheduleResponse,
+    summary="Update schedule",
     dependencies=[Depends(RequirePermission("schedule.update"))],
 )
 async def update_schedule(
@@ -282,6 +288,7 @@ async def update_schedule(
 @router.delete(
     "/schedules/{schedule_id}",
     status_code=204,
+    summary="Delete schedule",
     dependencies=[Depends(RequirePermission("schedule.delete"))],
 )
 async def delete_schedule(
@@ -303,6 +310,7 @@ async def delete_schedule(
     "/schedules/{schedule_id}/activities",
     response_model=ActivityResponse,
     status_code=201,
+    summary="Create activity",
     dependencies=[Depends(RequirePermission("schedule.update"))],
 )
 async def create_activity(
@@ -323,6 +331,7 @@ async def create_activity(
 @router.get(
     "/schedules/{schedule_id}/activities",
     response_model=list[ActivityResponse],
+    summary="List activities",
     dependencies=[Depends(RequirePermission("schedule.read"))],
 )
 async def list_activities(
@@ -339,6 +348,7 @@ async def list_activities(
 @router.get(
     "/schedules/{schedule_id}/gantt",
     response_model=GanttData,
+    summary="Get Gantt chart data",
     dependencies=[Depends(RequirePermission("schedule.read"))],
 )
 async def get_gantt_data(
@@ -356,6 +366,9 @@ async def get_gantt_data(
     "/schedules/{schedule_id}/generate-from-boq",
     response_model=list[ActivityResponse],
     status_code=201,
+    summary="Generate activities from BOQ",
+    description="Auto-generate schedule activities from a BOQ. Creates one activity per "
+    "section with cost-proportional durations and sequential FS dependencies.",
     dependencies=[Depends(RequirePermission("schedule.update"))],
 )
 async def generate_from_boq(
@@ -385,6 +398,9 @@ async def generate_from_boq(
 @router.post(
     "/schedules/{schedule_id}/calculate-cpm",
     response_model=CriticalPathResponse,
+    summary="Calculate critical path (CPM)",
+    description="Run CPM forward/backward pass on a schedule. Returns early/late start/finish, "
+    "total float, and critical path. Updates activity colors (red=critical, blue=non-critical).",
     dependencies=[Depends(RequirePermission("schedule.read"))],
 )
 async def calculate_cpm(
@@ -402,6 +418,10 @@ async def calculate_cpm(
 @router.get(
     "/schedules/{schedule_id}/risk-analysis",
     response_model=RiskAnalysisResponse,
+    summary="Get PERT risk analysis",
+    description="Compute PERT-based risk analysis with P50, P80, P95 duration estimates. "
+    "Derives optimistic/pessimistic durations for each activity and project-level "
+    "probability estimates for schedule completion.",
     dependencies=[Depends(RequirePermission("schedule.read"))],
 )
 async def get_risk_analysis(
@@ -419,6 +439,7 @@ async def get_risk_analysis(
 @router.patch(
     "/activities/{activity_id}",
     response_model=ActivityResponse,
+    summary="Update activity",
     dependencies=[Depends(RequirePermission("schedule.update"))],
 )
 async def update_activity(
@@ -434,6 +455,7 @@ async def update_activity(
 @router.delete(
     "/activities/{activity_id}",
     status_code=204,
+    summary="Delete activity",
     dependencies=[Depends(RequirePermission("schedule.delete"))],
 )
 async def delete_activity(
@@ -447,6 +469,7 @@ async def delete_activity(
 @router.post(
     "/activities/{activity_id}/link-position",
     response_model=ActivityResponse,
+    summary="Link BOQ position to activity",
     dependencies=[Depends(RequirePermission("schedule.update"))],
 )
 async def link_boq_position(
@@ -462,6 +485,7 @@ async def link_boq_position(
 @router.patch(
     "/activities/{activity_id}/progress",
     response_model=ActivityResponse,
+    summary="Update activity progress",
     dependencies=[Depends(RequirePermission("schedule.update"))],
 )
 async def update_activity_progress(
@@ -481,6 +505,7 @@ async def update_activity_progress(
     "/activities/{activity_id}/work-orders",
     response_model=WorkOrderResponse,
     status_code=201,
+    summary="Create work order",
     dependencies=[Depends(RequirePermission("schedule.work_orders.manage"))],
 )
 async def create_work_order(
@@ -501,6 +526,7 @@ async def create_work_order(
 @router.get(
     "/work-orders/",
     response_model=list[WorkOrderResponse],
+    summary="List work orders",
     dependencies=[Depends(RequirePermission("schedule.read"))],
 )
 async def list_work_orders(
@@ -517,6 +543,7 @@ async def list_work_orders(
 @router.patch(
     "/work-orders/{work_order_id}",
     response_model=WorkOrderResponse,
+    summary="Update work order",
     dependencies=[Depends(RequirePermission("schedule.work_orders.manage"))],
 )
 async def update_work_order(
@@ -536,6 +563,9 @@ async def update_work_order(
     "/schedules/{schedule_id}/relationships",
     response_model=RelationshipResponse,
     status_code=201,
+    summary="Create CPM relationship",
+    description="Create a dependency relationship between two activities. "
+    "Validates against self-references and circular dependencies.",
     dependencies=[Depends(RequirePermission("schedule.update"))],
 )
 async def create_relationship(
@@ -613,6 +643,7 @@ async def create_relationship(
 @router.get(
     "/schedules/{schedule_id}/relationships",
     response_model=list[RelationshipResponse],
+    summary="List CPM relationships",
     dependencies=[Depends(RequirePermission("schedule.read"))],
 )
 async def list_relationships(
@@ -635,6 +666,7 @@ async def list_relationships(
 @router.delete(
     "/relationships/{relationship_id}",
     status_code=204,
+    summary="Delete relationship",
     dependencies=[Depends(RequirePermission("schedule.update"))],
 )
 async def delete_relationship(
@@ -658,6 +690,10 @@ async def delete_relationship(
 @router.post(
     "/schedule/cpm/calculate",
     response_model=CriticalPathResponse,
+    summary="Run full CPM calculation",
+    description="Full CPM calculation using the core engine. Reads activities and "
+    "ScheduleRelationship records, runs forward/backward pass, computes floats, "
+    "identifies the critical path, and persists results on each activity.",
     dependencies=[Depends(RequirePermission("schedule.read"))],
 )
 async def calculate_cpm_full(
@@ -815,6 +851,7 @@ async def calculate_cpm_full(
     "/baselines/",
     response_model=BaselineResponse,
     status_code=201,
+    summary="Create baseline",
     dependencies=[Depends(RequirePermission("schedule.update"))],
 )
 async def create_baseline(
@@ -842,6 +879,7 @@ async def create_baseline(
 @router.get(
     "/baselines/",
     response_model=list[BaselineResponse],
+    summary="List baselines",
     dependencies=[Depends(RequirePermission("schedule.read"))],
 )
 async def list_baselines(
@@ -866,6 +904,7 @@ async def list_baselines(
 @router.get(
     "/baselines/{baseline_id}",
     response_model=BaselineResponse,
+    summary="Get baseline",
     dependencies=[Depends(RequirePermission("schedule.read"))],
 )
 async def get_baseline(
@@ -884,6 +923,7 @@ async def get_baseline(
 @router.patch(
     "/baselines/{baseline_id}",
     response_model=BaselineResponse,
+    summary="Update baseline",
     dependencies=[Depends(RequirePermission("schedule.update"))],
 )
 async def update_baseline(
@@ -919,6 +959,7 @@ async def update_baseline(
 @router.delete(
     "/baselines/{baseline_id}",
     status_code=204,
+    summary="Delete baseline",
     dependencies=[Depends(RequirePermission("schedule.delete"))],
 )
 async def delete_baseline(
@@ -942,6 +983,7 @@ async def delete_baseline(
     "/progress-updates/",
     response_model=ProgressUpdateResponse,
     status_code=201,
+    summary="Create progress update",
     dependencies=[Depends(RequirePermission("schedule.update"))],
 )
 async def create_progress_update(
@@ -973,6 +1015,7 @@ async def create_progress_update(
 @router.get(
     "/progress-updates/",
     response_model=list[ProgressUpdateResponse],
+    summary="List progress updates",
     dependencies=[Depends(RequirePermission("schedule.read"))],
 )
 async def list_progress_updates(
@@ -998,6 +1041,7 @@ async def list_progress_updates(
 @router.get(
     "/progress-updates/{update_id}",
     response_model=ProgressUpdateResponse,
+    summary="Get progress update",
     dependencies=[Depends(RequirePermission("schedule.read"))],
 )
 async def get_progress_update(
@@ -1016,6 +1060,7 @@ async def get_progress_update(
 @router.patch(
     "/progress-updates/{update_id}",
     response_model=ProgressUpdateResponse,
+    summary="Update progress update",
     dependencies=[Depends(RequirePermission("schedule.update"))],
 )
 async def update_progress_update(
@@ -1051,6 +1096,7 @@ async def update_progress_update(
 @router.delete(
     "/progress-updates/{update_id}",
     status_code=204,
+    summary="Delete progress update",
     dependencies=[Depends(RequirePermission("schedule.delete"))],
 )
 async def delete_progress_update(

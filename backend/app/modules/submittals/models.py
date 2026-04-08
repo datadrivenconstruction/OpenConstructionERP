@@ -27,7 +27,7 @@ class Submittal(Base):
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     spec_section: Mapped[str | None] = mapped_column(String(100), nullable=True)
     submittal_type: Mapped[str] = mapped_column(String(50), nullable=False)
-    status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft")
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft", index=True)
     ball_in_court: Mapped[str | None] = mapped_column(GUID(), nullable=True)
     current_revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     submitted_by_org: Mapped[str | None] = mapped_column(String(36), nullable=True)

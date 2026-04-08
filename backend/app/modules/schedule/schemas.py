@@ -35,11 +35,11 @@ class ScheduleCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     project_id: UUID
-    name: str = Field(..., min_length=1, max_length=255)
-    schedule_type: str = Field(default="master", max_length=50)
+    name: str = Field(..., min_length=1, max_length=255, examples=["Master Schedule Phase 1"])
+    schedule_type: str = Field(default="master", max_length=50, examples=["master"])
     description: str = ""
-    start_date: str | None = Field(default=None, max_length=20)
-    end_date: str | None = Field(default=None, max_length=20)
+    start_date: str | None = Field(default=None, max_length=20, examples=["2026-05-01"])
+    end_date: str | None = Field(default=None, max_length=20, examples=["2027-03-31"])
     data_date: str | None = Field(default=None, max_length=20)
     created_by: UUID | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)

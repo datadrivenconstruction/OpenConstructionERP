@@ -51,7 +51,7 @@ class SafetyIncident(Base):
     reported_to_regulator: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False
     )
-    status: Mapped[str] = mapped_column(String(50), nullable=False, default="reported")
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="reported", index=True)
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
@@ -85,7 +85,7 @@ class SafetyObservation(Base):
     risk_score: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     immediate_action: Mapped[str | None] = mapped_column(Text, nullable=True)
     corrective_action: Mapped[str | None] = mapped_column(Text, nullable=True)
-    status: Mapped[str] = mapped_column(String(50), nullable=False, default="open")
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="open", index=True)
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",

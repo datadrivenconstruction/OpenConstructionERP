@@ -7,7 +7,7 @@ Tables:
 import uuid
 from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, String
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Index, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -22,6 +22,10 @@ class Notification(Base):
     """
 
     __tablename__ = "oe_notifications_notification"
+    __table_args__ = (
+        Index("ix_notification_user_read", "user_id", "is_read"),
+        Index("ix_notification_user_created", "user_id", "created_at"),
+    )
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -45,7 +49,7 @@ class Notification(Base):
         server_default="{}",
     )
     action_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    is_read: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
+    is_read: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0", index=True)
     read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",

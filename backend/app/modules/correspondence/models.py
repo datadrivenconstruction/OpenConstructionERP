@@ -24,7 +24,7 @@ class Correspondence(Base):
         index=True,
     )
     reference_number: Mapped[str] = mapped_column(String(50), nullable=False)
-    direction: Mapped[str] = mapped_column(String(20), nullable=False)
+    direction: Mapped[str] = mapped_column(String(20), nullable=False, index=True)
     subject: Mapped[str] = mapped_column(String(500), nullable=False)
     from_contact_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
 

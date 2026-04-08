@@ -33,7 +33,7 @@ class DocumentContainer(Base):
     sequence_number: Mapped[str | None] = mapped_column(String(20), nullable=True)
     classification_system: Mapped[str | None] = mapped_column(String(50), nullable=True)
     classification_code: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    cde_state: Mapped[str] = mapped_column(String(50), nullable=False, default="wip")
+    cde_state: Mapped[str] = mapped_column(String(50), nullable=False, default="wip", index=True)
     suitability_code: Mapped[str | None] = mapped_column(String(10), nullable=True)
     current_revision_id: Mapped[str | None] = mapped_column(GUID(), nullable=True)
     title: Mapped[str] = mapped_column(String(500), nullable=False)

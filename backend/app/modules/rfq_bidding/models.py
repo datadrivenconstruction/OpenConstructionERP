@@ -29,7 +29,7 @@ class RFQ(Base):
     scope_of_work: Mapped[str | None] = mapped_column(Text, nullable=True)
     submission_deadline: Mapped[str | None] = mapped_column(String(20), nullable=True)
     currency_code: Mapped[str] = mapped_column(String(10), nullable=False, default="EUR")
-    status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft")
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft", index=True)
     issued_to_contacts: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON,
         nullable=False,
@@ -65,6 +65,7 @@ class RFQBid(Base):
         GUID(),
         ForeignKey("oe_rfq_rfq.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
     bidder_contact_id: Mapped[str] = mapped_column(String(36), nullable=False)
     bid_amount: Mapped[str] = mapped_column(String(50), nullable=False)

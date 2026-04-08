@@ -31,7 +31,7 @@ class Transmittal(Base):
     issued_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     response_due_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     status: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="draft", server_default="draft"
+        String(50), nullable=False, default="draft", server_default="draft", index=True,
     )
     cover_note: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_locked: Mapped[bool] = mapped_column(

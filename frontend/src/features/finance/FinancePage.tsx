@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -309,6 +309,19 @@ function BudgetsTab({ projectId }: { projectId: string }) {
   const [showCreate, setShowCreate] = useState(false);
   const [budgetForm, setBudgetForm] = useState({ wbs_code: '', category: '', original_budget: '' });
 
+  // Escape key handler for inline modals
+  useEffect(() => {
+    if (!showCreate && !showImport) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showCreate) setShowCreate(false);
+        if (showImport) setShowImport(false);
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [showCreate, showImport]);
+
   const createBudgetMut = useMutation({
     mutationFn: (data: { wbs_id: string | null; category: string | null; original_budget: string }) =>
       apiPost('/v1/finance/budgets', {
@@ -584,13 +597,14 @@ function BudgetsTab({ projectId }: { projectId: string }) {
     {/* New Budget Line Modal */}
     {showCreate && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-        <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4">
+        <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4" role="dialog" aria-label={t('finance.new_budget', { defaultValue: 'New Budget Line' })}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
             <h2 className="text-lg font-semibold text-content-primary">
               {t('finance.new_budget', { defaultValue: 'New Budget Line' })}
             </h2>
             <button
               onClick={() => setShowCreate(false)}
+              aria-label={t('common.close', { defaultValue: 'Close' })}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
             >
               <X size={18} />
@@ -664,13 +678,14 @@ function BudgetsTab({ projectId }: { projectId: string }) {
     {/* Budget Import Modal */}
     {showImport && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-        <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('finance.import_budgets', { defaultValue: 'Import Budgets' })}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
             <h2 className="text-lg font-semibold text-content-primary">
               {t('finance.import_budgets', { defaultValue: 'Import Budgets' })}
             </h2>
             <button
               onClick={() => setShowImport(false)}
+              aria-label={t('common.close', { defaultValue: 'Close' })}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
             >
               <X size={18} />
@@ -781,6 +796,16 @@ function InvoicesTab({ projectId }: { projectId: string }) {
     amount: '',
     description: '',
   });
+
+  // Escape key handler for inline modal
+  useEffect(() => {
+    if (!showCreate) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowCreate(false);
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [showCreate]);
 
   const createInvoiceMut = useMutation({
     mutationFn: (data: typeof invoiceForm) =>
@@ -1083,13 +1108,14 @@ function InvoicesTab({ projectId }: { projectId: string }) {
       {/* New Invoice Modal */}
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('finance.new_invoice', { defaultValue: 'New Invoice' })}>
             <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
               <h2 className="text-lg font-semibold text-content-primary">
                 {t('finance.new_invoice', { defaultValue: 'New Invoice' })}
               </h2>
               <button
                 onClick={() => setShowCreate(false)}
+                aria-label={t('common.close', { defaultValue: 'Close' })}
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
               >
                 <X size={18} />

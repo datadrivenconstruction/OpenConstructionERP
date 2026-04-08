@@ -38,7 +38,7 @@ def _validate_date_string(value: str | None, field_name: str) -> str | None:
 class ProjectCreate(BaseModel):
     """Create a new project."""
 
-    name: str = Field(..., min_length=1, max_length=255)
+    name: str = Field(..., min_length=1, max_length=255, examples=["Residential Berlin Mitte"])
 
     @field_validator("name", mode="after")
     @classmethod
@@ -46,21 +46,28 @@ class ProjectCreate(BaseModel):
         """Remove HTML tags to prevent XSS in project names."""
         return _HTML_TAG_RE.sub("", v).strip()
 
-    description: str = Field(default="", max_length=5000)
+    description: str = Field(
+        default="",
+        max_length=5000,
+        examples=["5-story residential building, 48 units, underground parking"],
+    )
     region: str = Field(
         default="",
         max_length=100,
         description="Region/market identifier — user must choose, no default bias",
+        examples=["DACH"],
     )
     classification_standard: str = Field(
         default="",
         max_length=100,
         description="Classification standard — accepts any standard identifier",
+        examples=["din276"],
     )
     currency: str = Field(
         default="",
         max_length=10,
         description="ISO 4217 currency code — user must choose, no default bias",
+        examples=["EUR"],
     )
     locale: str = Field(default="en", max_length=10)
     validation_rule_sets: list[str] = Field(default_factory=lambda: ["boq_quality"])

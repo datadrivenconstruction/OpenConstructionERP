@@ -8,6 +8,7 @@ import uuid
 
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import noload
 
 from app.modules.schedule.models import Activity, Schedule, WorkOrder
 
@@ -29,15 +30,23 @@ class ScheduleRepository:
         offset: int = 0,
         limit: int = 50,
     ) -> tuple[list[Schedule], int]:
-        """List schedules for a project with pagination. Returns (schedules, total_count)."""
+        """List schedules for a project with pagination. Returns (schedules, total_count).
+
+        Activities are NOT loaded in list queries to avoid N+1.
+        """
         base = select(Schedule).where(Schedule.project_id == project_id)
 
         # Count
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        # Fetch
-        stmt = base.order_by(Schedule.created_at.desc()).offset(offset).limit(limit)
+        # Fetch — skip eager loading of activities for list queries
+        stmt = (
+            base.options(noload(Schedule.activities))
+            .order_by(Schedule.created_at.desc())
+            .offset(offset)
+            .limit(limit)
+        )
         result = await self.session.execute(stmt)
         schedules = list(result.scalars().all())
 
@@ -80,15 +89,26 @@ class ActivityRepository:
         offset: int = 0,
         limit: int = 1000,
     ) -> tuple[list[Activity], int]:
-        """List activities for a schedule ordered by sort_order. Returns (activities, total)."""
+        """List activities for a schedule ordered by sort_order. Returns (activities, total).
+
+        Children and work_orders are NOT loaded to avoid N+1 on list queries.
+        """
         base = select(Activity).where(Activity.schedule_id == schedule_id)
 
         # Count
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        # Fetch ordered by sort_order, then wbs_code
-        stmt = base.order_by(Activity.sort_order, Activity.wbs_code).offset(offset).limit(limit)
+        # Fetch ordered by sort_order, then wbs_code — skip heavy relationships
+        stmt = (
+            base.options(
+                noload(Activity.children),
+                noload(Activity.work_orders),
+            )
+            .order_by(Activity.sort_order, Activity.wbs_code)
+            .offset(offset)
+            .limit(limit)
+        )
         result = await self.session.execute(stmt)
         activities = list(result.scalars().all())
 

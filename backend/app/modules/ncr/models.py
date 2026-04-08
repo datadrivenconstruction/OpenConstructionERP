@@ -32,7 +32,7 @@ class NCR(Base):
     root_cause_category: Mapped[str | None] = mapped_column(String(100), nullable=True)
     corrective_action: Mapped[str | None] = mapped_column(Text, nullable=True)
     preventive_action: Mapped[str | None] = mapped_column(Text, nullable=True)
-    status: Mapped[str] = mapped_column(String(50), nullable=False, default="identified")
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="identified", index=True)
     cost_impact: Mapped[str | None] = mapped_column(String(50), nullable=True)
     schedule_impact_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
     location_description: Mapped[str | None] = mapped_column(String(500), nullable=True)

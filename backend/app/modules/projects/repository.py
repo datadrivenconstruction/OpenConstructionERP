@@ -8,6 +8,7 @@ import uuid
 
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import noload
 
 from app.modules.projects.models import Project
 
@@ -50,8 +51,17 @@ class ProjectRepository:
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        # Fetch
-        stmt = base.order_by(Project.created_at.desc()).offset(offset).limit(limit)
+        # Fetch — skip eager loading of relationships for list queries
+        stmt = (
+            base.options(
+                noload(Project.wbs_nodes),
+                noload(Project.milestones),
+                noload(Project.children),
+            )
+            .order_by(Project.created_at.desc())
+            .offset(offset)
+            .limit(limit)
+        )
         result = await self.session.execute(stmt)
         projects = list(result.scalars().all())
 

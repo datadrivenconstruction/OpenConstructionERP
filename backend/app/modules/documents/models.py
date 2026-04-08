@@ -28,7 +28,7 @@ class Document(Base):
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
-    category: Mapped[str] = mapped_column(String(50), nullable=False, default="other")
+    category: Mapped[str] = mapped_column(String(50), nullable=False, default="other", index=True)
     file_size: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     mime_type: Mapped[str] = mapped_column(String(100), nullable=False, default="")
     file_path: Mapped[str] = mapped_column(String(500), nullable=False, default="")

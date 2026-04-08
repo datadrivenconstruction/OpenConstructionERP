@@ -93,7 +93,7 @@ class FieldReport(Base):
     signature_data: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Status & approval
-    status: Mapped[str] = mapped_column(String(20), nullable=False, default="draft")
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="draft", index=True)
     approved_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     approved_at: Mapped[str | None] = mapped_column(DateTime(timezone=True), nullable=True)
 

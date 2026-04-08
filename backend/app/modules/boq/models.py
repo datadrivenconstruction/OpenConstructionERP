@@ -11,7 +11,7 @@ Tables:
 
 import uuid
 
-from sqlalchemy import JSON, Boolean, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Boolean, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import GUID, Base
@@ -30,7 +30,7 @@ class BOQ(Base):
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
-    status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft")
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft", index=True)
 
     # ── Phase 12.2 lock & revision fields ────────────────────────────────
     estimate_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
@@ -211,6 +211,10 @@ class BOQActivityLog(Base):
     """
 
     __tablename__ = "oe_boq_activity_log"
+    __table_args__ = (
+        Index("ix_boq_activity_user_created", "user_id", "created_at"),
+        Index("ix_boq_activity_target", "target_type", "target_id"),
+    )
 
     project_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),

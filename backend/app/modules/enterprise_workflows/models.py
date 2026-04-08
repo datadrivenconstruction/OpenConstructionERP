@@ -61,12 +61,13 @@ class ApprovalRequest(Base):
         GUID(),
         ForeignKey("oe_workflows_approval.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
-    entity_type: Mapped[str] = mapped_column(String(100), nullable=False)
-    entity_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    entity_type: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    entity_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
     current_step: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
-    status: Mapped[str] = mapped_column(String(50), nullable=False, default="pending")
-    requested_by: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False)
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="pending", index=True)
+    requested_by: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
     decided_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     decided_at: Mapped[str | None] = mapped_column(String(20), nullable=True)
     decision_notes: Mapped[str | None] = mapped_column(Text, nullable=True)

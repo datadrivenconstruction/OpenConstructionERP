@@ -71,15 +71,18 @@ class InvoiceCreate(BaseModel):
     invoice_direction: str = Field(
         ...,
         pattern=r"^(payable|receivable)$",
+        examples=["payable"],
     )
-    invoice_number: str | None = Field(default=None, max_length=50)
-    invoice_date: str = Field(..., max_length=20)
-    due_date: str | None = Field(default=None, max_length=20)
-    currency_code: str = Field(default="EUR", max_length=10)
-    amount_subtotal: str = Field(default="0", max_length=50)
-    tax_amount: str = Field(default="0", max_length=50)
-    retention_amount: str = Field(default="0", max_length=50)
-    amount_total: str = Field(default="0", max_length=50)
+    invoice_number: str | None = Field(
+        default=None, max_length=50, examples=["INV-2026-0042"]
+    )
+    invoice_date: str = Field(..., max_length=20, examples=["2026-04-01"])
+    due_date: str | None = Field(default=None, max_length=20, examples=["2026-05-01"])
+    currency_code: str = Field(default="EUR", max_length=10, examples=["EUR"])
+    amount_subtotal: str = Field(default="0", max_length=50, examples=["50000.00"])
+    tax_amount: str = Field(default="0", max_length=50, examples=["9500.00"])
+    retention_amount: str = Field(default="0", max_length=50, examples=["2500.00"])
+    amount_total: str = Field(default="0", max_length=50, examples=["57000.00"])
     tax_config_id: str | None = Field(default=None, max_length=36)
     status: str = Field(default="draft", max_length=50)
     payment_terms_days: str | None = Field(default=None, max_length=10)

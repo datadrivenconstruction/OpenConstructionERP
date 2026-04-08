@@ -17,21 +17,28 @@ class ContactCreate(BaseModel):
     contact_type: str = Field(
         ...,
         pattern=r"^(client|subcontractor|supplier|consultant|internal)$",
+        examples=["subcontractor"],
     )
     is_platform_user: bool = False
     user_id: UUID | None = None
 
-    first_name: str | None = Field(default=None, max_length=255)
-    last_name: str | None = Field(default=None, max_length=255)
-    company_name: str | None = Field(default=None, max_length=255)
+    first_name: str | None = Field(default=None, max_length=255, examples=["Max"])
+    last_name: str | None = Field(default=None, max_length=255, examples=["Mustermann"])
+    company_name: str | None = Field(
+        default=None, max_length=255, examples=["Acme Construction GmbH"]
+    )
     legal_name: str | None = Field(default=None, max_length=255)
-    vat_number: str | None = Field(default=None, max_length=50)
+    vat_number: str | None = Field(default=None, max_length=50, examples=["DE123456789"])
 
-    country_code: str | None = Field(default=None, max_length=2)
+    country_code: str | None = Field(default=None, max_length=2, examples=["DE"])
     address: dict[str, Any] | None = None
 
-    primary_email: str | None = Field(default=None, max_length=255)
-    primary_phone: str | None = Field(default=None, max_length=50)
+    primary_email: str | None = Field(
+        default=None, max_length=255, examples=["info@acme-construction.de"]
+    )
+    primary_phone: str | None = Field(
+        default=None, max_length=50, examples=["+49 170 1234567"]
+    )
     website: str | None = Field(default=None, max_length=500)
 
     @field_validator("primary_email")

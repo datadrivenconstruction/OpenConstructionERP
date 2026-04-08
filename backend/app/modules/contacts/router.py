@@ -45,7 +45,13 @@ def _get_service(session: SessionDep) -> ContactService:
 # ── List ──────────────────────────────────────────────────────────────────────
 
 
-@router.get("/", response_model=ContactListResponse)
+@router.get(
+    "/",
+    response_model=ContactListResponse,
+    summary="List contacts",
+    description="Retrieve a paginated list of contacts with optional filters by type, "
+    "country, and active status. Returns total count for pagination.",
+)
 async def list_contacts(
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     contact_type: str | None = Query(default=None),
@@ -74,7 +80,13 @@ async def list_contacts(
 # ── Search ────────────────────────────────────────────────────────────────────
 
 
-@router.get("/search", response_model=ContactListResponse)
+@router.get(
+    "/search",
+    response_model=ContactListResponse,
+    summary="Search contacts",
+    description="Full-text search across contact name, company, and email fields. "
+    "Supports optional type filter and pagination.",
+)
 async def search_contacts(
     q: str = Query(..., min_length=1, max_length=200),
     contact_type: str | None = Query(default=None),
@@ -103,7 +115,13 @@ async def search_contacts(
 # ── Stats ────────────────────────────────────────────────────────────────────
 
 
-@router.get("/stats", response_model=ContactStatsResponse)
+@router.get(
+    "/stats",
+    response_model=ContactStatsResponse,
+    summary="Get contact statistics",
+    description="Aggregate statistics: total contacts, breakdown by type and country (top 10), "
+    "and count of contacts with expiring prequalification.",
+)
 async def contact_stats(
     service: ContactService = Depends(_get_service),
 ) -> ContactStatsResponse:
@@ -124,7 +142,12 @@ async def contact_stats(
 # ── By Company ───────────────────────────────────────────────────────────────
 
 
-@router.get("/by-company", response_model=ContactListResponse)
+@router.get(
+    "/by-company",
+    response_model=ContactListResponse,
+    summary="List contacts by company",
+    description="Find all contacts belonging to the same company (case-insensitive match).",
+)
 async def contacts_by_company(
     company_name: str = Query(..., min_length=1, max_length=255),
     offset: int = Query(default=0, ge=0),
@@ -308,7 +331,13 @@ def _parse_contact_rows_from_excel(content_bytes: bytes) -> list[dict[str, Any]]
     return rows
 
 
-@router.post("/import/file")
+@router.post(
+    "/import/file",
+    summary="Import contacts from file",
+    description="Upload an Excel (.xlsx) or CSV (.csv) file to bulk-import contacts. "
+    "Column headers are auto-detected using flexible aliases (EN/DE). "
+    "Returns a summary with imported, skipped, and error counts per row.",
+)
 async def import_contacts_file(
     _user_id: CurrentUserId,
     file: UploadFile = File(..., description="Excel (.xlsx) or CSV (.csv) file"),
@@ -472,7 +501,12 @@ async def import_contacts_file(
 # ── Export contacts as Excel ─────────────────────────────────────────────────
 
 
-@router.get("/export")
+@router.get(
+    "/export",
+    summary="Export contacts as Excel",
+    description="Download all active contacts as an Excel (.xlsx) file.",
+    response_description="Excel file stream (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)",
+)
 async def export_contacts(
     session: SessionDep,
     _user_id: CurrentUserId,
@@ -532,7 +566,13 @@ async def export_contacts(
 # ── Download import template ─────────────────────────────────────────────────
 
 
-@router.get("/template")
+@router.get(
+    "/template",
+    summary="Download import template",
+    description="Download an empty Excel template with correct column headers and "
+    "two example rows. Includes a Notes sheet explaining each column.",
+    response_description="Excel file stream with template headers and example data",
+)
 async def download_contacts_template(
     _user_id: CurrentUserId = None,  # type: ignore[assignment]
 ) -> StreamingResponse:
@@ -653,7 +693,14 @@ async def download_contacts_template(
 # ── Create ────────────────────────────────────────────────────────────────────
 
 
-@router.post("/", response_model=ContactResponse, status_code=201)
+@router.post(
+    "/",
+    response_model=ContactResponse,
+    status_code=201,
+    summary="Create contact",
+    description="Create a new contact in the directory. Validates email format "
+    "and enforces allowed contact types (client, subcontractor, supplier, consultant, internal).",
+)
 async def create_contact(
     data: ContactCreate,
     user_id: CurrentUserId,
@@ -667,7 +714,12 @@ async def create_contact(
 # ── Get ───────────────────────────────────────────────────────────────────────
 
 
-@router.get("/{contact_id}", response_model=ContactResponse)
+@router.get(
+    "/{contact_id}",
+    response_model=ContactResponse,
+    summary="Get contact",
+    description="Retrieve a single contact by its UUID.",
+)
 async def get_contact(
     contact_id: uuid.UUID,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -681,7 +733,12 @@ async def get_contact(
 # ── Update ────────────────────────────────────────────────────────────────────
 
 
-@router.patch("/{contact_id}", response_model=ContactResponse)
+@router.patch(
+    "/{contact_id}",
+    response_model=ContactResponse,
+    summary="Update contact",
+    description="Partially update a contact. Only provided fields are modified.",
+)
 async def update_contact(
     contact_id: uuid.UUID,
     data: ContactUpdate,
@@ -696,7 +753,13 @@ async def update_contact(
 # ── Delete (soft) ─────────────────────────────────────────────────────────────
 
 
-@router.delete("/{contact_id}", status_code=204)
+@router.delete(
+    "/{contact_id}",
+    status_code=204,
+    summary="Delete contact",
+    description="Soft-delete a contact by setting is_active=False. "
+    "The record is retained for audit purposes but excluded from default queries.",
+)
 async def delete_contact(
     contact_id: uuid.UUID,
     user_id: CurrentUserId,

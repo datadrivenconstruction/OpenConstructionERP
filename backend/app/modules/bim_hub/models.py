@@ -89,10 +89,10 @@ class BIMElement(Base):
         index=True,
     )
     stable_id: Mapped[str] = mapped_column(String(255), nullable=False)
-    element_type: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    element_type: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
     name: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    storey: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    discipline: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    storey: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
+    discipline: Mapped[str | None] = mapped_column(String(50), nullable=True, index=True)
     properties: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON,
         nullable=False,

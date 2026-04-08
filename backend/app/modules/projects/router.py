@@ -61,7 +61,14 @@ async def _verify_project_owner(
 # ── Create ────────────────────────────────────────────────────────────────
 
 
-@router.post("/", response_model=ProjectResponse, status_code=201)
+@router.post(
+    "/",
+    response_model=ProjectResponse,
+    status_code=201,
+    summary="Create project",
+    description="Create a new construction project. Sets the current user as owner. "
+    "Configure region, classification standard, and currency for the project context.",
+)
 async def create_project(
     data: ProjectCreate,
     user_id: CurrentUserId,
@@ -84,7 +91,13 @@ async def create_project(
 # ── List ──────────────────────────────────────────────────────────────────
 
 
-@router.get("/", response_model=list[ProjectResponse])
+@router.get(
+    "/",
+    response_model=list[ProjectResponse],
+    summary="List projects",
+    description="List projects visible to the current user. Admins see all projects; "
+    "regular users see only their own. Supports pagination and status filter.",
+)
 async def list_projects(
     user_id: CurrentUserId,
     payload: CurrentUserPayload,
@@ -108,7 +121,12 @@ async def list_projects(
 # ── Get ───────────────────────────────────────────────────────────────────
 
 
-@router.get("/{project_id}", response_model=ProjectResponse)
+@router.get(
+    "/{project_id}",
+    response_model=ProjectResponse,
+    summary="Get project",
+    description="Retrieve a single project by its UUID. Verifies ownership or admin role.",
+)
 async def get_project(
     project_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -123,7 +141,13 @@ async def get_project(
 # ── Update ────────────────────────────────────────────────────────────────
 
 
-@router.patch("/{project_id}", response_model=ProjectResponse)
+@router.patch(
+    "/{project_id}",
+    response_model=ProjectResponse,
+    summary="Update project",
+    description="Partially update project fields (name, description, region, currency, etc.). "
+    "Only provided fields are modified. Verifies ownership.",
+)
 async def update_project(
     project_id: uuid.UUID,
     data: ProjectUpdate,
@@ -140,7 +164,13 @@ async def update_project(
 # ── Delete (archive) ─────────────────────────────────────────────────────
 
 
-@router.delete("/{project_id}", status_code=204)
+@router.delete(
+    "/{project_id}",
+    status_code=204,
+    summary="Archive project",
+    description="Soft-delete (archive) a project. The project and its data are retained "
+    "but hidden from default queries. Use POST /{project_id}/restore to un-archive.",
+)
 async def delete_project(
     project_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -163,7 +193,13 @@ async def delete_project(
 # ── Restore (un-archive) ────────────────────────────────────────────────
 
 
-@router.post("/{project_id}/restore", response_model=ProjectResponse)
+@router.post(
+    "/{project_id}/restore",
+    response_model=ProjectResponse,
+    summary="Restore archived project",
+    description="Restore an archived project back to active status. "
+    "Only the project owner or admin can restore.",
+)
 async def restore_project(
     project_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -189,7 +225,14 @@ async def restore_project(
 # ── Project Dashboard (cross-module aggregation) ───────────────────────
 
 
-@router.get("/{project_id}/dashboard")
+@router.get(
+    "/{project_id}/dashboard",
+    summary="Get project dashboard",
+    description="Unified project dashboard with aggregated KPIs from all modules: "
+    "budget, schedule, quality (punch items, inspections, NCRs), documents, "
+    "communication (RFIs, submittals, tasks), procurement, and recent activity. "
+    "Each module section degrades gracefully if its table does not exist.",
+)
 async def project_dashboard(
     project_id: uuid.UUID,
     session: SessionDep,
@@ -912,7 +955,12 @@ async def project_dashboard(
 # ── Cross-Project Analytics ─────────────────────────────────────────────
 
 
-@router.get("/analytics/overview")
+@router.get(
+    "/analytics/overview",
+    summary="Get cross-project analytics",
+    description="Aggregated KPIs across all projects: total budget, actual spend, "
+    "variance, over-budget count, and per-project summary with BOQ counts.",
+)
 async def analytics_overview(
     session: SessionDep,
     _user_id: CurrentUserId,
@@ -998,7 +1046,14 @@ async def analytics_overview(
 # ── WBS CRUD ─────────────────────────────────────────────────────────────
 
 
-@router.post("/{project_id}/wbs", response_model=WBSResponse, status_code=201)
+@router.post(
+    "/{project_id}/wbs",
+    response_model=WBSResponse,
+    status_code=201,
+    summary="Create WBS node",
+    description="Create a Work Breakdown Structure node for a project. "
+    "Supports hierarchical nesting via parent_id.",
+)
 async def create_wbs_node(
     project_id: uuid.UUID,
     data: WBSCreate,
@@ -1044,7 +1099,12 @@ async def create_wbs_node(
     return WBSResponse.model_validate(node)
 
 
-@router.get("/{project_id}/wbs", response_model=list[WBSResponse])
+@router.get(
+    "/{project_id}/wbs",
+    response_model=list[WBSResponse],
+    summary="List WBS nodes",
+    description="List all WBS nodes for a project, ordered by sort_order.",
+)
 async def list_wbs_nodes(
     project_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -1065,7 +1125,12 @@ async def list_wbs_nodes(
     return [WBSResponse.model_validate(n) for n in nodes]
 
 
-@router.patch("/{project_id}/wbs/{wbs_id}", response_model=WBSResponse)
+@router.patch(
+    "/{project_id}/wbs/{wbs_id}",
+    response_model=WBSResponse,
+    summary="Update WBS node",
+    description="Partially update a WBS node. Validates that parent_id does not create a self-reference.",
+)
 async def update_wbs_node(
     project_id: uuid.UUID,
     wbs_id: uuid.UUID,
@@ -1118,7 +1183,11 @@ async def update_wbs_node(
     return WBSResponse.model_validate(node)
 
 
-@router.delete("/{project_id}/wbs/{wbs_id}", status_code=204)
+@router.delete(
+    "/{project_id}/wbs/{wbs_id}",
+    status_code=204,
+    summary="Delete WBS node",
+)
 async def delete_wbs_node(
     project_id: uuid.UUID,
     wbs_id: uuid.UUID,
@@ -1141,7 +1210,14 @@ async def delete_wbs_node(
 # ── Milestone CRUD ───────────────────────────────────────────────────────
 
 
-@router.post("/{project_id}/milestones", response_model=MilestoneResponse, status_code=201)
+@router.post(
+    "/{project_id}/milestones",
+    response_model=MilestoneResponse,
+    status_code=201,
+    summary="Create milestone",
+    description="Create a project milestone with planned date. "
+    "Can be linked to a payment percentage for progress billing.",
+)
 async def create_milestone(
     project_id: uuid.UUID,
     data: MilestoneCreate,
@@ -1170,7 +1246,12 @@ async def create_milestone(
     return MilestoneResponse.model_validate(milestone)
 
 
-@router.get("/{project_id}/milestones", response_model=list[MilestoneResponse])
+@router.get(
+    "/{project_id}/milestones",
+    response_model=list[MilestoneResponse],
+    summary="List milestones",
+    description="List all milestones for a project, ordered by planned date.",
+)
 async def list_milestones(
     project_id: uuid.UUID,
     user_id: CurrentUserId,

@@ -34,7 +34,7 @@ class PurchaseOrder(Base):
     amount_subtotal: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     tax_amount: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     amount_total: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
-    status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft")
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft", index=True)
     payment_terms: Mapped[str | None] = mapped_column(String(100), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
@@ -71,6 +71,7 @@ class PurchaseOrderItem(Base):
         GUID(),
         ForeignKey("oe_procurement_po.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
     description: Mapped[str] = mapped_column(String(500), nullable=False)
     quantity: Mapped[str] = mapped_column(String(50), nullable=False, default="1")
@@ -97,11 +98,12 @@ class GoodsReceipt(Base):
         GUID(),
         ForeignKey("oe_procurement_po.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
     receipt_date: Mapped[str] = mapped_column(String(20), nullable=False)
     received_by_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     delivery_note_number: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft")
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft", index=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
@@ -132,6 +134,7 @@ class GoodsReceiptItem(Base):
         GUID(),
         ForeignKey("oe_procurement_goods_receipt.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
     po_item_id: Mapped[uuid.UUID | None] = mapped_column(
         GUID(),

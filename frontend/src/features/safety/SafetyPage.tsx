@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -311,6 +311,16 @@ function IncidentsTab({ projectId }: { projectId: string }) {
     location: '',
   });
 
+  // Escape key handler for inline modal
+  useEffect(() => {
+    if (!showCreate) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowCreate(false);
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [showCreate]);
+
   const createMut = useMutation({
     mutationFn: (data: typeof incidentForm) =>
       apiPost('/v1/safety/incidents', {
@@ -535,13 +545,14 @@ function IncidentsTab({ projectId }: { projectId: string }) {
     {/* New Incident Modal */}
     {showCreate && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-        <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('safety.new_incident', { defaultValue: 'New Incident' })}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
             <h2 className="text-lg font-semibold text-content-primary">
               {t('safety.new_incident', { defaultValue: 'New Incident' })}
             </h2>
             <button
               onClick={() => setShowCreate(false)}
+              aria-label={t('common.close', { defaultValue: 'Close' })}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
             >
               <X size={18} />
@@ -664,6 +675,16 @@ function ObservationsTab({ projectId }: { projectId: string }) {
     severity: 3,
     likelihood: 3,
   });
+
+  // Escape key handler for inline modal
+  useEffect(() => {
+    if (!showCreate) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowCreate(false);
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [showCreate]);
 
   const computedRisk = obsForm.severity * obsForm.likelihood;
 
@@ -874,13 +895,14 @@ function ObservationsTab({ projectId }: { projectId: string }) {
     {/* New Observation Modal */}
     {showCreate && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-        <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('safety.new_observation', { defaultValue: 'New Observation' })}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
             <h2 className="text-lg font-semibold text-content-primary">
               {t('safety.new_observation', { defaultValue: 'New Observation' })}
             </h2>
             <button
               onClick={() => setShowCreate(false)}
+              aria-label={t('common.close', { defaultValue: 'Close' })}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
             >
               <X size={18} />

@@ -28,7 +28,7 @@ class ChangeOrder(Base):
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     reason_category: Mapped[str] = mapped_column(String(50), nullable=False, default="client_request")
-    status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft")
+    status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft", index=True)
     submitted_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     approved_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     submitted_at: Mapped[str | None] = mapped_column(String(20), nullable=True)

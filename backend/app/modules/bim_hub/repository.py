@@ -8,6 +8,7 @@ import uuid
 
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import noload
 
 from app.modules.bim_hub.models import (
     BIMElement,
@@ -35,13 +36,22 @@ class BIMModelRepository:
         offset: int = 0,
         limit: int = 50,
     ) -> tuple[list[BIMModel], int]:
-        """List BIM models for a project with pagination."""
+        """List BIM models for a project with pagination.
+
+        Elements are NOT loaded in list queries — use get() for a single model
+        with elements when needed.
+        """
         base = select(BIMModel).where(BIMModel.project_id == project_id)
 
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        stmt = base.order_by(BIMModel.created_at.desc()).offset(offset).limit(limit)
+        stmt = (
+            base.options(noload(BIMModel.elements))
+            .order_by(BIMModel.created_at.desc())
+            .offset(offset)
+            .limit(limit)
+        )
         result = await self.session.execute(stmt)
         models = list(result.scalars().all())
         return models, total
@@ -85,7 +95,10 @@ class BIMElementRepository:
         offset: int = 0,
         limit: int = 200,
     ) -> tuple[list[BIMElement], int]:
-        """List elements for a model with optional filters and pagination."""
+        """List elements for a model with optional filters and pagination.
+
+        BOQ links are NOT loaded in list queries to avoid N+1.
+        """
         base = select(BIMElement).where(BIMElement.model_id == model_id)
 
         if element_type is not None:
@@ -98,7 +111,12 @@ class BIMElementRepository:
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        stmt = base.order_by(BIMElement.created_at).offset(offset).limit(limit)
+        stmt = (
+            base.options(noload(BIMElement.boq_links))
+            .order_by(BIMElement.created_at)
+            .offset(offset)
+            .limit(limit)
+        )
         result = await self.session.execute(stmt)
         elements = list(result.scalars().all())
         return elements, total
