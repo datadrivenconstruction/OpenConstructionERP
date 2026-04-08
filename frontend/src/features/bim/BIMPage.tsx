@@ -946,6 +946,8 @@ export function BIMPage() {
   const [leftPanelUploadOpen, setLeftPanelUploadOpen] = useState(false);
   /** When set, opens the upload panel in advanced mode with this name pre-filled. */
   const [uploadConvertedName, setUploadConvertedName] = useState<string | null>(null);
+  /** Override to force-hide the full-page upload after a successful upload. */
+  const [showUploadOverride, setShowUploadOverride] = useState<boolean | null>(null);
   const addToast = useToastStore((s) => s.addToast);
 
   // Fetch models
@@ -956,6 +958,16 @@ export function BIMPage() {
   });
 
   const hasModels = (modelsQuery.data?.items?.length ?? 0) > 0;
+  // Show full-page upload only when truly no models AND no override.
+  // After upload, showUploadOverride is set to false to immediately hide the upload view.
+  const showFullPageUpload = showUploadOverride !== null ? showUploadOverride : !hasModels;
+
+  // Reset the override once query data catches up (models are present)
+  useEffect(() => {
+    if (hasModels && showUploadOverride === false) {
+      setShowUploadOverride(null);
+    }
+  }, [hasModels, showUploadOverride]);
 
   // Resolve active model from the list
   const activeModel = useMemo(
@@ -1081,11 +1093,12 @@ export function BIMPage() {
 
   const handleUploadComplete = useCallback(
     (modelId: string) => {
-      queryClient.invalidateQueries({ queryKey: ['bim-models', projectId] });
       setActiveModelId(modelId);
+      setShowUploadOverride(false); // Immediately hide full-page upload
       setSelectedElementId(null);
       setLeftPanelUploadOpen(false);
       setUploadConvertedName(null);
+      queryClient.invalidateQueries({ queryKey: ['bim-models', projectId] });
     },
     [queryClient, projectId],
   );
@@ -1134,7 +1147,8 @@ export function BIMPage() {
   }
 
   // Project selected but no models and not loading — show full-page upload
-  if (!hasModels && !modelsQuery.isLoading) {
+  // (unless override says to hide it, e.g. right after a successful upload)
+  if (showFullPageUpload && !modelsQuery.isLoading) {
     return (
       <div className="flex flex-col h-full">
         {/* Header */}
@@ -1147,9 +1161,32 @@ export function BIMPage() {
           </div>
         </div>
 
-        {/* Centered upload section */}
+        {/* Centered upload section, with model list above if any models exist */}
         <div className="flex-1 flex items-center justify-center p-6">
-          <div className="w-full max-w-xl">
+          <div className="w-full max-w-xl space-y-4">
+            {/* Show existing models above upload when available */}
+            {hasModels && modelsQuery.data?.items && (
+              <div className="border border-border-light rounded-lg bg-surface-primary p-4">
+                <h2 className="text-xs font-semibold text-content-tertiary uppercase tracking-wider mb-2">
+                  {t('bim.models', { defaultValue: 'Models' })}
+                </h2>
+                <div className="space-y-2">
+                  {modelsQuery.data.items.map((model) => (
+                    <ModelCard
+                      key={model.id}
+                      model={model}
+                      isActive={model.id === activeModelId}
+                      onClick={() => {
+                        setActiveModelId(model.id);
+                        setSelectedElementId(null);
+                        setShowUploadOverride(false);
+                      }}
+                      onUploadConverted={handleUploadConverted}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
             <UnifiedUploadSection
               projectId={projectId}
               onUploadComplete={handleUploadComplete}

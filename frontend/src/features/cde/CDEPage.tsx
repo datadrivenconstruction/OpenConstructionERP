@@ -11,6 +11,7 @@ import {
   ChevronDown,
   ChevronRight,
   ArrowRight,
+  Info,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, DateDisplay, ConfirmDialog, SkeletonTable } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -465,6 +466,9 @@ export function CDEPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [stateFilter, setStateFilter] = useState<CDEState | ''>('');
+  const [infoDismissed, setInfoDismissed] = useState(
+    () => localStorage.getItem('oe_cde_info_dismissed') === '1',
+  );
 
   // Data
   const { data: projects = [] } = useQuery({
@@ -606,6 +610,36 @@ export function CDEPage() {
         ]}
         className="mb-4"
       />
+
+      {/* Info box — dismissible */}
+      {!infoDismissed && (
+        <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-700 dark:bg-blue-950/30 dark:text-blue-300">
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <div className="flex items-center gap-2">
+              <Info size={16} />
+              <span className="font-semibold">
+                {t('cde.info_title', { defaultValue: 'About Document Containers' })}
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                setInfoDismissed(true);
+                localStorage.setItem('oe_cde_info_dismissed', '1');
+              }}
+              className="flex h-6 w-6 items-center justify-center rounded text-blue-600 hover:bg-blue-100 dark:text-blue-400 dark:hover:bg-blue-900/50 transition-colors shrink-0"
+              aria-label={t('common.dismiss', { defaultValue: 'Dismiss' })}
+            >
+              <X size={14} />
+            </button>
+          </div>
+          <p className="text-xs">
+            {t('cde.info_description', {
+              defaultValue:
+                'A container organizes your project documents following the ISO 19650 standard. Each container holds document revisions that flow through 4 states: WIP (work in progress) \u2192 Shared (with team) \u2192 Published (approved) \u2192 Archived. Link your uploaded documents from the Documents page to containers for formal tracking.',
+            })}
+          </p>
+        </div>
+      )}
 
       {/* Header */}
       <div className="mb-6 flex items-center justify-between gap-3 flex-wrap">
