@@ -963,10 +963,12 @@ function StepDataSetup({
   onNext,
   onBack,
   selectedLang,
+  backgroundLoad,
 }: {
   onNext: () => void;
   onBack: () => void;
   selectedLang: string;
+  backgroundLoad?: boolean;
 }) {
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
@@ -1143,9 +1145,21 @@ function StepDataSetup({
   });
 
   const handleContinue = useCallback(async () => {
+    // Start background DB loading if region selected but not loaded yet
+    if (backgroundLoad && selectedRegion && !loadedDb && !loadingDb) {
+      // Fire and forget — don't await, just start in background
+      handleLoadDb();
+      addToast({
+        type: 'info',
+        title: t('onboarding.db_loading_bg', { defaultValue: 'Loading database in background...' }),
+        message: t('onboarding.db_loading_bg_desc', {
+          defaultValue: 'You can continue working. We\'ll notify you when it\'s ready.',
+        }),
+      });
+    }
     // Install demo if toggled on and not yet installed
     if (installDemo && !demoInstalled && !installingDemo) {
-      await handleInstallDemo();
+      handleInstallDemo(); // also fire and forget in background
     }
     // Save AI key if provided
     if (apiKey.trim()) {
@@ -1153,6 +1167,11 @@ function StepDataSetup({
     }
     onNext();
   }, [
+    backgroundLoad,
+    selectedRegion,
+    loadedDb,
+    loadingDb,
+    handleLoadDb,
     installDemo,
     demoInstalled,
     installingDemo,
@@ -1686,9 +1705,13 @@ export function OnboardingWizard() {
             )}
             {step === 4 && (
               <StepDataSetup
-                onNext={() => setStep(5)}
+                onNext={() => {
+                  // Move to finish — background loading happens inside StepDataSetup
+                  setStep(5);
+                }}
                 onBack={handleBackFromData}
                 selectedLang={selectedLang}
+                backgroundLoad
               />
             )}
             {step === 5 && (
