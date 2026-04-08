@@ -25,7 +25,7 @@ import {
   Code2,
   type LucideIcon,
 } from 'lucide-react';
-import { Card, CardContent, Badge, Button, Input, Breadcrumb } from '@/shared/ui';
+import { Badge, Button, Input, Breadcrumb } from '@/shared/ui';
 import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 
@@ -479,24 +479,27 @@ export function IntegrationsPage() {
   }, [queryClient]);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-4 animate-fade-in">
+    <div className="max-w-content mx-auto animate-fade-in">
       <Breadcrumb
         items={[
           { label: t('nav.settings', 'Settings'), to: '/settings' },
           { label: t('integrations.title', 'Integrations') },
         ]}
+        className="mb-4"
       />
 
-      <div>
-        <h1 className="text-2xl font-bold text-primary">
-          {t('integrations.title', 'Integrations')}
-        </h1>
-        <p className="mt-1 text-sm text-secondary">
-          {t(
-            'integrations.subtitle',
-            'Connect external services to receive project notifications in your favorite tools.'
-          )}
-        </p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-content-primary">
+            {t('integrations.title', 'Integrations')}
+          </h1>
+          <p className="mt-1 text-sm text-content-secondary">
+            {t(
+              'integrations.subtitle',
+              'Connect external services to receive project notifications in your favorite tools.'
+            )}
+          </p>
+        </div>
       </div>
 
       {/* Connector cards grouped by category */}
@@ -506,11 +509,11 @@ export function IntegrationsPage() {
         const catLabel = CATEGORY_LABELS[category];
 
         return (
-          <div key={category} className="space-y-3">
-            <h2 className="text-lg font-semibold text-primary">
+          <div key={category} className="mb-6">
+            <h2 className="text-xs font-bold text-content-tertiary uppercase tracking-wider mb-3">
               {t(catLabel.key, catLabel.defaultLabel)}
             </h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {categoryConnectors.map((connector) => {
                 const existing = configsByType[connector.type] ?? [];
                 const isConnectable = CONNECTABLE_TYPES.includes(connector.type) && connector.status === 'available';
@@ -520,115 +523,113 @@ export function IntegrationsPage() {
                 const Icon = connector.icon;
 
                 return (
-                  <Card key={connector.nameKey} className="relative flex flex-col">
-                    <div className="flex flex-row items-start gap-3 pb-2">
-                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-white ${connector.color}`}>
-                        <Icon size={20} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-primary">
+                  <div key={connector.nameKey} className="rounded-xl border border-border-light bg-surface-primary p-4 hover:border-border hover:shadow-sm transition-all">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-secondary">
+                          <Icon size={18} className="text-content-secondary" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-semibold text-content-primary">
                             {t(connector.nameKey, connector.defaultName)}
                           </h3>
-                          {isConnected && (
-                            <Badge variant="success" size="sm">
-                              <CheckCircle2 size={12} className="mr-1" />
-                              {t('integrations.connected_label', 'Connected')}
-                            </Badge>
-                          )}
-                          {isComingSoon && (
-                            <Badge variant="warning" size="sm">
-                              {t('integrations.coming_soon', 'Coming soon')}
-                            </Badge>
-                          )}
+                          <p className="text-2xs text-content-tertiary">
+                            {t(catLabel.key, catLabel.defaultLabel)}
+                          </p>
                         </div>
-                        <p className="mt-0.5 text-xs text-secondary">
-                          {t(connector.descKey, connector.defaultDesc)}
-                        </p>
                       </div>
+                      {isConnected && (
+                        <Badge variant="success" size="sm">
+                          {t('integrations.connected_label', 'Connected')}
+                        </Badge>
+                      )}
+                      {isComingSoon && (
+                        <Badge variant="neutral" size="sm">
+                          {t('integrations.coming_soon', 'Coming soon')}
+                        </Badge>
+                      )}
+                      {isInfoOnly && !isConnected && (
+                        <Badge variant="blue" size="sm">
+                          {t('integrations.info_label', 'Info')}
+                        </Badge>
+                      )}
                     </div>
 
-                    <CardContent className="flex flex-1 flex-col justify-end pt-0">
-                      {/* Show connected configs */}
-                      {existing.map((cfg) => (
-                        <div
-                          key={cfg.id}
-                          className="mb-2 flex items-center justify-between rounded-lg bg-surface-secondary px-3 py-2 text-sm"
-                        >
-                          <div className="flex items-center gap-2 truncate">
-                            {cfg.is_active ? (
-                              <CheckCircle2 size={14} className="shrink-0 text-green-500" />
-                            ) : (
-                              <XCircle size={14} className="shrink-0 text-red-400" />
-                            )}
-                            <span className="truncate text-primary">{cfg.name}</span>
-                          </div>
-                          <div className="flex shrink-0 items-center gap-1">
-                            <button
-                              onClick={() => testMut.mutate(cfg.id)}
-                              disabled={testMut.isPending}
-                              className="rounded p-1 text-secondary hover:bg-surface-primary hover:text-primary"
-                              title={t('integrations.test', 'Test')}
-                            >
-                              {testMut.isPending ? <Loader2 size={14} className="animate-spin" /> : <TestTube2 size={14} />}
-                            </button>
-                            <button
-                              onClick={() => {
-                                if (window.confirm(t('integrations.confirm_disconnect', 'Disconnect this integration?'))) {
-                                  deleteMut.mutate(cfg.id);
-                                }
-                              }}
-                              className="rounded p-1 text-secondary hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
-                              title={t('integrations.disconnect', 'Disconnect')}
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                    <p className="text-xs text-content-secondary mb-3">
+                      {t(connector.descKey, connector.defaultDesc)}
+                    </p>
 
-                      {/* Connect / Add another button */}
-                      {isConnectable && (
-                        <Button
-                          variant={isConnected ? 'ghost' : 'primary'}
-                          size="sm"
-                          className="mt-auto w-full"
-                          onClick={() => setConnectingType(connector)}
-                        >
-                          <Plus size={14} className="mr-1" />
-                          {isConnected
-                            ? t('integrations.add_another', 'Add Another')
-                            : t('integrations.connect', 'Connect')}
-                        </Button>
-                      )}
-
-                      {/* Info-only cards: show setup hint + optional external link */}
-                      {isInfoOnly && (
-                        <div className="mt-2 space-y-1.5">
-                          <p className="text-center text-xs text-tertiary">
-                            {t('integrations.available_via_config', 'Available via configuration')}
-                          </p>
-                          {connector.externalUrl && (
-                            <a
-                              href={connector.externalUrl}
-                              target={connector.externalUrl.startsWith('http') ? '_blank' : undefined}
-                              rel={connector.externalUrl.startsWith('http') ? 'noopener noreferrer' : undefined}
-                              className="block text-center text-xs text-oe-blue hover:underline"
-                            >
-                              {t('integrations.learn_more', 'Learn more')}
-                            </a>
+                    {/* Show connected configs */}
+                    {existing.map((cfg) => (
+                      <div
+                        key={cfg.id}
+                        className="mb-2 flex items-center justify-between rounded-lg bg-surface-secondary px-3 py-2 text-sm"
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          {cfg.is_active ? (
+                            <CheckCircle2 size={14} className="shrink-0 text-green-500" />
+                          ) : (
+                            <XCircle size={14} className="shrink-0 text-red-400" />
                           )}
+                          <span className="truncate text-content-primary">{cfg.name}</span>
                         </div>
-                      )}
+                        <div className="flex shrink-0 items-center gap-1">
+                          <button
+                            onClick={() => testMut.mutate(cfg.id)}
+                            disabled={testMut.isPending}
+                            className="rounded p-1 text-content-secondary hover:bg-surface-primary hover:text-content-primary"
+                            title={t('integrations.test', 'Test')}
+                          >
+                            {testMut.isPending ? <Loader2 size={14} className="animate-spin" /> : <TestTube2 size={14} />}
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (window.confirm(t('integrations.confirm_disconnect', 'Disconnect this integration?'))) {
+                                deleteMut.mutate(cfg.id);
+                              }
+                            }}
+                            className="rounded p-1 text-content-secondary hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+                            title={t('integrations.disconnect', 'Disconnect')}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
 
-                      {/* Coming soon badge at bottom */}
-                      {isComingSoon && !isConnectable && (
-                        <p className="mt-2 text-center text-xs text-tertiary">
-                          {t('integrations.coming_soon_hint', 'This integration is not yet available.')}
-                        </p>
-                      )}
-                    </CardContent>
-                  </Card>
+                    {/* Connect / Add another button */}
+                    {isConnectable && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setConnectingType(connector)}
+                      >
+                        <Plus size={14} className="mr-1" />
+                        {isConnected
+                          ? t('integrations.add_another', 'Add Another')
+                          : t('integrations.connect', 'Connect')}
+                      </Button>
+                    )}
+
+                    {/* Info-only cards: show setup hint + optional external link */}
+                    {isInfoOnly && connector.externalUrl && (
+                      <a
+                        href={connector.externalUrl}
+                        target={connector.externalUrl.startsWith('http') ? '_blank' : undefined}
+                        rel={connector.externalUrl.startsWith('http') ? 'noopener noreferrer' : undefined}
+                        className="text-xs text-oe-blue hover:underline"
+                      >
+                        {t('integrations.learn_more', 'Learn more')}
+                      </a>
+                    )}
+
+                    {/* Coming soon hint at bottom */}
+                    {isComingSoon && !isConnectable && (
+                      <p className="text-xs text-content-tertiary">
+                        {t('integrations.coming_soon_hint', 'This integration is not yet available.')}
+                      </p>
+                    )}
+                  </div>
                 );
               })}
             </div>
@@ -637,7 +638,7 @@ export function IntegrationsPage() {
       })}
 
       {isLoading && (
-        <div className="flex items-center justify-center py-8 text-secondary">
+        <div className="flex items-center justify-center py-8 text-content-secondary">
           <Loader2 size={20} className="animate-spin" />
           <span className="ml-2">{t('common.loading', 'Loading...')}</span>
         </div>
