@@ -180,7 +180,7 @@ function CreateNCRModal({
         <div className="px-6 py-4 space-y-4">
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('ncr.field_title', { defaultValue: 'Title' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -210,7 +210,7 @@ function CreateNCRModal({
           {/* Two-column: Type + Severity */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('ncr.field_type', { defaultValue: 'Type' })}
               </label>
               <div className="relative">
@@ -233,7 +233,7 @@ function CreateNCRModal({
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('ncr.field_severity', { defaultValue: 'Severity' })}
               </label>
               <div className="relative">
@@ -259,7 +259,7 @@ function CreateNCRModal({
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('ncr.field_description', { defaultValue: 'Description' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -288,7 +288,7 @@ function CreateNCRModal({
 
           {/* Location */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('ncr.field_location', { defaultValue: 'Location' })}
             </label>
             <input
@@ -730,18 +730,18 @@ export function NCRPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <Card className="p-4 animate-card-in">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
             {t('ncr.stat_total', { defaultValue: 'Total' })}
           </p>
-          <p className="text-xl font-bold mt-1 tabular-nums text-content-primary">{stats.total}</p>
+          <p className="text-2xl font-bold mt-1 tabular-nums text-content-primary">{stats.total}</p>
         </Card>
         <Card className="p-4 animate-card-in">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
             {t('ncr.stat_open', { defaultValue: 'Open' })}
           </p>
           <p
             className={clsx(
-              'text-xl font-bold mt-1 tabular-nums',
+              'text-2xl font-bold mt-1 tabular-nums',
               stats.open > 0 ? 'text-semantic-error' : 'text-content-primary',
             )}
           >
@@ -749,16 +749,16 @@ export function NCRPage() {
           </p>
         </Card>
         <Card className="p-4 animate-card-in">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
             {t('ncr.stat_under_review', { defaultValue: 'Under Review' })}
           </p>
-          <p className="text-xl font-bold mt-1 tabular-nums text-amber-500">{stats.underReview}</p>
+          <p className="text-2xl font-bold mt-1 tabular-nums text-amber-500">{stats.underReview}</p>
         </Card>
         <Card className="p-4 animate-card-in">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
             {t('ncr.stat_closed', { defaultValue: 'Closed' })}
           </p>
-          <p className="text-xl font-bold mt-1 tabular-nums text-semantic-success">
+          <p className="text-2xl font-bold mt-1 tabular-nums text-semantic-success">
             {stats.closed}
           </p>
         </Card>
@@ -812,7 +812,7 @@ export function NCRPage() {
           <SkeletonTable rows={5} columns={6} />
         ) : filtered.length === 0 ? (
           <EmptyState
-            icon={<AlertOctagon size={24} strokeWidth={1.5} />}
+            icon={<AlertOctagon size={28} strokeWidth={1.5} />}
             title={
               searchQuery || statusFilter
                 ? t('ncr.no_results', { defaultValue: 'No matching NCRs' })
@@ -846,7 +846,7 @@ export function NCRPage() {
             </p>
             <Card padding="none" className="overflow-x-auto">
               {/* Table header */}
-              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border bg-surface-secondary/50 text-xs font-medium text-content-tertiary uppercase tracking-wide min-w-[640px]">
+              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border-light bg-surface-secondary/30 text-2xs font-medium text-content-tertiary uppercase tracking-wider min-w-[640px]">
                 <span className="w-5" />
                 <span className="w-20">#</span>
                 <span className="flex-1">

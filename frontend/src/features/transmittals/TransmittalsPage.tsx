@@ -156,7 +156,7 @@ function CreateTransmittalModal({
         <div className="px-6 py-4 space-y-4">
           {/* Subject */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('transmittals.field_subject', { defaultValue: 'Subject' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -186,7 +186,7 @@ function CreateTransmittalModal({
           {/* Two-column: Purpose + Response Due */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('transmittals.field_purpose', { defaultValue: 'Purpose' })}
               </label>
               <div className="relative">
@@ -207,7 +207,7 @@ function CreateTransmittalModal({
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('transmittals.field_response_due', { defaultValue: 'Response Due' })}
               </label>
               <input
@@ -221,7 +221,7 @@ function CreateTransmittalModal({
 
           {/* Recipients */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('transmittals.field_recipients', { defaultValue: 'Recipients' })}
             </label>
             <input
@@ -236,7 +236,7 @@ function CreateTransmittalModal({
 
           {/* Items */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('transmittals.field_items', { defaultValue: 'Document Items' })}
             </label>
             <input
@@ -251,7 +251,7 @@ function CreateTransmittalModal({
 
           {/* Cover Note */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('transmittals.field_cover_note', { defaultValue: 'Cover Note' })}
             </label>
             <textarea
@@ -704,40 +704,40 @@ export function TransmittalsPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
         <Card className="p-4 animate-card-in">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
             {t('transmittals.stat_total', { defaultValue: 'Total' })}
           </p>
-          <p className="text-xl font-bold mt-1 tabular-nums text-content-primary">
+          <p className="text-2xl font-bold mt-1 tabular-nums text-content-primary">
             {stats.total}
           </p>
         </Card>
         <Card className="p-4 animate-card-in">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
             {t('transmittals.stat_draft', { defaultValue: 'Draft' })}
           </p>
-          <p className="text-xl font-bold mt-1 tabular-nums text-content-tertiary">
+          <p className="text-2xl font-bold mt-1 tabular-nums text-content-tertiary">
             {stats.draft}
           </p>
         </Card>
         <Card className="p-4 animate-card-in">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
             {t('transmittals.stat_issued', { defaultValue: 'Issued' })}
           </p>
-          <p className="text-xl font-bold mt-1 tabular-nums text-oe-blue">{stats.issued}</p>
+          <p className="text-2xl font-bold mt-1 tabular-nums text-oe-blue">{stats.issued}</p>
         </Card>
         <Card className="p-4 animate-card-in">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
             {t('transmittals.stat_acknowledged', { defaultValue: 'Acknowledged' })}
           </p>
-          <p className="text-xl font-bold mt-1 tabular-nums text-semantic-success">
+          <p className="text-2xl font-bold mt-1 tabular-nums text-semantic-success">
             {stats.acknowledged}
           </p>
         </Card>
         <Card className="p-4 animate-card-in">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
             {t('transmittals.stat_closed', { defaultValue: 'Closed' })}
           </p>
-          <p className="text-xl font-bold mt-1 tabular-nums text-content-primary">
+          <p className="text-2xl font-bold mt-1 tabular-nums text-content-primary">
             {stats.closed}
           </p>
         </Card>
@@ -789,7 +789,7 @@ export function TransmittalsPage() {
           <SkeletonTable rows={5} columns={6} />
         ) : filtered.length === 0 ? (
           <EmptyState
-            icon={<Send size={24} strokeWidth={1.5} />}
+            icon={<Send size={28} strokeWidth={1.5} />}
             title={
               searchQuery || statusFilter
                 ? t('transmittals.no_results', {
@@ -830,7 +830,7 @@ export function TransmittalsPage() {
             </p>
             <Card padding="none" className="overflow-x-auto">
               {/* Table header */}
-              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border bg-surface-secondary/50 text-xs font-medium text-content-tertiary uppercase tracking-wide min-w-[640px]">
+              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border-light bg-surface-secondary/30 text-2xs font-medium text-content-tertiary uppercase tracking-wider min-w-[640px]">
                 <span className="w-5" />
                 <span className="w-20">#</span>
                 <span className="flex-1">

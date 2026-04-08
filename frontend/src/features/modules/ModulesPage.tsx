@@ -509,7 +509,7 @@ export function ModulesPage() {
   }
 
   return (
-    <div className="max-w-content mx-auto">
+    <div className="max-w-content mx-auto animate-fade-in">
       <Breadcrumb items={[{ label: t('nav.dashboard', 'Dashboard'), to: '/' }, { label: t('nav.modules', 'Modules') }]} className="mb-4" />
       {/* ── Header ─────────────────────────────────────────────────── */}
       <div className="mb-8 animate-card-in" style={{ animationDelay: '0ms' }}>

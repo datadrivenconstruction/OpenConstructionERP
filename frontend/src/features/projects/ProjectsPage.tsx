@@ -424,7 +424,7 @@ export function ProjectsPage() {
         <SkeletonGrid items={3} />
       ) : filtered.length === 0 && (searchQuery || statusFilter !== 'all' || regionFilter !== 'all') ? (
         <EmptyState
-          icon={<Search size={24} strokeWidth={1.5} />}
+          icon={<Search size={28} strokeWidth={1.5} />}
           title={t('projects.no_results', { defaultValue: 'No matching projects' })}
           description={t('projects.no_results_hint', {
             defaultValue: 'Try adjusting your search or filters',
@@ -432,7 +432,7 @@ export function ProjectsPage() {
         />
       ) : !projects || projects.length === 0 ? (
         <EmptyState
-          icon={<FolderOpen size={24} strokeWidth={1.5} />}
+          icon={<FolderOpen size={28} strokeWidth={1.5} />}
           title={t('projects.no_projects', { defaultValue: 'No projects yet' })}
           description={t('projects.no_projects_description', {
             defaultValue: 'Create your first construction cost estimation project',

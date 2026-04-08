@@ -270,7 +270,7 @@ function AddPunchModal({
         <div className="px-6 py-4 space-y-4">
           {/* Title — full width */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('punch.field_title', { defaultValue: 'Title' })} <span className="text-semantic-error">*</span>
             </label>
             <input
@@ -291,7 +291,7 @@ function AddPunchModal({
 
           {/* Description — full width */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('punch.field_description', { defaultValue: 'Description' })}
             </label>
             <textarea
@@ -340,7 +340,7 @@ function AddPunchModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Category */}
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('punch.field_category', { defaultValue: 'Category' })}
               </label>
               <select
@@ -363,7 +363,7 @@ function AddPunchModal({
 
             {/* Assigned To */}
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('punch.field_assigned_to', { defaultValue: 'Assigned To' })}
               </label>
               <select
@@ -387,7 +387,7 @@ function AddPunchModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Due Date */}
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('punch.field_due_date', { defaultValue: 'Due Date' })}
               </label>
               <input
@@ -400,7 +400,7 @@ function AddPunchModal({
 
             {/* Location */}
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('punch.field_location', { defaultValue: 'Location' })}
               </label>
               <input
@@ -788,7 +788,7 @@ export function PunchListPage() {
   );
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-6">
+    <div className="mx-auto max-w-7xl px-6 py-6 animate-fade-in">
       {/* Breadcrumb */}
       <Breadcrumb
         items={[
@@ -987,7 +987,7 @@ export function PunchListPage() {
       <div className="mt-6">
         {!projectId ? (
           <EmptyState
-            icon={<ListChecks size={40} className="text-content-quaternary" />}
+            icon={<ListChecks size={28} strokeWidth={1.5} />}
             title={t('punch.no_project_title', { defaultValue: 'No project selected' })}
             description={t('punch.no_project_desc', {
               defaultValue:
@@ -1000,7 +1000,7 @@ export function PunchListPage() {
           </div>
         ) : filteredItems.length === 0 ? (
           <EmptyState
-            icon={<ListChecks size={40} className="text-content-quaternary" />}
+            icon={<ListChecks size={28} strokeWidth={1.5} />}
             title={
               searchQuery || filterPriority || filterStatus || filterCategory || filterAssignee
                 ? t('punch.no_results_title', { defaultValue: 'No matching items' })

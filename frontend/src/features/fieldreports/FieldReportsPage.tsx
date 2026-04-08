@@ -330,7 +330,7 @@ export function FieldReportsPage() {
     return (
       <div className="p-6">
         <EmptyState
-          icon={<ClipboardList size={48} />}
+          icon={<ClipboardList size={28} strokeWidth={1.5} />}
           title={t('fieldreports.no_project', { defaultValue: 'Select a project' })}
           description={t('fieldreports.no_project_desc', { defaultValue: 'Choose a project from the sidebar to view field reports.' })}
         />
@@ -346,7 +346,7 @@ export function FieldReportsPage() {
   });
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex flex-col gap-6 p-6 animate-fade-in">
       {/* Breadcrumb */}
       <Breadcrumb
         items={[
@@ -601,7 +601,7 @@ export function FieldReportsPage() {
           {listReports.length === 0 ? (
             <div className="p-8">
               <EmptyState
-                icon={<ClipboardList size={48} />}
+                icon={<ClipboardList size={28} strokeWidth={1.5} />}
                 title={
                   statusFilter || typeFilter
                     ? t('fieldreports.no_match', { defaultValue: 'No matching reports' })

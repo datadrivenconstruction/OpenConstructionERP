@@ -14,6 +14,20 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.9.1',
+    date: '2026-04-07',
+    changes: [
+      'New: Discord webhook integration — send project notifications to Discord channels',
+      'New: WhatsApp Business integration (Coming Soon) — template messages via Meta Cloud API',
+      'New: Integration Hub now has 14 cards grouped by category: Notifications, Automation, Data',
+      'New: n8n, Zapier, and Make cards with setup instructions for workflow automation',
+      'New: Google Sheets export card — open your BOQ exports directly in Sheets',
+      'New: Power BI / Tableau card — connect BI tools to our REST API',
+      'New: REST API card with link to interactive OpenAPI docs',
+      'Fix: Cross-module event flow audit and corrections',
+    ],
+  },
+  {
     version: '0.9.0',
     date: '2026-04-07',
     changes: [

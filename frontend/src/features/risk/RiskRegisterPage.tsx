@@ -222,22 +222,22 @@ function CreateDialog({ projectId, currency, onClose, onCreated }: { projectId: 
         </div>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">{t('common.title', { defaultValue: 'Title' })} *</label>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">{t('common.title', { defaultValue: 'Title' })} *</label>
             <input value={f.title} onChange={(e) => set('title', e.target.value)} placeholder={t('risk.title_placeholder', { defaultValue: 'e.g. Foundation soil instability' })} className={inputCls} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">{t('common.description', { defaultValue: 'Description' })}</label>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">{t('common.description', { defaultValue: 'Description' })}</label>
             <textarea value={f.description} onChange={(e) => set('description', e.target.value)} rows={2} className={textareaCls} />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">{t('risk.category', { defaultValue: 'Category' })}</label>
+              <label className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.category', { defaultValue: 'Category' })}</label>
               <select value={f.category} onChange={(e) => set('category', e.target.value)} className={inputCls}>
                 {CATEGORIES.map((c) => <option key={c} value={c}>{t(`risk.cat_${c}`, { defaultValue: c })}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">{t('risk.severity', { defaultValue: 'Impact Severity' })}</label>
+              <label className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.severity', { defaultValue: 'Impact Severity' })}</label>
               <select value={f.impactSeverity} onChange={(e) => set('impactSeverity', e.target.value)} className={inputCls}>
                 {SEVERITIES.map((s) => <option key={s} value={s}>{t(`risk.severity_${s}`, { defaultValue: s })}</option>)}
               </select>
@@ -245,20 +245,20 @@ function CreateDialog({ projectId, currency, onClose, onCreated }: { projectId: 
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">{t('risk.probability', { defaultValue: 'Probability' })}</label>
+              <label className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.probability', { defaultValue: 'Probability' })}</label>
               <input type="number" min={0} max={1} step={0.1} value={f.probability} onChange={(e) => set('probability', parseFloat(e.target.value) || 0)} className={inputCls} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">{t('risk.impact_cost', { defaultValue: 'Cost Impact' })}</label>
+              <label className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.impact_cost', { defaultValue: 'Cost Impact' })}</label>
               <input type="number" min={0} step="any" value={f.impactCost} onChange={(e) => set('impactCost', parseFloat(e.target.value) || 0)} className={inputCls} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">{t('risk.schedule_days', { defaultValue: 'Days' })}</label>
+              <label className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.schedule_days', { defaultValue: 'Days' })}</label>
               <input type="number" min={0} value={f.scheduleDays} onChange={(e) => set('scheduleDays', parseInt(e.target.value) || 0)} className={inputCls} />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">{t('risk.owner', { defaultValue: 'Risk Owner' })}</label>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.owner', { defaultValue: 'Risk Owner' })}</label>
             <input value={f.ownerName} onChange={(e) => set('ownerName', e.target.value)} className={inputCls} />
           </div>
         </div>
@@ -334,17 +334,17 @@ function DetailView({ riskId, onBack }: { riskId: string; onBack: () => void }) 
       {editing ? (
         <Card className="p-5 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">{t('risk.status', { defaultValue: 'Status' })}</label>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.status', { defaultValue: 'Status' })}</label>
             <select value={ef.status} onChange={(e) => setEf((p) => ({ ...p, status: e.target.value }))} className={inputCls + ' max-w-xs'}>
               {STATUSES.map((s) => <option key={s} value={s}>{t(`risk.status_${s}`, { defaultValue: s })}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">{t('risk.mitigation', { defaultValue: 'Mitigation Strategy' })}</label>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.mitigation', { defaultValue: 'Mitigation Strategy' })}</label>
             <textarea value={ef.mitigation} onChange={(e) => setEf((p) => ({ ...p, mitigation: e.target.value }))} rows={3} className={textareaCls} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">{t('risk.contingency', { defaultValue: 'Contingency Plan' })}</label>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">{t('risk.contingency', { defaultValue: 'Contingency Plan' })}</label>
             <textarea value={ef.contingency} onChange={(e) => setEf((p) => ({ ...p, contingency: e.target.value }))} rows={3} className={textareaCls} />
           </div>
           <div className="flex gap-3">
@@ -419,7 +419,7 @@ export function RiskRegisterPage() {
   const hasRisks = (summary?.total_risks ?? 0) > 0;
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-6">
+    <div className="mx-auto max-w-5xl px-6 py-6 animate-fade-in">
       <Breadcrumb items={[{ label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' }, { label: t('nav.risk_register', { defaultValue: 'Risk Register' }) }]} />
 
       <div className="mt-4 flex items-center justify-between gap-3 flex-wrap">
@@ -520,7 +520,7 @@ export function RiskRegisterPage() {
           <div className="flex items-center justify-center py-20"><div className="h-6 w-6 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" /></div>
         ) : filteredRisks.length === 0 ? (
           <Card><EmptyState
-            icon={<ShieldAlert size={24} />}
+            icon={<ShieldAlert size={28} strokeWidth={1.5} />}
             title={searchQuery || filterCategory || filterStatus
               ? t('risk.no_match', { defaultValue: 'No matching risks' })
               : t('risk.empty', { defaultValue: 'No risks registered' })}

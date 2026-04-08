@@ -200,7 +200,7 @@ function CreateDialog({
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('common.title', { defaultValue: 'Title' })} *
             </label>
             <input
@@ -212,7 +212,7 @@ function CreateDialog({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('common.description', { defaultValue: 'Description' })}
             </label>
             <textarea
@@ -225,7 +225,7 @@ function CreateDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('changeorders.reason', { defaultValue: 'Reason' })}
               </label>
               <select
@@ -241,7 +241,7 @@ function CreateDialog({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('changeorders.schedule_days', { defaultValue: 'Schedule Impact (days)' })}
               </label>
               <input
@@ -340,7 +340,7 @@ function AddItemDialog({
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('common.description', { defaultValue: 'Description' })} *
             </label>
             <input
@@ -352,7 +352,7 @@ function AddItemDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('changeorders.change_type', { defaultValue: 'Change Type' })}
               </label>
               <select
@@ -366,7 +366,7 @@ function AddItemDialog({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('common.unit', { defaultValue: 'Unit' })}
               </label>
               <input
@@ -380,7 +380,7 @@ function AddItemDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('changeorders.orig_qty', { defaultValue: 'Original Qty' })}
               </label>
               <input
@@ -393,7 +393,7 @@ function AddItemDialog({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('changeorders.new_qty', { defaultValue: 'New Qty' })}
               </label>
               <input
@@ -409,7 +409,7 @@ function AddItemDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('changeorders.orig_rate', { defaultValue: 'Original Rate' })}
               </label>
               <input
@@ -422,7 +422,7 @@ function AddItemDialog({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('changeorders.new_rate', { defaultValue: 'New Rate' })}
               </label>
               <input
@@ -602,7 +602,7 @@ function DetailView({
         </button>
         <Card className="py-12">
           <EmptyState
-            icon={<AlertTriangle size={24} />}
+            icon={<AlertTriangle size={28} strokeWidth={1.5} />}
             title={t('common.error', { defaultValue: 'Error' })}
             description={t('changeorders.load_error', { defaultValue: 'Failed to load change order. Please try again.' })}
           />
@@ -774,7 +774,7 @@ function DetailView({
       {order.items.length === 0 ? (
         <Card className="py-12">
           <EmptyState
-            icon={<FileEdit size={24} />}
+            icon={<FileEdit size={28} strokeWidth={1.5} />}
             title={t('changeorders.no_items', { defaultValue: 'No items yet' })}
             description={t('changeorders.no_items_desc', { defaultValue: 'Add line items to define the scope change' })}
             action={
@@ -956,7 +956,7 @@ export function ChangeOrdersPage() {
   const currency = project?.currency || summary?.currency || 'EUR';
 
   return (
-    <div className="mx-auto max-w-content">
+    <div className="mx-auto max-w-content animate-fade-in">
       <Breadcrumb items={[
         { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
         { label: t('nav.change_orders', { defaultValue: 'Change Orders' }) },
@@ -1097,7 +1097,7 @@ export function ChangeOrdersPage() {
         ) : isError ? (
           <Card className="py-12">
             <EmptyState
-              icon={<AlertTriangle size={24} />}
+              icon={<AlertTriangle size={28} strokeWidth={1.5} />}
               title={t('common.error', { defaultValue: 'Error' })}
               description={t('changeorders.load_error', { defaultValue: 'Failed to load change orders. Please try again.' })}
             />
@@ -1105,7 +1105,7 @@ export function ChangeOrdersPage() {
         ) : orders.length === 0 ? (
           <Card>
             <EmptyState
-              icon={<FileEdit size={24} />}
+              icon={<FileEdit size={28} strokeWidth={1.5} />}
               title={t('changeorders.empty', { defaultValue: 'No change orders' })}
               description={t('changeorders.empty_desc', {
                 defaultValue: 'Create a change order to track scope changes with cost and schedule impact',

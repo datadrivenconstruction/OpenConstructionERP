@@ -712,13 +712,13 @@ export function BOQListPage() {
         </div>
       ) : filtered.length === 0 && (searchQuery || statusFilter || projectFilter) ? (
         <EmptyState
-          icon={<Search size={24} strokeWidth={1.5} />}
+          icon={<Search size={28} strokeWidth={1.5} />}
           title={t('boq.no_results', { defaultValue: 'No matching estimates' })}
           description={t('boq.no_results_hint', { defaultValue: 'Try adjusting your search or filters' })}
         />
       ) : !allBoqs || allBoqs.length === 0 ? (
         <EmptyState
-          icon={<Table size={24} strokeWidth={1.5} />}
+          icon={<Table size={28} strokeWidth={1.5} />}
           title={t('boq.no_boqs', { defaultValue: 'No BOQs yet' })}
           description={t('boq.no_boqs_hint', { defaultValue: 'Create a project first, then add a Bill of Quantities' })}
           action={{

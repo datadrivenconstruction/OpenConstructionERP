@@ -909,7 +909,7 @@ function ChartsTab({ sessionId, describe }: { sessionId: string; describe: Descr
         </Card>
       ) : (
         <EmptyState
-          icon={<BarChart3 size={32} />}
+          icon={<BarChart3 size={28} strokeWidth={1.5} />}
           title={t('explorer.no_chart_data', { defaultValue: 'No chart data' })}
           description={t('explorer.select_columns_for_chart', { defaultValue: 'Select group by and value columns to generate a chart.' })}
         />

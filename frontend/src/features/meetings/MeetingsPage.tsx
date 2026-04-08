@@ -176,7 +176,7 @@ function CreateMeetingModal({
         <div className="px-6 py-4 space-y-4">
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('meetings.field_title', { defaultValue: 'Title' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -206,7 +206,7 @@ function CreateMeetingModal({
           {/* Two-column: Type + Date */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('meetings.field_type', { defaultValue: 'Meeting Type' })}
               </label>
               <div className="relative">
@@ -229,7 +229,7 @@ function CreateMeetingModal({
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('meetings.field_date', { defaultValue: 'Date' })}{' '}
                 <span className="text-semantic-error">*</span>
               </label>
@@ -257,7 +257,7 @@ function CreateMeetingModal({
           {/* Two-column: Location + Chairperson */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('meetings.field_location', { defaultValue: 'Location' })}
               </label>
               <input
@@ -270,7 +270,7 @@ function CreateMeetingModal({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('meetings.field_chairperson', { defaultValue: 'Chairperson' })}
               </label>
               <input
@@ -1009,28 +1009,28 @@ export function MeetingsPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <Card className="p-4 animate-card-in">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
             {t('meetings.stat_total', { defaultValue: 'Total Meetings' })}
           </p>
-          <p className="text-xl font-bold mt-1 tabular-nums text-content-primary">{stats.total}</p>
+          <p className="text-2xl font-bold mt-1 tabular-nums text-content-primary">{stats.total}</p>
         </Card>
         <Card className="p-4 animate-card-in">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
             {t('meetings.stat_scheduled', { defaultValue: 'Scheduled' })}
           </p>
-          <p className="text-xl font-bold mt-1 tabular-nums text-oe-blue">{stats.scheduled}</p>
+          <p className="text-2xl font-bold mt-1 tabular-nums text-oe-blue">{stats.scheduled}</p>
         </Card>
         <Card className="p-4 animate-card-in">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
             {t('meetings.stat_in_progress', { defaultValue: 'In Progress' })}
           </p>
-          <p className="text-xl font-bold mt-1 tabular-nums text-amber-500">{stats.inProgress}</p>
+          <p className="text-2xl font-bold mt-1 tabular-nums text-amber-500">{stats.inProgress}</p>
         </Card>
         <Card className="p-4 animate-card-in">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
             {t('meetings.stat_completed', { defaultValue: 'Completed' })}
           </p>
-          <p className="text-xl font-bold mt-1 tabular-nums text-semantic-success">
+          <p className="text-2xl font-bold mt-1 tabular-nums text-semantic-success">
             {stats.completed}
           </p>
         </Card>
@@ -1107,7 +1107,7 @@ export function MeetingsPage() {
           <SkeletonTable rows={5} columns={6} />
         ) : filtered.length === 0 ? (
           <EmptyState
-            icon={<CalendarDays size={24} strokeWidth={1.5} />}
+            icon={<CalendarDays size={28} strokeWidth={1.5} />}
             title={
               searchQuery || typeFilter || statusFilter
                 ? t('meetings.no_results', { defaultValue: 'No matching meetings' })
@@ -1141,7 +1141,7 @@ export function MeetingsPage() {
             </p>
             <Card padding="none" className="overflow-x-auto">
               {/* Table header */}
-              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border bg-surface-secondary/50 text-xs font-medium text-content-tertiary uppercase tracking-wide min-w-[640px]">
+              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border-light bg-surface-secondary/30 text-2xs font-medium text-content-tertiary uppercase tracking-wider min-w-[640px]">
                 <span className="w-5" />
                 <span className="w-20">#</span>
                 <span className="flex-1">

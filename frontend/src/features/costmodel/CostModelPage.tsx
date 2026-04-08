@@ -1712,7 +1712,7 @@ export function CostModelPage() {
         </div>
       ) : !projects || projects.length === 0 ? (
         <EmptyState
-          icon={<DollarSign size={24} strokeWidth={1.5} />}
+          icon={<DollarSign size={28} strokeWidth={1.5} />}
           title={t('costmodel.no_projects', 'No projects available')}
           description={t(
             'costmodel.no_projects_hint',

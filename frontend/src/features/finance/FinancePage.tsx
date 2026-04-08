@@ -285,7 +285,7 @@ export function FinancePage() {
       {/* Tab Content */}
       {!projectId ? (
         <EmptyState
-          icon={<Wallet size={24} strokeWidth={1.5} />}
+          icon={<Wallet size={28} strokeWidth={1.5} />}
           title={t('finance.no_project', {
             defaultValue: 'No project selected',
           })}
@@ -423,7 +423,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
   if (!budgets || budgets.length === 0) {
     return (
       <EmptyState
-        icon={<Wallet size={24} strokeWidth={1.5} />}
+        icon={<Wallet size={28} strokeWidth={1.5} />}
         title={t('finance.no_budgets', { defaultValue: 'No budgets yet' })}
         description={t('finance.no_budgets_desc', {
           defaultValue: 'Budget lines will appear here when configured',
@@ -624,7 +624,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
           </div>
           <div className="px-6 py-4 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('finance.wbs', { defaultValue: 'WBS Code' })}
               </label>
               <input
@@ -635,7 +635,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('finance.category', { defaultValue: 'Category' })} <span className="text-semantic-error">*</span>
               </label>
               <input
@@ -646,7 +646,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('finance.original', { defaultValue: 'Original Budget' })} <span className="text-semantic-error">*</span>
               </label>
               <input
@@ -996,7 +996,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
         ) : !filtered.length ? (
           <div className="p-8">
             <EmptyState
-              icon={<FileText size={24} strokeWidth={1.5} />}
+              icon={<FileText size={28} strokeWidth={1.5} />}
               title={t('finance.no_invoices', {
                 defaultValue: 'No invoices found',
               })}
@@ -1188,7 +1188,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
               </div>
               {/* Vendor / Client (contact search) */}
               <div>
-                <label className="block text-sm font-medium text-content-secondary mb-1">
+                <label className="block text-sm font-medium text-content-primary mb-1.5">
                   {invoiceForm.direction === 'payable'
                     ? t('finance.vendor', { defaultValue: 'Vendor' })
                     : t('finance.client', { defaultValue: 'Client' })}
@@ -1205,7 +1205,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
               </div>
               {/* Invoice date */}
               <div>
-                <label className="block text-sm font-medium text-content-secondary mb-1">
+                <label className="block text-sm font-medium text-content-primary mb-1.5">
                   {t('finance.issue_date', { defaultValue: 'Invoice Date' })} <span className="text-semantic-error">*</span>
                 </label>
                 <input
@@ -1217,7 +1217,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
               </div>
               {/* Due date */}
               <div>
-                <label className="block text-sm font-medium text-content-secondary mb-1">
+                <label className="block text-sm font-medium text-content-primary mb-1.5">
                   {t('finance.due_date', { defaultValue: 'Due Date' })}
                 </label>
                 <input
@@ -1229,7 +1229,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
               </div>
               {/* Amount */}
               <div>
-                <label className="block text-sm font-medium text-content-secondary mb-1">
+                <label className="block text-sm font-medium text-content-primary mb-1.5">
                   {t('finance.amount', { defaultValue: 'Amount' })} <span className="text-semantic-error">*</span>
                 </label>
                 <input
@@ -1243,7 +1243,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
               </div>
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-content-secondary mb-1">
+                <label className="block text-sm font-medium text-content-primary mb-1.5">
                   {t('tasks.field_description', { defaultValue: 'Description' })}
                 </label>
                 <input
@@ -1297,7 +1297,7 @@ function PaymentsTab({ projectId }: { projectId: string }) {
   if (!payments || payments.length === 0) {
     return (
       <EmptyState
-        icon={<CreditCard size={24} strokeWidth={1.5} />}
+        icon={<CreditCard size={28} strokeWidth={1.5} />}
         title={t('finance.no_payments', { defaultValue: 'No payments yet' })}
         description={t('finance.no_payments_desc', {
           defaultValue: 'Payments will appear here once invoices are paid',
@@ -1399,7 +1399,7 @@ function EVMTab({ projectId }: { projectId: string }) {
   if (!evm) {
     return (
       <EmptyState
-        icon={<BarChart3 size={24} strokeWidth={1.5} />}
+        icon={<BarChart3 size={28} strokeWidth={1.5} />}
         title={t('finance.no_evm', { defaultValue: 'No EVM data available' })}
         description={t('finance.no_evm_desc', {
           defaultValue:

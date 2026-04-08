@@ -465,7 +465,7 @@ function RequirementModal({
         <div className="space-y-4">
           {/* Entity */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('requirements.entity', { defaultValue: 'Entity' })} *
             </label>
             <AutocompleteInput
@@ -480,7 +480,7 @@ function RequirementModal({
 
           {/* Attribute */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('requirements.attribute', { defaultValue: 'Attribute' })} *
             </label>
             <AutocompleteInput
@@ -496,7 +496,7 @@ function RequirementModal({
           {/* Constraint Type + Value */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('requirements.constraint_type', { defaultValue: 'Constraint Type' })}
               </label>
               <select
@@ -512,7 +512,7 @@ function RequirementModal({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('requirements.constraint_value', { defaultValue: 'Value' })} *
               </label>
               <input
@@ -559,7 +559,7 @@ function RequirementModal({
           {/* Unit + Category */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('requirements.unit', { defaultValue: 'Unit' })}
               </label>
               <select
@@ -575,7 +575,7 @@ function RequirementModal({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('requirements.category', { defaultValue: 'Category' })}
               </label>
               <select
@@ -631,7 +631,7 @@ function RequirementModal({
 
           {/* Source Reference */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('requirements.source_reference', { defaultValue: 'Source Reference' })}
             </label>
             <input
@@ -646,7 +646,7 @@ function RequirementModal({
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('requirements.notes', { defaultValue: 'Notes' })}
             </label>
             <textarea
@@ -1339,7 +1339,7 @@ function CreateSetModal({
         </div>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('common.name', { defaultValue: 'Name' })} *
             </label>
             <input
@@ -1352,7 +1352,7 @@ function CreateSetModal({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('common.description', { defaultValue: 'Description' })}
             </label>
             <textarea
@@ -1644,7 +1644,7 @@ export function RequirementsPage() {
   const isLoading = setsLoading || detailLoading;
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-6">
+    <div className="mx-auto max-w-6xl px-6 py-6 animate-fade-in">
       {/* Breadcrumb */}
       <Breadcrumb
         items={[
@@ -1704,7 +1704,7 @@ export function RequirementsPage() {
       {!projectId && (
         <div className="mt-6">
           <EmptyState
-            icon={<ClipboardCheck size={24} />}
+            icon={<ClipboardCheck size={28} strokeWidth={1.5} />}
             title={t('requirements.no_project', { defaultValue: 'No project selected' })}
             description={t('requirements.no_project_desc', {
               defaultValue: 'Select a project from the dropdown above to view and manage requirements and quality gates.',
@@ -1849,7 +1849,7 @@ export function RequirementsPage() {
         ) : !currentSetId || sets.length === 0 ? (
           <Card>
             <EmptyState
-              icon={<ClipboardCheck size={24} />}
+              icon={<ClipboardCheck size={28} strokeWidth={1.5} />}
               title={t('requirements.no_sets', {
                 defaultValue: 'No requirement sets',
               })}
@@ -1868,7 +1868,7 @@ export function RequirementsPage() {
         ) : filteredReqs.length === 0 && requirements.length === 0 ? (
           <Card>
             <EmptyState
-              icon={<ClipboardCheck size={24} />}
+              icon={<ClipboardCheck size={28} strokeWidth={1.5} />}
               title={t('requirements.empty', {
                 defaultValue: 'No requirements yet',
               })}

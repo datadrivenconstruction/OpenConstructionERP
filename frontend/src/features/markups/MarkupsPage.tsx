@@ -993,7 +993,7 @@ export function MarkupsPage() {
   }, [stamps]);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-4">
+    <div className="mx-auto max-w-7xl px-4 py-4 animate-fade-in">
       {/* Breadcrumb */}
       <Breadcrumb
         items={[
@@ -1101,7 +1101,7 @@ export function MarkupsPage() {
       {!projectId ? (
         <div className="mt-10">
           <EmptyState
-            icon={<PenTool size={36} className="text-content-quaternary" />}
+            icon={<PenTool size={28} strokeWidth={1.5} />}
             title={t('markups.no_project_title', { defaultValue: 'No project selected' })}
             description={t('markups.no_project_desc', {
               defaultValue:
@@ -1251,7 +1251,7 @@ export function MarkupsPage() {
               </div>
             ) : filteredMarkups.length === 0 ? (
               <EmptyState
-                icon={<PenTool size={36} className="text-content-quaternary" />}
+                icon={<PenTool size={28} strokeWidth={1.5} />}
                 title={
                   searchQuery || filterType || filterStatus
                     ? t('markups.no_match_title', { defaultValue: 'No matching markups' })

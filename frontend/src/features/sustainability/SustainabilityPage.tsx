@@ -517,7 +517,7 @@ export function SustainabilityPage() {
       {/* Empty state */}
       {!data && !sustainLoading && !calculated && (
         <EmptyState
-          icon={<Leaf size={24} strokeWidth={1.5} />}
+          icon={<Leaf size={28} strokeWidth={1.5} />}
           title={t('sustainability.empty_title', 'Embodied Carbon Analysis')}
           description={t(
             'sustainability.empty_desc',

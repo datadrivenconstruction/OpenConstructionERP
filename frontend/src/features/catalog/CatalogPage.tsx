@@ -1563,7 +1563,7 @@ export function CatalogPage() {
         </Card>
       ) : items.length === 0 ? (
         <EmptyState
-          icon={<Boxes size={24} strokeWidth={1.5} />}
+          icon={<Boxes size={28} strokeWidth={1.5} />}
           title={
             region === 'CUSTOM'
               ? t('catalog.my_catalog_empty', { defaultValue: 'Your catalog is empty' })

@@ -159,7 +159,7 @@ function AddTaskModal({
         <div className="px-6 py-4 space-y-4">
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('tasks.field_title', { defaultValue: 'Title' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -188,7 +188,7 @@ function AddTaskModal({
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('tasks.field_description', { defaultValue: 'Description' })}
             </label>
             <textarea
@@ -238,7 +238,7 @@ function AddTaskModal({
           {/* Two-column: Priority + Due Date */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('tasks.field_priority', { defaultValue: 'Priority' })}
               </label>
               <select
@@ -256,7 +256,7 @@ function AddTaskModal({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('tasks.field_due_date', { defaultValue: 'Due Date' })}
               </label>
               <input
@@ -270,7 +270,7 @@ function AddTaskModal({
 
           {/* Assignee */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('tasks.field_assignee', { defaultValue: 'Assignee' })}
             </label>
             <input
@@ -842,7 +842,7 @@ export function TasksPage() {
           <SkeletonGrid items={6} gridCols="md:grid-cols-3" />
         ) : filtered.length === 0 ? (
           <EmptyState
-            icon={<ClipboardList size={24} strokeWidth={1.5} />}
+            icon={<ClipboardList size={28} strokeWidth={1.5} />}
             title={
               searchQuery || typeFilter || myTasksOnly
                 ? t('tasks.no_results', { defaultValue: 'No matching tasks' })

@@ -621,7 +621,7 @@ export function ValidationPage() {
       {/* No selection state */}
       {!report && !runValidation.isPending && (
         <EmptyState
-          icon={<ShieldCheck size={24} strokeWidth={1.5} />}
+          icon={<ShieldCheck size={28} strokeWidth={1.5} />}
           title={t('validation.empty_title', 'No validation report yet')}
           description={t(
             'validation.empty_description',

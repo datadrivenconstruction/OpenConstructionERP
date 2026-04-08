@@ -972,7 +972,7 @@ export function PhotoGalleryPage() {
     return (
       <div className="space-y-6 p-6 max-w-7xl mx-auto">
         <EmptyState
-          icon={<Camera size={48} />}
+          icon={<Camera size={28} strokeWidth={1.5} />}
           title={t('photos.no_project', { defaultValue: 'No project selected' })}
           description={t('photos.select_project', {
             defaultValue: 'Select a project from the header to view its photo documentation.',
@@ -983,7 +983,7 @@ export function PhotoGalleryPage() {
   }
 
   return (
-    <div className="space-y-6 p-6 max-w-7xl mx-auto">
+    <div className="space-y-6 p-6 max-w-7xl mx-auto animate-fade-in">
       {/* Breadcrumb */}
       <Breadcrumb
         items={[
@@ -1156,7 +1156,7 @@ export function PhotoGalleryPage() {
         </div>
       ) : photoList.length === 0 && viewMode === 'grid' ? (
         <EmptyState
-          icon={<ImageIcon size={48} />}
+          icon={<ImageIcon size={28} strokeWidth={1.5} />}
           title={
             searchQuery || category !== 'all'
               ? t('photos.no_match_title', { defaultValue: 'No matching photos' })
@@ -1232,7 +1232,7 @@ export function PhotoGalleryPage() {
           ))}
           {(!timeline || timeline.length === 0) && (
             <EmptyState
-              icon={<ImageIcon size={48} />}
+              icon={<ImageIcon size={28} strokeWidth={1.5} />}
               title={t('photos.empty_title', { defaultValue: 'No photos yet' })}
               description={t('photos.empty_description', {
                 defaultValue: 'Upload photos to document your project progress, site conditions, and more.',

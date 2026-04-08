@@ -218,7 +218,7 @@ export function AnalyticsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Breadcrumb */}
       <Breadcrumb
         items={[
@@ -353,7 +353,7 @@ export function AnalyticsPage() {
         </div>
         {sortedProjects.length === 0 ? (
           <EmptyState
-            icon={<Search size={24} />}
+            icon={<Search size={28} strokeWidth={1.5} />}
             title={t('analytics.no_matching_projects', {
               defaultValue: 'No matching projects',
             })}

@@ -209,6 +209,26 @@ async def test_integration_config(
                 action_url=action_url,
             )
 
+        elif itype == "discord":
+            from app.modules.integrations.discord import send_discord_notification
+
+            webhook_url = cfg.get("webhook_url", "")
+            if not webhook_url:
+                return TestNotificationResponse(success=False, message="Missing webhook_url in config")
+            success = await send_discord_notification(
+                webhook_url=webhook_url,
+                title=title,
+                message=message,
+                action_url=action_url,
+                fields=[{"name": "Status", "value": "Test delivery"}],
+            )
+
+        elif itype == "whatsapp":
+            return TestNotificationResponse(
+                success=False,
+                message="WhatsApp integration requires Meta Business verification. Coming soon.",
+            )
+
         else:
             return TestNotificationResponse(
                 success=False,
