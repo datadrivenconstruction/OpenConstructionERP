@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { FeedbackDialog, OnboardingTour } from '@/shared/ui';
+import { FloatingQueuePanel } from './FloatingQueuePanel';
 import { GlobalProgress } from '@/shared/ui/GlobalProgress';
 import { OfflineBanner } from '@/shared/ui/OfflineBanner';
 
@@ -99,6 +100,9 @@ export function AppLayout({ title, children }: AppLayoutProps) {
       </div>
 
       <FeedbackDialog open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
+
+      {/* Floating queue panel — shows background task progress */}
+      <FloatingQueuePanel />
 
       {/* Onboarding tour — auto-starts on first visit */}
       <OnboardingTour />

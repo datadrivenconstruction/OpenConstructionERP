@@ -29,6 +29,7 @@ import {
 import { Logo, Button, CountryFlag, Badge } from '@/shared/ui';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { useToastStore } from '@/stores/useToastStore';
+import { useUploadQueueStore } from '@/stores/useUploadQueueStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useModuleStore } from '@/stores/useModuleStore';
 import { useViewModeStore } from '@/stores/useViewModeStore';
@@ -1018,14 +1019,33 @@ function StepDataSetup({
     return () => clearInterval(interval);
   }, [loadingDb]);
 
+  const addQueueTask = useUploadQueueStore((s) => s.addTask);
+  const updateQueueTask = useUploadQueueStore((s) => s.updateTask);
+
   const handleLoadDb = useCallback(async () => {
     if (loadingDb || loadedDb) return;
     setLoadingDb(true);
+
+    const dbName = CWICR_DATABASES.find((d) => d.id === selectedRegion)?.name ?? selectedRegion;
+    const taskId = `db-${selectedRegion}-${Date.now()}`;
+
+    // Add to global queue so FloatingQueuePanel shows progress
+    addQueueTask({
+      id: taskId,
+      type: 'import',
+      filename: `${dbName} Cost Database`,
+      status: 'processing',
+      progress: 10,
+      message: t('onboarding.db_loading_status', { defaultValue: 'Loading cost database...' }),
+    });
 
     try {
       const token = useAuthStore.getState().accessToken;
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
+
+      updateQueueTask(taskId, { progress: 30, message: t('onboarding.db_downloading', { defaultValue: 'Downloading from server...' }) });
+
       const res = await fetch(`/api/v1/costs/load-cwicr/${selectedRegion}`, {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -1034,10 +1054,19 @@ function StepDataSetup({
       clearTimeout(timeoutId);
 
       if (res.ok) {
+        updateQueueTask(taskId, { progress: 80, message: t('onboarding.db_importing', { defaultValue: 'Importing items...' }) });
+
         const data = await res.json();
         const imported = data.imported ?? 0;
         setDbProgress(100);
         setLoadedDb({ id: selectedRegion, count: imported });
+
+        // Update queue task to completed
+        updateQueueTask(taskId, {
+          status: 'completed',
+          progress: 100,
+          message: `${imported.toLocaleString()} items imported`,
+        });
 
         try {
           const existing = JSON.parse(
@@ -1053,8 +1082,6 @@ function StepDataSetup({
           // ignore
         }
 
-        const dbName =
-          CWICR_DATABASES.find((d) => d.id === selectedRegion)?.name ?? selectedRegion;
         addToast({
           type: 'success',
           title: `${dbName} loaded`,
@@ -1062,6 +1089,7 @@ function StepDataSetup({
         });
       } else {
         const err = await res.json().catch(() => ({ detail: 'Failed to load database' }));
+        updateQueueTask(taskId, { status: 'error', progress: 0, error: err.detail || 'Failed' });
         addToast({
           type: 'error',
           title: 'Failed to load database',
@@ -1069,6 +1097,7 @@ function StepDataSetup({
         });
       }
     } catch {
+      updateQueueTask(taskId, { status: 'error', progress: 0, error: 'Connection error' });
       addToast({
         type: 'error',
         title: t('common.connection_error', { defaultValue: 'Connection error' }),
