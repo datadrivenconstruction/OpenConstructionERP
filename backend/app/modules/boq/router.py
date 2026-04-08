@@ -1987,7 +1987,8 @@ async def export_boq_csv(
     service: BOQService = Depends(_get_service),
 ) -> StreamingResponse:
     """Export BOQ positions as a CSV file."""
-    boq_data = await service.get_boq_with_positions(boq_id)
+    # Use structured data to include markups in the grand total
+    structured = await service.get_boq_structured(boq_id)
 
     output = io.StringIO()
     writer = csv.writer(output)
@@ -2005,8 +2006,35 @@ async def export_boq_csv(
         ]
     )
 
-    # Position rows
-    for pos in boq_data.positions:
+    # Section positions
+    for section in structured.sections:
+        # Section header row
+        writer.writerow(
+            [
+                section.ordinal,
+                section.description,
+                "",
+                "",
+                "",
+                "",
+                "",
+            ]
+        )
+        for pos in section.positions:
+            writer.writerow(
+                [
+                    pos.ordinal,
+                    pos.description,
+                    pos.unit,
+                    f"{pos.quantity:.2f}",
+                    f"{pos.unit_rate:.2f}",
+                    f"{pos.total:.2f}",
+                    _get_classification_code(pos.classification),
+                ]
+            )
+
+    # Ungrouped positions
+    for pos in structured.positions:
         writer.writerow(
             [
                 pos.ordinal,
@@ -2019,7 +2047,14 @@ async def export_boq_csv(
             ]
         )
 
-    # Grand total row
+    # Direct cost subtotal
+    writer.writerow(["", "Direct Cost", "", "", "", f"{structured.direct_cost:.2f}", ""])
+
+    # Markup rows
+    for markup in structured.markups:
+        writer.writerow(["", f"  {markup.name}", "", "", "", f"{markup.amount:.2f}", ""])
+
+    # Grand total row (includes markups)
     writer.writerow(
         [
             "",
@@ -2027,7 +2062,7 @@ async def export_boq_csv(
             "",
             "",
             "",
-            f"{boq_data.grand_total:.2f}",
+            f"{structured.grand_total:.2f}",
             "",
         ]
     )
@@ -2035,7 +2070,7 @@ async def export_boq_csv(
     content = output.getvalue()
     output.close()
 
-    safe_name = boq_data.name.encode("ascii", errors="replace").decode("ascii").replace('"', "'")
+    safe_name = structured.name.encode("ascii", errors="replace").decode("ascii").replace('"', "'")
     filename = f"{safe_name}.csv"
 
     return StreamingResponse(

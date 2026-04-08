@@ -25,9 +25,11 @@ class SafetyIncident(Base):
         index=True,
     )
     incident_number: Mapped[str] = mapped_column(String(20), nullable=False)
+    title: Mapped[str] = mapped_column(String(500), nullable=False, default="")
     incident_date: Mapped[str] = mapped_column(String(20), nullable=False)
     location: Mapped[str | None] = mapped_column(String(500), nullable=True)
     incident_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    severity: Mapped[str] = mapped_column(String(50), nullable=False, default="minor")
     description: Mapped[str] = mapped_column(Text, nullable=False)
 
     # Injured person details: {name, role, company, age, ...}

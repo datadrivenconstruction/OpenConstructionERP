@@ -61,9 +61,11 @@ class SafetyService:
         incident = SafetyIncident(
             project_id=data.project_id,
             incident_number=incident_number,
+            title=data.title,
             incident_date=data.incident_date,
             location=data.location,
             incident_type=data.incident_type,
+            severity=data.severity,
             description=data.description,
             injured_person_details=data.injured_person_details,
             treatment_type=data.treatment_type,

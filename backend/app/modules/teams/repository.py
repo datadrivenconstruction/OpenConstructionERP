@@ -8,6 +8,7 @@ import uuid
 
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.modules.teams.models import EntityVisibility, Team, TeamMembership
 
@@ -19,8 +20,14 @@ class TeamRepository:
         self.session = session
 
     async def get(self, team_id: uuid.UUID) -> Team | None:
-        """Get team by ID."""
-        return await self.session.get(Team, team_id)
+        """Get team by ID (with memberships eager-loaded)."""
+        stmt = (
+            select(Team)
+            .where(Team.id == team_id)
+            .options(selectinload(Team.memberships))
+        )
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
 
     async def list_for_project(
         self,

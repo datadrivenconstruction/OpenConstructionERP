@@ -215,12 +215,19 @@ async def test_boq_full_workflow(client, auth_headers):
 
 
 @pytest.mark.asyncio
-async def test_cost_search(client):
-    resp = await client.get("/api/v1/costs/?limit=5")
+async def test_cost_search(client, auth_headers):
+    resp = await client.get("/api/v1/costs/?limit=5", headers=auth_headers)
     assert resp.status_code == 200
     data = resp.json()
     assert "items" in data
     assert "total" in data
+
+
+@pytest.mark.asyncio
+async def test_cost_search_requires_auth(client):
+    """Cost search should return 401 without authentication."""
+    resp = await client.get("/api/v1/costs/?limit=5")
+    assert resp.status_code == 401
 
 
 @pytest.mark.asyncio

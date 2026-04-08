@@ -110,11 +110,14 @@ export class SceneManager {
   }
 
   private updateSize(): void {
-    const w = this.container.clientWidth;
+    const w = this.container.clientWidth || 1;
     const h = Math.max(this.container.clientHeight, 1);
     this.renderer.setSize(w, h);
-    this.camera.aspect = w / h;
-    this.camera.updateProjectionMatrix();
+    // Camera may not be initialized yet during constructor
+    if (this.camera) {
+      this.camera.aspect = w / h;
+      this.camera.updateProjectionMatrix();
+    }
   }
 
   private animate = (): void => {

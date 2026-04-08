@@ -47,6 +47,7 @@ def _get_service(session: SessionDep) -> CostItemService:
 
 @router.get("/autocomplete", response_model=list[CostAutocompleteItem])
 async def autocomplete_cost_items(
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: CostItemService = Depends(_get_service),
     q: str = Query(..., min_length=2, max_length=200, description="Search text (min 2 chars)"),
     region: str | None = Query(default=None, description="Filter by region (e.g. DE_BERLIN)"),
@@ -161,6 +162,7 @@ async def create_cost_item(
 
 @router.get("/", response_model=CostSearchResponse)
 async def search_cost_items(
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: CostItemService = Depends(_get_service),
     q: str | None = Query(default=None, description="Text search on code and description"),
     unit: str | None = Query(default=None, description="Filter by unit"),
@@ -861,6 +863,7 @@ async def list_available_databases() -> list[dict]:
 @router.get("/{item_id}", response_model=CostItemResponse)
 async def get_cost_item(
     item_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: CostItemService = Depends(_get_service),
 ) -> CostItemResponse:
     """Get a cost item by ID."""

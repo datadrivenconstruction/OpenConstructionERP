@@ -45,6 +45,11 @@ ALLOWED_IMAGE_TYPES = {
     "image/heif",
     "image/tiff",
 }
+BLOCKED_EXTENSIONS = {
+    ".exe", ".bat", ".cmd", ".sh", ".ps1", ".com", ".scr",
+    ".msi", ".dll", ".vbs", ".js", ".ws", ".wsf", ".pif",
+    ".hta", ".cpl", ".msp", ".mst", ".reg",
+}
 
 
 def _sanitize_filename(name: str) -> str:
@@ -84,6 +89,14 @@ class DocumentService:
         # Sanitize filename
         raw_name = file.filename or "untitled"
         safe_name = _sanitize_filename(raw_name)
+
+        # Block dangerous file extensions
+        ext = Path(safe_name).suffix.lower()
+        if ext in BLOCKED_EXTENSIONS:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"File type '{ext}' is not allowed for security reasons.",
+            )
 
         # Validate category
         if category not in VALID_CATEGORIES:

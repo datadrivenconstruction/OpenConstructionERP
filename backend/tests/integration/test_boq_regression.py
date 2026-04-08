@@ -570,15 +570,26 @@ async def test_export_data_integrity(shared_client: AsyncClient, shared_auth: di
         )
         assert resp.status_code == 201
 
-    expected_grand = sum(q * r for _, _, q, r in items)
+    expected_direct_cost = sum(q * r for _, _, q, r in items)
 
-    # CSV grand total
+    # Get the authoritative grand total from structured API (includes markups)
+    resp = await client.get(f"/api/v1/boq/boqs/{bid}/structured", headers=auth)
+    assert resp.status_code == 200
+    structured_data = resp.json()
+    structured_grand = structured_data["grand_total"]
+    structured_direct = structured_data["direct_cost"]
+    # Direct cost should match raw position totals
+    assert abs(structured_direct - expected_direct_cost) < 0.01, (
+        f"Structured direct cost {structured_direct} != expected {expected_direct_cost}"
+    )
+
+    # CSV grand total (now includes markups, matching structured grand_total)
     resp = await client.get(f"/api/v1/boq/boqs/{bid}/export/csv", headers=auth)
     assert resp.status_code == 200
     rows = list(csv_mod.reader(io.StringIO(resp.text)))
     csv_total = float(rows[-1][5])
-    assert abs(csv_total - expected_grand) < 0.01, (
-        f"CSV grand total {csv_total} != expected {expected_grand}"
+    assert abs(csv_total - structured_grand) < 0.01, (
+        f"CSV grand total {csv_total} != structured grand total {structured_grand}"
     )
 
     # Excel grand total
@@ -590,16 +601,12 @@ async def test_export_data_integrity(shared_client: AsyncClient, shared_auth: di
     ws = wb.active
     max_row = ws.max_row
     excel_total = ws.cell(row=max_row, column=6).value
-    assert abs(float(excel_total) - expected_grand) < 0.01, (
-        f"Excel grand total {excel_total} != expected {expected_grand}"
+    assert abs(float(excel_total) - expected_direct_cost) < 0.01, (
+        f"Excel grand total {excel_total} != expected {expected_direct_cost}"
     )
     wb.close()
 
-    # GAEB grand total -- verify via structured API first, then compare
-    resp = await client.get(f"/api/v1/boq/boqs/{bid}/structured", headers=auth)
-    assert resp.status_code == 200
-    structured_grand = resp.json()["grand_total"]
-
+    # GAEB grand total
     resp = await client.get(f"/api/v1/boq/boqs/{bid}/export/gaeb", headers=auth)
     assert resp.status_code == 200
     root = ET.fromstring(resp.text)

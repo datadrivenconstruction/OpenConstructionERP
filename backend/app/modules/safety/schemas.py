@@ -24,11 +24,16 @@ class IncidentCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     project_id: UUID
+    title: str = Field(default="", max_length=500)
     incident_date: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
     location: str | None = Field(default=None, max_length=500)
     incident_type: str = Field(
         ...,
         pattern=r"^(injury|near_miss|property_damage|environmental|fire)$",
+    )
+    severity: str = Field(
+        default="minor",
+        pattern=r"^(minor|moderate|major|severe|critical)$",
     )
     description: str = Field(..., min_length=1)
     injured_person_details: dict[str, Any] | None = None
@@ -52,11 +57,16 @@ class IncidentUpdate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
+    title: str | None = Field(default=None, max_length=500)
     incident_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     location: str | None = Field(default=None, max_length=500)
     incident_type: str | None = Field(
         default=None,
         pattern=r"^(injury|near_miss|property_damage|environmental|fire)$",
+    )
+    severity: str | None = Field(
+        default=None,
+        pattern=r"^(minor|moderate|major|severe|critical)$",
     )
     description: str | None = Field(default=None, min_length=1)
     injured_person_details: dict[str, Any] | None = None
@@ -83,9 +93,11 @@ class IncidentResponse(BaseModel):
     id: UUID
     project_id: UUID
     incident_number: str
+    title: str = ""
     incident_date: str
     location: str | None = None
     incident_type: str
+    severity: str = "minor"
     description: str
     injured_person_details: dict[str, Any] | None = None
     treatment_type: str | None = None

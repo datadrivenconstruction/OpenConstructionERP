@@ -300,6 +300,7 @@ async def adjust_prices(
 
 @router.get("/", response_model=CatalogSearchResponse)
 async def search_catalog(
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: CatalogResourceService = Depends(_get_service),
     q: str | None = Query(default=None, description="Text search on code and name"),
     resource_type: str | None = Query(default=None, description="Filter: material, equipment, labor, operator"),
@@ -339,6 +340,7 @@ async def search_catalog(
 
 @router.get("/stats", response_model=CatalogStatsResponse)
 async def catalog_stats(
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: CatalogResourceService = Depends(_get_service),
 ) -> CatalogStatsResponse:
     """Get aggregated counts by type and category."""
@@ -351,6 +353,7 @@ async def catalog_stats(
 @router.get("/{resource_id}", response_model=CatalogResourceResponse)
 async def get_catalog_resource(
     resource_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: CatalogResourceService = Depends(_get_service),
 ) -> CatalogResourceResponse:
     """Get a single catalog resource by ID."""

@@ -8,6 +8,7 @@ import uuid
 
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.modules.finance.models import (
     EVMSnapshot,
@@ -26,7 +27,16 @@ class InvoiceRepository:
 
     async def get(self, invoice_id: uuid.UUID) -> Invoice | None:
         """Get invoice by ID (with line items and payments via selectin)."""
-        return await self.session.get(Invoice, invoice_id)
+        stmt = (
+            select(Invoice)
+            .where(Invoice.id == invoice_id)
+            .options(
+                selectinload(Invoice.line_items),
+                selectinload(Invoice.payments),
+            )
+        )
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
 
     async def list(
         self,

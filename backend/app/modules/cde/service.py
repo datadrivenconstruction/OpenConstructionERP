@@ -290,6 +290,9 @@ class CDEService:
             current_revision_id=str(revision.id),
         )
 
+        # Refresh the revision so its attributes are re-loaded after expire_all()
+        await self.session.refresh(revision)
+
         logger.info(
             "CDE revision created: %s (rev %s) for container %s",
             revision_code,

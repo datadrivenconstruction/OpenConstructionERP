@@ -144,8 +144,15 @@ class FinanceService:
             )
             await self.line_items.create(item)
 
-        logger.info("Invoice created: %s (%s)", invoice.invoice_number, invoice.invoice_direction)
-        return invoice
+        # Re-fetch invoice with relationships (line_items, payments) eager-loaded
+        refreshed = await self.invoices.get(invoice.id)
+        if refreshed is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to re-fetch created invoice",
+            )
+        logger.info("Invoice created: %s (%s)", refreshed.invoice_number, refreshed.invoice_direction)
+        return refreshed
 
     async def get_invoice(self, invoice_id: uuid.UUID) -> Invoice:
         """Get invoice by ID. Raises 404 if not found."""

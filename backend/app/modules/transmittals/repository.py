@@ -8,6 +8,7 @@ import uuid
 
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.modules.transmittals.models import (
     Transmittal,
@@ -26,7 +27,16 @@ class TransmittalRepository:
 
     async def get(self, transmittal_id: uuid.UUID) -> Transmittal | None:
         """Get transmittal by ID (with recipients and items eager-loaded)."""
-        return await self.session.get(Transmittal, transmittal_id)
+        stmt = (
+            select(Transmittal)
+            .where(Transmittal.id == transmittal_id)
+            .options(
+                selectinload(Transmittal.recipients),
+                selectinload(Transmittal.items),
+            )
+        )
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
 
     async def list_by_project(
         self,

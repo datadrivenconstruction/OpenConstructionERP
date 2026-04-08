@@ -1500,14 +1500,34 @@ class ScheduleService:
 
         # Parse dependencies: map activity_id -> list of (predecessor_id, type, lag)
         deps: dict[str, list[tuple[str, str, int]]] = {d["id"]: [] for d in act_data}
+
+        # 1. Load explicit ScheduleRelationship records from the database
+        from sqlalchemy import select
+
+        from app.modules.schedule.models import ScheduleRelationship
+
+        rel_stmt = select(ScheduleRelationship).where(
+            ScheduleRelationship.schedule_id == schedule_id
+        )
+        rel_result = await self.session.execute(rel_stmt)
+        seen_pairs: set[tuple[str, str]] = set()
+        for r in rel_result.scalars().all():
+            pred_id = str(r.predecessor_id)
+            succ_id = str(r.successor_id)
+            if pred_id in active_ids and succ_id in active_ids:
+                deps[succ_id].append((pred_id, r.relationship_type or "FS", r.lag_days or 0))
+                seen_pairs.add((pred_id, succ_id))
+
+        # 2. Inline JSON dependencies from each activity (deduplicate against DB)
         for ad in act_data:
             act_id = ad["id"]
             for dep in ad["dependencies"]:
                 pred_id = str(dep.get("activity_id", ""))
                 dep_type = dep.get("type", "FS")
                 lag = dep.get("lag_days", 0)
-                if pred_id in active_ids:
+                if pred_id in active_ids and (pred_id, act_id) not in seen_pairs:
                     deps[act_id].append((pred_id, dep_type, lag))
+                    seen_pairs.add((pred_id, act_id))
 
         # --- Forward pass: compute ES, EF ---
         es: dict[str, int] = {}
