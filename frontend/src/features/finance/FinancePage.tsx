@@ -28,6 +28,7 @@ import {
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { apiGet, apiPost, apiPatch, triggerDownload } from '@/shared/lib/api';
+import { ContactSearchInput } from '@/shared/ui/ContactSearchInput';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -765,6 +766,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
   const [invoiceForm, setInvoiceForm] = useState({
     direction: 'payable' as 'payable' | 'receivable',
     counterparty: '',
+    contact_id: '',
     invoice_date: '',
     due_date: '',
     amount: '',
@@ -775,6 +777,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
     mutationFn: (data: typeof invoiceForm) =>
       apiPost('/v1/finance/', {
         project_id: projectId,
+        contact_id: data.contact_id || undefined,
         invoice_direction: data.direction,
         invoice_date: data.invoice_date,
         due_date: data.due_date || undefined,
@@ -785,7 +788,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['finance-invoices', projectId] });
       setShowCreate(false);
-      setInvoiceForm({ direction: 'payable', counterparty: '', invoice_date: '', due_date: '', amount: '', description: '' });
+      setInvoiceForm({ direction: 'payable', counterparty: '', contact_id: '', invoice_date: '', due_date: '', amount: '', description: '' });
       addToast({ type: 'success', title: t('finance.invoice_created', { defaultValue: 'Invoice created' }) });
     },
     onError: (e: Error) =>
@@ -1085,6 +1088,23 @@ function InvoicesTab({ projectId }: { projectId: string }) {
                     </button>
                   ))}
                 </div>
+              </div>
+              {/* Vendor / Client (contact search) */}
+              <div>
+                <label className="block text-sm font-medium text-content-secondary mb-1">
+                  {invoiceForm.direction === 'payable'
+                    ? t('finance.vendor', { defaultValue: 'Vendor' })
+                    : t('finance.client', { defaultValue: 'Client' })}
+                </label>
+                <ContactSearchInput
+                  value={invoiceForm.counterparty}
+                  onChange={(id, name) => setInvoiceForm((f) => ({ ...f, counterparty: name, contact_id: id }))}
+                  placeholder={
+                    invoiceForm.direction === 'payable'
+                      ? t('finance.search_vendor', { defaultValue: 'Search vendor...' })
+                      : t('finance.search_client', { defaultValue: 'Search client...' })
+                  }
+                />
               </div>
               {/* Invoice date */}
               <div>

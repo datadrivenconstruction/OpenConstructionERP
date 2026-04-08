@@ -269,6 +269,16 @@ def create_app() -> FastAPI:
 
     app.include_router(audit_router)
 
+    # Global search API (cross-module)
+    from app.core.global_search_router import router as search_router
+
+    app.include_router(search_router)
+
+    # Activity feed API (cross-module)
+    from app.core.activity_feed_router import router as activity_router
+
+    app.include_router(activity_router)
+
     @app.get("/api/health", tags=["System"])
     async def health_check() -> dict[str, Any]:
         return {

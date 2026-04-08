@@ -1077,6 +1077,105 @@ async def lock_boq(
 
 
 @router.post(
+    "/boqs/{boq_id}/create-budget",
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def create_budget_from_boq(
+    boq_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: BOQService = Depends(_get_service),
+) -> dict:
+    """Create project budget lines from BOQ sections/positions.
+
+    Groups positions by WBS (if set) or by section, creates a
+    ProjectBudget entry for each group with original_budget = section total.
+    Returns the list of created budget IDs.
+    """
+    from decimal import Decimal
+
+    boq = await service.get_boq(boq_id)
+    if not boq.is_locked:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="BOQ must be locked before creating a budget. Lock the estimate first.",
+        )
+
+    positions = boq.positions or []
+    if not positions:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="BOQ has no positions — nothing to budget.",
+        )
+
+    # Group positions: by wbs_id if set, otherwise by parent_id (section), else "ungrouped"
+    groups: dict[str, Decimal] = {}
+    for pos in positions:
+        # Skip section headers (quantity=0, unit="")
+        try:
+            total = Decimal(str(pos.total))
+        except Exception:
+            total = Decimal("0")
+        if total == 0 and pos.unit == "":
+            continue
+
+        group_key = pos.wbs_id or (str(pos.parent_id) if pos.parent_id else "ungrouped")
+        groups[group_key] = groups.get(group_key, Decimal("0")) + total
+
+    if not groups:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No budgetable positions found in BOQ.",
+        )
+
+    # Lazy import finance module
+    created_ids: list[str] = []
+    try:
+        from app.modules.finance.models import ProjectBudget
+
+        for group_key, total_amount in groups.items():
+            budget = ProjectBudget(
+                project_id=boq.project_id,
+                wbs_id=group_key if group_key != "ungrouped" else None,
+                category="other",
+                original_budget=str(total_amount),
+                revised_budget=str(total_amount),
+                metadata_={"source": "boq", "boq_id": str(boq_id)},
+            )
+            session.add(budget)
+            await session.flush()
+            created_ids.append(str(budget.id))
+    except Exception as exc:
+        _log.exception("Failed to create budgets from BOQ %s: %s", boq_id, exc)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create budget lines. Finance module may not be available.",
+        )
+
+    await _log_activity(
+        service,
+        user_id=user_id,
+        action="boq.budget_created",
+        target_type="boq",
+        description=f"Created {len(created_ids)} budget lines from BOQ",
+        boq_id=boq_id,
+        project_id=boq.project_id,
+    )
+
+    _log.info(
+        "Created %d budget lines from BOQ %s (project %s)",
+        len(created_ids),
+        boq_id,
+        boq.project_id,
+    )
+    return {
+        "created": len(created_ids),
+        "budget_ids": created_ids,
+        "project_id": str(boq.project_id),
+    }
+
+
+@router.post(
     "/boqs/{boq_id}/create-revision",
     response_model=BOQResponse,
     status_code=201,

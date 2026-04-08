@@ -291,6 +291,104 @@ async def respond_to_rfi(
     return _to_response(rfi)
 
 
+@router.post("/{rfi_id}/create-variation")
+async def create_variation_from_rfi(
+    rfi_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("rfi.update")),
+    service: RFIService = Depends(_get_service),
+) -> dict:
+    """Create a change order/variation pre-filled from an RFI with cost impact.
+
+    The RFI must have cost_impact=True and be in 'answered' or 'closed' status.
+    Pre-fills the change order with the RFI's subject, question, and cost impact value.
+    """
+    rfi = await service.get_rfi(rfi_id)
+
+    if not rfi.cost_impact:
+        from fastapi import HTTPException
+
+        raise HTTPException(
+            status_code=400,
+            detail="RFI has no cost impact — cannot create a variation.",
+        )
+
+    if rfi.status not in ("answered", "closed"):
+        from fastapi import HTTPException
+
+        raise HTTPException(
+            status_code=400,
+            detail="RFI must be answered or closed before creating a variation.",
+        )
+
+    # Lazy import changeorders module
+    try:
+        from app.modules.changeorders.models import ChangeOrder
+        from app.modules.changeorders.repository import ChangeOrderRepository
+
+        repo = ChangeOrderRepository(session)
+        count = await repo.count_for_project(rfi.project_id)
+        code = f"CO-{count + 1:03d}"
+
+        description_parts = [
+            f"Variation from RFI {rfi.rfi_number}: {rfi.subject}",
+            "",
+            "Question:",
+            rfi.question,
+        ]
+        if rfi.official_response:
+            description_parts.extend(["", "Response:", rfi.official_response])
+
+        order = ChangeOrder(
+            project_id=rfi.project_id,
+            code=code,
+            title=f"Variation: {rfi.subject}",
+            description="\n".join(description_parts),
+            reason_category="client_request",
+            cost_impact=rfi.cost_impact_value or "0",
+            schedule_impact_days=rfi.schedule_impact_days or 0,
+            metadata_={
+                "source": "rfi",
+                "rfi_id": str(rfi_id),
+                "rfi_number": rfi.rfi_number,
+            },
+        )
+        session.add(order)
+        await session.flush()
+
+        # Link the change order back to the RFI
+        rfi.change_order_id = str(order.id)
+        await session.flush()
+
+        logger.info(
+            "Created change order %s from RFI %s",
+            code,
+            rfi_id,
+        )
+        return {
+            "change_order_id": str(order.id),
+            "code": code,
+            "rfi_id": str(rfi_id),
+            "title": order.title,
+        }
+    except ImportError:
+        from fastapi import HTTPException
+
+        raise HTTPException(
+            status_code=501,
+            detail="Change orders module is not available.",
+        )
+    except Exception as exc:
+        logger.exception("Failed to create variation from RFI %s: %s", rfi_id, exc)
+        from fastapi import HTTPException
+
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to create change order from RFI.",
+        )
+
+
 @router.post("/{rfi_id}/close", response_model=RFIResponse)
 async def close_rfi(
     rfi_id: uuid.UUID,

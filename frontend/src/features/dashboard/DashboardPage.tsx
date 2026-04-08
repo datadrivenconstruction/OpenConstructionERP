@@ -29,8 +29,10 @@ import {
   Calendar,
   Upload,
   ExternalLink,
+  AlertTriangle,
+  TrendingUp,
 } from 'lucide-react';
-import { Card, CardHeader, CardContent, Button, Badge, Skeleton, InfoHint } from '@/shared/ui';
+import { Card, CardHeader, CardContent, Button, Badge, Skeleton, InfoHint, ActivityFeed as CrossModuleActivityFeed } from '@/shared/ui';
 
 /* ── Types ────────────────────────────────────────────────────────────── */
 
@@ -719,6 +721,126 @@ function KpiRibbon({
   );
 }
 
+/* ── Portfolio Overview ────────────────────────────────────────────────── */
+
+interface AnalyticsOverview {
+  total_projects: number;
+  projects_with_budget: number;
+  total_planned: number;
+  total_actual: number;
+  total_variance: number;
+  over_budget_count: number;
+  projects: {
+    id: string;
+    name: string;
+    budget: number;
+    actual: number;
+    variance: number;
+    variance_pct: number;
+    status: string;
+  }[];
+}
+
+function PortfolioOverview({ projects: _projects }: { projects: ProjectSummary[] }) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  const { data: analytics } = useQuery({
+    queryKey: ['portfolio-analytics', _projects.length],
+    queryFn: () => apiGet<AnalyticsOverview>('/v1/projects/analytics/overview'),
+    retry: false,
+    staleTime: 60_000,
+  });
+
+  if (!analytics) return null;
+
+  const hasWarnings = analytics.over_budget_count > 0;
+  const totalBudgetFormatted = analytics.total_planned >= 1_000_000
+    ? `${(analytics.total_planned / 1_000_000).toFixed(1)}M`
+    : analytics.total_planned >= 1_000
+      ? `${(analytics.total_planned / 1_000).toFixed(0)}K`
+      : analytics.total_planned.toLocaleString();
+
+  const overBudgetProjects = (analytics.projects || []).filter(
+    (p) => p.status === 'over_budget',
+  );
+
+  return (
+    <div
+      className="rounded-xl border border-border-light bg-surface-primary p-4 animate-card-in"
+      style={{ animationDelay: '70ms' }}
+    >
+      <div className="flex items-center gap-2 mb-3">
+        <TrendingUp size={16} className="text-content-tertiary" strokeWidth={1.75} />
+        <h3 className="text-sm font-semibold text-content-primary">
+          {t('dashboard.portfolio_overview', { defaultValue: 'Portfolio Overview' })}
+        </h3>
+        {hasWarnings && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-2xs font-medium text-amber-700">
+            <AlertTriangle size={10} />
+            {analytics.over_budget_count} {t('dashboard.over_budget', { defaultValue: 'over budget' })}
+          </span>
+        )}
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="rounded-lg bg-surface-secondary p-3">
+          <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary">
+            {t('dashboard.active_projects', { defaultValue: 'Active Projects' })}
+          </div>
+          <div className="mt-1 text-xl font-bold tabular-nums text-content-primary">
+            {analytics.total_projects}
+          </div>
+        </div>
+        <div className="rounded-lg bg-surface-secondary p-3">
+          <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary">
+            {t('dashboard.total_budget_all', { defaultValue: 'Total Budget' })}
+          </div>
+          <div className="mt-1 text-xl font-bold tabular-nums text-content-primary">
+            {totalBudgetFormatted}
+          </div>
+        </div>
+        <div className="rounded-lg bg-surface-secondary p-3">
+          <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary">
+            {t('dashboard.with_budget', { defaultValue: 'With Budget' })}
+          </div>
+          <div className="mt-1 text-xl font-bold tabular-nums text-content-primary">
+            {analytics.projects_with_budget}
+          </div>
+        </div>
+        <div className={`rounded-lg p-3 ${hasWarnings ? 'bg-amber-50 dark:bg-amber-900/10' : 'bg-surface-secondary'}`}>
+          <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary">
+            {t('dashboard.budget_warnings', { defaultValue: 'Budget Warnings' })}
+          </div>
+          <div className={`mt-1 text-xl font-bold tabular-nums ${hasWarnings ? 'text-amber-600' : 'text-content-primary'}`}>
+            {analytics.over_budget_count}
+          </div>
+        </div>
+      </div>
+      {overBudgetProjects.length > 0 && (
+        <div className="mt-3 pt-3 border-t border-border-light">
+          <p className="text-2xs font-medium text-amber-600 uppercase tracking-wider mb-2">
+            {t('dashboard.projects_over_budget', { defaultValue: 'Projects Over Budget' })}
+          </p>
+          <div className="space-y-1.5">
+            {overBudgetProjects.slice(0, 3).map((p) => (
+              <button
+                key={p.id}
+                onClick={() => navigate(`/projects/${p.id}`)}
+                className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs hover:bg-surface-secondary transition-colors text-left"
+              >
+                <span className="text-content-primary font-medium truncate">{p.name}</span>
+                <span className="text-amber-600 tabular-nums shrink-0 ml-2">
+                  {p.variance_pct > 0 ? '+' : ''}{p.variance_pct}%
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Main Page ─────────────────────────────────────────────────────────── */
 
 export function DashboardPage() {
@@ -1028,6 +1150,11 @@ export function DashboardPage() {
       {/* KPI Ribbon */}
       <KpiRibbon boqs={allBoqs} schedules={allSchedules} projects={projects} />
 
+      {/* Portfolio Overview Stats */}
+      {projects && projects.length > 1 && (
+        <PortfolioOverview projects={projects} />
+      )}
+
       {/* Quick Actions */}
       <div className="flex flex-wrap sm:flex-nowrap sm:overflow-x-auto sm:scrollbar-none items-center gap-2 rounded-lg border border-border-light bg-surface-primary px-3 py-2 animate-card-in" style={{ animationDelay: '80ms' }}>
           <span className="text-xs font-medium text-content-tertiary mr-1">
@@ -1127,12 +1254,12 @@ export function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Activity Feed */}
+          {/* Activity Feed (cross-module) */}
           {projects && projects.length > 0 && (
             <Card>
               <CardHeader title={t('dashboard.activity', { defaultValue: 'Recent Activity' })} />
               <CardContent>
-                <ActivityFeed projects={projects} />
+                <CrossModuleActivityFeed limit={10} />
               </CardContent>
             </Card>
           )}
@@ -1676,108 +1803,4 @@ function SystemStatus() {
 
 /* ── Activity Feed ───────────────────────────────────────────────────── */
 
-function ActivityFeed({ projects }: { projects: ProjectSummary[] }) {
-  const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
-
-  // Fetch real activity from all projects (up to 3 projects, 5 entries each)
-  const projectIds = useMemo(() => projects.slice(0, 3).map((p) => p.id), [projects]);
-  const projectMap = useMemo(
-    () => Object.fromEntries(projects.map((p) => [p.id, p.name])),
-    [projects],
-  );
-
-  const { data: activityData } = useQuery({
-    queryKey: ['dashboard-activity', projectIds],
-    queryFn: async () => {
-      const results = await Promise.all(
-        projectIds.map((id) =>
-          apiGet<{ items: Array<{ id: string; project_id: string | null; action: string; description: string; created_at: string }>; total: number }>(
-            `/v1/boq/projects/${id}/activity?limit=5`,
-          ).catch(() => ({ items: [], total: 0 })),
-        ),
-      );
-      const all = results.flatMap((r) => r.items);
-      all.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      return all.slice(0, 8);
-    },
-    enabled: projectIds.length > 0,
-    staleTime: 30_000,
-  });
-
-  const activities = activityData ?? [];
-
-  // Icon + color by action type
-  const actionMeta = useCallback((action: string) => {
-    if (action.includes('added') || action.includes('created'))
-      return { icon: <FolderPlus size={12} />, bg: 'bg-emerald-100 dark:bg-emerald-900/30', fg: 'text-emerald-600 dark:text-emerald-400' };
-    if (action.includes('updated') || action.includes('changed'))
-      return { icon: <FileText size={12} />, bg: 'bg-oe-blue-subtle', fg: 'text-oe-blue' };
-    if (action.includes('deleted'))
-      return { icon: <X size={12} />, bg: 'bg-red-100 dark:bg-red-900/30', fg: 'text-red-500' };
-    if (action.includes('import'))
-      return { icon: <Download size={12} />, bg: 'bg-amber-100 dark:bg-amber-900/30', fg: 'text-amber-600 dark:text-amber-400' };
-    if (action.includes('validation'))
-      return { icon: <CheckCircle2 size={12} />, bg: 'bg-purple-100 dark:bg-purple-900/30', fg: 'text-purple-600 dark:text-purple-400' };
-    return { icon: <Zap size={12} />, bg: 'bg-oe-blue-subtle', fg: 'text-oe-blue' };
-  }, []);
-
-  if (activities.length === 0) {
-    return (
-      <p className="text-xs text-content-tertiary text-center py-4">
-        {t('dashboard.no_activity', { defaultValue: 'No recent activity' })}
-      </p>
-    );
-  }
-
-  return (
-    <div className="space-y-1">
-      {activities.map((a, i) => {
-        const meta = actionMeta(a.action);
-        const projName = a.project_id ? projectMap[a.project_id] : null;
-        return (
-          <button
-            key={`${a.id}-${i}`}
-            onClick={() => a.project_id ? navigate(`/projects/${a.project_id}`) : undefined}
-            className="flex items-center gap-3 w-full text-left px-2 py-1.5 rounded-lg hover:bg-surface-secondary transition-colors group"
-          >
-            <div className={`flex h-6 w-6 items-center justify-center rounded-md shrink-0 ${meta.bg} ${meta.fg}`}>
-              {meta.icon}
-            </div>
-            <div className="flex-1 min-w-0">
-              <span className="text-xs font-medium text-content-primary truncate block group-hover:text-oe-blue transition-colors">
-                {a.description}
-              </span>
-              <span className="text-2xs text-content-tertiary">
-                {projName && <>{projName} · </>}
-                {formatRelativeTime(a.created_at, i18n.language)}
-              </span>
-            </div>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-/** Format a date as relative time (e.g. "2 hours ago") */
-function formatRelativeTime(dateStr: string, locale: string): string {
-  const now = Date.now();
-  const date = new Date(dateStr).getTime();
-  const diffMs = now - date;
-  const diffSec = Math.floor(diffMs / 1000);
-  const diffMin = Math.floor(diffSec / 60);
-  const diffHr = Math.floor(diffMin / 60);
-  const diffDay = Math.floor(diffHr / 24);
-
-  try {
-    const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
-    if (diffMin < 1) return rtf.format(0, 'second');
-    if (diffMin < 60) return rtf.format(-diffMin, 'minute');
-    if (diffHr < 24) return rtf.format(-diffHr, 'hour');
-    if (diffDay < 30) return rtf.format(-diffDay, 'day');
-    return new Date(dateStr).toLocaleDateString(locale);
-  } catch {
-    return new Date(dateStr).toLocaleDateString(locale);
-  }
-}
+/* ActivityFeed is now provided by @/shared/ui/ActivityFeed (cross-module, audit-log-based) */

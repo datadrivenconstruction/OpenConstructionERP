@@ -199,6 +199,100 @@ async def delete_inspection(
     await service.delete_inspection(inspection_id)
 
 
+@router.post("/{inspection_id}/create-defect")
+async def create_defect_from_inspection(
+    inspection_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("inspections.update")),
+    service: InspectionService = Depends(_get_service),
+) -> dict:
+    """Create a punchlist item pre-filled from a failed inspection.
+
+    The inspection must have result='fail' or 'partial'. Pre-fills the
+    punchlist item with the inspection's title, location, and checklist
+    details for failed items.
+    """
+    inspection = await service.get_inspection(inspection_id)
+    if inspection.result not in ("fail", "partial"):
+        from fastapi import HTTPException
+
+        raise HTTPException(
+            status_code=400,
+            detail="Only failed or partial inspections can create defects.",
+        )
+
+    # Build description from failed checklist items
+    checklist = inspection.checklist_data or []
+    failed_items = [
+        ci.get("description", ci.get("question", "Unknown item"))
+        for ci in checklist
+        if isinstance(ci, dict) and not ci.get("passed", True)
+    ]
+    description_parts = [
+        f"Defect from inspection {inspection.inspection_number}: {inspection.title}",
+    ]
+    if failed_items:
+        description_parts.append("Failed items:")
+        for item in failed_items:
+            description_parts.append(f"  - {item}")
+
+    description = "\n".join(description_parts)
+
+    # Lazy import punchlist module
+    try:
+        from app.modules.punchlist.models import PunchItem
+
+        punch_item = PunchItem(
+            project_id=inspection.project_id,
+            title=f"Defect: {inspection.title}",
+            description=description,
+            priority="high" if inspection.result == "fail" else "medium",
+            status="open",
+            category=inspection.inspection_type if inspection.inspection_type in (
+                "structural", "electrical", "plumbing", "fire_safety", "general"
+            ) else "general",
+            trade=inspection.inspection_type,
+            created_by=str(user_id),
+            metadata_={
+                "source": "inspection",
+                "inspection_id": str(inspection_id),
+                "inspection_number": inspection.inspection_number,
+            },
+        )
+        # Copy location if available
+        if inspection.location:
+            punch_item.title = f"Defect: {inspection.title} @ {inspection.location}"
+        session.add(punch_item)
+        await session.flush()
+
+        logger.info(
+            "Created punchlist item %s from inspection %s",
+            punch_item.id,
+            inspection_id,
+        )
+        return {
+            "punch_item_id": str(punch_item.id),
+            "inspection_id": str(inspection_id),
+            "title": punch_item.title,
+        }
+    except ImportError:
+        from fastapi import HTTPException
+
+        raise HTTPException(
+            status_code=501,
+            detail="Punchlist module is not available.",
+        )
+    except Exception as exc:
+        logger.exception("Failed to create defect from inspection %s: %s", inspection_id, exc)
+        from fastapi import HTTPException
+
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to create punchlist item from inspection.",
+        )
+
+
 @router.post("/{inspection_id}/complete", response_model=InspectionResponse)
 async def complete_inspection(
     inspection_id: uuid.UUID,

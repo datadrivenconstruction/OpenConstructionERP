@@ -25,6 +25,12 @@ import {
   ExternalLink,
   Pencil,
   Save,
+  LayoutDashboard,
+  MessageSquare,
+  FileCheck,
+  Package,
+  Activity,
+  ClipboardList,
 } from 'lucide-react';
 import { Button, Card, CardHeader, Badge, Skeleton, EmptyState, Breadcrumb } from '@/shared/ui';
 import { apiGet } from '@/shared/lib/api';
@@ -82,7 +88,7 @@ interface ImportResult {
 // Tab types
 // ---------------------------------------------------------------------------
 
-type ProjectTab = 'overview' | 'schedule' | 'budget' | 'tendering';
+type ProjectTab = 'dashboard' | 'overview' | 'schedule' | 'budget' | 'tendering';
 
 interface ScheduleItem {
   id: string;
@@ -901,7 +907,7 @@ export function ProjectDetailPage() {
     boqName: string;
   } | null>(null);
 
-  const [activeTab, setActiveTab] = useState<ProjectTab>('overview');
+  const [activeTab, setActiveTab] = useState<ProjectTab>('dashboard');
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: '', description: '', region: '', currency: '' });
 
@@ -1029,6 +1035,14 @@ export function ProjectDetailPage() {
     queryKey: ['tenderPackages', projectId],
     queryFn: () => apiGet<TenderPackage[]>(`/v1/tendering/packages/?project_id=${projectId}`),
     enabled: !!projectId && activeTab === 'tendering',
+  });
+
+  // Unified dashboard data
+  const { data: dashboardData, isLoading: dashboardLoading } = useQuery({
+    queryKey: ['project-dashboard', projectId],
+    queryFn: () => projectsApi.dashboard(projectId!),
+    enabled: !!projectId && activeTab === 'dashboard',
+    staleTime: 30_000,
   });
 
   // ── Loading state ──────────────────────────────────────────────────────
@@ -1231,6 +1245,7 @@ export function ProjectDetailPage() {
       {/* ── Tab Bar ──────────────────────────────────────────────────────── */}
       <div className="flex items-center gap-1 mb-6 border-b border-border-light">
         {([
+          { key: 'dashboard' as ProjectTab, label: t('projects.dashboard', { defaultValue: 'Dashboard' }), icon: <LayoutDashboard size={15} /> },
           { key: 'overview' as ProjectTab, label: t('projects.overview'), icon: <Table2 size={15} /> },
           { key: 'schedule' as ProjectTab, label: t('projects.4d_schedule'), icon: <CalendarClock size={15} /> },
           { key: 'budget' as ProjectTab, label: t('projects.5d_budget'), icon: <Wallet size={15} /> },
@@ -1255,6 +1270,500 @@ export function ProjectDetailPage() {
       </div>
 
       {/* ── Tab Content ──────────────────────────────────────────────────── */}
+
+      {/* Dashboard Tab — Unified KPI view */}
+      {activeTab === 'dashboard' && (
+        <TabErrorBoundary fallbackTitle="Dashboard data failed to load">
+          {dashboardLoading ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} height={88} className="w-full" rounded="lg" />
+                ))}
+              </div>
+              <Skeleton height={120} className="w-full" rounded="lg" />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <Skeleton height={200} className="w-full" rounded="lg" />
+                <Skeleton height={200} className="w-full" rounded="lg" />
+              </div>
+            </div>
+          ) : dashboardData ? (
+            <div className="space-y-6 animate-fade-in">
+              {/* KPI Cards Row */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Budget consumed */}
+                <Card padding="md" className="relative overflow-hidden">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-xs font-medium text-content-tertiary uppercase tracking-wide">
+                        {t('projects.dash_budget_consumed', { defaultValue: 'Budget Consumed' })}
+                      </p>
+                      <p className="mt-1.5 text-2xl font-bold text-content-primary tabular-nums">
+                        {parseFloat(dashboardData.budget.consumed_pct).toFixed(1)}%
+                      </p>
+                      <p className="text-xs text-content-secondary mt-1 tabular-nums">
+                        {formatCurrency(parseFloat(dashboardData.budget.actual), currency)}{' '}
+                        {t('projects.dash_of', { defaultValue: 'of' })}{' '}
+                        {formatCurrency(parseFloat(dashboardData.budget.revised), currency)}
+                      </p>
+                    </div>
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                      dashboardData.budget.warning_level === 'critical'
+                        ? 'bg-semantic-error-bg text-semantic-error'
+                        : dashboardData.budget.warning_level === 'warning'
+                        ? 'bg-amber-100 text-amber-600'
+                        : 'bg-oe-blue-subtle text-oe-blue'
+                    }`}>
+                      <DollarSign size={20} strokeWidth={1.75} />
+                    </div>
+                  </div>
+                  {/* Budget bar */}
+                  <div className="mt-3 h-1.5 w-full rounded-full bg-surface-secondary overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${Math.min(parseFloat(dashboardData.budget.consumed_pct), 100)}%`,
+                        background: dashboardData.budget.warning_level === 'critical'
+                          ? 'var(--oe-error, #dc2626)'
+                          : dashboardData.budget.warning_level === 'warning'
+                          ? '#ca8a04'
+                          : 'var(--oe-blue)',
+                      }}
+                    />
+                  </div>
+                </Card>
+
+                {/* Schedule progress */}
+                <Card padding="md">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-xs font-medium text-content-tertiary uppercase tracking-wide">
+                        {t('projects.dash_schedule_progress', { defaultValue: 'Schedule Progress' })}
+                      </p>
+                      <p className="mt-1.5 text-2xl font-bold text-content-primary tabular-nums">
+                        {parseFloat(dashboardData.schedule.progress_pct).toFixed(1)}%
+                      </p>
+                      <p className="text-xs text-content-secondary mt-1">
+                        {dashboardData.schedule.completed}/{dashboardData.schedule.total_activities}{' '}
+                        {t('projects.dash_activities', { defaultValue: 'activities' })}
+                        {dashboardData.schedule.delayed > 0 && (
+                          <span className="text-semantic-error ml-1">
+                            ({dashboardData.schedule.delayed} {t('projects.dash_delayed', { defaultValue: 'delayed' })})
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0891b2]/10 text-[#0891b2]">
+                      <CalendarClock size={20} strokeWidth={1.75} />
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Quality score */}
+                <Card padding="md">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-xs font-medium text-content-tertiary uppercase tracking-wide">
+                        {t('projects.dash_quality', { defaultValue: 'Quality Score' })}
+                      </p>
+                      <p className="mt-1.5 text-2xl font-bold text-content-primary tabular-nums">
+                        {(parseFloat(dashboardData.quality.validation_score) * 100).toFixed(0)}%
+                      </p>
+                      <p className="text-xs text-content-secondary mt-1">
+                        {dashboardData.quality.open_defects > 0
+                          ? `${dashboardData.quality.open_defects} ${t('projects.dash_open_defects', { defaultValue: 'open defects' })}`
+                          : t('projects.dash_no_defects', { defaultValue: 'No open defects' })}
+                      </p>
+                    </div>
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                      parseFloat(dashboardData.quality.validation_score) >= 0.8
+                        ? 'bg-semantic-success-bg text-[#15803d]'
+                        : parseFloat(dashboardData.quality.validation_score) >= 0.5
+                        ? 'bg-amber-100 text-amber-600'
+                        : 'bg-surface-secondary text-content-tertiary'
+                    }`}>
+                      <ShieldCheck size={20} strokeWidth={1.75} />
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Open items count */}
+                <Card padding="md">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-xs font-medium text-content-tertiary uppercase tracking-wide">
+                        {t('projects.dash_open_items', { defaultValue: 'Open Items' })}
+                      </p>
+                      <p className="mt-1.5 text-2xl font-bold text-content-primary tabular-nums">
+                        {dashboardData.communication.open_rfis +
+                          dashboardData.communication.open_submittals +
+                          dashboardData.communication.open_tasks +
+                          dashboardData.quality.ncrs_open}
+                      </p>
+                      <p className="text-xs text-content-secondary mt-1">
+                        {dashboardData.communication.open_rfis} RFIs,{' '}
+                        {dashboardData.communication.open_tasks} {t('projects.dash_tasks', { defaultValue: 'tasks' })}
+                      </p>
+                    </div>
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#7c3aed]/10 text-[#7c3aed]">
+                      <ClipboardList size={20} strokeWidth={1.75} />
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
+              {/* Budget section — horizontal stacked bar */}
+              <Card padding="md">
+                <div className="flex items-center gap-2 mb-4">
+                  <DollarSign size={16} className="text-content-tertiary" />
+                  <h3 className="text-sm font-semibold text-content-primary">
+                    {t('projects.dash_budget_overview', { defaultValue: 'Budget Overview' })}
+                  </h3>
+                  {dashboardData.budget.warning_level !== 'normal' && (
+                    <Badge
+                      variant={dashboardData.budget.warning_level === 'critical' ? 'error' : 'warning'}
+                      size="sm"
+                    >
+                      {dashboardData.budget.warning_level === 'critical'
+                        ? t('projects.dash_over_budget', { defaultValue: 'Over Budget' })
+                        : t('projects.dash_at_risk', { defaultValue: 'At Risk' })}
+                    </Badge>
+                  )}
+                </div>
+                <div className="space-y-3">
+                  {/* Stacked bar */}
+                  <div className="relative h-8 w-full rounded-lg bg-surface-secondary overflow-hidden">
+                    {(() => {
+                      const forecast = parseFloat(dashboardData.budget.forecast) || 1;
+                      const actual = parseFloat(dashboardData.budget.actual);
+                      const committed = parseFloat(dashboardData.budget.committed);
+                      const original = parseFloat(dashboardData.budget.original);
+                      return (
+                        <>
+                          <div
+                            className="absolute inset-y-0 left-0 bg-oe-blue/20 rounded-lg"
+                            style={{ width: `${Math.min((original / forecast) * 100, 100)}%` }}
+                            title={`${t('projects.dash_original', { defaultValue: 'Original' })}: ${formatCurrency(original, currency)}`}
+                          />
+                          <div
+                            className="absolute inset-y-0 left-0 bg-oe-blue/40 rounded-l-lg"
+                            style={{ width: `${Math.min((committed / forecast) * 100, 100)}%` }}
+                            title={`${t('projects.dash_committed', { defaultValue: 'Committed' })}: ${formatCurrency(committed, currency)}`}
+                          />
+                          <div
+                            className="absolute inset-y-0 left-0 bg-oe-blue rounded-l-lg"
+                            style={{ width: `${Math.min((actual / forecast) * 100, 100)}%` }}
+                            title={`${t('projects.dash_actual', { defaultValue: 'Actual' })}: ${formatCurrency(actual, currency)}`}
+                          />
+                        </>
+                      );
+                    })()}
+                  </div>
+                  {/* Legend */}
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-content-secondary">
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-sm bg-oe-blue" />
+                      {t('projects.dash_actual', { defaultValue: 'Actual' })}: {formatCurrency(parseFloat(dashboardData.budget.actual), currency)}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-sm bg-oe-blue/40" />
+                      {t('projects.dash_committed', { defaultValue: 'Committed' })}: {formatCurrency(parseFloat(dashboardData.budget.committed), currency)}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-sm bg-oe-blue/20" />
+                      {t('projects.dash_original', { defaultValue: 'Original' })}: {formatCurrency(parseFloat(dashboardData.budget.original), currency)}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-sm border border-content-tertiary" />
+                      {t('projects.dash_forecast', { defaultValue: 'Forecast' })}: {formatCurrency(parseFloat(dashboardData.budget.forecast), currency)}
+                    </span>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Middle row: Schedule + Open Items */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Schedule section */}
+                <Card padding="md">
+                  <div className="flex items-center gap-2 mb-4">
+                    <CalendarClock size={16} className="text-content-tertiary" />
+                    <h3 className="text-sm font-semibold text-content-primary">
+                      {t('projects.dash_schedule', { defaultValue: 'Schedule' })}
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-6">
+                    {/* Progress ring */}
+                    <div className="relative shrink-0">
+                      <svg className="h-20 w-20 -rotate-90" viewBox="0 0 80 80">
+                        <circle cx="40" cy="40" r="34" fill="none" stroke="currentColor" strokeWidth="7" className="text-surface-secondary" />
+                        <circle
+                          cx="40" cy="40" r="34" fill="none" stroke="currentColor" strokeWidth="7"
+                          strokeLinecap="round"
+                          strokeDasharray={`${(parseFloat(dashboardData.schedule.progress_pct) / 100) * 213.63} 213.63`}
+                          className="text-oe-blue transition-all duration-500"
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-base font-bold text-content-primary tabular-nums">
+                          {parseFloat(dashboardData.schedule.progress_pct).toFixed(0)}%
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-content-secondary">{t('projects.dash_completed', { defaultValue: 'Completed' })}</span>
+                        <span className="font-medium text-content-primary tabular-nums">{dashboardData.schedule.completed}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-content-secondary">{t('projects.dash_in_progress', { defaultValue: 'In Progress' })}</span>
+                        <span className="font-medium text-content-primary tabular-nums">{dashboardData.schedule.in_progress}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-content-secondary">{t('projects.dash_delayed', { defaultValue: 'Delayed' })}</span>
+                        <span className={`font-medium tabular-nums ${dashboardData.schedule.delayed > 0 ? 'text-semantic-error' : 'text-content-primary'}`}>
+                          {dashboardData.schedule.delayed}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-content-secondary">{t('projects.dash_critical_path', { defaultValue: 'Critical Path' })}</span>
+                        <span className="font-medium text-content-primary tabular-nums">{dashboardData.schedule.critical_activities}</span>
+                      </div>
+                      {dashboardData.schedule.next_milestone && (
+                        <div className="mt-2 pt-2 border-t border-border-light">
+                          <p className="text-2xs text-content-tertiary uppercase tracking-wider">
+                            {t('projects.dash_next_milestone', { defaultValue: 'Next Milestone' })}
+                          </p>
+                          <p className="text-xs font-medium text-content-primary mt-0.5">
+                            {dashboardData.schedule.next_milestone.name}
+                          </p>
+                          <p className="text-2xs text-content-tertiary">
+                            {formatDate(dashboardData.schedule.next_milestone.date, i18n.language)}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Open Items Grid */}
+                <Card padding="md">
+                  <div className="flex items-center gap-2 mb-4">
+                    <MessageSquare size={16} className="text-content-tertiary" />
+                    <h3 className="text-sm font-semibold text-content-primary">
+                      {t('projects.dash_open_items_detail', { defaultValue: 'Open Items' })}
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      {
+                        label: t('projects.dash_rfis', { defaultValue: 'RFIs' }),
+                        count: dashboardData.communication.open_rfis,
+                        alert: dashboardData.communication.overdue_rfis,
+                        alertLabel: t('projects.dash_overdue', { defaultValue: 'overdue' }),
+                        icon: <MessageSquare size={14} />,
+                        color: 'text-oe-blue',
+                        bg: 'bg-oe-blue-subtle',
+                      },
+                      {
+                        label: t('projects.dash_submittals', { defaultValue: 'Submittals' }),
+                        count: dashboardData.communication.open_submittals,
+                        icon: <FileCheck size={14} />,
+                        color: 'text-[#7c3aed]',
+                        bg: 'bg-[#7c3aed]/10',
+                      },
+                      {
+                        label: t('projects.dash_tasks', { defaultValue: 'Tasks' }),
+                        count: dashboardData.communication.open_tasks,
+                        icon: <ClipboardList size={14} />,
+                        color: 'text-[#0891b2]',
+                        bg: 'bg-[#0891b2]/10',
+                      },
+                      {
+                        label: t('projects.dash_ncrs', { defaultValue: 'NCRs' }),
+                        count: dashboardData.quality.ncrs_open,
+                        icon: <AlertTriangle size={14} />,
+                        color: dashboardData.quality.ncrs_open > 0 ? 'text-semantic-error' : 'text-content-tertiary',
+                        bg: dashboardData.quality.ncrs_open > 0 ? 'bg-semantic-error-bg' : 'bg-surface-secondary',
+                      },
+                    ].map((item) => (
+                      <div key={item.label} className="rounded-lg border border-border-light p-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className={`flex h-6 w-6 items-center justify-center rounded-md ${item.bg} ${item.color}`}>
+                            {item.icon}
+                          </div>
+                          <span className="text-xs text-content-secondary">{item.label}</span>
+                        </div>
+                        <p className="text-lg font-bold text-content-primary tabular-nums">{item.count}</p>
+                        {'alert' in item && item.alert != null && item.alert > 0 && (
+                          <p className="text-2xs text-semantic-error mt-0.5">
+                            {item.alert} {item.alertLabel}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {/* Procurement summary */}
+                  <div className="mt-3 pt-3 border-t border-border-light">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Package size={14} className="text-content-tertiary" />
+                      <span className="text-xs font-medium text-content-secondary">
+                        {t('projects.dash_procurement', { defaultValue: 'Procurement' })}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4 text-xs text-content-secondary">
+                      <span>
+                        <strong className="text-content-primary">{dashboardData.procurement.active_pos}</strong>{' '}
+                        {t('projects.dash_active_pos', { defaultValue: 'active POs' })}
+                      </span>
+                      <span>
+                        <strong className="text-content-primary">{dashboardData.procurement.pending_delivery}</strong>{' '}
+                        {t('projects.dash_pending_delivery', { defaultValue: 'pending delivery' })}
+                      </span>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
+              {/* Bottom row: Recent Activity + Quick Actions */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                {/* Recent Activity Feed */}
+                <Card padding="none" className="lg:col-span-2">
+                  <div className="px-5 pt-5 pb-2">
+                    <div className="flex items-center gap-2">
+                      <Activity size={16} className="text-content-tertiary" />
+                      <h3 className="text-sm font-semibold text-content-primary">
+                        {t('projects.dash_recent_activity', { defaultValue: 'Recent Activity' })}
+                      </h3>
+                    </div>
+                  </div>
+                  {dashboardData.recent_activity.length === 0 ? (
+                    <div className="px-5 pb-5">
+                      <p className="text-xs text-content-tertiary text-center py-6">
+                        {t('projects.dash_no_activity', { defaultValue: 'No recent activity in this project.' })}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-border-light">
+                      {dashboardData.recent_activity.map((item, idx) => {
+                        const typeLabels: Record<string, string> = {
+                          rfi_created: 'RFI',
+                          task_created: t('projects.dash_task', { defaultValue: 'Task' }),
+                          change_order: t('projects.dash_change_order', { defaultValue: 'Change Order' }),
+                          document_uploaded: t('projects.dash_document', { defaultValue: 'Document' }),
+                          punch_item: t('projects.dash_punch_item', { defaultValue: 'Punch Item' }),
+                          field_report: t('projects.dash_field_report', { defaultValue: 'Field Report' }),
+                        };
+                        const typeColors: Record<string, string> = {
+                          rfi_created: 'bg-oe-blue-subtle text-oe-blue',
+                          task_created: 'bg-[#0891b2]/10 text-[#0891b2]',
+                          change_order: 'bg-amber-100 text-amber-600',
+                          document_uploaded: 'bg-[#7c3aed]/10 text-[#7c3aed]',
+                          punch_item: 'bg-semantic-error-bg text-semantic-error',
+                          field_report: 'bg-semantic-success-bg text-[#15803d]',
+                        };
+                        return (
+                          <div key={idx} className="flex items-center gap-3 px-5 py-3">
+                            <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-2xs font-bold ${typeColors[item.type] || 'bg-surface-secondary text-content-tertiary'}`}>
+                              {(typeLabels[item.type] || item.type).charAt(0).toUpperCase()}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm text-content-primary truncate">{item.title}</p>
+                              <p className="text-2xs text-content-tertiary">
+                                {typeLabels[item.type] || item.type}
+                              </p>
+                            </div>
+                            <span className="text-2xs text-content-tertiary shrink-0 tabular-nums">
+                              {formatDate(item.date, i18n.language)}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </Card>
+
+                {/* Quick Actions */}
+                <Card padding="md">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Sparkles size={16} className="text-content-tertiary" />
+                    <h3 className="text-sm font-semibold text-content-primary">
+                      {t('projects.dash_quick_actions', { defaultValue: 'Quick Actions' })}
+                    </h3>
+                  </div>
+                  <div className="space-y-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="w-full justify-start"
+                      icon={<Plus size={14} />}
+                      onClick={() => navigate(`/projects/${projectId}/boq/new`)}
+                    >
+                      {t('projects.new_boq', { defaultValue: 'New BOQ' })}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="w-full justify-start"
+                      icon={<MessageSquare size={14} />}
+                      onClick={() => navigate('/rfi')}
+                    >
+                      {t('projects.dash_new_rfi', { defaultValue: 'New RFI' })}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="w-full justify-start"
+                      icon={<ClipboardList size={14} />}
+                      onClick={() => navigate('/tasks')}
+                    >
+                      {t('projects.dash_new_task', { defaultValue: 'New Task' })}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="w-full justify-start"
+                      icon={<ShieldCheck size={14} />}
+                      onClick={() => navigate('/validation')}
+                    >
+                      {t('projects.dash_run_validation', { defaultValue: 'Run Validation' })}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="w-full justify-start"
+                      icon={<FileSpreadsheet size={14} />}
+                      onClick={() => navigate('/reports')}
+                    >
+                      {t('projects.dash_generate_report', { defaultValue: 'Generate Report' })}
+                    </Button>
+                  </div>
+                  {/* Document stats */}
+                  <div className="mt-4 pt-3 border-t border-border-light">
+                    <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider mb-2">
+                      {t('projects.dash_documents', { defaultValue: 'Documents' })}
+                    </p>
+                    <div className="flex items-center gap-3 text-xs text-content-secondary">
+                      <span><strong className="text-content-primary">{dashboardData.documents.total}</strong> {t('projects.dash_total', { defaultValue: 'total' })}</span>
+                      <span><strong className="text-content-primary">{dashboardData.documents.published}</strong> {t('projects.dash_published', { defaultValue: 'published' })}</span>
+                      {dashboardData.documents.pending_transmittals > 0 && (
+                        <span className="text-amber-600">
+                          <strong>{dashboardData.documents.pending_transmittals}</strong> {t('projects.dash_pending', { defaultValue: 'pending' })}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            </div>
+          ) : (
+            <EmptyState
+              icon={<LayoutDashboard size={24} strokeWidth={1.5} />}
+              title={t('projects.dash_empty', { defaultValue: 'No dashboard data' })}
+              description={t('projects.dash_empty_desc', { defaultValue: 'Start adding BOQs, schedules, and documents to see project KPIs here.' })}
+            />
+          )}
+        </TabErrorBoundary>
+      )}
 
       {/* Overview Tab — BOQ List */}
       {activeTab === 'overview' && (

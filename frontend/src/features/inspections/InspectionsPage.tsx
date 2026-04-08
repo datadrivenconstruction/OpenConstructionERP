@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
-import { apiGet, triggerDownload } from '@/shared/lib/api';
+import { apiGet, apiPost, triggerDownload } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -293,9 +293,11 @@ function CreateInspectionModal({
 function InspectionRow({
   inspection,
   onComplete,
+  onCreateDefect,
 }: {
   inspection: Inspection;
   onComplete: (id: string) => void;
+  onCreateDefect: (id: string) => void;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
@@ -443,6 +445,19 @@ function InspectionRow({
               >
                 <CheckCircle2 size={14} className="mr-1.5" />
                 {t('inspections.action_complete', { defaultValue: 'Complete Inspection' })}
+              </Button>
+            )}
+            {inspection.result && (inspection.result === 'fail' || inspection.result === 'partial') && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCreateDefect(inspection.id);
+                }}
+              >
+                <XCircle size={14} className="mr-1.5" />
+                {t('inspections.create_defect', { defaultValue: 'Create Punchlist Item' })}
               </Button>
             )}
           </div>
@@ -616,6 +631,34 @@ export function InspectionsPage() {
       completeMut.mutate(id);
     },
     [completeMut],
+  );
+
+  const createDefectMut = useMutation({
+    mutationFn: (inspectionId: string) =>
+      apiPost<{ punch_item_id: string; title: string }>(
+        `/v1/inspections/${inspectionId}/create-defect`,
+        {},
+      ),
+    onSuccess: (data) => {
+      addToast({
+        type: 'success',
+        title: t('inspections.defect_created', { defaultValue: 'Punchlist item created' }),
+        message: data.title,
+      });
+    },
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('common.error', { defaultValue: 'Error' }),
+        message: e.message,
+      }),
+  });
+
+  const handleCreateDefect = useCallback(
+    (id: string) => {
+      createDefectMut.mutate(id);
+    },
+    [createDefectMut],
   );
 
   return (
@@ -854,6 +897,7 @@ export function InspectionsPage() {
                   key={inspection.id}
                   inspection={inspection}
                   onComplete={handleComplete}
+                  onCreateDefect={handleCreateDefect}
                 />
               ))}
             </Card>

@@ -25,12 +25,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.costs.schemas import (
-    CostSearchQuery,
-    CostSearchResponse,
     CostAutocompleteItem,
     CostItemCreate,
     CostItemResponse,
     CostItemUpdate,
+    CostSearchQuery,
+    CostSearchResponse,
 )
 from app.modules.costs.service import CostItemService
 

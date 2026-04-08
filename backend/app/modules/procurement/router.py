@@ -164,6 +164,102 @@ async def update_purchase_order(
     return POResponse.model_validate(po)
 
 
+@router.post("/{po_id}/create-invoice")
+async def create_invoice_from_po(
+    po_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: ProcurementService = Depends(_get_service),
+) -> dict:
+    """Create a payable invoice pre-filled from PO line items.
+
+    Copies the PO's vendor, amounts, and line items into a new draft invoice
+    in the finance module.
+    """
+    import logging as _logging
+
+    _log = _logging.getLogger(__name__)
+
+    po = await service.get_po(po_id)
+
+    # Lazy import finance module
+    try:
+        from app.modules.finance.models import Invoice, InvoiceLineItem
+
+        # Generate invoice number from PO number
+        invoice_number = f"INV-{po.po_number}"
+
+        invoice = Invoice(
+            project_id=po.project_id,
+            contact_id=po.vendor_contact_id,
+            invoice_direction="payable",
+            invoice_number=invoice_number,
+            invoice_date=po.issue_date or "",
+            due_date=None,
+            currency_code=po.currency_code,
+            amount_subtotal=po.amount_subtotal,
+            tax_amount=po.tax_amount,
+            amount_total=po.amount_total,
+            status="draft",
+            notes=f"Auto-created from PO {po.po_number}",
+            created_by=user_id,
+            metadata_={
+                "source": "procurement",
+                "po_id": str(po_id),
+                "po_number": po.po_number,
+            },
+        )
+        session.add(invoice)
+        await session.flush()
+
+        # Copy PO line items to invoice line items
+        po_items = po.items or []
+        for idx, item in enumerate(po_items):
+            line = InvoiceLineItem(
+                invoice_id=invoice.id,
+                description=item.description,
+                quantity=item.quantity,
+                unit=item.unit,
+                unit_rate=item.unit_rate,
+                amount=item.amount,
+                wbs_id=item.wbs_id,
+                cost_category=item.cost_category,
+                sort_order=idx,
+            )
+            session.add(line)
+
+        await session.flush()
+
+        _log.info(
+            "Created invoice %s from PO %s (project %s)",
+            invoice_number,
+            po.po_number,
+            po.project_id,
+        )
+        return {
+            "invoice_id": str(invoice.id),
+            "invoice_number": invoice_number,
+            "po_id": str(po_id),
+            "po_number": po.po_number,
+            "amount_total": po.amount_total,
+        }
+    except ImportError:
+        from fastapi import HTTPException
+
+        raise HTTPException(
+            status_code=501,
+            detail="Finance module is not available.",
+        )
+    except Exception as exc:
+        _log.exception("Failed to create invoice from PO %s: %s", po_id, exc)
+        from fastapi import HTTPException
+
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to create invoice from purchase order.",
+        )
+
+
 @router.post("/{po_id}/issue", response_model=POResponse)
 async def issue_purchase_order(
     po_id: uuid.UUID,

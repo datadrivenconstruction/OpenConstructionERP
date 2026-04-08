@@ -17,7 +17,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
-import { apiGet, triggerDownload } from '@/shared/lib/api';
+import { apiGet, apiPost, triggerDownload } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -336,10 +336,12 @@ function RFIRow({
   rfi,
   onRespond,
   onClose,
+  onCreateVariation,
 }: {
   rfi: RFI;
   onRespond: (rfi: RFI) => void;
   onClose: (id: string) => void;
+  onCreateVariation: (id: string) => void;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
@@ -493,6 +495,19 @@ function RFIRow({
                 }}
               >
                 {t('rfi.action_close', { defaultValue: 'Close RFI' })}
+              </Button>
+            )}
+            {rfi.cost_impact && (rfi.status === 'answered' || rfi.status === 'closed') && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCreateVariation(rfi.id);
+                }}
+              >
+                <DollarSign size={14} className="mr-1" />
+                {t('rfi.create_variation', { defaultValue: 'Create Variation' })}
               </Button>
             )}
           </div>
@@ -708,6 +723,34 @@ export function RFIPage() {
       closeMut.mutate(id);
     },
     [closeMut],
+  );
+
+  const createVariationMut = useMutation({
+    mutationFn: (rfiId: string) =>
+      apiPost<{ change_order_id: string; code: string; title: string }>(
+        `/v1/rfi/${rfiId}/create-variation`,
+        {},
+      ),
+    onSuccess: (data) => {
+      addToast({
+        type: 'success',
+        title: t('rfi.variation_created', { defaultValue: 'Variation created' }),
+        message: `${data.code}: ${data.title}`,
+      });
+    },
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('common.error', { defaultValue: 'Error' }),
+        message: e.message,
+      }),
+  });
+
+  const handleCreateVariation = useCallback(
+    (id: string) => {
+      createVariationMut.mutate(id);
+    },
+    [createVariationMut],
   );
 
   return (
@@ -946,6 +989,7 @@ export function RFIPage() {
                   rfi={rfi}
                   onRespond={handleRespond}
                   onClose={handleClose}
+                  onCreateVariation={handleCreateVariation}
                 />
               ))}
             </Card>

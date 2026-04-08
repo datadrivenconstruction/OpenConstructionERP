@@ -1,12 +1,14 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import {
   Package,
   ClipboardCheck,
   Search,
+  FileText,
 } from 'lucide-react';
 import {
+  Button,
   Card,
   Badge,
   EmptyState,
@@ -15,7 +17,8 @@ import {
 } from '@/shared/ui';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
-import { apiGet } from '@/shared/lib/api';
+import { apiGet, apiPost } from '@/shared/lib/api';
+import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -184,6 +187,28 @@ export function ProcurementPage() {
 function PurchaseOrdersTab({ projectId }: { projectId: string }) {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
+  const addToast = useToastStore((s) => s.addToast);
+
+  const createInvoiceMut = useMutation({
+    mutationFn: (poId: string) =>
+      apiPost<{ invoice_id: string; invoice_number: string; po_number: string }>(
+        `/v1/procurement/${poId}/create-invoice`,
+        {},
+      ),
+    onSuccess: (data) => {
+      addToast({
+        type: 'success',
+        title: t('procurement.invoice_created', { defaultValue: 'Invoice created' }),
+        message: `${data.invoice_number} from PO ${data.po_number}`,
+      });
+    },
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('common.error', { defaultValue: 'Error' }),
+        message: e.message,
+      }),
+  });
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ['procurement-po', projectId],
@@ -263,6 +288,9 @@ function PurchaseOrdersTab({ projectId }: { projectId: string }) {
               <th className="px-4 py-3 text-center font-medium text-content-tertiary">
                 {t('common.status', { defaultValue: 'Status' })}
               </th>
+              <th className="px-4 py-3 text-right font-medium text-content-tertiary">
+                {t('common.actions', { defaultValue: 'Actions' })}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -295,6 +323,18 @@ function PurchaseOrdersTab({ projectId }: { projectId: string }) {
                       defaultValue: po.status,
                     })}
                   </Badge>
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => createInvoiceMut.mutate(po.id)}
+                    disabled={createInvoiceMut.isPending}
+                    title={t('procurement.create_invoice', { defaultValue: 'Create Invoice from PO' })}
+                  >
+                    <FileText size={14} className="mr-1" />
+                    {t('procurement.create_invoice_short', { defaultValue: 'Invoice' })}
+                  </Button>
                 </td>
               </tr>
             ))}

@@ -23,22 +23,52 @@ import {
   Sparkles,
   Download,
   CornerDownLeft,
+  Users,
+  HelpCircle,
+  CheckSquare,
+  ClipboardList,
+  AlertTriangle,
+  Globe,
   type LucideIcon,
 } from 'lucide-react';
 import { projectsApi, type Project } from '@/features/projects/api';
 import { boqApi, type BOQ } from '@/features/boq/api';
+import { apiGet } from '@/shared/lib/api';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
 interface SearchResult {
   id: string;
-  type: 'page' | 'project' | 'boq' | 'recent';
+  type: 'page' | 'project' | 'boq' | 'recent' | 'global';
   labelKey?: string;
   label?: string;
   description?: string;
   icon: LucideIcon;
   path: string;
 }
+
+interface GlobalSearchResult {
+  module: string;
+  type: string;
+  id: string;
+  title: string;
+  subtitle: string;
+  url: string;
+  score: number;
+}
+
+/** Map module names from global search API to Lucide icons. */
+const GLOBAL_SEARCH_ICONS: Record<string, LucideIcon> = {
+  boq: Table2,
+  contacts: Users,
+  documents: FileText,
+  rfi: HelpCircle,
+  tasks: CheckSquare,
+  costs: Database,
+  meetings: CalendarDays,
+  inspections: ClipboardList,
+  ncr: AlertTriangle,
+};
 
 interface CommandPaletteProps {
   open: boolean;
@@ -119,6 +149,38 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const [projectsLoaded, setProjectsLoaded] = useState(false);
   const [boqs, setBoqs] = useState<(BOQ & { projectName?: string })[]>([]);
   const [boqsLoaded, setBoqsLoaded] = useState(false);
+  const [globalResults, setGlobalResults] = useState<GlobalSearchResult[]>([]);
+  const [globalSearchLoading, setGlobalSearchLoading] = useState(false);
+  const globalSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Debounced global search — fires 300ms after user stops typing
+  useEffect(() => {
+    if (!open) return;
+    const trimmed = query.trim();
+    if (trimmed.length < 2) {
+      setGlobalResults([]);
+      return;
+    }
+
+    if (globalSearchTimer.current) clearTimeout(globalSearchTimer.current);
+    globalSearchTimer.current = setTimeout(() => {
+      setGlobalSearchLoading(true);
+      apiGet<GlobalSearchResult[]>(`/v1/search?q=${encodeURIComponent(trimmed)}&limit=10`)
+        .then((data) => {
+          setGlobalResults(data);
+        })
+        .catch(() => {
+          setGlobalResults([]);
+        })
+        .finally(() => {
+          setGlobalSearchLoading(false);
+        });
+    }, 300);
+
+    return () => {
+      if (globalSearchTimer.current) clearTimeout(globalSearchTimer.current);
+    };
+  }, [query, open]);
 
   // Load projects once when palette opens
   useEffect(() => {
@@ -316,8 +378,35 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       });
     }
 
+    // Global search results (from backend API)
+    if (globalResults.length > 0) {
+      // Group by module for cleaner display
+      const moduleGroups = new Map<string, SearchResult[]>();
+      for (const gr of globalResults) {
+        const moduleName = gr.module;
+        if (!moduleGroups.has(moduleName)) moduleGroups.set(moduleName, []);
+        moduleGroups.get(moduleName)!.push({
+          id: `global-${gr.type}-${gr.id}`,
+          type: 'global' as const,
+          label: gr.title,
+          description: gr.subtitle,
+          icon: GLOBAL_SEARCH_ICONS[moduleName] ?? Globe,
+          path: gr.url,
+        });
+      }
+      for (const [moduleName, items] of moduleGroups) {
+        const moduleLabel = moduleName.charAt(0).toUpperCase() + moduleName.slice(1);
+        groups.push({
+          title: t(`command_palette.global_${moduleName}`, {
+            defaultValue: moduleLabel,
+          }),
+          items,
+        });
+      }
+    }
+
     return groups;
-  }, [query, projects, boqs, t]);
+  }, [query, projects, boqs, globalResults, t]);
 
   // Flat list for keyboard navigation
   const flatResults = useMemo(() => results.flatMap((g) => g.items), [results]);
@@ -335,7 +424,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
         id: result.id.replace(/^recent-/, ''),
         label,
         path: result.path,
-        type: result.type === 'project' ? 'project' : result.type === 'boq' ? 'boq' : 'page',
+        type: result.type === 'project' ? 'project' : result.type === 'boq' ? 'boq' : result.type === 'global' ? 'page' : 'page',
       });
       navigate(result.path);
       onClose();
@@ -438,9 +527,14 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
 
         {/* Results */}
         <div ref={listRef} className="overflow-y-auto px-2 py-2">
-          {flatResults.length === 0 && query.trim() !== '' && (
+          {flatResults.length === 0 && query.trim() !== '' && !globalSearchLoading && (
             <div className="px-3 py-8 text-center text-sm text-content-tertiary">
               {t('command_palette.no_results', { defaultValue: 'No results found' })}
+            </div>
+          )}
+          {globalSearchLoading && query.trim().length >= 2 && (
+            <div className="px-3 py-3 text-center text-xs text-content-tertiary animate-pulse">
+              {t('command_palette.searching', { defaultValue: 'Searching across all modules...' })}
             </div>
           )}
 

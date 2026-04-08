@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 // lucide-react icons used by sub-components (BOQToolbar, BOQGrid, etc.) — none needed directly here
-import { Database, Download, ExternalLink, X, Sparkles, AlertTriangle as WarnTriangle, Lock, Copy } from 'lucide-react';
+import { Database, Download, ExternalLink, X, Sparkles, AlertTriangle as WarnTriangle, Lock, Copy, Wallet } from 'lucide-react';
 import { Button, Badge, Breadcrumb } from '@/shared/ui';
 import { useProgressStore } from '@/shared/ui/GlobalProgress';
 import { apiGet, apiPost, triggerDownload } from '@/shared/lib/api';
@@ -280,6 +280,31 @@ export function BOQEditorPage() {
   const handleLock = useCallback(() => {
     lockMutation.mutate();
   }, [lockMutation]);
+
+  const createBudgetMutation = useMutation({
+    mutationFn: () => apiPost<{ created: number }>(`/v1/boq/boqs/${boqId}/create-budget`, {}),
+    onSuccess: (data) => {
+      addToast({
+        type: 'success',
+        title: t('boq.budget_created', { defaultValue: 'Budget created' }),
+        message: t('boq.budget_created_desc', {
+          defaultValue: '{{count}} budget lines created from estimate',
+          count: data.created ?? 0,
+        }),
+      });
+    },
+    onError: (err) => {
+      addToast({
+        type: 'error',
+        title: t('boq.budget_create_failed', { defaultValue: 'Budget creation failed' }),
+        message: err instanceof Error ? err.message : '',
+      });
+    },
+  });
+
+  const handleCreateBudget = useCallback(() => {
+    createBudgetMutation.mutate();
+  }, [createBudgetMutation]);
 
   const createRevisionMutation = useMutation({
     mutationFn: () => apiPost<{ id: string }>(`/v1/boq/boqs/${boqId}/create-revision`, {}),
@@ -2127,6 +2152,12 @@ export function BOQEditorPage() {
               <Button variant="secondary" size="sm" onClick={handleLock} disabled={lockMutation.isPending}>
                 <Lock size={14} className="mr-1" />
                 {t('boq.lock', { defaultValue: 'Lock Estimate' })}
+              </Button>
+            )}
+            {boq.is_locked && (
+              <Button variant="secondary" size="sm" onClick={handleCreateBudget} disabled={createBudgetMutation.isPending}>
+                <Wallet size={14} className="mr-1" />
+                {t('boq.create_budget', { defaultValue: 'Create Budget' })}
               </Button>
             )}
             <Button variant="secondary" size="sm" onClick={handleCreateRevision} disabled={createRevisionMutation.isPending}>

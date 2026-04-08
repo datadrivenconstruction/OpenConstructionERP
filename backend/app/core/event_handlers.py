@@ -1145,11 +1145,421 @@ async def _handle_cde_container_promoted(event: Event) -> None:
         logger.exception("Error handling cde.container.promoted")
 
 
+# ===========================================================================
+# SMART NOTIFICATION TRIGGERS (16–23)
+#
+# Automatically create in-app notifications for common user-facing events.
+# Each handler uses NotificationService.create() with i18n keys so the
+# frontend renders the message in the user's locale.
+# ===========================================================================
+
+
+# ---------------------------------------------------------------------------
+# 16. rfi.assigned -> notify the assignee
+# ---------------------------------------------------------------------------
+
+async def _notify_rfi_assigned(event: Event) -> None:
+    """Notify the person assigned to answer an RFI.
+
+    Expected event.data:
+        project_id: str (UUID)
+        rfi_id: str (UUID)
+        rfi_number: str
+        subject: str
+        assigned_to: str (UUID of the assignee)
+        assigned_by: str (UUID, optional)
+    """
+    try:
+        data = event.data
+        assigned_to = data.get("assigned_to")
+        if not assigned_to:
+            return
+
+        from app.database import async_session_factory
+        from app.modules.notifications.service import NotificationService
+
+        async with async_session_factory() as session:
+            svc = NotificationService(session)
+            await svc.create(
+                user_id=assigned_to,
+                notification_type="info",
+                entity_type="rfi",
+                entity_id=str(data.get("rfi_id", "")),
+                title_key="notification.rfi_assigned_title",
+                body_key="notification.rfi_assigned_body",
+                body_context={
+                    "rfi_number": data.get("rfi_number", ""),
+                    "subject": str(data.get("subject", ""))[:200],
+                },
+                action_url=f"/projects/{data.get('project_id')}/rfi",
+            )
+            await session.commit()
+
+        logger.info("notify: RFI %s assigned to %s", data.get("rfi_number"), assigned_to)
+    except Exception:
+        logger.exception("Error in _notify_rfi_assigned")
+
+
+# ---------------------------------------------------------------------------
+# 17. task.assigned -> notify the assignee
+# ---------------------------------------------------------------------------
+
+async def _notify_task_assigned(event: Event) -> None:
+    """Notify the person responsible for a newly assigned task.
+
+    Expected event.data:
+        project_id: str (UUID)
+        task_id: str (UUID)
+        title: str
+        responsible_id: str (UUID of assignee)
+        assigned_by: str (UUID, optional)
+    """
+    try:
+        data = event.data
+        responsible_id = data.get("responsible_id")
+        if not responsible_id:
+            return
+
+        from app.database import async_session_factory
+        from app.modules.notifications.service import NotificationService
+
+        async with async_session_factory() as session:
+            svc = NotificationService(session)
+            await svc.create(
+                user_id=responsible_id,
+                notification_type="info",
+                entity_type="task",
+                entity_id=str(data.get("task_id", "")),
+                title_key="notification.task_assigned_title",
+                body_key="notification.task_assigned_body",
+                body_context={
+                    "task_title": str(data.get("title", ""))[:200],
+                    "assigned_by": data.get("assigned_by", ""),
+                },
+                action_url=f"/projects/{data.get('project_id')}/tasks",
+            )
+            await session.commit()
+
+        logger.info("notify: task '%s' assigned to %s", data.get("title", "")[:60], responsible_id)
+    except Exception:
+        logger.exception("Error in _notify_task_assigned")
+
+
+# ---------------------------------------------------------------------------
+# 18. invoice.approved -> notify the submitter
+# ---------------------------------------------------------------------------
+
+async def _notify_invoice_approved(event: Event) -> None:
+    """Notify the invoice creator when the invoice is approved.
+
+    Expected event.data:
+        project_id: str (UUID)
+        invoice_id: str (UUID)
+        invoice_number: str
+        amount_total: str
+        currency_code: str
+        created_by: str (UUID of original submitter)
+        approved_by: str (UUID, optional)
+    """
+    try:
+        data = event.data
+        created_by = data.get("created_by")
+        if not created_by:
+            return
+
+        from app.database import async_session_factory
+        from app.modules.notifications.service import NotificationService
+
+        async with async_session_factory() as session:
+            svc = NotificationService(session)
+            await svc.create(
+                user_id=created_by,
+                notification_type="success",
+                entity_type="invoice",
+                entity_id=str(data.get("invoice_id", "")),
+                title_key="notification.invoice_approved_title",
+                body_key="notification.invoice_approved_body",
+                body_context={
+                    "invoice_number": data.get("invoice_number", ""),
+                    "amount_total": data.get("amount_total", ""),
+                    "currency_code": data.get("currency_code", ""),
+                },
+                action_url=f"/projects/{data.get('project_id')}/finance",
+            )
+            await session.commit()
+
+        logger.info(
+            "notify: invoice %s approved, notified submitter %s",
+            data.get("invoice_number"),
+            created_by,
+        )
+    except Exception:
+        logger.exception("Error in _notify_invoice_approved")
+
+
+# ---------------------------------------------------------------------------
+# 19. inspection.scheduled -> notify the inspector
+# ---------------------------------------------------------------------------
+
+async def _notify_inspection_due(event: Event) -> None:
+    """Notify the inspector when an inspection is scheduled.
+
+    Expected event.data:
+        project_id: str (UUID)
+        inspection_id: str (UUID)
+        inspection_number: str
+        title: str
+        inspector_id: str (UUID)
+        inspection_date: str
+    """
+    try:
+        data = event.data
+        inspector_id = data.get("inspector_id")
+        if not inspector_id:
+            return
+
+        from app.database import async_session_factory
+        from app.modules.notifications.service import NotificationService
+
+        async with async_session_factory() as session:
+            svc = NotificationService(session)
+            await svc.create(
+                user_id=inspector_id,
+                notification_type="info",
+                entity_type="inspection",
+                entity_id=str(data.get("inspection_id", "")),
+                title_key="notification.inspection_scheduled_title",
+                body_key="notification.inspection_scheduled_body",
+                body_context={
+                    "inspection_number": data.get("inspection_number", ""),
+                    "title": str(data.get("title", ""))[:200],
+                    "inspection_date": data.get("inspection_date", ""),
+                },
+                action_url=f"/projects/{data.get('project_id')}/inspections",
+            )
+            await session.commit()
+
+        logger.info(
+            "notify: inspection %s scheduled, notified inspector %s",
+            data.get("inspection_number"),
+            inspector_id,
+        )
+    except Exception:
+        logger.exception("Error in _notify_inspection_due")
+
+
+# ---------------------------------------------------------------------------
+# 20. submittal.status_changed -> notify the submitter
+# ---------------------------------------------------------------------------
+
+async def _notify_submittal_status_changed(event: Event) -> None:
+    """Notify the submitter when a submittal's review status changes.
+
+    Expected event.data:
+        project_id: str (UUID)
+        submittal_id: str (UUID)
+        submittal_number: str
+        title: str
+        new_status: str (approved / rejected / revise_resubmit)
+        submitted_by: str (UUID)
+        reviewer_name: str (optional)
+    """
+    try:
+        data = event.data
+        submitted_by = data.get("submitted_by")
+        if not submitted_by:
+            return
+
+        from app.database import async_session_factory
+        from app.modules.notifications.service import NotificationService
+
+        async with async_session_factory() as session:
+            svc = NotificationService(session)
+            await svc.create(
+                user_id=submitted_by,
+                notification_type="info",
+                entity_type="submittal",
+                entity_id=str(data.get("submittal_id", "")),
+                title_key="notification.submittal_status_changed_title",
+                body_key="notification.submittal_status_changed_body",
+                body_context={
+                    "submittal_number": data.get("submittal_number", ""),
+                    "title": str(data.get("title", ""))[:200],
+                    "new_status": data.get("new_status", ""),
+                },
+                action_url=f"/projects/{data.get('project_id')}/submittals",
+            )
+            await session.commit()
+
+        logger.info(
+            "notify: submittal %s status -> %s, notified submitter %s",
+            data.get("submittal_number"),
+            data.get("new_status"),
+            submitted_by,
+        )
+    except Exception:
+        logger.exception("Error in _notify_submittal_status_changed")
+
+
+# ---------------------------------------------------------------------------
+# 21. meeting.scheduled -> notify all attendees
+# ---------------------------------------------------------------------------
+
+async def _notify_meeting_scheduled(event: Event) -> None:
+    """Notify all attendees when a meeting is scheduled.
+
+    Expected event.data:
+        project_id: str (UUID)
+        meeting_id: str (UUID)
+        meeting_number: str
+        title: str
+        meeting_date: str
+        attendee_user_ids: list[str] (UUIDs of attendees)
+    """
+    try:
+        data = event.data
+        attendee_ids = data.get("attendee_user_ids", [])
+        if not attendee_ids:
+            return
+
+        from app.database import async_session_factory
+        from app.modules.notifications.service import NotificationService
+
+        async with async_session_factory() as session:
+            svc = NotificationService(session)
+            await svc.notify_users(
+                user_ids=attendee_ids,
+                notification_type="info",
+                entity_type="meeting",
+                entity_id=str(data.get("meeting_id", "")),
+                title_key="notification.meeting_scheduled_title",
+                body_key="notification.meeting_scheduled_body",
+                body_context={
+                    "meeting_number": data.get("meeting_number", ""),
+                    "title": str(data.get("title", ""))[:200],
+                    "meeting_date": data.get("meeting_date", ""),
+                },
+                action_url=f"/projects/{data.get('project_id')}/meetings",
+            )
+            await session.commit()
+
+        logger.info(
+            "notify: meeting %s scheduled, notified %d attendees",
+            data.get("meeting_number"),
+            len(attendee_ids),
+        )
+    except Exception:
+        logger.exception("Error in _notify_meeting_scheduled")
+
+
+# ---------------------------------------------------------------------------
+# 22. ncr.created -> notify project team (creator receives confirmation)
+# ---------------------------------------------------------------------------
+
+async def _notify_ncr_created(event: Event) -> None:
+    """Notify relevant users when an NCR is raised.
+
+    Expected event.data:
+        project_id: str (UUID)
+        ncr_id: str (UUID)
+        ncr_number: str
+        title: str
+        severity: str
+        created_by: str (UUID)
+        notify_user_ids: list[str] (UUIDs to notify, e.g. QA manager)
+    """
+    try:
+        data = event.data
+        notify_ids = data.get("notify_user_ids", [])
+        if not notify_ids:
+            return
+
+        from app.database import async_session_factory
+        from app.modules.notifications.service import NotificationService
+
+        async with async_session_factory() as session:
+            svc = NotificationService(session)
+            await svc.notify_users(
+                user_ids=notify_ids,
+                notification_type="warning",
+                entity_type="ncr",
+                entity_id=str(data.get("ncr_id", "")),
+                title_key="notification.ncr_created_title",
+                body_key="notification.ncr_created_body",
+                body_context={
+                    "ncr_number": data.get("ncr_number", ""),
+                    "title": str(data.get("title", ""))[:200],
+                    "severity": data.get("severity", ""),
+                },
+                action_url=f"/projects/{data.get('project_id')}/ncr",
+            )
+            await session.commit()
+
+        logger.info(
+            "notify: NCR %s (%s) created, notified %d users",
+            data.get("ncr_number"),
+            data.get("severity"),
+            len(notify_ids),
+        )
+    except Exception:
+        logger.exception("Error in _notify_ncr_created")
+
+
+# ---------------------------------------------------------------------------
+# 23. document.uploaded -> notify project owner / relevant watchers
+# ---------------------------------------------------------------------------
+
+async def _notify_document_uploaded(event: Event) -> None:
+    """Notify project team when a new document is uploaded.
+
+    Expected event.data:
+        project_id: str (UUID)
+        document_id: str (UUID)
+        document_name: str
+        category: str
+        uploaded_by: str (UUID)
+        notify_user_ids: list[str] (UUIDs to notify)
+    """
+    try:
+        data = event.data
+        notify_ids = data.get("notify_user_ids", [])
+        if not notify_ids:
+            return
+
+        from app.database import async_session_factory
+        from app.modules.notifications.service import NotificationService
+
+        async with async_session_factory() as session:
+            svc = NotificationService(session)
+            await svc.notify_users(
+                user_ids=notify_ids,
+                notification_type="info",
+                entity_type="document",
+                entity_id=str(data.get("document_id", "")),
+                title_key="notification.document_uploaded_title",
+                body_key="notification.document_uploaded_body",
+                body_context={
+                    "document_name": str(data.get("document_name", ""))[:200],
+                    "category": data.get("category", ""),
+                },
+                action_url=f"/projects/{data.get('project_id')}/documents",
+            )
+            await session.commit()
+
+        logger.info(
+            "notify: document '%s' uploaded, notified %d users",
+            data.get("document_name", "")[:60],
+            len(notify_ids),
+        )
+    except Exception:
+        logger.exception("Error in _notify_document_uploaded")
+
+
 # ---------------------------------------------------------------------------
 # Registration
 # ---------------------------------------------------------------------------
 
-_HANDLER_COUNT = 15
+_HANDLER_COUNT = 23
 
 
 def register_event_handlers() -> None:
@@ -1157,6 +1567,7 @@ def register_event_handlers() -> None:
 
     Call this at startup after all modules are loaded.
     """
+    # Original cross-module dataflow handlers (1–15)
     event_bus.subscribe("meeting.action_item.created", _handle_meeting_action_item_created)
     event_bus.subscribe("safety.observation.high_risk", _handle_safety_observation_high_risk)
     event_bus.subscribe("inspection.completed.failed", _handle_inspection_completed_failed)
@@ -1172,5 +1583,15 @@ def register_event_handlers() -> None:
     event_bus.subscribe("variation.approved", _handle_variation_approved)
     event_bus.subscribe("transmittal.issued", _handle_transmittal_issued)
     event_bus.subscribe("cde.container.promoted", _handle_cde_container_promoted)
+
+    # Smart notification triggers (16–23)
+    event_bus.subscribe("rfi.assigned", _notify_rfi_assigned)
+    event_bus.subscribe("task.assigned", _notify_task_assigned)
+    event_bus.subscribe("invoice.approved", _notify_invoice_approved)
+    event_bus.subscribe("inspection.scheduled", _notify_inspection_due)
+    event_bus.subscribe("submittal.status_changed", _notify_submittal_status_changed)
+    event_bus.subscribe("meeting.scheduled", _notify_meeting_scheduled)
+    event_bus.subscribe("ncr.created", _notify_ncr_created)
+    event_bus.subscribe("document.uploaded", _notify_document_uploaded)
 
     logger.info("Registered %d cross-module event handlers", _HANDLER_COUNT)
