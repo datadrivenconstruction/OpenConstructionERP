@@ -570,7 +570,7 @@ function BidComparisonTable({
   if (comparison.bid_count === 0) {
     return (
       <EmptyState
-        icon={<BarChart3 size={24} strokeWidth={1.5} />}
+        icon={<BarChart3 size={28} strokeWidth={1.5} />}
         title={t('tendering.no_bids_yet', 'No bids yet')}
         description={t(
           'tendering.no_bids_description',
@@ -1086,7 +1086,7 @@ export function TenderingPage() {
       {/* No project selected */}
       {!selectedProjectId && (
         <EmptyState
-          icon={<FileText size={24} strokeWidth={1.5} />}
+          icon={<FileText size={28} strokeWidth={1.5} />}
           title={t('tendering.select_project_title', { defaultValue: 'Select a project' })}
           description={t('tendering.select_project_desc', {
             defaultValue: 'Select a project and create a tender from a BOQ to get started',
@@ -1102,7 +1102,7 @@ export function TenderingPage() {
       {/* No packages */}
       {selectedProjectId && !packagesLoading && packages && packages.length === 0 && (
         <EmptyState
-          icon={<FileText size={24} strokeWidth={1.5} />}
+          icon={<FileText size={28} strokeWidth={1.5} />}
           title={t('tendering.no_packages', { defaultValue: 'No tenders yet' })}
           description={t('tendering.no_packages_description', {
             defaultValue: 'Create a tender from a BOQ to start collecting bids',

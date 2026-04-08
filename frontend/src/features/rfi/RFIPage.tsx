@@ -150,7 +150,7 @@ function CreateRFIModal({
         <div className="px-6 py-4 space-y-4">
           {/* Subject */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('rfi.field_subject', { defaultValue: 'Subject' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -179,7 +179,7 @@ function CreateRFIModal({
 
           {/* Question */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('rfi.field_question', { defaultValue: 'Question' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -209,7 +209,7 @@ function CreateRFIModal({
           {/* Two-column: Ball in Court + Due Date */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('rfi.field_ball_in_court', { defaultValue: 'Ball in Court' })}
               </label>
               <input
@@ -222,7 +222,7 @@ function CreateRFIModal({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('rfi.field_due_date', { defaultValue: 'Due Date' })}
               </label>
               <input
@@ -331,7 +331,7 @@ function RespondModal({
             <p className="text-sm text-content-primary">{rfi.question}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('rfi.field_response', { defaultValue: 'Response' })}
             </label>
             <textarea
@@ -880,26 +880,26 @@ export function RFIPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <Card className="p-4 animate-card-in">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
             {t('rfi.stat_total', { defaultValue: 'Total RFIs' })}
           </p>
-          <p className="text-xl font-bold mt-1 tabular-nums text-content-primary">
+          <p className="text-2xl font-bold mt-1 tabular-nums text-content-primary">
             {stats.total}
           </p>
         </Card>
         <Card className="p-4 animate-card-in">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
             {t('rfi.stat_open', { defaultValue: 'Open' })}
           </p>
-          <p className="text-xl font-bold mt-1 tabular-nums text-oe-blue">{stats.open}</p>
+          <p className="text-2xl font-bold mt-1 tabular-nums text-oe-blue">{stats.open}</p>
         </Card>
         <Card className="p-4 animate-card-in">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
             {t('rfi.stat_overdue', { defaultValue: 'Overdue' })}
           </p>
           <p
             className={clsx(
-              'text-xl font-bold mt-1 tabular-nums',
+              'text-2xl font-bold mt-1 tabular-nums',
               stats.overdue > 0 ? 'text-semantic-error' : 'text-content-primary',
             )}
           >
@@ -907,10 +907,10 @@ export function RFIPage() {
           </p>
         </Card>
         <Card className="p-4 animate-card-in">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
             {t('rfi.stat_avg_days', { defaultValue: 'Avg. Days Open' })}
           </p>
-          <p className="text-xl font-bold mt-1 tabular-nums text-content-primary">
+          <p className="text-2xl font-bold mt-1 tabular-nums text-content-primary">
             {stats.avgDays}
           </p>
         </Card>
@@ -964,7 +964,7 @@ export function RFIPage() {
           <SkeletonTable rows={5} columns={6} />
         ) : filtered.length === 0 ? (
           <EmptyState
-            icon={<HelpCircle size={24} strokeWidth={1.5} />}
+            icon={<HelpCircle size={28} strokeWidth={1.5} />}
             title={
               searchQuery || statusFilter
                 ? t('rfi.no_results', { defaultValue: 'No matching RFIs' })
@@ -998,7 +998,7 @@ export function RFIPage() {
             </p>
             <Card padding="none" className="overflow-x-auto">
               {/* Table header */}
-              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border bg-surface-secondary/50 text-xs font-medium text-content-tertiary uppercase tracking-wide min-w-[640px]">
+              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border-light bg-surface-secondary/30 text-2xs font-medium text-content-tertiary uppercase tracking-wider min-w-[640px]">
                 <span className="w-5" /> {/* Chevron space */}
                 <span className="w-16">#</span>
                 <span className="flex-1">

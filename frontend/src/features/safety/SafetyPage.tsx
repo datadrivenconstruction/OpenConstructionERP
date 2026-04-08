@@ -271,7 +271,7 @@ export function SafetyPage() {
       {/* Tab Content */}
       {!projectId ? (
         <EmptyState
-          icon={<HardHat size={24} strokeWidth={1.5} />}
+          icon={<HardHat size={28} strokeWidth={1.5} />}
           title={t('safety.no_project', {
             defaultValue: 'No project selected',
           })}
@@ -392,7 +392,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
   if (!incidents || incidents.length === 0) {
     return (
       <EmptyState
-        icon={<ShieldAlert size={24} strokeWidth={1.5} />}
+        icon={<ShieldAlert size={28} strokeWidth={1.5} />}
         title={t('safety.no_incidents', {
           defaultValue: 'No incidents reported',
         })}
@@ -561,7 +561,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
           <div className="px-6 py-4 space-y-4">
             {/* Date */}
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('safety.date', { defaultValue: 'Date' })} <span className="text-semantic-error">*</span>
               </label>
               <input
@@ -595,7 +595,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
             </div>
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('tasks.field_description', { defaultValue: 'Description' })} <span className="text-semantic-error">*</span>
               </label>
               <textarea
@@ -608,7 +608,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
             </div>
             {/* Location */}
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('safety.location', { defaultValue: 'Location' })}
               </label>
               <input
@@ -620,7 +620,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
             </div>
             {/* Treatment */}
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('safety.treatment', { defaultValue: 'Treatment' })}
               </label>
               <select
@@ -752,7 +752,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
   if (!observations || observations.length === 0) {
     return (
       <EmptyState
-        icon={<Eye size={24} strokeWidth={1.5} />}
+        icon={<Eye size={28} strokeWidth={1.5} />}
         title={t('safety.no_observations', {
           defaultValue: 'No observations yet',
         })}
@@ -933,7 +933,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
             </div>
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('tasks.field_description', { defaultValue: 'Description' })} <span className="text-semantic-error">*</span>
               </label>
               <textarea
@@ -946,7 +946,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
             </div>
             {/* Location */}
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('safety.location', { defaultValue: 'Location' })}
               </label>
               <input
@@ -959,7 +959,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
             {/* Severity + Likelihood */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-content-secondary mb-1">
+                <label className="block text-sm font-medium text-content-primary mb-1.5">
                   {t('safety.severity', { defaultValue: 'Severity' })} (1-5)
                 </label>
                 <select
@@ -973,7 +973,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-content-secondary mb-1">
+                <label className="block text-sm font-medium text-content-primary mb-1.5">
                   {t('safety.likelihood', { defaultValue: 'Likelihood' })} (1-5)
                 </label>
                 <select

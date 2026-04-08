@@ -10,8 +10,8 @@ from pydantic import BaseModel, ConfigDict, Field
 # IntegrationConfig schemas (Teams, Slack, Telegram, etc.)
 # ---------------------------------------------------------------------------
 
-INTEGRATION_TYPES = ("teams", "slack", "telegram", "email", "webhook")
-IntegrationType = Literal["teams", "slack", "telegram", "email", "webhook"]
+INTEGRATION_TYPES = ("teams", "slack", "telegram", "discord", "whatsapp", "email", "webhook")
+IntegrationType = Literal["teams", "slack", "telegram", "discord", "whatsapp", "email", "webhook"]
 
 
 class IntegrationConfigCreate(BaseModel):

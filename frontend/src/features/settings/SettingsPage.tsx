@@ -742,7 +742,7 @@ export function SettingsPage() {
   });
 
   return (
-    <div className="max-w-content mx-auto space-y-6">
+    <div className="max-w-content mx-auto space-y-6 animate-fade-in">
       <Breadcrumb items={[
         { label: t('nav.dashboard', 'Dashboard'), to: '/' },
         { label: t('nav.settings', 'Settings') },

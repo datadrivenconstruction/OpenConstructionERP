@@ -164,7 +164,7 @@ function AddContactModal({
         <div className="px-6 py-4 space-y-4">
           {/* Company Name */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('contacts.field_company', { defaultValue: 'Company Name' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -194,7 +194,7 @@ function AddContactModal({
           {/* Two-column: Contact Name + Type */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('contacts.field_name', { defaultValue: 'Contact Name' })}
               </label>
               <input
@@ -205,7 +205,7 @@ function AddContactModal({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('contacts.field_type', { defaultValue: 'Type' })}
               </label>
               <select
@@ -227,7 +227,7 @@ function AddContactModal({
           {/* Two-column: Email + Phone */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('contacts.field_email', { defaultValue: 'Email' })}
               </label>
               <input
@@ -239,7 +239,7 @@ function AddContactModal({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('contacts.field_phone', { defaultValue: 'Phone' })}
               </label>
               <input
@@ -255,7 +255,7 @@ function AddContactModal({
           {/* Two-column: Country + Prequalification */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('contacts.field_country', { defaultValue: 'Country' })}
               </label>
               <input
@@ -268,7 +268,7 @@ function AddContactModal({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('contacts.field_prequal', { defaultValue: 'Prequalification' })}
               </label>
               <select
@@ -293,7 +293,7 @@ function AddContactModal({
 
           {/* Address */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('contacts.field_address', { defaultValue: 'Address' })}
             </label>
             <input
@@ -308,7 +308,7 @@ function AddContactModal({
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('contacts.field_notes', { defaultValue: 'Notes' })}
             </label>
             <textarea
@@ -832,7 +832,7 @@ export function ContactsPage() {
           </div>
         ) : filtered.length === 0 ? (
           <EmptyState
-            icon={<Building2 size={24} strokeWidth={1.5} />}
+            icon={<Building2 size={28} strokeWidth={1.5} />}
             title={
               searchQuery || typeFilter || countryFilter
                 ? t('contacts.no_results', { defaultValue: 'No matching contacts' })

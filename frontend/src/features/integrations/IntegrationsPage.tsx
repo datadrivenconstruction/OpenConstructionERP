@@ -15,6 +15,14 @@ import {
   Trash2,
   TestTube2,
   X,
+  Phone,
+  Gamepad2,
+  Workflow,
+  Zap,
+  Cog,
+  Sheet,
+  BarChart3,
+  Code2,
   type LucideIcon,
 } from 'lucide-react';
 import { Card, CardContent, Badge, Button, Input, Breadcrumb } from '@/shared/ui';
@@ -23,7 +31,7 @@ import { useToastStore } from '@/stores/useToastStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
-type IntegrationType = 'teams' | 'slack' | 'telegram' | 'email' | 'webhook';
+type IntegrationType = 'teams' | 'slack' | 'telegram' | 'discord' | 'whatsapp' | 'email' | 'webhook';
 
 interface IntegrationConfig {
   id: string;
@@ -47,6 +55,9 @@ interface IntegrationConfigListResponse {
 
 /* ── Connector definitions ─────────────────────────────────────────────── */
 
+type ConnectorStatus = 'available' | 'coming_soon' | 'info_only';
+type ConnectorCategory = 'notifications' | 'automation' | 'data';
+
 interface ConnectorDef {
   type: IntegrationType;
   nameKey: string;
@@ -55,11 +66,15 @@ interface ConnectorDef {
   defaultDesc: string;
   icon: LucideIcon;
   color: string;
+  category: ConnectorCategory;
+  status: ConnectorStatus;
   fields: { key: string; label: string; placeholder: string; type?: string }[];
   setupInstructions: string;
+  externalUrl?: string;
 }
 
 const CONNECTORS: ConnectorDef[] = [
+  // ── Notifications ──────────────────────────────────────────────────
   {
     type: 'teams',
     nameKey: 'integrations.teams',
@@ -68,6 +83,8 @@ const CONNECTORS: ConnectorDef[] = [
     defaultDesc: 'Send notifications to your Teams channel via Incoming Webhook',
     icon: MessageSquare,
     color: 'bg-[#6264A7]',
+    category: 'notifications',
+    status: 'available',
     fields: [
       {
         key: 'webhook_url',
@@ -86,6 +103,8 @@ const CONNECTORS: ConnectorDef[] = [
     defaultDesc: 'Send notifications to Slack via Incoming Webhook',
     icon: Hash,
     color: 'bg-[#4A154B]',
+    category: 'notifications',
+    status: 'available',
     fields: [
       {
         key: 'webhook_url',
@@ -104,6 +123,8 @@ const CONNECTORS: ConnectorDef[] = [
     defaultDesc: 'Get notified via Telegram bot',
     icon: Send,
     color: 'bg-[#0088cc]',
+    category: 'notifications',
+    status: 'available',
     fields: [
       {
         key: 'bot_token',
@@ -121,6 +142,40 @@ const CONNECTORS: ConnectorDef[] = [
       '1. Message @BotFather on Telegram > /newbot\n2. Copy the bot token\n3. Add the bot to your group/channel\n4. Get your chat_id (message @userinfobot or use the Telegram API)',
   },
   {
+    type: 'discord',
+    nameKey: 'integrations.discord',
+    defaultName: 'Discord',
+    descKey: 'integrations.discord_desc',
+    defaultDesc: 'Send notifications to a Discord channel via webhook',
+    icon: Gamepad2,
+    color: 'bg-[#5865F2]',
+    category: 'notifications',
+    status: 'available',
+    fields: [
+      {
+        key: 'webhook_url',
+        label: 'Webhook URL',
+        placeholder: 'https://discord.com/api/webhooks/...',
+      },
+    ],
+    setupInstructions:
+      '1. Open your Discord server\n2. Go to Server Settings > Integrations > Webhooks\n3. Click "New Webhook", choose a channel\n4. Copy the webhook URL and paste it here',
+  },
+  {
+    type: 'whatsapp',
+    nameKey: 'integrations.whatsapp',
+    defaultName: 'WhatsApp Business',
+    descKey: 'integrations.whatsapp_desc',
+    defaultDesc: 'Send template notifications via Meta Cloud API',
+    icon: Phone,
+    color: 'bg-[#25D366]',
+    category: 'notifications',
+    status: 'coming_soon',
+    fields: [],
+    setupInstructions:
+      'WhatsApp Business integration requires Meta Business verification.\nThis feature is coming in a future release.',
+  },
+  {
     type: 'email',
     nameKey: 'integrations.email',
     defaultName: 'Email',
@@ -128,20 +183,73 @@ const CONNECTORS: ConnectorDef[] = [
     defaultDesc: 'Receive email notifications (SMTP)',
     icon: Mail,
     color: 'bg-blue-600',
+    category: 'notifications',
+    status: 'coming_soon',
     fields: [],
     setupInstructions: 'Email notifications will be available in a future update.',
   },
+
+  // ── Automation ─────────────────────────────────────────────────────
   {
     type: 'webhook',
     nameKey: 'integrations.webhook',
     defaultName: 'Webhooks',
     descKey: 'integrations.webhook_desc',
-    defaultDesc: 'Send events to any URL (HTTP POST)',
+    defaultDesc: 'Send events to any URL (HTTP POST with HMAC signing)',
     icon: Globe,
     color: 'bg-gray-600',
+    category: 'automation',
+    status: 'info_only',
     fields: [],
     setupInstructions: 'Use the Webhooks tab in Settings to configure custom webhook endpoints.',
   },
+  {
+    type: 'webhook' as IntegrationType,
+    nameKey: 'integrations.n8n',
+    defaultName: 'n8n',
+    descKey: 'integrations.n8n_desc',
+    defaultDesc: 'Self-hosted workflow automation. Use our webhook URL as a trigger node.',
+    icon: Workflow,
+    color: 'bg-[#EA4B71]',
+    category: 'automation',
+    status: 'info_only',
+    fields: [],
+    setupInstructions:
+      '1. In n8n, add a "Webhook" trigger node\n2. Copy the webhook URL from n8n\n3. Go to Settings > Webhooks in this app and add a new endpoint\n4. Paste the n8n webhook URL, select which events to forward',
+    externalUrl: 'https://n8n.io',
+  },
+  {
+    type: 'webhook' as IntegrationType,
+    nameKey: 'integrations.zapier',
+    defaultName: 'Zapier',
+    descKey: 'integrations.zapier_desc',
+    defaultDesc: 'Connect 5,000+ apps. Use our webhook events as a Zapier trigger.',
+    icon: Zap,
+    color: 'bg-[#FF4A00]',
+    category: 'automation',
+    status: 'info_only',
+    fields: [],
+    setupInstructions:
+      '1. In Zapier, create a new Zap with "Webhooks by Zapier" as trigger\n2. Choose "Catch Hook" and copy the webhook URL\n3. Go to Settings > Webhooks and add a new endpoint with the Zapier URL\n4. Select which events to forward, then test in Zapier',
+    externalUrl: 'https://zapier.com',
+  },
+  {
+    type: 'webhook' as IntegrationType,
+    nameKey: 'integrations.make',
+    defaultName: 'Make (Integromat)',
+    descKey: 'integrations.make_desc',
+    defaultDesc: 'Visual workflow automation. Use webhook trigger to connect.',
+    icon: Cog,
+    color: 'bg-[#6D00CC]',
+    category: 'automation',
+    status: 'info_only',
+    fields: [],
+    setupInstructions:
+      '1. In Make, create a new Scenario with a "Webhooks" module\n2. Choose "Custom webhook" and copy the URL\n3. Go to Settings > Webhooks and add a new endpoint with the Make URL\n4. Select events to forward and run a test',
+    externalUrl: 'https://www.make.com',
+  },
+
+  // ── Data ───────────────────────────────────────────────────────────
   {
     type: 'email' as IntegrationType,
     nameKey: 'integrations.calendar',
@@ -150,13 +258,67 @@ const CONNECTORS: ConnectorDef[] = [
     defaultDesc: 'Subscribe in Google/Outlook Calendar (iCal feed)',
     icon: Calendar,
     color: 'bg-green-600',
+    category: 'data',
+    status: 'info_only',
     fields: [],
     setupInstructions: 'Calendar feeds are available per project. Go to Project Settings > Calendar.',
+  },
+  {
+    type: 'email' as IntegrationType,
+    nameKey: 'integrations.google_sheets',
+    defaultName: 'Google Sheets',
+    descKey: 'integrations.google_sheets_desc',
+    defaultDesc: 'Export BOQ and cost data in formats compatible with Google Sheets',
+    icon: Sheet,
+    color: 'bg-[#0F9D58]',
+    category: 'data',
+    status: 'info_only',
+    fields: [],
+    setupInstructions:
+      '1. Open your BOQ or cost report\n2. Click Export > Excel (.xlsx)\n3. Open the file in Google Sheets, or use File > Import in Google Drive',
+  },
+  {
+    type: 'email' as IntegrationType,
+    nameKey: 'integrations.power_bi',
+    defaultName: 'Power BI / Tableau',
+    descKey: 'integrations.power_bi_desc',
+    defaultDesc: 'Connect BI tools to our REST API for custom dashboards and analytics',
+    icon: BarChart3,
+    color: 'bg-[#F2C811]',
+    category: 'data',
+    status: 'info_only',
+    fields: [],
+    setupInstructions:
+      '1. In Power BI/Tableau, add a new Web/REST API data source\n2. Use your base URL + /api/v1/ endpoints\n3. Authenticate with your API key (Settings > API Keys)\n4. Build custom dashboards from BOQ, cost, and project data',
+    externalUrl: '/api/docs',
+  },
+  {
+    type: 'email' as IntegrationType,
+    nameKey: 'integrations.rest_api',
+    defaultName: 'REST API',
+    descKey: 'integrations.rest_api_desc',
+    defaultDesc: 'Full REST API with OpenAPI docs for custom integrations',
+    icon: Code2,
+    color: 'bg-slate-700',
+    category: 'data',
+    status: 'info_only',
+    fields: [],
+    setupInstructions:
+      '1. Generate an API key in Settings > API Keys\n2. Browse the interactive API docs at /api/docs\n3. Use any HTTP client to integrate with your systems',
+    externalUrl: '/api/docs',
   },
 ];
 
 // Only these types support the connect flow
-const CONNECTABLE_TYPES: IntegrationType[] = ['teams', 'slack', 'telegram'];
+const CONNECTABLE_TYPES: IntegrationType[] = ['teams', 'slack', 'telegram', 'discord'];
+
+const CATEGORY_LABELS: Record<ConnectorCategory, { key: string; defaultLabel: string }> = {
+  notifications: { key: 'integrations.cat_notifications', defaultLabel: 'Notifications' },
+  automation: { key: 'integrations.cat_automation', defaultLabel: 'Automation' },
+  data: { key: 'integrations.cat_data', defaultLabel: 'Data & Analytics' },
+};
+
+const CATEGORY_ORDER: ConnectorCategory[] = ['notifications', 'automation', 'data'];
 
 /* ── API helpers ────────────────────────────────────────────────────────── */
 
@@ -317,7 +479,7 @@ export function IntegrationsPage() {
   }, [queryClient]);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-4">
+    <div className="mx-auto max-w-5xl space-y-6 p-4 animate-fade-in">
       <Breadcrumb
         items={[
           { label: t('nav.settings', 'Settings'), to: '/settings' },
@@ -337,102 +499,142 @@ export function IntegrationsPage() {
         </p>
       </div>
 
-      {/* Connector cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {CONNECTORS.map((connector) => {
-          const existing = configsByType[connector.type] ?? [];
-          const isConnectable = CONNECTABLE_TYPES.includes(connector.type);
-          const isConnected = existing.length > 0;
-          const Icon = connector.icon;
+      {/* Connector cards grouped by category */}
+      {CATEGORY_ORDER.map((category) => {
+        const categoryConnectors = CONNECTORS.filter((c) => c.category === category);
+        if (categoryConnectors.length === 0) return null;
+        const catLabel = CATEGORY_LABELS[category];
 
-          return (
-            <Card key={connector.nameKey} className="relative flex flex-col">
-              <div className="flex flex-row items-start gap-3 pb-2">
-                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-white ${connector.color}`}>
-                  <Icon size={20} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-primary">
-                      {t(connector.nameKey, connector.defaultName)}
-                    </h3>
-                    {isConnected && (
-                      <Badge variant="success" size="sm">
-                        <CheckCircle2 size={12} className="mr-1" />
-                        {t('integrations.connected_label', 'Connected')}
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="mt-0.5 text-xs text-secondary">
-                    {t(connector.descKey, connector.defaultDesc)}
-                  </p>
-                </div>
-              </div>
+        return (
+          <div key={category} className="space-y-3">
+            <h2 className="text-lg font-semibold text-primary">
+              {t(catLabel.key, catLabel.defaultLabel)}
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {categoryConnectors.map((connector) => {
+                const existing = configsByType[connector.type] ?? [];
+                const isConnectable = CONNECTABLE_TYPES.includes(connector.type) && connector.status === 'available';
+                const isConnected = existing.length > 0;
+                const isComingSoon = connector.status === 'coming_soon';
+                const isInfoOnly = connector.status === 'info_only';
+                const Icon = connector.icon;
 
-              <CardContent className="flex flex-1 flex-col justify-end pt-0">
-                {/* Show connected configs */}
-                {existing.map((cfg) => (
-                  <div
-                    key={cfg.id}
-                    className="mb-2 flex items-center justify-between rounded-lg bg-surface-secondary px-3 py-2 text-sm"
-                  >
-                    <div className="flex items-center gap-2 truncate">
-                      {cfg.is_active ? (
-                        <CheckCircle2 size={14} className="shrink-0 text-green-500" />
-                      ) : (
-                        <XCircle size={14} className="shrink-0 text-red-400" />
+                return (
+                  <Card key={connector.nameKey} className="relative flex flex-col">
+                    <div className="flex flex-row items-start gap-3 pb-2">
+                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-white ${connector.color}`}>
+                        <Icon size={20} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-primary">
+                            {t(connector.nameKey, connector.defaultName)}
+                          </h3>
+                          {isConnected && (
+                            <Badge variant="success" size="sm">
+                              <CheckCircle2 size={12} className="mr-1" />
+                              {t('integrations.connected_label', 'Connected')}
+                            </Badge>
+                          )}
+                          {isComingSoon && (
+                            <Badge variant="warning" size="sm">
+                              {t('integrations.coming_soon', 'Coming soon')}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="mt-0.5 text-xs text-secondary">
+                          {t(connector.descKey, connector.defaultDesc)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <CardContent className="flex flex-1 flex-col justify-end pt-0">
+                      {/* Show connected configs */}
+                      {existing.map((cfg) => (
+                        <div
+                          key={cfg.id}
+                          className="mb-2 flex items-center justify-between rounded-lg bg-surface-secondary px-3 py-2 text-sm"
+                        >
+                          <div className="flex items-center gap-2 truncate">
+                            {cfg.is_active ? (
+                              <CheckCircle2 size={14} className="shrink-0 text-green-500" />
+                            ) : (
+                              <XCircle size={14} className="shrink-0 text-red-400" />
+                            )}
+                            <span className="truncate text-primary">{cfg.name}</span>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-1">
+                            <button
+                              onClick={() => testMut.mutate(cfg.id)}
+                              disabled={testMut.isPending}
+                              className="rounded p-1 text-secondary hover:bg-surface-primary hover:text-primary"
+                              title={t('integrations.test', 'Test')}
+                            >
+                              {testMut.isPending ? <Loader2 size={14} className="animate-spin" /> : <TestTube2 size={14} />}
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (window.confirm(t('integrations.confirm_disconnect', 'Disconnect this integration?'))) {
+                                  deleteMut.mutate(cfg.id);
+                                }
+                              }}
+                              className="rounded p-1 text-secondary hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+                              title={t('integrations.disconnect', 'Disconnect')}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Connect / Add another button */}
+                      {isConnectable && (
+                        <Button
+                          variant={isConnected ? 'ghost' : 'primary'}
+                          size="sm"
+                          className="mt-auto w-full"
+                          onClick={() => setConnectingType(connector)}
+                        >
+                          <Plus size={14} className="mr-1" />
+                          {isConnected
+                            ? t('integrations.add_another', 'Add Another')
+                            : t('integrations.connect', 'Connect')}
+                        </Button>
                       )}
-                      <span className="truncate text-primary">{cfg.name}</span>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-1">
-                      <button
-                        onClick={() => testMut.mutate(cfg.id)}
-                        disabled={testMut.isPending}
-                        className="rounded p-1 text-secondary hover:bg-surface-primary hover:text-primary"
-                        title={t('integrations.test', 'Test')}
-                      >
-                        {testMut.isPending ? <Loader2 size={14} className="animate-spin" /> : <TestTube2 size={14} />}
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (window.confirm(t('integrations.confirm_disconnect', 'Disconnect this integration?'))) {
-                            deleteMut.mutate(cfg.id);
-                          }
-                        }}
-                        className="rounded p-1 text-secondary hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
-                        title={t('integrations.disconnect', 'Disconnect')}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
 
-                {/* Connect / Add another button */}
-                {isConnectable && (
-                  <Button
-                    variant={isConnected ? 'ghost' : 'primary'}
-                    size="sm"
-                    className="mt-auto w-full"
-                    onClick={() => setConnectingType(connector)}
-                  >
-                    <Plus size={14} className="mr-1" />
-                    {isConnected
-                      ? t('integrations.add_another', 'Add Another')
-                      : t('integrations.connect', 'Connect')}
-                  </Button>
-                )}
+                      {/* Info-only cards: show setup hint + optional external link */}
+                      {isInfoOnly && (
+                        <div className="mt-2 space-y-1.5">
+                          <p className="text-center text-xs text-tertiary">
+                            {t('integrations.available_via_config', 'Available via configuration')}
+                          </p>
+                          {connector.externalUrl && (
+                            <a
+                              href={connector.externalUrl}
+                              target={connector.externalUrl.startsWith('http') ? '_blank' : undefined}
+                              rel={connector.externalUrl.startsWith('http') ? 'noopener noreferrer' : undefined}
+                              className="block text-center text-xs text-oe-blue hover:underline"
+                            >
+                              {t('integrations.learn_more', 'Learn more')}
+                            </a>
+                          )}
+                        </div>
+                      )}
 
-                {!isConnectable && (
-                  <p className="mt-2 text-center text-xs text-tertiary">
-                    {t('integrations.coming_soon', 'Coming soon')}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                      {/* Coming soon badge at bottom */}
+                      {isComingSoon && !isConnectable && (
+                        <p className="mt-2 text-center text-xs text-tertiary">
+                          {t('integrations.coming_soon_hint', 'This integration is not yet available.')}
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
 
       {isLoading && (
         <div className="flex items-center justify-center py-8 text-secondary">

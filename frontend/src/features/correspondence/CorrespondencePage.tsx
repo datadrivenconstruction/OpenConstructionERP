@@ -129,7 +129,7 @@ function CreateCorrespondenceModal({
         <div className="px-6 py-4 space-y-4">
           {/* Subject */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('correspondence.field_subject', { defaultValue: 'Subject' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -159,7 +159,7 @@ function CreateCorrespondenceModal({
           {/* Two-column: Direction + Type */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('correspondence.field_direction', { defaultValue: 'Direction' })}
               </label>
               <div className="relative">
@@ -181,7 +181,7 @@ function CreateCorrespondenceModal({
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('correspondence.field_type', { defaultValue: 'Type' })}
               </label>
               <div className="relative">
@@ -206,7 +206,7 @@ function CreateCorrespondenceModal({
           {/* Two-column: From + To */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('correspondence.field_from', { defaultValue: 'From' })}{' '}
                 <span className="text-semantic-error">*</span>
               </label>
@@ -232,7 +232,7 @@ function CreateCorrespondenceModal({
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('correspondence.field_to', { defaultValue: 'To' })}
               </label>
               <input
@@ -249,7 +249,7 @@ function CreateCorrespondenceModal({
           {/* Two-column: Date Sent + Date Received */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('correspondence.field_date_sent', { defaultValue: 'Date Sent' })}
               </label>
               <input
@@ -260,7 +260,7 @@ function CreateCorrespondenceModal({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('correspondence.field_date_received', { defaultValue: 'Date Received' })}
               </label>
               <input
@@ -274,7 +274,7 @@ function CreateCorrespondenceModal({
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('correspondence.field_notes', { defaultValue: 'Notes' })}
             </label>
             <textarea
@@ -720,7 +720,7 @@ export function CorrespondencePage() {
           <SkeletonTable rows={5} columns={6} />
         ) : filtered.length === 0 ? (
           <EmptyState
-            icon={<Mail size={24} strokeWidth={1.5} />}
+            icon={<Mail size={28} strokeWidth={1.5} />}
             title={
               searchQuery || directionFilter || typeFilter
                 ? t('correspondence.no_results', { defaultValue: 'No matching entries' })
@@ -754,7 +754,7 @@ export function CorrespondencePage() {
             </p>
             <Card padding="none" className="overflow-x-auto">
               {/* Table header */}
-              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border bg-surface-secondary/50 text-xs font-medium text-content-tertiary uppercase tracking-wide min-w-[640px]">
+              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border-light bg-surface-secondary/30 text-2xs font-medium text-content-tertiary uppercase tracking-wider min-w-[640px]">
                 <span className="w-5" />
                 <span className="w-20">#</span>
                 <span className="flex-1">

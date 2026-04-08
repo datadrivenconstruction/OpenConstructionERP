@@ -310,7 +310,7 @@ export function AssembliesPage() {
         <SkeletonGrid items={6} />
       ) : items.length === 0 ? (
         <EmptyState
-          icon={<Layers size={24} strokeWidth={1.5} />}
+          icon={<Layers size={28} strokeWidth={1.5} />}
           title={
             query || category
               ? t('assemblies.no_results', { defaultValue: 'No assemblies found' })
@@ -570,7 +570,7 @@ function AIGenerateModal({
         {/* Input form */}
         <div className="px-6 py-4 border-b border-border-light shrink-0 space-y-3">
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1.5">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('assemblies.ai_description_label', { defaultValue: 'Description' })}
             </label>
             <input

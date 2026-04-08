@@ -601,7 +601,7 @@ function GanttChart({
   if (activities.length === 0) {
     return (
       <EmptyState
-        icon={<Calendar size={24} strokeWidth={1.5} />}
+        icon={<Calendar size={28} strokeWidth={1.5} />}
         title={t('schedule.no_activities', { defaultValue: 'No activities yet' })}
         description={t('schedule.no_activities_hint', {
           defaultValue: 'Add activities to build your project schedule',
@@ -1591,7 +1591,7 @@ function ProjectSchedules({
         <SkeletonTable rows={3} columns={4} />
       ) : !schedules || schedules.length === 0 ? (
         <EmptyState
-          icon={<Calendar size={24} strokeWidth={1.5} />}
+          icon={<Calendar size={28} strokeWidth={1.5} />}
           title={t('schedule.no_schedules', { defaultValue: 'No schedules yet' })}
           description={t('schedule.no_schedules_hint', {
             defaultValue: 'Create a schedule to start planning your project timeline',
@@ -1770,7 +1770,7 @@ export function SchedulePage() {
         <SkeletonTable rows={3} columns={3} />
       ) : !projects || projects.length === 0 ? (
         <EmptyState
-          icon={<Calendar size={24} strokeWidth={1.5} />}
+          icon={<Calendar size={28} strokeWidth={1.5} />}
           title={t('schedule.no_schedule_items', { defaultValue: 'No schedule items' })}
           description={t('schedule.no_projects_hint', {
             defaultValue: 'Create a project first to start building your schedule',

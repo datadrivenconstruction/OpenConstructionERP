@@ -151,7 +151,7 @@ function CreateSubmittalModal({
         <div className="px-6 py-4 space-y-4">
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('submittals.field_title', { defaultValue: 'Title' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -181,7 +181,7 @@ function CreateSubmittalModal({
           {/* Two-column: Spec Section + Type */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('submittals.field_spec_section', { defaultValue: 'Spec Section' })}{' '}
                 <span className="text-semantic-error">*</span>
               </label>
@@ -207,7 +207,7 @@ function CreateSubmittalModal({
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('submittals.field_type', { defaultValue: 'Type' })}
               </label>
               <div className="relative">
@@ -231,7 +231,7 @@ function CreateSubmittalModal({
 
           {/* Date Required */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('submittals.field_date_required', { defaultValue: 'Date Required' })}
             </label>
             <input
@@ -244,7 +244,7 @@ function CreateSubmittalModal({
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('submittals.field_description', { defaultValue: 'Description' })}
             </label>
             <textarea
@@ -365,7 +365,7 @@ function ApproveModal({
 
           {/* Comments */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('submittals.field_comments', { defaultValue: 'Comments' })}
             </label>
             <textarea
@@ -759,34 +759,34 @@ export function SubmittalsPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <Card className="p-4 animate-card-in">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
             {t('submittals.stat_total', { defaultValue: 'Total' })}
           </p>
-          <p className="text-xl font-bold mt-1 tabular-nums text-content-primary">
+          <p className="text-2xl font-bold mt-1 tabular-nums text-content-primary">
             {stats.total}
           </p>
         </Card>
         <Card className="p-4 animate-card-in">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
             {t('submittals.stat_pending', { defaultValue: 'Pending Review' })}
           </p>
-          <p className="text-xl font-bold mt-1 tabular-nums text-amber-500">{stats.pending}</p>
+          <p className="text-2xl font-bold mt-1 tabular-nums text-amber-500">{stats.pending}</p>
         </Card>
         <Card className="p-4 animate-card-in">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
             {t('submittals.stat_approved', { defaultValue: 'Approved' })}
           </p>
-          <p className="text-xl font-bold mt-1 tabular-nums text-semantic-success">
+          <p className="text-2xl font-bold mt-1 tabular-nums text-semantic-success">
             {stats.approved}
           </p>
         </Card>
         <Card className="p-4 animate-card-in">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">
+          <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
             {t('submittals.stat_rejected', { defaultValue: 'Rejected / Resubmit' })}
           </p>
           <p
             className={clsx(
-              'text-xl font-bold mt-1 tabular-nums',
+              'text-2xl font-bold mt-1 tabular-nums',
               stats.rejected > 0 ? 'text-semantic-error' : 'text-content-primary',
             )}
           >
@@ -841,7 +841,7 @@ export function SubmittalsPage() {
           <SkeletonTable rows={5} columns={6} />
         ) : filtered.length === 0 ? (
           <EmptyState
-            icon={<FileCheck size={24} strokeWidth={1.5} />}
+            icon={<FileCheck size={28} strokeWidth={1.5} />}
             title={
               searchQuery || statusFilter
                 ? t('submittals.no_results', { defaultValue: 'No matching submittals' })
@@ -875,7 +875,7 @@ export function SubmittalsPage() {
             </p>
             <Card padding="none" className="overflow-x-auto">
               {/* Table header */}
-              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border bg-surface-secondary/50 text-xs font-medium text-content-tertiary uppercase tracking-wide min-w-[640px]">
+              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border-light bg-surface-secondary/30 text-2xs font-medium text-content-tertiary uppercase tracking-wider min-w-[640px]">
                 <span className="w-5" />
                 <span className="w-20">#</span>
                 <span className="flex-1">

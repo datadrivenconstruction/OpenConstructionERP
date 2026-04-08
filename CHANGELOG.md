@@ -5,6 +5,21 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.1] — 2026-04-07
+
+### Added — Integration Hub expansion
+- **Discord webhook connector** — send embed notifications to Discord channels, with color, fields, and action link
+- **WhatsApp Business connector** (Coming Soon) — Meta Cloud API v20.0 template messages, pending Meta Business verification
+- **Integration Hub redesign** — 14 integration cards grouped into 3 categories (Notifications, Automation, Data & Analytics)
+- **n8n / Zapier / Make cards** — guidance for connecting workflow automation tools via our existing webhook system
+- **Google Sheets card** — export BOQ/cost data to Sheets-compatible Excel format
+- **Power BI / Tableau card** — connect BI tools to our REST API for custom dashboards
+- **REST API card** — link to interactive OpenAPI docs at /api/docs
+
+### Fixed
+- Deep audit fixes for cross-module event flows
+- Integration type schema extended to support `discord` and `whatsapp` connectors
+
 ## [0.9.0] — 2026-04-07
 
 ### Added — 30 new backend modules (Phase 9–22 master plan)

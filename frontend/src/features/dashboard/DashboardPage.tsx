@@ -954,7 +954,7 @@ export function DashboardPage() {
   const lastBoqId = lastBoq?.id ?? null;
 
   return (
-    <div className="max-w-content mx-auto space-y-6">
+    <div className="max-w-content mx-auto space-y-6 animate-fade-in">
       {/* Hero — gradient animated heading */}
       <div
         className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-card-in"

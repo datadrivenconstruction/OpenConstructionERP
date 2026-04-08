@@ -162,7 +162,7 @@ function CreateCDEModal({
           {/* Two-column: Code + Discipline */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('cde.field_code', { defaultValue: 'Container Code' })}{' '}
                 <span className="text-semantic-error">*</span>
               </label>
@@ -189,7 +189,7 @@ function CreateCDEModal({
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('cde.field_discipline', { defaultValue: 'Discipline' })}
               </label>
               <div className="relative">
@@ -213,7 +213,7 @@ function CreateCDEModal({
 
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-content-secondary mb-1">
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
               {t('cde.field_title', { defaultValue: 'Title' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
@@ -242,7 +242,7 @@ function CreateCDEModal({
           {/* Two-column: Suitability Code + Classification */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('cde.field_suitability', { defaultValue: 'Suitability Code' })}
               </label>
               <input
@@ -253,7 +253,7 @@ function CreateCDEModal({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('cde.field_classification', { defaultValue: 'Classification' })}
               </label>
               <input
@@ -715,7 +715,7 @@ export function CDEPage() {
           <SkeletonTable rows={5} columns={5} />
         ) : filtered.length === 0 ? (
           <EmptyState
-            icon={<Database size={24} strokeWidth={1.5} />}
+            icon={<Database size={28} strokeWidth={1.5} />}
             title={
               searchQuery || stateFilter
                 ? t('cde.no_results', { defaultValue: 'No matching containers' })
@@ -750,7 +750,7 @@ export function CDEPage() {
             </p>
             <Card padding="none" className="overflow-x-auto">
               {/* Table header */}
-              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border bg-surface-secondary/50 text-xs font-medium text-content-tertiary uppercase tracking-wide min-w-[640px]">
+              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border-light bg-surface-secondary/30 text-2xs font-medium text-content-tertiary uppercase tracking-wider min-w-[640px]">
                 <span className="w-5" />
                 <span className="w-36">
                   {t('cde.col_code', { defaultValue: 'Code' })}

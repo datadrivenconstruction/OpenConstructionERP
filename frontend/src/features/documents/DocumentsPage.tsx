@@ -508,7 +508,7 @@ export function DocumentsPage() {
       <div className="max-w-content mx-auto animate-fade-in">
         <Breadcrumb items={[{ label: t('nav.dashboard', 'Dashboard'), to: '/' }, { label: t('nav.documents', 'Documents') }]} className="mb-4" />
         <EmptyState
-          icon={<FolderOpen size={24} />}
+          icon={<FolderOpen size={28} strokeWidth={1.5} />}
           title={t('documents.select_project', { defaultValue: 'Select a project' })}
           description={t('documents.select_project_hint', { defaultValue: 'Use the project switcher in the header to select a project first.' })}
         />
@@ -702,7 +702,7 @@ export function DocumentsPage() {
       ) : sortedDocuments.length === 0 ? (
         debouncedQuery.trim() ? (
           <EmptyState
-            icon={<Search size={24} />}
+            icon={<Search size={28} strokeWidth={1.5} />}
             title={t('documents.no_results', { defaultValue: 'No results found' })}
             description={t('documents.no_results_hint', {
               defaultValue: 'No documents match "{{query}}". Try a different search term or clear filters.',
@@ -715,7 +715,7 @@ export function DocumentsPage() {
           />
         ) : (
           <EmptyState
-            icon={<FolderOpen size={24} />}
+            icon={<FolderOpen size={28} strokeWidth={1.5} />}
             title={t('documents.empty', { defaultValue: 'No documents yet' })}
             description={t('documents.empty_hint', { defaultValue: 'Upload your first file — drawings, contracts, photos, or any project document.' })}
           />

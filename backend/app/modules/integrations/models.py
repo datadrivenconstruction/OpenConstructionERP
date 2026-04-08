@@ -93,11 +93,13 @@ class WebhookDelivery(Base):
 class IntegrationConfig(Base):
     """A user-configured chat notification connector.
 
-    Supported integration_type values: teams, slack, telegram, email, webhook.
+    Supported integration_type values: teams, slack, telegram, discord, whatsapp, email, webhook.
     The ``config`` JSON column stores connector-specific credentials:
         - teams:    {"webhook_url": "https://..."}
         - slack:    {"webhook_url": "https://hooks.slack.com/..."}
         - telegram: {"bot_token": "123456:ABC...", "chat_id": "-100..."}
+        - discord:  {"webhook_url": "https://discord.com/api/webhooks/..."}
+        - whatsapp: {"phone_number_id": "...", "access_token": "...", "to_phone": "+49..."}
         - email:    {"smtp_host": "...", "smtp_port": 587, ...}
     """
 

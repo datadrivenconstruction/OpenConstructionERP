@@ -160,7 +160,7 @@ export function ProcurementPage() {
       {/* Tab Content */}
       {!projectId ? (
         <EmptyState
-          icon={<Package size={24} strokeWidth={1.5} />}
+          icon={<Package size={28} strokeWidth={1.5} />}
           title={t('procurement.no_project', {
             defaultValue: 'No project selected',
           })}
@@ -237,7 +237,7 @@ function PurchaseOrdersTab({ projectId }: { projectId: string }) {
   if (!orders || orders.length === 0) {
     return (
       <EmptyState
-        icon={<Package size={24} strokeWidth={1.5} />}
+        icon={<Package size={28} strokeWidth={1.5} />}
         title={t('procurement.no_po', {
           defaultValue: 'No purchase orders yet',
         })}
@@ -386,7 +386,7 @@ function GoodsReceiptsTab({ projectId }: { projectId: string }) {
   if (!receipts || receipts.length === 0) {
     return (
       <EmptyState
-        icon={<ClipboardCheck size={24} strokeWidth={1.5} />}
+        icon={<ClipboardCheck size={28} strokeWidth={1.5} />}
         title={t('procurement.no_gr', {
           defaultValue: 'No goods receipts yet',
         })}

@@ -1757,7 +1757,7 @@ export function ProjectDetailPage() {
             </div>
           ) : (
             <EmptyState
-              icon={<LayoutDashboard size={24} strokeWidth={1.5} />}
+              icon={<LayoutDashboard size={28} strokeWidth={1.5} />}
               title={t('projects.dash_empty', { defaultValue: 'No dashboard data' })}
               description={t('projects.dash_empty_desc', { defaultValue: 'Start adding BOQs, schedules, and documents to see project KPIs here.' })}
             />
@@ -1797,7 +1797,7 @@ export function ProjectDetailPage() {
             ) : !boqs || boqs.length === 0 ? (
               <div className="px-6 pb-6">
                 <EmptyState
-                  icon={<Table2 size={24} strokeWidth={1.5} />}
+                  icon={<Table2 size={28} strokeWidth={1.5} />}
                   title={t('projects.no_boqs')}
                   description={t('projects.no_boqs_desc')}
                   action={
@@ -1899,7 +1899,7 @@ export function ProjectDetailPage() {
               </div>
             ) : !schedules || schedules.length === 0 ? (
               <EmptyState
-                icon={<CalendarClock size={24} strokeWidth={1.5} />}
+                icon={<CalendarClock size={28} strokeWidth={1.5} />}
                 title={t('projects.no_schedules', { defaultValue: 'No schedules yet' })}
                 description={t('projects.no_schedules_desc', { defaultValue: 'Create a schedule to manage project timelines.' })}
               />
@@ -1941,7 +1941,7 @@ export function ProjectDetailPage() {
               </div>
             ) : !budgetDashboard ? (
               <EmptyState
-                icon={<Wallet size={24} strokeWidth={1.5} />}
+                icon={<Wallet size={28} strokeWidth={1.5} />}
                 title={t('projects.no_budget', { defaultValue: 'No budget data' })}
                 description={t('projects.no_budget_desc', { defaultValue: 'Set up a 5D cost model to track planned vs actual costs.' })}
               />
@@ -2038,7 +2038,7 @@ export function ProjectDetailPage() {
               </div>
             ) : !tenderPackages || tenderPackages.length === 0 ? (
               <EmptyState
-                icon={<Gavel size={24} strokeWidth={1.5} />}
+                icon={<Gavel size={28} strokeWidth={1.5} />}
                 title={t('projects.no_tenders', { defaultValue: 'No tender packages' })}
                 description={t('projects.no_tenders_desc', { defaultValue: 'Create tender packages to manage bidding for this project.' })}
                 action={

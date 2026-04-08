@@ -714,7 +714,7 @@ function ApplyToBOQModal({
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Project selector */}
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1.5">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('projects.project', { defaultValue: 'Project' })}
               </label>
               <select
@@ -739,7 +739,7 @@ function ApplyToBOQModal({
 
             {/* BOQ selector */}
             <div>
-              <label className="block text-sm font-medium text-content-secondary mb-1.5">
+              <label className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('boq.boq', { defaultValue: 'BOQ' })}
               </label>
               <select
@@ -767,7 +767,7 @@ function ApplyToBOQModal({
             {/* Regional factor selector */}
             {hasRegionalFactors && (
               <div>
-                <label className="block text-sm font-medium text-content-secondary mb-1.5">
+                <label className="block text-sm font-medium text-content-primary mb-1.5">
                   {t('assemblies.select_region', { defaultValue: 'Region (applies regional factor)' })}
                 </label>
                 <select
