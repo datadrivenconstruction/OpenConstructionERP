@@ -29,10 +29,19 @@ class Schedule(Base):
         index=True,
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
+    schedule_type: Mapped[str] = mapped_column(
+        String(50), nullable=False, default="master", server_default="master"
+    )  # master / baseline / revision / what_if
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     start_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     end_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft")
+    data_date: Mapped[str | None] = mapped_column(
+        String(20), nullable=True
+    )  # current data/status date
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(), nullable=True
+    )
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,
@@ -110,6 +119,25 @@ class Activity(Base):
     is_critical: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default="0"
     )
+
+    # ── Constraints ──────────────────────────────────────────────────────────
+    constraint_type: Mapped[str | None] = mapped_column(
+        String(50), nullable=True
+    )  # as_soon_as_possible / as_late_as_possible / must_start_on / must_finish_on
+    #   start_no_earlier / start_no_later / finish_no_earlier / finish_no_later
+    constraint_date: Mapped[str | None] = mapped_column(
+        String(20), nullable=True
+    )  # ISO date
+
+    # Auto-generated activity code
+    activity_code: Mapped[str | None] = mapped_column(
+        String(50), nullable=True
+    )  # ACT-001, ACT-002
+
+    # BIM integration
+    bim_element_ids: Mapped[dict | None] = mapped_column(  # type: ignore[assignment]
+        JSON, nullable=True
+    )  # list of element IDs for 4D
 
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",

@@ -102,4 +102,15 @@ export const takeoffApi = {
   /** Export measurements as CSV or JSON. */
   export: (projectId: string, format: 'csv' | 'json' = 'json') =>
     apiGet<unknown>(`/v1/takeoff/measurements/export?project_id=${projectId}&format=${format}`),
+
+  /** Save a CAD takeoff session to a project as a BIM model. */
+  saveToProject: (
+    sessionId: string,
+    projectId: string,
+    modelName: string = 'Imported from Takeoff',
+  ) =>
+    apiPost<{ model_id: string; element_count: number; model_name: string; project_id: string }>(
+      `/v1/takeoff/sessions/${sessionId}/save-to-project?project_id=${encodeURIComponent(projectId)}`,
+      { model_name: modelName },
+    ),
 };

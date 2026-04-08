@@ -1589,6 +1589,103 @@ function SaveDialog({
   );
 }
 
+/* ── Save to Project (BIM) Dialog ─────────────────────────────────────── */
+
+function SaveToProjectDialog({
+  sessionId,
+  filename,
+  onClose,
+  onSaved,
+}: {
+  sessionId: string;
+  filename: string;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+  const navigate = useNavigate();
+  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+
+  const { data: projects = [] } = useQuery({
+    queryKey: ['projects'],
+    queryFn: () => apiGet<{ id: string; name: string }[]>('/v1/projects/'),
+  });
+
+  const [modelName, setModelName] = useState(filename.replace(/\.[^.]+$/, ''));
+  const [projectId, setProjectId] = useState(activeProjectId || '');
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = useCallback(async () => {
+    if (!modelName.trim() || !projectId) return;
+    setSaving(true);
+    try {
+      const result = await apiPost<{ model_id: string; element_count: number }>(
+        `/v1/takeoff/sessions/${sessionId}/save-to-project?project_id=${encodeURIComponent(projectId)}`,
+        { model_name: modelName.trim() },
+      );
+      addToast({
+        type: 'success',
+        title: t('explorer.saved_to_project', { defaultValue: 'Saved to BIM Hub' }),
+        message: t('explorer.saved_to_project_msg', {
+          defaultValue: '{{count}} elements saved. View in BIM Hub.',
+        }).replace('{{count}}', String(result.element_count)),
+      });
+      onSaved();
+      onClose();
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: t('common.error', { defaultValue: 'Error' }),
+        message: err instanceof Error ? err.message : 'Failed to save',
+      });
+    } finally {
+      setSaving(false);
+    }
+  }, [sessionId, projectId, modelName, addToast, t, onSaved, onClose]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+      <div className="w-full max-w-md mx-4 rounded-xl bg-surface-elevated shadow-xl border border-border-light p-5" onClick={(e) => e.stopPropagation()}>
+        <h3 className="text-sm font-semibold text-content-primary mb-1">
+          {t('explorer.save_to_project', { defaultValue: 'Save to Project (BIM Hub)' })}
+        </h3>
+        <p className="text-xs text-content-tertiary mb-4">
+          {t('explorer.save_to_project_desc', { defaultValue: 'Creates a BIM model with all extracted elements in the selected project.' })}
+        </p>
+        <div className="space-y-3">
+          <div>
+            <label className="block text-xs font-medium text-content-secondary mb-1">{t('explorer.model_name', { defaultValue: 'Model Name' })}</label>
+            <input
+              value={modelName}
+              onChange={(e) => setModelName(e.target.value)}
+              className="h-8 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              autoFocus
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-content-secondary mb-1">{t('explorer.project', { defaultValue: 'Project' })}</label>
+            <select
+              value={projectId}
+              onChange={(e) => setProjectId(e.target.value)}
+              className="h-8 w-full rounded-lg border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+            >
+              <option value="" disabled>{t('explorer.select_project', { defaultValue: 'Select project...' })}</option>
+              {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </div>
+        </div>
+        <div className="mt-4 flex justify-end gap-2">
+          <Button variant="ghost" size="sm" onClick={onClose}>{t('common.cancel', { defaultValue: 'Cancel' })}</Button>
+          <Button variant="primary" size="sm" onClick={handleSave} disabled={!modelName.trim() || !projectId || saving} loading={saving}>
+            {t('explorer.save_as_bim', { defaultValue: 'Save as BIM Model' })}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Main Page ─────────────────────────────────────────────────────────── */
 
 export function CadDataExplorerPage() {
@@ -1599,6 +1696,7 @@ export function CadDataExplorerPage() {
   const sessionId = searchParams.get('session') || '';
   const [activeTab, setActiveTab] = useState<TabId>('table');
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [showSaveToProjectDialog, setShowSaveToProjectDialog] = useState(false);
 
   const { data: describe, isLoading, error } = useQuery({
     queryKey: ['cad-describe', sessionId],
@@ -1740,7 +1838,11 @@ export function CadDataExplorerPage() {
           </div>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
-          <Button variant="primary" size="sm" onClick={() => setShowSaveDialog(true)} className="shrink-0 whitespace-nowrap">
+          <Button variant="primary" size="sm" onClick={() => setShowSaveToProjectDialog(true)} className="shrink-0 whitespace-nowrap">
+            <FolderOpen size={13} className="mr-1" />
+            <span>{t('explorer.save_to_project_btn', { defaultValue: 'Save to Project' })}</span>
+          </Button>
+          <Button variant="secondary" size="sm" onClick={() => setShowSaveDialog(true)} className="shrink-0 whitespace-nowrap">
             <Save size={13} className="mr-1" />
             <span>{t('explorer.save_analysis', { defaultValue: 'Save' })}</span>
           </Button>
@@ -1808,6 +1910,16 @@ export function CadDataExplorerPage() {
           sessionId={sessionId}
           filename={describe.filename}
           onClose={() => setShowSaveDialog(false)}
+          onSaved={() => queryClient.invalidateQueries({ queryKey: ['cad-saved-sessions'] })}
+        />
+      )}
+
+      {/* Save to Project (BIM) dialog */}
+      {showSaveToProjectDialog && describe && (
+        <SaveToProjectDialog
+          sessionId={sessionId}
+          filename={describe.filename}
+          onClose={() => setShowSaveToProjectDialog(false)}
           onSaved={() => queryClient.invalidateQueries({ queryKey: ['cad-saved-sessions'] })}
         />
       )}

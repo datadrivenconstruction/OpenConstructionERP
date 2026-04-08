@@ -1618,6 +1618,151 @@ async def cad_data_delete_session(
     _cad_sessions.pop(session_id, None)
 
 
+# ── Save CAD session to project as BIM model ────────────────────────────
+
+
+class SaveToProjectRequest(BaseModel):
+    """Request body for saving a takeoff session to a project as a BIM model."""
+
+    model_name: str = Field(default="Imported from Takeoff", max_length=255)
+
+
+@router.post(
+    "/sessions/{session_id}/save-to-project",
+    dependencies=[Depends(RequirePermission("takeoff.create"))],
+)
+async def save_session_to_project(
+    session_id: str,
+    body: SaveToProjectRequest,
+    project_id: str = Query(..., description="Target project UUID"),
+    db_session: SessionDep = None,  # type: ignore[assignment]
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+) -> dict[str, Any]:
+    """Convert a takeoff session's extracted elements into a persistent BIM model.
+
+    Creates a BIMModel + BIMElements from the session's extraction results.
+    The session itself remains (not deleted). Requires the bim_hub module
+    to be loaded; returns a clear error if it is not available.
+    """
+    import uuid as _uuid_mod
+
+    # 1. Load the takeoff session
+    _cleanup_memory_sessions()
+    cad_session = await _get_cad_session(db_session, session_id)
+    if not cad_session:
+        raise HTTPException(
+            status_code=404,
+            detail="CAD session not found or expired. Please re-upload the file.",
+        )
+
+    elements: list[dict] = cad_session.get("elements", [])
+    if not elements:
+        raise HTTPException(
+            status_code=400,
+            detail="Session contains no elements to save.",
+        )
+
+    # 2. Check that the bim_hub module models are available
+    try:
+        from app.modules.bim_hub.models import BIMElement, BIMModel
+    except ImportError:
+        raise HTTPException(
+            status_code=501,
+            detail=(
+                "BIM Hub module is not loaded. Cannot save takeoff session "
+                "as a BIM model. Enable the bim_hub module and try again."
+            ),
+        )
+
+    # 3. Create BIMModel record
+    project_uuid = _uuid_mod.UUID(project_id)
+    filename = cad_session.get("filename", "unknown")
+    file_format = cad_session.get("format", "")
+
+    bim_model = BIMModel(
+        project_id=project_uuid,
+        name=body.model_name,
+        discipline="general",
+        model_format=file_format,
+        version="1",
+        status="ready",
+        element_count=len(elements),
+        created_by=_uuid_mod.UUID(user_id) if user_id else None,
+        metadata_={
+            "source": "takeoff_session",
+            "takeoff_session_id": session_id,
+            "original_filename": filename,
+        },
+    )
+    db_session.add(bim_model)
+    await db_session.flush()  # Get the model ID
+
+    # 4. Create BIMElement records from extraction data
+    element_count = 0
+    for idx, el in enumerate(elements):
+        # Build quantities dict from numeric fields
+        quantities: dict[str, float] = {}
+        for key in ("volume", "area", "length", "gross volume", "gross area", "count"):
+            val = el.get(key)
+            if val is not None:
+                try:
+                    quantities[key] = float(val)
+                except (ValueError, TypeError):
+                    pass
+
+        # Build properties from non-numeric fields
+        properties: dict[str, str] = {}
+        for key, val in el.items():
+            if key in ("id", "volume", "area", "length", "gross volume", "gross area", "count"):
+                continue
+            if val is not None:
+                properties[key] = str(val)
+
+        bim_element = BIMElement(
+            model_id=bim_model.id,
+            stable_id=str(el.get("id", f"el_{idx}")),
+            element_type=str(el.get("category", el.get("type name", ""))),
+            name=str(el.get("type name", el.get("family", f"Element {idx + 1}"))),
+            storey=str(el.get("level", el.get("storey", ""))) or None,
+            discipline="general",
+            properties=properties,
+            quantities=quantities,
+            metadata_={"source_index": idx},
+        )
+        db_session.add(bim_element)
+        element_count += 1
+
+    # 5. Update the CAD session to mark it as persistent and linked
+    from sqlalchemy import update as sa_update
+
+    stmt = (
+        sa_update(CadExtractionSession)
+        .where(CadExtractionSession.session_id == session_id)
+        .values(
+            is_persistent=True,
+            bim_model_id=str(bim_model.id),
+            project_id=project_id,
+        )
+    )
+    await db_session.execute(stmt)
+    await db_session.flush()
+
+    logger.info(
+        "Saved takeoff session %s to project %s as BIM model %s (%d elements)",
+        session_id,
+        project_id,
+        bim_model.id,
+        element_count,
+    )
+
+    return {
+        "model_id": str(bim_model.id),
+        "element_count": element_count,
+        "model_name": body.model_name,
+        "project_id": project_id,
+    }
+
+
 MAX_PDF_SIZE = 50 * 1024 * 1024  # 50 MB
 
 

@@ -57,6 +57,9 @@ class FieldReportCreate(BaseModel):
     signature_by: str | None = Field(default=None, max_length=255)
     signature_data: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
+    # Optional coordinates for auto-fetching weather from OpenWeatherMap
+    lat: float | None = Field(default=None, ge=-90, le=90)
+    lon: float | None = Field(default=None, ge=-180, le=180)
 
 
 # ── Update ─────────────────────────────────────────────────────────────

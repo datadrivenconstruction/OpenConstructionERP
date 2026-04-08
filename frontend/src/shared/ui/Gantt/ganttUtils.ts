@@ -3,13 +3,15 @@
  * time header generation, dependency arrow paths, and date range calculations.
  */
 
-export type ViewMode = 'day' | 'week' | 'month';
+export type ViewMode = 'day' | 'week' | 'month' | 'quarter' | 'year';
 
 /** Pixels per unit for each zoom level */
 export const COLUMN_WIDTH: Record<ViewMode, number> = {
   day: 30,
   week: 40,
   month: 80,
+  quarter: 120,
+  year: 150,
 };
 
 /** Height of each activity row in pixels */
@@ -52,6 +54,10 @@ export function dateToPx(date: Date, viewMode: ViewMode, startDate: Date): numbe
       return (days / 7) * COLUMN_WIDTH.week;
     case 'month':
       return (days / 30) * COLUMN_WIDTH.month;
+    case 'quarter':
+      return (days / 91) * COLUMN_WIDTH.quarter;
+    case 'year':
+      return (days / 365) * COLUMN_WIDTH.year;
   }
 }
 
@@ -67,6 +73,12 @@ export function pxToDate(px: number, viewMode: ViewMode, startDate: Date): Date 
       break;
     case 'month':
       days = Math.round((px / COLUMN_WIDTH.month) * 30);
+      break;
+    case 'quarter':
+      days = Math.round((px / COLUMN_WIDTH.quarter) * 91);
+      break;
+    case 'year':
+      days = Math.round((px / COLUMN_WIDTH.year) * 365);
       break;
   }
   return addDays(startDate, days);
@@ -169,7 +181,7 @@ export function generateTimeHeaders(
       d.setDate(d.getDate() + 7);
       weekNum++;
     }
-  } else {
+  } else if (viewMode === 'month') {
     // month view
     // Top row: one cell per year
     const yearFmt = new Intl.DateTimeFormat(locale, { year: 'numeric' });
@@ -207,6 +219,85 @@ export function generateTimeHeaders(
       });
       m.setMonth(m.getMonth() + 1);
       m.setDate(1);
+    }
+  } else if (viewMode === 'quarter') {
+    // quarter view
+    // Top row: one cell per year
+    const yearFmt = new Intl.DateTimeFormat(locale, { year: 'numeric' });
+    const cursor = new Date(startDate);
+    cursor.setMonth(0);
+    cursor.setDate(1);
+    while (cursor <= endDate) {
+      const yearStart = new Date(cursor);
+      const yearEnd = new Date(cursor.getFullYear(), 11, 31);
+      const effectiveStart = yearStart < startDate ? startDate : yearStart;
+      const effectiveEnd = yearEnd > endDate ? endDate : yearEnd;
+      const x = dateToPx(effectiveStart, viewMode, startDate);
+      const xEnd = dateToPx(addDays(effectiveEnd, 1), viewMode, startDate);
+      topRow.push({
+        label: yearFmt.format(effectiveStart),
+        x,
+        width: xEnd - x,
+      });
+      cursor.setFullYear(cursor.getFullYear() + 1);
+    }
+
+    // Bottom row: one cell per quarter (Q1, Q2, Q3, Q4)
+    const q = new Date(startDate);
+    q.setMonth(Math.floor(q.getMonth() / 3) * 3);
+    q.setDate(1);
+    while (q <= endDate) {
+      const quarterNum = Math.floor(q.getMonth() / 3) + 1;
+      const quarterEnd = new Date(q.getFullYear(), q.getMonth() + 3, 0);
+      const effectiveStart = q < startDate ? startDate : new Date(q);
+      const effectiveEnd = quarterEnd > endDate ? endDate : quarterEnd;
+      const x = dateToPx(effectiveStart, viewMode, startDate);
+      const xEnd = dateToPx(addDays(effectiveEnd, 1), viewMode, startDate);
+      bottomRow.push({
+        label: `Q${quarterNum}`,
+        x,
+        width: xEnd - x,
+      });
+      q.setMonth(q.getMonth() + 3);
+      q.setDate(1);
+    }
+  } else {
+    // year view
+    // Top row: one cell per decade (or just label each year in top)
+    const yearFmt = new Intl.DateTimeFormat(locale, { year: 'numeric' });
+
+    // Top row: empty / decade label (we'll just use a single span)
+    const decadeCursor = new Date(startDate);
+    decadeCursor.setMonth(0);
+    decadeCursor.setDate(1);
+    const firstYear = decadeCursor.getFullYear();
+    const lastYear = endDate.getFullYear();
+    // Single top row spanning entire range
+    const x0 = dateToPx(startDate, viewMode, startDate);
+    const xLast = dateToPx(addDays(endDate, 1), viewMode, startDate);
+    topRow.push({
+      label: `${firstYear} - ${lastYear}`,
+      x: x0,
+      width: xLast - x0,
+    });
+
+    // Bottom row: one cell per year
+    const yr = new Date(startDate);
+    yr.setMonth(0);
+    yr.setDate(1);
+    while (yr <= endDate) {
+      const yearStart = new Date(yr);
+      const yearEnd = new Date(yr.getFullYear(), 11, 31);
+      const effectiveStart = yearStart < startDate ? startDate : yearStart;
+      const effectiveEnd = yearEnd > endDate ? endDate : yearEnd;
+      const x = dateToPx(effectiveStart, viewMode, startDate);
+      const xEnd = dateToPx(addDays(effectiveEnd, 1), viewMode, startDate);
+      bottomRow.push({
+        label: yearFmt.format(effectiveStart),
+        x,
+        width: xEnd - x,
+      });
+      yr.setFullYear(yr.getFullYear() + 1);
     }
   }
 

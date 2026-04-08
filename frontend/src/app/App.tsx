@@ -119,6 +119,9 @@ const InspectionsPage = lazy(() =>
 const NCRPage = lazy(() =>
   import('@/features/ncr/NCRPage').then((m) => ({ default: m.NCRPage }))
 );
+const ReportingPage = lazy(() =>
+  import('@/features/reporting/ReportingPage').then((m) => ({ default: m.ReportingPage }))
+);
 const BIMPage = lazy(() =>
   import('@/features/bim/BIMPage').then((m) => ({ default: m.BIMPage }))
 );
@@ -303,6 +306,7 @@ export default function App() {
         <Route path="/analytics" element={<P title="Analytics"><AnalyticsPage /></P>} />
 
         <Route path="/reports" element={<P title="Reports"><ReportsPage /></P>} />
+        <Route path="/reporting" element={<P title="Reporting Dashboards"><ReportingPage /></P>} />
 
         <Route path="/tendering" element={<P title="Tendering"><TenderingPage /></P>} />
 

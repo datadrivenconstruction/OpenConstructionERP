@@ -201,7 +201,9 @@ class ReportingService:
     ) -> tuple[list[GeneratedReport], int]:
         """List generated reports for a project."""
         return await self.report_repo.list_for_project(
-            project_id, offset=offset, limit=limit,
+            project_id,
+            offset=offset,
+            limit=limit,
         )
 
     async def get_report(self, report_id: uuid.UUID) -> GeneratedReport:
@@ -239,6 +241,206 @@ class ReportingService:
             data.project_id,
         )
         return report
+
+    # ── KPI Auto-Recalculation ───────────────────────────────────────────
+
+    async def auto_recalculate_kpis(self) -> dict:
+        """Recalculate KPI snapshots for all active projects.
+
+        Called by the scheduler or manually via the admin API endpoint.
+        Queries each module (finance, safety, RFI, schedule, etc.) to
+        compute up-to-date KPI values and creates a new KPISnapshot row
+        per project.
+
+        Returns a summary dict with counts of processed / failed projects.
+        """
+        from sqlalchemy import Float, func, select
+        from sqlalchemy.sql.expression import cast
+
+        from app.modules.projects.models import Project
+
+        today = datetime.now(UTC).strftime("%Y-%m-%d")
+
+        # Fetch all active projects
+        stmt = select(Project).where(Project.status == "active")
+        result = await self.session.execute(stmt)
+        projects = list(result.scalars().all())
+
+        processed = 0
+        failed = 0
+
+        for project in projects:
+            try:
+                pid = project.id
+
+                # ── Finance: CPI, SPI, budget consumed ──
+                cpi: str | None = None
+                spi: str | None = None
+                budget_consumed_pct: str | None = None
+                try:
+                    from app.modules.finance.service import FinanceService
+
+                    fin_svc = FinanceService(self.session)
+                    dashboard = await fin_svc.get_dashboard(project_id=pid)
+                    if dashboard.get("total_budget") and float(dashboard["total_budget"]) > 0:
+                        total_budget = float(dashboard["total_budget"])
+                        total_actual = float(dashboard.get("total_actual", 0))
+                        budget_consumed_pct = str(round((total_actual / total_budget) * 100, 1))
+                except Exception:
+                    pass
+
+                try:
+                    from app.modules.costmodel.service import CostModelService
+
+                    cm_svc = CostModelService(self.session)
+                    cm_dash = await cm_svc.get_dashboard(pid)
+                    if cm_dash.get("cpi"):
+                        cpi = str(cm_dash["cpi"])
+                    if cm_dash.get("spi"):
+                        spi = str(cm_dash["spi"])
+                except Exception:
+                    pass
+
+                # ── Safety: open defects & observations ──
+                open_defects = 0
+                open_observations = 0
+                try:
+                    from app.modules.safety.service import SafetyService
+
+                    safety_svc = SafetyService(self.session)
+                    safety_stats = await safety_svc.get_stats(pid)
+                    open_observations = getattr(safety_stats, "total_observations", 0) - getattr(
+                        safety_stats, "closed_observations", 0
+                    )
+                    if open_observations < 0:
+                        open_observations = 0
+                    open_defects = getattr(safety_stats, "total_incidents", 0)
+                except Exception:
+                    pass
+
+                # ── RFIs ──
+                open_rfis = 0
+                try:
+                    from app.modules.rfi.service import RFIService
+
+                    rfi_svc = RFIService(self.session)
+                    rfi_stats = await rfi_svc.get_stats(pid)
+                    open_rfis = getattr(rfi_stats, "open", 0)
+                except Exception:
+                    pass
+
+                # ── Submittals ──
+                open_submittals = 0
+                try:
+                    from sqlalchemy import select as sa_select
+
+                    from app.modules.submittals.models import Submittal
+
+                    sub_count = (
+                        await self.session.execute(
+                            sa_select(func.count(Submittal.id)).where(
+                                Submittal.project_id == pid,
+                                Submittal.status.notin_(["approved", "closed"]),
+                            )
+                        )
+                    ).scalar_one()
+                    open_submittals = sub_count
+                except Exception:
+                    pass
+
+                # ── Schedule progress ──
+                schedule_progress_pct: str | None = None
+                try:
+                    from app.modules.schedule.models import Activity, Schedule
+
+                    sched_ids_stmt = select(Schedule.id).where(Schedule.project_id == pid)
+                    sched_result = await self.session.execute(sched_ids_stmt)
+                    sched_ids = [r[0] for r in sched_result.all()]
+
+                    if sched_ids:
+                        avg_progress = (
+                            await self.session.execute(
+                                select(func.avg(cast(Activity.progress_pct, Float))).where(
+                                    Activity.schedule_id.in_(sched_ids)
+                                )
+                            )
+                        ).scalar_one()
+                        if avg_progress is not None:
+                            schedule_progress_pct = str(round(avg_progress, 1))
+                except Exception:
+                    pass
+
+                # ── Risk score ──
+                risk_score_avg: str | None = None
+                try:
+                    from app.modules.risk.models import RiskItem
+
+                    avg_risk = (
+                        await self.session.execute(
+                            select(func.avg(cast(RiskItem.risk_score, Float))).where(
+                                RiskItem.project_id == pid,
+                                RiskItem.status != "closed",
+                            )
+                        )
+                    ).scalar_one()
+                    if avg_risk is not None:
+                        risk_score_avg = str(round(avg_risk, 2))
+                except Exception:
+                    pass
+
+                # ── Create snapshot (upsert for today) ──
+                existing = None
+                existing_stmt = select(KPISnapshot).where(
+                    KPISnapshot.project_id == pid,
+                    KPISnapshot.snapshot_date == today,
+                )
+                existing = (await self.session.execute(existing_stmt)).scalar_one_or_none()
+
+                if existing:
+                    existing.cpi = cpi
+                    existing.spi = spi
+                    existing.budget_consumed_pct = budget_consumed_pct
+                    existing.open_defects = open_defects
+                    existing.open_observations = open_observations
+                    existing.schedule_progress_pct = schedule_progress_pct
+                    existing.open_rfis = open_rfis
+                    existing.open_submittals = open_submittals
+                    existing.risk_score_avg = risk_score_avg
+                else:
+                    snapshot = KPISnapshot(
+                        project_id=pid,
+                        snapshot_date=today,
+                        cpi=cpi,
+                        spi=spi,
+                        budget_consumed_pct=budget_consumed_pct,
+                        open_defects=open_defects,
+                        open_observations=open_observations,
+                        schedule_progress_pct=schedule_progress_pct,
+                        open_rfis=open_rfis,
+                        open_submittals=open_submittals,
+                        risk_score_avg=risk_score_avg,
+                        metadata_={},
+                    )
+                    self.session.add(snapshot)
+
+                await self.session.flush()
+                processed += 1
+
+            except Exception:
+                logger.exception("KPI recalculation failed for project %s", project.id)
+                failed += 1
+
+        logger.info(
+            "KPI auto-recalculation complete: %d processed, %d failed",
+            processed,
+            failed,
+        )
+        return {
+            "processed": processed,
+            "failed": failed,
+            "total_projects": len(projects),
+            "snapshot_date": today,
+        }
 
     # ── Seed system templates ─────────────────────────────────────────────
 

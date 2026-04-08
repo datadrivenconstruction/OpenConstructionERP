@@ -275,10 +275,13 @@ class ScheduleService:
         schedule = Schedule(
             project_id=data.project_id,
             name=data.name,
+            schedule_type=data.schedule_type,
             description=data.description,
             start_date=data.start_date,
             end_date=data.end_date,
             status="draft",
+            data_date=data.data_date,
+            created_by=data.created_by,
             metadata_=data.metadata,
         )
         schedule = await self.schedule_repo.create(schedule)
@@ -393,6 +396,12 @@ class ScheduleService:
             max_order = await self.activity_repo.get_max_sort_order(data.schedule_id)
             sort_order = max_order + 1
 
+        # Auto-generate activity_code if not provided
+        activity_code = data.activity_code
+        if not activity_code:
+            max_seq = await self.activity_repo.get_max_activity_code_seq(data.schedule_id)
+            activity_code = f"ACT-{max_seq + 1:03d}"
+
         # Serialize nested models to dicts for JSON storage
         dependencies_data = [dep.model_dump() for dep in data.dependencies]
         for dep in dependencies_data:
@@ -417,6 +426,10 @@ class ScheduleService:
             boq_position_ids=boq_ids,
             color=data.color,
             sort_order=sort_order,
+            constraint_type=data.constraint_type,
+            constraint_date=data.constraint_date,
+            activity_code=activity_code,
+            bim_element_ids=data.bim_element_ids,
             metadata_=data.metadata,
         )
         activity = await self.activity_repo.create(activity)

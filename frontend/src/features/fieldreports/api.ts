@@ -246,6 +246,27 @@ export async function exportFieldReports(projectId: string): Promise<void> {
   triggerDownload(blob, filename);
 }
 
+/* ── Weather ─────────────────────────────────────────────────────────────── */
+
+export interface WeatherData {
+  available: boolean;
+  temperature_c?: number | null;
+  feels_like_c?: number | null;
+  humidity_pct?: number | null;
+  wind_speed_ms?: number | null;
+  wind_direction?: string | null;
+  description?: string | null;
+  icon?: string | null;
+  precipitation_mm?: number | null;
+  error?: string;
+}
+
+export async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
+  return apiGet<WeatherData>(`/v1/fieldreports/weather?lat=${lat}&lon=${lon}`);
+}
+
+/* ── Template Download ──────────────────────────────────────────────────── */
+
 export function downloadFieldReportsTemplate(): void {
   const token = useAuthStore.getState().accessToken;
   const headers: Record<string, string> = {};

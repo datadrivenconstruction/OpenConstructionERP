@@ -93,6 +93,7 @@ class ProjectService:
             budget_estimate=data.budget_estimate,
             contingency_pct=data.contingency_pct,
             custom_fields=data.custom_fields,
+            work_calendar_id=data.work_calendar_id,
         )
         project = await self.repo.create(project)
 

@@ -118,6 +118,31 @@ async def get_calendar(
     return [_report_to_response(r) for r in reports]
 
 
+# ── Weather ─────────────────────────────────────────────────────────────────
+
+
+@router.get("/weather")
+async def get_current_weather(
+    lat: float = Query(..., description="Latitude"),
+    lon: float = Query(..., description="Longitude"),
+    _user_id: CurrentUserId = None,  # type: ignore[assignment]
+) -> dict:
+    """Fetch current weather for a location (optional, requires OPENWEATHERMAP_API_KEY)."""
+    from app.config import get_settings
+    from app.modules.fieldreports.weather import fetch_weather
+
+    settings = get_settings()
+    api_key = settings.openweathermap_api_key
+    if not api_key:
+        return {"available": False, "error": "OpenWeatherMap API key not configured"}
+
+    result = await fetch_weather(lat, lon, api_key=api_key)
+    if result is None:
+        return {"available": False, "error": "Weather fetch failed"}
+
+    return {"available": True, **result}
+
+
 # ── Import template ─────────────────────────────────────────────────────────
 
 

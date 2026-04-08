@@ -93,6 +93,7 @@ class Settings(BaseSettings):
     # ── External Services ────────────────────────────────────────────────
     cad_converter_url: str | None = "http://localhost:8001"
     cv_pipeline_url: str | None = "http://localhost:8002"
+    openweathermap_api_key: str = ""
 
     # ── Validation ───────────────────────────────────────────────────────
     default_validation_rule_sets: list[str] = Field(

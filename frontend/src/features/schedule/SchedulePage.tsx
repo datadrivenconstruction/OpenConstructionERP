@@ -356,12 +356,14 @@ function computeArrowPaths(
 
 /* ── Gantt Chart ───────────────────────────────────────────────────────── */
 
-type ZoomLevel = 'day' | 'week' | 'month';
+type ZoomLevel = 'day' | 'week' | 'month' | 'quarter' | 'year';
 
 const PIXELS_PER_DAY: Record<ZoomLevel, number> = {
   day: 40,
   week: 8,
   month: 2,
+  quarter: 0.9,
+  year: 0.4,
 };
 
 const ROW_HEIGHT = 44;
@@ -477,7 +479,7 @@ function GanttChart({
         }
         current.setDate(current.getDate() + 7);
       }
-    } else {
+    } else if (zoomLevel === 'month') {
       // Month view — one marker per month
       current.setDate(1);
       current.setMonth(current.getMonth() + 1);
@@ -491,6 +493,38 @@ function GanttChart({
           });
         }
         current.setMonth(current.getMonth() + 1);
+      }
+    } else if (zoomLevel === 'quarter') {
+      // Quarter view — one marker per quarter
+      current.setDate(1);
+      current.setMonth(Math.floor(current.getMonth() / 3) * 3 + 3);
+      while (current <= timelineEnd) {
+        const dayOffset = daysBetween(timelineStart.toISOString(), current.toISOString());
+        const pct = (dayOffset / totalDays) * 100;
+        if (pct >= 0 && pct <= 100) {
+          const q = Math.floor(current.getMonth() / 3) + 1;
+          markers.push({
+            label: `Q${q} ${current.getFullYear()}`,
+            offsetPct: pct,
+          });
+        }
+        current.setMonth(current.getMonth() + 3);
+      }
+    } else {
+      // Year view — one marker per year
+      current.setDate(1);
+      current.setMonth(0);
+      current.setFullYear(current.getFullYear() + 1);
+      while (current <= timelineEnd) {
+        const dayOffset = daysBetween(timelineStart.toISOString(), current.toISOString());
+        const pct = (dayOffset / totalDays) * 100;
+        if (pct >= 0 && pct <= 100) {
+          markers.push({
+            label: current.getFullYear().toString(),
+            offsetPct: pct,
+          });
+        }
+        current.setFullYear(current.getFullYear() + 1);
       }
     }
 
@@ -1144,7 +1178,7 @@ function ScheduleDetail({
                 ))}
               </div>
               <div className="flex items-center gap-1 rounded-lg border border-border-light p-0.5">
-                {(['day', 'week', 'month'] as const).map((level) => (
+                {(['day', 'week', 'month', 'quarter', 'year'] as const).map((level) => (
                   <button
                     key={level}
                     onClick={() => setZoomLevel(level)}

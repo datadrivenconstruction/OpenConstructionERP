@@ -119,6 +119,30 @@ class ActivityRepository:
         result = (await self.session.execute(stmt)).scalar_one()
         return int(result)
 
+    async def get_max_activity_code_seq(self, schedule_id: uuid.UUID) -> int:
+        """Get the highest numeric suffix from ACT-NNN activity codes in a schedule.
+
+        Returns 0 if no activity codes exist yet.
+        """
+        stmt = (
+            select(Activity.activity_code)
+            .where(Activity.schedule_id == schedule_id)
+            .where(Activity.activity_code.isnot(None))
+        )
+        result = await self.session.execute(stmt)
+        codes = [row[0] for row in result.all() if row[0]]
+
+        max_seq = 0
+        for code in codes:
+            # Parse ACT-NNN pattern
+            if code and code.startswith("ACT-"):
+                try:
+                    seq = int(code[4:])
+                    max_seq = max(max_seq, seq)
+                except (ValueError, IndexError):
+                    pass
+        return max_seq
+
 
 class WorkOrderRepository:
     """Data access for WorkOrder model."""

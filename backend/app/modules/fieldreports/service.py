@@ -37,8 +37,17 @@ class FieldReportService:
         data: FieldReportCreate,
         user_id: str | None = None,
     ) -> FieldReport:
-        """Create a new field report."""
+        """Create a new field report.
+
+        If ``lat`` and ``lon`` are provided and OPENWEATHERMAP_API_KEY is
+        configured, weather_data is auto-populated from OpenWeatherMap.
+        """
         workforce_data = [entry.model_dump() for entry in data.workforce]
+
+        # Auto-fetch weather when coordinates are provided
+        weather_data: dict[str, Any] | None = None
+        if data.lat is not None and data.lon is not None:
+            weather_data = await self._try_fetch_weather(data.lat, data.lon)
 
         report = FieldReport(
             project_id=data.project_id,
@@ -65,7 +74,16 @@ class FieldReportService:
             status="draft",
             created_by=user_id,
             metadata_=data.metadata,
+            weather_data=weather_data,
         )
+
+        # If weather was fetched and user didn't set temperature/humidity,
+        # back-fill from the API response.
+        if weather_data and data.temperature_c is None and weather_data.get("temperature_c") is not None:
+            report.temperature_c = weather_data["temperature_c"]
+        if weather_data and data.humidity is None and weather_data.get("humidity_pct") is not None:
+            report.humidity = weather_data["humidity_pct"]
+
         report = await self.repo.create(report)
         logger.info(
             "Field report created: %s (%s) for project %s",
@@ -74,6 +92,26 @@ class FieldReportService:
             data.project_id,
         )
         return report
+
+    async def _try_fetch_weather(self, lat: float, lon: float) -> dict[str, Any] | None:
+        """Attempt to fetch weather, returning None on any failure."""
+        import os
+
+        try:
+            from app.config import get_settings
+
+            api_key = get_settings().openweathermap_api_key
+            if not api_key:
+                api_key = os.environ.get("OPENWEATHERMAP_API_KEY", "")
+            if not api_key:
+                return None
+
+            from app.modules.fieldreports.weather import fetch_weather
+
+            return await fetch_weather(lat, lon, api_key=api_key)
+        except Exception:
+            logger.warning("Auto weather fetch failed for lat=%s lon=%s", lat, lon)
+            return None
 
     # ── Read ──────────────────────────────────────────────────────────────
 

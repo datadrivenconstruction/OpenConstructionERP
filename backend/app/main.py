@@ -728,9 +728,7 @@ def create_app() -> FastAPI:
         try:
             from app.modules.opencde_api.router import router as opencde_router
 
-            app.include_router(
-                opencde_router, prefix="/api/v1/opencde", tags=["OpenCDE API"]
-            )
+            app.include_router(opencde_router, prefix="/api/v1/opencde", tags=["OpenCDE API"])
         except Exception:
             logger.debug("OpenCDE API router not available (non-fatal)")
 
@@ -741,6 +739,26 @@ def create_app() -> FastAPI:
             app.include_router(co_router, prefix="/api/v1/variations", tags=["Variations"])
         except Exception:
             logger.debug("Variations alias not available (non-fatal)")
+
+        # costmodel → finance/evm alias (plan §3.3)
+        try:
+            from app.modules.costmodel.router import router as cm_router
+
+            app.include_router(cm_router, prefix="/api/v1/finance/evm", tags=["Finance EVM (alias)"])
+        except Exception:
+            logger.debug("Finance EVM alias not available (non-fatal)")
+
+        # tendering → procurement/tenders alias (plan §3.3)
+        try:
+            from app.modules.tendering.router import router as tend_router
+
+            app.include_router(
+                tend_router,
+                prefix="/api/v1/procurement/tenders",
+                tags=["Procurement Tenders (alias)"],
+            )
+        except Exception:
+            logger.debug("Procurement Tenders alias not available (non-fatal)")
 
         # Register cross-module event handlers (dataflow wiring)
         from app.core.event_handlers import register_event_handlers
@@ -757,6 +775,31 @@ def create_app() -> FastAPI:
 
         # Initialize vector database (LanceDB embedded, no Docker)
         _init_vector_db()
+
+        # ── KPI auto-recalculation scheduler (24-hour interval) ──────────
+        import asyncio
+
+        async def _kpi_scheduler() -> None:
+            """Run KPI recalculation for all active projects every 24 hours."""
+            while True:
+                await asyncio.sleep(86400)  # 24 hours
+                try:
+                    from app.database import async_session_factory as _kpi_sf
+                    from app.modules.reporting.service import ReportingService
+
+                    async with _kpi_sf() as kpi_session:
+                        svc = ReportingService(kpi_session)
+                        result = await svc.auto_recalculate_kpis()
+                        await kpi_session.commit()
+                        logger.info(
+                            "KPI scheduler: %d projects processed, %d failed",
+                            result["processed"],
+                            result["failed"],
+                        )
+                except Exception:
+                    logger.exception("KPI recalculation scheduler failed")
+
+        asyncio.create_task(_kpi_scheduler())
 
         logger.info("Application started successfully")
 

@@ -64,6 +64,7 @@ class Project(Base):
     custom_fields: Mapped[dict | None] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=True
     )
+    work_calendar_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
 
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
@@ -174,9 +175,7 @@ class ProjectMilestone(Base):
         index=True,
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    milestone_type: Mapped[str] = mapped_column(
-        String(50), nullable=False, default="general"
-    )
+    milestone_type: Mapped[str] = mapped_column(String(50), nullable=False, default="general")
     planned_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     actual_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="pending")

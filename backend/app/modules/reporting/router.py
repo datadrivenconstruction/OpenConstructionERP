@@ -61,7 +61,9 @@ async def list_kpi_history(
 ) -> list[KPISnapshotResponse]:
     """List KPI snapshots for a project over time."""
     snapshots, _ = await service.list_kpi_history(
-        project_id, offset=offset, limit=limit,
+        project_id,
+        offset=offset,
+        limit=limit,
     )
     return [KPISnapshotResponse.model_validate(s) for s in snapshots]
 
@@ -76,6 +78,21 @@ async def create_kpi_snapshot(
     """Create a new KPI snapshot for a project."""
     snapshot = await service.create_kpi_snapshot(data, user_id=user_id)
     return KPISnapshotResponse.model_validate(snapshot)
+
+
+@router.post("/kpi/recalculate-all", status_code=200)
+async def recalculate_all_kpis(
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("reporting.create")),
+    service: ReportingService = Depends(_get_service),
+) -> dict:
+    """Recalculate KPI snapshots for all active projects (admin only).
+
+    Queries finance, safety, RFI, submittals, schedule, and risk modules
+    to produce up-to-date KPI values.  Creates or updates one KPISnapshot
+    per project for today's date.
+    """
+    return await service.auto_recalculate_kpis()
 
 
 # ── Report Template endpoints ─────────────────────────────────────────────
@@ -130,7 +147,9 @@ async def list_reports(
 ) -> list[GeneratedReportResponse]:
     """List generated reports for a project."""
     reports, _ = await service.list_reports(
-        project_id, offset=offset, limit=limit,
+        project_id,
+        offset=offset,
+        limit=limit,
     )
     return [GeneratedReportResponse.model_validate(r) for r in reports]
 

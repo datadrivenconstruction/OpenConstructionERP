@@ -36,9 +36,12 @@ class ScheduleCreate(BaseModel):
 
     project_id: UUID
     name: str = Field(..., min_length=1, max_length=255)
+    schedule_type: str = Field(default="master", max_length=50)
     description: str = ""
     start_date: str | None = Field(default=None, max_length=20)
     end_date: str | None = Field(default=None, max_length=20)
+    data_date: str | None = Field(default=None, max_length=20)
+    created_by: UUID | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
@@ -53,10 +56,14 @@ class ScheduleUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     name: str | None = Field(default=None, min_length=1, max_length=255)
+    schedule_type: str | None = Field(default=None, max_length=50)
     description: str | None = None
     start_date: str | None = Field(default=None, max_length=20)
     end_date: str | None = Field(default=None, max_length=20)
-    status: str | None = Field(default=None, pattern=r"^(draft|active|completed)$")
+    status: str | None = Field(
+        default=None, pattern=r"^(draft|active|completed|frozen|archived)$"
+    )
+    data_date: str | None = Field(default=None, max_length=20)
     metadata: dict[str, Any] | None = None
 
     @model_validator(mode="after")
@@ -73,10 +80,13 @@ class ScheduleResponse(BaseModel):
     id: UUID
     project_id: UUID
     name: str
+    schedule_type: str = "master"
     description: str
     start_date: str | None
     end_date: str | None
     status: str
+    data_date: str | None = None
+    created_by: UUID | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, alias="metadata_")
     created_at: datetime
     updated_at: datetime
@@ -125,6 +135,10 @@ class ActivityCreate(BaseModel):
     boq_position_ids: list[UUID] = Field(default_factory=list)
     color: str = Field(default="#0071e3", max_length=20)
     sort_order: int = Field(default=0, ge=0)
+    constraint_type: str | None = Field(default=None, max_length=50)
+    constraint_date: str | None = Field(default=None, max_length=20)
+    activity_code: str | None = Field(default=None, max_length=50)
+    bim_element_ids: list[str] | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
@@ -156,6 +170,10 @@ class ActivityUpdate(BaseModel):
     boq_position_ids: list[UUID] | None = None
     color: str | None = Field(default=None, max_length=20)
     sort_order: int | None = Field(default=None, ge=0)
+    constraint_type: str | None = Field(default=None, max_length=50)
+    constraint_date: str | None = Field(default=None, max_length=20)
+    activity_code: str | None = Field(default=None, max_length=50)
+    bim_element_ids: list[str] | None = None
     metadata: dict[str, Any] | None = None
 
     @model_validator(mode="after")
@@ -198,6 +216,12 @@ class ActivityResponse(BaseModel):
     total_float: int | None = None
     free_float: int | None = None
     is_critical: bool = False
+
+    # Constraint, code, BIM fields
+    constraint_type: str | None = None
+    constraint_date: str | None = None
+    activity_code: str | None = None
+    bim_element_ids: list[str] | None = None
 
 
 class LinkPositionRequest(BaseModel):
@@ -417,6 +441,18 @@ class RiskAnalysisResponse(BaseModel):
         default_factory=list,
         description="Per-activity PERT estimates (optimistic, most_likely, pessimistic)",
     )
+
+
+# ── Import/Export schemas ───────���─────────────────────────────────────────
+
+
+class ImportResult(BaseModel):
+    """Result from importing a schedule file (XER / MSP XML)."""
+
+    activities_imported: int = 0
+    relationships_imported: int = 0
+    calendars_imported: int = 0
+    warnings: list[str] = Field(default_factory=list)
 
 
 # ── Schedule Relationship schemas (Phase 13) ──────────────────────────────

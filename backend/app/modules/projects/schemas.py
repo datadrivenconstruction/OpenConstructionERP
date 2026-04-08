@@ -28,8 +28,7 @@ def _validate_date_string(value: str | None, field_name: str) -> str | None:
         except ValueError:
             continue
     raise ValueError(
-        f"{field_name}: '{value}' is not a valid date. "
-        "Expected formats: YYYY-MM-DD, DD.MM.YYYY, or MM/DD/YYYY"
+        f"{field_name}: '{value}' is not a valid date. Expected formats: YYYY-MM-DD, DD.MM.YYYY, or MM/DD/YYYY"
     )
 
 
@@ -81,6 +80,7 @@ class ProjectCreate(BaseModel):
     budget_estimate: str | None = Field(default=None, max_length=50)
     contingency_pct: str | None = Field(default=None, max_length=10)
     custom_fields: dict[str, Any] | None = None
+    work_calendar_id: str | None = Field(default=None, max_length=36)
 
     @field_validator("planned_start_date", "planned_end_date", "actual_start_date", "actual_end_date")
     @classmethod
@@ -115,6 +115,7 @@ class ProjectUpdate(BaseModel):
     budget_estimate: str | None = Field(default=None, max_length=50)
     contingency_pct: str | None = Field(default=None, max_length=10)
     custom_fields: dict[str, Any] | None = None
+    work_calendar_id: str | None = Field(default=None, max_length=36)
     status: str | None = None
 
     @field_validator("planned_start_date", "planned_end_date", "actual_start_date", "actual_end_date")
@@ -160,6 +161,7 @@ class ProjectResponse(BaseModel):
     budget_estimate: str | None = None
     contingency_pct: str | None = None
     custom_fields: dict[str, Any] | None = None
+    work_calendar_id: str | None = None
 
 
 # ── WBS schemas ──────────────────────────────────────────────────────────
@@ -251,9 +253,7 @@ class MilestoneCreate(BaseModel):
     @classmethod
     def _validate_status(cls, v: str) -> str:
         if v not in _MILESTONE_STATUSES:
-            raise ValueError(
-                f"Invalid status '{v}'. Must be one of: {', '.join(_MILESTONE_STATUSES)}"
-            )
+            raise ValueError(f"Invalid status '{v}'. Must be one of: {', '.join(_MILESTONE_STATUSES)}")
         return v
 
     @field_validator("planned_date")
@@ -284,9 +284,7 @@ class MilestoneUpdate(BaseModel):
     @classmethod
     def _validate_status(cls, v: str | None) -> str | None:
         if v is not None and v not in _MILESTONE_STATUSES:
-            raise ValueError(
-                f"Invalid status '{v}'. Must be one of: {', '.join(_MILESTONE_STATUSES)}"
-            )
+            raise ValueError(f"Invalid status '{v}'. Must be one of: {', '.join(_MILESTONE_STATUSES)}")
         return v
 
     @field_validator("planned_date")
