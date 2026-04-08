@@ -39,6 +39,7 @@ import { BIMViewer, DisciplineToggle } from '@/shared/ui/BIMViewer';
 import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
+import { useUploadQueueStore } from '@/stores/useUploadQueueStore';
 import {
   fetchBIMModels,
   fetchBIMElements,
@@ -49,7 +50,7 @@ import {
 
 /* ── Constants ────────────────────────────────────────────────────────── */
 
-const CAD_EXTENSIONS = new Set(['.rvt', '.ifc', '.dwg', '.dgn', '.fbx', '.obj', '.3ds']);
+const CAD_EXTENSIONS = new Set(['.rvt', '.ifc']);
 const DATA_EXTENSIONS = new Set(['.csv', '.xlsx', '.xls']);
 
 function getFileExtension(filename: string): string {
@@ -313,7 +314,9 @@ function UnifiedUploadSection({
   const geoInputRef = useRef<HTMLInputElement>(null);
   const addToast = useToastStore((s) => s.addToast);
 
-  const allAcceptedExtensions = '.rvt,.ifc,.dwg,.dgn,.fbx,.obj,.3ds,.csv,.xlsx,.xls';
+  const allAcceptedExtensions = '.rvt,.ifc,.csv,.xlsx,.xls';
+  const addQueueTask = useUploadQueueStore((s) => s.addTask);
+  const updateQueueTask = useUploadQueueStore((s) => s.updateTask);
 
   const handleFileSelect = useCallback(
     (selectedFile: File) => {
@@ -322,7 +325,7 @@ function UnifiedUploadSection({
         setUploadError(
           t('bim.unsupported_format', {
             defaultValue:
-              'Unsupported file format. Use IFC, RVT, DWG, DGN, CSV, or Excel files.',
+              'Unsupported file format. Use IFC, RVT, CSV, or Excel files.',
           }),
         );
         return;
@@ -436,12 +439,31 @@ function UnifiedUploadSection({
       } else if (file) {
         // Unified mode: auto-detect from extension
         if (isCADFile(file.name)) {
+          const taskId = `bim-${Date.now()}`;
+          addQueueTask({
+            id: taskId,
+            type: 'import',
+            filename: file.name,
+            status: 'processing',
+            progress: 20,
+            message: t('bim.uploading_file', { defaultValue: 'Uploading file...' }),
+          });
+
+          updateQueueTask(taskId, { progress: 50, message: t('bim.processing_cad', { defaultValue: 'Sending to server...' }) });
+
           const result = await uploadCADFile(
             projectId,
             modelName || file.name.replace(/\.[^.]+$/, ''),
             discipline,
             file,
           );
+
+          updateQueueTask(taskId, {
+            status: 'completed',
+            progress: 100,
+            message: t('bim.cad_uploaded', { defaultValue: 'File uploaded — processing queued' }),
+          });
+
           addToast({
             type: 'success',
             title: t('bim.cad_upload_success', { defaultValue: 'CAD file uploaded' }),
@@ -493,6 +515,8 @@ function UnifiedUploadSection({
     discipline,
     onUploadComplete,
     addToast,
+    addQueueTask,
+    updateQueueTask,
     t,
     resetForm,
   ]);
