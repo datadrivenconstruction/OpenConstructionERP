@@ -1,8 +1,9 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import i18n from 'i18next';
+import clsx from 'clsx';
 import {
   ArrowRight,
   ArrowLeft,
@@ -14,8 +15,6 @@ import {
   Loader2,
   CheckCircle2,
   Database,
-  Globe,
-  BookOpen,
   FolderOpen,
   Rocket,
   Package,
@@ -24,24 +23,23 @@ import {
   ClipboardList,
   Pencil,
   Boxes,
-  Monitor,
-  Zap,
+  Settings2,
   type LucideIcon,
 } from 'lucide-react';
-import { Logo, Button, CountryFlag } from '@/shared/ui';
+import { Logo, Button, CountryFlag, Badge } from '@/shared/ui';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useModuleStore } from '@/stores/useModuleStore';
-import { useViewModeStore, type ViewMode } from '@/stores/useViewModeStore';
+import { useViewModeStore } from '@/stores/useViewModeStore';
 import { aiApi, type AIProvider } from '@/features/ai/api';
 import { apiPost } from '@/shared/lib/api';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-const TOTAL_STEPS = 10;
+const TOTAL_STEPS = 6;
 
-// ── Language → Region mapping ──────────────────────────────────────────────
+// ── Language -> Region mapping ──────────────────────────────────────────────
 
 const LANG_TO_REGION: Record<string, string> = {
   de: 'DE_BERLIN',
@@ -67,7 +65,7 @@ const LANG_TO_REGION: Record<string, string> = {
   bg: 'DE_BERLIN',
 };
 
-// ── Language → Demo project mapping ────────────────────────────────────────
+// ── Language -> Demo project mapping ────────────────────────────────────────
 
 const LANG_TO_DEMO: Record<string, string> = {
   de: 'residential-berlin',
@@ -100,84 +98,6 @@ const CWICR_DATABASES: CWICRDatabase[] = [
   { id: 'AR_DUBAI', name: 'Middle East / Gulf', city: 'Dubai', lang: '\u0627\u0644\u0639\u0631\u0628\u064a\u0629', currency: 'AED', flagId: 'ae' },
   { id: 'ZH_SHANGHAI', name: 'China', city: 'Shanghai', lang: '\u4e2d\u6587', currency: 'CNY', flagId: 'cn' },
   { id: 'HI_MUMBAI', name: 'India / South Asia', city: 'Mumbai', lang: 'Hindi', currency: 'INR', flagId: 'in' },
-];
-
-// ── Resource Catalog definitions ────────────────────────────────────────────
-
-interface ResourceCatalog {
-  id: string;
-  name: string;
-  flagId: string;
-  itemCount: number;
-  lang: string;
-}
-
-const RESOURCE_CATALOGS: ResourceCatalog[] = [
-  { id: 'ENG_TORONTO', name: 'North America', flagId: 'us', itemCount: 850, lang: 'English' },
-  { id: 'DE_BERLIN', name: 'Germany / DACH', flagId: 'de', itemCount: 920, lang: 'Deutsch' },
-  { id: 'FR_PARIS', name: 'France', flagId: 'fr', itemCount: 780, lang: 'Fran\u00e7ais' },
-  { id: 'SP_BARCELONA', name: 'Spain / LatAm', flagId: 'es', itemCount: 710, lang: 'Espa\u00f1ol' },
-  { id: 'PT_SAOPAULO', name: 'Brazil / Portugal', flagId: 'br', itemCount: 650, lang: 'Portugu\u00eas' },
-  { id: 'RU_STPETERSBURG', name: 'Russia / CIS', flagId: 'ru', itemCount: 800, lang: '\u0420\u0443\u0441\u0441\u043a\u0438\u0439' },
-  { id: 'AR_DUBAI', name: 'Middle East / Gulf', flagId: 'ae', itemCount: 620, lang: '\u0627\u0644\u0639\u0631\u0628\u064a\u0629' },
-  { id: 'ZH_SHANGHAI', name: 'China', flagId: 'cn', itemCount: 740, lang: '\u4e2d\u6587' },
-  { id: 'HI_MUMBAI', name: 'India / South Asia', flagId: 'in', itemCount: 680, lang: 'Hindi' },
-  { id: 'GB_LONDON', name: 'United Kingdom', flagId: 'gb', itemCount: 870, lang: 'English' },
-  { id: 'JP_TOKYO', name: 'Japan', flagId: 'jp', itemCount: 590, lang: '\u65e5\u672c\u8a9e' },
-];
-
-// ── Demo Project definitions ────────────────────────────────────────────────
-
-interface DemoProject {
-  id: string;
-  name: string;
-  flagId: string;
-  description: string;
-  budget: string;
-  positions: number;
-}
-
-const DEMO_PROJECTS: DemoProject[] = [
-  {
-    id: 'residential-berlin',
-    name: 'Residential Complex Berlin',
-    flagId: 'de',
-    description: '8-storey residential building with underground parking, DIN 276 classification',
-    budget: '\u20ac12.4M',
-    positions: 340,
-  },
-  {
-    id: 'office-london',
-    name: 'Office Tower London',
-    flagId: 'gb',
-    description: 'Grade A office building, 15 floors, NRM 1/2 compliant estimate',
-    budget: '\u00a318.7M',
-    positions: 520,
-  },
-  {
-    id: 'school-paris',
-    name: 'School Complex Paris',
-    flagId: 'fr',
-    description: 'Primary school with gymnasium and canteen, French standards',
-    budget: '\u20ac6.2M',
-    positions: 280,
-  },
-  {
-    id: 'warehouse-dubai',
-    name: 'Logistics Warehouse Dubai',
-    flagId: 'ae',
-    description: 'Climate-controlled warehouse 12,000 m\u00b2 with office block',
-    budget: '$8.9M',
-    positions: 190,
-  },
-  {
-    id: 'medical-us',
-    name: 'Medical Center Houston',
-    flagId: 'us',
-    description: 'Outpatient medical facility, MasterFormat division structure',
-    budget: '$22.1M',
-    positions: 610,
-  },
 ];
 
 // ── AI Provider definitions ─────────────────────────────────────────────────
@@ -227,6 +147,8 @@ interface CompanyPreset {
   descriptionKey: string;
   icon: LucideIcon;
   enabledModules: string[];
+  tags: string[];
+  popular?: boolean;
 }
 
 const COMPANY_PRESETS: CompanyPreset[] = [
@@ -235,6 +157,8 @@ const COMPANY_PRESETS: CompanyPreset[] = [
     labelKey: 'onboarding.company_general_contractor',
     descriptionKey: 'onboarding.company_general_contractor_desc',
     icon: Building2,
+    popular: true,
+    tags: ['BOQ', 'Finance', 'Safety'],
     enabledModules: [
       'boq', 'projects', 'costs', 'assemblies', 'catalog', 'templates',
       'schedule', 'finance', 'procurement', 'safety', 'inspections',
@@ -248,6 +172,7 @@ const COMPANY_PRESETS: CompanyPreset[] = [
     labelKey: 'onboarding.company_estimator',
     descriptionKey: 'onboarding.company_estimator_desc',
     icon: Calculator,
+    tags: ['BOQ', 'Costs', 'Takeoff', 'AI'],
     enabledModules: [
       'boq', 'projects', 'costs', 'assemblies', 'catalog', 'templates',
       'takeoff', 'pdf-takeoff', 'ai-estimate', 'advisor', 'validation',
@@ -260,6 +185,7 @@ const COMPANY_PRESETS: CompanyPreset[] = [
     labelKey: 'onboarding.company_project_management',
     descriptionKey: 'onboarding.company_project_management_desc',
     icon: ClipboardList,
+    tags: ['Schedule', 'Tasks', 'Finance'],
     enabledModules: [
       'projects', 'schedule', 'tasks', 'meetings', 'finance',
       'procurement', 'documents', 'cde', 'transmittals', 'rfi',
@@ -273,6 +199,7 @@ const COMPANY_PRESETS: CompanyPreset[] = [
     labelKey: 'onboarding.company_architecture',
     descriptionKey: 'onboarding.company_architecture_desc',
     icon: Pencil,
+    tags: ['Documents', 'CDE', 'BIM'],
     enabledModules: [
       'projects', 'documents', 'cde', 'bim', 'transmittals', 'rfi',
       'submittals', 'correspondence', 'takeoff', 'pdf-takeoff', 'boq',
@@ -285,6 +212,7 @@ const COMPANY_PRESETS: CompanyPreset[] = [
     labelKey: 'onboarding.company_full_enterprise',
     descriptionKey: 'onboarding.company_full_enterprise_desc',
     icon: Boxes,
+    tags: [],
     enabledModules: [], // special case: all modules
   },
 ];
@@ -296,47 +224,51 @@ interface ModuleDef {
   labelKey: string;
   descriptionKey: string;
   group: string;
+  core?: boolean;
 }
 
 const MODULE_GROUPS = [
   { id: 'core', labelKey: 'onboarding.mod_group_core' },
+  { id: 'estimation', labelKey: 'onboarding.mod_group_estimation' },
   { id: 'takeoff', labelKey: 'onboarding.mod_group_takeoff' },
+  { id: 'ai', labelKey: 'onboarding.mod_group_ai' },
   { id: 'planning', labelKey: 'onboarding.mod_group_planning' },
   { id: 'finance', labelKey: 'onboarding.mod_group_finance' },
   { id: 'communication', labelKey: 'onboarding.mod_group_communication' },
   { id: 'documents', labelKey: 'onboarding.mod_group_documents' },
   { id: 'quality', labelKey: 'onboarding.mod_group_quality' },
   { id: 'field', labelKey: 'onboarding.mod_group_field' },
-  { id: 'analytics', labelKey: 'onboarding.mod_group_analytics' },
 ];
 
 const ALL_MODULES: ModuleDef[] = [
-  // Core
-  { key: 'boq', labelKey: 'boq.title', descriptionKey: 'onboarding.mod_boq_desc', group: 'core' },
-  { key: 'projects', labelKey: 'projects.title', descriptionKey: 'onboarding.mod_projects_desc', group: 'core' },
-  { key: 'costs', labelKey: 'costs.title', descriptionKey: 'onboarding.mod_costs_desc', group: 'core' },
-  { key: 'assemblies', labelKey: 'nav.assemblies', descriptionKey: 'onboarding.mod_assemblies_desc', group: 'core' },
-  { key: 'catalog', labelKey: 'catalog.title', descriptionKey: 'onboarding.mod_catalog_desc', group: 'core' },
-  { key: 'templates', labelKey: 'nav.templates', descriptionKey: 'onboarding.mod_templates_desc', group: 'core' },
-  { key: 'validation', labelKey: 'validation.title', descriptionKey: 'onboarding.mod_validation_desc', group: 'core' },
-  // Takeoff & AI
+  // Core (always on)
+  { key: 'dashboard', labelKey: 'nav.dashboard', descriptionKey: 'onboarding.mod_dashboard_desc', group: 'core', core: true },
+  { key: 'projects', labelKey: 'projects.title', descriptionKey: 'onboarding.mod_projects_desc', group: 'core', core: true },
+  { key: 'contacts', labelKey: 'contacts.title', descriptionKey: 'onboarding.mod_contacts_desc', group: 'core', core: true },
+  // Estimation
+  { key: 'boq', labelKey: 'boq.title', descriptionKey: 'onboarding.mod_boq_desc', group: 'estimation' },
+  { key: 'costs', labelKey: 'costs.title', descriptionKey: 'onboarding.mod_costs_desc', group: 'estimation' },
+  { key: 'assemblies', labelKey: 'nav.assemblies', descriptionKey: 'onboarding.mod_assemblies_desc', group: 'estimation' },
+  { key: 'catalog', labelKey: 'catalog.title', descriptionKey: 'onboarding.mod_catalog_desc', group: 'estimation' },
+  { key: 'validation', labelKey: 'validation.title', descriptionKey: 'onboarding.mod_validation_desc', group: 'estimation' },
+  // Takeoff & BIM
   { key: 'takeoff', labelKey: 'nav.takeoff_overview', descriptionKey: 'onboarding.mod_takeoff_desc', group: 'takeoff' },
   { key: 'pdf-takeoff', labelKey: 'nav.pdf_measurements', descriptionKey: 'onboarding.mod_pdf_takeoff_desc', group: 'takeoff' },
-  { key: 'ai-estimate', labelKey: 'nav.ai_estimate', descriptionKey: 'onboarding.mod_ai_estimate_desc', group: 'takeoff' },
-  { key: 'advisor', labelKey: 'nav.ai_advisor', descriptionKey: 'onboarding.mod_advisor_desc', group: 'takeoff' },
-  { key: 'data-explorer', labelKey: 'nav.cad_bim_explorer', descriptionKey: 'onboarding.mod_data_explorer_desc', group: 'takeoff' },
   { key: 'bim', labelKey: 'nav.bim_viewer', descriptionKey: 'onboarding.mod_bim_desc', group: 'takeoff' },
+  { key: 'data-explorer', labelKey: 'nav.cad_bim_explorer', descriptionKey: 'onboarding.mod_data_explorer_desc', group: 'takeoff' },
+  // AI
+  { key: 'ai-estimate', labelKey: 'nav.ai_estimate', descriptionKey: 'onboarding.mod_ai_estimate_desc', group: 'ai' },
+  { key: 'advisor', labelKey: 'nav.ai_advisor', descriptionKey: 'onboarding.mod_advisor_desc', group: 'ai' },
   // Planning
   { key: 'schedule', labelKey: 'schedule.title', descriptionKey: 'onboarding.mod_schedule_desc', group: 'planning' },
-  { key: '5d', labelKey: 'nav.5d_cost_model', descriptionKey: 'onboarding.mod_5d_desc', group: 'planning' },
   { key: 'tasks', labelKey: 'tasks.title', descriptionKey: 'onboarding.mod_tasks_desc', group: 'planning' },
+  { key: '5d', labelKey: 'nav.5d_cost_model', descriptionKey: 'onboarding.mod_5d_desc', group: 'planning' },
   // Finance
   { key: 'finance', labelKey: 'finance.title', descriptionKey: 'onboarding.mod_finance_desc', group: 'finance' },
   { key: 'procurement', labelKey: 'procurement.title', descriptionKey: 'onboarding.mod_procurement_desc', group: 'finance' },
   { key: 'tendering', labelKey: 'tendering.title', descriptionKey: 'onboarding.mod_tendering_desc', group: 'finance' },
   { key: 'changeorders', labelKey: 'nav.change_orders', descriptionKey: 'onboarding.mod_changeorders_desc', group: 'finance' },
   // Communication
-  { key: 'contacts', labelKey: 'contacts.title', descriptionKey: 'onboarding.mod_contacts_desc', group: 'communication' },
   { key: 'meetings', labelKey: 'meetings.title', descriptionKey: 'onboarding.mod_meetings_desc', group: 'communication' },
   { key: 'rfi', labelKey: 'rfi.title', descriptionKey: 'onboarding.mod_rfi_desc', group: 'communication' },
   { key: 'submittals', labelKey: 'submittals.title', descriptionKey: 'onboarding.mod_submittals_desc', group: 'communication' },
@@ -356,14 +288,16 @@ const ALL_MODULES: ModuleDef[] = [
   // Field
   { key: 'field-reports', labelKey: 'nav.field_reports', descriptionKey: 'onboarding.mod_field_reports_desc', group: 'field' },
   { key: 'requirements', labelKey: 'nav.requirements', descriptionKey: 'onboarding.mod_requirements_desc', group: 'field' },
-  // Analytics & extras
-  { key: 'reports', labelKey: 'nav.reports', descriptionKey: 'onboarding.mod_reports_desc', group: 'analytics' },
-  { key: 'reporting', labelKey: 'nav.reporting', descriptionKey: 'onboarding.mod_reporting_desc', group: 'analytics' },
-  { key: 'analytics', labelKey: 'nav.analytics', descriptionKey: 'onboarding.mod_analytics_desc', group: 'analytics' },
-  { key: 'sustainability', labelKey: 'nav.sustainability', descriptionKey: 'onboarding.mod_sustainability_desc', group: 'analytics' },
-  { key: 'cost-benchmark', labelKey: 'nav.cost_benchmark', descriptionKey: 'onboarding.mod_cost_benchmark_desc', group: 'analytics' },
-  { key: 'collaboration', labelKey: 'nav.collaboration', descriptionKey: 'onboarding.mod_collaboration_desc', group: 'analytics' },
+  { key: 'reports', labelKey: 'nav.reports', descriptionKey: 'onboarding.mod_reports_desc', group: 'field' },
+  { key: 'reporting', labelKey: 'nav.reporting', descriptionKey: 'onboarding.mod_reporting_desc', group: 'field' },
+  { key: 'analytics', labelKey: 'nav.analytics', descriptionKey: 'onboarding.mod_analytics_desc', group: 'field' },
+  { key: 'sustainability', labelKey: 'nav.sustainability', descriptionKey: 'onboarding.mod_sustainability_desc', group: 'field' },
+  { key: 'cost-benchmark', labelKey: 'nav.cost_benchmark', descriptionKey: 'onboarding.mod_cost_benchmark_desc', group: 'field' },
+  { key: 'collaboration', labelKey: 'nav.collaboration', descriptionKey: 'onboarding.mod_collaboration_desc', group: 'field' },
+  { key: 'templates', labelKey: 'nav.templates', descriptionKey: 'onboarding.mod_templates_desc', group: 'field' },
 ];
+
+const CORE_MODULE_KEYS = new Set(ALL_MODULES.filter((m) => m.core).map((m) => m.key));
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -377,7 +311,7 @@ export function markOnboardingCompleted(): void {
   try {
     localStorage.setItem('oe_onboarding_completed', 'true');
   } catch {
-    // Storage unavailable — ignore.
+    // Storage unavailable -- ignore.
   }
 }
 
@@ -404,9 +338,62 @@ function getSuggestedDemo(lang?: string): string {
   return LANG_TO_DEMO[base] ?? DEFAULT_DEMO;
 }
 
-/** Mini flag component — uses bundled inline SVGs */
-function MiniFlag({ code }: { code: string }) {
-  return <CountryFlag code={code} size={32} className="shadow-xs border border-black/5" />;
+// ── Fade wrapper for step transitions ───────────────────────────────────────
+
+function StepTransition({ children, stepKey }: { children: ReactNode; stepKey: number }) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    // Trigger fade-in on mount
+    const frame = requestAnimationFrame(() => setVisible(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  return (
+    <div
+      key={stepKey}
+      className={clsx(
+        'transition-all duration-300 ease-out',
+        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3',
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+// ── Toggle Switch component ─────────────────────────────────────────────────
+
+function ToggleSwitch({
+  enabled,
+  onToggle,
+  disabled,
+}: {
+  enabled: boolean;
+  onToggle: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={enabled}
+      onClick={onToggle}
+      disabled={disabled}
+      className={clsx(
+        'relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0',
+        enabled ? 'bg-oe-blue' : 'bg-surface-tertiary',
+        disabled && 'opacity-60 cursor-not-allowed',
+      )}
+    >
+      <span
+        className={clsx(
+          'absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200',
+          enabled ? 'translate-x-[22px]' : 'translate-x-0.5',
+        )}
+      />
+    </button>
+  );
 }
 
 // ── Progress Bar ─────────────────────────────────────────────────────────────
@@ -415,14 +402,10 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
   const { t } = useTranslation();
   const stepLabels = [
     t('onboarding.step_welcome', { defaultValue: 'Welcome' }),
-    t('onboarding.step_language', { defaultValue: 'Language' }),
-    t('onboarding.step_company', { defaultValue: 'Company' }),
+    t('onboarding.step_start', { defaultValue: 'Start' }),
+    t('onboarding.step_profile', { defaultValue: 'Profile' }),
     t('onboarding.step_modules', { defaultValue: 'Modules' }),
-    t('onboarding.step_mode', { defaultValue: 'Mode' }),
-    t('onboarding.step_costdb', { defaultValue: 'Cost DB' }),
-    t('onboarding.step_catalog', { defaultValue: 'Catalog' }),
-    t('onboarding.step_demos', { defaultValue: 'Demos' }),
-    t('onboarding.step_ai', { defaultValue: 'AI' }),
+    t('onboarding.step_data', { defaultValue: 'Data' }),
     t('onboarding.step_finish', { defaultValue: 'Finish' }),
   ];
 
@@ -434,38 +417,42 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
             <div className="flex items-center w-full">
               {i > 0 && (
                 <div
-                  className={`h-0.5 flex-1 rounded-full transition-colors duration-500 ${
-                    i <= current ? 'bg-oe-blue' : 'bg-border-light'
-                  }`}
+                  className={clsx(
+                    'h-0.5 flex-1 rounded-full transition-colors duration-500',
+                    i <= current ? 'bg-oe-blue' : 'bg-border-light',
+                  )}
                 />
               )}
               <div
-                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-2xs font-bold transition-all duration-500 ease-oe ${
+                className={clsx(
+                  'flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-2xs font-bold transition-all duration-500 ease-oe',
                   i < current
                     ? 'bg-oe-blue text-white'
                     : i === current
                       ? 'bg-oe-blue text-white ring-4 ring-oe-blue/20 scale-110'
-                      : 'bg-surface-secondary text-content-tertiary border border-border-light'
-                }`}
+                      : 'bg-surface-secondary text-content-tertiary border border-border-light',
+                )}
               >
                 {i < current ? <Check size={12} /> : i + 1}
               </div>
               {i < total - 1 && (
                 <div
-                  className={`h-0.5 flex-1 rounded-full transition-colors duration-500 ${
-                    i < current ? 'bg-oe-blue' : 'bg-border-light'
-                  }`}
+                  className={clsx(
+                    'h-0.5 flex-1 rounded-full transition-colors duration-500',
+                    i < current ? 'bg-oe-blue' : 'bg-border-light',
+                  )}
                 />
               )}
             </div>
             <span
-              className={`text-2xs font-medium transition-colors whitespace-nowrap ${
+              className={clsx(
+                'text-2xs font-medium transition-colors whitespace-nowrap',
                 i === current
                   ? 'text-oe-blue'
                   : i < current
                     ? 'text-content-secondary'
-                    : 'text-content-quaternary'
-              }`}
+                    : 'text-content-quaternary',
+              )}
             >
               {stepLabels[i] ?? ''}
             </span>
@@ -476,57 +463,13 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
   );
 }
 
-// ── Step 1: Welcome ──────────────────────────────────────────────────────────
+// ── Step 1: Welcome + Language ───────────────────────────────────────────────
 
-function StepWelcome({ onNext }: { onNext: () => void }) {
-  const { t } = useTranslation();
-
-  return (
-    <div className="flex flex-col items-center justify-center text-center animate-fade-in">
-      <div className="mb-8">
-        <Logo size="xl" animate />
-      </div>
-
-      <h1 className="text-4xl font-bold text-content-primary tracking-tight">
-        {t('onboarding.welcome_title', { defaultValue: 'Welcome to OpenConstructionERP' })}
-      </h1>
-
-      <p className="mt-4 max-w-md text-lg text-content-secondary leading-relaxed">
-        {t('onboarding.welcome_subtitle', {
-          defaultValue:
-            'The professional construction cost estimation platform.\nSet up your workspace in a few simple steps.',
-        })}
-      </p>
-
-      <Button
-        variant="primary"
-        size="lg"
-        onClick={onNext}
-        icon={<ArrowRight size={18} />}
-        iconPosition="right"
-        className="mt-10"
-      >
-        {t('onboarding.get_started', { defaultValue: 'Get Started' })}
-      </Button>
-
-      <p className="mt-6 text-xs text-content-tertiary">
-        {t('onboarding.welcome_hint', {
-          defaultValue: 'Free and open source. No credit card required.',
-        })}
-      </p>
-    </div>
-  );
-}
-
-// ── Step 2: Language Selection ───────────────────────────────────────────────
-
-function StepLanguage({
+function StepWelcome({
   onNext,
-  onBack,
   onLanguageChange,
 }: {
   onNext: () => void;
-  onBack: () => void;
   onLanguageChange: (lang: string) => void;
 }) {
   const { t } = useTranslation();
@@ -556,37 +499,37 @@ function StepLanguage({
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="flex flex-col items-center animate-fade-in">
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue-subtle mb-4">
-        <Globe size={24} className="text-oe-blue" />
+    <div className="flex flex-col items-center justify-center text-center">
+      <div className="mb-8">
+        <Logo size="xl" animate />
       </div>
 
-      <h2 className="text-2xl font-bold text-content-primary">
-        {t('onboarding.language_title', { defaultValue: 'Choose Your Language' })}
-      </h2>
-      <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
-        {t('onboarding.language_subtitle', {
-          defaultValue: 'Select the interface language. You can change this anytime in Settings.',
+      <h1 className="text-4xl font-bold text-content-primary tracking-tight">
+        {t('onboarding.welcome_title', { defaultValue: 'Welcome to OpenConstructionERP' })}
+      </h1>
+
+      <p className="mt-4 max-w-md text-lg text-content-secondary leading-relaxed">
+        {t('onboarding.welcome_subtitle', {
+          defaultValue:
+            'The professional construction cost estimation platform.\nSet up your workspace in a few simple steps.',
         })}
       </p>
 
       {/* Language grid */}
-      <div className="mt-6 w-full max-w-xl grid grid-cols-3 sm:grid-cols-4 gap-2">
+      <div className="mt-8 w-full max-w-xl grid grid-cols-3 sm:grid-cols-4 gap-2">
         {SUPPORTED_LANGUAGES.map((lang) => {
           const isSelected = selected === lang.code;
           return (
             <button
               key={lang.code}
               onClick={() => handleSelect(lang.code)}
-              className={`
-                relative flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-left
-                border transition-all duration-normal ease-oe
-                ${
-                  isSelected
-                    ? 'border-oe-blue bg-oe-blue-subtle/40 ring-2 ring-oe-blue/20'
-                    : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary active:scale-[0.98]'
-                }
-              `}
+              className={clsx(
+                'relative flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-left',
+                'border transition-all duration-normal ease-oe',
+                isSelected
+                  ? 'border-oe-blue bg-oe-blue-subtle/40 ring-2 ring-oe-blue/20'
+                  : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary active:scale-[0.98]',
+              )}
             >
               <CountryFlag code={lang.country} size={20} className="shrink-0" />
               <div className="min-w-0 flex-1">
@@ -603,121 +546,293 @@ function StepLanguage({
         })}
       </div>
 
-      <div className="mt-8 flex items-center gap-3">
+      <Button
+        variant="primary"
+        size="lg"
+        onClick={onNext}
+        icon={<ArrowRight size={18} />}
+        iconPosition="right"
+        className="mt-10"
+      >
+        {t('onboarding.get_started', { defaultValue: 'Get Started' })}
+      </Button>
+
+      <p className="mt-6 text-xs text-content-tertiary">
+        {t('onboarding.welcome_hint', {
+          defaultValue: 'Free and open source. No credit card required.',
+        })}
+      </p>
+    </div>
+  );
+}
+
+// ── Step 2: "How would you like to start?" ──────────────────────────────────
+
+function StepStartChoice({
+  onQuickStart,
+  onChooseProfile,
+  onBack,
+}: {
+  onQuickStart: () => void;
+  onChooseProfile: () => void;
+  onBack: () => void;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <div className="flex flex-col items-center">
+      <h2 className="text-2xl font-bold text-content-primary">
+        {t('onboarding.start_choice_title', { defaultValue: 'How would you like to start?' })}
+      </h2>
+      <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
+        {t('onboarding.start_choice_subtitle', {
+          defaultValue: 'Choose a quick setup or customize your experience.',
+        })}
+      </p>
+
+      <div className="mt-8 w-full max-w-lg grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Quick Start card */}
+        <button
+          onClick={onQuickStart}
+          className={clsx(
+            'group relative flex flex-col items-start rounded-2xl p-6 text-left',
+            'border-2 border-border-light bg-surface-elevated',
+            'hover:border-oe-blue hover:bg-oe-blue-subtle/20 hover:shadow-lg hover:shadow-oe-blue/5',
+            'transition-all duration-300 ease-oe active:scale-[0.98]',
+          )}
+        >
+          <Badge variant="blue" size="sm" className="mb-4">
+            {t('onboarding.recommended', { defaultValue: 'Recommended' })}
+          </Badge>
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue mb-4 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
+            <Sparkles size={24} />
+          </div>
+          <h3 className="text-lg font-bold text-content-primary">
+            {t('onboarding.quick_start', { defaultValue: 'Quick Start' })}
+          </h3>
+          <p className="mt-2 text-sm text-content-secondary leading-relaxed">
+            {t('onboarding.quick_start_desc', {
+              defaultValue: 'All essential modules pre-activated. Start working immediately.',
+            })}
+          </p>
+        </button>
+
+        {/* Choose profile card */}
+        <button
+          onClick={onChooseProfile}
+          className={clsx(
+            'group relative flex flex-col items-start rounded-2xl p-6 text-left',
+            'border-2 border-border-light bg-surface-elevated',
+            'hover:border-oe-blue hover:bg-oe-blue-subtle/20 hover:shadow-lg hover:shadow-oe-blue/5',
+            'transition-all duration-300 ease-oe active:scale-[0.98]',
+          )}
+        >
+          <div className="h-5 mb-4" aria-hidden />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-secondary text-content-secondary mb-4 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
+            <Settings2 size={24} />
+          </div>
+          <h3 className="text-lg font-bold text-content-primary">
+            {t('onboarding.choose_profile', { defaultValue: 'Choose Your Profile' })}
+          </h3>
+          <p className="mt-2 text-sm text-content-secondary leading-relaxed">
+            {t('onboarding.choose_profile_desc', {
+              defaultValue: 'Select your role and customize which modules you need.',
+            })}
+          </p>
+        </button>
+      </div>
+
+      <div className="mt-8">
         <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
           {t('common.back', { defaultValue: 'Back' })}
-        </Button>
-        <Button
-          variant="primary"
-          onClick={onNext}
-          icon={<ArrowRight size={16} />}
-          iconPosition="right"
-        >
-          {t('common.continue', { defaultValue: 'Continue' })}
         </Button>
       </div>
     </div>
   );
 }
 
-// ── Step 3: Company Type ─────────────────────────────────────────────────────
+// ── Step 3: Company Profile (industry cards) ────────────────────────────────
 
-function StepCompanyType({
+function StepCompanyProfile({
   onNext,
   onBack,
   selectedType,
   onSelectType,
+  onConfigureIndividually,
 }: {
   onNext: () => void;
   onBack: () => void;
   selectedType: CompanyTypeKey | null;
   onSelectType: (key: CompanyTypeKey) => void;
+  onConfigureIndividually: () => void;
 }) {
   const { t } = useTranslation();
 
-  return (
-    <div className="flex flex-col items-center animate-fade-in">
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue-subtle mb-4">
-        <Building2 size={24} className="text-oe-blue" />
-      </div>
+  const handleSelect = useCallback(
+    (key: CompanyTypeKey) => {
+      onSelectType(key);
+    },
+    [onSelectType],
+  );
 
+  return (
+    <div className="flex flex-col items-center">
       <h2 className="text-2xl font-bold text-content-primary">
-        {t('onboarding.company_type_title', { defaultValue: 'What type of company are you?' })}
+        {t('onboarding.profile_title', { defaultValue: 'What best describes your work?' })}
       </h2>
       <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
-        {t('onboarding.company_type_subtitle', {
-          defaultValue: 'We will pre-configure the best set of modules for your workflow.',
+        {t('onboarding.profile_subtitle', {
+          defaultValue: "We'll pre-select the right modules. You can always change this later.",
         })}
       </p>
 
-      <div className="mt-6 w-full max-w-xl space-y-3">
-        {COMPANY_PRESETS.map((preset) => {
+      {/* Profile cards: 2 column grid on desktop, 1 on mobile */}
+      <div className="mt-6 w-full max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {COMPANY_PRESETS.filter((p) => p.key !== 'full_enterprise').map((preset) => {
           const isSelected = selectedType === preset.key;
           const Icon = preset.icon;
-          const moduleCount =
-            preset.key === 'full_enterprise'
-              ? ALL_MODULES.length
-              : preset.enabledModules.length;
+          const moduleCount = preset.enabledModules.length;
+          const visibleTags = preset.tags.slice(0, 3);
+          const extraCount = moduleCount - visibleTags.length;
 
           return (
             <button
               key={preset.key}
-              onClick={() => onSelectType(preset.key)}
-              className={`
-                group relative flex w-full items-center gap-4 rounded-2xl p-4 text-left
-                border-2 transition-all duration-300 ease-oe
-                ${
-                  isSelected
-                    ? 'border-oe-blue bg-gradient-to-r from-oe-blue-subtle/50 to-oe-blue-subtle/20 ring-4 ring-oe-blue/10 shadow-md shadow-oe-blue/5'
-                    : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary hover:shadow-sm active:scale-[0.99]'
-                }
-              `}
+              onClick={() => handleSelect(preset.key)}
+              className={clsx(
+                'group relative flex flex-col items-start rounded-2xl p-5 text-left',
+                'border-2 transition-all duration-300 ease-oe',
+                isSelected
+                  ? 'border-oe-blue bg-oe-blue-subtle/30 ring-4 ring-oe-blue/10 shadow-md shadow-oe-blue/5'
+                  : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary hover:shadow-sm active:scale-[0.99]',
+              )}
             >
-              {/* Icon circle */}
-              <div
-                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-all duration-300 ${
-                  isSelected
-                    ? 'bg-oe-blue text-white shadow-lg shadow-oe-blue/20'
-                    : 'bg-surface-secondary text-content-secondary group-hover:bg-surface-tertiary'
-                }`}
-              >
-                <Icon size={22} />
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`text-base font-bold transition-colors ${
-                      isSelected ? 'text-oe-blue' : 'text-content-primary'
-                    }`}
-                  >
-                    {t(preset.labelKey, { defaultValue: preset.key })}
-                  </span>
-                  {isSelected && (
-                    <CheckCircle2 size={16} className="text-oe-blue shrink-0" />
+              <div className="flex items-center gap-2 mb-3">
+                <div
+                  className={clsx(
+                    'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all duration-300',
+                    isSelected
+                      ? 'bg-oe-blue text-white shadow-lg shadow-oe-blue/20'
+                      : 'bg-surface-secondary text-content-secondary group-hover:bg-surface-tertiary',
                   )}
+                >
+                  <Icon size={20} />
                 </div>
-                <p className="mt-0.5 text-sm text-content-secondary leading-snug">
-                  {t(preset.descriptionKey, { defaultValue: '' })}
-                </p>
+                {preset.popular && (
+                  <Badge variant="blue" size="sm">
+                    {t('onboarding.popular', { defaultValue: 'Popular' })}
+                  </Badge>
+                )}
+                {isSelected && (
+                  <CheckCircle2 size={16} className="text-oe-blue ml-auto" />
+                )}
               </div>
 
-              {/* Module count badge */}
-              <div
-                className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold transition-all ${
-                  isSelected
-                    ? 'bg-oe-blue text-white'
-                    : 'bg-surface-secondary text-content-tertiary group-hover:bg-surface-tertiary'
-                }`}
+              <h3
+                className={clsx(
+                  'text-base font-bold transition-colors',
+                  isSelected ? 'text-oe-blue' : 'text-content-primary',
+                )}
               >
-                {moduleCount} {t('onboarding.modules_label', { defaultValue: 'modules' })}
+                {t(preset.labelKey, { defaultValue: preset.key })}
+              </h3>
+              <p className="mt-1 text-sm text-content-secondary leading-snug">
+                {t(preset.descriptionKey, { defaultValue: '' })}
+              </p>
+
+              {/* Module tags */}
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {visibleTags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center rounded-full bg-surface-tertiary px-2 py-0.5 text-2xs font-medium text-content-secondary"
+                  >
+                    {tag}
+                  </span>
+                ))}
+                {extraCount > 0 && (
+                  <span className="inline-flex items-center rounded-full bg-surface-tertiary px-2 py-0.5 text-2xs font-medium text-content-tertiary">
+                    +{extraCount} {t('onboarding.more', { defaultValue: 'more' })}
+                  </span>
+                )}
               </div>
             </button>
           );
         })}
       </div>
 
-      <div className="mt-8 flex items-center gap-3">
+      {/* Full Enterprise — wide card */}
+      {(() => {
+        const enterprise = COMPANY_PRESETS.find((p) => p.key === 'full_enterprise');
+        if (!enterprise) return null;
+        const isSelected = selectedType === 'full_enterprise';
+        const Icon = enterprise.icon;
+
+        return (
+          <button
+            onClick={() => handleSelect('full_enterprise')}
+            className={clsx(
+              'mt-3 w-full max-w-2xl group relative flex items-center gap-4 rounded-2xl p-5 text-left',
+              'border-2 transition-all duration-300 ease-oe',
+              isSelected
+                ? 'border-oe-blue bg-oe-blue-subtle/30 ring-4 ring-oe-blue/10 shadow-md shadow-oe-blue/5'
+                : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary hover:shadow-sm active:scale-[0.99]',
+            )}
+          >
+            <div
+              className={clsx(
+                'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all duration-300',
+                isSelected
+                  ? 'bg-oe-blue text-white shadow-lg shadow-oe-blue/20'
+                  : 'bg-surface-secondary text-content-secondary group-hover:bg-surface-tertiary',
+              )}
+            >
+              <Icon size={20} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h3
+                  className={clsx(
+                    'text-base font-bold transition-colors',
+                    isSelected ? 'text-oe-blue' : 'text-content-primary',
+                  )}
+                >
+                  {t(enterprise.labelKey, { defaultValue: 'Full Enterprise' })}
+                </h3>
+                {isSelected && <CheckCircle2 size={16} className="text-oe-blue" />}
+              </div>
+              <p className="mt-0.5 text-sm text-content-secondary">
+                {t(enterprise.descriptionKey, {
+                  defaultValue: 'Complete construction lifecycle -- everything enabled',
+                })}
+              </p>
+            </div>
+            <span
+              className={clsx(
+                'shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold transition-all',
+                isSelected
+                  ? 'bg-oe-blue text-white'
+                  : 'bg-surface-secondary text-content-tertiary',
+              )}
+            >
+              {t('onboarding.all_modules', {
+                defaultValue: 'All {{count}} modules',
+                count: ALL_MODULES.length,
+              })}
+            </span>
+          </button>
+        );
+      })()}
+
+      {/* Configure individually button */}
+      <button
+        onClick={onConfigureIndividually}
+        className="mt-4 text-sm font-medium text-oe-blue hover:underline transition-colors"
+      >
+        {t('onboarding.configure_individually', { defaultValue: 'Configure individually' })}
+      </button>
+
+      <div className="mt-6 flex items-center gap-3">
         <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
           {t('common.back', { defaultValue: 'Back' })}
         </Button>
@@ -735,9 +850,9 @@ function StepCompanyType({
   );
 }
 
-// ── Step 4: Module Review ───────────────────────────────────────────────────
+// ── Step 4: Module Configuration (toggle list) ─────────────────────────────
 
-function StepModuleReview({
+function StepModuleConfig({
   onNext,
   onBack,
   enabledModules,
@@ -749,75 +864,70 @@ function StepModuleReview({
   onToggleModule: (key: string) => void;
 }) {
   const { t } = useTranslation();
-  const enabledCount = enabledModules.size;
+  const enabledCount = enabledModules.size + CORE_MODULE_KEYS.size;
+  const totalCount = ALL_MODULES.length;
 
   return (
-    <div className="flex flex-col items-center animate-fade-in">
+    <div className="flex flex-col items-center">
       <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue-subtle mb-4">
         <Package size={24} className="text-oe-blue" />
       </div>
 
       <h2 className="text-2xl font-bold text-content-primary">
-        {t('onboarding.modules_title', { defaultValue: 'Review Your Modules' })}
+        {t('onboarding.modules_title', { defaultValue: 'Your Modules' })}
       </h2>
       <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
         {t('onboarding.modules_subtitle', {
-          defaultValue: 'Pre-selected based on your company type. Toggle any module on or off.',
+          defaultValue: 'Enable or disable modules as needed. You can change this anytime in Settings.',
         })}
       </p>
 
       <div className="mt-2 text-sm font-medium text-oe-blue">
-        {enabledCount} / {ALL_MODULES.length}{' '}
+        {enabledCount} / {totalCount}{' '}
         {t('onboarding.modules_active', { defaultValue: 'modules active' })}
       </div>
 
-      <div className="mt-4 w-full max-w-2xl max-h-[420px] overflow-y-auto pr-1 space-y-5 scrollbar-thin">
+      {/* Module list grouped by category */}
+      <div className="mt-4 w-full max-w-2xl max-h-[440px] overflow-y-auto pr-1 space-y-5 scrollbar-thin">
         {MODULE_GROUPS.map((group) => {
           const groupModules = ALL_MODULES.filter((m) => m.group === group.id);
           if (groupModules.length === 0) return null;
 
           return (
             <div key={group.id}>
-              <h3 className="text-xs font-bold text-content-tertiary uppercase tracking-wider mb-2">
+              <h3 className="text-xs font-bold text-content-tertiary uppercase tracking-wider mb-1 px-4">
                 {t(group.labelKey, { defaultValue: group.id })}
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+              <div className="rounded-xl border border-border-light bg-surface-elevated overflow-hidden">
                 {groupModules.map((mod) => {
-                  const isEnabled = enabledModules.has(mod.key);
+                  const isCore = !!mod.core;
+                  const isEnabled = isCore || enabledModules.has(mod.key);
                   return (
-                    <button
+                    <div
                       key={mod.key}
-                      onClick={() => onToggleModule(mod.key)}
-                      className={`
-                        flex items-center gap-2.5 rounded-lg px-3 py-2 text-left
-                        border transition-all duration-200 ease-oe
-                        ${
-                          isEnabled
-                            ? 'border-oe-blue/30 bg-oe-blue-subtle/20'
-                            : 'border-border-light bg-surface-elevated hover:bg-surface-secondary opacity-60'
-                        }
-                      `}
+                      className="flex items-center justify-between py-3 px-4 border-b border-border-light last:border-b-0"
                     >
-                      {/* Checkbox */}
-                      <div
-                        className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border-2 transition-all duration-150 ${
-                          isEnabled
-                            ? 'border-oe-blue bg-oe-blue'
-                            : 'border-content-tertiary bg-transparent'
-                        }`}
-                      >
-                        {isEnabled && <Check size={10} className="text-white" />}
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        <span className="text-sm font-medium text-content-primary truncate block">
-                          {t(mod.labelKey, { defaultValue: mod.key })}
-                        </span>
-                        <span className="text-2xs text-content-tertiary truncate block">
+                      <div className="flex-1 min-w-0 mr-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-content-primary">
+                            {t(mod.labelKey, { defaultValue: mod.key })}
+                          </span>
+                          {isCore && (
+                            <Badge variant="blue" size="sm">
+                              {t('onboarding.core', { defaultValue: 'Core' })}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-content-tertiary mt-0.5 truncate">
                           {t(mod.descriptionKey, { defaultValue: '' })}
-                        </span>
+                        </p>
                       </div>
-                    </button>
+                      <ToggleSwitch
+                        enabled={isEnabled}
+                        onToggle={() => !isCore && onToggleModule(mod.key)}
+                        disabled={isCore}
+                      />
+                    </div>
                   );
                 })}
               </div>
@@ -843,119 +953,9 @@ function StepModuleReview({
   );
 }
 
-// ── Step 5: Interface Mode ──────────────────────────────────────────────────
+// ── Step 5: Data Setup (combined) ───────────────────────────────────────────
 
-function StepInterfaceMode({
-  onNext,
-  onBack,
-  interfaceMode,
-  onSelectMode,
-}: {
-  onNext: () => void;
-  onBack: () => void;
-  interfaceMode: ViewMode;
-  onSelectMode: (mode: ViewMode) => void;
-}) {
-  const { t } = useTranslation();
-
-  const modes: { key: ViewMode; labelKey: string; descriptionKey: string; icon: LucideIcon }[] = [
-    {
-      key: 'simple',
-      labelKey: 'onboarding.mode_simple',
-      descriptionKey: 'onboarding.mode_simple_desc',
-      icon: Monitor,
-    },
-    {
-      key: 'advanced',
-      labelKey: 'onboarding.mode_advanced',
-      descriptionKey: 'onboarding.mode_advanced_desc',
-      icon: Zap,
-    },
-  ];
-
-  return (
-    <div className="flex flex-col items-center animate-fade-in">
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue-subtle mb-4">
-        <Monitor size={24} className="text-oe-blue" />
-      </div>
-
-      <h2 className="text-2xl font-bold text-content-primary">
-        {t('onboarding.mode_title', { defaultValue: 'Choose Interface Mode' })}
-      </h2>
-      <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
-        {t('onboarding.mode_subtitle', {
-          defaultValue: 'You can switch between modes anytime in Settings.',
-        })}
-      </p>
-
-      <div className="mt-8 w-full max-w-lg space-y-4">
-        {modes.map((mode) => {
-          const isSelected = interfaceMode === mode.key;
-          const Icon = mode.icon;
-          return (
-            <button
-              key={mode.key}
-              onClick={() => onSelectMode(mode.key)}
-              className={`
-                group relative flex w-full items-center gap-5 rounded-2xl p-5 text-left
-                border-2 transition-all duration-300 ease-oe
-                ${
-                  isSelected
-                    ? 'border-oe-blue bg-gradient-to-r from-oe-blue-subtle/50 to-oe-blue-subtle/20 ring-4 ring-oe-blue/10 shadow-md shadow-oe-blue/5'
-                    : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary hover:shadow-sm active:scale-[0.99]'
-                }
-              `}
-            >
-              <div
-                className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl transition-all duration-300 ${
-                  isSelected
-                    ? 'bg-oe-blue text-white shadow-lg shadow-oe-blue/20'
-                    : 'bg-surface-secondary text-content-secondary group-hover:bg-surface-tertiary'
-                }`}
-              >
-                <Icon size={28} />
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`text-lg font-bold transition-colors ${
-                      isSelected ? 'text-oe-blue' : 'text-content-primary'
-                    }`}
-                  >
-                    {t(mode.labelKey, { defaultValue: mode.key })}
-                  </span>
-                  {isSelected && <CheckCircle2 size={18} className="text-oe-blue shrink-0" />}
-                </div>
-                <p className="mt-1 text-sm text-content-secondary leading-relaxed">
-                  {t(mode.descriptionKey, { defaultValue: '' })}
-                </p>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="mt-8 flex items-center gap-3">
-        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
-          {t('common.back', { defaultValue: 'Back' })}
-        </Button>
-        <Button
-          variant="primary"
-          onClick={onNext}
-          icon={<ArrowRight size={16} />}
-          iconPosition="right"
-        >
-          {t('common.continue', { defaultValue: 'Continue' })}
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-// ── Step 6: Cost Database ───────────────────────────────────────────────────
-
-function StepCostDatabase({
+function StepDataSetup({
   onNext,
   onBack,
   selectedLang,
@@ -968,670 +968,130 @@ function StepCostDatabase({
   const addToast = useToastStore((s) => s.addToast);
 
   const suggestedRegion = getSuggestedRegion(selectedLang);
+  const suggestedDemoId = getSuggestedDemo(selectedLang);
 
-  const [loading, setLoading] = useState<string | null>(null);
+  // ── Cost Database state ──
+  const [selectedRegion, setSelectedRegion] = useState(suggestedRegion);
+  const [loadingDb, setLoadingDb] = useState(false);
   const [loadedDb, setLoadedDb] = useState<{ id: string; count: number } | null>(null);
-  const [elapsed, setElapsed] = useState(0);
-  const [progress, setProgress] = useState(0);
+  const [dbProgress, setDbProgress] = useState(0);
 
-  // Timer for elapsed time + simulated progress
+  // ── Demo Project state ──
+  const [installDemo, setInstallDemo] = useState(true);
+  const [installingDemo, setInstallingDemo] = useState(false);
+  const [demoInstalled, setDemoInstalled] = useState(false);
+
+  // ── AI state ──
+  const [selectedProvider, setSelectedProvider] = useState<AIProvider>('anthropic');
+  const [apiKey, setApiKey] = useState('');
+  const [showKey, setShowKey] = useState(false);
+
+  // ── DB loading progress simulation ──
   useEffect(() => {
-    if (!loading) {
-      setElapsed(0);
-      setProgress(0);
+    if (!loadingDb) {
+      setDbProgress(0);
       return;
     }
     const start = Date.now();
     const interval = setInterval(() => {
       const secs = Math.floor((Date.now() - start) / 1000);
-      setElapsed(secs);
-      // Simulate realistic progress: fast start, slow middle, never reaches 100%
-      // ~55K items, ~85 MB, typical 15-60s
-      const pct = Math.min(95, Math.round(
-        secs < 3 ? secs * 8 :           // 0-3s: fast start (0-24%)
-        secs < 10 ? 24 + (secs - 3) * 6 : // 3-10s: steady (24-66%)
-        secs < 30 ? 66 + (secs - 10) * 1.2 : // 10-30s: slower (66-90%)
-        90 + Math.min(5, (secs - 30) * 0.2)   // 30s+: crawl to 95%
-      ));
-      setProgress(pct);
+      const pct = Math.min(
+        95,
+        Math.round(
+          secs < 3
+            ? secs * 8
+            : secs < 10
+              ? 24 + (secs - 3) * 6
+              : secs < 30
+                ? 66 + (secs - 10) * 1.2
+                : 90 + Math.min(5, (secs - 30) * 0.2),
+        ),
+      );
+      setDbProgress(pct);
     }, 500);
     return () => clearInterval(interval);
-  }, [loading]);
+  }, [loadingDb]);
 
-  const handleLoad = useCallback(
-    async (db: CWICRDatabase) => {
-      if (loading) return;
-      setLoading(db.id);
+  const handleLoadDb = useCallback(async () => {
+    if (loadingDb || loadedDb) return;
+    setLoadingDb(true);
 
-      try {
-        const token = useAuthStore.getState().accessToken;
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000); // 5 min for large DB
-        const res = await fetch(`/api/v1/costs/load-cwicr/${db.id}`, {
-          method: 'POST',
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-          signal: controller.signal,
-        });
-        clearTimeout(timeoutId);
+    try {
+      const token = useAuthStore.getState().accessToken;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5 * 60 * 1000);
+      const res = await fetch(`/api/v1/costs/load-cwicr/${selectedRegion}`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
 
-        if (res.ok) {
-          const data = await res.json();
-          const imported = data.imported ?? 0;
-          setProgress(100);
-          setLoadedDb({ id: db.id, count: imported });
+      if (res.ok) {
+        const data = await res.json();
+        const imported = data.imported ?? 0;
+        setDbProgress(100);
+        setLoadedDb({ id: selectedRegion, count: imported });
 
-          // Persist to localStorage
-          try {
-            const existing = JSON.parse(localStorage.getItem('oe_loaded_databases') || '[]') as string[];
-            if (!existing.includes(db.id)) {
-              localStorage.setItem('oe_loaded_databases', JSON.stringify([...existing, db.id]));
-            }
-          } catch {
-            // ignore
+        try {
+          const existing = JSON.parse(
+            localStorage.getItem('oe_loaded_databases') || '[]',
+          ) as string[];
+          if (!existing.includes(selectedRegion)) {
+            localStorage.setItem(
+              'oe_loaded_databases',
+              JSON.stringify([...existing, selectedRegion]),
+            );
           }
-
-          addToast({
-            type: 'success',
-            title: `${db.name} loaded`,
-            message: `${imported.toLocaleString()} cost items imported`,
-          });
-        } else {
-          const err = await res.json().catch(() => ({ detail: 'Failed to load database' }));
-          addToast({
-            type: 'error',
-            title: `Failed to load ${db.name}`,
-            message: err.detail || 'Unknown error',
-          });
+        } catch {
+          // ignore
         }
-      } catch {
-        addToast({ type: 'error', title: t('common.connection_error', { defaultValue: 'Connection error' }) });
-      } finally {
-        setLoading(null);
-      }
-    },
-    [loading, addToast, t],
-  );
 
-  // Sort databases with suggested region first
-  const sortedDatabases = [...CWICR_DATABASES].sort((a, b) => {
-    if (a.id === suggestedRegion) return -1;
-    if (b.id === suggestedRegion) return 1;
-    return 0;
-  });
-
-  return (
-    <div className="flex flex-col items-center animate-fade-in">
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue-subtle mb-4">
-        <Database size={24} className="text-oe-blue" />
-      </div>
-
-      <h2 className="text-2xl font-bold text-content-primary">
-        {t('onboarding.cost_db_title', { defaultValue: 'Cost Database' })}
-      </h2>
-      <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
-        {t('onboarding.cost_db_subtitle', {
-          defaultValue: 'Load a pricing database for accurate estimates. Choose your region:',
-        })}
-      </p>
-
-      {/* Database grid */}
-      <div className="mt-6 w-full max-w-xl grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-        {sortedDatabases.map((db) => {
-          const isLoading = loading === db.id;
-          const isLoaded = loadedDb?.id === db.id;
-          const isSuggested = db.id === suggestedRegion && !loadedDb;
-          return (
-            <button
-              key={db.id}
-              onClick={() => handleLoad(db)}
-              disabled={isLoading || (loading !== null && loading !== db.id)}
-              className={`
-                relative flex items-center gap-3 rounded-xl px-3.5 py-3 text-left
-                border transition-all duration-normal ease-oe
-                ${isLoaded
-                  ? 'border-semantic-success/30 bg-semantic-success-bg/40'
-                  : isLoading
-                    ? 'border-oe-blue/40 bg-oe-blue-subtle/30'
-                    : isSuggested
-                      ? 'border-oe-blue/30 bg-oe-blue-subtle/20 ring-1 ring-oe-blue/10'
-                      : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary active:scale-[0.98]'
-                }
-                ${loading !== null && !isLoading && !isLoaded ? 'opacity-40 pointer-events-none' : ''}
-              `}
-            >
-              <MiniFlag code={db.flagId} />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-content-primary">{db.name}</span>
-                  {isLoaded && (
-                    <CheckCircle2 size={14} className="text-semantic-success shrink-0" />
-                  )}
-                  {isSuggested && !isLoading && (
-                    <span className="inline-flex items-center rounded-full bg-oe-blue-subtle px-1.5 py-0.5 text-2xs font-medium text-oe-blue">
-                      {t('onboarding.suggested', { defaultValue: 'Suggested' })}
-                    </span>
-                  )}
-                </div>
-                <div className="text-2xs text-content-tertiary">
-                  {db.city} · {db.lang} · {db.currency}
-                </div>
-              </div>
-              {isLoading && (
-                <Loader2 size={16} className="animate-spin text-oe-blue shrink-0" />
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Loading progress */}
-      {loading && (() => {
-        const loadingDb = CWICR_DATABASES.find((d) => d.id === loading);
-        const sizeMb = 85;
-        const loadedMb = Math.round(sizeMb * progress / 100);
-        const statusText = progress < 20
-          ? t('onboarding.loading_step_download', { defaultValue: 'Downloading pricing database...' })
-          : progress < 50
-            ? t('onboarding.loading_step_parse', { defaultValue: 'Parsing 55,000+ cost items...' })
-            : progress < 80
-              ? t('onboarding.loading_step_import', { defaultValue: 'Importing into local database...' })
-              : t('onboarding.loading_step_index', { defaultValue: 'Indexing and optimizing...' });
-        return (
-          <div className="mt-4 w-full max-w-xl rounded-xl border border-oe-blue/20 bg-oe-blue-subtle/10 p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                {loadingDb && <MiniFlag code={loadingDb.flagId} />}
-                <div>
-                  <span className="text-sm font-medium text-content-primary">
-                    {loadingDb?.name ?? loading}
-                  </span>
-                  <div className="flex items-center gap-1.5 text-xs text-content-tertiary">
-                    <Loader2 size={12} className="animate-spin text-oe-blue" />
-                    <span>{statusText}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="text-lg font-bold text-oe-blue tabular-nums">{progress}%</span>
-                <div className="text-2xs text-content-tertiary tabular-nums">{loadedMb} / {sizeMb} MB · {elapsed}s</div>
-              </div>
-            </div>
-            <div className="h-2.5 w-full overflow-hidden rounded-full bg-surface-secondary">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-500 transition-all duration-500 ease-out"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* Success message */}
-      {loadedDb && !loading && (() => {
-        const loadedInfo = CWICR_DATABASES.find((d) => d.id === loadedDb.id);
-        return (
-          <div className="mt-4 w-full max-w-xl rounded-xl border border-semantic-success/30 bg-semantic-success-bg/40 p-4 animate-fade-in">
-            <div className="flex items-center gap-3">
-              {loadedInfo && <MiniFlag code={loadedInfo.flagId} />}
-              <div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 size={16} className="text-semantic-success" />
-                  <span className="text-sm font-semibold text-semantic-success">
-                    {loadedInfo?.name ?? loadedDb.id}
-                  </span>
-                </div>
-                <span className="text-xs text-content-secondary">
-                  {loadedDb.count.toLocaleString()}{' '}
-                  {t('onboarding.items_loaded', { defaultValue: 'cost items loaded successfully' })}
-                </span>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
-      <p className="mt-4 text-xs text-content-tertiary text-center max-w-md">
-        {t('onboarding.cost_db_hint', {
-          defaultValue: 'You can add more databases later in Cost Database \u2192 Import.',
-        })}
-      </p>
-
-      <div className="mt-6 flex items-center gap-3">
-        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
-          {t('common.back', { defaultValue: 'Back' })}
-        </Button>
-        <Button variant="secondary" onClick={onNext}>
-          {t('onboarding.skip', { defaultValue: 'Skip' })}
-        </Button>
-        {loadedDb && (
-          <Button
-            variant="primary"
-            onClick={onNext}
-            icon={<ArrowRight size={16} />}
-            iconPosition="right"
-          >
-            {t('common.continue', { defaultValue: 'Continue' })}
-          </Button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ── Step 7: Resource Catalog ────────────────────────────────────────────────
-
-function StepResourceCatalog({
-  onNext,
-  onBack,
-  selectedLang,
-}: {
-  onNext: () => void;
-  onBack: () => void;
-  selectedLang: string;
-}) {
-  const { t } = useTranslation();
-  const addToast = useToastStore((s) => s.addToast);
-
-  const suggestedRegion = getSuggestedRegion(selectedLang);
-
-  const [loading, setLoading] = useState<string | null>(null);
-  const [loadedCatalog, setLoadedCatalog] = useState<{ id: string; count: number } | null>(null);
-  const [elapsed, setElapsed] = useState(0);
-
-  // Timer for elapsed time display
-  useEffect(() => {
-    if (!loading) {
-      setElapsed(0);
-      return;
-    }
-    const start = Date.now();
-    const interval = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 1000);
-    return () => clearInterval(interval);
-  }, [loading]);
-
-  const handleLoad = useCallback(
-    async (catalog: ResourceCatalog) => {
-      if (loading) return;
-      setLoading(catalog.id);
-
-      try {
-        const data = await apiPost<{ imported: number }>(`/v1/catalog/import/${catalog.id}`);
-        const imported = data.imported ?? catalog.itemCount;
-        setLoadedCatalog({ id: catalog.id, count: imported });
-
+        const dbName =
+          CWICR_DATABASES.find((d) => d.id === selectedRegion)?.name ?? selectedRegion;
         addToast({
           type: 'success',
-          title: `${catalog.name} catalog loaded`,
-          message: `${imported.toLocaleString()} resources imported`,
+          title: `${dbName} loaded`,
+          message: `${imported.toLocaleString()} cost items imported`,
         });
-      } catch {
-        addToast({
-          type: 'error',
-          title: t('common.connection_error', { defaultValue: 'Connection error' }),
-          message: t('onboarding.catalog_error', { defaultValue: 'Failed to import resource catalog' }),
-        });
-      } finally {
-        setLoading(null);
-      }
-    },
-    [loading, addToast, t],
-  );
-
-  // Sort catalogs with suggested region first
-  const sortedCatalogs = [...RESOURCE_CATALOGS].sort((a, b) => {
-    if (a.id === suggestedRegion) return -1;
-    if (b.id === suggestedRegion) return 1;
-    return 0;
-  });
-
-  return (
-    <div className="flex flex-col items-center animate-fade-in">
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue-subtle mb-4">
-        <BookOpen size={24} className="text-oe-blue" />
-      </div>
-
-      <h2 className="text-2xl font-bold text-content-primary">
-        {t('onboarding.catalog_title', { defaultValue: 'Resource Catalog' })}
-      </h2>
-      <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
-        {t('onboarding.catalog_subtitle', {
-          defaultValue: 'Load a catalog of materials, labor, equipment, and assemblies for your region:',
-        })}
-      </p>
-
-      {/* Catalog grid */}
-      <div className="mt-6 w-full max-w-xl grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-        {sortedCatalogs.map((catalog) => {
-          const isLoading = loading === catalog.id;
-          const isLoaded = loadedCatalog?.id === catalog.id;
-          const isSuggested = catalog.id === suggestedRegion && !loadedCatalog;
-          return (
-            <button
-              key={catalog.id}
-              onClick={() => handleLoad(catalog)}
-              disabled={isLoading || (loading !== null && loading !== catalog.id)}
-              className={`
-                relative flex items-center gap-3 rounded-xl px-3.5 py-3 text-left
-                border transition-all duration-normal ease-oe
-                ${isLoaded
-                  ? 'border-semantic-success/30 bg-semantic-success-bg/40'
-                  : isLoading
-                    ? 'border-oe-blue/40 bg-oe-blue-subtle/30'
-                    : isSuggested
-                      ? 'border-oe-blue/30 bg-oe-blue-subtle/20 ring-1 ring-oe-blue/10'
-                      : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary active:scale-[0.98]'
-                }
-                ${loading !== null && !isLoading && !isLoaded ? 'opacity-40 pointer-events-none' : ''}
-              `}
-            >
-              <MiniFlag code={catalog.flagId} />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-content-primary truncate">{catalog.name}</span>
-                  {isLoaded && (
-                    <CheckCircle2 size={14} className="text-semantic-success shrink-0" />
-                  )}
-                  {isSuggested && !isLoading && (
-                    <span className="inline-flex items-center rounded-full bg-oe-blue-subtle px-1.5 py-0.5 text-2xs font-medium text-oe-blue">
-                      {t('onboarding.suggested', { defaultValue: 'Suggested' })}
-                    </span>
-                  )}
-                </div>
-                <div className="text-2xs text-content-tertiary">
-                  {catalog.lang} · {catalog.itemCount.toLocaleString()} {t('onboarding.items', { defaultValue: 'items' })}
-                </div>
-              </div>
-              {isLoading && (
-                <Loader2 size={16} className="animate-spin text-oe-blue shrink-0" />
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Loading progress */}
-      {loading && (
-        <div className="mt-4 w-full max-w-xl rounded-xl border border-border-light bg-surface-tertiary p-4">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Loader2 size={14} className="animate-spin text-oe-blue" />
-              <span className="text-sm font-medium text-content-primary">
-                {t('onboarding.loading_catalog', { defaultValue: 'Importing resource catalog...' })}
-              </span>
-            </div>
-            <span className="text-xs text-content-tertiary font-mono">{elapsed}s</span>
-          </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-secondary">
-            <div
-              className="h-full animate-shimmer rounded-full bg-oe-blue opacity-70 bg-[length:200%_100%]"
-              style={{ width: '100%' }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Success message */}
-      {loadedCatalog && !loading && (
-        <div className="mt-4 w-full max-w-xl rounded-xl border border-semantic-success/30 bg-semantic-success-bg/40 p-4 animate-fade-in">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 size={16} className="text-semantic-success" />
-            <span className="text-sm font-semibold text-semantic-success">
-              {loadedCatalog.count.toLocaleString()}{' '}
-              {t('onboarding.resources_loaded', { defaultValue: 'resources loaded' })}
-            </span>
-          </div>
-        </div>
-      )}
-
-      <p className="mt-4 text-xs text-content-tertiary text-center max-w-md">
-        {t('onboarding.catalog_hint', {
-          defaultValue: 'Catalogs include materials, labor rates, equipment, and pre-built assemblies.',
-        })}
-      </p>
-
-      <div className="mt-6 flex items-center gap-3">
-        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
-          {t('common.back', { defaultValue: 'Back' })}
-        </Button>
-        <Button variant="secondary" onClick={onNext}>
-          {t('onboarding.skip', { defaultValue: 'Skip' })}
-        </Button>
-        {loadedCatalog && (
-          <Button
-            variant="primary"
-            onClick={onNext}
-            icon={<ArrowRight size={16} />}
-            iconPosition="right"
-          >
-            {t('common.continue', { defaultValue: 'Continue' })}
-          </Button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ── Step 8: Demo Projects ───────────────────────────────────────────────────
-
-function StepDemoProjects({
-  onNext,
-  onBack,
-  selectedLang,
-}: {
-  onNext: () => void;
-  onBack: () => void;
-  selectedLang: string;
-}) {
-  const { t } = useTranslation();
-  const addToast = useToastStore((s) => s.addToast);
-
-  const suggestedDemoId = getSuggestedDemo(selectedLang);
-
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => {
-    return new Set([suggestedDemoId]);
-  });
-  const [installing, setInstalling] = useState(false);
-  const [installedIds, setInstalledIds] = useState<Set<string>>(new Set());
-  const [progress, setProgress] = useState({ current: 0, total: 0 });
-
-  const toggleProject = useCallback((id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
       } else {
-        next.add(id);
-      }
-      return next;
-    });
-  }, []);
-
-  const handleInstall = useCallback(async () => {
-    const ids = Array.from(selectedIds);
-    if (ids.length === 0) return;
-
-    setInstalling(true);
-    setProgress({ current: 0, total: ids.length });
-
-    const installed = new Set<string>();
-
-    for (let i = 0; i < ids.length; i++) {
-      const demoId = ids[i]!;
-      setProgress({ current: i + 1, total: ids.length });
-      try {
-        await apiPost(`/demo/install/${demoId}`);
-        installed.add(demoId);
-      } catch {
+        const err = await res.json().catch(() => ({ detail: 'Failed to load database' }));
         addToast({
           type: 'error',
-          title: t('onboarding.demo_install_error', { defaultValue: 'Failed to install demo project' }),
-          message: demoId,
+          title: 'Failed to load database',
+          message: err.detail || 'Unknown error',
         });
       }
+    } catch {
+      addToast({
+        type: 'error',
+        title: t('common.connection_error', { defaultValue: 'Connection error' }),
+      });
+    } finally {
+      setLoadingDb(false);
     }
+  }, [loadingDb, loadedDb, selectedRegion, addToast, t]);
 
-    setInstalledIds(installed);
-    setInstalling(false);
-
-    if (installed.size > 0) {
+  const handleInstallDemo = useCallback(async () => {
+    setInstallingDemo(true);
+    try {
+      await apiPost(`/demo/install/${suggestedDemoId}`);
+      setDemoInstalled(true);
       addToast({
         type: 'success',
-        title: t('onboarding.demo_installed', { defaultValue: 'Demo projects installed' }),
-        message: `${installed.size} / ${ids.length}`,
+        title: t('onboarding.demo_installed', { defaultValue: 'Demo project installed' }),
       });
+    } catch {
+      addToast({
+        type: 'error',
+        title: t('onboarding.demo_install_error', {
+          defaultValue: 'Failed to install demo project',
+        }),
+      });
+    } finally {
+      setInstallingDemo(false);
     }
-  }, [selectedIds, addToast, t]);
-
-  const allInstalled = installedIds.size > 0 && !installing;
-
-  return (
-    <div className="flex flex-col items-center animate-fade-in">
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue-subtle mb-4">
-        <FolderOpen size={24} className="text-oe-blue" />
-      </div>
-
-      <h2 className="text-2xl font-bold text-content-primary">
-        {t('onboarding.demo_title', { defaultValue: 'Demo Projects' })}
-      </h2>
-      <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
-        {t('onboarding.demo_subtitle', {
-          defaultValue: 'Install sample projects to explore the platform. Select one or more:',
-        })}
-      </p>
-
-      {/* Demo project cards */}
-      <div className="mt-6 w-full max-w-xl space-y-2.5">
-        {DEMO_PROJECTS.map((project) => {
-          const isSelected = selectedIds.has(project.id);
-          const isInstalled = installedIds.has(project.id);
-          const isSuggested = project.id === suggestedDemoId;
-          return (
-            <button
-              key={project.id}
-              onClick={() => !installing && !allInstalled && toggleProject(project.id)}
-              disabled={installing || allInstalled}
-              className={`
-                relative flex w-full items-start gap-3.5 rounded-xl px-4 py-3.5 text-left
-                border transition-all duration-normal ease-oe
-                ${isInstalled
-                  ? 'border-semantic-success/30 bg-semantic-success-bg/40'
-                  : isSelected
-                    ? 'border-oe-blue/40 bg-oe-blue-subtle/20 ring-1 ring-oe-blue/10'
-                    : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary'
-                }
-                ${installing ? 'pointer-events-none' : ''}
-              `}
-            >
-              {/* Checkbox */}
-              <div
-                className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-all duration-fast ${
-                  isSelected || isInstalled
-                    ? isInstalled
-                      ? 'border-semantic-success bg-semantic-success'
-                      : 'border-oe-blue bg-oe-blue'
-                    : 'border-content-tertiary bg-transparent'
-                }`}
-              >
-                {(isSelected || isInstalled) && <Check size={12} className="text-white" />}
-              </div>
-
-              <MiniFlag code={project.flagId} />
-
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-content-primary">{project.name}</span>
-                  {isSuggested && !isInstalled && (
-                    <span className="inline-flex items-center rounded-full bg-oe-blue-subtle px-1.5 py-0.5 text-2xs font-medium text-oe-blue">
-                      {t('onboarding.suggested', { defaultValue: 'Suggested' })}
-                    </span>
-                  )}
-                  {isInstalled && (
-                    <CheckCircle2 size={14} className="text-semantic-success shrink-0" />
-                  )}
-                </div>
-                <p className="mt-0.5 text-xs text-content-secondary leading-relaxed">
-                  {project.description}
-                </p>
-                <div className="mt-1.5 flex items-center gap-3 text-2xs text-content-tertiary">
-                  <span>{t('onboarding.budget', { defaultValue: 'Budget' })}: {project.budget}</span>
-                  <span>{project.positions} {t('onboarding.positions', { defaultValue: 'positions' })}</span>
-                </div>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Install progress */}
-      {installing && (
-        <div className="mt-4 w-full max-w-xl rounded-xl border border-border-light bg-surface-tertiary p-4">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Loader2 size={14} className="animate-spin text-oe-blue" />
-              <span className="text-sm font-medium text-content-primary">
-                {t('onboarding.installing_demos', { defaultValue: 'Installing demo projects...' })}
-              </span>
-            </div>
-            <span className="text-xs text-content-tertiary font-mono">
-              {progress.current} / {progress.total}
-            </span>
-          </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-secondary">
-            <div
-              className="h-full rounded-full bg-oe-blue transition-all duration-300 ease-oe"
-              style={{ width: `${progress.total > 0 ? (progress.current / progress.total) * 100 : 0}%` }}
-            />
-          </div>
-        </div>
-      )}
-
-      <div className="mt-6 flex items-center gap-3">
-        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
-          {t('common.back', { defaultValue: 'Back' })}
-        </Button>
-        <Button variant="secondary" onClick={onNext}>
-          {t('onboarding.skip', { defaultValue: 'Skip' })}
-        </Button>
-        {!allInstalled && selectedIds.size > 0 && (
-          <Button
-            variant="primary"
-            onClick={handleInstall}
-            loading={installing}
-            icon={<Package size={16} />}
-          >
-            {t('onboarding.install_selected', { defaultValue: 'Install Selected' })} ({selectedIds.size})
-          </Button>
-        )}
-        {allInstalled && (
-          <Button
-            variant="primary"
-            onClick={onNext}
-            icon={<ArrowRight size={16} />}
-            iconPosition="right"
-          >
-            {t('common.continue', { defaultValue: 'Continue' })}
-          </Button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ── Step 9: AI Setup ────────────────────────────────────────────────────────
-
-function StepAI({
-  onNext,
-  onBack,
-}: {
-  onNext: () => void;
-  onBack: () => void;
-}) {
-  const { t } = useTranslation();
-  const addToast = useToastStore((s) => s.addToast);
-
-  const [selectedProvider, setSelectedProvider] = useState<AIProvider>('anthropic');
-  const [apiKey, setApiKey] = useState('');
-  const [showKey, setShowKey] = useState(false);
+  }, [suggestedDemoId, addToast, t]);
 
   const testMutation = useMutation({
     mutationFn: () => aiApi.testConnection(selectedProvider),
@@ -1675,214 +1135,281 @@ function StepAI({
           title: t('onboarding.ai_saved', { defaultValue: 'AI settings saved' }),
         });
       }
-      onNext();
-    },
-    onError: () => {
-      // Even if save fails, let them proceed
-      onNext();
     },
   });
 
-  const handleContinue = useCallback(() => {
+  const handleContinue = useCallback(async () => {
+    // Install demo if toggled on and not yet installed
+    if (installDemo && !demoInstalled && !installingDemo) {
+      await handleInstallDemo();
+    }
+    // Save AI key if provided
     if (apiKey.trim()) {
       saveMutation.mutate();
-    } else {
-      onNext();
     }
-  }, [apiKey, saveMutation, onNext]);
+    onNext();
+  }, [
+    installDemo,
+    demoInstalled,
+    installingDemo,
+    handleInstallDemo,
+    apiKey,
+    saveMutation,
+    onNext,
+  ]);
 
   return (
-    <div className="flex flex-col items-center animate-fade-in">
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue-subtle mb-4">
-        <Sparkles size={24} className="text-oe-blue" />
-      </div>
-
+    <div className="flex flex-col items-center">
       <h2 className="text-2xl font-bold text-content-primary">
-        {t('onboarding.ai_title', {
-          defaultValue: 'AI Provider (Optional)',
-        })}
+        {t('onboarding.data_setup_title', { defaultValue: 'Data Setup' })}
       </h2>
       <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
-        {t('onboarding.ai_subtitle', {
-          defaultValue: 'Connect an AI provider for smart features:',
+        {t('onboarding.data_setup_subtitle', {
+          defaultValue: 'Optional setup steps. You can skip any or all of these.',
         })}
       </p>
 
-      {/* Feature list */}
-      <ul className="mt-4 space-y-1.5 text-sm text-content-secondary max-w-md w-full">
-        <li className="flex items-center gap-2">
-          <span className="text-content-tertiary">&bull;</span>
-          {t('onboarding.ai_feature_1', { defaultValue: 'Generate estimates from text descriptions' })}
-        </li>
-        <li className="flex items-center gap-2">
-          <span className="text-content-tertiary">&bull;</span>
-          {t('onboarding.ai_feature_2', { defaultValue: 'Analyze photos of buildings' })}
-        </li>
-        <li className="flex items-center gap-2">
-          <span className="text-content-tertiary">&bull;</span>
-          {t('onboarding.ai_feature_3', { defaultValue: 'Parse PDF documents automatically' })}
-        </li>
-      </ul>
-
-      {/* Provider selection */}
-      <div className="mt-6 w-full max-w-md space-y-2">
-        {AI_PROVIDERS.map((provider) => {
-          const isSelected = selectedProvider === provider.id;
-          return (
-            <button
-              key={provider.id}
-              type="button"
-              onClick={() => {
-                setSelectedProvider(provider.id);
-                setApiKey('');
-                setShowKey(false);
-              }}
-              className={`relative flex w-full items-center gap-3 rounded-xl px-4 py-3.5 text-left transition-all duration-normal ease-oe ${
-                isSelected
-                  ? 'bg-oe-blue-subtle border-2 border-oe-blue ring-2 ring-oe-blue/10'
-                  : 'border-2 border-border-light hover:bg-surface-secondary hover:border-border'
-              }`}
-            >
-              <div
-                className={`h-4 w-4 shrink-0 rounded-full border-2 transition-colors duration-fast ${
-                  isSelected
-                    ? 'border-oe-blue bg-oe-blue'
-                    : 'border-content-tertiary bg-transparent'
-                }`}
-              >
-                {isSelected && (
-                  <div className="flex h-full w-full items-center justify-center">
-                    <div className="h-1.5 w-1.5 rounded-full bg-white" />
-                  </div>
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`text-sm font-semibold ${
-                      isSelected ? 'text-oe-blue' : 'text-content-primary'
-                    }`}
-                  >
-                    {provider.name}
-                  </span>
-                  {provider.recommended && (
-                    <span className="inline-flex items-center rounded-full bg-oe-blue-subtle px-1.5 py-0.5 text-2xs font-medium text-oe-blue">
-                      {t('onboarding.recommended', { defaultValue: 'Recommended' })}
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-content-secondary mt-0.5">
-                  {provider.description}
-                </p>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* API Key input */}
-      <div className="mt-6 w-full max-w-md">
-        <div className="flex items-center justify-between mb-1.5">
-          <label className="text-sm font-medium text-content-primary">
-            {t('onboarding.api_key', { defaultValue: 'API Key' })}
-          </label>
-          <a
-            href={AI_PROVIDERS.find((p) => p.id === selectedProvider)?.docsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 text-xs text-oe-blue hover:underline"
-          >
-            {t('onboarding.get_api_key', { defaultValue: 'Get an API key' })}
-            <ExternalLink size={11} />
-          </a>
-        </div>
-        <div className="relative">
-          <input
-            type="text"
-            value={showKey ? apiKey : apiKey ? maskApiKey(apiKey) : ''}
-            onChange={(e) => {
-              if (showKey) {
-                setApiKey(e.target.value);
-              } else {
-                setApiKey(e.target.value);
-                setShowKey(true);
-              }
-            }}
-            onFocus={() => {
-              if (apiKey && !showKey) setShowKey(true);
-            }}
-            placeholder={t('onboarding.api_key_placeholder', {
-              defaultValue: 'Paste your API key here...',
-            })}
-            className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 pr-20 font-mono text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all duration-normal ease-oe hover:border-content-tertiary"
-          />
-          <button
-            type="button"
-            onClick={() => setShowKey(!showKey)}
-            className="absolute inset-y-0 right-0 flex items-center px-3 text-content-tertiary hover:text-content-primary transition-colors duration-fast"
-            tabIndex={-1}
-          >
-            {showKey ? <EyeOff size={16} /> : <Eye size={16} />}
-            <span className="ml-1 text-xs">{showKey ? 'Hide' : 'Show'}</span>
-          </button>
-        </div>
-
-        {apiKey.trim() && (
-          <div className="mt-3 flex justify-start">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => testMutation.mutate()}
-              disabled={testMutation.isPending}
-              icon={
-                testMutation.isPending ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : undefined
-              }
-            >
-              {testMutation.isPending
-                ? t('onboarding.testing', { defaultValue: 'Testing...' })
-                : t('onboarding.test_connection', { defaultValue: 'Test Connection' })}
-            </Button>
+      {/* Three cards in a responsive grid */}
+      <div className="mt-6 w-full max-w-3xl grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Card 1: Cost Database */}
+        <div className="rounded-2xl border border-border-light bg-surface-elevated p-5 flex flex-col">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue">
+              <Database size={20} />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-content-primary">
+                {t('onboarding.load_cost_db', { defaultValue: 'Load Cost Database' })}
+              </h3>
+              <p className="text-2xs text-content-tertiary">
+                {t('onboarding.cost_db_optional', { defaultValue: '55,000+ pricing items' })}
+              </p>
+            </div>
           </div>
-        )}
+
+          {/* Region dropdown */}
+          <select
+            value={selectedRegion}
+            onChange={(e) => setSelectedRegion(e.target.value)}
+            disabled={loadingDb || !!loadedDb}
+            className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all"
+          >
+            {CWICR_DATABASES.map((db) => (
+              <option key={db.id} value={db.id}>
+                {db.name} ({db.currency})
+              </option>
+            ))}
+          </select>
+
+          {/* Load button / progress / success */}
+          <div className="mt-3 flex-1">
+            {loadedDb ? (
+              <div className="flex items-center gap-2 text-sm text-semantic-success">
+                <CheckCircle2 size={16} />
+                <span className="font-medium">
+                  {loadedDb.count.toLocaleString()}{' '}
+                  {t('onboarding.items_loaded', { defaultValue: 'items loaded' })}
+                </span>
+              </div>
+            ) : loadingDb ? (
+              <div>
+                <div className="flex items-center gap-2 text-sm text-content-secondary mb-2">
+                  <Loader2 size={14} className="animate-spin text-oe-blue" />
+                  <span>{dbProgress}%</span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-secondary">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-500 transition-all duration-500 ease-out"
+                    style={{ width: `${dbProgress}%` }}
+                  />
+                </div>
+              </div>
+            ) : (
+              <Button variant="secondary" size="sm" onClick={handleLoadDb} className="w-full">
+                {t('onboarding.load_database', { defaultValue: 'Load Database' })}
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Card 2: Demo Project */}
+        <div className="rounded-2xl border border-border-light bg-surface-elevated p-5 flex flex-col">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue">
+              <FolderOpen size={20} />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-content-primary">
+                {t('onboarding.install_demo', { defaultValue: 'Install Demo Project' })}
+              </h3>
+              <p className="text-2xs text-content-tertiary">
+                {t('onboarding.demo_optional', { defaultValue: 'Sample project to explore' })}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between py-2">
+            <span className="text-sm text-content-primary">
+              {t('onboarding.install_demo_data', { defaultValue: 'Install demo data' })}
+            </span>
+            <ToggleSwitch
+              enabled={installDemo}
+              onToggle={() => setInstallDemo(!installDemo)}
+              disabled={demoInstalled}
+            />
+          </div>
+
+          <div className="mt-auto">
+            {demoInstalled ? (
+              <div className="flex items-center gap-2 text-sm text-semantic-success">
+                <CheckCircle2 size={16} />
+                <span className="font-medium">
+                  {t('onboarding.demo_installed', { defaultValue: 'Installed' })}
+                </span>
+              </div>
+            ) : installingDemo ? (
+              <div className="flex items-center gap-2 text-sm text-content-secondary">
+                <Loader2 size={14} className="animate-spin text-oe-blue" />
+                <span>{t('onboarding.installing', { defaultValue: 'Installing...' })}</span>
+              </div>
+            ) : null}
+          </div>
+        </div>
+
+        {/* Card 3: AI Provider */}
+        <div className="rounded-2xl border border-border-light bg-surface-elevated p-5 flex flex-col">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue">
+              <Sparkles size={20} />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-content-primary">
+                {t('onboarding.connect_ai', { defaultValue: 'Connect AI' })}
+              </h3>
+              <p className="text-2xs text-content-tertiary">
+                {t('onboarding.ai_optional', { defaultValue: 'Smart estimation features' })}
+              </p>
+            </div>
+          </div>
+
+          {/* Provider selector */}
+          <select
+            value={selectedProvider}
+            onChange={(e) => {
+              setSelectedProvider(e.target.value as AIProvider);
+              setApiKey('');
+              setShowKey(false);
+            }}
+            className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all mb-2"
+          >
+            {AI_PROVIDERS.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+                {p.recommended ? ' *' : ''}
+              </option>
+            ))}
+          </select>
+
+          {/* API key input */}
+          <div className="relative">
+            <input
+              type="text"
+              value={showKey ? apiKey : apiKey ? maskApiKey(apiKey) : ''}
+              onChange={(e) => {
+                if (showKey) {
+                  setApiKey(e.target.value);
+                } else {
+                  setApiKey(e.target.value);
+                  setShowKey(true);
+                }
+              }}
+              onFocus={() => {
+                if (apiKey && !showKey) setShowKey(true);
+              }}
+              placeholder={t('onboarding.api_key_placeholder', {
+                defaultValue: 'Paste API key...',
+              })}
+              className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 pr-8 font-mono text-xs text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all"
+            />
+            <button
+              type="button"
+              onClick={() => setShowKey(!showKey)}
+              className="absolute inset-y-0 right-0 flex items-center px-2 text-content-tertiary hover:text-content-primary transition-colors"
+              tabIndex={-1}
+            >
+              {showKey ? <EyeOff size={14} /> : <Eye size={14} />}
+            </button>
+          </div>
+
+          {/* Test and docs link */}
+          <div className="mt-2 flex items-center justify-between">
+            <a
+              href={AI_PROVIDERS.find((p) => p.id === selectedProvider)?.docsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-2xs text-oe-blue hover:underline"
+            >
+              {t('onboarding.get_api_key', { defaultValue: 'Get key' })}
+              <ExternalLink size={10} />
+            </a>
+            {apiKey.trim() && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => testMutation.mutate()}
+                disabled={testMutation.isPending}
+                icon={
+                  testMutation.isPending ? (
+                    <Loader2 size={12} className="animate-spin" />
+                  ) : undefined
+                }
+              >
+                {testMutation.isPending
+                  ? t('onboarding.testing', { defaultValue: 'Testing...' })
+                  : t('onboarding.test', { defaultValue: 'Test' })}
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
 
-      <div className="mt-8 flex items-center gap-3">
+      <p className="mt-4 text-xs text-content-tertiary text-center max-w-md">
+        {t('onboarding.data_setup_hint', {
+          defaultValue: 'All of these can be configured later in Settings.',
+        })}
+      </p>
+
+      <div className="mt-6 flex items-center gap-3">
         <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
           {t('common.back', { defaultValue: 'Back' })}
         </Button>
         <Button variant="secondary" onClick={onNext}>
           {t('onboarding.skip', { defaultValue: 'Skip' })}
         </Button>
-        {apiKey.trim() && (
-          <Button
-            variant="primary"
-            onClick={handleContinue}
-            loading={saveMutation.isPending}
-            icon={<ArrowRight size={16} />}
-            iconPosition="right"
-          >
-            {t('onboarding.save_continue', { defaultValue: 'Save & Continue' })}
-          </Button>
-        )}
+        <Button
+          variant="primary"
+          onClick={handleContinue}
+          loading={saveMutation.isPending || installingDemo}
+          icon={<ArrowRight size={16} />}
+          iconPosition="right"
+        >
+          {t('common.continue', { defaultValue: 'Continue' })}
+        </Button>
       </div>
     </div>
   );
 }
 
-// ── Step 10: Finish ─────────────────────────────────────────────────────────
+// ── Step 6: Summary + Finish ────────────────────────────────────────────────
 
 function StepFinish({
   onBack,
   companyType,
   enabledModules,
-  interfaceMode,
 }: {
   onBack: () => void;
   companyType: CompanyTypeKey | null;
   enabledModules: Set<string>;
-  interfaceMode: ViewMode;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -1890,18 +1417,11 @@ function StepFinish({
   const setViewMode = useViewModeStore((s) => s.setMode);
   const [saving, setSaving] = useState(false);
 
-  // Gather what was installed from localStorage
-  const loadedDbs = (() => {
-    try {
-      return JSON.parse(localStorage.getItem('oe_loaded_databases') || '[]') as string[];
-    } catch {
-      return [];
-    }
-  })();
-
   const presetLabel = companyType
     ? COMPANY_PRESETS.find((p) => p.key === companyType)?.labelKey
     : null;
+
+  const enabledCount = enabledModules.size + CORE_MODULE_KEYS.size;
 
   const handleFinish = useCallback(async () => {
     setSaving(true);
@@ -1909,22 +1429,24 @@ function StepFinish({
     // 1. Apply module preferences to the store
     const allModuleKeys = ALL_MODULES.map((m) => m.key);
     for (const key of allModuleKeys) {
-      setModuleEnabled(key, enabledModules.has(key));
+      if (!CORE_MODULE_KEYS.has(key)) {
+        setModuleEnabled(key, enabledModules.has(key));
+      }
     }
 
-    // 2. Apply interface mode
-    setViewMode(interfaceMode);
+    // 2. Apply advanced mode (default for onboarding)
+    setViewMode('advanced');
 
     // 3. Save onboarding state to server
     try {
       await apiPost('/v1/users/me/onboarding', {
         company_type: companyType ?? 'full_enterprise',
         enabled_modules: Array.from(enabledModules),
-        interface_mode: interfaceMode,
+        interface_mode: 'advanced',
         completed: true,
       });
     } catch {
-      // Non-critical — local state is already applied
+      // Non-critical -- local state is already applied
     }
 
     // 4. Mark completed locally
@@ -1932,99 +1454,48 @@ function StepFinish({
 
     setSaving(false);
     navigate('/');
-  }, [companyType, enabledModules, interfaceMode, navigate, setModuleEnabled, setViewMode]);
+  }, [companyType, enabledModules, navigate, setModuleEnabled, setViewMode]);
 
   return (
-    <div className="flex flex-col items-center justify-center text-center animate-fade-in">
-      <div className="mb-6">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-semantic-success-bg/60 ring-4 ring-semantic-success/10">
+    <div className="flex flex-col items-center justify-center text-center">
+      {/* Confetti-like animation via pulsing rings */}
+      <div className="relative mb-6">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="h-24 w-24 rounded-full bg-semantic-success/5 animate-ping" />
+        </div>
+        <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-semantic-success-bg/60 ring-4 ring-semantic-success/10">
           <Rocket size={32} className="text-semantic-success" />
         </div>
       </div>
 
       <h2 className="text-3xl font-bold text-content-primary">
-        {t('onboarding.finish_title', { defaultValue: 'You\'re All Set!' })}
+        {t('onboarding.finish_title', { defaultValue: "You're All Set!" })}
       </h2>
 
       <p className="mt-3 max-w-md text-base text-content-secondary leading-relaxed">
         {t('onboarding.finish_subtitle', {
-          defaultValue: 'Your workspace is configured and ready to use. Here\'s a summary of what was set up:',
+          defaultValue:
+            "Your workspace is configured and ready to use.",
         })}
       </p>
 
-      {/* Summary card */}
-      <div className="mt-6 w-full max-w-md rounded-xl border border-border-light bg-surface-elevated p-5 text-left space-y-3">
-        {/* Language */}
-        <div className="flex items-center gap-3">
-          <Globe size={16} className="text-oe-blue shrink-0" />
-          <span className="text-sm text-content-primary">
-            {t('onboarding.summary_language', { defaultValue: 'Language' })}:
-          </span>
-          <span className="text-sm font-semibold text-content-primary ml-auto">
-            {SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language)?.name || i18n.language}
-          </span>
-        </div>
-
-        {/* Company Type */}
+      {/* Summary line */}
+      <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-surface-secondary px-4 py-2 text-sm text-content-primary">
         {companyType && presetLabel && (
-          <div className="flex items-center gap-3">
-            <Building2 size={16} className="text-oe-blue shrink-0" />
-            <span className="text-sm text-content-primary">
-              {t('onboarding.summary_company', { defaultValue: 'Company Type' })}:
-            </span>
-            <span className="text-sm font-semibold text-content-primary ml-auto">
+          <>
+            <span className="font-semibold">
               {t(presetLabel, { defaultValue: companyType })}
             </span>
-          </div>
+            <span className="text-content-tertiary">|</span>
+          </>
         )}
-
-        {/* Modules */}
-        <div className="flex items-center gap-3">
-          <Package size={16} className="text-oe-blue shrink-0" />
-          <span className="text-sm text-content-primary">
-            {t('onboarding.summary_modules', { defaultValue: 'Active Modules' })}:
-          </span>
-          <span className="text-sm font-semibold text-content-primary ml-auto">
-            {enabledModules.size} / {ALL_MODULES.length}
-          </span>
-        </div>
-
-        {/* Interface Mode */}
-        <div className="flex items-center gap-3">
-          <Monitor size={16} className="text-oe-blue shrink-0" />
-          <span className="text-sm text-content-primary">
-            {t('onboarding.summary_mode', { defaultValue: 'Interface Mode' })}:
-          </span>
-          <span className="text-sm font-semibold text-content-primary ml-auto capitalize">
-            {interfaceMode === 'simple'
-              ? t('onboarding.mode_simple', { defaultValue: 'Simple' })
-              : t('onboarding.mode_advanced', { defaultValue: 'Advanced' })}
-          </span>
-        </div>
-
-        {/* Cost DB */}
-        <div className="flex items-center gap-3">
-          <Database size={16} className="text-oe-blue shrink-0" />
-          <span className="text-sm text-content-primary">
-            {t('onboarding.summary_cost_db', { defaultValue: 'Cost Database' })}:
-          </span>
-          <span className="text-sm font-semibold text-content-primary ml-auto">
-            {loadedDbs.length > 0
-              ? loadedDbs.map((id) => CWICR_DATABASES.find((d) => d.id === id)?.name || id).join(', ')
-              : t('onboarding.summary_skipped', { defaultValue: 'Skipped' })}
-          </span>
-        </div>
-
-        {/* AI */}
-        <div className="flex items-center gap-3">
-          <Sparkles size={16} className="text-oe-blue shrink-0" />
-          <span className="text-sm text-content-primary">
-            {t('onboarding.summary_ai', { defaultValue: 'AI Provider' })}:
-          </span>
-          <span className="text-sm font-semibold text-content-primary ml-auto">
-            <CheckCircle2 size={14} className="inline text-semantic-success" />
-          </span>
-        </div>
+        <span>
+          {enabledCount} {t('onboarding.modules_label', { defaultValue: 'modules' })}
+        </span>
+        <span className="text-content-tertiary">|</span>
+        <span>
+          {SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language)?.name || i18n.language}
+        </span>
       </div>
 
       <p className="mt-5 text-xs text-content-tertiary max-w-md">
@@ -2045,7 +1516,7 @@ function StepFinish({
           icon={<ArrowRight size={18} />}
           iconPosition="right"
         >
-          {t('onboarding.go_to_dashboard', { defaultValue: 'Go to Dashboard' })}
+          {t('onboarding.start_working', { defaultValue: 'Start Working' })}
         </Button>
       </div>
     </div>
@@ -2059,9 +1530,13 @@ export function OnboardingWizard() {
   const [selectedLang, setSelectedLang] = useState(() => i18n.language?.split('-')[0] || 'en');
   const [companyType, setCompanyType] = useState<CompanyTypeKey | null>(null);
   const [enabledModules, setEnabledModules] = useState<Set<string>>(
-    () => new Set(ALL_MODULES.map((m) => m.key)),
+    () => new Set(ALL_MODULES.filter((m) => !m.core).map((m) => m.key)),
   );
-  const [interfaceMode, setInterfaceMode] = useState<ViewMode>('advanced');
+
+  // Track whether user chose "Quick Start" (skip profile + modules, go to data)
+  const [quickStart, setQuickStart] = useState(false);
+  // Track whether module config step should be shown
+  const [showModuleConfig, setShowModuleConfig] = useState(false);
 
   const goNext = useCallback(() => {
     setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1));
@@ -2081,7 +1556,7 @@ export function OnboardingWizard() {
     const preset = COMPANY_PRESETS.find((p) => p.key === key);
     if (preset) {
       if (key === 'full_enterprise') {
-        setEnabledModules(new Set(ALL_MODULES.map((m) => m.key)));
+        setEnabledModules(new Set(ALL_MODULES.filter((m) => !m.core).map((m) => m.key)));
       } else {
         setEnabledModules(new Set(preset.enabledModules));
       }
@@ -2100,56 +1575,102 @@ export function OnboardingWizard() {
     });
   }, []);
 
+  // Step 2 handlers
+  const handleQuickStart = useCallback(() => {
+    setQuickStart(true);
+    setShowModuleConfig(false);
+    // Set all modules enabled (full enterprise quick start)
+    setEnabledModules(new Set(ALL_MODULES.filter((m) => !m.core).map((m) => m.key)));
+    setCompanyType('full_enterprise');
+    // Jump to step 4 (data setup) -- step indices: 0=welcome, 1=choice, 2=profile, 3=modules, 4=data, 5=finish
+    setStep(4);
+  }, []);
+
+  const handleChooseProfile = useCallback(() => {
+    setQuickStart(false);
+    setShowModuleConfig(false);
+    // Go to step 2 (profile)
+    setStep(2);
+  }, []);
+
+  const handleConfigureIndividually = useCallback(() => {
+    setShowModuleConfig(true);
+    setStep(3);
+  }, []);
+
+  // Handle back from step 4 (data) -- depends on quick start
+  const handleBackFromData = useCallback(() => {
+    if (quickStart) {
+      setStep(1); // back to start choice
+    } else if (showModuleConfig) {
+      setStep(3); // back to module config
+    } else {
+      setStep(2); // back to profile
+    }
+  }, [quickStart, showModuleConfig]);
+
+  // Handle next from step 2 (profile) -- skip modules unless "configure individually"
+  const handleNextFromProfile = useCallback(() => {
+    if (showModuleConfig) {
+      setStep(3); // go to module config
+    } else {
+      setStep(4); // skip to data
+    }
+  }, [showModuleConfig]);
+
   return (
     <div className="flex min-h-screen flex-col bg-surface-primary">
       {/* Top bar with progress */}
-      <div className="px-8 pt-6 pb-4 max-w-5xl mx-auto w-full">
+      <div className="px-8 pt-6 pb-4 max-w-3xl mx-auto w-full">
         <ProgressBar current={step} total={TOTAL_STEPS} />
       </div>
 
       {/* Main content area */}
       <div className="flex flex-1 items-center justify-center px-6 pb-16">
-        <div className="w-full max-w-[680px]">
-          {step === 0 && <StepWelcome onNext={goNext} />}
-          {step === 1 && (
-            <StepLanguage onNext={goNext} onBack={goBack} onLanguageChange={handleLanguageChange} />
-          )}
-          {step === 2 && (
-            <StepCompanyType
-              onNext={goNext}
-              onBack={goBack}
-              selectedType={companyType}
-              onSelectType={handleSelectCompanyType}
-            />
-          )}
-          {step === 3 && (
-            <StepModuleReview
-              onNext={goNext}
-              onBack={goBack}
-              enabledModules={enabledModules}
-              onToggleModule={handleToggleModule}
-            />
-          )}
-          {step === 4 && (
-            <StepInterfaceMode
-              onNext={goNext}
-              onBack={goBack}
-              interfaceMode={interfaceMode}
-              onSelectMode={setInterfaceMode}
-            />
-          )}
-          {step === 5 && <StepCostDatabase onNext={goNext} onBack={goBack} selectedLang={selectedLang} />}
-          {step === 6 && <StepResourceCatalog onNext={goNext} onBack={goBack} selectedLang={selectedLang} />}
-          {step === 7 && <StepDemoProjects onNext={goNext} onBack={goBack} selectedLang={selectedLang} />}
-          {step === 8 && <StepAI onNext={goNext} onBack={goBack} />}
-          {step === 9 && (
-            <StepFinish
-              onBack={goBack}
-              companyType={companyType}
-              enabledModules={enabledModules}
-              interfaceMode={interfaceMode}
-            />
-          )}
+        <div className="w-full max-w-[720px]">
+          <StepTransition stepKey={step}>
+            {step === 0 && (
+              <StepWelcome onNext={goNext} onLanguageChange={handleLanguageChange} />
+            )}
+            {step === 1 && (
+              <StepStartChoice
+                onQuickStart={handleQuickStart}
+                onChooseProfile={handleChooseProfile}
+                onBack={goBack}
+              />
+            )}
+            {step === 2 && (
+              <StepCompanyProfile
+                onNext={handleNextFromProfile}
+                onBack={() => setStep(1)}
+                selectedType={companyType}
+                onSelectType={handleSelectCompanyType}
+                onConfigureIndividually={handleConfigureIndividually}
+              />
+            )}
+            {step === 3 && (
+              <StepModuleConfig
+                onNext={() => setStep(4)}
+                onBack={() => setStep(2)}
+                enabledModules={enabledModules}
+                onToggleModule={handleToggleModule}
+              />
+            )}
+            {step === 4 && (
+              <StepDataSetup
+                onNext={() => setStep(5)}
+                onBack={handleBackFromData}
+                selectedLang={selectedLang}
+              />
+            )}
+            {step === 5 && (
+              <StepFinish
+                onBack={() => setStep(4)}
+                companyType={companyType}
+                enabledModules={enabledModules}
+              />
+            )}
+          </StepTransition>
         </div>
       </div>
     </div>
