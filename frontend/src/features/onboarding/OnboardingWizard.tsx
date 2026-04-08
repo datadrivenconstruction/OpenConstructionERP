@@ -19,17 +19,27 @@ import {
   FolderOpen,
   Rocket,
   Package,
+  Building2,
+  Calculator,
+  ClipboardList,
+  Pencil,
+  Boxes,
+  Monitor,
+  Zap,
+  type LucideIcon,
 } from 'lucide-react';
 import { Logo, Button, CountryFlag } from '@/shared/ui';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useModuleStore } from '@/stores/useModuleStore';
+import { useViewModeStore, type ViewMode } from '@/stores/useViewModeStore';
 import { aiApi, type AIProvider } from '@/features/ai/api';
 import { apiPost } from '@/shared/lib/api';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 10;
 
 // ── Language → Region mapping ──────────────────────────────────────────────
 
@@ -202,6 +212,159 @@ const AI_PROVIDERS: ProviderOption[] = [
   },
 ];
 
+// ── Company Type Presets ────────────────────────────────────────────────────
+
+type CompanyTypeKey =
+  | 'general_contractor'
+  | 'estimator'
+  | 'project_management'
+  | 'architecture_engineering'
+  | 'full_enterprise';
+
+interface CompanyPreset {
+  key: CompanyTypeKey;
+  labelKey: string;
+  descriptionKey: string;
+  icon: LucideIcon;
+  enabledModules: string[];
+}
+
+const COMPANY_PRESETS: CompanyPreset[] = [
+  {
+    key: 'general_contractor',
+    labelKey: 'onboarding.company_general_contractor',
+    descriptionKey: 'onboarding.company_general_contractor_desc',
+    icon: Building2,
+    enabledModules: [
+      'boq', 'projects', 'costs', 'assemblies', 'catalog', 'templates',
+      'schedule', 'finance', 'procurement', 'safety', 'inspections',
+      'punchlist', 'field-reports', 'tasks', 'meetings', 'documents',
+      'risks', 'changeorders', 'contacts', 'reports', 'reporting',
+      'analytics', 'validation', 'photos', 'ncr', 'requirements',
+    ],
+  },
+  {
+    key: 'estimator',
+    labelKey: 'onboarding.company_estimator',
+    descriptionKey: 'onboarding.company_estimator_desc',
+    icon: Calculator,
+    enabledModules: [
+      'boq', 'projects', 'costs', 'assemblies', 'catalog', 'templates',
+      'takeoff', 'pdf-takeoff', 'ai-estimate', 'advisor', 'validation',
+      'reports', 'reporting', 'analytics', 'data-explorer', 'documents',
+      'cost-benchmark',
+    ],
+  },
+  {
+    key: 'project_management',
+    labelKey: 'onboarding.company_project_management',
+    descriptionKey: 'onboarding.company_project_management_desc',
+    icon: ClipboardList,
+    enabledModules: [
+      'projects', 'schedule', 'tasks', 'meetings', 'finance',
+      'procurement', 'documents', 'cde', 'transmittals', 'rfi',
+      'submittals', 'correspondence', 'risks', 'changeorders',
+      'reporting', 'contacts', 'reports', 'analytics', 'markups',
+      'photos', 'field-reports', 'requirements', 'inspections',
+    ],
+  },
+  {
+    key: 'architecture_engineering',
+    labelKey: 'onboarding.company_architecture',
+    descriptionKey: 'onboarding.company_architecture_desc',
+    icon: Pencil,
+    enabledModules: [
+      'projects', 'documents', 'cde', 'bim', 'transmittals', 'rfi',
+      'submittals', 'correspondence', 'takeoff', 'pdf-takeoff', 'boq',
+      'costs', 'data-explorer', 'markups', 'photos', 'reports',
+      'validation', 'sustainability',
+    ],
+  },
+  {
+    key: 'full_enterprise',
+    labelKey: 'onboarding.company_full_enterprise',
+    descriptionKey: 'onboarding.company_full_enterprise_desc',
+    icon: Boxes,
+    enabledModules: [], // special case: all modules
+  },
+];
+
+// ── Module catalog for review step ──────────────────────────────────────────
+
+interface ModuleDef {
+  key: string;
+  labelKey: string;
+  descriptionKey: string;
+  group: string;
+}
+
+const MODULE_GROUPS = [
+  { id: 'core', labelKey: 'onboarding.mod_group_core' },
+  { id: 'takeoff', labelKey: 'onboarding.mod_group_takeoff' },
+  { id: 'planning', labelKey: 'onboarding.mod_group_planning' },
+  { id: 'finance', labelKey: 'onboarding.mod_group_finance' },
+  { id: 'communication', labelKey: 'onboarding.mod_group_communication' },
+  { id: 'documents', labelKey: 'onboarding.mod_group_documents' },
+  { id: 'quality', labelKey: 'onboarding.mod_group_quality' },
+  { id: 'field', labelKey: 'onboarding.mod_group_field' },
+  { id: 'analytics', labelKey: 'onboarding.mod_group_analytics' },
+];
+
+const ALL_MODULES: ModuleDef[] = [
+  // Core
+  { key: 'boq', labelKey: 'boq.title', descriptionKey: 'onboarding.mod_boq_desc', group: 'core' },
+  { key: 'projects', labelKey: 'projects.title', descriptionKey: 'onboarding.mod_projects_desc', group: 'core' },
+  { key: 'costs', labelKey: 'costs.title', descriptionKey: 'onboarding.mod_costs_desc', group: 'core' },
+  { key: 'assemblies', labelKey: 'nav.assemblies', descriptionKey: 'onboarding.mod_assemblies_desc', group: 'core' },
+  { key: 'catalog', labelKey: 'catalog.title', descriptionKey: 'onboarding.mod_catalog_desc', group: 'core' },
+  { key: 'templates', labelKey: 'nav.templates', descriptionKey: 'onboarding.mod_templates_desc', group: 'core' },
+  { key: 'validation', labelKey: 'validation.title', descriptionKey: 'onboarding.mod_validation_desc', group: 'core' },
+  // Takeoff & AI
+  { key: 'takeoff', labelKey: 'nav.takeoff_overview', descriptionKey: 'onboarding.mod_takeoff_desc', group: 'takeoff' },
+  { key: 'pdf-takeoff', labelKey: 'nav.pdf_measurements', descriptionKey: 'onboarding.mod_pdf_takeoff_desc', group: 'takeoff' },
+  { key: 'ai-estimate', labelKey: 'nav.ai_estimate', descriptionKey: 'onboarding.mod_ai_estimate_desc', group: 'takeoff' },
+  { key: 'advisor', labelKey: 'nav.ai_advisor', descriptionKey: 'onboarding.mod_advisor_desc', group: 'takeoff' },
+  { key: 'data-explorer', labelKey: 'nav.cad_bim_explorer', descriptionKey: 'onboarding.mod_data_explorer_desc', group: 'takeoff' },
+  { key: 'bim', labelKey: 'nav.bim_viewer', descriptionKey: 'onboarding.mod_bim_desc', group: 'takeoff' },
+  // Planning
+  { key: 'schedule', labelKey: 'schedule.title', descriptionKey: 'onboarding.mod_schedule_desc', group: 'planning' },
+  { key: '5d', labelKey: 'nav.5d_cost_model', descriptionKey: 'onboarding.mod_5d_desc', group: 'planning' },
+  { key: 'tasks', labelKey: 'tasks.title', descriptionKey: 'onboarding.mod_tasks_desc', group: 'planning' },
+  // Finance
+  { key: 'finance', labelKey: 'finance.title', descriptionKey: 'onboarding.mod_finance_desc', group: 'finance' },
+  { key: 'procurement', labelKey: 'procurement.title', descriptionKey: 'onboarding.mod_procurement_desc', group: 'finance' },
+  { key: 'tendering', labelKey: 'tendering.title', descriptionKey: 'onboarding.mod_tendering_desc', group: 'finance' },
+  { key: 'changeorders', labelKey: 'nav.change_orders', descriptionKey: 'onboarding.mod_changeorders_desc', group: 'finance' },
+  // Communication
+  { key: 'contacts', labelKey: 'contacts.title', descriptionKey: 'onboarding.mod_contacts_desc', group: 'communication' },
+  { key: 'meetings', labelKey: 'meetings.title', descriptionKey: 'onboarding.mod_meetings_desc', group: 'communication' },
+  { key: 'rfi', labelKey: 'rfi.title', descriptionKey: 'onboarding.mod_rfi_desc', group: 'communication' },
+  { key: 'submittals', labelKey: 'submittals.title', descriptionKey: 'onboarding.mod_submittals_desc', group: 'communication' },
+  { key: 'transmittals', labelKey: 'transmittals.title', descriptionKey: 'onboarding.mod_transmittals_desc', group: 'communication' },
+  { key: 'correspondence', labelKey: 'correspondence.title', descriptionKey: 'onboarding.mod_correspondence_desc', group: 'communication' },
+  // Documents
+  { key: 'documents', labelKey: 'nav.documents', descriptionKey: 'onboarding.mod_documents_desc', group: 'documents' },
+  { key: 'cde', labelKey: 'cde.title', descriptionKey: 'onboarding.mod_cde_desc', group: 'documents' },
+  { key: 'photos', labelKey: 'nav.photos', descriptionKey: 'onboarding.mod_photos_desc', group: 'documents' },
+  { key: 'markups', labelKey: 'nav.markups', descriptionKey: 'onboarding.mod_markups_desc', group: 'documents' },
+  // Quality & Safety
+  { key: 'inspections', labelKey: 'inspections.title', descriptionKey: 'onboarding.mod_inspections_desc', group: 'quality' },
+  { key: 'ncr', labelKey: 'ncr.title', descriptionKey: 'onboarding.mod_ncr_desc', group: 'quality' },
+  { key: 'safety', labelKey: 'safety.title', descriptionKey: 'onboarding.mod_safety_desc', group: 'quality' },
+  { key: 'punchlist', labelKey: 'nav.punchlist', descriptionKey: 'onboarding.mod_punchlist_desc', group: 'quality' },
+  { key: 'risks', labelKey: 'nav.risk_register', descriptionKey: 'onboarding.mod_risks_desc', group: 'quality' },
+  // Field
+  { key: 'field-reports', labelKey: 'nav.field_reports', descriptionKey: 'onboarding.mod_field_reports_desc', group: 'field' },
+  { key: 'requirements', labelKey: 'nav.requirements', descriptionKey: 'onboarding.mod_requirements_desc', group: 'field' },
+  // Analytics & extras
+  { key: 'reports', labelKey: 'nav.reports', descriptionKey: 'onboarding.mod_reports_desc', group: 'analytics' },
+  { key: 'reporting', labelKey: 'nav.reporting', descriptionKey: 'onboarding.mod_reporting_desc', group: 'analytics' },
+  { key: 'analytics', labelKey: 'nav.analytics', descriptionKey: 'onboarding.mod_analytics_desc', group: 'analytics' },
+  { key: 'sustainability', labelKey: 'nav.sustainability', descriptionKey: 'onboarding.mod_sustainability_desc', group: 'analytics' },
+  { key: 'cost-benchmark', labelKey: 'nav.cost_benchmark', descriptionKey: 'onboarding.mod_cost_benchmark_desc', group: 'analytics' },
+  { key: 'collaboration', labelKey: 'nav.collaboration', descriptionKey: 'onboarding.mod_collaboration_desc', group: 'analytics' },
+];
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function maskApiKey(key: string): string {
@@ -253,6 +416,9 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
   const stepLabels = [
     t('onboarding.step_welcome', { defaultValue: 'Welcome' }),
     t('onboarding.step_language', { defaultValue: 'Language' }),
+    t('onboarding.step_company', { defaultValue: 'Company' }),
+    t('onboarding.step_modules', { defaultValue: 'Modules' }),
+    t('onboarding.step_mode', { defaultValue: 'Mode' }),
     t('onboarding.step_costdb', { defaultValue: 'Cost DB' }),
     t('onboarding.step_catalog', { defaultValue: 'Catalog' }),
     t('onboarding.step_demos', { defaultValue: 'Demos' }),
@@ -274,7 +440,7 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
                 />
               )}
               <div
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all duration-500 ease-oe ${
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-2xs font-bold transition-all duration-500 ease-oe ${
                   i < current
                     ? 'bg-oe-blue text-white'
                     : i === current
@@ -282,7 +448,7 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
                       : 'bg-surface-secondary text-content-tertiary border border-border-light'
                 }`}
               >
-                {i < current ? <Check size={14} /> : i + 1}
+                {i < current ? <Check size={12} /> : i + 1}
               </div>
               {i < total - 1 && (
                 <div
@@ -293,7 +459,7 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
               )}
             </div>
             <span
-              className={`text-2xs font-medium transition-colors ${
+              className={`text-2xs font-medium transition-colors whitespace-nowrap ${
                 i === current
                   ? 'text-oe-blue'
                   : i < current
@@ -454,7 +620,340 @@ function StepLanguage({
   );
 }
 
-// ── Step 3: Cost Database ───────────────────────────────────────────────────
+// ── Step 3: Company Type ─────────────────────────────────────────────────────
+
+function StepCompanyType({
+  onNext,
+  onBack,
+  selectedType,
+  onSelectType,
+}: {
+  onNext: () => void;
+  onBack: () => void;
+  selectedType: CompanyTypeKey | null;
+  onSelectType: (key: CompanyTypeKey) => void;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <div className="flex flex-col items-center animate-fade-in">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue-subtle mb-4">
+        <Building2 size={24} className="text-oe-blue" />
+      </div>
+
+      <h2 className="text-2xl font-bold text-content-primary">
+        {t('onboarding.company_type_title', { defaultValue: 'What type of company are you?' })}
+      </h2>
+      <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
+        {t('onboarding.company_type_subtitle', {
+          defaultValue: 'We will pre-configure the best set of modules for your workflow.',
+        })}
+      </p>
+
+      <div className="mt-6 w-full max-w-xl space-y-3">
+        {COMPANY_PRESETS.map((preset) => {
+          const isSelected = selectedType === preset.key;
+          const Icon = preset.icon;
+          const moduleCount =
+            preset.key === 'full_enterprise'
+              ? ALL_MODULES.length
+              : preset.enabledModules.length;
+
+          return (
+            <button
+              key={preset.key}
+              onClick={() => onSelectType(preset.key)}
+              className={`
+                group relative flex w-full items-center gap-4 rounded-2xl p-4 text-left
+                border-2 transition-all duration-300 ease-oe
+                ${
+                  isSelected
+                    ? 'border-oe-blue bg-gradient-to-r from-oe-blue-subtle/50 to-oe-blue-subtle/20 ring-4 ring-oe-blue/10 shadow-md shadow-oe-blue/5'
+                    : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary hover:shadow-sm active:scale-[0.99]'
+                }
+              `}
+            >
+              {/* Icon circle */}
+              <div
+                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-all duration-300 ${
+                  isSelected
+                    ? 'bg-oe-blue text-white shadow-lg shadow-oe-blue/20'
+                    : 'bg-surface-secondary text-content-secondary group-hover:bg-surface-tertiary'
+                }`}
+              >
+                <Icon size={22} />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`text-base font-bold transition-colors ${
+                      isSelected ? 'text-oe-blue' : 'text-content-primary'
+                    }`}
+                  >
+                    {t(preset.labelKey, { defaultValue: preset.key })}
+                  </span>
+                  {isSelected && (
+                    <CheckCircle2 size={16} className="text-oe-blue shrink-0" />
+                  )}
+                </div>
+                <p className="mt-0.5 text-sm text-content-secondary leading-snug">
+                  {t(preset.descriptionKey, { defaultValue: '' })}
+                </p>
+              </div>
+
+              {/* Module count badge */}
+              <div
+                className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold transition-all ${
+                  isSelected
+                    ? 'bg-oe-blue text-white'
+                    : 'bg-surface-secondary text-content-tertiary group-hover:bg-surface-tertiary'
+                }`}
+              >
+                {moduleCount} {t('onboarding.modules_label', { defaultValue: 'modules' })}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-8 flex items-center gap-3">
+        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
+          {t('common.back', { defaultValue: 'Back' })}
+        </Button>
+        <Button
+          variant="primary"
+          onClick={onNext}
+          disabled={!selectedType}
+          icon={<ArrowRight size={16} />}
+          iconPosition="right"
+        >
+          {t('common.continue', { defaultValue: 'Continue' })}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ── Step 4: Module Review ───────────────────────────────────────────────────
+
+function StepModuleReview({
+  onNext,
+  onBack,
+  enabledModules,
+  onToggleModule,
+}: {
+  onNext: () => void;
+  onBack: () => void;
+  enabledModules: Set<string>;
+  onToggleModule: (key: string) => void;
+}) {
+  const { t } = useTranslation();
+  const enabledCount = enabledModules.size;
+
+  return (
+    <div className="flex flex-col items-center animate-fade-in">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue-subtle mb-4">
+        <Package size={24} className="text-oe-blue" />
+      </div>
+
+      <h2 className="text-2xl font-bold text-content-primary">
+        {t('onboarding.modules_title', { defaultValue: 'Review Your Modules' })}
+      </h2>
+      <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
+        {t('onboarding.modules_subtitle', {
+          defaultValue: 'Pre-selected based on your company type. Toggle any module on or off.',
+        })}
+      </p>
+
+      <div className="mt-2 text-sm font-medium text-oe-blue">
+        {enabledCount} / {ALL_MODULES.length}{' '}
+        {t('onboarding.modules_active', { defaultValue: 'modules active' })}
+      </div>
+
+      <div className="mt-4 w-full max-w-2xl max-h-[420px] overflow-y-auto pr-1 space-y-5 scrollbar-thin">
+        {MODULE_GROUPS.map((group) => {
+          const groupModules = ALL_MODULES.filter((m) => m.group === group.id);
+          if (groupModules.length === 0) return null;
+
+          return (
+            <div key={group.id}>
+              <h3 className="text-xs font-bold text-content-tertiary uppercase tracking-wider mb-2">
+                {t(group.labelKey, { defaultValue: group.id })}
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                {groupModules.map((mod) => {
+                  const isEnabled = enabledModules.has(mod.key);
+                  return (
+                    <button
+                      key={mod.key}
+                      onClick={() => onToggleModule(mod.key)}
+                      className={`
+                        flex items-center gap-2.5 rounded-lg px-3 py-2 text-left
+                        border transition-all duration-200 ease-oe
+                        ${
+                          isEnabled
+                            ? 'border-oe-blue/30 bg-oe-blue-subtle/20'
+                            : 'border-border-light bg-surface-elevated hover:bg-surface-secondary opacity-60'
+                        }
+                      `}
+                    >
+                      {/* Checkbox */}
+                      <div
+                        className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border-2 transition-all duration-150 ${
+                          isEnabled
+                            ? 'border-oe-blue bg-oe-blue'
+                            : 'border-content-tertiary bg-transparent'
+                        }`}
+                      >
+                        {isEnabled && <Check size={10} className="text-white" />}
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <span className="text-sm font-medium text-content-primary truncate block">
+                          {t(mod.labelKey, { defaultValue: mod.key })}
+                        </span>
+                        <span className="text-2xs text-content-tertiary truncate block">
+                          {t(mod.descriptionKey, { defaultValue: '' })}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="mt-6 flex items-center gap-3">
+        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
+          {t('common.back', { defaultValue: 'Back' })}
+        </Button>
+        <Button
+          variant="primary"
+          onClick={onNext}
+          icon={<ArrowRight size={16} />}
+          iconPosition="right"
+        >
+          {t('common.continue', { defaultValue: 'Continue' })}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ── Step 5: Interface Mode ──────────────────────────────────────────────────
+
+function StepInterfaceMode({
+  onNext,
+  onBack,
+  interfaceMode,
+  onSelectMode,
+}: {
+  onNext: () => void;
+  onBack: () => void;
+  interfaceMode: ViewMode;
+  onSelectMode: (mode: ViewMode) => void;
+}) {
+  const { t } = useTranslation();
+
+  const modes: { key: ViewMode; labelKey: string; descriptionKey: string; icon: LucideIcon }[] = [
+    {
+      key: 'simple',
+      labelKey: 'onboarding.mode_simple',
+      descriptionKey: 'onboarding.mode_simple_desc',
+      icon: Monitor,
+    },
+    {
+      key: 'advanced',
+      labelKey: 'onboarding.mode_advanced',
+      descriptionKey: 'onboarding.mode_advanced_desc',
+      icon: Zap,
+    },
+  ];
+
+  return (
+    <div className="flex flex-col items-center animate-fade-in">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue-subtle mb-4">
+        <Monitor size={24} className="text-oe-blue" />
+      </div>
+
+      <h2 className="text-2xl font-bold text-content-primary">
+        {t('onboarding.mode_title', { defaultValue: 'Choose Interface Mode' })}
+      </h2>
+      <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
+        {t('onboarding.mode_subtitle', {
+          defaultValue: 'You can switch between modes anytime in Settings.',
+        })}
+      </p>
+
+      <div className="mt-8 w-full max-w-lg space-y-4">
+        {modes.map((mode) => {
+          const isSelected = interfaceMode === mode.key;
+          const Icon = mode.icon;
+          return (
+            <button
+              key={mode.key}
+              onClick={() => onSelectMode(mode.key)}
+              className={`
+                group relative flex w-full items-center gap-5 rounded-2xl p-5 text-left
+                border-2 transition-all duration-300 ease-oe
+                ${
+                  isSelected
+                    ? 'border-oe-blue bg-gradient-to-r from-oe-blue-subtle/50 to-oe-blue-subtle/20 ring-4 ring-oe-blue/10 shadow-md shadow-oe-blue/5'
+                    : 'border-border-light bg-surface-elevated hover:border-border hover:bg-surface-secondary hover:shadow-sm active:scale-[0.99]'
+                }
+              `}
+            >
+              <div
+                className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl transition-all duration-300 ${
+                  isSelected
+                    ? 'bg-oe-blue text-white shadow-lg shadow-oe-blue/20'
+                    : 'bg-surface-secondary text-content-secondary group-hover:bg-surface-tertiary'
+                }`}
+              >
+                <Icon size={28} />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`text-lg font-bold transition-colors ${
+                      isSelected ? 'text-oe-blue' : 'text-content-primary'
+                    }`}
+                  >
+                    {t(mode.labelKey, { defaultValue: mode.key })}
+                  </span>
+                  {isSelected && <CheckCircle2 size={18} className="text-oe-blue shrink-0" />}
+                </div>
+                <p className="mt-1 text-sm text-content-secondary leading-relaxed">
+                  {t(mode.descriptionKey, { defaultValue: '' })}
+                </p>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-8 flex items-center gap-3">
+        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
+          {t('common.back', { defaultValue: 'Back' })}
+        </Button>
+        <Button
+          variant="primary"
+          onClick={onNext}
+          icon={<ArrowRight size={16} />}
+          iconPosition="right"
+        >
+          {t('common.continue', { defaultValue: 'Continue' })}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ── Step 6: Cost Database ───────────────────────────────────────────────────
 
 function StepCostDatabase({
   onNext,
@@ -489,9 +988,9 @@ function StepCostDatabase({
       // Simulate realistic progress: fast start, slow middle, never reaches 100%
       // ~55K items, ~85 MB, typical 15-60s
       const pct = Math.min(95, Math.round(
-        secs < 3 ? secs * 8 :           // 0-3s: fast start (0→24%)
-        secs < 10 ? 24 + (secs - 3) * 6 : // 3-10s: steady (24→66%)
-        secs < 30 ? 66 + (secs - 10) * 1.2 : // 10-30s: slower (66→90%)
+        secs < 3 ? secs * 8 :           // 0-3s: fast start (0-24%)
+        secs < 10 ? 24 + (secs - 3) * 6 : // 3-10s: steady (24-66%)
+        secs < 30 ? 66 + (secs - 10) * 1.2 : // 10-30s: slower (66-90%)
         90 + Math.min(5, (secs - 30) * 0.2)   // 30s+: crawl to 95%
       ));
       setProgress(pct);
@@ -719,7 +1218,7 @@ function StepCostDatabase({
   );
 }
 
-// ── Step 4: Resource Catalog ────────────────────────────────────────────────
+// ── Step 7: Resource Catalog ────────────────────────────────────────────────
 
 function StepResourceCatalog({
   onNext,
@@ -912,7 +1411,7 @@ function StepResourceCatalog({
   );
 }
 
-// ── Step 5: Demo Projects ───────────────────────────────────────────────────
+// ── Step 8: Demo Projects ───────────────────────────────────────────────────
 
 function StepDemoProjects({
   onNext,
@@ -1118,7 +1617,7 @@ function StepDemoProjects({
   );
 }
 
-// ── Step 6: AI Setup ────────────────────────────────────────────────────────
+// ── Step 9: AI Setup ────────────────────────────────────────────────────────
 
 function StepAI({
   onNext,
@@ -1372,11 +1871,24 @@ function StepAI({
   );
 }
 
-// ── Step 7: Finish ──────────────────────────────────────────────────────────
+// ── Step 10: Finish ─────────────────────────────────────────────────────────
 
-function StepFinish({ onBack }: { onBack: () => void }) {
+function StepFinish({
+  onBack,
+  companyType,
+  enabledModules,
+  interfaceMode,
+}: {
+  onBack: () => void;
+  companyType: CompanyTypeKey | null;
+  enabledModules: Set<string>;
+  interfaceMode: ViewMode;
+}) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const setModuleEnabled = useModuleStore((s) => s.setModuleEnabled);
+  const setViewMode = useViewModeStore((s) => s.setMode);
+  const [saving, setSaving] = useState(false);
 
   // Gather what was installed from localStorage
   const loadedDbs = (() => {
@@ -1387,10 +1899,40 @@ function StepFinish({ onBack }: { onBack: () => void }) {
     }
   })();
 
-  const handleFinish = useCallback(() => {
+  const presetLabel = companyType
+    ? COMPANY_PRESETS.find((p) => p.key === companyType)?.labelKey
+    : null;
+
+  const handleFinish = useCallback(async () => {
+    setSaving(true);
+
+    // 1. Apply module preferences to the store
+    const allModuleKeys = ALL_MODULES.map((m) => m.key);
+    for (const key of allModuleKeys) {
+      setModuleEnabled(key, enabledModules.has(key));
+    }
+
+    // 2. Apply interface mode
+    setViewMode(interfaceMode);
+
+    // 3. Save onboarding state to server
+    try {
+      await apiPost('/v1/users/me/onboarding', {
+        company_type: companyType ?? 'full_enterprise',
+        enabled_modules: Array.from(enabledModules),
+        interface_mode: interfaceMode,
+        completed: true,
+      });
+    } catch {
+      // Non-critical — local state is already applied
+    }
+
+    // 4. Mark completed locally
     markOnboardingCompleted();
+
+    setSaving(false);
     navigate('/');
-  }, [navigate]);
+  }, [companyType, enabledModules, interfaceMode, navigate, setModuleEnabled, setViewMode]);
 
   return (
     <div className="flex flex-col items-center justify-center text-center animate-fade-in">
@@ -1423,6 +1965,43 @@ function StepFinish({ onBack }: { onBack: () => void }) {
           </span>
         </div>
 
+        {/* Company Type */}
+        {companyType && presetLabel && (
+          <div className="flex items-center gap-3">
+            <Building2 size={16} className="text-oe-blue shrink-0" />
+            <span className="text-sm text-content-primary">
+              {t('onboarding.summary_company', { defaultValue: 'Company Type' })}:
+            </span>
+            <span className="text-sm font-semibold text-content-primary ml-auto">
+              {t(presetLabel, { defaultValue: companyType })}
+            </span>
+          </div>
+        )}
+
+        {/* Modules */}
+        <div className="flex items-center gap-3">
+          <Package size={16} className="text-oe-blue shrink-0" />
+          <span className="text-sm text-content-primary">
+            {t('onboarding.summary_modules', { defaultValue: 'Active Modules' })}:
+          </span>
+          <span className="text-sm font-semibold text-content-primary ml-auto">
+            {enabledModules.size} / {ALL_MODULES.length}
+          </span>
+        </div>
+
+        {/* Interface Mode */}
+        <div className="flex items-center gap-3">
+          <Monitor size={16} className="text-oe-blue shrink-0" />
+          <span className="text-sm text-content-primary">
+            {t('onboarding.summary_mode', { defaultValue: 'Interface Mode' })}:
+          </span>
+          <span className="text-sm font-semibold text-content-primary ml-auto capitalize">
+            {interfaceMode === 'simple'
+              ? t('onboarding.mode_simple', { defaultValue: 'Simple' })
+              : t('onboarding.mode_advanced', { defaultValue: 'Advanced' })}
+          </span>
+        </div>
+
         {/* Cost DB */}
         <div className="flex items-center gap-3">
           <Database size={16} className="text-oe-blue shrink-0" />
@@ -1433,17 +2012,6 @@ function StepFinish({ onBack }: { onBack: () => void }) {
             {loadedDbs.length > 0
               ? loadedDbs.map((id) => CWICR_DATABASES.find((d) => d.id === id)?.name || id).join(', ')
               : t('onboarding.summary_skipped', { defaultValue: 'Skipped' })}
-          </span>
-        </div>
-
-        {/* Resource Catalog */}
-        <div className="flex items-center gap-3">
-          <BookOpen size={16} className="text-oe-blue shrink-0" />
-          <span className="text-sm text-content-primary">
-            {t('onboarding.summary_catalog', { defaultValue: 'Resource Catalog' })}:
-          </span>
-          <span className="text-sm font-semibold text-content-primary ml-auto">
-            <CheckCircle2 size={14} className="inline text-semantic-success" />
           </span>
         </div>
 
@@ -1473,6 +2041,7 @@ function StepFinish({ onBack }: { onBack: () => void }) {
           variant="primary"
           size="lg"
           onClick={handleFinish}
+          loading={saving}
           icon={<ArrowRight size={18} />}
           iconPosition="right"
         >
@@ -1488,6 +2057,11 @@ function StepFinish({ onBack }: { onBack: () => void }) {
 export function OnboardingWizard() {
   const [step, setStep] = useState(0);
   const [selectedLang, setSelectedLang] = useState(() => i18n.language?.split('-')[0] || 'en');
+  const [companyType, setCompanyType] = useState<CompanyTypeKey | null>(null);
+  const [enabledModules, setEnabledModules] = useState<Set<string>>(
+    () => new Set(ALL_MODULES.map((m) => m.key)),
+  );
+  const [interfaceMode, setInterfaceMode] = useState<ViewMode>('advanced');
 
   const goNext = useCallback(() => {
     setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1));
@@ -1501,25 +2075,81 @@ export function OnboardingWizard() {
     setSelectedLang(lang);
   }, []);
 
+  const handleSelectCompanyType = useCallback((key: CompanyTypeKey) => {
+    setCompanyType(key);
+    // Apply the preset modules
+    const preset = COMPANY_PRESETS.find((p) => p.key === key);
+    if (preset) {
+      if (key === 'full_enterprise') {
+        setEnabledModules(new Set(ALL_MODULES.map((m) => m.key)));
+      } else {
+        setEnabledModules(new Set(preset.enabledModules));
+      }
+    }
+  }, []);
+
+  const handleToggleModule = useCallback((key: string) => {
+    setEnabledModules((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  }, []);
+
   return (
     <div className="flex min-h-screen flex-col bg-surface-primary">
       {/* Top bar with progress */}
-      <div className="px-8 pt-6 pb-4 max-w-4xl mx-auto w-full">
+      <div className="px-8 pt-6 pb-4 max-w-5xl mx-auto w-full">
         <ProgressBar current={step} total={TOTAL_STEPS} />
       </div>
 
       {/* Main content area */}
       <div className="flex flex-1 items-center justify-center px-6 pb-16">
-        <div className="w-full max-w-[640px]">
+        <div className="w-full max-w-[680px]">
           {step === 0 && <StepWelcome onNext={goNext} />}
           {step === 1 && (
             <StepLanguage onNext={goNext} onBack={goBack} onLanguageChange={handleLanguageChange} />
           )}
-          {step === 2 && <StepCostDatabase onNext={goNext} onBack={goBack} selectedLang={selectedLang} />}
-          {step === 3 && <StepResourceCatalog onNext={goNext} onBack={goBack} selectedLang={selectedLang} />}
-          {step === 4 && <StepDemoProjects onNext={goNext} onBack={goBack} selectedLang={selectedLang} />}
-          {step === 5 && <StepAI onNext={goNext} onBack={goBack} />}
-          {step === 6 && <StepFinish onBack={goBack} />}
+          {step === 2 && (
+            <StepCompanyType
+              onNext={goNext}
+              onBack={goBack}
+              selectedType={companyType}
+              onSelectType={handleSelectCompanyType}
+            />
+          )}
+          {step === 3 && (
+            <StepModuleReview
+              onNext={goNext}
+              onBack={goBack}
+              enabledModules={enabledModules}
+              onToggleModule={handleToggleModule}
+            />
+          )}
+          {step === 4 && (
+            <StepInterfaceMode
+              onNext={goNext}
+              onBack={goBack}
+              interfaceMode={interfaceMode}
+              onSelectMode={setInterfaceMode}
+            />
+          )}
+          {step === 5 && <StepCostDatabase onNext={goNext} onBack={goBack} selectedLang={selectedLang} />}
+          {step === 6 && <StepResourceCatalog onNext={goNext} onBack={goBack} selectedLang={selectedLang} />}
+          {step === 7 && <StepDemoProjects onNext={goNext} onBack={goBack} selectedLang={selectedLang} />}
+          {step === 8 && <StepAI onNext={goNext} onBack={goBack} />}
+          {step === 9 && (
+            <StepFinish
+              onBack={goBack}
+              companyType={companyType}
+              enabledModules={enabledModules}
+              interfaceMode={interfaceMode}
+            />
+          )}
         </div>
       </div>
     </div>

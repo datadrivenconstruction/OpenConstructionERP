@@ -42,6 +42,8 @@ from app.modules.users.schemas import (
     ForgotPasswordRequest,
     ForgotPasswordResponse,
     LoginRequest,
+    OnboardingRequest,
+    OnboardingResponse,
     RefreshRequest,
     ResetPasswordRequest,
     ResetPasswordResponse,
@@ -260,6 +262,78 @@ async def save_module_preferences(
     metadata["module_preferences"] = data.modules
     await service.update_profile(uuid.UUID(user_id), metadata_=metadata)
     return ModulePreferencesPayload(modules=data.modules)
+
+
+# ── Onboarding ────────────────────────────────────────────────────────────────
+
+
+@router.get("/me/onboarding", response_model=OnboardingResponse)
+async def get_onboarding(
+    user_id: CurrentUserId,
+    service: UserService = Depends(_get_service),
+) -> OnboardingResponse:
+    """Get onboarding state for the current user."""
+    user = await service.get_user(uuid.UUID(user_id))
+    metadata: dict[str, Any] = user.metadata_ or {}
+    onboarding: dict[str, Any] = metadata.get("onboarding", {})
+    return OnboardingResponse(
+        completed=onboarding.get("completed", False),
+        company_type=onboarding.get("company_type"),
+        enabled_modules=onboarding.get("enabled_modules", []),
+        interface_mode=onboarding.get("interface_mode"),
+    )
+
+
+@router.post("/me/onboarding", response_model=OnboardingResponse)
+async def save_onboarding(
+    data: OnboardingRequest,
+    user_id: CurrentUserId,
+    service: UserService = Depends(_get_service),
+) -> OnboardingResponse:
+    """Save onboarding wizard choices.
+
+    Stores the company type, enabled modules, and interface mode in the
+    user's metadata JSON under the ``onboarding`` key.  Also syncs the
+    chosen modules into ``module_preferences`` so the sidebar reflects
+    the selection immediately.
+    """
+    user = await service.get_user(uuid.UUID(user_id))
+    metadata: dict[str, Any] = dict(user.metadata_ or {})
+
+    metadata["onboarding"] = {
+        "company_type": data.company_type,
+        "enabled_modules": data.enabled_modules,
+        "interface_mode": data.interface_mode,
+        "completed": data.completed,
+    }
+
+    # Also persist module preferences so sidebar picks them up
+    module_prefs: dict[str, bool] = {}
+    from app.core.onboarding_presets import _ALL_MODULES
+
+    for mod_key in _ALL_MODULES:
+        module_prefs[mod_key] = mod_key in data.enabled_modules
+    metadata["module_preferences"] = module_prefs
+
+    await service.update_profile(uuid.UUID(user_id), metadata_=metadata)
+
+    return OnboardingResponse(
+        completed=data.completed,
+        company_type=data.company_type,
+        enabled_modules=data.enabled_modules,
+        interface_mode=data.interface_mode,
+    )
+
+
+@router.get("/onboarding-presets")
+async def get_onboarding_presets() -> list[dict[str, Any]]:
+    """Return all available company-type presets for the onboarding wizard.
+
+    Public endpoint (no auth required) — the presets are non-sensitive.
+    """
+    from app.core.onboarding_presets import get_all_presets
+
+    return get_all_presets()
 
 
 # ── Admin: User management ─────────────────────────────────────────────────

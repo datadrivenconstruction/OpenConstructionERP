@@ -261,3 +261,38 @@ class APIKeyCreatedResponse(APIKeyResponse):
     """Response when creating an API key — includes the full key (shown only once)."""
 
     key: str  # Full API key — shown only at creation time
+
+
+# ── Onboarding ────────────────────────────────────────────────────────────────
+
+
+class OnboardingRequest(BaseModel):
+    """Save onboarding wizard choices."""
+
+    company_type: str = Field(
+        ...,
+        pattern=r"^(general_contractor|estimator|project_management|architecture_engineering|full_enterprise)$",
+        description="Selected company type preset key",
+    )
+    enabled_modules: list[str] = Field(
+        default_factory=list,
+        description="Final list of module keys the user wants enabled",
+    )
+    interface_mode: str = Field(
+        default="advanced",
+        pattern=r"^(simple|advanced)$",
+        description="Chosen interface complexity mode",
+    )
+    completed: bool = Field(
+        default=True,
+        description="Whether onboarding is considered complete",
+    )
+
+
+class OnboardingResponse(BaseModel):
+    """Onboarding state for the current user."""
+
+    completed: bool = False
+    company_type: str | None = None
+    enabled_modules: list[str] = Field(default_factory=list)
+    interface_mode: str | None = None
