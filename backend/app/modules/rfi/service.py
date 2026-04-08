@@ -16,6 +16,16 @@ logger = logging.getLogger(__name__)
 
 _RFI_RESPONSE_DUE_DAYS = 14
 
+# ── Allowed RFI status transitions ────────────────────────────────────────────
+
+_RFI_STATUS_TRANSITIONS: dict[str, set[str]] = {
+    "draft": {"open", "void"},
+    "open": {"answered", "closed", "void"},
+    "answered": {"closed", "open"},
+    "closed": set(),  # terminal
+    "void": set(),  # terminal
+}
+
 
 def _add_business_days(start: datetime, days: int) -> str:
     """Return ISO date string after adding *days* business days to *start*."""
@@ -114,15 +124,28 @@ class RFIService:
     ) -> RFI:
         rfi = await self.get_rfi(rfi_id)
 
-        if rfi.status == "closed":
+        if rfi.status in ("closed", "void"):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Cannot edit a closed RFI",
+                detail=f"Cannot edit an RFI with status '{rfi.status}'",
             )
 
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         if "metadata" in fields:
             fields["metadata_"] = fields.pop("metadata")
+
+        # Validate status transition if status is being changed
+        new_status = fields.get("status")
+        if new_status is not None and new_status != rfi.status:
+            allowed = _RFI_STATUS_TRANSITIONS.get(rfi.status, set())
+            if new_status not in allowed:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        f"Cannot transition RFI from '{rfi.status}' to '{new_status}'. "
+                        f"Allowed transitions: {', '.join(sorted(allowed)) or 'none'}"
+                    ),
+                )
 
         # When status transitions to 'open' and no response_due_date is set,
         # auto-calculate it (14 business days from now).

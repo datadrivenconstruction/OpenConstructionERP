@@ -591,10 +591,11 @@ function ProjectCard({
       addToast({ type: 'success', title: t('projects.deleted', 'Project archived') });
       onDeleted?.();
     },
-    onError: () => {
+    onError: (e: Error) => {
       addToast({
         type: 'error',
         title: t('projects.delete_failed', 'Failed to delete project'),
+        message: e.message,
       });
     },
   });
@@ -615,10 +616,11 @@ function ProjectCard({
       addToast({ type: 'success', title: t('projects.duplicated', 'Project duplicated') });
       navigate(`/projects/${newProject.id}`);
     },
-    onError: () => {
+    onError: (e: Error) => {
       addToast({
         type: 'error',
         title: t('projects.duplicate_failed', 'Failed to duplicate'),
+        message: e.message,
       });
     },
   });

@@ -1,10 +1,42 @@
 """Finance Pydantic schemas — request/response models."""
 
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+
+def _validate_non_negative_decimal(v: str, field_name: str = "value") -> str:
+    """Validate that a string is a valid non-negative decimal number."""
+    try:
+        d = Decimal(v)
+    except (InvalidOperation, ValueError, TypeError) as exc:
+        raise ValueError(f"Invalid decimal value for {field_name}: {v!r}") from exc
+    if d < 0:
+        raise ValueError(f"{field_name} must be non-negative, got {v!r}")
+    return v
+
+
+def _validate_decimal(v: str, field_name: str = "value") -> str:
+    """Validate that a string is a valid decimal number (allows negative for EVM)."""
+    try:
+        Decimal(v)
+    except (InvalidOperation, ValueError, TypeError) as exc:
+        raise ValueError(f"Invalid decimal value for {field_name}: {v!r}") from exc
+    return v
+
+
+def _validate_positive_decimal(v: str, field_name: str = "value") -> str:
+    """Validate that a string is a valid positive decimal number (> 0)."""
+    try:
+        d = Decimal(v)
+    except (InvalidOperation, ValueError, TypeError) as exc:
+        raise ValueError(f"Invalid decimal value for {field_name}: {v!r}") from exc
+    if d <= 0:
+        raise ValueError(f"{field_name} must be positive, got {v!r}")
+    return v
 
 # ── Invoice ──────────────────────────────────────────────────────────────────
 
@@ -22,6 +54,11 @@ class InvoiceLineItemCreate(BaseModel):
     wbs_id: str | None = Field(default=None, max_length=36)
     cost_category: str | None = Field(default=None, max_length=100)
     sort_order: int = 0
+
+    @field_validator("quantity", "unit_rate", "amount")
+    @classmethod
+    def _check_non_negative_decimal(cls, v: str) -> str:
+        return _validate_non_negative_decimal(v)
 
 
 class InvoiceCreate(BaseModel):
@@ -50,6 +87,11 @@ class InvoiceCreate(BaseModel):
     line_items: list[InvoiceLineItemCreate] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
+    @field_validator("amount_subtotal", "tax_amount", "retention_amount", "amount_total")
+    @classmethod
+    def _check_non_negative_decimal(cls, v: str) -> str:
+        return _validate_non_negative_decimal(v)
+
 
 class InvoiceUpdate(BaseModel):
     """Partial update for an invoice."""
@@ -74,6 +116,13 @@ class InvoiceUpdate(BaseModel):
     notes: str | None = None
     line_items: list[InvoiceLineItemCreate] | None = None
     metadata: dict[str, Any] | None = None
+
+    @field_validator("amount_subtotal", "tax_amount", "retention_amount", "amount_total")
+    @classmethod
+    def _check_non_negative_decimal(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        return _validate_non_negative_decimal(v)
 
 
 # ── Invoice responses ────────────────────────────────────────────────────────
@@ -151,6 +200,16 @@ class PaymentCreate(BaseModel):
     reference: str | None = Field(default=None, max_length=255)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
+    @field_validator("amount")
+    @classmethod
+    def _check_positive_amount(cls, v: str) -> str:
+        return _validate_positive_decimal(v, "amount")
+
+    @field_validator("exchange_rate_snapshot")
+    @classmethod
+    def _check_positive_rate(cls, v: str) -> str:
+        return _validate_positive_decimal(v, "exchange_rate_snapshot")
+
 
 class PaymentResponse(BaseModel):
     """Payment returned from the API."""
@@ -194,6 +253,13 @@ class BudgetCreate(BaseModel):
     forecast_final: str = Field(default="0", max_length=50)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
+    @field_validator(
+        "original_budget", "revised_budget", "committed", "actual", "forecast_final",
+    )
+    @classmethod
+    def _check_non_negative_decimal(cls, v: str) -> str:
+        return _validate_non_negative_decimal(v)
+
 
 class BudgetUpdate(BaseModel):
     """Partial update for a budget line."""
@@ -208,6 +274,15 @@ class BudgetUpdate(BaseModel):
     actual: str | None = Field(default=None, max_length=50)
     forecast_final: str | None = Field(default=None, max_length=50)
     metadata: dict[str, Any] | None = None
+
+    @field_validator(
+        "original_budget", "revised_budget", "committed", "actual", "forecast_final",
+    )
+    @classmethod
+    def _check_non_negative_decimal(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        return _validate_non_negative_decimal(v)
 
 
 class BudgetResponse(BaseModel):
@@ -279,6 +354,16 @@ class EVMSnapshotCreate(BaseModel):
     spi: str = Field(default="0", max_length=50)
     cpi: str = Field(default="0", max_length=50)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("bac", "pv", "ev", "ac")
+    @classmethod
+    def _check_non_negative_decimal(cls, v: str) -> str:
+        return _validate_non_negative_decimal(v)
+
+    @field_validator("sv", "cv", "spi", "cpi")
+    @classmethod
+    def _check_decimal(cls, v: str) -> str:
+        return _validate_decimal(v)
 
 
 class EVMSnapshotResponse(BaseModel):

@@ -145,8 +145,8 @@ class PositionUpdate(OEBase):
     ordinal: str | None = None
     description: str | None = None
     unit: MeasurementUnit | None = None
-    quantity: Decimal | None = None
-    unit_rate: Decimal | None = None
+    quantity: Decimal | None = Field(default=None, ge=0)
+    unit_rate: Decimal | None = Field(default=None, ge=0)
     classification: Classification | None = None
     metadata: dict[str, Any] | None = None
 
@@ -177,8 +177,8 @@ class CostSearchQuery(OEBase):
     classification_code: str | None = None
     source: str | None = None
     region: str | None = None
-    min_rate: Decimal | None = None
-    max_rate: Decimal | None = None
+    min_rate: Decimal | None = Field(default=None, ge=0)
+    max_rate: Decimal | None = Field(default=None, ge=0)
     locale: str = "en"  # Return descriptions in this language
     limit: int = Field(default=20, ge=1, le=100)
     offset: int = Field(default=0, ge=0)

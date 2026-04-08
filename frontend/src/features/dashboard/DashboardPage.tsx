@@ -33,6 +33,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { Card, CardHeader, CardContent, Button, Badge, Skeleton, InfoHint, ActivityFeed as CrossModuleActivityFeed } from '@/shared/ui';
+import { DateDisplay } from '@/shared/ui/DateDisplay';
 
 /* ── Types ────────────────────────────────────────────────────────────── */
 
@@ -1285,7 +1286,7 @@ export function DashboardPage() {
 /* ── Projects List ────────────────────────────────────────────────────── */
 
 function ProjectsList({ projects }: { projects?: ProjectSummary[] }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -1396,7 +1397,7 @@ function ProjectsList({ projects }: { projects?: ProjectSummary[] }) {
             </div>
           </div>
           <div className="text-xs text-content-tertiary">
-            {new Date(p.created_at).toLocaleDateString(i18n.language)}
+            <DateDisplay value={p.created_at} />
           </div>
           <ArrowRight size={14} className="text-content-tertiary" />
         </button>

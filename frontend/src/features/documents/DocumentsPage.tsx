@@ -7,6 +7,7 @@ import {
   MoreHorizontal, Pencil, Tag, Ruler,
 } from 'lucide-react';
 import { Card, Button, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
+import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { apiGet, apiDelete, apiPatch } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -674,7 +675,7 @@ export function DocumentsPage() {
                         <span className={`px-1.5 py-0.5 rounded text-2xs font-bold ${fmtColor[fmt] || 'bg-gray-100 text-gray-600'}`}>{fmt}</span>
                         <span className="text-2xs text-content-tertiary">{s.element_count.toLocaleString()} elements</span>
                         <span className="text-2xs text-content-quaternary">{s.extraction_time.toFixed(1)}s</span>
-                        {s.created_at && <span className="text-2xs text-content-quaternary">{new Date(s.created_at).toLocaleDateString()}</span>}
+                        {s.created_at && <span className="text-2xs text-content-quaternary"><DateDisplay value={s.created_at} /></span>}
                         {s.is_permanent ? (
                           <Badge variant="success" size="sm">{t('documents.saved', { defaultValue: 'Saved' })}</Badge>
                         ) : (
@@ -761,7 +762,7 @@ export function DocumentsPage() {
                     </div>
                     <div className="flex items-center gap-2 mt-1">
                       <p className="text-2xs text-content-quaternary">
-                        {new Date(doc.created_at).toLocaleDateString()}
+                        <DateDisplay value={doc.created_at} />
                       </p>
                       {previewKind && (
                         <span className="flex items-center gap-0.5 text-2xs text-oe-blue opacity-0 group-hover:opacity-100 transition-opacity">
@@ -912,7 +913,7 @@ export function DocumentsPage() {
                 {fileIcon(editDoc.mime_type)}
                 <div className="min-w-0">
                   <h3 className="text-sm font-semibold text-content-primary truncate">{editDoc.name}</h3>
-                  <p className="text-2xs text-content-tertiary">{formatSize(editDoc.file_size)} · {new Date(editDoc.created_at).toLocaleDateString()}</p>
+                  <p className="text-2xs text-content-tertiary">{formatSize(editDoc.file_size)} · <DateDisplay value={editDoc.created_at} /></p>
                 </div>
               </div>
               <button onClick={() => setEditDoc(null)} className="p-1.5 rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors">

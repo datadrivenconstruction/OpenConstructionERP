@@ -17,6 +17,7 @@ import {
   FileDown,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, SkeletonGrid } from '@/shared/ui';
+import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { apiGet } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
@@ -368,10 +369,7 @@ function TaskCard({
             >
               <Calendar size={11} />
               <span>
-                {new Date(task.due_date).toLocaleDateString(undefined, {
-                  month: 'short',
-                  day: 'numeric',
-                })}
+                <DateDisplay value={task.due_date} />
               </span>
             </div>
           )}

@@ -1604,7 +1604,6 @@ function SaveToProjectDialog({
 }) {
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
-  const navigate = useNavigate();
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
 
   const { data: projects = [] } = useQuery({

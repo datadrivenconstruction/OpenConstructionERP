@@ -269,10 +269,11 @@ export function TemplatesPage() {
       });
       navigate(`/boq/${boq.id}`);
     },
-    onError: () => {
+    onError: (e: Error) => {
       addToast({
         type: 'error',
         title: t('boq.template_error', { defaultValue: 'Failed to create BOQ from template' }),
+        message: e.message,
       });
     },
   });

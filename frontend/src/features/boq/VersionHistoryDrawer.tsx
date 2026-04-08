@@ -96,10 +96,11 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
         title: t('boq.snapshot_created', { defaultValue: 'Snapshot saved' }),
       });
     },
-    onError: () => {
+    onError: (e: Error) => {
       useToastStore.getState().addToast({
         type: 'error',
         title: t('boq.snapshot_failed', { defaultValue: 'Failed to save snapshot' }),
+        message: e.message,
       });
     },
   });
@@ -115,10 +116,11 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
         title: t('boq.snapshot_restored', { defaultValue: 'Snapshot restored' }),
       });
     },
-    onError: () => {
+    onError: (e: Error) => {
       useToastStore.getState().addToast({
         type: 'error',
         title: t('boq.restore_failed', { defaultValue: 'Failed to restore snapshot' }),
+        message: e.message,
       });
     },
   });

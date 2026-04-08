@@ -466,7 +466,13 @@ function IncidentsTab({ projectId }: { projectId: string }) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((inc) => (
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="px-4 py-8 text-center text-sm text-content-tertiary">
+                  {t('safety.no_incidents_match', { defaultValue: 'No matching incidents' })}
+                </td>
+              </tr>
+            ) : filtered.map((inc) => (
               <tr
                 key={inc.id}
                 className="border-b border-border-light hover:bg-surface-secondary/30 transition-colors"
@@ -806,7 +812,13 @@ function ObservationsTab({ projectId }: { projectId: string }) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((obs) => (
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-4 py-8 text-center text-sm text-content-tertiary">
+                  {t('safety.no_observations_match', { defaultValue: 'No matching observations' })}
+                </td>
+              </tr>
+            ) : filtered.map((obs) => (
               <tr
                 key={obs.id}
                 className="border-b border-border-light hover:bg-surface-secondary/30 transition-colors"

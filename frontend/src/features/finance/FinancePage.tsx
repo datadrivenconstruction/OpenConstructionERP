@@ -498,7 +498,13 @@ function BudgetsTab({ projectId }: { projectId: string }) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((b) => (
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="px-4 py-8 text-center text-sm text-content-tertiary">
+                  {t('finance.no_budget_match', { defaultValue: 'No matching budget lines' })}
+                </td>
+              </tr>
+            ) : filtered.map((b) => (
               <tr
                 key={b.id}
                 className="border-b border-border-light hover:bg-surface-secondary/30 transition-colors"
@@ -990,7 +996,13 @@ function InvoicesTab({ projectId }: { projectId: string }) {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((inv) => (
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-8 text-center text-sm text-content-tertiary">
+                      {t('finance.no_invoice_match', { defaultValue: 'No matching invoices' })}
+                    </td>
+                  </tr>
+                ) : filtered.map((inv) => (
                   <tr
                     key={inv.id}
                     className="border-b border-border-light hover:bg-surface-secondary/30 transition-colors"

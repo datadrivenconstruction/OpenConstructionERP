@@ -13,6 +13,15 @@ from app.modules.tasks.schemas import TaskCreate, TaskStatsResponse, TaskUpdate
 
 logger = logging.getLogger(__name__)
 
+# ── Allowed task status transitions ───────────────────────────────────────────
+
+_TASK_STATUS_TRANSITIONS: dict[str, set[str]] = {
+    "draft": {"open"},
+    "open": {"in_progress", "completed", "draft"},
+    "in_progress": {"completed", "open"},
+    "completed": set(),  # terminal
+}
+
 
 class TaskService:
     """Business logic for task operations."""
@@ -131,6 +140,19 @@ class TaskService:
                 entry.model_dump() if hasattr(entry, "model_dump") else entry
                 for entry in fields["checklist"]
             ]
+
+        # Validate status transition if status is being changed
+        new_status = fields.get("status")
+        if new_status is not None and new_status != task.status:
+            allowed = _TASK_STATUS_TRANSITIONS.get(task.status, set())
+            if new_status not in allowed:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        f"Cannot transition task from '{task.status}' to '{new_status}'. "
+                        f"Allowed transitions: {', '.join(sorted(allowed)) or 'none'}"
+                    ),
+                )
 
         if not fields:
             return task

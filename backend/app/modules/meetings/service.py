@@ -26,6 +26,16 @@ from app.modules.meetings.schemas import (
 
 logger = logging.getLogger(__name__)
 
+# ── Allowed meeting status transitions ────────────────────────────────────────
+
+_MEETING_STATUS_TRANSITIONS: dict[str, set[str]] = {
+    "draft": {"scheduled", "cancelled"},
+    "scheduled": {"in_progress", "cancelled", "draft"},
+    "in_progress": {"completed", "cancelled"},
+    "completed": set(),  # terminal
+    "cancelled": {"draft"},
+}
+
 
 class MeetingService:
     """Business logic for meeting operations."""
@@ -113,15 +123,29 @@ class MeetingService:
         """Update meeting fields."""
         meeting = await self.get_meeting(meeting_id)
 
-        if meeting.status == "completed":
+        if meeting.status in ("completed", "cancelled"):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Cannot edit a completed meeting",
+                detail=f"Cannot edit a meeting with status '{meeting.status}'",
             )
 
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         if "metadata" in fields:
             fields["metadata_"] = fields.pop("metadata")
+
+        # Validate status transition if status is being changed
+        new_status = fields.get("status")
+        if new_status is not None and new_status != meeting.status:
+            allowed = _MEETING_STATUS_TRANSITIONS.get(meeting.status, set())
+            if new_status not in allowed:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        f"Cannot transition meeting from '{meeting.status}' to "
+                        f"'{new_status}'. Allowed transitions: "
+                        f"{', '.join(sorted(allowed)) or 'none'}"
+                    ),
+                )
 
         # Convert Pydantic models to dicts for JSON columns
         for key in ("attendees", "agenda_items", "action_items"):

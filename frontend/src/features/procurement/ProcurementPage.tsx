@@ -294,7 +294,13 @@ function PurchaseOrdersTab({ projectId }: { projectId: string }) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((po) => (
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="px-4 py-8 text-center text-sm text-content-tertiary">
+                  {t('procurement.no_po_match', { defaultValue: 'No matching purchase orders' })}
+                </td>
+              </tr>
+            ) : filtered.map((po) => (
               <tr
                 key={po.id}
                 className="border-b border-border-light hover:bg-surface-secondary/30 transition-colors"
@@ -429,7 +435,13 @@ function GoodsReceiptsTab({ projectId }: { projectId: string }) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((gr) => (
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-4 py-8 text-center text-sm text-content-tertiary">
+                  {t('procurement.no_gr_match', { defaultValue: 'No matching goods receipts' })}
+                </td>
+              </tr>
+            ) : filtered.map((gr) => (
               <tr
                 key={gr.id}
                 className="border-b border-border-light hover:bg-surface-secondary/30 transition-colors"

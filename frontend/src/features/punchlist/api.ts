@@ -152,7 +152,7 @@ export async function uploadPunchPhoto(id: string, file: File): Promise<PunchIte
 }
 
 export async function fetchPunchSummary(projectId: string): Promise<PunchSummary> {
-  if (!projectId) return { total: 0, by_status: {}, by_priority: {}, overdue: 0 };
+  if (!projectId) return { total: 0, by_status: {}, by_priority: {}, overdue: 0, avg_days_to_close: null };
   return apiGet<PunchSummary>(`/v1/punchlist/summary?project_id=${projectId}`);
 }
 

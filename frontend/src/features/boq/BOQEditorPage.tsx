@@ -777,10 +777,11 @@ export function BOQEditorPage() {
         title: t('boq.positions_reordered', { defaultValue: 'Positions reordered' }),
       });
     },
-    onError: () => {
+    onError: (e: Error) => {
       addToast({
         type: 'error',
         title: t('boq.reorder_failed', { defaultValue: 'Failed to reorder positions' }),
+        message: e.message,
       });
     },
   });

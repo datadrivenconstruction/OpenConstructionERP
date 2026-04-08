@@ -14,6 +14,17 @@ from app.modules.ncr.schemas import NCRCreate, NCRUpdate
 
 logger = logging.getLogger(__name__)
 
+# ── Allowed NCR status transitions ────────────────────────────────────────────
+
+_NCR_STATUS_TRANSITIONS: dict[str, set[str]] = {
+    "identified": {"under_review", "void"},
+    "under_review": {"corrective_action", "identified", "void"},
+    "corrective_action": {"verification", "under_review", "void"},
+    "verification": {"closed", "corrective_action"},
+    "closed": set(),  # terminal
+    "void": set(),  # terminal
+}
+
 
 class NCRService:
     """Business logic for NCR operations."""
@@ -104,6 +115,19 @@ class NCRService:
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         if "metadata" in fields:
             fields["metadata_"] = fields.pop("metadata")
+
+        # Validate status transition if status is being changed
+        new_status = fields.get("status")
+        if new_status is not None and new_status != ncr.status:
+            allowed = _NCR_STATUS_TRANSITIONS.get(ncr.status, set())
+            if new_status not in allowed:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        f"Cannot transition NCR from '{ncr.status}' to '{new_status}'. "
+                        f"Allowed transitions: {', '.join(sorted(allowed)) or 'none'}"
+                    ),
+                )
 
         if not fields:
             return ncr

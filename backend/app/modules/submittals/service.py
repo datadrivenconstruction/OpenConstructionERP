@@ -13,6 +13,19 @@ from app.modules.submittals.schemas import SubmittalCreate, SubmittalUpdate
 
 logger = logging.getLogger(__name__)
 
+# ── Allowed submittal status transitions ──────────────────────────────────────
+
+_SUBMITTAL_STATUS_TRANSITIONS: dict[str, set[str]] = {
+    "draft": {"submitted"},
+    "submitted": {"under_review", "approved", "approved_as_noted", "revise_and_resubmit", "rejected"},
+    "under_review": {"approved", "approved_as_noted", "revise_and_resubmit", "rejected"},
+    "approved": {"closed"},
+    "approved_as_noted": {"closed"},
+    "revise_and_resubmit": {"draft", "submitted"},
+    "rejected": {"draft", "closed"},
+    "closed": set(),  # terminal
+}
+
 
 class SubmittalService:
     """Business logic for submittal operations."""
@@ -111,6 +124,20 @@ class SubmittalService:
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         if "metadata" in fields:
             fields["metadata_"] = fields.pop("metadata")
+
+        # Validate status transition if status is being changed
+        new_status = fields.get("status")
+        if new_status is not None and new_status != submittal.status:
+            allowed = _SUBMITTAL_STATUS_TRANSITIONS.get(submittal.status, set())
+            if new_status not in allowed:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        f"Cannot transition submittal from '{submittal.status}' to "
+                        f"'{new_status}'. Allowed transitions: "
+                        f"{', '.join(sorted(allowed)) or 'none'}"
+                    ),
+                )
 
         if not fields:
             return submittal

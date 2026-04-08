@@ -7,6 +7,7 @@ import {
   Search, ArrowUpDown, ChevronDown, GitCompareArrows, X, Loader2,
 } from 'lucide-react';
 import { Card, Badge, EmptyState, Skeleton, Button, Breadcrumb } from '@/shared/ui';
+import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { apiGet } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { boqApi, type BOQWithPositions, groupPositionsIntoSections, type SectionGroup } from './api';
@@ -290,7 +291,7 @@ function CompareModal({ boqIdA, boqIdB, currencyA, currencyB, onClose }: Compare
 type SortField = 'name' | 'total' | 'positions' | 'date';
 
 export function BOQListPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
@@ -492,8 +493,8 @@ export function BOQListPage() {
       queryClient.invalidateQueries({ queryKey: ['all-boqs'] });
       addToast({ type: 'success', title: t('boq.duplicated', { defaultValue: 'BOQ duplicated' }) });
     },
-    onError: () => {
-      addToast({ type: 'error', title: t('boq.duplicate_failed', { defaultValue: 'Failed to duplicate' }) });
+    onError: (e: Error) => {
+      addToast({ type: 'error', title: t('boq.duplicate_failed', { defaultValue: 'Failed to duplicate' }), message: e.message });
     },
   });
 
@@ -504,9 +505,9 @@ export function BOQListPage() {
       setConfirmDeleteId(null);
       addToast({ type: 'success', title: t('boq.deleted', { defaultValue: 'BOQ deleted' }) });
     },
-    onError: () => {
+    onError: (e: Error) => {
       setConfirmDeleteId(null);
-      addToast({ type: 'error', title: t('boq.delete_failed', { defaultValue: 'Failed to delete' }) });
+      addToast({ type: 'error', title: t('boq.delete_failed', { defaultValue: 'Failed to delete' }), message: e.message });
     },
   });
 
@@ -764,7 +765,7 @@ export function BOQListPage() {
 
                 <div className="flex items-center gap-1.5 shrink-0">
                   <span className="text-2xs text-content-quaternary hidden sm:inline">
-                    {new Date(boq.created_at).toLocaleDateString(i18n.language)}
+                    <DateDisplay value={boq.created_at} />
                   </span>
 
                   <button

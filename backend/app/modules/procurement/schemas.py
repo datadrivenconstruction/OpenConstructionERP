@@ -1,10 +1,22 @@
 """Procurement Pydantic schemas — request/response models."""
 
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+
+def _validate_non_negative_decimal(v: str) -> str:
+    """Validate that a string is a valid non-negative decimal number."""
+    try:
+        d = Decimal(v)
+    except (InvalidOperation, ValueError, TypeError) as exc:
+        raise ValueError(f"Invalid decimal value: {v!r}") from exc
+    if d < 0:
+        raise ValueError(f"Value must be non-negative, got {v!r}")
+    return v
 
 # ── Purchase Order ───────────────────────────────────────────────────────────
 
@@ -22,6 +34,11 @@ class POItemCreate(BaseModel):
     wbs_id: str | None = Field(default=None, max_length=36)
     cost_category: str | None = Field(default=None, max_length=100)
     sort_order: int = 0
+
+    @field_validator("quantity", "unit_rate", "amount")
+    @classmethod
+    def _check_non_negative_decimal(cls, v: str) -> str:
+        return _validate_non_negative_decimal(v)
 
 
 class POCreate(BaseModel):
@@ -45,6 +62,11 @@ class POCreate(BaseModel):
     items: list[POItemCreate] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
+    @field_validator("amount_subtotal", "tax_amount", "amount_total")
+    @classmethod
+    def _check_non_negative_decimal(cls, v: str) -> str:
+        return _validate_non_negative_decimal(v)
+
 
 class POUpdate(BaseModel):
     """Partial update for a purchase order."""
@@ -64,6 +86,13 @@ class POUpdate(BaseModel):
     notes: str | None = None
     items: list[POItemCreate] | None = None
     metadata: dict[str, Any] | None = None
+
+    @field_validator("amount_subtotal", "tax_amount", "amount_total")
+    @classmethod
+    def _check_non_negative_decimal(cls, v: str | None) -> str | None:
+        if v is None:
+            return v
+        return _validate_non_negative_decimal(v)
 
 
 # ── Purchase Order responses ─────────────────────────────────────────────────
@@ -136,6 +165,11 @@ class GRItemCreate(BaseModel):
     quantity_received: str = Field(default="0", max_length=50)
     quantity_rejected: str = Field(default="0", max_length=50)
     rejection_reason: str | None = None
+
+    @field_validator("quantity_ordered", "quantity_received", "quantity_rejected")
+    @classmethod
+    def _check_non_negative_decimal(cls, v: str) -> str:
+        return _validate_non_negative_decimal(v)
 
 
 class GRCreate(BaseModel):

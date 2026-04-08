@@ -193,8 +193,8 @@ export function FieldReportsPage() {
       setShowModal(false);
       setEditingReport(null);
     },
-    onError: () => {
-      addToast({ type: 'error', title: '', message: t('fieldreports.create_error', { defaultValue: 'Failed to create report' }) });
+    onError: (e: Error) => {
+      addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: e.message });
     },
   });
 
@@ -207,8 +207,8 @@ export function FieldReportsPage() {
       setShowModal(false);
       setEditingReport(null);
     },
-    onError: () => {
-      addToast({ type: 'error', title: '', message: t('fieldreports.update_error', { defaultValue: 'Failed to update report' }) });
+    onError: (e: Error) => {
+      addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: e.message });
     },
   });
 

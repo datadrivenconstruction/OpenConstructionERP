@@ -48,6 +48,17 @@ def _validate_checklist_structure(checklist: list[dict[str, Any]]) -> None:
             )
 
 
+# ── Allowed inspection status transitions ─────────────────────────────────────
+
+_INSPECTION_STATUS_TRANSITIONS: dict[str, set[str]] = {
+    "scheduled": {"in_progress", "cancelled"},
+    "in_progress": {"completed", "failed", "cancelled"},
+    "completed": set(),  # terminal
+    "failed": {"scheduled"},  # allow re-inspection
+    "cancelled": {"scheduled"},  # allow rescheduling
+}
+
+
 class InspectionService:
     """Business logic for inspection operations."""
 
@@ -131,9 +142,29 @@ class InspectionService:
         """Update inspection fields."""
         inspection = await self.get_inspection(inspection_id)
 
+        if inspection.status in ("completed", "failed"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Cannot edit an inspection with status '{inspection.status}'",
+            )
+
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         if "metadata" in fields:
             fields["metadata_"] = fields.pop("metadata")
+
+        # Validate status transition if status is being changed
+        new_status = fields.get("status")
+        if new_status is not None and new_status != inspection.status:
+            allowed = _INSPECTION_STATUS_TRANSITIONS.get(inspection.status, set())
+            if new_status not in allowed:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        f"Cannot transition inspection from '{inspection.status}' to "
+                        f"'{new_status}'. Allowed transitions: "
+                        f"{', '.join(sorted(allowed)) or 'none'}"
+                    ),
+                )
 
         if "checklist_data" in fields and fields["checklist_data"] is not None:
             fields["checklist_data"] = [
