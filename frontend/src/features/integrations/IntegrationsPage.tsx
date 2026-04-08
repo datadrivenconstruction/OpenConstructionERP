@@ -318,6 +318,12 @@ const CATEGORY_LABELS: Record<ConnectorCategory, { key: string; defaultLabel: st
   data: { key: 'integrations.cat_data', defaultLabel: 'Data & Analytics' },
 };
 
+const CATEGORY_ICON_STYLES: Record<ConnectorCategory, string> = {
+  notifications: 'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400',
+  automation: 'bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400',
+  data: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400',
+};
+
 const CATEGORY_ORDER: ConnectorCategory[] = ['notifications', 'automation', 'data'];
 
 /* ── API helpers ────────────────────────────────────────────────────────── */
@@ -526,8 +532,8 @@ export function IntegrationsPage() {
                   <div key={connector.nameKey} className="rounded-xl border border-border-light bg-surface-primary p-4 hover:border-border hover:shadow-sm transition-all">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2.5">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-secondary">
-                          <Icon size={18} className="text-content-secondary" />
+                        <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${CATEGORY_ICON_STYLES[connector.category]}`}>
+                          <Icon size={18} />
                         </div>
                         <div>
                           <h3 className="text-sm font-semibold text-content-primary">

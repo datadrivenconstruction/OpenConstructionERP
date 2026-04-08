@@ -760,11 +760,8 @@ export function SettingsPage() {
         <p className="mt-1 text-sm text-content-secondary">{t('settings.subtitle', { defaultValue: 'Manage your account and preferences' })}</p>
       </div>
 
-      {/* ── Two-column grid on wide screens ──────────────────────────── */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-
-      {/* Left column */}
-      <div className="space-y-6">
+      {/* ── Masonry-style two-column layout ──────────────────────────── */}
+      <div className="columns-1 xl:columns-2 gap-6 space-y-6 [&>*]:break-inside-avoid">
 
       {/* Profile */}
       <Card className="animate-card-in" style={{ animationDelay: '100ms' }}>
@@ -848,6 +845,12 @@ export function SettingsPage() {
         </CardContent>
       </Card>
 
+      {/* AI Configuration */}
+      <div>
+        <InfoHint className="animate-card-in mb-6" style={{ animationDelay: '140ms' }} text={t('settings.ai_guidance', { defaultValue: 'AI features (estimation, takeoff analysis, semantic search) require an API key. Anthropic Claude is recommended for best accuracy. Keys are stored encrypted and never leave your server.' })} />
+        <AIConfigurationCard animationDelay="200ms" />
+      </div>
+
       {/* Interface Mode */}
       <InterfaceModeCard animationDelay="150ms" />
 
@@ -884,25 +887,16 @@ export function SettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Translation Manager */}
+      <div className="animate-card-in" style={{ animationDelay: '350ms' }}>
+        <TranslationManager />
+      </div>
+
       {/* Regional Settings */}
       <RegionalSettings animationDelay="280ms" />
 
       {/* Appearance */}
       <AppearanceCard animationDelay="330ms" />
-
-      </div>{/* End left column */}
-
-      {/* Right column */}
-      <div className="space-y-6">
-
-      {/* AI Configuration */}
-      <InfoHint className="animate-card-in" style={{ animationDelay: '140ms' }} text={t('settings.ai_guidance', { defaultValue: 'AI features (estimation, takeoff analysis, semantic search) require an API key. Anthropic Claude is recommended for best accuracy. Keys are stored encrypted and never leave your server.' })} />
-      <AIConfigurationCard animationDelay="200ms" />
-
-      {/* Translation Manager */}
-      <div className="animate-card-in" style={{ animationDelay: '350ms' }}>
-        <TranslationManager />
-      </div>
 
       {/* Backup & Restore */}
       <div className="animate-card-in" style={{ animationDelay: '370ms' }}>
@@ -956,8 +950,7 @@ export function SettingsPage() {
         </CardContent>
       </Card>
 
-      </div>{/* End right column */}
-      </div>{/* End two-column grid */}
+      </div>{/* End masonry columns */}
 
       {/* About link */}
       <div className="mt-2 text-center">
