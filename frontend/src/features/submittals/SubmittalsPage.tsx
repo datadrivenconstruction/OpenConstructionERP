@@ -10,6 +10,7 @@ import {
   X,
   ChevronDown,
   ChevronRight,
+  Info,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, DateDisplay, SkeletonTable, ConfirmDialog } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -73,6 +74,8 @@ const STATUS_LABELS: Record<SubmittalStatus, string> = {
   revise_and_resubmit: 'Revise & Resubmit',
   rejected: 'Rejected',
 };
+
+const LS_INFO_DISMISSED = 'oe_submittals_info_dismissed';
 
 const inputCls =
   'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
@@ -493,6 +496,27 @@ const SubmittalRow = React.memo(function SubmittalRow({
             </span>
           </div>
 
+          {/* Linked BOQ items */}
+          {(() => {
+            const ids = (submittal as unknown as { linked_boq_item_ids?: string[] }).linked_boq_item_ids;
+            return ids && ids.length > 0 ? (
+              <div className="text-xs text-content-tertiary">
+                {t('submittals.linked_boq', {
+                  defaultValue: 'Linked to {{count}} BOQ position(s)',
+                  count: ids.length,
+                })}
+              </div>
+            ) : null;
+          })()}
+
+          {/* Document reference */}
+          <p className="text-2xs text-content-quaternary">
+            {t('submittals.doc_reference_hint', {
+              defaultValue:
+                'Upload supporting documents in the Documents module, then reference them here.',
+            })}
+          </p>
+
           {/* Actions */}
           <div className="flex items-center gap-2 pt-1">
             {submittal.status === 'draft' && (
@@ -540,6 +564,9 @@ export function SubmittalsPage() {
   const [reviewingSubmittal, setReviewingSubmittal] = useState<Submittal | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<SubmittalStatus | ''>('');
+  const [infoDismissed, setInfoDismissed] = useState(
+    () => localStorage.getItem(LS_INFO_DISMISSED) === '1',
+  );
 
   // Data
   const { data: projects = [] } = useQuery({
@@ -748,6 +775,44 @@ export function SubmittalsPage() {
           </Button>
         </div>
       </div>
+
+      {/* Info banner */}
+      {!infoDismissed && (
+        <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-700 dark:bg-blue-950/30 dark:text-blue-300 relative">
+          <button
+            onClick={() => {
+              setInfoDismissed(true);
+              localStorage.setItem(LS_INFO_DISMISSED, '1');
+            }}
+            className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded text-blue-400 hover:text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/40 dark:hover:text-blue-200 transition-colors"
+            aria-label={t('common.dismiss', { defaultValue: 'Dismiss' })}
+          >
+            <X size={14} />
+          </button>
+          <div className="flex items-center gap-2 mb-1">
+            <Info size={16} />
+            <span className="font-semibold">
+              {t('submittals.info_title', { defaultValue: 'About Submittals' })}
+            </span>
+          </div>
+          <p className="text-xs pr-6">
+            {t('submittals.info_body', {
+              defaultValue:
+                'Submittals are documents sent for review and approval \u2014 shop drawings, product data, samples, test reports, or certificates. Each submittal goes through a review workflow:',
+            })}{' '}
+            <strong>
+              {t('submittals.info_workflow', {
+                defaultValue: 'Draft \u2192 Submitted \u2192 Under Review \u2192 Approved/Rejected',
+              })}
+            </strong>
+            {'. '}
+            {t('submittals.info_link_hint', {
+              defaultValue:
+                'Link submittals to your BOQ positions to track which items have approved documentation.',
+            })}
+          </p>
+        </div>
+      )}
 
       {/* No-project warning */}
       {!projectId && (

@@ -503,6 +503,17 @@ function PhotoCard({
         alt={photo.caption || photo.filename}
         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         loading="lazy"
+        onError={(e) => {
+          const target = e.currentTarget;
+          target.style.display = 'none';
+          const parent = target.parentElement;
+          if (parent && !parent.querySelector('.photo-fallback')) {
+            const fallback = document.createElement('div');
+            fallback.className = 'photo-fallback absolute inset-0 flex items-center justify-center bg-surface-secondary';
+            fallback.innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-content-quaternary"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
+            parent.appendChild(fallback);
+          }
+        }}
       />
 
       {/* Selection checkbox */}
@@ -1184,7 +1195,7 @@ export function PhotoGalleryPage() {
         />
       ) : viewMode === 'grid' ? (
         /* Grid view */
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
           {photoList.map((photo, idx) => (
             <PhotoCard
               key={photo.id}
@@ -1212,7 +1223,7 @@ export function PhotoGalleryPage() {
                   {group.photos.length}
                 </Badge>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 ml-11">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 ml-11">
                 {group.photos.map((photo) => {
                   // Find the global index for lightbox navigation
                   const globalIdx = photoList.findIndex((p) => p.id === photo.id);

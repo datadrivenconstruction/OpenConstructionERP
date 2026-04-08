@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   Users,
   FileText,
+  Info,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, DateDisplay, ConfirmDialog, SkeletonTable } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -69,6 +70,15 @@ const PURPOSE_LABELS: Record<TransmittalPurpose, string> = {
   as_requested: 'As Requested',
 };
 
+const PURPOSE_DESCRIPTIONS: Record<TransmittalPurpose, string> = {
+  for_approval: 'Requires formal response',
+  for_information: 'No response required',
+  for_construction: 'Issued for use on site',
+  for_review: 'Review and comment expected',
+  for_record: 'Archived for documentation',
+  as_requested: 'Sent per prior request',
+};
+
 const PURPOSE_COLORS: Record<TransmittalPurpose, string> = {
   for_approval: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
   for_information: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
@@ -77,6 +87,8 @@ const PURPOSE_COLORS: Record<TransmittalPurpose, string> = {
   for_record: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
   as_requested: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
 };
+
+const LS_INFO_DISMISSED = 'oe_transmittals_info_dismissed';
 
 const inputCls =
   'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
@@ -205,6 +217,9 @@ function CreateTransmittalModal({
                   <ChevronDown size={14} />
                 </div>
               </div>
+              <p className="mt-1 text-2xs text-content-tertiary">
+                {PURPOSE_DESCRIPTIONS[form.purpose]}
+              </p>
             </div>
             <div>
               <label className="block text-sm font-medium text-content-primary mb-1.5">
@@ -512,6 +527,9 @@ export function TransmittalsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<TransmittalStatus | ''>('');
+  const [infoDismissed, setInfoDismissed] = useState(
+    () => localStorage.getItem(LS_INFO_DISMISSED) === '1',
+  );
 
   // Data
   const { data: projects = [] } = useQuery({
@@ -693,6 +711,41 @@ export function TransmittalsPage() {
           </Button>
         </div>
       </div>
+
+      {/* Info banner */}
+      {!infoDismissed && (
+        <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-700 dark:bg-blue-950/30 dark:text-blue-300 relative">
+          <button
+            onClick={() => {
+              setInfoDismissed(true);
+              localStorage.setItem(LS_INFO_DISMISSED, '1');
+            }}
+            className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded text-blue-400 hover:text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/40 dark:hover:text-blue-200 transition-colors"
+            aria-label={t('common.dismiss', { defaultValue: 'Dismiss' })}
+          >
+            <X size={14} />
+          </button>
+          <div className="flex items-center gap-2 mb-1">
+            <Info size={16} />
+            <span className="font-semibold">
+              {t('transmittals.info_title', { defaultValue: 'About Transmittals' })}
+            </span>
+          </div>
+          <p className="text-xs pr-6">
+            {t('transmittals.info_body', {
+              defaultValue:
+                'A transmittal is a formal document distribution record. When you send drawings, specifications, or other documents to a subcontractor or consultant, create a transmittal to track: what was sent, to whom, when, and whether they acknowledged receipt.',
+            })}
+            <br />
+            <strong>
+              {t('transmittals.info_purpose_codes', {
+                defaultValue:
+                  'Purpose codes: For Approval, For Information, For Construction, For Review.',
+              })}
+            </strong>
+          </p>
+        </div>
+      )}
 
       {/* No-project warning */}
       {!projectId && (
