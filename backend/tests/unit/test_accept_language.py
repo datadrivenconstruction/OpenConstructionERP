@@ -22,7 +22,6 @@ from app.middleware.accept_language import (
     parse_accept_language,
 )
 
-
 # ── parse_accept_language ───────────────────────────────────────────────────
 
 
@@ -180,7 +179,7 @@ def _seed_translations():
     _translations.update(saved)
 
 
-@pytest.fixture()
+@pytest.fixture
 def client() -> TestClient:
     """Test client with AcceptLanguageMiddleware active."""
     return TestClient(_make_app())

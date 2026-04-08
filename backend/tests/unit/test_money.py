@@ -12,7 +12,6 @@ from app.core.money import (
     parse_money,
 )
 
-
 # ── MoneyValue construction ──────────────────────────────────────────────────
 
 

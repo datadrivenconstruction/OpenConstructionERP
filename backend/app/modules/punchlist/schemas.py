@@ -120,6 +120,7 @@ class PunchListSummary(BaseModel):
     by_status: dict[str, int] = Field(default_factory=dict)
     by_priority: dict[str, int] = Field(default_factory=dict)
     overdue: int = 0
+    avg_days_to_close: float | None = None
 
 
 # ── Pin-to-sheet schema ────────────────────────────────────────────────

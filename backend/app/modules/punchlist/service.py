@@ -291,16 +291,34 @@ class PunchListService:
 
         by_status: dict[str, int] = {}
         by_priority: dict[str, int] = {}
+        closed_durations: list[float] = []
 
         for item in items:
             by_status[item.status] = by_status.get(item.status, 0) + 1
             by_priority[item.priority] = by_priority.get(item.priority, 0) + 1
+
+            # Compute days-to-close for closed/verified items
+            if item.status in ("closed", "verified") and item.created_at:
+                end_time = item.verified_at or item.resolved_at or item.updated_at
+                if end_time:
+                    try:
+                        delta = end_time - item.created_at
+                        days = delta.total_seconds() / 86400.0
+                        if days >= 0:
+                            closed_durations.append(days)
+                    except (TypeError, AttributeError):
+                        pass
+
+        avg_days_to_close: float | None = None
+        if closed_durations:
+            avg_days_to_close = round(sum(closed_durations) / len(closed_durations), 1)
 
         return {
             "total": len(items),
             "by_status": by_status,
             "by_priority": by_priority,
             "overdue": overdue,
+            "avg_days_to_close": avg_days_to_close,
         }
 
     # ── PDF Export ────────────────────────────────────────────────────────

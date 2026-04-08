@@ -662,3 +662,48 @@ class AssemblyService:
 
         logger.info("Assembly cloned: %s → %s", source.code, new_code)
         return cloned
+
+    # ── Stats ─────────────────────────────────────────────────────────────
+
+    async def get_stats(self) -> dict[str, object]:
+        """Return aggregated assembly statistics.
+
+        Returns total count, category breakdown, and most-used assemblies
+        (determined by the number of BOQ positions referencing each assembly).
+        """
+        from sqlalchemy import func as sqlfunc
+
+        # All active assemblies with components loaded
+        assemblies, total = await self.assembly_repo.list_all(offset=0, limit=10000)
+
+        by_category: dict[str, int] = {}
+        for asm in assemblies:
+            cat = asm.category or "uncategorized"
+            by_category[cat] = by_category.get(cat, 0) + 1
+
+        # Try to get usage counts from BOQ positions that reference assemblies
+        most_used: list[dict[str, object]] = []
+        try:
+            from sqlalchemy import select as sa_select
+
+            from app.modules.boq.models import BOQPosition
+
+            stmt = (
+                sa_select(Assembly.name, sqlfunc.count(BOQPosition.id).label("cnt"))
+                .join(BOQPosition, BOQPosition.assembly_id == Assembly.id)
+                .where(Assembly.is_active.is_(True))
+                .group_by(Assembly.id, Assembly.name)
+                .order_by(sqlfunc.count(BOQPosition.id).desc())
+                .limit(5)
+            )
+            rows = (await self.session.execute(stmt)).all()
+            most_used = [{"name": row[0], "usage_count": row[1]} for row in rows]
+        except Exception:
+            # BOQ module may not exist or table not yet created
+            logger.debug("Could not compute assembly usage stats from BOQ positions")
+
+        return {
+            "total": total,
+            "most_used": most_used,
+            "by_category": by_category,
+        }

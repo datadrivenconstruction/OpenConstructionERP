@@ -76,12 +76,23 @@ class DocumentResponse(BaseModel):
 # ── Summary schema ───────────────────────────────────────────────────────
 
 
+class RecentUpload(BaseModel):
+    """A recently uploaded document summary."""
+
+    name: str
+    uploaded_at: str
+    size: int = 0
+
+
 class DocumentSummary(BaseModel):
     """Aggregated document stats for a project."""
 
+    total: int = 0
     total_documents: int = 0
     total_size_bytes: int = 0
+    total_size_mb: float = 0.0
     by_category: dict[str, int] = Field(default_factory=dict)
+    recent_uploads: list[RecentUpload] = Field(default_factory=list)
 
 
 # ── Photo schemas ───────────────────────────────────────────────────────

@@ -45,13 +45,36 @@ COL_TOTAL = 30 * mm
 TABLE_COL_WIDTHS = [COL_POS, COL_DESC, COL_UNIT, COL_QTY, COL_RATE, COL_TOTAL]
 
 
-def _fmt(value: float, decimals: int = 2) -> str:
+def _fmt(value: float, decimals: int = 2, currency: str = "") -> str:
     """Format a number with thousands separator and fixed decimals.
 
-    Uses comma as thousands separator and dot as decimal separator,
-    matching international estimating conventions.
+    When *currency* is provided, uses locale-aware formatting:
+    - EUR (German/DACH): 1.234,56  (dot=thousands, comma=decimal)
+    - USD/GBP (Anglo):   1,234.56  (comma=thousands, dot=decimal)
+    - CHF (Swiss):       1'234.56  (apostrophe=thousands, dot=decimal)
+
+    Falls back to international style (comma thousands, dot decimal) when
+    the currency is unknown or empty.
     """
+    if currency and currency.upper() == "EUR":
+        raw = f"{value:,.{decimals}f}"
+        return raw.replace(",", "THOU").replace(".", ",").replace("THOU", ".")
+    if currency and currency.upper() == "CHF":
+        raw = f"{value:,.{decimals}f}"
+        return raw.replace(",", "'")
     return f"{value:,.{decimals}f}"
+
+
+def _fmt_currency(value: float, currency: str, decimals: int = 2) -> str:
+    """Format a monetary amount with currency code appended.
+
+    Examples:
+        _fmt_currency(1234.56, "EUR") -> "1.234,56 EUR"
+        _fmt_currency(1234.56, "USD") -> "1,234.56 USD"
+        _fmt_currency(1234.56, "GBP") -> "1,234.56 GBP"
+    """
+    formatted = _fmt(value, decimals, currency)
+    return f"{formatted} {currency}"
 
 
 def _build_styles() -> dict[str, ParagraphStyle]:
@@ -388,11 +411,11 @@ def _build_cover_page(
         gross_total = net_total
 
     summary_rows = [
-        ("Direct Cost:", f"{_fmt(direct_cost)} {currency}", False),
-        ("Markups:", f"{_fmt(markup_total)} {currency}", False),
-        ("Net Total:", f"{_fmt(net_total)} {currency}", False),
-        (f"VAT {_fmt(vat_rate, 0)}%:", f"{_fmt(vat_amount)} {currency}", False),
-        ("Gross Total:", f"{_fmt(gross_total)} {currency}", True),
+        ("Direct Cost:", _fmt_currency(direct_cost, currency), False),
+        ("Markups:", _fmt_currency(markup_total, currency), False),
+        ("Net Total:", _fmt_currency(net_total, currency), False),
+        (f"VAT {_fmt(vat_rate, 0)}%:", _fmt_currency(vat_amount, currency), False),
+        ("Gross Total:", _fmt_currency(gross_total, currency), True),
     ]
 
     summary_table_data = []
@@ -447,8 +470,21 @@ def _build_boq_table(
     currency: str,
     styles: dict[str, ParagraphStyle],
 ) -> list[Any]:
-    """Build the BOQ table flowables (sections, positions, totals)."""
+    """Build the BOQ table flowables (sections, positions, totals).
+
+    Improvements:
+    - Locale-aware currency formatting for all monetary values
+    - Conditional page break before each major section (60mm threshold)
+    - Grand total block wrapped in KeepTogether
+    """
     elements: list[Any] = []
+
+    # Locale-aware formatting shortcuts
+    def _fv(value: float, decimals: int = 2) -> str:
+        return _fmt(value, decimals, currency)
+
+    def _fc(value: float) -> str:
+        return _fmt_currency(value, currency)
 
     # Table header row
     header_row = [
@@ -456,8 +492,8 @@ def _build_boq_table(
         Paragraph("<b>Description</b>", styles["section_header"]),
         Paragraph("<b>Unit</b>", styles["section_header"]),
         Paragraph("<b>Qty</b>", styles["cell_bold_right"]),
-        Paragraph("<b>Rate</b>", styles["cell_bold_right"]),
-        Paragraph("<b>Total</b>", styles["cell_bold_right"]),
+        Paragraph(f"<b>Rate ({currency})</b>", styles["cell_bold_right"]),
+        Paragraph(f"<b>Total ({currency})</b>", styles["cell_bold_right"]),
     ]
 
     table_data: list[list[Any]] = [header_row]
@@ -488,9 +524,9 @@ def _build_boq_table(
                     Paragraph(pos.ordinal, styles["cell"]),
                     Paragraph(pos.description, styles["cell"]),
                     Paragraph(pos.unit, styles["cell"]),
-                    Paragraph(_fmt(pos.quantity), styles["cell_right"]),
-                    Paragraph(_fmt(pos.unit_rate), styles["cell_right"]),
-                    Paragraph(_fmt(pos.total), styles["cell_right"]),
+                    Paragraph(_fv(pos.quantity), styles["cell_right"]),
+                    Paragraph(_fv(pos.unit_rate), styles["cell_right"]),
+                    Paragraph(_fv(pos.total), styles["cell_right"]),
                 ]
             )
             row_styles.append((row_idx, "item"))
@@ -504,7 +540,7 @@ def _build_boq_table(
                 Paragraph("Subtotal:", styles["subtotal_label"]),
                 "",
                 "",
-                Paragraph(_fmt(section.subtotal), styles["subtotal_value"]),
+                Paragraph(_fv(section.subtotal), styles["subtotal_value"]),
             ]
         )
         row_styles.append((row_idx, "subtotal"))
@@ -532,9 +568,9 @@ def _build_boq_table(
                     Paragraph(pos.ordinal, styles["cell"]),
                     Paragraph(pos.description, styles["cell"]),
                     Paragraph(pos.unit, styles["cell"]),
-                    Paragraph(_fmt(pos.quantity), styles["cell_right"]),
-                    Paragraph(_fmt(pos.unit_rate), styles["cell_right"]),
-                    Paragraph(_fmt(pos.total), styles["cell_right"]),
+                    Paragraph(_fv(pos.quantity), styles["cell_right"]),
+                    Paragraph(_fv(pos.unit_rate), styles["cell_right"]),
+                    Paragraph(_fv(pos.total), styles["cell_right"]),
                 ]
             )
             row_styles.append((row_idx, "item"))
@@ -548,7 +584,7 @@ def _build_boq_table(
                 Paragraph("Subtotal:", styles["subtotal_label"]),
                 "",
                 "",
-                Paragraph(_fmt(ungrouped_total), styles["subtotal_value"]),
+                Paragraph(_fv(ungrouped_total), styles["subtotal_value"]),
             ]
         )
         row_styles.append((row_idx, "subtotal"))
@@ -567,7 +603,7 @@ def _build_boq_table(
             Paragraph("<b>Direct Cost:</b>", styles["cell_bold_right"]),
             "",
             "",
-            Paragraph(f"<b>{_fmt(boq_data.direct_cost)}</b>", styles["cell_bold_right"]),
+            Paragraph(f"<b>{_fc(boq_data.direct_cost)}</b>", styles["cell_bold_right"]),
         ]
     )
     row_styles.append((row_idx, "total_line"))
@@ -579,7 +615,7 @@ def _build_boq_table(
             continue
         label = markup.name
         if markup.markup_type == "percentage":
-            label = f"{markup.name} ({_fmt(markup.percentage, 1)}%)"
+            label = f"{markup.name} ({_fv(markup.percentage, 1)}%)"
         table_data.append(
             [
                 "",
@@ -587,7 +623,7 @@ def _build_boq_table(
                 Paragraph(label, styles["cell_right"]),
                 "",
                 "",
-                Paragraph(_fmt(markup.amount), styles["cell_right"]),
+                Paragraph(_fc(markup.amount), styles["cell_right"]),
             ]
         )
         row_styles.append((row_idx, "markup"))
@@ -601,7 +637,7 @@ def _build_boq_table(
             Paragraph("<b>Net Total:</b>", styles["cell_bold_right"]),
             "",
             "",
-            Paragraph(f"<b>{_fmt(boq_data.net_total)}</b>", styles["cell_bold_right"]),
+            Paragraph(f"<b>{_fc(boq_data.net_total)}</b>", styles["cell_bold_right"]),
         ]
     )
     row_styles.append((row_idx, "grand_total"))
@@ -625,10 +661,10 @@ def _build_boq_table(
         [
             "",
             "",
-            Paragraph(f"VAT {_fmt(vat_rate, 0)}%:", styles["cell_right"]),
+            Paragraph(f"VAT {_fv(vat_rate, 0)}%:", styles["cell_right"]),
             "",
             "",
-            Paragraph(_fmt(vat_amount), styles["cell_right"]),
+            Paragraph(_fc(vat_amount), styles["cell_right"]),
         ]
     )
     row_styles.append((row_idx, "vat"))
@@ -641,7 +677,7 @@ def _build_boq_table(
             Paragraph(f"<b>Gross Total ({currency}):</b>", styles["cell_bold_right"]),
             "",
             "",
-            Paragraph(f"<b>{_fmt(gross_total)}</b>", styles["cell_bold_right"]),
+            Paragraph(f"<b>{_fc(gross_total)}</b>", styles["cell_bold_right"]),
         ]
     )
     row_styles.append((row_idx, "grand_total"))
@@ -933,7 +969,7 @@ def generate_boq_pdf_simple(
                 Paragraph(section.ordinal, styles["cell"]),
                 Paragraph(section.description, styles["cell"]),
                 Paragraph(str(len(section.positions)), styles["cell_right"]),
-                Paragraph(_fmt(section.subtotal), styles["cell_right"]),
+                Paragraph(_fmt_currency(section.subtotal, currency), styles["cell_right"]),
             ]
         )
 
@@ -944,7 +980,7 @@ def generate_boq_pdf_simple(
                 Paragraph("", styles["cell"]),
                 Paragraph("Other Positions", styles["cell"]),
                 Paragraph(str(len(boq_data.positions)), styles["cell_right"]),
-                Paragraph(_fmt(ungrouped_total), styles["cell_right"]),
+                Paragraph(_fmt_currency(ungrouped_total, currency), styles["cell_right"]),
             ]
         )
 
@@ -974,7 +1010,7 @@ def generate_boq_pdf_simple(
     cost_rows.append(
         [
             Paragraph("<b>Direct Cost:</b>", styles["cell_bold_right"]),
-            Paragraph(f"<b>{_fmt(boq_data.direct_cost)} {currency}</b>", styles["cell_bold_right"]),
+            Paragraph(f"<b>{_fmt_currency(boq_data.direct_cost, currency)}</b>", styles["cell_bold_right"]),
         ]
     )
 
@@ -983,18 +1019,18 @@ def generate_boq_pdf_simple(
             continue
         label = markup.name
         if markup.markup_type == "percentage":
-            label = f"{markup.name} ({_fmt(markup.percentage, 1)}%)"
+            label = f"{markup.name} ({_fmt(markup.percentage, 1, currency)}%)"
         cost_rows.append(
             [
                 Paragraph(label, styles["cell_right"]),
-                Paragraph(f"{_fmt(markup.amount)} {currency}", styles["cell_right"]),
+                Paragraph(_fmt_currency(markup.amount, currency), styles["cell_right"]),
             ]
         )
 
     cost_rows.append(
         [
             Paragraph("<b>Net Total:</b>", styles["cell_bold_right"]),
-            Paragraph(f"<b>{_fmt(boq_data.net_total)} {currency}</b>", styles["cell_bold_right"]),
+            Paragraph(f"<b>{_fmt_currency(boq_data.net_total, currency)}</b>", styles["cell_bold_right"]),
         ]
     )
 
@@ -1009,14 +1045,14 @@ def generate_boq_pdf_simple(
 
     cost_rows.append(
         [
-            Paragraph(f"VAT {_fmt(vat_rate, 0)}%:", styles["cell_right"]),
-            Paragraph(f"{_fmt(vat_amount)} {currency}", styles["cell_right"]),
+            Paragraph(f"VAT {_fmt(vat_rate, 0, currency)}%:", styles["cell_right"]),
+            Paragraph(_fmt_currency(vat_amount, currency), styles["cell_right"]),
         ]
     )
     cost_rows.append(
         [
             Paragraph(f"<b>Gross Total ({currency}):</b>", styles["cell_bold_right"]),
-            Paragraph(f"<b>{_fmt(gross_total)} {currency}</b>", styles["cell_bold_right"]),
+            Paragraph(f"<b>{_fmt_currency(gross_total, currency)}</b>", styles["cell_bold_right"]),
         ]
     )
 

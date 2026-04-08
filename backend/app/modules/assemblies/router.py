@@ -341,6 +341,17 @@ async def ai_generate_assembly(
 
 
 @router.get(
+    "/stats",
+    dependencies=[Depends(RequirePermission("assemblies.read"))],
+)
+async def get_stats(
+    service: AssemblyService = Depends(_get_service),
+) -> dict:
+    """Return aggregated assembly statistics: totals, category breakdown, most-used."""
+    return await service.get_stats()
+
+
+@router.get(
     "/{assembly_id}",
     response_model=AssemblyWithComponents,
     dependencies=[Depends(RequirePermission("assemblies.read"))],

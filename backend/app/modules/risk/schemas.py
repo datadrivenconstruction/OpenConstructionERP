@@ -101,15 +101,28 @@ class RiskResponse(BaseModel):
 # ── Summary schema ───────────────────────────────────────────────────────
 
 
+class TopRisk(BaseModel):
+    """A high-scoring risk for display in stats."""
+
+    title: str
+    score: float
+
+
 class RiskSummary(BaseModel):
     """Aggregated risk stats for a project."""
 
+    total: int = 0
     total_risks: int = 0
     by_status: dict[str, int] = Field(default_factory=dict)
+    by_tier: dict[str, int] = Field(default_factory=dict)
     by_category: dict[str, int] = Field(default_factory=dict)
     high_critical_count: int = 0
+    avg_risk_score: float = 0.0
     total_exposure: float = 0.0
+    with_mitigation: int = 0
+    without_mitigation: int = 0
     mitigated_count: int = 0
+    top_risks: list[TopRisk] = Field(default_factory=list)
     currency: str = "EUR"
 
 

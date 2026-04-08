@@ -73,42 +73,67 @@ class ChangeOrderRepository:
         )
         return (await self.session.execute(stmt)).scalar_one()
 
-    async def get_summary(self, project_id: uuid.UUID) -> dict[str, int | float | str]:
+    async def get_summary(self, project_id: uuid.UUID) -> dict[str, object]:
         """Aggregate change order stats for a project."""
         base = select(ChangeOrder).where(ChangeOrder.project_id == project_id)
         result = await self.session.execute(base)
         orders = list(result.scalars().all())
 
-        summary: dict[str, int | float | str] = {
-            "total_orders": len(orders),
-            "draft_count": 0,
-            "submitted_count": 0,
-            "approved_count": 0,
-            "rejected_count": 0,
-            "total_cost_impact": 0.0,
-            "total_schedule_impact_days": 0,
-            "currency": "EUR",
-        }
+        draft_count = 0
+        submitted_count = 0
+        approved_count = 0
+        rejected_count = 0
+        total_cost_impact = 0.0
+        total_approved_amount = 0.0
+        total_schedule_impact_days = 0
+        total_time_impact_days = 0
+        by_status: dict[str, int] = {}
+        by_type: dict[str, int] = {}
+        currency = "EUR"
 
         for order in orders:
+            # by_status aggregation
+            by_status[order.status] = by_status.get(order.status, 0) + 1
+
+            # by_type aggregation (reason_category)
+            rcat = order.reason_category or "other"
+            by_type[rcat] = by_type.get(rcat, 0) + 1
+
             if order.status == "draft":
-                summary["draft_count"] = int(summary["draft_count"]) + 1  # type: ignore[arg-type]
+                draft_count += 1
             elif order.status == "submitted":
-                summary["submitted_count"] = int(summary["submitted_count"]) + 1  # type: ignore[arg-type]
+                submitted_count += 1
             elif order.status == "approved":
-                summary["approved_count"] = int(summary["approved_count"]) + 1  # type: ignore[arg-type]
+                approved_count += 1
                 # Only approved orders count toward total cost/schedule impact
-                summary["total_cost_impact"] = float(summary["total_cost_impact"]) + float(order.cost_impact)  # type: ignore[arg-type]
-                summary["total_schedule_impact_days"] = (
-                    int(summary["total_schedule_impact_days"]) + order.schedule_impact_days
-                )  # type: ignore[arg-type]
+                try:
+                    total_cost_impact += float(order.cost_impact)
+                    total_approved_amount += float(order.cost_impact)
+                except (ValueError, TypeError):
+                    pass
+                total_schedule_impact_days += order.schedule_impact_days or 0
+                total_time_impact_days += order.schedule_impact_days or 0
             elif order.status == "rejected":
-                summary["rejected_count"] = int(summary["rejected_count"]) + 1  # type: ignore[arg-type]
+                rejected_count += 1
 
             if order.currency:
-                summary["currency"] = order.currency
+                currency = order.currency
 
-        return summary
+        return {
+            "total": len(orders),
+            "total_orders": len(orders),
+            "by_status": by_status,
+            "by_type": by_type,
+            "draft_count": draft_count,
+            "submitted_count": submitted_count,
+            "approved_count": approved_count,
+            "rejected_count": rejected_count,
+            "total_approved_amount": round(total_approved_amount, 2),
+            "total_cost_impact": round(total_cost_impact, 2),
+            "total_time_impact_days": total_time_impact_days,
+            "total_schedule_impact_days": total_schedule_impact_days,
+            "currency": currency,
+        }
 
     # ── ChangeOrderItem ──────────────────────────────────────────────────
 

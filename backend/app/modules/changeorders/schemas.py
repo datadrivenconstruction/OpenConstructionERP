@@ -146,11 +146,16 @@ class ChangeOrderItemUpdate(BaseModel):
 class ChangeOrderSummary(BaseModel):
     """Aggregated change order stats for a project."""
 
+    total: int = 0
     total_orders: int = 0
+    by_status: dict[str, int] = Field(default_factory=dict)
+    by_type: dict[str, int] = Field(default_factory=dict)
     draft_count: int = 0
     submitted_count: int = 0
     approved_count: int = 0
     rejected_count: int = 0
+    total_approved_amount: float = 0.0
     total_cost_impact: float = 0.0
+    total_time_impact_days: int = 0
     total_schedule_impact_days: int = 0
     currency: str = "EUR"

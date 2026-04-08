@@ -133,8 +133,9 @@ function StatsCards({ summary }: { summary: PunchSummary | undefined }) {
   const total = summary?.total ?? 0;
   const byStatus = summary?.by_status ?? {};
   const overdue = summary?.overdue ?? 0;
+  const avgDays = summary?.avg_days_to_close;
 
-  const items = [
+  const items: { label: string; value: string | number; cls: string }[] = [
     {
       label: t('punch.stat_total', { defaultValue: 'Total' }),
       value: total,
@@ -156,14 +157,14 @@ function StatsCards({ summary }: { summary: PunchSummary | undefined }) {
       cls: 'text-oe-blue',
     },
     {
-      label: t('punch.stat_verified', { defaultValue: 'Verified' }),
-      value: byStatus['verified'] ?? 0,
-      cls: 'text-[#15803d]',
-    },
-    {
       label: t('punch.stat_overdue', { defaultValue: 'Overdue' }),
       value: overdue,
       cls: overdue > 0 ? 'text-semantic-error' : 'text-content-primary',
+    },
+    {
+      label: t('punch.stat_avg_close', { defaultValue: 'Avg Days to Close' }),
+      value: avgDays != null ? `${avgDays}d` : '-',
+      cls: 'text-content-primary',
     },
   ];
 

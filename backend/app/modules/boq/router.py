@@ -1974,11 +1974,12 @@ async def export_boq_excel(
     survives a round-trip through Excel.
     """
     from openpyxl import Workbook
-    from openpyxl.styles import Alignment, Font, numbers
+    from openpyxl.styles import Alignment, Border, Font, PatternFill, Side, numbers
     from openpyxl.utils import get_column_letter
 
     boq_data = await service.get_boq_with_positions(boq_id)
     boq_obj = await service.get_boq(boq_id)
+    structured_data = await service.get_boq_structured(boq_id)
 
     # ── Custom column definitions from BOQ metadata ──────────────────────
     boq_meta = boq_obj.metadata_ if isinstance(boq_obj.metadata_, dict) else {}
@@ -2002,39 +2003,92 @@ async def export_boq_excel(
     ]
     custom_headers = [c.get("display_name", c.get("name", "")) for c in custom_columns]
     headers = standard_headers + custom_headers
+    n_standard = len(standard_headers)
+
+    # ── Reusable styles ──────────────────────────────────────────────────
     bold_font = Font(bold=True)
+    grand_total_font = Font(bold=True, size=12)
+    subtotal_font = Font(bold=True, italic=True)
+    section_font = Font(bold=True, size=11)
+    gray_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
+    light_gray_fill = PatternFill(start_color="F0F0F5", end_color="F0F0F5", fill_type="solid")
+    top_border = Border(top=Side(style="medium"))
+    number_format = numbers.FORMAT_NUMBER_COMMA_SEPARATED1  # #,##0.00
+    right_align = Alignment(horizontal="right")
 
     for col_idx, header in enumerate(headers, start=1):
         cell = ws.cell(row=1, column=col_idx, value=header)
         cell.font = bold_font
+        cell.fill = gray_fill
 
-    # ── Position rows ─────────────────────────────────────────────────────
-    number_format = numbers.FORMAT_NUMBER_COMMA_SEPARATED1  # #,##0.00
-    n_standard = len(standard_headers)
+    # ── Freeze header row ────────────────────────────────────────────────
+    ws.freeze_panes = "A2"
 
-    for row_idx, pos in enumerate(boq_data.positions, start=2):
-        ws.cell(row=row_idx, column=1, value=pos.ordinal)
-        ws.cell(row=row_idx, column=2, value=pos.description)
-        ws.cell(row=row_idx, column=3, value=pos.unit)
+    # ── Build section lookup for subtotal insertion ───────────────────────
+    section_map: dict[str, tuple[str, str, float]] = {}
+    for sec in structured_data.sections:
+        section_map[str(sec.id)] = (sec.ordinal, sec.description, sec.subtotal)
 
-        qty_cell = ws.cell(row=row_idx, column=4, value=pos.quantity)
+    # ── Position rows (with section headers and subtotals) ───────────────
+    current_row = 2
+    current_section_id: str | None = None
+
+    def _write_subtotal(row: int, sec_ordinal: str, sec_desc: str, subtotal: float) -> int:
+        """Write a section subtotal row with bold + gray fill. Returns next row."""
+        for c in range(1, len(headers) + 1):
+            ws.cell(row=row, column=c).fill = light_gray_fill
+        label_cell = ws.cell(row=row, column=2, value=f"Subtotal: {sec_ordinal} {sec_desc}")
+        label_cell.font = subtotal_font
+        label_cell.fill = light_gray_fill
+        total_cell = ws.cell(row=row, column=6, value=subtotal)
+        total_cell.font = subtotal_font
+        total_cell.number_format = number_format
+        total_cell.alignment = right_align
+        total_cell.fill = light_gray_fill
+        return row + 1
+
+    for pos in boq_data.positions:
+        pos_parent = str(pos.parent_id) if pos.parent_id else None
+
+        # If we switched sections, write subtotal for previous section
+        if pos_parent != current_section_id and current_section_id is not None:
+            if current_section_id in section_map:
+                s_ord, s_desc, s_sub = section_map[current_section_id]
+                current_row = _write_subtotal(current_row, s_ord, s_desc, s_sub)
+
+        # Section header rows (unit="section")
+        if pos.unit in ("", "section"):
+            current_section_id = str(pos.id)
+            for c in range(1, len(headers) + 1):
+                ws.cell(row=current_row, column=c).fill = gray_fill
+            ws.cell(row=current_row, column=1, value=pos.ordinal).font = section_font
+            desc_cell = ws.cell(row=current_row, column=2, value=pos.description)
+            desc_cell.font = section_font
+            desc_cell.fill = gray_fill
+            current_row += 1
+            continue
+
+        # Regular position row
+        ws.cell(row=current_row, column=1, value=pos.ordinal)
+        ws.cell(row=current_row, column=2, value=pos.description)
+        ws.cell(row=current_row, column=3, value=pos.unit)
+
+        qty_cell = ws.cell(row=current_row, column=4, value=pos.quantity)
         qty_cell.number_format = number_format
 
-        rate_cell = ws.cell(row=row_idx, column=5, value=pos.unit_rate)
+        rate_cell = ws.cell(row=current_row, column=5, value=pos.unit_rate)
         rate_cell.number_format = number_format
 
-        total_cell = ws.cell(row=row_idx, column=6, value=pos.total)
+        total_cell = ws.cell(row=current_row, column=6, value=pos.total)
         total_cell.number_format = number_format
 
         ws.cell(
-            row=row_idx,
+            row=current_row,
             column=7,
             value=_get_classification_code(pos.classification),
         )
 
         # ── Custom column values ─────────────────────────────────────────
-        # Look up `position.metadata_.custom_fields[col_name]` for each
-        # custom column. Missing values render as empty cells.
         if custom_columns:
             pos_meta_raw = getattr(pos, "metadata", None) or getattr(pos, "metadata_", None) or {}
             custom_fields = pos_meta_raw.get("custom_fields", {}) if isinstance(pos_meta_raw, dict) else {}
@@ -2042,22 +2096,35 @@ async def export_boq_excel(
                 col_name = col_def.get("name", "")
                 col_type = col_def.get("column_type", "text")
                 value = custom_fields.get(col_name, "") if isinstance(custom_fields, dict) else ""
-                cell = ws.cell(row=row_idx, column=n_standard + 1 + offset, value=value)
+                cell = ws.cell(row=current_row, column=n_standard + 1 + offset, value=value)
                 if col_type == "number" and value not in (None, ""):
                     try:
                         cell.value = float(value)
                         cell.number_format = number_format
                     except (TypeError, ValueError):
-                        pass  # Keep as text fallback
+                        pass
 
-    # ── Grand total row ───────────────────────────────────────────────────
-    total_row = len(boq_data.positions) + 2
+        current_row += 1
+
+    # Write final section subtotal
+    if current_section_id is not None and current_section_id in section_map:
+        s_ord, s_desc, s_sub = section_map[current_section_id]
+        current_row = _write_subtotal(current_row, s_ord, s_desc, s_sub)
+
+    # ── Grand total row (bold, larger font, top border) ──────────────────
+    total_row = current_row
+    for c in range(1, len(headers) + 1):
+        ws.cell(row=total_row, column=c).border = top_border
+
     total_label = ws.cell(row=total_row, column=2, value="Grand Total")
-    total_label.font = bold_font
+    total_label.font = grand_total_font
+    total_label.border = top_border
 
     grand_total_cell = ws.cell(row=total_row, column=6, value=boq_data.grand_total)
-    grand_total_cell.font = bold_font
+    grand_total_cell.font = grand_total_font
     grand_total_cell.number_format = number_format
+    grand_total_cell.alignment = right_align
+    grand_total_cell.border = top_border
 
     # ── Auto-width columns ────────────────────────────────────────────────
     for col_idx in range(1, len(headers) + 1):
@@ -2072,14 +2139,13 @@ async def export_boq_excel(
                 val = cell.value
                 if val is not None:
                     max_length = max(max_length, len(str(val)))
-        # Add a small padding; cap at 60 to avoid excessively wide columns
         adjusted = min(max_length + 3, 60)
         ws.column_dimensions[get_column_letter(col_idx)].width = adjusted
 
     # Align numeric columns to the right
     for row in ws.iter_rows(min_row=2, max_row=total_row, min_col=4, max_col=6):
         for cell in row:
-            cell.alignment = Alignment(horizontal="right")
+            cell.alignment = right_align
 
     # ── Write to bytes buffer and return ──────────────────────────────────
     buffer = io.BytesIO()

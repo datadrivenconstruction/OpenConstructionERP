@@ -54,6 +54,7 @@ export interface PunchSummary {
   by_status: Record<string, number>;
   by_priority: Record<string, number>;
   overdue: number;
+  avg_days_to_close: number | null;
 }
 
 export interface PunchFilters {

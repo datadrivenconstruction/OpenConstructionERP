@@ -220,13 +220,26 @@ class DocumentService:
         Uses SQL COUNT/SUM aggregation instead of loading all records into memory.
         """
         total_count, total_size, cat_rows = await self.repo.summary_for_project(project_id)
+        recent_docs = await self.repo.recent_uploads(project_id, limit=5)
 
         by_category: dict[str, int] = {cat: count for cat, count in cat_rows}
 
+        recent_uploads = [
+            {
+                "name": doc.name,
+                "uploaded_at": doc.created_at.isoformat() if doc.created_at else "",
+                "size": doc.file_size or 0,
+            }
+            for doc in recent_docs
+        ]
+
         return {
+            "total": total_count,
             "total_documents": total_count,
             "total_size_bytes": total_size,
+            "total_size_mb": round(total_size / (1024 * 1024), 1) if total_size else 0.0,
             "by_category": by_category,
+            "recent_uploads": recent_uploads,
         }
 
 

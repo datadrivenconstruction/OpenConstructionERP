@@ -101,6 +101,19 @@ class DocumentRepository:
 
         return total_count, total_size, list(cat_rows)
 
+    async def recent_uploads(
+        self, project_id: uuid.UUID, limit: int = 5
+    ) -> list[Document]:
+        """Return the most recently uploaded documents for a project."""
+        stmt = (
+            select(Document)
+            .where(Document.project_id == project_id)
+            .order_by(Document.created_at.desc())
+            .limit(limit)
+        )
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
 
 class PhotoRepository:
     """Data access for ProjectPhoto models."""

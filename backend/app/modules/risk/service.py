@@ -151,15 +151,24 @@ class RiskService:
         items = await self.repo.all_for_project(project_id)
 
         by_status: dict[str, int] = {}
+        by_tier: dict[str, int] = {}
         by_category: dict[str, int] = {}
         high_critical_count = 0
         mitigated_count = 0
+        with_mitigation = 0
+        without_mitigation = 0
         total_exposure = 0.0
+        risk_scores: list[float] = []
+        scored_items: list[tuple[str, float]] = []
         currency = "EUR"
 
         for item in items:
             by_status[item.status] = by_status.get(item.status, 0) + 1
             by_category[item.category] = by_category.get(item.category, 0) + 1
+
+            # Tier breakdown by impact_severity
+            tier = item.impact_severity or "medium"
+            by_tier[tier] = by_tier.get(tier, 0) + 1
 
             if item.impact_severity in ("high", "critical"):
                 high_critical_count += 1
@@ -167,22 +176,50 @@ class RiskService:
             if item.status in ("mitigating", "closed"):
                 mitigated_count += 1
 
+            # Mitigation tracking
+            if item.mitigation_strategy and item.mitigation_strategy.strip():
+                with_mitigation += 1
+            else:
+                without_mitigation += 1
+
             # Exposure = impact_cost * probability
             try:
                 total_exposure += float(item.impact_cost) * float(item.probability)
             except (ValueError, TypeError):
                 pass
 
+            # Risk score tracking
+            try:
+                score = float(item.risk_score)
+                risk_scores.append(score)
+                scored_items.append((item.title, score))
+            except (ValueError, TypeError):
+                pass
+
             if item.currency:
                 currency = item.currency
 
+        avg_risk_score = 0.0
+        if risk_scores:
+            avg_risk_score = round(sum(risk_scores) / len(risk_scores), 1)
+
+        # Top risks sorted by score descending
+        scored_items.sort(key=lambda x: x[1], reverse=True)
+        top_risks = [{"title": t, "score": s} for t, s in scored_items[:5]]
+
         return {
+            "total": len(items),
             "total_risks": len(items),
             "by_status": by_status,
+            "by_tier": by_tier,
             "by_category": by_category,
             "high_critical_count": high_critical_count,
+            "avg_risk_score": avg_risk_score,
             "total_exposure": round(total_exposure, 2),
+            "with_mitigation": with_mitigation,
+            "without_mitigation": without_mitigation,
             "mitigated_count": mitigated_count,
+            "top_risks": top_risks,
             "currency": currency,
         }
 
