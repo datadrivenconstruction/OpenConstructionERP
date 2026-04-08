@@ -13,6 +13,7 @@ import { QuantitiesPage } from '@/features/quantities';
 import { ModulesPage } from '@/features/modules';
 import { useModuleRouteElements } from '@/modules/ModuleRoutes';
 import { SettingsPage } from '@/features/settings';
+import { IntegrationsPage } from '@/features/integrations';
 import { AboutPage } from '@/features/about/AboutPage';
 import { QuickEstimatePage } from '@/features/ai';
 import { Logo, ShortcutsDialog, CommandPalette, ToastContainer, ErrorBoundary, NotFoundPage } from '@/shared/ui';
@@ -354,6 +355,7 @@ export default function App() {
         <Route path="/modules" element={<P title="Modules"><ModulesPage /></P>} />
 
         <Route path="/settings" element={<P title="Settings"><SettingsPage /></P>} />
+        <Route path="/integrations" element={<P title="Integrations"><IntegrationsPage /></P>} />
         <Route path="/about" element={<P title="About"><AboutPage /></P>} />
 
         {/* Plugin module routes — lazy-loaded */}

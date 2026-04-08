@@ -90,6 +90,14 @@ class Settings(BaseSettings):
     yandex_api_key: str | None = None
     gigachat_api_key: str | None = None
 
+    # ── Email (SMTP) ──────────────────────────────────────────────────────
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_from: str = "notifications@openconstructionerp.com"
+    smtp_tls: bool = True
+
     # ── External Services ────────────────────────────────────────────────
     cad_converter_url: str | None = "http://localhost:8001"
     cv_pipeline_url: str | None = "http://localhost:8002"

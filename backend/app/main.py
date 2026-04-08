@@ -714,6 +714,7 @@ def create_app() -> FastAPI:
             from app.modules.full_evm import models as _full_evm_models  # noqa: F401
             from app.modules.i18n_foundation import models as _i18n_models  # noqa: F401
             from app.modules.inspections import models as _inspections_models  # noqa: F401
+            from app.modules.integrations import models as _integrations_models  # noqa: F401
             from app.modules.markups import models as _markups_models  # noqa: F401
             from app.modules.meetings import models as _meetings_models  # noqa: F401
             from app.modules.ncr import models as _ncr_models  # noqa: F401

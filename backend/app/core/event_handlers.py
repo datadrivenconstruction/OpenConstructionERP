@@ -1556,10 +1556,46 @@ async def _notify_document_uploaded(event: Event) -> None:
 
 
 # ---------------------------------------------------------------------------
+# 24. Wildcard: forward ALL events to registered outgoing webhooks
+# ---------------------------------------------------------------------------
+
+async def _dispatch_to_webhooks(event: Event) -> None:
+    """Forward all events to registered webhooks.
+
+    This is a wildcard handler — it receives every event published on the
+    bus and dispatches it to matching WebhookEndpoint rows via the
+    integrations module's WebhookService.
+    """
+    try:
+        from app.database import async_session_factory
+        from app.modules.integrations.service import WebhookService
+
+        project_id = event.data.get("project_id")
+        payload = {
+            "event": event.name,
+            "data": event.data,
+            "event_id": event.id,
+            "timestamp": event.timestamp.isoformat() if event.timestamp else None,
+            "source_module": event.source_module,
+        }
+
+        async with async_session_factory() as session:
+            svc = WebhookService(session)
+            count = await svc.dispatch_event(event.name, payload, project_id=project_id)
+            await session.commit()
+
+        if count:
+            logger.debug("Dispatched event '%s' to %d webhooks", event.name, count)
+
+    except Exception:
+        logger.exception("Error dispatching event '%s' to webhooks", event.name)
+
+
+# ---------------------------------------------------------------------------
 # Registration
 # ---------------------------------------------------------------------------
 
-_HANDLER_COUNT = 23
+_HANDLER_COUNT = 24
 
 
 def register_event_handlers() -> None:
@@ -1593,5 +1629,8 @@ def register_event_handlers() -> None:
     event_bus.subscribe("meeting.scheduled", _notify_meeting_scheduled)
     event_bus.subscribe("ncr.created", _notify_ncr_created)
     event_bus.subscribe("document.uploaded", _notify_document_uploaded)
+
+    # 24. Outgoing webhooks — wildcard handler forwards all events
+    event_bus.subscribe("*", _dispatch_to_webhooks)
 
     logger.info("Registered %d cross-module event handlers", _HANDLER_COUNT)

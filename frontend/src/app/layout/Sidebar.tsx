@@ -40,6 +40,7 @@ import {
   FileCheck,
   Mail,
   Send,
+  Plug,
   type LucideIcon,
 } from 'lucide-react';
 import { useModuleStore } from '@/stores/useModuleStore';
@@ -209,6 +210,7 @@ const navGroups: NavGroup[] = [
 
 const bottomNav: NavItem[] = [
   { labelKey: 'modules.title', to: '/modules', icon: Package },
+  { labelKey: 'integrations.title', to: '/integrations', icon: Plug },
   { labelKey: 'nav.settings', to: '/settings', icon: Settings },
   { labelKey: 'nav.about', to: '/about', icon: Info },
 ];
