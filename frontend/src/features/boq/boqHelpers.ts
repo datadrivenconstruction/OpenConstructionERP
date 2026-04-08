@@ -19,7 +19,7 @@ const BASE_UNITS = ['m', 'm2', 'm3', 'kg', 't', 'pcs', 'lsum', 'h', 'set', 'lm']
  * Key = i18n language code, value = extra units for that locale.
  */
 const LOCALE_UNITS: Record<string, readonly string[]> = {
-  de: ['Stk', 'Psch', 'lfm', 'FM', 'Std', 'Mt', 'Wo', 'Tag', 'LE', 'BE', 'ME'],
+  de: ['Stk', 'Psch', 'lfm', 'Std', 'FM', 'Mt', 'Wo', 'Tag', 'LE', 'BE', 'ME'],
   fr: ['u', 'ens', 'fft', 'ml', 'j', 'sem', 'mois', 'lot'],
   es: ['ud', 'pa', 'ml', 'gl', 'jor', 'mes'],
   pt: ['un', 'vb', 'cj', 'gl', 'dia', 'mes'],
@@ -74,7 +74,7 @@ export function getUnitsForLocale(lang?: string): string[] {
 export const UNITS = BASE_UNITS;
 
 /** Maximum number of undo entries stored. */
-export const UNDO_STACK_LIMIT = 26;
+export const UNDO_STACK_LIMIT = 30;
 
 /** Editable field names in left-to-right column order for keyboard navigation. */
 export const EDITABLE_FIELDS = ['ordinal', 'description', 'unit', 'quantity', 'unit_rate'] as const;

@@ -27,8 +27,8 @@ export interface Position {
   classification: Record<string, string>;
   source: string;
   confidence: number | null;
-  validation_status: string;
   sort_order: number;
+  validation_status: string;
   /** Backend returns `metadata_` (aliased) — normalize to `metadata` in fetch layer */
   metadata: Record<string, unknown>;
   metadata_?: Record<string, unknown>;

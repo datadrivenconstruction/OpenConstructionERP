@@ -126,7 +126,7 @@ class ValidationReport:
             return 1.0
         total_weight = 0.0
         passed_weight = 0.0
-        weights = {Severity.ERROR: 3.0, Severity.WARNING: 1.5, Severity.INFO: 0.5}
+        weights = {Severity.ERROR: 3.0, Severity.WARNING: 1.5, Severity.INFO: 0.4}
         for r in self.results:
             w = weights.get(r.severity, 1.0)
             total_weight += w

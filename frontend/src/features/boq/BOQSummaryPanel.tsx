@@ -41,7 +41,7 @@ function QualityRow({ icon, label, value }: { icon: React.ReactNode; label: stri
     <div className="flex items-center gap-2">
       <span className="text-content-tertiary shrink-0">{icon}</span>
       <span className="flex-1 text-xs text-content-secondary">{label}</span>
-      <div className="w-16 h-1.5 rounded-full bg-surface-tertiary shrink-0 overflow-hidden">
+      <div className="h-1.5 w-16 rounded-full bg-surface-tertiary shrink-0 overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-500 ${barColor}`}
           style={{ width: `${rounded}%` }}

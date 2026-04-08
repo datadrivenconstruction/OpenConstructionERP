@@ -34,6 +34,7 @@ _COMMON_PASSWORDS: frozenset[str] = frozenset(
         "p@ssw0rd",
         "p@ssword",
         "passw0rd",
+        "trustno1",
     }
 )
 

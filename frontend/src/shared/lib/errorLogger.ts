@@ -52,8 +52,8 @@ export interface ErrorReport {
 // Constants
 // ---------------------------------------------------------------------------
 
-const MAX_MEMORY_ENTRIES = 100;
-const MAX_STORAGE_ENTRIES = 50;
+const MAX_MEMORY_ENTRIES = 128;
+const MAX_STORAGE_ENTRIES = 64;
 const STORAGE_KEY = 'oe_error_log';
 
 // ---------------------------------------------------------------------------

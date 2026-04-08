@@ -15,12 +15,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.dependencies import CurrentUserId, CurrentUserPayload, SessionDep, SettingsDep
 from app.modules.projects.schemas import (
-    MilestoneCreate,
-    MilestoneResponse,
-    MilestoneUpdate,
     ProjectCreate,
     ProjectResponse,
     ProjectUpdate,
+    MilestoneCreate,
+    MilestoneResponse,
+    MilestoneUpdate,
     WBSCreate,
     WBSResponse,
     WBSUpdate,

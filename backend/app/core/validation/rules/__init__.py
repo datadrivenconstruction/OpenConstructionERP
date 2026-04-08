@@ -42,7 +42,7 @@ class PositionHasQuantity(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Position {pos.get('ordinal', '?')} has zero/missing quantity",
+                    message="OK" if passed else f"Position {pos.get('ordinal', '?')} must not have zero or missing quantity",
                     element_ref=pos.get("id"),
                     suggestion="Set a quantity greater than 0" if not passed else None,
                 )
@@ -70,7 +70,7 @@ class PositionHasUnitRate(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Position {pos.get('ordinal', '?')} has no unit rate",
+                    message="OK" if passed else f"Position {pos.get('ordinal', '?')} should have a unit rate assigned",
                     element_ref=pos.get("id"),
                     suggestion="Assign a rate from the cost database" if not passed else None,
                 )
@@ -98,7 +98,7 @@ class PositionHasDescription(ValidationRule):
                     severity=self.severity,
                     category=self.category,
                     passed=passed,
-                    message="OK" if passed else f"Position {pos.get('ordinal', '?')} missing description",
+                    message="OK" if passed else f"Position {pos.get('ordinal', '?')} cannot have an empty description",
                     element_ref=pos.get("id"),
                 )
             )

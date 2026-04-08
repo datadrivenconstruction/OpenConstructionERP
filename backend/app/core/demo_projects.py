@@ -210,7 +210,7 @@ _BERLIN = DemoTemplate(
     project_description=(
         "Neubau einer Wohnanlage mit 48 Wohneinheiten, 3 Treppenhaeuser, "
         "Tiefgarage mit 60 Stellplaetzen. 5 Geschosse + Staffelgeschoss. "
-        "Grundstueck ca. 4.200 m2, BGF ca. 7.800 m2. "
+        "Grundstueck ca. 4.200 m2, BGF ca. 7.840 m2. "
         "KfW Effizienzhaus 55. Baukosten ca. 12 Mio EUR."
     ),
     region="DACH",

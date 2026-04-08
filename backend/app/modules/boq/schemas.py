@@ -60,12 +60,12 @@ class BOQResponse(BaseModel):
     updated_at: datetime
 
     # Phase 12.2 lock & revision fields
+    base_date: str | None = None
     estimate_type: str | None = None
     is_locked: bool = False
     parent_estimate_id: UUID | None = None
     approved_by: str | None = None
     approved_at: str | None = None
-    base_date: str | None = None
 
 
 class BOQListItem(BOQResponse):
@@ -75,7 +75,7 @@ class BOQListItem(BOQResponse):
     position_count: int = 0
 
 
-# ── Position schemas ──────────────────────────────────────────────────────────
+# ── Position schemas ───────────────────────────────────────────────────────
 
 
 class PositionCreate(BaseModel):

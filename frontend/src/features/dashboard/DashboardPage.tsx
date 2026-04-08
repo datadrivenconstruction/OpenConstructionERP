@@ -852,7 +852,7 @@ export function DashboardPage() {
             href="https://github.com/datadrivenconstruction/OpenConstructionERP"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-3 flex items-center gap-3 rounded-xl bg-gradient-to-r from-oe-blue/8 via-violet-500/8 to-emerald-500/8 border border-oe-blue/15 px-4 py-2.5 hover:shadow-md hover:border-oe-blue/30 transition-all animate-stagger-in"
+            className="mt-3 flex items-center gap-3 rounded-xl bg-gradient-to-r from-oe-blue/8 via-violet-500/8 to-emerald-500/8 border border-oe-blue/15 py-2.5 px-4 hover:shadow-md hover:border-oe-blue/30 transition-all animate-stagger-in"
             style={{ animationDelay: '150ms' }}
           >
             <span className="relative flex h-2.5 w-2.5 shrink-0">

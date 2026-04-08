@@ -17,8 +17,8 @@ import {
 const REGIONS: { code: string; flag: string; label: string; standard: string }[] = [
   { code: 'DACH', flag: '\ud83c\udde9\ud83c\uddea', label: 'DACH', standard: 'VOB/HOAI' },
   { code: 'UK', flag: '\ud83c\uddec\ud83c\udde7', label: 'United Kingdom', standard: 'NRM/RICS' },
-  { code: 'US', flag: '\ud83c\uddfa\ud83c\uddf8', label: 'United States', standard: 'RSMeans/AIA' },
   { code: 'FR', flag: '\ud83c\uddeb\ud83c\uddf7', label: 'France', standard: 'BATIPRIX' },
+  { code: 'US', flag: '\ud83c\uddfa\ud83c\uddf8', label: 'United States', standard: 'RSMeans/AIA' },
   { code: 'GULF', flag: '\ud83c\udde6\ud83c\uddea', label: 'Gulf / UAE', standard: 'FIDIC' },
   { code: 'IN', flag: '\ud83c\uddee\ud83c\uddf3', label: 'India', standard: 'CPWD' },
   { code: 'AU', flag: '\ud83c\udde6\ud83c\uddfa', label: 'Australia', standard: 'AIQS' },
@@ -32,7 +32,7 @@ const REGIONS: { code: string; flag: string; label: string; standard: string }[]
 ];
 
 const CATEGORY_COLORS: Record<string, string> = {
-  overhead: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+  overhead: 'bg-blue-100 text-blue-700 dark:text-blue-300 dark:bg-blue-900/30',
   profit: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
   tax: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
   contingency: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',

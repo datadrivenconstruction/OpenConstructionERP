@@ -49,7 +49,7 @@ interface CostComponent {
   quantity: number;
   unit_rate: number;
   cost: number;
-  type: 'labor' | 'material' | 'equipment' | 'operator' | 'electricity' | 'other';
+  type: 'material' | 'labor' | 'equipment' | 'operator' | 'electricity' | 'other';
 }
 
 interface CostItem {

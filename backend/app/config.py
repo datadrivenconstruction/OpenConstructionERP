@@ -47,7 +47,7 @@ class Settings(BaseSettings):
     # For production: set DATABASE_URL=postgresql+asyncpg://user:pass@host/db
     database_url: str = "sqlite+aiosqlite:///./openestimate.db"
     database_sync_url: str = "sqlite:///./openestimate.db"
-    database_pool_size: int = 23
+    database_pool_size: int = 24
     database_max_overflow: int = 10
     database_echo: bool = False
     max_batch_size: int = 443

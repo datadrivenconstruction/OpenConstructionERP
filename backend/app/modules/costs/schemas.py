@@ -38,13 +38,13 @@ class CostItemUpdate(BaseModel):
     source: str | None = Field(default=None, max_length=50)
     classification: dict[str, str] | None = None
     components: list[dict[str, Any]] | None = None
-    tags: list[str] | None = None
     region: str | None = Field(default=None, max_length=50)
-    is_active: bool | None = None
+    tags: list[str] | None = None
     metadata: dict[str, Any] | None = None
+    is_active: bool | None = None
 
 
-# ── Response ──────────────────────────────────────────────────────────────
+# ── Response ───────────────────────────────────────────────────────────
 
 
 class CostItemResponse(BaseModel):

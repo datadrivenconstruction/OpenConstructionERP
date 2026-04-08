@@ -6,7 +6,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-# ── Result item (single rule check) ──────────────────────────────────────
+# ── Result item (single rule check) ────────────────────────────────
 
 
 class ValidationResultItem(BaseModel):
@@ -44,8 +44,8 @@ class ValidationReportResponse(BaseModel):
     score: str | None = None
     total_rules: int = 0
     passed_count: int = 0
-    warning_count: int = 0
     error_count: int = 0
+    warning_count: int = 0
     results: list[dict[str, Any]] = Field(default_factory=list)
     created_by: UUID | None = None
     created_at: datetime | None = None

@@ -27,9 +27,9 @@ const LOCALE_MAP: Record<string, string> = {
   sv: 'sv-SE',
   tr: 'tr-TR',
   uk: 'uk-UA',
+  bg: 'bg-BG',
   ar: 'ar-SA',
   zh: 'zh-CN',
-  bg: 'bg-BG',
 };
 
 /** Returns the Intl-compatible locale string for the current i18next language. */

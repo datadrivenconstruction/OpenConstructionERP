@@ -70,8 +70,8 @@ CURRENCIES: dict[str, dict[str, Any]] = {
     "ZAR": {"symbol": "R", "name": "South African Rand", "decimals": 2},
     "EGP": {"symbol": "E£", "name": "Egyptian Pound", "decimals": 2},
     # Asia-Pacific
-    "CNY": {"symbol": "¥", "name": "Chinese Yuan", "decimals": 2},
     "JPY": {"symbol": "¥", "name": "Japanese Yen", "decimals": 0},
+    "CNY": {"symbol": "¥", "name": "Chinese Yuan", "decimals": 2},
     "KRW": {"symbol": "₩", "name": "South Korean Won", "decimals": 0},
     "INR": {"symbol": "₹", "name": "Indian Rupee", "decimals": 2},
     "AUD": {"symbol": "A$", "name": "Australian Dollar", "decimals": 2},

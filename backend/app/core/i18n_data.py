@@ -44,11 +44,11 @@ MEASUREMENT_SYSTEMS: dict[str, dict[str, str]] = {
 # ---------------------------------------------------------------------------
 
 PAPER_SIZES: dict[str, dict[str, str | int]] = {
-    "A4": {"width_mm": 210, "height_mm": 297, "name": "A4"},
-    "A3": {"width_mm": 297, "height_mm": 420, "name": "A3"},
-    "A2": {"width_mm": 420, "height_mm": 594, "name": "A2"},
-    "A1": {"width_mm": 594, "height_mm": 841, "name": "A1"},
     "A0": {"width_mm": 841, "height_mm": 1189, "name": "A0"},
+    "A1": {"width_mm": 594, "height_mm": 841, "name": "A1"},
+    "A2": {"width_mm": 420, "height_mm": 594, "name": "A2"},
+    "A3": {"width_mm": 297, "height_mm": 420, "name": "A3"},
+    "A4": {"width_mm": 210, "height_mm": 297, "name": "A4"},
     "Letter": {"width_mm": 216, "height_mm": 279, "name": "US Letter"},
     "Legal": {"width_mm": 216, "height_mm": 356, "name": "US Legal"},
     "Tabloid": {"width_mm": 279, "height_mm": 432, "name": "US Tabloid"},
@@ -102,8 +102,8 @@ REGION_GROUPS: dict[str, list[str]] = {
     "UK": ["GB"],
     "NA": ["US", "CA"],
     "LATAM": ["MX", "BR", "AR", "CL", "CO", "PE"],
-    "MENA": ["AE", "SA", "QA", "KW", "EG", "IL", "TR"],
-    "APAC": ["AU", "NZ", "JP", "KR", "CN", "SG", "IN", "MY", "TH"],
+    "MENA": ["SA", "AE", "QA", "KW", "EG", "IL", "TR"],
+    "APAC": ["AU", "JP", "NZ", "KR", "CN", "SG", "IN", "MY", "TH"],
     "RU": ["RU"],
 }
 
