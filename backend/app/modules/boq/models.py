@@ -41,6 +41,7 @@ class BOQ(Base):
         GUID(),
         ForeignKey("oe_boq_boq.id", ondelete="SET NULL"),
         nullable=True,
+        index=True,
     )
     approved_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     approved_at: Mapped[str | None] = mapped_column(String(20), nullable=True)
@@ -282,6 +283,7 @@ class BOQSnapshot(Base):
         GUID(),
         ForeignKey("oe_users_user.id", ondelete="SET NULL"),
         nullable=True,
+        index=True,
     )
 
     def __repr__(self) -> str:
