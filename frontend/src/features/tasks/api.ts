@@ -9,9 +9,9 @@ import { useAuthStore } from '@/stores/useAuthStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
-export type TaskType = 'task' | 'topic' | 'info' | 'decision' | 'personal';
-export type TaskStatus = 'open' | 'in_progress' | 'completed';
-export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
+export type TaskType = 'task' | 'topic' | 'information' | 'decision' | 'personal';
+export type TaskStatus = 'draft' | 'open' | 'in_progress' | 'completed';
+export type TaskPriority = 'low' | 'normal' | 'high' | 'urgent';
 
 export interface ChecklistItem {
   id: string;
@@ -52,9 +52,8 @@ export interface CreateTaskPayload {
   description?: string;
   task_type?: TaskType;
   priority?: TaskPriority;
-  assigned_to?: string;
+  responsible_id?: string;
   due_date?: string;
-  checklist?: { label: string; checked: boolean }[];
 }
 
 export interface UpdateTaskPayload {
@@ -77,7 +76,7 @@ export async function fetchTasks(filters?: TaskFilters): Promise<Task[]> {
   if (filters?.status) params.set('status', filters.status);
   if (filters?.assigned_to) params.set('assigned_to', filters.assigned_to);
   const qs = params.toString();
-  return apiGet<Task[]>(`/v1/tasks${qs ? `?${qs}` : ''}`);
+  return apiGet<Task[]>(`/v1/tasks/${qs ? `?${qs}` : ''}`);
 }
 
 export async function createTask(data: CreateTaskPayload): Promise<Task> {

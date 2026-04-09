@@ -79,9 +79,10 @@ const STATUS_CONFIG: Record<
   NCRStatus,
   { variant: 'neutral' | 'blue' | 'success' | 'error' | 'warning'; cls: string }
 > = {
-  open: { variant: 'error', cls: '' },
+  identified: { variant: 'error', cls: '' },
   under_review: { variant: 'warning', cls: '' },
   corrective_action: { variant: 'blue', cls: '' },
+  verification: { variant: 'blue', cls: '' },
   closed: { variant: 'success', cls: '' },
   void: {
     variant: 'neutral',
@@ -114,9 +115,10 @@ const SEVERITY_CARD_CONFIG: Record<NCRSeverity, { icon: React.ElementType; color
 };
 
 const NCR_STATUSES: NCRStatus[] = [
-  'open',
+  'identified',
   'under_review',
   'corrective_action',
+  'verification',
   'closed',
   'void',
 ];
@@ -413,7 +415,7 @@ const NCRRow = React.memo(function NCRRow({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
-  const statusCfg = STATUS_CONFIG[ncr.status] ?? STATUS_CONFIG.open;
+  const statusCfg = STATUS_CONFIG[ncr.status] ?? STATUS_CONFIG.identified;
   const typeCfg = NCR_TYPE_COLORS[ncr.ncr_type] ?? 'neutral';
   const severityCfg = SEVERITY_CONFIG[ncr.severity] ?? SEVERITY_CONFIG.minor;
 
@@ -684,7 +686,7 @@ export function NCRPage() {
   // Stats
   const stats = useMemo(() => {
     const total = ncrs.length;
-    const open = ncrs.filter((n) => n.status === 'open').length;
+    const open = ncrs.filter((n) => n.status === 'identified').length;
     const underReview = ncrs.filter((n) => n.status === 'under_review').length;
     const closed = ncrs.filter((n) => n.status === 'closed').length;
     return { total, open, underReview, closed };
@@ -764,7 +766,8 @@ export function NCRPage() {
         ncr_type: formData.ncr_type,
         severity: formData.severity,
         description: formData.description,
-        location: formData.location || undefined,
+        location_description: formData.location || undefined,
+        root_cause: formData.root_cause || undefined,
       });
     },
     [createMut, projectId, addToast, t],

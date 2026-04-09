@@ -1,0 +1,193 @@
+{
+  "app": {
+    "name": "OpenEstimator.io",
+    "tagline": "تقدير تكاليف البناء مفتوح المصدر"
+  },
+  "nav": {
+    "dashboard": "لوحة المعلومات",
+    "ai_estimate": "تقدير بالذكاء الاصطناعي",
+    "settings": "الإعدادات",
+    "5d_cost_model": "نموذج التكلفة 5D",
+    "templates": "قوالب"
+  },
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "create": "إنشاء",
+    "search": "بحث",
+    "filter": "تصفية",
+    "export": "تصدير",
+    "import": "استيراد",
+    "loading": "جارٍ التحميل...",
+    "error": "خطأ",
+    "success": "تم بنجاح",
+    "confirm": "تأكيد",
+    "back": "رجوع",
+    "next": "التالي",
+    "yes": "نعم",
+    "no": "لا"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "logout": "تسجيل الخروج",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور"
+  },
+  "projects": {
+    "title": "المشاريع",
+    "new_project": "مشروع جديد",
+    "project_name": "اسم المشروع",
+    "no_projects": "لا توجد مشاريع بعد"
+  },
+  "boq": {
+    "title": "جدول الكميات",
+    "position": "بند",
+    "ordinal": "رقم التسلسل",
+    "description": "الوصف",
+    "quantity": "الكمية",
+    "unit": "الوحدة",
+    "unit_rate": "سعر الوحدة",
+    "total": "الإجمالي",
+    "add_position": "إضافة بند",
+    "add_section": "إضافة قسم",
+    "assembly": "تحليل سعر",
+    "subtotal": "المجموع الفرعي",
+    "grand_total": "المجموع الكلي",
+    "direct_cost": "التكلفة المباشرة",
+    "net_total": "الإجمالي الصافي",
+    "gross_total": "الإجمالي الكلي",
+    "vat": "ضريبة القيمة المضافة",
+    "add_markups": "إضافة هوامش",
+    "validate": "تحقق",
+    "export": "تصدير"
+  },
+  "costs": {
+    "title": "قاعدة بيانات الأسعار",
+    "rate": "السعر",
+    "material": "مواد",
+    "labor": "عمالة",
+    "equipment": "معدات",
+    "search_costs": "بحث في الأسعار..."
+  },
+  "assemblies": {
+    "title": "تحليلات الأسعار"
+  },
+  "validation": {
+    "title": "التحقق",
+    "passed": "ناجح",
+    "warnings": "تحذيرات",
+    "errors": "أخطاء",
+    "score": "درجة الجودة",
+    "run_validation": "تشغيل التحقق",
+    "missing_quantity": "البند {position} بدون كمية",
+    "missing_rate": "البند {position} بدون سعر وحدة",
+    "missing_description": "البند {position} بدون وصف",
+    "missing_classification": "البند {position} يحتاج رمز تصنيف",
+    "duplicate_ordinal": "رقم تسلسل مكرر: {ordinal}",
+    "rate_anomaly": "سعر الوحدة {rate} يتجاوز الحد ({threshold})"
+  },
+  "schedule": {
+    "title": "جدول زمني 4D"
+  },
+  "cad": {
+    "title": "استيراد CAD",
+    "upload": "رفع ملف CAD",
+    "supported_formats": "الصيغ: DWG، DGN، RVT، IFC، PDF",
+    "converting": "جارٍ التحويل...",
+    "elements_found": "تم العثور على {count} عنصر"
+  },
+  "takeoff": {
+    "title": "حصر الكميات",
+    "auto_detect": "كشف تلقائي",
+    "manual_measure": "قياس يدوي",
+    "confidence": "الموثوقية"
+  },
+  "tendering": {
+    "title": "المناقصات",
+    "create_tender": "إنشاء مناقصة",
+    "bid": "عرض سعر",
+    "award": "ترسية"
+  },
+  "modules": {
+    "title": "الوحدات",
+    "installed": "مُثبّت",
+    "available": "متاح",
+    "install": "تثبيت",
+    "uninstall": "إزالة",
+    "update": "تحديث"
+  },
+  "dashboard": {
+    "welcome": "مرحباً بك في OpenEstimate",
+    "subtitle": "منصة تقدير تكاليف البناء مفتوحة المصدر",
+    "recent_projects": "المشاريع الأخيرة",
+    "system_status": "حالة النظام",
+    "modules_loaded": "الوحدات المحمّلة",
+    "validation_rules": "قواعد التحقق",
+    "languages": "اللغات",
+    "continue_estimate": "متابعة آخر تقدير",
+    "getting_started": "البدء",
+    "total_value": "القيمة الإجمالية",
+    "active_estimates": "التقديرات النشطة",
+    "schedule_status": "حالة الجدول",
+    "quality_score": "درجة الجودة",
+    "analytics": "التحليلات",
+    "project_overview": "نظرة عامة على المشروع",
+    "step_load_db": "تحميل قاعدة الأسعار",
+    "step_load_db_desc": "استيراد بيانات الأسعار الإقليمية مع 55,000+ عنصر",
+    "step_ai_search": "تفعيل البحث الذكي",
+    "step_ai_search_desc": "إنشاء تضمينات متجهية للمطابقة الدلالية للتكاليف",
+    "step_connect_ai": "ربط الذكاء الاصطناعي",
+    "step_connect_ai_desc": "أضف مفاتيح API للتقدير بالذكاء الاصطناعي",
+    "step_create_project": "إنشاء مشروع",
+    "step_create_project_desc": "ابدأ أول مشروع تقدير تكاليف البناء",
+    "step_build_boq": "إنشاء جدول الكميات",
+    "step_build_boq_desc": "أنشئ جدول كميات بمساعدة الذكاء الاصطناعي",
+    "new_project": "مشروع جديد",
+    "create_boq": "إنشاء جدول كميات",
+    "add_api_keys": "إضافة مفاتيح API",
+    "load_database": "تحميل قاعدة البيانات"
+  },
+  "units": {
+    "m": "م",
+    "m2": "م²",
+    "m3": "م³",
+    "kg": "كغ",
+    "t": "طن",
+    "pcs": "قطعة",
+    "lsum": "مقطوعية",
+    "h": "ساعة",
+    "set": "طقم"
+  },
+  "users": {
+    "management": "إدارة المستخدمين",
+    "management_desc": "Manage team members, roles, and access",
+    "invite_user": "Invite User",
+    "invite": "Invite",
+    "full_name": "Full Name",
+    "email": "Email",
+    "password": "Password",
+    "role": "Role",
+    "status": "Status",
+    "last_login": "Last Login",
+    "actions": "Actions",
+    "name": "Name",
+    "total": "Total Users",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "admins": "Admins",
+    "managers": "Managers",
+    "search": "Search by name or email...",
+    "no_users": "No users found",
+    "updated": "User updated",
+    "invited": "User invited successfully",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "never": "أبداً",
+    "role_admin_desc": "Full access to all features",
+    "role_manager_desc": "Project and team management",
+    "role_editor_desc": "Create and edit content",
+    "role_viewer_desc": "Read-only access"
+  }
+}

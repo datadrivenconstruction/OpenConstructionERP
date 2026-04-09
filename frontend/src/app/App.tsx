@@ -127,6 +127,9 @@ const ReportingPage = lazy(() =>
 const BIMPage = lazy(() =>
   import('@/features/bim/BIMPage').then((m) => ({ default: m.BIMPage }))
 );
+const UserManagementPage = lazy(() =>
+  import('@/features/users/UserManagementPage').then((m) => ({ default: m.UserManagementPage }))
+);
 
 function LoadingScreen() {
   return (
@@ -353,6 +356,7 @@ export default function App() {
         <Route path="/projects/:projectId/ncr" element={<P title="NCR"><NCRPage /></P>} />
         <Route path="/ncr" element={<P title="NCR"><NCRPage /></P>} />
 
+        <Route path="/users" element={<P title="User Management"><UserManagementPage /></P>} />
         <Route path="/modules" element={<P title="Modules"><ModulesPage /></P>} />
 
         <Route path="/setup/databases" element={<P title="Databases & Resources"><DatabaseSetupPage /></P>} />

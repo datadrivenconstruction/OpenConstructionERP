@@ -14,9 +14,9 @@ export type TransmittalPurpose =
   | 'for_approval'
   | 'for_information'
   | 'for_construction'
+  | 'for_tender'
   | 'for_review'
-  | 'for_record'
-  | 'as_requested';
+  | 'for_record';
 
 export interface TransmittalRecipient {
   id: string;
@@ -72,7 +72,8 @@ export async function fetchTransmittals(filters?: TransmittalFilters): Promise<T
   if (filters?.project_id) params.set('project_id', filters.project_id);
   if (filters?.status) params.set('status', filters.status);
   const qs = params.toString();
-  return apiGet<Transmittal[]>(`/v1/transmittals${qs ? `?${qs}` : ''}`);
+  const res = await apiGet<Transmittal[] | { items: Transmittal[] }>(`/v1/transmittals/${qs ? `?${qs}` : ''}`);
+  return Array.isArray(res) ? res : res.items ?? [];
 }
 
 export async function createTransmittal(data: CreateTransmittalPayload): Promise<Transmittal> {

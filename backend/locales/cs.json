@@ -1,0 +1,171 @@
+{
+  "app": {
+    "name": "OpenEstimator.io",
+    "tagline": "Open-source rozpočtování staveb"
+  },
+  "nav": {
+    "dashboard": "Přehled",
+    "ai_estimate": "AI odhad",
+    "settings": "Nastavení",
+    "5d_cost_model": "5D model nákladů",
+    "templates": "Šablony"
+  },
+  "common": {
+    "save": "Uložit",
+    "cancel": "Zrušit",
+    "delete": "Smazat",
+    "edit": "Upravit",
+    "create": "Vytvořit",
+    "search": "Hledat",
+    "filter": "Filtrovat",
+    "export": "Exportovat",
+    "import": "Importovat",
+    "loading": "Načítání...",
+    "error": "Chyba",
+    "success": "Úspěch",
+    "confirm": "Potvrdit",
+    "back": "Zpět",
+    "next": "Další",
+    "yes": "Ano",
+    "no": "Ne"
+  },
+  "auth": {
+    "login": "Přihlásit se",
+    "logout": "Odhlásit se",
+    "email": "E-mail",
+    "password": "Heslo"
+  },
+  "projects": {
+    "title": "Projekty",
+    "new_project": "Nový projekt",
+    "project_name": "Název projektu",
+    "no_projects": "Žádné projekty"
+  },
+  "boq": {
+    "title": "Výkaz výměr",
+    "position": "Položka",
+    "ordinal": "Pořadové číslo",
+    "description": "Popis",
+    "quantity": "Množství",
+    "unit": "Měrná jednotka",
+    "unit_rate": "Jednotková cena",
+    "total": "Celkem",
+    "add_position": "Přidat položku",
+    "add_section": "Přidat oddíl",
+    "assembly": "Kalkulace položky",
+    "subtotal": "Mezisoučet",
+    "grand_total": "Celková suma",
+    "direct_cost": "Přímé náklady",
+    "net_total": "Celkem bez DPH",
+    "gross_total": "Celkem s DPH",
+    "vat": "DPH",
+    "add_markups": "Přidat přirážky",
+    "validate": "Validovat",
+    "export": "Exportovat"
+  },
+  "costs": {
+    "title": "Cenová databáze",
+    "rate": "Cena",
+    "material": "Materiál",
+    "labor": "Práce",
+    "equipment": "Stroje",
+    "search_costs": "Hledat ceny..."
+  },
+  "assemblies": {
+    "title": "Kalkulace položek"
+  },
+  "validation": {
+    "title": "Validace",
+    "passed": "Bez závad",
+    "warnings": "Upozornění",
+    "errors": "Chyby",
+    "score": "Hodnocení kvality",
+    "run_validation": "Spustit validaci",
+    "missing_quantity": "Položka {position} nemá množství",
+    "missing_rate": "Položka {position} nemá jednotkovou cenu",
+    "missing_description": "Položka {position} nemá popis",
+    "missing_classification": "Položka {position} potřebuje klasifikační kód",
+    "duplicate_ordinal": "Duplicitní pořadové číslo: {ordinal}",
+    "rate_anomaly": "Jednotková cena {rate} překračuje práh ({threshold})"
+  },
+  "schedule": {
+    "title": "4D Harmonogram"
+  },
+  "cad": {
+    "title": "Import CAD",
+    "upload": "Nahrát soubor CAD",
+    "supported_formats": "Podporované: DWG, DGN, RVT, IFC, PDF",
+    "converting": "Převádění...",
+    "elements_found": "Nalezeno prvků: {count}"
+  },
+  "takeoff": {
+    "title": "Výkaz výměr",
+    "auto_detect": "Automatická detekce",
+    "manual_measure": "Ruční měření",
+    "confidence": "Spolehlivost"
+  },
+  "tendering": {
+    "title": "Výběrové řízení",
+    "create_tender": "Vytvořit výběrové řízení",
+    "bid": "Nabídka",
+    "award": "Zadání zakázky"
+  },
+  "modules": {
+    "title": "Moduly",
+    "installed": "Nainstalováno",
+    "available": "Dostupné",
+    "install": "Nainstalovat",
+    "uninstall": "Odinstalovat",
+    "update": "Aktualizovat"
+  },
+  "dashboard": {
+    "welcome": "Vítejte v OpenEstimate",
+    "subtitle": "Open-source platforma pro rozpočtování staveb",
+    "recent_projects": "Nedávné projekty",
+    "system_status": "Stav systému",
+    "modules_loaded": "Načtené moduly",
+    "validation_rules": "Validační pravidla",
+    "languages": "Jazyky"
+  },
+  "units": {
+    "m": "m",
+    "m2": "m²",
+    "m3": "m³",
+    "kg": "kg",
+    "t": "t",
+    "pcs": "ks",
+    "lsum": "paušál",
+    "h": "hod",
+    "set": "sada"
+  },
+  "users": {
+    "management": "Správa uživatelů",
+    "management_desc": "Manage team members, roles, and access",
+    "invite_user": "Invite User",
+    "invite": "Invite",
+    "full_name": "Full Name",
+    "email": "Email",
+    "password": "Password",
+    "role": "Role",
+    "status": "Status",
+    "last_login": "Last Login",
+    "actions": "Actions",
+    "name": "Name",
+    "total": "Total Users",
+    "active": "Aktivní",
+    "inactive": "Neaktivní",
+    "admins": "Admins",
+    "managers": "Managers",
+    "search": "Search by name or email...",
+    "no_users": "No users found",
+    "updated": "User updated",
+    "invited": "User invited successfully",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "never": "Nikdy",
+    "role_admin_desc": "Full access to all features",
+    "role_manager_desc": "Project and team management",
+    "role_editor_desc": "Create and edit content",
+    "role_viewer_desc": "Read-only access"
+  }
+}

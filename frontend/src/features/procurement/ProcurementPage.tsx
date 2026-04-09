@@ -357,9 +357,9 @@ function PurchaseOrdersTab({ projectId }: { projectId: string }) {
   const { data: orders, isLoading } = useQuery({
     queryKey: ['procurement-po', projectId],
     queryFn: () =>
-      apiGet<PurchaseOrder[]>(
-        `/v1/procurement/purchase-orders?project_id=${projectId}`,
-      ),
+      apiGet<{ items: PurchaseOrder[]; total: number }>(
+        `/v1/procurement/?project_id=${projectId}`,
+      ).then((res) => res.items),
   });
 
   const filtered = useMemo(() => {
@@ -794,9 +794,9 @@ function GoodsReceiptsTab({ projectId }: { projectId: string }) {
   const { data: receipts, isLoading } = useQuery({
     queryKey: ['procurement-gr', projectId],
     queryFn: () =>
-      apiGet<GoodsReceipt[]>(
+      apiGet<{ items: GoodsReceipt[]; total: number }>(
         `/v1/procurement/goods-receipts?project_id=${projectId}`,
-      ),
+      ).then((res) => res.items),
   });
 
   const filtered = useMemo(() => {

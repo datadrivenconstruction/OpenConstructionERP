@@ -65,27 +65,27 @@ const PURPOSE_LABELS: Record<TransmittalPurpose, string> = {
   for_approval: 'For Approval',
   for_information: 'For Information',
   for_construction: 'For Construction',
+  for_tender: 'For Tender',
   for_review: 'For Review',
   for_record: 'For Record',
-  as_requested: 'As Requested',
 };
 
 const PURPOSE_DESCRIPTIONS: Record<TransmittalPurpose, string> = {
   for_approval: 'Requires formal response',
   for_information: 'No response required',
   for_construction: 'Issued for use on site',
+  for_tender: 'Issued for tender/bidding',
   for_review: 'Review and comment expected',
   for_record: 'Archived for documentation',
-  as_requested: 'Sent per prior request',
 };
 
 const PURPOSE_COLORS: Record<TransmittalPurpose, string> = {
   for_approval: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
   for_information: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
   for_construction: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  for_tender: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
   for_review: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
   for_record: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
-  as_requested: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
 };
 
 const LS_INFO_DISMISSED = 'oe_transmittals_info_dismissed';
@@ -645,19 +645,9 @@ export function TransmittalsPage() {
       createMut.mutate({
         project_id: projectId,
         subject: formData.subject,
-        purpose: formData.purpose,
+        purpose_code: formData.purpose,
         cover_note: formData.cover_note || undefined,
-        response_due: formData.response_due || undefined,
-        recipients: formData.recipients
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean)
-          .map((name) => ({ name })),
-        items: formData.items
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean)
-          .map((title) => ({ document_title: title })),
+        response_due_date: formData.response_due || undefined,
       });
     },
     [createMut, projectId, addToast, t],

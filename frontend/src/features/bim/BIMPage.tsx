@@ -385,9 +385,7 @@ function UnifiedUploadSection({
   projectId: string;
   onUploadComplete: (modelId: string) => void;
   compact?: boolean;
-  /** Open in advanced mode immediately (for "Upload Converted Data" flow). */
   initialAdvancedMode?: boolean;
-  /** Pre-fill model name (e.g. from a processing model). */
   initialModelName?: string;
 }) {
   const { t } = useTranslation();
@@ -396,18 +394,17 @@ function UnifiedUploadSection({
   const [modelName, setModelName] = useState(initialModelName || '');
   const [discipline, setDiscipline] = useState('architecture');
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStage, setUploadStage] = useState('');
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
-  // Advanced mode state (separate data + geometry upload)
   const [advancedMode, setAdvancedMode] = useState(initialAdvancedMode || false);
 
-  // Sync initialModelName when it changes (e.g. user clicks "Upload Converted Data" for a different model)
   useEffect(() => {
     if (initialModelName) setModelName(initialModelName);
   }, [initialModelName]);
 
-  // Sync initialAdvancedMode when it changes
   useEffect(() => {
     if (initialAdvancedMode) setAdvancedMode(true);
   }, [initialAdvancedMode]);
@@ -511,102 +508,88 @@ function UnifiedUploadSection({
 
   const handleUpload = useCallback(async () => {
     if (!projectId) {
-      setUploadError(
-        t('bim.select_project_first', { defaultValue: 'Please select a project first' }),
-      );
+      setUploadError(t('bim.select_project_first', { defaultValue: 'Please select a project first' }));
       return;
     }
 
     setUploading(true);
     setUploadError(null);
+    setUploadProgress(0);
 
     try {
       if (advancedMode) {
-        // Advanced mode: separate data + geometry upload
         if (!dataFile) return;
-        const result = await uploadBIMData(
-          projectId,
-          modelName || 'Imported Model',
-          discipline,
-          dataFile,
-          geometryFile,
-        );
+        setUploadStage(t('bim.stage_uploading', { defaultValue: 'Uploading data...' }));
+        setUploadProgress(30);
+        const result = await uploadBIMData(projectId, modelName || 'Imported Model', discipline, dataFile, geometryFile);
+        setUploadProgress(100);
+        setUploadStage(t('bim.stage_done', { defaultValue: 'Done!' }));
         addToast({
           type: 'success',
           title: t('bim.upload_success', { defaultValue: 'BIM data uploaded' }),
-          message: t('bim.upload_success_desc', {
-            defaultValue: '{{count}} elements imported successfully.',
-            count: result.element_count,
-          }),
+          message: `${result.element_count} elements imported`,
         });
         onUploadComplete(result.model_id);
         resetForm();
       } else if (file) {
-        // Unified mode: auto-detect from extension
+        const name = modelName || file.name.replace(/\.[^.]+$/, '');
         if (isCADFile(file.name)) {
-          const taskId = `bim-${Date.now()}`;
-          addQueueTask({
-            id: taskId,
-            type: 'import',
-            filename: file.name,
-            status: 'processing',
-            progress: 20,
-            message: t('bim.uploading_file', { defaultValue: 'Uploading file...' }),
-          });
+          setUploadStage(t('bim.stage_uploading_cad', { defaultValue: 'Uploading CAD file...' }));
+          setUploadProgress(20);
 
-          updateQueueTask(taskId, { progress: 50, message: t('bim.processing_cad', { defaultValue: 'Sending to server...' }) });
+          // Simulate progress during upload
+          const progressInterval = setInterval(() => {
+            setUploadProgress((p) => Math.min(p + 5, 85));
+          }, 500);
 
-          const result = await uploadCADFile(
-            projectId,
-            modelName || file.name.replace(/\.[^.]+$/, ''),
-            discipline,
-            file,
+          const result = await uploadCADFile(projectId, name, discipline, file);
+          clearInterval(progressInterval);
+
+          setUploadProgress(90);
+          setUploadStage(t('bim.stage_processing', { defaultValue: 'Server processing...' }));
+
+          // Brief pause to show 90%
+          await new Promise((r) => setTimeout(r, 500));
+          setUploadProgress(100);
+          setUploadStage(
+            t('bim.stage_queued', {
+              defaultValue: '{{format}} uploaded — server is parsing elements',
+              format: result.format.toUpperCase(),
+            }).replace('{{format}}', result.format.toUpperCase()),
           );
-
-          updateQueueTask(taskId, {
-            status: 'completed',
-            progress: 100,
-            message: t('bim.cad_uploaded', { defaultValue: 'File uploaded — processing queued' }),
-          });
 
           addToast({
             type: 'success',
             title: t('bim.cad_upload_success', { defaultValue: 'CAD file uploaded' }),
-            message: t('bim.cad_upload_success_desc', {
-              defaultValue:
-                '{{format}} file uploaded. Processing will start shortly.',
-              format: result.format.toUpperCase(),
-            }),
+            message: `${result.format.toUpperCase()} file uploaded. Element extraction in progress.`,
           });
           onUploadComplete(result.model_id);
+
+          // Keep progress visible for 2s then reset
+          await new Promise((r) => setTimeout(r, 2000));
           resetForm();
         } else if (isDataFile(file.name)) {
-          const result = await uploadBIMData(
-            projectId,
-            modelName || 'Imported Model',
-            discipline,
-            file,
-          );
+          setUploadStage(t('bim.stage_importing', { defaultValue: 'Importing elements...' }));
+          setUploadProgress(40);
+          const result = await uploadBIMData(projectId, name, discipline, file);
+          setUploadProgress(100);
+          setUploadStage(`${result.element_count} elements imported`);
           addToast({
             type: 'success',
             title: t('bim.upload_success', { defaultValue: 'BIM data uploaded' }),
-            message: t('bim.upload_success_desc', {
-              defaultValue: '{{count}} elements imported successfully.',
-              count: result.element_count,
-            }),
+            message: `${result.element_count} elements imported`,
           });
           onUploadComplete(result.model_id);
+          await new Promise((r) => setTimeout(r, 1500));
           resetForm();
         }
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       setUploadError(msg);
-      addToast({
-        type: 'error',
-        title: t('bim.upload_failed', { defaultValue: 'Upload failed' }),
-        message: msg,
-      });
+      setUploadProgress(0);
+      setUploadStage('');
+      addToast({ type: 'error', title: t('bim.upload_failed', { defaultValue: 'Upload failed' }), message: msg });
     } finally {
       setUploading(false);
     }
@@ -723,12 +706,12 @@ function UnifiedUploadSection({
                     </p>
                     <p className="text-2xs text-content-tertiary mt-1">
                       {t('bim.supported_formats', {
-                        defaultValue: 'Supported: IFC, RVT',
+                        defaultValue: 'Supported: Revit (.rvt), IFC (.ifc)',
                       })}
                     </p>
                     <p className="text-2xs text-content-quaternary mt-0.5">
                       {t('bim.max_file_size', {
-                        defaultValue: 'Max: 500 MB for CAD, 50 MB for data files',
+                        defaultValue: 'Max file size: 500 MB',
                       })}
                     </p>
                   </div>
@@ -853,18 +836,28 @@ function UnifiedUploadSection({
             </select>
           </div>
 
+          {/* Inline progress bar */}
+          {uploading && (
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-content-secondary font-medium">{uploadStage}</span>
+                <span className="text-content-tertiary tabular-nums">{uploadProgress}%</span>
+              </div>
+              <div className="h-2 w-full rounded-full bg-surface-tertiary overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-oe-blue transition-all duration-300 ease-out"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
+
           <Button
             variant="primary"
             size="sm"
             onClick={handleUpload}
-            disabled={!projectId || !canUpload}
-            title={
-              !projectId
-                ? t('bim.select_project_first', {
-                    defaultValue: 'Please select a project first',
-                  })
-                : undefined
-            }
+            disabled={!projectId || !canUpload || uploading}
+            title={!projectId ? t('bim.select_project_first', { defaultValue: 'Please select a project first' }) : undefined}
           >
             {uploading ? (
               <>

@@ -21,7 +21,7 @@ class CorrespondenceCreate(BaseModel):
     date_received: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     correspondence_type: str = Field(
         ...,
-        pattern=r"^(letter|email|notice)$",
+        pattern=r"^(letter|email|notice|memo)$",
     )
     linked_document_ids: list[str] = Field(default_factory=list)
     linked_transmittal_id: str | None = None
@@ -43,7 +43,7 @@ class CorrespondenceUpdate(BaseModel):
     date_received: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     correspondence_type: str | None = Field(
         default=None,
-        pattern=r"^(letter|email|notice)$",
+        pattern=r"^(letter|email|notice|memo)$",
     )
     linked_document_ids: list[str] | None = None
     linked_transmittal_id: str | None = None

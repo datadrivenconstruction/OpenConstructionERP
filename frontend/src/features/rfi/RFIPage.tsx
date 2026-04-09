@@ -813,7 +813,7 @@ export function RFIPage() {
         subject: formData.subject,
         question: formData.question,
         ball_in_court: formData.ball_in_court || undefined,
-        due_date: formData.due_date || undefined,
+        response_due_date: formData.due_date || undefined,
         cost_impact: formData.cost_impact,
         schedule_impact: formData.schedule_impact,
       });

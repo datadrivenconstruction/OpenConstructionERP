@@ -41,10 +41,10 @@ export interface CreateRFIPayload {
   subject: string;
   question: string;
   ball_in_court?: string;
-  due_date?: string;
+  response_due_date?: string;
   cost_impact?: boolean;
   schedule_impact?: boolean;
-  linked_drawings?: string[];
+  linked_drawing_ids?: string[];
 }
 
 export interface RespondRFIPayload {
@@ -58,7 +58,7 @@ export async function fetchRFIs(filters?: RFIFilters): Promise<RFI[]> {
   if (filters?.project_id) params.set('project_id', filters.project_id);
   if (filters?.status) params.set('status', filters.status);
   const qs = params.toString();
-  return apiGet<RFI[]>(`/v1/rfi${qs ? `?${qs}` : ''}`);
+  return apiGet<RFI[]>(`/v1/rfi/${qs ? `?${qs}` : ''}`);
 }
 
 export async function createRFI(data: CreateRFIPayload): Promise<RFI> {

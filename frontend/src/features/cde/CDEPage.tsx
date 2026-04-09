@@ -14,6 +14,9 @@ import {
   Info,
   Send,
   Link2,
+  FileText,
+  Check,
+  File,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, DateDisplay, ConfirmDialog, SkeletonTable } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -25,6 +28,7 @@ import {
   createCDEContainer,
   transitionContainer,
   fetchContainerRevisions,
+  createContainerRevision,
   type CDEContainer,
   type CDEState,
   type CDEDiscipline,
@@ -290,14 +294,248 @@ function CreateCDEModal({
   );
 }
 
+/* ── Link Document Modal ─────────────────────────────────────────────── */
+
+interface DocItem {
+  id: string;
+  name: string;
+  file_name?: string;
+  file_size: number | null;
+  mime_type: string | null;
+  category: string | null;
+  created_at: string;
+}
+
+function LinkDocumentModal({
+  container,
+  projectId,
+  onClose,
+  onLinked,
+}: {
+  container: CDEContainer;
+  projectId: string;
+  onClose: () => void;
+  onLinked: () => void;
+}) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+  const [search, setSearch] = useState('');
+  const [selected, setSelected] = useState<DocItem[]>([]);
+  const [linking, setLinking] = useState(false);
+
+  const { data: docs = [], isLoading } = useQuery({
+    queryKey: ['documents-for-link', projectId],
+    queryFn: () =>
+      apiGet<DocItem[] | { items: DocItem[] }>(
+        `/v1/documents/?project_id=${projectId}&limit=100`,
+      ).then((res) => (Array.isArray(res) ? res : (res as { items: DocItem[] }).items ?? [])),
+  });
+
+  const filtered = useMemo(() => {
+    if (!search) return docs;
+    const q = search.toLowerCase();
+    return docs.filter((d) => (d.name || '').toLowerCase().includes(q));
+  }, [docs, search]);
+
+  const toggle = (doc: DocItem) => {
+    setSelected((prev) =>
+      prev.some((d) => d.id === doc.id) ? prev.filter((d) => d.id !== doc.id) : [...prev, doc],
+    );
+  };
+
+  const handleLink = async () => {
+    if (selected.length === 0) return;
+    setLinking(true);
+    try {
+      for (const doc of selected) {
+        await createContainerRevision(container.id, {
+          file_name: doc.name || doc.file_name || 'document',
+          change_summary: `Linked from Documents`,
+          mime_type: doc.mime_type || undefined,
+          file_size: doc.file_size ? String(doc.file_size) : undefined,
+          storage_key: doc.id,
+        });
+      }
+      addToast({
+        type: 'success',
+        title: t('cde.documents_linked', {
+          defaultValue: '{{count}} document(s) linked',
+          count: selected.length,
+        }),
+      });
+      onLinked();
+      onClose();
+    } catch (e) {
+      addToast({
+        type: 'error',
+        title: t('common.error', { defaultValue: 'Error' }),
+        message: e instanceof Error ? e.message : 'Failed to link',
+      });
+    } finally {
+      setLinking(false);
+    }
+  };
+
+  const formatSize = (bytes: number | null) => {
+    if (!bytes) return '';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in"
+      onClick={onClose}
+    >
+      <div
+        className="bg-surface-primary rounded-xl shadow-2xl border border-border w-full max-w-lg mx-4 max-h-[80vh] flex flex-col animate-scale-in"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
+          <div>
+            <div className="flex items-center gap-2">
+              <Link2 size={18} className="text-oe-blue" />
+              <h3 className="text-base font-semibold">
+                {t('cde.link_documents', { defaultValue: 'Link Documents' })}
+              </h3>
+            </div>
+            <p className="text-xs text-content-secondary mt-0.5">
+              {container.container_code} — {container.title}
+            </p>
+          </div>
+          <button onClick={onClose} className="p-1 rounded hover:bg-surface-secondary">
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Search */}
+        <div className="px-5 py-3 border-b border-border shrink-0">
+          <div className="relative">
+            <Search
+              size={14}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-content-quaternary"
+            />
+            <input
+              className="h-9 w-full rounded-lg border border-border bg-surface-primary pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+              placeholder={t('cde.search_documents', {
+                defaultValue: 'Search documents...',
+              })}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              autoFocus
+            />
+          </div>
+          {selected.length > 0 && (
+            <div className="mt-2 text-xs text-oe-blue font-medium">
+              {selected.length} {t('cde.selected', { defaultValue: 'selected' })}
+            </div>
+          )}
+        </div>
+
+        {/* Document list */}
+        <div className="flex-1 overflow-y-auto px-2 py-2">
+          {isLoading ? (
+            <div className="space-y-2 px-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="h-12 animate-pulse rounded-lg bg-surface-secondary" />
+              ))}
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-8 text-content-tertiary text-sm">
+              <FileText size={24} className="mx-auto mb-2 opacity-30" />
+              <p>
+                {docs.length === 0
+                  ? t('cde.no_documents_in_project', {
+                      defaultValue: 'No documents in this project. Upload documents first.',
+                    })
+                  : t('cde.no_matching_documents', {
+                      defaultValue: 'No matching documents',
+                    })}
+              </p>
+            </div>
+          ) : (
+            filtered.map((doc) => {
+              const isSelected = selected.some((d) => d.id === doc.id);
+              return (
+                <button
+                  key={doc.id}
+                  onClick={() => toggle(doc)}
+                  className={clsx(
+                    'flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left transition-all mb-0.5',
+                    isSelected
+                      ? 'bg-oe-blue/5 ring-1 ring-oe-blue/20'
+                      : 'hover:bg-surface-secondary',
+                  )}
+                >
+                  <div
+                    className={clsx(
+                      'w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-colors',
+                      isSelected
+                        ? 'bg-oe-blue border-oe-blue text-white'
+                        : 'border-border',
+                    )}
+                  >
+                    {isSelected && <Check size={12} />}
+                  </div>
+                  <File
+                    size={16}
+                    className={clsx(
+                      'shrink-0',
+                      isSelected ? 'text-oe-blue' : 'text-content-tertiary',
+                    )}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{doc.name || doc.file_name}</p>
+                    <p className="text-2xs text-content-quaternary">
+                      {doc.category || 'Document'}
+                      {doc.file_size ? ` · ${formatSize(doc.file_size)}` : ''}
+                    </p>
+                  </div>
+                </button>
+              );
+            })
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between px-5 py-3 border-t border-border shrink-0">
+          <span className="text-xs text-content-tertiary">
+            {filtered.length} {t('cde.documents_available', { defaultValue: 'documents available' })}
+          </span>
+          <div className="flex gap-2">
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              {t('common.cancel', { defaultValue: 'Cancel' })}
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleLink}
+              disabled={selected.length === 0 || linking}
+            >
+              <Link2 size={14} className="mr-1" />
+              {linking
+                ? t('cde.linking', { defaultValue: 'Linking...' })
+                : `${t('cde.link_selected', { defaultValue: 'Link' })} ${selected.length} ${t('cde.documents', { defaultValue: 'Document(s)' })}`}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Container Row (expandable with revision history) ─────────────────── */
 
 const ContainerRow = React.memo(function ContainerRow({
   container,
   onPromote,
+  onLinkDocument,
 }: {
   container: CDEContainer;
   onPromote: (c: CDEContainer) => void;
+  onLinkDocument: (c: CDEContainer) => void;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -407,7 +645,7 @@ const ContainerRow = React.memo(function ContainerRow({
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
-                navigate('/documents');
+                onLinkDocument(container);
               }}
             >
               <Link2 size={14} className="mr-1" />
@@ -457,6 +695,7 @@ const ContainerRow = React.memo(function ContainerRow({
           </div>
         </div>
       )}
+
     </div>
   );
 });
@@ -607,6 +846,11 @@ export function CDEPage() {
   );
 
   const { confirm, ...confirmProps } = useConfirm();
+  const [linkTarget, setLinkTarget] = useState<CDEContainer | null>(null);
+
+  const handleLinkDocument = useCallback((container: CDEContainer) => {
+    setLinkTarget(container);
+  }, []);
 
   const handlePromote = useCallback(
     async (container: CDEContainer) => {
@@ -864,6 +1108,7 @@ export function CDEPage() {
                   key={c.id}
                   container={c}
                   onPromote={handlePromote}
+                  onLinkDocument={handleLinkDocument}
                 />
               ))}
             </Card>
@@ -882,6 +1127,19 @@ export function CDEPage() {
 
       {/* Confirm Dialog */}
       <ConfirmDialog {...confirmProps} />
+
+      {/* Link Document Modal — rendered at page level for correct z-index */}
+      {linkTarget && projectId && (
+        <LinkDocumentModal
+          container={linkTarget}
+          projectId={projectId}
+          onClose={() => setLinkTarget(null)}
+          onLinked={() => {
+            qc.invalidateQueries({ queryKey: ['cde-revisions', linkTarget.id] });
+            setLinkTarget(null);
+          }}
+        />
+      )}
     </div>
   );
 }

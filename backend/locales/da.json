@@ -1,0 +1,171 @@
+{
+  "app": {
+    "name": "OpenEstimator.io",
+    "tagline": "Byggekalkulation med åben kildekode"
+  },
+  "nav": {
+    "dashboard": "Oversigt",
+    "ai_estimate": "AI-kalkule",
+    "settings": "Indstillinger",
+    "5d_cost_model": "5D Omkostningsmodel",
+    "templates": "Skabeloner"
+  },
+  "common": {
+    "save": "Gem",
+    "cancel": "Annuller",
+    "delete": "Slet",
+    "edit": "Rediger",
+    "create": "Opret",
+    "search": "Søg",
+    "filter": "Filtrer",
+    "export": "Eksporter",
+    "import": "Importer",
+    "loading": "Indlæser...",
+    "error": "Fejl",
+    "success": "Gennemført",
+    "confirm": "Bekræft",
+    "back": "Tilbage",
+    "next": "Næste",
+    "yes": "Ja",
+    "no": "Nej"
+  },
+  "auth": {
+    "login": "Log ind",
+    "logout": "Log ud",
+    "email": "E-mail",
+    "password": "Adgangskode"
+  },
+  "projects": {
+    "title": "Projekter",
+    "new_project": "Nyt projekt",
+    "project_name": "Projektnavn",
+    "no_projects": "Ingen projekter endnu"
+  },
+  "boq": {
+    "title": "Tilbudsliste",
+    "position": "Post",
+    "ordinal": "Positionsnummer",
+    "description": "Beskrivelse",
+    "quantity": "Mængde",
+    "unit": "Enhed",
+    "unit_rate": "Enhedspris",
+    "total": "I alt",
+    "add_position": "Tilføj post",
+    "add_section": "Tilføj afsnit",
+    "assembly": "Sammensat pris",
+    "subtotal": "Subtotal",
+    "grand_total": "Total",
+    "direct_cost": "Direkte omkostning",
+    "net_total": "Netto i alt",
+    "gross_total": "Brutto i alt",
+    "vat": "Moms",
+    "add_markups": "Tilføj tillæg",
+    "validate": "Validere",
+    "export": "Eksporter"
+  },
+  "costs": {
+    "title": "Prisdatabase",
+    "rate": "Pris",
+    "material": "Materiale",
+    "labor": "Arbejdskraft",
+    "equipment": "Maskinel",
+    "search_costs": "Søg efter priser..."
+  },
+  "assemblies": {
+    "title": "Sammensatte priser"
+  },
+  "validation": {
+    "title": "Validering",
+    "passed": "Bestået",
+    "warnings": "Advarsler",
+    "errors": "Fejl",
+    "score": "Kvalitetspoint",
+    "run_validation": "Kør validering",
+    "missing_quantity": "Post {position} mangler mængde",
+    "missing_rate": "Post {position} mangler enhedspris",
+    "missing_description": "Post {position} mangler beskrivelse",
+    "missing_classification": "Post {position} kræver en klassifikationskode",
+    "duplicate_ordinal": "Duplikeret positionsnummer: {ordinal}",
+    "rate_anomaly": "Enhedspris {rate} overskrider tærskelværdi ({threshold})"
+  },
+  "schedule": {
+    "title": "4D Tidsplan"
+  },
+  "cad": {
+    "title": "CAD-import",
+    "upload": "Upload CAD-fil",
+    "supported_formats": "Understøttet: DWG, DGN, RVT, IFC, PDF",
+    "converting": "Konverterer...",
+    "elements_found": "{count} elementer fundet"
+  },
+  "takeoff": {
+    "title": "Mængdeberegning",
+    "auto_detect": "Automatisk registrering",
+    "manual_measure": "Manuel opmåling",
+    "confidence": "Pålidelighed"
+  },
+  "tendering": {
+    "title": "Udbud",
+    "create_tender": "Opret udbud",
+    "bid": "Tilbud",
+    "award": "Tildeling"
+  },
+  "modules": {
+    "title": "Moduler",
+    "installed": "Installeret",
+    "available": "Tilgængelige",
+    "install": "Installer",
+    "uninstall": "Afinstaller",
+    "update": "Opdater"
+  },
+  "dashboard": {
+    "welcome": "Velkommen til OpenEstimate",
+    "subtitle": "Byggekalkulation med åben kildekode",
+    "recent_projects": "Seneste projekter",
+    "system_status": "Systemstatus",
+    "modules_loaded": "Indlæste moduler",
+    "validation_rules": "Valideringsregler",
+    "languages": "Sprog"
+  },
+  "units": {
+    "m": "m",
+    "m2": "m²",
+    "m3": "m³",
+    "kg": "kg",
+    "t": "t",
+    "pcs": "stk",
+    "lsum": "sum",
+    "h": "t",
+    "set": "sæt"
+  },
+  "users": {
+    "management": "Brugeradministration",
+    "management_desc": "Manage team members, roles, and access",
+    "invite_user": "Invite User",
+    "invite": "Invite",
+    "full_name": "Full Name",
+    "email": "Email",
+    "password": "Password",
+    "role": "Role",
+    "status": "Status",
+    "last_login": "Last Login",
+    "actions": "Actions",
+    "name": "Name",
+    "total": "Total Users",
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "admins": "Admins",
+    "managers": "Managers",
+    "search": "Search by name or email...",
+    "no_users": "No users found",
+    "updated": "User updated",
+    "invited": "User invited successfully",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "never": "Aldrig",
+    "role_admin_desc": "Full access to all features",
+    "role_manager_desc": "Project and team management",
+    "role_editor_desc": "Create and edit content",
+    "role_viewer_desc": "Read-only access"
+  }
+}

@@ -297,7 +297,7 @@ export function DatabaseSetupPage() {
     return initial;
   });
   const [dbItemCounts, setDbItemCounts] = useState<Record<string, number>>({});
-  const [singleLoading, setSingleLoading] = useState(false);
+  const [_singleLoading, setSingleLoading] = useState(false);
   const [loadAllActive, setLoadAllActive] = useState(false);
   const loadAllAbortRef = useRef(false);
 
