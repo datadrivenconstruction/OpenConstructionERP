@@ -1,8 +1,8 @@
 /**
- * BIMPage — redesigned split-view BIM Hub page.
+ * BIMPage — BIM Hub page with full-width 3D viewer and bottom model bar.
  *
- * Left panel: model list + element tree (grouped by storey > discipline > type).
- * Right panel: Three.js BIM Viewer.
+ * Layout: full-width Three.js BIM Viewer on top, horizontal model filmstrip at bottom.
+ * Each model card shows name + status badge + element count, with a delete button on hover.
  *
  * Upload: single unified drop zone that accepts ALL file types (CAD + data).
  * Auto-detects format from extension and routes to the correct endpoint.
