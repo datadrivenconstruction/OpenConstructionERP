@@ -8,7 +8,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useProjectStore } from '@/stores/useProjectStore';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { ScoreRing } from './ScoreRing';
 import { DomainBar } from './DomainBar';
 import { GapCard } from './GapCard';
@@ -24,7 +24,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 
-const API_BASE = '/api/v1/project-intelligence';
+const API_BASE = '/api/v1/project_intelligence';
 
 // Domain display config
 const DOMAIN_CONFIG: Record<
@@ -93,7 +93,7 @@ interface ActionDef {
 export function ProjectIntelligencePage() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
-  const projectId = useProjectStore((s) => s.currentProjectId);
+  const projectId = useProjectContextStore((s) => s.activeProjectId);
   const paramProjectId = searchParams.get('project_id');
   const activeProjectId = paramProjectId || projectId;
 
