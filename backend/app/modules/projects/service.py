@@ -18,6 +18,32 @@ from app.config import Settings
 from app.core.events import event_bus
 
 _logger_ev = __import__("logging").getLogger(__name__ + ".events")
+_logger_audit = __import__("logging").getLogger(__name__ + ".audit")
+
+
+async def _safe_audit(
+    session: "AsyncSession",
+    *,
+    action: str,
+    entity_type: str,
+    entity_id: str | None = None,
+    user_id: str | None = None,
+    details: dict | None = None,
+) -> None:
+    """Best-effort audit log — never blocks the caller on failure."""
+    try:
+        from app.core.audit import audit_log
+
+        await audit_log(
+            session,
+            action=action,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            user_id=user_id,
+            details=details,
+        )
+    except Exception:
+        _logger_audit.debug("Audit log write skipped for %s %s", action, entity_type)
 
 
 async def _safe_publish(name: str, data: dict, source_module: str = "") -> None:
@@ -126,6 +152,15 @@ class ProjectService:
         except Exception:
             logger.debug("Auto-create default team skipped (teams module may not be loaded)")
 
+        await _safe_audit(
+            self.session,
+            action="create",
+            entity_type="project",
+            entity_id=str(project.id),
+            user_id=str(owner_id),
+            details={"name": project.name, "project_code": project_code},
+        )
+
         logger.info("Project created: %s (owner=%s, code=%s)", project.name, owner_id, project_code)
         return project
 
@@ -205,6 +240,14 @@ class ProjectService:
                 "updated_fields": list(fields.keys()),
             },
             source_module="oe_projects",
+        )
+
+        await _safe_audit(
+            self.session,
+            action="update",
+            entity_type="project",
+            entity_id=str(project_id),
+            details={"updated_fields": list(fields.keys()), "name": project.name},
         )
 
         logger.info("Project updated: %s (fields=%s)", project_id, list(fields.keys()))
@@ -297,6 +340,14 @@ class ProjectService:
                 "owner_id": owner_id,
             },
             source_module="oe_projects",
+        )
+
+        await _safe_audit(
+            self.session,
+            action="delete",
+            entity_type="project",
+            entity_id=str(project_id),
+            details={"name": project.name},
         )
 
         logger.info("Project archived: %s", project_id)

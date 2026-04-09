@@ -20,8 +20,8 @@ class PunchItemCreate(BaseModel):
 
     project_id: UUID
     title: str = Field(..., min_length=1, max_length=255)
-    description: str = ""
-    document_id: str | None = None
+    description: str = Field(default="", max_length=5000)
+    document_id: str | None = Field(default=None, max_length=36)
     page: int | None = Field(default=None, ge=1)
     location_x: float | None = Field(default=None, ge=0.0, le=1.0)
     location_y: float | None = Field(default=None, ge=0.0, le=1.0)
@@ -29,7 +29,7 @@ class PunchItemCreate(BaseModel):
         default="medium",
         pattern=r"^(low|medium|high|critical)$",
     )
-    assigned_to: str | None = None
+    assigned_to: str | None = Field(default=None, max_length=36)
     due_date: datetime | None = None
     category: str | None = Field(
         default=None,
@@ -45,8 +45,8 @@ class PunchItemUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     title: str | None = Field(default=None, min_length=1, max_length=255)
-    description: str | None = None
-    document_id: str | None = None
+    description: str | None = Field(default=None, max_length=5000)
+    document_id: str | None = Field(default=None, max_length=36)
     page: int | None = Field(default=None, ge=1)
     location_x: float | None = Field(default=None, ge=0.0, le=1.0)
     location_y: float | None = Field(default=None, ge=0.0, le=1.0)
@@ -54,14 +54,14 @@ class PunchItemUpdate(BaseModel):
         default=None,
         pattern=r"^(low|medium|high|critical)$",
     )
-    assigned_to: str | None = None
+    assigned_to: str | None = Field(default=None, max_length=36)
     due_date: datetime | None = None
     category: str | None = Field(
         default=None,
         pattern=r"^(structural|mechanical|electrical|architectural|fire_safety|plumbing|finishing|hvac|exterior|landscaping|general)$",
     )
     trade: str | None = Field(default=None, max_length=100)
-    resolution_notes: str | None = None
+    resolution_notes: str | None = Field(default=None, max_length=5000)
     metadata: dict[str, Any] | None = None
 
 
@@ -107,7 +107,7 @@ class PunchStatusTransition(BaseModel):
         ...,
         pattern=r"^(open|in_progress|resolved|verified|closed)$",
     )
-    notes: str | None = None
+    notes: str | None = Field(default=None, max_length=5000)
 
 
 # ── Summary schema ──────────────────────────────────────────────────────

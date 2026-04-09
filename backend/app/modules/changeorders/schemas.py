@@ -21,7 +21,7 @@ class ChangeOrderCreate(BaseModel):
 
     project_id: UUID
     title: str = Field(..., min_length=1, max_length=255)
-    description: str = ""
+    description: str = Field(default="", max_length=5000)
     reason_category: str = Field(
         default="client_request",
         pattern=r"^(client_request|design_change|unforeseen|regulatory|error)$",
@@ -37,7 +37,7 @@ class ChangeOrderUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     title: str | None = Field(default=None, min_length=1, max_length=255)
-    description: str | None = None
+    description: str | None = Field(default=None, max_length=5000)
     reason_category: str | None = Field(
         default=None,
         pattern=r"^(client_request|design_change|unforeseen|regulatory|error)$",
@@ -107,7 +107,7 @@ class ChangeOrderItemCreate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    description: str = Field(..., min_length=1)
+    description: str = Field(..., min_length=1, max_length=5000)
     change_type: str = Field(
         default="modified",
         pattern=r"^(added|removed|modified)$",
@@ -126,7 +126,7 @@ class ChangeOrderItemUpdate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    description: str | None = Field(default=None, min_length=1)
+    description: str | None = Field(default=None, min_length=1, max_length=5000)
     change_type: str | None = Field(
         default=None,
         pattern=r"^(added|removed|modified)$",

@@ -25,6 +25,32 @@ from app.modules.meetings.schemas import (
 )
 
 logger = logging.getLogger(__name__)
+_logger_audit = logging.getLogger(__name__ + ".audit")
+
+
+async def _safe_audit(
+    session: AsyncSession,
+    *,
+    action: str,
+    entity_type: str,
+    entity_id: str | None = None,
+    user_id: str | None = None,
+    details: dict | None = None,
+) -> None:
+    """Best-effort audit log — never blocks the caller on failure."""
+    try:
+        from app.core.audit import audit_log
+
+        await audit_log(
+            session,
+            action=action,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            user_id=user_id,
+            details=details,
+        )
+    except Exception:
+        _logger_audit.debug("Audit log write skipped for %s %s", action, entity_type)
 
 # ── Allowed meeting status transitions ────────────────────────────────────────
 
@@ -75,6 +101,21 @@ class MeetingService:
             metadata_=data.metadata,
         )
         meeting = await self.repo.create(meeting)
+
+        await _safe_audit(
+            self.session,
+            action="create",
+            entity_type="meeting",
+            entity_id=str(meeting.id),
+            user_id=user_id,
+            details={
+                "title": data.title,
+                "meeting_number": meeting_number,
+                "meeting_type": data.meeting_type,
+                "project_id": str(data.project_id),
+            },
+        )
+
         logger.info(
             "Meeting created: %s (%s) for project %s",
             meeting_number,

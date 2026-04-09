@@ -43,7 +43,7 @@ class ItemCreate(BaseModel):
     document_id: UUID | None = None
     item_number: int = Field(..., ge=1)
     description: str | None = Field(default=None, max_length=500)
-    notes: str | None = None
+    notes: str | None = Field(default=None, max_length=5000)
 
 
 class ItemResponse(BaseModel):
@@ -76,9 +76,9 @@ class TransmittalCreate(BaseModel):
         ...,
         pattern=r"^(for_approval|for_information|for_construction|for_tender|for_review|for_record)$",
     )
-    issued_date: str | None = Field(default=None, max_length=20)
-    response_due_date: str | None = Field(default=None, max_length=20)
-    cover_note: str | None = None
+    issued_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20)
+    response_due_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20)
+    cover_note: str | None = Field(default=None, max_length=5000)
     recipients: list[RecipientCreate] = Field(default_factory=list)
     items: list[ItemCreate] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -95,9 +95,9 @@ class TransmittalUpdate(BaseModel):
         default=None,
         pattern=r"^(for_approval|for_information|for_construction|for_tender|for_review|for_record)$",
     )
-    issued_date: str | None = Field(default=None, max_length=20)
-    response_due_date: str | None = Field(default=None, max_length=20)
-    cover_note: str | None = None
+    issued_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20)
+    response_due_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20)
+    cover_note: str | None = Field(default=None, max_length=5000)
     recipients: list[RecipientCreate] | None = None
     items: list[ItemCreate] | None = None
     metadata: dict[str, Any] | None = None

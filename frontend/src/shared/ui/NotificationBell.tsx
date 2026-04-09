@@ -113,6 +113,9 @@ export function NotificationBell() {
       queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] });
       queryClient.invalidateQueries({ queryKey: ['notifications-list'] });
     },
+    onError: (err: Error) => {
+      console.warn('Failed to mark notification as read:', err.message);
+    },
   });
 
   // Mark all as read
@@ -121,6 +124,9 @@ export function NotificationBell() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] });
       queryClient.invalidateQueries({ queryKey: ['notifications-list'] });
+    },
+    onError: (err: Error) => {
+      console.warn('Failed to mark all notifications as read:', err.message);
     },
   });
 

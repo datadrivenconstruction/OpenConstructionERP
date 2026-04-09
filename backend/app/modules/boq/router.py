@@ -209,7 +209,7 @@ async def _log_activity(
                 boq = await service.get_boq(boq_id)
                 project_id = boq.project_id
             except Exception:
-                pass
+                _log.debug("Activity log: failed to resolve project_id from boq_id", exc_info=True)
         await service.log_activity(
             user_id=user_id,
             action=action,
@@ -3029,7 +3029,7 @@ def _extract_from_excel_for_smart(content: bytes) -> dict[str, Any]:
             if has_description:
                 return {"text": "", "structured": True, "rows": rows}
     except Exception:
-        pass
+        logger.debug("Smart import: structured Excel parsing failed, using raw text", exc_info=True)
 
     # Fall back to extracting raw text from all cells
     from openpyxl import load_workbook
@@ -3066,7 +3066,7 @@ def _extract_from_csv_for_smart(content: bytes) -> dict[str, Any]:
             if has_description:
                 return {"text": "", "structured": True, "rows": rows}
     except Exception:
-        pass
+        logger.debug("Smart import: structured CSV parsing failed, using raw text", exc_info=True)
 
     # Fall back to raw text
     for encoding in ("utf-8-sig", "utf-8", "latin-1"):
@@ -3693,7 +3693,7 @@ async def enrich_resources(
                     if isinstance(raw, list):
                         components = raw
             except Exception:
-                pass
+                logger.debug("Assembly expand: component lookup by code failed", exc_info=True)
 
         # Fallback: lookup by description
         if not components:

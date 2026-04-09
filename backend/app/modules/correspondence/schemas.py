@@ -26,7 +26,7 @@ class CorrespondenceCreate(BaseModel):
     linked_document_ids: list[str] = Field(default_factory=list)
     linked_transmittal_id: str | None = None
     linked_rfi_id: str | None = None
-    notes: str | None = None
+    notes: str | None = Field(default=None, max_length=5000)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -48,7 +48,7 @@ class CorrespondenceUpdate(BaseModel):
     linked_document_ids: list[str] | None = None
     linked_transmittal_id: str | None = None
     linked_rfi_id: str | None = None
-    notes: str | None = None
+    notes: str | None = Field(default=None, max_length=5000)
     metadata: dict[str, Any] | None = None
 
 
