@@ -513,7 +513,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
               onChange={(e) => setBudgetForm((p) => ({ ...p, notes: e.target.value }))}
               rows={2}
               className={clsx(inputCls, 'h-auto py-2.5 resize-none')}
-              placeholder={t('finance.budget_notes_placeholder', { defaultValue: 'Optional notes...' })}
+              placeholder={t('finance.budget_notes_placeholder', { defaultValue: 'e.g., Includes contingency for weather delays' })}
             />
           </div>
         </div>
@@ -1642,7 +1642,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
                   onChange={(e) => setInvoiceForm((f) => ({ ...f, description: e.target.value }))}
                   rows={3}
                   className={clsx(inputCls, 'h-auto py-2.5 resize-none')}
-                  placeholder={t('finance.invoice_desc_placeholder', { defaultValue: 'Optional description or notes...' })}
+                  placeholder={t('finance.invoice_desc_placeholder', { defaultValue: 'e.g., Progress payment for concrete works - Phase 2' })}
                 />
               </div>
             </div>

@@ -885,7 +885,7 @@ export function RFIPage() {
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('rfi.variation_failed', { defaultValue: 'Failed to create variation from RFI' }),
         message: e.message,
       }),
   });

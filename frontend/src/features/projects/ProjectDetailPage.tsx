@@ -925,10 +925,10 @@ export function ProjectDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       setActiveProject(projectId!, updated.name);
       setIsEditing(false);
-      addToast({ type: 'success', title: t('toasts.project_updated', { defaultValue: 'Project updated' }) });
+      addToast({ type: 'success', title: t('toasts.project_updated', { defaultValue: 'Project updated successfully' }) });
     },
     onError: (error: Error) => {
-      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+      addToast({ type: 'error', title: t('toasts.project_update_failed', { defaultValue: 'Failed to update project' }), message: error.message });
     },
   });
 
