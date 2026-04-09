@@ -53,6 +53,102 @@ import {
   deleteBIMModel,
 } from './api';
 
+/* ── Converter Install Panel (inline, no navigation) ───────────────── */
+
+function ConverterInstallPanel({ format }: { format: string }) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+  const [installing, setInstalling] = useState<string | null>(null);
+  const [installed, setInstalled] = useState<Set<string>>(new Set());
+
+  const converters = [
+    { id: 'ddc-ifc-converter', ext: 'IFC', color: 'blue', name: 'DDC cad2data — IFC Converter', desc: 'Extract walls, slabs, columns, beams, MEP from IFC files' },
+    { id: 'ddc-rvt-converter', ext: 'RVT', color: 'purple', name: 'DDC cad2data — Revit Converter', desc: 'Extract families, types, parameters from Revit files' },
+  ];
+
+  const handleInstall = async (converterId: string) => {
+    setInstalling(converterId);
+    try {
+      // Enable module in user preferences via API
+      const { apiPatch } = await import('@/shared/lib/api');
+      const current = JSON.parse(localStorage.getItem('oe_module_prefs') || '{}');
+      current[converterId] = true;
+      localStorage.setItem('oe_module_prefs', JSON.stringify(current));
+      try {
+        await apiPatch('/v1/users/me/module-preferences/', { modules: current });
+      } catch { /* best effort */ }
+      setInstalled((prev) => new Set([...prev, converterId]));
+      addToast({ type: 'success', title: t('bim.converter_installed', { defaultValue: 'Converter installed successfully' }) });
+    } catch {
+      addToast({ type: 'error', title: t('bim.converter_install_failed', { defaultValue: 'Failed to install converter' }) });
+    } finally {
+      setInstalling(null);
+    }
+  };
+
+  return (
+    <div className="rounded-lg bg-oe-blue/5 border border-oe-blue/20 p-4 mb-4 text-start">
+      <p className="text-sm text-oe-blue font-semibold mb-2 flex items-center gap-2">
+        <Box size={16} />
+        {t('bim.install_converter', { defaultValue: 'Install Converter Module' })}
+      </p>
+      <p className="text-xs text-content-secondary mb-3">
+        {t('bim.converter_explanation', {
+          defaultValue: 'Install a converter to automatically extract building elements from your CAD files.',
+        })}
+      </p>
+      <div className="space-y-2 mb-3">
+        {converters.map((conv) => {
+          const isInstalled = installed.has(conv.id);
+          const isInstalling = installing === conv.id;
+          const isRelevant = format === conv.ext.toLowerCase();
+          return (
+            <div key={conv.id} className={`flex items-center gap-3 rounded-lg bg-surface-primary px-3 py-2.5 border ${isRelevant ? 'border-oe-blue/30 ring-1 ring-oe-blue/10' : 'border-border-light'}`}>
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${conv.color === 'blue' ? 'bg-blue-50 dark:bg-blue-950/30' : 'bg-purple-50 dark:bg-purple-950/30'}`}>
+                <span className={`text-xs font-bold ${conv.color === 'blue' ? 'text-blue-600' : 'text-purple-600'}`}>{conv.ext}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-content-primary">{conv.name}</p>
+                <p className="text-2xs text-content-tertiary">{conv.desc}</p>
+              </div>
+              {isInstalled ? (
+                <span className="flex items-center gap-1 text-2xs text-green-600 font-medium shrink-0">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                  Installed
+                </span>
+              ) : (
+                <button
+                  onClick={() => handleInstall(conv.id)}
+                  disabled={isInstalling}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium shrink-0 transition-colors ${
+                    isRelevant
+                      ? 'bg-oe-blue text-white hover:bg-oe-blue-dark'
+                      : 'bg-surface-secondary text-content-secondary hover:bg-surface-tertiary'
+                  } disabled:opacity-50`}
+                >
+                  {isInstalling ? (
+                    <span className="flex items-center gap-1">
+                      <svg width="12" height="12" className="animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+                      Installing...
+                    </span>
+                  ) : (
+                    'Install'
+                  )}
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <p className="text-2xs text-content-quaternary">
+        {t('bim.converter_note', {
+          defaultValue: 'Converters run on the server. Once installed, all future uploads will be processed automatically.',
+        })}
+      </p>
+    </div>
+  );
+}
+
 /* ── Constants ────────────────────────────────────────────────────────── */
 
 const CAD_EXTENSIONS = new Set(['.rvt', '.ifc']);
@@ -1143,45 +1239,7 @@ export function BIMPage() {
                   format: (activeModel.model_format || activeModel.format || '').toUpperCase(),
                 })}
               </p>
-              <div className="rounded-lg bg-oe-blue/5 border border-oe-blue/20 p-4 mb-4 text-start">
-                <p className="text-sm text-oe-blue font-semibold mb-2 flex items-center gap-2">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-                  {t('bim.install_converter', { defaultValue: 'Install a Converter Module' })}
-                </p>
-                <p className="text-xs text-content-secondary mb-3">
-                  {t('bim.converter_explanation', {
-                    defaultValue:
-                      'CAD/BIM files need a converter module to extract building elements. Install a converter from the Modules marketplace, or upload pre-converted data (CSV + DAE).',
-                  })}
-                </p>
-                <div className="space-y-2 mb-3">
-                  <div className="flex items-center gap-3 rounded-md bg-surface-primary px-3 py-2 border border-border-light">
-                    <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center shrink-0">
-                      <span className="text-xs font-bold text-blue-600">IFC</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-content-primary">DDC cad2data — IFC Converter</p>
-                      <p className="text-2xs text-content-tertiary">Extract elements from IFC files</p>
-                    </div>
-                    <button onClick={() => window.location.href = '/modules'} className="text-2xs text-oe-blue font-medium hover:underline shrink-0">Install</button>
-                  </div>
-                  <div className="flex items-center gap-3 rounded-md bg-surface-primary px-3 py-2 border border-border-light">
-                    <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-950/30 flex items-center justify-center shrink-0">
-                      <span className="text-xs font-bold text-purple-600">RVT</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-content-primary">DDC cad2data — Revit Converter</p>
-                      <p className="text-2xs text-content-tertiary">Extract elements from Revit (.rvt) files</p>
-                    </div>
-                    <button onClick={() => window.location.href = '/modules'} className="text-2xs text-oe-blue font-medium hover:underline shrink-0">Install</button>
-                  </div>
-                </div>
-                <p className="text-2xs text-content-quaternary">
-                  {t('bim.alternative_upload', {
-                    defaultValue: 'Alternative: Convert your file externally with DDC cad2data, then upload CSV + DAE via Advanced Mode below.',
-                  })}
-                </p>
-              </div>
+              <ConverterInstallPanel format={(activeModel.model_format || activeModel.format || 'rvt').toLowerCase()} />
               <div className="text-xs text-content-tertiary mb-5">
                 {t('bim.model_processing_file_info', {
                   defaultValue: 'File: {{name}} ({{size}})',
