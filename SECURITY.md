@@ -2,16 +2,16 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in OpenEstimate, please report it responsibly.
+If you discover a security vulnerability in OpenConstructionERP, please report it responsibly.
 
 **DO NOT** open a public GitHub issue for security vulnerabilities.
 
 ### How to Report
 
 1. **GitHub Security Advisories** (preferred):
-   Go to [Security Advisories](https://github.com/openestimate/openestimate/security/advisories/new) and create a new advisory.
+   Go to [Security Advisories](https://github.com/datadrivenconstruction/OpenConstructionERP/security/advisories/new) and create a new advisory.
 
-2. **Email**: security@openestimate.io
+2. **Email**: security@datadrivenconstruction.com
 
 ### What to Include
 
@@ -33,11 +33,13 @@ If you discover a security vulnerability in OpenEstimate, please report it respo
 
 | Version | Supported |
 |---------|-----------|
-| 0.1.x   | Yes       |
+| 1.1.x   | Yes       |
+| 1.0.x   | Yes       |
+| < 1.0   | No        |
 
 ## Self-Hosting Security Checklist
 
-If you deploy OpenEstimate on your own infrastructure:
+If you deploy OpenConstructionERP on your own infrastructure:
 
 - [ ] Change `JWT_SECRET` from the default value
 - [ ] Use HTTPS (TLS) in production — never expose HTTP publicly

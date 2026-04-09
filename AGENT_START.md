@@ -9,12 +9,7 @@
 
 1. **This file** — you're here. Quick orientation.
 2. **`CLAUDE.md`** (repo root) — architecture, conventions, code style, module structure. Authoritative.
-3. **`OpenConstructionERP_APPLICATION_PLAN.md`** (in `~/Downloads/`) — full master plan: all 50 modules, phasing, data models, inter-module flows, QA process. Read when working on new modules or cross-module features.
-
-Path to master plan:
-```
-C:\Users\Artem Boiko\Downloads\OpenConstructionERP_APPLICATION_PLAN.md
-```
+3. **`OpenConstructionERP_APPLICATION_PLAN.md`** — full master plan: all 50 modules, phasing, data models, inter-module flows, QA process. Read when working on new modules or cross-module features. Ask the owner for the current location of this file if not present in the repo.
 
 ---
 
@@ -22,7 +17,7 @@ C:\Users\Artem Boiko\Downloads\OpenConstructionERP_APPLICATION_PLAN.md
 
 | Key | Value |
 |-----|-------|
-| Current version | **v0.8.0** (production) |
+| Current version | **v1.1.0** (production) |
 | Current phase | **Phase 0 complete** (CI green). Next: Phase 9 (i18n Foundation) per master plan |
 | Production URL | https://openconstructionerp.com |
 | Demo SPA | https://openconstructionerp.com/demo/ |
@@ -92,17 +87,17 @@ Phase 22    v1.0.0 release
 
 ### Backend
 ```bash
-cd "C:/Users/Artem Boiko/Desktop/CodeProjects/ERP_26030500/backend"
+cd backend
 python -m uvicorn app.main:create_app --factory --port 8000 --host 0.0.0.0
 ```
 - DB: SQLite at `./openestimate.db`
 - Health: http://localhost:8000/api/health
 - API docs: http://localhost:8000/docs
-- Demo login: `demo@openestimator.io` / `DemoPass1234!`
+- Demo login: see `.env.example` for demo credentials
 
 ### Frontend
 ```bash
-cd "C:/Users/Artem Boiko/Desktop/CodeProjects/ERP_26030500/frontend"
+cd frontend
 npm run dev
 ```
 - http://localhost:5173 (Vite proxy: `/api` → backend)

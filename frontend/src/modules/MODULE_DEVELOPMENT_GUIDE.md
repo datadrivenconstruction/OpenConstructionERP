@@ -1,6 +1,6 @@
 # Module Development Guide
 
-How to create, register, and publish a plugin module for OpenEstimate.
+How to create, register, and publish a plugin module for OpenConstructionERP.
 
 ---
 
@@ -131,19 +131,19 @@ export const MODULE_REGISTRY: ModuleManifest[] = [
 ];
 ```
 
-Edit `frontend/src/app/i18n.ts` — add the nav key in each language's translation block:
+Edit `frontend/src/app/i18n.ts` — find each language block (search for `// === English`, `// === German`, etc.) and add the nav key:
 
 ```ts
-// English section (~line 900)
+// In the English block:
 'nav.my_feature': 'My Feature',
 
-// German section (~line 1390)
+// In the German block:
 'nav.my_feature': 'Meine Funktion',
 
-// French section (~line 1570)
+// In the French block:
 'nav.my_feature': 'Ma fonctionnalité',
 
-// Russian section (~line 2590)
+// In the Russian block:
 'nav.my_feature': 'Моя функция',
 ```
 
