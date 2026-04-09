@@ -21,7 +21,6 @@ import {
   ChevronDown,
   AlertTriangle,
   CheckCircle2,
-  ArrowLeft,
 } from 'lucide-react';
 
 const API_BASE = '/api/v1/project_intelligence';
@@ -239,13 +238,6 @@ export function ProjectIntelligencePage() {
   const { score, state } = summary;
   const gradeColor = GRADE_COLORS[score.overall_grade] || '#8b949e';
 
-  // Separate gaps by type for display
-  const criticalGaps = score.critical_gaps.filter(
-    (g) => g.severity === 'blocker' || g.severity === 'critical'
-  );
-  const warningGaps = score.critical_gaps.filter(
-    (g) => g.severity === 'warning' || g.severity === 'suggestion'
-  );
   const displayGaps = showAllGaps ? score.critical_gaps : score.critical_gaps.slice(0, 5);
   const hasMoreGaps = !showAllGaps && score.critical_gaps.length > 5;
 

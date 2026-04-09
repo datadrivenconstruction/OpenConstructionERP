@@ -431,7 +431,7 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({ item }: { item
 
         {/* Ref # */}
         <span className="text-sm font-mono font-semibold text-content-secondary w-20 shrink-0">
-          {item.ref_number}
+          {item.reference_number}
         </span>
 
         {/* Subject */}
@@ -462,7 +462,7 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({ item }: { item
 
         {/* From */}
         <span className="text-xs text-content-tertiary w-24 truncate shrink-0 hidden lg:block">
-          {item.from_contact}
+          {item.from_contact_id}
         </span>
 
         {/* To */}
@@ -479,10 +479,10 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({ item }: { item
         </span>
 
         {/* Linked docs count */}
-        {item.linked_docs_count > 0 && (
+        {(item.created_by || "").length > 0 && (
           <span className="flex items-center gap-1 text-xs text-content-tertiary shrink-0">
             <FileText size={12} />
-            {item.linked_docs_count}
+            {item.created_by}
           </span>
         )}
       </div>
@@ -492,7 +492,7 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({ item }: { item
         <div className="px-4 pb-4 pl-12 space-y-3 animate-fade-in">
           <div className="flex items-center gap-4 text-xs text-content-tertiary flex-wrap">
             <span>
-              {t('correspondence.label_from', { defaultValue: 'From' })}: {item.from_contact}
+              {t('correspondence.label_from', { defaultValue: 'From' })}: {item.from_contact_id}
             </span>
             <span>
               {t('correspondence.label_to', { defaultValue: 'To' })}:{' '}
@@ -623,8 +623,8 @@ export function CorrespondencePage() {
     return items.filter(
       (c) =>
         c.subject.toLowerCase().includes(q) ||
-        c.ref_number.toLowerCase().includes(q) ||
-        c.from_contact.toLowerCase().includes(q) ||
+        c.reference_number.toLowerCase().includes(q) ||
+        (c.from_contact_id || '').toLowerCase().includes(q) ||
         (c.to_contact_ids ?? []).some((tc) => tc.toLowerCase().includes(q)),
     );
   }, [items, searchQuery]);
