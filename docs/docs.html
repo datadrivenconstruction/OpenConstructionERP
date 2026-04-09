@@ -23,7 +23,7 @@
  <!-- Open Graph -->
  <meta property="og:type" content="article">
  <meta property="og:title" content="OpenConstructionERP Documentation — Free Construction ERP">
- <meta property="og:description" content="Step-by-step guide: BOQ editor, 55K+ cost items, AI estimation, 4D/5D, CAD/BIM takeoff. 21 languages, 20 standards.">
+ <meta property="og:description" content="Step-by-step guide: BOQ editor, 55K+ cost items, AI estimation, 4D/5D, CAD/BIM takeoff, Project Intelligence. 55 modules, 20 languages, v1.2.0.">
  <meta property="og:url" content="https://openconstructionerp.com/docs">
  <meta property="og:site_name" content="OpenConstructionERP">
 
@@ -993,6 +993,49 @@ cd frontend &amp;&amp; npm install &amp;&amp; npm run dev</code></pre><p>Backend
 <tr><td>Import/Export</td><td><code>/api/v1/import/</code> / <code>/api/v1/export/</code></td><td>Bulk data import and export</td></tr>
 </table>
 <p>See each module section above for detailed endpoint documentation with parameters and descriptions.</p></section>
+
+<section id="project-intelligence"><h2>Project Intelligence (PCI)</h2>
+<p>AI-powered project analysis that scores your project across <strong>9 weighted domains</strong> and generates a completeness score from 0 to 100 (grades A through F).</p>
+<h3>Domains &amp; Weights</h3>
+<ul>
+<li><strong>BOQ (30%)</strong> &mdash; Bill of Quantities completeness, pricing, resources</li>
+<li><strong>Validation (20%)</strong> &mdash; Quality check results, critical errors</li>
+<li><strong>Schedule (15%)</strong> &mdash; 4D schedule, activities, critical path</li>
+<li><strong>Cost Model (10%)</strong> &mdash; Budget, baseline, earned value</li>
+<li><strong>Takeoff (8%)</strong> &mdash; CAD/BIM files, quantity extraction</li>
+<li><strong>Risk (7%)</strong> &mdash; Risk register, mitigations, contingency</li>
+<li><strong>Tendering (5%)</strong> &mdash; Bid packages, comparisons</li>
+<li><strong>Documents (3%)</strong> &mdash; Uploaded files, categories covered</li>
+<li><strong>Reports (2%)</strong> &mdash; Generated reports, exports</li>
+</ul>
+<h3>Features</h3>
+<ul>
+<li><strong>Critical Gaps</strong> &mdash; Identifies issues sorted by severity (blocker, critical, warning, suggestion) with one-click fix actions</li>
+<li><strong>Achievements</strong> &mdash; Positive reinforcement for milestones reached</li>
+<li><strong>AI Recommendations</strong> &mdash; Connect Anthropic Claude, OpenAI, or Google Gemini in Settings for personalized advice</li>
+<li><strong>Role-based views</strong> &mdash; Estimator, Manager, and Explorer perspectives</li>
+</ul>
+<p><strong>API:</strong> <code>GET /api/v1/project_intelligence/score/?project_id=X</code> &mdash; returns overall score, domain scores, critical gaps, and achievements.</p>
+</section>
+
+<section id="user-management"><h2>User Management</h2>
+<p>Manage team members, roles, and per-module access control.</p>
+<h3>Roles</h3>
+<ul>
+<li><strong>Admin</strong> &mdash; Full access to all features, user management, system configuration</li>
+<li><strong>Manager</strong> &mdash; Project and team management, approvals, lock/unlock estimates</li>
+<li><strong>Editor</strong> &mdash; Create and edit content across all enabled modules</li>
+<li><strong>Viewer</strong> &mdash; Read-only access to all data</li>
+</ul>
+<h3>Module Access Matrix</h3>
+<p>Admins can configure per-user module visibility and access levels (None, View, Edit, Full) via the <strong>/users</strong> page. Custom role names can be assigned (e.g., "Site Engineer", "Cost Manager").</p>
+<h3>Features</h3>
+<ul>
+<li><strong>Invite users</strong> &mdash; Register new team members with role assignment</li>
+<li><strong>Activate/Deactivate</strong> &mdash; Control access without deleting accounts</li>
+<li><strong>Module presets</strong> &mdash; Full Access, View Only, Minimal quick-apply</li>
+</ul>
+</section>
 
 <section id="support"><h2>Support &amp; Contributing</h2><div class="g2"><div class="cd"><h4>Star on GitHub</h4><p><a href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank">Star the repository</a> to help others discover the project.</p></div><div class="cd"><h4>Report Issues</h4><p><a href="https://github.com/datadrivenconstruction/OpenConstructionERP/issues" target="_blank">Open an issue</a> on GitHub.</p></div><div class="cd"><h4>Discussions</h4><p><a href="https://t.me/datadrivenconstruction" target="_blank">Join Telegram community</a> to ask questions.</p></div><div class="cd"><h4>Consulting</h4><p><a href="https://datadrivenconstruction.io/contact-support/" target="_blank">Contact us</a> for deployment and training.</p></div></div><p><strong>License:</strong> AGPL-3.0. Commercial licensing: <a href="mailto:info@datadrivenconstruction.io">info@datadrivenconstruction.io</a></p></section>
 </div>
