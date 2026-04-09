@@ -991,6 +991,7 @@ export const fallbackResources = {
       'nav.resource_catalog': 'Resource Catalog',
       'nav.settings': 'Settings',
       'nav.about': 'About',
+      'nav.architecture': 'Architecture Map',
       'nav.ai_advisor': 'AI Cost Advisor',
       'nav.change_orders': 'Change Orders',
       'nav.risk_register': 'Risk Register',

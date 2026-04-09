@@ -8,7 +8,8 @@
     "ai_estimate": "تقدير بالذكاء الاصطناعي",
     "settings": "الإعدادات",
     "5d_cost_model": "نموذج التكلفة 5D",
-    "templates": "قوالب"
+    "templates": "قوالب",
+    "architecture": "خريطة البنية"
   },
   "common": {
     "save": "حفظ",

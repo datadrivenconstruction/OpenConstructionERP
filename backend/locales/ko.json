@@ -8,7 +8,8 @@
     "ai_estimate": "AI 견적",
     "settings": "설정",
     "5d_cost_model": "5D 비용 모델",
-    "templates": "템플릿"
+    "templates": "템플릿",
+    "architecture": "아키텍처 맵"
   },
   "common": {
     "save": "저장",

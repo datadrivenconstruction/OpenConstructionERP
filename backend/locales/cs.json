@@ -8,7 +8,8 @@
     "ai_estimate": "AI odhad",
     "settings": "Nastavení",
     "5d_cost_model": "5D model nákladů",
-    "templates": "Šablony"
+    "templates": "Šablony",
+    "architecture": "Mapa architektury"
   },
   "common": {
     "save": "Uložit",
