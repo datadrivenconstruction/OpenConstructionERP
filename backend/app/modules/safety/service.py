@@ -87,7 +87,6 @@ class SafetyService:
 
         # Create notification for project owner (using same session to avoid
         # SQLite write-lock contention that occurs with event_bus handlers)
-        print(f"SAFETY NOTIF: entering notification block for {incident_number}", flush=True)
         try:
             from sqlalchemy import select
 
@@ -98,12 +97,6 @@ class SafetyService:
                 select(Project.owner_id).where(Project.id == data.project_id)
             )
             owner_id = result.scalar_one_or_none()
-            logger.warning(
-                "NOTIFICATION DEBUG: project_id=%s, owner_id=%s (type=%s)",
-                data.project_id,
-                owner_id,
-                type(owner_id).__name__,
-            )
             if owner_id:
                 notif_svc = NotificationService(self.session)
                 await notif_svc.create(
@@ -120,14 +113,7 @@ class SafetyService:
                     },
                     action_url=f"/projects/{data.project_id}/safety?incident={incident.id}",
                 )
-        except Exception as _notif_exc:
-            import sys as _sys
-            import traceback as _tb
-            print(
-                f"NOTIFICATION ERROR for incident {incident_number}: {_notif_exc}",
-                file=_sys.stderr,
-            )
-            _tb.print_exc(file=_sys.stderr)
+        except Exception:
             logger.exception("Failed to create notification for safety incident %s", incident_number)
 
         # Emit event for additional cross-module handlers (analytics, etc.)

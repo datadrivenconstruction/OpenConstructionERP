@@ -52,6 +52,7 @@ class BIMModel(Base):
         GUID(),
         ForeignKey("oe_bim_model.id", ondelete="SET NULL"),
         nullable=True,
+        index=True,
     )
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
@@ -208,11 +209,13 @@ class BIMModelDiff(Base):
         GUID(),
         ForeignKey("oe_bim_model.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
     new_model_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
         ForeignKey("oe_bim_model.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
     diff_summary: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON,

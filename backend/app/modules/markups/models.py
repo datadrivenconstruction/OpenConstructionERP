@@ -44,6 +44,7 @@ class Markup(Base):
         GUID(),
         ForeignKey("oe_markups_stamp_template.id", ondelete="SET NULL"),
         nullable=True,
+        index=True,
     )
     linked_boq_position_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     layer: Mapped[str] = mapped_column(String(100), nullable=False, default="default")
