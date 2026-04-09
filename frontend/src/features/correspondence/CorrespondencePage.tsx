@@ -457,7 +457,7 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({ item }: { item
 
         {/* Type */}
         <Badge variant="neutral" size="sm" className="hidden md:inline-flex">
-          {t(`correspondence.type_${item.type}`, { defaultValue: TYPE_LABELS[item.type] })}
+          {t(`correspondence.type_${item.correspondence_type ?? 'letter'}`, { defaultValue: TYPE_LABELS[(item.correspondence_type ?? 'letter') as CorrespondenceType] })}
         </Badge>
 
         {/* From */}
@@ -467,7 +467,7 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({ item }: { item
 
         {/* To */}
         <span className="text-xs text-content-tertiary w-24 truncate shrink-0 hidden lg:block">
-          {item.to_contacts.length > 0 ? item.to_contacts.join(', ') : '-'}
+          {(item.to_contact_ids ?? []).length > 0 ? (item.to_contact_ids ?? []).join(', ') : '-'}
         </span>
 
         {/* Date */}
@@ -496,7 +496,7 @@ const CorrespondenceRow = React.memo(function CorrespondenceRow({ item }: { item
             </span>
             <span>
               {t('correspondence.label_to', { defaultValue: 'To' })}:{' '}
-              {item.to_contacts.length > 0 ? item.to_contacts.join(', ') : '-'}
+              {(item.to_contact_ids ?? []).length > 0 ? (item.to_contact_ids ?? []).join(', ') : '-'}
             </span>
             <span>
               {t('correspondence.label_sent', { defaultValue: 'Sent' })}:{' '}
@@ -625,7 +625,7 @@ export function CorrespondencePage() {
         c.subject.toLowerCase().includes(q) ||
         c.ref_number.toLowerCase().includes(q) ||
         c.from_contact.toLowerCase().includes(q) ||
-        c.to_contacts.some((tc) => tc.toLowerCase().includes(q)),
+        (c.to_contact_ids ?? []).some((tc) => tc.toLowerCase().includes(q)),
     );
   }, [items, searchQuery]);
 

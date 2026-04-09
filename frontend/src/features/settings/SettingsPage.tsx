@@ -1047,6 +1047,20 @@ export function SettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Integrations link */}
+      <Card className="animate-card-in" style={{ animationDelay: '500ms' }}>
+        <CardHeader title={t('integrations.title', { defaultValue: 'Integrations' })} subtitle={t('integrations.desc', { defaultValue: 'Connect Teams, Slack, Telegram, Discord, Webhooks' })} />
+        <CardContent>
+          <button
+            onClick={() => window.location.href = '/integrations'}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-oe-blue/20 bg-oe-blue/[0.04] text-oe-blue text-sm font-medium hover:bg-oe-blue/10 transition-colors"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v6m0 8v6M4.93 4.93l4.24 4.24m5.66 5.66l4.24 4.24M2 12h6m8 0h6M4.93 19.07l4.24-4.24m5.66-5.66l4.24-4.24"/></svg>
+            {t('integrations.configure', { defaultValue: 'Configure Integrations' })}
+          </button>
+        </CardContent>
+      </Card>
+
       {/* Danger zone */}
       <Card className="animate-card-in border-semantic-error/20" style={{ animationDelay: '520ms' }}>
         <CardHeader title={t('settings.account_title', { defaultValue: 'Account' })} subtitle={t('settings.account_subtitle', { defaultValue: 'Sign out or manage your account' })} />
