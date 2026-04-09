@@ -312,16 +312,16 @@ export function CostDatabaseSearchModal({
     setIsAdding(true);
 
     try {
-      // Get existing position count for ordinal
+      // Get existing position count for unique ordinal
       let nextOrd = 1;
       try {
-        const existing = await apiGet<unknown[]>(`/v1/boq/boqs/${boqId}/positions`);
-        nextOrd = existing.length + 1;
+        const boqData = await apiGet<{ positions?: unknown[] }>(`/v1/boq/boqs/${boqId}`);
+        nextOrd = (boqData.positions?.length ?? 0) + 1;
       } catch { /* ignore */ }
 
       const selectedItems = items.filter((i) => selected.has(i.id));
       for (const item of selectedItems) {
-        const ordinal = String(nextOrd).padStart(3, '0');
+        const ordinal = `${String(Math.floor(nextOrd / 100) + 1).padStart(2, '0')}.${String(nextOrd % 100 || nextOrd).padStart(3, '0')}`;
         // Convert cost item components to position resources
         const resources = (item.components || []).map((c) => ({
           name: c.name,
