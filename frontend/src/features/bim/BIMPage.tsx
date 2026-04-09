@@ -32,6 +32,10 @@ import {
   Info,
   CalendarDays,
   Trash2,
+  Eye,
+  Layers,
+  AlertTriangle,
+  UploadCloud,
 } from 'lucide-react';
 import { Button, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
 import { BIMViewer } from '@/shared/ui/BIMViewer';
@@ -908,7 +912,7 @@ export function BIMPage() {
     );
   }
 
-  // Project selected but no models and not loading — show full-page upload
+  // Project selected but no models and not loading — show full-page upload landing
   // (unless override says to hide it, e.g. right after a successful upload)
   if (showFullPageUpload && !modelsQuery.isLoading) {
     return (
@@ -916,19 +920,73 @@ export function BIMPage() {
         {/* Header */}
         <div className="px-6 pt-4 pb-3 border-b border-border-light">
           <Breadcrumb items={breadcrumbItems} />
-          <div className="flex items-center justify-between mt-2">
-            <h1 className="text-xl font-bold text-content-primary">
-              {t('bim.title', { defaultValue: 'BIM Viewer' })}
-            </h1>
-          </div>
         </div>
 
-        {/* Centered upload section, with model list above if any models exist */}
-        <div className="flex-1 flex items-center justify-center p-6">
-          <div className="w-full max-w-xl space-y-4">
+        {/* Professional landing */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-3xl mx-auto px-6 py-10">
+            {/* Hero */}
+            <div className="text-center mb-8">
+              <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-oe-blue/10 to-oe-blue/20 flex items-center justify-center mb-4">
+                <Box size={32} className="text-oe-blue" />
+              </div>
+              <h1 className="text-2xl font-bold text-content-primary">
+                {t('bim.landing_title', { defaultValue: 'BIM 3D Viewer' })}
+              </h1>
+              <p className="text-sm text-content-secondary mt-2 max-w-lg mx-auto">
+                {t('bim.landing_desc', {
+                  defaultValue:
+                    'Upload IFC or Revit files to visualize building elements, extract quantities, and link to your Bill of Quantities.',
+                })}
+              </p>
+            </div>
+
+            {/* Feature cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <div className="border border-border-light rounded-lg bg-surface-primary p-5 text-center">
+                <div className="mx-auto w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center mb-3">
+                  <Eye size={20} className="text-blue-600 dark:text-blue-400" />
+                </div>
+                <h3 className="text-sm font-semibold text-content-primary mb-1">
+                  {t('bim.feature_3d_title', { defaultValue: '3D Visualization' })}
+                </h3>
+                <p className="text-xs text-content-tertiary">
+                  {t('bim.feature_3d_desc', {
+                    defaultValue: 'View your building model in an interactive 3D viewer with storey filtering and element selection.',
+                  })}
+                </p>
+              </div>
+              <div className="border border-border-light rounded-lg bg-surface-primary p-5 text-center">
+                <div className="mx-auto w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center mb-3">
+                  <Layers size={20} className="text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <h3 className="text-sm font-semibold text-content-primary mb-1">
+                  {t('bim.feature_data_title', { defaultValue: 'Element Data' })}
+                </h3>
+                <p className="text-xs text-content-tertiary">
+                  {t('bim.feature_data_desc', {
+                    defaultValue: 'Browse walls, slabs, columns and other elements with their properties, areas, and volumes.',
+                  })}
+                </p>
+              </div>
+              <div className="border border-border-light rounded-lg bg-surface-primary p-5 text-center">
+                <div className="mx-auto w-10 h-10 rounded-lg bg-violet-50 dark:bg-violet-950/30 flex items-center justify-center mb-3">
+                  <Link2 size={20} className="text-violet-600 dark:text-violet-400" />
+                </div>
+                <h3 className="text-sm font-semibold text-content-primary mb-1">
+                  {t('bim.feature_boq_title', { defaultValue: 'BOQ Linking' })}
+                </h3>
+                <p className="text-xs text-content-tertiary">
+                  {t('bim.feature_boq_desc', {
+                    defaultValue: 'Connect BIM elements to cost items for automated quantity verification and take-off.',
+                  })}
+                </p>
+              </div>
+            </div>
+
             {/* Show existing models above upload when available */}
             {hasModels && modelsQuery.data?.items && (
-              <div className="border border-border-light rounded-lg bg-surface-primary p-4">
+              <div className="border border-border-light rounded-lg bg-surface-primary p-4 mb-4">
                 <h2 className="text-xs font-semibold text-content-tertiary uppercase tracking-wider mb-2">
                   {t('bim.models', { defaultValue: 'Models' })}
                 </h2>
@@ -944,16 +1002,28 @@ export function BIMPage() {
                         setShowUploadOverride(false);
                       }}
                       onDelete={() => handleDeleteModel(model.id, model.name)}
-
                     />
                   ))}
                 </div>
               </div>
             )}
+
+            {/* Upload section */}
             <UnifiedUploadSection
               projectId={projectId}
               onUploadComplete={handleUploadComplete}
             />
+
+            {/* IFC / RVT note */}
+            <div className="flex items-start gap-2 mt-4 p-3 rounded-lg bg-surface-secondary border border-border-light">
+              <Info size={14} className="text-content-quaternary mt-0.5 shrink-0" />
+              <p className="text-xs text-content-tertiary">
+                {t('bim.format_note', {
+                  defaultValue:
+                    'IFC files are processed instantly on the server. RVT files require the DDC cad2data converter for element extraction.',
+                })}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -1050,26 +1120,59 @@ export function BIMPage() {
       <div className="flex-1 min-h-0">
         {activeModelId && activeModel?.status === 'processing' ? (
           <div className="flex flex-col items-center justify-center h-full bg-surface-secondary">
-            <div className="text-center max-w-sm">
-              <div className="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center mb-4">
-                <Box size={32} className="text-amber-600" />
+            <div className="text-center max-w-md px-4">
+              <div className="mx-auto w-16 h-16 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 flex items-center justify-center mb-4">
+                <AlertTriangle size={28} className="text-amber-600 dark:text-amber-400" />
               </div>
               <h2 className="text-lg font-semibold text-content-primary mb-2">
-                {t('bim.model_processing_title', { defaultValue: 'Model Processing' })}
+                {t('bim.model_not_processed_title', { defaultValue: 'Model Could Not Be Processed' })}
               </h2>
-              <p className="text-sm text-content-secondary mb-4">
-                {t('bim.model_processing_viewer_desc', {
+              <p className="text-sm text-content-secondary mb-2">
+                {t('bim.model_not_processed_desc', {
                   defaultValue:
-                    'Your {{format}} file is being processed. The 3D viewer will load automatically when elements are ready.',
+                    'The {{format}} file was uploaded but no elements were extracted automatically.',
                   format: (activeModel.model_format || activeModel.format || '').toUpperCase(),
                 })}
               </p>
-              <div className="text-xs text-content-tertiary">
+              <div className="rounded-lg bg-surface-primary border border-border-light p-3 mb-4 text-start">
+                <p className="text-xs text-content-secondary mb-1.5 font-medium">
+                  {t('bim.model_not_processed_reason_title', { defaultValue: 'What happened?' })}
+                </p>
+                <p className="text-xs text-content-tertiary">
+                  {t('bim.model_not_processed_reason', {
+                    defaultValue:
+                      'RVT files require the DDC cad2data converter to extract elements. You can convert the file externally, then upload the resulting CSV and DAE files using Advanced Mode.',
+                  })}
+                </p>
+              </div>
+              <div className="text-xs text-content-tertiary mb-5">
                 {t('bim.model_processing_file_info', {
                   defaultValue: 'File: {{name}} ({{size}})',
                   name: activeModel.name,
-                  size: activeModel.file_size ? formatFileSize(activeModel.file_size) : '—',
+                  size: activeModel.file_size ? formatFileSize(activeModel.file_size) : '--',
                 })}
+              </div>
+              <div className="flex items-center justify-center gap-3">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => {
+                    setUploadConvertedName(activeModel.name);
+                    setLeftPanelUploadOpen(true);
+                  }}
+                >
+                  <UploadCloud size={14} className="me-1.5" />
+                  {t('bim.upload_converted_data', { defaultValue: 'Upload Converted Data' })}
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => handleDeleteModel(activeModel.id, activeModel.name)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+                >
+                  <Trash2 size={14} className="me-1.5" />
+                  {t('bim.delete_model', { defaultValue: 'Delete Model' })}
+                </Button>
               </div>
             </div>
           </div>
@@ -1129,6 +1232,35 @@ export function BIMPage() {
             <span className="text-xs text-content-quaternary">
               {t('bim.no_models', { defaultValue: 'No models uploaded yet' })}
             </span>
+          )}
+
+          {/* Active model info summary */}
+          {activeModel && activeModel.status === 'ready' && (
+            <div className="ms-auto shrink-0 flex items-center gap-3 text-xs text-content-tertiary border-s border-border-light ps-3">
+              <span className="font-medium text-content-secondary">{activeModel.name}</span>
+              {(activeModel.model_format || activeModel.format) && (
+                <Badge variant="neutral" size="sm">
+                  {(activeModel.model_format || activeModel.format || '').toUpperCase()}
+                </Badge>
+              )}
+              <span className="tabular-nums">
+                {t('bim.info_elements', {
+                  defaultValue: '{{count}} elements',
+                  count: elements.length,
+                })}
+              </span>
+              {(() => {
+                const storeys = new Set(elements.map((e) => e.storey).filter(Boolean));
+                return storeys.size > 0 ? (
+                  <span className="tabular-nums">
+                    {t('bim.info_storeys', {
+                      defaultValue: '{{count}} storeys',
+                      count: storeys.size,
+                    })}
+                  </span>
+                ) : null;
+              })()}
+            </div>
           )}
         </div>
       </div>
