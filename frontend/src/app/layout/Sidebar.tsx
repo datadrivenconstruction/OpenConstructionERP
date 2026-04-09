@@ -215,7 +215,6 @@ const bottomNav: NavItem[] = [
   { labelKey: 'users.management', to: '/users', icon: Users },
   { labelKey: 'modules.title', to: '/modules', icon: Package },
   { labelKey: 'integrations.title', to: '/integrations', icon: Plug },
-  { labelKey: 'nav.architecture', to: '/architecture', icon: Network },
   { labelKey: 'nav.settings', to: '/settings', icon: Settings },
   { labelKey: 'nav.about', to: '/about', icon: Info },
 ];

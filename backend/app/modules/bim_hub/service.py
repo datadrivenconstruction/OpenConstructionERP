@@ -134,6 +134,23 @@ class BIMHubService:
         await self.model_repo.delete(model_id)
         logger.info("BIM model deleted: %s", model_id)
 
+    async def cleanup_stale_processing(
+        self,
+        project_id: uuid.UUID,
+        max_age_hours: int = 1,
+    ) -> int:
+        """Remove models stuck in 'processing' with 0 elements older than max_age_hours."""
+        count = await self.model_repo.cleanup_stale_processing(
+            project_id, max_age_hours=max_age_hours
+        )
+        if count:
+            logger.info(
+                "Cleaned up %d stale processing model(s) for project %s",
+                count,
+                project_id,
+            )
+        return count
+
     # ── BIM Elements ─────────────────────────────────────────────────────────
 
     async def list_elements(
