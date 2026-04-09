@@ -226,7 +226,7 @@ export function AdvisorPage() {
 
   // Check if AI is configured on mount
   useEffect(() => {
-    apiGet<Record<string, unknown>>('/v1/ai/settings')
+    apiGet<Record<string, unknown>>('/v1/ai/settings/')
       .then((s) => {
         const hasKey =
           !!s.anthropic_api_key_set ||
@@ -276,7 +276,7 @@ export function AdvisorPage() {
           content: m.content,
         }));
 
-        const data = await apiPost<AdvisorResponse>('/v1/ai/advisor/chat', {
+        const data = await apiPost<AdvisorResponse>('/v1/ai/advisor/chat/', {
           message: msg,
           project_id: activeProjectId || undefined,
           region: region || undefined,

@@ -559,7 +559,7 @@ export const boqApi = {
   /* Duplicate */
   duplicateBoq: (boqId: string) => apiPost<BOQ>(`/v1/boq/boqs/${boqId}/duplicate/`, {}),
   duplicatePosition: (posId: string) =>
-    apiPost<Position>(`/v1/boq/positions/${posId}/duplicate`, {}),
+    apiPost<Position>(`/v1/boq/positions/${posId}/duplicate/`, {}),
 
   /* Section */
   addSection: (boqId: string, data: { ordinal: string; description: string }) =>
@@ -574,7 +574,7 @@ export const boqApi = {
 
   /* Position reorder (drag-and-drop) */
   reorderPositions: (boqId: string, positionIds: string[]) =>
-    apiPost<{ ok: boolean }>(`/v1/boq/boqs/${boqId}/positions/reorder`, {
+    apiPost<{ ok: boolean }>(`/v1/boq/boqs/${boqId}/positions/reorder/`, {
       position_ids: positionIds,
     }),
 
@@ -587,7 +587,7 @@ export const boqApi = {
   deleteMarkup: (boqId: string, markupId: string) =>
     apiDelete(`/v1/boq/boqs/${boqId}/markups/${markupId}`),
   applyDefaults: (boqId: string, region: string) =>
-    apiPost<Markup[]>(`/v1/boq/boqs/${boqId}/markups/apply-defaults?region=${encodeURIComponent(region)}`, {}),
+    apiPost<Markup[]>(`/v1/boq/boqs/${boqId}/markups/apply-defaults/?region=${encodeURIComponent(region)}`, {}),
 
   /* Activity */
   getActivity: async (boqId: string): Promise<ActivityResponse> => {
@@ -632,37 +632,37 @@ export const boqApi = {
 
   /* AI Chat */
   aiChat: (boqId: string, data: AIChatRequest) =>
-    apiPost<AIChatResponse>(`/v1/boq/boqs/${boqId}/ai-chat`, data),
+    apiPost<AIChatResponse>(`/v1/boq/boqs/${boqId}/ai-chat/`, data),
 
   /* Recalculate rates from resource breakdowns */
   recalculateRates: (boqId: string) =>
     apiPost<{ updated: number; skipped: number; total: number }>(
-      `/v1/boq/boqs/${boqId}/recalculate-rates`,
+      `/v1/boq/boqs/${boqId}/recalculate-rates/`,
       {},
     ),
 
   /* Resource Summary */
   getResourceSummary: (boqId: string) =>
-    apiGet<ResourceSummaryResponse>(`/v1/boq/boqs/${boqId}/resource-summary`),
+    apiGet<ResourceSummaryResponse>(`/v1/boq/boqs/${boqId}/resource-summary/`),
 
   /* Cost Breakdown */
   getCostBreakdown: (boqId: string) =>
-    apiGet<CostBreakdownResponse>(`/v1/boq/boqs/${boqId}/cost-breakdown`),
+    apiGet<CostBreakdownResponse>(`/v1/boq/boqs/${boqId}/cost-breakdown/`),
 
   /* AACE Estimate Classification */
   getClassification: (boqId: string) =>
-    apiGet<EstimateClassificationResponse>(`/v1/boq/boqs/${boqId}/classification`),
+    apiGet<EstimateClassificationResponse>(`/v1/boq/boqs/${boqId}/classification/`),
 
   /* Sensitivity Analysis */
   getSensitivity: (boqId: string, variationPct = 10) =>
     apiGet<SensitivityResponse>(
-      `/v1/boq/boqs/${boqId}/sensitivity?variation_pct=${variationPct}`,
+      `/v1/boq/boqs/${boqId}/sensitivity/?variation_pct=${variationPct}`,
     ),
 
   /* Monte Carlo Cost Risk */
   getCostRisk: (boqId: string, iterations = 1000) =>
     apiGet<CostRiskResponse>(
-      `/v1/boq/boqs/${boqId}/cost-risk?iterations=${iterations}`,
+      `/v1/boq/boqs/${boqId}/cost-risk/?iterations=${iterations}`,
     ),
 
   /* Statistics — aggregated BOQ metrics */
@@ -682,20 +682,20 @@ export const boqApi = {
       classification_coverage_pct: number;
       created_at: string;
       updated_at: string;
-    }>(`/v1/boq/boqs/${boqId}/statistics`),
+    }>(`/v1/boq/boqs/${boqId}/statistics/`),
 
   /* Snapshot / Version History */
   getSnapshots: (boqId: string) =>
-    apiGet<BOQSnapshot[]>(`/v1/boq/boqs/${boqId}/snapshots`),
+    apiGet<BOQSnapshot[]>(`/v1/boq/boqs/${boqId}/snapshots/`),
   createSnapshot: (boqId: string, label?: string) =>
-    apiPost<BOQSnapshot>(`/v1/boq/boqs/${boqId}/snapshots`, { name: label ?? '' }),
+    apiPost<BOQSnapshot>(`/v1/boq/boqs/${boqId}/snapshots/`, { name: label ?? '' }),
   restoreSnapshot: (boqId: string, snapshotId: string) =>
     apiPost<{ ok: boolean }>(`/v1/boq/boqs/${boqId}/restore/${snapshotId}`, {}),
 
   /* Enrich positions with resources from cost database */
   enrichResources: (boqId: string) =>
     apiPost<{ enriched_count: number; total_positions: number }>(
-      `/v1/boq/boqs/${boqId}/enrich-resources`,
+      `/v1/boq/boqs/${boqId}/enrich-resources/`,
       {},
     ),
 

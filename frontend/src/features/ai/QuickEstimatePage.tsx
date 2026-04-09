@@ -1235,7 +1235,7 @@ export function QuickEstimatePage() {
     setInstallResult(null);
     setInstallError(null);
     try {
-      const data = await apiPost<{ message: string }>(`/v1/takeoff/converters/${c.id}/install`);
+      const data = await apiPost<{ message: string }>(`/v1/takeoff/converters/${c.id}/install/`);
       setInstallResult(data);
       addToast({ type: 'success', title: `${c.name} installed`, message: data.message });
       queryClient.invalidateQueries({ queryKey: ['takeoff', 'converters'] });
