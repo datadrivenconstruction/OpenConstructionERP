@@ -79,7 +79,7 @@ export async function fetchSubmittals(filters?: SubmittalFilters): Promise<Submi
 }
 
 export async function createSubmittal(data: CreateSubmittalPayload): Promise<Submittal> {
-  return apiPost<Submittal>('/v1/submittals', data);
+  return apiPost<Submittal>('/v1/submittals/', data);
 }
 
 export async function submitSubmittal(id: string): Promise<Submittal> {

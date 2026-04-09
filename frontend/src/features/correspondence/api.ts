@@ -64,5 +64,5 @@ export async function fetchCorrespondence(
 export async function createCorrespondence(
   data: CreateCorrespondencePayload,
 ): Promise<Correspondence> {
-  return apiPost<Correspondence>('/v1/correspondence', data);
+  return apiPost<Correspondence>('/v1/correspondence/', data);
 }

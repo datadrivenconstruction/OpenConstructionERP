@@ -78,7 +78,7 @@ export async function fetchTransmittals(filters?: TransmittalFilters): Promise<T
 }
 
 export async function createTransmittal(data: CreateTransmittalPayload): Promise<Transmittal> {
-  return apiPost<Transmittal>('/v1/transmittals', data);
+  return apiPost<Transmittal>('/v1/transmittals/', data);
 }
 
 export async function issueTransmittal(id: string): Promise<Transmittal> {
