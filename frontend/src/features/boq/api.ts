@@ -701,15 +701,15 @@ export const boqApi = {
 
   /* AI: Classify position */
   classify: (data: { description: string; unit?: string; project_standard?: string }) =>
-    apiPost<ClassifyResponse>('/v1/boq/boqs/classify', data),
+    apiPost<ClassifyResponse>('/v1/boq/boqs/classify/', data),
 
   /* AI: Suggest rate */
   suggestRate: (data: { description: string; unit?: string; classification?: Record<string, string>; region?: string }) =>
-    apiPost<SuggestRateResponse>('/v1/boq/boqs/suggest-rate', data),
+    apiPost<SuggestRateResponse>('/v1/boq/boqs/suggest-rate/', data),
 
   /* AI: Check anomalies */
   checkAnomalies: (boqId: string) =>
-    apiPost<AnomalyCheckResponse>(`/v1/boq/boqs/${boqId}/check-anomalies`, {}),
+    apiPost<AnomalyCheckResponse>(`/v1/boq/boqs/${boqId}/check-anomalies/`, {}),
 
   /* AI: Search cost items (vector similarity) */
   searchCostItems: (data: {
@@ -718,7 +718,7 @@ export const boqApi = {
     region?: string;
     limit?: number;
     min_score?: number;
-  }) => apiPost<CostItemSearchResponse>('/v1/boq/boqs/search-cost-items', data),
+  }) => apiPost<CostItemSearchResponse>('/v1/boq/boqs/search-cost-items/', data),
 
   /* AI: Enhance description via LLM */
   enhanceDescription: (data: {
@@ -726,7 +726,7 @@ export const boqApi = {
     unit?: string;
     classification?: Record<string, string>;
     locale?: string;
-  }) => apiPost<EnhanceDescriptionResponse>('/v1/boq/boqs/enhance-description', data),
+  }) => apiPost<EnhanceDescriptionResponse>('/v1/boq/boqs/enhance-description/', data),
 
   /* AI: Suggest prerequisites via LLM */
   suggestPrerequisites: (data: {
@@ -735,7 +735,7 @@ export const boqApi = {
     classification?: Record<string, string>;
     existing_descriptions?: string[];
     locale?: string;
-  }) => apiPost<SuggestPrerequisitesResponse>('/v1/boq/boqs/suggest-prerequisites', data),
+  }) => apiPost<SuggestPrerequisitesResponse>('/v1/boq/boqs/suggest-prerequisites/', data),
 
   /* AI: Check scope completeness via LLM */
   checkScope: (boqId: string, data: {
@@ -743,7 +743,7 @@ export const boqApi = {
     region?: string;
     currency?: string;
     locale?: string;
-  }) => apiPost<CheckScopeResponse>(`/v1/boq/boqs/${boqId}/check-scope`, data),
+  }) => apiPost<CheckScopeResponse>(`/v1/boq/boqs/${boqId}/check-scope/`, data),
 
   /* AI: Escalate rate via LLM */
   escalateRate: (data: {
@@ -755,13 +755,13 @@ export const boqApi = {
     target_year?: number;
     region?: string;
     locale?: string;
-  }) => apiPost<EscalateRateResponse>('/v1/boq/boqs/escalate-rate', data),
+  }) => apiPost<EscalateRateResponse>('/v1/boq/boqs/escalate-rate/', data),
 
   /* Custom Columns — manage user-defined fields per BOQ */
   listCustomColumns: (boqId: string) =>
-    apiGet<CustomColumnDef[]>(`/v1/boq/boqs/${boqId}/columns`),
+    apiGet<CustomColumnDef[]>(`/v1/boq/boqs/${boqId}/columns/`),
   addCustomColumn: (boqId: string, data: CustomColumnDef) =>
-    apiPost<CustomColumnDef, CustomColumnDef>(`/v1/boq/boqs/${boqId}/columns`, data),
+    apiPost<CustomColumnDef, CustomColumnDef>(`/v1/boq/boqs/${boqId}/columns/`, data),
   deleteCustomColumn: (boqId: string, columnName: string) =>
     apiDelete<void>(`/v1/boq/boqs/${boqId}/columns/${columnName}`),
 
