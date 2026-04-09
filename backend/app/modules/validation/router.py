@@ -39,7 +39,7 @@ def _get_service(session: SessionDep) -> ValidationModuleService:
 
 
 @router.post(
-    "/run",
+    "/run/",
     response_model=RunValidationResponse,
     dependencies=[Depends(RequirePermission("boq.read"))],
 )
@@ -98,7 +98,7 @@ async def run_validation(
 
 
 @router.get(
-    "/reports",
+    "/reports/",
     response_model=list[ValidationReportResponse],
     dependencies=[Depends(RequirePermission("boq.read"))],
 )
@@ -160,7 +160,7 @@ async def delete_report(
 
 
 @router.get(
-    "/rule-sets",
+    "/rule-sets/",
 )
 async def list_rule_sets(
     service: ValidationModuleService = Depends(_get_service),

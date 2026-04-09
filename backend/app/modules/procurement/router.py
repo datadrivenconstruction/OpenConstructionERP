@@ -81,7 +81,7 @@ async def create_purchase_order(
 # ── Stats ────────────────────────────────────────────────────────────────────
 
 
-@router.get("/stats", response_model=ProcurementStatsResponse)
+@router.get("/stats/", response_model=ProcurementStatsResponse)
 async def procurement_stats(
     project_id: uuid.UUID = Query(...),
     service: ProcurementService = Depends(_get_service),
@@ -97,7 +97,7 @@ async def procurement_stats(
 # ── Goods Receipts (MUST be before /{po_id}) ────────────────────────────────
 
 
-@router.get("/goods-receipts", response_model=GRListResponse)
+@router.get("/goods-receipts/", response_model=GRListResponse)
 async def list_goods_receipts(
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     po_id: uuid.UUID | None = Query(default=None),
@@ -116,7 +116,7 @@ async def list_goods_receipts(
     )
 
 
-@router.post("/goods-receipts", response_model=GRResponse, status_code=201)
+@router.post("/goods-receipts/", response_model=GRResponse, status_code=201)
 async def create_goods_receipt(
     data: GRCreate,
     user_id: CurrentUserId,
@@ -127,7 +127,7 @@ async def create_goods_receipt(
     return GRResponse.model_validate(gr)
 
 
-@router.post("/goods-receipts/{gr_id}/confirm", response_model=GRResponse)
+@router.post("/goods-receipts/{gr_id}/confirm/", response_model=GRResponse)
 async def confirm_goods_receipt(
     gr_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -164,7 +164,7 @@ async def update_purchase_order(
     return POResponse.model_validate(po)
 
 
-@router.post("/{po_id}/create-invoice", status_code=201)
+@router.post("/{po_id}/create-invoice/", status_code=201)
 async def create_invoice_from_po(
     po_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -260,7 +260,7 @@ async def create_invoice_from_po(
         )
 
 
-@router.post("/{po_id}/issue", response_model=POResponse)
+@router.post("/{po_id}/issue/", response_model=POResponse)
 async def issue_purchase_order(
     po_id: uuid.UUID,
     user_id: CurrentUserId,

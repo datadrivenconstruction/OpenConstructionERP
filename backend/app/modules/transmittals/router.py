@@ -106,7 +106,7 @@ async def update_transmittal(
 # ── Issue ───────────────────────────────────────────────────────────────────
 
 
-@router.post("/{transmittal_id}/issue", response_model=TransmittalResponse)
+@router.post("/{transmittal_id}/issue/", response_model=TransmittalResponse)
 async def issue_transmittal(
     transmittal_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -121,7 +121,7 @@ async def issue_transmittal(
 
 
 @router.post(
-    "/{transmittal_id}/recipients/{recipient_id}/acknowledge",
+    "/{transmittal_id}/recipients/{recipient_id}/acknowledge/",
     response_model=RecipientResponse,
 )
 async def acknowledge_receipt(
@@ -140,7 +140,7 @@ async def acknowledge_receipt(
 
 
 @router.post(
-    "/{transmittal_id}/recipients/{recipient_id}/respond",
+    "/{transmittal_id}/recipients/{recipient_id}/respond/",
     response_model=RecipientResponse,
 )
 async def submit_response(

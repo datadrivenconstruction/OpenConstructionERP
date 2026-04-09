@@ -99,7 +99,7 @@ async def delete_team(
 # ── Members ──────────────────────────────────────────────────────────────
 
 
-@router.get("/{team_id}/members", response_model=list[MembershipResponse])
+@router.get("/{team_id}/members/", response_model=list[MembershipResponse])
 async def list_members(
     team_id: uuid.UUID,
     service: TeamService = Depends(_get_service),
@@ -109,7 +109,7 @@ async def list_members(
     return [MembershipResponse.model_validate(m) for m in members]
 
 
-@router.post("/{team_id}/members", response_model=MembershipResponse, status_code=201)
+@router.post("/{team_id}/members/", response_model=MembershipResponse, status_code=201)
 async def add_member(
     team_id: uuid.UUID,
     data: AddMemberRequest,

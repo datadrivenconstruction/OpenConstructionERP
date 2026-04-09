@@ -122,7 +122,7 @@ async def delete_ncr(
     await service.delete_ncr(ncr_id)
 
 
-@router.post("/{ncr_id}/create-variation", status_code=201)
+@router.post("/{ncr_id}/create-variation/", status_code=201)
 async def create_variation_from_ncr(
     ncr_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -214,7 +214,7 @@ async def create_variation_from_ncr(
         )
 
 
-@router.post("/{ncr_id}/close", response_model=NCRResponse)
+@router.post("/{ncr_id}/close/", response_model=NCRResponse)
 async def close_ncr(
     ncr_id: uuid.UUID,
     user_id: CurrentUserId = None,  # type: ignore[assignment]

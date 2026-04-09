@@ -113,7 +113,7 @@ async def delete_workflow(
 # ── Approval Requests ──────────────────────────────────────────────────────
 
 
-@router.get("/requests", response_model=ApprovalRequestListResponse)
+@router.get("/requests/", response_model=ApprovalRequestListResponse)
 async def list_approval_requests(
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     workflow_id: uuid.UUID | None = Query(default=None),
@@ -139,7 +139,7 @@ async def list_approval_requests(
     )
 
 
-@router.post("/requests", response_model=ApprovalRequestResponse, status_code=201)
+@router.post("/requests/", response_model=ApprovalRequestResponse, status_code=201)
 async def submit_approval_request(
     data: ApprovalRequestCreate,
     user_id: CurrentUserId,
@@ -161,7 +161,7 @@ async def get_approval_request(
     return ApprovalRequestResponse.model_validate(request)
 
 
-@router.post("/requests/{request_id}/approve", response_model=ApprovalRequestResponse)
+@router.post("/requests/{request_id}/approve/", response_model=ApprovalRequestResponse)
 async def approve_request(
     request_id: uuid.UUID,
     data: ApprovalDecision | None = None,
@@ -174,7 +174,7 @@ async def approve_request(
     return ApprovalRequestResponse.model_validate(request)
 
 
-@router.post("/requests/{request_id}/reject", response_model=ApprovalRequestResponse)
+@router.post("/requests/{request_id}/reject/", response_model=ApprovalRequestResponse)
 async def reject_request(
     request_id: uuid.UUID,
     data: ApprovalDecision | None = None,

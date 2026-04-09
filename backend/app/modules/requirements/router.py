@@ -140,7 +140,7 @@ def _set_to_detail(item: object) -> RequirementSetDetail:
 # ── Stats ───────────────────────────────────────────────────────────────────
 
 
-@router.get("/stats", response_model=RequirementStats)
+@router.get("/stats/", response_model=RequirementStats)
 async def get_stats(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -228,7 +228,7 @@ _EXPORT_COLUMNS = [
 ]
 
 
-@router.get("/{set_id}/export", response_model=None)
+@router.get("/{set_id}/export/", response_model=None)
 async def export_requirements(
     set_id: uuid.UUID,
     format: str = Query(default="csv", pattern="^(csv|json)$"),
@@ -283,7 +283,7 @@ async def delete_set(
 
 
 @router.post(
-    "/{set_id}/requirements",
+    "/{set_id}/requirements/",
     response_model=RequirementResponse,
     status_code=201,
 )
@@ -312,7 +312,7 @@ async def add_requirement(
 
 
 @router.post(
-    "/{set_id}/requirements/bulk",
+    "/{set_id}/requirements/bulk/",
     response_model=list[RequirementResponse],
     status_code=201,
 )
@@ -376,7 +376,7 @@ async def delete_requirement(
 
 
 @router.post(
-    "/{set_id}/gates/{gate_number}/run",
+    "/{set_id}/gates/{gate_number}/run/",
     response_model=GateResultResponse,
     status_code=200,
 )
@@ -404,7 +404,7 @@ async def run_gate(
 # ── List gate results ───────────────────────────────────────────────────────
 
 
-@router.get("/{set_id}/gates", response_model=list[GateResultResponse])
+@router.get("/{set_id}/gates/", response_model=list[GateResultResponse])
 async def list_gates(
     set_id: uuid.UUID,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -439,7 +439,7 @@ async def link_to_position(
 
 
 @router.post(
-    "/{set_id}/import/text",
+    "/{set_id}/import/text/",
     response_model=RequirementSetDetail,
     status_code=201,
 )

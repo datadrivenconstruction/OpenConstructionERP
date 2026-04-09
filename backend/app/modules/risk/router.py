@@ -63,7 +63,7 @@ def _risk_to_response(item: object) -> RiskResponse:
 # ── Summary ──────────────────────────────────────────────────────────────────
 
 
-@router.get("/summary", response_model=RiskSummary)
+@router.get("/summary/", response_model=RiskSummary)
 async def get_summary(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -77,7 +77,7 @@ async def get_summary(
 # ── Matrix ───────────────────────────────────────────────────────────────────
 
 
-@router.get("/matrix", response_model=RiskMatrixResponse)
+@router.get("/matrix/", response_model=RiskMatrixResponse)
 async def get_matrix(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]

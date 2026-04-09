@@ -53,7 +53,7 @@ def _get_service(session: SessionDep) -> WebhookService:
 # ---------------------------------------------------------------------------
 
 
-@router.get("/configs", response_model=IntegrationConfigListResponse)
+@router.get("/configs/", response_model=IntegrationConfigListResponse)
 async def list_integration_configs(
     user_id: CurrentUserId,
     session: SessionDep,
@@ -80,7 +80,7 @@ async def list_integration_configs(
 
 
 @router.post(
-    "/configs",
+    "/configs/",
     response_model=IntegrationConfigResponse,
     status_code=status.HTTP_201_CREATED,
 )
@@ -147,7 +147,7 @@ async def delete_integration_config(
     await session.flush()
 
 
-@router.post("/configs/{config_id}/test", response_model=TestNotificationResponse)
+@router.post("/configs/{config_id}/test/", response_model=TestNotificationResponse)
 async def test_integration_config(
     config_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -255,7 +255,7 @@ async def test_integration_config(
 # ---------------------------------------------------------------------------
 
 
-@router.get("/webhooks", response_model=list[WebhookResponse])
+@router.get("/webhooks/", response_model=list[WebhookResponse])
 async def list_webhooks(
     user_id: CurrentUserId,
     svc: WebhookService = Depends(_get_service),
@@ -265,7 +265,7 @@ async def list_webhooks(
     return [WebhookResponse.model_validate(w) for w in items]
 
 
-@router.post("/webhooks", response_model=WebhookResponse, status_code=201)
+@router.post("/webhooks/", response_model=WebhookResponse, status_code=201)
 async def create_webhook(
     body: WebhookCreate,
     user_id: CurrentUserId,
@@ -305,7 +305,7 @@ async def delete_webhook(
 
 
 @router.get(
-    "/webhooks/{webhook_id}/deliveries",
+    "/webhooks/{webhook_id}/deliveries/",
     response_model=list[DeliveryResponse],
 )
 async def list_deliveries(
@@ -322,7 +322,7 @@ async def list_deliveries(
 
 
 @router.post(
-    "/webhooks/{webhook_id}/test",
+    "/webhooks/{webhook_id}/test/",
     response_model=DeliveryResponse,
 )
 async def test_webhook(
@@ -367,7 +367,7 @@ def _ical_dt(iso_str: str | None) -> str | None:
     return clean + "T090000Z"
 
 
-@router.get("/calendar/{project_id}.ics")
+@router.get("/calendar/{project_id}.ics/")
 async def calendar_feed(
     project_id: uuid.UUID,
     session: SessionDep,

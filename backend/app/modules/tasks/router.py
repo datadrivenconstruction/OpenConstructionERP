@@ -124,7 +124,7 @@ async def list_tasks(
     return [_to_response(t) for t in tasks]
 
 
-@router.get("/my-tasks", response_model=list[TaskResponse])
+@router.get("/my-tasks/", response_model=list[TaskResponse])
 async def my_tasks(
     user_id: CurrentUserId,
     offset: int = Query(default=0, ge=0),
@@ -154,7 +154,7 @@ async def create_task(
     return _to_response(task)
 
 
-@router.get("/stats", response_model=TaskStatsResponse)
+@router.get("/stats/", response_model=TaskStatsResponse)
 async def task_stats(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -171,7 +171,7 @@ async def task_stats(
 # ── Export tasks as Excel ────────────────────────────────────────────────────
 
 
-@router.get("/export")
+@router.get("/export/")
 async def export_tasks(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -243,7 +243,7 @@ async def export_tasks(
 # ── Import template ─────────────────────────────────────────────────────────
 
 
-@router.get("/template")
+@router.get("/template/")
 async def download_task_template() -> StreamingResponse:
     """Download an Excel template for task import."""
     from openpyxl import Workbook
@@ -390,7 +390,7 @@ def _parse_task_rows_from_excel(content: bytes) -> list[dict[str, Any]]:
     return rows
 
 
-@router.post("/import/file")
+@router.post("/import/file/")
 async def import_tasks_file(
     user_id: CurrentUserId,
     project_id: uuid.UUID = Query(...),
@@ -549,7 +549,7 @@ async def delete_task(
     await service.delete_task(task_id, current_user_id=user_id)
 
 
-@router.post("/{task_id}/complete", response_model=TaskResponse)
+@router.post("/{task_id}/complete/", response_model=TaskResponse)
 async def complete_task(
     task_id: uuid.UUID,
     body: TaskCompleteRequest | None = None,

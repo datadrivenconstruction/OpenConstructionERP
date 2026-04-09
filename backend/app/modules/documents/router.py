@@ -87,7 +87,7 @@ def _doc_to_response(doc: object) -> DocumentResponse:
 # ── Summary ──────────────────────────────────────────────────────────────────
 
 
-@router.get("/summary", response_model=DocumentSummary)
+@router.get("/summary/", response_model=DocumentSummary)
 async def get_summary(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -101,7 +101,7 @@ async def get_summary(
 # ── Upload ───────────────────────────────────────────────────────────────────
 
 
-@router.post("/upload", response_model=DocumentResponse, status_code=201)
+@router.post("/upload/", response_model=DocumentResponse, status_code=201)
 async def upload_document(
     project_id: uuid.UUID = Query(...),
     category: str = Query(default="other"),
@@ -190,7 +190,7 @@ def _photo_to_response(photo: object) -> PhotoResponse:
 # ── Upload photo ────────────────────────────────────────────────────────
 
 
-@router.post("/photos/upload", response_model=PhotoResponse, status_code=201)
+@router.post("/photos/upload/", response_model=PhotoResponse, status_code=201)
 async def upload_photo(
     project_id: uuid.UUID = Query(...),
     category: str = Form(default="site"),
@@ -235,7 +235,7 @@ async def upload_photo(
 # ── List photos ─────────────────────────────────────────────────────────
 
 
-@router.get("/photos", response_model=list[PhotoResponse])
+@router.get("/photos/", response_model=list[PhotoResponse])
 async def list_photos(
     project_id: uuid.UUID = Query(...),
     category: str | None = Query(default=None),
@@ -278,7 +278,7 @@ async def list_photos(
 # ── Gallery ─────────────────────────────────────────────────────────────
 
 
-@router.get("/photos/gallery", response_model=list[PhotoResponse])
+@router.get("/photos/gallery/", response_model=list[PhotoResponse])
 async def get_gallery(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -292,7 +292,7 @@ async def get_gallery(
 # ── Timeline ────────────────────────────────────────────────────────────
 
 
-@router.get("/photos/timeline", response_model=list[PhotoTimelineGroup])
+@router.get("/photos/timeline/", response_model=list[PhotoTimelineGroup])
 async def get_timeline(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -326,7 +326,7 @@ async def get_photo(
 # ── Serve photo file ────────────────────────────────────────────────────
 
 
-@router.get("/photos/{photo_id}/file")
+@router.get("/photos/{photo_id}/file/")
 async def serve_photo_file(
     photo_id: uuid.UUID,
     service: PhotoService = Depends(_get_photo_service),
@@ -436,7 +436,7 @@ def _sheet_to_response(sheet: object) -> SheetResponse:
 # ── List sheets ────────────────────────────────────────────────────────
 
 
-@router.get("/sheets", response_model=list[SheetResponse])
+@router.get("/sheets/", response_model=list[SheetResponse])
 async def list_sheets(
     project_id: uuid.UUID = Query(...),
     discipline: str | None = Query(default=None),
@@ -464,7 +464,7 @@ async def list_sheets(
 # ── Distinct disciplines ───────────────────────────────────────────────
 
 
-@router.get("/sheets/disciplines", response_model=list[str])
+@router.get("/sheets/disciplines/", response_model=list[str])
 async def list_disciplines(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -477,7 +477,7 @@ async def list_disciplines(
 # ── Split PDF into sheets ──────────────────────────────────────────────
 
 
-@router.post("/sheets/split-pdf", response_model=list[SheetResponse], status_code=201)
+@router.post("/sheets/split-pdf/", response_model=list[SheetResponse], status_code=201)
 async def split_pdf(
     project_id: uuid.UUID = Query(...),
     file: UploadFile = File(...),
@@ -543,7 +543,7 @@ async def update_sheet(
 # ── Version history ────────────────────────────────────────────────────
 
 
-@router.get("/sheets/{sheet_id}/versions", response_model=SheetVersionHistory)
+@router.get("/sheets/{sheet_id}/versions/", response_model=SheetVersionHistory)
 async def get_sheet_versions(
     sheet_id: uuid.UUID,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -579,7 +579,7 @@ async def get_document(
 # ── Download ─────────────────────────────────────────────────────────────────
 
 
-@router.get("/{document_id}/download")
+@router.get("/{document_id}/download/")
 async def download_document(
     document_id: uuid.UUID,
     user_id: CurrentUserId = None,  # type: ignore[assignment]

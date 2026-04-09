@@ -96,7 +96,7 @@ async def create_inspection(
     return _to_response(inspection)
 
 
-@router.get("/export")
+@router.get("/export/")
 async def export_inspections(
     project_id: uuid.UUID = Query(...),
     session: SessionDep = None,  # type: ignore[assignment]
@@ -199,7 +199,7 @@ async def delete_inspection(
     await service.delete_inspection(inspection_id)
 
 
-@router.post("/{inspection_id}/create-defect", status_code=201)
+@router.post("/{inspection_id}/create-defect/", status_code=201)
 async def create_defect_from_inspection(
     inspection_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -293,7 +293,7 @@ async def create_defect_from_inspection(
         )
 
 
-@router.post("/{inspection_id}/complete", response_model=InspectionResponse)
+@router.post("/{inspection_id}/complete/", response_model=InspectionResponse)
 async def complete_inspection(
     inspection_id: uuid.UUID,
     body: CompleteInspectionRequest | None = None,
