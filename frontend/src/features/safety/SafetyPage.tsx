@@ -543,7 +543,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
 
   const createMut = useMutation({
     mutationFn: (data: typeof incidentForm) =>
-      apiPost('/v1/safety/incidents', {
+      apiPost('/v1/safety/incidents/', {
         project_id: projectId,
         incident_date: data.incident_date,
         incident_type: data.incident_type,
@@ -1032,7 +1032,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
 
   const createObsMut = useMutation({
     mutationFn: (data: typeof obsForm) =>
-      apiPost('/v1/safety/observations', {
+      apiPost('/v1/safety/observations/', {
         project_id: projectId,
         observation_type: data.observation_type,
         description: data.description,
