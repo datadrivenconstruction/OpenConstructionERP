@@ -269,7 +269,7 @@ export function CostDatabaseSearchModal({
   // Load available regions
   const { data: regionsData } = useQuery({
     queryKey: ['cost-regions-modal'],
-    queryFn: () => apiGet<string[]>('/v1/costs/regions'),
+    queryFn: () => apiGet<string[]>('/v1/costs/regions/'),
   });
   const regions = regionsData ?? [];
 

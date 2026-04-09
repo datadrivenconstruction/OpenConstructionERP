@@ -1039,7 +1039,7 @@ export function ProjectDetailPage() {
 
   const { data: budgetDashboard, isLoading: budgetLoading } = useQuery({
     queryKey: ['budget', projectId],
-    queryFn: () => apiGet<BudgetDashboard>(`/v1/costmodel/projects/${projectId}/5d/dashboard`),
+    queryFn: () => apiGet<BudgetDashboard>(`/v1/costmodel/projects/${projectId}/5d/dashboard/`),
     enabled: !!projectId && activeTab === 'budget',
   });
 

@@ -299,7 +299,7 @@ function AddItemDialog({
 
   const mutation = useMutation({
     mutationFn: () =>
-      apiPost<ChangeOrderItem>(`/v1/changeorders/${orderId}/items`, {
+      apiPost<ChangeOrderItem>(`/v1/changeorders/${orderId}/items/`, {
         description: desc,
         change_type: changeType,
         original_quantity: origQty,
@@ -543,7 +543,7 @@ function DetailView({
   });
 
   const submitMut = useMutation({
-    mutationFn: () => apiPost<ChangeOrder>(`/v1/changeorders/${orderId}/submit`),
+    mutationFn: () => apiPost<ChangeOrder>(`/v1/changeorders/${orderId}/submit/`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['changeorder', orderId] });
       queryClient.invalidateQueries({ queryKey: ['changeorders'] });
@@ -553,7 +553,7 @@ function DetailView({
   });
 
   const approveMut = useMutation({
-    mutationFn: () => apiPost<ChangeOrder>(`/v1/changeorders/${orderId}/approve`),
+    mutationFn: () => apiPost<ChangeOrder>(`/v1/changeorders/${orderId}/approve/`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['changeorder', orderId] });
       queryClient.invalidateQueries({ queryKey: ['changeorders'] });
@@ -563,7 +563,7 @@ function DetailView({
   });
 
   const rejectMut = useMutation({
-    mutationFn: () => apiPost<ChangeOrder>(`/v1/changeorders/${orderId}/reject`),
+    mutationFn: () => apiPost<ChangeOrder>(`/v1/changeorders/${orderId}/reject/`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['changeorder', orderId] });
       queryClient.invalidateQueries({ queryKey: ['changeorders'] });

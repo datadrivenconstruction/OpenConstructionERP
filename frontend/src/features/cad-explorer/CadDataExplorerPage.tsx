@@ -1250,7 +1250,7 @@ function ConverterStatus() {
   const { t } = useTranslation();
   const { data } = useQuery({
     queryKey: ['cad-converters-status'],
-    queryFn: () => apiGet<{ converters: { id: string; name: string; extensions: string[]; installed: boolean }[] }>('/v1/takeoff/converters'),
+    queryFn: () => apiGet<{ converters: { id: string; name: string; extensions: string[]; installed: boolean }[] }>('/v1/takeoff/converters/'),
     staleTime: 60000,
   });
 

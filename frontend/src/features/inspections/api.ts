@@ -82,5 +82,5 @@ export async function createInspection(data: CreateInspectionPayload): Promise<I
 }
 
 export async function completeInspection(id: string): Promise<Inspection> {
-  return apiPost<Inspection>(`/v1/inspections/${id}/complete`);
+  return apiPost<Inspection>(`/v1/inspections/${id}/complete/`);
 }
