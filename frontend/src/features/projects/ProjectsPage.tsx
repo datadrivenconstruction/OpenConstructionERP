@@ -262,7 +262,7 @@ export function ProjectsPage() {
           <p className="mt-1 text-sm text-content-secondary">
             {projects
               ? t('projects.subtitle_count', {
-                  defaultValue: '{{count}} projects',
+                  defaultValue: 'Manage your construction estimation projects ({{count}} total)',
                   count: projects.length,
                 })
               : t('common.loading', { defaultValue: 'Loading...' })}
@@ -435,7 +435,7 @@ export function ProjectsPage() {
           icon={<FolderOpen size={28} strokeWidth={1.5} />}
           title={t('projects.no_projects', { defaultValue: 'No projects yet' })}
           description={t('projects.no_projects_description', {
-            defaultValue: 'Create your first construction cost estimation project',
+            defaultValue: 'Projects organize your estimates, documents, and team. Create your first project to get started with cost estimation.',
           })}
           action={{
             label: t('projects.new_project', { defaultValue: 'Create Project' }),
@@ -588,7 +588,7 @@ function ProjectCard({
     onSuccess: () => {
       setConfirmDelete(false);
       queryClient.invalidateQueries({ queryKey: ['projects'] });
-      addToast({ type: 'success', title: t('projects.deleted', 'Project archived') });
+      addToast({ type: 'success', title: t('projects.deleted', 'Project deleted successfully') });
       onDeleted?.();
     },
     onError: (e: Error) => {
@@ -613,13 +613,13 @@ function ProjectCard({
     },
     onSuccess: (newProject) => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
-      addToast({ type: 'success', title: t('projects.duplicated', 'Project duplicated') });
+      addToast({ type: 'success', title: t('projects.duplicated', 'Project duplicated successfully') });
       navigate(`/projects/${newProject.id}`);
     },
     onError: (e: Error) => {
       addToast({
         type: 'error',
-        title: t('projects.duplicate_failed', 'Failed to duplicate'),
+        title: t('projects.duplicate_failed', 'Failed to duplicate project'),
         message: e.message,
       });
     },
@@ -629,10 +629,10 @@ function ProjectCard({
     mutationFn: () => apiPatch(`/v1/projects/${project.id}`, { status: 'archived' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
-      addToast({ type: 'success', title: t('toasts.project_archived', { defaultValue: 'Project archived' }) });
+      addToast({ type: 'success', title: t('toasts.project_archived', { defaultValue: 'Project archived successfully' }) });
     },
     onError: (error: Error) => {
-      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+      addToast({ type: 'error', title: t('toasts.archive_failed', { defaultValue: 'Failed to archive project' }), message: error.message });
     },
   });
 

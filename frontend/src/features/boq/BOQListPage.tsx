@@ -552,7 +552,11 @@ export function BOQListPage() {
           <h1 className="text-2xl font-bold text-content-primary">{t('boq.title')}</h1>
           <p className="mt-1 text-sm text-content-secondary">
             {allBoqs
-              ? `${allBoqs.length} ${t('boq.estimates', { defaultValue: 'estimates' })} · ${projects?.length ?? 0} ${t('boq.projects_label', { defaultValue: 'projects' })}`
+              ? t('boq.list_subtitle_count', {
+                  defaultValue: '{{boqCount}} estimates across {{projectCount}} projects',
+                  boqCount: allBoqs.length,
+                  projectCount: projects?.length ?? 0,
+                })
               : t('common.loading')}
           </p>
         </div>

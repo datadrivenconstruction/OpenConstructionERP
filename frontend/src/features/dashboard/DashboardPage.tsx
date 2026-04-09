@@ -1889,7 +1889,7 @@ export function DashboardPage() {
                 });
                 navigate(`/boq/${boq.id}`);
               } catch {
-                addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }) });
+                addToast({ type: 'error', title: t('dashboard.quick_start_failed', { defaultValue: 'Failed to create quick start estimate' }) });
               }
             }}
           >

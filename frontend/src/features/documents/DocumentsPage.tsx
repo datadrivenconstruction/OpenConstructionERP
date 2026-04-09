@@ -302,11 +302,11 @@ export function DocumentsPage() {
     mutationFn: (id: string) => apiDelete(`/v1/documents/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
-      addToast({ type: 'success', title: t('documents.deleted', { defaultValue: 'Document deleted' }) });
+      addToast({ type: 'success', title: t('documents.deleted', { defaultValue: 'Document deleted successfully' }) });
       setConfirmDeleteId(null);
     },
     onError: (err: Error) => {
-      addToast({ type: 'error', title: t('documents.delete_failed', { defaultValue: 'Delete failed' }), message: err.message });
+      addToast({ type: 'error', title: t('documents.delete_failed', { defaultValue: 'Failed to delete document' }), message: err.message });
       setConfirmDeleteId(null);
     },
   });
@@ -320,7 +320,7 @@ export function DocumentsPage() {
     if (!projectId) {
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('documents.no_project_error', { defaultValue: 'No project selected' }),
         message: t('documents.select_project_first', { defaultValue: 'Please select a project first before uploading.' }),
       });
       return;
@@ -473,11 +473,11 @@ export function DocumentsPage() {
       apiPatch<unknown, { name: string }>(`/v1/documents/${id}`, { name }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
-      addToast({ type: 'success', title: t('documents.renamed', { defaultValue: 'Document renamed' }) });
+      addToast({ type: 'success', title: t('documents.renamed', { defaultValue: 'Document renamed successfully' }) });
       setRenameDoc(null);
     },
     onError: (err: Error) => {
-      addToast({ type: 'error', title: t('documents.rename_failed', { defaultValue: 'Rename failed' }), message: err.message });
+      addToast({ type: 'error', title: t('documents.rename_failed', { defaultValue: 'Failed to rename document' }), message: err.message });
     },
   });
 
@@ -487,11 +487,11 @@ export function DocumentsPage() {
       apiPatch<unknown, Record<string, unknown>>(`/v1/documents/${id}`, fields),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
-      addToast({ type: 'success', title: t('documents.properties_saved', { defaultValue: 'Properties saved' }) });
+      addToast({ type: 'success', title: t('documents.properties_saved', { defaultValue: 'Document properties saved successfully' }) });
       setEditDoc(null);
     },
     onError: (err: Error) => {
-      addToast({ type: 'error', title: t('documents.save_failed', { defaultValue: 'Save failed' }), message: err.message });
+      addToast({ type: 'error', title: t('documents.save_failed', { defaultValue: 'Failed to save document properties' }), message: err.message });
     },
   });
 

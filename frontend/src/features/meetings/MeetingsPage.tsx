@@ -538,7 +538,7 @@ function ImportSummaryModal({
       const msg = err instanceof Error ? err.message : 'Preview extraction failed';
       setPreviewError(msg);
       setStep('upload');
-      addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: msg });
+      addToast({ type: 'error', title: t('meetings.preview_failed', { defaultValue: 'Failed to preview meeting transcript' }), message: msg });
     }
   }, [selectedFile, projectId, t, addToast]);
 
@@ -1439,7 +1439,7 @@ export function MeetingsPage() {
   const handleCreateSubmit = useCallback(
     (formData: MeetingFormData) => {
       if (!projectId) {
-        addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: t('common.select_project_first', { defaultValue: 'Please select a project first' }) });
+        addToast({ type: 'error', title: t('meetings.no_project_error', { defaultValue: 'No project selected' }), message: t('common.select_project_first', { defaultValue: 'Please select a project first' }) });
         return;
       }
       const attendeesList = formData.attendees
