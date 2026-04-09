@@ -40,8 +40,6 @@ import {
   FileCheck,
   Mail,
   Send,
-  Plug,
-  Network,
   History,
   BrainCircuit,
   type LucideIcon,
@@ -86,6 +84,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.dashboard', to: '/', icon: LayoutDashboard },
       { labelKey: 'projects.title', to: '/projects', icon: FolderOpen, tourId: 'projects' },
       { labelKey: 'nav.reports', to: '/reports', icon: FileBarChart, advancedOnly: true },
+      { labelKey: 'nav.project_intelligence', to: '/project-intelligence', icon: BrainCircuit },
     ],
   },
   {
@@ -118,7 +117,6 @@ const navGroups: NavGroup[] = [
     items: [
       { labelKey: 'nav.ai_estimate', to: '/ai-estimate', icon: Sparkles },
       { labelKey: 'nav.ai_advisor', to: '/advisor', icon: MessageSquare },
-      { labelKey: 'nav.project_intelligence', to: '/project-intelligence', icon: BrainCircuit },
     ],
   },
   // ── PLANNING & CONTROL (advanced) ──────────────────────────────────

@@ -578,8 +578,8 @@ function ModuleTogglesSection({
 /* ══════════════════════════════════════════════════════════════════════════ */
 
 function DataPackagesTab() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const [activeCategory, setActiveCategory] = useState<CategoryKey>('all');
@@ -1000,7 +1000,6 @@ function SystemModulesTab() {
     queryFn: () => apiGet<SystemModule[]>('/v1/modules'),
   });
 
-  const navigate = useNavigate();
   const enabledCount = systemModules?.filter((m) => m.enabled).length ?? 0;
 
   async function handleBackendToggle(mod: SystemModule): Promise<void> {

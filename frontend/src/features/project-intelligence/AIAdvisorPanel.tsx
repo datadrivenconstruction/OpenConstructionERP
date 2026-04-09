@@ -12,7 +12,6 @@ import {
   MessageSquare,
   Send,
   Loader2,
-  RotateCcw,
   Sparkles,
   AlertCircle,
 } from 'lucide-react';
@@ -35,7 +34,7 @@ interface ChatMessage {
   text: string;
 }
 
-export function AIAdvisorPanel({ projectId, role, projectName, score }: AIAdvisorPanelProps) {
+export function AIAdvisorPanel({ projectId, role, }: AIAdvisorPanelProps) {
   const { t } = useTranslation();
   const [recommendation, setRecommendation] = useState<string | null>(null);
   const [loadingRec, setLoadingRec] = useState(false);

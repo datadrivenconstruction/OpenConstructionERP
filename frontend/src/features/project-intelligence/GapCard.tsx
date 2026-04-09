@@ -69,13 +69,13 @@ const SEVERITY_CONFIG: Record<
 
 export function GapCard({ gap, isExpanded, onToggle, onAction, actionLabel }: GapCardProps) {
   const config = SEVERITY_CONFIG[gap.severity] || SEVERITY_CONFIG.suggestion;
-  const Icon = config.icon;
+  const Icon = config?.icon;
 
   return (
     <div
       className={clsx(
         'rounded-lg border-l-[3px] transition-all duration-200',
-        config.border,
+        config?.border,
         isExpanded ? 'bg-surface-tertiary/70' : 'bg-surface-tertiary/30 hover:bg-surface-tertiary/50'
       )}
     >
@@ -85,17 +85,17 @@ export function GapCard({ gap, isExpanded, onToggle, onAction, actionLabel }: Ga
         className="w-full text-left px-3 py-2.5 flex items-start gap-2"
         aria-expanded={isExpanded}
       >
-        <Icon size={14} className={clsx('shrink-0 mt-0.5', config.color)} />
+        {Icon && <Icon size={14} className={clsx('shrink-0 mt-0.5', config?.color)} />}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
             <span
               className={clsx(
                 'text-2xs font-bold uppercase tracking-wider px-1 py-0.5 rounded',
-                config.bg,
-                config.color
+                config?.bg,
+                config?.color
               )}
             >
-              {config.label}
+              {config?.label}
             </span>
             <span className="text-2xs text-content-quaternary uppercase">
               {gap.domain}

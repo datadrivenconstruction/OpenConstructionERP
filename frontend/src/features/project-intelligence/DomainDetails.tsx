@@ -126,8 +126,6 @@ function DomainContent({
   onAction: (actionId: string) => void;
   actions: ActionDef[];
 }) {
-  const { t } = useTranslation();
-  const domainState = state[domain] || state[domain.replace('_', '')] || {};
 
   const rows: { label: string; value: string | number; status?: 'ok' | 'warn' | 'error' }[] = [];
 
