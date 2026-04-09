@@ -81,7 +81,7 @@ export async function fetchTasks(filters?: TaskFilters): Promise<Task[]> {
 }
 
 export async function createTask(data: CreateTaskPayload): Promise<Task> {
-  return apiPost<Task>('/v1/tasks', data);
+  return apiPost<Task>('/v1/tasks/', data);
 }
 
 export async function updateTask(id: string, data: UpdateTaskPayload): Promise<Task> {

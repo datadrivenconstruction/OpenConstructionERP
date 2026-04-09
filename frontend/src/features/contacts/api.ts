@@ -60,7 +60,7 @@ export async function fetchContacts(filters?: ContactFilters): Promise<Contact[]
 }
 
 export async function createContact(data: CreateContactPayload): Promise<Contact> {
-  return apiPost<Contact>('/v1/contacts', data);
+  return apiPost<Contact>('/v1/contacts/', data);
 }
 
 export async function updateContact(

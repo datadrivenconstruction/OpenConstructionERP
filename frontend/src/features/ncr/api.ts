@@ -59,11 +59,11 @@ export async function fetchNCRs(filters?: NCRFilters): Promise<NCR[]> {
   if (filters?.status) params.set('status', filters.status);
   if (filters?.severity) params.set('severity', filters.severity);
   const qs = params.toString();
-  return apiGet<NCR[]>(`/v1/ncr${qs ? `?${qs}` : ''}`);
+  return apiGet<NCR[]>(`/v1/ncr/${qs ? `?${qs}` : ''}`);
 }
 
 export async function createNCR(data: CreateNCRPayload): Promise<NCR> {
-  return apiPost<NCR>('/v1/ncr', data);
+  return apiPost<NCR>('/v1/ncr/', data);
 }
 
 export async function closeNCR(id: string): Promise<NCR> {

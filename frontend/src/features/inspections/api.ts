@@ -74,7 +74,7 @@ export async function fetchInspections(filters?: InspectionFilters): Promise<Ins
 }
 
 export async function createInspection(data: CreateInspectionPayload): Promise<Inspection> {
-  return apiPost<Inspection>('/v1/inspections', data);
+  return apiPost<Inspection>('/v1/inspections/', data);
 }
 
 export async function completeInspection(id: string): Promise<Inspection> {
