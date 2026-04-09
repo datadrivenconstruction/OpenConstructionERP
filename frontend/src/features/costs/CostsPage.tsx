@@ -427,14 +427,14 @@ export function CostsPage() {
   // Fetch loaded regions list
   const { data: loadedRegions } = useQuery({
     queryKey: ['costs', 'regions'],
-    queryFn: () => apiGet<string[]>('/v1/costs/regions'),
+    queryFn: () => apiGet<string[]>('/v1/costs/regions/'),
     retry: false,
   });
 
   // Fetch per-region stats (for item counts in tabs)
   const { data: regionStats } = useQuery({
     queryKey: ['costs', 'regions', 'stats'],
-    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats'),
+    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats/'),
     retry: false,
   });
 

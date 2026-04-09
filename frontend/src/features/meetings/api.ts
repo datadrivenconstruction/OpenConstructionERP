@@ -102,7 +102,7 @@ export async function updateMeeting(
 }
 
 export async function completeMeeting(id: string): Promise<Meeting> {
-  return apiPost<Meeting>(`/v1/meetings/${id}/complete`);
+  return apiPost<Meeting>(`/v1/meetings/${id}/complete/`);
 }
 
 /* -- Import Preview Types -------------------------------------------------- */

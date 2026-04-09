@@ -343,7 +343,7 @@ export function AssembliesPage() {
                 onClick={() => navigate(`/assemblies/${assembly.id}`)}
                 onDuplicate={async () => {
                   try {
-                    const cloned = await apiPost<Assembly>(`/v1/assemblies/${assembly.id}/clone`, {});
+                    const cloned = await apiPost<Assembly>(`/v1/assemblies/${assembly.id}/clone/`, {});
                     queryClient.invalidateQueries({ queryKey: ['assemblies'] });
                     addToast({ type: 'success', title: t('toasts.assembly_duplicated', { defaultValue: 'Assembly duplicated' }), message: cloned.name });
                   } catch {

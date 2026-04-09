@@ -778,7 +778,7 @@ function PortfolioOverview({ projects: _projects }: { projects: ProjectSummary[]
 
   const { data: analytics } = useQuery({
     queryKey: ['portfolio-analytics', _projects.length],
-    queryFn: () => apiGet<AnalyticsOverview>('/v1/projects/analytics/overview'),
+    queryFn: () => apiGet<AnalyticsOverview>('/v1/projects/analytics/overview/'),
     retry: false,
     staleTime: 60_000,
   });
@@ -1295,14 +1295,14 @@ export function DashboardPage() {
 
   const { data: regionStats } = useQuery({
     queryKey: ['costs', 'regions', 'stats'],
-    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats').catch(() => []),
+    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats/').catch(() => []),
     retry: false,
   });
 
   // Fetch system status for vector DB count (used in onboarding steps)
   const { data: systemStatus } = useQuery({
     queryKey: ['system-status'],
-    queryFn: () => fetch('/api/system/status/').then((r) => r.json()) as Promise<SystemStatusData>,
+    queryFn: () => fetch('/api/system/status').then((r) => r.json()) as Promise<SystemStatusData>,
     retry: false,
     staleTime: 30_000,
   });
@@ -2134,20 +2134,20 @@ function SystemStatus() {
 
   const { data: status } = useQuery({
     queryKey: ['system-status'],
-    queryFn: () => fetch('/api/system/status/').then((r) => r.json()) as Promise<SystemStatusData>,
+    queryFn: () => fetch('/api/system/status').then((r) => r.json()) as Promise<SystemStatusData>,
     retry: false,
     refetchInterval: 15000,
   });
 
   const { data: modules } = useQuery({
     queryKey: ['modules'],
-    queryFn: () => fetch('/api/system/modules/').then((r) => r.json()),
+    queryFn: () => fetch('/api/system/modules').then((r) => r.json()),
     retry: false,
   });
 
   const { data: rules } = useQuery({
     queryKey: ['validation-rules'],
-    queryFn: () => fetch('/api/system/validation-rules/').then((r) => r.json()),
+    queryFn: () => fetch('/api/system/validation-rules').then((r) => r.json()),
     retry: false,
   });
 

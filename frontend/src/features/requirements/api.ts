@@ -133,7 +133,7 @@ export async function addRequirement(
   setId: string,
   data: AddRequirementPayload,
 ): Promise<Requirement> {
-  return apiPost<Requirement>(`/v1/requirements/${setId}/requirements`, data);
+  return apiPost<Requirement>(`/v1/requirements/${setId}/requirements/`, data);
 }
 
 export async function updateRequirement(
@@ -149,7 +149,7 @@ export async function deleteRequirement(setId: string, reqId: string): Promise<v
 }
 
 export async function runGate(setId: string, gateNumber: number): Promise<GateResult> {
-  return apiPost<GateResult>(`/v1/requirements/${setId}/gates/${gateNumber}/run`);
+  return apiPost<GateResult>(`/v1/requirements/${setId}/gates/${gateNumber}/run/`);
 }
 
 export async function fetchGates(setId: string): Promise<GateResult[]> {
@@ -170,7 +170,7 @@ export async function linkToPosition(
 }
 
 export async function importFromText(setId: string, text: string): Promise<RequirementSetDetail> {
-  return apiPost<RequirementSetDetail>(`/v1/requirements/${setId}/import/text`, { text });
+  return apiPost<RequirementSetDetail>(`/v1/requirements/${setId}/import/text/`, { text });
 }
 
 /* ── Export Functions ─────────────────────────────────────────────────────── */

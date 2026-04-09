@@ -121,7 +121,7 @@ export const costModelApi = {
   createBudgetLine: (projectId: string, data: Partial<BudgetLine>) =>
     apiPost<BudgetLine>(`/v1/costmodel/projects/${projectId}/5d/budget-lines/`, data),
   updateBudgetLine: (id: string, data: Partial<BudgetLine>) =>
-    apiPatch<BudgetLine>(`/v1/costmodel/5d/budget-lines/${id}/`, data),
+    apiPatch<BudgetLine>(`/v1/costmodel/5d/budget-lines/${id}`, data),
   generateBudgetFromBoq: (projectId: string, boqId: string) =>
     apiPost(`/v1/costmodel/projects/${projectId}/5d/generate-budget/`, { boq_id: boqId }),
   createSnapshot: (projectId: string, data: { period: string; notes?: string }) =>

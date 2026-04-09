@@ -80,7 +80,7 @@ export function AISmartPanel({
 
   useEffect(() => {
     if (!isOpen) return;
-    apiGet<Record<string, unknown>>('/v1/ai/settings')
+    apiGet<Record<string, unknown>>('/v1/ai/settings/')
       .then((s) => {
         const hasKey =
           !!s.anthropic_api_key_set || !!s.openai_api_key_set || !!s.gemini_api_key_set ||

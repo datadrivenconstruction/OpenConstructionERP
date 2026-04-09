@@ -726,13 +726,13 @@ export function SettingsPage() {
 
   const { data: profile, isPending: profileLoading } = useQuery({
     queryKey: ['me'],
-    queryFn: () => apiGet<UserProfile>('/v1/users/me'),
+    queryFn: () => apiGet<UserProfile>('/v1/users/me/'),
     retry: false,
   });
 
   const profileMutation = useMutation({
     mutationFn: (data: { full_name: string }) =>
-      apiPatch<UserProfile>('/v1/users/me', data),
+      apiPatch<UserProfile>('/v1/users/me/', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['me'] });
       setEditingProfile(false);

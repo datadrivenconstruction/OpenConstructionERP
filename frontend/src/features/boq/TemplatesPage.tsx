@@ -232,7 +232,7 @@ export function TemplatesPage() {
     queryKey: ['boq-templates'],
     queryFn: async () => {
       try {
-        return await apiGet<BOQTemplate[]>('/v1/boq/boqs/templates');
+        return await apiGet<BOQTemplate[]>('/v1/boq/boqs/templates/');
       } catch (err) {
         if (err instanceof ApiError && err.status === 404) {
           return FALLBACK_TEMPLATES;
@@ -259,7 +259,7 @@ export function TemplatesPage() {
 
   const createMutation = useMutation({
     mutationFn: (data: CreateFromTemplateData) =>
-      apiPost<BOQ>('/v1/boq/boqs/from-template', data),
+      apiPost<BOQ>('/v1/boq/boqs/from-template/', data),
     onSuccess: (boq) => {
       queryClient.invalidateQueries({ queryKey: ['boqs'] });
       queryClient.invalidateQueries({ queryKey: ['all-boqs'] });
