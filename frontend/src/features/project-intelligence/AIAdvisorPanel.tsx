@@ -4,20 +4,25 @@
  * Two modes:
  * - Recommendations mode: auto-fetches analysis on load
  * - Chat mode: user can ask follow-up questions
+ *
+ * Detects when no LLM provider is configured and shows a setup banner
+ * linking to Settings > AI Configuration.
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+import { apiPost } from '@/shared/lib/api';
 import {
   MessageSquare,
   Send,
   Loader2,
   Sparkles,
   AlertCircle,
+  Info,
+  Settings,
 } from 'lucide-react';
 import clsx from 'clsx';
-
-const API_BASE = '/api/v1/project_intelligence';
 
 interface AIAdvisorPanelProps {
   projectId: string;
@@ -34,9 +39,20 @@ interface ChatMessage {
   text: string;
 }
 
-export function AIAdvisorPanel({ projectId, role, }: AIAdvisorPanelProps) {
+/** Heuristic: if the recommendation text matches the rule-based fallback pattern,
+ *  AI is likely not configured. */
+function looksLikeFallback(text: string): boolean {
+  return (
+    text.includes('Priority actions:') ||
+    text.includes('No critical gaps detected') ||
+    text.includes('AI recommendations require an LLM provider')
+  );
+}
+
+export function AIAdvisorPanel({ projectId, role }: AIAdvisorPanelProps) {
   const { t } = useTranslation();
   const [recommendation, setRecommendation] = useState<string | null>(null);
+  const [aiConfigured, setAiConfigured] = useState(true);
   const [loadingRec, setLoadingRec] = useState(false);
   const [recError, setRecError] = useState<string | null>(null);
   const [chatMode, setChatMode] = useState(false);
@@ -45,27 +61,18 @@ export function AIAdvisorPanel({ projectId, role, }: AIAdvisorPanelProps) {
   const [chatLoading, setChatLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  const headers = {
-    Authorization: `Bearer ${localStorage.getItem('oe_token') || ''}`,
-    'Content-Type': 'application/json',
-  };
-
   // Fetch recommendations on mount and role change
   const fetchRecommendations = useCallback(async () => {
     setLoadingRec(true);
     setRecError(null);
     try {
-      const res = await fetch(
-        `${API_BASE}/recommendations/?project_id=${projectId}`,
-        {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({ role, language: 'en' }),
-        }
+      const data = await apiPost<{ text: string; role: string; language: string }>(
+        `/v1/project_intelligence/recommendations/?project_id=${projectId}`,
+        { role, language: 'en' },
       );
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setRecommendation(data.text || '');
+      const text = data.text || '';
+      setRecommendation(text);
+      setAiConfigured(!looksLikeFallback(text));
     } catch (err: any) {
       setRecError(err.message || 'Failed to load recommendations');
     } finally {
@@ -92,16 +99,10 @@ export function AIAdvisorPanel({ projectId, role, }: AIAdvisorPanelProps) {
     setChatLoading(true);
 
     try {
-      const res = await fetch(
-        `${API_BASE}/chat/?project_id=${projectId}`,
-        {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({ question, role, language: 'en' }),
-        }
+      const data = await apiPost<{ text: string; question: string }>(
+        `/v1/project_intelligence/chat/?project_id=${projectId}`,
+        { question, role, language: 'en' },
       );
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
       setChatMessages((prev) => [
         ...prev,
         { role: 'assistant', text: data.text || 'No response' },
@@ -109,12 +110,17 @@ export function AIAdvisorPanel({ projectId, role, }: AIAdvisorPanelProps) {
     } catch {
       setChatMessages((prev) => [
         ...prev,
-        { role: 'assistant', text: 'Sorry, I could not process your question. Please try again.' },
+        {
+          role: 'assistant',
+          text: t('project_intelligence.chat_error', {
+            defaultValue: 'Sorry, I could not process your question. Please try again.',
+          }),
+        },
       ]);
     } finally {
       setChatLoading(false);
     }
-  }, [chatInput, chatLoading, projectId, role]);
+  }, [chatInput, chatLoading, projectId, role, t]);
 
   return (
     <div className="bg-surface-secondary rounded-xl border border-border-light overflow-hidden">
@@ -154,6 +160,35 @@ export function AIAdvisorPanel({ projectId, role, }: AIAdvisorPanelProps) {
         </div>
       </div>
 
+      {/* AI not configured banner */}
+      {!loadingRec && !aiConfigured && (
+        <div className="mx-4 mt-3 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-950/40">
+          <Info size={16} className="mt-0.5 shrink-0 text-blue-500" />
+          <div className="flex-1 text-xs leading-relaxed text-blue-800 dark:text-blue-300">
+            <p className="font-medium">
+              {t('project_intelligence.ai_not_configured_title', {
+                defaultValue: 'AI provider not connected',
+              })}
+            </p>
+            <p className="mt-1">
+              {t('project_intelligence.ai_not_configured_desc', {
+                defaultValue:
+                  'Connect an AI provider (Anthropic Claude, OpenAI, or Google Gemini) to get personalized, context-aware recommendations for your project. Without AI, you still see rule-based analysis below.',
+              })}
+            </p>
+            <Link
+              to="/settings"
+              className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-blue-100 px-3 py-1.5 font-medium text-blue-700 transition-colors hover:bg-blue-200 dark:bg-blue-900/60 dark:text-blue-200 dark:hover:bg-blue-900"
+            >
+              <Settings size={12} />
+              {t('project_intelligence.go_to_ai_settings', {
+                defaultValue: 'Settings — AI Configuration',
+              })}
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Content area */}
       <div className="p-4 min-h-[200px] max-h-[400px] overflow-y-auto">
         {!chatMode ? (
@@ -191,7 +226,7 @@ export function AIAdvisorPanel({ projectId, role, }: AIAdvisorPanelProps) {
               <p className="text-sm text-content-tertiary">
                 {t('project_intelligence.no_recommendations', {
                   defaultValue:
-                    'AI recommendations require an LLM provider. Configure one in Settings > AI.',
+                    'No recommendations available yet. Try refreshing the analysis.',
                 })}
               </p>
             )}
