@@ -10,10 +10,10 @@ No IfcOpenShell. No BCF. No native IFC processing.
 ## Pipeline
 
 ```
-DWG  → ODA SDK (C++) → Python bridge → Canonical JSON
-DGN  → ODA SDK (C++) → Python bridge → Canonical JSON
+DWG  → DDC cad2data → Python bridge → Canonical JSON
+DGN  → DDC cad2data → Python bridge → Canonical JSON
 RVT  → Rust parser (reverse engineering) → Canonical JSON
-IFC  → ODA SDK (C++) → Python bridge → Canonical JSON
+IFC  → DDC cad2data → Python bridge → Canonical JSON
 PDF  → PyMuPDF → vector/raster extraction → elements
 ```
 
