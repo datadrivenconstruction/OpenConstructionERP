@@ -33,6 +33,10 @@ import {
   TrendingUp,
   Users,
   Lightbulb,
+  ClipboardList,
+  MessageSquare,
+  HardHat,
+  Percent,
 } from 'lucide-react';
 import { Card, CardHeader, CardContent, Button, Badge, Skeleton, InfoHint, ActivityFeed as CrossModuleActivityFeed } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
@@ -47,6 +51,26 @@ interface ProjectSummary {
   classification_standard: string;
   currency: string;
   created_at: string;
+}
+
+interface ProjectCardMetrics {
+  id: string;
+  name: string;
+  description: string;
+  region: string;
+  currency: string;
+  classification_standard: string;
+  status: string;
+  phase: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  boq_total_value: number;
+  boq_count: number;
+  position_count: number;
+  open_tasks: number;
+  open_rfis: number;
+  safety_incidents: number;
+  progress_pct: number;
 }
 
 interface BOQWithTotal {
@@ -1002,6 +1026,232 @@ function NextSteps({
   );
 }
 
+/* ── Project Metric Cards ─────────────────────────────────────────────── */
+
+const STATUS_INDICATOR_COLORS: Record<string, string> = {
+  active: '#16a34a',
+  draft: '#2563eb',
+  archived: '#6b7280',
+  template: '#7c3aed',
+};
+
+function ProjectMetricCards({
+  cards,
+  loading,
+}: {
+  cards?: ProjectCardMetrics[];
+  loading: boolean;
+}) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  if (loading) {
+    return (
+      <div className="animate-card-in" style={{ animationDelay: '130ms' }}>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Layers size={16} className="text-content-tertiary" strokeWidth={1.75} />
+            <h3 className="text-sm font-semibold text-content-primary">
+              {t('dashboard.project_cards_title', { defaultValue: 'Projects' })}
+            </h3>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} height={160} className="w-full" rounded="lg" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!cards || cards.length === 0) return null;
+
+  const formatValue = (value: number, currency: string) => {
+    const symbol =
+      currency === 'EUR' ? '\u20AC' :
+      currency === 'GBP' ? '\u00A3' :
+      currency === 'USD' ? '$' :
+      currency === 'AED' ? 'AED ' :
+      `${currency} `;
+    if (value >= 1_000_000) return `${symbol}${(value / 1_000_000).toFixed(1)}M`;
+    if (value >= 1_000) return `${symbol}${(value / 1_000).toFixed(1)}K`;
+    if (value > 0)
+      return `${symbol}${value.toLocaleString(undefined, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      })}`;
+    return `${symbol}0`;
+  };
+
+  return (
+    <div className="animate-card-in" style={{ animationDelay: '130ms' }}>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Layers size={16} className="text-content-tertiary" strokeWidth={1.75} />
+          <h3 className="text-sm font-semibold text-content-primary">
+            {t('dashboard.project_cards_title', { defaultValue: 'Projects' })}
+          </h3>
+          <Badge variant="blue" size="sm">{cards.length}</Badge>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          icon={<ArrowRight size={14} />}
+          iconPosition="right"
+          onClick={() => navigate('/projects')}
+        >
+          {t('dashboard.view_all', { defaultValue: 'View All' })}
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {cards.slice(0, 6).map((card, index) => {
+          const indicatorColor = STATUS_INDICATOR_COLORS[card.status] || '#6b7280';
+          const hasProgress = card.progress_pct > 0;
+          const hasSafetyAlert = card.safety_incidents > 0;
+
+          return (
+            <button
+              key={card.id}
+              onClick={() => navigate(`/projects/${card.id}`)}
+              className="group relative flex flex-col rounded-xl border border-border-light bg-surface-primary p-5 text-left transition-all duration-normal ease-oe hover:border-oe-blue/30 hover:shadow-md animate-stagger-in"
+              style={{ animationDelay: `${150 + index * 60}ms` }}
+            >
+              {/* Status indicator dot */}
+              <div className="absolute top-4 right-4 flex items-center gap-1.5">
+                <span
+                  className="h-2 w-2 rounded-full"
+                  style={{ backgroundColor: indicatorColor }}
+                  title={card.status}
+                />
+                <ArrowRight
+                  size={14}
+                  className="text-content-quaternary opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-normal"
+                />
+              </div>
+
+              {/* Project name + initial badge */}
+              <div className="flex items-start gap-3 mb-3 pr-10">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue text-sm font-bold transition-transform group-hover:scale-105">
+                  {card.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h4 className="text-sm font-semibold text-content-primary truncate leading-snug">
+                    {card.name}
+                  </h4>
+                  <p className="text-2xs text-content-tertiary truncate mt-0.5">
+                    {card.description ||
+                      [card.classification_standard?.toUpperCase(), card.region, card.currency]
+                        .filter(Boolean)
+                        .join(' \u00B7 ')}
+                  </p>
+                </div>
+              </div>
+
+              {/* Progress bar (if schedule data exists) */}
+              {hasProgress && (
+                <div className="mb-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-2xs text-content-tertiary">
+                      {t('dashboard.card_progress', { defaultValue: 'Progress' })}
+                    </span>
+                    <span className="text-2xs font-semibold tabular-nums text-content-secondary">
+                      {card.progress_pct}%
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full rounded-full bg-surface-secondary overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-500 ease-out"
+                      style={{
+                        width: `${Math.min(card.progress_pct, 100)}%`,
+                        background:
+                          card.progress_pct >= 80
+                            ? '#16a34a'
+                            : card.progress_pct >= 40
+                              ? '#2563eb'
+                              : '#ca8a04',
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* KPI chips */}
+              <div className="flex flex-wrap gap-2 mt-auto">
+                {/* BOQ Total Value */}
+                <div
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-oe-blue-subtle/60 px-2.5 py-1.5 text-2xs font-medium text-oe-blue"
+                  title={t('dashboard.card_boq_value', { defaultValue: 'BOQ Total Value' })}
+                >
+                  <DollarSign size={12} strokeWidth={2} />
+                  <span className="tabular-nums">{formatValue(card.boq_total_value, card.currency)}</span>
+                </div>
+
+                {/* Open Tasks */}
+                <div
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-2xs font-medium ${
+                    card.open_tasks > 0
+                      ? 'bg-[#7c3aed]/10 text-[#7c3aed]'
+                      : 'bg-surface-secondary text-content-tertiary'
+                  }`}
+                  title={t('dashboard.card_open_tasks', { defaultValue: 'Open Tasks' })}
+                >
+                  <ClipboardList size={12} strokeWidth={2} />
+                  <span className="tabular-nums">{card.open_tasks}</span>
+                </div>
+
+                {/* Open RFIs */}
+                <div
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-2xs font-medium ${
+                    card.open_rfis > 0
+                      ? 'bg-[#0891b2]/10 text-[#0891b2]'
+                      : 'bg-surface-secondary text-content-tertiary'
+                  }`}
+                  title={t('dashboard.card_open_rfis', { defaultValue: 'Open RFIs' })}
+                >
+                  <MessageSquare size={12} strokeWidth={2} />
+                  <span className="tabular-nums">{card.open_rfis}</span>
+                </div>
+
+                {/* Safety Incidents */}
+                <div
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-2xs font-medium ${
+                    hasSafetyAlert
+                      ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
+                      : 'bg-surface-secondary text-content-tertiary'
+                  }`}
+                  title={t('dashboard.card_safety', { defaultValue: 'Safety Incidents' })}
+                >
+                  <HardHat size={12} strokeWidth={2} />
+                  <span className="tabular-nums">{card.safety_incidents}</span>
+                </div>
+
+                {/* Schedule Progress (compact chip, shown if progress exists) */}
+                {hasProgress && (
+                  <div
+                    className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-2xs font-medium ${
+                      card.progress_pct >= 80
+                        ? 'bg-[#16a34a]/10 text-[#16a34a]'
+                        : card.progress_pct >= 40
+                          ? 'bg-[#2563eb]/10 text-[#2563eb]'
+                          : 'bg-[#ca8a04]/10 text-[#ca8a04]'
+                    }`}
+                    title={t('dashboard.card_schedule_progress', { defaultValue: 'Schedule Progress' })}
+                  >
+                    <Percent size={12} strokeWidth={2} />
+                    <span className="tabular-nums">{card.progress_pct}%</span>
+                  </div>
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 /* ── Main Page ─────────────────────────────────────────────────────────── */
 
 export function DashboardPage() {
@@ -1029,6 +1279,14 @@ export function DashboardPage() {
     queryKey: ['projects'],
     queryFn: () => apiGet<ProjectSummary[]>('/v1/projects/').catch(() => []),
     retry: false,
+  });
+
+  // Fetch lightweight per-project summary metrics for dashboard cards (single endpoint)
+  const { data: projectCards, isLoading: cardsLoading } = useQuery({
+    queryKey: ['dashboard-project-cards'],
+    queryFn: () => apiGet<ProjectCardMetrics[]>('/v1/projects/dashboard/cards/').catch(() => []),
+    retry: false,
+    staleTime: 30_000,
   });
 
   const { data: regionStats } = useQuery({
@@ -1397,8 +1655,12 @@ export function DashboardPage() {
       {/* Onboarding Steps */}
       <OnboardingSteps projects={projects} regionStats={regionStats} boqs={allBoqs} vectorCount={vectorCount} />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Recent Projects — staggered card entrance */}
+      {/* Project Summary Cards with KPI metrics */}
+      <ProjectMetricCards cards={projectCards} loading={cardsLoading} />
+
+      <div className={`grid grid-cols-1 gap-6 ${(!projectCards || projectCards.length === 0) ? 'lg:grid-cols-3' : 'lg:grid-cols-2'}`}>
+        {/* Recent Projects — fallback list shown when no project cards data */}
+        {(!projectCards || projectCards.length === 0) && (
         <div className="lg:col-span-2 animate-card-in" style={{ animationDelay: '150ms' }}>
           <Card padding="none">
             <div className="p-6 pb-0">
@@ -1422,8 +1684,9 @@ export function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+        )}
 
-        {/* System Status + Activity — staggered card entrance */}
+        {/* System Status + Activity */}
         <div className="space-y-6 animate-card-in" style={{ animationDelay: '300ms' }}>
           <Card>
             <CardHeader title={t('dashboard.system_status')} />

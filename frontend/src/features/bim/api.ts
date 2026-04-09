@@ -59,7 +59,7 @@ export async function fetchBIMElements(
   offset = 0,
 ): Promise<BIMElementsResponse> {
   return apiGet<BIMElementsResponse>(
-    `/v1/bim_hub/models/${encodeURIComponent(modelId)}/elements?limit=${limit}&offset=${offset}`,
+    `/v1/bim_hub/models/${encodeURIComponent(modelId)}/elements/?limit=${limit}&offset=${offset}`,
   );
 }
 

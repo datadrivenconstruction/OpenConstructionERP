@@ -884,10 +884,11 @@ export function ContactsPage() {
           </Button>
           <Button
             variant="primary"
+            size="sm"
             onClick={() => setShowAddModal(true)}
-            icon={<Plus size={16} />}
+            icon={<Plus size={14} />}
           >
-            {t('contacts.add_contact', { defaultValue: 'Add Contact' })}
+            {t('contacts.new_contact', { defaultValue: 'New Contact' })}
           </Button>
         </div>
       </div>
@@ -993,7 +994,7 @@ export function ContactsPage() {
             action={
               !searchQuery && !typeFilter && !countryFilter
                 ? {
-                    label: t('contacts.add_contact', { defaultValue: 'Add Contact' }),
+                    label: t('contacts.new_contact', { defaultValue: 'New Contact' }),
                     onClick: () => setShowAddModal(true),
                   }
                 : undefined

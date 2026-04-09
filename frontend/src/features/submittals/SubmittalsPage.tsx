@@ -768,9 +768,9 @@ export function SubmittalsPage() {
             disabled={!projectId}
             title={!projectId ? t('common.select_project_first', { defaultValue: 'Please select a project first' }) : undefined}
             className="shrink-0 whitespace-nowrap"
+            icon={<Plus size={14} />}
           >
-            <Plus size={14} className="mr-1 shrink-0" />
-            <span>{t('submittals.new_submittal', { defaultValue: 'New Submittal' })}</span>
+            {t('submittals.new_submittal', { defaultValue: 'New Submittal' })}
           </Button>
         </div>
       </div>

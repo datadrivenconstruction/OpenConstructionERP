@@ -300,6 +300,11 @@ def create_app() -> FastAPI:
 
     app.include_router(activity_router)
 
+    # Sidebar badge counts (single endpoint for Tasks + RFI + Safety counts)
+    from app.core.sidebar_badges_router import router as sidebar_badges_router
+
+    app.include_router(sidebar_badges_router)
+
     # Store startup time for uptime calculation
     _startup_time: float = time.time()
 

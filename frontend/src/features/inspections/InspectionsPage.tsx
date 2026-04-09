@@ -839,10 +839,11 @@ export function InspectionsPage() {
           </Button>
           <Button
             variant="primary"
+            size="sm"
             onClick={() => setShowCreateModal(true)}
             disabled={!projectId}
             title={!projectId ? t('common.select_project_first', { defaultValue: 'Please select a project first' }) : undefined}
-            icon={<Plus size={16} />}
+            icon={<Plus size={14} />}
           >
             {t('inspections.new_inspection', { defaultValue: 'New Inspection' })}
           </Button>

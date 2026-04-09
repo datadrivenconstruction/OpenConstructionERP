@@ -23,6 +23,7 @@ import {
   Info,
   MapPin,
   ListChecks,
+  Link2,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, SkeletonTable } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -539,6 +540,34 @@ const NCRRow = React.memo(function NCRRow({
             </div>
           )}
 
+          {/* Change Order traceability banner */}
+          {ncr.change_order_id && (
+            <div
+              className="flex items-center gap-2.5 rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 px-3.5 py-2.5 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-950/30 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate('/changeorders');
+              }}
+              role="link"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.stopPropagation();
+                  navigate('/changeorders');
+                }
+              }}
+            >
+              <Link2 size={15} className="text-blue-600 dark:text-blue-400 shrink-0" />
+              <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                {t('ncr.linked_change_order', { defaultValue: 'Linked to Change Order' })}
+              </span>
+              <Badge variant="blue" size="sm">
+                {ncr.change_order_id.slice(0, 8)}
+              </Badge>
+              <ChevronRight size={14} className="ml-auto text-blue-400 dark:text-blue-500" />
+            </div>
+          )}
+
           {/* Location + Dates */}
           <div className="flex items-center gap-4 text-xs text-content-tertiary flex-wrap">
             {ncr.location && (
@@ -740,6 +769,7 @@ export function NCRPage() {
         {},
       ),
     onSuccess: (data) => {
+      invalidateAll();
       addToast({
         type: 'success',
         title: t('ncr.variation_created', { defaultValue: 'Variation created' }),
@@ -837,10 +867,11 @@ export function NCRPage() {
           )}
           <Button
             variant="primary"
+            size="sm"
             onClick={() => setShowCreateModal(true)}
             disabled={!projectId}
             title={!projectId ? t('common.select_project_first', { defaultValue: 'Please select a project first' }) : undefined}
-            icon={<Plus size={16} />}
+            icon={<Plus size={14} />}
           >
             {t('ncr.new_ncr', { defaultValue: 'New NCR' })}
           </Button>
