@@ -73,10 +73,10 @@ export interface CreateMeetingPayload {
   project_id: string;
   title: string;
   meeting_type: MeetingType;
-  date: string;
+  meeting_date: string;
   location?: string;
-  chairperson?: string;
-  attendees?: string[];
+  chairperson_id?: string;
+  attendees?: { name: string; company?: string; status?: string }[];
 }
 
 /* -- API Functions --------------------------------------------------------- */
@@ -87,7 +87,7 @@ export async function fetchMeetings(filters?: MeetingFilters): Promise<Meeting[]
   if (filters?.meeting_type) params.set('meeting_type', filters.meeting_type);
   if (filters?.status) params.set('status', filters.status);
   const qs = params.toString();
-  return apiGet<Meeting[]>(`/v1/meetings${qs ? `?${qs}` : ''}`);
+  return apiGet<Meeting[]>(`/v1/meetings/${qs ? `?${qs}` : ''}`);
 }
 
 export async function createMeeting(data: CreateMeetingPayload): Promise<Meeting> {

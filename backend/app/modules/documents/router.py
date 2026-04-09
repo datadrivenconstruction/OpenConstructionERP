@@ -329,7 +329,6 @@ async def get_photo(
 @router.get("/photos/{photo_id}/file")
 async def serve_photo_file(
     photo_id: uuid.UUID,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: PhotoService = Depends(_get_photo_service),
 ) -> FileResponse:
     """Serve the actual photo file."""

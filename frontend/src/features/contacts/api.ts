@@ -9,23 +9,33 @@ import { useAuthStore } from '@/stores/useAuthStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
-export type ContactType = 'client' | 'subcontractor' | 'supplier' | 'consultant';
+export type ContactType = 'client' | 'subcontractor' | 'supplier' | 'consultant' | 'internal';
 
-export type PrequalificationStatus = 'none' | 'pending' | 'approved' | 'expired' | 'rejected';
+export type PrequalificationStatus = 'pending' | 'approved' | 'expired' | 'rejected';
 
 export interface Contact {
   id: string;
-  company_name: string;
-  contact_name: string;
   contact_type: ContactType;
-  email: string;
-  phone: string;
-  country: string;
-  address: string;
-  prequalification_status: PrequalificationStatus;
-  notes: string;
+  first_name: string | null;
+  last_name: string | null;
+  company_name: string | null;
+  legal_name: string | null;
+  vat_number: string | null;
+  primary_email: string | null;
+  primary_phone: string | null;
+  website: string | null;
+  country_code: string | null;
+  address: Record<string, unknown> | null;
+  prequalification_status: PrequalificationStatus | null;
+  payment_terms_days: string | null;
+  notes: string | null;
   created_at: string;
   updated_at: string;
+  // Computed display helpers
+  contact_name?: string;
+  email?: string;
+  phone?: string;
+  country?: string;
 }
 
 export interface ContactFilters {
@@ -36,13 +46,18 @@ export interface ContactFilters {
 }
 
 export interface CreateContactPayload {
-  company_name: string;
-  contact_name: string;
   contact_type: ContactType;
-  email?: string;
-  phone?: string;
-  country?: string;
-  address?: string;
+  first_name?: string;
+  last_name?: string;
+  company_name?: string;
+  legal_name?: string;
+  vat_number?: string;
+  primary_email?: string;
+  primary_phone?: string;
+  website?: string;
+  country_code?: string;
+  address?: Record<string, unknown>;
+  payment_terms_days?: string;
   prequalification_status?: PrequalificationStatus;
   notes?: string;
 }
@@ -56,7 +71,8 @@ export async function fetchContacts(filters?: ContactFilters): Promise<Contact[]
   if (filters?.search) params.set('search', filters.search);
   if (filters?.limit) params.set('limit', String(filters.limit));
   const qs = params.toString();
-  return apiGet<Contact[]>(`/v1/contacts${qs ? `?${qs}` : ''}`);
+  const res = await apiGet<Contact[] | { items: Contact[] }>(`/v1/contacts/${qs ? `?${qs}` : ''}`);
+  return Array.isArray(res) ? res : res.items ?? [];
 }
 
 export async function createContact(data: CreateContactPayload): Promise<Contact> {

@@ -374,6 +374,33 @@ class PhotoService:
             len(content),
             project_id,
         )
+
+        # Also create a Document record so photos appear in Documents hub
+        try:
+            import json as _json
+            from sqlalchemy import text as _text
+
+            doc_id = str(uuid.uuid4())
+            now = datetime.utcnow().isoformat()
+            tags_json = _json.dumps(["photo", category or "site"])
+            await self.session.execute(
+                _text(
+                    "INSERT INTO oe_documents_document "
+                    "(id, project_id, name, description, category, file_size, mime_type, "
+                    "file_path, version, uploaded_by, tags, metadata, created_at, updated_at) "
+                    "VALUES (:id, :pid, :name, :desc, :cat, :fsize, :mime, :fpath, 1, :by, :tags, '{}', :now, :now)"
+                ),
+                {
+                    "id": doc_id, "pid": str(project_id), "name": safe_name,
+                    "desc": caption or "", "cat": "photo", "fsize": len(content),
+                    "mime": content_type, "fpath": str(file_path), "by": user_id or "",
+                    "tags": tags_json, "now": now,
+                },
+            )
+            logger.info("Cross-linked photo → document %s (tags: photo, %s)", doc_id, category)
+        except Exception:
+            logger.exception("CROSS-LINK FAILED")
+
         return photo
 
     # ── Read ───────────────────────────────────────────────────────────────

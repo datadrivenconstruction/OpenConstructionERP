@@ -1,0 +1,171 @@
+{
+  "app": {
+    "name": "OpenEstimator.io",
+    "tagline": "오픈소스 건설 원가 산정"
+  },
+  "nav": {
+    "dashboard": "대시보드",
+    "ai_estimate": "AI 견적",
+    "settings": "설정",
+    "5d_cost_model": "5D 비용 모델",
+    "templates": "템플릿"
+  },
+  "common": {
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "편집",
+    "create": "생성",
+    "search": "검색",
+    "filter": "필터",
+    "export": "내보내기",
+    "import": "가져오기",
+    "loading": "로딩 중...",
+    "error": "오류",
+    "success": "성공",
+    "confirm": "확인",
+    "back": "뒤로",
+    "next": "다음",
+    "yes": "예",
+    "no": "아니오"
+  },
+  "auth": {
+    "login": "로그인",
+    "logout": "로그아웃",
+    "email": "이메일",
+    "password": "비밀번호"
+  },
+  "projects": {
+    "title": "프로젝트",
+    "new_project": "새 프로젝트",
+    "project_name": "프로젝트명",
+    "no_projects": "프로젝트가 없습니다"
+  },
+  "boq": {
+    "title": "물량산출서",
+    "position": "항목",
+    "ordinal": "순번",
+    "description": "공종명",
+    "quantity": "수량",
+    "unit": "단위",
+    "unit_rate": "단가",
+    "total": "금액",
+    "add_position": "항목 추가",
+    "add_section": "부문 추가",
+    "assembly": "일위대가",
+    "subtotal": "소계",
+    "grand_total": "총계",
+    "direct_cost": "직접비",
+    "net_total": "순 합계",
+    "gross_total": "총 합계",
+    "vat": "부가세",
+    "add_markups": "할증 추가",
+    "validate": "검증",
+    "export": "내보내기"
+  },
+  "costs": {
+    "title": "단가 데이터베이스",
+    "rate": "단가",
+    "material": "재료비",
+    "labor": "노무비",
+    "equipment": "경비",
+    "search_costs": "단가 검색..."
+  },
+  "assemblies": {
+    "title": "일위대가 목록"
+  },
+  "validation": {
+    "title": "검증",
+    "passed": "통과",
+    "warnings": "경고",
+    "errors": "오류",
+    "score": "품질 점수",
+    "run_validation": "검증 실행",
+    "missing_quantity": "항목 {position}에 수량이 없습니다",
+    "missing_rate": "항목 {position}에 단가가 없습니다",
+    "missing_description": "항목 {position}에 설명이 없습니다",
+    "missing_classification": "항목 {position}에 분류 코드가 필요합니다",
+    "duplicate_ordinal": "순번 중복: {ordinal}",
+    "rate_anomaly": "단가 {rate}이(가) 임계값을 초과 ({threshold})"
+  },
+  "schedule": {
+    "title": "4D 공정표"
+  },
+  "cad": {
+    "title": "CAD 가져오기",
+    "upload": "CAD 파일 업로드",
+    "supported_formats": "지원 형식: DWG, DGN, RVT, IFC, PDF",
+    "converting": "변환 중...",
+    "elements_found": "{count}개 요소 발견"
+  },
+  "takeoff": {
+    "title": "물량 산출",
+    "auto_detect": "자동 감지",
+    "manual_measure": "수동 측정",
+    "confidence": "신뢰도"
+  },
+  "tendering": {
+    "title": "입찰",
+    "create_tender": "입찰 생성",
+    "bid": "투찰",
+    "award": "낙찰"
+  },
+  "modules": {
+    "title": "모듈",
+    "installed": "설치됨",
+    "available": "사용 가능",
+    "install": "설치",
+    "uninstall": "제거",
+    "update": "업데이트"
+  },
+  "dashboard": {
+    "welcome": "OpenEstimate에 오신 것을 환영합니다",
+    "subtitle": "오픈소스 건설 원가 산정 플랫폼",
+    "recent_projects": "최근 프로젝트",
+    "system_status": "시스템 상태",
+    "modules_loaded": "로드된 모듈",
+    "validation_rules": "검증 규칙",
+    "languages": "언어"
+  },
+  "units": {
+    "m": "m",
+    "m2": "m²",
+    "m3": "m³",
+    "kg": "kg",
+    "t": "t",
+    "pcs": "개",
+    "lsum": "식",
+    "h": "인",
+    "set": "세트"
+  },
+  "users": {
+    "management": "사용자 관리",
+    "management_desc": "Manage team members, roles, and access",
+    "invite_user": "Invite User",
+    "invite": "Invite",
+    "full_name": "Full Name",
+    "email": "Email",
+    "password": "Password",
+    "role": "Role",
+    "status": "Status",
+    "last_login": "Last Login",
+    "actions": "Actions",
+    "name": "Name",
+    "total": "Total Users",
+    "active": "활성",
+    "inactive": "비활성",
+    "admins": "Admins",
+    "managers": "Managers",
+    "search": "Search by name or email...",
+    "no_users": "No users found",
+    "updated": "User updated",
+    "invited": "User invited successfully",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "never": "없음",
+    "role_admin_desc": "Full access to all features",
+    "role_manager_desc": "Project and team management",
+    "role_editor_desc": "Create and edit content",
+    "role_viewer_desc": "Read-only access"
+  }
+}

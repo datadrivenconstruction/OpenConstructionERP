@@ -27,7 +27,10 @@ class InspectionCreate(BaseModel):
     project_id: UUID
     inspection_type: str = Field(
         ...,
-        pattern=r"^(concrete_pour|waterproofing|mep|fire_stopping|handover|general)$",
+        pattern=(
+            r"^(concrete_pour|waterproofing|mep|fire_stopping|handover|general"
+            r"|structural|electrical|plumbing|fire_safety|concrete)$"
+        ),
     )
     title: str = Field(..., min_length=1, max_length=500)
     description: str | None = None
@@ -51,7 +54,10 @@ class InspectionUpdate(BaseModel):
 
     inspection_type: str | None = Field(
         default=None,
-        pattern=r"^(concrete_pour|waterproofing|mep|fire_stopping|handover|general)$",
+        pattern=(
+            r"^(concrete_pour|waterproofing|mep|fire_stopping|handover|general"
+            r"|structural|electrical|plumbing|fire_safety|concrete)$"
+        ),
     )
     title: str | None = Field(default=None, min_length=1, max_length=500)
     description: str | None = None

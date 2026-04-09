@@ -1,0 +1,171 @@
+{
+  "app": {
+    "name": "OpenEstimator.io",
+    "tagline": "Kosztorysowanie budowlane open-source"
+  },
+  "nav": {
+    "dashboard": "Panel główny",
+    "ai_estimate": "Szacowanie AI",
+    "settings": "Ustawienia",
+    "5d_cost_model": "Model kosztów 5D",
+    "templates": "Szablony"
+  },
+  "common": {
+    "save": "Zapisz",
+    "cancel": "Anuluj",
+    "delete": "Usuń",
+    "edit": "Edytuj",
+    "create": "Utwórz",
+    "search": "Szukaj",
+    "filter": "Filtruj",
+    "export": "Eksportuj",
+    "import": "Importuj",
+    "loading": "Ładowanie...",
+    "error": "Błąd",
+    "success": "Sukces",
+    "confirm": "Potwierdź",
+    "back": "Wstecz",
+    "next": "Dalej",
+    "yes": "Tak",
+    "no": "Nie"
+  },
+  "auth": {
+    "login": "Zaloguj się",
+    "logout": "Wyloguj się",
+    "email": "E-mail",
+    "password": "Hasło"
+  },
+  "projects": {
+    "title": "Projekty",
+    "new_project": "Nowy projekt",
+    "project_name": "Nazwa projektu",
+    "no_projects": "Brak projektów"
+  },
+  "boq": {
+    "title": "Kosztorys",
+    "position": "Pozycja",
+    "ordinal": "Numer porządkowy",
+    "description": "Opis",
+    "quantity": "Ilość",
+    "unit": "Jednostka",
+    "unit_rate": "Cena jednostkowa",
+    "total": "Razem",
+    "add_position": "Dodaj pozycję",
+    "add_section": "Dodaj dział",
+    "assembly": "Kalkulacja szczegółowa",
+    "subtotal": "Suma częściowa",
+    "grand_total": "Suma ogólna",
+    "direct_cost": "Koszty bezpośrednie",
+    "net_total": "Suma netto",
+    "gross_total": "Suma brutto",
+    "vat": "VAT",
+    "add_markups": "Dodaj narzuty",
+    "validate": "Waliduj",
+    "export": "Eksportuj"
+  },
+  "costs": {
+    "title": "Baza cenowa",
+    "rate": "Cena",
+    "material": "Materiał",
+    "labor": "Robocizna",
+    "equipment": "Sprzęt",
+    "search_costs": "Szukaj cen..."
+  },
+  "assemblies": {
+    "title": "Kalkulacje szczegółowe"
+  },
+  "validation": {
+    "title": "Walidacja",
+    "passed": "Zaliczone",
+    "warnings": "Ostrzeżenia",
+    "errors": "Błędy",
+    "score": "Ocena jakości",
+    "run_validation": "Uruchom walidację",
+    "missing_quantity": "Pozycja {position} nie ma ilości",
+    "missing_rate": "Pozycja {position} nie ma ceny jednostkowej",
+    "missing_description": "Pozycja {position} nie ma opisu",
+    "missing_classification": "Pozycja {position} wymaga kodu klasyfikacji",
+    "duplicate_ordinal": "Zduplikowany numer porządkowy: {ordinal}",
+    "rate_anomaly": "Cena jednostkowa {rate} przekracza próg ({threshold})"
+  },
+  "schedule": {
+    "title": "Harmonogram 4D"
+  },
+  "cad": {
+    "title": "Import CAD",
+    "upload": "Prześlij plik CAD",
+    "supported_formats": "Obsługiwane: DWG, DGN, RVT, IFC, PDF",
+    "converting": "Konwersja...",
+    "elements_found": "Znaleziono elementów: {count}"
+  },
+  "takeoff": {
+    "title": "Obmiar",
+    "auto_detect": "Automatyczne wykrywanie",
+    "manual_measure": "Pomiar ręczny",
+    "confidence": "Pewność"
+  },
+  "tendering": {
+    "title": "Przetarg",
+    "create_tender": "Utwórz przetarg",
+    "bid": "Oferta",
+    "award": "Udzielenie zamówienia"
+  },
+  "modules": {
+    "title": "Moduły",
+    "installed": "Zainstalowane",
+    "available": "Dostępne",
+    "install": "Zainstaluj",
+    "uninstall": "Odinstaluj",
+    "update": "Aktualizuj"
+  },
+  "dashboard": {
+    "welcome": "Witaj w OpenEstimate",
+    "subtitle": "Platforma kosztorysowania budowlanego open-source",
+    "recent_projects": "Ostatnie projekty",
+    "system_status": "Stan systemu",
+    "modules_loaded": "Załadowane moduły",
+    "validation_rules": "Reguły walidacji",
+    "languages": "Języki"
+  },
+  "units": {
+    "m": "m",
+    "m2": "m²",
+    "m3": "m³",
+    "kg": "kg",
+    "t": "t",
+    "pcs": "szt",
+    "lsum": "ryczałt",
+    "h": "godz",
+    "set": "kpl"
+  },
+  "users": {
+    "management": "Zarządzanie użytkownikami",
+    "management_desc": "Manage team members, roles, and access",
+    "invite_user": "Invite User",
+    "invite": "Invite",
+    "full_name": "Full Name",
+    "email": "Email",
+    "password": "Password",
+    "role": "Role",
+    "status": "Status",
+    "last_login": "Last Login",
+    "actions": "Actions",
+    "name": "Name",
+    "total": "Total Users",
+    "active": "Aktywny",
+    "inactive": "Nieaktywny",
+    "admins": "Admins",
+    "managers": "Managers",
+    "search": "Search by name or email...",
+    "no_users": "No users found",
+    "updated": "User updated",
+    "invited": "User invited successfully",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "never": "Nigdy",
+    "role_admin_desc": "Full access to all features",
+    "role_manager_desc": "Project and team management",
+    "role_editor_desc": "Create and edit content",
+    "role_viewer_desc": "Read-only access"
+  }
+}

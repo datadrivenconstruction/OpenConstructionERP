@@ -548,8 +548,10 @@ function IncidentsTab({ projectId }: { projectId: string }) {
         incident_date: data.incident_date,
         incident_type: data.incident_type,
         description: data.description,
+        severity: data.severity,
         treatment_type: data.treatment_type || undefined,
         location: data.location || undefined,
+        days_lost: data.days_lost || 0,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['safety-incidents', projectId] });

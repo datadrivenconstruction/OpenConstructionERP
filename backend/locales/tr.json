@@ -1,0 +1,171 @@
+{
+  "app": {
+    "name": "OpenEstimator.io",
+    "tagline": "Açık kaynak inşaat maliyet tahmini"
+  },
+  "nav": {
+    "dashboard": "Gösterge paneli",
+    "ai_estimate": "YZ Tahmin",
+    "settings": "Ayarlar",
+    "5d_cost_model": "5D Maliyet Modeli",
+    "templates": "Şablonlar"
+  },
+  "common": {
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "create": "Oluştur",
+    "search": "Ara",
+    "filter": "Filtrele",
+    "export": "Dışa aktar",
+    "import": "İçe aktar",
+    "loading": "Yükleniyor...",
+    "error": "Hata",
+    "success": "Başarılı",
+    "confirm": "Onayla",
+    "back": "Geri",
+    "next": "İleri",
+    "yes": "Evet",
+    "no": "Hayır"
+  },
+  "auth": {
+    "login": "Giriş yap",
+    "logout": "Çıkış yap",
+    "email": "E-posta",
+    "password": "Şifre"
+  },
+  "projects": {
+    "title": "Projeler",
+    "new_project": "Yeni proje",
+    "project_name": "Proje adı",
+    "no_projects": "Henüz proje yok"
+  },
+  "boq": {
+    "title": "Keşif Özeti",
+    "position": "Pozisyon",
+    "ordinal": "Sıra numarası",
+    "description": "Tanım",
+    "quantity": "Metraj",
+    "unit": "Birim",
+    "unit_rate": "Birim fiyat",
+    "total": "Toplam",
+    "add_position": "Pozisyon ekle",
+    "add_section": "Bölüm ekle",
+    "assembly": "Analiz",
+    "subtotal": "Ara toplam",
+    "grand_total": "Genel toplam",
+    "direct_cost": "Doğrudan maliyet",
+    "net_total": "Net toplam",
+    "gross_total": "Brüt toplam",
+    "vat": "KDV",
+    "add_markups": "Kâr ve genel gider ekle",
+    "validate": "Doğrula",
+    "export": "Dışa aktar"
+  },
+  "costs": {
+    "title": "Fiyat veritabanı",
+    "rate": "Fiyat",
+    "material": "Malzeme",
+    "labor": "İşçilik",
+    "equipment": "Makine",
+    "search_costs": "Fiyat ara..."
+  },
+  "assemblies": {
+    "title": "Analizler"
+  },
+  "validation": {
+    "title": "Doğrulama",
+    "passed": "Başarılı",
+    "warnings": "Uyarılar",
+    "errors": "Hatalar",
+    "score": "Kalite puanı",
+    "run_validation": "Doğrulama başlat",
+    "missing_quantity": "Pozisyon {position} metrajı yok",
+    "missing_rate": "Pozisyon {position} birim fiyatı yok",
+    "missing_description": "Pozisyon {position} tanımı yok",
+    "missing_classification": "Pozisyon {position} sınıflandırma kodu gerekli",
+    "duplicate_ordinal": "Yinelenen sıra numarası: {ordinal}",
+    "rate_anomaly": "Birim fiyat {rate} eşik değeri aşıyor ({threshold})"
+  },
+  "schedule": {
+    "title": "4D İş Programı"
+  },
+  "cad": {
+    "title": "CAD içe aktarma",
+    "upload": "CAD dosyası yükle",
+    "supported_formats": "Desteklenen: DWG, DGN, RVT, IFC, PDF",
+    "converting": "Dönüştürülüyor...",
+    "elements_found": "{count} eleman bulundu"
+  },
+  "takeoff": {
+    "title": "Metraj",
+    "auto_detect": "Otomatik algılama",
+    "manual_measure": "Manuel ölçüm",
+    "confidence": "Güvenilirlik"
+  },
+  "tendering": {
+    "title": "İhale",
+    "create_tender": "İhale oluştur",
+    "bid": "Teklif",
+    "award": "İhale kararı"
+  },
+  "modules": {
+    "title": "Modüller",
+    "installed": "Yüklü",
+    "available": "Mevcut",
+    "install": "Yükle",
+    "uninstall": "Kaldır",
+    "update": "Güncelle"
+  },
+  "dashboard": {
+    "welcome": "OpenEstimate'e hoş geldiniz",
+    "subtitle": "Açık kaynak inşaat maliyet tahmini platformu",
+    "recent_projects": "Son projeler",
+    "system_status": "Sistem durumu",
+    "modules_loaded": "Yüklü modüller",
+    "validation_rules": "Doğrulama kuralları",
+    "languages": "Diller"
+  },
+  "units": {
+    "m": "m",
+    "m2": "m²",
+    "m3": "m³",
+    "kg": "kg",
+    "t": "t",
+    "pcs": "ad",
+    "lsum": "götürü",
+    "h": "sa",
+    "set": "tk"
+  },
+  "users": {
+    "management": "Kullanıcı Yönetimi",
+    "management_desc": "Manage team members, roles, and access",
+    "invite_user": "Invite User",
+    "invite": "Invite",
+    "full_name": "Full Name",
+    "email": "Email",
+    "password": "Password",
+    "role": "Role",
+    "status": "Status",
+    "last_login": "Last Login",
+    "actions": "Actions",
+    "name": "Name",
+    "total": "Total Users",
+    "active": "Aktif",
+    "inactive": "Pasif",
+    "admins": "Admins",
+    "managers": "Managers",
+    "search": "Search by name or email...",
+    "no_users": "No users found",
+    "updated": "User updated",
+    "invited": "User invited successfully",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "never": "Hiç",
+    "role_admin_desc": "Full access to all features",
+    "role_manager_desc": "Project and team management",
+    "role_editor_desc": "Create and edit content",
+    "role_viewer_desc": "Read-only access"
+  }
+}

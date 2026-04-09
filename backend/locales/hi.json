@@ -1,0 +1,171 @@
+{
+  "app": {
+    "name": "OpenEstimator.io",
+    "tagline": "ओपन सोर्स निर्माण लागत अनुमान"
+  },
+  "nav": {
+    "dashboard": "डैशबोर्ड",
+    "ai_estimate": "AI अनुमान",
+    "settings": "सेटिंग्स",
+    "5d_cost_model": "5D लागत मॉडल",
+    "templates": "टेम्पलेट"
+  },
+  "common": {
+    "save": "सहेजें",
+    "cancel": "रद्द करें",
+    "delete": "हटाएं",
+    "edit": "संपादित करें",
+    "create": "बनाएं",
+    "search": "खोजें",
+    "filter": "छानें",
+    "export": "निर्यात करें",
+    "import": "आयात करें",
+    "loading": "लोड हो रहा है...",
+    "error": "त्रुटि",
+    "success": "सफल",
+    "confirm": "पुष्टि करें",
+    "back": "वापस",
+    "next": "अगला",
+    "yes": "हाँ",
+    "no": "नहीं"
+  },
+  "auth": {
+    "login": "लॉग इन",
+    "logout": "लॉग आउट",
+    "email": "ईमेल",
+    "password": "पासवर्ड"
+  },
+  "projects": {
+    "title": "परियोजनाएं",
+    "new_project": "नई परियोजना",
+    "project_name": "परियोजना का नाम",
+    "no_projects": "अभी कोई परियोजना नहीं"
+  },
+  "boq": {
+    "title": "मात्रा विवरण",
+    "position": "मद",
+    "ordinal": "क्रम संख्या",
+    "description": "विवरण",
+    "quantity": "मात्रा",
+    "unit": "इकाई",
+    "unit_rate": "दर",
+    "total": "कुल",
+    "add_position": "मद जोड़ें",
+    "add_section": "अनुभाग जोड़ें",
+    "assembly": "संयोजित दर",
+    "subtotal": "उप-योग",
+    "grand_total": "कुल योग",
+    "direct_cost": "प्रत्यक्ष लागत",
+    "net_total": "निवल कुल",
+    "gross_total": "सकल कुल",
+    "vat": "GST",
+    "add_markups": "मार्कअप जोड़ें",
+    "validate": "सत्यापित करें",
+    "export": "निर्यात करें"
+  },
+  "costs": {
+    "title": "दर डेटाबेस",
+    "rate": "दर",
+    "material": "सामग्री",
+    "labor": "श्रम",
+    "equipment": "उपकरण",
+    "search_costs": "दरें खोजें..."
+  },
+  "assemblies": {
+    "title": "संयोजित दरें"
+  },
+  "validation": {
+    "title": "सत्यापन",
+    "passed": "उत्तीर्ण",
+    "warnings": "चेतावनी",
+    "errors": "त्रुटियां",
+    "score": "गुणवत्ता अंक",
+    "run_validation": "सत्यापन चलाएं",
+    "missing_quantity": "मद {position} में मात्रा नहीं है",
+    "missing_rate": "मद {position} में दर नहीं है",
+    "missing_description": "मद {position} में विवरण नहीं है",
+    "missing_classification": "मद {position} को वर्गीकरण कोड चाहिए",
+    "duplicate_ordinal": "दोहराया क्रम संख्या: {ordinal}",
+    "rate_anomaly": "दर {rate} सीमा से अधिक है ({threshold})"
+  },
+  "schedule": {
+    "title": "4D अनुसूची"
+  },
+  "cad": {
+    "title": "CAD आयात",
+    "upload": "CAD फ़ाइल अपलोड करें",
+    "supported_formats": "समर्थित: DWG, DGN, RVT, IFC, PDF",
+    "converting": "रूपांतरित हो रहा है...",
+    "elements_found": "{count} तत्व मिले"
+  },
+  "takeoff": {
+    "title": "मात्रा निकालना",
+    "auto_detect": "स्वतः पहचान",
+    "manual_measure": "मैन्युअल मापन",
+    "confidence": "विश्वसनीयता"
+  },
+  "tendering": {
+    "title": "निविदा",
+    "create_tender": "निविदा बनाएं",
+    "bid": "बोली",
+    "award": "आवंटन"
+  },
+  "modules": {
+    "title": "मॉड्यूल",
+    "installed": "स्थापित",
+    "available": "उपलब्ध",
+    "install": "स्थापित करें",
+    "uninstall": "अनस्थापित करें",
+    "update": "अपडेट करें"
+  },
+  "dashboard": {
+    "welcome": "OpenEstimate में आपका स्वागत है",
+    "subtitle": "ओपन सोर्स निर्माण लागत अनुमान मंच",
+    "recent_projects": "हाल की परियोजनाएं",
+    "system_status": "सिस्टम स्थिति",
+    "modules_loaded": "लोड किए गए मॉड्यूल",
+    "validation_rules": "सत्यापन नियम",
+    "languages": "भाषाएं"
+  },
+  "units": {
+    "m": "मी",
+    "m2": "मी²",
+    "m3": "मी³",
+    "kg": "किग्रा",
+    "t": "टन",
+    "pcs": "नग",
+    "lsum": "निश्चित राशि",
+    "h": "घंटा",
+    "set": "सेट"
+  },
+  "users": {
+    "management": "उपयोगकर्ता प्रबंधन",
+    "management_desc": "Manage team members, roles, and access",
+    "invite_user": "Invite User",
+    "invite": "Invite",
+    "full_name": "Full Name",
+    "email": "Email",
+    "password": "Password",
+    "role": "Role",
+    "status": "Status",
+    "last_login": "Last Login",
+    "actions": "Actions",
+    "name": "Name",
+    "total": "Total Users",
+    "active": "सक्रिय",
+    "inactive": "निष्क्रिय",
+    "admins": "Admins",
+    "managers": "Managers",
+    "search": "Search by name or email...",
+    "no_users": "No users found",
+    "updated": "User updated",
+    "invited": "User invited successfully",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "never": "कभी नहीं",
+    "role_admin_desc": "Full access to all features",
+    "role_manager_desc": "Project and team management",
+    "role_editor_desc": "Create and edit content",
+    "role_viewer_desc": "Read-only access"
+  }
+}

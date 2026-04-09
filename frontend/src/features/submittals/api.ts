@@ -24,7 +24,7 @@ export type SubmittalType =
   | 'mock_up'
   | 'test_report'
   | 'certificate'
-  | 'other';
+  | 'warranty';
 
 export interface Submittal {
   id: string;
@@ -53,10 +53,9 @@ export interface SubmittalFilters {
 export interface CreateSubmittalPayload {
   project_id: string;
   title: string;
-  spec_section: string;
-  type: SubmittalType;
+  spec_section?: string;
+  submittal_type: SubmittalType;
   date_required?: string;
-  description?: string;
 }
 
 export interface ReviewSubmittalPayload {
@@ -75,7 +74,7 @@ export async function fetchSubmittals(filters?: SubmittalFilters): Promise<Submi
   if (filters?.project_id) params.set('project_id', filters.project_id);
   if (filters?.status) params.set('status', filters.status);
   const qs = params.toString();
-  return apiGet<Submittal[]>(`/v1/submittals${qs ? `?${qs}` : ''}`);
+  return apiGet<Submittal[]>(`/v1/submittals/${qs ? `?${qs}` : ''}`);
 }
 
 export async function createSubmittal(data: CreateSubmittalPayload): Promise<Submittal> {

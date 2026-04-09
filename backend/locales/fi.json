@@ -1,0 +1,171 @@
+{
+  "app": {
+    "name": "OpenEstimator.io",
+    "tagline": "Avoimen lähdekoodin rakennuskustannuslaskenta"
+  },
+  "nav": {
+    "dashboard": "Yleiskatsaus",
+    "ai_estimate": "Tekoälylaskelma",
+    "settings": "Asetukset",
+    "5d_cost_model": "5D Kustannusmalli",
+    "templates": "Mallipohjat"
+  },
+  "common": {
+    "save": "Tallenna",
+    "cancel": "Peruuta",
+    "delete": "Poista",
+    "edit": "Muokkaa",
+    "create": "Luo",
+    "search": "Hae",
+    "filter": "Suodata",
+    "export": "Vie",
+    "import": "Tuo",
+    "loading": "Ladataan...",
+    "error": "Virhe",
+    "success": "Onnistui",
+    "confirm": "Vahvista",
+    "back": "Takaisin",
+    "next": "Seuraava",
+    "yes": "Kyllä",
+    "no": "Ei"
+  },
+  "auth": {
+    "login": "Kirjaudu sisään",
+    "logout": "Kirjaudu ulos",
+    "email": "Sähköposti",
+    "password": "Salasana"
+  },
+  "projects": {
+    "title": "Projektit",
+    "new_project": "Uusi projekti",
+    "project_name": "Projektin nimi",
+    "no_projects": "Ei projekteja"
+  },
+  "boq": {
+    "title": "Määräluettelo",
+    "position": "Nimike",
+    "ordinal": "Järjestysnumero",
+    "description": "Kuvaus",
+    "quantity": "Määrä",
+    "unit": "Yksikkö",
+    "unit_rate": "Yksikköhinta",
+    "total": "Yhteensä",
+    "add_position": "Lisää nimike",
+    "add_section": "Lisää osio",
+    "assembly": "Rakenneosa",
+    "subtotal": "Välisumma",
+    "grand_total": "Loppusumma",
+    "direct_cost": "Välittömät kustannukset",
+    "net_total": "Nettosumma",
+    "gross_total": "Bruttosumma",
+    "vat": "ALV",
+    "add_markups": "Lisää lisät",
+    "validate": "Validoi",
+    "export": "Vie"
+  },
+  "costs": {
+    "title": "Hintatietokanta",
+    "rate": "Hinta",
+    "material": "Materiaali",
+    "labor": "Työ",
+    "equipment": "Kalusto",
+    "search_costs": "Hae hintoja..."
+  },
+  "assemblies": {
+    "title": "Rakenneosat"
+  },
+  "validation": {
+    "title": "Validointi",
+    "passed": "Hyväksytty",
+    "warnings": "Varoitukset",
+    "errors": "Virheet",
+    "score": "Laatupistemäärä",
+    "run_validation": "Suorita validointi",
+    "missing_quantity": "Nimikkeeltä {position} puuttuu määrä",
+    "missing_rate": "Nimikkeeltä {position} puuttuu yksikköhinta",
+    "missing_description": "Nimikkeeltä {position} puuttuu kuvaus",
+    "missing_classification": "Nimike {position} tarvitsee luokituskoodin",
+    "duplicate_ordinal": "Järjestysnumeron kaksoiskappale: {ordinal}",
+    "rate_anomaly": "Yksikköhinta {rate} ylittää kynnysarvon ({threshold})"
+  },
+  "schedule": {
+    "title": "4D Aikataulu"
+  },
+  "cad": {
+    "title": "CAD-tuonti",
+    "upload": "Lataa CAD-tiedosto",
+    "supported_formats": "Tuetut: DWG, DGN, RVT, IFC, PDF",
+    "converting": "Muunnetaan...",
+    "elements_found": "{count} elementtiä löytyi"
+  },
+  "takeoff": {
+    "title": "Määrälaskenta",
+    "auto_detect": "Automaattinen tunnistus",
+    "manual_measure": "Manuaalinen mittaus",
+    "confidence": "Luotettavuus"
+  },
+  "tendering": {
+    "title": "Tarjouskilpailu",
+    "create_tender": "Luo tarjouskilpailu",
+    "bid": "Tarjous",
+    "award": "Hankintapäätös"
+  },
+  "modules": {
+    "title": "Moduulit",
+    "installed": "Asennettu",
+    "available": "Saatavilla",
+    "install": "Asenna",
+    "uninstall": "Poista asennus",
+    "update": "Päivitä"
+  },
+  "dashboard": {
+    "welcome": "Tervetuloa OpenEstimateen",
+    "subtitle": "Avoimen lähdekoodin rakennuskustannuslaskenta-alusta",
+    "recent_projects": "Viimeisimmät projektit",
+    "system_status": "Järjestelmän tila",
+    "modules_loaded": "Ladatut moduulit",
+    "validation_rules": "Validointisäännöt",
+    "languages": "Kielet"
+  },
+  "units": {
+    "m": "m",
+    "m2": "m²",
+    "m3": "m³",
+    "kg": "kg",
+    "t": "t",
+    "pcs": "kpl",
+    "lsum": "erä",
+    "h": "h",
+    "set": "sarja"
+  },
+  "users": {
+    "management": "Käyttäjähallinta",
+    "management_desc": "Manage team members, roles, and access",
+    "invite_user": "Invite User",
+    "invite": "Invite",
+    "full_name": "Full Name",
+    "email": "Email",
+    "password": "Password",
+    "role": "Role",
+    "status": "Status",
+    "last_login": "Last Login",
+    "actions": "Actions",
+    "name": "Name",
+    "total": "Total Users",
+    "active": "Aktiivinen",
+    "inactive": "Ei-aktiivinen",
+    "admins": "Admins",
+    "managers": "Managers",
+    "search": "Search by name or email...",
+    "no_users": "No users found",
+    "updated": "User updated",
+    "invited": "User invited successfully",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "never": "Ei koskaan",
+    "role_admin_desc": "Full access to all features",
+    "role_manager_desc": "Project and team management",
+    "role_editor_desc": "Create and edit content",
+    "role_viewer_desc": "Read-only access"
+  }
+}

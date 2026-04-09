@@ -210,6 +210,7 @@ const navGroups: NavGroup[] = [
 ];
 
 const bottomNav: NavItem[] = [
+  { labelKey: 'users.management', to: '/users', icon: Users },
   { labelKey: 'modules.title', to: '/modules', icon: Package },
   { labelKey: 'integrations.title', to: '/integrations', icon: Plug },
   { labelKey: 'nav.settings', to: '/settings', icon: Settings },

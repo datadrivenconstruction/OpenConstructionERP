@@ -50,13 +50,13 @@ interface Project {
   name: string;
 }
 
-const TASK_TYPES: TaskType[] = ['task', 'topic', 'info', 'decision', 'personal'];
-const STATUSES: TaskStatus[] = ['open', 'in_progress', 'completed'];
+const TASK_TYPES: TaskType[] = ['task', 'topic', 'information', 'decision', 'personal'];
+const STATUSES: TaskStatus[] = ['draft', 'open', 'in_progress', 'completed'];
 
 const TYPE_CARD_ICON: Record<TaskType, React.ElementType> = {
   task: ListTodo,
   topic: MessageCircle,
-  info: Info,
+  information: Info,
   decision: Scale,
   personal: UserCircle,
 };
@@ -64,7 +64,7 @@ const TYPE_CARD_ICON: Record<TaskType, React.ElementType> = {
 const TYPE_COLOR: Record<TaskType, string> = {
   task: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
   topic: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
-  info: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300',
+  information: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300',
   decision: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
   personal: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
 };
@@ -72,12 +72,12 @@ const TYPE_COLOR: Record<TaskType, string> = {
 const PRIORITY_BADGE: Record<TaskPriority, { variant: 'neutral' | 'blue' | 'warning' | 'error'; cls: string }> = {
   low: { variant: 'neutral', cls: '' },
   normal: { variant: 'blue', cls: '' },
-  medium: { variant: 'blue', cls: '' },
   high: { variant: 'warning', cls: '' },
   urgent: { variant: 'error', cls: '' },
 };
 
 const STATUS_HEADER_CLS: Record<TaskStatus, string> = {
+  draft: 'bg-gray-100 text-gray-700 dark:bg-gray-800/50 dark:text-gray-400',
   open: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
   in_progress: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
   completed: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
@@ -372,7 +372,7 @@ const TaskCard = React.memo(function TaskCard({
   const checklistDone = task.checklist?.filter((c) => c.checked).length ?? 0;
   const checklistPercent = checklistTotal > 0 ? Math.round((checklistDone / checklistTotal) * 100) : 0;
 
-  const pb = PRIORITY_BADGE[task.priority] ?? PRIORITY_BADGE.medium;
+  const pb = PRIORITY_BADGE[task.priority as TaskPriority] ?? PRIORITY_BADGE.normal;
 
   return (
     <Card
@@ -653,7 +653,7 @@ export function TasksPage() {
         description: formData.description || undefined,
         task_type: formData.task_type,
         priority: formData.priority,
-        assigned_to: formData.assigned_to || undefined,
+        responsible_id: formData.assigned_to || undefined,
         due_date: formData.due_date || undefined,
       });
     },
