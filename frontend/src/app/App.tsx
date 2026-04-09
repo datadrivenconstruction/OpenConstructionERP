@@ -133,6 +133,9 @@ const UserManagementPage = lazy(() =>
 const ArchitectureMapPage = lazy(() =>
   import('@/features/architecture/ArchitectureMapPage').then((m) => ({ default: m.ArchitectureMapPage }))
 );
+const ProjectIntelligencePage = lazy(() =>
+  import('@/features/project-intelligence/ProjectIntelligencePage').then((m) => ({ default: m.ProjectIntelligencePage }))
+);
 
 function LoadingScreen() {
   return (
@@ -366,6 +369,7 @@ export default function App() {
         <Route path="/settings" element={<P title="Settings"><SettingsPage /></P>} />
         <Route path="/integrations" element={<P title="Integrations"><IntegrationsPage /></P>} />
         <Route path="/about" element={<P title="About"><AboutPage /></P>} />
+        <Route path="/project-intelligence" element={<P title="Project Intelligence"><ProjectIntelligencePage /></P>} />
         <Route path="/architecture" element={<P title="Architecture Map"><ArchitectureMapPage /></P>} />
 
         {/* Convenience route aliases — redirect to canonical paths */}
