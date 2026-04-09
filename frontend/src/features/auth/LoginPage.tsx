@@ -82,15 +82,44 @@ export function LoginPage() {
   const handleDemoLogin = async (demoEmail: string) => {
     setDemoLoading(demoEmail);
     setError('');
+    setEmail('');
+    setPassword('');
     try {
-      const res = await fetch('/api/v1/users/auth/login/', {
+      // Try login first
+      let res = await fetch('/api/v1/users/auth/login/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: demoEmail, password: 'DemoPass1234!' }),
       });
+
+      // If user doesn't exist, auto-register then login
+      if (!res.ok) {
+        const errData = await res.json().catch(() => null);
+        if (errData?.detail?.includes('Invalid') || errData?.detail?.includes('not found') || res.status === 401) {
+          // Auto-register demo user
+          const regRes = await fetch('/api/v1/users/auth/register/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: demoEmail,
+              password: 'DemoPass1234!',
+              full_name: demoEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+            }),
+          });
+          if (regRes.ok) {
+            // Re-try login after registration
+            res = await fetch('/api/v1/users/auth/login/', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: demoEmail, password: 'DemoPass1234!' }),
+            });
+          }
+        }
+      }
+
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        setError(data?.detail || t('auth.invalid_credentials', 'Invalid email or password'));
+        setError(data?.detail || t('auth.demo_login_failed', 'Demo login failed. Please try again.'));
         return;
       }
       const data = await res.json();
