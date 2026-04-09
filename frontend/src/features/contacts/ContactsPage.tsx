@@ -141,7 +141,7 @@ const EMPTY_FORM: ContactFormData = {
   country: '',
   address: '',
   payment_terms: '30',
-  prequalification_status: 'none',
+  prequalification_status: 'pending',
   notes: '',
 };
 
