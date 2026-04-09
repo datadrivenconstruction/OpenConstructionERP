@@ -5,6 +5,47 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] — 2026-04-09
+
+### Added
+- **Project Completion Intelligence (PCI)** — AI co-pilot: project scoring (A-F), domain analysis, critical gaps, achievements, AI advisor
+- **Architecture Map** — interactive React Flow visualization of 54 modules, 98 models, 128 dependency edges
+- **Dashboard project cards** — KPI metrics per project (BOQ value, tasks, RFIs, safety, progress)
+- **Sidebar badge counts** — live open item counts for Tasks, RFI, Safety
+- **Data Explorer** — professional landing page with feature cards and upload zone
+- **BIM filmstrip layout** — models at bottom, delete button, stale cleanup endpoint
+- **NCR → Change Order** traceability banner with navigation
+- **UserSearchInput** integrated into Meetings, Tasks, Inspections, RFI forms
+- **Document Hub cross-links** — Takeoff, Punchlist, Meeting transcripts auto-appear in Documents
+- **Swagger UI** accessible at /api/docs (SPA catch-all fixed)
+- **Change password** returns new JWT tokens (user stays logged in)
+- **Configurable rate limiter** via API_RATE_LIMIT, LOGIN_RATE_LIMIT env vars
+
+### Fixed
+- **CORS 307 redirects eliminated** — redirect_slashes=False + 369 backend routes with trailing slash
+- **All form field mismatches** — 15+ modules aligned frontend↔backend
+- **Correspondence crash** — to_contact_ids field name mismatch
+- **BOQ Create Revision** — MissingGreenlet fix + trailing slash
+- **BOQ Import** — source enum (cost_database, smart_import, assembly)
+- **BOQ costs→positions** — ordinal XX.YYY format, no conflicts
+- **Finance invoice list** — endpoint URL fix
+- **Procurement PO list** — endpoint URL + paginated response
+- **Safety create buttons** — visible in empty state
+- **Project cascade delete** — child records cleaned up
+- **Notifications** fire on task creation
+- **Photo gallery** — served without auth for img tags
+- **Meetings 500** — corrupt UUID data fixed
+- **Paginated response handling** — 7 modules with defensive Array.isArray checks
+- **Project context guards** — 6 modules show warning when no project selected
+- **Unified create buttons** — 14 pages standardized to "+ New X" pattern
+
+### Changed
+- ODA SDK references replaced with DDC cad2data
+- Integrations moved from sidebar to Settings
+- Architecture Map in Modules section
+- GitHub button moved to header
+- Version bumped to 1.2.0
+
 ## [1.1.0] — 2026-04-09
 
 ### Added

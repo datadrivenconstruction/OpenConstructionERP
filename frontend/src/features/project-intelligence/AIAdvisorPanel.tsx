@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 
-const API_BASE = '/api/v1/project-intelligence';
+const API_BASE = '/api/v1/project_intelligence';
 
 interface AIAdvisorPanelProps {
   projectId: string;
