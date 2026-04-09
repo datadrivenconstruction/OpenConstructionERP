@@ -218,6 +218,15 @@ function UnifiedUploadSection({
       }
       setFile(selectedFile);
       setUploadError(null);
+      // Warn about RVT — can't be processed without converter
+      if (ext === '.rvt') {
+        setUploadError(
+          t('bim.rvt_warning', {
+            defaultValue:
+              'Note: RVT files require the DDC cad2data converter for element extraction. The file will be stored but elements cannot be extracted automatically. Consider converting to IFC first.',
+          }),
+        );
+      }
       // Auto-fill model name from filename (strip extension)
       if (!modelName) {
         const baseName = selectedFile.name.replace(/\.[^.]+$/, '');
