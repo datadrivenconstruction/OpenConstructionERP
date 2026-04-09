@@ -26,6 +26,7 @@ import {
 import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, SkeletonGrid } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { useConfirm } from '@/shared/hooks/useConfirm';
+import { useCreateShortcut } from '@/shared/hooks/useCreateShortcut';
 import { apiGet } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -525,6 +526,12 @@ export function TasksPage() {
   const [typeFilter, setTypeFilter] = useState<TaskType | ''>('');
   const [myTasksOnly, setMyTasksOnly] = useState(false);
 
+  // "n" shortcut → open new task form
+  useCreateShortcut(
+    useCallback(() => setShowAddModal(true), []),
+    !showAddModal && !showImportModal,
+  );
+
   // Escape key handler for import modal
   useEffect(() => {
     if (!showImportModal) return;
@@ -600,13 +607,13 @@ export function TasksPage() {
       setShowAddModal(false);
       addToast({
         type: 'success',
-        title: t('tasks.created', { defaultValue: 'Task created' }),
+        title: t('tasks.created', { defaultValue: 'Task created successfully' }),
       });
     },
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('tasks.create_failed', { defaultValue: 'Failed to create task' }),
         message: e.message,
       }),
   });
@@ -616,13 +623,13 @@ export function TasksPage() {
     onSuccess: () =>
       addToast({
         type: 'success',
-        title: t('tasks.export_success', { defaultValue: 'Export complete' }),
-        message: t('tasks.export_success_msg', { defaultValue: 'Excel file downloaded.' }),
+        title: t('tasks.export_success', { defaultValue: 'Tasks exported successfully' }),
+        message: t('tasks.export_success_msg', { defaultValue: 'Excel file has been downloaded.' }),
       }),
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('tasks.export_failed', { defaultValue: 'Export failed' }),
+        title: t('tasks.export_failed', { defaultValue: 'Failed to export tasks' }),
         message: e.message,
       }),
   });
@@ -633,13 +640,13 @@ export function TasksPage() {
       invalidateAll();
       addToast({
         type: 'success',
-        title: t('tasks.completed', { defaultValue: 'Task completed' }),
+        title: t('tasks.completed', { defaultValue: 'Task marked as completed' }),
       });
     },
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('tasks.complete_failed', { defaultValue: 'Failed to complete task' }),
         message: e.message,
       }),
   });
@@ -750,9 +757,14 @@ export function TasksPage() {
 
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-content-primary">
-          {t('tasks.title', { defaultValue: 'Tasks' })}
-        </h1>
+        <div>
+          <h1 className="text-2xl font-bold text-content-primary">
+            {t('tasks.title', { defaultValue: 'Tasks' })}
+          </h1>
+          <p className="mt-1 text-sm text-content-secondary">
+            {t('tasks.subtitle', { defaultValue: 'Track assignments, deadlines, and progress across your team' })}
+          </p>
+        </div>
 
         <div className="flex items-center gap-2 shrink-0">
           {/* Project selector (if not in route) */}
@@ -910,10 +922,10 @@ export function TasksPage() {
             description={
               searchQuery || typeFilter || myTasksOnly
                 ? t('tasks.no_results_hint', {
-                    defaultValue: 'Try adjusting your search or filters',
+                    defaultValue: 'Try adjusting your search or filters to find what you are looking for.',
                   })
                 : t('tasks.no_tasks_hint', {
-                    defaultValue: 'Create your first task to get started',
+                    defaultValue: 'Create your first task to track assignments, deadlines, and progress across your team.',
                   })
             }
             action={
@@ -978,7 +990,7 @@ export function TasksPage() {
         <EmptyState
           icon={<ClipboardList size={28} strokeWidth={1.5} />}
           title={t('tasks.no_project', { defaultValue: 'No project selected' })}
-          description={t('tasks.select_project', { defaultValue: 'Open a project first to view and manage tasks.' })}
+          description={t('tasks.select_project', { defaultValue: 'Select a project from the header to view and manage tasks, assignments, and deadlines.' })}
         />
       )}
 

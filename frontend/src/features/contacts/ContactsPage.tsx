@@ -27,6 +27,7 @@ import {
   User,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, CountryFlag } from '@/shared/ui';
+import { useCreateShortcut } from '@/shared/hooks/useCreateShortcut';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   fetchContacts,
@@ -746,6 +747,12 @@ export function ContactsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<ContactType | ''>('');
   const [countryFilter, setCountryFilter] = useState('');
+
+  // "n" shortcut → open new contact form
+  useCreateShortcut(
+    useCallback(() => setShowAddModal(true), []),
+    !showAddModal && !showImportModal,
+  );
 
   // Data
   const { data: contacts = [], isLoading } = useQuery({

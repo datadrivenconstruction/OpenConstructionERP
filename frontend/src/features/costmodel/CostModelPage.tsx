@@ -663,10 +663,19 @@ const EVMDashboard = memo(function EVMDashboard({
 }) {
   const { t } = useTranslation();
 
+  const evmTooltip = t('costmodel.evm_tooltip', { defaultValue: 'Earned Value Management compares planned vs actual cost and schedule performance' });
+
   if (isLoading) {
     return (
       <Card>
-        <CardHeader title={t('costmodel.evm_title', { defaultValue: 'Earned Value Analysis' })} />
+        <div className="flex items-start justify-between gap-4">
+          <h3 className="text-lg font-semibold text-content-primary truncate">
+            {t('costmodel.evm_title', { defaultValue: 'Earned Value Analysis' })}
+            <span className="ml-1.5 inline-flex align-middle cursor-help" title={evmTooltip}>
+              <Activity size={14} className="text-content-tertiary" />
+            </span>
+          </h3>
+        </div>
         <CardContent>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -687,7 +696,14 @@ const EVMDashboard = memo(function EVMDashboard({
 
   return (
     <Card>
-      <CardHeader title={t('costmodel.evm_title', { defaultValue: 'Earned Value Analysis' })} />
+      <div className="flex items-start justify-between gap-4">
+        <h3 className="text-lg font-semibold text-content-primary truncate">
+          {t('costmodel.evm_title', { defaultValue: 'Earned Value Analysis' })}
+          <span className="ml-1.5 inline-flex align-middle cursor-help" title={evmTooltip}>
+            <Activity size={14} className="text-content-tertiary" />
+          </span>
+        </h3>
+      </div>
       <CardContent>
         <div className="space-y-5">
           {/* EVM KPI boxes */}
@@ -1482,7 +1498,14 @@ function FiveDDashboard({ project }: { project: Project }) {
         <EVMDashboard evm={evmData} currency={currency} isLoading={evmLoading} />
       ) : hasBudget ? (
         <Card>
-          <CardHeader title={t('costmodel.evm_title', { defaultValue: 'Earned Value Analysis' })} />
+          <div className="flex items-start justify-between gap-4">
+            <h3 className="text-lg font-semibold text-content-primary truncate">
+              {t('costmodel.evm_title', { defaultValue: 'Earned Value Analysis' })}
+              <span className="ml-1.5 inline-flex align-middle cursor-help" title={t('costmodel.evm_tooltip', { defaultValue: 'Earned Value Management compares planned vs actual cost and schedule performance' })}>
+                <Activity size={14} className="text-content-tertiary" />
+              </span>
+            </h3>
+          </div>
           <CardContent>
             <p className="text-sm text-content-tertiary">
               {t('costmodel.evm_needs_schedule', { defaultValue: 'Create a 4D Schedule and track activity progress to see EVM performance metrics (SPI, CPI).' })}

@@ -396,7 +396,7 @@ function AddBidDialog({
 
   const createMutation = useMutation({
     mutationFn: () =>
-      apiPost<BidData>(`/v1/tendering/packages/${packageId}/bids`, {
+      apiPost<BidData>(`/v1/tendering/packages/${packageId}/bids/`, {
         company_name: companyName,
         contact_email: contactEmail,
         total_amount: totalAmount || '0',
@@ -684,7 +684,7 @@ function PackageDetail({
   // Fetch comparison
   const { data: comparison, isLoading: comparisonLoading } = useQuery({
     queryKey: ['tendering-comparison', packageId],
-    queryFn: () => apiGet<BidComparison>(`/v1/tendering/packages/${packageId}/comparison`),
+    queryFn: () => apiGet<BidComparison>(`/v1/tendering/packages/${packageId}/comparison/`),
   });
 
   // Award mutation

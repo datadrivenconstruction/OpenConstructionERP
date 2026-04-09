@@ -129,7 +129,7 @@ export function ActivityFeed({ projectId, limit = 15, className }: ActivityFeedP
 
   const { data: entries, isLoading } = useQuery({
     queryKey: ['activity-feed', projectId, limit],
-    queryFn: () => apiGet<ActivityEntry[]>(`/v1/activity/?${queryParams.toString()}`),
+    queryFn: () => apiGet<ActivityEntry[]>(`/v1/activity?${queryParams.toString()}`),
     staleTime: 30_000,
     refetchInterval: 60_000,
     retry: false,

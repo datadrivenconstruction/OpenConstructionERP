@@ -88,7 +88,7 @@ export async function updateTask(id: string, data: UpdateTaskPayload): Promise<T
 }
 
 export async function completeTask(id: string): Promise<Task> {
-  return apiPost<Task>(`/v1/tasks/${id}/complete`);
+  return apiPost<Task>(`/v1/tasks/${id}/complete/`);
 }
 
 export async function exportTasks(projectId: string): Promise<void> {
