@@ -1000,6 +1000,7 @@ function SystemModulesTab() {
     queryFn: () => apiGet<SystemModule[]>('/v1/modules'),
   });
 
+  const navigate = useNavigate();
   const enabledCount = systemModules?.filter((m) => m.enabled).length ?? 0;
 
   async function handleBackendToggle(mod: SystemModule): Promise<void> {
