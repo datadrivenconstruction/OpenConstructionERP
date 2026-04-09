@@ -14,6 +14,7 @@ import {
   ArrowUpDown, ChevronDown, ChevronRight, ChevronLeft, Layers, X, Save,
   Download as DownloadIcon, Columns3, Search as SearchIcon,
   Upload, FileUp, Loader2, CheckCircle2, Settings, AlertCircle, FolderOpen,
+  TrendingUp, Hash, Clock,
 } from 'lucide-react';
 import { Button, Card, Badge, Breadcrumb, EmptyState } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
@@ -37,11 +38,11 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
 type TabId = 'table' | 'pivot' | 'charts' | 'describe';
 
-const TABS: { id: TabId; icon: React.ElementType; label: string }[] = [
-  { id: 'table', icon: Table2, label: 'Data Table' },
-  { id: 'pivot', icon: Layers, label: 'Pivot' },
-  { id: 'charts', icon: BarChart3, label: 'Charts' },
-  { id: 'describe', icon: FileSpreadsheet, label: 'Describe' },
+const TABS: { id: TabId; icon: React.ElementType; label: string; description: string }[] = [
+  { id: 'table', icon: Table2, label: 'Data Table', description: 'Filter, sort and search element data' },
+  { id: 'pivot', icon: Layers, label: 'Pivot', description: 'Group and aggregate data by any column' },
+  { id: 'charts', icon: BarChart3, label: 'Charts', description: 'Visualize distributions and patterns' },
+  { id: 'describe', icon: FileSpreadsheet, label: 'Describe', description: 'Statistical summary of all numeric columns' },
 ];
 
 const AGG_FUNCTIONS = ['sum', 'avg', 'min', 'max', 'count'];
@@ -1485,22 +1486,30 @@ function UploadConvertZone({
             <p className="text-sm font-medium text-green-600">{t('explorer.done', { defaultValue: 'Conversion complete! Loading...' })}</p>
           </div>
         ) : (
-          <div className="px-6 py-5 flex items-center gap-5">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-oe-blue-subtle shrink-0">
-              <FileUp size={22} className="text-oe-blue" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-content-primary">
-                {t('explorer.drop_cad', { defaultValue: 'Drop a CAD/BIM file to explore' })}
-              </p>
-              <p className="text-xs text-content-tertiary mt-0.5">
-                {t('explorer.or_click', { defaultValue: 'or click to browse — data table, pivot, charts & statistics' })}
-              </p>
-            </div>
-            <div className="hidden sm:flex items-center gap-1.5 shrink-0">
-              {CAD_FORMATS.map((fmt) => (
-                <span key={fmt} className={`px-1.5 py-0.5 rounded text-2xs font-bold ${FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600'}`}>.{fmt.toLowerCase()}</span>
-              ))}
+          <div className="px-6 py-6">
+            <div className="flex items-center gap-5">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-oe-blue-subtle shrink-0">
+                <FileUp size={26} className="text-oe-blue" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-content-primary">
+                  {t('explorer.drop_cad', { defaultValue: 'Drop a CAD/BIM file to explore' })}
+                </p>
+                <p className="text-xs text-content-tertiary mt-0.5">
+                  {t('explorer.or_click', { defaultValue: 'or click to browse — data table, pivot, charts & statistics' })}
+                </p>
+                <div className="flex items-center gap-3 mt-2.5">
+                  <div className="flex items-center gap-1.5">
+                    {CAD_FORMATS.map((fmt) => (
+                      <span key={fmt} className={`px-1.5 py-0.5 rounded text-2xs font-bold ${FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600'}`}>.{fmt.toLowerCase()}</span>
+                    ))}
+                  </div>
+                  <span className="text-2xs text-content-quaternary">|</span>
+                  <span className="text-2xs text-content-quaternary">
+                    {t('explorer.max_file_size', { defaultValue: 'Max 100 MB' })}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -1724,28 +1733,70 @@ export function CadDataExplorerPage() {
 
   if (!sessionId) {
     const recentSessions = allSessions.slice(0, 12);
-    const FORMAT_COLORS: Record<string, string> = {
+    const LANDING_FORMAT_COLORS: Record<string, string> = {
       RVT: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
       IFC: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
       DWG: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
       DGN: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
     };
 
+    const FEATURE_CARDS: { icon: React.ElementType; title: string; desc: string; color: string }[] = [
+      { icon: Table2, title: t('explorer.feat_table', { defaultValue: 'Data Table' }), desc: t('explorer.feat_table_desc', { defaultValue: 'Filter, sort, and search across all BIM element properties with heatmap visualization' }), color: 'text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400' },
+      { icon: Layers, title: t('explorer.feat_pivot', { defaultValue: 'Pivot Analysis' }), desc: t('explorer.feat_pivot_desc', { defaultValue: 'Group by any column and aggregate quantities — sum, average, min, max across categories' }), color: 'text-purple-600 bg-purple-50 dark:bg-purple-900/20 dark:text-purple-400' },
+      { icon: BarChart3, title: t('explorer.feat_charts', { defaultValue: 'Charts' }), desc: t('explorer.feat_charts_desc', { defaultValue: 'Bar and pie charts for quantity distribution by category, level, material, or any property' }), color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400' },
+      { icon: TrendingUp, title: t('explorer.feat_stats', { defaultValue: 'Statistics' }), desc: t('explorer.feat_stats_desc', { defaultValue: 'Full statistical summary — min, max, mean, value counts, data completeness per column' }), color: 'text-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400' },
+    ];
+
     return (
-      <div className="max-w-content mx-auto px-4 py-4 space-y-5 animate-fade-in">
+      <div className="max-w-content mx-auto px-4 py-4 space-y-6 animate-fade-in">
         <Breadcrumb items={[
           { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
           { label: t('explorer.title', { defaultValue: 'CAD-BIM Explorer' }) },
         ]} />
 
+        {/* Hero section */}
+        <div className="text-center pt-4 pb-2">
+          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-oe-blue-subtle mb-4">
+            <Database size={28} className="text-oe-blue" />
+          </div>
+          <h1 className="text-2xl font-bold text-content-primary mb-2">
+            {t('explorer.hero_title', { defaultValue: 'CAD Data Explorer' })}
+          </h1>
+          <p className="text-sm text-content-tertiary max-w-lg mx-auto leading-relaxed">
+            {t('explorer.hero_subtitle', { defaultValue: 'Explore and analyze BIM/CAD element data in a spreadsheet-like interface. Upload a model to extract properties, quantities, and classifications automatically.' })}
+          </p>
+        </div>
+
+        {/* Feature cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {FEATURE_CARDS.map(({ icon: Icon, title, desc, color }) => (
+            <Card key={title} className="p-4 hover:shadow-md transition-shadow">
+              <div className={`inline-flex h-9 w-9 items-center justify-center rounded-xl ${color} mb-3`}>
+                <Icon size={18} />
+              </div>
+              <h3 className="text-sm font-semibold text-content-primary mb-1">{title}</h3>
+              <p className="text-2xs text-content-tertiary leading-relaxed">{desc}</p>
+            </Card>
+          ))}
+        </div>
+
         {/* Upload zone */}
-        <UploadConvertZone onSessionReady={handleSessionReady} />
+        <div>
+          <h2 className="text-xs font-semibold text-content-tertiary uppercase tracking-wider mb-2">
+            {t('explorer.upload_heading', { defaultValue: 'Upload CAD/BIM File' })}
+          </h2>
+          <UploadConvertZone onSessionReady={handleSessionReady} />
+          <p className="text-2xs text-content-quaternary mt-2 text-center">
+            {t('explorer.upload_hint', { defaultValue: 'Supported: RVT, IFC, DWG, DGN, DXF, RFA -- Max file size 100 MB' })}
+          </p>
+        </div>
 
         {/* Recent sessions — compact table */}
         {recentSessions.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xs font-semibold text-content-tertiary uppercase tracking-wider">
+              <h2 className="text-xs font-semibold text-content-tertiary uppercase tracking-wider flex items-center gap-1.5">
+                <Clock size={12} />
                 {t('explorer.recent_models', { defaultValue: 'Recent Models' })}
               </h2>
               <span className="text-2xs text-content-quaternary tabular-nums">
@@ -1770,7 +1821,7 @@ export function CadDataExplorerPage() {
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-surface-hover transition-colors group"
                     onClick={() => setSearchParams({ session: s.session_id })}
                   >
-                    <span className={`px-1.5 py-0.5 rounded text-2xs font-bold shrink-0 ${FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>
+                    <span className={`px-1.5 py-0.5 rounded text-2xs font-bold shrink-0 ${LANDING_FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>
                       {fmt || '?'}
                     </span>
                     <span className="text-sm font-medium text-content-primary truncate flex-1">
@@ -1829,11 +1880,26 @@ export function CadDataExplorerPage() {
             <Database size={20} className="text-oe-blue" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-lg font-bold text-content-primary">{t('explorer.title', { defaultValue: 'CAD-BIM Explorer' })}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-bold text-content-primary truncate">
+                {describe ? describe.filename : t('explorer.title', { defaultValue: 'CAD-BIM Explorer' })}
+              </h1>
+              {describe?.format && (
+                <Badge variant="blue" size="sm">{describe.format.toUpperCase()}</Badge>
+              )}
+            </div>
             {describe && (
-              <p className="text-xs text-content-tertiary truncate">
-                {describe.filename} · {describe.total_elements.toLocaleString()} {t('explorer.elements', { defaultValue: 'elements' })}{describe.format ? ` · ${describe.format.toUpperCase()}` : ''} · {describe.total_columns} {t('explorer.columns', { defaultValue: 'columns' })}
-              </p>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="inline-flex items-center gap-1 text-2xs text-content-tertiary">
+                  <Hash size={10} />
+                  {describe.total_elements.toLocaleString()} {t('explorer.rows', { defaultValue: 'rows' })}
+                </span>
+                <span className="text-content-quaternary text-2xs">|</span>
+                <span className="inline-flex items-center gap-1 text-2xs text-content-tertiary">
+                  <Columns3 size={10} />
+                  {describe.total_columns} {t('explorer.columns', { defaultValue: 'columns' })}
+                </span>
+              </div>
             )}
           </div>
         </div>
@@ -1880,7 +1946,7 @@ export function CadDataExplorerPage() {
 
           {/* Tab selector */}
           <div className="flex items-center gap-1 border-b border-border-light">
-            {TABS.map(({ id, icon: Icon, label }) => (
+            {TABS.map(({ id, icon: Icon, label, description }) => (
               <button
                 key={id}
                 onClick={() => setActiveTab(id)}
@@ -1889,9 +1955,17 @@ export function CadDataExplorerPage() {
                     ? 'border-oe-blue text-oe-blue'
                     : 'border-transparent text-content-tertiary hover:text-content-primary'
                 }`}
+                title={t(`explorer.tab_${id}_desc`, { defaultValue: description })}
               >
                 <Icon size={14} />
                 {t(`explorer.tab_${id}`, { defaultValue: label })}
+                {id === 'table' && describe && (
+                  <span className={`ml-1 px-1.5 py-0.5 rounded-full text-2xs tabular-nums ${
+                    activeTab === id ? 'bg-oe-blue/10' : 'bg-surface-secondary'
+                  }`}>
+                    {describe.total_elements.toLocaleString()}
+                  </span>
+                )}
               </button>
             ))}
           </div>

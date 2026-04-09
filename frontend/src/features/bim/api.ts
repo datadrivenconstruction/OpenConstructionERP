@@ -8,7 +8,7 @@
  *   GET  /v1/bim_hub/models/{id}/geometry   — serve DAE geometry file
  */
 
-import { apiGet } from '@/shared/lib/api';
+import { apiGet, apiDelete } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
 
@@ -122,6 +122,11 @@ export async function uploadBIMData(
   }
 
   return response.json();
+}
+
+/** Delete a BIM model and all its elements. */
+export async function deleteBIMModel(modelId: string): Promise<void> {
+  await apiDelete(`/v1/bim_hub/${encodeURIComponent(modelId)}`);
 }
 
 /** Upload a raw CAD file (RVT, IFC, DWG, DGN, FBX, OBJ, 3DS) for background processing. */
