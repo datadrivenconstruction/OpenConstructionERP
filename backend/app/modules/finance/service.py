@@ -10,6 +10,8 @@ from decimal import Decimal, InvalidOperation
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.events import event_bus
+
 from app.modules.finance.models import (
     EVMSnapshot,
     Invoice,
@@ -276,7 +278,11 @@ class FinanceService:
         return updated
 
     async def pay_invoice(self, invoice_id: uuid.UUID) -> Invoice:
-        """Transition invoice to paid status."""
+        """Transition invoice to paid status.
+
+        After marking as paid, emits ``invoice.paid`` event so that
+        cross-module handlers (e.g. budget actuals recalculation) can react.
+        """
         invoice = await self.get_invoice(invoice_id)
         if invoice.status != "approved":
             raise HTTPException(
@@ -294,6 +300,19 @@ class FinanceService:
                 detail="Invoice not found",
             )
         logger.info("Invoice paid: %s", invoice.invoice_number)
+
+        # Emit event for cross-module handlers (budget actuals, EVM, etc.)
+        await event_bus.publish(
+            "invoice.paid",
+            {
+                "project_id": str(invoice.project_id),
+                "invoice_id": str(invoice.id),
+                "amount_total": str(invoice.amount_total),
+                "currency_code": invoice.currency_code or "EUR",
+            },
+            source_module="finance",
+        )
+
         return updated
 
     # ── Payments ─────────────────────────────────────────────────────────────

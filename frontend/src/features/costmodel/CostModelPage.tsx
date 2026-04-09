@@ -914,6 +914,9 @@ function WhatIfPanel({
       setResult(data);
       queryClient.invalidateQueries({ queryKey: ['costmodel'] });
     },
+    onError: (err: Error) => {
+      console.error('What-if scenario failed:', err.message);
+    },
   });
 
   const handleToggle = useCallback(() => setIsExpanded((v) => !v), []);
@@ -1275,6 +1278,9 @@ function FiveDDashboard({ project }: { project: Project }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['costmodel'] });
     },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('costmodel.budget_failed', { defaultValue: 'Failed to generate budget' }), message: err.message });
+    },
   });
 
   const createSnapshot = useMutation({
@@ -1286,12 +1292,18 @@ function FiveDDashboard({ project }: { project: Project }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['costmodel'] });
     },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('costmodel.snapshot_failed', { defaultValue: 'Failed to create snapshot' }), message: err.message });
+    },
   });
 
   const generateCashFlow = useMutation({
     mutationFn: () => costModelApi.generateCashFlow(project.id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['costmodel'] });
+    },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('costmodel.cashflow_failed', { defaultValue: 'Failed to generate cash flow' }), message: err.message });
     },
   });
 

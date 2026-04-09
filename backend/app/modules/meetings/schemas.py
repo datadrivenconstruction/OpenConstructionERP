@@ -28,16 +28,16 @@ class AgendaItemEntry(BaseModel):
     topic: str = Field(..., min_length=1, max_length=500)
     presenter: str | None = Field(default=None, max_length=200)
     entity_type: str | None = Field(default=None, max_length=50)
-    entity_id: str | None = None
-    notes: str | None = None
+    entity_id: str | None = Field(default=None, max_length=36)
+    notes: str | None = Field(default=None, max_length=5000)
 
 
 class ActionItemEntry(BaseModel):
     """A single action item."""
 
     description: str = Field(..., min_length=1, max_length=1000)
-    owner_id: str | None = None
-    due_date: str | None = Field(default=None, max_length=20)
+    owner_id: str | None = Field(default=None, max_length=36)
+    due_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20)
     status: str = Field(default="open", pattern=r"^(open|completed|cancelled)$")
 
 
@@ -57,11 +57,11 @@ class MeetingCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=500)
     meeting_date: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
     location: str | None = Field(default=None, max_length=500)
-    chairperson_id: str | None = None
+    chairperson_id: str | None = Field(default=None, max_length=36)
     attendees: list[AttendeeEntry] = Field(default_factory=list)
     agenda_items: list[AgendaItemEntry] = Field(default_factory=list)
     action_items: list[ActionItemEntry] = Field(default_factory=list)
-    minutes: str | None = None
+    minutes: str | None = Field(default=None, max_length=50000)
     status: str = Field(
         default="draft",
         pattern=r"^(draft|scheduled|in_progress|completed|cancelled)$",
@@ -84,11 +84,11 @@ class MeetingUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=500)
     meeting_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     location: str | None = Field(default=None, max_length=500)
-    chairperson_id: str | None = None
+    chairperson_id: str | None = Field(default=None, max_length=36)
     attendees: list[AttendeeEntry] | None = None
     agenda_items: list[AgendaItemEntry] | None = None
     action_items: list[ActionItemEntry] | None = None
-    minutes: str | None = None
+    minutes: str | None = Field(default=None, max_length=50000)
     status: str | None = Field(
         default=None,
         pattern=r"^(draft|scheduled|in_progress|completed|cancelled)$",

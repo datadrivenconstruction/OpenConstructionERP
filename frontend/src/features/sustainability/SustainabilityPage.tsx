@@ -186,6 +186,9 @@ export function SustainabilityPage() {
       refetch();
       alert(`CO2 enriched: ${res.enriched} positions (${res.skipped} skipped)`);
     },
+    onError: (err: Error) => {
+      alert(`CO2 enrichment failed: ${err.message}`);
+    },
   });
 
   // Assign CO2 mutation
@@ -194,6 +197,9 @@ export function SustainabilityPage() {
       assignPositionCO2(posId, epdId),
     onSuccess: () => {
       refetch();
+    },
+    onError: (err: Error) => {
+      console.error('Failed to assign CO2 data:', err.message);
     },
   });
 

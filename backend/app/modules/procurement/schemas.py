@@ -26,14 +26,14 @@ class POItemCreate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    description: str = Field(..., max_length=500)
+    description: str = Field(..., min_length=1, max_length=500)
     quantity: str = Field(default="1", max_length=50)
     unit: str | None = Field(default=None, max_length=20)
     unit_rate: str = Field(default="0", max_length=50)
     amount: str = Field(default="0", max_length=50)
     wbs_id: str | None = Field(default=None, max_length=36)
     cost_category: str | None = Field(default=None, max_length=100)
-    sort_order: int = 0
+    sort_order: int = Field(default=0, ge=0)
 
     @field_validator("quantity", "unit_rate", "amount")
     @classmethod
@@ -50,15 +50,15 @@ class POCreate(BaseModel):
     vendor_contact_id: str | None = Field(default=None, max_length=36)
     po_number: str | None = Field(default=None, max_length=50)
     po_type: str = Field(default="standard", max_length=50)
-    issue_date: str | None = Field(default=None, max_length=20)
-    delivery_date: str | None = Field(default=None, max_length=20)
+    issue_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20)
+    delivery_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20)
     currency_code: str = Field(default="EUR", max_length=10)
     amount_subtotal: str = Field(default="0", max_length=50)
     tax_amount: str = Field(default="0", max_length=50)
     amount_total: str = Field(default="0", max_length=50)
     status: str = Field(default="draft", max_length=50)
     payment_terms: str | None = Field(default=None, max_length=100)
-    notes: str | None = None
+    notes: str | None = Field(default=None, max_length=5000)
     items: list[POItemCreate] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -83,7 +83,7 @@ class POUpdate(BaseModel):
     amount_total: str | None = Field(default=None, max_length=50)
     status: str | None = Field(default=None, max_length=50)
     payment_terms: str | None = Field(default=None, max_length=100)
-    notes: str | None = None
+    notes: str | None = Field(default=None, max_length=5000)
     items: list[POItemCreate] | None = None
     metadata: dict[str, Any] | None = None
 
@@ -178,11 +178,11 @@ class GRCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     po_id: UUID
-    receipt_date: str = Field(..., max_length=20)
+    receipt_date: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20)
     received_by_id: UUID | None = None
     delivery_note_number: str | None = Field(default=None, max_length=100)
     status: str = Field(default="draft", max_length=50)
-    notes: str | None = None
+    notes: str | None = Field(default=None, max_length=5000)
     items: list[GRItemCreate] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
 

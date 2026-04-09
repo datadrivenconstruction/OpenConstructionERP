@@ -9,6 +9,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { apiGet, apiPost } from '@/shared/lib/api';
 import { ScoreRing } from './ScoreRing';
 import { DomainBar } from './DomainBar';
 import { GapCard } from './GapCard';
@@ -22,8 +23,6 @@ import {
   AlertTriangle,
   CheckCircle2,
 } from 'lucide-react';
-
-const API_BASE = '/api/v1/project_intelligence';
 
 // Domain display config
 const DOMAIN_CONFIG: Record<
@@ -116,31 +115,19 @@ export function ProjectIntelligencePage() {
         else setLoading(true);
         setError(null);
 
-        const res = await fetch(
-          `${API_BASE}/summary/?project_id=${activeProjectId}${refresh ? '&refresh=true' : ''}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('oe_access_token') || ''}`,
-            },
-          }
+        const data = await apiGet<Summary>(
+          `/v1/project_intelligence/summary/?project_id=${activeProjectId}${refresh ? '&refresh=true' : ''}`,
         );
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data: Summary = await res.json();
         setSummary(data);
         setLastRefresh(new Date());
 
         // Fetch available actions
-        const actRes = await fetch(
-          `${API_BASE}/actions/?project_id=${activeProjectId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('oe_access_token') || ''}`,
-            },
-          }
-        );
-        if (actRes.ok) {
-          setActions(await actRes.json());
-        }
+        try {
+          const actData = await apiGet<ActionDef[]>(
+            `/v1/project_intelligence/actions/?project_id=${activeProjectId}`,
+          );
+          setActions(actData);
+        } catch { /* actions are optional */ }
       } catch (err: any) {
         setError(err.message || 'Failed to load project intelligence');
       } finally {
@@ -160,21 +147,12 @@ export function ProjectIntelligencePage() {
     async (actionId: string) => {
       if (!activeProjectId) return;
       try {
-        const res = await fetch(
-          `${API_BASE}/actions/${actionId}/?project_id=${activeProjectId}`,
-          {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('oe_access_token') || ''}`,
-              'Content-Type': 'application/json',
-            },
-          }
+        const result = await apiPost<{ status: string; message: string; redirect_url?: string }>(
+          `/v1/project_intelligence/actions/${actionId}/?project_id=${activeProjectId}`,
         );
-        const result = await res.json();
         if (result.redirect_url) {
           window.location.href = result.redirect_url;
         } else {
-          // Re-fetch data after action
           fetchData(true);
         }
       } catch {

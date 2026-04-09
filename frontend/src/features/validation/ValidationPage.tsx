@@ -446,6 +446,9 @@ export function ValidationPage() {
       setExpandedResults(new Set());
       queryClient.invalidateQueries({ queryKey: ['validation', selectedBoqId] });
     },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('validation.run_failed', { defaultValue: 'Validation failed' }), message: err.message });
+    },
   });
 
   // Reset BOQ selection when project changes

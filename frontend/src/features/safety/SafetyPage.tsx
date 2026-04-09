@@ -531,6 +531,8 @@ function IncidentsTab({ projectId }: { projectId: string }) {
     }
   }, [showCreate]);
 
+  const canSubmitIncident = !!incidentForm.incident_date && incidentForm.description.trim().length > 0;
+
   const validateIncident = (): boolean => {
     const e: Record<string, string> = {};
     if (!incidentForm.incident_date) e.incident_date = t('validation.required', { defaultValue: 'This field is required' });
@@ -999,7 +1001,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
                 if (!validateIncident()) return;
                 createMut.mutate(incidentForm);
               }}
-              disabled={createMut.isPending}
+              disabled={createMut.isPending || !canSubmitIncident}
             >
               {createMut.isPending ? (
                 <Loader2 size={16} className="animate-spin mr-1.5" />
@@ -1032,6 +1034,16 @@ function ObservationsTab({ projectId }: { projectId: string }) {
     severity: 3,
     likelihood: 3,
   });
+  const [obsErrors, setObsErrors] = useState<Record<string, string>>({});
+
+  const canSubmitObs = obsForm.description.trim().length > 0;
+
+  const validateObs = (): boolean => {
+    const e: Record<string, string> = {};
+    if (!obsForm.description.trim()) e.description = t('validation.required', { defaultValue: 'This field is required' });
+    setObsErrors(e);
+    return Object.keys(e).length === 0;
+  };
 
   // Escape key handler for inline modal
   useEffect(() => {
@@ -1364,11 +1376,15 @@ function ObservationsTab({ projectId }: { projectId: string }) {
               </label>
               <textarea
                 value={obsForm.description}
-                onChange={(e) => setObsForm((f) => ({ ...f, description: e.target.value }))}
+                onChange={(e) => {
+                  setObsForm((f) => ({ ...f, description: e.target.value }));
+                  if (obsErrors.description) setObsErrors((prev) => { const next = { ...prev }; delete next.description; return next; });
+                }}
                 rows={3}
-                className={textareaCls}
+                className={clsx(textareaCls, obsErrors.description && 'border-semantic-error focus:ring-red-300 focus:border-semantic-error')}
                 placeholder={t('safety.obs_desc_placeholder', { defaultValue: 'Describe the observation...' })}
               />
+              {obsErrors.description && <p className="mt-1 text-xs text-semantic-error">{obsErrors.description}</p>}
             </div>
 
             {/* Location */}
@@ -1484,8 +1500,11 @@ function ObservationsTab({ projectId }: { projectId: string }) {
             </Button>
             <Button
               variant="primary"
-              onClick={() => createObsMut.mutate(obsForm)}
-              disabled={createObsMut.isPending || !obsForm.description.trim()}
+              onClick={() => {
+                if (!validateObs()) return;
+                createObsMut.mutate(obsForm);
+              }}
+              disabled={createObsMut.isPending || !canSubmitObs}
             >
               {createObsMut.isPending ? (
                 <Loader2 size={16} className="animate-spin mr-1.5" />

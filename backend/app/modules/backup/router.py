@@ -371,7 +371,7 @@ async def restore_backup(
                                     count_skipped += 1
                                     continue
                             except Exception:
-                                pass  # If check fails, attempt insert anyway
+                                logger.debug("Duplicate check failed for %s, attempting insert", backup_key)
 
                     try:
                         obj = deserialize_row(model_cls, record)

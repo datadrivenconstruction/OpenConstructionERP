@@ -232,17 +232,26 @@ export function BOQEditorPage() {
       }
       isUndoRedoInProgressRef.current = false;
     },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('boq.add_failed', { defaultValue: 'Failed to add position' }), message: err.message });
+    },
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdatePositionData }) =>
       boqApi.updatePosition(id, data),
     onSuccess: () => invalidateAll(),
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('boq.update_failed', { defaultValue: 'Failed to update position' }), message: err.message });
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => boqApi.deletePosition(id),
     onSuccess: () => invalidateAll(),
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('boq.delete_failed', { defaultValue: 'Failed to delete position' }), message: err.message });
+    },
   });
 
   const [renumberDialogOpen, setRenumberDialogOpen] = useState(false);
@@ -934,6 +943,9 @@ export function BOQEditorPage() {
     onSuccess: () => {
       invalidateAll();
       addToast({ type: 'success', title: t('boq.section_added', { defaultValue: 'Section added' }) });
+    },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('boq.section_add_failed', { defaultValue: 'Failed to add section' }), message: err.message });
     },
   });
 

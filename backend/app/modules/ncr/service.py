@@ -69,6 +69,23 @@ class NCRService:
             data.severity,
             data.project_id,
         )
+
+        # Emit event for cross-module handlers (notifications, analytics)
+        await event_bus.publish(
+            "ncr.created",
+            {
+                "project_id": str(data.project_id),
+                "ncr_id": str(ncr.id),
+                "ncr_number": ncr_number,
+                "title": data.title,
+                "severity": data.severity,
+                "ncr_type": data.ncr_type,
+                "created_by": user_id,
+                "notify_user_ids": [],
+            },
+            source_module="ncr",
+        )
+
         return ncr
 
     async def get_ncr(self, ncr_id: uuid.UUID) -> NCR:

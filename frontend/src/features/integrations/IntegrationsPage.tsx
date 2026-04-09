@@ -858,6 +858,9 @@ export function IntegrationsPage() {
         title: t('integrations.disconnected', 'Disconnected'),
       });
     },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('integrations.disconnect_failed', { defaultValue: 'Failed to disconnect' }), message: err.message });
+    },
   });
 
   const testMut = useMutation({

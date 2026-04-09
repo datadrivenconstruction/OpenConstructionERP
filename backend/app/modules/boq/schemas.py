@@ -31,6 +31,7 @@ class BOQCreate(BaseModel):
     )
     description: str = Field(
         default="",
+        max_length=5000,
         description="Optional description of the BOQ scope",
         examples=["Full BOQ for structural and architectural works"],
     )
@@ -54,7 +55,7 @@ class BOQUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     name: str | None = Field(default=None, min_length=1, max_length=255)
-    description: str | None = None
+    description: str | None = Field(default=None, max_length=5000)
     status: str | None = Field(default=None, pattern=r"^(draft|final|archived)$")
     metadata: dict[str, Any] | None = None
     estimate_type: str | None = Field(default=None, max_length=50)
@@ -116,6 +117,7 @@ class PositionCreate(BaseModel):
     )
     description: str = Field(
         default="",
+        max_length=5000,
         description="Position description / specification text",
         examples=["Reinforced concrete wall C30/37, 24cm, formwork both sides"],
     )
@@ -167,7 +169,7 @@ class SectionCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     ordinal: str = Field(..., min_length=1, max_length=50)
-    description: str = Field(default="")
+    description: str = Field(default="", max_length=5000)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -178,7 +180,7 @@ class PositionUpdate(BaseModel):
 
     parent_id: UUID | None = None
     ordinal: str | None = Field(default=None, min_length=1, max_length=50)
-    description: str | None = Field(default=None)
+    description: str | None = Field(default=None, max_length=5000)
     unit: str | None = Field(default=None, min_length=1, max_length=20)
     quantity: float | None = Field(default=None, ge=0.0)
     unit_rate: float | None = Field(default=None, ge=0.0)
@@ -459,7 +461,7 @@ class ActivityLogList(BaseModel):
 class SnapshotCreate(BaseModel):
     """Create a point-in-time snapshot of a BOQ."""
 
-    name: str = ""
+    name: str = Field(default="", max_length=255)
 
 
 class SnapshotResponse(BaseModel):

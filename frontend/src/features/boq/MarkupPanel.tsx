@@ -80,12 +80,18 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
       invalidate();
       addToast({ type: 'success', title: t('boq.markup_added', { defaultValue: 'Markup added' }) });
     },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('boq.markup_add_failed', { defaultValue: 'Failed to add markup' }), message: err.message });
+    },
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ markupId, data }: { markupId: string; data: UpdateMarkupData }) =>
       boqApi.updateMarkup(boqId, markupId, data),
     onSuccess: () => invalidate(),
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('boq.markup_update_failed', { defaultValue: 'Failed to update markup' }), message: err.message });
+    },
   });
 
   const deleteMutation = useMutation({
@@ -93,6 +99,9 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
     onSuccess: () => {
       invalidate();
       addToast({ type: 'success', title: t('boq.markup_deleted', { defaultValue: 'Markup deleted' }) });
+    },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('boq.markup_delete_failed', { defaultValue: 'Failed to delete markup' }), message: err.message });
     },
   });
 
@@ -102,6 +111,9 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
       invalidate();
       setShowRegionMenu(false);
       addToast({ type: 'success', title: t('boq.template_applied', { defaultValue: 'Regional template applied' }) });
+    },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('boq.apply_defaults_failed', { defaultValue: 'Failed to apply template' }), message: err.message });
     },
   });
 

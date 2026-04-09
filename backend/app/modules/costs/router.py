@@ -78,7 +78,7 @@ async def autocomplete_cost_items(
                         for db_item in items_from_db:
                             components_map[db_item.code] = db_item.components or []
                     except Exception:
-                        pass  # Graceful fallback — return without components
+                        logger.debug("Cost search: component lookup failed", exc_info=True)
 
                     return [
                         CostAutocompleteItem(
@@ -92,7 +92,7 @@ async def autocomplete_cost_items(
                         for r in results
                     ]
         except Exception:
-            pass  # Fall back to text search
+            logger.debug("Cost search: vector search failed, falling back to text", exc_info=True)
 
     # Standard text search — fetch extra to prioritize items with components
     query = CostSearchQuery(q=q, region=region, limit=limit * 3, offset=0)
@@ -329,6 +329,7 @@ async def vector_region_stats() -> list[dict]:
             try:
                 tbl = db.open_table(COST_TABLE)
             except Exception:
+                logger.debug("LanceDB table %s not found", COST_TABLE)
                 return []
             df = tbl.to_pandas()
             if "region" not in df.columns:
@@ -344,6 +345,7 @@ async def vector_region_stats() -> list[dict]:
                 return [{"region": "all", "count": col["vectors_count"]}]
             return []
     except Exception:
+        logger.debug("Vector stats query failed", exc_info=True)
         return []
 
 
