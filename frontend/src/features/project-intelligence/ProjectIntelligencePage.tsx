@@ -120,7 +120,7 @@ export function ProjectIntelligencePage() {
           `${API_BASE}/summary/?project_id=${activeProjectId}${refresh ? '&refresh=true' : ''}`,
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('oe_token') || ''}`,
+              Authorization: `Bearer ${localStorage.getItem('oe_access_token') || ''}`,
             },
           }
         );
@@ -134,7 +134,7 @@ export function ProjectIntelligencePage() {
           `${API_BASE}/actions/?project_id=${activeProjectId}`,
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('oe_token') || ''}`,
+              Authorization: `Bearer ${localStorage.getItem('oe_access_token') || ''}`,
             },
           }
         );
@@ -165,7 +165,7 @@ export function ProjectIntelligencePage() {
           {
             method: 'POST',
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('oe_token') || ''}`,
+              Authorization: `Bearer ${localStorage.getItem('oe_access_token') || ''}`,
               'Content-Type': 'application/json',
             },
           }
