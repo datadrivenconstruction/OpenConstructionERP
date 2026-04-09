@@ -1,0 +1,171 @@
+{
+  "app": {
+    "name": "OpenEstimator.io",
+    "tagline": "Estimation des coûts de construction open-source"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "ai_estimate": "Estimation IA",
+    "settings": "Paramètres",
+    "5d_cost_model": "Modèle de coût 5D",
+    "templates": "Modèles"
+  },
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "create": "Créer",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "export": "Exporter",
+    "import": "Importer",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "confirm": "Confirmer",
+    "back": "Retour",
+    "next": "Suivant",
+    "yes": "Oui",
+    "no": "Non"
+  },
+  "auth": {
+    "login": "Se connecter",
+    "logout": "Se déconnecter",
+    "email": "E-mail",
+    "password": "Mot de passe"
+  },
+  "projects": {
+    "title": "Projets",
+    "new_project": "Nouveau projet",
+    "project_name": "Nom du projet",
+    "no_projects": "Aucun projet"
+  },
+  "boq": {
+    "title": "Devis quantitatif",
+    "position": "Poste",
+    "ordinal": "Numéro d’ordre",
+    "description": "Désignation",
+    "quantity": "Quantité",
+    "unit": "Unité",
+    "unit_rate": "Prix unitaire",
+    "total": "Total",
+    "add_position": "Ajouter un poste",
+    "add_section": "Ajouter une section",
+    "assembly": "Ouvrage élémentaire",
+    "subtotal": "Sous-total",
+    "grand_total": "Total général",
+    "direct_cost": "Coût direct",
+    "net_total": "Total net",
+    "gross_total": "Total brut",
+    "vat": "TVA",
+    "add_markups": "Ajouter des majorations",
+    "validate": "Valider",
+    "export": "Exporter"
+  },
+  "costs": {
+    "title": "Base de prix",
+    "rate": "Prix",
+    "material": "Matériau",
+    "labor": "Main-d’œuvre",
+    "equipment": "Matériel",
+    "search_costs": "Rechercher des prix..."
+  },
+  "assemblies": {
+    "title": "Ouvrages élémentaires"
+  },
+  "validation": {
+    "title": "Validation",
+    "passed": "Réussi",
+    "warnings": "Avertissements",
+    "errors": "Erreurs",
+    "score": "Score qualité",
+    "run_validation": "Lancer la validation",
+    "missing_quantity": "Le poste {position} n’a pas de quantité",
+    "missing_rate": "Le poste {position} n’a pas de prix unitaire",
+    "missing_description": "Le poste {position} n’a pas de désignation",
+    "missing_classification": "Le poste {position} nécessite un code de classification",
+    "duplicate_ordinal": "Numéro d’ordre en double : {ordinal}",
+    "rate_anomaly": "Le prix unitaire {rate} dépasse le seuil ({threshold})"
+  },
+  "schedule": {
+    "title": "Planning 4D"
+  },
+  "cad": {
+    "title": "Import CAO",
+    "upload": "Téléverser un fichier CAO",
+    "supported_formats": "Formats : DWG, DGN, RVT, IFC, PDF",
+    "converting": "Conversion en cours...",
+    "elements_found": "{count} éléments trouvés"
+  },
+  "takeoff": {
+    "title": "Métré",
+    "auto_detect": "Détection automatique",
+    "manual_measure": "Mesure manuelle",
+    "confidence": "Confiance"
+  },
+  "tendering": {
+    "title": "Appel d’offres",
+    "create_tender": "Créer un appel d’offres",
+    "bid": "Offre",
+    "award": "Attribution"
+  },
+  "modules": {
+    "title": "Modules",
+    "installed": "Installés",
+    "available": "Disponibles",
+    "install": "Installer",
+    "uninstall": "Désinstaller",
+    "update": "Mettre à jour"
+  },
+  "dashboard": {
+    "welcome": "Bienvenue sur OpenEstimate",
+    "subtitle": "Plateforme d’estimation des coûts de construction open-source",
+    "recent_projects": "Projets récents",
+    "system_status": "État du système",
+    "modules_loaded": "Modules chargés",
+    "validation_rules": "Règles de validation",
+    "languages": "Langues"
+  },
+  "units": {
+    "m": "m",
+    "m2": "m²",
+    "m3": "m³",
+    "kg": "kg",
+    "t": "t",
+    "pcs": "u",
+    "lsum": "forfait",
+    "h": "h",
+    "set": "ens"
+  },
+  "users": {
+    "management": "Gestion des utilisateurs",
+    "management_desc": "Manage team members, roles, and access",
+    "invite_user": "Invite User",
+    "invite": "Invite",
+    "full_name": "Full Name",
+    "email": "Email",
+    "password": "Password",
+    "role": "Role",
+    "status": "Status",
+    "last_login": "Last Login",
+    "actions": "Actions",
+    "name": "Name",
+    "total": "Total Users",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "admins": "Admins",
+    "managers": "Managers",
+    "search": "Search by name or email...",
+    "no_users": "No users found",
+    "updated": "User updated",
+    "invited": "User invited successfully",
+    "deactivate": "Désactiver",
+    "activate": "Activer",
+    "never": "Jamais",
+    "role_admin_desc": "Full access to all features",
+    "role_manager_desc": "Project and team management",
+    "role_editor_desc": "Create and edit content",
+    "role_viewer_desc": "Read-only access"
+  }
+}

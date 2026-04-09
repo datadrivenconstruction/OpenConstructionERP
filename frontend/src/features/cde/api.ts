@@ -108,3 +108,18 @@ export async function transitionContainer(
 export async function fetchContainerRevisions(id: string): Promise<CDERevision[]> {
   return apiGet<CDERevision[]>(`/v1/cde/containers/${id}/revisions`);
 }
+
+export interface CreateRevisionPayload {
+  file_name: string;
+  change_summary?: string;
+  storage_key?: string;
+  mime_type?: string;
+  file_size?: string;
+}
+
+export async function createContainerRevision(
+  containerId: string,
+  data: CreateRevisionPayload,
+): Promise<CDERevision> {
+  return apiPost<CDERevision>(`/v1/cde/containers/${containerId}/revisions`, data);
+}

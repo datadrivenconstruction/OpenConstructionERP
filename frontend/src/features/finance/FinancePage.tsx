@@ -987,7 +987,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
         tax_amount: String(tax),
         amount_total: String(total),
         currency_code: data.currency || 'EUR',
-        description: data.description || undefined,
+        notes: data.description || undefined,
         status: 'draft',
       });
     },

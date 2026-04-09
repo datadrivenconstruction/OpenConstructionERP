@@ -62,7 +62,7 @@ const TYPE_LABELS: Record<SubmittalType, string> = {
   mock_up: 'Mock-Up',
   test_report: 'Test Report',
   certificate: 'Certificate',
-  other: 'Other',
+  warranty: 'Warranty',
 };
 
 const STATUS_LABELS: Record<SubmittalStatus, string> = {
@@ -684,10 +684,9 @@ export function SubmittalsPage() {
       createMut.mutate({
         project_id: projectId,
         title: formData.title,
-        spec_section: formData.spec_section,
-        type: formData.type,
+        spec_section: formData.spec_section || undefined,
+        submittal_type: formData.type,
         date_required: formData.date_required || undefined,
-        description: formData.description || undefined,
       });
     },
     [createMut, projectId, addToast, t],

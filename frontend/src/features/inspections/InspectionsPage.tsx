@@ -59,7 +59,11 @@ const INSPECTION_TYPE_COLORS: Record<
   plumbing: 'neutral',
   fire_safety: 'error',
   concrete: 'blue',
+  concrete_pour: 'blue',
   waterproofing: 'neutral',
+  mep: 'warning',
+  fire_stopping: 'error',
+  handover: 'success',
   general: 'neutral',
 };
 
@@ -100,11 +104,15 @@ const INSPECTION_TYPES: InspectionType[] = [
 
 const TYPE_CARD_CONFIG: Record<InspectionType, { icon: React.ElementType; color: string }> = {
   concrete: { icon: Box, color: 'text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-950/30 dark:border-blue-800' },
+  concrete_pour: { icon: Box, color: 'text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-950/30 dark:border-blue-800' },
   waterproofing: { icon: Droplet, color: 'text-cyan-600 bg-cyan-50 border-cyan-200 dark:text-cyan-400 dark:bg-cyan-950/30 dark:border-cyan-800' },
+  mep: { icon: Zap, color: 'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800' },
   electrical: { icon: Zap, color: 'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800' },
   plumbing: { icon: Droplets, color: 'text-indigo-600 bg-indigo-50 border-indigo-200 dark:text-indigo-400 dark:bg-indigo-950/30 dark:border-indigo-800' },
   fire_safety: { icon: Flame, color: 'text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800' },
+  fire_stopping: { icon: Flame, color: 'text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800' },
   structural: { icon: Columns3, color: 'text-purple-600 bg-purple-50 border-purple-200 dark:text-purple-400 dark:bg-purple-950/30 dark:border-purple-800' },
+  handover: { icon: Eye, color: 'text-green-600 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950/30 dark:border-green-800' },
   general: { icon: Eye, color: 'text-gray-600 bg-gray-50 border-gray-200 dark:text-gray-400 dark:bg-gray-800/50 dark:border-gray-700' },
 };
 
@@ -704,8 +712,8 @@ export function InspectionsPage() {
         project_id: projectId,
         title: formData.title,
         inspection_type: formData.inspection_type,
-        date: formData.date,
-        inspector: formData.inspector || undefined,
+        inspection_date: formData.date,
+        inspector_id: formData.inspector || undefined,
         location: formData.location || undefined,
       });
     },

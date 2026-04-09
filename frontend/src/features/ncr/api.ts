@@ -12,7 +12,7 @@ export type NCRType = 'material' | 'workmanship' | 'design' | 'documentation' | 
 
 export type NCRSeverity = 'critical' | 'major' | 'minor' | 'observation';
 
-export type NCRStatus = 'open' | 'under_review' | 'corrective_action' | 'closed' | 'void';
+export type NCRStatus = 'identified' | 'under_review' | 'corrective_action' | 'verification' | 'closed' | 'void';
 
 export interface NCR {
   id: string;
@@ -48,7 +48,8 @@ export interface CreateNCRPayload {
   ncr_type: NCRType;
   severity: NCRSeverity;
   description: string;
-  location?: string;
+  location_description?: string;
+  root_cause?: string;
 }
 
 /* -- API Functions --------------------------------------------------------- */

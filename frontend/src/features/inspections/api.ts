@@ -14,7 +14,11 @@ export type InspectionType =
   | 'plumbing'
   | 'fire_safety'
   | 'concrete'
+  | 'concrete_pour'
   | 'waterproofing'
+  | 'mep'
+  | 'fire_stopping'
+  | 'handover'
   | 'general';
 
 export type InspectionResult = 'pass' | 'fail' | 'partial';
@@ -57,8 +61,8 @@ export interface CreateInspectionPayload {
   project_id: string;
   title: string;
   inspection_type: InspectionType;
-  date: string;
-  inspector?: string;
+  inspection_date?: string;
+  inspector_id?: string;
   location?: string;
 }
 
@@ -70,7 +74,7 @@ export async function fetchInspections(filters?: InspectionFilters): Promise<Ins
   if (filters?.status) params.set('status', filters.status);
   if (filters?.result) params.set('result', filters.result);
   const qs = params.toString();
-  return apiGet<Inspection[]>(`/v1/inspections${qs ? `?${qs}` : ''}`);
+  return apiGet<Inspection[]>(`/v1/inspections/${qs ? `?${qs}` : ''}`);
 }
 
 export async function createInspection(data: CreateInspectionPayload): Promise<Inspection> {
