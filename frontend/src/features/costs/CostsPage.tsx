@@ -1195,11 +1195,12 @@ function AddToBOQModal({
     }
   }, [boqs, boqId]);
 
-  // Fetch sections for selected BOQ
+  // Fetch sections for selected BOQ (extract positions from BOQ detail)
   const { data: sections } = useQuery({
     queryKey: ['boq-sections', boqId],
     queryFn: async () => {
-      const positions = await apiGet<BOQSection[]>(`/v1/boq/boqs/${boqId}/positions`);
+      const boqData = await apiGet<{ positions?: BOQSection[] }>(`/v1/boq/boqs/${boqId}`);
+      const positions = boqData.positions ?? [];
       // Sections are positions with empty unit
       return positions.filter((p) => !p.unit || p.unit.trim() === '');
     },
@@ -1215,23 +1216,31 @@ function AddToBOQModal({
 
     try {
       let nextOrdinal = 1;
-      // Get existing positions and find max ordinal for correct numbering
+      // Fetch BOQ detail to find the max existing ordinal for correct numbering
       try {
-        const existing = await apiGet<Array<{ordinal: string}>>(`/v1/boq/boqs/${boqId}/positions`);
+        const boqData = await apiGet<{ positions?: Array<{ ordinal: string }> }>(
+          `/v1/boq/boqs/${boqId}`,
+        );
+        const existing = boqData.positions ?? [];
         if (existing.length > 0) {
-          const maxOrd = Math.max(...existing.map(p => {
+          let maxNum = 0;
+          for (const p of existing) {
             const parts = p.ordinal.split('.');
-            const last = parts[parts.length - 1] ?? '0';
-            return parseInt(last, 10) || 0;
-          }));
-          nextOrdinal = maxOrd + 1;
+            for (const part of parts) {
+              const n = parseInt(part, 10);
+              if (!isNaN(n) && n > maxNum) maxNum = n;
+            }
+          }
+          nextOrdinal = maxNum + 1;
         }
       } catch {
         // Fallback: start at 1
       }
 
       for (const item of items) {
-        const ordinal = String(nextOrdinal).padStart(3, '0');
+        const section = String(Math.floor((nextOrdinal - 1) / 999) + 1).padStart(2, '0');
+        const pos = String(((nextOrdinal - 1) % 999) + 1).padStart(3, '0');
+        const ordinal = `${section}.${pos}`;
 
         // Build rich metadata with cost breakdown + components
         const meta: Record<string, unknown> = {

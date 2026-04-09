@@ -319,7 +319,7 @@ export function BOQEditorPage() {
   }, [unlockMutation]);
 
   const createBudgetMutation = useMutation({
-    mutationFn: () => apiPost<{ created: number }>(`/v1/boq/boqs/${boqId}/create-budget`, {}),
+    mutationFn: () => apiPost<{ created: number }>(`/v1/boq/boqs/${boqId}/create-budget/`, {}),
     onSuccess: (data) => {
       addToast({
         type: 'success',
@@ -344,7 +344,7 @@ export function BOQEditorPage() {
   }, [createBudgetMutation]);
 
   const createRevisionMutation = useMutation({
-    mutationFn: () => apiPost<{ id: string }>(`/v1/boq/boqs/${boqId}/create-revision`, {}),
+    mutationFn: () => apiPost<{ id: string }>(`/v1/boq/boqs/${boqId}/create-revision/`, {}),
     onSuccess: (result) => {
       invalidateAll();
       addToast({

@@ -1261,7 +1261,8 @@ export function ReportsPage() {
               if (sections.includes('boq_detail') && selectedBoqId && selectedBoq) {
                 htmlParts.push('<h2>BOQ Detail</h2>');
                 try {
-                  const positions = await apiGet<Array<{ ordinal: string; description: string; unit: string; quantity: number; unit_rate: number; total: number }>>(`/v1/boq/boqs/${selectedBoqId}/positions`);
+                  const boqDetail = await apiGet<{ positions?: Array<{ ordinal: string; description: string; unit: string; quantity: number; unit_rate: number; total: number }> }>(`/v1/boq/boqs/${selectedBoqId}`);
+                  const positions = boqDetail.positions ?? [];
                   htmlParts.push(`<p>BOQ: <strong>${selectedBoq.name}</strong> (${positions.length} positions)</p>`);
                   htmlParts.push('<table><thead><tr><th>#</th><th>Description</th><th>Unit</th><th style="text-align:right">Qty</th><th style="text-align:right">Rate</th><th style="text-align:right">Total</th></tr></thead><tbody>');
                   let grandTotal = 0;
