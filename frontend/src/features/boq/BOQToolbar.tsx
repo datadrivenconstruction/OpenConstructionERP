@@ -275,6 +275,7 @@ export function BOQToolbar({
             icon={<ShieldCheck size={15} className={isValidating ? 'animate-pulse text-oe-blue' : lastValidationScore != null ? (lastValidationScore >= 80 ? 'text-emerald-500' : lastValidationScore >= 50 ? 'text-amber-500' : 'text-red-500') : ''} />}
             onClick={onValidate}
             disabled={isValidating}
+            title={t('boq.validate_info_tooltip', { defaultValue: 'Run 42 automatic quality checks against DIN 276, NRM, MasterFormat, and GAEB standards' })}
           >
             <span className="hidden xl:inline">
               {isValidating

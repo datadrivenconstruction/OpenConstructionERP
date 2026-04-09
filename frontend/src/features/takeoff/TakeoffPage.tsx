@@ -764,7 +764,7 @@ export function TakeoffPage() {
 
   const analyzeMutation = useMutation({
     mutationFn: async (docId: string) => {
-      return apiPost<AnalysisResult>(`/v1/takeoff/documents/${docId}/analyze`);
+      return apiPost<AnalysisResult>(`/v1/takeoff/documents/${docId}/analyze/`);
     },
     onMutate: (docId) => {
       setDocuments((prev) =>
@@ -794,7 +794,7 @@ export function TakeoffPage() {
 
   const extractTablesMutation = useMutation({
     mutationFn: async (docId: string) => {
-      return apiPost<AnalysisResult>(`/v1/takeoff/documents/${docId}/extract-tables`);
+      return apiPost<AnalysisResult>(`/v1/takeoff/documents/${docId}/extract-tables/`);
     },
     onMutate: (docId) => {
       setDocuments((prev) =>

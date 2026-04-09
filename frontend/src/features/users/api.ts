@@ -62,16 +62,16 @@ export async function updateUser(id: string, data: UserAdminUpdate): Promise<Use
 }
 
 export async function inviteUser(data: InviteUserPayload): Promise<User> {
-  return apiPost<User>('/v1/users/auth/register', data);
+  return apiPost<User>('/v1/users/auth/register/', data);
 }
 
 export async function getUserModuleAccess(userId: string): Promise<UserModuleAccessPayload> {
-  return apiGet<UserModuleAccessPayload>(`/v1/users/${userId}/module-access`);
+  return apiGet<UserModuleAccessPayload>(`/v1/users/${userId}/module-access/`);
 }
 
 export async function setUserModuleAccess(
   userId: string,
   data: UserModuleAccessPayload,
 ): Promise<UserModuleAccessPayload> {
-  return apiPatch<UserModuleAccessPayload>(`/v1/users/${userId}/module-access`, data);
+  return apiPatch<UserModuleAccessPayload>(`/v1/users/${userId}/module-access/`, data);
 }

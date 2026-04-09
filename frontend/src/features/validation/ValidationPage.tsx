@@ -439,7 +439,7 @@ export function ValidationPage() {
   // Run validation mutation
   const runValidation = useMutation({
     mutationFn: () =>
-      apiPost<ValidationReportData>(`/v1/boq/boqs/${selectedBoqId}/validate`),
+      apiPost<ValidationReportData>(`/v1/boq/boqs/${selectedBoqId}/validate/`),
     onSuccess: (data) => {
       setReport(data);
       setFilter('all');
