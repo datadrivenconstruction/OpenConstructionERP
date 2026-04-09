@@ -5,6 +5,7 @@ and model diffs live here. No business logic — pure data access.
 """
 
 import uuid
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -73,6 +74,32 @@ class BIMModelRepository:
         """Delete a BIM model and all its elements (via CASCADE)."""
         stmt = delete(BIMModel).where(BIMModel.id == model_id)
         await self.session.execute(stmt)
+
+    async def cleanup_stale_processing(
+        self,
+        project_id: uuid.UUID,
+        max_age_hours: int = 1,
+    ) -> int:
+        """Delete models stuck in 'processing' with 0 elements for longer than max_age_hours.
+
+        Returns the number of models deleted.
+        """
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=max_age_hours)
+        # Find stale models
+        find_stmt = select(BIMModel.id).where(
+            BIMModel.project_id == project_id,
+            BIMModel.status == "processing",
+            BIMModel.element_count == 0,
+            BIMModel.created_at < cutoff,
+        )
+        result = await self.session.execute(find_stmt)
+        stale_ids = [row[0] for row in result.all()]
+        if not stale_ids:
+            return 0
+        # Delete them
+        del_stmt = delete(BIMModel).where(BIMModel.id.in_(stale_ids))
+        await self.session.execute(del_stmt)
+        return len(stale_ids)
 
 
 class BIMElementRepository:

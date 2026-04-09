@@ -816,6 +816,18 @@ async def delete_model(
     await service.delete_model(model_id)
 
 
+@router.post("/cleanup-stale")
+async def cleanup_stale_processing(
+    project_id: uuid.UUID = Query(...),
+    max_age_hours: int = Query(default=1, ge=0),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: BIMHubService = Depends(_get_service),
+) -> dict[str, int]:
+    """Remove models stuck in 'processing' with 0 elements older than max_age_hours."""
+    count = await service.cleanup_stale_processing(project_id, max_age_hours=max_age_hours)
+    return {"deleted": count}
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Elements
 # ═══════════════════════════════════════════════════════════════════════════════
