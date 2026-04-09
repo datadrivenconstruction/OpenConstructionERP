@@ -253,7 +253,7 @@ function CompanyProfilesTab() {
 
   const { data: presets, isLoading: presetsLoading } = useQuery({
     queryKey: ['onboarding-presets'],
-    queryFn: () => apiGet<CompanyPresetAPI[]>('/v1/users/onboarding-presets'),
+    queryFn: () => apiGet<CompanyPresetAPI[]>('/v1/users/onboarding-presets/'),
   });
 
   const handleProfileClick = useCallback(
@@ -679,7 +679,7 @@ function DataPackagesTab() {
         }
         setInstallingId(mod.id);
         try {
-          const status = await apiGet<{ backend: string; connected: boolean; can_restore_snapshots: boolean; can_generate_locally: boolean }>('/v1/costs/vector/status');
+          const status = await apiGet<{ backend: string; connected: boolean; can_restore_snapshots: boolean; can_generate_locally: boolean }>('/v1/costs/vector/status/');
           let result;
           if (status.can_restore_snapshots) {
             result = await apiPost<{ restored?: boolean; indexed?: number; database?: string; duration_seconds?: number }>(`/v1/costs/vector/restore-snapshot/${dbId}`);
@@ -997,7 +997,7 @@ function SystemModulesTab() {
 
   const { data: systemModules, refetch } = useQuery({
     queryKey: ['system-modules'],
-    queryFn: () => apiGet<SystemModule[]>('/v1/modules'),
+    queryFn: () => apiGet<SystemModule[]>('/v1/modules/'),
   });
 
   const enabledCount = systemModules?.filter((m) => m.enabled).length ?? 0;

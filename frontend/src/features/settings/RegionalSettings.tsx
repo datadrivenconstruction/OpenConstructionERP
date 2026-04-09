@@ -286,7 +286,7 @@ export function RegionalSettings({ animationDelay = '0ms' }: { animationDelay?: 
   // Fetch current preferences from backend
   const { data: prefs } = useQuery({
     queryKey: ['user-preferences'],
-    queryFn: () => apiGet<UserPreferencesResponse>('/v1/users/me/preferences'),
+    queryFn: () => apiGet<UserPreferencesResponse>('/v1/users/me/preferences/'),
     retry: false,
     staleTime: 60_000,
   });
@@ -302,7 +302,7 @@ export function RegionalSettings({ animationDelay = '0ms' }: { animationDelay?: 
   // Patch mutation
   const patchMutation = useMutation({
     mutationFn: (update: Partial<UserPreferencesResponse>) =>
-      apiPatch<UserPreferencesResponse>('/v1/users/me/preferences', update),
+      apiPatch<UserPreferencesResponse>('/v1/users/me/preferences/', update),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-preferences'] });
       addToast({

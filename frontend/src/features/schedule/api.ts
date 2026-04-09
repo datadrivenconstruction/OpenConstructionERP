@@ -115,9 +115,9 @@ export const scheduleApi = {
 
   // Activities
   getGantt: (scheduleId: string) =>
-    apiGet<GanttData>(`/v1/schedule/schedules/${scheduleId}/gantt`),
+    apiGet<GanttData>(`/v1/schedule/schedules/${scheduleId}/gantt/`),
   createActivity: (scheduleId: string, data: Partial<Activity>) =>
-    apiPost<Activity>(`/v1/schedule/schedules/${scheduleId}/activities`, data),
+    apiPost<Activity>(`/v1/schedule/schedules/${scheduleId}/activities/`, data),
   updateActivity: (activityId: string, data: Partial<Activity>) =>
     apiPatch<Activity>(`/v1/schedule/activities/${activityId}`, data),
   deleteActivity: (activityId: string) =>

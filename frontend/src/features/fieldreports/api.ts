@@ -134,7 +134,7 @@ export async function fetchFieldReport(id: string): Promise<FieldReport> {
 }
 
 export async function createFieldReport(data: CreateFieldReportPayload): Promise<FieldReport> {
-  return apiPost<FieldReport>('/v1/fieldreports/reports', data);
+  return apiPost<FieldReport>('/v1/fieldreports/reports/', data);
 }
 
 export async function updateFieldReport(
@@ -149,11 +149,11 @@ export async function deleteFieldReport(id: string): Promise<void> {
 }
 
 export async function submitFieldReport(id: string): Promise<FieldReport> {
-  return apiPost<FieldReport>(`/v1/fieldreports/reports/${id}/submit`, {});
+  return apiPost<FieldReport>(`/v1/fieldreports/reports/${id}/submit/`, {});
 }
 
 export async function approveFieldReport(id: string): Promise<FieldReport> {
-  return apiPost<FieldReport>(`/v1/fieldreports/reports/${id}/approve`, {});
+  return apiPost<FieldReport>(`/v1/fieldreports/reports/${id}/approve/`, {});
 }
 
 export async function fetchFieldReportSummary(projectId: string): Promise<FieldReportSummary | null> {

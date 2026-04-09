@@ -138,7 +138,7 @@ export async function deleteMarkup(id: string): Promise<void> {
 }
 
 export async function linkMarkupToBoq(markupId: string, positionId: string): Promise<Markup> {
-  return apiPost<Markup>(`/v1/markups/${markupId}/link-to-boq`, { position_id: positionId });
+  return apiPost<Markup>(`/v1/markups/${markupId}/link-to-boq/`, { position_id: positionId });
 }
 
 /* ── Stamps ───────────────────────────────────────────────────────────── */
@@ -155,7 +155,7 @@ export async function createStampTemplate(data: {
   color: string;
   project_id?: string;
 }): Promise<StampTemplate> {
-  return apiPost<StampTemplate>('/v1/markups/stamps/templates', data);
+  return apiPost<StampTemplate>('/v1/markups/stamps/templates/', data);
 }
 
 export async function deleteStampTemplate(id: string): Promise<void> {

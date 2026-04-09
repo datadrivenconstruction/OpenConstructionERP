@@ -662,7 +662,7 @@ export function QuantitiesPage() {
   // Converter data from API
   const { data: convertersData } = useQuery<ConvertersResponse>({
     queryKey: ['takeoff', 'converters'],
-    queryFn: () => apiGet<ConvertersResponse>('/v1/takeoff/converters'),
+    queryFn: () => apiGet<ConvertersResponse>('/v1/takeoff/converters/'),
     staleTime: 30_000,
   });
 

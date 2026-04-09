@@ -1133,7 +1133,7 @@ function MonteCarloPanel({ projectId, currency }: { projectId: string; currency:
   const runSimulation = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await apiPost<MCResult>(`/v1/costmodel/projects/${projectId}/5d/monte-carlo?iterations=1000`);
+      const data = await apiPost<MCResult>(`/v1/costmodel/projects/${projectId}/5d/monte-carlo/?iterations=1000`);
       setResult(data);
     } catch (err) {
       addToast({ type: 'error', title: t('costmodel.mc_failed', { defaultValue: 'Simulation failed' }), message: err instanceof Error ? err.message : '' });

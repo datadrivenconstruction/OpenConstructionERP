@@ -1182,14 +1182,14 @@ export function CatalogPage() {
   // Fetch stats (for tab counts)
   const { data: stats } = useQuery({
     queryKey: ['catalog', 'stats'],
-    queryFn: () => apiGet<CatalogStatsResponse>('/v1/catalog/stats'),
+    queryFn: () => apiGet<CatalogStatsResponse>('/v1/catalog/stats/'),
     retry: false,
   });
 
   // Fetch loaded regions
   const { data: regionStats } = useQuery({
     queryKey: ['catalog', 'regions'],
-    queryFn: () => apiGet<CatalogRegionStat[]>('/v1/catalog/regions'),
+    queryFn: () => apiGet<CatalogRegionStat[]>('/v1/catalog/regions/'),
     retry: false,
   });
 

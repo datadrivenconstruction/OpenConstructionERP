@@ -306,7 +306,7 @@ async function downloadValidationReport(projectId: string, projectName: string):
   };
   let report: ValidationReport;
   try {
-    report = await apiPost<ValidationReport>(`/v1/boq/boqs/${boq.id}/validate`, {});
+    report = await apiPost<ValidationReport>(`/v1/boq/boqs/${boq.id}/validate/`, {});
   } catch (err) {
     throw new Error(
       `Validation failed: ${err instanceof Error ? err.message : 'Unknown error'}`,

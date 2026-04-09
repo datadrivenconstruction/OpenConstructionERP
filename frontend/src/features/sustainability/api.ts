@@ -75,7 +75,7 @@ export function fetchSustainability(boqId: string, areaM2: number) {
 }
 
 export function enrichCO2(boqId: string) {
-  return apiPost<CO2EnrichResponse>(`/v1/boq/boqs/${boqId}/enrich-co2`, {});
+  return apiPost<CO2EnrichResponse>(`/v1/boq/boqs/${boqId}/enrich-co2/`, {});
 }
 
 export function assignPositionCO2(positionId: string, epdId: string) {
