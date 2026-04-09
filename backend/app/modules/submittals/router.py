@@ -121,7 +121,7 @@ async def delete_submittal(
     await service.delete_submittal(submittal_id)
 
 
-@router.post("/{submittal_id}/submit", response_model=SubmittalResponse)
+@router.post("/{submittal_id}/submit/", response_model=SubmittalResponse)
 async def submit_submittal(
     submittal_id: uuid.UUID,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -133,7 +133,7 @@ async def submit_submittal(
     return _to_response(submittal)
 
 
-@router.post("/{submittal_id}/review", response_model=SubmittalResponse)
+@router.post("/{submittal_id}/review/", response_model=SubmittalResponse)
 async def review_submittal(
     submittal_id: uuid.UUID,
     body: SubmittalReviewRequest,
@@ -146,7 +146,7 @@ async def review_submittal(
     return _to_response(submittal)
 
 
-@router.post("/{submittal_id}/approve", response_model=SubmittalResponse)
+@router.post("/{submittal_id}/approve/", response_model=SubmittalResponse)
 async def approve_submittal(
     submittal_id: uuid.UUID,
     user_id: CurrentUserId,

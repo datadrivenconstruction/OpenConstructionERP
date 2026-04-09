@@ -75,7 +75,7 @@ def _get_service(session: SessionDep) -> AIService:
 
 
 @router.get(
-    "/settings",
+    "/settings/",
     response_model=AISettingsResponse,
     dependencies=[Depends(RequirePermission("ai.settings.read"))],
 )
@@ -92,7 +92,7 @@ async def get_ai_settings(
 
 
 @router.patch(
-    "/settings",
+    "/settings/",
     response_model=AISettingsResponse,
     dependencies=[Depends(RequirePermission("ai.settings.update"))],
 )
@@ -120,7 +120,7 @@ async def update_ai_settings(
 
 
 @router.post(
-    "/settings/test",
+    "/settings/test/",
     dependencies=[Depends(RequirePermission("ai.settings.read"))],
 )
 async def test_ai_connection(
@@ -193,7 +193,7 @@ async def test_ai_connection(
 
 
 @router.post(
-    "/quick-estimate",
+    "/quick-estimate/",
     response_model=EstimateJobResponse,
     dependencies=[Depends(RequirePermission("ai.estimate"))],
 )
@@ -227,7 +227,7 @@ async def quick_estimate(
 
 
 @router.post(
-    "/photo-estimate",
+    "/photo-estimate/",
     response_model=EstimateJobResponse,
     dependencies=[Depends(RequirePermission("ai.estimate"))],
 )
@@ -300,7 +300,7 @@ async def photo_estimate(
 
 
 @router.post(
-    "/file-estimate",
+    "/file-estimate/",
     response_model=EstimateJobResponse,
     dependencies=[Depends(RequirePermission("ai.estimate"))],
 )
@@ -375,7 +375,7 @@ async def file_estimate(
 
 
 @router.post(
-    "/estimate/{job_id}/create-boq",
+    "/estimate/{job_id}/create-boq/",
     status_code=201,
     dependencies=[Depends(RequirePermission("ai.create_boq"))],
 )
@@ -407,7 +407,7 @@ async def create_boq_from_estimate(
 
 
 @router.post(
-    "/estimate/{job_id}/enrich",
+    "/estimate/{job_id}/enrich/",
     dependencies=[Depends(RequirePermission("ai.use"))],
 )
 async def enrich_estimate(
@@ -631,7 +631,7 @@ async def get_estimate_job(
 
 
 @router.post(
-    "/advisor/chat",
+    "/advisor/chat/",
     dependencies=[Depends(RequirePermission("ai.estimate"))],
 )
 async def advisor_chat(

@@ -68,7 +68,7 @@ def _get_service(session: SessionDep) -> I18nFoundationService:
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-@router.get("/exchange-rates", response_model=ExchangeRateListResponse)
+@router.get("/exchange-rates/", response_model=ExchangeRateListResponse)
 async def list_exchange_rates(
     service: I18nFoundationService = Depends(_get_service),
     from_currency: str | None = Query(default=None, description="Filter by source currency"),
@@ -94,7 +94,7 @@ async def list_exchange_rates(
 
 
 @router.post(
-    "/exchange-rates",
+    "/exchange-rates/",
     response_model=ExchangeRateResponse,
     status_code=status.HTTP_201_CREATED,
 )
@@ -108,7 +108,7 @@ async def create_exchange_rate(
     return ExchangeRateResponse.model_validate(rate)
 
 
-@router.get("/exchange-rates/convert", response_model=ConvertResponse)
+@router.get("/exchange-rates/convert/", response_model=ConvertResponse)
 async def convert_currency(
     from_currency: str = Query(..., min_length=3, max_length=3, description="Source currency"),
     to_currency: str = Query(..., min_length=3, max_length=3, description="Target currency"),
@@ -125,7 +125,7 @@ async def convert_currency(
     )
 
 
-@router.post("/exchange-rates/fetch-ecb")
+@router.post("/exchange-rates/fetch-ecb/")
 async def fetch_ecb_rates(
     _user_id: CurrentUserId,
     _admin: None = Depends(RequirePermission("admin")),
@@ -180,7 +180,7 @@ async def delete_exchange_rate(
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-@router.get("/countries", response_model=CountryListResponse)
+@router.get("/countries/", response_model=CountryListResponse)
 async def list_countries(
     service: I18nFoundationService = Depends(_get_service),
     region: str | None = Query(default=None, description="Filter by region group (EU, DACH, etc.)"),
@@ -209,7 +209,7 @@ async def get_country(
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-@router.get("/work-calendars", response_model=WorkCalendarListResponse)
+@router.get("/work-calendars/", response_model=WorkCalendarListResponse)
 async def list_work_calendars(
     service: I18nFoundationService = Depends(_get_service),
     country_code: str | None = Query(default=None, description="Filter by country code"),
@@ -224,7 +224,7 @@ async def list_work_calendars(
     )
 
 
-@router.get("/work-calendars/working-days", response_model=WorkingDaysResponse)
+@router.get("/work-calendars/working-days/", response_model=WorkingDaysResponse)
 async def calculate_working_days(
     country_code: str = Query(..., min_length=2, max_length=2, description="ISO country code"),
     from_date: str = Query(..., description="Start date (ISO format)"),
@@ -244,7 +244,7 @@ async def calculate_working_days(
 
 
 @router.post(
-    "/work-calendars",
+    "/work-calendars/",
     response_model=WorkCalendarResponse,
     status_code=status.HTTP_201_CREATED,
 )
@@ -287,7 +287,7 @@ async def update_work_calendar(
 # ═══════════════════════════════════════════════════════════════════════════
 
 
-@router.get("/tax-configs", response_model=TaxConfigListResponse)
+@router.get("/tax-configs/", response_model=TaxConfigListResponse)
 async def list_tax_configs(
     service: I18nFoundationService = Depends(_get_service),
     country_code: str | None = Query(default=None, description="Filter by country code"),
@@ -320,7 +320,7 @@ async def get_active_taxes_for_country(
 
 
 @router.post(
-    "/tax-configs",
+    "/tax-configs/",
     response_model=TaxConfigResponse,
     status_code=status.HTTP_201_CREATED,
 )

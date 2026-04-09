@@ -94,7 +94,7 @@ def _observation_to_response(item: object) -> ObservationResponse:
 # ── Stats & Trends ──────────────────────────────────────────────────────
 
 
-@router.get("/stats", response_model=SafetyStatsResponse)
+@router.get("/stats/", response_model=SafetyStatsResponse)
 async def safety_stats(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -106,7 +106,7 @@ async def safety_stats(
     return await service.get_stats(project_id)
 
 
-@router.get("/trends", response_model=SafetyTrendsResponse)
+@router.get("/trends/", response_model=SafetyTrendsResponse)
 async def safety_trends(
     project_id: uuid.UUID = Query(...),
     period: str = Query(default="monthly", pattern=r"^(monthly|weekly)$"),
@@ -151,7 +151,7 @@ async def create_incident(
     return _incident_to_response(incident)
 
 
-@router.get("/incidents/export")
+@router.get("/incidents/export/")
 async def export_incidents(
     project_id: uuid.UUID = Query(...),
     session: SessionDep = None,  # type: ignore[assignment]
@@ -287,7 +287,7 @@ async def create_observation(
     return _observation_to_response(observation)
 
 
-@router.get("/observations/export")
+@router.get("/observations/export/")
 async def export_observations(
     project_id: uuid.UUID = Query(...),
     session: SessionDep = None,  # type: ignore[assignment]

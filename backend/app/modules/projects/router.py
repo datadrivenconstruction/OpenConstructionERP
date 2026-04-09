@@ -194,7 +194,7 @@ async def delete_project(
 
 
 @router.post(
-    "/{project_id}/restore",
+    "/{project_id}/restore/",
     response_model=ProjectResponse,
     summary="Restore archived project",
     description="Restore an archived project back to active status. "
@@ -226,7 +226,7 @@ async def restore_project(
 
 
 @router.get(
-    "/{project_id}/dashboard",
+    "/{project_id}/dashboard/",
     summary="Get project dashboard",
     description="Unified project dashboard with aggregated KPIs from all modules: "
     "budget, schedule, quality (punch items, inspections, NCRs), documents, "
@@ -956,7 +956,7 @@ async def project_dashboard(
 
 
 @router.get(
-    "/analytics/overview",
+    "/analytics/overview/",
     summary="Get cross-project analytics",
     description="Aggregated KPIs across all projects: total budget, actual spend, "
     "variance, over-budget count, and per-project summary with BOQ counts.",
@@ -1047,7 +1047,7 @@ async def analytics_overview(
 
 
 @router.post(
-    "/{project_id}/wbs",
+    "/{project_id}/wbs/",
     response_model=WBSResponse,
     status_code=201,
     summary="Create WBS node",
@@ -1100,7 +1100,7 @@ async def create_wbs_node(
 
 
 @router.get(
-    "/{project_id}/wbs",
+    "/{project_id}/wbs/",
     response_model=list[WBSResponse],
     summary="List WBS nodes",
     description="List all WBS nodes for a project, ordered by sort_order.",
@@ -1211,7 +1211,7 @@ async def delete_wbs_node(
 
 
 @router.post(
-    "/{project_id}/milestones",
+    "/{project_id}/milestones/",
     response_model=MilestoneResponse,
     status_code=201,
     summary="Create milestone",
@@ -1247,7 +1247,7 @@ async def create_milestone(
 
 
 @router.get(
-    "/{project_id}/milestones",
+    "/{project_id}/milestones/",
     response_model=list[MilestoneResponse],
     summary="List milestones",
     description="List all milestones for a project, ordered by planned date.",

@@ -73,7 +73,7 @@ def _item_to_response(item: object) -> PunchItemResponse:
 # ── Summary ──────────────────────────────────────────────────────────────────
 
 
-@router.get("/summary", response_model=PunchListSummary)
+@router.get("/summary/", response_model=PunchListSummary)
 async def get_summary(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -87,7 +87,7 @@ async def get_summary(
 # ── Create ───────────────────────────────────────────────────────────────────
 
 
-@router.post("/items", response_model=PunchItemResponse, status_code=201)
+@router.post("/items/", response_model=PunchItemResponse, status_code=201)
 async def create_item(
     data: PunchItemCreate,
     user_id: CurrentUserId,
@@ -111,7 +111,7 @@ async def create_item(
 # ── List ─────────────────────────────────────────────────────────────────────
 
 
-@router.get("/items", response_model=list[PunchItemResponse])
+@router.get("/items/", response_model=list[PunchItemResponse])
 async def list_items(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -183,7 +183,7 @@ async def delete_item(
 # ── Status transition ────────────────────────────────────────────────────────
 
 
-@router.post("/items/{item_id}/transition", response_model=PunchItemResponse)
+@router.post("/items/{item_id}/transition/", response_model=PunchItemResponse)
 async def transition_status(
     item_id: uuid.UUID,
     data: PunchStatusTransition,
@@ -214,7 +214,7 @@ async def transition_status(
 # ── Pin to sheet ─────────────────────────────────────────────────────────────
 
 
-@router.post("/items/{item_id}/pin-to-sheet", response_model=PunchItemResponse)
+@router.post("/items/{item_id}/pin-to-sheet/", response_model=PunchItemResponse)
 async def pin_to_sheet(
     item_id: uuid.UUID,
     data: PinToSheetRequest,
@@ -247,7 +247,7 @@ async def pin_to_sheet(
 # ── Photos ───────────────────────────────────────────────────────────────────
 
 
-@router.post("/items/{item_id}/photos", response_model=PunchItemResponse)
+@router.post("/items/{item_id}/photos/", response_model=PunchItemResponse)
 async def upload_photo(
     item_id: uuid.UUID,
     file: UploadFile = File(...),
@@ -304,7 +304,7 @@ async def remove_photo(
 # ── PDF Export ───────────────────────────────────────────────────────────────
 
 
-@router.get("/export/pdf")
+@router.get("/export/pdf/")
 async def export_pdf(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -319,7 +319,7 @@ async def export_pdf(
     )
 
 
-@router.get("/export/excel")
+@router.get("/export/excel/")
 async def export_excel(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]

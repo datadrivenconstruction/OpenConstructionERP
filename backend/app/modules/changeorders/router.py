@@ -139,7 +139,7 @@ def _item_to_response(item: object) -> ChangeOrderItemResponse:
 # ── Summary ──────────────────────────────────────────────────────────────────
 
 
-@router.get("/summary", response_model=ChangeOrderSummary)
+@router.get("/summary/", response_model=ChangeOrderSummary)
 async def get_summary(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -238,7 +238,7 @@ async def delete_change_order(
 # ── Items ────────────────────────────────────────────────────────────────────
 
 
-@router.post("/{order_id}/items", response_model=ChangeOrderItemResponse, status_code=201)
+@router.post("/{order_id}/items/", response_model=ChangeOrderItemResponse, status_code=201)
 async def add_item(
     order_id: uuid.UUID,
     data: ChangeOrderItemCreate,
@@ -280,7 +280,7 @@ async def delete_item(
 # ── Status transitions ──────────────────────────────────────────────────────
 
 
-@router.post("/{order_id}/submit", response_model=ChangeOrderResponse)
+@router.post("/{order_id}/submit/", response_model=ChangeOrderResponse)
 async def submit_order(
     order_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -292,7 +292,7 @@ async def submit_order(
     return _order_to_response(order)
 
 
-@router.post("/{order_id}/approve", response_model=ChangeOrderResponse)
+@router.post("/{order_id}/approve/", response_model=ChangeOrderResponse)
 async def approve_order(
     order_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -304,7 +304,7 @@ async def approve_order(
     return _order_to_response(order)
 
 
-@router.post("/{order_id}/reject", response_model=ChangeOrderResponse)
+@router.post("/{order_id}/reject/", response_model=ChangeOrderResponse)
 async def reject_order(
     order_id: uuid.UUID,
     user_id: CurrentUserId,

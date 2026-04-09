@@ -215,7 +215,7 @@ def _guess_component_type(item: object) -> str:
 
 
 @router.post(
-    "/ai-generate",
+    "/ai-generate/",
     dependencies=[Depends(RequirePermission("assemblies.create"))],
 )
 async def ai_generate_assembly(
@@ -343,7 +343,7 @@ async def ai_generate_assembly(
 
 
 @router.get(
-    "/stats",
+    "/stats/",
     dependencies=[Depends(RequirePermission("assemblies.read"))],
 )
 async def get_stats(
@@ -398,7 +398,7 @@ async def delete_assembly(
 
 
 @router.post(
-    "/{assembly_id}/components",
+    "/{assembly_id}/components/",
     response_model=ComponentResponse,
     status_code=201,
     dependencies=[Depends(RequirePermission("assemblies.update"))],
@@ -471,7 +471,7 @@ async def delete_component(
 
 
 @router.post(
-    "/{assembly_id}/apply-to-boq",
+    "/{assembly_id}/apply-to-boq/",
     status_code=201,
     dependencies=[Depends(RequirePermission("assemblies.update"))],
 )
@@ -495,7 +495,7 @@ async def apply_to_boq(
 
 
 @router.post(
-    "/{assembly_id}/clone",
+    "/{assembly_id}/clone/",
     response_model=AssemblyResponse,
     status_code=201,
     dependencies=[Depends(RequirePermission("assemblies.create"))],

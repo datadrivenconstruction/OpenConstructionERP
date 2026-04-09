@@ -94,7 +94,7 @@ async def list_meetings(
 # ── Stats ────────────────────────────────────────────────────────────────────
 
 
-@router.get("/stats", response_model=MeetingStatsResponse)
+@router.get("/stats/", response_model=MeetingStatsResponse)
 async def meeting_stats(
     project_id: uuid.UUID = Query(...),
     service: MeetingService = Depends(_get_service),
@@ -110,7 +110,7 @@ async def meeting_stats(
 # ── Open Action Items ────────────────────────────────────────────────────────
 
 
-@router.get("/open-actions", response_model=list[OpenActionItemResponse])
+@router.get("/open-actions/", response_model=list[OpenActionItemResponse])
 async def open_action_items(
     project_id: uuid.UUID = Query(...),
     service: MeetingService = Depends(_get_service),
@@ -784,7 +784,7 @@ def _build_preview_response(extracted: dict, ai_used: bool) -> ImportPreviewResp
     )
 
 
-@router.post("/import-summary")
+@router.post("/import-summary/")
 async def import_meeting_summary(
     project_id: uuid.UUID = Query(...),
     file: UploadFile = File(...),
@@ -1000,7 +1000,7 @@ async def delete_meeting(
 # ── Complete ──────────────────────────────────────────────────────────────────
 
 
-@router.post("/{meeting_id}/complete", response_model=MeetingResponse)
+@router.post("/{meeting_id}/complete/", response_model=MeetingResponse)
 async def complete_meeting(
     meeting_id: uuid.UUID,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -1020,7 +1020,7 @@ async def complete_meeting(
 # ── PDF Export ───────────────────────────────────────────────────────────────
 
 
-@router.get("/{meeting_id}/export/pdf")
+@router.get("/{meeting_id}/export/pdf/")
 async def export_meeting_pdf(
     meeting_id: uuid.UUID,
     session: SessionDep = None,  # type: ignore[assignment]

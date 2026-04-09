@@ -38,7 +38,7 @@ def _get_service(session: SessionDep) -> ReportingService:
 # ── KPI Snapshot endpoints ────────────────────────────────────────────────
 
 
-@router.get("/kpi", response_model=KPISnapshotResponse | None)
+@router.get("/kpi/", response_model=KPISnapshotResponse | None)
 async def get_latest_kpi(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -51,7 +51,7 @@ async def get_latest_kpi(
     return KPISnapshotResponse.model_validate(snapshot)
 
 
-@router.get("/kpi/history", response_model=list[KPISnapshotResponse])
+@router.get("/kpi/history/", response_model=list[KPISnapshotResponse])
 async def list_kpi_history(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -68,7 +68,7 @@ async def list_kpi_history(
     return [KPISnapshotResponse.model_validate(s) for s in snapshots]
 
 
-@router.post("/kpi/snapshot", response_model=KPISnapshotResponse, status_code=201)
+@router.post("/kpi/snapshot/", response_model=KPISnapshotResponse, status_code=201)
 async def create_kpi_snapshot(
     data: KPISnapshotCreate,
     user_id: CurrentUserId,
@@ -80,7 +80,7 @@ async def create_kpi_snapshot(
     return KPISnapshotResponse.model_validate(snapshot)
 
 
-@router.post("/kpi/recalculate-all", status_code=200)
+@router.post("/kpi/recalculate-all/", status_code=200)
 async def recalculate_all_kpis(
     user_id: CurrentUserId,
     _perm: None = Depends(RequirePermission("reporting.create")),
@@ -98,7 +98,7 @@ async def recalculate_all_kpis(
 # ── Report Template endpoints ─────────────────────────────────────────────
 
 
-@router.get("/templates", response_model=list[ReportTemplateResponse])
+@router.get("/templates/", response_model=list[ReportTemplateResponse])
 async def list_templates(
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     offset: int = Query(default=0, ge=0),
@@ -110,7 +110,7 @@ async def list_templates(
     return [ReportTemplateResponse.model_validate(t) for t in templates]
 
 
-@router.post("/templates", response_model=ReportTemplateResponse, status_code=201)
+@router.post("/templates/", response_model=ReportTemplateResponse, status_code=201)
 async def create_template(
     data: ReportTemplateCreate,
     user_id: CurrentUserId,
@@ -125,7 +125,7 @@ async def create_template(
 # ── Generated Report endpoints ────────────────────────────────────────────
 
 
-@router.post("/generate", response_model=GeneratedReportResponse, status_code=201)
+@router.post("/generate/", response_model=GeneratedReportResponse, status_code=201)
 async def generate_report(
     data: GenerateReportRequest,
     user_id: CurrentUserId,
@@ -137,7 +137,7 @@ async def generate_report(
     return GeneratedReportResponse.model_validate(report)
 
 
-@router.get("/reports", response_model=list[GeneratedReportResponse])
+@router.get("/reports/", response_model=list[GeneratedReportResponse])
 async def list_reports(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]

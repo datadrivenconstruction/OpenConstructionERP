@@ -45,7 +45,7 @@ def _get_service(session: SessionDep) -> CostItemService:
 # ── Autocomplete ──────────────────────────────────────────────────────────
 
 
-@router.get("/autocomplete", response_model=list[CostAutocompleteItem])
+@router.get("/autocomplete/", response_model=list[CostAutocompleteItem])
 async def autocomplete_cost_items(
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: CostItemService = Depends(_get_service),
@@ -216,7 +216,7 @@ def _invalidate_cost_cache() -> None:
     _region_cache["ts"] = 0
 
 
-@router.get("/regions", response_model=list[str])
+@router.get("/regions/", response_model=list[str])
 async def list_loaded_regions(
     session: SessionDep,
 ) -> list[str]:
@@ -241,7 +241,7 @@ async def list_loaded_regions(
     return regions
 
 
-@router.get("/regions/stats")
+@router.get("/regions/stats/")
 async def region_stats(
     session: SessionDep,
 ) -> list[dict]:
@@ -298,7 +298,7 @@ async def clear_region_database(
 # ── Vector database (LanceDB embedded / Qdrant server) ──────────────────────
 
 
-@router.get("/vector/status")
+@router.get("/vector/status/")
 async def get_vector_status() -> dict:
     """Check vector DB status (LanceDB embedded or Qdrant server)."""
     from app.core.vector import vector_status as vs
@@ -306,7 +306,7 @@ async def get_vector_status() -> dict:
     return vs()
 
 
-@router.get("/vector/regions")
+@router.get("/vector/regions/")
 async def vector_region_stats() -> list[dict]:
     """Return per-region vector counts from the vector DB.
 
@@ -348,7 +348,7 @@ async def vector_region_stats() -> list[dict]:
 
 
 @router.post(
-    "/vector/index",
+    "/vector/index/",
     dependencies=[Depends(RequirePermission("costs.create"))],
 )
 async def vectorize_cost_items(
@@ -780,7 +780,7 @@ async def restore_qdrant_snapshot(
     }
 
 
-@router.get("/vector/search")
+@router.get("/vector/search/")
 async def semantic_search(
     q: str = Query(..., min_length=2, max_length=500, description="Natural language query"),
     region: str | None = Query(default=None, description="Filter by region"),
@@ -801,7 +801,7 @@ async def semantic_search(
 # ── Categories (distinct classification.collection values) ───────────────
 
 
-@router.get("/categories", response_model=list[str])
+@router.get("/categories/", response_model=list[str])
 async def list_categories(
     session: SessionDep,
     region: str | None = Query(default=None, description="Filter by region"),
@@ -845,7 +845,7 @@ async def list_categories(
 # ── Available CWICR databases ─────────────────────────────────────────────
 
 
-@router.get("/available-databases")
+@router.get("/available-databases/")
 async def list_available_databases() -> list[dict]:
     """List all available CWICR regional databases with their IDs.
 
@@ -911,7 +911,7 @@ async def delete_cost_item(
 
 
 @router.post(
-    "/bulk",
+    "/bulk/",
     response_model=list[CostItemResponse],
     status_code=201,
     dependencies=[Depends(RequirePermission("costs.create"))],
@@ -1121,7 +1121,7 @@ def _parse_cost_rows_from_excel(content_bytes: bytes) -> list[dict[str, Any]]:
 
 
 @router.post(
-    "/import/file",
+    "/import/file/",
     dependencies=[Depends(RequirePermission("costs.create"))],
 )
 async def import_cost_file(
@@ -1988,7 +1988,7 @@ async def _bulk_insert_costs(session: AsyncSession, items: list[dict]) -> int:
 
 
 @router.delete(
-    "/actions/clear-database",
+    "/actions/clear-database/",
     dependencies=[Depends(RequirePermission("costs.update"))],
 )
 async def clear_cost_database(
@@ -2020,7 +2020,7 @@ async def clear_cost_database(
 
 
 @router.get(
-    "/actions/export-excel",
+    "/actions/export-excel/",
     dependencies=[Depends(RequirePermission("costs.list"))],
 )
 async def export_cost_database(
