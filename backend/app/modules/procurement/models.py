@@ -140,6 +140,7 @@ class GoodsReceiptItem(Base):
         GUID(),
         ForeignKey("oe_procurement_po_item.id", ondelete="SET NULL"),
         nullable=True,
+        index=True,
     )
     quantity_ordered: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     quantity_received: Mapped[str] = mapped_column(String(50), nullable=False, default="0")

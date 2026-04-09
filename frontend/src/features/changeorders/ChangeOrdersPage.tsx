@@ -1006,6 +1006,17 @@ export function ChangeOrdersPage() {
 
       <InfoHint className="mt-4 mb-2" text={t('changeorders.workflow_desc', { defaultValue: 'Change Order workflow: Draft (prepare scope change) \u2192 Submitted (send for review) \u2192 Approved or Rejected. Each order tracks cost impact and schedule impact in days. Add line items to detail what changed \u2014 original vs new quantities and rates. The cost delta is computed automatically.' })} />
 
+      {/* No-project warning */}
+      {!projectId && (
+        <div className="mb-4 mt-4 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 px-4 py-3">
+          <AlertTriangle size={18} className="text-amber-600 shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-300">{t('common.no_project_selected', { defaultValue: 'No project selected' })}</p>
+            <p className="text-xs text-amber-600 dark:text-amber-400">{t('common.select_project_hint', { defaultValue: 'Select a project from the header to view and manage items.' })}</p>
+          </div>
+        </div>
+      )}
+
       {/* Summary cards */}
       {summary && (
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -1091,7 +1102,13 @@ export function ChangeOrdersPage() {
 
       {/* Orders table */}
       <div>
-        {isLoading ? (
+        {!projectId ? (
+          <EmptyState
+            icon={<FileEdit size={28} strokeWidth={1.5} />}
+            title={t('changeorders.no_project', { defaultValue: 'No project selected' })}
+            description={t('changeorders.no_project_desc', { defaultValue: 'Open a project first to view and manage change orders.' })}
+          />
+        ) : isLoading ? (
           <div className="flex items-center justify-center py-20">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" />
           </div>

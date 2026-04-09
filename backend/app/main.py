@@ -24,11 +24,12 @@ _BUILD_HASH = _hashlib.sha256(f"DDC-CWICR-OE-{_INSTANCE_ID}".encode()).hexdigest
 from datetime import UTC
 
 import structlog
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import Settings, get_settings
 from app.core.module_loader import module_loader
+from app.dependencies import get_current_user_id
 
 logger = logging.getLogger(__name__)
 
@@ -564,7 +565,10 @@ def create_app() -> FastAPI:
         return DEMO_CATALOG
 
     @app.post("/api/demo/install/{demo_id}", tags=["System"])
-    async def install_demo(demo_id: str) -> dict[str, Any]:
+    async def install_demo(
+        demo_id: str,
+        _user_id: str = Depends(get_current_user_id),
+    ) -> dict[str, Any]:
         """Install a demo project with full BOQ, Schedule, Budget, and Tendering data."""
         from app.core.demo_projects import DEMO_TEMPLATES, install_demo_project
         from app.database import async_session_factory
@@ -602,7 +606,10 @@ def create_app() -> FastAPI:
         return installed
 
     @app.delete("/api/demo/uninstall/{demo_id}", tags=["System"])
-    async def uninstall_demo(demo_id: str) -> dict[str, Any]:
+    async def uninstall_demo(
+        demo_id: str,
+        _user_id: str = Depends(get_current_user_id),
+    ) -> dict[str, Any]:
         """Remove a demo project and all its data."""
         from sqlalchemy import select
 
@@ -627,7 +634,9 @@ def create_app() -> FastAPI:
         return {"deleted_projects": len(targets), "demo_id": demo_id}
 
     @app.delete("/api/demo/clear-all", tags=["System"])
-    async def clear_all_demos() -> dict[str, Any]:
+    async def clear_all_demos(
+        _user_id: str = Depends(get_current_user_id),
+    ) -> dict[str, Any]:
         """Remove ALL demo projects and their data."""
         from sqlalchemy import select
 

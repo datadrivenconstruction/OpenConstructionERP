@@ -69,6 +69,7 @@ class Document(Base):
         ForeignKey("oe_documents_document.id", ondelete="SET NULL"),
         nullable=True,
         default=None,
+        index=True,
     )
     security_classification: Mapped[str | None] = mapped_column(
         String(50), nullable=True, default=None,
