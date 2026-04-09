@@ -130,6 +130,8 @@ const navGroups: NavGroup[] = [
       { labelKey: 'schedule.title', to: '/schedule', icon: CalendarDays, moduleKey: 'schedule' },
       { labelKey: 'tasks.title', to: '/tasks', icon: ClipboardList },
       { labelKey: 'nav.5d_cost_model', to: '/5d', icon: TrendingUp, moduleKey: '5d', advancedOnly: true },
+      { labelKey: 'nav.requirements', to: '/requirements', icon: ClipboardCheck, advancedOnly: true },
+      { labelKey: 'nav.risk_register', to: '/risks', icon: ShieldAlert, advancedOnly: true },
     ],
   },
   {
@@ -170,6 +172,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'cde.title', to: '/cde', icon: Database },
       { labelKey: 'nav.photos', to: '/photos', icon: Camera },
       { labelKey: 'nav.markups', to: '/markups', icon: PenTool },
+      { labelKey: 'nav.field_reports', to: '/field-reports', icon: ClipboardList, advancedOnly: true },
     ],
   },
   // ── QUALITY & SAFETY ───────────────────────────────────────────────
@@ -184,19 +187,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'ncr.title', to: '/ncr', icon: AlertOctagon },
       { labelKey: 'safety.title', to: '/safety', icon: HardHat },
       { labelKey: 'nav.punchlist', to: '/punchlist', icon: ListChecks },
-      { labelKey: 'nav.risk_register', to: '/risks', icon: ShieldAlert },
       // sustainability + cost-benchmark injected dynamically from module registry
-    ],
-  },
-  // ── FIELD ──────────────────────────────────────────────────────────
-  {
-    id: 'field',
-    labelKey: 'nav.group_field',
-    defaultOpen: false,
-    hideInSimple: true,
-    items: [
-      { labelKey: 'nav.field_reports', to: '/field-reports', icon: ClipboardList },
-      { labelKey: 'nav.requirements', to: '/requirements', icon: ClipboardCheck },
     ],
   },
   {
