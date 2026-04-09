@@ -74,7 +74,7 @@ class RFIService:
             rfi_number=rfi_number,
             subject=data.subject,
             question=data.question,
-            raised_by=data.raised_by,
+            raised_by=data.raised_by or (uuid.UUID(user_id) if user_id else None),
             assigned_to=data.assigned_to,
             status=data.status,
             ball_in_court=ball_in_court,
