@@ -164,18 +164,42 @@ export function ProjectIntelligencePage() {
 
   if (!activeProjectId) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center space-y-3">
-          <BrainCircuit size={48} className="mx-auto text-content-tertiary" />
-          <h2 className="text-lg font-semibold text-content-primary">
-            {t('project_intelligence.no_project', { defaultValue: 'No project selected' })}
+      <div className="max-w-content mx-auto py-16">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 rounded-2xl bg-oe-blue/10 flex items-center justify-center mx-auto">
+            <BrainCircuit size={32} className="text-oe-blue" />
+          </div>
+          <h2 className="text-xl font-bold text-content-primary">
+            {t('project_intelligence.title', { defaultValue: 'Project Intelligence' })}
           </h2>
-          <p className="text-sm text-content-secondary max-w-md">
-            {t('project_intelligence.select_project', {
+          <p className="text-sm text-content-secondary max-w-lg mx-auto">
+            {t('project_intelligence.description', {
               defaultValue:
-                'Select a project from the Projects page to view its intelligence analysis.',
+                'AI-powered project analysis that scores your project across 9 domains (BOQ, Validation, Schedule, Cost Model, Takeoff, Risk, Tendering, Documents, Reports), identifies critical gaps, and provides actionable recommendations.',
             })}
           </p>
+          <div className="flex items-center justify-center gap-2 pt-2">
+            <AlertTriangle size={16} className="text-amber-500" />
+            <span className="text-sm text-amber-700 dark:text-amber-400">
+              {t('project_intelligence.select_project', {
+                defaultValue: 'Select a project from the header to start analysis',
+              })}
+            </span>
+          </div>
+          <div className="grid grid-cols-3 gap-3 max-w-md mx-auto pt-4 text-xs text-content-tertiary">
+            <div className="bg-surface-secondary rounded-lg p-3 text-center">
+              <div className="font-bold text-lg text-content-primary">A-F</div>
+              <div>Score Grade</div>
+            </div>
+            <div className="bg-surface-secondary rounded-lg p-3 text-center">
+              <div className="font-bold text-lg text-content-primary">9</div>
+              <div>Domains</div>
+            </div>
+            <div className="bg-surface-secondary rounded-lg p-3 text-center">
+              <div className="font-bold text-lg text-content-primary">AI</div>
+              <div>Recommendations</div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -183,11 +207,11 @@ export function ProjectIntelligencePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="max-w-content mx-auto py-16">
         <div className="text-center space-y-3 animate-pulse">
-          <BrainCircuit size={48} className="mx-auto text-content-tertiary" />
+          <BrainCircuit size={48} className="mx-auto text-oe-blue" />
           <p className="text-sm text-content-secondary">
-            {t('project_intelligence.analyzing', { defaultValue: 'Analyzing project...' })}
+            {t('project_intelligence.analyzing', { defaultValue: 'Analyzing project across 9 domains...' })}
           </p>
         </div>
       </div>
