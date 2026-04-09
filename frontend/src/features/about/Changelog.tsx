@@ -14,6 +14,29 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.0.0',
+    date: '2026-04-08',
+    changes: [
+      'New: 53 modules — full construction lifecycle from estimation to handover',
+      'New: Interconnected module ecosystems — Documents↔CDE↔Transmittals, Safety↔Inspections↔NCR↔Punchlist, BIM↔Takeoff↔Schedule',
+      'New: Visual create forms with card selectors, section headers, smart defaults across all modules',
+      'New: Cross-module navigation links on every page',
+      'New: 14 integrations — Teams, Slack, Telegram, Discord, Email, Webhooks, Calendar, n8n, Zapier, Make, Google Sheets, Power BI, REST API',
+      'New: DokuFluss-style onboarding with 5 company profiles and module toggle switches',
+      'New: AI Meeting Summary import — 3-step flow with preview (Teams, Google Meet, Zoom, Webex)',
+      'New: Project Dashboard with unified KPIs from all modules',
+      'New: Global Search across 9 entity types',
+      'New: 5 comprehensive demo projects with data across 12 modules each',
+      'New: Quality dashboard summary (incidents, inspections, NCRs, defects)',
+      'New: SVG Gantt chart with BIM element badges on linked activities',
+      'New: Three.js BIM Viewer with processing status tracking',
+      'Fix: 90+ bugs from deep QA audit across all modules',
+      'Fix: 15 critical security and crash fixes from QA test reports',
+      'Fix: CPM engine now correctly processes schedule relationships',
+      'Polish: Consistent UI across all pages — animations, badges, forms, mobile responsive',
+    ],
+  },
+  {
     version: '0.9.1',
     date: '2026-04-07',
     changes: [
