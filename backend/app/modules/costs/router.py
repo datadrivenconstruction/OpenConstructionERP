@@ -372,13 +372,36 @@ async def vectorize_cost_items(
 
     # Quick check: can we even import the vector module?
     try:
-        from app.core.vector import encode_texts, vector_index
+        from app.core.vector import encode_texts, get_embedder, vector_index
     except Exception as exc:
         logger.warning("Vector module import failed: %s", exc)
         return {
             "indexed": 0,
             "message": "Vector indexing is not available: vector module failed to load.",
             "error": str(exc),
+        }
+
+    # Verify embedding model is loadable (run in thread with short timeout
+    # so a slow model download doesn't hang the request indefinitely).
+    try:
+        embedder = await asyncio.wait_for(asyncio.to_thread(get_embedder), timeout=30)
+        if embedder is None:
+            return {
+                "indexed": 0,
+                "message": "Vector indexing is not available: no embedding model found. "
+                "Install sentence-transformers (pip install sentence-transformers).",
+            }
+    except asyncio.TimeoutError:
+        return {
+            "indexed": 0,
+            "message": "Vector indexing is not available: embedding model loading timed out. "
+            "The model may need to be downloaded first — try again later.",
+        }
+    except Exception as exc:
+        logger.warning("Embedding model check failed: %s", exc)
+        return {
+            "indexed": 0,
+            "message": f"Vector indexing is not available: {exc}",
         }
 
     from app.modules.costs.models import CostItem

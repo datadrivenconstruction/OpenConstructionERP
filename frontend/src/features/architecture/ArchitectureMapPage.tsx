@@ -327,10 +327,15 @@ function FKEdge(props: {
   style?: React.CSSProperties;
 }) {
   const { sourceX, sourceY, targetX, targetY } = props;
-  const path = `M${sourceX},${sourceY} C${sourceX + 50},${sourceY} ${targetX - 50},${targetY} ${targetX},${targetY}`;
+  const path = `M${sourceX},${sourceY} C${sourceX + 60},${sourceY} ${targetX - 60},${targetY} ${targetX},${targetY}`;
   return (
     <g>
-      <path d={path} fill="none" stroke="#f59e0b" strokeWidth={1.5} />
+      <defs>
+        <marker id="arrow-amber" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 Z" fill="#f59e0b" />
+        </marker>
+      </defs>
+      <path d={path} fill="none" stroke="#f59e0b" strokeWidth={2} markerEnd="url(#arrow-amber)" />
     </g>
   );
 }
@@ -344,10 +349,15 @@ function ImportEdge(props: {
   style?: React.CSSProperties;
 }) {
   const { sourceX, sourceY, targetX, targetY } = props;
-  const path = `M${sourceX},${sourceY} C${sourceX + 50},${sourceY} ${targetX - 50},${targetY} ${targetX},${targetY}`;
+  const path = `M${sourceX},${sourceY} C${sourceX + 60},${sourceY} ${targetX - 60},${targetY} ${targetX},${targetY}`;
   return (
     <g>
-      <path d={path} fill="none" stroke="#6b7280" strokeWidth={1} strokeDasharray="6 3" />
+      <defs>
+        <marker id="arrow-gray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 Z" fill="#94a3b8" />
+        </marker>
+      </defs>
+      <path d={path} fill="none" stroke="#94a3b8" strokeWidth={2} markerEnd="url(#arrow-gray)" />
     </g>
   );
 }
@@ -364,14 +374,12 @@ function APIEdge(props: {
   const path = `M${sourceX},${sourceY} C${sourceX + 60},${sourceY} ${targetX - 60},${targetY} ${targetX},${targetY}`;
   return (
     <g>
-      <path
-        d={path}
-        fill="none"
-        stroke="#3b82f6"
-        strokeWidth={1.5}
-        strokeDasharray="8 4"
-        className="animate-pulse"
-      />
+      <defs>
+        <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 Z" fill="#3b82f6" />
+        </marker>
+      </defs>
+      <path d={path} fill="none" stroke="#3b82f6" strokeWidth={2} strokeDasharray="8 4" markerEnd="url(#arrow-blue)" />
     </g>
   );
 }
@@ -1207,7 +1215,7 @@ function FlowCanvas({ manifest, viewLevel, searchQuery }: FlowCanvasProps) {
         proOptions={{ hideAttribution: true }}
         style={{ background: CANVAS_BG }}
       >
-        <Background color="#1e293b" gap={24} size={1} />
+        <Background color="#cbd5e1" gap={24} size={1} />
         <Controls
           showInteractive={false}
           style={{ background: '#f1f5f9', borderColor: '#e2e8f0', borderRadius: 8 }}

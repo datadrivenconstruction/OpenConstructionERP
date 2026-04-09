@@ -8,7 +8,8 @@
     "ai_estimate": "AI-raming",
     "settings": "Instellingen",
     "5d_cost_model": "5D Kostenmodel",
-    "templates": "Sjablonen"
+    "templates": "Sjablonen",
+    "architecture": "Architectuurkaart"
   },
   "common": {
     "save": "Opslaan",
