@@ -286,6 +286,45 @@ async def upload_photo(
     # Store relative path in the database
     photo_path = f"punchlist/photos/{filename}"
     item = await service.add_photo(item_id, photo_path)
+
+    # Cross-link: create Document record so punch photos appear in Documents hub
+    try:
+        import json as _json
+        from datetime import datetime as _dt
+
+        from sqlalchemy import text as _text
+
+        punch_project_id = item.project_id  # type: ignore[attr-defined]
+        doc_id = str(uuid.uuid4())
+        now = _dt.utcnow().isoformat()
+        tags_json = _json.dumps(["punchlist", "photo"])
+        await service.session.execute(
+            _text(
+                "INSERT INTO oe_documents_document "
+                "(id, project_id, name, description, category, file_size, mime_type, "
+                "file_path, version, uploaded_by, tags, metadata, "
+                "created_at, updated_at) "
+                "VALUES (:id, :pid, :name, :desc, :cat, :fsize, :mime, :fpath, "
+                "1, :by, :tags, '{}', :now, :now)"
+            ),
+            {
+                "id": doc_id,
+                "pid": str(punch_project_id),
+                "name": filename,
+                "desc": f"Punch list photo for item {item_id}",
+                "cat": "photo",
+                "fsize": len(content),
+                "mime": file.content_type or "image/jpeg",
+                "fpath": str(filepath),
+                "by": user_id or "",
+                "tags": tags_json,
+                "now": now,
+            },
+        )
+        logger.info("Cross-linked punch photo -> document %s", doc_id)
+    except Exception:
+        logger.exception("Failed to cross-link punch photo to Documents hub")
+
     return _item_to_response(item)
 
 
