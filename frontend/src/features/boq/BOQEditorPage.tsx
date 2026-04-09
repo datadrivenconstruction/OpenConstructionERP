@@ -1295,6 +1295,22 @@ export function BOQEditorPage() {
     setShowRecalcConfirm(true);
   }, []);
 
+  // "s" shortcut → save / recalculate rates (when not typing in an input)
+  useEffect(() => {
+    const INTERACTIVE = new Set(['INPUT', 'TEXTAREA', 'SELECT']);
+    const handler = (e: KeyboardEvent) => {
+      const el = document.activeElement;
+      if (el && (INTERACTIVE.has(el.tagName) || (el as HTMLElement).isContentEditable)) return;
+      if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
+      if (e.key === 's') {
+        e.preventDefault();
+        handleRecalculate();
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [handleRecalculate]);
+
   /* ── Excel paste handler ──────────────────────────────────────────── */
 
   const handleExcelPaste = useCallback(async (rows: PastedRow[]) => {
@@ -2201,7 +2217,7 @@ export function BOQEditorPage() {
           )}
           <div className="flex items-center gap-2 flex-shrink-0">
             {!boq.is_locked && isManager && (
-              <Button variant="secondary" size="sm" onClick={handleLock} disabled={lockMutation.isPending}>
+              <Button variant="secondary" size="sm" onClick={handleLock} disabled={lockMutation.isPending} title={t('boq.lock_tooltip', { defaultValue: 'Lock prevents edits. Create a revision to make changes to a locked estimate.' })}>
                 <Lock size={14} className="mr-1" />
                 {t('boq.lock', { defaultValue: 'Lock Estimate' })}
               </Button>

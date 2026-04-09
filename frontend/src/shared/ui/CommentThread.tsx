@@ -341,7 +341,7 @@ export function CommentThread({ entityType, entityId, className }: CommentThread
       entity_id: string;
       text: string;
       parent_comment_id?: string;
-    }) => apiPost<CommentData>('/v1/collaboration/comments', body),
+    }) => apiPost<CommentData>('/v1/collaboration/comments/', body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
       setNewText('');

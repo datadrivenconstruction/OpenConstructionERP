@@ -372,10 +372,10 @@ function BudgetsTab({ projectId }: { projectId: string }) {
       queryClient.invalidateQueries({ queryKey: ['finance-budgets', projectId] });
       setShowCreate(false);
       setBudgetForm({ wbs_code: '', category: '', original_budget: '', notes: '' });
-      addToast({ type: 'success', title: t('finance.budget_created', { defaultValue: 'Budget line created' }) });
+      addToast({ type: 'success', title: t('finance.budget_created', { defaultValue: 'Budget line created successfully' }) });
     },
     onError: (e: Error) =>
-      addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: e.message }),
+      addToast({ type: 'error', title: t('finance.budget_create_failed', { defaultValue: 'Failed to create budget line' }), message: e.message }),
   });
 
   const exportBudgetsMut = useMutation({
@@ -387,12 +387,12 @@ function BudgetsTab({ projectId }: { projectId: string }) {
     onSuccess: () =>
       addToast({
         type: 'success',
-        title: t('finance.export_success', { defaultValue: 'Export complete' }),
+        title: t('finance.export_success', { defaultValue: 'Budget data exported successfully' }),
       }),
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('finance.export_failed', { defaultValue: 'Export failed' }),
+        title: t('finance.export_failed', { defaultValue: 'Failed to export budget data' }),
         message: e.message,
       }),
   });
@@ -999,10 +999,10 @@ function InvoicesTab({ projectId }: { projectId: string }) {
       queryClient.invalidateQueries({ queryKey: ['finance-invoices', projectId] });
       setShowCreate(false);
       setInvoiceForm({ direction: 'payable', counterparty: '', contact_id: '', invoice_date: todayStr, due_date: '', subtotal: '', tax: '', amount: '', currency: 'EUR', description: '' });
-      addToast({ type: 'success', title: t('finance.invoice_created', { defaultValue: 'Invoice created' }) });
+      addToast({ type: 'success', title: t('finance.invoice_created', { defaultValue: 'Invoice created successfully' }) });
     },
     onError: (e: Error) =>
-      addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: e.message }),
+      addToast({ type: 'error', title: t('finance.invoice_create_failed', { defaultValue: 'Failed to create invoice' }), message: e.message }),
   });
 
   const exportInvoicesMut = useMutation({
@@ -1014,12 +1014,12 @@ function InvoicesTab({ projectId }: { projectId: string }) {
     onSuccess: () =>
       addToast({
         type: 'success',
-        title: t('finance.export_success', { defaultValue: 'Export complete' }),
+        title: t('finance.invoices_export_success', { defaultValue: 'Invoices exported successfully' }),
       }),
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('finance.export_failed', { defaultValue: 'Export failed' }),
+        title: t('finance.invoices_export_failed', { defaultValue: 'Failed to export invoices' }),
         message: e.message,
       }),
   });
@@ -1068,12 +1068,12 @@ function InvoicesTab({ projectId }: { projectId: string }) {
       addToast({
         type: 'success',
         title: t('finance.invoice_approved', {
-          defaultValue: 'Invoice approved',
+          defaultValue: 'Invoice approved successfully',
         }),
       });
     },
     onError: (e: Error) =>
-      addToast({ type: 'error', title: t('common.error', 'Error'), message: e.message }),
+      addToast({ type: 'error', title: t('finance.approve_failed', { defaultValue: 'Failed to approve invoice' }), message: e.message }),
   });
 
   const markPaidMutation = useMutation({
@@ -1085,18 +1085,18 @@ function InvoicesTab({ projectId }: { projectId: string }) {
       });
       addToast({
         type: 'success',
-        title: t('finance.invoice_paid', { defaultValue: 'Invoice marked as paid' }),
+        title: t('finance.invoice_paid', { defaultValue: 'Invoice marked as paid successfully' }),
       });
     },
     onError: (e: Error) =>
-      addToast({ type: 'error', title: t('common.error', 'Error'), message: e.message }),
+      addToast({ type: 'error', title: t('finance.pay_failed', { defaultValue: 'Failed to mark invoice as paid' }), message: e.message }),
   });
 
   return (
     <div className="space-y-4">
       {/* Sub-tabs: Payable / Receivable + Export */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" title={t('finance.payable_receivable_tooltip', { defaultValue: 'Payable = invoices you owe to vendors. Receivable = invoices clients owe to you.' })}>
           <button
             onClick={() => setSubTab('payable')}
             className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
@@ -1820,13 +1820,13 @@ function EVMTab({ projectId }: { projectId: string }) {
       queryClient.invalidateQueries({ queryKey: ['finance-evm', projectId] });
       addToast({
         type: 'success',
-        title: t('finance.snapshot_created', { defaultValue: 'EVM snapshot created' }),
+        title: t('finance.snapshot_created', { defaultValue: 'EVM snapshot created successfully' }),
       });
     },
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('finance.snapshot_failed', { defaultValue: 'Snapshot failed' }),
+        title: t('finance.snapshot_failed', { defaultValue: 'Failed to create EVM snapshot' }),
         message: e.message,
       }),
   });

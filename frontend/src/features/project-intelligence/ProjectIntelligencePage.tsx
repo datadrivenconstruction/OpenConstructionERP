@@ -314,7 +314,7 @@ export function ProjectIntelligencePage() {
           <div className="lg:col-span-4 space-y-5">
             {/* Score ring card */}
             <div className="bg-surface-secondary rounded-xl border border-border-light p-5">
-              <div className="flex justify-center mb-5">
+              <div className="flex justify-center mb-5" title={t('project_intelligence.score_tooltip', { defaultValue: 'Score is calculated from 9 domains weighted by importance: BOQ 30%, Validation 20%, Schedule 15%, Cost Model 10%, Takeoff 8%, Risk 7%, Tendering 5%, Documents 3%, Reports 2%' })}>
                 <ScoreRing
                   score={score.overall}
                   grade={score.overall_grade}
