@@ -164,42 +164,113 @@ export function ProjectIntelligencePage() {
 
   if (!activeProjectId) {
     return (
-      <div className="max-w-content mx-auto py-16">
-        <div className="text-center space-y-4">
+      <div className="max-w-3xl mx-auto py-12 px-6">
+        {/* Hero */}
+        <div className="text-center space-y-4 mb-10">
           <div className="w-16 h-16 rounded-2xl bg-oe-blue/10 flex items-center justify-center mx-auto">
             <BrainCircuit size={32} className="text-oe-blue" />
           </div>
           <h2 className="text-xl font-bold text-content-primary">
             {t('project_intelligence.title', { defaultValue: 'Project Intelligence' })}
           </h2>
-          <p className="text-sm text-content-secondary max-w-lg mx-auto">
-            {t('project_intelligence.description', {
+          <p className="text-sm text-content-secondary max-w-xl mx-auto leading-relaxed">
+            {t('project_intelligence.hero_description', {
               defaultValue:
-                'AI-powered project analysis that scores your project across 9 domains (BOQ, Validation, Schedule, Cost Model, Takeoff, Risk, Tendering, Documents, Reports), identifies critical gaps, and provides actionable recommendations.',
+                'Project Intelligence analyzes your project across 9 weighted domains and generates a completeness score from 0 to 100 (grades A through F). It identifies critical gaps that need attention and provides actionable recommendations to improve project quality.',
             })}
           </p>
-          <div className="flex items-center justify-center gap-2 pt-2">
-            <AlertTriangle size={16} className="text-amber-500" />
-            <span className="text-sm text-amber-700 dark:text-amber-400">
-              {t('project_intelligence.select_project', {
-                defaultValue: 'Select a project from the header to start analysis',
-              })}
-            </span>
+        </div>
+
+        {/* How it works — step by step */}
+        <div className="bg-surface-secondary rounded-xl border border-border-light p-6 mb-6">
+          <h3 className="text-sm font-semibold text-content-primary mb-4">
+            {t('project_intelligence.how_it_works', { defaultValue: 'How it works' })}
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            {[
+              {
+                step: '1',
+                title: t('project_intelligence.step1_title', { defaultValue: 'Select a project' }),
+                desc: t('project_intelligence.step1_desc', {
+                  defaultValue: 'Choose an active project from the header dropdown to begin analysis.',
+                }),
+              },
+              {
+                step: '2',
+                title: t('project_intelligence.step2_title', { defaultValue: 'View completeness score' }),
+                desc: t('project_intelligence.step2_desc', {
+                  defaultValue: 'See your overall score (0-100) and per-domain breakdown across BOQ, Validation, Cost Model, and 6 more.',
+                }),
+              },
+              {
+                step: '3',
+                title: t('project_intelligence.step3_title', { defaultValue: 'Fix gaps' }),
+                desc: t('project_intelligence.step3_desc', {
+                  defaultValue: 'Review critical gaps sorted by severity. Each gap includes a description, impact, and a one-click fix action.',
+                }),
+              },
+              {
+                step: '4',
+                title: t('project_intelligence.step4_title', { defaultValue: 'Get AI recommendations' }),
+                desc: t('project_intelligence.step4_desc', {
+                  defaultValue: 'Connect an AI provider in Settings to receive personalized, role-specific advice and chat with the advisor.',
+                }),
+              },
+            ].map((item) => (
+              <div key={item.step} className="text-center sm:text-left">
+                <div className="w-8 h-8 rounded-full bg-oe-blue/10 text-oe-blue text-sm font-bold flex items-center justify-center mx-auto sm:mx-0 mb-2">
+                  {item.step}
+                </div>
+                <div className="text-xs font-medium text-content-primary mb-1">{item.title}</div>
+                <div className="text-2xs text-content-tertiary leading-relaxed">{item.desc}</div>
+              </div>
+            ))}
           </div>
-          <div className="grid grid-cols-3 gap-3 max-w-md mx-auto pt-4 text-xs text-content-tertiary">
-            <div className="bg-surface-secondary rounded-lg p-3 text-center">
-              <div className="font-bold text-lg text-content-primary">A-F</div>
-              <div>Score Grade</div>
-            </div>
-            <div className="bg-surface-secondary rounded-lg p-3 text-center">
-              <div className="font-bold text-lg text-content-primary">9</div>
-              <div>Domains</div>
-            </div>
-            <div className="bg-surface-secondary rounded-lg p-3 text-center">
-              <div className="font-bold text-lg text-content-primary">AI</div>
-              <div>Recommendations</div>
-            </div>
+        </div>
+
+        {/* Domains overview */}
+        <div className="bg-surface-secondary rounded-xl border border-border-light p-6 mb-6">
+          <h3 className="text-sm font-semibold text-content-primary mb-1">
+            {t('project_intelligence.domains_title', { defaultValue: '9 analysis domains' })}
+          </h3>
+          <p className="text-2xs text-content-tertiary mb-4">
+            {t('project_intelligence.domains_desc', {
+              defaultValue:
+                'Each domain is weighted by importance. BOQ and Validation carry the most weight; Reports and Documents the least.',
+            })}
+          </p>
+          <div className="grid grid-cols-3 gap-2 text-xs">
+            {[
+              { label: 'BOQ', weight: '30%', color: '#f0883e' },
+              { label: 'Validation', weight: '20%', color: '#3fb950' },
+              { label: 'Schedule', weight: '15%', color: '#58a6ff' },
+              { label: 'Cost Model', weight: '10%', color: '#bc8cff' },
+              { label: 'Takeoff', weight: '8%', color: '#39d353' },
+              { label: 'Risk', weight: '7%', color: '#ff7b72' },
+              { label: 'Tendering', weight: '5%', color: '#ffa657' },
+              { label: 'Documents', weight: '3%', color: '#79c0ff' },
+              { label: 'Reports', weight: '2%', color: '#56d364' },
+            ].map((d) => (
+              <div
+                key={d.label}
+                className="flex items-center gap-2 rounded-md bg-surface-tertiary px-3 py-2"
+              >
+                <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
+                <span className="text-content-secondary">{d.label}</span>
+                <span className="ml-auto text-content-quaternary tabular-nums">{d.weight}</span>
+              </div>
+            ))}
           </div>
+        </div>
+
+        {/* Call to action */}
+        <div className="flex items-center justify-center gap-2 py-4">
+          <AlertTriangle size={16} className="text-amber-500" />
+          <span className="text-sm text-amber-700 dark:text-amber-400">
+            {t('project_intelligence.select_project', {
+              defaultValue: 'Select a project from the header to start analysis',
+            })}
+          </span>
         </div>
       </div>
     );
@@ -339,8 +410,21 @@ export function ProjectIntelligencePage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left column — Score + Gaps + Achievements */}
           <div className="lg:col-span-4 space-y-5">
-            {/* Score ring card */}
+            {/* Completeness Score section */}
             <div className="bg-surface-secondary rounded-xl border border-border-light p-5">
+              <div className="mb-4">
+                <h3 className="text-sm font-semibold text-content-primary">
+                  {t('project_intelligence.completeness_score', {
+                    defaultValue: 'Completeness Score',
+                  })}
+                </h3>
+                <p className="text-2xs text-content-tertiary mt-0.5 leading-relaxed">
+                  {t('project_intelligence.completeness_score_desc', {
+                    defaultValue:
+                      'How complete is your project across 9 weighted domains. BOQ (30%) and Validation (20%) carry the most weight.',
+                  })}
+                </p>
+              </div>
               <div className="flex justify-center mb-5" title={t('project_intelligence.score_tooltip', { defaultValue: 'Score is calculated from 9 domains weighted by importance: BOQ 30%, Validation 20%, Schedule 15%, Cost Model 10%, Takeoff 8%, Risk 7%, Tendering 5%, Documents 3%, Reports 2%' })}>
                 <ScoreRing
                   score={score.overall}
@@ -373,18 +457,26 @@ export function ProjectIntelligencePage() {
               </div>
             </div>
 
-            {/* Critical gaps */}
+            {/* Critical gaps section */}
             {score.critical_gaps.length > 0 && (
               <div className="bg-surface-secondary rounded-xl border border-border-light p-5">
-                <h3 className="text-sm font-semibold text-content-primary mb-3 flex items-center gap-2">
-                  <AlertTriangle size={15} className="text-red-400" />
-                  {t('project_intelligence.critical_gaps', {
-                    defaultValue: 'Critical Gaps',
-                  })}
-                  <span className="text-xs text-content-tertiary font-normal ml-auto">
-                    {score.critical_gaps.length}
-                  </span>
-                </h3>
+                <div className="mb-3">
+                  <h3 className="text-sm font-semibold text-content-primary flex items-center gap-2">
+                    <AlertTriangle size={15} className="text-red-400" />
+                    {t('project_intelligence.critical_gaps', {
+                      defaultValue: 'Critical Gaps',
+                    })}
+                    <span className="text-xs text-content-tertiary font-normal ml-auto">
+                      {score.critical_gaps.length}
+                    </span>
+                  </h3>
+                  <p className="text-2xs text-content-tertiary mt-0.5 leading-relaxed">
+                    {t('project_intelligence.critical_gaps_desc', {
+                      defaultValue:
+                        'Issues that need attention, sorted by severity. Expand each gap to see its impact and available fix actions.',
+                    })}
+                  </p>
+                </div>
                 <div className="space-y-2">
                   {displayGaps.map((gap) => (
                     <GapCard
@@ -416,15 +508,41 @@ export function ProjectIntelligencePage() {
               </div>
             )}
 
-            {/* Achievements */}
+            {/* No gaps — all clear */}
+            {score.critical_gaps.length === 0 && (
+              <div className="bg-surface-secondary rounded-xl border border-border-light p-5 text-center">
+                <CheckCircle2 size={24} className="mx-auto text-green-400 mb-2" />
+                <p className="text-sm font-medium text-content-primary">
+                  {t('project_intelligence.no_gaps_title', {
+                    defaultValue: 'No critical gaps',
+                  })}
+                </p>
+                <p className="text-2xs text-content-tertiary mt-1">
+                  {t('project_intelligence.no_gaps_desc', {
+                    defaultValue:
+                      'Your project has no critical issues. Keep adding data to improve your score further.',
+                  })}
+                </p>
+              </div>
+            )}
+
+            {/* Achievements section */}
             {score.achievements.length > 0 && (
               <div className="bg-surface-secondary rounded-xl border border-border-light p-5">
-                <h3 className="text-sm font-semibold text-content-primary mb-3 flex items-center gap-2">
-                  <CheckCircle2 size={15} className="text-green-400" />
-                  {t('project_intelligence.achievements', {
-                    defaultValue: 'Achievements',
-                  })}
-                </h3>
+                <div className="mb-3">
+                  <h3 className="text-sm font-semibold text-content-primary flex items-center gap-2">
+                    <CheckCircle2 size={15} className="text-green-400" />
+                    {t('project_intelligence.achievements', {
+                      defaultValue: 'Achievements',
+                    })}
+                  </h3>
+                  <p className="text-2xs text-content-tertiary mt-0.5 leading-relaxed">
+                    {t('project_intelligence.achievements_desc', {
+                      defaultValue:
+                        'What you have done well. These are milestones your project has already reached.',
+                    })}
+                  </p>
+                </div>
                 <div className="space-y-1.5">
                   {score.achievements.map((ach, i) => (
                     <AchievementCard key={i} achievement={ach} />
@@ -444,15 +562,30 @@ export function ProjectIntelligencePage() {
               score={score}
             />
 
-            {/* Domain details */}
-            <DomainDetails
-              state={state}
-              scores={score.domain_scores}
-              selectedDomain={selectedDomain}
-              onSelectDomain={setSelectedDomain}
-              onAction={handleAction}
-              actions={actions}
-            />
+            {/* Domain Analysis section */}
+            <div>
+              <div className="mb-2 px-1">
+                <h3 className="text-sm font-semibold text-content-primary">
+                  {t('project_intelligence.domain_analysis', {
+                    defaultValue: 'Domain Analysis',
+                  })}
+                </h3>
+                <p className="text-2xs text-content-tertiary mt-0.5">
+                  {t('project_intelligence.domain_analysis_desc', {
+                    defaultValue:
+                      'Click a domain tab to see detailed metrics, status indicators, and available actions for each area.',
+                  })}
+                </p>
+              </div>
+              <DomainDetails
+                state={state}
+                scores={score.domain_scores}
+                selectedDomain={selectedDomain}
+                onSelectDomain={setSelectedDomain}
+                onAction={handleAction}
+                actions={actions}
+              />
+            </div>
           </div>
         </div>
       </div>
