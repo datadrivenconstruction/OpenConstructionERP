@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, SkeletonTable } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
+import { useCreateShortcut } from '@/shared/hooks/useCreateShortcut';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { apiGet, triggerDownload } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
@@ -1286,6 +1287,12 @@ export function MeetingsPage() {
   const [typeFilter, setTypeFilter] = useState<MeetingType | ''>('');
   const [statusFilter, setStatusFilter] = useState<MeetingStatus | ''>('');
 
+  // "n" shortcut → open new meeting form
+  useCreateShortcut(
+    useCallback(() => setShowCreateModal(true), []),
+    !showCreateModal && !showImportModal,
+  );
+
   // Data
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
@@ -1341,13 +1348,13 @@ export function MeetingsPage() {
       setShowCreateModal(false);
       addToast({
         type: 'success',
-        title: t('meetings.created', { defaultValue: 'Meeting created' }),
+        title: t('meetings.created', { defaultValue: 'Meeting created successfully' }),
       });
     },
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('meetings.create_failed', { defaultValue: 'Failed to create meeting' }),
         message: e.message,
       }),
   });
@@ -1361,7 +1368,7 @@ export function MeetingsPage() {
       addToast(
         {
           type: 'success',
-          title: t('meetings.completed', { defaultValue: 'Meeting completed' }),
+          title: t('meetings.completed', { defaultValue: 'Meeting marked as completed' }),
           message: actionCount > 0
             ? t('meetings.tasks_created_count', {
                 defaultValue: 'Meeting completed. {{count}} tasks created from action items.',
@@ -1383,7 +1390,7 @@ export function MeetingsPage() {
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('meetings.complete_failed', { defaultValue: 'Failed to complete meeting' }),
         message: e.message,
       }),
   });
@@ -1393,12 +1400,12 @@ export function MeetingsPage() {
     onSuccess: () =>
       addToast({
         type: 'success',
-        title: t('meetings.export_success', { defaultValue: 'PDF exported' }),
+        title: t('meetings.export_success', { defaultValue: 'Meeting minutes exported as PDF' }),
       }),
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('meetings.export_failed', { defaultValue: 'Failed to export meeting PDF' }),
         message: e.message,
       }),
   });
@@ -1411,13 +1418,13 @@ export function MeetingsPage() {
       setShowImportModal(false);
       addToast({
         type: 'success',
-        title: t('meetings.import_success', { defaultValue: 'Meeting imported from transcript' }),
+        title: t('meetings.import_success', { defaultValue: 'Meeting imported successfully from transcript' }),
       });
     },
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('meetings.import_failed', { defaultValue: 'Failed to import meeting transcript' }),
         message: e.message,
       }),
   });
@@ -1490,9 +1497,14 @@ export function MeetingsPage() {
 
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-content-primary">
-          {t('meetings.page_title', { defaultValue: 'Meetings' })}
-        </h1>
+        <div>
+          <h1 className="text-2xl font-bold text-content-primary">
+            {t('meetings.page_title', { defaultValue: 'Meetings' })}
+          </h1>
+          <p className="mt-1 text-sm text-content-secondary">
+            {t('meetings.subtitle', { defaultValue: 'Schedule, track, and document project meetings with action items' })}
+          </p>
+        </div>
 
         <div className="flex items-center gap-2 shrink-0">
           {!routeProjectId && projects.length > 0 && (
@@ -1660,10 +1672,10 @@ export function MeetingsPage() {
             description={
               searchQuery || typeFilter || statusFilter
                 ? t('meetings.no_results_hint', {
-                    defaultValue: 'Try adjusting your search or filters',
+                    defaultValue: 'Try adjusting your search or filters to find what you are looking for.',
                   })
                 : t('meetings.no_meetings_hint', {
-                    defaultValue: 'Schedule your first meeting',
+                    defaultValue: 'Schedule your first meeting to track attendance, decisions, and action items across your project.',
                   })
             }
             action={
@@ -1728,7 +1740,7 @@ export function MeetingsPage() {
         <EmptyState
           icon={<CalendarDays size={28} strokeWidth={1.5} />}
           title={t('meetings.no_project', { defaultValue: 'No project selected' })}
-          description={t('meetings.select_project', { defaultValue: 'Open a project first to view and manage meetings.' })}
+          description={t('meetings.select_project', { defaultValue: 'Select a project from the header to schedule meetings, track attendance, and manage action items.' })}
         />
       )}
 

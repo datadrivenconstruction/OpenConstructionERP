@@ -1211,6 +1211,7 @@ function ScheduleDetail({
                 icon={<Zap size={16} />}
                 onClick={() => calculateCPM.mutate()}
                 loading={calculateCPM.isPending}
+                title={t('schedule.cpm_tooltip', { defaultValue: 'Critical Path Method calculates the longest path through the project and identifies activities that cannot be delayed' })}
               >
                 {t('schedule.calculate_cpm', 'Critical Path')}
               </Button>
