@@ -426,7 +426,7 @@ export function SafetyPage() {
         </h1>
         <p className="mt-1 text-sm text-content-secondary">
           {t('safety.subtitle', {
-            defaultValue: 'Incident tracking and safety observations',
+            defaultValue: 'Report incidents, record observations, and monitor site safety compliance',
           })}
         </p>
       </div>
@@ -496,7 +496,7 @@ export function SafetyPage() {
           })}
           description={t('safety.select_project', {
             defaultValue:
-              'Open a project first to view its safety data',
+              'Select a project from the header to report incidents, record safety observations, and track compliance.',
           })}
         />
       )}
@@ -575,10 +575,10 @@ function IncidentsTab({ projectId }: { projectId: string }) {
         location: '',
         days_lost: 0,
       });
-      addToast({ type: 'success', title: t('safety.incident_created', { defaultValue: 'Incident reported' }) });
+      addToast({ type: 'success', title: t('safety.incident_created', { defaultValue: 'Incident reported successfully' }) });
     },
     onError: (e: Error) =>
-      addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: e.message }),
+      addToast({ type: 'error', title: t('safety.incident_create_failed', { defaultValue: 'Failed to report incident' }), message: e.message }),
   });
 
   const exportMut = useMutation({
@@ -590,12 +590,12 @@ function IncidentsTab({ projectId }: { projectId: string }) {
     onSuccess: () =>
       addToast({
         type: 'success',
-        title: t('safety.export_success', { defaultValue: 'Export complete' }),
+        title: t('safety.export_success', { defaultValue: 'Safety data exported successfully' }),
       }),
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('safety.export_failed', { defaultValue: 'Failed to export safety data' }),
         message: e.message,
       }),
   });
@@ -634,7 +634,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
           defaultValue: 'No incidents reported',
         })}
         description={t('safety.no_incidents_desc', {
-          defaultValue: 'Incidents will appear here when reported',
+          defaultValue: 'Report workplace incidents to track injuries, near misses, and property damage. All records are logged for compliance reporting.',
         })}
         action={{
           label: t('safety.report_incident', { defaultValue: 'Report Incident' }),
@@ -1071,10 +1071,10 @@ function ObservationsTab({ projectId }: { projectId: string }) {
       queryClient.invalidateQueries({ queryKey: ['safety-observations', projectId] });
       setShowCreate(false);
       setObsForm({ observation_type: 'unsafe_condition', description: '', location: '', severity: 3, likelihood: 3 });
-      addToast({ type: 'success', title: t('safety.observation_created', { defaultValue: 'Observation recorded' }) });
+      addToast({ type: 'success', title: t('safety.observation_created', { defaultValue: 'Safety observation recorded successfully' }) });
     },
     onError: (e: Error) =>
-      addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: e.message }),
+      addToast({ type: 'error', title: t('safety.observation_create_failed', { defaultValue: 'Failed to record observation' }), message: e.message }),
   });
 
   const exportMut = useMutation({
@@ -1130,7 +1130,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
           defaultValue: 'No observations yet',
         })}
         description={t('safety.no_observations_desc', {
-          defaultValue: 'Safety observations will appear here when recorded',
+          defaultValue: 'Record safety observations to identify hazards, track unsafe conditions, and reinforce positive safety behavior on site.',
         })}
         action={{
           label: t('safety.report_observation_btn', { defaultValue: 'Report Observation' }),
