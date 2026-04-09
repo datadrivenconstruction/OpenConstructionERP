@@ -845,9 +845,8 @@ export function PunchListPage() {
               ))}
             </select>
           )}
-          <Button variant="primary" size="sm" onClick={() => setShowAddModal(true)} disabled={!projectId} className="shrink-0 whitespace-nowrap">
-            <Plus size={14} className="mr-1 shrink-0" />
-            <span className="whitespace-nowrap">{t('punch.new_item', { defaultValue: 'New Item' })}</span>
+          <Button variant="primary" size="sm" onClick={() => setShowAddModal(true)} disabled={!projectId} className="shrink-0 whitespace-nowrap" icon={<Plus size={14} />}>
+            {t('punch.new_item', { defaultValue: 'New Item' })}
           </Button>
         </div>
       </div>

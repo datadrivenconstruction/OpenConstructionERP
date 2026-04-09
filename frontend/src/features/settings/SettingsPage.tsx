@@ -20,10 +20,11 @@ import {
   Monitor,
   Pencil,
   Save,
+  Lock,
 } from 'lucide-react';
 import { Card, CardHeader, CardContent, CardFooter, Button, Badge, InfoHint, Skeleton, Breadcrumb } from '@/shared/ui';
 import { UpdateNotification } from '@/shared/ui/UpdateChecker';
-import { apiGet, apiPatch } from '@/shared/lib/api';
+import { apiGet, apiPatch, apiPost } from '@/shared/lib/api';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useThemeStore } from '@/stores/useThemeStore';
@@ -716,6 +717,7 @@ function AppearanceCard({ animationDelay }: { animationDelay: string }) {
 export function SettingsPage() {
   const { t, i18n } = useTranslation();
   const logout = useAuthStore((s) => s.logout);
+  const setTokens = useAuthStore((s) => s.setTokens);
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
 
@@ -740,6 +742,28 @@ export function SettingsPage() {
       addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
     },
   });
+
+  // ── Change password ──────────────────────────────────────────────────
+  const [pwForm, setPwForm] = useState({ current: '', new_: '', confirm: '' });
+  const [showPwFields, setShowPwFields] = useState(false);
+
+  const pwMutation = useMutation({
+    mutationFn: (body: { current_password: string; new_password: string }) =>
+      apiPost<{ access_token: string; refresh_token: string }>('/v1/users/me/change-password/', body),
+    onSuccess: (data) => {
+      const remember = localStorage.getItem('oe_remember') === '1';
+      const email = useAuthStore.getState().userEmail ?? undefined;
+      setTokens(data.access_token, data.refresh_token, remember, email);
+      setPwForm({ current: '', new_: '', confirm: '' });
+      setShowPwFields(false);
+      addToast({ type: 'success', title: t('settings.password_changed', { defaultValue: 'Password changed successfully' }) });
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+    },
+  });
+
+  const pwValid = pwForm.current.length >= 8 && pwForm.new_.length >= 8 && pwForm.new_ === pwForm.confirm;
 
   return (
     <div className="max-w-content mx-auto space-y-6 animate-fade-in">
@@ -937,8 +961,94 @@ export function SettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Change password */}
+      <Card className="animate-card-in" style={{ animationDelay: '480ms' }}>
+        <CardHeader
+          title={t('settings.change_password_title', { defaultValue: 'Change Password' })}
+          subtitle={t('settings.change_password_subtitle', { defaultValue: 'Update your account password' })}
+        />
+        <CardContent>
+          {showPwFields ? (
+            <form
+              className="space-y-3"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (pwValid && !pwMutation.isPending) {
+                  pwMutation.mutate({ current_password: pwForm.current, new_password: pwForm.new_ });
+                }
+              }}
+            >
+              <div>
+                <label htmlFor="pw-current" className="block text-sm font-medium text-content-secondary mb-1">
+                  {t('settings.current_password', { defaultValue: 'Current password' })}
+                </label>
+                <input
+                  id="pw-current"
+                  type="password"
+                  autoComplete="current-password"
+                  className="w-full rounded-md border border-border bg-surface-secondary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
+                  value={pwForm.current}
+                  onChange={(e) => setPwForm((f) => ({ ...f, current: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label htmlFor="pw-new" className="block text-sm font-medium text-content-secondary mb-1">
+                  {t('settings.new_password', { defaultValue: 'New password' })}
+                </label>
+                <input
+                  id="pw-new"
+                  type="password"
+                  autoComplete="new-password"
+                  className="w-full rounded-md border border-border bg-surface-secondary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
+                  placeholder={t('settings.password_min_hint', { defaultValue: 'Minimum 8 characters' })}
+                  value={pwForm.new_}
+                  onChange={(e) => setPwForm((f) => ({ ...f, new_: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label htmlFor="pw-confirm" className="block text-sm font-medium text-content-secondary mb-1">
+                  {t('settings.confirm_new_password', { defaultValue: 'Confirm new password' })}
+                </label>
+                <input
+                  id="pw-confirm"
+                  type="password"
+                  autoComplete="new-password"
+                  className="w-full rounded-md border border-border bg-surface-secondary px-3 py-2 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/40"
+                  value={pwForm.confirm}
+                  onChange={(e) => setPwForm((f) => ({ ...f, confirm: e.target.value }))}
+                />
+                {pwForm.confirm && pwForm.new_ !== pwForm.confirm && (
+                  <p className="mt-1 text-xs text-semantic-error">{t('settings.passwords_mismatch', { defaultValue: 'Passwords do not match' })}</p>
+                )}
+              </div>
+              <div className="flex gap-2 pt-1">
+                <Button type="submit" disabled={!pwValid || pwMutation.isPending}>
+                  {pwMutation.isPending ? (
+                    <><Loader2 className="mr-1.5 h-4 w-4 animate-spin" />{t('common.saving', { defaultValue: 'Saving...' })}</>
+                  ) : (
+                    t('settings.update_password', { defaultValue: 'Update Password' })
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => { setPwForm({ current: '', new_: '', confirm: '' }); setShowPwFields(false); }}
+                >
+                  {t('common.cancel', { defaultValue: 'Cancel' })}
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <Button variant="secondary" onClick={() => setShowPwFields(true)}>
+              <Lock className="mr-1.5 h-4 w-4" />
+              {t('settings.change_password', { defaultValue: 'Change Password' })}
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Danger zone */}
-      <Card className="animate-card-in border-semantic-error/20" style={{ animationDelay: '480ms' }}>
+      <Card className="animate-card-in border-semantic-error/20" style={{ animationDelay: '520ms' }}>
         <CardHeader title={t('settings.account_title', { defaultValue: 'Account' })} subtitle={t('settings.account_subtitle', { defaultValue: 'Sign out or manage your account' })} />
         <CardContent>
           <Button

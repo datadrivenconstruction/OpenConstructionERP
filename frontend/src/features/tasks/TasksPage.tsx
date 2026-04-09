@@ -806,10 +806,11 @@ export function TasksPage() {
           </Button>
           <Button
             variant="primary"
+            size="sm"
             onClick={() => setShowAddModal(true)}
             disabled={!projectId}
             title={!projectId ? t('common.select_project_first', { defaultValue: 'Please select a project first' }) : undefined}
-            icon={<Plus size={16} />}
+            icon={<Plus size={14} />}
           >
             {t('tasks.new_task', { defaultValue: 'New Task' })}
           </Button>

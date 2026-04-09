@@ -30,6 +30,7 @@ export interface NCR {
   location: string;
   linked_inspection_id: string | null;
   linked_inspection_number: number | null;
+  change_order_id: string | null;
   reported_by: string | null;
   created_at: string;
   updated_at: string;

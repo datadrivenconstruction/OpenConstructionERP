@@ -423,9 +423,8 @@ export function FieldReportsPage() {
             <Upload size={14} className="mr-1.5 shrink-0" />
             <span className="whitespace-nowrap">{t('fieldreports.import', { defaultValue: 'Import' })}</span>
           </Button>
-          <Button size="sm" onClick={handleOpenNew} className="shrink-0 whitespace-nowrap">
-            <Plus size={14} className="mr-1.5 shrink-0" />
-            <span className="whitespace-nowrap">{t('fieldreports.new_report', { defaultValue: 'New Report' })}</span>
+          <Button variant="primary" size="sm" onClick={handleOpenNew} className="shrink-0 whitespace-nowrap" icon={<Plus size={14} />}>
+            {t('fieldreports.new_report', { defaultValue: 'New Report' })}
           </Button>
         </div>
       </div>
@@ -616,9 +615,8 @@ export function FieldReportsPage() {
                   statusFilter || typeFilter
                     ? undefined
                     : (
-                      <Button size="sm" onClick={handleOpenNew} className="shrink-0 whitespace-nowrap">
-                        <Plus size={14} className="mr-1.5 shrink-0" />
-                        <span className="whitespace-nowrap">{t('fieldreports.new_report', { defaultValue: 'New Report' })}</span>
+                      <Button variant="primary" size="sm" onClick={handleOpenNew} className="shrink-0 whitespace-nowrap" icon={<Plus size={14} />}>
+                        {t('fieldreports.new_report', { defaultValue: 'New Report' })}
                       </Button>
                     )
                 }

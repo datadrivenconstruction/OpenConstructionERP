@@ -103,6 +103,20 @@ class Settings(BaseSettings):
     cv_pipeline_url: str | None = "http://localhost:8002"
     openweathermap_api_key: str = ""
 
+    # ── Rate Limiting ────────────────────────────────────────────────────
+    api_rate_limit: int = Field(
+        default=100,
+        description="Maximum API requests per minute per user/IP",
+    )
+    login_rate_limit: int = Field(
+        default=10,
+        description="Maximum login attempts per minute per IP",
+    )
+    ai_rate_limit: int = Field(
+        default=10,
+        description="Maximum AI requests per minute per user",
+    )
+
     # ── Validation ───────────────────────────────────────────────────────
     default_validation_rule_sets: list[str] = Field(
         default=["boq_quality"],

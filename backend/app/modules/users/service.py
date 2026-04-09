@@ -416,13 +416,13 @@ class UserService:
         self,
         user_id: uuid.UUID,
         data: ChangePasswordRequest,
-    ) -> None:
-        """Change user password. Verifies current password first.
+    ) -> TokenResponse:
+        """Change user password and return fresh JWT tokens.
 
-        Also bumps `password_changed_at` so any JWT issued before this moment
-        will be rejected by `get_current_user`. This invalidates all existing
-        sessions for the user — they need to log in again with the new
-        password.
+        Verifies current password first, then bumps `password_changed_at` so
+        any JWT issued before this moment will be rejected by
+        `get_current_user`.  Returns a new token pair so the caller stays
+        authenticated without a forced re-login.
         """
         user = await self.get_user(user_id)
 
@@ -442,6 +442,18 @@ class UserService:
             password_changed_at=datetime.now(UTC),
         )
         logger.info("Password changed for user %s", user_email)
+
+        # Re-fetch user to pick up the updated password_changed_at timestamp
+        user = await self.user_repo.get_by_id(user_id)
+
+        access_token = create_access_token(user, self.settings)
+        refresh_token = create_refresh_token(user, self.settings)
+
+        return TokenResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            expires_in=self.settings.jwt_expire_minutes * 60,
+        )
 
     async def list_users(
         self,

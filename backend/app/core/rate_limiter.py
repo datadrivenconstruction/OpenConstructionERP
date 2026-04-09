@@ -2,6 +2,11 @@
 
 Limits requests per user per time window. Thread-safe via dict with timestamps.
 For production, replace with Redis-based implementation.
+
+Limits are configurable via environment variables:
+  AI_RATE_LIMIT   — max AI requests per minute per user (default 10)
+  API_RATE_LIMIT  — max API requests per minute per user/IP (default 100)
+  LOGIN_RATE_LIMIT — max login attempts per minute per IP (default 10)
 """
 
 import time
@@ -33,10 +38,32 @@ class RateLimiter:
             return True, remaining
 
 
-# Global instances
-ai_limiter = RateLimiter(max_requests=10, window_seconds=60)  # 10 AI requests/min
-api_limiter = RateLimiter(max_requests=100, window_seconds=60)  # 100 API requests/min
-# Login rate limit — protects against brute-force credential stuffing.
-# Keyed per IP. Allows 10 attempts per minute, far above any legitimate use
-# (~1 try/6s avg) but well below what brute-force scripts need to be useful.
-login_limiter = RateLimiter(max_requests=10, window_seconds=60)
+def _create_limiters() -> tuple[RateLimiter, RateLimiter, RateLimiter]:
+    """Create rate limiter instances using values from Settings.
+
+    Reads AI_RATE_LIMIT, API_RATE_LIMIT, and LOGIN_RATE_LIMIT from the
+    application configuration (environment variables / .env file).
+    Falls back to sensible defaults if settings cannot be loaded.
+    """
+    try:
+        from app.config import get_settings
+
+        settings = get_settings()
+        ai_max = settings.ai_rate_limit
+        api_max = settings.api_rate_limit
+        login_max = settings.login_rate_limit
+    except Exception:
+        # Fallback: config not available yet (e.g. during testing or import)
+        ai_max = 10
+        api_max = 100
+        login_max = 10
+
+    return (
+        RateLimiter(max_requests=ai_max, window_seconds=60),
+        RateLimiter(max_requests=api_max, window_seconds=60),
+        RateLimiter(max_requests=login_max, window_seconds=60),
+    )
+
+
+# Global instances — configured from environment variables
+ai_limiter, api_limiter, login_limiter = _create_limiters()
