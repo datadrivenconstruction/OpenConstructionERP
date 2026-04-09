@@ -83,7 +83,6 @@ const navGroups: NavGroup[] = [
     items: [
       { labelKey: 'nav.dashboard', to: '/', icon: LayoutDashboard },
       { labelKey: 'projects.title', to: '/projects', icon: FolderOpen, tourId: 'projects' },
-      { labelKey: 'nav.reports', to: '/reports', icon: FileBarChart, advancedOnly: true },
       { labelKey: 'nav.project_intelligence', to: '/project-intelligence', icon: BrainCircuit },
     ],
   },
@@ -173,6 +172,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.photos', to: '/photos', icon: Camera },
       { labelKey: 'nav.markups', to: '/markups', icon: PenTool },
       { labelKey: 'nav.field_reports', to: '/field-reports', icon: ClipboardList, advancedOnly: true },
+      { labelKey: 'nav.reports', to: '/reports', icon: FileBarChart, advancedOnly: true },
     ],
   },
   // ── QUALITY & SAFETY ───────────────────────────────────────────────
