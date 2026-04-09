@@ -60,11 +60,9 @@ export interface TransmittalFilters {
 export interface CreateTransmittalPayload {
   project_id: string;
   subject: string;
-  purpose: TransmittalPurpose;
+  purpose_code: TransmittalPurpose;
   cover_note?: string;
-  response_due?: string;
-  recipients: { name: string; company?: string }[];
-  items: { document_title: string; document_ref?: string; revision?: string }[];
+  response_due_date?: string;
 }
 
 /* ── API Functions ─────────────────────────────────────────────────────── */

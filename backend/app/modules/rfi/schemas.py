@@ -15,7 +15,7 @@ class RFICreate(BaseModel):
     project_id: UUID
     subject: str = Field(..., min_length=1, max_length=500)
     question: str = Field(..., min_length=1)
-    raised_by: UUID
+    raised_by: UUID | None = None  # Auto-filled from authenticated user if not provided
     assigned_to: str | None = None
     status: str = Field(
         default="draft",
