@@ -967,7 +967,7 @@ export function TasksPage() {
                   <div className="flex-1 min-h-[80px]">
                     {colItems.length === 0 ? (
                       <div className="flex items-center justify-center py-8 text-xs text-content-quaternary">
-                        {t('tasks.column_empty', { defaultValue: 'No items' })}
+                        {t('tasks.column_empty', { defaultValue: 'No tasks in this column' })}
                       </div>
                     ) : (
                       colItems.map((task) => (
