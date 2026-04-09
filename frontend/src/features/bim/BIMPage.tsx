@@ -338,7 +338,7 @@ function ModelCard({
             <p className="text-2xs leading-relaxed">
               {t('bim.processing_explanation', {
                 defaultValue:
-                  'Your file has been uploaded successfully. To extract elements and geometry, a CAD converter (ODA SDK or Cad2Data) needs to be installed on the server.',
+                  'Your file has been uploaded successfully. To extract elements and geometry, a CAD converter (DDC cad2data) needs to be installed on the server.',
               })}
             </p>
             <p className="text-2xs leading-relaxed mt-1.5">

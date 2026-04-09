@@ -158,9 +158,7 @@ def _parse_vtt_transcript(content: str) -> list[dict[str, str]]:
     current_text = ""
     current_ts = ""
 
-    ts_pattern = re.compile(
-        r"(\d{2}:\d{2}:\d{2}[\.,]\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}[\.,]\d{3})"
-    )
+    ts_pattern = re.compile(r"(\d{2}:\d{2}:\d{2}[\.,]\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}[\.,]\d{3})")
 
     for line in lines:
         line = line.strip()
@@ -171,9 +169,7 @@ def _parse_vtt_transcript(content: str) -> list[dict[str, str]]:
         if ts_match:
             # Save previous segment
             if current_text:
-                segments.append(
-                    {"speaker": current_speaker, "text": current_text.strip(), "timestamp": current_ts}
-                )
+                segments.append({"speaker": current_speaker, "text": current_text.strip(), "timestamp": current_ts})
                 current_text = ""
             current_ts = ts_match.group(1)
             continue
@@ -196,9 +192,7 @@ def _parse_vtt_transcript(content: str) -> list[dict[str, str]]:
 
     # Final segment
     if current_text:
-        segments.append(
-            {"speaker": current_speaker, "text": current_text.strip(), "timestamp": current_ts}
-        )
+        segments.append({"speaker": current_speaker, "text": current_text.strip(), "timestamp": current_ts})
 
     return segments
 
@@ -322,16 +316,35 @@ def _infer_meeting_type(text: str) -> str:
     """
     lower = text[:5000].lower()
     safety_kw = [
-        "safety", "incident", "hazard", "ppe", "osha", "near miss",
-        "risk assessment", "toolbox talk", "jsa", "job safety",
+        "safety",
+        "incident",
+        "hazard",
+        "ppe",
+        "osha",
+        "near miss",
+        "risk assessment",
+        "toolbox talk",
+        "jsa",
+        "job safety",
     ]
     design_kw = [
-        "design review", "architectural", "structural", "mep",
-        "schematic", "drawing", "specification", "detail",
+        "design review",
+        "architectural",
+        "structural",
+        "mep",
+        "schematic",
+        "drawing",
+        "specification",
+        "detail",
     ]
     subcontractor_kw = [
-        "subcontractor", "sub-contractor", "trade", "bid",
-        "quote", "scope of work", "sow",
+        "subcontractor",
+        "sub-contractor",
+        "trade",
+        "bid",
+        "quote",
+        "scope of work",
+        "sow",
     ]
     kickoff_kw = ["kickoff", "kick-off", "project start", "mobilization"]
     closeout_kw = ["closeout", "close-out", "handover", "deficiency", "punchlist", "punch list"]
@@ -467,21 +480,13 @@ def _extract_meeting_data_heuristic(
     # Build minutes from all text
     minutes_text = "\n".join(all_text_parts[:200])  # Cap at ~200 lines
     if decisions:
-        minutes_text += "\n\n--- Key Decisions ---\n" + "\n".join(
-            f"- {d['decision']}" for d in decisions[:20]
-        )
+        minutes_text += "\n\n--- Key Decisions ---\n" + "\n".join(f"- {d['decision']}" for d in decisions[:20])
 
     # Build attendee list
-    attendee_list = [
-        {"name": name, "company": "", "role": "", "status": "present"}
-        for name in attendees
-    ]
+    attendee_list = [{"name": name, "company": "", "role": "", "status": "present"} for name in attendees]
 
     # Build agenda items from discussion topics
-    agenda_list = [
-        {"topic": topic, "presenter": None, "notes": None}
-        for topic in discussion_topics[:20]
-    ]
+    agenda_list = [{"topic": topic, "presenter": None, "notes": None} for topic in discussion_topics[:20]]
 
     # Detect source platform and meeting type
     full_text = raw_text or " ".join(all_text_parts[:100])
@@ -664,13 +669,16 @@ async def _extract_with_ai(
         if ai_data.get("title"):
             extracted["title"] = ai_data["title"]
         if ai_data.get("meeting_type") and ai_data["meeting_type"] in (
-            "progress", "design", "safety", "subcontractor", "kickoff", "closeout",
+            "progress",
+            "design",
+            "safety",
+            "subcontractor",
+            "kickoff",
+            "closeout",
         ):
             extracted["meeting_type"] = ai_data["meeting_type"]
         if ai_data.get("key_topics") and isinstance(ai_data["key_topics"], list):
-            extracted["key_topics"] = [
-                str(t)[:200] for t in ai_data["key_topics"][:15] if t
-            ]
+            extracted["key_topics"] = [str(t)[:200] for t in ai_data["key_topics"][:15] if t]
         if ai_data.get("attendees") and isinstance(ai_data["attendees"], list):
             extracted["attendees"] = [
                 {
@@ -950,6 +958,53 @@ async def import_meeting_summary(
         ai_used,
     )
 
+    # Cross-link: save transcript and create Document record in Documents hub
+    try:
+        import json as _json
+        from datetime import datetime as _dt
+        from pathlib import Path as _Path
+
+        from sqlalchemy import text as _text
+
+        upload_dir = _Path.home() / ".openestimator" / "uploads" / str(project_id)
+        upload_dir.mkdir(parents=True, exist_ok=True)
+        file_uuid = uuid.uuid4().hex[:12]
+        safe_name = re.sub(r"[^\w.\-]", "_", file.filename or "transcript")
+        storage_name = f"{file_uuid}_{safe_name}"
+        transcript_path = upload_dir / storage_name
+        transcript_path.write_bytes(content)
+
+        doc_id = str(uuid.uuid4())
+        now = _dt.utcnow().isoformat()
+        tags_json = _json.dumps(["meeting", "transcript"])
+        mime = file.content_type or "text/plain"
+        await service.session.execute(
+            _text(
+                "INSERT INTO oe_documents_document "
+                "(id, project_id, name, description, category, file_size, mime_type, "
+                "file_path, version, uploaded_by, tags, metadata, "
+                "created_at, updated_at) "
+                "VALUES (:id, :pid, :name, :desc, :cat, :fsize, :mime, :fpath, "
+                "1, :by, :tags, '{}', :now, :now)"
+            ),
+            {
+                "id": doc_id,
+                "pid": str(project_id),
+                "name": file.filename or "transcript",
+                "desc": f"Meeting transcript: {extracted.get('title', '')}",
+                "cat": "correspondence",
+                "fsize": len(content),
+                "mime": mime,
+                "fpath": str(transcript_path),
+                "by": str(user_id) if user_id else "",
+                "tags": tags_json,
+                "now": now,
+            },
+        )
+        logger.info("Cross-linked meeting transcript -> document %s", doc_id)
+    except Exception:
+        logger.exception("Failed to cross-link meeting transcript to Documents hub")
+
     return _meeting_to_response(meeting)
 
 
@@ -1052,9 +1107,7 @@ async def export_meeting_pdf(
         raise HTTPException(status_code=404, detail="Meeting not found")
 
     # Fetch project name
-    proj_result = await session.execute(
-        select(Project.name).where(Project.id == meeting.project_id)
-    )
+    proj_result = await session.execute(select(Project.name).where(Project.id == meeting.project_id))
     project_name = proj_result.scalar_one_or_none() or "Unknown Project"
 
     # ── Build PDF ────────────────────────────────────────────────────────
@@ -1142,11 +1195,13 @@ async def export_meeting_pdf(
         att_data = [["Name", "Company", "Status"]]
         for att in attendees:
             if isinstance(att, dict):
-                att_data.append([
-                    att.get("name", ""),
-                    att.get("company", att.get("role", "")),
-                    att.get("status", "").replace("_", " ").title(),
-                ])
+                att_data.append(
+                    [
+                        att.get("name", ""),
+                        att.get("company", att.get("role", "")),
+                        att.get("status", "").replace("_", " ").title(),
+                    ]
+                )
         att_table = Table(
             att_data,
             colWidths=[USABLE_WIDTH * 0.4, USABLE_WIDTH * 0.35, USABLE_WIDTH * 0.25],
@@ -1181,9 +1236,7 @@ async def export_meeting_pdf(
                     line += f"  <i>({presenter})</i>"
                 elements.append(Paragraph(line, style_body))
                 if notes:
-                    elements.append(
-                        Paragraph(f"&nbsp;&nbsp;&nbsp;&nbsp;{notes}", style_small)
-                    )
+                    elements.append(Paragraph(f"&nbsp;&nbsp;&nbsp;&nbsp;{notes}", style_small))
 
     # Action items
     actions = meeting.action_items or []
@@ -1192,16 +1245,18 @@ async def export_meeting_pdf(
         act_data = [["#", "Description", "Owner", "Due Date", "Status"]]
         for idx, ai in enumerate(actions, 1):
             if isinstance(ai, dict):
-                status_str = "Completed" if ai.get("completed") else (
-                    ai.get("status", "Open").replace("_", " ").title()
+                status_str = (
+                    "Completed" if ai.get("completed") else (ai.get("status", "Open").replace("_", " ").title())
                 )
-                act_data.append([
-                    str(idx),
-                    ai.get("description", ""),
-                    ai.get("owner", ai.get("owner_id", "")),
-                    ai.get("due_date", ""),
-                    status_str,
-                ])
+                act_data.append(
+                    [
+                        str(idx),
+                        ai.get("description", ""),
+                        ai.get("owner", ai.get("owner_id", "")),
+                        ai.get("due_date", ""),
+                        status_str,
+                    ]
+                )
         act_table = Table(
             act_data,
             colWidths=[
@@ -1231,9 +1286,7 @@ async def export_meeting_pdf(
     # Footer timestamp
     elements.append(Spacer(1, 10 * mm))
     generated_at = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
-    elements.append(
-        Paragraph(f"Generated: {generated_at}", style_small)
-    )
+    elements.append(Paragraph(f"Generated: {generated_at}", style_small))
 
     # Build document
     buf = io.BytesIO()
@@ -1242,9 +1295,7 @@ async def export_meeting_pdf(
         canvas_obj.saveState()
         canvas_obj.setFont("Helvetica", 7)
         canvas_obj.setFillColor(colors.HexColor("#999999"))
-        canvas_obj.drawString(
-            MARGIN, PAGE_HEIGHT - 12 * mm, f"{project_name} — {meeting.title}"
-        )
+        canvas_obj.drawString(MARGIN, PAGE_HEIGHT - 12 * mm, f"{project_name} — {meeting.title}")
         canvas_obj.drawRightString(
             PAGE_WIDTH - MARGIN,
             10 * mm,
@@ -1254,9 +1305,7 @@ async def export_meeting_pdf(
 
     frame = Frame(MARGIN, MARGIN, USABLE_WIDTH, PAGE_HEIGHT - 2 * MARGIN, id="main")
     doc = BaseDocTemplate(buf, pagesize=A4)
-    doc.addPageTemplates(
-        [PageTemplate(id="main", frames=[frame], onPage=_header_footer)]
-    )
+    doc.addPageTemplates([PageTemplate(id="main", frames=[frame], onPage=_header_footer)])
     doc.build(elements)
 
     buf.seek(0)
