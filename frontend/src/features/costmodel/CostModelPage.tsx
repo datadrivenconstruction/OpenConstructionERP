@@ -1241,6 +1241,7 @@ function MonteCarloPanel({ projectId, currency }: { projectId: string; currency:
 function FiveDDashboard({ project }: { project: Project }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
   const [selectedBoqId, setSelectedBoqId] = useState('');
 
   const { data: dashboard, isLoading: dashboardLoading } = useQuery({

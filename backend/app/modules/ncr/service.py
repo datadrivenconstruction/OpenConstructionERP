@@ -70,7 +70,38 @@ class NCRService:
             data.project_id,
         )
 
-        # Emit event for cross-module handlers (notifications, analytics)
+        # Create notification for project owner (same session avoids
+        # SQLite write-lock contention from event_bus handlers)
+        try:
+            from sqlalchemy import select
+
+            from app.modules.notifications.service import NotificationService
+            from app.modules.projects.models import Project
+
+            result = await self.session.execute(
+                select(Project.owner_id).where(Project.id == data.project_id)
+            )
+            owner_id = result.scalar_one_or_none()
+            if owner_id:
+                notif_svc = NotificationService(self.session)
+                await notif_svc.create(
+                    user_id=owner_id,
+                    notification_type="warning",
+                    title_key="notification.ncr_created_title",
+                    entity_type="ncr",
+                    entity_id=str(ncr.id),
+                    body_key="notification.ncr_created_body",
+                    body_context={
+                        "ncr_number": ncr_number,
+                        "title": data.title[:200],
+                        "severity": data.severity,
+                    },
+                    action_url=f"/projects/{data.project_id}/ncr",
+                )
+        except Exception:
+            logger.exception("Failed to create notification for NCR %s", ncr_number)
+
+        # Emit event for additional cross-module handlers (analytics, etc.)
         await event_bus.publish(
             "ncr.created",
             {

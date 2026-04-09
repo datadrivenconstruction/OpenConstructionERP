@@ -45,10 +45,8 @@ async def _safe_audit(
             user_id=user_id,
             details=details,
         )
-    except Exception as exc:
-        import traceback
-        print(f"[AUDIT FAIL] {action} {entity_type}: {exc}")
-        traceback.print_exc()
+    except Exception:
+        _logger_audit.debug("Audit log write skipped for %s %s", action, entity_type)
 
 
 def _validate_email_format(email: str | None) -> None:
