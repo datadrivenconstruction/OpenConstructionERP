@@ -124,7 +124,7 @@ def _stamp_to_response(item: object) -> StampTemplateResponse:
 # ── Summary ──────────────────────────────────────────────────────────────────
 
 
-@router.get("/summary", response_model=MarkupSummary)
+@router.get("/summary/", response_model=MarkupSummary)
 async def get_summary(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -138,7 +138,7 @@ async def get_summary(
 # ── Export ───────────────────────────────────────────────────────────────────
 
 
-@router.get("/export")
+@router.get("/export/")
 async def export_markups(
     project_id: uuid.UUID = Query(...),
     format: str = Query(default="csv", pattern=r"^csv$"),
@@ -163,7 +163,7 @@ async def export_markups(
 # ── Bulk Create ──────────────────────────────────────────────────────────────
 
 
-@router.post("/bulk", response_model=list[MarkupResponse], status_code=201)
+@router.post("/bulk/", response_model=list[MarkupResponse], status_code=201)
 async def bulk_create_markups(
     data: MarkupBulkCreate,
     user_id: CurrentUserId,
@@ -278,7 +278,7 @@ async def delete_markup(
 # ── BOQ Link ─────────────────────────────────────────────────────────────────
 
 
-@router.post("/{markup_id}/link-to-boq", response_model=MarkupResponse)
+@router.post("/{markup_id}/link-to-boq/", response_model=MarkupResponse)
 async def link_to_boq(
     markup_id: uuid.UUID,
     data: BoqLinkRequest,
@@ -341,7 +341,7 @@ async def delete_scale(
 # ── Stamp Templates ──────────────────────────────────────────────────────────
 
 
-@router.post("/stamps/templates", response_model=StampTemplateResponse, status_code=201)
+@router.post("/stamps/templates/", response_model=StampTemplateResponse, status_code=201)
 async def create_stamp_template(
     data: StampTemplateCreate,
     user_id: CurrentUserId,
@@ -362,7 +362,7 @@ async def create_stamp_template(
         )
 
 
-@router.get("/stamps/templates", response_model=list[StampTemplateResponse])
+@router.get("/stamps/templates/", response_model=list[StampTemplateResponse])
 async def list_stamp_templates(
     project_id: uuid.UUID | None = Query(default=None),
     user_id: CurrentUserId = None,  # type: ignore[assignment]

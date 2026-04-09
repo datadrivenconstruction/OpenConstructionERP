@@ -307,7 +307,7 @@ async def delete_schedule(
 
 
 @router.post(
-    "/schedules/{schedule_id}/activities",
+    "/schedules/{schedule_id}/activities/",
     response_model=ActivityResponse,
     status_code=201,
     summary="Create activity",
@@ -329,7 +329,7 @@ async def create_activity(
 
 
 @router.get(
-    "/schedules/{schedule_id}/activities",
+    "/schedules/{schedule_id}/activities/",
     response_model=list[ActivityResponse],
     summary="List activities",
     dependencies=[Depends(RequirePermission("schedule.read"))],
@@ -346,7 +346,7 @@ async def list_activities(
 
 
 @router.get(
-    "/schedules/{schedule_id}/gantt",
+    "/schedules/{schedule_id}/gantt/",
     response_model=GanttData,
     summary="Get Gantt chart data",
     dependencies=[Depends(RequirePermission("schedule.read"))],
@@ -363,7 +363,7 @@ async def get_gantt_data(
 
 
 @router.post(
-    "/schedules/{schedule_id}/generate-from-boq",
+    "/schedules/{schedule_id}/generate-from-boq/",
     response_model=list[ActivityResponse],
     status_code=201,
     summary="Generate activities from BOQ",
@@ -396,7 +396,7 @@ async def generate_from_boq(
 
 
 @router.post(
-    "/schedules/{schedule_id}/calculate-cpm",
+    "/schedules/{schedule_id}/calculate-cpm/",
     response_model=CriticalPathResponse,
     summary="Calculate critical path (CPM)",
     description="Run CPM forward/backward pass on a schedule. Returns early/late start/finish, "
@@ -416,7 +416,7 @@ async def calculate_cpm(
 
 
 @router.get(
-    "/schedules/{schedule_id}/risk-analysis",
+    "/schedules/{schedule_id}/risk-analysis/",
     response_model=RiskAnalysisResponse,
     summary="Get PERT risk analysis",
     description="Compute PERT-based risk analysis with P50, P80, P95 duration estimates. "
@@ -467,7 +467,7 @@ async def delete_activity(
 
 
 @router.post(
-    "/activities/{activity_id}/link-position",
+    "/activities/{activity_id}/link-position/",
     response_model=ActivityResponse,
     summary="Link BOQ position to activity",
     dependencies=[Depends(RequirePermission("schedule.update"))],
@@ -483,7 +483,7 @@ async def link_boq_position(
 
 
 @router.patch(
-    "/activities/{activity_id}/progress",
+    "/activities/{activity_id}/progress/",
     response_model=ActivityResponse,
     summary="Update activity progress",
     dependencies=[Depends(RequirePermission("schedule.update"))],
@@ -502,7 +502,7 @@ async def update_activity_progress(
 
 
 @router.post(
-    "/activities/{activity_id}/work-orders",
+    "/activities/{activity_id}/work-orders/",
     response_model=WorkOrderResponse,
     status_code=201,
     summary="Create work order",
@@ -560,7 +560,7 @@ async def update_work_order(
 
 
 @router.post(
-    "/schedules/{schedule_id}/relationships",
+    "/schedules/{schedule_id}/relationships/",
     response_model=RelationshipResponse,
     status_code=201,
     summary="Create CPM relationship",
@@ -641,7 +641,7 @@ async def create_relationship(
 
 
 @router.get(
-    "/schedules/{schedule_id}/relationships",
+    "/schedules/{schedule_id}/relationships/",
     response_model=list[RelationshipResponse],
     summary="List CPM relationships",
     dependencies=[Depends(RequirePermission("schedule.read"))],
@@ -688,7 +688,7 @@ async def delete_relationship(
 
 
 @router.post(
-    "/schedule/cpm/calculate",
+    "/schedule/cpm/calculate/",
     response_model=CriticalPathResponse,
     summary="Run full CPM calculation",
     description="Full CPM calculation using the core engine. Reads activities and "
@@ -1155,7 +1155,7 @@ def _parse_xer_tables(content: str) -> dict[str, list[dict[str, str]]]:
 
 
 @router.post(
-    "/schedule/import/xer",
+    "/schedule/import/xer/",
     response_model=ImportResult,
     status_code=201,
     dependencies=[Depends(RequirePermission("schedule.update"))],
@@ -1390,7 +1390,7 @@ def _parse_msp_duration_to_days(duration_str: str) -> int:
 
 
 @router.post(
-    "/schedule/import/msp-xml",
+    "/schedule/import/msp-xml/",
     response_model=ImportResult,
     status_code=201,
     dependencies=[Depends(RequirePermission("schedule.update"))],
@@ -1621,7 +1621,7 @@ async def import_msp_xml(
 
 
 @router.get(
-    "/schedule/export/csv",
+    "/schedule/export/csv/",
     dependencies=[Depends(RequirePermission("schedule.read"))],
 )
 async def export_schedule_csv(
@@ -1731,7 +1731,7 @@ async def export_schedule_csv(
 
 
 @router.get(
-    "/stats",
+    "/stats/",
     response_model=ScheduleStatsResponse,
     dependencies=[Depends(RequirePermission("schedule.read"))],
 )
@@ -1815,7 +1815,7 @@ async def schedule_stats(
 
 
 @router.get(
-    "/critical-path",
+    "/critical-path/",
     response_model=list[ActivityResponse],
     dependencies=[Depends(RequirePermission("schedule.read"))],
 )

@@ -359,7 +359,7 @@ def _rows_to_elements(
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
-@router.post("/upload", status_code=201)
+@router.post("/upload/", status_code=201)
 async def upload_bim_data(
     project_id: str = Query(..., description="Project UUID"),
     name: str = Query(default="Imported Model", max_length=255),
@@ -542,7 +542,7 @@ _ALLOWED_CAD_EXTENSIONS = {".rvt", ".ifc", ".dwg", ".dgn", ".fbx", ".obj", ".3ds
 _CAD_MAX_SIZE = 500 * 1024 * 1024  # 500 MB
 
 
-@router.post("/upload-cad", status_code=201)
+@router.post("/upload-cad/", status_code=201)
 async def upload_cad_file(
     project_id: str = Query(..., description="Project UUID"),
     name: str = Query(default="", max_length=255),
@@ -713,7 +713,7 @@ async def upload_cad_file(
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
-@router.get("/models/{model_id}/geometry")
+@router.get("/models/{model_id}/geometry/")
 async def get_model_geometry(
     model_id: uuid.UUID,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -821,7 +821,7 @@ async def delete_model(
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
-@router.get("/models/{model_id}/elements", response_model=BIMElementListResponse)
+@router.get("/models/{model_id}/elements/", response_model=BIMElementListResponse)
 async def list_elements(
     model_id: uuid.UUID,
     element_type: str | None = Query(default=None),
@@ -850,7 +850,7 @@ async def list_elements(
 
 
 @router.post(
-    "/models/{model_id}/elements",
+    "/models/{model_id}/elements/",
     response_model=BIMElementListResponse,
     status_code=201,
 )
@@ -886,7 +886,7 @@ async def get_element(
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
-@router.get("/links", response_model=BOQElementLinkListResponse)
+@router.get("/links/", response_model=BOQElementLinkListResponse)
 async def list_links(
     boq_position_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -900,7 +900,7 @@ async def list_links(
     )
 
 
-@router.post("/links", response_model=BOQElementLinkResponse, status_code=201)
+@router.post("/links/", response_model=BOQElementLinkResponse, status_code=201)
 async def create_link(
     data: BOQElementLinkCreate,
     user_id: CurrentUserId,
@@ -926,7 +926,7 @@ async def delete_link(
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
-@router.get("/quantity-maps", response_model=BIMQuantityMapListResponse)
+@router.get("/quantity-maps/", response_model=BIMQuantityMapListResponse)
 async def list_quantity_maps(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=1, le=500),
@@ -941,7 +941,7 @@ async def list_quantity_maps(
     )
 
 
-@router.post("/quantity-maps", response_model=BIMQuantityMapResponse, status_code=201)
+@router.post("/quantity-maps/", response_model=BIMQuantityMapResponse, status_code=201)
 async def create_quantity_map(
     data: BIMQuantityMapCreate,
     user_id: CurrentUserId,
@@ -964,7 +964,7 @@ async def update_quantity_map(
     return BIMQuantityMapResponse.model_validate(qmap)
 
 
-@router.post("/quantity-maps/apply", response_model=QuantityMapApplyResult)
+@router.post("/quantity-maps/apply/", response_model=QuantityMapApplyResult)
 async def apply_quantity_maps(
     data: QuantityMapApplyRequest,
     user_id: CurrentUserId,

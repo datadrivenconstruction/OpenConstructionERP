@@ -81,7 +81,7 @@ async def list_contacts(
 
 
 @router.get(
-    "/search",
+    "/search/",
     response_model=ContactListResponse,
     summary="Search contacts",
     description="Full-text search across contact name, company, and email fields. "
@@ -116,7 +116,7 @@ async def search_contacts(
 
 
 @router.get(
-    "/stats",
+    "/stats/",
     response_model=ContactStatsResponse,
     summary="Get contact statistics",
     description="Aggregate statistics: total contacts, breakdown by type and country (top 10), "
@@ -143,7 +143,7 @@ async def contact_stats(
 
 
 @router.get(
-    "/by-company",
+    "/by-company/",
     response_model=ContactListResponse,
     summary="List contacts by company",
     description="Find all contacts belonging to the same company (case-insensitive match).",
@@ -332,7 +332,7 @@ def _parse_contact_rows_from_excel(content_bytes: bytes) -> list[dict[str, Any]]
 
 
 @router.post(
-    "/import/file",
+    "/import/file/",
     summary="Import contacts from file",
     description="Upload an Excel (.xlsx) or CSV (.csv) file to bulk-import contacts. "
     "Column headers are auto-detected using flexible aliases (EN/DE). "
@@ -502,7 +502,7 @@ async def import_contacts_file(
 
 
 @router.get(
-    "/export",
+    "/export/",
     summary="Export contacts as Excel",
     description="Download all active contacts as an Excel (.xlsx) file.",
     response_description="Excel file stream (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)",
@@ -567,7 +567,7 @@ async def export_contacts(
 
 
 @router.get(
-    "/template",
+    "/template/",
     summary="Download import template",
     description="Download an empty Excel template with correct column headers and "
     "two example rows. Includes a Notes sheet explaining each column.",

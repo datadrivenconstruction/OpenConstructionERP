@@ -93,7 +93,7 @@ def _revision_to_response(revision: object) -> RevisionResponse:
 # ── Stats ────────────────────────────────────────────────────────────────────
 
 
-@router.get("/stats", response_model=CDEStatsResponse)
+@router.get("/stats/", response_model=CDEStatsResponse)
 async def cde_stats(
     project_id: uuid.UUID = Query(...),
     service: CDEService = Depends(_get_service),
@@ -109,7 +109,7 @@ async def cde_stats(
 # ── Container List ────────────────────────────────────────────────────────────
 
 
-@router.get("/containers", response_model=list[ContainerResponse])
+@router.get("/containers/", response_model=list[ContainerResponse])
 async def list_containers(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -133,7 +133,7 @@ async def list_containers(
 # ── Container Create ──────────────────────────────────────────────────────────
 
 
-@router.post("/containers", response_model=ContainerResponse, status_code=201)
+@router.post("/containers/", response_model=ContainerResponse, status_code=201)
 async def create_container(
     data: ContainerCreate,
     user_id: CurrentUserId,
@@ -176,7 +176,7 @@ async def update_container(
 # ── State Transition ──────────────────────────────────────────────────────────
 
 
-@router.post("/containers/{container_id}/transition", response_model=ContainerResponse)
+@router.post("/containers/{container_id}/transition/", response_model=ContainerResponse)
 async def transition_state(
     container_id: uuid.UUID,
     data: StateTransitionRequest,
@@ -197,7 +197,7 @@ async def transition_state(
 # ── Revision List ─────────────────────────────────────────────────────────────
 
 
-@router.get("/containers/{container_id}/revisions", response_model=list[RevisionResponse])
+@router.get("/containers/{container_id}/revisions/", response_model=list[RevisionResponse])
 async def list_revisions(
     container_id: uuid.UUID,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -218,7 +218,7 @@ async def list_revisions(
 
 
 @router.post(
-    "/containers/{container_id}/revisions",
+    "/containers/{container_id}/revisions/",
     response_model=RevisionResponse,
     status_code=201,
 )

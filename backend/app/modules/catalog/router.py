@@ -181,7 +181,7 @@ async def import_catalog_from_github(
 # ── List loaded regions ──────────────────────────────────────────────────
 
 
-@router.get("/regions")
+@router.get("/regions/")
 async def list_catalog_regions(
     session: SessionDep,
 ) -> list[dict[str, Any]]:
@@ -215,7 +215,7 @@ async def delete_catalog_region(
 
 
 @router.patch(
-    "/adjust-prices",
+    "/adjust-prices/",
     dependencies=[Depends(RequirePermission("catalog.create"))],
 )
 async def adjust_prices(
@@ -338,7 +338,7 @@ async def search_catalog(
 # ── Stats ─────────────────────────────────────────────────────────────────
 
 
-@router.get("/stats", response_model=CatalogStatsResponse)
+@router.get("/stats/", response_model=CatalogStatsResponse)
 async def catalog_stats(
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: CatalogResourceService = Depends(_get_service),
@@ -378,7 +378,7 @@ async def create_catalog_resource(
 # ── Extract from cost items ──────────────────────────────────────────────
 
 
-@router.post("/extract")
+@router.post("/extract/")
 async def extract_resources(
     service: CatalogResourceService = Depends(_get_service),
     _user: str = Depends(RequirePermission("catalog.extract")),

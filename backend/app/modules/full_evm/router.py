@@ -26,7 +26,7 @@ def _get_service(session: SessionDep) -> EVMService:
     return EVMService(session)
 
 
-@router.get("/forecasts", response_model=EVMForecastListResponse)
+@router.get("/forecasts/", response_model=EVMForecastListResponse)
 async def list_forecasts(
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     project_id: uuid.UUID | None = Query(default=None),
@@ -40,7 +40,7 @@ async def list_forecasts(
     )
 
 
-@router.post("/forecasts/calculate", response_model=EVMForecastResponse, status_code=201)
+@router.post("/forecasts/calculate/", response_model=EVMForecastResponse, status_code=201)
 async def calculate_forecast(
     data: EVMCalculateRequest,
     user_id: CurrentUserId,
@@ -54,7 +54,7 @@ async def calculate_forecast(
     return EVMForecastResponse.model_validate(forecast)
 
 
-@router.get("/s-curve-data", response_model=SCurveDataResponse)
+@router.get("/s-curve-data/", response_model=SCurveDataResponse)
 async def get_s_curve_data(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]

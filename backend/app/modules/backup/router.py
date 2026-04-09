@@ -238,7 +238,7 @@ def parse_backup_zip(raw: bytes) -> tuple[dict[str, Any], dict[str, list[dict]]]
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 
-@router.post("/export", tags=["Backup"])
+@router.post("/export/", tags=["Backup"])
 async def export_backup(user_id: CurrentUserId) -> StreamingResponse:
     """Export all user data as a downloadable ZIP backup.
 
@@ -294,7 +294,7 @@ async def export_backup(user_id: CurrentUserId) -> StreamingResponse:
     )
 
 
-@router.post("/restore", response_model=RestoreResponse, tags=["Backup"])
+@router.post("/restore/", response_model=RestoreResponse, tags=["Backup"])
 async def restore_backup(
     user_id: CurrentUserId,
     file: UploadFile = File(...),
@@ -431,7 +431,7 @@ async def restore_backup(
     )
 
 
-@router.post("/validate", response_model=ValidateResponse, tags=["Backup"])
+@router.post("/validate/", response_model=ValidateResponse, tags=["Backup"])
 async def validate_backup(
     user_id: CurrentUserId,
     file: UploadFile = File(...),

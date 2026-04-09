@@ -366,7 +366,7 @@ async def list_boqs(
 
 
 @router.get(
-    "/boqs/templates",
+    "/boqs/templates/",
     response_model=list[TemplateInfo],
     summary="List BOQ templates",
     dependencies=[Depends(RequirePermission("boq.read"))],
@@ -393,7 +393,7 @@ async def list_templates(
 
 
 @router.post(
-    "/boqs/from-template",
+    "/boqs/from-template/",
     response_model=BOQResponse,
     status_code=201,
     summary="Create BOQ from template",
@@ -425,7 +425,7 @@ async def create_boq_from_template(
 
 
 @router.post(
-    "/boqs/classify",
+    "/boqs/classify/",
     response_model=ClassifyResponse,
     summary="AI: Suggest classification codes",
     dependencies=[Depends(RequirePermission("boq.read"))],
@@ -476,7 +476,7 @@ async def classify_position(
 
 
 @router.post(
-    "/boqs/classify-elements",
+    "/boqs/classify-elements/",
     response_model=ClassifyElementsResponse,
     summary="Map CAD elements to classification codes",
     dependencies=[Depends(RequirePermission("boq.read"))],
@@ -538,7 +538,7 @@ async def classify_elements(
 
 
 @router.post(
-    "/boqs/search-cost-items",
+    "/boqs/search-cost-items/",
     response_model=CostItemSearchResponse,
     summary="AI: Search cost items",
     dependencies=[Depends(RequirePermission("boq.read"))],
@@ -601,7 +601,7 @@ async def search_cost_items(
 
 
 @router.post(
-    "/boqs/suggest-rate",
+    "/boqs/suggest-rate/",
     response_model=SuggestRateResponse,
     summary="AI: Suggest market rate",
     dependencies=[Depends(RequirePermission("boq.read"))],
@@ -665,7 +665,7 @@ async def suggest_rate(
 
 
 @router.post(
-    "/boqs/{boq_id}/check-anomalies",
+    "/boqs/{boq_id}/check-anomalies/",
     response_model=AnomalyCheckResponse,
     summary="AI: Detect pricing anomalies",
     dependencies=[Depends(RequirePermission("boq.read"))],
@@ -725,7 +725,7 @@ async def check_anomalies(
 
 
 @router.post(
-    "/boqs/enhance-description",
+    "/boqs/enhance-description/",
     response_model=EnhanceDescriptionResponse,
     summary="AI: Enhance description",
     dependencies=[Depends(RequirePermission("boq.read"))],
@@ -765,7 +765,7 @@ async def enhance_description(
 
 
 @router.post(
-    "/boqs/suggest-prerequisites",
+    "/boqs/suggest-prerequisites/",
     response_model=SuggestPrerequisitesResponse,
     summary="AI: Suggest prerequisites",
     dependencies=[Depends(RequirePermission("boq.read"))],
@@ -804,7 +804,7 @@ async def suggest_prerequisites(
 
 
 @router.post(
-    "/boqs/{boq_id}/check-scope",
+    "/boqs/{boq_id}/check-scope/",
     response_model=CheckScopeResponse,
     summary="AI: Check scope completeness",
     dependencies=[Depends(RequirePermission("boq.read"))],
@@ -854,7 +854,7 @@ async def check_scope(
 
 
 @router.post(
-    "/boqs/escalate-rate",
+    "/boqs/escalate-rate/",
     response_model=EscalateRateResponse,
     summary="AI: Escalate rate to current prices",
     dependencies=[Depends(RequirePermission("boq.read"))],
@@ -928,7 +928,7 @@ async def get_boq(
 
 
 @router.get(
-    "/boqs/{boq_id}/structured",
+    "/boqs/{boq_id}/structured/",
     response_model=BOQWithSections,
     summary="Get BOQ with sections and markups",
     dependencies=[Depends(RequirePermission("boq.read"))],
@@ -951,7 +951,7 @@ async def get_boq_structured(
 
 
 @router.get(
-    "/boqs/{boq_id}/activity",
+    "/boqs/{boq_id}/activity/",
     response_model=ActivityLogList,
     summary="Get BOQ activity log",
     dependencies=[Depends(RequirePermission("boq.read"))],
@@ -971,7 +971,7 @@ async def get_boq_activity(
 
 
 @router.get(
-    "/projects/{project_id}/activity",
+    "/projects/{project_id}/activity/",
     response_model=ActivityLogList,
     summary="Get project activity log",
     dependencies=[Depends(RequirePermission("boq.read"))],
@@ -1031,7 +1031,7 @@ async def delete_boq(
 
 
 @router.post(
-    "/boqs/{boq_id}/duplicate",
+    "/boqs/{boq_id}/duplicate/",
     response_model=BOQResponse,
     status_code=201,
     summary="Duplicate BOQ",
@@ -1051,7 +1051,7 @@ async def duplicate_boq(
 
 
 @router.post(
-    "/positions/{position_id}/duplicate",
+    "/positions/{position_id}/duplicate/",
     response_model=PositionResponse,
     status_code=201,
     summary="Duplicate position",
@@ -1073,7 +1073,7 @@ async def duplicate_position(
 
 
 @router.post(
-    "/boqs/{boq_id}/lock",
+    "/boqs/{boq_id}/lock/",
     response_model=BOQResponse,
     summary="Lock BOQ",
     dependencies=[Depends(RequirePermission("boq.update"))],
@@ -1103,7 +1103,7 @@ async def lock_boq(
 
 
 @router.post(
-    "/boqs/{boq_id}/unlock",
+    "/boqs/{boq_id}/unlock/",
     response_model=BOQResponse,
     summary="Unlock BOQ",
     dependencies=[Depends(RequirePermission("boq.update"))],
@@ -1144,7 +1144,7 @@ async def unlock_boq(
 
 
 @router.post(
-    "/boqs/{boq_id}/create-budget",
+    "/boqs/{boq_id}/create-budget/",
     status_code=201,
     summary="Create budget from BOQ",
     description="Create project budget lines from BOQ sections/positions. "
@@ -1247,7 +1247,7 @@ async def create_budget_from_boq(
 
 
 @router.post(
-    "/boqs/{boq_id}/create-revision",
+    "/boqs/{boq_id}/create-revision/",
     response_model=BOQResponse,
     status_code=201,
     summary="Create BOQ revision",
@@ -1279,7 +1279,7 @@ async def create_revision(
 
 
 @router.post(
-    "/boqs/{boq_id}/positions",
+    "/boqs/{boq_id}/positions/",
     response_model=PositionResponse,
     status_code=201,
     summary="Add position",
@@ -1311,7 +1311,7 @@ async def add_position(
 
 
 @router.post(
-    "/boqs/{boq_id}/positions/bulk",
+    "/boqs/{boq_id}/positions/bulk/",
     response_model=list[PositionResponse],
     status_code=201,
     summary="Bulk add positions",
@@ -1430,7 +1430,7 @@ async def delete_position(
 
 
 @router.post(
-    "/boqs/{boq_id}/positions/reorder",
+    "/boqs/{boq_id}/positions/reorder/",
     summary="Reorder positions",
     dependencies=[Depends(RequirePermission("boq.update"))],
 )
@@ -1463,7 +1463,7 @@ async def reorder_positions(
 
 
 @router.post(
-    "/boqs/{boq_id}/sections",
+    "/boqs/{boq_id}/sections/",
     response_model=PositionResponse,
     status_code=201,
     summary="Create section",
@@ -1487,7 +1487,7 @@ async def create_section(
 
 
 @router.get(
-    "/boqs/{boq_id}/markups",
+    "/boqs/{boq_id}/markups/",
     summary="List markups",
     dependencies=[Depends(RequirePermission("boq.read"))],
 )
@@ -1501,7 +1501,7 @@ async def list_markups(
 
 
 @router.post(
-    "/boqs/{boq_id}/markups",
+    "/boqs/{boq_id}/markups/",
     response_model=MarkupResponse,
     status_code=201,
     summary="Add markup",
@@ -1550,7 +1550,7 @@ async def delete_markup(
 
 
 @router.post(
-    "/boqs/{boq_id}/markups/apply-defaults",
+    "/boqs/{boq_id}/markups/apply-defaults/",
     response_model=list[MarkupResponse],
     summary="Apply regional default markups",
     dependencies=[Depends(RequirePermission("boq.update"))],
@@ -1579,7 +1579,7 @@ async def apply_default_markups(
 
 
 @router.get(
-    "/boqs/{boq_id}/snapshots",
+    "/boqs/{boq_id}/snapshots/",
     response_model=list[SnapshotResponse],
     summary="List snapshots",
     dependencies=[Depends(RequirePermission("boq.read"))],
@@ -1603,7 +1603,7 @@ async def list_snapshots(
 
 
 @router.post(
-    "/boqs/{boq_id}/snapshots",
+    "/boqs/{boq_id}/snapshots/",
     response_model=SnapshotResponse,
     status_code=201,
     summary="Create snapshot",
@@ -1711,7 +1711,7 @@ def _build_rule_sets(
 
 
 @router.post(
-    "/boqs/{boq_id}/recalculate-rates",
+    "/boqs/{boq_id}/recalculate-rates/",
     summary="Recalculate rates from resources",
     dependencies=[Depends(RequirePermission("boq.update"))],
 )
@@ -1729,7 +1729,7 @@ async def recalculate_rates(
 
 
 @router.post(
-    "/boqs/{boq_id}/validate",
+    "/boqs/{boq_id}/validate/",
     summary="Validate BOQ",
     description="Validate a BOQ against configured rule sets (DIN 276, GAEB, NRM, boq_quality, etc.). "
     "Rule sets are auto-determined from the project's region and classification standard.",
@@ -1842,7 +1842,7 @@ Rules:
 
 
 @router.post(
-    "/boqs/{boq_id}/ai-chat",
+    "/boqs/{boq_id}/ai-chat/",
     response_model=AIChatResponse,
     summary="AI: Generate positions via chat",
     dependencies=[Depends(RequirePermission("boq.update"))],
@@ -1979,7 +1979,7 @@ def _get_classification_code(classification: dict[str, Any]) -> str:
 
 
 @router.get(
-    "/boqs/{boq_id}/export/csv",
+    "/boqs/{boq_id}/export/csv/",
     summary="Export BOQ as CSV",
     dependencies=[Depends(RequirePermission("boq.read"))],
 )
@@ -2084,7 +2084,7 @@ async def export_boq_csv(
 
 
 @router.get(
-    "/boqs/{boq_id}/export/excel",
+    "/boqs/{boq_id}/export/excel/",
     summary="Export BOQ as Excel",
     dependencies=[Depends(RequirePermission("boq.read"))],
 )
@@ -2294,7 +2294,7 @@ async def export_boq_excel(
 
 
 @router.get(
-    "/boqs/{boq_id}/export/pdf",
+    "/boqs/{boq_id}/export/pdf/",
     summary="Export BOQ as PDF",
     dependencies=[Depends(RequirePermission("boq.read"))],
 )
@@ -2392,7 +2392,7 @@ async def export_boq_pdf(
 
 
 @router.get(
-    "/boqs/{boq_id}/export/gaeb",
+    "/boqs/{boq_id}/export/gaeb/",
     summary="Export BOQ as GAEB XML 3.3",
     dependencies=[Depends(RequirePermission("boq.read"))],
 )
@@ -2764,7 +2764,7 @@ def _parse_rows_from_excel(
 
 
 @router.post(
-    "/boqs/{boq_id}/import/excel",
+    "/boqs/{boq_id}/import/excel/",
     summary="Import positions from Excel/CSV",
     dependencies=[Depends(RequirePermission("boq.update"))],
 )
@@ -3153,7 +3153,7 @@ async def _extract_from_cad(content: bytes, ext: str, filename: str) -> dict[str
 
 
 @router.post(
-    "/boqs/{boq_id}/import/smart",
+    "/boqs/{boq_id}/import/smart/",
     summary="Smart import: any file via AI",
     dependencies=[Depends(RequirePermission("boq.update"))],
 )
@@ -3516,7 +3516,7 @@ def _get_position_co2(pos: Any) -> dict[str, Any] | None:
 
 
 @router.get(
-    "/boqs/{boq_id}/resource-summary",
+    "/boqs/{boq_id}/resource-summary/",
     response_model=ResourceSummaryResponse,
     summary="Get resource summary",
     dependencies=[Depends(RequirePermission("boq.read"))],
@@ -3645,7 +3645,7 @@ async def get_resource_summary(
 
 
 @router.post(
-    "/boqs/{boq_id}/enrich-resources",
+    "/boqs/{boq_id}/enrich-resources/",
     summary="Enrich position resources",
     dependencies=[Depends(RequirePermission("boq.write"))],
 )
@@ -3726,7 +3726,7 @@ async def enrich_resources(
 
 
 @router.get(
-    "/epd-materials",
+    "/epd-materials/",
     summary="List EPD materials",
     dependencies=[Depends(RequirePermission("boq.read"))],
 )
@@ -3744,7 +3744,7 @@ async def list_epd_materials(
 
 
 @router.post(
-    "/boqs/{boq_id}/enrich-co2",
+    "/boqs/{boq_id}/enrich-co2/",
     response_model=CO2EnrichResponse,
     summary="Enrich BOQ with CO2 data",
     dependencies=[Depends(RequirePermission("boq.write"))],
@@ -3805,7 +3805,7 @@ async def enrich_co2(
 
 
 @router.put(
-    "/positions/{position_id}/co2",
+    "/positions/{position_id}/co2/",
     summary="Assign CO2 data to position",
     dependencies=[Depends(RequirePermission("boq.write"))],
 )
@@ -3854,7 +3854,7 @@ async def assign_position_co2(
 
 
 @router.get(
-    "/boqs/{boq_id}/sustainability",
+    "/boqs/{boq_id}/sustainability/",
     response_model=SustainabilityResponse,
     summary="Get sustainability analysis",
     dependencies=[Depends(RequirePermission("boq.read"))],
@@ -4010,7 +4010,7 @@ async def get_sustainability(
 
 
 @router.get(
-    "/boqs/{boq_id}/cost-breakdown",
+    "/boqs/{boq_id}/cost-breakdown/",
     response_model=CostBreakdownResponse,
     summary="Get cost breakdown",
     dependencies=[Depends(RequirePermission("boq.read"))],
@@ -4037,7 +4037,7 @@ async def get_cost_breakdown(
 
 
 @router.get(
-    "/boqs/{boq_id}/statistics",
+    "/boqs/{boq_id}/statistics/",
     summary="Get BOQ statistics",
     dependencies=[Depends(RequirePermission("boq.read"))],
 )
@@ -4060,7 +4060,7 @@ async def get_boq_statistics(
 
 
 @router.get(
-    "/boqs/{boq_id}/sensitivity",
+    "/boqs/{boq_id}/sensitivity/",
     response_model=SensitivityResponse,
     summary="Get sensitivity analysis",
     dependencies=[Depends(RequirePermission("boq.read"))],
@@ -4132,7 +4132,7 @@ async def get_sensitivity(
 
 
 @router.get(
-    "/boqs/{boq_id}/classification",
+    "/boqs/{boq_id}/classification/",
     response_model=EstimateClassificationResponse,
     summary="Get AACE estimate classification",
     dependencies=[Depends(RequirePermission("boq.read"))],
@@ -4179,7 +4179,7 @@ def _pert_sample(low: float, mode: float, high: float) -> float:
 
 
 @router.get(
-    "/boqs/{boq_id}/cost-risk",
+    "/boqs/{boq_id}/cost-risk/",
     response_model=CostRiskResponse,
     summary="Monte Carlo cost risk simulation",
     dependencies=[Depends(RequirePermission("boq.read"))],
@@ -4346,7 +4346,7 @@ async def get_cost_risk(
 
 
 @router.get(
-    "/boqs/{boq_id}/columns",
+    "/boqs/{boq_id}/columns/",
     summary="List custom columns",
     dependencies=[Depends(RequirePermission("boq.read"))],
 )
@@ -4361,7 +4361,7 @@ async def list_custom_columns(
 
 
 @router.post(
-    "/boqs/{boq_id}/columns",
+    "/boqs/{boq_id}/columns/",
     summary="Add custom column",
     status_code=201,
     dependencies=[Depends(RequirePermission("boq.update"))],
@@ -4463,7 +4463,7 @@ class RenumberRequest(BaseModel):
 
 
 @router.post(
-    "/boqs/{boq_id}/renumber",
+    "/boqs/{boq_id}/renumber/",
     summary="Renumber positions",
     dependencies=[Depends(RequirePermission("boq.update"))],
 )

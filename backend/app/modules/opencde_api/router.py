@@ -52,7 +52,7 @@ def _get_service(session: SessionDep) -> OpenCDEService:
 # ══════════════════════════════════════════════════════════════════════════
 
 
-@router.get("/foundation/versions", response_model=FoundationVersions)
+@router.get("/foundation/versions/", response_model=FoundationVersions)
 async def foundation_versions() -> FoundationVersions:
     """Return supported API versions (OpenCDE Foundation API 1.1)."""
     return FoundationVersions(
@@ -71,7 +71,7 @@ async def foundation_versions() -> FoundationVersions:
     )
 
 
-@router.get("/foundation/1.1/auth", response_model=FoundationAuth)
+@router.get("/foundation/1.1/auth/", response_model=FoundationAuth)
 async def foundation_auth() -> FoundationAuth:
     """Return authentication info (OpenCDE Foundation API 1.1)."""
     return FoundationAuth(
@@ -82,7 +82,7 @@ async def foundation_auth() -> FoundationAuth:
     )
 
 
-@router.get("/foundation/1.1/current-user", response_model=BCFUser)
+@router.get("/foundation/1.1/current-user/", response_model=BCFUser)
 async def foundation_current_user(
     user_id: CurrentUserId,
     session: SessionDep,
@@ -105,7 +105,7 @@ async def foundation_current_user(
 # ══════════════════════════════════════════════════════════════════════════
 
 
-@router.get("/bcf/3.0/projects", response_model=list[BCFProject])
+@router.get("/bcf/3.0/projects/", response_model=list[BCFProject])
 async def bcf_list_projects(
     user_payload: OptionalUserPayload,
     service: OpenCDEService = Depends(_get_service),
@@ -130,7 +130,7 @@ async def bcf_get_project(
 
 
 @router.get(
-    "/bcf/3.0/projects/{project_id}/topics",
+    "/bcf/3.0/projects/{project_id}/topics/",
     response_model=list[BCFTopic],
 )
 async def bcf_list_topics(
@@ -143,7 +143,7 @@ async def bcf_list_topics(
 
 
 @router.post(
-    "/bcf/3.0/projects/{project_id}/topics",
+    "/bcf/3.0/projects/{project_id}/topics/",
     response_model=BCFTopic,
     status_code=201,
 )
@@ -192,7 +192,7 @@ async def bcf_update_topic(
 
 
 @router.get(
-    "/bcf/3.0/projects/{project_id}/topics/{topic_guid}/comments",
+    "/bcf/3.0/projects/{project_id}/topics/{topic_guid}/comments/",
     response_model=list[BCFComment],
 )
 async def bcf_list_comments(
@@ -206,7 +206,7 @@ async def bcf_list_comments(
 
 
 @router.post(
-    "/bcf/3.0/projects/{project_id}/topics/{topic_guid}/comments",
+    "/bcf/3.0/projects/{project_id}/topics/{topic_guid}/comments/",
     response_model=BCFComment,
     status_code=201,
 )
@@ -229,7 +229,7 @@ async def bcf_create_comment(
 
 
 @router.get(
-    "/bcf/3.0/projects/{project_id}/topics/{topic_guid}/viewpoints",
+    "/bcf/3.0/projects/{project_id}/topics/{topic_guid}/viewpoints/",
     response_model=list[BCFViewpoint],
 )
 async def bcf_list_viewpoints(
@@ -243,7 +243,7 @@ async def bcf_list_viewpoints(
 
 
 @router.post(
-    "/bcf/3.0/projects/{project_id}/topics/{topic_guid}/viewpoints",
+    "/bcf/3.0/projects/{project_id}/topics/{topic_guid}/viewpoints/",
     response_model=BCFViewpoint,
     status_code=201,
 )

@@ -37,7 +37,7 @@ def _get_service(session: SessionDep) -> CollaborationService:
 # ── Comments ─────────────────────────────────────────────────────────────
 
 
-@router.get("/comments", response_model=CommentListResponse)
+@router.get("/comments/", response_model=CommentListResponse)
 async def list_comments(
     entity_type: str = Query(..., min_length=1, max_length=100),
     entity_id: str = Query(..., min_length=1, max_length=36),
@@ -58,7 +58,7 @@ async def list_comments(
     )
 
 
-@router.post("/comments", response_model=CommentResponse, status_code=201)
+@router.post("/comments/", response_model=CommentResponse, status_code=201)
 async def create_comment(
     data: CommentCreate,
     user_id: CurrentUserId,
@@ -97,7 +97,7 @@ async def delete_comment(
     await service.delete_comment(comment_id, uuid.UUID(user_id))
 
 
-@router.get("/comments/{comment_id}/thread", response_model=list[CommentResponse])
+@router.get("/comments/{comment_id}/thread/", response_model=list[CommentResponse])
 async def get_thread(
     comment_id: uuid.UUID,
     service: CollaborationService = Depends(_get_service),
@@ -110,7 +110,7 @@ async def get_thread(
 # ── Viewpoints ───────────────────────────────────────────────────────────
 
 
-@router.post("/viewpoints", response_model=ViewpointResponse, status_code=201)
+@router.post("/viewpoints/", response_model=ViewpointResponse, status_code=201)
 async def create_viewpoint(
     data: ViewpointCreate,
     user_id: CurrentUserId,
@@ -127,7 +127,7 @@ async def create_viewpoint(
         raise HTTPException(status_code=500, detail="Failed to create viewpoint")
 
 
-@router.get("/viewpoints", response_model=list[ViewpointResponse])
+@router.get("/viewpoints/", response_model=list[ViewpointResponse])
 async def list_viewpoints(
     entity_type: str = Query(..., min_length=1, max_length=100),
     entity_id: str = Query(..., min_length=1, max_length=36),

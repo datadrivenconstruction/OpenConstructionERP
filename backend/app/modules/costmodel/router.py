@@ -113,7 +113,7 @@ def _cash_flow_to_response(entry: object) -> CashFlowResponse:
 
 
 @router.get(
-    "/projects/{project_id}/5d/dashboard",
+    "/projects/{project_id}/5d/dashboard/",
     response_model=DashboardResponse,
     dependencies=[Depends(RequirePermission("costmodel.read"))],
 )
@@ -126,7 +126,7 @@ async def get_dashboard(
 
 
 @router.get(
-    "/projects/{project_id}/5d/s-curve",
+    "/projects/{project_id}/5d/s-curve/",
     response_model=SCurveData,
     dependencies=[Depends(RequirePermission("costmodel.read"))],
 )
@@ -139,7 +139,7 @@ async def get_s_curve(
 
 
 @router.get(
-    "/projects/{project_id}/5d/cash-flow",
+    "/projects/{project_id}/5d/cash-flow/",
     response_model=CashFlowData,
     dependencies=[Depends(RequirePermission("costmodel.read"))],
 )
@@ -155,7 +155,7 @@ async def get_cash_flow(
 
 
 @router.get(
-    "/projects/{project_id}/5d/budget",
+    "/projects/{project_id}/5d/budget/",
     response_model=BudgetSummary,
     dependencies=[Depends(RequirePermission("costmodel.read"))],
 )
@@ -168,7 +168,7 @@ async def get_budget_summary(
 
 
 @router.get(
-    "/projects/{project_id}/5d/budget-lines",
+    "/projects/{project_id}/5d/budget-lines/",
     response_model=list[BudgetLineResponse],
     dependencies=[Depends(RequirePermission("costmodel.read"))],
 )
@@ -185,7 +185,7 @@ async def list_budget_lines(
 
 
 @router.post(
-    "/projects/{project_id}/5d/budget-lines",
+    "/projects/{project_id}/5d/budget-lines/",
     response_model=BudgetLineResponse,
     status_code=201,
     dependencies=[Depends(RequirePermission("costmodel.write"))],
@@ -234,7 +234,7 @@ async def delete_budget_line(
 
 
 @router.post(
-    "/projects/{project_id}/5d/generate-budget",
+    "/projects/{project_id}/5d/generate-budget/",
     response_model=list[BudgetLineResponse],
     status_code=201,
     dependencies=[Depends(RequirePermission("costmodel.write"))],
@@ -277,7 +277,7 @@ async def generate_budget(
 
 
 @router.post(
-    "/projects/{project_id}/5d/snapshots",
+    "/projects/{project_id}/5d/snapshots/",
     response_model=SnapshotResponse,
     status_code=201,
     dependencies=[Depends(RequirePermission("costmodel.write"))],
@@ -295,7 +295,7 @@ async def create_snapshot(
 
 
 @router.get(
-    "/projects/{project_id}/5d/snapshots",
+    "/projects/{project_id}/5d/snapshots/",
     response_model=list[SnapshotResponse],
     dependencies=[Depends(RequirePermission("costmodel.read"))],
 )
@@ -322,7 +322,7 @@ async def list_snapshots(
 
 
 @router.get(
-    "/projects/{project_id}/5d/evm",
+    "/projects/{project_id}/5d/evm/",
     response_model=EVMResponse,
     dependencies=[Depends(RequirePermission("costmodel.read"))],
 )
@@ -342,7 +342,7 @@ async def get_evm(
 
 
 @router.post(
-    "/projects/{project_id}/5d/what-if",
+    "/projects/{project_id}/5d/what-if/",
     response_model=WhatIfResult,
     status_code=201,
     dependencies=[Depends(RequirePermission("costmodel.write"))],
@@ -365,7 +365,7 @@ async def create_what_if_scenario(
 
 
 @router.post(
-    "/projects/{project_id}/5d/generate-cash-flow",
+    "/projects/{project_id}/5d/generate-cash-flow/",
     response_model=list[CashFlowResponse],
     status_code=201,
     dependencies=[Depends(RequirePermission("costmodel.write"))],
@@ -384,7 +384,7 @@ async def generate_cash_flow(
 
 
 @router.post(
-    "/projects/{project_id}/5d/monte-carlo",
+    "/projects/{project_id}/5d/monte-carlo/",
     dependencies=[Depends(RequirePermission("costmodel.read"))],
 )
 async def run_monte_carlo(

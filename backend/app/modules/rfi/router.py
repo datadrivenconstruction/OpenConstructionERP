@@ -142,7 +142,7 @@ async def create_rfi(
     return _to_response(rfi)
 
 
-@router.get("/stats", response_model=RFIStatsResponse)
+@router.get("/stats/", response_model=RFIStatsResponse)
 async def rfi_stats(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -155,7 +155,7 @@ async def rfi_stats(
     return await service.get_stats(project_id)
 
 
-@router.get("/export")
+@router.get("/export/")
 async def export_rfi_log(
     project_id: uuid.UUID = Query(...),
     session: SessionDep = None,  # type: ignore[assignment]
@@ -278,7 +278,7 @@ async def delete_rfi(
     await service.delete_rfi(rfi_id)
 
 
-@router.post("/{rfi_id}/respond", response_model=RFIResponse)
+@router.post("/{rfi_id}/respond/", response_model=RFIResponse)
 async def respond_to_rfi(
     rfi_id: uuid.UUID,
     body: RFIRespondRequest,
@@ -291,7 +291,7 @@ async def respond_to_rfi(
     return _to_response(rfi)
 
 
-@router.post("/{rfi_id}/create-variation", status_code=201)
+@router.post("/{rfi_id}/create-variation/", status_code=201)
 async def create_variation_from_rfi(
     rfi_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -389,7 +389,7 @@ async def create_variation_from_rfi(
         )
 
 
-@router.post("/{rfi_id}/close", response_model=RFIResponse)
+@router.post("/{rfi_id}/close/", response_model=RFIResponse)
 async def close_rfi(
     rfi_id: uuid.UUID,
     user_id: CurrentUserId = None,  # type: ignore[assignment]

@@ -71,7 +71,7 @@ async def list_notifications(
 # ── Unread count ────────────────────────────────────────────────────────────
 
 
-@router.get("/unread-count")
+@router.get("/unread-count/")
 async def unread_count(
     user_id: CurrentUserId,
     service: NotificationService = Depends(_get_service),
@@ -84,7 +84,7 @@ async def unread_count(
 # ── Mark read ───────────────────────────────────────────────────────────────
 
 
-@router.post("/{notification_id}/read")
+@router.post("/{notification_id}/read/")
 async def mark_read(
     notification_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -100,7 +100,7 @@ async def mark_read(
     return {"success": True}
 
 
-@router.post("/read-all")
+@router.post("/read-all/")
 async def mark_all_read(
     user_id: CurrentUserId,
     service: NotificationService = Depends(_get_service),

@@ -90,7 +90,7 @@ def _report_to_response(report: object) -> FieldReportResponse:
 # ── Summary ──────────────────────────────────────────────────────────────────
 
 
-@router.get("/reports/summary", response_model=FieldReportSummary)
+@router.get("/reports/summary/", response_model=FieldReportSummary)
 async def get_summary(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -104,7 +104,7 @@ async def get_summary(
 # ── Calendar ─────────────────────────────────────────────────────────────────
 
 
-@router.get("/reports/calendar", response_model=list[FieldReportResponse])
+@router.get("/reports/calendar/", response_model=list[FieldReportResponse])
 async def get_calendar(
     project_id: uuid.UUID = Query(...),
     month: str = Query(..., pattern=r"^\d{4}-\d{2}$"),
@@ -121,7 +121,7 @@ async def get_calendar(
 # ── Weather ─────────────────────────────────────────────────────────────────
 
 
-@router.get("/weather")
+@router.get("/weather/")
 async def get_current_weather(
     lat: float = Query(..., description="Latitude"),
     lon: float = Query(..., description="Longitude"),
@@ -146,7 +146,7 @@ async def get_current_weather(
 # ── Import template ─────────────────────────────────────────────────────────
 
 
-@router.get("/reports/template")
+@router.get("/reports/template/")
 async def download_field_reports_template(
     _user_id: CurrentUserId = None,  # type: ignore[assignment]
 ) -> StreamingResponse:
@@ -421,7 +421,7 @@ def _parse_report_rows_from_excel(content_bytes: bytes) -> list[dict[str, Any]]:
 # ── Import from file ───────────────────────────────────────────────────────
 
 
-@router.post("/reports/import/file")
+@router.post("/reports/import/file/")
 async def import_field_reports_file(
     project_id: uuid.UUID = Query(...),
     _user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -565,7 +565,7 @@ async def import_field_reports_file(
 # ── Export all reports as Excel ────────────────────────────────────────────
 
 
-@router.get("/reports/export")
+@router.get("/reports/export/")
 async def export_field_reports(
     project_id: uuid.UUID = Query(...),
     _user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -634,7 +634,7 @@ async def export_field_reports(
 # ── Create ───────────────────────────────────────────────────────────────────
 
 
-@router.post("/reports", response_model=FieldReportResponse, status_code=201)
+@router.post("/reports/", response_model=FieldReportResponse, status_code=201)
 async def create_report(
     data: FieldReportCreate,
     user_id: CurrentUserId,
@@ -649,7 +649,7 @@ async def create_report(
 # ── List ─────────────────────────────────────────────────────────────────────
 
 
-@router.get("/reports", response_model=list[FieldReportResponse])
+@router.get("/reports/", response_model=list[FieldReportResponse])
 async def list_reports(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -721,7 +721,7 @@ async def delete_report(
 # ── Submit ───────────────────────────────────────────────────────────────────
 
 
-@router.post("/reports/{report_id}/submit", response_model=FieldReportResponse)
+@router.post("/reports/{report_id}/submit/", response_model=FieldReportResponse)
 async def submit_report(
     report_id: uuid.UUID,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -736,7 +736,7 @@ async def submit_report(
 # ── Approve ──────────────────────────────────────────────────────────────────
 
 
-@router.post("/reports/{report_id}/approve", response_model=FieldReportResponse)
+@router.post("/reports/{report_id}/approve/", response_model=FieldReportResponse)
 async def approve_report(
     report_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -751,7 +751,7 @@ async def approve_report(
 # ── Link documents ──────────────────────────────────────────────────────────
 
 
-@router.post("/reports/{report_id}/link-documents", response_model=FieldReportResponse)
+@router.post("/reports/{report_id}/link-documents/", response_model=FieldReportResponse)
 async def link_documents(
     report_id: uuid.UUID,
     data: LinkDocumentsRequest,
@@ -768,7 +768,7 @@ async def link_documents(
     return _report_to_response(report)
 
 
-@router.get("/reports/{report_id}/documents", response_model=list[LinkedDocumentResponse])
+@router.get("/reports/{report_id}/documents/", response_model=list[LinkedDocumentResponse])
 async def get_linked_documents(
     report_id: uuid.UUID,
     session: SessionDep,
@@ -809,7 +809,7 @@ async def get_linked_documents(
 # ── PDF Export ───────────────────────────────────────────────────────────────
 
 
-@router.get("/reports/{report_id}/export/pdf")
+@router.get("/reports/{report_id}/export/pdf/")
 async def export_pdf(
     report_id: uuid.UUID,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -828,7 +828,7 @@ async def export_pdf(
 
 
 @router.post(
-    "/reports/{report_id}/workforce",
+    "/reports/{report_id}/workforce/",
     response_model=SiteWorkforceLogResponse,
     status_code=201,
 )
@@ -859,7 +859,7 @@ async def create_workforce_log(
 
 
 @router.get(
-    "/reports/{report_id}/workforce",
+    "/reports/{report_id}/workforce/",
     response_model=list[SiteWorkforceLogResponse],
 )
 async def list_workforce_logs(
@@ -934,7 +934,7 @@ async def delete_workforce_log(
 
 
 @router.post(
-    "/reports/{report_id}/equipment",
+    "/reports/{report_id}/equipment/",
     response_model=SiteEquipmentLogResponse,
     status_code=201,
 )
@@ -964,7 +964,7 @@ async def create_equipment_log(
 
 
 @router.get(
-    "/reports/{report_id}/equipment",
+    "/reports/{report_id}/equipment/",
     response_model=list[SiteEquipmentLogResponse],
 )
 async def list_equipment_logs(

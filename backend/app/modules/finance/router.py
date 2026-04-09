@@ -118,7 +118,7 @@ async def create_invoice(
 
 
 @router.get(
-    "/invoices/export",
+    "/invoices/export/",
     summary="Export invoices as Excel",
     description="Download invoices for a project as an Excel (.xlsx) file. "
     "Optionally filter by direction (payable/receivable).",
@@ -196,7 +196,7 @@ async def export_invoices(
 
 
 @router.get(
-    "/payments",
+    "/payments/",
     response_model=PaymentListResponse,
     summary="List payments",
     description="Retrieve a paginated list of payments, optionally filtered by invoice.",
@@ -219,7 +219,7 @@ async def list_payments(
 
 
 @router.post(
-    "/payments",
+    "/payments/",
     response_model=PaymentResponse,
     status_code=201,
     summary="Create payment",
@@ -239,7 +239,7 @@ async def create_payment(
 
 
 @router.get(
-    "/budgets",
+    "/budgets/",
     response_model=BudgetListResponse,
     summary="List budgets",
     description="Retrieve project budget lines with optional filters by project and cost category.",
@@ -259,7 +259,7 @@ async def list_budgets(
 
 
 @router.post(
-    "/budgets",
+    "/budgets/",
     response_model=BudgetResponse,
     status_code=201,
     summary="Create budget line",
@@ -429,7 +429,7 @@ def _parse_budget_rows_from_excel(content_bytes: bytes) -> list[dict[str, Any]]:
 
 
 @router.post(
-    "/budgets/import/file",
+    "/budgets/import/file/",
     summary="Import budgets from file",
     description="Upload an Excel (.xlsx) or CSV (.csv) file to bulk-import budget lines. "
     "Column headers are auto-detected using flexible aliases (EN/DE). "
@@ -577,7 +577,7 @@ async def import_budgets_file(
 
 
 @router.get(
-    "/budgets/export",
+    "/budgets/export/",
     summary="Export budgets as Excel",
     description="Download budgets for a project as an Excel (.xlsx) file with "
     "original, revised, committed, actual, forecast, and variance columns.",
@@ -679,7 +679,7 @@ async def update_budget(
 
 
 @router.get(
-    "/evm",
+    "/evm/",
     response_model=EVMListResponse,
     summary="List EVM snapshots",
     description="List Earned Value Management snapshots for a project. "
@@ -699,7 +699,7 @@ async def list_evm_snapshots(
 
 
 @router.post(
-    "/evm/snapshot",
+    "/evm/snapshot/",
     response_model=EVMSnapshotResponse,
     status_code=201,
     summary="Create EVM snapshot",
@@ -720,7 +720,7 @@ async def create_evm_snapshot(
 
 
 @router.get(
-    "/dashboard",
+    "/dashboard/",
     summary="Get finance dashboard",
     description="Aggregated finance KPIs: payable, receivable, overdue totals, "
     "budget utilisation, cash flow overview, and budget warning level "
@@ -777,7 +777,7 @@ async def update_invoice(
 
 
 @router.post(
-    "/{invoice_id}/approve",
+    "/{invoice_id}/approve/",
     response_model=InvoiceResponse,
     summary="Approve invoice",
     description="Transition an invoice to 'approved' status. "
@@ -794,7 +794,7 @@ async def approve_invoice(
 
 
 @router.post(
-    "/{invoice_id}/pay",
+    "/{invoice_id}/pay/",
     response_model=InvoiceResponse,
     summary="Mark invoice as paid",
     description="Transition an invoice to 'paid' status. Records the payment date.",

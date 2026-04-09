@@ -109,7 +109,7 @@ _CONVERTER_META: list[dict[str, Any]] = [
 ]
 
 
-@router.get("/converters")
+@router.get("/converters/")
 async def list_converters() -> dict[str, Any]:
     """Return the status of all known CAD/BIM converters.
 
@@ -229,7 +229,7 @@ def _install_converter_from_zip(zip_path: Path, converter_id: str) -> Path:
 
 
 @router.post(
-    "/converters/{converter_id}/install",
+    "/converters/{converter_id}/install/",
     dependencies=[Depends(RequirePermission("takeoff.create"))],
 )
 async def install_converter(
@@ -299,7 +299,7 @@ async def install_converter(
 
 
 @router.post(
-    "/converters/{converter_id}/uninstall",
+    "/converters/{converter_id}/uninstall/",
     dependencies=[Depends(RequirePermission("takeoff.delete"))],
 )
 async def uninstall_converter(
@@ -353,7 +353,7 @@ _SUPPORTED_CAD_EXTS = {"rvt", "ifc", "dwg", "dgn", "rfa", "dxf"}
 
 
 @router.post(
-    "/cad-extract",
+    "/cad-extract/",
     dependencies=[Depends(RequirePermission("takeoff.read"))],
 )
 async def cad_extract(
@@ -546,7 +546,7 @@ class CadGroupRequest(BaseModel):
 
 
 @router.post(
-    "/cad-columns",
+    "/cad-columns/",
     dependencies=[Depends(RequirePermission("takeoff.read"))],
 )
 async def cad_columns(
@@ -719,7 +719,7 @@ async def cad_columns(
 
 
 @router.post(
-    "/cad-group",
+    "/cad-group/",
     dependencies=[Depends(RequirePermission("takeoff.read"))],
 )
 async def cad_group(
@@ -790,7 +790,7 @@ class CadGroupElementsRequest(BaseModel):
 
 
 @router.post(
-    "/cad-group/elements",
+    "/cad-group/elements/",
     dependencies=[Depends(RequirePermission("takeoff.read"))],
 )
 async def get_group_elements(
@@ -876,7 +876,7 @@ class CreateBOQFromCadRequest(BaseModel):
 
 
 @router.post(
-    "/cad-group/create-boq",
+    "/cad-group/create-boq/",
     status_code=201,
     dependencies=[Depends(RequirePermission("takeoff.create"))],
 )
@@ -1011,7 +1011,7 @@ async def create_boq_from_cad_qto(
 
 
 @router.get(
-    "/cad-group/export",
+    "/cad-group/export/",
     dependencies=[Depends(RequirePermission("takeoff.read"))],
 )
 async def export_cad_group(
@@ -1200,7 +1200,7 @@ def _collect_column_names(elements: list[dict]) -> list[str]:
 
 
 @router.post(
-    "/cad-data/describe",
+    "/cad-data/describe/",
     dependencies=[Depends(RequirePermission("takeoff.read"))],
 )
 async def cad_data_describe(
@@ -1276,7 +1276,7 @@ async def cad_data_describe(
 
 
 @router.post(
-    "/cad-data/value-counts",
+    "/cad-data/value-counts/",
     dependencies=[Depends(RequirePermission("takeoff.read"))],
 )
 async def cad_data_value_counts(
@@ -1330,7 +1330,7 @@ async def cad_data_value_counts(
 
 
 @router.get(
-    "/cad-data/elements",
+    "/cad-data/elements/",
     dependencies=[Depends(RequirePermission("takeoff.read"))],
 )
 async def cad_data_elements(
@@ -1401,7 +1401,7 @@ _SUPPORTED_AGG_FUNCS = {"sum", "avg", "mean", "min", "max", "count"}
 
 
 @router.post(
-    "/cad-data/aggregate",
+    "/cad-data/aggregate/",
     dependencies=[Depends(RequirePermission("takeoff.read"))],
 )
 async def cad_data_aggregate(
@@ -1514,7 +1514,7 @@ class CadDataSaveRequest(BaseModel):
 
 
 @router.post(
-    "/cad-data/save",
+    "/cad-data/save/",
     dependencies=[Depends(RequirePermission("takeoff.create"))],
 )
 async def cad_data_save(
@@ -1553,7 +1553,7 @@ async def cad_data_save(
 
 
 @router.get(
-    "/cad-data/sessions",
+    "/cad-data/sessions/",
     dependencies=[Depends(RequirePermission("takeoff.read"))],
 )
 async def cad_data_list_sessions(
@@ -1630,7 +1630,7 @@ class SaveToProjectRequest(BaseModel):
 
 
 @router.post(
-    "/sessions/{session_id}/save-to-project",
+    "/sessions/{session_id}/save-to-project/",
     dependencies=[Depends(RequirePermission("takeoff.create"))],
 )
 async def save_session_to_project(
@@ -1776,7 +1776,7 @@ def _get_service(session: SessionDep) -> TakeoffService:
 
 
 @router.post(
-    "/documents/upload",
+    "/documents/upload/",
     status_code=201,
     dependencies=[Depends(RequirePermission("takeoff.create"))],
 )
@@ -1890,7 +1890,7 @@ async def get_document(
 
 
 @router.post(
-    "/documents/{doc_id}/extract-tables",
+    "/documents/{doc_id}/extract-tables/",
     dependencies=[Depends(RequirePermission("takeoff.read"))],
 )
 async def extract_tables(
@@ -1909,7 +1909,7 @@ async def extract_tables(
 
 
 @router.get(
-    "/documents/{doc_id}/download",
+    "/documents/{doc_id}/download/",
     dependencies=[Depends(RequirePermission("takeoff.read"))],
 )
 async def download_document(
@@ -1945,7 +1945,7 @@ async def download_document(
 
 
 @router.post(
-    "/documents/{doc_id}/analyze",
+    "/documents/{doc_id}/analyze/",
     dependencies=[Depends(RequirePermission("takeoff.read"))],
 )
 async def analyze_document(
@@ -2136,7 +2136,7 @@ def _measurement_to_response(item: object) -> TakeoffMeasurementResponse:
 
 
 @router.get(
-    "/measurements/summary",
+    "/measurements/summary/",
     response_model=TakeoffMeasurementSummary,
     dependencies=[Depends(RequirePermission("takeoff.read"))],
 )
@@ -2154,7 +2154,7 @@ async def measurement_summary(
 
 
 @router.get(
-    "/measurements/export",
+    "/measurements/export/",
     dependencies=[Depends(RequirePermission("takeoff.read"))],
 )
 async def export_measurements(
@@ -2191,7 +2191,7 @@ async def export_measurements(
 
 
 @router.post(
-    "/measurements/bulk",
+    "/measurements/bulk/",
     response_model=list[TakeoffMeasurementResponse],
     status_code=201,
     dependencies=[Depends(RequirePermission("takeoff.create"))],
@@ -2219,7 +2219,7 @@ async def bulk_create_measurements(
 
 
 @router.post(
-    "/measurements",
+    "/measurements/",
     response_model=TakeoffMeasurementResponse,
     status_code=201,
     dependencies=[Depends(RequirePermission("takeoff.create"))],
@@ -2247,7 +2247,7 @@ async def create_measurement(
 
 
 @router.get(
-    "/measurements",
+    "/measurements/",
     response_model=list[TakeoffMeasurementResponse],
     dependencies=[Depends(RequirePermission("takeoff.read"))],
 )
@@ -2333,7 +2333,7 @@ async def delete_measurement(
 
 
 @router.post(
-    "/measurements/{measurement_id}/link-to-boq",
+    "/measurements/{measurement_id}/link-to-boq/",
     response_model=TakeoffMeasurementResponse,
     dependencies=[Depends(RequirePermission("takeoff.update"))],
 )

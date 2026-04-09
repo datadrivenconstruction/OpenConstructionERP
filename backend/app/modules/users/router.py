@@ -75,14 +75,14 @@ def _get_service(session: SessionDep, settings: SettingsDep) -> UserService:
 # ── Auth ───────────────────────────────────────────────────────────────────
 
 
-@router.post("/auth/register", response_model=UserResponse, status_code=201)
+@router.post("/auth/register/", response_model=UserResponse, status_code=201)
 async def register(data: UserCreate, service: UserService = Depends(_get_service)) -> UserResponse:
     """Register a new user account."""
     user = await service.register(data)
     return UserResponse.model_validate(user)
 
 
-@router.post("/auth/login", response_model=TokenResponse)
+@router.post("/auth/login/", response_model=TokenResponse)
 async def login(
     data: LoginRequest,
     request: Request,
@@ -103,7 +103,7 @@ async def login(
     return await service.login(data)
 
 
-@router.post("/auth/refresh", response_model=TokenResponse)
+@router.post("/auth/refresh/", response_model=TokenResponse)
 async def refresh(
     data: RefreshRequest,
     service: UserService = Depends(_get_service),
@@ -112,7 +112,7 @@ async def refresh(
     return await service.refresh_tokens(data.refresh_token)
 
 
-@router.post("/auth/forgot-password", response_model=ForgotPasswordResponse)
+@router.post("/auth/forgot-password/", response_model=ForgotPasswordResponse)
 async def forgot_password(
     data: ForgotPasswordRequest,
     service: UserService = Depends(_get_service),
@@ -125,7 +125,7 @@ async def forgot_password(
     return await service.forgot_password(data)
 
 
-@router.post("/auth/reset-password", response_model=ResetPasswordResponse)
+@router.post("/auth/reset-password/", response_model=ResetPasswordResponse)
 async def reset_password(
     data: ResetPasswordRequest,
     service: UserService = Depends(_get_service),
@@ -137,7 +137,7 @@ async def reset_password(
 # ── Current user ───────────────────────────────────────────────────────────
 
 
-@router.get("/me", response_model=UserMeResponse)
+@router.get("/me/", response_model=UserMeResponse)
 async def get_me(
     user_id: CurrentUserId,
     service: UserService = Depends(_get_service),
@@ -153,7 +153,7 @@ async def get_me(
     )
 
 
-@router.patch("/me", response_model=UserResponse)
+@router.patch("/me/", response_model=UserResponse)
 async def update_me(
     data: UserUpdate,
     user_id: CurrentUserId,
@@ -165,7 +165,7 @@ async def update_me(
     return UserResponse.model_validate(user)
 
 
-@router.post("/me/change-password", status_code=204)
+@router.post("/me/change-password/", status_code=204)
 async def change_password(
     data: ChangePasswordRequest,
     user_id: CurrentUserId,
@@ -178,7 +178,7 @@ async def change_password(
 # ── Regional Preferences ──────────────────────────────────────────────────
 
 
-@router.get("/me/preferences", response_model=UserPreferencesResponse)
+@router.get("/me/preferences/", response_model=UserPreferencesResponse)
 async def get_my_preferences(
     user_id: CurrentUserId,
     service: UserService = Depends(_get_service),
@@ -188,7 +188,7 @@ async def get_my_preferences(
     return UserPreferencesResponse.model_validate(user)
 
 
-@router.patch("/me/preferences", response_model=UserPreferencesResponse)
+@router.patch("/me/preferences/", response_model=UserPreferencesResponse)
 async def update_my_preferences(
     data: UserPreferencesUpdate,
     user_id: CurrentUserId,
@@ -202,7 +202,7 @@ async def update_my_preferences(
 # ── API Keys ───────────────────────────────────────────────────────────────
 
 
-@router.get("/me/api-keys", response_model=list[APIKeyResponse])
+@router.get("/me/api-keys/", response_model=list[APIKeyResponse])
 async def list_my_api_keys(
     user_id: CurrentUserId,
     service: UserService = Depends(_get_service),
@@ -212,7 +212,7 @@ async def list_my_api_keys(
     return [APIKeyResponse.model_validate(k) for k in keys]
 
 
-@router.post("/me/api-keys", response_model=APIKeyCreatedResponse, status_code=201)
+@router.post("/me/api-keys/", response_model=APIKeyCreatedResponse, status_code=201)
 async def create_api_key(
     data: APIKeyCreate,
     user_id: CurrentUserId,
@@ -235,7 +235,7 @@ async def revoke_api_key(
 # ── Module Preferences ────────────────────────────────────────────────────
 
 
-@router.get("/me/module-preferences", response_model=ModulePreferencesPayload)
+@router.get("/me/module-preferences/", response_model=ModulePreferencesPayload)
 async def get_module_preferences(
     user_id: CurrentUserId,
     service: UserService = Depends(_get_service),
@@ -247,7 +247,7 @@ async def get_module_preferences(
     return ModulePreferencesPayload(modules=prefs)
 
 
-@router.patch("/me/module-preferences", response_model=ModulePreferencesPayload)
+@router.patch("/me/module-preferences/", response_model=ModulePreferencesPayload)
 async def save_module_preferences(
     data: ModulePreferencesPayload,
     user_id: CurrentUserId,
@@ -267,7 +267,7 @@ async def save_module_preferences(
 # ── Onboarding ────────────────────────────────────────────────────────────────
 
 
-@router.get("/me/onboarding", response_model=OnboardingResponse)
+@router.get("/me/onboarding/", response_model=OnboardingResponse)
 async def get_onboarding(
     user_id: CurrentUserId,
     service: UserService = Depends(_get_service),
@@ -284,7 +284,7 @@ async def get_onboarding(
     )
 
 
-@router.post("/me/onboarding", response_model=OnboardingResponse)
+@router.post("/me/onboarding/", response_model=OnboardingResponse)
 async def save_onboarding(
     data: OnboardingRequest,
     user_id: CurrentUserId,
@@ -325,7 +325,7 @@ async def save_onboarding(
     )
 
 
-@router.get("/onboarding-presets")
+@router.get("/onboarding-presets/")
 async def get_onboarding_presets() -> list[dict[str, Any]]:
     """Return all available company-type presets for the onboarding wizard.
 
@@ -400,7 +400,7 @@ class UserModuleAccessPayload(BaseModel):
 
 
 @router.get(
-    "/{user_id}/module-access",
+    "/{user_id}/module-access/",
     response_model=UserModuleAccessPayload,
     dependencies=[Depends(RequirePermission("users.read"))],
 )
@@ -423,7 +423,7 @@ async def get_user_module_access(
 
 
 @router.patch(
-    "/{user_id}/module-access",
+    "/{user_id}/module-access/",
     response_model=UserModuleAccessPayload,
     dependencies=[Depends(RequirePermission("users.update"))],
 )

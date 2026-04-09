@@ -93,7 +93,7 @@ async def get_manifest(
 # ── GET /modules — List modules ──────────────────────────────────────────
 
 
-@router.get("/modules")
+@router.get("/modules/")
 async def list_modules(
     layer: str | None = Query(None, description="Filter by layer (e.g. frontend, backend)"),
     category: str | None = Query(None, description="Filter by category"),
@@ -164,7 +164,7 @@ async def get_module(
 # ── GET /connections — List connections ──────────────────────────────────
 
 
-@router.get("/connections")
+@router.get("/connections/")
 async def list_connections(
     type: str | None = Query(None, description="Filter by connection type (e.g. api, event, data)"),
     source: str | None = Query(None, description="Filter by source module ID"),
@@ -195,7 +195,7 @@ async def list_connections(
 # ── GET /search — Fuzzy search ───────────────────────────────────────────
 
 
-@router.get("/search")
+@router.get("/search/")
 async def search_entities(
     q: str = Query(..., min_length=1, description="Search query"),
     refresh: bool = Query(False, description="Force reload manifest from disk"),
@@ -287,7 +287,7 @@ async def search_entities(
 # ── GET /stats — Aggregate statistics ────────────────────────────────────
 
 
-@router.get("/stats")
+@router.get("/stats/")
 async def get_stats(
     refresh: bool = Query(False, description="Force reload manifest from disk"),
 ) -> dict[str, Any]:

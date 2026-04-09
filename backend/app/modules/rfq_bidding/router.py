@@ -109,7 +109,7 @@ async def delete_rfq(
     await service.delete_rfq(rfq_id)
 
 
-@router.post("/{rfq_id}/issue", response_model=RFQResponse)
+@router.post("/{rfq_id}/issue/", response_model=RFQResponse)
 async def issue_rfq(
     rfq_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -123,7 +123,7 @@ async def issue_rfq(
 # ── Bids ────────────────────────────────────────────────────────────────────
 
 
-@router.get("/bids", response_model=BidListResponse)
+@router.get("/bids/", response_model=BidListResponse)
 async def list_bids(
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     rfq_id: uuid.UUID | None = Query(default=None),
@@ -139,7 +139,7 @@ async def list_bids(
     )
 
 
-@router.post("/bids", response_model=RFQBidResponse, status_code=201)
+@router.post("/bids/", response_model=RFQBidResponse, status_code=201)
 async def submit_bid(
     data: BidCreate,
     user_id: CurrentUserId,
@@ -161,7 +161,7 @@ async def get_bid(
     return RFQBidResponse.model_validate(bid)
 
 
-@router.post("/bids/{bid_id}/evaluate", response_model=RFQBidResponse)
+@router.post("/bids/{bid_id}/evaluate/", response_model=RFQBidResponse)
 async def evaluate_bid(
     bid_id: uuid.UUID,
     data: BidEvaluation,
@@ -173,7 +173,7 @@ async def evaluate_bid(
     return RFQBidResponse.model_validate(bid)
 
 
-@router.post("/bids/{bid_id}/award", response_model=RFQBidResponse)
+@router.post("/bids/{bid_id}/award/", response_model=RFQBidResponse)
 async def award_bid(
     bid_id: uuid.UUID,
     user_id: CurrentUserId,

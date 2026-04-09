@@ -215,7 +215,7 @@ async def update_package(
 # ── Bid Endpoints ────────────────────────────────────────────────────────────
 
 
-@router.post("/packages/{package_id}/bids", response_model=BidResponse, status_code=201)
+@router.post("/packages/{package_id}/bids/", response_model=BidResponse, status_code=201)
 async def create_bid(
     package_id: uuid.UUID,
     data: BidCreate,
@@ -239,7 +239,7 @@ async def create_bid(
         )
 
 
-@router.get("/packages/{package_id}/bids", response_model=list[BidResponse])
+@router.get("/packages/{package_id}/bids/", response_model=list[BidResponse])
 async def list_bids(
     package_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -278,7 +278,7 @@ async def update_bid(
 
 
 @router.get(
-    "/packages/{package_id}/comparison",
+    "/packages/{package_id}/comparison/",
     response_model=BidComparisonResponse,
 )
 async def compare_bids(
@@ -296,7 +296,7 @@ async def compare_bids(
 # ── Export Endpoints ──────────────────────────────────────────────────────────
 
 
-@router.get("/packages/{package_id}/export/pdf")
+@router.get("/packages/{package_id}/export/pdf/")
 async def export_tender_pdf(
     package_id: uuid.UUID,
     user_id: CurrentUserId,

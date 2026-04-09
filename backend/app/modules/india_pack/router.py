@@ -14,7 +14,7 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-@router.get("/config")
+@router.get("/config/")
 async def get_config() -> dict:
     """Return the India regional pack configuration."""
     return PACK_CONFIG
