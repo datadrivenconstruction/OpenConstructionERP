@@ -627,7 +627,7 @@ export const boqApi = {
   autocomplete: (q: string, limit = 8, region?: string) => {
     const params = new URLSearchParams({ q, limit: String(limit), semantic: 'true' });
     if (region) params.set('region', region);
-    return apiGet<CostAutocompleteItem[]>(`/v1/costs/autocomplete?${params.toString()}`);
+    return apiGet<CostAutocompleteItem[]>(`/v1/costs/autocomplete/?${params.toString()}`);
   },
 
   /* AI Chat */

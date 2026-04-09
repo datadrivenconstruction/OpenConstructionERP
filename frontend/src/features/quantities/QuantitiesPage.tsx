@@ -744,7 +744,7 @@ export function QuantitiesPage() {
       setUninstalling(converterId);
 
       try {
-        await apiPost(`/v1/takeoff/converters/${converterId}/uninstall`);
+        await apiPost(`/v1/takeoff/converters/${converterId}/uninstall/`);
 
         setLocalInstalled((prev) => {
           const next = new Set(prev);

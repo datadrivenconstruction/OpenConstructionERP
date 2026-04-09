@@ -33,7 +33,7 @@ import {
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
-import { apiGet, apiPost, apiPatch, triggerDownload } from '@/shared/lib/api';
+import { apiGet, apiPost, triggerDownload } from '@/shared/lib/api';
 import { ContactSearchInput } from '@/shared/ui/ContactSearchInput';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -359,7 +359,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
 
   const createBudgetMut = useMutation({
     mutationFn: (data: { wbs_id: string | null; category: string | null; original_budget: string; notes: string | null }) =>
-      apiPost('/v1/finance/budgets', {
+      apiPost('/v1/finance/budgets/', {
         project_id: projectId,
         wbs_id: data.wbs_id,
         category: data.category,
@@ -1024,7 +1024,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
     queryKey: ['finance-invoices', projectId, subTab],
     queryFn: () =>
       apiGet<Invoice[]>(
-        `/v1/finance/invoices?project_id=${projectId}&direction=${subTab}`,
+        `/v1/finance/?project_id=${projectId}&direction=${subTab}`,
       ),
     select: (d): Invoice[] => (Array.isArray(d) ? d : (d as any)?.items ?? []),
   });
@@ -1056,7 +1056,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
 
   const approveMutation = useMutation({
     mutationFn: (invoiceId: string) =>
-      apiPatch(`/v1/finance/invoices/${invoiceId}`, { status: 'approved' }),
+      apiPost(`/v1/finance/${invoiceId}/approve/`),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['finance-invoices', projectId],
@@ -1074,7 +1074,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
 
   const markPaidMutation = useMutation({
     mutationFn: (invoiceId: string) =>
-      apiPatch(`/v1/finance/invoices/${invoiceId}`, { status: 'paid' }),
+      apiPost(`/v1/finance/${invoiceId}/pay/`),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['finance-invoices', projectId],
@@ -1680,7 +1680,7 @@ function PaymentsTab({ projectId }: { projectId: string }) {
   const { data: payments, isLoading } = useQuery({
     queryKey: ['finance-payments', projectId],
     queryFn: () =>
-      apiGet<Payment[]>(`/v1/finance/payments?project_id=${projectId}`),
+      apiGet<Payment[]>(`/v1/finance/payments/?project_id=${projectId}`),
     select: (d): Payment[] => (Array.isArray(d) ? d : (d as any)?.items ?? []),
   });
 
@@ -1803,12 +1803,12 @@ function EVMTab({ projectId }: { projectId: string }) {
   const { data: evm, isLoading } = useQuery({
     queryKey: ['finance-evm', projectId],
     queryFn: () =>
-      apiGet<EVMData>(`/v1/finance/evm?project_id=${projectId}`),
+      apiGet<EVMData>(`/v1/finance/evm/?project_id=${projectId}`),
   });
 
   const snapshotMut = useMutation({
     mutationFn: () =>
-      apiPost('/v1/finance/evm/snapshot', {
+      apiPost('/v1/finance/evm/snapshot/', {
         project_id: projectId,
         snapshot_date: new Date().toISOString().split('T')[0],
       }),

@@ -139,7 +139,7 @@ class PositionCreate(BaseModel):
     )
     source: str = Field(
         default="manual",
-        pattern=r"^(manual|cad_import|ai_takeoff|gaeb_import|excel_import|takeoff)$",
+        pattern=r"^(manual|cad_import|ai_takeoff|gaeb_import|excel_import|takeoff|smart_import|smart_import_ai|cad_import_ai)$",
         description="Data source. Must be: manual, cad_import, ai_takeoff, gaeb_import, excel_import, or takeoff",
         examples=["manual"],
     )
@@ -185,7 +185,7 @@ class PositionUpdate(BaseModel):
     classification: dict[str, Any] | None = None
     source: str | None = Field(
         default=None,
-        pattern=r"^(manual|cad_import|ai_takeoff|gaeb_import|excel_import|takeoff)$",
+        pattern=r"^(manual|cad_import|ai_takeoff|gaeb_import|excel_import|takeoff|smart_import|smart_import_ai|cad_import_ai)$",
     )
     confidence: float | None = Field(default=None, ge=0.0, le=1.0)
     cad_element_ids: list[str] | None = None

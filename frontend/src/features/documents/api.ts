@@ -60,17 +60,17 @@ export async function fetchPhotos(
   if (filters?.date_from) params.set('date_from', filters.date_from);
   if (filters?.date_to) params.set('date_to', filters.date_to);
   if (filters?.search) params.set('search', filters.search);
-  return apiGet<PhotoItem[]>(`/v1/documents/photos?${params.toString()}`);
+  return apiGet<PhotoItem[]>(`/v1/documents/photos/?${params.toString()}`);
 }
 
 export async function fetchPhotoGallery(projectId: string): Promise<PhotoItem[]> {
   if (!projectId) return [];
-  return apiGet<PhotoItem[]>(`/v1/documents/photos/gallery?project_id=${projectId}`);
+  return apiGet<PhotoItem[]>(`/v1/documents/photos/gallery/?project_id=${projectId}`);
 }
 
 export async function fetchPhotoTimeline(projectId: string): Promise<PhotoTimelineGroup[]> {
   if (!projectId) return [];
-  return apiGet<PhotoTimelineGroup[]>(`/v1/documents/photos/timeline?project_id=${projectId}`);
+  return apiGet<PhotoTimelineGroup[]>(`/v1/documents/photos/timeline/?project_id=${projectId}`);
 }
 
 export async function fetchPhoto(id: string): Promise<PhotoItem> {
@@ -104,7 +104,7 @@ export async function uploadPhoto(
   if (metadata.taken_at) formData.append('taken_at', metadata.taken_at);
 
   const token = useAuthStore.getState().accessToken;
-  const res = await fetch(`/api/v1/documents/photos/upload?project_id=${projectId}`, {
+  const res = await fetch(`/api/v1/documents/photos/upload/?project_id=${projectId}`, {
     method: 'POST',
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),

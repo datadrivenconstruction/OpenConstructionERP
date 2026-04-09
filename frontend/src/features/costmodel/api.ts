@@ -109,29 +109,29 @@ export interface WhatIfResult {
 
 export const costModelApi = {
   getDashboard: (projectId: string) =>
-    apiGet<DashboardData>(`/v1/costmodel/projects/${projectId}/5d/dashboard`),
+    apiGet<DashboardData>(`/v1/costmodel/projects/${projectId}/5d/dashboard/`),
   getSCurve: (projectId: string) =>
-    apiGet<{ periods: SCurvePoint[] }>(`/v1/costmodel/projects/${projectId}/5d/s-curve`),
+    apiGet<{ periods: SCurvePoint[] }>(`/v1/costmodel/projects/${projectId}/5d/s-curve/`),
   getCashFlow: (projectId: string) =>
-    apiGet<{ periods: CashFlowPoint[] }>(`/v1/costmodel/projects/${projectId}/5d/cash-flow`),
+    apiGet<{ periods: CashFlowPoint[] }>(`/v1/costmodel/projects/${projectId}/5d/cash-flow/`),
   getBudgetSummary: (projectId: string) =>
-    apiGet<{ categories: BudgetCategorySummary[] }>(`/v1/costmodel/projects/${projectId}/5d/budget`),
+    apiGet<{ categories: BudgetCategorySummary[] }>(`/v1/costmodel/projects/${projectId}/5d/budget/`),
   getBudgetLines: (projectId: string) =>
-    apiGet<BudgetLine[]>(`/v1/costmodel/projects/${projectId}/5d/budget-lines`),
+    apiGet<BudgetLine[]>(`/v1/costmodel/projects/${projectId}/5d/budget-lines/`),
   createBudgetLine: (projectId: string, data: Partial<BudgetLine>) =>
-    apiPost<BudgetLine>(`/v1/costmodel/projects/${projectId}/5d/budget-lines`, data),
+    apiPost<BudgetLine>(`/v1/costmodel/projects/${projectId}/5d/budget-lines/`, data),
   updateBudgetLine: (id: string, data: Partial<BudgetLine>) =>
-    apiPatch<BudgetLine>(`/v1/costmodel/5d/budget-lines/${id}`, data),
+    apiPatch<BudgetLine>(`/v1/costmodel/5d/budget-lines/${id}/`, data),
   generateBudgetFromBoq: (projectId: string, boqId: string) =>
-    apiPost(`/v1/costmodel/projects/${projectId}/5d/generate-budget`, { boq_id: boqId }),
+    apiPost(`/v1/costmodel/projects/${projectId}/5d/generate-budget/`, { boq_id: boqId }),
   createSnapshot: (projectId: string, data: { period: string; notes?: string }) =>
-    apiPost<Snapshot>(`/v1/costmodel/projects/${projectId}/5d/snapshots`, data),
+    apiPost<Snapshot>(`/v1/costmodel/projects/${projectId}/5d/snapshots/`, data),
   getSnapshots: (projectId: string) =>
-    apiGet<Snapshot[]>(`/v1/costmodel/projects/${projectId}/5d/snapshots`),
+    apiGet<Snapshot[]>(`/v1/costmodel/projects/${projectId}/5d/snapshots/`),
   generateCashFlow: (projectId: string) =>
-    apiPost(`/v1/costmodel/projects/${projectId}/5d/generate-cash-flow`, {}),
+    apiPost(`/v1/costmodel/projects/${projectId}/5d/generate-cash-flow/`, {}),
   getEVM: (projectId: string) =>
-    apiGet<EVMData>(`/v1/costmodel/projects/${projectId}/5d/evm`),
+    apiGet<EVMData>(`/v1/costmodel/projects/${projectId}/5d/evm/`),
   createWhatIfScenario: (projectId: string, data: WhatIfAdjustments) =>
-    apiPost<WhatIfResult>(`/v1/costmodel/projects/${projectId}/5d/what-if`, data),
+    apiPost<WhatIfResult>(`/v1/costmodel/projects/${projectId}/5d/what-if/`, data),
 };

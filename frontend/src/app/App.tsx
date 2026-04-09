@@ -130,6 +130,9 @@ const BIMPage = lazy(() =>
 const UserManagementPage = lazy(() =>
   import('@/features/users/UserManagementPage').then((m) => ({ default: m.UserManagementPage }))
 );
+const ArchitectureMapPage = lazy(() =>
+  import('@/features/architecture/ArchitectureMapPage').then((m) => ({ default: m.ArchitectureMapPage }))
+);
 
 function LoadingScreen() {
   return (
@@ -363,6 +366,7 @@ export default function App() {
         <Route path="/settings" element={<P title="Settings"><SettingsPage /></P>} />
         <Route path="/integrations" element={<P title="Integrations"><IntegrationsPage /></P>} />
         <Route path="/about" element={<P title="About"><AboutPage /></P>} />
+        <Route path="/architecture" element={<P title="Architecture Map"><ArchitectureMapPage /></P>} />
 
         {/* Convenience route aliases — redirect to canonical paths */}
         <Route path="/change-orders" element={<Navigate to="/changeorders" replace />} />

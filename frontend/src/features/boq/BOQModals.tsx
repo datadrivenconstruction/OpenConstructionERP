@@ -83,7 +83,7 @@ export function AssemblyPickerModal({
     const qty = quantity[assemblyId] || 1;
     setApplying(assemblyId);
     try {
-      await apiPost(`/v1/assemblies/${assemblyId}/apply-to-boq`, {
+      await apiPost(`/v1/assemblies/${assemblyId}/apply-to-boq/`, {
         boq_id: boqId,
         quantity: qty,
       });
@@ -332,7 +332,7 @@ export function CostDatabaseSearchModal({
           unit_rate: c.unit_rate ?? 0,
           total: c.cost || (c.quantity ?? 1) * (c.unit_rate ?? 0),
         }));
-        await apiPost(`/v1/boq/boqs/${boqId}/positions`, {
+        await apiPost(`/v1/boq/boqs/${boqId}/positions/`, {
           boq_id: boqId,
           ordinal,
           description: item.description || 'Unnamed item',

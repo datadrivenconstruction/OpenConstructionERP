@@ -149,7 +149,7 @@ async function fetchBoqDetail(boqId: string): Promise<BOQDetail> {
 async function smartImportFile(boqId: string, file: File): Promise<ImportResult> {
   const form = new FormData();
   form.append('file', file);
-  const res = await fetch(`/api/v1/boq/boqs/${boqId}/import/smart`, {
+  const res = await fetch(`/api/v1/boq/boqs/${boqId}/import/smart/`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: form,

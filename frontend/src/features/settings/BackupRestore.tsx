@@ -43,7 +43,7 @@ interface RestoreResult {
 
 async function exportBackup(): Promise<Blob> {
   const token = useAuthStore.getState().accessToken;
-  const resp = await fetch('/api/v1/backup/export', {
+  const resp = await fetch('/api/v1/backup/export/', {
     method: 'POST',
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
@@ -55,7 +55,7 @@ async function validateBackup(file: File): Promise<ValidateResult> {
   const token = useAuthStore.getState().accessToken;
   const form = new FormData();
   form.append('file', file);
-  const resp = await fetch('/api/v1/backup/validate', {
+  const resp = await fetch('/api/v1/backup/validate/', {
     method: 'POST',
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: form,
@@ -72,7 +72,7 @@ async function restoreBackup(
   const form = new FormData();
   form.append('file', file);
   form.append('mode', mode);
-  const resp = await fetch('/api/v1/backup/restore', {
+  const resp = await fetch('/api/v1/backup/restore/', {
     method: 'POST',
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: form,

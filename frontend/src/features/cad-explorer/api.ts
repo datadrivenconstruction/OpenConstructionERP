@@ -96,7 +96,7 @@ export async function fetchElements(
   if (params.sort_order) qs.set('sort_order', params.sort_order);
   if (params.filter_column) qs.set('filter_column', params.filter_column);
   if (params.filter_value) qs.set('filter_value', params.filter_value);
-  return apiGet<ElementsResponse>(`/v1/takeoff/cad-data/elements?${qs.toString()}`);
+  return apiGet<ElementsResponse>(`/v1/takeoff/cad-data/elements/?${qs.toString()}`);
 }
 
 export async function aggregate(
@@ -104,7 +104,7 @@ export async function aggregate(
   groupBy: string[],
   aggregations: Record<string, string>,
 ): Promise<AggregateResponse> {
-  return apiPost<AggregateResponse>('/v1/takeoff/cad-data/aggregate', {
+  return apiPost<AggregateResponse>('/v1/takeoff/cad-data/aggregate/', {
     session_id: sessionId,
     group_by: groupBy,
     aggregations,
@@ -130,7 +130,7 @@ export async function saveSession(
   projectId: string,
   displayName: string,
 ): Promise<{ status: string; session_id: string }> {
-  return apiPost('/v1/takeoff/cad-data/save', {
+  return apiPost('/v1/takeoff/cad-data/save/', {
     session_id: sessionId,
     project_id: projectId,
     display_name: displayName,
@@ -142,7 +142,7 @@ export async function listSessions(projectId?: string, savedOnly = false): Promi
   if (projectId) params.set('project_id', projectId);
   if (savedOnly) params.set('saved_only', 'true');
   const qs = params.toString();
-  return apiGet<SavedSession[]>(`/v1/takeoff/cad-data/sessions${qs ? `?${qs}` : ''}`);
+  return apiGet<SavedSession[]>(`/v1/takeoff/cad-data/sessions/${qs ? `?${qs}` : ''}`);
 }
 
 export async function deleteSession(sessionId: string): Promise<void> {

@@ -154,7 +154,7 @@ export function InlinePdfAnnotator({
       setError(null);
       try {
         const token = useAuthStore.getState().accessToken;
-        const res = await fetch(`/api/v1/documents/${documentId}/download`, {
+        const res = await fetch(`/api/v1/documents/${documentId}/download/`, {
           headers: {
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
             'X-DDC-Client': 'OE/1.0',

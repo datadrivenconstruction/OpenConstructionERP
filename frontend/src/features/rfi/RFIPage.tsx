@@ -967,11 +967,17 @@ export function RFIPage() {
 
       {/* No-project warning */}
       {!projectId && (
-        <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
-          {t('common.select_project_hint', { defaultValue: 'Select a project from the header to get started.' })}
+        <div className="mb-4 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 px-4 py-3">
+          <AlertTriangle size={18} className="text-amber-600 shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-300">{t('common.no_project_selected', { defaultValue: 'No project selected' })}</p>
+            <p className="text-xs text-amber-600 dark:text-amber-400">{t('common.select_project_hint', { defaultValue: 'Select a project from the header to view and manage items.' })}</p>
+          </div>
         </div>
       )}
 
+      {projectId ? (
+      <>
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         <Card className="p-4 animate-card-in">
@@ -1177,6 +1183,14 @@ export function RFIPage() {
           </>
         )}
       </div>
+      </>
+      ) : (
+        <EmptyState
+          icon={<HelpCircle size={28} strokeWidth={1.5} />}
+          title={t('rfi.no_project', { defaultValue: 'No project selected' })}
+          description={t('rfi.select_project', { defaultValue: 'Open a project first to view and manage RFIs.' })}
+        />
+      )}
 
       {/* Create Modal */}
       {showCreateModal && (

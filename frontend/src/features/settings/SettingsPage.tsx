@@ -866,7 +866,7 @@ export function SettingsPage() {
                   key={lang.code}
                   onClick={() => {
                     i18n.changeLanguage(lang.code);
-                    apiPatch('/v1/users/me', { locale: lang.code }).then(() => {
+                    apiPatch('/v1/users/me/', { locale: lang.code }).then(() => {
                       queryClient.invalidateQueries({ queryKey: ['me'] });
                     }).catch(() => {});
                   }}

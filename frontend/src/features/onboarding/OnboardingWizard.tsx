@@ -1048,7 +1048,7 @@ function StepDataSetup({
 
       updateQueueTask(taskId, { progress: 30, message: t('onboarding.db_downloading', { defaultValue: 'Downloading from server...' }) });
 
-      const res = await fetch(`/api/v1/costs/load-cwicr/${selectedRegion}`, {
+      const res = await fetch(`/api/v1/costs/load-cwicr/${selectedRegion}/`, {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         signal: controller.signal,
@@ -1112,7 +1112,7 @@ function StepDataSetup({
   const handleInstallDemo = useCallback(async () => {
     setInstallingDemo(true);
     try {
-      await apiPost(`/demo/install/${suggestedDemoId}`);
+      await apiPost(`/demo/install/${suggestedDemoId}/`);
       setDemoInstalled(true);
       addToast({
         type: 'success',
@@ -1520,7 +1520,7 @@ function StepFinish({
 
     // 3. Save onboarding state to server
     try {
-      await apiPost('/v1/users/me/onboarding', {
+      await apiPost('/v1/users/me/onboarding/', {
         company_type: companyType ?? 'full_enterprise',
         enabled_modules: Array.from(enabledModules),
         interface_mode: 'advanced',

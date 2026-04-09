@@ -1213,7 +1213,7 @@ export function QuickEstimatePage() {
     total_count: number;
   }>({
     queryKey: ['takeoff', 'converters'],
-    queryFn: () => apiGet('/v1/takeoff/converters'),
+    queryFn: () => apiGet('/v1/takeoff/converters/'),
     staleTime: 60_000,
     enabled: activeTab === 'cad' || isCadRoute,
   });
@@ -1250,7 +1250,7 @@ export function QuickEstimatePage() {
 
   const handleConverterUninstall = useCallback(async (c: ConverterFull) => {
     try {
-      await apiPost(`/v1/takeoff/converters/${c.id}/uninstall`);
+      await apiPost(`/v1/takeoff/converters/${c.id}/uninstall/`);
       addToast({ type: 'success', title: `${c.name} uninstalled` });
       queryClient.invalidateQueries({ queryKey: ['takeoff', 'converters'] });
     } catch (err) {

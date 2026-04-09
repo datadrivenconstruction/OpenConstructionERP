@@ -325,7 +325,7 @@ export default function DPGFExchangeModule() {
         source: 'dpgf_import',
       }));
 
-      await apiPost(`/v1/boq/boqs/${importTargetBoqId}/import`, { positions: payload });
+      await apiPost(`/v1/boq/boqs/${importTargetBoqId}/import/`, { positions: payload });
 
       const imported = payload.length;
       setImportResult({ imported, errors: [] });

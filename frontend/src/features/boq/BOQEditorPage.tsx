@@ -274,7 +274,7 @@ export function BOQEditorPage() {
   });
 
   const lockMutation = useMutation({
-    mutationFn: () => apiPost(`/v1/boq/boqs/${boqId}/lock`, {}),
+    mutationFn: () => apiPost(`/v1/boq/boqs/${boqId}/lock/`, {}),
     onSuccess: () => {
       invalidateAll();
       addToast(
@@ -302,6 +302,21 @@ export function BOQEditorPage() {
   const handleLock = useCallback(() => {
     lockMutation.mutate();
   }, [lockMutation]);
+
+  const unlockMutation = useMutation({
+    mutationFn: () => apiPost(`/v1/boq/boqs/${boqId}/unlock/`, {}),
+    onSuccess: () => {
+      invalidateAll();
+      addToast({ type: 'success', title: t('boq.unlocked_success', { defaultValue: 'Estimate unlocked' }) });
+    },
+    onError: (err) => {
+      addToast({ type: 'error', title: t('boq.unlock_failed', { defaultValue: 'Unlock failed' }), message: err instanceof Error ? err.message : '' });
+    },
+  });
+
+  const handleUnlock = useCallback(() => {
+    unlockMutation.mutate();
+  }, [unlockMutation]);
 
   const createBudgetMutation = useMutation({
     mutationFn: () => apiPost<{ created: number }>(`/v1/boq/boqs/${boqId}/create-budget`, {}),
@@ -1083,7 +1098,7 @@ export function BOQEditorPage() {
       }
 
       const token = useAuthStore.getState().accessToken;
-      const r = await fetch(`/api/v1/boq/boqs/${boqId}/export/${format}`, {
+      const r = await fetch(`/api/v1/boq/boqs/${boqId}/export/${format}/`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (r.ok) {
@@ -1146,7 +1161,7 @@ export function BOQEditorPage() {
     setIsValidating(true);
     useProgressStore.getState().start();
     try {
-      const r = await fetch(`/api/v1/boq/boqs/${boqId}/validate`, {
+      const r = await fetch(`/api/v1/boq/boqs/${boqId}/validate/`, {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
@@ -1282,7 +1297,7 @@ export function BOQEditorPage() {
         quantity: r.quantity,
         unit_rate: r.unit_rate,
       }));
-      await apiPost(`/v1/boq/boqs/${boqId}/positions/bulk`, { items });
+      await apiPost(`/v1/boq/boqs/${boqId}/positions/bulk/`, { items });
       addToast({
         type: 'success',
         title: t('boq.paste_import_success', { defaultValue: 'Imported successfully' }),
@@ -1589,7 +1604,7 @@ export function BOQEditorPage() {
   const handleIndexNow = useCallback(async () => {
     setVectorIndexing(true);
     try {
-      await apiPost('/v1/costs/vector/index');
+      await apiPost('/v1/costs/vector/index/');
       queryClient.invalidateQueries({ queryKey: ['vector-status'] });
       addToast({
         type: 'success',
@@ -1864,7 +1879,7 @@ export function BOQEditorPage() {
       form.append('file', file);
 
       try {
-        const res = await fetch(`/api/v1/boq/boqs/${boqId}/import/smart`, {
+        const res = await fetch(`/api/v1/boq/boqs/${boqId}/import/smart/`, {
           method: 'POST',
           headers: token ? { Authorization: `Bearer ${token}` } : {},
           body: form,
@@ -2016,7 +2031,7 @@ export function BOQEditorPage() {
         // Add components from resources
         for (let i = 0; i < resources.length; i++) {
           const r = resources[i]!;
-          await apiPost(`/v1/assemblies/${assemblyResp.id}/components`, {
+          await apiPost(`/v1/assemblies/${assemblyResp.id}/components/`, {
             description: r.name || '',
             factor: 1.0,
             quantity: r.quantity || 1,
@@ -2027,7 +2042,7 @@ export function BOQEditorPage() {
 
         // If no resources, add a single component from the position itself
         if (resources.length === 0) {
-          await apiPost(`/v1/assemblies/${assemblyResp.id}/components`, {
+          await apiPost(`/v1/assemblies/${assemblyResp.id}/components/`, {
             description: pos.description || 'Main item',
             factor: 1.0,
             quantity: 1,
@@ -2177,6 +2192,12 @@ export function BOQEditorPage() {
               <Button variant="secondary" size="sm" onClick={handleLock} disabled={lockMutation.isPending}>
                 <Lock size={14} className="mr-1" />
                 {t('boq.lock', { defaultValue: 'Lock Estimate' })}
+              </Button>
+            )}
+            {boq.is_locked && isManager && (
+              <Button variant="ghost" size="sm" onClick={handleUnlock} disabled={unlockMutation.isPending}>
+                <Lock size={14} className="mr-1" />
+                {t('boq.unlock', { defaultValue: 'Unlock' })}
               </Button>
             )}
             {boq.is_locked && (

@@ -292,27 +292,31 @@ function QualityDashboardSummary({ projectId }: { projectId: string }) {
 
   const { data: safetyStats } = useQuery({
     queryKey: ['safety-stats', projectId],
-    queryFn: () => apiGet<SafetyStats>(`/v1/safety/stats?project_id=${projectId}`),
+    queryFn: () => apiGet<SafetyStats>(`/v1/safety/stats/?project_id=${projectId}`),
     enabled: !!projectId,
   });
 
   const { data: inspections } = useQuery({
     queryKey: ['inspections-summary', projectId],
     queryFn: () =>
-      apiGet<{ status: string }[]>(`/v1/inspections?project_id=${projectId}`),
+      apiGet<{ status: string }[]>(`/v1/inspections/?project_id=${projectId}`),
+    select: (d): { status: string }[] =>
+      Array.isArray(d) ? d : (d as any)?.items ?? [],
     enabled: !!projectId,
   });
 
   const { data: ncrs } = useQuery({
     queryKey: ['ncrs-summary', projectId],
     queryFn: () =>
-      apiGet<{ status: string }[]>(`/v1/ncr?project_id=${projectId}`),
+      apiGet<{ status: string }[]>(`/v1/ncr/?project_id=${projectId}`),
+    select: (d): { status: string }[] =>
+      Array.isArray(d) ? d : (d as any)?.items ?? [],
     enabled: !!projectId,
   });
 
   const { data: punchSummary } = useQuery({
     queryKey: ['punch-summary', projectId],
-    queryFn: () => apiGet<PunchSummaryData>(`/v1/punchlist/summary?project_id=${projectId}`),
+    queryFn: () => apiGet<PunchSummaryData>(`/v1/punchlist/summary/?project_id=${projectId}`),
     enabled: !!projectId,
   });
 
@@ -444,34 +448,47 @@ export function SafetyPage() {
 
       {/* No-project warning */}
       {!projectId && (
-        <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
-          {t('common.select_project_hint', { defaultValue: 'Select a project from the header to get started.' })}
+        <div className="mb-4 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 px-4 py-3">
+          <AlertTriangle size={18} className="text-amber-600 shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-300">{t('common.no_project_selected', { defaultValue: 'No project selected' })}</p>
+            <p className="text-xs text-amber-600 dark:text-amber-400">{t('common.select_project_hint', { defaultValue: 'Select a project from the header to view and manage items.' })}</p>
+          </div>
         </div>
       )}
 
-      {/* Tab Bar */}
-      <div className="flex items-center gap-1 mb-6 border-b border-border-light">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`
-              flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-all
-              ${
-                activeTab === tab.key
-                  ? 'border-oe-blue text-oe-blue'
-                  : 'border-transparent text-content-tertiary hover:text-content-primary hover:bg-surface-secondary'
-              }
-            `}
-          >
-            {tab.icon}
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      {projectId ? (
+        <>
+          {/* Tab Bar */}
+          <div className="flex items-center gap-1 mb-6 border-b border-border-light">
+            {tabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`
+                  flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-all
+                  ${
+                    activeTab === tab.key
+                      ? 'border-oe-blue text-oe-blue'
+                      : 'border-transparent text-content-tertiary hover:text-content-primary hover:bg-surface-secondary'
+                  }
+                `}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-      {/* Tab Content */}
-      {!projectId ? (
+          {/* Tab Content */}
+          {activeTab === 'incidents' && (
+            <IncidentsTab projectId={projectId} />
+          )}
+          {activeTab === 'observations' && (
+            <ObservationsTab projectId={projectId} />
+          )}
+        </>
+      ) : (
         <EmptyState
           icon={<HardHat size={28} strokeWidth={1.5} />}
           title={t('safety.no_project', {
@@ -482,15 +499,6 @@ export function SafetyPage() {
               'Open a project first to view its safety data',
           })}
         />
-      ) : (
-        <>
-          {activeTab === 'incidents' && (
-            <IncidentsTab projectId={projectId} />
-          )}
-          {activeTab === 'observations' && (
-            <ObservationsTab projectId={projectId} />
-          )}
-        </>
       )}
     </div>
   );
@@ -596,6 +604,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
       apiGet<Incident[]>(
         `/v1/safety/incidents?project_id=${projectId}`,
       ),
+    select: (d): Incident[] => (Array.isArray(d) ? d : (d as any)?.items ?? []),
   });
 
   const filtered = useMemo(() => {
@@ -612,8 +621,11 @@ function IncidentsTab({ projectId }: { projectId: string }) {
 
   if (isLoading) return <SkeletonTable rows={5} columns={7} />;
 
-  if (!incidents || incidents.length === 0) {
-    return (
+  const isEmpty = !incidents || incidents.length === 0;
+
+  return (
+    <>
+    {isEmpty ? (
       <EmptyState
         icon={<ShieldAlert size={28} strokeWidth={1.5} />}
         title={t('safety.no_incidents', {
@@ -622,12 +634,12 @@ function IncidentsTab({ projectId }: { projectId: string }) {
         description={t('safety.no_incidents_desc', {
           defaultValue: 'Incidents will appear here when reported',
         })}
+        action={{
+          label: t('safety.report_incident', { defaultValue: 'Report Incident' }),
+          onClick: () => setShowCreate(true),
+        }}
       />
-    );
-  }
-
-  return (
-    <>
+    ) : (
     <Card padding="none">
       {/* Search + Export + New */}
       <div className="p-4 border-b border-border-light flex items-center gap-3">
@@ -797,6 +809,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
         ))}
       </div>
     </Card>
+    )}
 
     {/* New Incident Modal */}
     {showCreate && (
@@ -1077,6 +1090,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
       apiGet<Observation[]>(
         `/v1/safety/observations?project_id=${projectId}`,
       ),
+    select: (d): Observation[] => (Array.isArray(d) ? d : (d as any)?.items ?? []),
   });
 
   const filtered = useMemo(() => {
@@ -1093,8 +1107,11 @@ function ObservationsTab({ projectId }: { projectId: string }) {
 
   if (isLoading) return <SkeletonTable rows={5} columns={6} />;
 
-  if (!observations || observations.length === 0) {
-    return (
+  const isEmpty = !observations || observations.length === 0;
+
+  return (
+    <>
+    {isEmpty ? (
       <EmptyState
         icon={<Eye size={28} strokeWidth={1.5} />}
         title={t('safety.no_observations', {
@@ -1103,12 +1120,12 @@ function ObservationsTab({ projectId }: { projectId: string }) {
         description={t('safety.no_observations_desc', {
           defaultValue: 'Safety observations will appear here when recorded',
         })}
+        action={{
+          label: t('safety.record_observation', { defaultValue: 'Record Observation' }),
+          onClick: () => setShowCreate(true),
+        }}
       />
-    );
-  }
-
-  return (
-    <>
+    ) : (
     <Card padding="none">
       {/* Search + Export + New */}
       <div className="p-4 border-b border-border-light flex items-center gap-3">
@@ -1282,6 +1299,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
         ))}
       </div>
     </Card>
+    )}
 
     {/* New Observation Modal */}
     {showCreate && (

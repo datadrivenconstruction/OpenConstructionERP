@@ -41,6 +41,7 @@ import {
   Mail,
   Send,
   Plug,
+  Network,
   History,
   type LucideIcon,
 } from 'lucide-react';
@@ -213,6 +214,7 @@ const bottomNav: NavItem[] = [
   { labelKey: 'users.management', to: '/users', icon: Users },
   { labelKey: 'modules.title', to: '/modules', icon: Package },
   { labelKey: 'integrations.title', to: '/integrations', icon: Plug },
+  { labelKey: 'nav.architecture', to: '/architecture', icon: Network },
   { labelKey: 'nav.settings', to: '/settings', icon: Settings },
   { labelKey: 'nav.about', to: '/about', icon: Info },
 ];
@@ -337,10 +339,12 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
       </nav>
 
       {/* Recent items */}
-      <RecentSection onItemClick={onClose} />
+      <div className="bg-black/[0.02] dark:bg-white/[0.02]">
+        <RecentSection onItemClick={onClose} />
+      </div>
 
       {/* Bottom navigation */}
-      <div className="border-t border-border-light px-3 py-2">
+      <div className="border-t border-border-light px-3 py-2 bg-black/[0.04] dark:bg-white/[0.03]">
         <ul className="space-y-0.5">
           {bottomNav.map((item) => (
             <li key={item.to}>

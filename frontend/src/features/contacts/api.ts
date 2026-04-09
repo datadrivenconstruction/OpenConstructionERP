@@ -107,7 +107,7 @@ export async function importContactsFile(file: File): Promise<ImportResult> {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch('/api/v1/contacts/import/file', {
+  const response = await fetch('/api/v1/contacts/import/file/', {
     method: 'POST',
     headers,
     body: formData,
@@ -134,7 +134,7 @@ export async function exportContacts(): Promise<void> {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch('/api/v1/contacts/export', { method: 'GET', headers });
+  const response = await fetch('/api/v1/contacts/export/', { method: 'GET', headers });
   if (!response.ok) {
     let detail = 'Export failed';
     try {
@@ -159,7 +159,7 @@ export function downloadContactsTemplate(): void {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  fetch('/api/v1/contacts/template', { method: 'GET', headers })
+  fetch('/api/v1/contacts/template/', { method: 'GET', headers })
     .then((response) => {
       if (!response.ok) throw new Error('Failed to download template');
       return response.blob();

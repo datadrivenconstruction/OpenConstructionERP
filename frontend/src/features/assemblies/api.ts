@@ -110,7 +110,7 @@ export const assembliesApi = {
   deleteComponent: (assemblyId: string, componentId: string) =>
     apiDelete(`/v1/assemblies/${assemblyId}/components/${componentId}`),
   applyToBoq: (assemblyId: string, boqId: string, quantity: number) =>
-    apiPost(`/v1/assemblies/${assemblyId}/apply-to-boq`, { boq_id: boqId, quantity }),
+    apiPost(`/v1/assemblies/${assemblyId}/apply-to-boq/`, { boq_id: boqId, quantity }),
   aiGenerate: (data: AIGenerateRequest) =>
-    apiPost<AIGeneratedAssembly>('/v1/assemblies/ai-generate', data),
+    apiPost<AIGeneratedAssembly>('/v1/assemblies/ai-generate/', data),
 };

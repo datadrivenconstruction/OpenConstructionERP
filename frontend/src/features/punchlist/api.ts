@@ -113,7 +113,10 @@ export async function fetchPunchItems(
   if (filters?.status) params.set('status', filters.status);
   if (filters?.category) params.set('category', filters.category);
   if (filters?.assigned_to) params.set('assigned_to', filters.assigned_to);
-  return apiGet<PunchItem[]>(`/v1/punchlist/items?${params.toString()}`);
+  const res = await apiGet<PunchItem[] | { items: PunchItem[] }>(
+    `/v1/punchlist/items?${params.toString()}`,
+  );
+  return Array.isArray(res) ? res : res.items ?? [];
 }
 
 export async function createPunchItem(data: CreatePunchPayload): Promise<PunchItem> {
@@ -139,7 +142,7 @@ export async function uploadPunchPhoto(id: string, file: File): Promise<PunchIte
   const formData = new FormData();
   formData.append('file', file);
   const token = localStorage.getItem('oe_access_token');
-  const res = await fetch(`/api/v1/punchlist/items/${id}/photos`, {
+  const res = await fetch(`/api/v1/punchlist/items/${id}/photos/`, {
     method: 'POST',
     headers: {
       Authorization: token ? `Bearer ${token}` : '',
@@ -153,10 +156,13 @@ export async function uploadPunchPhoto(id: string, file: File): Promise<PunchIte
 
 export async function fetchPunchSummary(projectId: string): Promise<PunchSummary> {
   if (!projectId) return { total: 0, by_status: {}, by_priority: {}, overdue: 0, avg_days_to_close: null };
-  return apiGet<PunchSummary>(`/v1/punchlist/summary?project_id=${projectId}`);
+  return apiGet<PunchSummary>(`/v1/punchlist/summary/?project_id=${projectId}`);
 }
 
 export async function fetchTeamMembers(projectId: string): Promise<TeamMember[]> {
   if (!projectId) return [];
-  return apiGet<TeamMember[]>(`/v1/projects/${projectId}/members`);
+  const res = await apiGet<TeamMember[] | { items: TeamMember[] }>(
+    `/v1/projects/${projectId}/members`,
+  );
+  return Array.isArray(res) ? res : res.items ?? [];
 }

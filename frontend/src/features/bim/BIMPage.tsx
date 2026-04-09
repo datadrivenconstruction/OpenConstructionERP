@@ -558,14 +558,24 @@ function UnifiedUploadSection({
             }).replace('{{format}}', result.format.toUpperCase()),
           );
 
+          const elemCount = (result as any).element_count || 0;
+          const isReady = (result as any).status === 'ready';
+
           addToast({
             type: 'success',
-            title: t('bim.cad_upload_success', { defaultValue: 'CAD file uploaded' }),
-            message: `${result.format.toUpperCase()} file uploaded. Element extraction in progress.`,
+            title: isReady
+              ? t('bim.processing_complete', { defaultValue: 'IFC processed successfully' })
+              : t('bim.cad_upload_success', { defaultValue: 'CAD file uploaded' }),
+            message: isReady
+              ? `${elemCount} elements extracted from ${result.format.toUpperCase()} file`
+              : `${result.format.toUpperCase()} file uploaded. Processing queued.`,
           });
-          onUploadComplete(result.model_id);
 
-          // Keep progress visible for 2s then reset
+          if (isReady) {
+            setUploadStage(`${elemCount} elements extracted — model ready`);
+          }
+
+          onUploadComplete(result.model_id);
           await new Promise((r) => setTimeout(r, 2000));
           resetForm();
         } else if (isDataFile(file.name)) {
