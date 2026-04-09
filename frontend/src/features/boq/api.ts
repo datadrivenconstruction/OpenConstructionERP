@@ -559,7 +559,7 @@ export const boqApi = {
   /* Duplicate */
   duplicateBoq: (boqId: string) => apiPost<BOQ>(`/v1/boq/boqs/${boqId}/duplicate/`, {}),
   duplicatePosition: (posId: string) =>
-    apiPost<Position>(`/v1/boq/positions/${posId}/duplicate/`, {}),
+    apiPost<Position>(`/v1/boq/positions/${posId}/duplicate`, {}),
 
   /* Section */
   addSection: (boqId: string, data: { ordinal: string; description: string }) =>
@@ -569,8 +569,8 @@ export const boqApi = {
   addPosition: (data: CreatePositionData) =>
     apiPost<Position>(`/v1/boq/boqs/${data.boq_id}/positions/`, data),
   updatePosition: (posId: string, data: UpdatePositionData) =>
-    apiPatch<Position>(`/v1/boq/positions/${posId}/`, data),
-  deletePosition: (posId: string) => apiDelete(`/v1/boq/positions/${posId}/`),
+    apiPatch<Position>(`/v1/boq/positions/${posId}`, data),
+  deletePosition: (posId: string) => apiDelete(`/v1/boq/positions/${posId}`),
 
   /* Position reorder (drag-and-drop) */
   reorderPositions: (boqId: string, positionIds: string[]) =>
@@ -583,9 +583,9 @@ export const boqApi = {
   addMarkup: (boqId: string, data: CreateMarkupData) =>
     apiPost<Markup>(`/v1/boq/boqs/${boqId}/markups/`, data),
   updateMarkup: (boqId: string, markupId: string, data: UpdateMarkupData) =>
-    apiPatch<Markup>(`/v1/boq/boqs/${boqId}/markups/${markupId}/`, data),
+    apiPatch<Markup>(`/v1/boq/boqs/${boqId}/markups/${markupId}`, data),
   deleteMarkup: (boqId: string, markupId: string) =>
-    apiDelete(`/v1/boq/boqs/${boqId}/markups/${markupId}/`),
+    apiDelete(`/v1/boq/boqs/${boqId}/markups/${markupId}`),
   applyDefaults: (boqId: string, region: string) =>
     apiPost<Markup[]>(`/v1/boq/boqs/${boqId}/markups/apply-defaults?region=${encodeURIComponent(region)}`, {}),
 
