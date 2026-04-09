@@ -8,7 +8,8 @@
     "ai_estimate": "Szacowanie AI",
     "settings": "Ustawienia",
     "5d_cost_model": "Model kosztów 5D",
-    "templates": "Szablony"
+    "templates": "Szablony",
+    "architecture": "Mapa architektury"
   },
   "common": {
     "save": "Zapisz",

@@ -15,7 +15,8 @@
     "group_estimation": "Kalkulation",
     "group_planning": "Planung",
     "group_procurement": "Beschaffung",
-    "group_tools": "Werkzeuge"
+    "group_tools": "Werkzeuge",
+    "architecture": "Architektur-Karte"
   },
   "common": {
     "save": "Speichern",

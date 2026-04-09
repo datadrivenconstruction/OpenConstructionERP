@@ -8,7 +8,8 @@
     "ai_estimate": "AI 估算",
     "settings": "设置",
     "5d_cost_model": "5D 成本模型",
-    "templates": "模板"
+    "templates": "模板",
+    "architecture": "架构图"
   },
   "common": {
     "save": "保存",

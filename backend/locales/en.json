@@ -15,7 +15,8 @@
     "group_estimation": "Estimation",
     "group_planning": "Planning",
     "group_procurement": "Procurement",
-    "group_tools": "Tools"
+    "group_tools": "Tools",
+    "architecture": "Architecture Map"
   },
   "common": {
     "save": "Save",

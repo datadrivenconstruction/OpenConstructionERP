@@ -15,7 +15,8 @@
     "group_estimation": "Сметное дело",
     "group_planning": "Планирование",
     "group_procurement": "Закупки",
-    "group_tools": "Инструменты"
+    "group_tools": "Инструменты",
+    "architecture": "Карта архитектуры"
   },
   "common": {
     "save": "Сохранить",

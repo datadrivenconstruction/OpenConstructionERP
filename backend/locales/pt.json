@@ -8,7 +8,8 @@
     "ai_estimate": "Estimativa IA",
     "settings": "Configurações",
     "5d_cost_model": "Modelo de custos 5D",
-    "templates": "Modelos"
+    "templates": "Modelos",
+    "architecture": "Mapa de arquitetura"
   },
   "common": {
     "save": "Guardar",
