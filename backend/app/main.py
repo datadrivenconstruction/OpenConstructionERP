@@ -207,7 +207,7 @@ def create_app() -> FastAPI:
         redoc_url="/api/redoc" if not settings.is_production else None,
         openapi_url="/api/openapi.json",
         swagger_ui_oauth2_redirect_url=("/api/docs/oauth2-redirect" if not settings.is_production else None),
-        redirect_slashes=True,
+        redirect_slashes=False,
     )
 
     # ── Middleware ───────────────────────────────────────────────────────
