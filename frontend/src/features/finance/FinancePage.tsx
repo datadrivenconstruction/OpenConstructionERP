@@ -1987,7 +1987,7 @@ function EVMTab({ projectId }: { projectId: string }) {
                     colorize={kpi.label.includes('Variance')}
                   />
                 ) : (
-                  kpi.value.toFixed(2)
+                  (kpi.value ?? 0).toFixed(2)
                 )}
               </div>
               {kpi.isIndex && (

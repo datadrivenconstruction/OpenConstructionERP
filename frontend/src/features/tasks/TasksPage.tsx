@@ -71,6 +71,7 @@ const TYPE_COLOR: Record<TaskType, string> = {
 
 const PRIORITY_BADGE: Record<TaskPriority, { variant: 'neutral' | 'blue' | 'warning' | 'error'; cls: string }> = {
   low: { variant: 'neutral', cls: '' },
+  normal: { variant: 'blue', cls: '' },
   medium: { variant: 'blue', cls: '' },
   high: { variant: 'warning', cls: '' },
   urgent: { variant: 'error', cls: '' },
@@ -102,7 +103,7 @@ const EMPTY_FORM: TaskFormData = {
   title: '',
   description: '',
   task_type: 'task',
-  priority: 'medium',
+  priority: 'normal',
   assigned_to: '',
   due_date: '',
 };
@@ -266,11 +267,11 @@ function AddTaskModal({
               {t('tasks.field_priority', { defaultValue: 'Priority' })}
             </label>
             <div className="grid grid-cols-4 gap-2">
-              {(['low', 'medium', 'high', 'urgent'] as TaskPriority[]).map((p) => {
+              {(['low', 'normal', 'high', 'urgent'] as TaskPriority[]).map((p) => {
                 const selected = form.priority === p;
-                const colorMap: Record<TaskPriority, string> = {
+                const colorMap: Record<string, string> = {
                   low: 'text-gray-600 bg-gray-50 border-gray-200 dark:text-gray-400 dark:bg-gray-800/50 dark:border-gray-700',
-                  medium: 'text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-950/30 dark:border-blue-800',
+                  normal: 'text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-950/30 dark:border-blue-800',
                   high: 'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800',
                   urgent: 'text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800',
                 };
