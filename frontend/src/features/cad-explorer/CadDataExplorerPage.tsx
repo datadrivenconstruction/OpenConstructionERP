@@ -1743,11 +1743,11 @@ export function CadDataExplorerPage() {
       DGN: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
     };
 
-    const FEATURE_CARDS: { icon: React.ElementType; title: string; desc: string; color: string }[] = [
-      { icon: Table2, title: t('explorer.feat_table', { defaultValue: 'Data Table' }), desc: t('explorer.feat_table_desc', { defaultValue: 'Filter, sort, and search across all BIM element properties with heatmap visualization' }), color: 'text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400' },
-      { icon: Layers, title: t('explorer.feat_pivot', { defaultValue: 'Pivot Analysis' }), desc: t('explorer.feat_pivot_desc', { defaultValue: 'Group by any column and aggregate quantities — sum, average, min, max across categories' }), color: 'text-purple-600 bg-purple-50 dark:bg-purple-900/20 dark:text-purple-400' },
-      { icon: BarChart3, title: t('explorer.feat_charts', { defaultValue: 'Charts' }), desc: t('explorer.feat_charts_desc', { defaultValue: 'Bar and pie charts for quantity distribution by category, level, material, or any property' }), color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400' },
-      { icon: TrendingUp, title: t('explorer.feat_stats', { defaultValue: 'Statistics' }), desc: t('explorer.feat_stats_desc', { defaultValue: 'Full statistical summary — min, max, mean, value counts, data completeness per column' }), color: 'text-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400' },
+    const FEATURE_CARDS: { icon: React.ElementType; title: string; desc: string; color: string; iconBg: string }[] = [
+      { icon: Table2, title: t('explorer.feat_table', { defaultValue: 'Data Table' }), desc: t('explorer.feat_table_desc', { defaultValue: 'Browse all elements with sorting, filtering, and column selection. Export to CSV or Excel.' }), color: 'text-blue-600 dark:text-blue-400', iconBg: 'bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20' },
+      { icon: Layers, title: t('explorer.feat_pivot', { defaultValue: 'Pivot Analysis' }), desc: t('explorer.feat_pivot_desc', { defaultValue: 'Group elements by storey, discipline, or type. Aggregate volumes, areas, and counts.' }), color: 'text-purple-600 dark:text-purple-400', iconBg: 'bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/30 dark:to-purple-800/20' },
+      { icon: BarChart3, title: t('explorer.feat_charts', { defaultValue: 'Charts' }), desc: t('explorer.feat_charts_desc', { defaultValue: 'Visualize quantity distributions with bar charts and pie charts.' }), color: 'text-emerald-600 dark:text-emerald-400', iconBg: 'bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-900/30 dark:to-emerald-800/20' },
+      { icon: TrendingUp, title: t('explorer.feat_stats', { defaultValue: 'Statistics' }), desc: t('explorer.feat_stats_desc', { defaultValue: 'Descriptive statistics for every numeric column -- min, max, mean, std dev.' }), color: 'text-orange-600 dark:text-orange-400', iconBg: 'bg-gradient-to-br from-orange-100 to-orange-50 dark:from-orange-900/30 dark:to-orange-800/20' },
     ];
 
     return (

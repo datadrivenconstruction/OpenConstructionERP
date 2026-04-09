@@ -11,6 +11,14 @@ import {
   BarChart3,
   Banknote,
   Activity,
+  LineChart,
+  Wallet,
+  Gauge,
+  Dice5,
+  GitBranch,
+  Lock,
+  Target,
+  ShieldCheck,
 } from 'lucide-react';
 import { Card, CardHeader, CardContent, Button, Badge, EmptyState, Skeleton, InfoHint, Breadcrumb } from '@/shared/ui';
 import { apiGet, apiPost } from '@/shared/lib/api';
