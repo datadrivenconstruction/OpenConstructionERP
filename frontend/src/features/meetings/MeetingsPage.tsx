@@ -1442,10 +1442,12 @@ export function MeetingsPage() {
         project_id: projectId,
         title: formData.title,
         meeting_type: formData.meeting_type,
-        date: formData.date,
+        meeting_date: formData.date?.split('T')[0] || formData.date,
         location: formData.location || undefined,
-        chairperson: formData.chairperson || undefined,
-        attendees: attendeesList.length > 0 ? attendeesList : undefined,
+        chairperson_id: formData.chairperson || undefined,
+        attendees: attendeesList.length > 0
+          ? attendeesList.map((name) => ({ name }))
+          : undefined,
       });
     },
     [createMut, projectId, addToast, t],

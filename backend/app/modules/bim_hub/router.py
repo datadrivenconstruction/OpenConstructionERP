@@ -622,6 +622,34 @@ async def upload_cad_file(
         model_id,
     )
 
+    # Cross-link: create Document record so BIM files appear in Documents hub
+    try:
+        import json as _json
+        from datetime import datetime as _dt
+        from sqlalchemy import text as _text
+
+        doc_id = str(uuid.uuid4())
+        now = _dt.utcnow().isoformat()
+        tags_json = _json.dumps(["bim", model_format, discipline])
+        await service.session.execute(
+            _text(
+                "INSERT INTO oe_documents_document "
+                "(id, project_id, name, description, category, file_size, mime_type, "
+                "file_path, version, uploaded_by, tags, metadata, created_at, updated_at) "
+                "VALUES (:id, :pid, :name, :desc, :cat, :fsize, :mime, :fpath, 1, :by, :tags, '{}', :now, :now)"
+            ),
+            {
+                "id": doc_id, "pid": project_id, "name": filename,
+                "desc": f"BIM model: {model_name}", "cat": "drawing",
+                "fsize": len(content), "mime": f"application/{model_format}",
+                "fpath": str(cad_path), "by": user_id or "",
+                "tags": tags_json, "now": now,
+            },
+        )
+        logger.info("Cross-linked BIM model %s → document %s", model_id, doc_id)
+    except Exception as exc:
+        logger.warning("Failed to cross-link BIM to documents hub: %s", exc)
+
     return {
         "model_id": str(model_id),
         "name": model_name,

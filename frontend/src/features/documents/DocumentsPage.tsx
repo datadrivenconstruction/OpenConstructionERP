@@ -317,7 +317,14 @@ export function DocumentsPage() {
   const updateQueueTask = useUploadQueueStore((s) => s.updateTask);
 
   const handleUpload = useCallback(async (files: FileList | File[]) => {
-    if (!projectId) return;
+    if (!projectId) {
+      addToast({
+        type: 'error',
+        title: t('common.error', { defaultValue: 'Error' }),
+        message: t('documents.select_project_first', { defaultValue: 'Please select a project first before uploading.' }),
+      });
+      return;
+    }
 
     const fileArray = Array.from(files);
     if (fileArray.length === 0) return;
@@ -537,6 +544,21 @@ export function DocumentsPage() {
         ...(activeProjectName ? [{ label: activeProjectName }] : []),
       ]} className="mb-4" />
 
+      {/* ── No project warning ────────────────────────────────────────── */}
+      {!projectId && (
+        <div className="mb-4 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 px-4 py-3">
+          <Upload size={18} className="text-amber-600 shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+              {t('documents.no_project_selected', { defaultValue: 'No project selected' })}
+            </p>
+            <p className="text-xs text-amber-600 dark:text-amber-400">
+              {t('documents.select_project_hint', { defaultValue: 'Select a project from the header to upload and view documents.' })}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-5">
         <div>
@@ -560,7 +582,9 @@ export function DocumentsPage() {
             variant="primary"
             size="sm"
             icon={<Upload size={14} />}
+            disabled={!projectId}
             onClick={() => fileInputRef.current?.click()}
+            title={!projectId ? t('documents.select_project_first', { defaultValue: 'Select a project first' }) : ''}
           >
             {t('documents.upload', { defaultValue: 'Upload Files' })}
           </Button>
@@ -601,7 +625,7 @@ export function DocumentsPage() {
 
       {/* ── Drop zone ───────────────────────────────────────────────────── */}
       <div
-        className={`mb-5 rounded-xl border-2 border-dashed p-8 text-center transition-all duration-200 ${
+        className={`mb-5 rounded-xl border-2 border-dashed p-6 text-center transition-all duration-200 ${
           dragOver
             ? 'border-oe-blue bg-oe-blue-subtle/30 scale-[1.01] shadow-lg'
             : 'border-border-light hover:border-border'
@@ -609,15 +633,30 @@ export function DocumentsPage() {
         role="region"
         aria-label={t('documents.drop_zone', { defaultValue: 'File drop zone' })}
       >
-        <Upload size={24} className={`mx-auto mb-2 transition-colors ${dragOver ? 'text-oe-blue' : 'text-content-tertiary'}`} />
-        <p className="text-sm text-content-secondary">
+        <Upload size={28} className={`mx-auto mb-3 transition-colors ${dragOver ? 'text-oe-blue' : 'text-content-tertiary'}`} />
+        <p className="text-sm text-content-secondary mb-1">
           {dragOver
             ? t('documents.drop_now', { defaultValue: 'Drop files to upload' })
-            : t('documents.drop_hint', { defaultValue: 'Drag & drop files here, or click Upload' })}
+            : t('documents.drop_hint', { defaultValue: 'Drag & drop files here' })}
         </p>
-        <p className="text-xs text-content-tertiary mt-1">
+        <p className="text-xs text-content-tertiary mb-3">
           {t('documents.supported_types', { defaultValue: 'PDF, images, Excel, DWG, IFC — any file type (max 100 MB)' })}
         </p>
+        <button
+          type="button"
+          disabled={!projectId}
+          onClick={() => fileInputRef.current?.click()}
+          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
+            projectId
+              ? 'border-oe-blue text-oe-blue hover:bg-oe-blue hover:text-white'
+              : 'border-border text-content-quaternary cursor-not-allowed'
+          }`}
+        >
+          <Upload size={14} />
+          {projectId
+            ? t('documents.browse_files', { defaultValue: 'Browse Files' })
+            : t('documents.select_project_first', { defaultValue: 'Select a project first' })}
+        </button>
       </div>
 
       {/* ── Filters + Sort ──────────────────────────────────────────────── */}

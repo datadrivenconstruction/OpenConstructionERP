@@ -1,0 +1,171 @@
+{
+  "app": {
+    "name": "OpenEstimator.io",
+    "tagline": "Open-source bouwkostencalculatie"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "ai_estimate": "AI-raming",
+    "settings": "Instellingen",
+    "5d_cost_model": "5D Kostenmodel",
+    "templates": "Sjablonen"
+  },
+  "common": {
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "delete": "Verwijderen",
+    "edit": "Bewerken",
+    "create": "Aanmaken",
+    "search": "Zoeken",
+    "filter": "Filteren",
+    "export": "Exporteren",
+    "import": "Importeren",
+    "loading": "Laden...",
+    "error": "Fout",
+    "success": "Gelukt",
+    "confirm": "Bevestigen",
+    "back": "Terug",
+    "next": "Volgende",
+    "yes": "Ja",
+    "no": "Nee"
+  },
+  "auth": {
+    "login": "Inloggen",
+    "logout": "Uitloggen",
+    "email": "E-mail",
+    "password": "Wachtwoord"
+  },
+  "projects": {
+    "title": "Projecten",
+    "new_project": "Nieuw project",
+    "project_name": "Projectnaam",
+    "no_projects": "Nog geen projecten"
+  },
+  "boq": {
+    "title": "Hoeveelhedenstaat",
+    "position": "Post",
+    "ordinal": "Volgnummer",
+    "description": "Omschrijving",
+    "quantity": "Hoeveelheid",
+    "unit": "Eenheid",
+    "unit_rate": "Eenheidsprijs",
+    "total": "Totaal",
+    "add_position": "Post toevoegen",
+    "add_section": "Hoofdstuk toevoegen",
+    "assembly": "Samengestelde prijs",
+    "subtotal": "Subtotaal",
+    "grand_total": "Eindtotaal",
+    "direct_cost": "Directe kosten",
+    "net_total": "Netto totaal",
+    "gross_total": "Bruto totaal",
+    "vat": "BTW",
+    "add_markups": "Opslagen toevoegen",
+    "validate": "Valideren",
+    "export": "Exporteren"
+  },
+  "costs": {
+    "title": "Prijsdatabase",
+    "rate": "Prijs",
+    "material": "Materiaal",
+    "labor": "Arbeid",
+    "equipment": "Materieel",
+    "search_costs": "Prijzen zoeken..."
+  },
+  "assemblies": {
+    "title": "Samengestelde prijzen"
+  },
+  "validation": {
+    "title": "Validatie",
+    "passed": "Geslaagd",
+    "warnings": "Waarschuwingen",
+    "errors": "Fouten",
+    "score": "Kwaliteitsscore",
+    "run_validation": "Validatie starten",
+    "missing_quantity": "Post {position} heeft geen hoeveelheid",
+    "missing_rate": "Post {position} heeft geen eenheidsprijs",
+    "missing_description": "Post {position} heeft geen omschrijving",
+    "missing_classification": "Post {position} heeft een classificatiecode nodig",
+    "duplicate_ordinal": "Dubbel volgnummer: {ordinal}",
+    "rate_anomaly": "Eenheidsprijs {rate} overschrijdt drempelwaarde ({threshold})"
+  },
+  "schedule": {
+    "title": "4D Planning"
+  },
+  "cad": {
+    "title": "CAD-import",
+    "upload": "CAD-bestand uploaden",
+    "supported_formats": "Ondersteund: DWG, DGN, RVT, IFC, PDF",
+    "converting": "Converteren...",
+    "elements_found": "{count} elementen gevonden"
+  },
+  "takeoff": {
+    "title": "Hoeveelheden bepaling",
+    "auto_detect": "Automatische detectie",
+    "manual_measure": "Handmatige meting",
+    "confidence": "Betrouwbaarheid"
+  },
+  "tendering": {
+    "title": "Aanbesteding",
+    "create_tender": "Aanbesteding aanmaken",
+    "bid": "Inschrijving",
+    "award": "Gunning"
+  },
+  "modules": {
+    "title": "Modules",
+    "installed": "Geïnstalleerd",
+    "available": "Beschikbaar",
+    "install": "Installeren",
+    "uninstall": "Deïnstalleren",
+    "update": "Bijwerken"
+  },
+  "dashboard": {
+    "welcome": "Welkom bij OpenEstimate",
+    "subtitle": "Open-source bouwkostencalculatie-platform",
+    "recent_projects": "Recente projecten",
+    "system_status": "Systeemstatus",
+    "modules_loaded": "Geladen modules",
+    "validation_rules": "Validatieregels",
+    "languages": "Talen"
+  },
+  "units": {
+    "m": "m",
+    "m2": "m²",
+    "m3": "m³",
+    "kg": "kg",
+    "t": "t",
+    "pcs": "st",
+    "lsum": "post",
+    "h": "uur",
+    "set": "set"
+  },
+  "users": {
+    "management": "Gebruikersbeheer",
+    "management_desc": "Manage team members, roles, and access",
+    "invite_user": "Invite User",
+    "invite": "Invite",
+    "full_name": "Full Name",
+    "email": "Email",
+    "password": "Password",
+    "role": "Role",
+    "status": "Status",
+    "last_login": "Last Login",
+    "actions": "Actions",
+    "name": "Name",
+    "total": "Total Users",
+    "active": "Actief",
+    "inactive": "Inactief",
+    "admins": "Admins",
+    "managers": "Managers",
+    "search": "Search by name or email...",
+    "no_users": "No users found",
+    "updated": "User updated",
+    "invited": "User invited successfully",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "never": "Nooit",
+    "role_admin_desc": "Full access to all features",
+    "role_manager_desc": "Project and team management",
+    "role_editor_desc": "Create and edit content",
+    "role_viewer_desc": "Read-only access"
+  }
+}

@@ -14,7 +14,6 @@ import {
   Clock,
   ShieldAlert,
   ShieldX,
-  Shield,
   Upload,
   Download,
   Loader2,
@@ -51,18 +50,13 @@ const TYPE_BADGE_VARIANT: Record<ContactType, 'blue' | 'warning' | 'success' | '
   subcontractor: 'warning',
   supplier: 'success',
   consultant: 'neutral',
+  internal: 'neutral',
 };
 
 const PREQUAL_CONFIG: Record<
   PrequalificationStatus,
   { icon: React.ElementType; cls: string; labelKey: string; defaultLabel: string }
 > = {
-  none: {
-    icon: Shield,
-    cls: 'text-content-quaternary',
-    labelKey: 'contacts.prequal_none',
-    defaultLabel: 'None',
-  },
   pending: {
     icon: Clock,
     cls: 'text-amber-500',
@@ -99,6 +93,7 @@ const TYPE_CARD_CONFIG: Record<ContactType, { icon: React.ElementType; color: st
   subcontractor: { icon: HardHat, color: 'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800' },
   supplier: { icon: Truck, color: 'text-green-600 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950/30 dark:border-green-800' },
   consultant: { icon: Briefcase, color: 'text-gray-600 bg-gray-50 border-gray-200 dark:text-gray-400 dark:bg-gray-800/50 dark:border-gray-700' },
+  internal: { icon: Users, color: 'text-indigo-600 bg-indigo-50 border-indigo-200 dark:text-indigo-400 dark:bg-indigo-950/30 dark:border-indigo-800' },
 };
 
 function SectionHeader({ icon: Icon, label }: { icon: React.ElementType; label: string }) {
@@ -670,8 +665,10 @@ function ImportContactsModal({
 
 const ContactCard = React.memo(function ContactCard({ contact }: { contact: Contact }) {
   const { t } = useTranslation();
-  const prequal = PREQUAL_CONFIG[contact.prequalification_status] ?? PREQUAL_CONFIG.none;
+  const prequal = PREQUAL_CONFIG[contact.prequalification_status as PrequalificationStatus] ?? PREQUAL_CONFIG.pending;
   const PrequalIcon = prequal.icon;
+  const displayName = contact.company_name || [contact.first_name, contact.last_name].filter(Boolean).join(' ') || '—';
+  const personName = [contact.first_name, contact.last_name].filter(Boolean).join(' ');
 
   return (
     <Card className="p-4 animate-card-in hover:shadow-md transition-shadow">
@@ -679,18 +676,18 @@ const ContactCard = React.memo(function ContactCard({ contact }: { contact: Cont
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue font-bold text-sm shrink-0">
-            {contact.company_name.charAt(0).toUpperCase()}
+            {displayName.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0">
             <h3 className="text-sm font-semibold text-content-primary truncate">
-              {contact.company_name}
+              {displayName}
             </h3>
-            {contact.contact_name && (
-              <p className="text-xs text-content-secondary truncate">{contact.contact_name}</p>
+            {personName && contact.company_name && (
+              <p className="text-xs text-content-secondary truncate">{personName}</p>
             )}
           </div>
         </div>
-        <Badge variant={TYPE_BADGE_VARIANT[contact.contact_type]} size="sm">
+        <Badge variant={TYPE_BADGE_VARIANT[contact.contact_type] ?? 'neutral'} size="sm">
           {t(`contacts.type_${contact.contact_type}`, {
             defaultValue: contact.contact_type.charAt(0).toUpperCase() + contact.contact_type.slice(1),
           })}
@@ -699,16 +696,16 @@ const ContactCard = React.memo(function ContactCard({ contact }: { contact: Cont
 
       {/* Contact details */}
       <div className="mt-3 space-y-1.5">
-        {contact.email && (
+        {contact.primary_email && (
           <div className="flex items-center gap-2 text-xs text-content-secondary">
             <Mail size={12} className="shrink-0 text-content-tertiary" />
-            <span className="truncate">{contact.email}</span>
+            <span className="truncate">{contact.primary_email}</span>
           </div>
         )}
-        {contact.phone && (
+        {contact.primary_phone && (
           <div className="flex items-center gap-2 text-xs text-content-secondary">
             <Phone size={12} className="shrink-0 text-content-tertiary" />
-            <span>{contact.phone}</span>
+            <span>{contact.primary_phone}</span>
           </div>
         )}
       </div>
@@ -716,10 +713,10 @@ const ContactCard = React.memo(function ContactCard({ contact }: { contact: Cont
       {/* Bottom row: country + prequal */}
       <div className="mt-3 pt-2.5 border-t border-border-light flex items-center justify-between">
         <div className="flex items-center gap-1.5">
-          {contact.country && (
+          {contact.country_code && (
             <>
-              <CountryFlag code={contact.country} size={14} />
-              <span className="text-xs text-content-tertiary">{contact.country}</span>
+              <CountryFlag code={contact.country_code} size={14} />
+              <span className="text-xs text-content-tertiary">{contact.country_code}</span>
             </>
           )}
         </div>
@@ -765,14 +762,15 @@ export function ContactsPage() {
       const q = searchQuery.toLowerCase();
       list = list.filter(
         (c) =>
-          c.company_name.toLowerCase().includes(q) ||
-          c.contact_name.toLowerCase().includes(q) ||
-          c.email.toLowerCase().includes(q),
+          (c.company_name || '').toLowerCase().includes(q) ||
+          (c.first_name || '').toLowerCase().includes(q) ||
+          (c.last_name || '').toLowerCase().includes(q) ||
+          (c.primary_email || '').toLowerCase().includes(q),
       );
     }
     if (countryFilter.trim()) {
       const cf = countryFilter.toLowerCase();
-      list = list.filter((c) => c.country.toLowerCase().includes(cf));
+      list = list.filter((c) => (c.country_code || '').toLowerCase().includes(cf));
     }
     return list;
   }, [contacts, searchQuery, countryFilter]);
@@ -824,16 +822,20 @@ export function ContactsPage() {
 
   const handleCreateSubmit = useCallback(
     (formData: ContactFormData) => {
-      const contactName = [formData.first_name, formData.last_name].filter(Boolean).join(' ');
       createMut.mutate({
-        company_name: formData.company_name,
-        contact_name: contactName,
         contact_type: formData.contact_type,
-        email: formData.email || undefined,
-        phone: formData.phone || undefined,
-        country: formData.country || undefined,
-        address: formData.address || undefined,
-        prequalification_status: formData.prequalification_status,
+        first_name: formData.first_name || undefined,
+        last_name: formData.last_name || undefined,
+        company_name: formData.company_name || undefined,
+        legal_name: formData.legal_name || undefined,
+        vat_number: formData.vat_number || undefined,
+        primary_email: formData.email || undefined,
+        primary_phone: formData.phone || undefined,
+        website: formData.website || undefined,
+        country_code: formData.country || undefined,
+        address: formData.address ? { text: formData.address } : undefined,
+        payment_terms_days: formData.payment_terms || undefined,
+        prequalification_status: formData.prequalification_status || undefined,
         notes: formData.notes || undefined,
       });
     },

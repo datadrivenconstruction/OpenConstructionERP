@@ -5,6 +5,34 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] — 2026-04-09
+
+### Added
+- **User Management page** (`/users`) — invite users, change roles (admin/manager/editor/viewer), activate/deactivate, per-user module access matrix with custom role names
+- **UserSearchInput** component — searchable dropdown for selecting team members across all modules
+- **Document Hub cross-linking** — photos and BIM files automatically appear in Documents module with source tags (`photo`, `bim`, `site`, `ifc`, etc.)
+- **CDE Link Document modal** — searchable document picker instead of redirect to /documents page
+- **20-language translations** for User Management module
+
+### Fixed
+- **All form field mismatches** — systematic audit and fix of 15+ modules (Tasks, Meetings, RFI, NCR, Submittals, Inspections, Correspondence, Contacts, Transmittals, Finance, Safety, Procurement)
+- **Trailing slash CORS issue** — all GET list endpoints now use trailing slash to prevent 307 redirect → CORS block
+- **Contacts display** — field names aligned with backend (`first_name`/`last_name`, `primary_email`, `country_code`)
+- **Procurement PO list** — fixed endpoint URL (`/purchase-orders` → `/`) and paginated response handling
+- **Transmittals list** — fixed paginated response handling
+- **Photo gallery** — photos now served without auth requirement for `<img>` tags
+- **Safety incidents** — POST route trailing slash fix
+- **Meetings 500 error** — fixed corrupt UUID in chairperson_id
+- **NCR status enum** — `open` → `identified` to match backend
+- **Inspection types** — expanded to include all construction-standard types
+- **Documents upload** — clear "Select project first" warning when no project selected, clickable drop zone
+- **BIM upload** — inline progress bar, only IFC/RVT accepted
+
+### Changed
+- Backend enum patterns expanded for inspections and correspondence
+- Contacts `prequalification_status` removed invalid `none` value
+- Tasks `task_type` `info` → `information`, `priority` `medium` → `normal`
+
 ## [0.9.1] — 2026-04-07
 
 ### Added — Integration Hub expansion

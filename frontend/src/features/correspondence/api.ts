@@ -10,7 +10,7 @@ import { apiGet, apiPost } from '@/shared/lib/api';
 
 export type CorrespondenceDirection = 'incoming' | 'outgoing';
 
-export type CorrespondenceType = 'letter' | 'email' | 'notice' | 'memo' | 'other';
+export type CorrespondenceType = 'letter' | 'email' | 'notice' | 'memo';
 
 export interface Correspondence {
   id: string;
@@ -40,9 +40,9 @@ export interface CreateCorrespondencePayload {
   project_id: string;
   subject: string;
   direction: CorrespondenceDirection;
-  type: CorrespondenceType;
-  from_contact: string;
-  to_contacts: string[];
+  correspondence_type: CorrespondenceType;
+  from_contact_id?: string;
+  to_contact_ids?: string[];
   date_sent?: string;
   date_received?: string;
   notes?: string;
@@ -58,7 +58,7 @@ export async function fetchCorrespondence(
   if (filters?.direction) params.set('direction', filters.direction);
   if (filters?.type) params.set('type', filters.type);
   const qs = params.toString();
-  return apiGet<Correspondence[]>(`/v1/correspondence${qs ? `?${qs}` : ''}`);
+  return apiGet<Correspondence[]>(`/v1/correspondence/${qs ? `?${qs}` : ''}`);
 }
 
 export async function createCorrespondence(

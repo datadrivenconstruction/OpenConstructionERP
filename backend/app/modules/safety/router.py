@@ -140,7 +140,7 @@ async def list_incidents(
     return [_incident_to_response(i) for i in items]
 
 
-@router.post("/incidents", response_model=IncidentResponse, status_code=201)
+@router.post("/incidents/", response_model=IncidentResponse, status_code=201)
 async def create_incident(
     data: IncidentCreate,
     user_id: CurrentUserId,
@@ -276,7 +276,7 @@ async def list_observations(
     return [_observation_to_response(i) for i in items]
 
 
-@router.post("/observations", response_model=ObservationResponse, status_code=201)
+@router.post("/observations/", response_model=ObservationResponse, status_code=201)
 async def create_observation(
     data: ObservationCreate,
     user_id: CurrentUserId,

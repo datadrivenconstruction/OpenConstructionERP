@@ -44,7 +44,6 @@ const TYPE_LABELS: Record<CorrespondenceType, string> = {
   email: 'Email',
   notice: 'Notice',
   memo: 'Memo',
-  other: 'Other',
 };
 
 const DIRECTION_CARD_CONFIG: Record<
@@ -72,7 +71,6 @@ const TYPE_BADGE_COLORS: Record<CorrespondenceType, string> = {
   email: 'text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-950/30 dark:border-blue-800',
   notice: 'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800',
   memo: 'text-gray-600 bg-gray-50 border-gray-200 dark:text-gray-400 dark:bg-gray-800/50 dark:border-gray-700',
-  other: 'text-gray-500 bg-gray-50 border-gray-200 dark:text-gray-400 dark:bg-gray-800/50 dark:border-gray-700',
 };
 
 const CORR_TYPES_LIST: CorrespondenceType[] = ['letter', 'email', 'notice', 'memo'];
@@ -665,9 +663,9 @@ export function CorrespondencePage() {
         project_id: projectId,
         subject: formData.subject,
         direction: formData.direction,
-        type: formData.type,
-        from_contact: formData.from_display || formData.from_contact,
-        to_contacts: (formData.to_display || formData.to_contacts)
+        correspondence_type: formData.type,
+        from_contact_id: formData.from_contact || undefined,
+        to_contact_ids: (formData.to_display || formData.to_contacts)
           .split(',')
           .map((s) => s.trim())
           .filter(Boolean),

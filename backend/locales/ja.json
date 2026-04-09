@@ -1,0 +1,171 @@
+{
+  "app": {
+    "name": "OpenEstimator.io",
+    "tagline": "オープンソース建設コスト見積"
+  },
+  "nav": {
+    "dashboard": "ダッシュボード",
+    "ai_estimate": "AI 見積",
+    "settings": "設定",
+    "5d_cost_model": "5D コストモデル",
+    "templates": "テンプレート"
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "create": "作成",
+    "search": "検索",
+    "filter": "フィルター",
+    "export": "エクスポート",
+    "import": "インポート",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功",
+    "confirm": "確認",
+    "back": "戻る",
+    "next": "次へ",
+    "yes": "はい",
+    "no": "いいえ"
+  },
+  "auth": {
+    "login": "ログイン",
+    "logout": "ログアウト",
+    "email": "メールアドレス",
+    "password": "パスワード"
+  },
+  "projects": {
+    "title": "プロジェクト",
+    "new_project": "新規プロジェクト",
+    "project_name": "プロジェクト名",
+    "no_projects": "プロジェクトなし"
+  },
+  "boq": {
+    "title": "数量調書",
+    "position": "項目",
+    "ordinal": "番号",
+    "description": "名称・仕様",
+    "quantity": "数量",
+    "unit": "単位",
+    "unit_rate": "単価",
+    "total": "金額",
+    "add_position": "項目を追加",
+    "add_section": "セクションを追加",
+    "assembly": "複合単価",
+    "subtotal": "小計",
+    "grand_total": "合計",
+    "direct_cost": "直接費",
+    "net_total": "税抜合計",
+    "gross_total": "税込合計",
+    "vat": "消費税",
+    "add_markups": "請負高を追加",
+    "validate": "検証",
+    "export": "エクスポート"
+  },
+  "costs": {
+    "title": "単価データベース",
+    "rate": "単価",
+    "material": "材料",
+    "labor": "労務",
+    "equipment": "機械",
+    "search_costs": "単価を検索..."
+  },
+  "assemblies": {
+    "title": "複合単価一覧"
+  },
+  "validation": {
+    "title": "検証",
+    "passed": "合格",
+    "warnings": "警告",
+    "errors": "エラー",
+    "score": "品質スコア",
+    "run_validation": "検証を実行",
+    "missing_quantity": "項目 {position} に数量がありません",
+    "missing_rate": "項目 {position} に単価がありません",
+    "missing_description": "項目 {position} に名称がありません",
+    "missing_classification": "項目 {position} に分類コードが必要です",
+    "duplicate_ordinal": "番号が重複しています: {ordinal}",
+    "rate_anomaly": "単価 {rate} がしきい値を超過 ({threshold})"
+  },
+  "schedule": {
+    "title": "4D 工程表"
+  },
+  "cad": {
+    "title": "CAD インポート",
+    "upload": "CAD ファイルをアップロード",
+    "supported_formats": "対応形式: DWG, DGN, RVT, IFC, PDF",
+    "converting": "変換中...",
+    "elements_found": "{count} 個の要素を検出"
+  },
+  "takeoff": {
+    "title": "拾い出し",
+    "auto_detect": "自動検出",
+    "manual_measure": "手動計測",
+    "confidence": "信頼度"
+  },
+  "tendering": {
+    "title": "入札",
+    "create_tender": "入札を作成",
+    "bid": "見積",
+    "award": "落札"
+  },
+  "modules": {
+    "title": "モジュール",
+    "installed": "インストール済み",
+    "available": "利用可能",
+    "install": "インストール",
+    "uninstall": "アンインストール",
+    "update": "更新"
+  },
+  "dashboard": {
+    "welcome": "OpenEstimate へようこそ",
+    "subtitle": "オープンソース建設コスト見積プラットフォーム",
+    "recent_projects": "最近のプロジェクト",
+    "system_status": "システム状態",
+    "modules_loaded": "読み込み済みモジュール",
+    "validation_rules": "検証ルール",
+    "languages": "言語"
+  },
+  "units": {
+    "m": "m",
+    "m2": "m²",
+    "m3": "m³",
+    "kg": "kg",
+    "t": "t",
+    "pcs": "個",
+    "lsum": "一式",
+    "h": "人工",
+    "set": "セット"
+  },
+  "users": {
+    "management": "ユーザー管理",
+    "management_desc": "Manage team members, roles, and access",
+    "invite_user": "Invite User",
+    "invite": "Invite",
+    "full_name": "Full Name",
+    "email": "Email",
+    "password": "Password",
+    "role": "Role",
+    "status": "Status",
+    "last_login": "Last Login",
+    "actions": "Actions",
+    "name": "Name",
+    "total": "Total Users",
+    "active": "アクティブ",
+    "inactive": "非アクティブ",
+    "admins": "Admins",
+    "managers": "Managers",
+    "search": "Search by name or email...",
+    "no_users": "No users found",
+    "updated": "User updated",
+    "invited": "User invited successfully",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "never": "なし",
+    "role_admin_desc": "Full access to all features",
+    "role_manager_desc": "Project and team management",
+    "role_editor_desc": "Create and edit content",
+    "role_viewer_desc": "Read-only access"
+  }
+}

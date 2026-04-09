@@ -1,0 +1,171 @@
+{
+  "app": {
+    "name": "OpenEstimator.io",
+    "tagline": "Stima dei costi di costruzione open-source"
+  },
+  "nav": {
+    "dashboard": "Pannello di controllo",
+    "ai_estimate": "Stima IA",
+    "settings": "Impostazioni",
+    "5d_cost_model": "Modello costi 5D",
+    "templates": "Modelli"
+  },
+  "common": {
+    "save": "Salva",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "create": "Crea",
+    "search": "Cerca",
+    "filter": "Filtra",
+    "export": "Esporta",
+    "import": "Importa",
+    "loading": "Caricamento...",
+    "error": "Errore",
+    "success": "Successo",
+    "confirm": "Conferma",
+    "back": "Indietro",
+    "next": "Avanti",
+    "yes": "Sì",
+    "no": "No"
+  },
+  "auth": {
+    "login": "Accedi",
+    "logout": "Esci",
+    "email": "E-mail",
+    "password": "Password"
+  },
+  "projects": {
+    "title": "Progetti",
+    "new_project": "Nuovo progetto",
+    "project_name": "Nome del progetto",
+    "no_projects": "Nessun progetto"
+  },
+  "boq": {
+    "title": "Computo metrico",
+    "position": "Voce",
+    "ordinal": "Numero d’ordine",
+    "description": "Descrizione",
+    "quantity": "Quantità",
+    "unit": "Unità di misura",
+    "unit_rate": "Prezzo unitario",
+    "total": "Totale",
+    "add_position": "Aggiungi voce",
+    "add_section": "Aggiungi sezione",
+    "assembly": "Analisi prezzo",
+    "subtotal": "Subtotale",
+    "grand_total": "Totale generale",
+    "direct_cost": "Costo diretto",
+    "net_total": "Totale netto",
+    "gross_total": "Totale lordo",
+    "vat": "IVA",
+    "add_markups": "Aggiungi maggiorazioni",
+    "validate": "Validare",
+    "export": "Esporta"
+  },
+  "costs": {
+    "title": "Prezzario",
+    "rate": "Prezzo",
+    "material": "Materiale",
+    "labor": "Manodopera",
+    "equipment": "Attrezzatura",
+    "search_costs": "Cerca prezzi..."
+  },
+  "assemblies": {
+    "title": "Analisi prezzi"
+  },
+  "validation": {
+    "title": "Validazione",
+    "passed": "Superato",
+    "warnings": "Avvisi",
+    "errors": "Errori",
+    "score": "Punteggio qualità",
+    "run_validation": "Avvia validazione",
+    "missing_quantity": "La voce {position} non ha quantità",
+    "missing_rate": "La voce {position} non ha prezzo unitario",
+    "missing_description": "La voce {position} non ha descrizione",
+    "missing_classification": "La voce {position} necessita di un codice di classificazione",
+    "duplicate_ordinal": "Numero d’ordine duplicato: {ordinal}",
+    "rate_anomaly": "Il prezzo unitario {rate} supera la soglia ({threshold})"
+  },
+  "schedule": {
+    "title": "Programma lavori 4D"
+  },
+  "cad": {
+    "title": "Importazione CAD",
+    "upload": "Carica file CAD",
+    "supported_formats": "Formati: DWG, DGN, RVT, IFC, PDF",
+    "converting": "Conversione in corso...",
+    "elements_found": "{count} elementi trovati"
+  },
+  "takeoff": {
+    "title": "Computo quantità",
+    "auto_detect": "Rilevamento automatico",
+    "manual_measure": "Misura manuale",
+    "confidence": "Affidabilità"
+  },
+  "tendering": {
+    "title": "Gara d’appalto",
+    "create_tender": "Crea gara d’appalto",
+    "bid": "Offerta",
+    "award": "Aggiudicazione"
+  },
+  "modules": {
+    "title": "Moduli",
+    "installed": "Installati",
+    "available": "Disponibili",
+    "install": "Installa",
+    "uninstall": "Disinstalla",
+    "update": "Aggiorna"
+  },
+  "dashboard": {
+    "welcome": "Benvenuto su OpenEstimate",
+    "subtitle": "Piattaforma open-source per la stima dei costi di costruzione",
+    "recent_projects": "Progetti recenti",
+    "system_status": "Stato del sistema",
+    "modules_loaded": "Moduli caricati",
+    "validation_rules": "Regole di validazione",
+    "languages": "Lingue"
+  },
+  "units": {
+    "m": "m",
+    "m2": "m²",
+    "m3": "m³",
+    "kg": "kg",
+    "t": "t",
+    "pcs": "pz",
+    "lsum": "a corpo",
+    "h": "h",
+    "set": "kit"
+  },
+  "users": {
+    "management": "Gestione Utenti",
+    "management_desc": "Manage team members, roles, and access",
+    "invite_user": "Invite User",
+    "invite": "Invite",
+    "full_name": "Full Name",
+    "email": "Email",
+    "password": "Password",
+    "role": "Role",
+    "status": "Status",
+    "last_login": "Last Login",
+    "actions": "Actions",
+    "name": "Name",
+    "total": "Total Users",
+    "active": "Attivo",
+    "inactive": "Inattivo",
+    "admins": "Admins",
+    "managers": "Managers",
+    "search": "Search by name or email...",
+    "no_users": "No users found",
+    "updated": "User updated",
+    "invited": "User invited successfully",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "never": "Mai",
+    "role_admin_desc": "Full access to all features",
+    "role_manager_desc": "Project and team management",
+    "role_editor_desc": "Create and edit content",
+    "role_viewer_desc": "Read-only access"
+  }
+}

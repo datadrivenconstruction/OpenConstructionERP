@@ -383,3 +383,70 @@ async def update_user(
     fields = data.model_dump(exclude_unset=True)
     user = await service.update_profile(user_id, **fields)
     return UserResponse.model_validate(user)
+
+
+class ModuleAccessLevel(BaseModel):
+    """Per-module access level for a user."""
+
+    visible: bool = True
+    access: str = "edit"  # none | view | edit | full
+
+
+class UserModuleAccessPayload(BaseModel):
+    """Module access configuration for a user."""
+
+    modules: dict[str, ModuleAccessLevel] = {}
+    custom_role_name: str | None = None
+
+
+@router.get(
+    "/{user_id}/module-access",
+    response_model=UserModuleAccessPayload,
+    dependencies=[Depends(RequirePermission("users.read"))],
+)
+async def get_user_module_access(
+    user_id: uuid.UUID,
+    service: UserService = Depends(_get_service),
+) -> UserModuleAccessPayload:
+    """Get per-module access settings for a user (admin/manager)."""
+    user = await service.get_user(user_id)
+    metadata = user.metadata_ if hasattr(user, "metadata_") else (user.metadata or {})
+    access_data = metadata.get("module_access", {})
+    custom_role = metadata.get("custom_role_name")
+    modules = {}
+    for mod_id, cfg in access_data.items():
+        if isinstance(cfg, dict):
+            modules[mod_id] = ModuleAccessLevel(**cfg)
+        else:
+            modules[mod_id] = ModuleAccessLevel(visible=bool(cfg))
+    return UserModuleAccessPayload(modules=modules, custom_role_name=custom_role)
+
+
+@router.patch(
+    "/{user_id}/module-access",
+    response_model=UserModuleAccessPayload,
+    dependencies=[Depends(RequirePermission("users.update"))],
+)
+async def set_user_module_access(
+    user_id: uuid.UUID,
+    data: UserModuleAccessPayload,
+    service: UserService = Depends(_get_service),
+) -> UserModuleAccessPayload:
+    """Set per-module access settings for a user (admin only).
+
+    Also syncs module_preferences for sidebar visibility.
+    """
+    user = await service.get_user(user_id)
+    metadata = dict(user.metadata_ if hasattr(user, "metadata_") else (user.metadata or {}))
+    # Store full access config
+    access_data = {}
+    module_prefs = {}
+    for mod_id, cfg in data.modules.items():
+        access_data[mod_id] = cfg.model_dump()
+        module_prefs[mod_id] = cfg.visible
+    metadata["module_access"] = access_data
+    metadata["module_preferences"] = module_prefs
+    if data.custom_role_name is not None:
+        metadata["custom_role_name"] = data.custom_role_name
+    await service.update_profile(user_id, metadata=metadata)
+    return data
