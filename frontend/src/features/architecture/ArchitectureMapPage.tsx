@@ -21,6 +21,7 @@ import {
   type NodeMouseHandler,
   type NodeTypes,
   type EdgeTypes as RFEdgeTypes,
+  MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -434,11 +435,10 @@ function buildModuleView(manifest: ArchitectureManifest): { nodes: Node[]; edges
           id: `dep-${sourceId}-${targetId}`,
           source: `mod-${sourceId}`,
           target: `mod-${targetId}`,
-          type: 'import',
+          type: 'smoothstep',
           animated: false,
           style: { stroke: '#94a3b8', strokeWidth: 1.5 },
-          label: targetId,
-          labelStyle: { fontSize: 9, fill: '#94a3b8' },
+          markerEnd: { type: MarkerType.ArrowClosed, color: '#94a3b8', width: 15, height: 15 },
         });
       }
     }
@@ -495,9 +495,10 @@ function buildModelView(manifest: ArchitectureManifest): { nodes: Node[]; edges:
             id: `fk-${sourceId}-${rel.name}-${targetId}`,
             source: sourceId,
             target: targetId,
-            type: 'fk',
+            type: 'smoothstep',
             animated: false,
-            style: { stroke: '#f59e0b' },
+            style: { stroke: '#f59e0b', strokeWidth: 2 },
+            markerEnd: { type: MarkerType.ArrowClosed, color: '#f59e0b', width: 12, height: 12 },
             label: rel.name,
           });
         }
@@ -582,7 +583,8 @@ function buildAPIView(manifest: ArchitectureManifest): { nodes: Node[]; edges: E
         source: modNodeId,
         target: routeNodeId,
         animated: true,
-        style: { stroke: '#3b82f6', strokeDasharray: '8 4' },
+        style: { stroke: '#3b82f6', strokeWidth: 2, strokeDasharray: '8 4' },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6', width: 12, height: 12 },
       });
     }
 
@@ -599,9 +601,10 @@ function buildAPIView(manifest: ArchitectureManifest): { nodes: Node[]; edges: E
         id: `fe-be-${featureName}-${backendModule}`,
         source: featureNodeId,
         target: backendNodeId,
-        type: 'api',
+        type: 'smoothstep',
         animated: true,
-        style: { stroke: '#3b82f6', strokeDasharray: '8 4' },
+        style: { stroke: '#3b82f6', strokeWidth: 2, strokeDasharray: '8 4' },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6', width: 12, height: 12 },
       });
     }
   }
@@ -699,7 +702,7 @@ function buildFullView(manifest: ArchitectureManifest): { nodes: Node[]; edges: 
           id: `dep-${sourceId}-${targetId}`,
           source: `mod-${sourceId}`,
           target: `mod-${targetId}`,
-          type: 'import',
+          type: 'smoothstep',
           style: { stroke: '#6b728060', strokeDasharray: '6 3' },
         });
       }
@@ -717,7 +720,7 @@ function buildFullView(manifest: ArchitectureManifest): { nodes: Node[]; edges: 
             id: `fk-${sourceId}-${rel.name}-${targetId}`,
             source: sourceId,
             target: targetId,
-            type: 'fk',
+            type: 'smoothstep',
             style: { stroke: '#f59e0b60' },
           });
         }
