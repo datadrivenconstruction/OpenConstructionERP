@@ -22,7 +22,7 @@ _logger_audit = __import__("logging").getLogger(__name__ + ".audit")
 
 
 async def _safe_audit(
-    session: "AsyncSession",
+    session: AsyncSession,
     *,
     action: str,
     entity_type: str,

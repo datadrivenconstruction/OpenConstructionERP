@@ -9,11 +9,11 @@
 
 | Category | Found | Fixed | Remaining (acceptable) |
 |----------|-------|-------|------------------------|
-| Backend: silent `except Exception: pass` | 38 | 38 | 0 |
+| Backend: silent `except Exception: pass` | 39 | 39 | 0 |
 | Backend: silent `except (ValueError,TypeError): pass` | 32 | 0 | 32 (type conversion guards) |
 | Backend: `except ImportError: pass` | 8 | 0 | 8 (optional module checks) |
 | Frontend: `useMutation` missing `onError` | 29 | 29 | 0 |
-| **Total** | **107** | **67** | **40** |
+| **Total** | **108** | **68** | **40** |
 
 ---
 
@@ -86,11 +86,19 @@ Silent failure when checking for duplicate records during backup restore.
 
 **Files changed**: `backend/app/modules/backup/router.py`
 
+### 8. boq/cad_import.py -- DDC converter discovery (1 fix)
+
+Silent failure when discovering DDC converter binaries via importlib.
+
+**Fix**: `logger.debug("DDC converter discovery via importlib failed", exc_info=True)`
+
+**Files changed**: `backend/app/modules/boq/cad_import.py`
+
 ---
 
 ## Frontend Fixes
 
-### 8. useMutation hooks missing onError (29 fixes)
+### 9. useMutation hooks missing onError (29 fixes)
 
 All 166 `useMutation` hooks across the frontend were audited. 29 were missing
 `onError` handlers, meaning API failures would be completely invisible to users.
@@ -144,5 +152,31 @@ A benign `len(str(cell.value))` guard during Excel column auto-fit. No data impa
 
 After all fixes:
 - **0** `useMutation` hooks without `onError` (was 29)
-- **0** `except Exception: pass` in router/service files for business logic (was 38)
-- All remaining silent catches are type conversion guards or optional import checks
+- **1** `except Exception: pass` remaining in router/service files (takeoff Excel formatting -- benign)
+- **0** `except Exception: pass` in business logic paths (was 39)
+- All remaining silent catches are type conversion guards (`ValueError`/`TypeError`) or optional import checks
+
+### Files modified (backend -- 8 files)
+- `backend/app/modules/projects/router.py`
+- `backend/app/modules/reporting/service.py`
+- `backend/app/modules/ai/router.py`
+- `backend/app/modules/costs/router.py`
+- `backend/app/modules/boq/router.py`
+- `backend/app/modules/boq/cad_import.py`
+- `backend/app/modules/takeoff/service.py`
+- `backend/app/modules/backup/router.py`
+
+### Files modified (frontend -- 12 files)
+- `frontend/src/features/boq/BOQEditorPage.tsx`
+- `frontend/src/features/boq/MarkupPanel.tsx`
+- `frontend/src/shared/ui/CommentThread.tsx`
+- `frontend/src/shared/ui/NotificationBell.tsx`
+- `frontend/src/features/dashboard/DashboardPage.tsx`
+- `frontend/src/features/fieldreports/FieldReportsPage.tsx`
+- `frontend/src/features/cad-explorer/CadDataExplorerPage.tsx`
+- `frontend/src/features/costmodel/CostModelPage.tsx`
+- `frontend/src/features/validation/ValidationPage.tsx`
+- `frontend/src/features/sustainability/SustainabilityPage.tsx`
+- `frontend/src/features/integrations/IntegrationsPage.tsx`
+- `frontend/src/features/onboarding/OnboardingWizard.tsx`
+- `frontend/src/features/assemblies/CreateAssemblyPage.tsx`

@@ -85,7 +85,38 @@ class SafetyService:
             data.project_id,
         )
 
-        # Emit event for cross-module handlers (notifications, analytics)
+        # Create notification for project owner (using same session to avoid
+        # SQLite write-lock contention that occurs with event_bus handlers)
+        try:
+            from sqlalchemy import select
+
+            from app.modules.notifications.service import NotificationService
+            from app.modules.projects.models import Project
+
+            result = await self.session.execute(
+                select(Project.owner_id).where(Project.id == data.project_id)
+            )
+            owner_id = result.scalar_one_or_none()
+            if owner_id:
+                notif_svc = NotificationService(self.session)
+                await notif_svc.create(
+                    user_id=owner_id,
+                    notification_type="warning",
+                    title_key="notifications.safety.incident_created",
+                    entity_type="safety_incident",
+                    entity_id=str(incident.id),
+                    body_key="notifications.safety.incident_created_body",
+                    body_context={
+                        "incident_number": incident_number,
+                        "severity": data.severity,
+                        "description": (data.description or "")[:200],
+                    },
+                    action_url=f"/projects/{data.project_id}/safety?incident={incident.id}",
+                )
+        except Exception:
+            logger.exception("Failed to create notification for safety incident %s", incident_number)
+
+        # Emit event for additional cross-module handlers (analytics, etc.)
         await event_bus.publish(
             "safety.incident.created",
             {
@@ -196,8 +227,41 @@ class SafetyService:
             data.project_id,
         )
 
-        # Emit high-risk event for notifications (cross-module handler)
+        # Create notification for project owner on high-risk observations
         if risk_score > 15:
+            try:
+                from sqlalchemy import select
+
+                from app.modules.notifications.service import NotificationService
+                from app.modules.projects.models import Project
+
+                result = await self.session.execute(
+                    select(Project.owner_id).where(Project.id == data.project_id)
+                )
+                owner_id = result.scalar_one_or_none()
+                if owner_id:
+                    notif_svc = NotificationService(self.session)
+                    await notif_svc.create(
+                        user_id=owner_id,
+                        notification_type="warning",
+                        title_key="notifications.safety.high_risk_observation",
+                        entity_type="safety_observation",
+                        entity_id=str(observation.id),
+                        body_key="notifications.safety.high_risk_body",
+                        body_context={
+                            "observation_number": observation_number,
+                            "risk_score": risk_score,
+                            "description": data.description[:200],
+                        },
+                        action_url=f"/projects/{data.project_id}/safety?observation={observation.id}",
+                    )
+            except Exception:
+                logger.exception(
+                    "Failed to create notification for high-risk observation %s",
+                    observation_number,
+                )
+
+            # Emit event for additional cross-module handlers
             await event_bus.publish(
                 "safety.observation.high_risk",
                 data={
@@ -206,7 +270,7 @@ class SafetyService:
                     "observation_number": observation_number,
                     "risk_score": risk_score,
                     "description": data.description[:200],
-                    "notify_user_ids": [],  # Populated by handler from project team
+                    "notify_user_ids": [],
                 },
                 source_module="safety",
             )

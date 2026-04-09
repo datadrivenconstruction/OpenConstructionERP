@@ -280,8 +280,8 @@ class FinanceService:
     async def pay_invoice(self, invoice_id: uuid.UUID) -> Invoice:
         """Transition invoice to paid status.
 
-        After marking as paid, emits ``invoice.paid`` event so that
-        cross-module handlers (e.g. budget actuals recalculation) can react.
+        After marking as paid, recalculates budget actuals for the project
+        (sum of all paid invoices) and emits ``invoice.paid`` event.
         """
         invoice = await self.get_invoice(invoice_id)
         if invoice.status != "approved":
@@ -301,7 +301,46 @@ class FinanceService:
             )
         logger.info("Invoice paid: %s", invoice.invoice_number)
 
-        # Emit event for cross-module handlers (budget actuals, EVM, etc.)
+        # Recalculate budget actuals in the same session (avoids SQLite lock
+        # contention that occurs with event_bus handlers in separate sessions)
+        try:
+            from sqlalchemy import select
+
+            paid_result = await self.session.execute(
+                select(Invoice).where(
+                    Invoice.project_id == invoice.project_id,
+                    Invoice.status == "paid",
+                )
+            )
+            paid_invoices = paid_result.scalars().all()
+            total_actual = Decimal("0")
+            for inv in paid_invoices:
+                try:
+                    total_actual += Decimal(str(inv.amount_total))
+                except (InvalidOperation, ValueError):
+                    continue
+
+            budget_result = await self.session.execute(
+                select(ProjectBudget).where(
+                    ProjectBudget.project_id == invoice.project_id
+                )
+            )
+            budgets = budget_result.scalars().all()
+            for budget in budgets:
+                budget.actual = str(total_actual)
+
+            logger.info(
+                "Updated budget actuals for project %s: total_actual=%s",
+                invoice.project_id,
+                total_actual,
+            )
+        except Exception:
+            logger.exception(
+                "Failed to update budget actuals after paying invoice %s",
+                invoice.invoice_number,
+            )
+
+        # Emit event for additional cross-module handlers
         await event_bus.publish(
             "invoice.paid",
             {

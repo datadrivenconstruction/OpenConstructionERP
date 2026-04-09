@@ -41,7 +41,7 @@ async def _safe_publish(name: str, data: dict[str, Any], source_module: str = "o
 
 
 async def _safe_audit(
-    session: "AsyncSession",
+    session: AsyncSession,
     *,
     action: str,
     entity_type: str,
