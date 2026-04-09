@@ -275,6 +275,103 @@ async function downloadExcelExport(url: string, fallbackFilename: string): Promi
   triggerDownload(blob, filename);
 }
 
+/* ── Quality Ecosystem Summary ────────────────────────────────────────── */
+
+interface SafetyStats {
+  total_incidents: number;
+  incidents_by_status?: Record<string, number>;
+}
+
+interface PunchSummaryData {
+  total: number;
+  by_status: Record<string, number>;
+}
+
+function QualityDashboardSummary({ projectId }: { projectId: string }) {
+  const { t } = useTranslation();
+
+  const { data: safetyStats } = useQuery({
+    queryKey: ['safety-stats', projectId],
+    queryFn: () => apiGet<SafetyStats>(`/v1/safety/stats?project_id=${projectId}`),
+    enabled: !!projectId,
+  });
+
+  const { data: inspections } = useQuery({
+    queryKey: ['inspections-summary', projectId],
+    queryFn: () =>
+      apiGet<{ status: string }[]>(`/v1/inspections?project_id=${projectId}`),
+    enabled: !!projectId,
+  });
+
+  const { data: ncrs } = useQuery({
+    queryKey: ['ncrs-summary', projectId],
+    queryFn: () =>
+      apiGet<{ status: string }[]>(`/v1/ncr?project_id=${projectId}`),
+    enabled: !!projectId,
+  });
+
+  const { data: punchSummary } = useQuery({
+    queryKey: ['punch-summary', projectId],
+    queryFn: () => apiGet<PunchSummaryData>(`/v1/punchlist/summary?project_id=${projectId}`),
+    enabled: !!projectId,
+  });
+
+  const openIncidents = safetyStats
+    ? (safetyStats.incidents_by_status?.['reported'] ?? 0) +
+      (safetyStats.incidents_by_status?.['investigating'] ?? 0)
+    : 0;
+
+  const pendingInspections = inspections
+    ? inspections.filter((i) => i.status === 'scheduled' || i.status === 'in_progress').length
+    : 0;
+
+  const openNCRs = ncrs
+    ? ncrs.filter((n) => n.status === 'open' || n.status === 'under_review' || n.status === 'corrective_action').length
+    : 0;
+
+  const openDefects = punchSummary
+    ? (punchSummary.by_status?.['open'] ?? 0) +
+      (punchSummary.by_status?.['in_progress'] ?? 0)
+    : 0;
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <Card padding="none">
+        <div className="p-3">
+          <div className="text-2xs text-content-tertiary uppercase">
+            {t('safety.dash_open_incidents', { defaultValue: 'Open Incidents' })}
+          </div>
+          <div className="text-xl font-bold text-content-primary">{openIncidents}</div>
+        </div>
+      </Card>
+      <Card padding="none">
+        <div className="p-3">
+          <div className="text-2xs text-content-tertiary uppercase">
+            {t('safety.dash_pending_inspections', { defaultValue: 'Pending Inspections' })}
+          </div>
+          <div className="text-xl font-bold text-content-primary">{pendingInspections}</div>
+        </div>
+      </Card>
+      <Card padding="none">
+        <div className="p-3">
+          <div className="text-2xs text-content-tertiary uppercase">
+            {t('safety.dash_open_ncrs', { defaultValue: 'Open NCRs' })}
+          </div>
+          <div className="text-xl font-bold text-content-primary">{openNCRs}</div>
+        </div>
+      </Card>
+      <Card padding="none">
+        <div className="p-3">
+          <div className="text-2xs text-content-tertiary uppercase">
+            {t('safety.dash_open_defects', { defaultValue: 'Open Defects' })}
+          </div>
+          <div className="text-xl font-bold text-content-primary">{openDefects}</div>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
 /* ── Main Page ────────────────────────────────────────────────────────── */
 
 const inputCls =
@@ -341,6 +438,9 @@ export function SafetyPage() {
           {t('safety.link_punchlist', { defaultValue: 'Punch List' })}
         </Button>
       </div>
+
+      {/* Quality Ecosystem Summary */}
+      {projectId && <QualityDashboardSummary projectId={projectId} />}
 
       {/* No-project warning */}
       {!projectId && (
@@ -905,6 +1005,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
 
 function ObservationsTab({ projectId }: { projectId: string }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const addToast = useToastStore((s) => s.addToast);
@@ -1125,6 +1226,14 @@ function ObservationsTab({ projectId }: { projectId: string }) {
                       defaultValue: obs.status.replace(/_/g, ' '),
                     })}
                   </Badge>
+                  {obs.risk_score > 15 && (
+                    <div className="text-2xs text-red-600 mt-1">
+                      {t('safety.high_risk_hint', { defaultValue: 'High risk \u2014 consider scheduling an inspection' })}
+                      <Button variant="ghost" size="sm" className="text-2xs ml-1" onClick={(e) => { e.stopPropagation(); navigate('/inspections'); }}>
+                        {t('safety.create_inspection_link', { defaultValue: 'Create Inspection \u2192' })}
+                      </Button>
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}
@@ -1159,6 +1268,14 @@ function ObservationsTab({ projectId }: { projectId: string }) {
                 {obs.risk_score} {riskScoreLabel(obs.risk_score, t)}
               </span>
             </div>
+            {obs.risk_score > 15 && (
+              <div className="text-2xs text-red-600 mt-2">
+                {t('safety.high_risk_hint', { defaultValue: 'High risk \u2014 consider scheduling an inspection' })}
+                <Button variant="ghost" size="sm" className="text-2xs ml-1" onClick={() => navigate('/inspections')}>
+                  {t('safety.create_inspection_link', { defaultValue: 'Create Inspection \u2192' })}
+                </Button>
+              </div>
+            )}
           </Card>
         ))}
       </div>

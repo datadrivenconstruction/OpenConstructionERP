@@ -18,6 +18,9 @@ import {
   Loader2,
   X,
   Ruler,
+  Box,
+  Link2,
+  ArrowRight,
 } from 'lucide-react';
 
 import { Button, Card, Badge, Input, Skeleton, Breadcrumb } from '@/shared/ui';
@@ -538,6 +541,31 @@ function DocumentCard({
                     </span>
                   </div>
                 )}
+              </div>
+
+              {/* Next steps */}
+              <div className="pt-3 border-t border-border-light mt-2">
+                <p className="text-2xs font-semibold text-content-tertiary uppercase tracking-wider mb-2">
+                  {t('takeoff.next_steps', 'Next Steps')}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <a
+                    href="/bim"
+                    className="flex items-center gap-1.5 rounded-lg border border-border-light px-3 py-1.5 text-xs text-content-secondary transition-colors hover:bg-oe-blue-subtle hover:text-oe-blue hover:border-oe-blue/30"
+                  >
+                    <Box size={13} />
+                    {t('takeoff.open_in_bim', 'Open in BIM Viewer')}
+                    <ArrowRight size={11} className="text-content-quaternary" />
+                  </a>
+                  <a
+                    href="/boq"
+                    className="flex items-center gap-1.5 rounded-lg border border-border-light px-3 py-1.5 text-xs text-content-secondary transition-colors hover:bg-oe-blue-subtle hover:text-oe-blue hover:border-oe-blue/30"
+                  >
+                    <Link2 size={13} />
+                    {t('takeoff.link_to_boq', 'Link to BOQ')}
+                    <ArrowRight size={11} className="text-content-quaternary" />
+                  </a>
+                </div>
               </div>
             </div>
           )}

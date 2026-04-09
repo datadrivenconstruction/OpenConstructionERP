@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Upload, FileText, Image, FileSpreadsheet, File, Trash2, Download,
   Search, X, Loader2, FolderOpen, ChevronDown, HardDrive, Eye,
-  MoreHorizontal, Pencil, Tag, Ruler, Database, Send,
+  MoreHorizontal, Pencil, Tag, Ruler, Send,
 } from 'lucide-react';
 import { Card, Button, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
@@ -29,6 +29,7 @@ interface DocItem {
   uploaded_by: string;
   tags: string[];
   created_at: string;
+  cde_state?: 'wip' | 'shared' | 'published' | 'archived' | null;
 }
 
 type SortField = 'date' | 'name' | 'size';
@@ -36,6 +37,13 @@ type SortField = 'date' | 'name' | 'size';
 const CATEGORIES = ['all', 'drawing', 'contract', 'specification', 'photo', 'correspondence', 'other'] as const;
 
 const MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024; // 100 MB
+
+const CDE_STATE_COLORS: Record<string, 'warning' | 'blue' | 'success' | 'neutral'> = {
+  wip: 'warning',
+  shared: 'blue',
+  published: 'success',
+  archived: 'neutral',
+};
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
@@ -559,16 +567,22 @@ export function DocumentsPage() {
         </div>
       </div>
 
-      {/* ── Cross-module links ──────────────────────────────────────────── */}
-      <div className="flex flex-wrap gap-1.5 mb-4">
-        <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate('/cde')}>
-          <Database size={13} className="me-1" />
-          {t('documents.link_cde', { defaultValue: 'CDE Containers' })}
-        </Button>
-        <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate('/transmittals')}>
-          <Send size={13} className="me-1" />
-          {t('documents.link_transmittals', { defaultValue: 'Transmittals' })}
-        </Button>
+      {/* ── Document flow ──────────────────────────────────────────────── */}
+      <div className="flex items-center gap-2 text-2xs text-content-quaternary mb-4">
+        <span className="text-content-tertiary">
+          {t('documents.flow_label', { defaultValue: 'Document flow:' })}
+        </span>
+        <span className="text-oe-blue font-medium">
+          {t('documents.flow_upload', { defaultValue: 'Upload' })}
+        </span>
+        <span>&#8594;</span>
+        <button onClick={() => navigate('/cde')} className="hover:text-oe-blue transition-colors">
+          {t('documents.flow_organize', { defaultValue: 'Organize (CDE)' })}
+        </button>
+        <span>&#8594;</span>
+        <button onClick={() => navigate('/transmittals')} className="hover:text-oe-blue transition-colors">
+          {t('documents.flow_distribute', { defaultValue: 'Distribute' })}
+        </button>
       </div>
 
       {/* ── Stats bar ───────────────────────────────────────────────────── */}
@@ -771,6 +785,11 @@ export function DocumentsPage() {
                       <span>&middot;</span>
                       <Badge variant="neutral" size="sm">{doc.category}</Badge>
                       {doc.version > 1 && <Badge variant="blue" size="sm">v{doc.version}</Badge>}
+                      {doc.cde_state && (
+                        <Badge variant={CDE_STATE_COLORS[doc.cde_state] ?? 'neutral'} size="sm">
+                          {doc.cde_state.toUpperCase()}
+                        </Badge>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 mt-1">
                       <p className="text-2xs text-content-quaternary">
@@ -893,6 +912,17 @@ export function DocumentsPage() {
                             >
                               <Tag size={14} className="text-content-tertiary" />
                               {t('documents.properties', { defaultValue: 'Properties' })}
+                            </button>
+                            <button
+                              role="menuitem"
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                navigate('/transmittals?create=true&doc_ids=' + doc.id);
+                              }}
+                              className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
+                            >
+                              <Send size={14} className="text-content-tertiary" />
+                              {t('documents.send_transmittal', { defaultValue: 'Send via Transmittal' })}
                             </button>
                             <div className="my-1 h-px bg-border-light" />
                             <button

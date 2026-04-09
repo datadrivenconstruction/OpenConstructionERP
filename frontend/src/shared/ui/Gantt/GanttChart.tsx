@@ -458,6 +458,31 @@ export function GanttChart({
                 : a.name}
             </text>
           )}
+
+          {/* BIM link indicator (3D cube icon) */}
+          {a.bim_element_ids && a.bim_element_ids.length > 0 && (
+            <g
+              transform={`translate(${effectiveX + width - 16}, ${barY + 2})`}
+              className="pointer-events-none"
+            >
+              <rect
+                x={0}
+                y={0}
+                width={14}
+                height={14}
+                rx={3}
+                fill="#6366f1"
+                opacity={0.85}
+              />
+              {/* Simplified 3D cube path */}
+              <path
+                d="M7 3 L10.5 5 L10.5 9 L7 11 L3.5 9 L3.5 5 Z M7 7 L10.5 5 M7 7 L3.5 5 M7 7 L7 11"
+                stroke="white"
+                strokeWidth={0.8}
+                fill="none"
+              />
+            </g>
+          )}
         </g>
       );
     },

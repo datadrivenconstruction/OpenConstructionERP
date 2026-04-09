@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   Send,
@@ -119,13 +119,18 @@ function CreateTransmittalModal({
   onClose,
   onSubmit,
   isPending,
+  initialItems,
 }: {
   onClose: () => void;
   onSubmit: (data: TransmittalFormData) => void;
   isPending: boolean;
+  initialItems?: string;
 }) {
   const { t } = useTranslation();
-  const [form, setForm] = useState<TransmittalFormData>(EMPTY_FORM);
+  const [form, setForm] = useState<TransmittalFormData>({
+    ...EMPTY_FORM,
+    items: initialItems || '',
+  });
   const [touched, setTouched] = useState(false);
 
   const set = <K extends keyof TransmittalFormData>(key: K, value: TransmittalFormData[K]) =>
@@ -467,23 +472,26 @@ const TransmittalRow = React.memo(function TransmittalRow({
                 })}
               </p>
               <div className="space-y-1">
-                {transmittal.items.map((item) => (
+                {transmittal.items.map((item, idx) => (
                   <div
                     key={item.id}
                     className="flex items-center gap-2 rounded-lg bg-surface-secondary p-2 text-sm"
                   >
+                    <span className="text-2xs text-content-quaternary font-mono w-5 text-center shrink-0">
+                      {idx + 1}
+                    </span>
                     <FileText size={13} className="text-content-tertiary shrink-0" />
                     <span className="text-content-primary truncate">
                       {item.document_title}
                     </span>
                     {item.document_ref && (
-                      <span className="text-xs text-content-tertiary font-mono">
+                      <Badge variant="neutral" size="sm" className="font-mono shrink-0">
                         {item.document_ref}
-                      </span>
+                      </Badge>
                     )}
                     {item.revision && (
-                      <Badge variant="neutral" size="sm">
-                        {item.revision}
+                      <Badge variant="blue" size="sm" className="shrink-0">
+                        Rev {item.revision}
                       </Badge>
                     )}
                   </div>
@@ -518,18 +526,34 @@ const TransmittalRow = React.memo(function TransmittalRow({
 
 export function TransmittalsPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { projectId: routeProjectId } = useParams<{ projectId: string }>();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
 
+  // Auto-open create modal when navigated from Documents with ?create=true
+  const autoCreate = searchParams.get('create') === 'true';
+  const docIdsParam = searchParams.get('doc_ids') || '';
+
   // State
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(autoCreate);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<TransmittalStatus | ''>('');
   const [infoDismissed, setInfoDismissed] = useState(
     () => localStorage.getItem(LS_INFO_DISMISSED) === '1',
   );
+
+  // Clear URL params after opening modal
+  useEffect(() => {
+    if (autoCreate) {
+      const next = new URLSearchParams(searchParams);
+      next.delete('create');
+      next.delete('doc_ids');
+      setSearchParams(next, { replace: true });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Data
   const { data: projects = [] } = useQuery({
@@ -667,6 +691,24 @@ export function TransmittalsPage() {
         ]}
         className="mb-4"
       />
+
+      {/* Document flow */}
+      <div className="flex items-center gap-2 text-2xs text-content-quaternary mb-4">
+        <span className="text-content-tertiary">
+          {t('transmittals.flow_label', { defaultValue: 'Document flow:' })}
+        </span>
+        <button onClick={() => navigate('/documents')} className="hover:text-oe-blue transition-colors">
+          {t('transmittals.flow_upload', { defaultValue: 'Upload' })}
+        </button>
+        <span>&#8594;</span>
+        <button onClick={() => navigate('/cde')} className="hover:text-oe-blue transition-colors">
+          {t('transmittals.flow_organize', { defaultValue: 'Organize (CDE)' })}
+        </button>
+        <span>&#8594;</span>
+        <span className="text-oe-blue font-medium">
+          {t('transmittals.flow_distribute', { defaultValue: 'Distribute' })}
+        </span>
+      </div>
 
       {/* Header */}
       <div className="mb-6 flex items-center justify-between gap-3 flex-wrap">
@@ -926,6 +968,7 @@ export function TransmittalsPage() {
           onClose={() => setShowCreateModal(false)}
           onSubmit={handleCreateSubmit}
           isPending={createMut.isPending}
+          initialItems={docIdsParam}
         />
       )}
 

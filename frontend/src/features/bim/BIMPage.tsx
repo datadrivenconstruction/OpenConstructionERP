@@ -13,7 +13,7 @@
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Box,
@@ -34,6 +34,7 @@ import {
   AlertCircle,
   ChevronUp,
   Info,
+  CalendarDays,
 } from 'lucide-react';
 import { Button, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
 import { BIMViewer, DisciplineToggle } from '@/shared/ui/BIMViewer';
@@ -940,6 +941,7 @@ function UnifiedUploadSection({
 export function BIMPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { projectId: urlProjectId } = useParams<{ projectId: string }>();
   const contextProjectId = useProjectContextStore((s) => s.activeProjectId);
   const contextProjectName = useProjectContextStore((s) => s.activeProjectName);
@@ -1210,11 +1212,51 @@ export function BIMPage() {
       <div className="px-6 pt-4 pb-3 border-b border-border-light">
         <Breadcrumb items={breadcrumbItems} />
         <div className="flex items-center justify-between mt-2">
-          <h1 className="text-xl font-bold text-content-primary">
-            {t('bim.title', { defaultValue: 'BIM Viewer' })}
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl font-bold text-content-primary">
+              {t('bim.title', { defaultValue: 'BIM Viewer' })}
+            </h1>
+            {elements.length > 0 && (
+              <Badge variant="blue" size="sm">
+                {t('bim.element_count', {
+                  defaultValue: '{{count}} elements',
+                  count: elements.length,
+                })}
+              </Badge>
+            )}
+          </div>
           <div className="flex items-center gap-2">
-            {selectedElementId && (
+            {elements.length > 0 && (
+              <>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    /* Link to BOQ — future implementation */
+                  }}
+                  title={t('bim.link_to_boq_hint', {
+                    defaultValue:
+                      'Select elements in the 3D viewer and link them to BOQ positions for quantity verification.',
+                  })}
+                >
+                  <Link2 size={14} className="me-1.5" />
+                  {t('bim.link_to_boq', { defaultValue: 'Link to BOQ' })}
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => navigate('/schedule')}
+                  title={t('bim.schedule_link_hint', {
+                    defaultValue:
+                      'Link BIM elements to schedule activities for 4D construction simulation.',
+                  })}
+                >
+                  <CalendarDays size={14} className="me-1.5" />
+                  {t('bim.four_d_schedule', { defaultValue: '4D Schedule' })}
+                </Button>
+              </>
+            )}
+            {selectedElementId && elements.length === 0 && (
               <Button
                 variant="secondary"
                 size="sm"

@@ -1626,7 +1626,8 @@ function SaveToProjectDialog({
         type: 'success',
         title: t('explorer.saved_to_project', { defaultValue: 'Saved to BIM Hub' }),
         message: t('explorer.saved_to_project_msg', {
-          defaultValue: '{{count}} elements saved. View in BIM Hub.',
+          defaultValue:
+            '{{count}} elements saved to BIM Hub. View them in the BIM Viewer.',
         }).replace('{{count}}', String(result.element_count)),
       });
       onSaved();

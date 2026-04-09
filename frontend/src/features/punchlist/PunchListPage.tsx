@@ -481,6 +481,22 @@ const PunchKanbanCard = React.memo(function PunchKanbanCard({
         </p>
       )}
 
+      {/* Source badge */}
+      {item.metadata?.source === 'inspection' && (
+        <div className="mt-1">
+          <Badge variant="blue" size="sm">
+            {t('punch.source_inspection', { defaultValue: 'From Inspection' })}
+          </Badge>
+        </div>
+      )}
+      {item.metadata?.source === 'ncr' && (
+        <div className="mt-1">
+          <Badge variant="warning" size="sm">
+            {t('punch.source_ncr', { defaultValue: 'From NCR' })}
+          </Badge>
+        </div>
+      )}
+
       {/* Bottom row: avatar + due date */}
       <div className="flex items-center justify-between mt-3 text-xs text-content-tertiary">
         {/* Assignee avatar */}
@@ -1145,6 +1161,16 @@ const PunchTableRow = React.memo(function PunchTableRow({
           <p className="text-xs text-content-tertiary mt-0.5 truncate max-w-[250px]">
             {`(${item.location_x ?? '-'}, ${item.location_y ?? '-'})`}
           </p>
+        )}
+        {item.metadata?.source === 'inspection' && (
+          <Badge variant="blue" size="sm" className="mt-0.5">
+            {t('punch.source_inspection', { defaultValue: 'From Inspection' })}
+          </Badge>
+        )}
+        {item.metadata?.source === 'ncr' && (
+          <Badge variant="warning" size="sm" className="mt-0.5">
+            {t('punch.source_ncr', { defaultValue: 'From NCR' })}
+          </Badge>
         )}
       </td>
       <td className="px-4 py-3">

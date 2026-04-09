@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   ClipboardCheck,
@@ -378,6 +378,7 @@ const InspectionRow = React.memo(function InspectionRow({
   onCreateDefect: (id: string) => void;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
   const statusCfg = STATUS_CONFIG[inspection.status] ?? STATUS_CONFIG.scheduled;
   const typeCfg = INSPECTION_TYPE_COLORS[inspection.inspection_type] ?? 'neutral';
@@ -526,17 +527,30 @@ const InspectionRow = React.memo(function InspectionRow({
               </Button>
             )}
             {inspection.result && (inspection.result === 'fail' || inspection.result === 'partial') && (
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onCreateDefect(inspection.id);
-                }}
-              >
-                <XCircle size={14} className="mr-1.5" />
-                {t('inspections.create_defect', { defaultValue: 'Create Punchlist Item' })}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCreateDefect(inspection.id);
+                  }}
+                >
+                  <XCircle size={14} className="mr-1.5" />
+                  {t('inspections.create_defect', { defaultValue: 'Create Punchlist Item' })}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate('/ncr');
+                  }}
+                >
+                  <AlertTriangle size={14} className="mr-1.5" />
+                  {t('inspections.create_ncr', { defaultValue: 'Create NCR' })}
+                </Button>
+              </div>
             )}
           </div>
         </div>

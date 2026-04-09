@@ -22,6 +22,7 @@ import {
   Download,
   ClipboardList,
   Users,
+  Box,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Input, InfoHint, SkeletonTable, Breadcrumb, GanttChart as SVGGanttChart } from '@/shared/ui';
 import type { GanttActivity as SVGGanttActivity, GanttViewMode } from '@/shared/ui';
@@ -30,6 +31,7 @@ import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { scheduleApi } from './api';
+import { fetchBIMModels } from '@/features/bim/api';
 import type {
   Schedule,
   Activity,
@@ -954,6 +956,15 @@ function ScheduleDetail({
     enabled: showGenerateBOQ,
   });
 
+  // BIM models check (for showing 4D link hint)
+  const { data: bimModelsData } = useQuery({
+    queryKey: ['bim-models', projectId],
+    queryFn: () => fetchBIMModels(projectId),
+    enabled: !!projectId,
+    staleTime: 300_000,
+  });
+  const hasBIMModels = (bimModelsData?.items?.length ?? 0) > 0;
+
   // CPM state
   const [cpmResult, setCpmResult] = useState<CriticalPathResponse | null>(null);
   const [riskResult, setRiskResult] = useState<RiskAnalysisResponse | null>(null);
@@ -1333,6 +1344,19 @@ function ScheduleDetail({
             </span>
           </div>
         </Card>
+      )}
+
+      {/* BIM hint */}
+      {hasBIMModels && (
+        <div className="mt-4 flex items-center gap-2 rounded-lg border border-border-light bg-surface-secondary/30 px-4 py-2.5">
+          <Box size={14} className="shrink-0 text-content-tertiary" />
+          <span className="text-xs text-content-tertiary">
+            {t('schedule.bim_hint', {
+              defaultValue:
+                'BIM models available -- link activities to elements for 4D visualization',
+            })}
+          </span>
+        </div>
       )}
 
       {/* Gantt chart */}

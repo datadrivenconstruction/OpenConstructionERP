@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   AlertOctagon,
@@ -22,6 +22,7 @@ import {
   AlertTriangle,
   Info,
   MapPin,
+  ListChecks,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, SkeletonTable } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -410,6 +411,7 @@ const NCRRow = React.memo(function NCRRow({
   onCreateVariation: (id: string) => void;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
   const statusCfg = STATUS_CONFIG[ncr.status] ?? STATUS_CONFIG.open;
   const typeCfg = NCR_TYPE_COLORS[ncr.ncr_type] ?? 'neutral';
@@ -582,6 +584,51 @@ const NCRRow = React.memo(function NCRRow({
                 {t('ncr.create_variation', { defaultValue: 'Create Variation' })}
               </Button>
             )}
+          </div>
+
+          {/* Related cross-links */}
+          <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-border-light">
+            <span className="text-2xs text-content-quaternary">
+              {t('ncr.related', { defaultValue: 'Related' })}:
+            </span>
+            {ncr.linked_inspection_id && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-2xs"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate('/inspections');
+                }}
+              >
+                <ClipboardCheck size={11} className="mr-1" />
+                {t('ncr.view_inspection', { defaultValue: 'View Inspection' })}
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-2xs"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate('/changeorders');
+              }}
+            >
+              <DollarSign size={11} className="mr-1" />
+              {t('ncr.view_change_orders', { defaultValue: 'View Change Orders' })}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-2xs"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate('/punchlist');
+              }}
+            >
+              <ListChecks size={11} className="mr-1" />
+              {t('ncr.view_punchlist', { defaultValue: 'View Punch List' })}
+            </Button>
           </div>
         </div>
       )}

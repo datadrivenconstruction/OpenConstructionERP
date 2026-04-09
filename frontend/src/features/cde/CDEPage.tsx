@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   Database,
@@ -12,6 +12,8 @@ import {
   ChevronRight,
   ArrowRight,
   Info,
+  Send,
+  Link2,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, DateDisplay, ConfirmDialog, SkeletonTable } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -298,6 +300,7 @@ const ContainerRow = React.memo(function ContainerRow({
   onPromote: (c: CDEContainer) => void;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
   const containerState = getContainerState(container);
   const containerDiscipline = getContainerDiscipline(container);
@@ -377,9 +380,10 @@ const ContainerRow = React.memo(function ContainerRow({
       {/* Expanded detail: revision history */}
       {expanded && (
         <div className="px-4 pb-4 pl-12 space-y-3 animate-fade-in">
-          {/* Promote action */}
-          {canPromote && nextState && (
-            <div className="flex items-center gap-2">
+          {/* Actions row */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Promote action */}
+            {canPromote && nextState && (
               <Button
                 variant="primary"
                 size="sm"
@@ -396,13 +400,37 @@ const ContainerRow = React.memo(function ContainerRow({
                   }),
                 })}
               </Button>
-            </div>
-          )}
+            )}
+            {/* Link Document button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate('/documents');
+              }}
+            >
+              <Link2 size={14} className="mr-1" />
+              {t('cde.link_document', { defaultValue: 'Link Document' })}
+            </Button>
+            {/* Send via Transmittal */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate('/transmittals?create=true');
+              }}
+            >
+              <Send size={13} className="mr-1" />
+              {t('cde.send_transmittal', { defaultValue: 'Send via Transmittal' })}
+            </Button>
+          </div>
 
-          {/* Revision history */}
+          {/* Revision history / Documents in container */}
           <div>
             <p className="text-xs text-content-tertiary mb-2 font-medium uppercase tracking-wide">
-              {t('cde.label_revisions', { defaultValue: 'Revision History' })}
+              {t('cde.label_revisions', { defaultValue: 'Revisions' })}
             </p>
             {revisionsLoading ? (
               <div className="space-y-2">
@@ -414,9 +442,11 @@ const ContainerRow = React.memo(function ContainerRow({
                 ))}
               </div>
             ) : revisions.length === 0 ? (
-              <p className="text-sm text-content-tertiary">
-                {t('cde.no_revisions', { defaultValue: 'No revisions recorded' })}
-              </p>
+              <div className="px-4 py-3 bg-surface-secondary/30 rounded-lg">
+                <p className="text-xs text-content-quaternary">
+                  {t('cde.no_revisions_hint', { defaultValue: 'No revisions yet. Upload documents and link them to this container.' })}
+                </p>
+              </div>
             ) : (
               <div className="space-y-1">
                 {revisions.map((rev) => (
@@ -457,6 +487,7 @@ function RevisionItem({ revision }: { revision: CDERevision }) {
 
 export function CDEPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { projectId: routeProjectId } = useParams<{ projectId: string }>();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -640,6 +671,24 @@ export function CDEPage() {
           </p>
         </div>
       )}
+
+      {/* Document flow */}
+      <div className="flex items-center gap-2 text-2xs text-content-quaternary mb-4">
+        <span className="text-content-tertiary">
+          {t('cde.flow_label', { defaultValue: 'Document flow:' })}
+        </span>
+        <button onClick={() => navigate('/documents')} className="hover:text-oe-blue transition-colors">
+          {t('cde.flow_upload', { defaultValue: 'Upload' })}
+        </button>
+        <span>&#8594;</span>
+        <span className="text-oe-blue font-medium">
+          {t('cde.flow_organize', { defaultValue: 'Organize (CDE)' })}
+        </span>
+        <span>&#8594;</span>
+        <button onClick={() => navigate('/transmittals')} className="hover:text-oe-blue transition-colors">
+          {t('cde.flow_distribute', { defaultValue: 'Distribute' })}
+        </button>
+      </div>
 
       {/* Header */}
       <div className="mb-6 flex items-center justify-between gap-3 flex-wrap">

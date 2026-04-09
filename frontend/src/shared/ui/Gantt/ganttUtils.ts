@@ -365,6 +365,8 @@ export interface GanttActivity {
   baselineStart?: string;
   baselineEnd?: string;
   color?: string;
+  /** When set and non-empty, indicates the activity is linked to BIM elements (4D). */
+  bim_element_ids?: string[];
 }
 
 /**
