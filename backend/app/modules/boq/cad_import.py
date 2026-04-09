@@ -66,7 +66,7 @@ def _find_ddc_toolkit_bin() -> Path | None:
                     candidate = candidate.parent
                 break
     except Exception:
-        pass
+        logger.debug("DDC converter discovery via importlib failed", exc_info=True)
 
     # 3. Scan common sibling directories (projects next to this repo)
     this_project = Path(__file__).resolve().parents[4]  # backend/app/modules/boq -> repo root
