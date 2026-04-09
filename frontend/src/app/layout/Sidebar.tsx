@@ -281,7 +281,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     >
       {/* Logo + mobile close button */}
       <div className="flex h-header items-center justify-between px-5 border-b border-border-light">
-        <a href="https://openconstructionerp.com/?utm_source=app&utm_medium=sidebar&utm_campaign=branding" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
+        <a href="https://openconstructionerp.com/?utm_source=app" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
           <LogoWithText size="xs" />
         </a>
         {onClose && (
