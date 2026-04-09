@@ -219,17 +219,39 @@ export function ProjectIntelligencePage() {
   }
 
   if (error) {
+    const isAuth = error.includes('401') || error.includes('auth') || error.includes('Unauthorized');
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center space-y-3">
-          <AlertTriangle size={48} className="mx-auto text-yellow-500" />
-          <p className="text-sm text-content-secondary">{error}</p>
-          <button
-            onClick={() => fetchData()}
-            className="px-4 py-2 text-sm bg-oe-blue text-white rounded-lg hover:bg-oe-blue-dark transition-colors"
-          >
-            {t('common.retry', { defaultValue: 'Retry' })}
-          </button>
+      <div className="max-w-content mx-auto py-12">
+        <div className="text-center space-y-4">
+          <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center mx-auto">
+            <AlertTriangle size={28} className="text-amber-500" />
+          </div>
+          <h2 className="text-lg font-bold text-content-primary">
+            {isAuth
+              ? t('project_intelligence.auth_error', { defaultValue: 'Session expired' })
+              : t('project_intelligence.load_error', { defaultValue: 'Could not load analysis' })}
+          </h2>
+          <p className="text-sm text-content-secondary max-w-md mx-auto">
+            {isAuth
+              ? t('project_intelligence.auth_hint', { defaultValue: 'Please refresh the page or sign in again to continue.' })
+              : error}
+          </p>
+          <div className="flex items-center justify-center gap-3 pt-2">
+            <button
+              onClick={() => fetchData()}
+              className="px-4 py-2 text-sm bg-oe-blue text-white rounded-lg hover:bg-oe-blue-dark transition-colors"
+            >
+              {t('common.retry', { defaultValue: 'Retry' })}
+            </button>
+            {isAuth && (
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 text-sm border border-border rounded-lg hover:bg-surface-secondary transition-colors"
+              >
+                {t('common.refresh_page', { defaultValue: 'Refresh Page' })}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -266,9 +288,14 @@ export function ProjectIntelligencePage() {
             <div>
               <h1 className="text-base font-semibold text-content-primary">
                 {t('project_intelligence.title', { defaultValue: 'Project Intelligence' })}
+                <span className="ml-2 text-xs font-normal text-content-tertiary">
+                  — {state.project_name || t('project_intelligence.unnamed', { defaultValue: 'Unnamed Project' })}
+                </span>
               </h1>
-              <p className="text-xs text-content-tertiary">
-                {state.project_name || t('project_intelligence.unnamed', { defaultValue: 'Unnamed Project' })}
+              <p className="text-xs text-content-quaternary">
+                {t('project_intelligence.header_desc', {
+                  defaultValue: 'AI analysis of 9 domains: BOQ, Validation, Schedule, Cost Model, Takeoff, Risk, Tendering, Documents, Reports',
+                })}
               </p>
             </div>
           </div>

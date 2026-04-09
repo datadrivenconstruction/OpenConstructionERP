@@ -285,12 +285,12 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
     mutationFn: projectsApi.create,
     onSuccess: (project) => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
-      addToast({ type: 'success', title: t('toasts.project_created', { defaultValue: 'Project created' }) });
+      addToast({ type: 'success', title: t('toasts.project_created', { defaultValue: 'Project created successfully' }) });
       onClose();
       navigate(`/projects/${project.id}`);
     },
     onError: (error: Error) => {
-      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+      addToast({ type: 'error', title: t('toasts.project_create_failed', { defaultValue: 'Failed to create project' }), message: error.message });
     },
   });
 

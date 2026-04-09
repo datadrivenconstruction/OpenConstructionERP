@@ -654,7 +654,7 @@ export function TasksPage() {
   const handleCreateSubmit = useCallback(
     (formData: TaskFormData) => {
       if (!projectId) {
-        addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: t('common.select_project_first', { defaultValue: 'Please select a project first' }) });
+        addToast({ type: 'error', title: t('tasks.no_project_error', { defaultValue: 'No project selected' }), message: t('common.select_project_first', { defaultValue: 'Please select a project first' }) });
         return;
       }
       createMut.mutate({
@@ -735,8 +735,8 @@ export function TasksPage() {
     } catch (e: unknown) {
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
-        message: e instanceof Error ? e.message : 'Failed to download template',
+        title: t('tasks.template_download_failed', { defaultValue: 'Failed to download template' }),
+        message: e instanceof Error ? e.message : t('tasks.template_error_generic', { defaultValue: 'An unexpected error occurred while downloading the import template.' }),
       });
     }
   };

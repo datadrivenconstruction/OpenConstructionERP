@@ -1086,12 +1086,12 @@ function ObservationsTab({ projectId }: { projectId: string }) {
     onSuccess: () =>
       addToast({
         type: 'success',
-        title: t('safety.export_success', { defaultValue: 'Export complete' }),
+        title: t('safety.obs_export_success', { defaultValue: 'Observations exported successfully' }),
       }),
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('safety.obs_export_failed', { defaultValue: 'Failed to export observations' }),
         message: e.message,
       }),
   });
