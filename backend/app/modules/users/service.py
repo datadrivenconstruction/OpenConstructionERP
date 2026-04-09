@@ -158,9 +158,11 @@ class UserService:
                 detail="Email already registered",
             )
 
-        # First user becomes admin
+        # First user becomes admin; subsequent users are always 'editor'
+        # regardless of what the client sends, to prevent privilege escalation.
+        # Only admins can promote users via the PATCH /{user_id} endpoint.
         user_count = await self.user_repo.count()
-        role = "admin" if user_count == 0 else data.role
+        role = "admin" if user_count == 0 else "editor"
 
         user = User(
             email=data.email.lower(),
