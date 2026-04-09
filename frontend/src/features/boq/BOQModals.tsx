@@ -312,16 +312,34 @@ export function CostDatabaseSearchModal({
     setIsAdding(true);
 
     try {
-      // Get existing position count for unique ordinal
-      let nextOrd = 1;
+      // Fetch BOQ detail to find the max existing ordinal for unique numbering
+      let nextOrdNum = 1;
       try {
-        const boqData = await apiGet<{ positions?: unknown[] }>(`/v1/boq/boqs/${boqId}`);
-        nextOrd = (boqData.positions?.length ?? 0) + 1;
-      } catch { /* ignore */ }
+        const boqData = await apiGet<{ positions?: Array<{ ordinal: string }> }>(
+          `/v1/boq/boqs/${boqId}`,
+        );
+        const positions = boqData.positions ?? [];
+        if (positions.length > 0) {
+          // Parse all ordinal numeric parts and find the max
+          let maxNum = 0;
+          for (const p of positions) {
+            const parts = p.ordinal.split('.');
+            for (const part of parts) {
+              const n = parseInt(part, 10);
+              if (!isNaN(n) && n > maxNum) maxNum = n;
+            }
+          }
+          nextOrdNum = maxNum + 1;
+        }
+      } catch {
+        /* ignore — start at 1 */
+      }
 
       const selectedItems = items.filter((i) => selected.has(i.id));
       for (const item of selectedItems) {
-        const ordinal = `${String(Math.floor(nextOrd / 100) + 1).padStart(2, '0')}.${String(nextOrd % 100 || nextOrd).padStart(3, '0')}`;
+        const section = String(Math.floor((nextOrdNum - 1) / 999) + 1).padStart(2, '0');
+        const pos = String(((nextOrdNum - 1) % 999) + 1).padStart(3, '0');
+        const ordinal = `${section}.${pos}`;
         // Convert cost item components to position resources
         const resources = (item.components || []).map((c) => ({
           name: c.name,
@@ -347,7 +365,7 @@ export function CostDatabaseSearchModal({
             ...(resources.length > 0 ? { resources } : {}),
           },
         });
-        nextOrd++;
+        nextOrdNum++;
       }
       onAdded();
     } catch (err) {
