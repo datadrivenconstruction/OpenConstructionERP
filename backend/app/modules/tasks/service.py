@@ -1,4 +1,7 @@
-"""Tasks service — business logic for task management."""
+"""Tasks service — business logic for task management.
+
+- Event publishing on create/update/delete
+"""
 
 import logging
 import uuid
@@ -7,11 +10,20 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.events import event_bus
 from app.modules.tasks.models import Task
 from app.modules.tasks.repository import TaskRepository
 from app.modules.tasks.schemas import TaskCreate, TaskStatsResponse, TaskUpdate
 
 logger = logging.getLogger(__name__)
+_logger_ev = logging.getLogger(__name__ + ".events")
+
+
+async def _safe_publish(name: str, data: dict, source_module: str = "") -> None:
+    try:
+        await event_bus.publish(name, data, source_module=source_module)
+    except Exception:
+        _logger_ev.debug("Event publish skipped: %s", name)
 
 # ── Allowed task status transitions ───────────────────────────────────────────
 
@@ -58,6 +70,21 @@ class TaskService:
         )
         task = await self.repo.create(task)
         logger.info("Task created: %s (%s) for project %s", task.title[:40], data.task_type, data.project_id)
+
+        # Publish task.assigned event so notification handlers fire
+        if data.responsible_id:
+            await _safe_publish(
+                "task.assigned",
+                {
+                    "project_id": str(data.project_id),
+                    "task_id": str(task.id),
+                    "title": data.title,
+                    "responsible_id": str(data.responsible_id),
+                    "assigned_by": user_id or "",
+                },
+                source_module="oe_tasks",
+            )
+
         return task
 
     async def get_task(
@@ -159,9 +186,31 @@ class TaskService:
         if not fields:
             return task
 
+        # Detect reassignment so we can fire task.assigned
+        old_responsible = str(task.responsible_id) if task.responsible_id else None
+        new_responsible = fields.get("responsible_id")
+
         await self.repo.update_fields(task_id, **fields)
         await self.session.refresh(task)
         logger.info("Task updated: %s (fields=%s)", task_id, list(fields.keys()))
+
+        # Fire task.assigned when responsible_id changes to a new user
+        if (
+            new_responsible is not None
+            and str(new_responsible) != old_responsible
+        ):
+            await _safe_publish(
+                "task.assigned",
+                {
+                    "project_id": str(task.project_id),
+                    "task_id": str(task_id),
+                    "title": task.title,
+                    "responsible_id": str(new_responsible),
+                    "assigned_by": current_user_id or "",
+                },
+                source_module="oe_tasks",
+            )
+
         return task
 
     async def delete_task(

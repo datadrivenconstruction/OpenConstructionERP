@@ -165,11 +165,16 @@ async def update_project(
 
 
 @router.delete(
-    "/{project_id}",
+    "/{project_id}/",
     status_code=204,
     summary="Archive project",
     description="Soft-delete (archive) a project. The project and its data are retained "
     "but hidden from default queries. Use POST /{project_id}/restore to un-archive.",
+)
+@router.delete(
+    "/{project_id}",
+    status_code=204,
+    include_in_schema=False,
 )
 async def delete_project(
     project_id: uuid.UUID,
@@ -177,7 +182,12 @@ async def delete_project(
     payload: CurrentUserPayload,
     service: ProjectService = Depends(_get_service),
 ) -> None:
-    """Archive a project (soft delete). Verifies ownership."""
+    """Archive a project (soft delete) and cascade-archive child records.
+
+    Verifies ownership. Marks the project and all its child tasks, RFIs,
+    and other linked entities as archived/inactive so they no longer appear
+    in default queries.
+    """
     import logging as _log
 
     try:

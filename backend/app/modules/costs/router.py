@@ -361,12 +361,26 @@ async def vectorize_cost_items(
 
     Uses FastEmbed/ONNX (all-MiniLM-L6-v2, 384d) locally — no API key needed.
     Default backend: LanceDB (embedded, no Docker required).
+
+    Returns a graceful 200 with an error message when vector dependencies
+    (sentence-transformers, LanceDB) are not available instead of a 500.
     """
+    import asyncio
     import time
 
     from sqlalchemy import select
 
-    from app.core.vector import encode_texts, vector_index
+    # Quick check: can we even import the vector module?
+    try:
+        from app.core.vector import encode_texts, vector_index
+    except Exception as exc:
+        logger.warning("Vector module import failed: %s", exc)
+        return {
+            "indexed": 0,
+            "message": "Vector indexing is not available: vector module failed to load.",
+            "error": str(exc),
+        }
+
     from app.modules.costs.models import CostItem
 
     start = time.monotonic()
@@ -410,10 +424,9 @@ async def vectorize_cost_items(
             }
         )
 
-    # Run CPU-heavy embedding in a separate process to not block event loop
-    import asyncio
-    import concurrent.futures
-
+    # Run CPU-heavy embedding in a thread to not block event loop.
+    # NOTE: Uses ThreadPoolExecutor (not Process) to avoid pickling issues
+    # with global model singletons and LanceDB connections.
     def _vectorize_batch(data: list[dict], bs: int) -> int:
         total = 0
         for i in range(0, len(data), bs):
@@ -427,9 +440,18 @@ async def vectorize_cost_items(
             total += vector_index(records)
         return total
 
-    loop = asyncio.get_event_loop()
-    with concurrent.futures.ProcessPoolExecutor(max_workers=1) as pool:
-        indexed = await loop.run_in_executor(pool, _vectorize_batch, items_data, batch_size)
+    try:
+        indexed = await asyncio.to_thread(_vectorize_batch, items_data, batch_size)
+    except Exception as exc:
+        # Graceful error when vector backend is unavailable:
+        # - RuntimeError: no embedding model or LanceDB not installed
+        # - ImportError: sentence-transformers / lancedb not installed
+        # - Any other error during vectorization
+        logger.warning("Vector indexing failed: %s", exc)
+        return {
+            "indexed": 0,
+            "message": f"Vector indexing failed: {exc}",
+        }
 
     duration = round(time.monotonic() - start, 1)
     logger.info("Indexed %d cost items in %.1fs", indexed, duration)
