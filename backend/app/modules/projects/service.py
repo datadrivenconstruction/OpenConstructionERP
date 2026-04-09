@@ -215,13 +215,78 @@ class ProjectService:
     async def delete_project(self, project_id: uuid.UUID) -> None:
         """Soft-delete a project by setting status to 'archived'.
 
+        Also hard-deletes child records (tasks, RFIs, etc.) that reference
+        the project so they don't remain accessible after the project is
+        archived.  The DB FK constraints use ``ondelete=CASCADE`` for real
+        deletes, but since the project row itself is kept (soft-delete) those
+        cascades never trigger — we do it explicitly here.
+
         Raises 404 if not found. Idempotent — re-archiving an archived
         project is a no-op (returns 204) so the user gets a clean delete UX.
         """
+        from sqlalchemy import delete as sa_delete
+
         project = await self.get_project(project_id, include_archived=True)
         if project.status == "archived":
             return  # Already archived — silently succeed
         owner_id = str(project.owner_id)  # Save before expire_all()
+
+        # Cascade-delete child records that belong to this project.
+        # These models all have project_id FK with ondelete=CASCADE, but
+        # since we only soft-delete the project row the DB cascade never
+        # fires.  Delete them explicitly so they don't remain accessible.
+        child_models: list[type] = []
+        try:
+            from app.modules.tasks.models import Task
+            child_models.append(Task)
+        except ImportError:
+            pass
+        try:
+            from app.modules.rfi.models import RFI
+            child_models.append(RFI)
+        except ImportError:
+            pass
+        try:
+            from app.modules.meetings.models import Meeting
+            child_models.append(Meeting)
+        except ImportError:
+            pass
+        try:
+            from app.modules.punchlist.models import PunchItem
+            child_models.append(PunchItem)
+        except ImportError:
+            pass
+        try:
+            from app.modules.inspections.models import Inspection
+            child_models.append(Inspection)
+        except ImportError:
+            pass
+        try:
+            from app.modules.ncr.models import NCR
+            child_models.append(NCR)
+        except ImportError:
+            pass
+        try:
+            from app.modules.fieldreports.models import FieldReport
+            child_models.append(FieldReport)
+        except ImportError:
+            pass
+        try:
+            from app.modules.risk.models import Risk
+            child_models.append(Risk)
+        except ImportError:
+            pass
+
+        for model in child_models:
+            try:
+                stmt = sa_delete(model).where(model.project_id == project_id)  # type: ignore[attr-defined]
+                await self.session.execute(stmt)
+            except Exception as exc:
+                logger.debug(
+                    "Cascade delete for %s skipped: %s",
+                    model.__tablename__,  # type: ignore[attr-defined]
+                    exc,
+                )
 
         await self.repo.update_fields(project_id, status="archived")
 

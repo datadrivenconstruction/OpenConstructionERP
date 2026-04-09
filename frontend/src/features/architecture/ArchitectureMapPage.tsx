@@ -139,17 +139,17 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 const METHOD_COLORS: Record<string, string> = {
-  GET: '#22c55e',
+  GET: '#16a34a',
   POST: '#3b82f6',
   PUT: '#f59e0b',
   PATCH: '#f59e0b',
   DELETE: '#ef4444',
 };
 
-const CANVAS_BG = '#0f1117';
-const NODE_BG = '#1e2433';
-const NODE_TEXT = '#e2e8f0';
-const NODE_TEXT_DIM = '#94a3b8';
+const CANVAS_BG = '#f8fafc';
+const NODE_BG = '#ffffff';
+const NODE_TEXT = '#1e293b';
+const NODE_TEXT_DIM = '#64748b';
 
 function getCategoryColor(category: string): string {
   return CATEGORY_COLORS[category] ?? '#6b7280';
@@ -173,11 +173,12 @@ function ModuleNodeComponent({ data }: { data: ModuleNodeData }) {
   const color = getCategoryColor(data.category);
   return (
     <div
-      className="rounded-xl px-4 py-3 min-w-[180px] max-w-[240px] shadow-lg"
+      className="rounded-xl px-4 py-3 min-w-[180px] max-w-[240px]"
       style={{
         background: NODE_BG,
         border: `2px solid ${color}`,
         color: NODE_TEXT,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
       }}
     >
       <div className="flex items-center gap-2 mb-2">
@@ -427,7 +428,9 @@ function buildModuleView(manifest: ArchitectureManifest): { nodes: Node[]; edges
           target: `mod-${targetId}`,
           type: 'import',
           animated: false,
-          style: { stroke: '#6b7280', strokeDasharray: '6 3' },
+          style: { stroke: '#94a3b8', strokeWidth: 1.5 },
+          label: targetId,
+          labelStyle: { fontSize: 9, fill: '#94a3b8' },
         });
       }
     }
@@ -778,7 +781,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
                   <span
                     key={dep}
                     className="text-[10px] px-2 py-0.5 rounded-full"
-                    style={{ background: '#334155', color: NODE_TEXT_DIM }}
+                    style={{ background: '#e2e8f0', color: NODE_TEXT_DIM }}
                   >
                     {dep}
                   </span>
@@ -797,7 +800,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
                   <div
                     key={model.class_name}
                     className="text-[11px] px-2 py-1 rounded"
-                    style={{ background: '#0f1117', color: NODE_TEXT_DIM }}
+                    style={{ background: '#f8fafc', color: NODE_TEXT_DIM }}
                   >
                     <span className="font-mono font-medium" style={{ color: '#eab308' }}>
                       {model.class_name}
@@ -819,7 +822,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
                   <div
                     key={`${route.method}-${route.path}-${idx}`}
                     className="flex items-center gap-2 text-[11px] px-2 py-1 rounded"
-                    style={{ background: '#0f1117' }}
+                    style={{ background: '#f8fafc' }}
                   >
                     <span
                       className="px-1 py-0.5 rounded text-[9px] font-bold shrink-0"
@@ -880,7 +883,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
                   <div
                     key={col.name}
                     className="flex items-center gap-2 text-[11px] px-2 py-1 rounded"
-                    style={{ background: '#0f1117' }}
+                    style={{ background: '#f8fafc' }}
                   >
                     <span
                       className="w-2 h-2 rounded-full shrink-0"
@@ -917,7 +920,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
                 <div
                   key={rel.name}
                   className="flex items-center gap-2 text-[11px] px-2 py-1 rounded"
-                  style={{ background: '#0f1117' }}
+                  style={{ background: '#f8fafc' }}
                 >
                   <ChevronRight size={10} style={{ color: '#f59e0b' }} />
                   <span className="font-mono" style={{ color: '#f59e0b' }}>
@@ -968,7 +971,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
               <h4 className="text-xs font-semibold mb-1" style={{ color: NODE_TEXT }}>
                 {t('architecture.response_model', { defaultValue: 'Response Model' })}
               </h4>
-              <span className="text-xs font-mono" style={{ color: '#22c55e' }}>
+              <span className="text-xs font-mono" style={{ color: '#16a34a' }}>
                 {route.response_model}
               </span>
             </div>
@@ -1001,11 +1004,11 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
       className="absolute top-0 right-0 h-full overflow-y-auto z-20 shadow-2xl"
       style={{
         width: 380,
-        background: '#1a1f2e',
+        background: '#ffffff',
         borderLeft: '1px solid #334155',
       }}
     >
-      <div className="sticky top-0 flex items-center justify-between px-4 py-3 z-10" style={{ background: '#1a1f2e', borderBottom: '1px solid #334155' }}>
+      <div className="sticky top-0 flex items-center justify-between px-4 py-3 z-10" style={{ background: '#ffffff', borderBottom: '1px solid #334155' }}>
         <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: NODE_TEXT_DIM }}>
           {t('architecture.details', { defaultValue: 'Details' })}
         </span>
@@ -1031,7 +1034,7 @@ function Legend() {
   return (
     <div
       className="rounded-lg px-3 py-2 text-[10px] space-y-2"
-      style={{ background: '#1a1f2eee', border: '1px solid #334155', color: NODE_TEXT_DIM }}
+      style={{ background: '#ffffffee', border: '1px solid #334155', color: NODE_TEXT_DIM }}
     >
       <div className="font-semibold text-[11px]" style={{ color: NODE_TEXT }}>
         {t('architecture.legend', { defaultValue: 'Legend' })}
@@ -1092,7 +1095,7 @@ function ArchitectureEmptyState() {
       <div className="flex flex-col items-center gap-4 max-w-md text-center px-6">
         <div
           className="w-16 h-16 rounded-2xl flex items-center justify-center"
-          style={{ background: '#1e2433', border: '1px solid #334155' }}
+          style={{ background: '#f1f5f9', border: '1px solid #334155' }}
         >
           <Network size={32} style={{ color: '#6b7280' }} />
         </div>
@@ -1107,7 +1110,7 @@ function ArchitectureEmptyState() {
         </p>
         <div
           className="text-xs font-mono px-4 py-2 rounded-lg"
-          style={{ background: '#0f1117', border: '1px solid #334155', color: '#22c55e' }}
+          style={{ background: '#f8fafc', border: '1px solid #334155', color: '#16a34a' }}
         >
           python generate_architecture_manifest.py
         </div>
@@ -1207,7 +1210,7 @@ function FlowCanvas({ manifest, viewLevel, searchQuery }: FlowCanvasProps) {
         <Background color="#1e293b" gap={24} size={1} />
         <Controls
           showInteractive={false}
-          style={{ background: '#1e2433', borderColor: '#334155', borderRadius: 8 }}
+          style={{ background: '#f1f5f9', borderColor: '#e2e8f0', borderRadius: 8 }}
         />
         <MiniMap
           nodeColor={(node) => {
@@ -1216,8 +1219,8 @@ function FlowCanvas({ manifest, viewLevel, searchQuery }: FlowCanvasProps) {
           }}
           maskColor="#0f111780"
           style={{
-            background: '#1a1f2e',
-            borderColor: '#334155',
+            background: '#ffffff',
+            borderColor: '#e2e8f0',
             borderRadius: 8,
           }}
         />
@@ -1315,11 +1318,11 @@ export function ArchitectureMapPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full" style={{ background: CANVAS_BG }}>
+      <div className="flex items-center justify-center" style={{ background: CANVAS_BG, height: 'calc(100vh - 56px)' }}>
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#3b82f6', borderTopColor: 'transparent' }} />
           <span className="text-sm" style={{ color: NODE_TEXT_DIM }}>
-            {t('architecture.loading', { defaultValue: 'Loading architecture...' })}
+            {t('architecture.loading', { defaultValue: 'Loading architecture data (54 modules)...' })}
           </span>
         </div>
       </div>
@@ -1331,11 +1334,11 @@ export function ArchitectureMapPage() {
   }
 
   return (
-    <div className="flex flex-col h-full" style={{ background: CANVAS_BG }}>
+    <div className="flex flex-col" style={{ background: CANVAS_BG, height: 'calc(100vh - 56px)' }}>
       {/* Top bar */}
       <div
         className="flex items-center gap-3 px-4 py-2 shrink-0 z-10"
-        style={{ background: '#1a1f2e', borderBottom: '1px solid #334155' }}
+        style={{ background: '#ffffff', borderBottom: '1px solid #e2e8f0' }}
       >
         {/* View level buttons */}
         <div className="flex items-center gap-1">
@@ -1369,7 +1372,7 @@ export function ArchitectureMapPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-8 pr-8 py-1.5 rounded-md text-xs outline-none"
             style={{
-              background: '#0f1117',
+              background: '#f8fafc',
               border: '1px solid #334155',
               color: NODE_TEXT,
               width: 220,
@@ -1392,13 +1395,13 @@ export function ArchitectureMapPage() {
         {/* Stats badge */}
         <div
           className="hidden md:flex items-center gap-2 text-[10px] px-3 py-1 rounded-md"
-          style={{ background: '#0f1117', border: '1px solid #334155', color: NODE_TEXT_DIM }}
+          style={{ background: '#f8fafc', border: '1px solid #334155', color: NODE_TEXT_DIM }}
         >
           <Info size={12} />
           <span>{manifest.statistics.backend_modules} modules</span>
-          <span style={{ color: '#334155' }}>|</span>
+          <span style={{ color: '#e2e8f0' }}>|</span>
           <span>{manifest.statistics.total_models} models</span>
-          <span style={{ color: '#334155' }}>|</span>
+          <span style={{ color: '#e2e8f0' }}>|</span>
           <span>{manifest.statistics.total_routes} routes</span>
         </div>
       </div>
