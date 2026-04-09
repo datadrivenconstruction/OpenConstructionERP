@@ -1486,30 +1486,27 @@ function UploadConvertZone({
             <p className="text-sm font-medium text-green-600">{t('explorer.done', { defaultValue: 'Conversion complete! Loading...' })}</p>
           </div>
         ) : (
-          <div className="px-6 py-6">
-            <div className="flex items-center gap-5">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-oe-blue-subtle shrink-0">
-                <FileUp size={26} className="text-oe-blue" />
+          <div className="px-8 py-10">
+            <div className="flex flex-col items-center text-center gap-4">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-oe-blue/10 to-blue-50 dark:from-oe-blue/20 dark:to-blue-900/10 border border-oe-blue/10">
+                <FileUp size={30} className="text-oe-blue" />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-content-primary">
-                  {t('explorer.drop_cad', { defaultValue: 'Drop a CAD/BIM file to explore' })}
+              <div>
+                <p className="text-base font-bold text-content-primary mb-1">
+                  {t('explorer.drop_cad', { defaultValue: 'Drop your IFC, RVT, DWG, or DGN file here' })}
                 </p>
-                <p className="text-xs text-content-tertiary mt-0.5">
-                  {t('explorer.or_click', { defaultValue: 'or click to browse — data table, pivot, charts & statistics' })}
+                <p className="text-sm text-content-tertiary">
+                  {t('explorer.or_click', { defaultValue: 'or click to browse your files' })}
                 </p>
-                <div className="flex items-center gap-3 mt-2.5">
-                  <div className="flex items-center gap-1.5">
-                    {CAD_FORMATS.map((fmt) => (
-                      <span key={fmt} className={`px-1.5 py-0.5 rounded text-2xs font-bold ${FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600'}`}>.{fmt.toLowerCase()}</span>
-                    ))}
-                  </div>
-                  <span className="text-2xs text-content-quaternary">|</span>
-                  <span className="text-2xs text-content-quaternary">
-                    {t('explorer.max_file_size', { defaultValue: 'Max 100 MB' })}
-                  </span>
-                </div>
               </div>
+              <div className="flex items-center gap-2 mt-1">
+                {CAD_FORMATS.map((fmt) => (
+                  <span key={fmt} className={`px-2 py-1 rounded-lg text-2xs font-bold ${FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600'}`}>.{fmt.toLowerCase()}</span>
+                ))}
+              </div>
+              <p className="text-2xs text-content-quaternary">
+                {t('explorer.max_file_size', { defaultValue: 'Max 100 MB' })} — {t('explorer.upload_auto', { defaultValue: 'Automatic conversion and element extraction' })}
+              </p>
             </div>
           </div>
         )}
@@ -1751,62 +1748,74 @@ export function CadDataExplorerPage() {
     ];
 
     return (
-      <div className="max-w-content mx-auto px-4 py-4 space-y-6 animate-fade-in">
+      <div className="max-w-content mx-auto px-4 py-4 space-y-8 animate-fade-in">
         <Breadcrumb items={[
           { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
           { label: t('explorer.title', { defaultValue: 'CAD-BIM Explorer' }) },
         ]} />
 
         {/* Hero section */}
-        <div className="text-center pt-4 pb-2">
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-oe-blue-subtle mb-4">
-            <Database size={28} className="text-oe-blue" />
+        <div className="relative text-center pt-10 pb-6 overflow-hidden">
+          {/* Gradient background decoration */}
+          <div className="absolute inset-0 -z-10 overflow-hidden rounded-3xl">
+            <div className="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-oe-blue/5 blur-3xl" />
+            <div className="absolute -bottom-16 -right-16 w-64 h-64 rounded-full bg-purple-500/5 blur-3xl" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-48 rounded-full bg-emerald-500/5 blur-3xl" />
           </div>
-          <h1 className="text-2xl font-bold text-content-primary mb-2">
-            {t('explorer.hero_title', { defaultValue: 'CAD Data Explorer' })}
+
+          <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-oe-blue to-blue-600 shadow-lg shadow-oe-blue/20 mb-6">
+            <Database size={36} className="text-white" />
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-content-primary mb-3 tracking-tight">
+            {t('explorer.hero_title', { defaultValue: 'CAD/BIM Data Explorer' })}
           </h1>
-          <p className="text-sm text-content-tertiary max-w-lg mx-auto leading-relaxed">
-            {t('explorer.hero_subtitle', { defaultValue: 'Explore and analyze BIM/CAD element data in a spreadsheet-like interface. Upload a model to extract properties, quantities, and classifications automatically.' })}
+          <p className="text-base text-content-secondary max-w-2xl mx-auto leading-relaxed">
+            {t('explorer.hero_subtitle', { defaultValue: 'Analyze building element data in a powerful spreadsheet interface. Filter, pivot, chart, and export quantities from your IFC and Revit models.' })}
           </p>
         </div>
 
         {/* Feature cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {FEATURE_CARDS.map(({ icon: Icon, title, desc, color }) => (
-            <Card key={title} className="p-4 hover:shadow-md transition-shadow">
-              <div className={`inline-flex h-9 w-9 items-center justify-center rounded-xl ${color} mb-3`}>
-                <Icon size={18} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {FEATURE_CARDS.map(({ icon: Icon, title, desc, color, iconBg }) => (
+            <Card key={title} className="p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group border-border-light">
+              <div className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ${iconBg} mb-4 group-hover:scale-105 transition-transform`}>
+                <Icon size={22} className={color} />
               </div>
-              <h3 className="text-sm font-semibold text-content-primary mb-1">{title}</h3>
-              <p className="text-2xs text-content-tertiary leading-relaxed">{desc}</p>
+              <h3 className="text-sm font-bold text-content-primary mb-1.5">{title}</h3>
+              <p className="text-xs text-content-tertiary leading-relaxed">{desc}</p>
             </Card>
           ))}
         </div>
 
         {/* Upload zone */}
-        <div>
-          <h2 className="text-xs font-semibold text-content-tertiary uppercase tracking-wider mb-2">
-            {t('explorer.upload_heading', { defaultValue: 'Upload CAD/BIM File' })}
-          </h2>
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="h-px flex-1 bg-border-light" />
+            <h2 className="text-xs font-bold text-content-secondary uppercase tracking-widest px-3">
+              {t('explorer.upload_heading', { defaultValue: 'Upload CAD/BIM File' })}
+            </h2>
+            <div className="h-px flex-1 bg-border-light" />
+          </div>
           <UploadConvertZone onSessionReady={handleSessionReady} />
-          <p className="text-2xs text-content-quaternary mt-2 text-center">
-            {t('explorer.upload_hint', { defaultValue: 'Supported: RVT, IFC, DWG, DGN, DXF, RFA -- Max file size 100 MB' })}
-          </p>
+          <div className="flex items-center justify-center gap-2 text-2xs text-content-quaternary">
+            <span>{t('explorer.upload_hint_formats', { defaultValue: 'Supported formats:' })}</span>
+            <span className="font-semibold text-content-tertiary">IFC, RVT, DWG, DGN, DXF, RFA</span>
+            <span className="mx-1">|</span>
+            <span>{t('explorer.upload_hint_size', { defaultValue: 'Max file size: 100 MB' })}</span>
+          </div>
         </div>
 
-        {/* Recent sessions — compact table */}
+        {/* Recent sessions — card grid */}
         {recentSessions.length > 0 && (
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xs font-semibold text-content-tertiary uppercase tracking-wider flex items-center gap-1.5">
-                <Clock size={12} />
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-bold text-content-primary flex items-center gap-2">
+                <Clock size={15} className="text-content-tertiary" />
                 {t('explorer.recent_models', { defaultValue: 'Recent Models' })}
+                <Badge variant="neutral" size="sm">{allSessions.length}</Badge>
               </h2>
-              <span className="text-2xs text-content-quaternary tabular-nums">
-                {allSessions.length} {t('explorer.total_analyses', { defaultValue: 'total' })}
-              </span>
             </div>
-            <div className="rounded-xl border border-border-light bg-surface-elevated overflow-hidden divide-y divide-border-light">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {recentSessions.map((s) => {
                 const fmt = (s.file_format || '').toUpperCase();
                 const timeAgo = s.created_at ? (() => {
@@ -1818,27 +1827,16 @@ export function CadDataExplorerPage() {
                   return `${Math.floor(hrs / 24)}d ago`;
                 })() : '';
 
+                // Estimate column count from element_count (heuristic for display)
+                const colCount = describe ? describe.total_columns : null;
+
                 return (
                   <button
                     key={s.session_id}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-surface-hover transition-colors group"
+                    className="relative w-full text-left rounded-xl border border-border-light bg-surface-elevated p-4 hover:shadow-lg hover:border-oe-blue/30 hover:-translate-y-0.5 transition-all duration-200 group cursor-pointer"
                     onClick={() => setSearchParams({ session: s.session_id })}
                   >
-                    <span className={`px-1.5 py-0.5 rounded text-2xs font-bold shrink-0 ${LANDING_FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>
-                      {fmt || '?'}
-                    </span>
-                    <span className="text-sm font-medium text-content-primary truncate flex-1">
-                      {s.display_name}
-                    </span>
-                    <span className="text-2xs text-content-tertiary tabular-nums shrink-0">
-                      {s.element_count.toLocaleString()} el.
-                    </span>
-                    {s.is_permanent && (
-                      <Save size={12} className="text-green-500 shrink-0" />
-                    )}
-                    <span className="text-2xs text-content-quaternary tabular-nums shrink-0 w-12 text-right">
-                      {timeAgo}
-                    </span>
+                    {/* Delete button */}
                     <span
                       role="button"
                       tabIndex={0}
@@ -1849,12 +1847,57 @@ export function CadDataExplorerPage() {
                         }
                       }}
                       onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.click(); }}
-                      className="shrink-0 h-6 w-6 flex items-center justify-center rounded-md text-content-quaternary hover:text-semantic-error hover:bg-semantic-error-bg opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                      className="absolute top-2.5 right-2.5 h-6 w-6 flex items-center justify-center rounded-md text-content-quaternary hover:text-semantic-error hover:bg-semantic-error-bg opacity-0 group-hover:opacity-100 transition-all cursor-pointer z-10"
                       title={t('common.delete', { defaultValue: 'Delete' })}
                     >
                       <X size={14} />
                     </span>
-                    <ChevronRight size={14} className="text-content-quaternary shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                    {/* Header: name + format badge */}
+                    <div className="flex items-start gap-2.5 mb-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-surface-secondary shrink-0">
+                        <Database size={16} className="text-content-tertiary" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="text-sm font-semibold text-content-primary truncate">{s.display_name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`px-1.5 py-0.5 rounded text-2xs font-bold shrink-0 ${LANDING_FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>
+                            {fmt || '?'}
+                          </span>
+                          {s.is_permanent && (
+                            <span className="inline-flex items-center gap-0.5 text-2xs text-green-600 dark:text-green-400 font-medium">
+                              <Save size={10} />
+                              {t('explorer.saved_label', { defaultValue: 'Saved' })}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Stats row */}
+                    <div className="flex items-center gap-3 text-2xs text-content-tertiary">
+                      <span className="inline-flex items-center gap-1 tabular-nums">
+                        <Hash size={10} className="text-content-quaternary" />
+                        {s.element_count.toLocaleString()} {t('explorer.elements_short', { defaultValue: 'elements' })}
+                      </span>
+                      {colCount != null && (
+                        <span className="inline-flex items-center gap-1 tabular-nums">
+                          <Columns3 size={10} className="text-content-quaternary" />
+                          {colCount} {t('explorer.cols_short', { defaultValue: 'cols' })}
+                        </span>
+                      )}
+                      <span className="ml-auto inline-flex items-center gap-1 tabular-nums text-content-quaternary">
+                        <Clock size={10} />
+                        {timeAgo}
+                      </span>
+                    </div>
+
+                    {/* Hover arrow indicator */}
+                    <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ChevronRight size={16} className="text-oe-blue" />
+                    </div>
                   </button>
                 );
               })}
