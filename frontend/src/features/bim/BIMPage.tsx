@@ -1143,14 +1143,42 @@ export function BIMPage() {
                   format: (activeModel.model_format || activeModel.format || '').toUpperCase(),
                 })}
               </p>
-              <div className="rounded-lg bg-surface-primary border border-border-light p-3 mb-4 text-start">
-                <p className="text-xs text-content-secondary mb-1.5 font-medium">
-                  {t('bim.model_not_processed_reason_title', { defaultValue: 'What happened?' })}
+              <div className="rounded-lg bg-oe-blue/5 border border-oe-blue/20 p-4 mb-4 text-start">
+                <p className="text-sm text-oe-blue font-semibold mb-2 flex items-center gap-2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                  {t('bim.install_converter', { defaultValue: 'Install a Converter Module' })}
                 </p>
-                <p className="text-xs text-content-tertiary">
-                  {t('bim.model_not_processed_reason', {
+                <p className="text-xs text-content-secondary mb-3">
+                  {t('bim.converter_explanation', {
                     defaultValue:
-                      'RVT files require the DDC cad2data converter to extract elements. You can convert the file externally, then upload the resulting CSV and DAE files using Advanced Mode.',
+                      'CAD/BIM files need a converter module to extract building elements. Install a converter from the Modules marketplace, or upload pre-converted data (CSV + DAE).',
+                  })}
+                </p>
+                <div className="space-y-2 mb-3">
+                  <div className="flex items-center gap-3 rounded-md bg-surface-primary px-3 py-2 border border-border-light">
+                    <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center shrink-0">
+                      <span className="text-xs font-bold text-blue-600">IFC</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-content-primary">DDC cad2data — IFC Converter</p>
+                      <p className="text-2xs text-content-tertiary">Extract elements from IFC files</p>
+                    </div>
+                    <button onClick={() => window.location.href = '/modules'} className="text-2xs text-oe-blue font-medium hover:underline shrink-0">Install</button>
+                  </div>
+                  <div className="flex items-center gap-3 rounded-md bg-surface-primary px-3 py-2 border border-border-light">
+                    <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-950/30 flex items-center justify-center shrink-0">
+                      <span className="text-xs font-bold text-purple-600">RVT</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-content-primary">DDC cad2data — Revit Converter</p>
+                      <p className="text-2xs text-content-tertiary">Extract elements from Revit (.rvt) files</p>
+                    </div>
+                    <button onClick={() => window.location.href = '/modules'} className="text-2xs text-oe-blue font-medium hover:underline shrink-0">Install</button>
+                  </div>
+                </div>
+                <p className="text-2xs text-content-quaternary">
+                  {t('bim.alternative_upload', {
+                    defaultValue: 'Alternative: Convert your file externally with DDC cad2data, then upload CSV + DAE via Advanced Mode below.',
                   })}
                 </p>
               </div>
