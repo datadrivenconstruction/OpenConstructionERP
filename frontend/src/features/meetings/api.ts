@@ -91,7 +91,7 @@ export async function fetchMeetings(filters?: MeetingFilters): Promise<Meeting[]
 }
 
 export async function createMeeting(data: CreateMeetingPayload): Promise<Meeting> {
-  return apiPost<Meeting>('/v1/meetings', data);
+  return apiPost<Meeting>('/v1/meetings/', data);
 }
 
 export async function updateMeeting(

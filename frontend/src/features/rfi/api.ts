@@ -62,7 +62,7 @@ export async function fetchRFIs(filters?: RFIFilters): Promise<RFI[]> {
 }
 
 export async function createRFI(data: CreateRFIPayload): Promise<RFI> {
-  return apiPost<RFI>('/v1/rfi', data);
+  return apiPost<RFI>('/v1/rfi/', data);
 }
 
 export async function respondToRFI(id: string, data: RespondRFIPayload): Promise<RFI> {
