@@ -484,7 +484,7 @@ async def project_dashboard(
                 punch_items[row_status] = cnt
         quality_section["open_defects"] = punch_items["open"] + punch_items["in_progress"]
     except Exception:
-        pass
+        logger.debug("Dashboard: punch items query failed", exc_info=True)
 
     try:
         from app.modules.inspections.models import QualityInspection
@@ -499,7 +499,7 @@ async def project_dashboard(
         ).scalar_one()
         quality_section["pending_inspections"] = pending_insp
     except Exception:
-        pass
+        logger.debug("Dashboard: inspections query failed", exc_info=True)
 
     try:
         from app.modules.ncr.models import NCR
@@ -514,7 +514,7 @@ async def project_dashboard(
         ).scalar_one()
         quality_section["ncrs_open"] = ncr_open
     except Exception:
-        pass
+        logger.debug("Dashboard: NCR query failed", exc_info=True)
 
     try:
         from app.modules.risk.models import RiskItem as _RiskItem
@@ -529,7 +529,7 @@ async def project_dashboard(
         ).scalar_one()
         quality_section["high_risk_observations"] = _risk_high
     except Exception:
-        pass
+        logger.debug("Dashboard: risk items query failed", exc_info=True)
 
     # Validation score from BOQ positions
     if boq_ids:
@@ -556,7 +556,7 @@ async def project_dashboard(
             if val_total > 0:
                 quality_section["validation_score"] = str(round(val_passed / val_total, 2))
         except Exception:
-            pass
+            logger.debug("Dashboard: validation score query failed", exc_info=True)
 
     # ── Documents ──────────────────────────────────────────────────────────
     documents_section: dict = {
@@ -587,7 +587,7 @@ async def project_dashboard(
                 documents_section["published"] = cnt
         documents_section["total"] = doc_total
     except Exception:
-        pass
+        logger.debug("Dashboard: documents query failed", exc_info=True)
 
     try:
         from app.modules.transmittals.models import Transmittal
@@ -602,7 +602,7 @@ async def project_dashboard(
         ).scalar_one()
         documents_section["pending_transmittals"] = pending_trans
     except Exception:
-        pass
+        logger.debug("Dashboard: transmittals query failed", exc_info=True)
 
     # ── Communication (RFIs, Submittals, Tasks) ────────────────────────────
     communication_section: dict = {
@@ -640,7 +640,7 @@ async def project_dashboard(
         ).scalar_one()
         communication_section["overdue_rfis"] = overdue_rfis
     except Exception:
-        pass
+        logger.debug("Dashboard: RFI query failed", exc_info=True)
 
     try:
         from app.modules.submittals.models import Submittal
@@ -655,7 +655,7 @@ async def project_dashboard(
         ).scalar_one()
         communication_section["open_submittals"] = open_submittals
     except Exception:
-        pass
+        logger.debug("Dashboard: submittals query failed", exc_info=True)
 
     try:
         from app.modules.tasks.models import Task
@@ -670,7 +670,7 @@ async def project_dashboard(
         ).scalar_one()
         communication_section["open_tasks"] = open_tasks
     except Exception:
-        pass
+        logger.debug("Dashboard: tasks query failed", exc_info=True)
 
     try:
         from app.modules.meetings.models import Meeting
@@ -698,7 +698,7 @@ async def project_dashboard(
                 unresolved += sum(1 for item in items if isinstance(item, dict) and item.get("status") != "completed")
         communication_section["unresolved_action_items"] = unresolved
     except Exception:
-        pass
+        logger.debug("Dashboard: meetings query failed", exc_info=True)
 
     # ── Procurement ──────────────────────────────────────────────────────────
     procurement_section: dict = {
@@ -739,7 +739,7 @@ async def project_dashboard(
         ).scalar_one()
         procurement_section["total_committed"] = str(round(total_committed_result or 0, 2))
     except Exception:
-        pass
+        logger.debug("Dashboard: procurement query failed", exc_info=True)
 
     # ── Recent Activity (last 10 across modules) ───────────────────────────
     recent_activity: list[dict] = []
@@ -759,7 +759,7 @@ async def project_dashboard(
                 ).where(_RFI.project_id == project_id)
             )
         except Exception:
-            pass
+            logger.debug("Dashboard activity: RFI query build failed", exc_info=True)
         try:
             activity_queries.append(
                 select(
@@ -767,7 +767,7 @@ async def project_dashboard(
                 ).where(_Task.project_id == project_id)
             )
         except Exception:
-            pass
+            logger.debug("Dashboard activity: Task query build failed", exc_info=True)
         try:
             activity_queries.append(
                 select(
@@ -777,7 +777,7 @@ async def project_dashboard(
                 ).where(ChangeOrder.project_id == project_id)
             )
         except Exception:
-            pass
+            logger.debug("Dashboard activity: ChangeOrder query build failed", exc_info=True)
         try:
             activity_queries.append(
                 select(
@@ -785,7 +785,7 @@ async def project_dashboard(
                 ).where(_Doc.project_id == project_id)
             )
         except Exception:
-            pass
+            logger.debug("Dashboard activity: Document query build failed", exc_info=True)
         try:
             activity_queries.append(
                 select(
@@ -793,7 +793,7 @@ async def project_dashboard(
                 ).where(_Punch.project_id == project_id)
             )
         except Exception:
-            pass
+            logger.debug("Dashboard activity: PunchItem query build failed", exc_info=True)
         try:
             activity_queries.append(
                 select(
@@ -803,7 +803,7 @@ async def project_dashboard(
                 ).where(FieldReport.project_id == project_id)
             )
         except Exception:
-            pass
+            logger.debug("Dashboard activity: FieldReport query build failed", exc_info=True)
 
         if activity_queries:
             combined = union_all(*activity_queries).subquery()
@@ -849,7 +849,7 @@ async def project_dashboard(
             ).scalar_one()
             requirements_coverage = round(linked_count / requirements_total * 100) if requirements_total > 0 else 0
     except Exception:
-        pass
+        logger.debug("Dashboard: requirements query failed", exc_info=True)
 
     markups_count = 0
     try:
@@ -859,7 +859,7 @@ async def project_dashboard(
             await session.execute(select(func.count(Markup.id)).where(Markup.project_id == project_id))
         ).scalar_one()
     except Exception:
-        pass
+        logger.debug("Dashboard: markups query failed", exc_info=True)
 
     field_reports_total = 0
     field_reports_this_week = 0
@@ -876,7 +876,7 @@ async def project_dashboard(
             )
         ).scalar_one()
     except Exception:
-        pass
+        logger.debug("Dashboard: field reports query failed", exc_info=True)
 
     photos_count = 0
     try:
@@ -886,7 +886,7 @@ async def project_dashboard(
             await session.execute(select(func.count(ProjectPhoto.id)).where(ProjectPhoto.project_id == project_id))
         ).scalar_one()
     except Exception:
-        pass
+        logger.debug("Dashboard: photos query failed", exc_info=True)
 
     measurements_count = 0
     try:
@@ -898,7 +898,7 @@ async def project_dashboard(
             )
         ).scalar_one()
     except Exception:
-        pass
+        logger.debug("Dashboard: takeoff measurements query failed", exc_info=True)
 
     risk_total = 0
     risk_high_count = 0
@@ -916,7 +916,7 @@ async def project_dashboard(
             )
         ).scalar_one()
     except Exception:
-        pass
+        logger.debug("Dashboard: risk items query failed", exc_info=True)
 
     co_total = 0
     co_approved = 0
@@ -930,7 +930,7 @@ async def project_dashboard(
             )
         ).scalar_one()
     except Exception:
-        pass
+        logger.debug("Dashboard: change orders query failed", exc_info=True)
 
     return {
         # New unified dashboard structure

@@ -17,6 +17,7 @@ from app.modules.tasks.schemas import TaskCreate, TaskStatsResponse, TaskUpdate
 
 logger = logging.getLogger(__name__)
 _logger_ev = logging.getLogger(__name__ + ".events")
+_logger_audit = logging.getLogger(__name__ + ".audit")
 
 
 async def _safe_publish(name: str, data: dict, source_module: str = "") -> None:
@@ -24,6 +25,31 @@ async def _safe_publish(name: str, data: dict, source_module: str = "") -> None:
         await event_bus.publish(name, data, source_module=source_module)
     except Exception:
         _logger_ev.debug("Event publish skipped: %s", name)
+
+
+async def _safe_audit(
+    session: AsyncSession,
+    *,
+    action: str,
+    entity_type: str,
+    entity_id: str | None = None,
+    user_id: str | None = None,
+    details: dict | None = None,
+) -> None:
+    """Best-effort audit log — never blocks the caller on failure."""
+    try:
+        from app.core.audit import audit_log
+
+        await audit_log(
+            session,
+            action=action,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            user_id=user_id,
+            details=details,
+        )
+    except Exception:
+        _logger_audit.debug("Audit log write skipped for %s %s", action, entity_type)
 
 # ── Allowed task status transitions ───────────────────────────────────────────
 
@@ -69,6 +95,20 @@ class TaskService:
             metadata_=data.metadata,
         )
         task = await self.repo.create(task)
+
+        await _safe_audit(
+            self.session,
+            action="create",
+            entity_type="task",
+            entity_id=str(task.id),
+            user_id=user_id,
+            details={
+                "title": data.title[:100],
+                "project_id": str(data.project_id),
+                "task_type": data.task_type,
+            },
+        )
+
         logger.info("Task created: %s (%s) for project %s", task.title[:40], data.task_type, data.project_id)
 
         # Publish task.assigned event so notification handlers fire
@@ -192,6 +232,16 @@ class TaskService:
 
         await self.repo.update_fields(task_id, **fields)
         await self.session.refresh(task)
+
+        await _safe_audit(
+            self.session,
+            action="update",
+            entity_type="task",
+            entity_id=str(task_id),
+            user_id=current_user_id,
+            details={"title": task.title[:100], "updated_fields": list(fields.keys())},
+        )
+
         logger.info("Task updated: %s (fields=%s)", task_id, list(fields.keys()))
 
         # Fire task.assigned when responsible_id changes to a new user

@@ -335,6 +335,8 @@ function BudgetsTab({ projectId }: { projectId: string }) {
     }
   }, [showCreate]);
 
+  const canSubmitBudget = budgetForm.category.trim().length > 0 && budgetForm.original_budget.trim().length > 0 && parseFloat(budgetForm.original_budget) > 0;
+
   const validateBudget = (): boolean => {
     const e: Record<string, string> = {};
     if (!budgetForm.category.trim()) e.category = t('validation.required', { defaultValue: 'This field is required' });
@@ -530,7 +532,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
                 notes: budgetForm.notes || null,
               });
             }}
-            disabled={createBudgetMut.isPending}
+            disabled={createBudgetMut.isPending || !canSubmitBudget}
           >
             {createBudgetMut.isPending ? (
               <Loader2 size={16} className="animate-spin mr-1.5" />
@@ -949,6 +951,8 @@ function InvoicesTab({ projectId }: { projectId: string }) {
       setTimeout(() => invoiceDateRef.current?.focus(), 100);
     }
   }, [showCreate]);
+
+  const canSubmitInvoice = !!invoiceForm.invoice_date && (parseFloat(invoiceForm.subtotal || '0') > 0 || parseFloat(invoiceForm.amount || '0') > 0);
 
   const validateInvoice = (): boolean => {
     const e: Record<string, string> = {};
@@ -1652,7 +1656,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
                   if (!validateInvoice()) return;
                   createInvoiceMut.mutate(invoiceForm);
                 }}
-                disabled={createInvoiceMut.isPending}
+                disabled={createInvoiceMut.isPending || !canSubmitInvoice}
               >
                 {createInvoiceMut.isPending ? (
                   <Loader2 size={16} className="animate-spin mr-1.5" />

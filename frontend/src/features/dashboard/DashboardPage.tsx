@@ -169,6 +169,7 @@ function ImportDemoModal({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
   const [installingId, setInstallingId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -194,6 +195,9 @@ function ImportDemoModal({
       void queryClient.invalidateQueries({ queryKey: ['projects'] });
       onClose();
       navigate(`/projects/${result.project_id}`);
+    },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('demo.install_failed', { defaultValue: 'Failed to install demo' }), message: err.message });
     },
     onSettled: () => {
       setInstallingId(null);
@@ -1729,12 +1733,16 @@ function ProjectsList({ projects }: { projects?: ProjectSummary[] }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
 
   const installDemoMutation = useMutation({
     mutationFn: () => apiPost<DemoInstallResult>('/demo/install/residential-berlin'),
     onSuccess: (result) => {
       void queryClient.invalidateQueries({ queryKey: ['projects'] });
       navigate(`/projects/${result.project_id}`);
+    },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('demo.install_failed', { defaultValue: 'Failed to install demo' }), message: err.message });
     },
   });
 

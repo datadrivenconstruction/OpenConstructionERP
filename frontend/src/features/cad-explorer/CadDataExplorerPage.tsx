@@ -1729,6 +1729,9 @@ export function CadDataExplorerPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cad-all-sessions'] });
     },
+    onError: (err: Error) => {
+      console.error('Failed to delete CAD session:', err.message);
+    },
   });
 
   if (!sessionId) {

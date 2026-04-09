@@ -29,6 +29,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.events import event_bus
 
 logger_events = logging.getLogger(__name__ + ".events")
+_logger_audit = logging.getLogger(__name__ + ".audit")
 
 
 async def _safe_publish(name: str, data: dict[str, Any], source_module: str = "oe_boq") -> None:
@@ -37,6 +38,31 @@ async def _safe_publish(name: str, data: dict[str, Any], source_module: str = "o
         await event_bus.publish(name, data, source_module=source_module)
     except Exception:
         logger_events.debug("Event publish skipped (SQLite async): %s", name)
+
+
+async def _safe_audit(
+    session: "AsyncSession",
+    *,
+    action: str,
+    entity_type: str,
+    entity_id: str | None = None,
+    user_id: str | None = None,
+    details: dict | None = None,
+) -> None:
+    """Best-effort audit log — never blocks the caller on failure."""
+    try:
+        from app.core.audit import audit_log
+
+        await audit_log(
+            session,
+            action=action,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            user_id=user_id,
+            details=details,
+        )
+    except Exception:
+        _logger_audit.debug("Audit log write skipped for %s %s", action, entity_type)
 
 
 from app.modules.boq.models import BOQ, BOQActivityLog, BOQMarkup, BOQSnapshot, Position
@@ -999,6 +1025,14 @@ class BOQService:
             source_module="oe_boq",
         )
 
+        await _safe_audit(
+            self.session,
+            action="create",
+            entity_type="boq",
+            entity_id=str(boq.id),
+            details={"name": boq.name, "project_id": str(data.project_id)},
+        )
+
         logger.info("BOQ created: %s (project=%s)", boq.name, data.project_id)
         return boq
 
@@ -1127,6 +1161,18 @@ class BOQService:
                 "ordinal": data.ordinal,
             },
             source_module="oe_boq",
+        )
+
+        await _safe_audit(
+            self.session,
+            action="create",
+            entity_type="position",
+            entity_id=str(position.id),
+            details={
+                "boq_id": str(data.boq_id),
+                "ordinal": data.ordinal,
+                "description": (data.description or "")[:100],
+            },
         )
 
         logger.info("Position added: %s to BOQ %s", data.ordinal, data.boq_id)

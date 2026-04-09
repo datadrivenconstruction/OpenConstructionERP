@@ -717,7 +717,7 @@ async def advisor_chat(
             if proj:
                 project_context = f"\nProject: {proj.name}, Region: {proj.region}, Currency: {proj.currency}"
         except Exception:
-            pass
+            logger.debug("AI advisor: project context lookup failed", exc_info=True)
 
     # 4. Build prompt — locale-aware, allows general knowledge
     _LOCALE_NAMES = {

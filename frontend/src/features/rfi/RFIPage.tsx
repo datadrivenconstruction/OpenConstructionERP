@@ -110,6 +110,8 @@ function CreateRFIModal({
     if (errors[key]) setErrors((prev) => { const next = { ...prev }; delete next[key]; return next; });
   };
 
+  const canSubmit = form.subject.trim().length > 0 && form.question.trim().length > 0;
+
   const validate = (): boolean => {
     const e: Record<string, string> = {};
     if (!form.subject.trim()) e.subject = t('validation.required', { defaultValue: 'This field is required' });
@@ -354,7 +356,7 @@ function CreateRFIModal({
           <Button variant="ghost" onClick={onClose} disabled={isPending}>
             {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={isPending}>
+          <Button variant="primary" onClick={handleSubmit} disabled={isPending || !canSubmit}>
             {isPending ? (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
             ) : (

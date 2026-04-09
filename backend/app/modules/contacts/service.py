@@ -19,8 +19,36 @@ from app.modules.contacts.repository import ContactRepository
 from app.modules.contacts.schemas import ContactCreate, ContactUpdate
 
 logger = logging.getLogger(__name__)
+_logger_audit = logging.getLogger(__name__ + ".audit")
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+async def _safe_audit(
+    session: AsyncSession,
+    *,
+    action: str,
+    entity_type: str,
+    entity_id: str | None = None,
+    user_id: str | None = None,
+    details: dict | None = None,
+) -> None:
+    """Best-effort audit log — never blocks the caller on failure."""
+    try:
+        from app.core.audit import audit_log
+
+        await audit_log(
+            session,
+            action=action,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            user_id=user_id,
+            details=details,
+        )
+    except Exception as exc:
+        import traceback
+        print(f"[AUDIT FAIL] {action} {entity_type}: {exc}")
+        traceback.print_exc()
 
 
 def _validate_email_format(email: str | None) -> None:
@@ -93,6 +121,16 @@ class ContactService:
         )
         contact = await self.repo.create(contact)
         label = data.company_name or f"{data.first_name or ''} {data.last_name or ''}".strip()
+
+        await _safe_audit(
+            self.session,
+            action="create",
+            entity_type="contact",
+            entity_id=str(contact.id),
+            user_id=user_id,
+            details={"company_name": label, "contact_type": data.contact_type},
+        )
+
         logger.info("Contact created: %s (%s)", label, data.contact_type)
         return contact
 
@@ -179,6 +217,14 @@ class ContactService:
                 detail="Contact not found",
             )
 
+        await _safe_audit(
+            self.session,
+            action="update",
+            entity_type="contact",
+            entity_id=str(contact_id),
+            details={"updated_fields": list(fields.keys())},
+        )
+
         logger.info("Contact updated: %s (fields=%s)", contact_id, list(fields.keys()))
         return updated
 
@@ -188,6 +234,14 @@ class ContactService:
         """Soft-delete a contact (set is_active=False)."""
         await self.get_contact(contact_id)  # Raises 404 if not found
         await self.repo.update(contact_id, is_active=False)
+        await _safe_audit(
+            self.session,
+            action="delete",
+            entity_type="contact",
+            entity_id=str(contact_id),
+            details={},
+        )
+
         logger.info("Contact deactivated: %s", contact_id)
 
     # ── Count ─────────────────────────────────────────────────────────────

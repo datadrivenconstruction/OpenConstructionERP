@@ -26,13 +26,13 @@ class TaskCreate(BaseModel):
         pattern=r"^(task|topic|information|decision|personal)$",
     )
     title: str = Field(..., min_length=1, max_length=500)
-    description: str | None = None
+    description: str | None = Field(default=None, max_length=5000)
     checklist: list[ChecklistItemEntry] = Field(default_factory=list)
-    responsible_id: str | None = None
+    responsible_id: str | None = Field(default=None, max_length=36)
     persons_involved: list[str] = Field(default_factory=list)
     due_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
-    milestone_id: str | None = None
-    meeting_id: str | None = None
+    milestone_id: str | None = Field(default=None, max_length=36)
+    meeting_id: str | None = Field(default=None, max_length=36)
     status: str = Field(
         default="draft",
         pattern=r"^(draft|open|in_progress|completed)$",
@@ -41,7 +41,7 @@ class TaskCreate(BaseModel):
         default="normal",
         pattern=r"^(low|normal|high|urgent)$",
     )
-    result: str | None = None
+    result: str | None = Field(default=None, max_length=5000)
     is_private: bool = False
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -56,13 +56,13 @@ class TaskUpdate(BaseModel):
         pattern=r"^(task|topic|information|decision|personal)$",
     )
     title: str | None = Field(default=None, min_length=1, max_length=500)
-    description: str | None = None
+    description: str | None = Field(default=None, max_length=5000)
     checklist: list[ChecklistItemEntry] | None = None
-    responsible_id: str | None = None
+    responsible_id: str | None = Field(default=None, max_length=36)
     persons_involved: list[str] | None = None
     due_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
-    milestone_id: str | None = None
-    meeting_id: str | None = None
+    milestone_id: str | None = Field(default=None, max_length=36)
+    meeting_id: str | None = Field(default=None, max_length=36)
     status: str | None = Field(
         default=None,
         pattern=r"^(draft|open|in_progress|completed)$",
@@ -71,7 +71,7 @@ class TaskUpdate(BaseModel):
         default=None,
         pattern=r"^(low|normal|high|urgent)$",
     )
-    result: str | None = None
+    result: str | None = Field(default=None, max_length=5000)
     is_private: bool | None = None
     metadata: dict[str, Any] | None = None
 

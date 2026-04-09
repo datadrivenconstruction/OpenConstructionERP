@@ -1173,6 +1173,9 @@ function StepDataSetup({
         });
       }
     },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('onboarding.ai_save_failed', { defaultValue: 'Failed to save AI settings' }), message: err.message });
+    },
   });
 
   const handleContinue = useCallback(async () => {

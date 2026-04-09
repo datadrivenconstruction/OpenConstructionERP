@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { X, Layers } from 'lucide-react';
 import { Button, Input } from '@/shared/ui';
+import { useToastStore } from '@/stores/useToastStore';
 import { assembliesApi, type CreateAssemblyData } from './api';
 
 /* -- Constants ------------------------------------------------------------ */
@@ -70,6 +71,7 @@ export function CreateAssemblyModal({ open, onClose }: CreateAssemblyModalProps)
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
 
   const [form, setForm] = useState({
     code: '',
@@ -98,6 +100,9 @@ export function CreateAssemblyModal({ open, onClose }: CreateAssemblyModalProps)
       queryClient.invalidateQueries({ queryKey: ['assemblies'] });
       onClose();
       navigate(`/assemblies/${assembly.id}`);
+    },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('assemblies.create_failed', { defaultValue: 'Failed to create assembly' }), message: err.message });
     },
   });
 

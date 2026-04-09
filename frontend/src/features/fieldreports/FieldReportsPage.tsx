@@ -218,6 +218,9 @@ export function FieldReportsPage() {
       queryClient.invalidateQueries({ queryKey: ['fieldreports'] });
       addToast({ type: 'success', title: '', message: t('fieldreports.deleted', { defaultValue: 'Field report deleted' }) });
     },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: err.message });
+    },
   });
 
   const submitMut = useMutation({
@@ -226,6 +229,9 @@ export function FieldReportsPage() {
       queryClient.invalidateQueries({ queryKey: ['fieldreports'] });
       addToast({ type: 'success', title: '', message: t('fieldreports.submitted', { defaultValue: 'Report submitted for approval' }) });
     },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: err.message });
+    },
   });
 
   const approveMut = useMutation({
@@ -233,6 +239,9 @@ export function FieldReportsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['fieldreports'] });
       addToast({ type: 'success', title: '', message: t('fieldreports.approved', { defaultValue: 'Report approved' }) });
+    },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: err.message });
     },
   });
 

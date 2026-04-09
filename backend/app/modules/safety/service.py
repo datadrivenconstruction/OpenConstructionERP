@@ -84,6 +84,21 @@ class SafetyService:
             data.incident_type,
             data.project_id,
         )
+
+        # Emit event for cross-module handlers (notifications, analytics)
+        await event_bus.publish(
+            "safety.incident.created",
+            {
+                "project_id": str(data.project_id),
+                "incident_id": str(incident.id),
+                "incident_number": incident_number,
+                "incident_type": data.incident_type,
+                "severity": data.severity,
+                "description": (data.description or "")[:200],
+            },
+            source_module="safety",
+        )
+
         return incident
 
     async def get_incident(self, incident_id: uuid.UUID) -> SafetyIncident:
