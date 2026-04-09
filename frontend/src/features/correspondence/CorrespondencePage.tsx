@@ -726,9 +726,9 @@ export function CorrespondencePage() {
             disabled={!projectId}
             title={!projectId ? t('common.select_project_first', { defaultValue: 'Please select a project first' }) : undefined}
             className="shrink-0 whitespace-nowrap"
+            icon={<Plus size={14} />}
           >
-            <Plus size={14} className="mr-1 shrink-0" />
-            <span>{t('correspondence.new_entry', { defaultValue: 'New Entry' })}</span>
+            {t('correspondence.new_letter', { defaultValue: 'New Letter' })}
           </Button>
         </div>
       </div>
@@ -866,7 +866,7 @@ export function CorrespondencePage() {
             action={
               !searchQuery && !directionFilter && !typeFilter
                 ? {
-                    label: t('correspondence.new_entry', { defaultValue: 'New Entry' }),
+                    label: t('correspondence.new_letter', { defaultValue: 'New Letter' }),
                     onClick: () => setShowCreateModal(true),
                   }
                 : undefined

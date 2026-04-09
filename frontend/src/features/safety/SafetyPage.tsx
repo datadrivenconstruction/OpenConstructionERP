@@ -678,7 +678,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
           icon={<Plus size={14} />}
           onClick={() => setShowCreate(true)}
         >
-          {t('safety.new_incident', { defaultValue: 'New Incident' })}
+          {t('safety.report_incident_btn', { defaultValue: 'Report Incident' })}
         </Button>
       </div>
 
@@ -1121,7 +1121,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
           defaultValue: 'Safety observations will appear here when recorded',
         })}
         action={{
-          label: t('safety.record_observation', { defaultValue: 'Record Observation' }),
+          label: t('safety.report_observation_btn', { defaultValue: 'Report Observation' }),
           onClick: () => setShowCreate(true),
         }}
       />
@@ -1164,7 +1164,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
           icon={<Plus size={14} />}
           onClick={() => setShowCreate(true)}
         >
-          {t('safety.new_observation', { defaultValue: 'New Observation' })}
+          {t('safety.report_observation_btn', { defaultValue: 'Report Observation' })}
         </Button>
       </div>
 

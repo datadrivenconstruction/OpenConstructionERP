@@ -165,14 +165,19 @@ async def update_me(
     return UserResponse.model_validate(user)
 
 
-@router.post("/me/change-password/", status_code=204)
+@router.post("/me/change-password/", response_model=TokenResponse)
 async def change_password(
     data: ChangePasswordRequest,
     user_id: CurrentUserId,
     service: UserService = Depends(_get_service),
-) -> None:
-    """Change current user's password."""
-    await service.change_password(uuid.UUID(user_id), data)
+) -> TokenResponse:
+    """Change current user's password and return fresh JWT tokens.
+
+    After a successful password change the old tokens are invalidated
+    (via ``password_changed_at``).  The response contains a new token
+    pair so the client can stay authenticated without a forced re-login.
+    """
+    return await service.change_password(uuid.UUID(user_id), data)
 
 
 # ── Regional Preferences ──────────────────────────────────────────────────

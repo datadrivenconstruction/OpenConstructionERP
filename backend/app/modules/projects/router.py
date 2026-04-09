@@ -952,6 +952,239 @@ async def project_dashboard(
     }
 
 
+# ── Dashboard Summary Cards (lightweight, single endpoint) ──────────────
+
+
+@router.get(
+    "/dashboard/cards/",
+    summary="Get dashboard summary cards for all projects",
+    description="Returns lightweight per-project summary metrics for dashboard cards: "
+    "BOQ total value, open tasks count, open RFIs count, active safety incidents, "
+    "and schedule progress percentage. All modules degrade gracefully.",
+)
+async def dashboard_cards(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+) -> list[dict]:
+    """Dashboard summary cards — lightweight per-project KPIs in a single call.
+
+    Returns a list of project summaries with key metrics aggregated from
+    multiple modules. Each module section is wrapped in try/except for
+    graceful degradation if a module table does not exist yet.
+    """
+    from sqlalchemy import Float, func, select
+    from sqlalchemy.sql.expression import cast
+
+    from app.modules.projects.models import Project
+
+    # Fetch all projects (admin sees all, regular user sees own)
+    is_admin = payload.get("role") == "admin"
+    if is_admin:
+        proj_result = await session.execute(
+            select(Project).where(Project.status != "archived").order_by(Project.updated_at.desc())
+        )
+    else:
+        proj_result = await session.execute(
+            select(Project)
+            .where(Project.owner_id == uuid.UUID(user_id), Project.status != "archived")
+            .order_by(Project.updated_at.desc())
+        )
+    all_projects = proj_result.scalars().all()
+
+    if not all_projects:
+        return []
+
+    project_ids = [p.id for p in all_projects]
+
+    # ── BOQ total value per project ─────────────────────────────────────
+    boq_values: dict[str, float] = {}
+    boq_counts: dict[str, int] = {}
+    position_counts: dict[str, int] = {}
+    try:
+        from app.modules.boq.models import BOQ, Position
+
+        # BOQ count per project
+        boq_count_rows = (
+            await session.execute(
+                select(BOQ.project_id, func.count(BOQ.id))
+                .where(BOQ.project_id.in_(project_ids))
+                .group_by(BOQ.project_id)
+            )
+        ).all()
+        for pid, cnt in boq_count_rows:
+            boq_counts[str(pid)] = cnt
+
+        # Get all BOQ IDs grouped by project
+        boq_rows = (
+            await session.execute(
+                select(BOQ.id, BOQ.project_id).where(BOQ.project_id.in_(project_ids))
+            )
+        ).all()
+        boq_id_to_project: dict[str, str] = {}
+        for bid, pid in boq_rows:
+            boq_id_to_project[str(bid)] = str(pid)
+
+        if boq_id_to_project:
+            all_boq_ids = [uuid.UUID(bid) for bid in boq_id_to_project]
+
+            # Sum of position totals per BOQ
+            pos_rows = (
+                await session.execute(
+                    select(
+                        Position.boq_id,
+                        func.sum(cast(Position.total, Float)).label("total_value"),
+                        func.count(Position.id).label("pos_count"),
+                    )
+                    .where(Position.boq_id.in_(all_boq_ids))
+                    .group_by(Position.boq_id)
+                )
+            ).all()
+            for boq_id, total_val, pos_cnt in pos_rows:
+                pid = boq_id_to_project.get(str(boq_id), "")
+                if pid:
+                    boq_values[pid] = boq_values.get(pid, 0.0) + (total_val or 0.0)
+                    position_counts[pid] = position_counts.get(pid, 0) + (pos_cnt or 0)
+    except Exception:
+        logger.debug("Dashboard cards: BOQ query failed", exc_info=True)
+
+    # ── Open tasks per project ──────────────────────────────────────────
+    open_tasks: dict[str, int] = {}
+    try:
+        from app.modules.tasks.models import Task
+
+        task_rows = (
+            await session.execute(
+                select(Task.project_id, func.count(Task.id))
+                .where(
+                    Task.project_id.in_(project_ids),
+                    Task.status.in_(["draft", "open", "in_progress"]),
+                )
+                .group_by(Task.project_id)
+            )
+        ).all()
+        for pid, cnt in task_rows:
+            open_tasks[str(pid)] = cnt
+    except Exception:
+        logger.debug("Dashboard cards: Tasks query failed", exc_info=True)
+
+    # ── Open RFIs per project ───────────────────────────────────────────
+    open_rfis: dict[str, int] = {}
+    try:
+        from app.modules.rfi.models import RFI
+
+        rfi_rows = (
+            await session.execute(
+                select(RFI.project_id, func.count(RFI.id))
+                .where(
+                    RFI.project_id.in_(project_ids),
+                    RFI.status.in_(["draft", "open", "in_review"]),
+                )
+                .group_by(RFI.project_id)
+            )
+        ).all()
+        for pid, cnt in rfi_rows:
+            open_rfis[str(pid)] = cnt
+    except Exception:
+        logger.debug("Dashboard cards: RFI query failed", exc_info=True)
+
+    # ── Active safety incidents per project ─────────────────────────────
+    safety_incidents: dict[str, int] = {}
+    try:
+        from app.modules.safety.models import SafetyIncident
+
+        safety_rows = (
+            await session.execute(
+                select(SafetyIncident.project_id, func.count(SafetyIncident.id))
+                .where(
+                    SafetyIncident.project_id.in_(project_ids),
+                    SafetyIncident.status.in_(["reported", "under_investigation", "open"]),
+                )
+                .group_by(SafetyIncident.project_id)
+            )
+        ).all()
+        for pid, cnt in safety_rows:
+            safety_incidents[str(pid)] = cnt
+    except Exception:
+        logger.debug("Dashboard cards: Safety query failed", exc_info=True)
+
+    # ── Schedule progress per project ───────────────────────────────────
+    schedule_progress: dict[str, float] = {}
+    try:
+        from app.modules.schedule.models import Activity, Schedule
+
+        sched_rows = (
+            await session.execute(
+                select(Schedule.id, Schedule.project_id).where(
+                    Schedule.project_id.in_(project_ids)
+                )
+            )
+        ).all()
+        sched_to_project: dict[str, str] = {}
+        sched_ids = []
+        for sid, pid in sched_rows:
+            sched_to_project[str(sid)] = str(pid)
+            sched_ids.append(sid)
+
+        if sched_ids:
+            act_rows = (
+                await session.execute(
+                    select(
+                        Activity.schedule_id,
+                        Activity.status,
+                        func.count(Activity.id),
+                    )
+                    .where(Activity.schedule_id.in_(sched_ids))
+                    .group_by(Activity.schedule_id, Activity.status)
+                )
+            ).all()
+
+            # Aggregate per project
+            project_totals: dict[str, int] = {}
+            project_completed: dict[str, int] = {}
+            for sid, act_status, cnt in act_rows:
+                pid = sched_to_project.get(str(sid), "")
+                if pid:
+                    project_totals[pid] = project_totals.get(pid, 0) + cnt
+                    if act_status in ("completed", "complete"):
+                        project_completed[pid] = project_completed.get(pid, 0) + cnt
+
+            for pid, total in project_totals.items():
+                if total > 0:
+                    done = project_completed.get(pid, 0)
+                    schedule_progress[pid] = round(done / total * 100, 1)
+    except Exception:
+        logger.debug("Dashboard cards: Schedule query failed", exc_info=True)
+
+    # ── Assemble response ───────────────────────────────────────────────
+    result = []
+    for p in all_projects:
+        pid = str(p.id)
+        result.append(
+            {
+                "id": pid,
+                "name": p.name,
+                "description": p.description or "",
+                "region": p.region or "",
+                "currency": p.currency or "EUR",
+                "classification_standard": p.classification_standard or "",
+                "status": p.status or "active",
+                "phase": getattr(p, "phase", None),
+                "created_at": p.created_at.isoformat() if p.created_at else None,
+                "updated_at": p.updated_at.isoformat() if p.updated_at else None,
+                "boq_total_value": round(boq_values.get(pid, 0.0), 2),
+                "boq_count": boq_counts.get(pid, 0),
+                "position_count": position_counts.get(pid, 0),
+                "open_tasks": open_tasks.get(pid, 0),
+                "open_rfis": open_rfis.get(pid, 0),
+                "safety_incidents": safety_incidents.get(pid, 0),
+                "progress_pct": schedule_progress.get(pid, 0.0),
+            }
+        )
+
+    return result
+
+
 # ── Cross-Project Analytics ─────────────────────────────────────────────
 
 

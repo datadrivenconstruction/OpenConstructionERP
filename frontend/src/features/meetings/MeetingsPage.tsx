@@ -1526,10 +1526,11 @@ export function MeetingsPage() {
           </Button>
           <Button
             variant="primary"
+            size="sm"
             onClick={() => setShowCreateModal(true)}
             disabled={!projectId}
             title={!projectId ? t('common.select_project_first', { defaultValue: 'Please select a project first' }) : undefined}
-            icon={<Plus size={16} />}
+            icon={<Plus size={14} />}
           >
             {t('meetings.new_meeting', { defaultValue: 'New Meeting' })}
           </Button>
