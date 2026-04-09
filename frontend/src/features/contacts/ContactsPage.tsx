@@ -801,13 +801,13 @@ export function ContactsPage() {
       setShowAddModal(false);
       addToast({
         type: 'success',
-        title: t('contacts.created', { defaultValue: 'Contact created' }),
+        title: t('contacts.created', { defaultValue: 'Contact created successfully' }),
       });
     },
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('contacts.create_failed', { defaultValue: 'Failed to create contact' }),
         message: e.message,
       }),
   });
@@ -818,13 +818,13 @@ export function ContactsPage() {
     onSuccess: () =>
       addToast({
         type: 'success',
-        title: t('contacts.export_success', { defaultValue: 'Export complete' }),
-        message: t('contacts.export_success_msg', { defaultValue: 'Excel file downloaded.' }),
+        title: t('contacts.export_success', { defaultValue: 'Contacts exported successfully' }),
+        message: t('contacts.export_success_msg', { defaultValue: 'Excel file has been downloaded.' }),
       }),
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('contacts.export_failed', { defaultValue: 'Export failed' }),
+        title: t('contacts.export_failed', { defaultValue: 'Failed to export contacts' }),
         message: e.message,
       }),
   });
@@ -864,9 +864,14 @@ export function ContactsPage() {
 
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-content-primary">
-          {t('contacts.page_title', { defaultValue: 'Contacts Directory' })}
-        </h1>
+        <div>
+          <h1 className="text-2xl font-bold text-content-primary">
+            {t('contacts.page_title', { defaultValue: 'Contacts Directory' })}
+          </h1>
+          <p className="mt-1 text-sm text-content-secondary">
+            {t('contacts.subtitle', { defaultValue: 'Manage clients, subcontractors, suppliers, and consultants' })}
+          </p>
+        </div>
         <div className="flex items-center gap-2">
           <Button
             variant="secondary"
