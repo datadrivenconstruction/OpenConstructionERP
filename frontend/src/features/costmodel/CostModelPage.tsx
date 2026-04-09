@@ -20,7 +20,7 @@ import {
   Target,
   ShieldCheck,
 } from 'lucide-react';
-import { Card, CardHeader, CardContent, Button, Badge, EmptyState, Skeleton, InfoHint, Breadcrumb } from '@/shared/ui';
+import { Card, CardHeader, CardContent, Button, Badge, EmptyState, Skeleton, Breadcrumb } from '@/shared/ui';
 import { apiGet, apiPost } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import {
@@ -113,7 +113,6 @@ const KPICard = memo(function KPICard({
   accentColor?: string;
 }) {
   const { t } = useTranslation();
-  const accent = accentColor || 'bg-oe-blue/10 text-oe-blue';
   return (
     <Card padding="none" className="flex-1 min-w-[200px] relative overflow-hidden">
       {/* Top accent bar */}
@@ -1844,35 +1843,6 @@ export function CostModelPage() {
 
   const handleBack = useCallback(() => setSelectedProjectId(null), []);
 
-  // Project detail view with 5D dashboard
-  if (selectedProject) {
-    return (
-      <div className="max-w-content mx-auto animate-fade-in">
-        <button
-          onClick={handleBack}
-          className="mb-4 flex items-center gap-1.5 text-sm text-content-secondary hover:text-content-primary transition-colors"
-        >
-          <ArrowLeft size={14} />
-          {t('costmodel.back_to_projects', 'Back to projects')}
-        </button>
-
-        <div className="mb-6 flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-oe-blue-subtle text-oe-blue">
-            <BarChart3 size={22} />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-content-primary">{selectedProject.name}</h1>
-            <p className="mt-0.5 text-sm text-content-secondary">
-              {t('costmodel.dashboard_subtitle', '5D Cost Model -- Budget tracking, EVM, S-curves, and forecasting')}
-            </p>
-          </div>
-        </div>
-
-        <FiveDDashboard project={selectedProject} />
-      </div>
-    );
-  }
-
   // Feature cards for the empty/intro state
   const featureCards = useMemo(
     () => [
@@ -1915,6 +1885,35 @@ export function CostModelPage() {
     ],
     [t],
   );
+
+  // Project detail view with 5D dashboard
+  if (selectedProject) {
+    return (
+      <div className="max-w-content mx-auto animate-fade-in">
+        <button
+          onClick={handleBack}
+          className="mb-4 flex items-center gap-1.5 text-sm text-content-secondary hover:text-content-primary transition-colors"
+        >
+          <ArrowLeft size={14} />
+          {t('costmodel.back_to_projects', 'Back to projects')}
+        </button>
+
+        <div className="mb-6 flex items-start gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-oe-blue-subtle text-oe-blue">
+            <BarChart3 size={22} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-content-primary">{selectedProject.name}</h1>
+            <p className="mt-0.5 text-sm text-content-secondary">
+              {t('costmodel.dashboard_subtitle', '5D Cost Model -- Budget tracking, EVM, S-curves, and forecasting')}
+            </p>
+          </div>
+        </div>
+
+        <FiveDDashboard project={selectedProject} />
+      </div>
+    );
+  }
 
   // Project selector view
   return (

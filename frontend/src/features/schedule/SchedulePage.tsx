@@ -27,7 +27,7 @@ import {
   TrendingUp,
   Layers,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Input, InfoHint, SkeletonTable, Breadcrumb, GanttChart as SVGGanttChart } from '@/shared/ui';
+import { Button, Card, Badge, Input, InfoHint, SkeletonTable, Breadcrumb, GanttChart as SVGGanttChart } from '@/shared/ui';
 import type { GanttActivity as SVGGanttActivity, GanttViewMode } from '@/shared/ui';
 import { apiGet, apiDelete } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
