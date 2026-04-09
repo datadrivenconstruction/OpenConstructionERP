@@ -281,7 +281,9 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     >
       {/* Logo + mobile close button */}
       <div className="flex h-header items-center justify-between px-5 border-b border-border-light">
-        <LogoWithText size="xs" />
+        <a href="https://openconstructionerp.com/?utm_source=app&utm_medium=sidebar&utm_campaign=branding" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
+          <LogoWithText size="xs" />
+        </a>
         {onClose && (
           <button
             onClick={onClose}
@@ -371,19 +373,6 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
 
         {/* Update notification */}
         <UpdateNotification />
-
-        {/* DDC branding */}
-        <div className="mt-2 pt-2 border-t border-border-light px-1">
-          <a
-            href="https://OpenConstructionERP.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-content-quaternary hover:text-content-secondary hover:bg-surface-secondary/50 transition-all"
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            <span className="text-2xs">OpenConstructionERP.com</span>
-          </a>
-        </div>
 
         {/* Version + AGPL notice */}
         <div className="px-3 pb-2 text-center">
