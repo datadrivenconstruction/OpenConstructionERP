@@ -106,7 +106,7 @@ async function downloadExcelExport(): Promise<void> {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch('/api/v1/costs/actions/export-excel', { method: 'GET', headers });
+  const response = await fetch('/api/v1/costs/actions/export-excel/', { method: 'GET', headers });
   if (!response.ok) {
     let detail = 'Export failed';
     try {
@@ -444,7 +444,7 @@ export function CostsPage() {
     queryFn: () => {
       const params = new URLSearchParams();
       if (region) params.set('region', region);
-      return apiGet<string[]>(`/v1/costs/categories?${params.toString()}`);
+      return apiGet<string[]>(`/v1/costs/categories/?${params.toString()}`);
     },
     retry: false,
   });
@@ -465,7 +465,7 @@ export function CostsPage() {
         try {
           const params = new URLSearchParams({ q: debouncedQuery, limit: String(PAGE_SIZE) });
           if (region) params.set('region', region);
-          const results = await apiGet<Array<Record<string, unknown>>>(`/v1/costs/vector/search?${params}`);
+          const results = await apiGet<Array<Record<string, unknown>>>(`/v1/costs/vector/search/?${params}`);
           // Wrap in CostSearchResponse format
           return {
             items: results.map((r) => ({
@@ -1283,7 +1283,7 @@ function AddToBOQModal({
           meta.cost_breakdown = byType;
         }
 
-        await apiPost(`/v1/boq/boqs/${boqId}/positions`, {
+        await apiPost(`/v1/boq/boqs/${boqId}/positions/`, {
           boq_id: boqId,
           ordinal,
           description: item.description,
@@ -1529,7 +1529,7 @@ function CreateAssemblyFromCostsModal({
 
       // Add each cost item as a component
       for (const item of items) {
-        await apiPost(`/v1/assemblies/${assembly.id}/components`, {
+        await apiPost(`/v1/assemblies/${assembly.id}/components/`, {
           cost_item_id: item.id,
           description: item.description,
           unit: item.unit,

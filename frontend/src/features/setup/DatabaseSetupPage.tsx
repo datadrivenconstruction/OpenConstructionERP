@@ -370,7 +370,7 @@ export function DatabaseSetupPage() {
         }
 
         // Trigger vector indexing in background
-        apiPost('/v1/costs/vector/index').catch(() => {
+        apiPost('/v1/costs/vector/index/').catch(() => {
           // Non-critical
         });
 
@@ -419,7 +419,7 @@ export function DatabaseSetupPage() {
     }
 
     // Trigger vector indexing once at the end
-    apiPost('/v1/costs/vector/index').catch(() => {});
+    apiPost('/v1/costs/vector/index/').catch(() => {});
     queryClient.invalidateQueries({ queryKey: ['costs'] });
 
     setLoadAllActive(false);

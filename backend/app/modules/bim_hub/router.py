@@ -650,12 +650,61 @@ async def upload_cad_file(
     except Exception as exc:
         logger.warning("Failed to cross-link BIM to documents hub: %s", exc)
 
+    # Process IFC file — extract elements + generate COLLADA geometry
+    final_status = "processing"
+    element_count = 0
+    if ext == ".ifc":
+        try:
+            from app.modules.bim_hub.ifc_processor import process_ifc_file
+
+            result = process_ifc_file(cad_path, cad_dir)
+            element_count = result["element_count"]
+
+            if element_count > 0:
+                # Insert elements into DB
+                from app.modules.bim_hub.models import BIMElement
+
+                for elem_data in result["elements"]:
+                    el = BIMElement(
+                        model_id=model_id,
+                        stable_id=elem_data["stable_id"],
+                        element_type=elem_data.get("element_type"),
+                        name=elem_data.get("name"),
+                        storey=elem_data.get("storey"),
+                        discipline=elem_data.get("discipline"),
+                        properties=elem_data.get("properties", {}),
+                        quantities=elem_data.get("quantities", {}),
+                        geometry_hash=elem_data.get("geometry_hash"),
+                        bounding_box=elem_data.get("bounding_box"),
+                    )
+                    service.session.add(el)
+
+                # Update model record
+                model.status = "ready"
+                model.element_count = element_count
+                model.storey_count = len(result["storeys"])
+                model.bounding_box = result.get("bounding_box")
+                if result.get("geometry_path"):
+                    model.canonical_file_path = result["geometry_path"]
+                await service.session.flush()
+                final_status = "ready"
+
+                logger.info(
+                    "IFC processed: %d elements, %d storeys → model %s is ready",
+                    element_count, len(result["storeys"]), model_id,
+                )
+            else:
+                logger.warning("IFC processed but no elements found: %s", filename)
+        except Exception as exc:
+            logger.warning("IFC processing failed (model stays in processing): %s", exc)
+
     return {
         "model_id": str(model_id),
         "name": model_name,
         "format": model_format,
         "file_size": len(content),
-        "status": "processing",
+        "status": final_status,
+        "element_count": element_count,
     }
 
 

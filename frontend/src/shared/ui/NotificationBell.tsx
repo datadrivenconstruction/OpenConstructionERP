@@ -100,7 +100,7 @@ export function NotificationBell() {
   // Fetch last 10 notifications when dropdown opens
   const { data: notifications } = useQuery({
     queryKey: ['notifications-list'],
-    queryFn: () => apiGet<Notification[]>('/v1/notifications?limit=10'),
+    queryFn: () => apiGet<Notification[]>('/v1/notifications/?limit=10'),
     enabled: open,
     staleTime: 10_000,
     retry: false,

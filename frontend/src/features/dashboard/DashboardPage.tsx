@@ -1040,7 +1040,7 @@ export function DashboardPage() {
   // Fetch system status for vector DB count (used in onboarding steps)
   const { data: systemStatus } = useQuery({
     queryKey: ['system-status'],
-    queryFn: () => fetch('/api/system/status').then((r) => r.json()) as Promise<SystemStatusData>,
+    queryFn: () => fetch('/api/system/status/').then((r) => r.json()) as Promise<SystemStatusData>,
     retry: false,
     staleTime: 30_000,
   });
@@ -1863,20 +1863,20 @@ function SystemStatus() {
 
   const { data: status } = useQuery({
     queryKey: ['system-status'],
-    queryFn: () => fetch('/api/system/status').then((r) => r.json()) as Promise<SystemStatusData>,
+    queryFn: () => fetch('/api/system/status/').then((r) => r.json()) as Promise<SystemStatusData>,
     retry: false,
     refetchInterval: 15000,
   });
 
   const { data: modules } = useQuery({
     queryKey: ['modules'],
-    queryFn: () => fetch('/api/system/modules').then((r) => r.json()),
+    queryFn: () => fetch('/api/system/modules/').then((r) => r.json()),
     retry: false,
   });
 
   const { data: rules } = useQuery({
     queryKey: ['validation-rules'],
-    queryFn: () => fetch('/api/system/validation-rules').then((r) => r.json()),
+    queryFn: () => fetch('/api/system/validation-rules/').then((r) => r.json()),
     retry: false,
   });
 

@@ -389,9 +389,9 @@ export function RiskRegisterPage() {
   const projectId = activeProjectId || projects[0]?.id || '';
   const project = useMemo(() => projects.find((p) => p.id === projectId), [projects, projectId]);
 
-  const { data: risks = [], isLoading } = useQuery({ queryKey: ['risks', projectId], queryFn: () => apiGet<RiskItem[]>(`/v1/risk/?project_id=${projectId}`), enabled: !!projectId });
-  const { data: summary } = useQuery({ queryKey: ['risk-summary', projectId], queryFn: () => apiGet<RiskSummary>(`/v1/risk/summary?project_id=${projectId}`), enabled: !!projectId });
-  const { data: matrixData } = useQuery({ queryKey: ['risk-matrix', projectId], queryFn: () => apiGet<{ cells: MatrixCell[] }>(`/v1/risk/matrix?project_id=${projectId}`), enabled: !!projectId });
+  const { data: risks = [], isLoading } = useQuery({ queryKey: ['risks', projectId], queryFn: () => apiGet<RiskItem[]>(`/v1/risk/?project_id=${projectId}`), select: (d): RiskItem[] => (Array.isArray(d) ? d : (d as any)?.items ?? []), enabled: !!projectId });
+  const { data: summary } = useQuery({ queryKey: ['risk-summary', projectId], queryFn: () => apiGet<RiskSummary>(`/v1/risk/summary/?project_id=${projectId}`), enabled: !!projectId });
+  const { data: matrixData } = useQuery({ queryKey: ['risk-matrix', projectId], queryFn: () => apiGet<{ cells: MatrixCell[] }>(`/v1/risk/matrix/?project_id=${projectId}`), enabled: !!projectId });
 
   const delMut = useMutation({
     mutationFn: (id: string) => apiDelete(`/v1/risk/${id}`),

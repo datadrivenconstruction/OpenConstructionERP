@@ -1113,7 +1113,7 @@ function CreateBOQFromPivotModal({ open, onClose, groups, groupByColumns, aggCol
           ?? group.results[`avg_${quantityCol}`]
           ?? group.count;
 
-        await apiPost(`/v1/boq/boqs/${boqId}/positions`, {
+        await apiPost(`/v1/boq/boqs/${boqId}/positions/`, {
           boq_id: boqId,
           ordinal: String(ordinal).padStart(2, '0') + '.001',
           description: description || `Group ${ordinal}`,
@@ -1395,7 +1395,7 @@ function UploadConvertZone({
       const form = new FormData();
       form.append('file', file);
 
-      const res = await fetch('/api/v1/takeoff/cad-columns', {
+      const res = await fetch('/api/v1/takeoff/cad-columns/', {
         method: 'POST',
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),

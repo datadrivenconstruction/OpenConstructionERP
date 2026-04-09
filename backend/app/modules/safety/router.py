@@ -120,7 +120,7 @@ async def safety_trends(
 # ── Incidents ────────────────────────────────────────────────────────────
 
 
-@router.get("/incidents", response_model=list[IncidentResponse])
+@router.get("/incidents/", response_model=list[IncidentResponse])
 async def list_incidents(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -256,7 +256,7 @@ async def delete_incident(
 # ── Observations ─────────────────────────────────────────────────────────
 
 
-@router.get("/observations", response_model=list[ObservationResponse])
+@router.get("/observations/", response_model=list[ObservationResponse])
 async def list_observations(
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]

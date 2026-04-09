@@ -116,7 +116,7 @@ async function uploadCostFile(file: File): Promise<ImportResult> {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch('/api/v1/costs/import/file', {
+  const response = await fetch('/api/v1/costs/import/file/', {
     method: 'POST',
     headers,
     body: formData,
@@ -298,7 +298,7 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
         queryClient.invalidateQueries({ queryKey: ['costs'] });
 
         // Auto-index vectors in background — don't await (it takes 30-60s and blocks UI)
-        apiPost('/v1/costs/vector/index').catch((err) => {
+        apiPost('/v1/costs/vector/index/').catch((err) => {
           console.error('Vector indexing failed (non-critical):', err);
         });
       } catch (err: unknown) {
@@ -567,7 +567,7 @@ async function downloadExcelExport(): Promise<void> {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch('/api/v1/costs/actions/export-excel', { method: 'GET', headers });
+  const response = await fetch('/api/v1/costs/actions/export-excel/', { method: 'GET', headers });
   if (!response.ok) {
     let detail = 'Export failed';
     try {
@@ -926,7 +926,7 @@ function VectorDatabaseSection() {
             console.error('GitHub vector load failed, falling back to local generation:', err);
             // GitHub vectors not available — generate locally for this region
             const token = useAuthStore.getState().accessToken;
-            const res = await fetch(`/api/v1/costs/vector/index?region=${encodeURIComponent(db.id)}`, {
+            const res = await fetch(`/api/v1/costs/vector/index/?region=${encodeURIComponent(db.id)}`, {
               method: 'POST',
               headers: token ? { Authorization: `Bearer ${token}` } : {},
             });
@@ -972,7 +972,7 @@ function VectorDatabaseSection() {
     setLastResult(null);
     try {
       const token = useAuthStore.getState().accessToken;
-      const res = await fetch('/api/v1/costs/vector/index', {
+      const res = await fetch('/api/v1/costs/vector/index/', {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });

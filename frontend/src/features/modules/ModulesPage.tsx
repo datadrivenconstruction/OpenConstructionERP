@@ -283,7 +283,7 @@ function CompanyProfilesTab() {
       }
 
       // Persist to server
-      await apiPost('/v1/users/me/onboarding', {
+      await apiPost('/v1/users/me/onboarding/', {
         company_type: switchingTo.key,
         enabled_modules: switchingTo.enabled_modules,
         interface_mode: 'advanced',

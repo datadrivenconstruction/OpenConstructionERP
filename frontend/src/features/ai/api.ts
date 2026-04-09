@@ -176,7 +176,7 @@ export const aiApi = {
     if (params.currency) form.append('currency', params.currency);
     if (params.standard) form.append('standard', params.standard);
 
-    const res = await fetch('/api/v1/ai/photo-estimate', {
+    const res = await fetch('/api/v1/ai/photo-estimate/', {
       method: 'POST',
       headers: { ...getAuthHeaders(), Accept: 'application/json' },
       body: form,
@@ -201,7 +201,7 @@ export const aiApi = {
     if (params.currency) form.append('currency', params.currency);
     if (params.standard) form.append('standard', params.standard);
 
-    const res = await fetch('/api/v1/ai/file-estimate', {
+    const res = await fetch('/api/v1/ai/file-estimate/', {
       method: 'POST',
       headers: { ...getAuthHeaders(), Accept: 'application/json' },
       body: form,
@@ -227,7 +227,7 @@ export const aiApi = {
     const form = new FormData();
     form.append('file', file);
 
-    const res = await fetch('/api/v1/takeoff/cad-extract', {
+    const res = await fetch('/api/v1/takeoff/cad-extract/', {
       method: 'POST',
       headers: { ...getAuthHeaders(), Accept: 'application/json' },
       body: form,
@@ -244,7 +244,7 @@ export const aiApi = {
     const form = new FormData();
     form.append('file', file);
 
-    const res = await fetch('/api/v1/takeoff/cad-columns', {
+    const res = await fetch('/api/v1/takeoff/cad-columns/', {
       method: 'POST',
       headers: { ...getAuthHeaders(), Accept: 'application/json' },
       body: form,
@@ -258,16 +258,16 @@ export const aiApi = {
 
   /** Group CAD elements by selected columns and sum quantities. */
   cadGroup: (data: CadGroupRequest) =>
-    apiPost<CadGroupResponse, CadGroupRequest>('/v1/takeoff/cad-group', data),
+    apiPost<CadGroupResponse, CadGroupRequest>('/v1/takeoff/cad-group/', data),
 
   /** Get individual elements for a specific group. */
   cadGroupElements: (data: CadGroupElementsRequest) =>
-    apiPost<CadGroupElementsResponse, CadGroupElementsRequest>('/v1/takeoff/cad-group/elements', data),
+    apiPost<CadGroupElementsResponse, CadGroupElementsRequest>('/v1/takeoff/cad-group/elements/', data),
 
   /** Create a BOQ directly from grouped CAD QTO data. */
   createBOQFromCadQTO: (data: CreateBOQFromCadQTORequest) =>
     apiPost<CreateBOQFromCadQTOResponse, CreateBOQFromCadQTORequest>(
-      '/v1/takeoff/cad-group/create-boq',
+      '/v1/takeoff/cad-group/create-boq/',
       data,
     ),
 
@@ -283,7 +283,7 @@ export const aiApi = {
       sum_columns: params.sum_columns.join(','),
       format: 'xlsx',
     });
-    const res = await fetch(`/api/v1/takeoff/cad-group/export?${query.toString()}`, {
+    const res = await fetch(`/api/v1/takeoff/cad-group/export/?${query.toString()}`, {
       method: 'GET',
       headers: { ...getAuthHeaders() },
     });

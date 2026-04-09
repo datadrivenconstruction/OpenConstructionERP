@@ -44,7 +44,7 @@ export interface BIMCadUploadResponse {
 
 /** Fetch all BIM models for a project. */
 export async function fetchBIMModels(projectId: string): Promise<BIMModelsResponse> {
-  return apiGet<BIMModelsResponse>(`/v1/bim_hub?project_id=${encodeURIComponent(projectId)}`);
+  return apiGet<BIMModelsResponse>(`/v1/bim_hub/?project_id=${encodeURIComponent(projectId)}`);
 }
 
 /** Fetch a single BIM model by ID (used for status polling). */
@@ -99,7 +99,7 @@ export async function uploadBIMData(
 
   let response: Response;
   try {
-    response = await fetch(`/api/v1/bim_hub/upload?${params.toString()}`, {
+    response = await fetch(`/api/v1/bim_hub/upload/?${params.toString()}`, {
       method: 'POST',
       headers,
       body: formData,
@@ -151,7 +151,7 @@ export async function uploadCADFile(
 
   let response: Response;
   try {
-    response = await fetch(`/api/v1/bim_hub/upload-cad?${params.toString()}`, {
+    response = await fetch(`/api/v1/bim_hub/upload-cad/?${params.toString()}`, {
       method: 'POST',
       headers,
       body: formData,

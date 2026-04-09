@@ -123,7 +123,10 @@ export async function fetchFieldReports(
   if (filters?.date_to) params.set('date_to', filters.date_to);
   if (filters?.status) params.set('status', filters.status);
   if (filters?.type) params.set('type', filters.type);
-  return apiGet<FieldReport[]>(`/v1/fieldreports/reports?${params.toString()}`);
+  const res = await apiGet<FieldReport[] | { items: FieldReport[] }>(
+    `/v1/fieldreports/reports?${params.toString()}`,
+  );
+  return Array.isArray(res) ? res : res.items ?? [];
 }
 
 export async function fetchFieldReport(id: string): Promise<FieldReport> {
@@ -155,7 +158,7 @@ export async function approveFieldReport(id: string): Promise<FieldReport> {
 
 export async function fetchFieldReportSummary(projectId: string): Promise<FieldReportSummary | null> {
   if (!projectId) return null;
-  return apiGet<FieldReportSummary>(`/v1/fieldreports/reports/summary?project_id=${projectId}`);
+  return apiGet<FieldReportSummary>(`/v1/fieldreports/reports/summary/?project_id=${projectId}`);
 }
 
 export async function fetchFieldReportCalendar(
@@ -163,9 +166,10 @@ export async function fetchFieldReportCalendar(
   month: string,
 ): Promise<FieldReport[]> {
   if (!projectId) return [];
-  return apiGet<FieldReport[]>(
-    `/v1/fieldreports/reports/calendar?project_id=${projectId}&month=${month}`,
+  const res = await apiGet<FieldReport[] | { items: FieldReport[] }>(
+    `/v1/fieldreports/reports/calendar/?project_id=${projectId}&month=${month}`,
   );
+  return Array.isArray(res) ? res : res.items ?? [];
 }
 
 export function getFieldReportPdfUrl(id: string): string {
@@ -262,7 +266,7 @@ export interface WeatherData {
 }
 
 export async function fetchWeather(lat: number, lon: number): Promise<WeatherData> {
-  return apiGet<WeatherData>(`/v1/fieldreports/weather?lat=${lat}&lon=${lon}`);
+  return apiGet<WeatherData>(`/v1/fieldreports/weather/?lat=${lat}&lon=${lon}`);
 }
 
 /* ── Template Download ──────────────────────────────────────────────────── */
@@ -274,7 +278,7 @@ export function downloadFieldReportsTemplate(): void {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  fetch('/api/v1/fieldreports/reports/template', { method: 'GET', headers })
+  fetch('/api/v1/fieldreports/reports/template/', { method: 'GET', headers })
     .then((response) => {
       if (!response.ok) throw new Error('Failed to download template');
       return response.blob();

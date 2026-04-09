@@ -104,7 +104,10 @@ export interface UpdateRequirementPayload {
 
 export async function fetchRequirementSets(projectId: string): Promise<RequirementSet[]> {
   if (!projectId) return [];
-  return apiGet<RequirementSet[]>(`/v1/requirements/?project_id=${projectId}`);
+  const res = await apiGet<RequirementSet[] | { items: RequirementSet[] }>(
+    `/v1/requirements/?project_id=${projectId}`,
+  );
+  return Array.isArray(res) ? res : res.items ?? [];
 }
 
 export async function fetchRequirementSetDetail(setId: string): Promise<RequirementSetDetail> {
@@ -113,7 +116,7 @@ export async function fetchRequirementSetDetail(setId: string): Promise<Requirem
 
 export async function fetchRequirementStats(projectId: string): Promise<RequirementStats> {
   if (!projectId) return { total_requirements: 0, total_sets: 0, by_priority: {}, by_status: {}, by_category: {}, linked_count: 0, unlinked_count: 0 };
-  return apiGet<RequirementStats>(`/v1/requirements/stats?project_id=${projectId}`);
+  return apiGet<RequirementStats>(`/v1/requirements/stats/?project_id=${projectId}`);
 }
 
 export async function createRequirementSet(
@@ -150,7 +153,10 @@ export async function runGate(setId: string, gateNumber: number): Promise<GateRe
 }
 
 export async function fetchGates(setId: string): Promise<GateResult[]> {
-  return apiGet<GateResult[]>(`/v1/requirements/${setId}/gates`);
+  const res = await apiGet<GateResult[] | { items: GateResult[] }>(
+    `/v1/requirements/${setId}/gates`,
+  );
+  return Array.isArray(res) ? res : res.items ?? [];
 }
 
 export async function linkToPosition(
@@ -192,7 +198,7 @@ export async function exportRequirementsCSV(
   requirements?: Requirement[],
 ): Promise<Blob> {
   try {
-    const res = await fetch(`/api/v1/requirements/${setId}/export?format=csv`, {
+    const res = await fetch(`/api/v1/requirements/${setId}/export/?format=csv`, {
       headers: {
         Authorization: `Bearer ${useAuthStore.getState().accessToken ?? ''}`,
         'X-DDC-Client': 'OE/1.0',

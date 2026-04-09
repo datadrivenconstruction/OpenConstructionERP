@@ -97,11 +97,11 @@ export const takeoffApi = {
 
   /** Get measurement summary stats for a project. */
   summary: (projectId: string) =>
-    apiGet<MeasurementSummary>(`/v1/takeoff/measurements/summary?project_id=${projectId}`),
+    apiGet<MeasurementSummary>(`/v1/takeoff/measurements/summary/?project_id=${projectId}`),
 
   /** Export measurements as CSV or JSON. */
   export: (projectId: string, format: 'csv' | 'json' = 'json') =>
-    apiGet<unknown>(`/v1/takeoff/measurements/export?project_id=${projectId}&format=${format}`),
+    apiGet<unknown>(`/v1/takeoff/measurements/export/?project_id=${projectId}&format=${format}`),
 
   /** Save a CAD takeoff session to a project as a BIM model. */
   saveToProject: (

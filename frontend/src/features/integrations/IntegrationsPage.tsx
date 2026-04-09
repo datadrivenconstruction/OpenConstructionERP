@@ -454,7 +454,7 @@ const CATEGORY_ORDER: ConnectorCategory[] = ['notifications', 'automation', 'dat
 /* ── API helpers ────────────────────────────────────────────────────────── */
 
 function fetchConfigs(): Promise<IntegrationConfigListResponse> {
-  return apiGet('/v1/integrations/configs');
+  return apiGet('/v1/integrations/configs/');
 }
 
 /* ── Info Popover ─────────────────────────────────────────────────────── */
@@ -658,7 +658,7 @@ function ConnectModal({
     }
     setSaving(true);
     try {
-      await apiPost('/v1/integrations/configs', {
+      await apiPost('/v1/integrations/configs/', {
         integration_type: connector.type,
         name: name.trim() || connector.defaultName,
         config: fieldValues,

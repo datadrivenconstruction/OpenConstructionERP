@@ -1263,15 +1263,16 @@ async def create_revision(
     back to the original via parent_estimate_id for revision tracking.
     """
     new_boq = await service.duplicate_boq(boq_id)
+    new_boq_id = new_boq.id  # Capture before session expires attributes
     # Link the new BOQ to the original as its revision parent
     await service.boq_repo.update_fields(
-        new_boq.id,
+        new_boq_id,
         parent_estimate_id=boq_id,
         status="draft",
         is_locked=False,
     )
-    new_boq = await service.get_boq(new_boq.id)
-    return BOQResponse.model_validate(new_boq)
+    refreshed = await service.get_boq(new_boq_id)
+    return BOQResponse.model_validate(refreshed)
 
 
 # ── Position CRUD ─────────────────────────────────────────────────────────────

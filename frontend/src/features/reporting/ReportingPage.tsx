@@ -233,12 +233,12 @@ export function ReportingPage() {
 
   const loadProjectStats = useCallback(async (pid: string) => {
     const results = await Promise.allSettled([
-      apiGet<FinanceDashboard>(`/v1/finance/dashboard?project_id=${pid}`).then(setFinanceDash),
-      apiGet<SafetyStats>(`/v1/safety/stats?project_id=${pid}`).then(setSafetyStats),
-      apiGet<TaskStats>(`/v1/tasks/stats?project_id=${pid}`).then(setTaskStats),
-      apiGet<RFIStats>(`/v1/rfi/stats?project_id=${pid}`).then(setRfiStats),
-      apiGet<ScheduleStats>(`/v1/schedule/stats?project_id=${pid}`).then(setScheduleStats),
-      apiGet<ProcurementStats>(`/v1/procurement/stats?project_id=${pid}`).then(setProcurementStats),
+      apiGet<FinanceDashboard>(`/v1/finance/dashboard/?project_id=${pid}`).then(setFinanceDash),
+      apiGet<SafetyStats>(`/v1/safety/stats/?project_id=${pid}`).then(setSafetyStats),
+      apiGet<TaskStats>(`/v1/tasks/stats/?project_id=${pid}`).then(setTaskStats),
+      apiGet<RFIStats>(`/v1/rfi/stats/?project_id=${pid}`).then(setRfiStats),
+      apiGet<ScheduleStats>(`/v1/schedule/stats/?project_id=${pid}`).then(setScheduleStats),
+      apiGet<ProcurementStats>(`/v1/procurement/stats/?project_id=${pid}`).then(setProcurementStats),
     ]);
 
     // Clear data for rejected promises to avoid stale state
@@ -264,7 +264,7 @@ export function ReportingPage() {
   const handleRecalculate = async () => {
     setRecalculating(true);
     try {
-      await apiPost('/v1/reporting/kpi/recalculate-all', {});
+      await apiPost('/v1/reporting/kpi/recalculate-all/', {});
       await loadData();
     } catch {
       // handled by error boundary

@@ -172,12 +172,12 @@ export async function fetchScales(documentId: string): Promise<ScaleConfig[]> {
 
 export async function fetchMarkupsSummary(projectId: string): Promise<MarkupsSummary> {
   if (!projectId) return { total: 0, by_type: {}, by_status: {}, by_author: {} };
-  return apiGet<MarkupsSummary>(`/v1/markups/summary?project_id=${projectId}`);
+  return apiGet<MarkupsSummary>(`/v1/markups/summary/?project_id=${projectId}`);
 }
 
 export async function exportMarkupsCSV(projectId: string): Promise<Blob> {
   const token = useAuthStore.getState().accessToken;
-  const res = await fetch(`/api/v1/markups/export?project_id=${projectId}&format=csv`, {
+  const res = await fetch(`/api/v1/markups/export/?project_id=${projectId}&format=csv`, {
     headers: token ? { Authorization: `Bearer ${token}`, 'X-DDC-Client': 'OE/1.0' } : { 'X-DDC-Client': 'OE/1.0' },
   });
   if (!res.ok) throw new Error(`Export failed: ${res.statusText}`);

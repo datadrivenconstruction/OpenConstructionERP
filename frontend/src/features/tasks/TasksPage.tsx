@@ -21,6 +21,7 @@ import {
   Info,
   Scale,
   UserCircle,
+  AlertTriangle,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, SkeletonGrid } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
@@ -717,7 +718,7 @@ export function TasksPage() {
       const headers: Record<string, string> = { Accept: 'application/octet-stream' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const response = await fetch('/api/v1/tasks/template', { method: 'GET', headers });
+      const response = await fetch('/api/v1/tasks/template/', { method: 'GET', headers });
       if (!response.ok) throw new Error('Failed to download template');
 
       const blob = await response.blob();
@@ -817,11 +818,17 @@ export function TasksPage() {
 
       {/* No-project warning */}
       {!projectId && (
-        <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
-          {t('common.select_project_hint', { defaultValue: 'Select a project from the header to get started.' })}
+        <div className="mb-4 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 px-4 py-3">
+          <AlertTriangle size={18} className="text-amber-600 shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-300">{t('common.no_project_selected', { defaultValue: 'No project selected' })}</p>
+            <p className="text-xs text-amber-600 dark:text-amber-400">{t('common.select_project_hint', { defaultValue: 'Select a project from the header to view and manage items.' })}</p>
+          </div>
         </div>
       )}
 
+      {projectId ? (
+      <>
       {/* Type filter tabs */}
       <div className="mb-4 flex items-center gap-1 overflow-x-auto pb-1">
         <button
@@ -963,6 +970,14 @@ export function TasksPage() {
           </div>
         )}
       </div>
+      </>
+      ) : (
+        <EmptyState
+          icon={<ClipboardList size={28} strokeWidth={1.5} />}
+          title={t('tasks.no_project', { defaultValue: 'No project selected' })}
+          description={t('tasks.select_project', { defaultValue: 'Open a project first to view and manage tasks.' })}
+        />
+      )}
 
       {/* Add Modal */}
       {showAddModal && (

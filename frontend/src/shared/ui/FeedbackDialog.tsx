@@ -82,7 +82,7 @@ export function FeedbackDialog({ open, onClose }: FeedbackDialogProps) {
 
     setSending(true);
     try {
-      await apiPost('/v1/feedback', {
+      await apiPost('/v1/feedback/', {
         category,
         subject: subject.trim(),
         description: description.trim(),

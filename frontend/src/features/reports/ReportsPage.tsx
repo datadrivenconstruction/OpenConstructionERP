@@ -559,7 +559,7 @@ async function downloadChangeOrderReport(projectId: string, projectName: string)
   try {
     [orders, summary] = await Promise.all([
       apiGet<typeof orders>(`/v1/changeorders/?project_id=${projectId}`),
-      apiGet<typeof summary>(`/v1/changeorders/summary?project_id=${projectId}`),
+      apiGet<typeof summary>(`/v1/changeorders/summary/?project_id=${projectId}`),
     ]);
   } catch {
     throw new Error(
@@ -762,7 +762,8 @@ async function downloadBoqExport(
   format: ReportFormat,
 ): Promise<void> {
   const token = useAuthStore.getState().accessToken;
-  const response = await fetch(`/api/v1/boq/boqs/${boqId}/${format.endpoint}`, {
+  const endpoint = format.endpoint.endsWith('/') ? format.endpoint : `${format.endpoint}/`;
+  const response = await fetch(`/api/v1/boq/boqs/${boqId}/${endpoint}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
 
@@ -1245,7 +1246,7 @@ export function ReportsPage() {
               if (sections.includes('changeorders')) {
                 htmlParts.push('<h2>Change Orders Summary</h2>');
                 try {
-                  const summary = await apiGet<{ total_orders: number; draft_count: number; submitted_count: number; approved_count: number; rejected_count: number; total_cost_impact: number; total_schedule_impact_days: number; currency: string }>(`/v1/changeorders/summary?project_id=${selectedProjectId}`);
+                  const summary = await apiGet<{ total_orders: number; draft_count: number; submitted_count: number; approved_count: number; rejected_count: number; total_cost_impact: number; total_schedule_impact_days: number; currency: string }>(`/v1/changeorders/summary/?project_id=${selectedProjectId}`);
                   htmlParts.push(`<div class="metric"><div class="metric-label">Total Orders</div><div class="metric-value">${summary.total_orders}</div></div>`);
                   htmlParts.push(`<div class="metric"><div class="metric-label">Approved</div><div class="metric-value">${summary.approved_count}</div></div>`);
                   htmlParts.push(`<div class="metric"><div class="metric-label">Pending</div><div class="metric-value">${summary.draft_count + summary.submitted_count}</div></div>`);

@@ -523,7 +523,7 @@ export function ValidationPage() {
     if (!selectedBoqId) return;
     try {
       const token = useAuthStore.getState().accessToken;
-      const response = await fetch(`/api/v1/boq/boqs/${selectedBoqId}/export/pdf`, {
+      const response = await fetch(`/api/v1/boq/boqs/${selectedBoqId}/export/pdf/`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!response.ok) throw new Error(`Export failed: ${response.status}`);

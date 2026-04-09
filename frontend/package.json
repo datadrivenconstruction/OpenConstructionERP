@@ -20,6 +20,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.62.0",
     "@types/three": "^0.183.1",
+    "@xyflow/react": "^12.10.2",
     "ag-grid-community": "^32.3.0",
     "ag-grid-react": "^32.3.0",
     "clsx": "^2.1.0",

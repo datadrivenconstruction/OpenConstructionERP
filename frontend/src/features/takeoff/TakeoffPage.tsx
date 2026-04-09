@@ -742,7 +742,7 @@ export function TakeoffPage() {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`/api/v1/takeoff/documents/upload`, {
+      const response = await fetch(`/api/v1/takeoff/documents/upload/`, {
         method: 'POST',
         headers,
         body: formData,
@@ -827,7 +827,7 @@ export function TakeoffPage() {
       if (!selectedBoqId) {
         throw new Error(t('takeoff.no_boq_selected', 'Please select a project and BOQ first'));
       }
-      return apiPost(`/v1/boq/boqs/${selectedBoqId}/positions/bulk`, { items });
+      return apiPost(`/v1/boq/boqs/${selectedBoqId}/positions/bulk/`, { items });
     },
     onSuccess: (_data, variables) => {
       const msg = t('takeoff.added_to_boq_success_count', '{{count}} items added to BOQ successfully').replace(

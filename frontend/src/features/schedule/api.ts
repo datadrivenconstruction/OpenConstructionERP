@@ -100,10 +100,15 @@ export interface RiskAnalysisResponse {
   }>;
 }
 
+/** Defensive unwrap: handle both plain array and paginated {items, total} responses. */
+function unwrapList<T>(res: T[] | { items: T[] }): T[] {
+  return Array.isArray(res) ? res : res.items ?? [];
+}
+
 export const scheduleApi = {
   // Schedules
   listSchedules: (projectId: string) =>
-    apiGet<Schedule[]>(`/v1/schedule/schedules/?project_id=${projectId}`),
+    apiGet<Schedule[] | { items: Schedule[] }>(`/v1/schedule/schedules/?project_id=${projectId}`).then(unwrapList),
   getSchedule: (id: string) => apiGet<Schedule>(`/v1/schedule/schedules/${id}`),
   createSchedule: (data: { project_id: string; name: string; description?: string; start_date?: string; end_date?: string }) =>
     apiPost<Schedule>('/v1/schedule/schedules/', data),
@@ -118,26 +123,26 @@ export const scheduleApi = {
   deleteActivity: (activityId: string) =>
     apiDelete(`/v1/schedule/activities/${activityId}`),
   linkPosition: (activityId: string, positionId: string) =>
-    apiPost(`/v1/schedule/activities/${activityId}/link-position`, { boq_position_id: positionId }),
+    apiPost(`/v1/schedule/activities/${activityId}/link-position/`, { boq_position_id: positionId }),
   updateProgress: (activityId: string, progressPct: number) =>
-    apiPatch(`/v1/schedule/activities/${activityId}/progress`, { progress_pct: progressPct }),
+    apiPatch(`/v1/schedule/activities/${activityId}/progress/`, { progress_pct: progressPct }),
 
   // CPM & BOQ Generation
   generateFromBOQ: (scheduleId: string, boqId: string, totalProjectDays?: number) =>
-    apiPost<Activity[]>(`/v1/schedule/schedules/${scheduleId}/generate-from-boq`, {
+    apiPost<Activity[]>(`/v1/schedule/schedules/${scheduleId}/generate-from-boq/`, {
       boq_id: boqId,
       ...(totalProjectDays != null ? { total_project_days: totalProjectDays } : {}),
     }),
   calculateCPM: (scheduleId: string) =>
-    apiPost<CriticalPathResponse>(`/v1/schedule/schedules/${scheduleId}/calculate-cpm`),
+    apiPost<CriticalPathResponse>(`/v1/schedule/schedules/${scheduleId}/calculate-cpm/`),
   getRiskAnalysis: (scheduleId: string) =>
-    apiGet<RiskAnalysisResponse>(`/v1/schedule/schedules/${scheduleId}/risk-analysis`),
+    apiGet<RiskAnalysisResponse>(`/v1/schedule/schedules/${scheduleId}/risk-analysis/`),
 
   // Work Orders
   listWorkOrders: (params: { schedule_id?: string; activity_id?: string }) =>
-    apiGet<WorkOrder[]>(`/v1/schedule/work-orders/?${new URLSearchParams(params as Record<string, string>)}`),
+    apiGet<WorkOrder[] | { items: WorkOrder[] }>(`/v1/schedule/work-orders/?${new URLSearchParams(params as Record<string, string>)}`).then(unwrapList),
   createWorkOrder: (activityId: string, data: Partial<WorkOrder>) =>
-    apiPost<WorkOrder>(`/v1/schedule/activities/${activityId}/work-orders`, data),
+    apiPost<WorkOrder>(`/v1/schedule/activities/${activityId}/work-orders/`, data),
   updateWorkOrder: (id: string, data: Partial<WorkOrder>) =>
     apiPatch<WorkOrder>(`/v1/schedule/work-orders/${id}`, data),
 };

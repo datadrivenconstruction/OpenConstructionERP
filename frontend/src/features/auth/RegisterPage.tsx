@@ -52,7 +52,7 @@ export function RegisterPage() {
     setLoading(true);
 
     try {
-      const regRes = await fetch('/api/v1/users/auth/register', {
+      const regRes = await fetch('/api/v1/users/auth/register/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, full_name: fullName }),
@@ -64,7 +64,7 @@ export function RegisterPage() {
         return;
       }
 
-      const loginRes = await fetch('/api/v1/users/auth/login', {
+      const loginRes = await fetch('/api/v1/users/auth/login/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

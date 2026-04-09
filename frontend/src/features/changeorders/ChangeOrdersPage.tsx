@@ -891,6 +891,7 @@ export function ChangeOrdersPage() {
   const { data: orders = [], isLoading, isError } = useQuery({
     queryKey: ['changeorders', projectId],
     queryFn: () => apiGet<ChangeOrder[]>(`/v1/changeorders/?project_id=${projectId}`),
+    select: (d): ChangeOrder[] => (Array.isArray(d) ? d : (d as any)?.items ?? []),
     enabled: !!projectId,
   });
 
@@ -902,7 +903,7 @@ export function ChangeOrdersPage() {
   // Fetch summary
   const { data: summary } = useQuery({
     queryKey: ['changeorders-summary', projectId],
-    queryFn: () => apiGet<Summary>(`/v1/changeorders/summary?project_id=${projectId}`),
+    queryFn: () => apiGet<Summary>(`/v1/changeorders/summary/?project_id=${projectId}`),
     enabled: !!projectId,
   });
 
