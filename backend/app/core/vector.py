@@ -33,6 +33,22 @@ _embedder_instance: Any = None
 _embedder_tried: bool = False
 
 
+def _has_module(name: str) -> bool:
+    """Check if a module is importable WITHOUT actually importing it.
+
+    Used during startup to report availability of optional dependencies
+    (qdrant-client, sentence-transformers) without triggering heavy
+    native imports like torch — which on Windows + Anaconda can cause
+    MKL/OMP DLL conflicts that terminate the process silently.
+    """
+    import importlib.util
+
+    try:
+        return importlib.util.find_spec(name) is not None
+    except Exception:
+        return False
+
+
 def get_embedder():
     """Get singleton embedding model.
 
@@ -167,8 +183,11 @@ def _lancedb_status() -> dict[str, Any]:
             }
         else:
             info["cost_collection"] = None
-        info["can_restore_snapshots"] = _get_qdrant() is not None
-        info["can_generate_locally"] = get_embedder() is not None
+        # LAZY checks — never instantiate heavy torch/qdrant during status.
+        # Loading torch during startup on Windows + Anaconda can trigger
+        # a silent MKL/OMP DLL conflict that terminates the process.
+        info["can_restore_snapshots"] = _has_module("qdrant_client")
+        info["can_generate_locally"] = _has_module("sentence_transformers")
         info["embedding_dim"] = EMBEDDING_DIM
         info["backend"] = "lancedb"
         return info
@@ -295,7 +314,8 @@ def vector_status() -> dict[str, Any]:
             else:
                 info["cost_collection"] = None
             info["can_restore_snapshots"] = True
-            info["can_generate_locally"] = get_embedder() is not None
+            # Lazy — see note on _lancedb_status above.
+            info["can_generate_locally"] = _has_module("sentence_transformers")
             info["embedding_dim"] = QDRANT_SNAPSHOT_DIM
             info["backend"] = "qdrant"
             return info

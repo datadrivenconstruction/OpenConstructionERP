@@ -14,6 +14,18 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.10',
+    date: '2026-04-10',
+    changes: [
+      'Fix: backend no longer silently exits on Windows + Anaconda Python during startup — root cause was an MKL/OpenMP DLL conflict (libiomp5md.dll loaded twice from both Anaconda and torch), which triggered a native TerminateProcess call with no Python traceback. Fixed by setting KMP_DUPLICATE_LIB_OK=TRUE + OMP_NUM_THREADS=1 + MKL_NUM_THREADS=1 as the very first thing in app/main.py, before any import that can pull in numpy or torch',
+      'Fix: vector DB status check no longer eagerly loads the sentence-transformers model (which pulled in torch and ~400 MB of weights just to return a boolean can_generate_locally). Now uses importlib.util.find_spec() as a lazy availability check — startup is ~30 seconds faster and avoids the torch import path entirely when the embedder is not actually needed',
+      'Fix: vector DB status check no longer eagerly opens a Qdrant connection during startup just to populate can_restore_snapshots. Same lazy-check approach — if qdrant-client is installed, we assume snapshot restore is possible',
+      'Feature: _init_vector_db() now logs actionable hints when vector backend is not reachable — e.g. "Start a local Qdrant with: docker run -p 6333:6333 qdrant/qdrant" or "Install the embedded vector backend with: pip install openconstructionerp[vector]"',
+      'Feature: Qdrant is still the recommended production vector backend (supports snapshots, scales to millions of vectors). The app simply degrades gracefully to LanceDB or disables semantic search if Qdrant is unreachable, instead of crashing',
+      'Fix: https://openconstructionerp.com/demo/ now correctly serves the SPA index.html instead of returning {"detail":"Not Found"}. Root cause was a Starlette lifecycle trap — mount_frontend() registered its SPA 404 exception handler INSIDE the startup event handler, but by then Starlette had already built the ExceptionMiddleware with a snapshot of app.exception_handlers, so the new handler never became active. Moved mount_frontend() into create_app() (before the app is returned), so the handler is in place before the first lifespan message is processed',
+    ],
+  },
+  {
     version: '1.3.9',
     date: '2026-04-10',
     changes: [

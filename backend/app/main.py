@@ -9,6 +9,27 @@ Usage:
     openestimate serve  (CLI mode — also serves frontend)
 """
 
+# ── Runtime compatibility shims ─────────────────────────────────────────────
+# MUST run BEFORE any import that can pull in numpy / torch / lancedb.
+# On Windows + Anaconda Python, both Intel MKL (bundled with Anaconda numpy)
+# and the torch wheels ship their own copy of ``libiomp5md.dll``. When the
+# second copy is loaded, the OpenMP runtime aborts with:
+#
+#   OMP: Error #15: Initializing libiomp5md.dll, but found libiomp5md.dll
+#                   already initialized.
+#
+# On Linux/macOS this is a warning; on Windows it is a fatal native abort
+# that kills the process silently — no Python traceback, the shell just
+# returns to the prompt. ``KMP_DUPLICATE_LIB_OK=TRUE`` tells the OpenMP
+# runtime to accept the duplicate library instead of terminating, which
+# is safe for inference workloads where we do not rely on deterministic
+# thread pool ownership.
+import os as _os
+
+_os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
+_os.environ.setdefault("OMP_NUM_THREADS", "1")
+_os.environ.setdefault("MKL_NUM_THREADS", "1")
+
 import hashlib as _hashlib
 import logging
 import os
@@ -56,11 +77,22 @@ def configure_logging(settings: Settings) -> None:
 
 
 def _init_vector_db() -> None:
-    """Initialize vector database on startup (non-blocking).
+    """Initialize vector database on startup (non-blocking, never fatal).
 
-    Default: LanceDB (embedded, no Docker needed).
-    If VECTOR_BACKEND=qdrant, checks if Qdrant is reachable.
-    Embedding model is loaded lazily on first use, NOT at startup.
+    Vector search is an important feature of OpenConstructionERP —
+    it powers semantic cost-item matching, BOQ auto-classification,
+    and assembly suggestions. We support two backends:
+
+    * **Qdrant** (recommended for production) — dedicated server, scales
+      to millions of vectors, supports snapshots. Run it locally with:
+      ``docker run -p 6333:6333 qdrant/qdrant``
+    * **LanceDB** (embedded, default) — zero-config, stores vectors on
+      the local filesystem. Good enough for single-node deployments.
+
+    Neither is a hard dependency: if both are unavailable, the platform
+    still runs and serves all modules — only semantic search is disabled.
+    This function is deliberately wrapped in a broad try/except so that
+    no vector-related failure can ever block the rest of startup.
     """
     try:
         from app.core.vector import vector_status
@@ -71,13 +103,28 @@ def _init_vector_db() -> None:
             vectors = status.get("cost_collection", {})
             count = vectors.get("vectors_count", 0) if vectors else 0
             logger.info("Vector DB ready: %s (%d vectors indexed)", engine, count)
+            return
+
+        # Not connected — log a clear, actionable hint so users know how
+        # to enable semantic search if they need it.
+        error = status.get("error", "unknown")
+        if engine == "qdrant":
+            logger.warning(
+                "Qdrant not reachable (%s). Semantic search is disabled. "
+                "Start a local Qdrant with: docker run -p 6333:6333 qdrant/qdrant",
+                error,
+            )
         else:
-            if engine == "lancedb":
-                logger.info("LanceDB init failed: %s", status.get("error", "unknown"))
-            else:
-                logger.info("Qdrant not available — semantic search disabled")
-    except Exception as exc:
-        logger.info("Vector DB init skipped: %s", exc)
+            logger.warning(
+                "LanceDB init failed (%s). Semantic search is disabled. "
+                "Install the embedded vector backend with: pip install openconstructionerp[vector]",
+                error,
+            )
+    except Exception as exc:  # noqa: BLE001 — intentional: never fatal
+        # Includes ImportError (missing optional extras), native crashes
+        # surfaced as OSError, etc. Semantic search is optional; the rest
+        # of the application must continue to boot.
+        logger.warning("Vector DB init skipped: %s", exc)
 
 
 async def _seed_demo_account() -> None:
@@ -893,13 +940,14 @@ def create_app() -> FastAPI:
 
         logger.info("Application started successfully")
 
-        # ── Frontend Static Files (CLI / single-image mode) ──────────────
-        # MUST be mounted AFTER all module routers to avoid /{path:path}
-        # catch-all intercepting /api/* GET requests.
-        if os.environ.get("SERVE_FRONTEND", "").lower() in ("1", "true", "yes"):
-            from app.cli_static import mount_frontend
-
-            mount_frontend(app)
+        # NOTE: frontend static mounting moved to create_app() (below, before
+        # the startup event runs). Registering the SPA 404 exception handler
+        # here (inside the startup lifespan) is TOO LATE — Starlette has
+        # already built the ExceptionMiddleware by the time lifespan.startup
+        # fires, and the middleware captures a COPY of app.exception_handlers
+        # at build time.  Subsequent modifications to app.exception_handlers
+        # (like the one mount_frontend used to do) never reach the middleware.
+        # Symptom: https://.../demo/ returned a JSON 404 instead of index.html.
 
     @app.on_event("shutdown")
     async def shutdown() -> None:
@@ -907,5 +955,23 @@ def create_app() -> FastAPI:
         from app.database import engine
 
         await engine.dispose()
+
+    # ── Frontend Static Files (CLI / single-image mode) ─────────────────────
+    # Registered HERE, before the app is returned from create_app(), so the
+    # SPA 404 exception handler is already in app.exception_handlers when
+    # Starlette builds the ExceptionMiddleware on the first lifespan message.
+    # (If this runs inside on_event("startup"), the handler is never wired up
+    # and the SPA 404 fallback silently does nothing — see comment above.)
+    #
+    # Exception handlers are independent of routes, so it is safe to register
+    # this before module routers are mounted: the handler only fires for
+    # requests that do NOT match any route.
+    if os.environ.get("SERVE_FRONTEND", "").lower() in ("1", "true", "yes"):
+        try:
+            from app.cli_static import mount_frontend
+
+            mount_frontend(app)
+        except Exception as exc:  # noqa: BLE001 — frontend is optional
+            logger.warning("Frontend mount skipped: %s", exc)
 
     return app
