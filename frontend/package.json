@@ -58,7 +58,7 @@
     "@typescript-eslint/parser": "^8.15.0",
     "@vitejs/plugin-react": "^4.3.0",
     "autoprefixer": "^10.4.0",
-    "eslint": "^9.15.0",
+    "eslint": "^10.2.0",
     "jest-axe": "^10.0.0",
     "jsdom": "^29.0.1",
     "msw": "^2.12.14",
