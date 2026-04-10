@@ -135,6 +135,14 @@ export class SceneManager {
     // 100×100 GridHelper and the lights, and those dominate the bbox
     // for any real-world model (~30 m), making the camera distance
     // far too large and the model invisibly small in frame.
+    //
+    // CRITICAL: force the entire scene graph to recompute world
+    // matrices BEFORE we read any mesh.matrixWorld. Otherwise the
+    // first zoomToFit after a DAE load runs against stale identity
+    // matrices and returns a tiny bbox, leaving the camera parked
+    // 1000× too far away.
+    this.scene.updateMatrixWorld(true);
+
     let box: THREE.Box3;
     if (bbox) {
       box = bbox;
@@ -154,6 +162,9 @@ export class SceneManager {
           return;
         }
         if (obj instanceof THREE.Mesh && obj.geometry) {
+          // Make sure the geometry has a bbox computed; otherwise
+          // setFromObject silently returns an empty box.
+          if (!obj.geometry.boundingBox) obj.geometry.computeBoundingBox();
           tmp.setFromObject(obj);
           if (!tmp.isEmpty() && Number.isFinite(tmp.min.x)) {
             box.union(tmp);
