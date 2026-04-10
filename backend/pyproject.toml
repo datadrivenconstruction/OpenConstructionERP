@@ -1,6 +1,6 @@
 [project]
 name = "openconstructionerp"
-version = "1.3.12"
+version = "1.3.13"
 description = "The #1 open-source platform for construction cost estimation — BOQ, 4D/5D, AI, CAD/BIM takeoff"
 license = "AGPL-3.0-or-later"
 requires-python = ">=3.12"
@@ -56,6 +56,14 @@ dependencies = [
     "python-dateutil>=2.9.0",
     "structlog>=24.4.0",
     "tenacity>=9.0.0",
+    # Tabular data — needed by the CWICR cost-database loader and the
+    # BIM Excel parser, both of which are core onboarding paths. Used to
+    # be optional via the `[vector]` extra; promoted to base in v1.3.13
+    # after a fresh-install bug where load-cwicr returned HTTP 500 with
+    # "ModuleNotFoundError: No module named 'pandas'" on the headline
+    # quickstart command. pyarrow is the parquet engine pandas needs.
+    "pandas>=2.2.0",
+    "pyarrow>=18.0.0",
 ]
 
 [project.scripts]
@@ -78,9 +86,9 @@ server = [
     "boto3>=1.35.0",
 ]
 # Embedded vector search (LanceDB)
+# pyarrow is now in base deps (was here before v1.3.13).
 vector = [
     "lancedb>=0.17.0",
-    "pyarrow>=18.0.0",
     "fastembed>=0.4.0",
 ]
 # AI/LLM providers + Qdrant vector DB

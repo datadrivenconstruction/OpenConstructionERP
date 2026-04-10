@@ -510,6 +510,15 @@ Report vulnerabilities via [GitHub Issues](https://github.com/datadrivenconstruc
 
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines, code style, and PR process.
 
+### Contributors
+
+Thanks to everyone who has helped shape this project — by reporting bugs, walking us through real-world workflows, sending pull requests, or just trying it out and writing back.
+
+- [@migfrazao2003](https://github.com/migfrazao2003) — found and reproduced the PostgreSQL quickstart bug ([#42](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/42)) that was blocking the headline `make quickstart` install path; clean repro report led directly to the v1.3.12 fix.
+- [@maher00746](https://github.com/maher00746) — opened [#44](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/44) asking about cost-database provenance, which led us to better document where CWICR data comes from and how accurate it is.
+
+If you've contributed and aren't listed here, please open an issue or PR — we want to credit everyone.
+
 ## License
 
 **AGPL-3.0** — see [LICENSE](LICENSE).
