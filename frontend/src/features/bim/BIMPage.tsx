@@ -450,7 +450,7 @@ function LandingPage({ projectId, onUploadComplete, breadcrumbItems }: {
   ];
 
   return (
-    <div className="flex flex-col -mx-3 sm:-mx-4 lg:-mx-6 -mt-4 -mb-4" style={{ height: 'calc(100vh - 56px)' }}>
+    <div className="flex flex-col -mx-3 sm:-mx-4 lg:-mx-6 -mt-4 -mb-4 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
       <div className="px-6 pt-4 pb-3 border-b border-border-light"><Breadcrumb items={breadcrumbItems} /></div>
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto px-6 py-12">
@@ -623,7 +623,7 @@ export function BIMPage() {
 
   if (!projectId) {
     return (
-      <div className="flex items-center justify-center -mx-3 sm:-mx-4 lg:-mx-6 -mt-4 -mb-4" style={{ height: 'calc(100vh - 56px)' }}>
+      <div className="flex items-center justify-center -mx-3 sm:-mx-4 lg:-mx-6 -mt-4 -mb-4 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
         <EmptyState icon={<FolderOpen size={32} />} title="No project selected" description="Select a project to view BIM models." />
       </div>
     );
@@ -638,7 +638,7 @@ export function BIMPage() {
   const isModelNonReady = activeModel && ['processing', 'needs_converter', 'error'].includes(activeModel.status);
 
   return (
-    <div className="flex flex-col -mx-3 sm:-mx-4 lg:-mx-6 -mt-4 -mb-4" style={{ height: 'calc(100vh - 56px)' }}>
+    <div className="flex flex-col -mx-3 sm:-mx-4 lg:-mx-6 -mt-4 -mb-4 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
       {/* ── Header ── */}
       <div className="relative z-20 px-5 py-3 flex items-center justify-between border-b border-border-light bg-surface-primary">
         <div className="flex items-center gap-4">
@@ -687,7 +687,7 @@ export function BIMPage() {
                 title={t('bim.color_by', { defaultValue: 'Color by' })}
                 className="text-[11px] py-1.5 px-2 rounded-lg border border-border-light bg-surface-secondary text-content-secondary hover:bg-surface-tertiary focus:outline-none focus:ring-1 focus:ring-oe-blue"
               >
-                <option value="default">{t('bim.color_default', { defaultValue: 'Color: Discipline' })}</option>
+                <option value="default">{t('bim.color_default', { defaultValue: 'Color: Category' })}</option>
                 <option value="storey">{t('bim.color_storey', { defaultValue: 'Color: Storey' })}</option>
                 <option value="type">{t('bim.color_type', { defaultValue: 'Color: Type' })}</option>
               </select>
@@ -731,6 +731,7 @@ export function BIMPage() {
           <div className="shrink-0 h-full">
             <BIMFilterPanel
               elements={elements}
+              modelFormat={activeModel?.model_format || activeModel?.format}
               onFilterChange={handleFilterChange}
               onClose={() => setFilterPanelOpen(false)}
               onElementClick={handleFilterElementClick}
