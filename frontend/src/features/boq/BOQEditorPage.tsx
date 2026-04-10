@@ -494,8 +494,11 @@ export function BOQEditorPage() {
       const pending = pendingDeleteRef.current;
       if (pending) {
         clearTimeout(pending.timeoutId);
-        // Fire the API call so the delete isn't silently lost
-        boqApi.deletePosition(pending.positionSnapshot.id).catch(() => {});
+        // Fire the API call so the delete isn't silently lost.
+        // Log failures — component is unmounting so toasts may not render.
+        boqApi.deletePosition(pending.positionSnapshot.id).catch((err) => {
+          console.error('Failed to flush pending delete on unmount:', err);
+        });
         pendingDeleteRef.current = null;
       }
     };

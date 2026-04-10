@@ -1089,8 +1089,11 @@ export function CostsPage() {
               icon={<Copy size={14} />}
               onClick={() => {
                 const text = selectedItems.map((i) => `${i.code}\t${i.description}\t${i.unit}\t${i.rate}`).join('\n');
-                navigator.clipboard.writeText(text).catch(() => {});
-                addToast({ type: 'success', title: t('common.copied', { defaultValue: 'Copied' }), message: t('costs.items_copied', { defaultValue: '{{count}} items copied to clipboard', count: selectedIds.size }) });
+                navigator.clipboard.writeText(text).then(() => {
+                  addToast({ type: 'success', title: t('common.copied', { defaultValue: 'Copied' }), message: t('costs.items_copied', { defaultValue: '{{count}} items copied to clipboard', count: selectedIds.size }) });
+                }).catch((err) => {
+                  addToast({ type: 'error', title: t('common.copy_failed', { defaultValue: 'Copy failed' }), message: err?.message || 'Clipboard access denied' });
+                });
               }}
             >
               {t('common.copy', { defaultValue: 'Copy' })}
