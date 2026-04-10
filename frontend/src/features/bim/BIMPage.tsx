@@ -46,6 +46,8 @@ import {
 import { Badge, EmptyState, Breadcrumb } from '@/shared/ui';
 import { BIMViewer } from '@/shared/ui/BIMViewer';
 import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
+import BIMFilterPanel from './BIMFilterPanel';
+import { Filter } from 'lucide-react';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
 import {
@@ -532,6 +534,11 @@ export function BIMPage() {
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploadConvertedName, setUploadConvertedName] = useState<string | null>(null);
   const [showUploadOverride, setShowUploadOverride] = useState<boolean | null>(null);
+  const [filterPanelOpen, setFilterPanelOpen] = useState(true);
+  const [filterPredicate, setFilterPredicate] = useState<
+    ((el: BIMElementData) => boolean) | null
+  >(null);
+  const [visibleElementCount, setVisibleElementCount] = useState<number | null>(null);
   const addToast = useToastStore((s) => s.addToast);
 
   const modelsQuery = useQuery({ queryKey: ['bim-models', projectId], queryFn: () => fetchBIMModels(projectId), enabled: !!projectId });
@@ -572,6 +579,20 @@ export function BIMPage() {
   }, [activeModelId, activeModel, elements]);
 
   const handleElementSelect = useCallback((id: string | null) => setSelectedElementId(id), []);
+
+  // Stable callback for BIMFilterPanel — uses functional setState so it
+  // doesn't need to track filterPredicate in its dependency list.
+  const handleFilterChange = useCallback(
+    (predicate: (el: BIMElementData) => boolean, visibleCount: number) => {
+      setFilterPredicate(() => predicate);
+      setVisibleElementCount(visibleCount);
+    },
+    [],
+  );
+
+  const handleFilterElementClick = useCallback((elementId: string) => {
+    setSelectedElementId(elementId);
+  }, []);
 
   const handleUploadComplete = useCallback((modelId: string) => {
     setActiveModelId(modelId); setShowUploadOverride(false); setSelectedElementId(null);
@@ -639,6 +660,23 @@ export function BIMPage() {
         <div className="flex items-center gap-2">
           {elements.length > 0 && (
             <>
+              <button
+                onClick={() => setFilterPanelOpen((p) => !p)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${
+                  filterPanelOpen
+                    ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
+                    : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
+                }`}
+                title={t('bim.filter_toggle', { defaultValue: 'Toggle filter panel' })}
+              >
+                <Filter size={13} />
+                {t('bim.filter_button', { defaultValue: 'Filter' })}
+                {visibleElementCount !== null && visibleElementCount < elements.length && (
+                  <span className="text-[10px] bg-oe-blue text-white rounded-full px-1.5 py-0 tabular-nums">
+                    {visibleElementCount}
+                  </span>
+                )}
+              </button>
               <button onClick={() => navigate('/boq')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-content-secondary bg-surface-secondary border border-border-light hover:bg-surface-tertiary transition-colors">
                 <Link2 size={13} /> Link to BOQ
               </button>
@@ -653,8 +691,21 @@ export function BIMPage() {
         </div>
       </div>
 
-      {/* ── 3D Viewport ── */}
-      <div className="flex-1 min-h-0 relative bg-surface-secondary">
+      {/* ── 3D Viewport with filter sidebar ── */}
+      <div className="flex-1 min-h-0 relative bg-surface-secondary flex">
+        {/* Filter sidebar — only when model has loaded elements */}
+        {activeModelId && !isModelNonReady && elements.length > 0 && filterPanelOpen && (
+          <div className="shrink-0 h-full">
+            <BIMFilterPanel
+              elements={elements}
+              onFilterChange={handleFilterChange}
+              onClose={() => setFilterPanelOpen(false)}
+              onElementClick={handleFilterElementClick}
+            />
+          </div>
+        )}
+
+        <div className="flex-1 min-w-0 relative">
         {isModelNonReady ? (
           <NonReadyOverlay
             model={activeModel!}
@@ -671,6 +722,7 @@ export function BIMPage() {
             isLoading={elementsQuery.isLoading}
             error={elementsQuery.error ? 'Failed to load model elements. Check the server connection.' : null}
             geometryUrl={geometryUrl}
+            filterPredicate={filterPredicate}
             className="h-full"
           />
         ) : (
@@ -691,6 +743,7 @@ export function BIMPage() {
             initialModelName={uploadConvertedName || undefined}
           />
         )}
+        </div>
       </div>
 
       {/* ── Model Filmstrip ── */}
