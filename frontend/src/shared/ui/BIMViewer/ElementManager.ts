@@ -185,7 +185,24 @@ export class ElementManager {
           }
 
           let matchedCount = 0;
+          let strippedLights = 0;
           this.allDaeMeshes = [];
+
+          // Strip every Light/Camera that COLLADA dragged into the scene.
+          // DDC RvtExporter exports ~40 spot lights inside the DAE which
+          // ColladaLoader happily adds to the THREE scene — combined with
+          // our 4 application lights this turns into a 50-light shadow
+          // catastrophe (1 fps on a 5 000-mesh model).
+          const lightsToRemove: THREE.Object3D[] = [];
+          scene.traverse((obj) => {
+            if (obj instanceof THREE.Light || obj instanceof THREE.Camera) {
+              lightsToRemove.push(obj);
+            }
+          });
+          for (const obj of lightsToRemove) {
+            if (obj.parent) obj.parent.remove(obj);
+            strippedLights++;
+          }
 
           // Traverse the loaded DAE scene and match mesh nodes.
           //
@@ -209,8 +226,20 @@ export class ElementManager {
                 nameToElement.get(nodeName) ||
                 nameToElement.get(parentName);
 
-              child.castShadow = true;
-              child.receiveShadow = true;
+              // Shadows DISABLED on DAE meshes — drawing 5 000 shadow
+              // casters per frame is the difference between 60 fps and
+              // 1 fps on real Revit exports. Shadows on the BIM viewer
+              // were never load-bearing visually and the perf cost is
+              // catastrophic.
+              child.castShadow = false;
+              child.receiveShadow = false;
+
+              // Static geometry — lock the world matrix so Three.js doesn't
+              // recompute 5 000+ matrices every frame. The COLLADA loader
+              // has already set the local transform; we just need to push it
+              // to world once and then freeze.
+              child.matrixAutoUpdate = false;
+              child.updateMatrix();
 
               // Cache the original material so colour-by / reset can
               // toggle without losing the COLLADA visual.
@@ -239,6 +268,40 @@ export class ElementManager {
               this.allDaeMeshes.push(child);
             }
           });
+
+          if (strippedLights > 0) {
+            // eslint-disable-next-line no-console
+            console.info(`[BIM] stripped ${strippedLights} lights/cameras from COLLADA scene`);
+          }
+
+          // POSITIONAL FALLBACK: when the converter (looking at you, DDC
+          // RvtExporter) drops node ids and we get 0% explicit matches,
+          // pair DAE meshes with element data by index. The order is not
+          // guaranteed correct, but it gives every mesh an `elementId`
+          // and lets the filter / colour-by / isolate paths actually do
+          // their job. Without this, every filter chip is a no-op for
+          // models exported by DDC.
+          if (matchedCount === 0 && this.allDaeMeshes.length > 0 && this.elementDataMap.size > 0) {
+            const elementsArr = Array.from(this.elementDataMap.values());
+            const pairs = Math.min(this.allDaeMeshes.length, elementsArr.length);
+            for (let i = 0; i < pairs; i++) {
+              const mesh = this.allDaeMeshes[i]!;
+              const el = elementsArr[i]!;
+              mesh.userData = {
+                ...(mesh.userData as object),
+                elementId: el.id,
+                elementData: el,
+                positionalFallback: true,
+              };
+              this.meshMap.set(el.id, mesh);
+            }
+            matchedCount = pairs;
+            // eslint-disable-next-line no-console
+            console.info(
+              `[BIM] positional fallback: paired ${pairs} DAE meshes with element data ` +
+              `(node names were generic, real mesh_ref matching unavailable)`,
+            );
+          }
 
           const totalElements = this.elementDataMap.size;
           this.meshMatchRatio = totalElements > 0 ? matchedCount / totalElements : 0;

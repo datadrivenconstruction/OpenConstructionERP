@@ -35,9 +35,14 @@ export class SceneManager {
       antialias: true,
       alpha: false,
     });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    // Pixel ratio capped at 1 — high-DPI rendering on a 5 000-mesh BIM
+    // scene quadruples the per-frame fragment cost for marginal visual
+    // gain on the engineering-readability use case. Users who want a
+    // sharper picture can take a screenshot via the browser at any
+    // zoom; the live viewport stays fluid.
+    this.renderer.setPixelRatio(1);
+    // Shadow map disabled — see DirectionalLight comment below.
+    this.renderer.shadowMap.enabled = false;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.0;
     this.updateSize();
@@ -68,8 +73,10 @@ export class SceneManager {
     // Lighting
     this.setupLighting();
 
-    // Grid
-    this.gridHelper = new THREE.GridHelper(100, 100, 0xcccccc, 0xe0e0e0);
+    // Grid — initial 20 m × 20 m with 1 m cells. Resized to fit the
+    // loaded model after zoomToFit() so the grid always sits at the
+    // same scale as the geometry (a 100 m grid swamps a 2 m model).
+    this.gridHelper = new THREE.GridHelper(20, 20, 0xcccccc, 0xe0e0e0);
     this.scene.add(this.gridHelper);
 
     // Resize observer
@@ -90,19 +97,14 @@ export class SceneManager {
     hemi.position.set(0, 50, 0);
     this.scene.add(hemi);
 
-    // Main directional light with soft shadows
+    // Main directional light. Shadow casting is DISABLED — rendering
+    // shadows for thousands of BIM meshes per frame drops the viewer
+    // from 60 fps to 1 fps on real Revit exports. The directional
+    // contribution alone is enough for solid 3D readability without
+    // the per-frame shadow map cost.
     const directional = new THREE.DirectionalLight(0xffffff, 0.8);
     directional.position.set(30, 50, 30);
-    directional.castShadow = true;
-    directional.shadow.mapSize.width = 2048;
-    directional.shadow.mapSize.height = 2048;
-    directional.shadow.camera.near = 0.5;
-    directional.shadow.camera.far = 200;
-    directional.shadow.camera.left = -50;
-    directional.shadow.camera.right = 50;
-    directional.shadow.camera.top = 50;
-    directional.shadow.camera.bottom = -50;
-    directional.shadow.bias = -0.0001;
+    directional.castShadow = false;
     this.scene.add(directional);
 
     // Fill light from opposite direction
@@ -180,7 +182,11 @@ export class SceneManager {
     if (!Number.isFinite(maxDim) || maxDim <= 0) return;
 
     const fov = this.camera.fov * (Math.PI / 180);
-    const dist = (maxDim / (2 * Math.tan(fov / 2))) * 1.4;
+    // Multiplier 1.05 (was 1.4) — pull the camera in tighter so the
+    // model fills the viewport instead of sitting in the middle with
+    // ~40% empty margin around it. The orbit controls let users zoom
+    // out anyway if they want a wider view.
+    const dist = (maxDim / (2 * Math.tan(fov / 2))) * 1.05;
 
     // Place camera at a 3/4 angle, looking at the model centre.
     this.controls.target.copy(center);
@@ -191,6 +197,41 @@ export class SceneManager {
     );
     this.camera.lookAt(center);
     this.controls.update();
+
+    // Resize the grid to match the model. We want 1-unit cells (≈ 1 m
+    // when the model is in metres) and a total extent that's slightly
+    // larger than the model footprint so the grid frames the geometry
+    // without dwarfing it.
+    this.resizeGridToBox(box);
+  }
+
+  /** Replace the grid helper with one sized to the given bounding box. */
+  private resizeGridToBox(box: THREE.Box3): void {
+    if (!this.gridHelper) return;
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    // Use the larger horizontal axis to size the grid; clamp to a sane
+    // range so we never end up with a 1 cm grid (zero-divisions error)
+    // or a 10 km grid (millions of lines).
+    const horizontal = Math.max(size.x, size.z);
+    let extent = Math.max(2, Math.ceil(horizontal * 1.6));
+    extent = Math.min(extent, 500);
+    // Choose a cell size that keeps the line count reasonable: 1 m for
+    // anything ≤ 100 m, then scale up to keep ~100 divisions max.
+    let cell = 1;
+    if (extent > 100) cell = Math.ceil(extent / 100);
+    const divisions = Math.max(2, Math.round(extent / cell));
+    // Replace the existing grid (GridHelper has no resize API).
+    this.scene.remove(this.gridHelper);
+    this.gridHelper.geometry.dispose();
+    const mat = this.gridHelper.material;
+    if (Array.isArray(mat)) mat.forEach((m) => m.dispose());
+    else mat?.dispose();
+    this.gridHelper = new THREE.GridHelper(extent, divisions, 0xcccccc, 0xe0e0e0);
+    // Sit the grid just below the model floor so it doesn't z-fight
+    // with the lowest geometry.
+    this.gridHelper.position.set(center.x, box.min.y - 0.001, center.z);
+    this.scene.add(this.gridHelper);
   }
 
   /** Zoom to specific element bounding boxes. */

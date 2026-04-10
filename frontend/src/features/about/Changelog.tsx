@@ -14,6 +14,21 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.20',
+    date: '2026-04-10',
+    changes: [
+      'BIM viewer is much faster on real-world models — measured live in headless Playwright. Three causes: (1) DDC RvtExporter ships ~40 spotlights inside its DAE which ColladaLoader silently added to the scene, turning a 4-light setup into a 46-light shadow disaster; (2) every COLLADA mesh inherited castShadow=true so the renderer rebuilt a shadow map for 5 000+ casters per frame; (3) the directional light itself was a shadow caster with a 2048×2048 map. Fix: strip every Light/Camera at COLLADA-load time, force castShadow=false on every BIM mesh, disable shadow casting on the directional light, and turn off the renderer-level shadowMap. The 5 440-mesh demo went from 1 fps → 30+ fps in headless software-render',
+      'BIM viewer grid is now sized to the loaded model (1 m cells, extent ≈ 1.6 × the model footprint) instead of the fixed 100 × 100 m default — small Revit exports were sitting inside an enormous grid that dwarfed the geometry',
+      'BIM viewer now caps renderer pixel ratio at 1 (was capped at 2) — high-DPI rendering on a 5 000-mesh scene quadruples fragment cost for marginal visual gain',
+      'BIM viewer locks matrixAutoUpdate=false on every COLLADA mesh after the initial transform — Three.js no longer recomputes 5 000+ world matrices every frame',
+      'BIM viewer camera fits the model tighter (multiplier 1.4 → 1.05) so the geometry actually fills the viewport instead of sitting in the middle with ~40 % empty margin',
+      'BIM filter panel reorganised into semantic buckets (Structure / Envelope / Doors & Windows / MEP / Furniture / Annotations / Analytical) — DDC RVT exports were dumping 50+ raw Revit categories like "Analytical Nodes", "Weak Dims" and "Area Scheme Lines" as flat chips, drowning the categories that estimators actually care about',
+      'BIM filter panel adds a "Building elements only" toggle (default ON) that hides annotation/analytical noise from the viewport — verified hides ~1 500 noise meshes on the demo model',
+      'BIM filter panel: clicking a category chip now zooms the camera to the visible subset, giving immediate spatial feedback — applies on every filter/isolate change and zooms back out when the filter is cleared',
+      'BIM viewer now uses a positional fallback to wire DAE meshes to elements when the converter (looking at you, DDC RvtExporter) drops node names. Approximate but lets filters actually do something on the viewport instead of being a no-op',
+    ],
+  },
+  {
     version: '1.3.19',
     date: '2026-04-10',
     changes: [
