@@ -108,22 +108,38 @@ export class ElementManager {
     this.sceneManager.scene.add(this.elementGroup);
   }
 
-  /** Load elements and create placeholder meshes. */
-  loadElements(elements: BIMElementData[]): void {
+  /** Load elements and (optionally) create placeholder meshes.
+   *
+   * @param skipPlaceholders  When true, no box placeholders are
+   *   created from `el.bounding_box`. Use this when a real DAE/COLLADA
+   *   geometry URL is about to load — the placeholders would briefly
+   *   render at the BIM bounding-box coordinates (which can be in a
+   *   different scale than the COLLADA scene) and produce a
+   *   wrong-distance camera fit on the first frame.
+   */
+  loadElements(
+    elements: BIMElementData[],
+    options: { skipPlaceholders?: boolean } = {},
+  ): void {
     this.clear();
+
+    const skipPlaceholders = options.skipPlaceholders === true;
 
     for (const el of elements) {
       this.elementDataMap.set(el.id, el);
 
       // Only create box placeholders when DAE geometry is not loaded
-      if (!this.geometryLoaded && el.bounding_box) {
+      // AND the caller didn't explicitly opt out.
+      if (!skipPlaceholders && !this.geometryLoaded && el.bounding_box) {
         const mesh = this.createBoxMesh(el);
         this.meshMap.set(el.id, mesh);
         this.elementGroup.add(mesh);
       }
     }
 
-    // Zoom to fit all loaded elements
+    // Zoom to fit only when we actually have visible content. Without
+    // placeholders the scene is empty until the DAE loader finishes
+    // — BIMViewer schedules its own zoomToFit chain at that point.
     if (this.meshMap.size > 0 || (this.daeGroup && this.daeGroup.children.length > 0)) {
       this.sceneManager.zoomToFit();
     }
