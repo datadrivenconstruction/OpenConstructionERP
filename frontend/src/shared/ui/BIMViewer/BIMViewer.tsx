@@ -233,12 +233,18 @@ export function BIMViewer({
   const onElementHoverRef = useRef(onElementHover);
   onElementHoverRef.current = onElementHover;
 
-  // Load elements when data changes
+  // Load elements when data changes. When a real DAE/COLLADA geometry
+  // URL is available we skip the placeholder boxes — the placeholders
+  // would briefly render at the BIM bounding-box coordinates (which are
+  // in source-CAD units, often a different scale than the COLLADA scene)
+  // and trigger a wrong-distance camera fit before the DAE finishes
+  // loading. Skipping them keeps the first zoomToFit clean.
   useEffect(() => {
     if (!elementMgrRef.current || !elements) return;
-    elementMgrRef.current.loadElements(elements);
+    const skipPlaceholders = !!geometryUrl;
+    elementMgrRef.current.loadElements(elements, { skipPlaceholders });
     setElementCount(elements.length);
-  }, [elements]);
+  }, [elements, geometryUrl]);
 
   // Load DAE geometry when URL is available (after elements are loaded)
   const onGeometryLoadedRef = useRef(onGeometryLoaded);
@@ -252,10 +258,19 @@ export function BIMViewer({
         .loadDAEGeometry(geometryUrl)
         .then(() => {
           onGeometryLoadedRef.current?.(mgr.getMeshMatchRatio());
-          // Re-fit the camera once DAE geometry is parented — belt & braces:
-          // some models have only the DAE group as visible content, so the
-          // initial zoom-to-fit inside ElementManager may run before layout.
-          sceneRef.current?.zoomToFit();
+          // Re-fit the camera AFTER the DAE scene has been parented and
+          // the next render cycle had a chance to commit world matrices.
+          // We schedule three fits at increasing delays as belt & braces:
+          //   * 0  ms — synchronous, catches the common case
+          //   * 50 ms — lets ColladaLoader's microtasks settle
+          //   * 250ms — ultimate safety net for slow first-frame layouts
+          // Each call inside SceneManager.zoomToFit forces
+          // updateMatrixWorld(true), so a stale matrix tree cannot
+          // sabotage the bbox computation.
+          const fit = () => sceneRef.current?.zoomToFit();
+          fit();
+          setTimeout(fit, 50);
+          setTimeout(fit, 250);
         })
         .catch(() => {
           // Silently fall back to placeholder boxes (already rendered by loadElements)
