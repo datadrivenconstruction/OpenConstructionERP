@@ -60,6 +60,13 @@ export interface BIMViewerProps {
    * visible. Fast — no re-render, just mesh.visible toggles.
    */
   filterPredicate?: ((el: BIMElementData) => boolean) | null;
+  /**
+   * Color-by mode. ``'default'`` uses discipline colors, other modes recolor
+   * meshes based on the chosen element field via a golden-angle palette.
+   */
+  colorByMode?: 'default' | 'discipline' | 'storey' | 'type';
+  /** Element IDs to isolate (hide everything else). Empty = show all. */
+  isolatedIds?: string[] | null;
 }
 
 /* ── Properties Table ──────────────────────────────────────────────────── */
@@ -159,6 +166,8 @@ export function BIMViewer({
   error = null,
   geometryUrl = null,
   filterPredicate = null,
+  colorByMode = 'default',
+  isolatedIds = null,
 }: BIMViewerProps) {
   const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -240,12 +249,27 @@ export function BIMViewer({
   // only toggles mesh.visible — no geometry regeneration.
   useEffect(() => {
     if (!elementMgrRef.current) return;
-    if (filterPredicate) {
+    if (isolatedIds && isolatedIds.length > 0) {
+      elementMgrRef.current.isolate(isolatedIds);
+    } else if (filterPredicate) {
       elementMgrRef.current.applyFilter(filterPredicate);
     } else {
       elementMgrRef.current.showAll();
     }
-  }, [filterPredicate, elements]);
+  }, [filterPredicate, isolatedIds, elements]);
+
+  // Apply color-by mode when it changes.
+  useEffect(() => {
+    if (!elementMgrRef.current || !elements?.length) return;
+    const mgr = elementMgrRef.current;
+    if (colorByMode === 'storey') {
+      mgr.colorBy((el) => el.storey || 'Unassigned');
+    } else if (colorByMode === 'type') {
+      mgr.colorBy((el) => el.element_type || 'Unknown');
+    } else {
+      mgr.resetColors();
+    }
+  }, [colorByMode, elements]);
 
   // Sync selection from parent
   useEffect(() => {
