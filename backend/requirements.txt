@@ -26,7 +26,7 @@ cobble==0.1.4
 colorama==0.4.6
 contourpy==1.3.3
 coverage==7.13.4
-cryptography==46.0.6
+cryptography==46.0.7
 cycler==0.12.1
 # DDC Toolkit — optional, for CAD/BIM converter integration
 # Install from: https://github.com/datadrivenconstruction/ddc-community-toolkit
