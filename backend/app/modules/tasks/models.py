@@ -57,6 +57,14 @@ class Task(Base):
     result: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_private: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    # Task dependency: this task can only be completed after `depends_on` is completed.
+    # ON DELETE SET NULL — deleting the predecessor doesn't delete dependents.
+    depends_on: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_tasks_task.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,

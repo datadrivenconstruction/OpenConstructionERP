@@ -43,6 +43,10 @@ class TaskCreate(BaseModel):
     )
     result: str | None = Field(default=None, max_length=5000)
     is_private: bool = False
+    depends_on: UUID | None = Field(
+        default=None,
+        description="Task UUID this task depends on. Cannot be completed until predecessor is completed.",
+    )
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -73,6 +77,7 @@ class TaskUpdate(BaseModel):
     )
     result: str | None = Field(default=None, max_length=5000)
     is_private: bool | None = None
+    depends_on: UUID | None = None
     metadata: dict[str, Any] | None = None
 
 
@@ -107,6 +112,7 @@ class TaskResponse(BaseModel):
     result: str | None = None
     is_private: bool = False
     created_by: str | None = None
+    depends_on: UUID | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
@@ -115,6 +121,10 @@ class TaskResponse(BaseModel):
     is_overdue: bool = Field(
         default=False,
         description="True when status is not completed and due_date is past today",
+    )
+    blocked_by_count: int = Field(
+        default=0,
+        description="Number of incomplete predecessor tasks (computed from depends_on chain).",
     )
 
 

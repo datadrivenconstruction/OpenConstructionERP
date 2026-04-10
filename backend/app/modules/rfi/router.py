@@ -16,9 +16,10 @@ import logging
 import uuid
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
 
+from app.core.bulk_ops import BulkDeleteRequest, BulkStatusRequest
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.rfi.schemas import (
     RFICreate,
@@ -124,6 +125,11 @@ async def list_rfis(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
     status_filter: str | None = Query(default=None, alias="status"),
+    search: str | None = Query(
+        default=None,
+        max_length=200,
+        description="Free-text search across subject, question, response, and RFI number.",
+    ),
     service: RFIService = Depends(_get_service),
 ) -> list[RFIResponse]:
     rfis, _ = await service.list_rfis(
@@ -131,6 +137,7 @@ async def list_rfis(
         offset=offset,
         limit=limit,
         status_filter=status_filter,
+        search=search,
     )
     return [_to_response(r) for r in rfis]
 
@@ -255,6 +262,90 @@ async def export_rfi_log(
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": 'attachment; filename="rfi_log.xlsx"'},
     )
+
+
+# ── Bulk operations (must be BEFORE parametric /{rfi_id}) ──────────────
+
+
+@router.post(
+    "/batch/delete/",
+    status_code=200,
+    dependencies=[Depends(RequirePermission("rfi.delete"))],
+)
+async def batch_delete_rfis(
+    body: BulkDeleteRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> dict:
+    """Delete multiple RFIs in one request."""
+    from sqlalchemy import select as _select
+
+    from app.core.bulk_ops import bulk_delete
+    from app.modules.projects.repository import ProjectRepository
+    from app.modules.rfi.models import RFI
+
+    proj_repo = ProjectRepository(session)
+    owned_projects, _ = await proj_repo.list_for_user(
+        owner_id=user_id, offset=0, limit=10000, exclude_archived=False
+    )
+    owned_project_ids = {str(p.id) for p in owned_projects}
+
+    rows = (await session.execute(
+        _select(RFI.id, RFI.project_id).where(RFI.id.in_(body.ids))
+    )).all()
+    allowed = [r[0] for r in rows if str(r[1]) in owned_project_ids]
+
+    deleted = await bulk_delete(session, RFI, allowed)
+    logger.info(
+        "Bulk delete RFIs: requested=%d deleted=%d user=%s",
+        len(body.ids), deleted, user_id,
+    )
+    return {"requested": len(body.ids), "deleted": deleted}
+
+
+@router.patch(
+    "/batch/status/",
+    status_code=200,
+    dependencies=[Depends(RequirePermission("rfi.update"))],
+)
+async def batch_update_rfi_status(
+    body: BulkStatusRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> dict:
+    """Bulk-update status on multiple RFIs."""
+    from sqlalchemy import select as _select
+
+    from app.core.bulk_ops import bulk_update_status
+    from app.modules.projects.repository import ProjectRepository
+    from app.modules.rfi.models import RFI
+
+    allowed_statuses = {"draft", "open", "answered", "closed", "void"}
+    if body.status not in allowed_statuses:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid status. Allowed: {sorted(allowed_statuses)}",
+        )
+
+    proj_repo = ProjectRepository(session)
+    owned_projects, _ = await proj_repo.list_for_user(
+        owner_id=user_id, offset=0, limit=10000, exclude_archived=False
+    )
+    owned_project_ids = {str(p.id) for p in owned_projects}
+
+    rows = (await session.execute(
+        _select(RFI.id, RFI.project_id).where(RFI.id.in_(body.ids))
+    )).all()
+    allowed_ids = [r[0] for r in rows if str(r[1]) in owned_project_ids]
+
+    updated = await bulk_update_status(
+        session, RFI, allowed_ids, body.status, allowed_statuses=allowed_statuses
+    )
+    logger.info(
+        "Bulk update RFI status: requested=%d updated=%d user=%s",
+        len(body.ids), updated, user_id,
+    )
+    return {"requested": len(body.ids), "updated": updated, "status": body.status}
 
 
 @router.get(

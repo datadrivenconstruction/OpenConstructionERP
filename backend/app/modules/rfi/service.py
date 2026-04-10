@@ -137,12 +137,14 @@ class RFIService:
         offset: int = 0,
         limit: int = 50,
         status_filter: str | None = None,
+        search: str | None = None,
     ) -> tuple[list[RFI], int]:
         return await self.repo.list_for_project(
             project_id,
             offset=offset,
             limit=limit,
             status=status_filter,
+            search=search,
         )
 
     async def update_rfi(

@@ -144,14 +144,16 @@ class MeetingService:
         limit: int = 50,
         meeting_type: str | None = None,
         status_filter: str | None = None,
+        search: str | None = None,
     ) -> tuple[list[Meeting], int]:
-        """List meetings for a project."""
+        """List meetings for a project with optional search."""
         return await self.repo.list_for_project(
             project_id,
             offset=offset,
             limit=limit,
             meeting_type=meeting_type,
             status=status_filter,
+            search=search,
         )
 
     # ── Update ────────────────────────────────────────────────────────────
