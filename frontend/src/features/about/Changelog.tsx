@@ -14,6 +14,17 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.3',
+    date: '2026-04-10',
+    changes: [
+      'Feature: Bulk operations — POST /batch/delete/, PATCH /batch/status/, POST /batch/assign/ on Tasks/RFI/Documents/Risks',
+      'Feature: Reusable bulk_ops core helper with BulkDeleteRequest/BulkStatusRequest/BulkAssignRequest schemas',
+      'Feature: Backend search on Tasks (title/description/result), RFI (subject/question/response/number), Meetings (title/agenda/minutes/number) — case-insensitive ILIKE',
+      'Feature: Task dependencies — depends_on FK field, complete_task blocks until predecessor done, cycle detection on update',
+      'Feature: TaskService.list_blockers() helper for dependency graph queries',
+    ],
+  },
+  {
     version: '1.3.2',
     date: '2026-04-10',
     changes: [

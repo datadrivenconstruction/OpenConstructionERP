@@ -6,7 +6,7 @@ No business logic — pure data access.
 
 import uuid
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.meetings.models import Meeting
@@ -30,13 +30,26 @@ class MeetingRepository:
         limit: int = 50,
         meeting_type: str | None = None,
         status: str | None = None,
+        search: str | None = None,
     ) -> tuple[list[Meeting], int]:
-        """List meetings for a project with pagination and filters."""
+        """List meetings for a project with pagination, filters, and search."""
         base = select(Meeting).where(Meeting.project_id == project_id)
         if meeting_type is not None:
             base = base.where(Meeting.meeting_type == meeting_type)
         if status is not None:
             base = base.where(Meeting.status == status)
+
+        # Free-text search across title, agenda, minutes, and meeting number
+        if search and search.strip():
+            pattern = f"%{search.strip()}%"
+            base = base.where(
+                or_(
+                    Meeting.title.ilike(pattern),
+                    Meeting.agenda.ilike(pattern),
+                    Meeting.minutes.ilike(pattern),
+                    Meeting.meeting_number.ilike(pattern),
+                )
+            )
 
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
