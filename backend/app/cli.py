@@ -330,8 +330,101 @@ def check_env_overrides() -> Check:
     return Check("DATABASE_URL", "ok", "SQLite mode (default)")
 
 
+def check_core_tabular_deps() -> list[Check]:
+    """Verify base tabular dependencies are importable.
+
+    `pandas` and `pyarrow` were promoted from the `[vector]` extra into
+    base dependencies in v1.3.13 after a fresh-install bug where the
+    CWICR cost-database loader returned HTTP 500 with "No module named
+    'pandas'". They are needed by:
+      - the `load-cwicr` headline quickstart endpoint
+      - the BIM Excel parser (openpyxl + pandas)
+      - parquet seed data for classifications & cost databases
+
+    A missing install here is a hard ERROR, not a warning — the app
+    will boot but the first onboarding step will 500.
+    """
+    from importlib.util import find_spec
+
+    hint = (
+        "Cost database import requires pandas + pyarrow. "
+        "Reinstall with: pip install --upgrade openconstructionerp"
+    )
+    out: list[Check] = []
+    for mod in ("pandas", "pyarrow"):
+        try:
+            present = find_spec(mod) is not None
+        except Exception:
+            present = False
+        if present:
+            out.append(Check(f"Tabular core ({mod})", "ok", f"{mod} installed"))
+        else:
+            out.append(
+                Check(
+                    f"Tabular core ({mod})",
+                    "error",
+                    f"{mod} is missing from base dependencies",
+                    hint,
+                )
+            )
+    return out
+
+
+def check_ai_provider_keys() -> Check:
+    """Check whether at least one LLM provider API key is configured.
+
+    We call LLM providers via REST (httpx), not vendor SDKs, so there is
+    no Python package to probe. Instead, look at the two places keys can
+    live:
+      1. Settings / environment variables (OPENAI_API_KEY, ANTHROPIC_API_KEY, ...)
+      2. ``~/.openestimate/config.json`` (CLI-managed overrides)
+
+    This only reports INFO-level WARN when none are set — AI is optional.
+    """
+    # 1. Settings-level keys (env vars, .env file, pydantic-settings).
+    env_key_names = (
+        "OPENAI_API_KEY",
+        "ANTHROPIC_API_KEY",
+        "GEMINI_API_KEY",
+        "OPENROUTER_API_KEY",
+        "MISTRAL_API_KEY",
+        "GROQ_API_KEY",
+        "DEEPSEEK_API_KEY",
+    )
+    configured = [name for name in env_key_names if os.environ.get(name)]
+
+    # 2. CLI config file overrides.
+    config_path = DEFAULT_DATA_DIR / "config.json"
+    if config_path.exists():
+        try:
+            import json
+
+            with open(config_path, encoding="utf-8") as fh:
+                cfg = json.load(fh)
+            if isinstance(cfg, dict):
+                for key, val in cfg.items():
+                    if key.lower().endswith("_api_key") and val:
+                        configured.append(key.upper())
+        except Exception:
+            pass
+
+    if configured:
+        names = ", ".join(sorted({c.split("_")[0].title() for c in configured}))
+        return Check(
+            "AI provider keys",
+            "ok",
+            f"configured: {names}",
+        )
+    return Check(
+        "AI provider keys",
+        "warn",
+        "no LLM provider API key found (AI estimation will be disabled)",
+        "Set e.g. ANTHROPIC_API_KEY or OPENAI_API_KEY, or configure via Settings > AI in the UI",
+    )
+
+
 def check_optional_extras() -> list[Check]:
-    """Report which optional extras are installed (non-fatal)."""
+    """Report which optional extras are installed (mostly non-fatal)."""
     from importlib.util import find_spec
 
     def _present(mod: str) -> bool:
@@ -340,7 +433,11 @@ def check_optional_extras() -> list[Check]:
         except Exception:
             return False
 
-    out = []
+    out: list[Check] = []
+
+    # Embedded vector search (LanceDB) — used by the local semantic search
+    # path for cost-database matching. Optional: code falls back to keyword
+    # match when missing.
     if _present("lancedb"):
         out.append(Check("Vector search [vector]", "ok", "lancedb installed"))
     else:
@@ -348,21 +445,43 @@ def check_optional_extras() -> list[Check]:
             Check(
                 "Vector search [vector]",
                 "warn",
-                "not installed (semantic search disabled)",
+                "not installed (LanceDB semantic search disabled)",
                 "pip install 'openconstructionerp[vector]'",
             )
         )
-    if _present("anthropic") or _present("openai"):
-        out.append(Check("AI providers [ai]", "ok", "LLM client library installed"))
+
+    # Semantic embeddings (sentence-transformers + Qdrant client).
+    # Renamed from `[ai]` in v1.3.14 — the old extra is still an alias.
+    if _present("sentence_transformers"):
+        out.append(
+            Check("Semantic search [semantic]", "ok", "sentence-transformers installed")
+        )
     else:
         out.append(
             Check(
-                "AI providers [ai]",
+                "Semantic search [semantic]",
                 "warn",
-                "no LLM client installed (AI estimation disabled)",
-                "pip install 'openconstructionerp[ai]'",
+                "not installed (RAG / embedding search disabled)",
+                "pip install 'openconstructionerp[semantic]'",
             )
         )
+
+    # PDF parsing for takeoff / document extraction.
+    if _present("pymupdf") or _present("fitz"):
+        out.append(Check("PDF takeoff [cv]", "ok", "pymupdf installed"))
+    else:
+        out.append(
+            Check(
+                "PDF takeoff [cv]",
+                "warn",
+                "not installed (PDF takeoff disabled)",
+                "pip install 'openconstructionerp[cv]'",
+            )
+        )
+
+    # AI provider key configuration (not a package check).
+    out.append(check_ai_provider_keys())
+
     return out
 
 
@@ -382,6 +501,10 @@ def run_preflight(
         check_frontend_bundled(),
         check_env_overrides(),
     ]
+    # Base tabular deps (pandas, pyarrow) are ERROR-level: the onboarding
+    # load-cwicr endpoint hard-requires them. Run on every preflight so
+    # `serve` also catches a broken install before uvicorn spins up.
+    checks.extend(check_core_tabular_deps())
     if verbose:
         checks.extend(check_optional_extras())
     return checks
@@ -400,6 +523,7 @@ def cmd_serve(args: argparse.Namespace) -> None:
         check_python_version(),
         check_data_dir(data_dir),
         check_port_free(args.host, args.port),
+        *check_core_tabular_deps(),
     ]
     blocking = [c for c in fatal_checks if c.status == "error"]
     if blocking:
@@ -497,39 +621,57 @@ def cmd_init_db(args: argparse.Namespace) -> None:
     # instantly without table creation lag.
     import asyncio
 
-    async def _create() -> None:
-        from app.database import Base, engine
+    # Mirrors the list in main.py's startup hook — keep the two lists in
+    # sync when adding a new module.
+    _module_names = [
+        "ai", "assemblies", "bim_hub", "boq", "catalog", "cde",
+        "changeorders", "collaboration", "contacts", "correspondence",
+        "costmodel", "costs", "documents", "enterprise_workflows",
+        "erp_chat", "fieldreports", "finance", "full_evm",
+        "i18n_foundation", "inspections", "integrations", "markups",
+        "meetings", "ncr", "notifications", "procurement", "projects",
+        "punchlist", "reporting", "requirements", "rfi", "rfq_bidding",
+        "risk", "safety", "schedule", "submittals", "takeoff", "tasks",
+        "teams", "tendering", "transmittals", "users", "validation",
+    ]
 
-        # Import every module's models so SQLAlchemy's metadata sees them
-        # before create_all. Mirrors the list in main.py's startup hook —
-        # keep the two lists in sync when adding a new module. Any import
-        # failure is swallowed: init-db must succeed even if one optional
-        # module is broken.
-        _module_names = [
-            "ai", "assemblies", "bim_hub", "boq", "catalog", "cde",
-            "changeorders", "collaboration", "contacts", "correspondence",
-            "costmodel", "costs", "documents", "enterprise_workflows",
-            "erp_chat", "fieldreports", "finance", "full_evm",
-            "i18n_foundation", "inspections", "integrations", "markups",
-            "meetings", "ncr", "notifications", "procurement", "projects",
-            "punchlist", "reporting", "requirements", "rfi", "rfq_bidding",
-            "risk", "safety", "schedule", "submittals", "takeoff", "tasks",
-            "teams", "tendering", "transmittals", "users", "validation",
-        ]
+    # Track import failures so we can report them loudly. Silently
+    # swallowing these (as the pre-v1.3.14 code did) led to "no such
+    # table" errors at runtime — the user saw "Ready." during init-db
+    # and then the server 500'd on the first query to a missing model.
+    failed_imports: list[tuple[str, str]] = []
+    imported_ok = 0
+
+    async def _create() -> None:
+        nonlocal imported_ok
         import importlib
+
+        from app.database import Base, engine
 
         for name in _module_names:
             try:
                 importlib.import_module(f"app.modules.{name}.models")
-            except Exception:
-                pass
+                imported_ok += 1
+            except ImportError as exc:
+                failed_imports.append((name, f"ImportError: {exc}"))
+                logger.warning("init-db: failed to import app.modules.%s.models: %s", name, exc)
+            except Exception as exc:  # noqa: BLE001
+                # Non-ImportError (e.g. syntax error, attribute error) is
+                # still a real problem — record it.
+                failed_imports.append((name, f"{type(exc).__name__}: {exc}"))
+                logger.warning(
+                    "init-db: %s while importing app.modules.%s.models: %s",
+                    type(exc).__name__,
+                    name,
+                    exc,
+                )
 
         try:
             from app.core.sqlite_migrator import sqlite_auto_migrate
 
             await sqlite_auto_migrate(engine, Base)
-        except Exception:
-            pass
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("init-db: sqlite_auto_migrate skipped: %s", exc)
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
 
@@ -538,6 +680,25 @@ def cmd_init_db(args: argparse.Namespace) -> None:
     except Exception as exc:
         print(_red(f"Database initialisation failed: {exc}"))
         print(_dim(f"  {_u('\u2192', '->')} Run 'openestimate doctor' for diagnostics."))
+        sys.exit(1)
+
+    total = len(_module_names)
+    print()
+    print(f"  {_dim('Modules:')}  imported {imported_ok}/{total} module models")
+
+    if failed_imports:
+        print()
+        print(_red(_bold(f"  {len(failed_imports)} module(s) failed to import:")))
+        for name, err in failed_imports:
+            print(f"    - {_bold(name)}: {_dim(err)}")
+        print()
+        print(
+            _red(
+                "Schema may be incomplete. Reinstall the package or check the error above."
+            )
+        )
+        print(_dim(f"  {_u('\u2192', '->')} pip install --upgrade --force-reinstall openconstructionerp"))
+        print(_dim(f"  {_u('\u2192', '->')} Then run 'openestimate doctor' to verify."))
         sys.exit(1)
 
     print()

@@ -1,6 +1,6 @@
 [project]
 name = "openconstructionerp"
-version = "1.3.13"
+version = "1.3.14"
 description = "The #1 open-source platform for construction cost estimation — BOQ, 4D/5D, AI, CAD/BIM takeoff"
 license = "AGPL-3.0-or-later"
 requires-python = ">=3.12"
@@ -91,12 +91,22 @@ vector = [
     "lancedb>=0.17.0",
     "fastembed>=0.4.0",
 ]
-# AI/LLM providers + Qdrant vector DB
-ai = [
+# Semantic search: Qdrant vector DB + sentence-transformers embeddings.
+# Used by the cost-database semantic-match endpoints and the RAG layer.
+#
+# NOTE: LLM provider SDKs (`anthropic`, `openai`, etc.) are intentionally
+# NOT listed here. `app/modules/ai/ai_client.py` calls those providers'
+# REST APIs directly via `httpx`, so the vendor SDKs would just be ~800 MB
+# of dead wheels on the user's disk. API keys live in the database and
+# `~/.openestimate/config.json`, not in SDK clients.
+semantic = [
     "qdrant-client>=1.12.0",
     "sentence-transformers>=3.3.0",
-    "anthropic>=0.40.0",
-    "openai>=1.55.0",
+]
+# Backwards-compat alias. Deprecated since v1.3.14 — prefer `[semantic]`.
+# Kept so existing `pip install openconstructionerp[ai]` commands still work.
+ai = [
+    "openconstructionerp[semantic]",
 ]
 # Computer vision for PDF takeoff
 cv = [
@@ -108,7 +118,7 @@ cv = [
 ]
 # Everything
 all = [
-    "openconstructionerp[server,vector,ai,cv]",
+    "openconstructionerp[server,vector,semantic,cv]",
 ]
 # Development tools
 dev = [
