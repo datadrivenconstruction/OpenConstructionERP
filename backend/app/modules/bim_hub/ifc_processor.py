@@ -6,6 +6,13 @@ Processing pipeline:
 3. Generates simplified COLLADA boxes for 3D preview
 
 For full geometry: install DDC cad2data or use Advanced Mode to upload CSV + DAE.
+
+Identity mapping (DDC RvtExporter):
+    The DDC COLLADA pass emits numeric ``<node id="N">`` values where ``N`` is
+    the Revit ElementId (``Element.Id.IntegerValue``). The DDC Excel pass emits
+    the same ElementId in its first column (header ``ID``). We use that ID as
+    the element's ``mesh_ref`` so the 3D viewer can pair each BIM element row
+    with its DAE node for filtering and isolation.
 """
 
 import hashlib
@@ -14,6 +21,8 @@ import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
+
+_COLLADA_NS = "http://www.collada.org/2005/11/COLLADASchema"
 
 logger = logging.getLogger(__name__)
 
@@ -265,6 +274,19 @@ def _excel_elements_to_bim_result(
     storeys_set: set[str] = set()
     disciplines_set: set[str] = set()
 
+    # Pre-parse the DAE (if provided) to extract per-node bounding boxes
+    # keyed by the numeric Revit ElementId written into <node id="...">.
+    dae_bboxes: dict[int, dict[str, float]] = {}
+    if real_dae_path and real_dae_path.exists():
+        try:
+            dae_bboxes = _extract_dae_bboxes_by_node_id(real_dae_path)
+            logger.info(
+                "Extracted %d per-element bounding boxes from DAE",
+                len(dae_bboxes),
+            )
+        except Exception as exc:
+            logger.warning("Failed to extract DAE bboxes: %s", exc)
+
     for i, row in enumerate(raw_elements):
         # Normalize keys to lowercase for tolerant lookup
         lc_row = {k.lower(): v for k, v in row.items()}
@@ -293,13 +315,22 @@ def _excel_elements_to_bim_result(
         )
         name = str(name)[:200]
 
+        # Storey: DDC writes the actual building level under "Level" for most
+        # categories, but walls/columns sometimes only fill "Base Constraint"
+        # or "Reference Level". Fall back through all known synonyms.
         storey = (
             lc_row.get("level")
             or lc_row.get("storey")
+            or lc_row.get("base constraint")
             or lc_row.get("base level")
+            or lc_row.get("reference level")
+            or lc_row.get("schedule level")
+            or lc_row.get("associated level")
             or ""
         )
         storey = str(storey).strip() if storey else ""
+        if storey.lower() == "none":
+            storey = ""
 
         discipline = _classify_discipline(etype)
         if storey:
@@ -329,6 +360,20 @@ def _excel_elements_to_bim_result(
             or lc_row.get("id")
             or i
         )
+
+        # mesh_ref — numeric Revit ElementId that matches the DAE <node id="...">.
+        # DDC's Excel ``ID`` column IS ``Element.Id.IntegerValue``. If it is
+        # missing we can still recover it from the last segment of ``UniqueId``
+        # (which encodes the ElementId in hex).
+        mesh_ref_int = _extract_revit_element_id(lc_row)
+        mesh_ref: str | None = str(mesh_ref_int) if mesh_ref_int is not None else None
+
+        # Bounding box — DDC RvtExporter Excel does NOT emit bbox columns at
+        # all, so we compute bbox per element from the DAE geometry (in metres;
+        # COLLADA is unit-normalised by DDC).
+        bbox: dict[str, float] | None = None
+        if mesh_ref_int is not None:
+            bbox = dae_bboxes.get(mesh_ref_int)
 
         # Properties: keep human-meaningful BuiltIn params, drop noisy / structural keys
         SKIP_PROP_KEYS = {
@@ -360,7 +405,8 @@ def _excel_elements_to_bim_result(
             "properties": properties,
             "quantities": quantities,
             "geometry_hash": hashlib.md5(f"{stable_id}:{etype}:{name}".encode()).hexdigest()[:16],
-            "bounding_box": None,
+            "bounding_box": bbox,
+            "mesh_ref": mesh_ref,
         })
 
     # Geometry: prefer the real Revit COLLADA from the second DDC pass.
@@ -505,7 +551,10 @@ def process_ifc_file(
                 "properties": {"ifc_type": ifc_type, "ifc_id": eid},
                 "quantities": quantities,
                 "geometry_hash": geo_hash,
+                # Both bbox and mesh_ref are populated post-loop from the
+                # placeholder COLLADA we generate (node id = "n{index}").
                 "bounding_box": None,
+                "mesh_ref": None,
             })
 
     # Generate simplified COLLADA
@@ -639,6 +688,19 @@ def _generate_collada_boxes(
         y = row * 4.0
         z = 0.0
 
+        # Record the placeholder node id + per-element bbox so callers can
+        # populate BIMElement.mesh_ref / bounding_box from this result.
+        node_id = f"n{i}"
+        elem["mesh_ref"] = node_id
+        elem["bounding_box"] = {
+            "min_x": float(x),
+            "min_y": float(y),
+            "min_z": float(z),
+            "max_x": float(x + ln),
+            "max_y": float(y + w),
+            "max_z": float(z + h),
+        }
+
         gid = f"g{i}"
         geom = ET.SubElement(lib_geom, "geometry", id=gid, name=elem.get("name", f"e{i}"))
         mesh = ET.SubElement(geom, "mesh")
@@ -688,6 +750,155 @@ def _generate_collada_boxes(
 
     logger.info("Generated COLLADA boxes: %d elements", n)
     return dae_path, bb
+
+
+def _extract_revit_element_id(lc_row: dict[str, Any]) -> int | None:
+    """Pull the Revit ``Element.Id.IntegerValue`` out of a DDC Excel row.
+
+    Tries, in order:
+    1. The lowercase ``id`` column (DDC's first column, already an integer).
+    2. The last hyphenated segment of ``uniqueid`` parsed as hex — the Revit
+       UniqueId format is ``<EpisodeGUID>-<ElementIdHex>``.
+    3. Any column whose normalised name matches one of the known aliases for
+       "revit element id".
+
+    Returns ``None`` if no numeric id can be recovered.
+    """
+    # 1) Direct ID column from DDC RvtExporter.
+    raw = lc_row.get("id")
+    if raw is not None:
+        try:
+            return int(raw)
+        except (TypeError, ValueError):
+            pass
+
+    # 2) UniqueId -> hex element id
+    uid = lc_row.get("uniqueid")
+    if isinstance(uid, str) and "-" in uid:
+        last = uid.rsplit("-", 1)[-1]
+        try:
+            return int(last, 16)
+        except ValueError:
+            pass
+
+    # 3) Alternate column names used by other CAD tools.
+    for key in ("element_id", "elementid", "revit_id", "revitid", "elem_id"):
+        val = lc_row.get(key)
+        if val is None:
+            continue
+        try:
+            return int(val)
+        except (TypeError, ValueError):
+            continue
+
+    return None
+
+
+def _extract_dae_bboxes_by_node_id(dae_path: Path) -> dict[int, dict[str, float]]:
+    """Parse a COLLADA file and compute a bounding box per scene node.
+
+    Returns a mapping ``{revit_element_id: {min_x, min_y, min_z,
+    max_x, max_y, max_z}}`` keyed by the integer ``<node id="...">`` value
+    (which DDC RvtExporter sets to the Revit ElementId).
+
+    Non-numeric node ids are skipped — they correspond to lights, cameras,
+    and other auxiliary scene entries that do not map to BIM elements.
+
+    Coordinates are returned in the DAE's own units (DDC emits metres).
+    """
+    tree = ET.parse(str(dae_path))
+    root = tree.getroot()
+    ns = {"c": _COLLADA_NS}
+
+    # Index geometries by id so we can resolve <instance_geometry url="#gid">.
+    geom_positions: dict[str, list[tuple[float, float, float]]] = {}
+    for geom in root.findall(".//c:library_geometries/c:geometry", ns):
+        gid = geom.get("id") or ""
+        # Prefer the <vertices>-referenced <source> when present; otherwise
+        # fall back to the first float_array in the mesh.
+        fa = geom.find(".//c:mesh//c:float_array", ns)
+        if fa is None or not fa.text:
+            continue
+        try:
+            nums = [float(x) for x in fa.text.split()]
+        except ValueError:
+            continue
+        # Positions are 3-tuples. Ignore trailing values.
+        pts = [(nums[i], nums[i + 1], nums[i + 2]) for i in range(0, len(nums) - 2, 3)]
+        if pts:
+            geom_positions[gid] = pts
+
+    result: dict[int, dict[str, float]] = {}
+
+    def _parse_matrix(text: str) -> tuple[float, ...] | None:
+        try:
+            vals = tuple(float(v) for v in text.split())
+        except ValueError:
+            return None
+        return vals if len(vals) == 16 else None
+
+    def _apply_matrix(
+        m: tuple[float, ...],
+        pt: tuple[float, float, float],
+    ) -> tuple[float, float, float]:
+        x, y, z = pt
+        # COLLADA matrices are row-major 4x4.
+        nx = m[0] * x + m[1] * y + m[2] * z + m[3]
+        ny = m[4] * x + m[5] * y + m[6] * z + m[7]
+        nz = m[8] * x + m[9] * y + m[10] * z + m[11]
+        return nx, ny, nz
+
+    for node in root.findall(".//c:visual_scene//c:node", ns):
+        nid = node.get("id") or ""
+        if not nid.isdigit():
+            continue
+        elem_id = int(nid)
+
+        # Collect parent-chain transforms — DDC usually flattens geometry,
+        # but we still respect any direct <matrix> on the node.
+        matrix: tuple[float, ...] | None = None
+        mat_el = node.find("c:matrix", ns)
+        if mat_el is not None and mat_el.text:
+            matrix = _parse_matrix(mat_el.text)
+
+        min_x = min_y = min_z = float("inf")
+        max_x = max_y = max_z = float("-inf")
+
+        for inst in node.findall("c:instance_geometry", ns):
+            url = inst.get("url") or ""
+            if not url.startswith("#"):
+                continue
+            pts = geom_positions.get(url[1:])
+            if not pts:
+                continue
+            for pt in pts:
+                tp = _apply_matrix(matrix, pt) if matrix else pt
+                if tp[0] < min_x:
+                    min_x = tp[0]
+                if tp[1] < min_y:
+                    min_y = tp[1]
+                if tp[2] < min_z:
+                    min_z = tp[2]
+                if tp[0] > max_x:
+                    max_x = tp[0]
+                if tp[1] > max_y:
+                    max_y = tp[1]
+                if tp[2] > max_z:
+                    max_z = tp[2]
+
+        if min_x == float("inf"):
+            continue  # No geometry attached — skip.
+
+        result[elem_id] = {
+            "min_x": round(min_x, 4),
+            "min_y": round(min_y, 4),
+            "min_z": round(min_z, 4),
+            "max_x": round(max_x, 4),
+            "max_y": round(max_y, 4),
+            "max_z": round(max_z, 4),
+        }
+
+    return result
 
 
 def _empty_result() -> dict[str, Any]:

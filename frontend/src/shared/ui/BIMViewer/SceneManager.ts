@@ -46,12 +46,15 @@ export class SceneManager {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0xf0f2f5);
 
-    // Gradient sky via hemisphere light contribution + fog
-    this.scene.fog = new THREE.Fog(0xf0f2f5, 200, 500);
+    // Gradient sky via hemisphere light contribution + fog.
+    // Range is tightened in zoomToFit() once the model size is known.
+    this.scene.fog = new THREE.Fog(0xf0f2f5, 2_000, 20_000);
 
-    // Camera
+    // Camera — near/far and controls.min/maxDistance are tuned dynamically in
+    // zoomToFit() so models in any unit (metres / millimetres / feet) fit
+    // correctly without user zoom.
     const aspect = this.container.clientWidth / Math.max(this.container.clientHeight, 1);
-    this.camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
+    this.camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 10_000);
     this.camera.position.set(30, 20, 30);
     this.camera.lookAt(0, 0, 0);
 
@@ -59,8 +62,8 @@ export class SceneManager {
     this.controls = new OrbitControls(this.camera, canvas);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.1;
-    this.controls.minDistance = 1;
-    this.controls.maxDistance = 500;
+    this.controls.minDistance = 0.1;
+    this.controls.maxDistance = 100_000;
     this.controls.target.set(0, 0, 0);
 
     // Lighting
@@ -126,16 +129,63 @@ export class SceneManager {
     this.renderer.render(this.scene, this.camera);
   };
 
+  /**
+   * Compute a bounding box of the BIM content only — excluding helpers
+   * (grid, lights, cameras) that would otherwise skew the fit distance.
+   */
+  private computeContentBBox(): THREE.Box3 {
+    const box = new THREE.Box3();
+    const tmp = new THREE.Box3();
+    this.scene.traverse((obj) => {
+      // Skip helpers, lights, cameras — they don't represent real geometry
+      if (
+        obj instanceof THREE.GridHelper ||
+        obj instanceof THREE.Light ||
+        obj instanceof THREE.Camera ||
+        (obj as THREE.Object3D & { isHelper?: boolean }).isHelper
+      ) {
+        return;
+      }
+      if (obj instanceof THREE.Mesh && obj.geometry) {
+        tmp.setFromObject(obj);
+        if (!tmp.isEmpty()) box.union(tmp);
+      }
+    });
+    return box;
+  }
+
   /** Fit all objects (or a specific bounding box) into the camera view. */
   zoomToFit(bbox?: THREE.Box3): void {
-    const box = bbox ?? new THREE.Box3().setFromObject(this.scene);
+    const box = bbox ?? this.computeContentBBox();
     if (box.isEmpty()) return;
 
     const center = box.getCenter(new THREE.Vector3());
     const size = box.getSize(new THREE.Vector3());
     const maxDim = Math.max(size.x, size.y, size.z);
+    if (!Number.isFinite(maxDim) || maxDim <= 0) return;
+
     const fov = this.camera.fov * (Math.PI / 180);
-    const dist = maxDim / (2 * Math.tan(fov / 2)) * 1.5;
+    const dist = (maxDim / (2 * Math.tan(fov / 2))) * 1.6;
+
+    // Dynamically rescale camera frustum + controls distance limits based on
+    // the model size. Critical for RVT/COLLADA models that ship in mm or ft —
+    // without this, a 30-metre building has a 30_000-unit bbox and the
+    // hard-coded camera.far=1000 / maxDistance=500 would hide the model.
+    this.camera.near = Math.max(0.01, maxDim / 10_000);
+    this.camera.far = Math.max(1000, dist * 50);
+    this.camera.updateProjectionMatrix();
+
+    this.controls.minDistance = Math.max(0.01, maxDim / 1000);
+    this.controls.maxDistance = dist * 20;
+
+    // Grid sizing — make the helper at least as large as the model footprint
+    this.rescaleGrid(maxDim, center);
+
+    // Fog — place it well beyond the model so we don't fog out the geometry
+    if (this.scene.fog instanceof THREE.Fog) {
+      this.scene.fog.near = dist * 5;
+      this.scene.fog.far = dist * 25;
+    }
 
     this.controls.target.copy(center);
     this.camera.position.set(
@@ -145,6 +195,30 @@ export class SceneManager {
     );
     this.camera.lookAt(center);
     this.controls.update();
+  }
+
+  /** Rebuild the grid helper so it scales with model size. */
+  private rescaleGrid(maxDim: number, center: THREE.Vector3): void {
+    if (!this.gridHelper) return;
+    const wasVisible = this.gridHelper.visible;
+    this.scene.remove(this.gridHelper);
+    this.gridHelper.geometry.dispose();
+    const mat = this.gridHelper.material;
+    if (Array.isArray(mat)) mat.forEach((m) => m.dispose());
+    else mat?.dispose();
+
+    // Grid at least 2x model footprint, rounded up to a clean power-of-ten
+    const target = Math.max(10, maxDim * 2);
+    const magnitude = Math.pow(10, Math.floor(Math.log10(target)));
+    const gridSize = Math.ceil(target / magnitude) * magnitude;
+    const divisions = 20;
+    this.gridHelper = new THREE.GridHelper(gridSize, divisions, 0xcccccc, 0xe0e0e0);
+    // Place grid under the model (Three's default is Y-up; models come in
+    // with varying up-axes, but the grid is a visual guide so we align to the
+    // bottom of the content bbox)
+    this.gridHelper.position.set(center.x, center.y - maxDim / 2 - 0.01, center.z);
+    this.gridHelper.visible = wasVisible;
+    this.scene.add(this.gridHelper);
   }
 
   /** Zoom to specific element bounding boxes. */

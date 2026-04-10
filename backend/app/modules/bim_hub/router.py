@@ -124,12 +124,78 @@ _BIM_COLUMN_ALIASES: dict[str, list[str]] = {
         "storey",
         "story",
         "level",
+        "level_name",
+        "levelname",
+        "host_level_name",
+        "hostlevelname",
         "floor",
+        "floor_name",
         "etage",
         "geschoss",
         "building_storey",
         "buildingstorey",
         "ifc_storey",
+        "ifcstorey",
+        "base_constraint",
+        "baseconstraint",
+        "base_level",
+        "baselevel",
+        "reference_level",
+        "referencelevel",
+        "associated_level",
+        "associatedlevel",
+        "schedule_level",
+        "schedulelevel",
+    ],
+    "mesh_ref": [
+        "mesh_ref",
+        "meshref",
+        "mesh_id",
+        "meshid",
+        "node_id",
+        "nodeid",
+        "dae_node",
+        "daenode",
+        "collada_node",
+        "colladanode",
+        "geometry_ref",
+        "geometryref",
+    ],
+    "bbox_min_x": [
+        "bbox_min_x", "bboxminx", "min_x", "minx",
+        "bounding_box_min_x", "boundingboxminx",
+        "bb_min_x", "bbminx", "xmin",
+    ],
+    "bbox_min_y": [
+        "bbox_min_y", "bboxminy", "min_y", "miny",
+        "bounding_box_min_y", "boundingboxminy",
+        "bb_min_y", "bbminy", "ymin",
+    ],
+    "bbox_min_z": [
+        "bbox_min_z", "bboxminz", "min_z", "minz",
+        "bounding_box_min_z", "boundingboxminz",
+        "bb_min_z", "bbminz", "zmin",
+    ],
+    "bbox_max_x": [
+        "bbox_max_x", "bboxmaxx", "max_x", "maxx",
+        "bounding_box_max_x", "boundingboxmaxx",
+        "bb_max_x", "bbmaxx", "xmax",
+    ],
+    "bbox_max_y": [
+        "bbox_max_y", "bboxmaxy", "max_y", "maxy",
+        "bounding_box_max_y", "boundingboxmaxy",
+        "bb_max_y", "bbmaxy", "ymax",
+    ],
+    "bbox_max_z": [
+        "bbox_max_z", "bboxmaxz", "max_z", "maxz",
+        "bounding_box_max_z", "boundingboxmaxz",
+        "bb_max_z", "bbmaxz", "zmax",
+    ],
+    "bounding_box": [
+        "bounding_box",
+        "boundingbox",
+        "bbox",
+        "aabb",
     ],
     "discipline": [
         "discipline",
@@ -330,11 +396,60 @@ def _rows_to_elements(
         elif isinstance(raw_props, dict):
             props = raw_props
 
+        # Explicit mesh_ref column wins, otherwise fall back to element_id
+        # (which matches DDC RvtExporter's DAE ``<node id="...">`` pattern).
+        raw_mesh_ref = row.get("mesh_ref")
+        if raw_mesh_ref is not None and str(raw_mesh_ref).strip():
+            mesh_ref: str | None = str(raw_mesh_ref).strip()
+        elif has_geometry:
+            mesh_ref = eid
+        else:
+            mesh_ref = None
+
+        # Explicit bbox — either a pre-built JSON blob in ``bounding_box`` or
+        # six individual min/max columns.
+        bbox: dict[str, float] | None = None
+        raw_bbox = row.get("bounding_box")
+        if isinstance(raw_bbox, dict):
+            bbox = {k: float(v) for k, v in raw_bbox.items() if v is not None}
+        elif isinstance(raw_bbox, str) and raw_bbox.strip():
+            try:
+                parsed = json.loads(raw_bbox)
+                if isinstance(parsed, dict):
+                    bbox = {k: float(v) for k, v in parsed.items() if v is not None}
+            except (json.JSONDecodeError, ValueError, TypeError):
+                pass
+        if bbox is None:
+            bbox_keys = ("bbox_min_x", "bbox_min_y", "bbox_min_z",
+                         "bbox_max_x", "bbox_max_y", "bbox_max_z")
+            if any(row.get(k) is not None for k in bbox_keys):
+                bbox = {
+                    "min_x": _safe_float(row.get("bbox_min_x")),
+                    "min_y": _safe_float(row.get("bbox_min_y")),
+                    "min_z": _safe_float(row.get("bbox_min_z")),
+                    "max_x": _safe_float(row.get("bbox_max_x")),
+                    "max_y": _safe_float(row.get("bbox_max_y")),
+                    "max_z": _safe_float(row.get("bbox_max_z")),
+                }
+                # Heuristic: if the numbers look like millimetres (range >10000
+                # in any axis) convert to metres.
+                ranges = [
+                    abs(bbox["max_x"] - bbox["min_x"]),
+                    abs(bbox["max_y"] - bbox["min_y"]),
+                    abs(bbox["max_z"] - bbox["min_z"]),
+                ]
+                if any(r > 10_000 for r in ranges):
+                    bbox = {k: v / 1000.0 for k, v in bbox.items()}
+
         # Collect any extra columns not in known canonical keys as properties
+        bbox_col_keys = {
+            "bounding_box", "bbox_min_x", "bbox_min_y", "bbox_min_z",
+            "bbox_max_x", "bbox_max_y", "bbox_max_z",
+        }
         known_keys = {
             "element_id", "element_type", "name", "storey",
-            "discipline", "properties",
-        } | quantity_keys
+            "discipline", "properties", "mesh_ref",
+        } | quantity_keys | bbox_col_keys
         for k, v in row.items():
             if k not in known_keys and v is not None and str(v).strip():
                 props[k] = v
@@ -347,7 +462,8 @@ def _rows_to_elements(
             "discipline": str(row.get("discipline", "")).strip() or None,
             "quantities": quantities,
             "properties": props,
-            "mesh_ref": eid if has_geometry else None,
+            "mesh_ref": mesh_ref,
+            "bounding_box": bbox,
         }
         elements.append(element)
 
@@ -508,6 +624,7 @@ async def upload_bim_data(
             quantities=ed.get("quantities", {}),
             properties=ed.get("properties", {}),
             mesh_ref=ed.get("mesh_ref"),
+            bounding_box=ed.get("bounding_box"),
         )
         for ed in element_dicts
     ]
@@ -681,6 +798,7 @@ async def upload_cad_file(
                         quantities=elem_data.get("quantities", {}),
                         geometry_hash=elem_data.get("geometry_hash"),
                         bounding_box=elem_data.get("bounding_box"),
+                        mesh_ref=elem_data.get("mesh_ref"),
                     )
                     service.session.add(el)
 
