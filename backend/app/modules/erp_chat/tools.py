@@ -4,6 +4,12 @@ Each tool maps to a real ERP service call. Handlers return a dict with:
     renderer  — frontend component hint (e.g. "projects_grid", "boq_table")
     data      — structured payload for the renderer
     summary   — one-line human-readable summary for the AI
+
+SECURITY: all project-scoped tools MUST call ``_require_project_access``
+before touching data, otherwise any user could pass an arbitrary project_id
+to enumerate data they don't own. Tool arguments are also validated via
+``_parse_uuid`` and ``_parse_str`` helpers so malformed AI output produces
+a clean error response instead of crashing the stream.
 """
 
 import logging
@@ -13,6 +19,92 @@ from typing import Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
+
+
+# ── Shared authorization + validation helpers ───────────────────────────────
+
+
+class ToolAuthError(Exception):
+    """Raised when a tool handler fails authorization or input validation."""
+
+
+def _parse_uuid(raw: Any, field_name: str = "id") -> uuid.UUID:
+    """Parse a UUID from tool arguments, raising ToolAuthError on failure."""
+    if raw is None or raw == "":
+        raise ToolAuthError(f"Missing required field '{field_name}'")
+    try:
+        return uuid.UUID(str(raw))
+    except (ValueError, TypeError, AttributeError):
+        raise ToolAuthError(f"Invalid UUID for '{field_name}': {raw!r}")
+
+
+def _parse_str(
+    raw: Any,
+    field_name: str = "field",
+    *,
+    required: bool = False,
+    max_length: int = 500,
+) -> str | None:
+    """Parse + sanitize a string arg. Truncates to max_length, rejects types."""
+    if raw is None or raw == "":
+        if required:
+            raise ToolAuthError(f"Missing required field '{field_name}'")
+        return None
+    if not isinstance(raw, (str, int, float)):
+        raise ToolAuthError(f"Invalid type for '{field_name}': expected string")
+    s = str(raw).strip()
+    if len(s) > max_length:
+        s = s[:max_length]
+    return s
+
+
+async def _require_project_access(
+    session: AsyncSession,
+    project_id: uuid.UUID,
+    user_id: str,
+) -> None:
+    """Verify the user owns or is an admin on the referenced project.
+
+    Raises ToolAuthError if the project doesn't exist or the user has no
+    access. Central choke-point for tool authorization — every project-scoped
+    tool must call this before querying data.
+    """
+    try:
+        from app.modules.projects.repository import ProjectRepository
+        from app.modules.users.repository import UserRepository
+
+        proj_repo = ProjectRepository(session)
+        project = await proj_repo.get_by_id(project_id)
+        if project is None:
+            raise ToolAuthError(f"Project {project_id} not found")
+
+        # Admin bypass
+        try:
+            user_repo = UserRepository(session)
+            user = await user_repo.get_by_id(user_id)
+            if user and getattr(user, "role", "") == "admin":
+                return
+        except Exception:
+            pass
+
+        if str(project.owner_id) != str(user_id):
+            raise ToolAuthError(
+                f"Access denied: you do not own project {project_id}"
+            )
+    except ToolAuthError:
+        raise
+    except Exception as exc:
+        logger.warning("Project access check failed for %s: %s", project_id, exc)
+        raise ToolAuthError(f"Authorization check failed: {exc}")
+
+
+def _auth_error(msg: str) -> dict[str, Any]:
+    """Build a standard error result for tool handlers."""
+    return {
+        "renderer": "error",
+        "data": {"error": msg},
+        "summary": f"Error: {msg}",
+    }
 
 # ── Tool definitions (Anthropic function-calling format) ─────────────────────
 
@@ -234,10 +326,14 @@ async def handle_get_project_summary(
 ) -> dict[str, Any]:
     """Get detailed summary for a single project."""
     try:
+        pid = _parse_uuid(args.get("project_id"), "project_id")
+        await _require_project_access(session, pid, user_id)
+    except ToolAuthError as exc:
+        return _auth_error(str(exc))
+    try:
         from app.config import get_settings
         from app.modules.projects.service import ProjectService
 
-        pid = uuid.UUID(args["project_id"])
         svc = ProjectService(session, get_settings())
         p = await svc.get_project(pid)
         return {
@@ -273,7 +369,11 @@ async def handle_get_boq_items(
     try:
         from app.modules.boq.service import BOQService
 
-        pid = uuid.UUID(args["project_id"])
+        try:
+            pid = _parse_uuid(args.get("project_id"), "project_id")
+            await _require_project_access(session, pid, user_id)
+        except ToolAuthError as _te:
+            return _auth_error(str(_te))
         svc = BOQService(session)
         boqs, total_boqs = await svc.list_boqs_for_project(pid, limit=5)
         if not boqs:
@@ -324,7 +424,11 @@ async def handle_get_schedule(
     try:
         from app.modules.schedule.service import ScheduleService
 
-        pid = uuid.UUID(args["project_id"])
+        try:
+            pid = _parse_uuid(args.get("project_id"), "project_id")
+            await _require_project_access(session, pid, user_id)
+        except ToolAuthError as _te:
+            return _auth_error(str(_te))
         svc = ScheduleService(session)
         schedules, total = await svc.list_schedules_for_project(pid, limit=5)
         if not schedules:
@@ -381,7 +485,11 @@ async def handle_get_validation_results(
     try:
         from app.modules.validation.repository import ValidationReportRepository
 
-        pid = uuid.UUID(args["project_id"])
+        try:
+            pid = _parse_uuid(args.get("project_id"), "project_id")
+            await _require_project_access(session, pid, user_id)
+        except ToolAuthError as _te:
+            return _auth_error(str(_te))
         repo = ValidationReportRepository(session)
         reports, total = await repo.list_for_project(pid, limit=10)
         if not reports:
@@ -424,7 +532,11 @@ async def handle_get_risk_register(
     try:
         from app.modules.risk.service import RiskService
 
-        pid = uuid.UUID(args["project_id"])
+        try:
+            pid = _parse_uuid(args.get("project_id"), "project_id")
+            await _require_project_access(session, pid, user_id)
+        except ToolAuthError as _te:
+            return _auth_error(str(_te))
         svc = RiskService(session)
         risks, total = await svc.list_risks(pid, limit=50)
         summary_data = await svc.get_summary(pid)
@@ -500,7 +612,11 @@ async def handle_get_cost_model(
     try:
         from app.modules.boq.service import BOQService
 
-        pid = uuid.UUID(args["project_id"])
+        try:
+            pid = _parse_uuid(args.get("project_id"), "project_id")
+            await _require_project_access(session, pid, user_id)
+        except ToolAuthError as _te:
+            return _auth_error(str(_te))
         svc = BOQService(session)
         boqs, _ = await svc.list_boqs_for_project(pid, limit=1)
         if not boqs:
@@ -561,13 +677,25 @@ async def handle_compare_projects(
         from app.config import get_settings
         from app.modules.projects.service import ProjectService
 
-        project_ids = [uuid.UUID(pid) for pid in args.get("project_ids", [])]
+        raw_ids = args.get("project_ids") or []
+        if not isinstance(raw_ids, list) or not raw_ids:
+            return _auth_error("project_ids must be a non-empty list")
+        if len(raw_ids) > 20:
+            return _auth_error("Cannot compare more than 20 projects at once")
+
+        # Parse + authorize every ID before doing any work
+        project_ids: list[uuid.UUID] = []
+        for raw in raw_ids:
+            try:
+                pid = _parse_uuid(raw, "project_id")
+                await _require_project_access(session, pid, user_id)
+                project_ids.append(pid)
+            except ToolAuthError as _te:
+                # Skip IDs the user can't access; do not expose the reason
+                logger.info("compare_projects: skipping %r (%s)", raw, _te)
+
         if not project_ids:
-            return {
-                "renderer": "error",
-                "data": {"error": "No project IDs provided"},
-                "summary": "Error: No project IDs provided",
-            }
+            return _auth_error("No accessible projects found in project_ids")
 
         svc = ProjectService(session, get_settings())
         comparisons = []
@@ -604,7 +732,11 @@ async def handle_run_validation(
     try:
         from app.modules.validation.repository import ValidationReportRepository
 
-        pid = uuid.UUID(args["project_id"])
+        try:
+            pid = _parse_uuid(args.get("project_id"), "project_id")
+            await _require_project_access(session, pid, user_id)
+        except ToolAuthError as _te:
+            return _auth_error(str(_te))
         repo = ValidationReportRepository(session)
         # Return the most recent validation reports
         reports, total = await repo.list_for_project(pid, limit=5)
@@ -649,7 +781,11 @@ async def handle_create_boq_item(
         from app.modules.boq.schemas import PositionCreate
         from app.modules.boq.service import BOQService
 
-        pid = uuid.UUID(args["project_id"])
+        try:
+            pid = _parse_uuid(args.get("project_id"), "project_id")
+            await _require_project_access(session, pid, user_id)
+        except ToolAuthError as _te:
+            return _auth_error(str(_te))
         svc = BOQService(session)
         boqs, _ = await svc.list_boqs_for_project(pid, limit=1)
         if not boqs:

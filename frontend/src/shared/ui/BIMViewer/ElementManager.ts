@@ -400,6 +400,75 @@ export class ElementManager {
     }
   }
 
+  /** Isolate given element IDs — hide everything else. */
+  isolate(elementIds: string[]): void {
+    const keep = new Set(elementIds);
+    for (const [id, mesh] of this.meshMap) {
+      mesh.visible = keep.has(id);
+    }
+  }
+
+  /**
+   * Re-color every mesh based on a key-extractor function. A distinct color
+   * is assigned to each unique key via a simple hash-to-hue mapping.
+   * Used to implement "color by storey" and "color by type" modes.
+   */
+  colorBy(keyFn: (el: BIMElementData) => string): void {
+    // Collect unique keys for stable color assignment
+    const keys = new Set<string>();
+    for (const el of this.elementDataMap.values()) {
+      keys.add(keyFn(el));
+    }
+    const keyList = Array.from(keys).sort();
+    const colorMap = new Map<string, THREE.Color>();
+    for (let i = 0; i < keyList.length; i++) {
+      const hue = (i * 137.5) % 360; // golden angle for distinct hues
+      const color = new THREE.Color().setHSL(hue / 360, 0.55, 0.55);
+      colorMap.set(keyList[i]!, color);
+    }
+
+    // Apply per-mesh material clone (so we can color independently)
+    for (const [elementId, mesh] of this.meshMap) {
+      const el = this.elementDataMap.get(elementId);
+      if (!el) continue;
+      const key = keyFn(el);
+      const color = colorMap.get(key);
+      if (!color) continue;
+
+      // Clone material on first recolor so we don't mutate the shared one
+      const ud = mesh.userData as { customMaterial?: boolean };
+      if (!ud.customMaterial) {
+        const base = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
+        if (base instanceof THREE.MeshStandardMaterial) {
+          mesh.material = base.clone();
+          ud.customMaterial = true;
+        }
+      }
+      const mat = mesh.material as THREE.MeshStandardMaterial;
+      if (mat && mat.color) {
+        mat.color.copy(color);
+      }
+    }
+  }
+
+  /** Reset mesh colors back to their discipline-based material. */
+  resetColors(): void {
+    for (const [elementId, mesh] of this.meshMap) {
+      const el = this.elementDataMap.get(elementId);
+      if (!el) continue;
+      const ud = mesh.userData as { customMaterial?: boolean };
+      if (ud.customMaterial) {
+        // Dispose the cloned material and restore shared discipline material
+        const old = mesh.material;
+        if (old instanceof THREE.MeshStandardMaterial) {
+          old.dispose();
+        }
+        mesh.material = this.getMaterial(el.discipline || 'other');
+        ud.customMaterial = false;
+      }
+    }
+  }
+
   /** Remove all elements from the scene. */
   clear(): void {
     for (const mesh of this.meshMap.values()) {

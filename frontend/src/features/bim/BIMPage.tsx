@@ -539,6 +539,8 @@ export function BIMPage() {
     ((el: BIMElementData) => boolean) | null
   >(null);
   const [visibleElementCount, setVisibleElementCount] = useState<number | null>(null);
+  const [colorByMode, setColorByMode] = useState<'default' | 'storey' | 'type'>('default');
+  const [isolatedIds, setIsolatedIds] = useState<string[] | null>(null);
   const addToast = useToastStore((s) => s.addToast);
 
   const modelsQuery = useQuery({ queryKey: ['bim-models', projectId], queryFn: () => fetchBIMModels(projectId), enabled: !!projectId });
@@ -677,6 +679,37 @@ export function BIMPage() {
                   </span>
                 )}
               </button>
+
+              {/* Color-by selector */}
+              <select
+                value={colorByMode}
+                onChange={(e) => setColorByMode(e.target.value as 'default' | 'storey' | 'type')}
+                title={t('bim.color_by', { defaultValue: 'Color by' })}
+                className="text-[11px] py-1.5 px-2 rounded-lg border border-border-light bg-surface-secondary text-content-secondary hover:bg-surface-tertiary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+              >
+                <option value="default">{t('bim.color_default', { defaultValue: 'Color: Discipline' })}</option>
+                <option value="storey">{t('bim.color_storey', { defaultValue: 'Color: Storey' })}</option>
+                <option value="type">{t('bim.color_type', { defaultValue: 'Color: Type' })}</option>
+              </select>
+
+              {/* Isolate toggle (when an element is selected) */}
+              {selectedElementId && (
+                <button
+                  onClick={() =>
+                    setIsolatedIds((cur) => (cur ? null : [selectedElementId]))
+                  }
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${
+                    isolatedIds
+                      ? 'bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800'
+                      : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
+                  }`}
+                  title={t('bim.isolate_selection', { defaultValue: 'Isolate selection' })}
+                >
+                  {isolatedIds
+                    ? t('bim.show_all', { defaultValue: 'Show all' })
+                    : t('bim.isolate', { defaultValue: 'Isolate' })}
+                </button>
+              )}
               <button onClick={() => navigate('/boq')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-content-secondary bg-surface-secondary border border-border-light hover:bg-surface-tertiary transition-colors">
                 <Link2 size={13} /> Link to BOQ
               </button>
@@ -723,6 +756,8 @@ export function BIMPage() {
             error={elementsQuery.error ? 'Failed to load model elements. Check the server connection.' : null}
             geometryUrl={geometryUrl}
             filterPredicate={filterPredicate}
+            colorByMode={colorByMode}
+            isolatedIds={isolatedIds}
             className="h-full"
           />
         ) : (

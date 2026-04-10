@@ -103,7 +103,7 @@ export function LoginPage() {
             body: JSON.stringify({
               email: demoEmail,
               password: 'DemoPass1234!',
-              full_name: demoEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+              full_name: (demoEmail.split('@')[0] ?? 'Demo User').replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
             }),
           });
           if (regRes.ok) {
