@@ -110,6 +110,73 @@ function getTypeKey(el: BIMElementData, format: BIMModelFormat): string {
   return el.category || el.element_type || 'Unknown';
 }
 
+/**
+ * Parse a raw storey string into a structured form for sorting and
+ * display.  Revit / IFC level names typically look like:
+ *
+ *   "01 - Entry Level"     →  level = 1, label = "Entry Level"
+ *   "02 - Floor 1"         →  level = 2, label = "Floor 1"
+ *   "Level 03"             →  level = 3, label = "Level 03"
+ *   "Roof"                 →  level = null, label = "Roof"
+ *   "B1 - Basement"        →  level = -1, label = "Basement"
+ *
+ * The leading number (or B1/B2 basement notation) is extracted as
+ * `level` so that storeys can be ordered ground-up regardless of how
+ * the originating CAD tool formatted the string.
+ */
+export interface ParsedStorey {
+  raw: string;
+  /** Numeric level extracted from the prefix; null if no prefix found. */
+  level: number | null;
+  /** Display label with the prefix stripped. */
+  label: string;
+  /** Element count on this storey. */
+  count: number;
+}
+
+function parseStorey(raw: string, count: number): ParsedStorey {
+  const trimmed = raw.trim();
+  // Basement: "B1", "B2", "BSMT", "Basement 1"
+  const basement = /^(?:b|bsmt|basement)\s*0*(\d+)/i.exec(trimmed);
+  if (basement) {
+    return {
+      raw,
+      level: -Number(basement[1]),
+      label: trimmed.replace(/^[^-]*-\s*/, '') || trimmed,
+      count,
+    };
+  }
+  // "Ground Floor" / "Ground"
+  if (/^ground/i.test(trimmed)) {
+    return { raw, level: 0, label: trimmed, count };
+  }
+  // "Roof" / "Penthouse" — keep label, no level (sort to end)
+  // Numeric prefix: "01 - Entry Level", "12 Foo", "Level 03"
+  const numberMatch =
+    /^(\d{1,3})(?:\s*[-–:.]\s*(.*))?$/.exec(trimmed) ||
+    /^level\s+(\d{1,3})(?:\s*[-–:.]\s*(.*))?$/i.exec(trimmed) ||
+    /^(?:floor|fl|etage|stockwerk)\s+(\d{1,3})(?:\s*[-–:.]\s*(.*))?$/i.exec(trimmed);
+  if (numberMatch) {
+    const level = Number(numberMatch[1]);
+    const labelPart = numberMatch[2]?.trim();
+    return {
+      raw,
+      level,
+      label: labelPart && labelPart.length > 0 ? labelPart : trimmed,
+      count,
+    };
+  }
+  return { raw, level: null, label: trimmed, count };
+}
+
+/** Format a level number for display in the chip badge. */
+function formatLevelBadge(level: number | null): string {
+  if (level === null) return '';
+  if (level < 0) return `B${Math.abs(level)}`;
+  if (level === 0) return 'G';
+  return String(level).padStart(2, '0');
+}
+
 // ── Component ────────────────────────────────────────────────────────────
 
 export default function BIMFilterPanel({
@@ -142,6 +209,12 @@ export default function BIMFilterPanel({
   );
 
   // ── Derived: counts per dimension + bucket grouping ─────────────────
+  //
+  // Storey counts are scoped by the buildingsOnly toggle: when ON, the
+  // ~10 000 annotation/analytical elements with `storey: null` are
+  // EXCLUDED from the storey list, so the user sees a clean list of
+  // real building levels instead of an overwhelming "—" entry that
+  // dominates the panel.
   const counts = useMemo(() => {
     const byStorey = new Map<string, number>();
     const byType = new Map<string, number>();
@@ -150,10 +223,16 @@ export default function BIMFilterPanel({
     const bucketTotals = new Map<BIMCategoryBucket, number>();
 
     for (const el of elements) {
-      const s = el.storey || '—';
-      byStorey.set(s, (byStorey.get(s) ?? 0) + 1);
-
       const tpe = getTypeKey(el, format);
+      const isNoise = isNoiseCategory(tpe);
+
+      // Storey counts skip noise when buildingsOnly is on, AND skip
+      // null storeys entirely (an annotation row with no level isn't
+      // a useful "—" filter target).
+      if (!(state.buildingsOnly && isNoise) && el.storey) {
+        byStorey.set(el.storey, (byStorey.get(el.storey) ?? 0) + 1);
+      }
+
       byType.set(tpe, (byType.get(tpe) ?? 0) + 1);
 
       const bucket = bucketOf(tpe);
@@ -183,14 +262,25 @@ export default function BIMFilterPanel({
       });
     }
 
+    // Storey list — parse the leading number (if any) so "10 - Roof"
+    // sorts after "02 - Entry Level" and not before it. Extract a
+    // short label without the numeric prefix for cleaner display.
+    const storeysOrdered = Array.from(byStorey.entries())
+      .map(([raw, count]) => parseStorey(raw, count))
+      .sort((a, b) => {
+        // Numbered storeys first (sorted numerically), then unnamed.
+        if (a.level !== null && b.level !== null) return a.level - b.level;
+        if (a.level !== null) return -1;
+        if (b.level !== null) return 1;
+        return a.raw.localeCompare(b.raw);
+      });
+
     return {
-      storeys: Array.from(byStorey.entries()).sort((a, b) =>
-        a[0].localeCompare(b[0]),
-      ),
+      storeys: storeysOrdered,
       types: Array.from(byType.entries()).sort((a, b) => b[1] - a[1]),
       buckets: orderedBuckets,
     };
-  }, [elements, format]);
+  }, [elements, format, state.buildingsOnly]);
 
   // ── Filter predicate ───────────────────────────────────────────────
   const applyFilters = useCallback(
@@ -443,26 +533,57 @@ export default function BIMFilterPanel({
 
       {/* Scroll area: Storeys + Types */}
       <div className="flex-1 overflow-y-auto">
-        {/* Storeys */}
+        {/* Storeys — sorted by parsed level number (B2 → G → 01 → 02 → …)
+            with a small level badge on each chip. */}
         <FilterSection
           title={t('bim.filter_storeys', { defaultValue: 'Storeys' })}
           icon={<Layers size={12} />}
+          action={
+            counts.storeys.length > 0 && state.storeys.size > 0 ? (
+              <button
+                type="button"
+                onClick={() => setState((p) => ({ ...p, storeys: new Set() }))}
+                className="text-[10px] text-content-tertiary hover:text-oe-blue"
+              >
+                {t('bim.filter_all_levels', { defaultValue: 'All levels' })}
+              </button>
+            ) : null
+          }
         >
-          {counts.storeys.map(([name, count]) => {
-            const active = state.storeys.has(name);
+          {counts.storeys.map((s) => {
+            const active = state.storeys.has(s.raw);
+            const badge = formatLevelBadge(s.level);
             return (
-              <FilterChip
-                key={name}
-                label={name}
-                count={count}
-                active={active}
-                onClick={() => toggleSet('storeys', name)}
-              />
+              <button
+                key={s.raw}
+                type="button"
+                onClick={() => toggleSet('storeys', s.raw)}
+                className={`w-full flex items-center gap-2 px-2 py-1 rounded text-[11px] transition-colors ${
+                  active
+                    ? 'bg-oe-blue/10 text-oe-blue font-medium'
+                    : 'text-content-secondary hover:bg-surface-secondary'
+                }`}
+                title={s.raw}
+              >
+                <span
+                  className={`inline-flex items-center justify-center min-w-[22px] h-[18px] px-1 rounded text-[9px] font-bold tabular-nums ${
+                    active
+                      ? 'bg-oe-blue text-white'
+                      : 'bg-surface-secondary text-content-tertiary border border-border-light'
+                  }`}
+                >
+                  {badge || '·'}
+                </span>
+                <span className="flex-1 truncate text-left">{s.label}</span>
+                <span className="text-[10px] text-content-quaternary tabular-nums shrink-0">
+                  {s.count.toLocaleString()}
+                </span>
+              </button>
             );
           })}
           {counts.storeys.length === 0 && (
             <div className="text-[10px] text-content-quaternary italic">
-              {t('bim.filter_no_storeys', { defaultValue: 'No storeys detected' })}
+              {t('bim.filter_no_storeys', { defaultValue: 'No levels detected in this model' })}
             </div>
           )}
         </FilterSection>
@@ -642,18 +763,23 @@ function FilterSection({
   title,
   icon,
   children,
+  action,
 }: {
   title: string;
   icon: React.ReactNode;
   children: React.ReactNode;
+  action?: React.ReactNode;
 }) {
   return (
     <div className="border-b border-border-light py-3 px-4">
-      <div className="flex items-center gap-1.5 mb-2">
-        <span className="text-content-tertiary">{icon}</span>
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
-          {title}
-        </span>
+      <div className="flex items-center justify-between gap-1.5 mb-2">
+        <div className="flex items-center gap-1.5">
+          <span className="text-content-tertiary">{icon}</span>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+            {title}
+          </span>
+        </div>
+        {action}
       </div>
       <div className="space-y-1">{children}</div>
     </div>
