@@ -47,7 +47,7 @@ export default function MessageThread({ messages, isStreaming }: MessageThreadPr
       style={{
         flex: 1,
         overflowY: 'auto',
-        padding: '16px 16px 8px',
+        padding: '16px 4px 8px',
         display: 'flex',
         flexDirection: 'column',
         gap: 4,
