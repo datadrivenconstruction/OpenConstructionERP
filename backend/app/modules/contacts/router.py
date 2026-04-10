@@ -22,8 +22,9 @@ from typing import Any
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies import CurrentUserId, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.contacts.models import Contact
 from app.modules.contacts.schemas import (
     ContactCreate,
@@ -40,6 +41,70 @@ logger = logging.getLogger(__name__)
 
 def _get_service(session: SessionDep) -> ContactService:
     return ContactService(session)
+
+
+# ── IDOR protection helpers ─────────────────────────────────────────────────
+#
+# TODO(v1.4-tenancy): the Contact model has no ``tenant_id`` column today.
+# Until a proper multi-tenant schema migration lands we fall back to the
+# ``created_by`` field as a tenant proxy: owner of the contact record.
+# Admins bypass the check. Once tenancy is in place these helpers should be
+# replaced with a ``tenant_id`` filter at the repository layer.
+
+
+async def _is_admin(session: AsyncSession, user_id: str | None) -> bool:
+    """Return True if the given user has the ``admin`` role."""
+    if user_id is None:
+        return False
+    try:
+        from app.modules.users.repository import UserRepository
+
+        user_repo = UserRepository(session)
+        try:
+            user_uuid = uuid.UUID(str(user_id))
+        except (ValueError, TypeError):
+            return False
+        user = await user_repo.get_by_id(user_uuid)
+        return user is not None and getattr(user, "role", "") == "admin"
+    except Exception:  # noqa: BLE001 — best-effort admin check
+        return False
+
+
+async def _require_contact_access(
+    session: AsyncSession,
+    contact_id: uuid.UUID,
+    user_id: str | None,
+) -> Contact:
+    """Load a contact and verify the caller owns it or is an admin.
+
+    Ownership is derived from ``Contact.created_by`` as a tenant proxy until
+    a dedicated ``tenant_id`` column is introduced. See TODO(v1.4-tenancy).
+    """
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+        )
+
+    contact = await session.get(Contact, contact_id)
+    if contact is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Contact {contact_id} not found",
+        )
+
+    if await _is_admin(session, user_id):
+        return contact
+
+    owner = getattr(contact, "created_by", None)
+    # Legacy records with no created_by fall through the same 403 — safer to
+    # block enumeration than accidentally grant access.
+    if owner is None or str(owner) != str(user_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied: you do not own this contact",
+        )
+    return contact
 
 
 # ── List ──────────────────────────────────────────────────────────────────────
@@ -59,9 +124,15 @@ async def list_contacts(
     is_active: bool = Query(default=True),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
+    _perm: None = Depends(RequirePermission("contacts.read")),
     service: ContactService = Depends(_get_service),
 ) -> ContactListResponse:
-    """List contacts with optional filters."""
+    """List contacts with optional filters.
+
+    TODO(v1.4-tenancy): scope results by ``tenant_id`` once the schema
+    migration lands. Today the service returns all rows and scoping would
+    require a repository-level filter by ``created_by``.
+    """
     items, total = await service.list_contacts(
         contact_type=contact_type,
         country_code=country_code,
@@ -94,6 +165,7 @@ async def search_contacts(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("contacts.read")),
     service: ContactService = Depends(_get_service),
 ) -> ContactListResponse:
     """Search contacts across name, company, email."""
@@ -123,6 +195,7 @@ async def search_contacts(
     "and count of contacts with expiring prequalification.",
 )
 async def contact_stats(
+    _perm: None = Depends(RequirePermission("contacts.read")),
     service: ContactService = Depends(_get_service),
 ) -> ContactStatsResponse:
     """Aggregate contact statistics.
@@ -152,6 +225,7 @@ async def contacts_by_company(
     company_name: str = Query(..., min_length=1, max_length=255),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
+    _perm: None = Depends(RequirePermission("contacts.read")),
     service: ContactService = Depends(_get_service),
 ) -> ContactListResponse:
     """List all contacts at the same company (case-insensitive match)."""
@@ -341,6 +415,7 @@ def _parse_contact_rows_from_excel(content_bytes: bytes) -> list[dict[str, Any]]
 async def import_contacts_file(
     _user_id: CurrentUserId,
     file: UploadFile = File(..., description="Excel (.xlsx) or CSV (.csv) file"),
+    _perm: None = Depends(RequirePermission("contacts.create")),
     service: ContactService = Depends(_get_service),
 ) -> dict[str, Any]:
     """Import contacts from an Excel or CSV file upload.
@@ -510,6 +585,7 @@ async def import_contacts_file(
 async def export_contacts(
     session: SessionDep,
     _user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("contacts.read")),
 ) -> StreamingResponse:
     """Export all active contacts as Excel file."""
     from openpyxl import Workbook
@@ -575,6 +651,7 @@ async def export_contacts(
 )
 async def download_contacts_template(
     _user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("contacts.read")),
 ) -> StreamingResponse:
     """Download an empty Excel template with headers and example rows."""
     from openpyxl import Workbook
@@ -704,6 +781,7 @@ async def download_contacts_template(
 async def create_contact(
     data: ContactCreate,
     user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("contacts.create")),
     service: ContactService = Depends(_get_service),
 ) -> ContactResponse:
     """Create a new contact."""
@@ -722,10 +800,13 @@ async def create_contact(
 )
 async def get_contact(
     contact_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("contacts.read")),
     service: ContactService = Depends(_get_service),
 ) -> ContactResponse:
     """Get a single contact by ID."""
+    await _require_contact_access(session, contact_id, user_id)
     contact = await service.get_contact(contact_id)
     return ContactResponse.model_validate(contact)
 
@@ -743,9 +824,12 @@ async def update_contact(
     contact_id: uuid.UUID,
     data: ContactUpdate,
     user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("contacts.update")),
     service: ContactService = Depends(_get_service),
 ) -> ContactResponse:
     """Update a contact."""
+    await _require_contact_access(session, contact_id, user_id)
     contact = await service.update_contact(contact_id, data)
     return ContactResponse.model_validate(contact)
 
@@ -763,7 +847,10 @@ async def update_contact(
 async def delete_contact(
     contact_id: uuid.UUID,
     user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("contacts.delete")),
     service: ContactService = Depends(_get_service),
 ) -> None:
     """Soft-delete a contact (set is_active=False)."""
+    await _require_contact_access(session, contact_id, user_id)
     await service.deactivate_contact(contact_id)
