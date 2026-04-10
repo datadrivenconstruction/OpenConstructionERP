@@ -1529,6 +1529,46 @@ class ScheduleService:
                     deps[act_id].append((pred_id, dep_type, lag))
                     seen_pairs.add((pred_id, act_id))
 
+        # --- Topological sort (Kahn's algorithm) ---
+        # The forward/backward passes must visit each activity AFTER all of its
+        # predecessors. Iterating in raw DB order is unsafe: if a successor is
+        # listed before its predecessor, the forward pass would read ef.get(pred)
+        # as the fallback (0 + pred_dur) and produce wrong CPM dates. We also
+        # detect cycles here so we never silently return nonsense.
+        from collections import defaultdict, deque
+
+        adj: dict[str, list[str]] = defaultdict(list)
+        in_degree: dict[str, int] = {d["id"]: 0 for d in act_data}
+        for succ_id, preds in deps.items():
+            for pred_id, _dep_type, _lag in preds:
+                adj[pred_id].append(succ_id)
+                in_degree[succ_id] += 1
+
+        queue: deque[str] = deque(
+            [d["id"] for d in act_data if in_degree[d["id"]] == 0]
+        )
+        sorted_ids: list[str] = []
+        while queue:
+            nid = queue.popleft()
+            sorted_ids.append(nid)
+            for succ in adj[nid]:
+                in_degree[succ] -= 1
+                if in_degree[succ] == 0:
+                    queue.append(succ)
+
+        if len(sorted_ids) < len(act_data):
+            unsorted_ids = [d["id"] for d in act_data if d["id"] not in set(sorted_ids)]
+            unsorted_names = [idx[aid]["name"] or aid for aid in unsorted_ids[:5]]
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    "Schedule has a dependency cycle. Affected activities: "
+                    + ", ".join(unsorted_names)
+                ),
+            )
+
+        sorted_act_data: list[dict] = [idx[aid] for aid in sorted_ids]
+
         # --- Forward pass: compute ES, EF ---
         # Supports all 4 dependency types per PMBOK:
         #   FS (Finish-to-Start): successor starts after predecessor finishes (+lag)
@@ -1537,7 +1577,7 @@ class ScheduleService:
         #   SF (Start-to-Finish): successor finishes after predecessor starts (+lag)
         es: dict[str, int] = {}
         ef: dict[str, int] = {}
-        for ad in act_data:
+        for ad in sorted_act_data:
             act_id = ad["id"]
             dur = ad["duration_days"]
             act_es = 0
@@ -1579,7 +1619,7 @@ class ScheduleService:
         lf: dict[str, int] = {d["id"]: project_duration for d in act_data}
         ls: dict[str, int] = {}
 
-        for ad in reversed(act_data):
+        for ad in reversed(sorted_act_data):
             act_id = ad["id"]
             dur = ad["duration_days"]
             for succ_id, dep_type, lag in successors.get(act_id, []):
