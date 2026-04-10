@@ -62,7 +62,7 @@ export interface ModuleManifest {
   /** Lucide icon for marketplace / module listing */
   icon: LucideIcon;
   /** Sidebar category */
-  category: 'estimation' | 'planning' | 'procurement' | 'tools' | 'regional';
+  category: 'estimation' | 'planning' | 'procurement' | 'tools' | 'regional' | 'converter';
   /** Routes this module registers */
   routes: ModuleRoute[];
   /** Sidebar nav items */
