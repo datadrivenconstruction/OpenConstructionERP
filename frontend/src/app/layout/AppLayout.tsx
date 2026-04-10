@@ -7,6 +7,7 @@ import { FeedbackDialog, OnboardingTour } from '@/shared/ui';
 import { FloatingQueuePanel } from './FloatingQueuePanel';
 import { GlobalProgress } from '@/shared/ui/GlobalProgress';
 import { OfflineBanner } from '@/shared/ui/OfflineBanner';
+import { DemoBanner } from '@/shared/ui/DemoBanner';
 
 import { useSwipeGesture, useEdgeSwipe } from '@/shared/hooks/useSwipeGesture';
 import { useIsRTL } from '@/shared/hooks/useIsRTL';
@@ -58,6 +59,7 @@ export function AppLayout({ title, children }: AppLayoutProps) {
 
   return (
     <div className="min-h-screen bg-surface-secondary">
+      <DemoBanner />
       <OfflineBanner />
       <GlobalProgress />
 
