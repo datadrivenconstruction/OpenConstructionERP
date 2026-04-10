@@ -27,7 +27,7 @@ from app.modules.erp_chat.service import ERPChatService
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/erp_chat", tags=["ERP Chat"])
+router = APIRouter(tags=["ERP Chat"])
 
 
 @router.post("/stream/")

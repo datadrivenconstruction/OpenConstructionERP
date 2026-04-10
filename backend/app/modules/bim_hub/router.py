@@ -39,7 +39,7 @@ import pathlib
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, Header, HTTPException, Query, UploadFile, status
 from fastapi.responses import FileResponse
 
 from app.dependencies import CurrentUserId, SessionDep
@@ -749,14 +749,47 @@ async def upload_cad_file(
 @router.get("/models/{model_id}/geometry/")
 async def get_model_geometry(
     model_id: uuid.UUID,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    token: str | None = Query(
+        default=None,
+        description="JWT access token (alternative to Authorization header for static loaders)",
+    ),
+    authorization: str | None = Header(default=None),
     service: BIMHubService = Depends(_get_service),
 ) -> FileResponse:
     """Serve the COLLADA/DAE geometry file for the 3D viewer.
 
+    Auth: accepts either an Authorization header OR a ``?token=...`` query
+    parameter. The query param exists because Three.js ColladaLoader cannot
+    set custom headers — without this fallback the viewer would 401.
+
     Looks for geometry files (DAE, GLB, glTF) saved during upload
     at ``data/bim/{project_id}/{model_id}/geometry.*``.
     """
+    # Validate the token (header or query). ColladaLoader can't set headers,
+    # so we accept ?token=<jwt> as an alternative auth mechanism.
+    from app.config import get_settings
+    from app.dependencies import decode_access_token
+
+    auth_token: str | None = token
+    if not auth_token and authorization and authorization.lower().startswith("bearer "):
+        auth_token = authorization[7:]
+
+    if not auth_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing token (use ?token=<jwt> or Authorization header)",
+        )
+
+    try:
+        decode_access_token(auth_token, get_settings())
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token",
+        )
+
     model = await service.get_model(model_id)
     project_id = str(model.project_id)
     geo_dir = _BIM_DATA_DIR / project_id / str(model_id)
@@ -774,6 +807,10 @@ async def get_model_geometry(
                 path=str(geo_path),
                 media_type=media_types.get(ext, "application/octet-stream"),
                 filename=f"{model.name}{ext}",
+                headers={
+                    # Allow long browser caching since DAE content is content-addressed
+                    "Cache-Control": "private, max-age=3600",
+                },
             )
 
     raise HTTPException(

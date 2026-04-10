@@ -14,6 +14,17 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.6',
+    date: '2026-04-10',
+    changes: [
+      'Fix: BIM 3D viewer geometry now loads — endpoint accepts ?token= query param so Three.js ColladaLoader (which can\'t set Authorization header) can authenticate',
+      'Fix: /chat page no longer returns 404 — removed duplicate prefix from erp_chat router (was being mounted at /api/v1/erp_chat/erp_chat/)',
+      'Fix: Cost database installation from onboarding now works — added trailing slash to load-cwicr endpoint',
+      'Feature: Big floating AI Chat button (bottom-right) on every page — gradient pill with pulse indicator, hidden on /chat itself',
+      'Feature: Floating Recent button moved up to make room for the AI Chat FAB',
+    ],
+  },
+  {
     version: '1.3.5',
     date: '2026-04-10',
     changes: [
@@ -100,7 +111,6 @@ const CHANGELOG: ChangelogEntry[] = [
     version: '1.0.0',
     date: '2026-04-08',
     changes: [
-      'New: 53 modules — full construction lifecycle from estimation to handover',
       'New: Interconnected module ecosystems — Documents↔CDE↔Transmittals, Safety↔Inspections↔NCR↔Punchlist, BIM↔Takeoff↔Schedule',
       'New: Visual create forms with card selectors, section headers, smart defaults across all modules',
       'New: Cross-module navigation links on every page',
