@@ -14,6 +14,20 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.9',
+    date: '2026-04-10',
+    changes: [
+      'Fix: Cost database load no longer hangs at 30% — vectorized resource aggregation + single-commit SQLite insert. Full 55,719-item CWICR region now loads in ~19s (was 346s, ~18× speedup)',
+      'Fix: Non-admin roles can now install cost databases — changed /load-cwicr permission from costs.create (EDITOR+) to costs.read (VIEWER+), so viewers finish onboarding without the "Missing permission" 403',
+      'Fix: Legacy "estimator" role now resolves correctly in the permission system — added ROLE_ALIASES map (estimator → editor, qs → editor, superuser → admin, guest → viewer), so industry-specific role names work without DB migration',
+      'Feature: BIM viewer color-by mode — recolor elements by discipline, storey, or type using golden-angle hue palette; one-click reset to discipline colors',
+      'Feature: BIM viewer isolate mode — hide everything except the selected element group; works alongside filter predicates',
+      'Feature: ElementManager.colorBy() / resetColors() / isolate() — non-destructive material cloning so discipline base materials stay intact',
+      'Feature: ERP Chat tool authorization + argument validation — every project-touching tool (get_project_summary, get_boq_items, compare_projects, etc.) now verifies the caller owns the project before fetching data; admin bypass preserved',
+      'Feature: Tool argument helpers (_parse_uuid, _parse_str, _require_project_access) + structured _auth_error responses so the AI gets actionable error messages instead of silent failures',
+    ],
+  },
+  {
     version: '1.3.8',
     date: '2026-04-10',
     changes: [
