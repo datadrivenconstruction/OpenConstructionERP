@@ -197,6 +197,41 @@ def _download_converter_from_github(converter_id: str) -> Path | None:
         return None
 
 
+def _safe_extract(zip_file: zipfile.ZipFile, dest_dir: Path) -> None:
+    """Extract a zip file safely, rejecting members that try to escape ``dest_dir``.
+
+    Defends against the classic zip-slip attack (CVE-2018-1002200 family)
+    where an archive contains entries like ``../../etc/passwd`` or absolute
+    paths. Since converter zips are fetched over HTTPS from GitHub, a
+    supply-chain compromise would otherwise become arbitrary-file-write /
+    RCE on the OpenEstimator host.
+    """
+    dest = dest_dir.resolve()
+    for member in zip_file.namelist():
+        member_path = Path(member)
+        # Reject absolute paths and any parent-traversal component outright.
+        if member_path.is_absolute() or ".." in member_path.parts:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    f"Refused to extract zip: member '{member}' has unsafe "
+                    f"path (zip-slip attack)"
+                ),
+            )
+        target = (dest / member).resolve()
+        try:
+            target.relative_to(dest)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    f"Refused to extract zip: member '{member}' escapes "
+                    f"destination directory (zip-slip attack)"
+                ),
+            ) from exc
+    zip_file.extractall(dest)
+
+
 def _install_converter_from_zip(zip_path: Path, converter_id: str) -> Path:
     """Extract a converter zip into the install directory.
 
@@ -210,8 +245,11 @@ def _install_converter_from_zip(zip_path: Path, converter_id: str) -> Path:
     exe_name: str = meta["exe"]
     _CONVERTER_INSTALL_DIR.mkdir(parents=True, exist_ok=True)
 
+    # TODO(v1.4): verify SHA256 of ``zip_path`` against an ``expected_sha256``
+    # entry in ``_META_BY_ID`` once the DDC Community Toolkit releases publish
+    # signed hashes. For now we rely on GitHub HTTPS + zip-slip defence.
     with zipfile.ZipFile(zip_path, "r") as zf:
-        zf.extractall(_CONVERTER_INSTALL_DIR)
+        _safe_extract(zf, _CONVERTER_INSTALL_DIR)
 
     # The exe may be at root or nested one level deep
     exe_path = _CONVERTER_INSTALL_DIR / exe_name

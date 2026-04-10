@@ -171,7 +171,18 @@ export class ElementManager {
           let matchedCount = 0;
           this.allDaeMeshes = [];
 
-          // Traverse the loaded DAE scene and match mesh nodes
+          // Traverse the loaded DAE scene and match mesh nodes.
+          //
+          // IMPORTANT: do NOT replace `child.material`. The COLLADA file
+          // ships with real per-element materials (colours, opacities,
+          // textures) authored in the source CAD tool. Replacing them
+          // with our default discipline `MeshStandardMaterial` produces
+          // the white-everything regression users reported. We only
+          // touch the material when an explicit colour-by mode is on
+          // (`colorBy` / `isolate` mutate clones, not the originals),
+          // and we cache the COLLADA original on the mesh as
+          // `userData.originalMaterial` so `resetColors()` can restore
+          // it after a colour-by toggle.
           scene.traverse((child) => {
             if (child instanceof THREE.Mesh) {
               const nodeName = child.name || '';
@@ -182,24 +193,32 @@ export class ElementManager {
                 nameToElement.get(nodeName) ||
                 nameToElement.get(parentName);
 
+              child.castShadow = true;
+              child.receiveShadow = true;
+
+              // Cache the original material so colour-by / reset can
+              // toggle without losing the COLLADA visual.
+              const originalMaterial = child.material;
+
               if (element) {
-                const discipline = element.discipline || 'other';
-                child.material = this.getMaterial(discipline);
-                child.castShadow = true;
-                child.receiveShadow = true;
                 child.userData = {
                   elementId: element.id,
                   elementData: element,
+                  originalMaterial,
                 };
                 this.meshMap.set(element.id, child);
                 matchedCount++;
               } else {
-                // Unmatched mesh — apply default material
-                child.material = this.getMaterial('other');
-                child.castShadow = true;
-                child.receiveShadow = true;
-                child.userData = { elementId: null };
+                child.userData = { elementId: null, originalMaterial };
               }
+
+              // Only apply our default material when the COLLADA mesh
+              // came in with no material at all (rare — usually a
+              // converter bug).
+              if (!child.material) {
+                child.material = this.getMaterial(element?.discipline || 'other');
+              }
+
               // Track every mesh for bulk operations (filter / color-by / isolate)
               this.allDaeMeshes.push(child);
             }
@@ -507,14 +526,24 @@ export class ElementManager {
     for (const [elementId, mesh] of this.meshMap) {
       const el = this.elementDataMap.get(elementId);
       if (!el) continue;
-      const ud = mesh.userData as { customMaterial?: boolean };
+      const ud = mesh.userData as {
+        customMaterial?: boolean;
+        originalMaterial?: THREE.Material | THREE.Material[];
+      };
       if (ud.customMaterial) {
-        // Dispose the cloned material and restore shared discipline material
+        // Dispose the cloned material we created in colorBy()...
         const old = mesh.material;
         if (old instanceof THREE.MeshStandardMaterial) {
           old.dispose();
         }
-        mesh.material = this.getMaterial(el.discipline || 'other');
+        // ...and restore the COLLADA original if we cached one
+        // (loadDAEGeometry stashes it on userData), otherwise fall
+        // back to our flat discipline material so the mesh stays visible.
+        if (ud.originalMaterial) {
+          mesh.material = ud.originalMaterial;
+        } else {
+          mesh.material = this.getMaterial(el.discipline || 'other');
+        }
         ud.customMaterial = false;
       }
     }

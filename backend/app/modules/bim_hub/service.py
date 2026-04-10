@@ -10,11 +10,14 @@ Stateless service layer. Handles:
 
 import fnmatch
 import logging
+import shutil
 import uuid
 from decimal import Decimal, InvalidOperation
+from pathlib import Path
 from typing import Any
 
 from fastapi import HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.bim_hub.models import (
@@ -43,6 +46,13 @@ from app.modules.bim_hub.schemas import (
 )
 
 logger = logging.getLogger(__name__)
+
+# On-disk directory for BIM geometry files (original.{ext}, geometry.dae,
+# dataframe.xlsx, …). Matches the layout used by ``bim_hub.router`` which
+# writes to ``<repo>/data/bim/{project_id}/{model_id}/``.
+#
+# ``service.py`` → ``app/modules/bim_hub/service.py`` → parents[4] == repo root
+_BIM_DATA_DIR = Path(__file__).resolve().parents[4] / "data" / "bim"
 
 
 class BIMHubService:
@@ -129,10 +139,98 @@ class BIMHubService:
         return updated
 
     async def delete_model(self, model_id: uuid.UUID) -> None:
-        """Delete a BIM model and all its elements."""
-        await self.get_model(model_id)  # 404 check
+        """Delete a BIM model, all its elements, and on-disk geometry files.
+
+        Disk cleanup is best-effort — a failure to remove the directory MUST
+        NOT fail the delete operation (the DB row is already gone and the
+        orphan sweeper can pick up any stragglers later).
+        """
+        model = await self.get_model(model_id)  # 404 check
+        project_id = model.project_id
         await self.model_repo.delete(model_id)
         logger.info("BIM model deleted: %s", model_id)
+
+        # Best-effort disk cleanup (after DB delete so we never strand files
+        # belonging to a still-live DB row).
+        geo_dir = _BIM_DATA_DIR / str(project_id) / str(model_id)
+        try:
+            if geo_dir.is_dir():
+                shutil.rmtree(geo_dir, ignore_errors=True)
+                logger.info("BIM geometry dir removed: %s", geo_dir)
+        except Exception as exc:  # noqa: BLE001 — disk I/O must never block delete
+            logger.warning(
+                "Failed to remove BIM geometry dir %s: %s", geo_dir, exc
+            )
+
+    async def cleanup_orphan_bim_files(self) -> dict[str, Any]:
+        """Scan ``data/bim/`` and remove directories with no matching DB row.
+
+        Walks ``data/bim/{project_id}/{model_id}/`` and deletes any model
+        directory whose ``model_id`` is not present in the ``oe_bim_models``
+        table. Also removes empty ``project_id`` directories.
+
+        Returns a summary with the count of removed model dirs and bytes
+        reclaimed. Called from the admin-only
+        ``POST /api/v1/bim_hub/cleanup-orphans/`` endpoint.
+        """
+        if not _BIM_DATA_DIR.is_dir():
+            return {"scanned": 0, "removed_models": 0, "removed_projects": 0, "bytes_freed": 0}
+
+        # Load all known model ids from the DB in a single query.
+        from app.modules.bim_hub.models import BIMModel
+
+        result = await self.session.execute(select(BIMModel.id))
+        known_ids = {str(row[0]) for row in result.all()}
+
+        scanned = 0
+        removed_models = 0
+        removed_projects = 0
+        bytes_freed = 0
+        removed_details: list[str] = []
+
+        for project_dir in _BIM_DATA_DIR.iterdir():
+            if not project_dir.is_dir():
+                continue
+            for model_dir in project_dir.iterdir():
+                if not model_dir.is_dir():
+                    continue
+                scanned += 1
+                if model_dir.name in known_ids:
+                    continue
+                # Orphan — compute size then remove.
+                try:
+                    size = sum(
+                        f.stat().st_size
+                        for f in model_dir.rglob("*")
+                        if f.is_file()
+                    )
+                except OSError:
+                    size = 0
+                try:
+                    shutil.rmtree(model_dir, ignore_errors=True)
+                    removed_models += 1
+                    bytes_freed += size
+                    removed_details.append(str(model_dir))
+                    logger.info(
+                        "Orphan BIM dir removed: %s (%d bytes)", model_dir, size
+                    )
+                except Exception as exc:  # noqa: BLE001
+                    logger.warning("Failed to remove orphan %s: %s", model_dir, exc)
+            # Drop now-empty project directories.
+            try:
+                if not any(project_dir.iterdir()):
+                    project_dir.rmdir()
+                    removed_projects += 1
+            except OSError:
+                pass
+
+        return {
+            "scanned": scanned,
+            "removed_models": removed_models,
+            "removed_projects": removed_projects,
+            "bytes_freed": bytes_freed,
+            "removed": removed_details,
+        }
 
     async def cleanup_stale_processing(
         self,

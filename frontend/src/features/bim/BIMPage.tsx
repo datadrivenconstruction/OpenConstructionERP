@@ -609,7 +609,7 @@ function LandingPage({ projectId, onUploadComplete, breadcrumbItems }: {
   ];
 
   return (
-    <div className="flex flex-col -mx-3 sm:-mx-4 lg:-mx-6 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
+    <div className="flex flex-col -mx-2 sm:-mx-3 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
       <div className="px-6 pt-4 pb-3 border-b border-border-light"><Breadcrumb items={breadcrumbItems} /></div>
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto px-6 py-12">
@@ -801,7 +801,7 @@ export function BIMPage() {
 
   if (!projectId) {
     return (
-      <div className="flex items-center justify-center -mx-3 sm:-mx-4 lg:-mx-6 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
+      <div className="flex items-center justify-center -mx-2 sm:-mx-3 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
         <EmptyState icon={<FolderOpen size={32} />} title="No project selected" description="Select a project to view BIM models." />
       </div>
     );
@@ -816,7 +816,7 @@ export function BIMPage() {
   const isModelNonReady = activeModel && ['processing', 'needs_converter', 'error'].includes(activeModel.status);
 
   return (
-    <div className="flex flex-col -mx-3 sm:-mx-4 lg:-mx-6 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
+    <div className="flex flex-col -mx-2 sm:-mx-3 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
       {/* ── Header ── */}
       <div className="relative z-20 px-3 py-2.5 flex items-center justify-between border-b border-border-light bg-surface-primary">
         <div className="flex items-center gap-4">
