@@ -14,6 +14,17 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.4',
+    date: '2026-04-10',
+    changes: [
+      'Fix: BIM RVT file upload now actually works — was failing because relative input paths broke when DDC converter ran from its own DLL directory',
+      'Fix: BIM Excel parser now filters out non-element rows (Materials/SunStudy/ViewPorts/None) — extracts 8200+ real elements from Revit files',
+      'Fix: BIM elements now use Revit OST_ category names + Revit uniqueid as stable_id + correct quantity column mapping',
+      'Test: Added 17 unit tests for BIM processor (discipline classification, IFC text parser, Excel mapping, edge cases)',
+      'Docs: openconstructionerp.com/docs.html updated with latest content + screenshots',
+    ],
+  },
+  {
     version: '1.3.3',
     date: '2026-04-10',
     changes: [
