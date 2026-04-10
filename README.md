@@ -2,322 +2,26 @@
 
 # OpenConstructionERP
 
-**The #1 Open-Source Construction Estimation & Project Management Software**
+**The open-source cost estimation and project control platform for construction.**
+BOQ, 4D/5D, CAD/BIM takeoff, AI estimating — self-hosted, on a 2 GB VPS, under one `pip install`.
 
-Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all in one platform.
+[![PyPI](https://img.shields.io/pypi/v/openconstructionerp?color=f0883e&label=pypi)](https://pypi.org/project/openconstructionerp/)
+[![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/datadrivenconstruction/OpenConstructionERP?style=flat&color=f0883e)](https://github.com/datadrivenconstruction/OpenConstructionERP/stargazers)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue)](https://www.python.org/downloads/)
+[![Languages](https://img.shields.io/badge/i18n-21%20languages-blueviolet)](#features)
 
-[Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Discussions](https://t.me/datadrivenconstruction) · [Report Bug](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
+[Live demo](https://openconstructionerp.com/demo/) · [Documentation](https://openconstructionerp.com/docs) · [PyPI](https://pypi.org/project/openconstructionerp/) · [Discussions](https://t.me/datadrivenconstruction) · [Report an issue](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 
-![License](https://img.shields.io/badge/license-AGPL--3.0-blue)
-![Version](https://img.shields.io/badge/version-1.0.0-green)
-![Languages](https://img.shields.io/badge/languages-21-orange)
-![Cost Items](https://img.shields.io/badge/cost_items-55%2C000%2B-red)
-![Standards](https://img.shields.io/badge/standards-20-blueviolet)
-
-<img src="docs/screenshots/hero-overview.jpg" alt="OpenConstructionERP — Dashboard Overview" width="800" />
-
-*100% open source · 55,000+ cost items · AI estimation · 21 languages · Self-hosted*
+<img src="docs/screenshots/hero-overview.jpg" alt="OpenConstructionERP dashboard" width="880" />
 
 </div>
 
 ---
 
-<details open>
-<summary><h2>Table of Contents</h2></summary>
+## Quick start
 
-<table width="100%">
-<tr>
-<td width="33%" valign="top">
-
-**Getting Started**
-- [Why OpenConstructionERP?](#why-openconstructionerp)
-- [Quick Start](#quick-start)
-- [Demo Accounts](#demo-accounts)
-
-</td>
-<td width="33%" valign="top">
-
-**Core Modules**
-- [BOQ Management](#-bill-of-quantities-boq-management)
-- [Cost Databases & Catalog](#%EF%B8%8F-cost-databases--resource-catalog)
-- [CAD/BIM & AI Estimation](#%EF%B8%8F-cadbim-takeoff--ai-estimation)
-
-</td>
-<td width="33%" valign="top">
-
-**Planning & Delivery**
-- [4D Scheduling & 5D Cost](#-4d-scheduling--5d-cost-model)
-- [Tendering, Risk & Reports](#-tendering-risk--reporting)
-- [Requirements & Quality](#-requirements--quality-gates)
-
-</td>
-</tr>
-<tr>
-<td valign="top">
-
-**Field Tools**
-- [PDF Markups & Annotations](#%EF%B8%8F-pdf-markups--annotations)
-- [Punch List](#-punch-list)
-- [Validation Engine](#%EF%B8%8F-validation--compliance-engine)
-
-</td>
-<td valign="top">
-
-**Standards & Regions**
-- [20 Regional Standards](#-20-regional-standards)
-- [Guided Onboarding](#-guided-onboarding)
-- [Key Features Overview](#key-features)
-
-</td>
-<td valign="top">
-
-**Technical**
-- [Tech Stack](#tech-stack)
-- [Architecture](#architecture)
-- [Security](#security)
-- [Contributing](#contributing)
-
-</td>
-</tr>
-</table>
-
-</details>
-
----
-
-## Why OpenConstructionERP?
-
-Construction cost estimation software is expensive, closed-source, and locked to specific regions. OpenConstructionERP changes that.
-
-| What you get | How it works |
-|-------------|-------------|
-| **Free forever** | AGPL-3.0 license. No subscriptions, no per-seat fees, no vendor lock-in. |
-| **Your data, your server** | Self-hosted. Everything runs on your machine — nothing leaves your network. |
-| **21 languages** | Full UI translation: English, German, French, Spanish, Portuguese, Russian, Chinese, Arabic, Hindi, Japanese, Korean, and 10 more. |
-| **20 regional standards** | DIN 276, NRM 1/2, CSI MasterFormat, GAEB, ГЭСН, DPGF, GB/T 50500, CPWD, and more. |
-| **AI-powered** | Connect any LLM provider (Anthropic, OpenAI, Gemini, Mistral, Groq, DeepSeek) for smart estimation. |
-| **55,000+ cost items** | CWICR database with 11 regional pricing databases (DACH, UK, US, France, Spain, Brazil, Russia, UAE, China, India, Canada). |
-
-### How It Compares
-
-<table>
-<tr>
-<th align="left">Capability</th>
-<th align="center">OpenConstructionERP</th>
-<th align="center">Typical Proprietary Estimating</th>
-<th align="center">Typical Takeoff Tool</th>
-</tr>
-<tr><td><b>License</b></td><td align="center">AGPL-3.0 (free)</td><td align="center">Proprietary</td><td align="center">Proprietary</td></tr>
-<tr><td><b>Self-hosted / offline</b></td><td align="center">&#10004;</td><td align="center">&#10006; cloud only</td><td align="center">&#10006;</td></tr>
-<tr><td><b>Price</b></td><td align="center"><b>Free forever</b></td><td align="center">&#8364;200-500/mo per seat</td><td align="center">&#8364;30-100/mo per seat</td></tr>
-<tr><td><b>AI estimation</b></td><td align="center">&#10004; 16 LLM providers</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
-<tr><td><b>UI languages</b></td><td align="center"><b>21</b></td><td align="center">2-5</td><td align="center">3-8</td></tr>
-<tr><td><b>Regional standards</b></td><td align="center"><b>20</b></td><td align="center">1-4</td><td align="center">&mdash;</td></tr>
-<tr><td><b>BOQ editor</b></td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10006;</td></tr>
-<tr><td><b>CAD/BIM takeoff</b></td><td align="center">&#10004; RVT IFC DWG DGN</td><td align="center">&#10004;</td><td align="center">&#10004; PDF only</td></tr>
-<tr><td><b>4D/5D planning</b></td><td align="center">&#10004;</td><td align="center">&#9888; limited</td><td align="center">&#10006;</td></tr>
-<tr><td><b>Cost database included</b></td><td align="center">&#10004; 55K+ items with rates</td><td align="center">&#10006; extra cost</td><td align="center">&#10006;</td></tr>
-<tr><td><b>Resource catalog</b></td><td align="center">&#10004; 7K+ with prices</td><td align="center">&#10006; extra cost</td><td align="center">&#10006;</td></tr>
-<tr><td><b>Validation engine</b></td><td align="center">&#10004; 42 rules</td><td align="center">&#9888; limited</td><td align="center">&#10006;</td></tr>
-<tr><td><b>REST API</b></td><td align="center">&#10004; full access</td><td align="center">&#9888; limited</td><td align="center">&#10006;</td></tr>
-</table>
-
-### What's New in v0.9.0
-
-**30 new modules** — contacts, finance, procurement, tasks, meetings, safety, inspections, RFI, submittals, NCR, correspondence, CDE (ISO 19650), transmittals, BIM Hub, reporting, and more.
-
-**SVG Gantt chart** — day/week/month zoom, dependency arrows, critical path highlighting, drag-to-reschedule.
-
-**BIM Viewer** — Three.js viewer with discipline coloring, element selection, properties panel. Upload CSV/Excel element data + DAE geometry, or raw CAD files (RVT, IFC, DWG, DGN).
-
-**16 AI providers** — Anthropic, OpenAI, Google Gemini, Mistral, Groq, DeepSeek, OpenRouter, Together, Fireworks, Perplexity, Cohere, AI21, xAI, Zhipu, Yandex GPT, Baidu.
-
-**8 regional packs** — US (AIA/CSI), DACH (DIN 276/GAEB/VOB), UK (NRM2/JCT/NEC4), Russia, Middle East (FIDIC), Asia-Pacific, India, Latin America.
-
-**Import/export everywhere** — contacts CSV import with template, budget Excel import, safety/inspection/RFI Excel exports, meeting minutes PDF export, AI meeting transcript import (Teams/Meet/Zoom).
-
-**ISO 19650 CDE** — document containers with WIP->Shared->Published->Archived workflow, OpenCDE BCF 3.0 API compliance.
-
-**568 translation keys x 20 languages** — professional construction terminology in German, French, Spanish, Russian, Chinese, Arabic, Japanese, and 13 more.
-
----
-
-### Complete Estimation Workflow
-
-OpenConstructionERP covers the full lifecycle — from first sketch to final tender submission:
-
-```
-  Upload              Convert            Validate           Estimate           Tender
- ┌────────┐        ┌──────────┐       ┌───────────┐      ┌──────────┐      ┌──────────┐
- │PDF/CAD │───────▶│ Extract  │──────▶│ 42 rules  │─────▶│BOQ Editor│─────▶│ Bid Pkgs │
- │Photo   │        │quantities│       │ DIN/NRM/  │      │ + AI     │      │ Compare  │
- │Text    │        │ + AI     │       │ MasterFmt │      │ + Costs  │      │ Award    │
- └────────┘        └──────────┘       └───────────┘      └──────────┘      └──────────┘
-                                                               │
-                                                         ┌─────┴──────┐
-                                                         │ 4D Schedule│
-                                                         │ 5D Costs   │
-                                                         │ Risk Reg.  │
-                                                         │ Reports    │
-                                                         └────────────┘
-```
-
----
-
-⭐ <b>If you want to see new updates and database versions and if you find our tools useful please give our repositories a star to see more similar applications for the construction industry.</b>
-Star OpenConstructionERP on GitHub and be instantly notified of new releases.
-<p align="center">
-  <br>
-  <img src="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN-pipeline-with-conversion-validation-qto/blob/main/DDC_in_additon/DDC_readme_content/OCE%20star%20GitHub.gif" width="100%"/>
-  <br></br>
-</p>
-
----
-
-## Key Features
-
-### 📊 Bill of Quantities (BOQ) Management
-
-<img src="docs/screenshots/feature-boq.jpg" alt="BOQ Editor — Create, manage and analyze Bills of Quantities" width="800" />
-
-Build professional cost estimates with a powerful BOQ editor:
-
-- **Hierarchical BOQ structure** — Sections, positions, sub-positions with drag-and-drop reordering
-- **Inline editing** — Click any cell to edit. Tab between fields. Undo/redo with Ctrl+Z
-- **Resources & assemblies** — Link labor, materials, equipment to each position. Build reusable cost recipes
-- **Markups** — Overhead, profit, VAT, contingency — configure per project or use regional defaults
-- **Automatic calculations** — Quantity × unit rate = total. Section subtotals. Grand total with markups
-- **Validation** — 42 built-in rules check for missing quantities, zero prices, duplicate items, and compliance with DIN 276, NRM, MasterFormat
-- **Export** — Download as Excel, CSV, PDF report, or GAEB XML (X83)
-
-### 🗄️ Cost Databases & Resource Catalog
-
-<img src="docs/screenshots/feature-databases.jpg" alt="Cost Database — 55,000+ items across 11 regions" width="800" />
-
-Access the world's construction pricing data:
-
-- **CWICR database** — 55,000+ cost items covering all major construction trades. Available in 9 languages with 11 regional price sets
-- **Smart search** — Find items by description, code, or classification. AI-powered semantic search matches meaning, not just keywords ("concrete wall" finds "reinforced partition C30/37")
-- **Resource catalog** — 7,000+ materials, equipment, labor rates, and operators. Build custom assemblies from catalog items
-- **Regional pricing** — Automatic price adjustment based on project location. Compare rates across regions
-- **Import your data** — Upload your own cost database from Excel, CSV, or connect via API
-
-### 🏗️ CAD/BIM Takeoff & AI Estimation
-
-<img src="docs/screenshots/feature-takeoff-ai.jpg" alt="CAD/BIM Takeoff and AI-powered estimation" width="800" />
-
-Extract quantities from any source — drawings, models, text, or photos:
-
-- **CAD/BIM takeoff** — Upload Revit (.rvt), IFC, AutoCAD (.dwg), or MicroStation (.dgn) files. DDC converters extract elements with volumes, areas, and lengths automatically
-- **Interactive QTO** — Choose how to group extracted data: by Category, Type, Level, Family. Format-specific presets for Revit and IFC
-- **PDF measurement** — Open construction drawings directly in the browser. Measure distances, areas, and count elements with calibrated scale
-- **AI estimation** — Describe your project in plain text, upload a building photo, or paste a PDF — AI generates a complete BOQ with quantities and market rates
-- **AI Cost Advisor** — Ask questions about pricing, materials, or estimation methodology. AI answers using your cost database as context
-- **Cost matching** — After AI generates an estimate, match each item against your CWICR database to replace AI-guessed rates with real market prices
-
-### 📅 4D Scheduling & 5D Cost Model
-
-Plan your project timeline and track costs over time:
-
-- **Gantt chart** — Visual project schedule with drag-and-drop activities, dependencies (FS/FF/SS/SF), and critical path highlighting
-- **Auto-generate from BOQ** — Create schedule activities directly from your BOQ sections with cost-proportional durations
-- **Earned Value Management** — Track SPI, CPI, EAC, and variance. S-curve visualization shows planned vs actual progress
-- **Budget tracking** — Set baselines, compare snapshots, run what-if scenarios
-- **Monte Carlo simulation** — Risk-adjusted schedule analysis with probability distributions
-
-### 📋 Tendering, Risk & Reporting
-
-Complete your estimation workflow:
-
-- **Tendering** — Create bid packages, distribute to subcontractors, collect and compare bids with side-by-side price mirror
-- **Change orders** — Track scope changes with cost and schedule impact analysis
-- **Risk register** — Probability × impact matrix, mitigation strategies, risk-adjusted contingency
-- **Reports** — Generate professional PDF reports, Excel exports, GAEB XML. 12 built-in templates
-- **Documents** — Centralized file management with version tracking and drag-and-drop upload
-
-### 📝 Requirements & Quality Gates
-
-Track and validate construction requirements with the EAC (Entity-Attribute-Constraint) system:
-
-- **EAC Triplets** — Capture requirements as structured data: Entity (wall), Attribute (fire_rating), Constraint (≥ F90)
-- **4 Quality Gates** — Completeness → Consistency → Coverage → Compliance. Run sequentially to validate requirements
-- **BOQ Traceability** — Link each requirement to BOQ positions for full traceability from spec to estimate
-- **Bulk Import** — Import requirements from structured text (pipe-delimited format)
-- **Categories** — Structural, fire safety, thermal, acoustic, waterproofing, electrical, mechanical, architectural
-
-### ✏️ PDF Markups & Annotations
-
-Annotate construction drawings and documents directly in the browser:
-
-- **10 markup types** — Cloud, arrow, text, rectangle, highlight, polygon, distance, area, count, stamp
-- **Custom stamps** — Approved, Rejected, For Review, Revised, Final + create your own with logo and date
-- **Scale calibration** — Set real-world scale per page for accurate measurements
-- **Markups List** — Table view of all annotations with filters, search, and CSV export
-- **BOQ Integration** — Link measurements directly to BOQ positions (quantity = measured value)
-
-### ✅ Punch List
-
-Track construction deficiencies from discovery to resolution:
-
-- **5-stage workflow** — Open → In Progress → Resolved → Verified → Closed
-- **Location pins** — Mark exact position on PDF drawings (x/y coordinates)
-- **Priority levels** — Low, Medium, High, Critical with color coding
-- **Photo attachments** — Upload photos of deficiencies from the field
-- **Categories** — Structural, mechanical, electrical, architectural, fire safety, plumbing, finishing
-- **PDF Export** — Generate punch list reports for stakeholder review
-- **Verification control** — Different user must verify (not the resolver)
-
-### 🌍 20 Regional Standards
-
-| Standard | Region | Format |
-|----------|--------|--------|
-| DIN 276 / ÖNORM / SIA | Germany / Austria / Switzerland | Excel, CSV |
-| NRM 1/2 (RICS) | United Kingdom | Excel, CSV |
-| CSI MasterFormat | United States / Canada | Excel, CSV |
-| GAEB DA XML 3.3 | DACH region | XML |
-| DPGF / DQE | France | Excel, CSV |
-| ГЭСН / ФЕР | Russia / CIS | Excel, CSV |
-| GB/T 50500 | China | Excel, CSV |
-| CPWD / IS 1200 | India | Excel, CSV |
-| Bayındırlık Birim Fiyat | Turkey | Excel, CSV |
-| 積算基準 (Sekisan) | Japan | Excel, CSV |
-| Computo Metrico / DEI | Italy | Excel, CSV |
-| STABU / RAW | Netherlands | Excel, CSV |
-| KNR / KNNR | Poland | Excel, CSV |
-| 표준품셈 | South Korea | Excel, CSV |
-| NS 3420 / AMA | Nordic countries | Excel, CSV |
-| ÚRS / TSKP | Czech Republic / Slovakia | Excel, CSV |
-| ACMM / ANZSMM | Australia / New Zealand | Excel, CSV |
-| CSI / CIQS | Canada | Excel, CSV |
-| FIDIC | UAE / GCC | Excel, CSV |
-| PBC / Base de Precios | Spain | Excel, CSV |
-
-### 🛡️ Validation & Compliance Engine
-
-Ensure your estimates meet regulatory standards before submission:
-
-- **42 built-in rules** across 13 rule sets — DIN 276, NRM, MasterFormat, GAEB, and universal BOQ quality checks
-- **Real-time validation** — Run checks with Ctrl+Shift+V. Each position gets a pass/warning/error indicator
-- **Quality score** — Overall BOQ quality percentage (0–100%) visible in the toolbar
-- **Drill-down** — Click any finding to jump directly to the affected BOQ position and fix it
-- **Custom rules** — Define project-specific validation rules via the rule builder or Python scripting
-
-### 🚀 Guided Onboarding
-
-Get productive in under 10 minutes:
-
-1. **Choose language** — Select from 21 languages. The entire UI switches instantly
-2. **Select region** — Determines default cost database, currency, and classification standard
-3. **Load cost database** — One-click import of CWICR pricing data for your region (55,000+ items)
-4. **Import resource catalog** — Materials, labor, equipment, and pre-built assemblies
-5. **Configure AI** *(optional)* — Enter an API key from any supported LLM provider
-6. **Create your first project** — Set name, region, standard, and start estimating
-
----
-
-## Quick Start
-
-The fastest way to run OpenConstructionERP locally — **three commands**, no Docker, no database setup:
+Three commands. No Docker. No database to provision. The frontend is bundled inside the wheel.
 
 ```bash
 pip install openconstructionerp
@@ -325,216 +29,323 @@ openestimate init-db
 openestimate serve
 ```
 
-That's it. Open **http://localhost:8080** in your browser and log in with the demo account below.
+Open **http://localhost:8080** and log in with `demo@openestimator.io` / `DemoPass1234!`.
 
-> **Requires Python 3.12+** (check with `python --version`). Uses SQLite by default — no PostgreSQL, no Redis, no Docker required. The frontend is bundled inside the wheel, so a single `pip install` gets you the full app (backend + UI). Total install size: ~30 MB.
-
-### What you should see when it works
-
-```
-  ___                  ____                _                   _   _
- / _ \ _ __   ___ _ _ / ___|___  _ __  ___| |_ _ _ _   _  ___ | |_(_) ___  _ _
-| | | | '_ \ / _ \ '_| |   / _ \| '_ \/ __| __| '_| | | |/ __|| __| |/ _ \| '_ \
-| |_| | |_) |  __/ | | |__| (_) | | | \__ \ |_| |  | |_| | (__ | |_| | (_) | | | |
- \___/| .__/ \___|_|  \____\___/|_| |_|___/\__|_|   \__,_|\___(_)__|_|\___/|_| |_|
-      |_|                                                             ERP
-
-  OpenConstructionERP v1.3.11
-  Open-source construction cost estimation platform
-
-  Open in your browser:  http://127.0.0.1:8080
-  API docs:              http://127.0.0.1:8080/api/docs
-
-  Demo login (auto-created on first run)
-    Email:    demo@openestimator.io
-    Password: DemoPass1234!
-
-  Data directory: ~/.openestimate
-  Stop the server: Ctrl+C
-  Need help: https://openconstructionerp.com/docs
-```
-
-The first run takes 10–30 seconds while the server creates the SQLite database and seeds five demo projects. Subsequent runs start in 2–3 seconds.
-
-### Other install options
+First run takes 10-30 seconds to create the SQLite database and seed five demo projects
+(Berlin, London, New York, Paris, Dubai). Subsequent runs start in 2-3 seconds. Runs comfortably
+on a 2 GB VPS.
 
 <details>
-<summary><b>Open browser automatically</b></summary>
+<summary><b>Other install options</b></summary>
 
+**Open browser automatically**
 ```bash
 openestimate serve --open
 ```
-</details>
 
-<details>
-<summary><b>Custom port or data directory</b></summary>
-
+**Custom port or data directory**
 ```bash
 openestimate serve --port 9000 --data-dir ~/my-erp-data
 ```
-</details>
 
-<details>
-<summary><b>Docker (PostgreSQL + Redis + MinIO)</b></summary>
-
+**Docker (PostgreSQL + Redis + MinIO)**
 ```bash
 git clone https://github.com/datadrivenconstruction/OpenConstructionERP.git
 cd OpenConstructionERP
 make quickstart
 ```
 
-Open **http://localhost:8080** — builds everything in ~2 minutes. Recommended for multi-user deployments.
-</details>
-
-<details>
-<summary><b>One-line installer (auto-detects Docker / Python / uv)</b></summary>
-
+**One-line installer (Linux / macOS)**
 ```bash
-# Linux / macOS
 curl -sSL https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionERP/main/scripts/install.sh | bash
+```
 
-# Windows (PowerShell)
+**Windows (PowerShell)**
+```powershell
 irm https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionERP/main/scripts/install.ps1 | iex
 ```
-</details>
 
-<details>
-<summary><b>Local development from a git checkout</b></summary>
-
+**Optional extras**
 ```bash
-git clone https://github.com/datadrivenconstruction/OpenConstructionERP.git
-cd OpenConstructionERP
-
-# Backend
-cd backend && pip install -r requirements.txt && cd ..
-
-# Frontend
-cd frontend && npm install && npm run build && cd ..
-
-# Run
-cd backend && uvicorn app.main:create_app --factory --reload --port 8000
+pip install 'openconstructionerp[semantic]'   # Qdrant + sentence-transformers semantic search
+pip install 'openconstructionerp[cv]'         # PaddleOCR + YOLO for PDF takeoff
+pip install 'openconstructionerp[server]'     # PostgreSQL + Redis + S3 for production
+pip install 'openconstructionerp[all]'        # Everything
 ```
 
-Open **http://localhost:8000**. Requires Python 3.12+ and Node.js 20+.
 </details>
-
-### Troubleshooting
-
-If `openestimate serve` doesn't work, run **`openestimate doctor`** first — it checks the top failure modes and tells you exactly what to fix.
-
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| `Python 3.X is too old` | Python below 3.12 | Install Python 3.12+ from [python.org](https://www.python.org/downloads/) |
-| `port 8080 is already in use` | Another app on port 8080 | `openestimate serve --port 9000` |
-| `cannot write to ~/.openestimate` | Locked-down home directory | `openestimate serve --data-dir /tmp/erp-data` |
-| Process exits silently on Windows + Anaconda | torch/MKL DLL conflict (fixed in v1.3.10) | Upgrade: `pip install -U openconstructionerp` |
-| `command not found: openestimate` | Scripts dir not on PATH | Use `python -m app` or add `~/.local/bin` to PATH |
-| `no frontend found` | Wheel was built without bundled UI | `pip install --force-reinstall openconstructionerp` |
-| AI estimation buttons disabled | Optional `[ai]` extras not installed | `pip install 'openconstructionerp[ai]'` |
-| Semantic search disabled | Optional `[vector]` extras not installed | `pip install 'openconstructionerp[vector]'` |
-
-For anything else, copy the output of `openestimate doctor` into a [GitHub issue](https://github.com/datadrivenconstruction/OpenConstructionERP/issues).
-
-### Demo Accounts
-
-Three demo accounts are created automatically on first start:
-
-| Account | Email | Password | Role |
-|---------|-------|----------|------|
-| Admin | `demo@openestimator.io` | `DemoPass1234!` | Full access |
-| Estimator | `estimator@openestimator.io` | `DemoPass1234!` | Estimator |
-| Manager | `manager@openestimator.io` | `DemoPass1234!` | Manager |
-
-> Demo accounts include 5 pre-loaded projects from Berlin, London, New York, Paris, and Dubai with complete BOQs, schedules, and cost models.
 
 ---
 
-## Tech Stack
+## Live demo
 
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| Backend | Python 3.12+ / FastAPI | Async API, Pydantic v2 validation, modular architecture |
-| Frontend | React 18 / TypeScript / Vite | SPA with code splitting, 21 language bundles |
-| Database | PostgreSQL 16+ / SQLite (dev) | OLTP with JSON columns, zero-config SQLite for development |
-| UI | Tailwind CSS / AG Grid | Professional data grid, responsive design, dark mode |
-| AI | Any LLM via REST API | Anthropic, OpenAI, Gemini, Mistral, Groq, DeepSeek |
-| Vector Search | LanceDB (embedded) / Qdrant | Semantic cost item search, 384d or 3072d embeddings |
-| CAD/BIM | [DDC cad2data](https://github.com/datadrivenconstruction) | RVT, IFC, DWG, DGN → structured quantities |
-| i18n | i18next + 21 language packs | Full RTL support (Arabic), locale-aware formatting |
+| | |
+|---|---|
+| **URL** | https://openconstructionerp.com/demo/ |
+| **Email** | `demo@openestimator.io` |
+| **Password** | `DemoPass1234!` |
+
+The demo runs the same build as PyPI. Data resets periodically. Personal information is
+stripped from user records in demo mode.
+
+---
+
+## Why OpenConstructionERP
+
+- **It is actually self-hostable.** One `pip install`, SQLite by default, frontend bundled in the
+  wheel. No docker-compose hunt, no managed Postgres, no SaaS fallback when you run out of credits.
+- **The data is already inside.** Ten regional CWICR cost databases (USA, UK, DE, FR, ES, PT, RU,
+  AE, KSA, CA), 55,000+ items each. A 55,719-item region loads in ~19 seconds. Five full demo
+  projects are seeded on first run.
+- **Standards are native, not an import quirk.** DIN 276, NRM 1 & 2, CSI MasterFormat, GAEB XML
+  3.3, DPGF, ГЭСН, GB/T 50500 — built into the validation engine and the BOQ editor, not bolted on.
+- **AI is bring-your-own-key.** Thirteen LLM providers wired in through a single HTTP client. No
+  vendor SDK bloat, no forced OpenAI dependency, keys live on your server. The ERP Chat has 11
+  specialised tools that query your real project data — not a chatbot glued onto a landing page.
+
+---
+
+## Features
+
+**56 modules, 43 with persistent models. Auto-discovered, manifest-based, replaceable.**
+
+### Core estimation
+
+| | |
+|---|---|
+| **Bill of Quantities** | Hierarchical positions, assemblies, real-time roll-ups. AG Grid inline edit, undo/redo, keyboard nav. DIN 276 / NRM / MasterFormat on every position. |
+| **Cost Database** | 10 regional CWICR databases (USA, UK, DE, FR, ES, PT, RU, AE, KSA, CA), 55,000+ items each. Vector semantic search. A full region imports in ~19 seconds. |
+| **Assemblies** | Reusable cost recipes with regional factors. One-click apply to BOQ, components auto-expand into labour / material / equipment. |
+| **Resource Catalog** | 7,000+ materials, equipment, labour rates and operators. Excel / CSV import. |
+| **Validation engine** | 42 rules across 13 rule sets — DIN 276, GAEB, NRM, MasterFormat, universal BOQ quality. Traffic-light dashboard, drill-down to source position. |
+| **Change Orders** | Variations with cost and schedule impact, approval workflow. |
+
+### CAD / BIM / takeoff
+
+| | |
+|---|---|
+| **BIM Hub** | Three.js 3D viewer. RVT / IFC / DWG / DGN ingest via DDC cad2data + a custom Rust RVT parser. Handles 16,000+ elements, colour-by category / storey / type, isolate, COLLADA material preservation. |
+| **Quantity Takeoff** | PDF.js viewer with calibrated scale. Click-to-measure distance / area / count, OCR dimension strings, optional AI symbol detection. |
+| **Markups** | 10 annotation types. Points stored in PDF user units, so markups survive zoom and re-scale. Custom stamps. Link measurements to BOQ positions. |
+| **CAD Converter** | Standalone service. DDC cad2data bridge for DWG / DGN / IFC, custom Rust parser for Revit. All formats land in a single canonical JSON. |
+
+### AI / intelligence
+
+| | |
+|---|---|
+| **AI Estimating** | Text, photo or PDF to BOQ via 13 LLM providers — OpenAI, Anthropic, Gemini, OpenRouter, Mistral, Groq, DeepSeek, Together, Fireworks, Perplexity, Cohere, xAI, Zhipu. |
+| **AI Cost Advisor** | Ask pricing and methodology questions. Answers cite your cost database as context. |
+| **ERP Chat** | 11 specialised tools that query your real ERP data — project summary, BOQ items, compare projects, schedule status, EVM. Per-call tool authorisation. |
+| **Cost matching** | After AI drafts an estimate, match each line against your CWICR database to replace guessed rates with market prices. |
+| **Project Intelligence** | Cross-module summarisation. Cached per user — never leaks between tenants. |
+| **Confidence scores** | Every AI suggestion carries a 0.0-1.0 confidence score. Human review before apply. |
+
+### Project control
+
+| | |
+|---|---|
+| **4D Schedule** | SVG Gantt, day / week / month zoom, drag-to-reschedule. Full CPM with forward / backward pass, all four PMBOK dependency types, cycle detection, critical path. |
+| **5D Cost Model** | Earned Value Management — SPI, CPI, EAC, variance, S-curve. SPI clamped when the time-phased PV proxy degenerates. |
+| **Risk Register** | Real 5×5 probability × impact matrix. Mitigation strategies, risk-adjusted contingency. |
+| **Tasks** | Assignee, due date, priority, subtasks, attachments. |
+| **Reporting** | KPI dashboards, 12 built-in templates, PDF / Excel / GAEB XML export. |
+| **Budget & snapshots** | Set baselines, compare snapshots, what-if scenarios. |
+
+### Procurement
+
+| | |
+|---|---|
+| **Tendering** | Bid packages, distribution, side-by-side comparison, award recommendation. |
+| **RFQ & Bidding** | Structured RFQs, supplier responses, scored comparison. |
+| **Procurement** | Purchase orders, goods receipts, invoice matching. |
+| **Contacts** | Vendors, subcontractors, clients. CSV import with template. |
+| **Finance** | Cost codes, budget lines, actuals, commitments. |
+
+### Document control
+
+| | |
+|---|---|
+| **Document Management** | ISO 19650 CDE. WIP → Shared → Published → Archived workflow. OpenCDE BCF 3.0 compliant. |
+| **RFIs & Submittals** | Structured RFI workflow, submittal log, transmittals, correspondence register. |
+| **Meetings** | Minutes, action items, AI transcript import from Teams / Meet / Zoom, PDF export. |
+| **Requirements** | EAC (Entity-Attribute-Constraint) triplets. Four quality gates: Completeness → Consistency → Coverage → Compliance. Linked to BOQ positions. |
+| **Field Reports** | Daily site reports with photo attachments. |
+
+### Quality & safety
+
+| | |
+|---|---|
+| **Safety** | Incident register, severity, root cause, corrective actions, Excel export. |
+| **Inspections** | Checklists, pass / fail, photo evidence, scheduled re-inspection. |
+| **Punch List** | 5-stage workflow, pin location on PDFs, priority, photo attachments, PDF export. Verification requires a different user than the resolver. |
+| **NCRs** | Non-Conformance Reports with disposition and close-out. |
+| **Audit logging** | Who changed what, when, from which IP. |
+
+### Platform
+
+| | |
+|---|---|
+| **21 languages** | Full UI translation, RTL support for Arabic, locale-aware formatting. |
+| **Multi-tenancy** | PostgreSQL RLS, per-tenant isolation, ownership checks on every project-touching endpoint. |
+| **Modules = plugins** | Drop a module package into `backend/app/modules/`, restart, done. Each module has its own manifest, migrations and permissions. |
+
+<div align="center">
+<img src="docs/screenshots/feature-boq.jpg" alt="BOQ editor" width="880" />
+<br><i>BOQ editor: hierarchical positions, inline edit, validation.</i>
+<br><br>
+<img src="docs/screenshots/feature-databases.jpg" alt="Cost databases" width="880" />
+<br><i>10 regional CWICR cost databases, 55,000+ items per region.</i>
+<br><br>
+<img src="docs/screenshots/feature-takeoff-ai.jpg" alt="CAD takeoff and AI estimating" width="880" />
+<br><i>CAD/BIM takeoff and AI estimating from text, photo or PDF.</i>
+</div>
+
+---
+
+## How it compares
+
+| Capability | OpenConstructionERP | iTWO / RIB cx | Sage Estimating | HeavyBid |
+|---|:---:|:---:|:---:|:---:|
+| License | AGPL-3.0 | Proprietary | Proprietary | Proprietary |
+| Self-hosted | Yes | No (cloud) | On-prem only | On-prem only |
+| Price | Free | €400-1200/seat/mo | €200-500/seat/mo | €300-800/seat/mo |
+| One-command install | `pip install` | Multi-day setup | Installer + SQL Server | Installer |
+| Cost DB included | 10 regions × 55k items | Extra | Extra | US only |
+| UI languages | 21 | 3-5 | 2 | 1 |
+| Regional standards | DIN / NRM / MasterFormat / GAEB native | DIN / GAEB | MasterFormat | CSI |
+| AI estimating | 13 LLM providers | No | No | No |
+| BIM ingest | RVT / IFC / DWG / DGN | IFC + RVT | No | No |
+| 4D schedule + CPM | Yes | Yes | No | Yes |
+| 5D (EVM) | Yes | Yes | Limited | Yes |
+| REST API | Full | Limited | Limited | No |
+| Runs on 2 GB VPS | Yes | No | No | No |
+
+---
+
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| Backend | Python 3.12+, FastAPI, Pydantic v2, SQLAlchemy 2 async |
+| Frontend | React 18, TypeScript (strict), Vite, Tailwind, Zustand, React Query, AG Grid, PDF.js, Three.js |
+| Database | SQLite (default), PostgreSQL 16+ (production), Alembic migrations |
+| Vector search | LanceDB (embedded) or Qdrant (production) |
+| AI | Any of 13 LLM providers via a single `httpx` client — no vendor SDKs |
+| CAD / BIM | DDC cad2data bridge + custom Rust RVT parser, canonical JSON format |
+| i18n | i18next, 21 languages including RTL Arabic |
+| Background jobs | Celery + Redis (optional) or in-process (dev) |
+
+---
 
 ## Architecture
 
+OpenConstructionERP is a modular monolith. The backend auto-discovers modules in
+`backend/app/modules/`. Each module is a self-contained Python package with `manifest.py`,
+`models.py`, `schemas.py`, `router.py`, `service.py`, `repository.py`. Routes mount at
+`/api/v1/{module_name}/`. Install a module by dropping it into the modules folder and restarting.
+
 ```
-┌──────────────────────────────────────────────────┐
-│  Frontend (React SPA)                            │
-│  TypeScript · Tailwind · AG Grid · PDF.js        │
-└──────────────────┬───────────────────────────────┘
-                   │ REST API
-┌──────────────────┴───────────────────────────────┐
-│  Backend (FastAPI)                               │
-│  20 auto-discovered modules · Plugin system      │
-├──────────────────────────────────────────────────┤
-│  BOQ · Costs · Schedule · 5D · Validation · AI  │
-│  Takeoff · Tendering · Risk · Reports · Catalog  │
-│  Requirements · Markups · Punch List             │
-├──────────────────────────────────────────────────┤
-│  Database (PostgreSQL / SQLite)                  │
-│  Vector DB (LanceDB / Qdrant)                    │
-│  CAD Converters (DDC cad2data)                   │
-└──────────────────────────────────────────────────┘
+  Frontend (React SPA, bundled in the Python wheel)
+         |
+         | REST /api/v1
+         v
+  FastAPI app factory
+         |
+         +--- Core: module loader | event bus | hook registry | RBAC | validation engine
+         |
+         +--- 56 auto-discovered modules
+         |      BOQ | Costs | Assemblies | Catalog | Validation | BIM Hub | Takeoff |
+         |      Markups | AI Estimating | ERP Chat | Schedule | Cost Model | Risk |
+         |      Tendering | RFQ | Procurement | Contacts | Finance | Documents |
+         |      RFIs | Submittals | Meetings | Safety | Inspections | Punch List | ...
+         v
+  Database (SQLite dev  /  PostgreSQL 16+ production)
+  Vector DB (LanceDB embedded  /  Qdrant production)
+  File storage (local filesystem  /  MinIO / S3)
 ```
+
+Principles: validation is first-class (no import without validation), CAD-agnostic via conversion
+to a single canonical format, AI-augmented with human confirmation, open data standards (GAEB XML
+3.3, DIN 276, NRM, MasterFormat), PostgreSQL as the only hard dependency. See [CLAUDE.md](CLAUDE.md)
+for the full philosophy.
 
 ---
 
-## Support the Project
+## Deployment
 
-OpenConstructionERP is built and maintained by the community. If you find it useful:
+| Target | How | When to use |
+|---|---|---|
+| **Local desktop** | `pip install openconstructionerp` | Single user, solo estimator, offline work |
+| **2 GB VPS** | `pip install openconstructionerp` behind Caddy/nginx | Small team, <10 users |
+| **Docker Compose** | `make quickstart` (Postgres + Redis + MinIO) | Multi-user, local network |
+| **Kubernetes** | Helm chart in `deploy/kubernetes/` | Enterprise, multi-tenant |
+| **Cloud** | Any Python 3.12+ host + Postgres | Managed production |
 
-- ⭐ **[Star this repo](https://github.com/datadrivenconstruction/OpenConstructionERP)** — helps others discover the project
-- 💬 **[Join Discussions](https://t.me/datadrivenconstruction)** — ask questions, share ideas, help others
-- 🐛 **[Report issues](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)** — help us improve
-- 💼 **[Professional consulting](https://datadrivenconstruction.io/contact-support/)** — custom deployment, training, enterprise support
+---
 
-## Security
+## Documentation
 
-OpenConstructionERP includes security hardening for production deployments:
-- Path traversal protection on all file download endpoints
-- CORS wildcard blocking in production mode
-- Bounded input validation on bulk price operations
-- Generic error responses to prevent account enumeration
-- Production startup checks for secrets, credentials, and database configuration
+- [User guide](https://openconstructionerp.com/docs)
+- [Quickstart](https://openconstructionerp.com/docs/quickstart)
+- [Module development](https://openconstructionerp.com/docs/modules)
+- [API reference](http://localhost:8080/api/docs) (generated by your running instance)
+- [Project philosophy](CLAUDE.md)
+- [Changelog](CHANGELOG.md)
 
-Report vulnerabilities via [GitHub Issues](https://github.com/datadrivenconstruction/OpenConstructionERP/issues) (private reports supported).
+---
+
+## Community & support
+
+- **Star this repo** — if you find it useful, it helps others find it. 15,000+ GitHub clones in
+  the last six months.
+- **[Telegram discussions](https://t.me/datadrivenconstruction)** — questions, ideas, show and tell.
+- **[GitHub issues](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)** — bugs
+  and feature requests. Include `openestimate doctor` output for install issues.
+- **[Commercial support](https://datadrivenconstruction.io/contact-support/)** — custom
+  deployment, training, enterprise licensing.
+
+---
 
 ## Contributing
 
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines, code style, and PR process.
+Pull requests welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for code style, commit conventions
+and the PR process. Backend uses `ruff` + `pytest`; frontend uses ESLint + Prettier + Vitest.
 
 ### Contributors
 
-Thanks to everyone who has helped shape this project — by reporting bugs, walking us through real-world workflows, sending pull requests, or just trying it out and writing back.
+Thanks to everyone who has reported bugs, walked us through real workflows, or just tried it
+and written back.
 
-- [@migfrazao2003](https://github.com/migfrazao2003) — found and reproduced the PostgreSQL quickstart bug ([#42](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/42)) that was blocking the headline `make quickstart` install path; clean repro report led directly to the v1.3.12 fix.
-- [@maher00746](https://github.com/maher00746) — opened [#44](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/44) asking about cost-database provenance, which led us to better document where CWICR data comes from and how accurate it is.
+- [@migfrazao2003](https://github.com/migfrazao2003) — found and cleanly reproduced the PostgreSQL
+  quickstart bug ([#42](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/42))
+  that was blocking the headline `make quickstart` install path. The repro led directly to the
+  v1.3.12 fix.
+- [@maher00746](https://github.com/maher00746) — opened
+  [#44](https://github.com/datadrivenconstruction/OpenConstructionERP/issues/44) asking about
+  cost-database provenance, which pushed us to properly document where CWICR data comes from
+  and how accurate it is.
 
-If you've contributed and aren't listed here, please open an issue or PR — we want to credit everyone.
+If you have contributed and are not listed here, open an issue or PR — we want to credit everyone.
+
+---
 
 ## License
 
-**AGPL-3.0** — see [LICENSE](LICENSE).
+**AGPL-3.0** — see [LICENSE](LICENSE). You can use, modify and distribute this freely. If you run
+a modified version as a network service, you must make your source available under the same terms.
 
-You can freely use, modify, and distribute this software. If you modify and deploy it as a service, you must make your source code available under the same license.
-
-For commercial licensing without AGPL obligations, contact [info@datadrivenconstruction.io](mailto:info@datadrivenconstruction.io).
+For commercial licensing without AGPL obligations, contact
+[info@datadrivenconstruction.io](mailto:info@datadrivenconstruction.io).
 
 ---
 
 <div align="center">
 
-**Created by [Artem Boiko](https://www.linkedin.com/in/boikoartem/)** · [Data Driven Construction](https://datadrivenconstruction.io)
-
-Building open-source tools for the global construction industry.
+Built by [Artem Boiko](https://www.linkedin.com/in/boikoartem/) — 10+ years in construction cost
+estimation, author of CWICR (55,000+ items, 9 languages) and the DDC cad2data pipeline.
 
 [Website](https://datadrivenconstruction.io) · [LinkedIn](https://www.linkedin.com/in/boikoartem/) · [YouTube](https://www.youtube.com/@datadrivenconstruction) · [GitHub](https://github.com/datadrivenconstruction)
+
+<sub>OpenConstructionERP v1.3.18 · AGPL-3.0 · Python 3.12+</sub>
 
 </div>
