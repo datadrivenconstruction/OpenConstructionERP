@@ -14,6 +14,17 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.14',
+    date: '2026-04-10',
+    changes: [
+      'Fix #42 (round 2): login 404 on quickstart — `/api/v1/users/auth/login` now works with and without trailing slash. Same for /register and /refresh',
+      'Fix #42: PostgreSQL demo seed crash "expected str, got int" — `Activity.progress_pct` is `String(10)` in the schema, demo seeder was passing `int`. Wrapped in `str()`',
+      'Cleanup: `[ai]` extra renamed to `[semantic]` (just qdrant + sentence-transformers). Old `[ai]` kept as alias. Vendor LLM SDKs (anthropic, openai) removed — they were ~800 MB of dead wheels (we use httpx directly)',
+      '`openestimate doctor` now checks pandas + pyarrow as ERROR-level (was silent), and checks for any LLM provider API key',
+      '`openestimate init-db` now reports per-module import failures loudly and exits non-zero if any module fails',
+    ],
+  },
+  {
     version: '1.3.13',
     date: '2026-04-10',
     changes: [
