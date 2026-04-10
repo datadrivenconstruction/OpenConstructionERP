@@ -434,12 +434,19 @@ def create_app() -> FastAPI:
     @app.get("/api/system/status", tags=["System"])
     async def system_status() -> dict[str, Any]:
         """Full system status: database, vector DB, AI providers."""
+        # Public hosted demo flag — set OE_DEMO_MODE=true on the VPS
+        # systemd unit so the frontend can show the "demo only" warning
+        # banner and the /users page can strip personal data from the
+        # demo registration list. Defaults to false on every fresh
+        # local install.
+        demo_mode = os.environ.get("OE_DEMO_MODE", "").lower() in ("1", "true", "yes")
         result: dict[str, Any] = {
             "api": {"status": "healthy", "version": settings.app_version},
             "database": {"status": "unknown"},
             "vector_db": {"status": "offline", "engine": "qdrant"},
             "ai": {"providers": []},
             "cache": {"status": "unknown"},
+            "demo_mode": demo_mode,
         }
 
         # Cache check

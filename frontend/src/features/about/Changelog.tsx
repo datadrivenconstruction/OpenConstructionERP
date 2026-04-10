@@ -14,6 +14,19 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.13',
+    date: '2026-04-10',
+    changes: [
+      'Fix: pandas + pyarrow are now in base dependencies — fresh `pip install openconstructionerp` no longer breaks `load-cwicr` with HTTP 500',
+      'Fix: BIM viewer geometry now visible on first load — reverted to a simple `setFromObject(scene)` fit, removed the broken Mesh-only filter that missed COLLADA Group nodes',
+      'Fix: BIM viewer wide camera near/far range (0.01–1,000,000) so models in any unit (mm/cm/m/ft) fit without manual zoom',
+      'New: persistent demo-mode warning banner + one-time modal on the public hosted demo (driven by `OE_DEMO_MODE=true` env var)',
+      'New: `/api/v1/users/` strips PII (names blanked, email local part hashed) when `OE_DEMO_MODE=true` — only the email domain remains visible',
+      'Cleanup: removed `pyarrow` from `[vector]` extra (now in base)',
+      'Credit: @migfrazao2003 + @maher00746 added to README contributors',
+    ],
+  },
+  {
     version: '1.3.12',
     date: '2026-04-10',
     changes: [
