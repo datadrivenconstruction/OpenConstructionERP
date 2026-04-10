@@ -11,10 +11,10 @@ Endpoints:
 import logging
 import uuid
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 
-from app.dependencies import CurrentUserId, SessionDep
+from app.dependencies import CurrentUserId, SessionDep, check_ai_rate_limit
 from app.modules.erp_chat.models import ChatSession
 from app.modules.erp_chat.schemas import (
     ChatMessageResponse,
@@ -35,6 +35,7 @@ async def stream_chat(
     body: StreamChatRequest,
     user_id: CurrentUserId,
     session: SessionDep,
+    _remaining: int = Depends(check_ai_rate_limit),
 ) -> StreamingResponse:
     """Stream an AI chat response with tool-calling via SSE.
 

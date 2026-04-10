@@ -14,6 +14,19 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.16',
+    date: '2026-04-10',
+    changes: [
+      'Security: validation reports — list/get/delete now verify project ownership (was IDOR)',
+      'Security: tendering — bid PATCH now verifies ownership; package list now requires project_id (no more cross-tenant enumeration)',
+      'Security: project_intelligence — all 8 endpoints behind RequirePermission + ownership check; cache key now includes user_id (was leaking cached state across users)',
+      'Security: full_evm — all 3 endpoints behind RequirePermission + ownership check',
+      'Security: catalog/region delete now requires catalog.delete (was catalog.create — wrong perm); same for costs/clear-region (was costs.update)',
+      'Security: AI provider API keys now encrypted at rest with Fernet (was plaintext in oe_ai_settings). Existing rows transparently fall through to plaintext on first read, get re-encrypted on next save',
+      'Security: erp_chat /stream/ now rate-limited (was unlimited); tool results capped at 8000 chars / 50 list items before re-injection into the LLM context (was unbounded — a 16k-element BOQ tool call would burn ~500k tokens per agent round)',
+    ],
+  },
+  {
     version: '1.3.15',
     date: '2026-04-10',
     changes: [

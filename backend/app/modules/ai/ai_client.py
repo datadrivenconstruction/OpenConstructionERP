@@ -498,6 +498,8 @@ def resolve_provider_and_key(
     Raises:
         ValueError: If no API key is configured.
     """
+    from app.core.crypto import decrypt_secret
+
     model = preferred_model or (settings.preferred_model if settings else "claude-sonnet")
 
     # Map model preferences to providers
@@ -520,7 +522,7 @@ def resolve_provider_and_key(
     for keywords, provider_name, key_attr in _MODEL_PROVIDER_MAP:
         if any(kw in model for kw in keywords):
             if settings and getattr(settings, key_attr, None):
-                return provider_name, getattr(settings, key_attr)
+                return provider_name, decrypt_secret(getattr(settings, key_attr))
             break  # matched model but no key -- fall through to fallback
 
     # Fallback: try any available key (in priority order)
@@ -544,7 +546,7 @@ def resolve_provider_and_key(
         for provider_name, key_attr in _FALLBACK_ORDER:
             key_val = getattr(settings, key_attr, None)
             if key_val:
-                return provider_name, key_val
+                return provider_name, decrypt_secret(key_val)
 
     msg = (
         "No AI API key configured. Please add your API key in Settings > AI. "
