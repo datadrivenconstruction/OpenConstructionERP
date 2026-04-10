@@ -76,13 +76,23 @@ def _get_service(session: SessionDep, settings: SettingsDep) -> UserService:
 
 
 @router.post("/auth/register/", response_model=UserResponse, status_code=201)
+@router.post("/auth/register", response_model=UserResponse, status_code=201, include_in_schema=False)
 async def register(data: UserCreate, service: UserService = Depends(_get_service)) -> UserResponse:
     """Register a new user account."""
     user = await service.register(data)
     return UserResponse.model_validate(user)
 
 
+# NOTE on the dual-route registration: every auth endpoint below is mounted
+# at BOTH the trailing-slash and the bare path. Issue #42 retest showed that
+# some Docker quickstart proxy setups (and bare curl users) hit
+# `POST /api/v1/users/auth/login` (no slash) and got a 404 because FastAPI's
+# default 307 redirect doesn't preserve POST bodies. Registering both forms
+# is more robust than relying on slash redirects to behave correctly through
+# every reverse proxy in the wild.
+
 @router.post("/auth/login/", response_model=TokenResponse)
+@router.post("/auth/login", response_model=TokenResponse, include_in_schema=False)
 async def login(
     data: LoginRequest,
     request: Request,
@@ -104,6 +114,7 @@ async def login(
 
 
 @router.post("/auth/refresh/", response_model=TokenResponse)
+@router.post("/auth/refresh", response_model=TokenResponse, include_in_schema=False)
 async def refresh(
     data: RefreshRequest,
     service: UserService = Depends(_get_service),
