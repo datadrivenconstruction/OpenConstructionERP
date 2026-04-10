@@ -14,6 +14,17 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.5',
+    date: '2026-04-10',
+    changes: [
+      'Feature: /chat page now respects site theme — light/dark mode switches automatically when user toggles the theme',
+      'Feature: Rich empty state on /chat — 3-step explanation, 6 tool category cards with examples, hero icon',
+      'Feature: All /chat UI strings now use i18next — translates automatically to all 21 supported languages',
+      'Feature: New light theme tokens in chat-tokens.css with warm whites and proper contrast',
+      'Fix: Send button text color works in both light and dark themes',
+    ],
+  },
+  {
     version: '1.3.4',
     date: '2026-04-10',
     changes: [
