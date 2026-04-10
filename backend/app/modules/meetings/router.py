@@ -78,15 +78,21 @@ async def list_meetings(
     limit: int = Query(default=50, ge=1, le=100),
     type_filter: str | None = Query(default=None, alias="type"),
     status_filter: str | None = Query(default=None, alias="status"),
+    search: str | None = Query(
+        default=None,
+        max_length=200,
+        description="Free-text search across title, agenda, minutes, and meeting number.",
+    ),
     service: MeetingService = Depends(_get_service),
 ) -> list[MeetingResponse]:
-    """List meetings for a project with optional filters."""
+    """List meetings for a project with optional filters and search."""
     meetings, _ = await service.list_meetings(
         project_id,
         offset=offset,
         limit=limit,
         meeting_type=type_filter,
         status_filter=status_filter,
+        search=search,
     )
     return [_meeting_to_response(m) for m in meetings]
 

@@ -27,6 +27,7 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query, UploadFile, status
 from fastapi.responses import FileResponse
 
+from app.core.bulk_ops import BulkDeleteRequest
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.documents.schemas import (
     DocumentResponse,
@@ -563,6 +564,47 @@ async def get_sheet_versions(
         current=_sheet_to_response(result["current"]),
         history=[_sheet_to_response(s) for s in result["history"]],
     )
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# Bulk operations (must come BEFORE parametric /{document_id})
+# ══════════════════════════════════════════════════════════════════════════
+
+
+@router.post(
+    "/batch/delete/",
+    status_code=200,
+    dependencies=[Depends(RequirePermission("documents.delete"))],
+)
+async def batch_delete_documents(
+    body: BulkDeleteRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> dict:
+    """Delete multiple documents in one request."""
+    from sqlalchemy import select as _select
+
+    from app.core.bulk_ops import bulk_delete
+    from app.modules.documents.models import Document
+    from app.modules.projects.repository import ProjectRepository
+
+    proj_repo = ProjectRepository(session)
+    owned_projects, _ = await proj_repo.list_for_user(
+        owner_id=user_id, offset=0, limit=10000, exclude_archived=False
+    )
+    owned_project_ids = {str(p.id) for p in owned_projects}
+
+    rows = (await session.execute(
+        _select(Document.id, Document.project_id).where(Document.id.in_(body.ids))
+    )).all()
+    allowed = [r[0] for r in rows if str(r[1]) in owned_project_ids]
+
+    deleted = await bulk_delete(session, Document, allowed)
+    logger.info(
+        "Bulk delete documents: requested=%d deleted=%d user=%s",
+        len(body.ids), deleted, user_id,
+    )
+    return {"requested": len(body.ids), "deleted": deleted}
 
 
 # ══════════════════════════════════════════════════════════════════════════

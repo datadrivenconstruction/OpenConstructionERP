@@ -24,6 +24,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import StreamingResponse
 
+from app.core.bulk_ops import BulkAssignRequest, BulkDeleteRequest, BulkStatusRequest
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.tasks.schemas import (
     TaskCompleteRequest,
@@ -104,6 +105,11 @@ async def list_tasks(
     priority: str | None = Query(default=None),
     responsible_id: str | None = Query(default=None),
     meeting_id: str | None = Query(default=None),
+    search: str | None = Query(
+        default=None,
+        max_length=200,
+        description="Free-text search across title, description, and result fields.",
+    ),
     service: TaskService = Depends(_get_service),
 ) -> list[TaskResponse]:
     """List tasks for a project with optional filters.
@@ -120,6 +126,7 @@ async def list_tasks(
         priority=priority,
         responsible_id=responsible_id,
         meeting_id=meeting_id,
+        search=search,
     )
     return [_to_response(t) for t in tasks]
 
@@ -512,6 +519,112 @@ async def import_tasks_file(
         "errors": errors,
         "total_rows": len(rows),
     }
+
+
+# ── Bulk operations (must come BEFORE parametric /{task_id}) ───────────
+
+
+async def _filter_owned_task_ids(
+    session: SessionDep,
+    user_id: str,
+    task_ids: list[uuid.UUID],
+) -> list[uuid.UUID]:
+    """Return the subset of task_ids that belong to projects owned by user_id."""
+    from sqlalchemy import select as _select
+
+    from app.modules.projects.repository import ProjectRepository
+    from app.modules.tasks.models import Task
+
+    proj_repo = ProjectRepository(session)
+    owned_projects, _ = await proj_repo.list_for_user(
+        owner_id=user_id, offset=0, limit=10000, exclude_archived=False
+    )
+    owned_project_ids = {str(p.id) for p in owned_projects}
+
+    rows = (await session.execute(
+        _select(Task.id, Task.project_id).where(Task.id.in_(task_ids))
+    )).all()
+    return [r[0] for r in rows if str(r[1]) in owned_project_ids]
+
+
+@router.post(
+    "/batch/delete/",
+    status_code=200,
+    dependencies=[Depends(RequirePermission("tasks.delete"))],
+)
+async def batch_delete_tasks(
+    body: BulkDeleteRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> dict:
+    """Delete multiple tasks in one request. Only project-owned tasks are deleted."""
+    from app.core.bulk_ops import bulk_delete
+    from app.modules.tasks.models import Task
+
+    allowed = await _filter_owned_task_ids(session, user_id, body.ids)
+    deleted = await bulk_delete(session, Task, allowed)
+    logger.info(
+        "Bulk delete tasks: requested=%d deleted=%d user=%s",
+        len(body.ids), deleted, user_id,
+    )
+    return {"requested": len(body.ids), "deleted": deleted}
+
+
+@router.patch(
+    "/batch/status/",
+    status_code=200,
+    dependencies=[Depends(RequirePermission("tasks.update"))],
+)
+async def batch_update_task_status(
+    body: BulkStatusRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> dict:
+    """Bulk-update status on multiple tasks."""
+    from app.core.bulk_ops import bulk_update_status
+    from app.modules.tasks.models import Task
+
+    allowed_statuses = {"draft", "open", "in_progress", "completed"}
+    if body.status not in allowed_statuses:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid status. Allowed: {sorted(allowed_statuses)}",
+        )
+
+    allowed_ids = await _filter_owned_task_ids(session, user_id, body.ids)
+    updated = await bulk_update_status(
+        session, Task, allowed_ids, body.status, allowed_statuses=allowed_statuses
+    )
+    logger.info(
+        "Bulk update task status: requested=%d updated=%d new_status=%s user=%s",
+        len(body.ids), updated, body.status, user_id,
+    )
+    return {"requested": len(body.ids), "updated": updated, "status": body.status}
+
+
+@router.post(
+    "/batch/assign/",
+    status_code=200,
+    dependencies=[Depends(RequirePermission("tasks.update"))],
+)
+async def batch_assign_tasks(
+    body: BulkAssignRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> dict:
+    """Bulk-assign multiple tasks to a single user."""
+    from app.core.bulk_ops import bulk_update_fields
+    from app.modules.tasks.models import Task
+
+    allowed_ids = await _filter_owned_task_ids(session, user_id, body.ids)
+    updated = await bulk_update_fields(
+        session, Task, allowed_ids, {"responsible_id": body.assignee_id}
+    )
+    logger.info(
+        "Bulk assign tasks: requested=%d updated=%d assignee=%s user=%s",
+        len(body.ids), updated, body.assignee_id, user_id,
+    )
+    return {"requested": len(body.ids), "updated": updated, "assignee_id": body.assignee_id}
 
 
 @router.get("/{task_id}", response_model=TaskResponse)

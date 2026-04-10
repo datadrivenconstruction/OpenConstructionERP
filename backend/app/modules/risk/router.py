@@ -15,6 +15,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
+from app.core.bulk_ops import BulkDeleteRequest, BulkStatusRequest
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.risk.schemas import (
     RiskCreate,
@@ -137,6 +138,80 @@ async def list_risks(
         severity_filter=severity,
     )
     return [_risk_to_response(i) for i in items]
+
+
+# ── Bulk operations (must come BEFORE parametric /{risk_id}) ─────────
+
+
+@router.post(
+    "/batch/delete/",
+    status_code=200,
+)
+async def batch_delete_risks(
+    body: BulkDeleteRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> dict:
+    """Delete multiple risks in one request."""
+    from sqlalchemy import select as _select
+
+    from app.core.bulk_ops import bulk_delete
+    from app.modules.projects.repository import ProjectRepository
+    from app.modules.risk.models import RiskItem
+
+    proj_repo = ProjectRepository(session)
+    owned_projects, _ = await proj_repo.list_for_user(
+        owner_id=user_id, offset=0, limit=10000, exclude_archived=False
+    )
+    owned_project_ids = {str(p.id) for p in owned_projects}
+
+    rows = (await session.execute(
+        _select(RiskItem.id, RiskItem.project_id).where(RiskItem.id.in_(body.ids))
+    )).all()
+    allowed = [r[0] for r in rows if str(r[1]) in owned_project_ids]
+
+    deleted = await bulk_delete(session, RiskItem, allowed)
+    return {"requested": len(body.ids), "deleted": deleted}
+
+
+@router.patch(
+    "/batch/status/",
+    status_code=200,
+)
+async def batch_update_risk_status(
+    body: BulkStatusRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> dict:
+    """Bulk-update status on multiple risks."""
+    from sqlalchemy import select as _select
+
+    from app.core.bulk_ops import bulk_update_status
+    from app.modules.projects.repository import ProjectRepository
+    from app.modules.risk.models import RiskItem
+
+    allowed_statuses = {"identified", "assessed", "mitigating", "closed", "occurred"}
+    if body.status not in allowed_statuses:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid status. Allowed: {sorted(allowed_statuses)}",
+        )
+
+    proj_repo = ProjectRepository(session)
+    owned_projects, _ = await proj_repo.list_for_user(
+        owner_id=user_id, offset=0, limit=10000, exclude_archived=False
+    )
+    owned_project_ids = {str(p.id) for p in owned_projects}
+
+    rows = (await session.execute(
+        _select(RiskItem.id, RiskItem.project_id).where(RiskItem.id.in_(body.ids))
+    )).all()
+    allowed_ids = [r[0] for r in rows if str(r[1]) in owned_project_ids]
+
+    updated = await bulk_update_status(
+        session, RiskItem, allowed_ids, body.status, allowed_statuses=allowed_statuses
+    )
+    return {"requested": len(body.ids), "updated": updated, "status": body.status}
 
 
 # ── Get ──────────────────────────────────────────────────────────────────────

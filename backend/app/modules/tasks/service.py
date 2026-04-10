@@ -78,6 +78,20 @@ class TaskService:
         """Create a new task."""
         checklist = [entry.model_dump() for entry in data.checklist]
 
+        # Validate dependency: predecessor must exist in same project
+        if data.depends_on:
+            predecessor = await self.repo.get_by_id(data.depends_on)
+            if predecessor is None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Dependency task {data.depends_on} not found",
+                )
+            if predecessor.project_id != data.project_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Dependency task must belong to the same project",
+                )
+
         task = Task(
             project_id=data.project_id,
             task_type=data.task_type,
@@ -93,6 +107,7 @@ class TaskService:
             priority=data.priority,
             result=data.result,
             is_private=data.is_private,
+            depends_on=data.depends_on,
             created_by=user_id,
             metadata_=data.metadata,
         )
@@ -160,6 +175,7 @@ class TaskService:
         priority: str | None = None,
         responsible_id: str | None = None,
         meeting_id: str | None = None,
+        search: str | None = None,
     ) -> tuple[list[Task], int]:
         return await self.repo.list_for_project(
             project_id,
@@ -171,6 +187,7 @@ class TaskService:
             priority=priority,
             responsible_id=responsible_id,
             meeting_id=meeting_id,
+            search=search,
         )
 
     async def list_my_tasks(
@@ -211,6 +228,32 @@ class TaskService:
                 entry.model_dump() if hasattr(entry, "model_dump") else entry
                 for entry in fields["checklist"]
             ]
+
+        # Validate dependency change: prevent self-reference and cycles
+        if "depends_on" in fields and fields["depends_on"] is not None:
+            new_dep_id = fields["depends_on"]
+            if new_dep_id == task_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Task cannot depend on itself",
+                )
+            # Walk up the dependency chain to detect cycles
+            visited: set[uuid.UUID] = {task_id}
+            cur_id = new_dep_id
+            while cur_id is not None:
+                if cur_id in visited:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Dependency would create a cycle",
+                    )
+                visited.add(cur_id)
+                pred = await self.repo.get_by_id(cur_id)
+                if pred is None or pred.project_id != task.project_id:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Invalid dependency target",
+                    )
+                cur_id = pred.depends_on
 
         # Validate status transition if status is being changed
         new_status = fields.get("status")
@@ -280,13 +323,30 @@ class TaskService:
         result: str | None = None,
         current_user_id: str | None = None,
     ) -> Task:
-        """Mark a task as completed with optional result."""
+        """Mark a task as completed with optional result.
+
+        Enforces dependency guard: if this task has a ``depends_on`` predecessor
+        that is not yet completed, the request is rejected with HTTP 409. This
+        prevents skipping prerequisite work in a dependency chain.
+        """
         task = await self.get_task(task_id, current_user_id=current_user_id)
         if task.status == "completed":
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Task is already completed",
             )
+
+        # Dependency guard
+        if task.depends_on:
+            predecessor = await self.repo.get_by_id(task.depends_on)
+            if predecessor and predecessor.status != "completed":
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=(
+                        f"Cannot complete: blocked by '{predecessor.title}' "
+                        f"(status: {predecessor.status}). Complete it first."
+                    ),
+                )
 
         fields: dict[str, Any] = {"status": "completed"}
         if result is not None:
@@ -296,6 +356,14 @@ class TaskService:
         await self.session.refresh(task)
         logger.info("Task completed: %s", task_id)
         return task
+
+    async def list_blockers(self, task_id: uuid.UUID) -> list[Task]:
+        """Return tasks that are blocked by this task (have depends_on == task_id)."""
+        from sqlalchemy import select
+
+        stmt = select(Task).where(Task.depends_on == task_id)
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
 
     async def get_stats(
         self,
