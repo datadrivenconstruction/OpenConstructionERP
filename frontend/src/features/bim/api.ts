@@ -63,9 +63,16 @@ export async function fetchBIMElements(
   );
 }
 
-/** Get the geometry file URL for a BIM model. */
+/** Get the geometry file URL for a BIM model.
+ *
+ * Includes the JWT access token as a query param because Three.js
+ * ColladaLoader cannot set custom headers — without this the geometry
+ * fetch would 401.
+ */
 export function getGeometryUrl(modelId: string): string {
-  return `/api/v1/bim_hub/models/${encodeURIComponent(modelId)}/geometry/`;
+  const token = useAuthStore.getState().accessToken;
+  const base = `/api/v1/bim_hub/models/${encodeURIComponent(modelId)}/geometry/`;
+  return token ? `${base}?token=${encodeURIComponent(token)}` : base;
 }
 
 /** Upload BIM data (DataFrame + optional geometry file). */

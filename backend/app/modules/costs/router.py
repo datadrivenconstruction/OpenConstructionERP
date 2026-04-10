@@ -1456,7 +1456,7 @@ async def _find_cwicr_file(db_id: str) -> Path | None:
 
 
 @router.post(
-    "/load-cwicr/{db_id}",
+    "/load-cwicr/{db_id}/",
     dependencies=[Depends(RequirePermission("costs.create"))],
 )
 async def load_cwicr_database(
