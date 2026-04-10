@@ -208,8 +208,35 @@ class MeetingService:
     # ── Delete ────────────────────────────────────────────────────────────
 
     async def delete_meeting(self, meeting_id: uuid.UUID) -> None:
-        """Delete a meeting."""
+        """Delete a meeting.
+
+        Also scrubs ``meeting_id`` references from any tasks that were
+        auto-created via ``complete_meeting`` — preventing dangling FK
+        pointers without destroying the user's task history.
+        """
         await self.get_meeting(meeting_id)  # Raises 404 if not found
+
+        # Clear the meeting_id FK on tasks that reference this meeting
+        try:
+            from sqlalchemy import update as _update
+            from app.modules.tasks.models import Task
+
+            result = await self.session.execute(
+                _update(Task)
+                .where(Task.meeting_id == str(meeting_id))
+                .values(meeting_id=None)
+            )
+            if result.rowcount:
+                logger.info(
+                    "Cleared meeting_id on %d tasks before deleting meeting %s",
+                    result.rowcount, meeting_id,
+                )
+        except Exception as exc:  # best-effort cleanup
+            logger.warning(
+                "Failed to scrub task.meeting_id refs for meeting %s: %s",
+                meeting_id, exc,
+            )
+
         await self.repo.delete(meeting_id)
         logger.info("Meeting deleted: %s", meeting_id)
 

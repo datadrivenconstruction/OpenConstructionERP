@@ -1429,18 +1429,22 @@ async def update_position(
 async def delete_position(
     position_id: uuid.UUID,
     user_id: CurrentUserId,
+    cascade: bool = Query(
+        default=False,
+        description="If true, delete all descendant positions when deleting a section.",
+    ),
     service: BOQService = Depends(_get_service),
 ) -> None:
-    """Delete a single position."""
+    """Delete a single position. For sections, pass ?cascade=true to delete children."""
     await _log_activity(
         service,
         user_id=user_id,
         action="position_deleted",
         target_type="position",
-        description=f"Deleted position {position_id}",
+        description=f"Deleted position {position_id} (cascade={cascade})",
         target_id=position_id,
     )
-    await service.delete_position(position_id)
+    await service.delete_position(position_id, cascade=cascade)
 
 
 @router.post(
