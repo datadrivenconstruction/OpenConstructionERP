@@ -13,8 +13,10 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.modules.validation.models import ValidationReport
 from app.modules.validation.schemas import (
     RunValidationRequest,
     RunValidationResponse,
@@ -28,20 +30,96 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["Validation"])
 
 
-# ── Dependency ──────────────���────────────────────��────────────────────────
+# ── Dependency ────────────────────────────────────────────────────────────
 
 
 def _get_service(session: SessionDep) -> ValidationModuleService:
     return ValidationModuleService(session)
 
 
-# ── POST /run — Run validation on a BOQ ──────────���───────────────────────
+# ── IDOR protection helpers ───────────────────────────────────────────────
+
+
+async def _require_project_access(
+    session: AsyncSession,
+    project_id: uuid.UUID | None,
+    user_id: str | None,
+) -> None:
+    """Verify the current user owns (or is admin on) the referenced project.
+
+    Central choke-point for project-scoped validation endpoints. Mirrors
+    the pattern used by ``finance.router._require_project_access``.
+    Raises HTTP 403 if the user has no access. ``None`` project_id is a
+    no-op — callers that accept global aggregates must scope at the
+    service layer.
+    """
+    if project_id is None:
+        return
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+        )
+
+    try:
+        from app.modules.projects.repository import ProjectRepository
+        from app.modules.users.repository import UserRepository
+
+        proj_repo = ProjectRepository(session)
+        project = await proj_repo.get_by_id(project_id)
+        if project is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Project {project_id} not found",
+            )
+
+        # Admin bypass
+        try:
+            user_repo = UserRepository(session)
+            user = await user_repo.get_by_id(user_id)
+            if user is not None and getattr(user, "role", "") == "admin":
+                return
+        except Exception:  # noqa: BLE001 — best-effort admin check
+            pass
+
+        if str(getattr(project, "owner_id", "")) != str(user_id):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: you do not own this project",
+            )
+    except HTTPException:
+        raise
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Validation project access check failed for %s: %s", project_id, exc)
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Authorization check failed",
+        )
+
+
+async def _require_report_access(
+    session: AsyncSession,
+    report_id: uuid.UUID,
+    user_id: str | None,
+) -> ValidationReport:
+    """Load a report and verify the caller owns its parent project."""
+    report = await session.get(ValidationReport, report_id)
+    if report is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Validation report {report_id} not found",
+        )
+    await _require_project_access(session, report.project_id, user_id)
+    return report
+
+
+# ── POST /run — Run validation on a BOQ ──────────────────────────────────
 
 
 @router.post(
     "/run/",
     response_model=RunValidationResponse,
-    dependencies=[Depends(RequirePermission("boq.read"))],
+    dependencies=[Depends(RequirePermission("validation.create"))],
 )
 async def run_validation(
     data: RunValidationRequest,
@@ -56,6 +134,7 @@ async def run_validation(
 
     The report is also persisted to the database for historical review.
     """
+    await _require_project_access(session, data.project_id, user_id)
     try:
         result = await service.run_validation(
             project_id=data.project_id,
@@ -94,44 +173,44 @@ async def run_validation(
     )
 
 
-# ── GET /reports — List validation reports ────────────��───────────────────
+# ── GET /reports — List validation reports ───────────────────────────────
 
 
 @router.get(
     "/reports/",
     response_model=list[ValidationReportResponse],
-    dependencies=[Depends(RequirePermission("boq.read"))],
+    dependencies=[Depends(RequirePermission("validation.read"))],
 )
 async def list_reports(
+    user_id: CurrentUserId,
+    session: SessionDep,
     project_id: uuid.UUID = Query(..., description="Project ID to list reports for"),
     target_type: str | None = Query(None, description="Filter by target type (boq, document, etc.)"),
     limit: int = Query(50, ge=1, le=200),
     service: ValidationModuleService = Depends(_get_service),
 ) -> list[ValidationReportResponse]:
     """List validation reports for a project, newest first."""
+    await _require_project_access(session, project_id, user_id)
     reports = await service.list_reports(project_id, target_type=target_type, limit=limit)
     return [ValidationReportResponse.model_validate(r) for r in reports]
 
 
-# ── GET /reports/{report_id} — Get single report ──────��──────────────────
+# ── GET /reports/{report_id} — Get single report ─────────────────────────
 
 
 @router.get(
     "/reports/{report_id}",
     response_model=ValidationReportResponse,
-    dependencies=[Depends(RequirePermission("boq.read"))],
+    dependencies=[Depends(RequirePermission("validation.read"))],
 )
 async def get_report(
     report_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
     service: ValidationModuleService = Depends(_get_service),
 ) -> ValidationReportResponse:
     """Get a single validation report by ID."""
-    report = await service.get_report(report_id)
-    if report is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Validation report {report_id} not found",
-        )
+    report = await _require_report_access(session, report_id, user_id)
     return ValidationReportResponse.model_validate(report)
 
 
@@ -141,13 +220,16 @@ async def get_report(
 @router.delete(
     "/reports/{report_id}",
     status_code=204,
-    dependencies=[Depends(RequirePermission("boq.update"))],
+    dependencies=[Depends(RequirePermission("validation.delete"))],
 )
 async def delete_report(
     report_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
     service: ValidationModuleService = Depends(_get_service),
 ) -> None:
     """Delete a validation report."""
+    await _require_report_access(session, report_id, user_id)
     deleted = await service.delete_report(report_id)
     if not deleted:
         raise HTTPException(

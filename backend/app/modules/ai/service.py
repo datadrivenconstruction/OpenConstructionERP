@@ -267,13 +267,15 @@ class AIService:
             "gigachat_api_key",
         ]
 
+        from app.core.crypto import encrypt_secret
+
         if settings is None:
-            # Create with provided values
+            # Create with provided values (encrypt API keys at rest)
             create_kwargs: dict[str, Any] = {"user_id": uid}
             for key_field in _API_KEY_FIELDS:
                 val = getattr(data, key_field, None)
                 if val is not None:
-                    create_kwargs[key_field] = val
+                    create_kwargs[key_field] = encrypt_secret(val)
             create_kwargs["preferred_model"] = data.preferred_model or "claude-sonnet"
             settings = AISettings(**create_kwargs)
             settings = await self.settings_repo.create(settings)
@@ -282,7 +284,7 @@ class AIService:
             for key_field in _API_KEY_FIELDS:
                 val = getattr(data, key_field, None)
                 if val is not None:
-                    fields[key_field] = val
+                    fields[key_field] = encrypt_secret(val)
             if data.preferred_model is not None:
                 fields["preferred_model"] = data.preferred_model
 

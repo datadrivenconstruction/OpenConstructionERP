@@ -270,7 +270,7 @@ async def region_stats(
 
 @router.delete(
     "/actions/clear-region/{region}",
-    dependencies=[Depends(RequirePermission("costs.update"))],
+    dependencies=[Depends(RequirePermission("costs.delete"))],
 )
 async def clear_region_database(
     region: str,
