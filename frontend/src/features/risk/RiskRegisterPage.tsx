@@ -52,7 +52,15 @@ function fmtCur(n: number, c = 'EUR') {
 }
 
 function matrixColor(prob: string, impact: string) {
-  const score = parseFloat(prob) * ({ low: 1, medium: 2, high: 3, critical: 4 }[impact] || 1);
+  // Guard against missing/invalid probability — treat as 0 so the cell stays neutral
+  const probNum = parseFloat(prob);
+  const probValid = Number.isFinite(probNum) ? probNum : 0;
+  // Guard against unknown impact values — default to 0 (not 1) so the cell is marked neutral
+  // instead of silently treated as low-risk.
+  const impactMap: Record<string, number> = { low: 1, medium: 2, high: 3, critical: 4 };
+  const impactNum = impactMap[impact] ?? 0;
+  const score = probValid * impactNum;
+  if (score === 0) return 'bg-surface-secondary text-content-quaternary';
   if (score >= 2.0) return 'bg-red-500/80 text-white';
   if (score >= 1.2) return 'bg-orange-400/80 text-white';
   if (score >= 0.6) return 'bg-yellow-400/80 text-gray-900';

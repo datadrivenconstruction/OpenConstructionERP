@@ -1608,7 +1608,12 @@ function InvoicesTab({ projectId }: { projectId: string }) {
                       {t('finance.total', { defaultValue: 'Total' })}
                     </span>
                     <span className="text-base font-bold tabular-nums text-content-primary">
-                      {invoiceForm.currency} {(parseFloat(invoiceForm.subtotal || '0') + parseFloat(invoiceForm.tax || '0')).toFixed(2)}
+                      {invoiceForm.currency} {(() => {
+                        const sub = parseFloat(invoiceForm.subtotal || '0');
+                        const tax = parseFloat(invoiceForm.tax || '0');
+                        const total = (Number.isFinite(sub) ? sub : 0) + (Number.isFinite(tax) ? tax : 0);
+                        return total.toFixed(2);
+                      })()}
                     </span>
                   </div>
                 </div>

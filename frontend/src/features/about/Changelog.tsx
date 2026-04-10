@@ -14,6 +14,24 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.1',
+    date: '2026-04-10',
+    changes: [
+      'Security: Procurement module — added RequirePermission to all POST/PATCH endpoints (was unprotected)',
+      'Security: BOQ module — added ownership verification to position, section, and markup CRUD (prevents cross-tenant writes)',
+      'Security: RFI module — added RequirePermission to read endpoints (list, stats, get, export, close)',
+      'Fix: BOQEditorPage — deferred delete errors now logged instead of silently swallowed',
+      'Fix: CostsPage — clipboard copy toast only shows on actual success, error toast on failure',
+      'Fix: ProjectsPage — BOQ stats loading errors now surfaced per-project with hasError flag',
+      'Fix: FinancePage — invoice total handles NaN inputs gracefully',
+      'Fix: RiskRegisterPage — matrix color handles unknown impact values instead of defaulting to low-risk',
+      'Fix: TakeoffPage — previous upload error toast cleared when new files are selected',
+      'Fix: BOQ classify_position — returns 503 error instead of empty suggestions on AI failures',
+      'Fix: ChangeOrders — lazy-loading errors now debug-logged with context',
+      'Perf: Costs module — added indexes on source, region, and (source, region) composite',
+    ],
+  },
+  {
     version: '1.3.0',
     date: '2026-04-10',
     changes: [

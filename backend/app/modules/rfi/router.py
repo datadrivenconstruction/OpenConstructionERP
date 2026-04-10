@@ -113,10 +113,14 @@ def _to_response(item: object) -> RFIResponse:
     )
 
 
-@router.get("/", response_model=list[RFIResponse])
+@router.get(
+    "/",
+    response_model=list[RFIResponse],
+    dependencies=[Depends(RequirePermission("rfi.read"))],
+)
 async def list_rfis(
+    user_id: CurrentUserId,
     project_id: uuid.UUID = Query(...),
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
     status_filter: str | None = Query(default=None, alias="status"),
@@ -142,10 +146,14 @@ async def create_rfi(
     return _to_response(rfi)
 
 
-@router.get("/stats/", response_model=RFIStatsResponse)
+@router.get(
+    "/stats/",
+    response_model=RFIStatsResponse,
+    dependencies=[Depends(RequirePermission("rfi.read"))],
+)
 async def rfi_stats(
+    user_id: CurrentUserId,
     project_id: uuid.UUID = Query(...),
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: RFIService = Depends(_get_service),
 ) -> RFIStatsResponse:
     """Return summary statistics for RFIs in a project.
@@ -155,11 +163,14 @@ async def rfi_stats(
     return await service.get_stats(project_id)
 
 
-@router.get("/export/")
+@router.get(
+    "/export/",
+    dependencies=[Depends(RequirePermission("rfi.read"))],
+)
 async def export_rfi_log(
+    _user: CurrentUserId,
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
-    session: SessionDep = None,  # type: ignore[assignment]
-    _user: CurrentUserId = None,  # type: ignore[assignment]
 ) -> StreamingResponse:
     """Export RFI log for a project as Excel."""
     from openpyxl import Workbook
@@ -246,10 +257,14 @@ async def export_rfi_log(
     )
 
 
-@router.get("/{rfi_id}", response_model=RFIResponse)
+@router.get(
+    "/{rfi_id}",
+    response_model=RFIResponse,
+    dependencies=[Depends(RequirePermission("rfi.read"))],
+)
 async def get_rfi(
     rfi_id: uuid.UUID,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    user_id: CurrentUserId,
     service: RFIService = Depends(_get_service),
 ) -> RFIResponse:
     rfi = await service.get_rfi(rfi_id)
@@ -389,11 +404,14 @@ async def create_variation_from_rfi(
         )
 
 
-@router.post("/{rfi_id}/close/", response_model=RFIResponse)
+@router.post(
+    "/{rfi_id}/close/",
+    response_model=RFIResponse,
+    dependencies=[Depends(RequirePermission("rfi.update"))],
+)
 async def close_rfi(
     rfi_id: uuid.UUID,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
-    _perm: None = Depends(RequirePermission("rfi.update")),
+    user_id: CurrentUserId,
     service: RFIService = Depends(_get_service),
 ) -> RFIResponse:
     """Close an RFI."""
