@@ -14,6 +14,13 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.19',
+    date: '2026-04-10',
+    changes: [
+      'Fix: BIM viewer camera now correctly frames the model on first load — diagnosed via headless Playwright (model was 1 m wide but camera was 1840 m away, off by 1000×). Three root causes: (1) placeholder boxes from element bounding_box created an early bbox in source-CAD units that the first zoomToFit framed; (2) SceneManager.zoomToFit did not force updateMatrixWorld so it read stale identity matrices on the first call; (3) BIMViewer only fired one post-DAE zoomToFit which often beat ColladaLoader\'s microtask flush. Fix: skip placeholders when a real DAE URL is queued, force updateMatrixWorld at the top of zoomToFit, and schedule the post-DAE fit at 0/50/250 ms',
+    ],
+  },
+  {
     version: '1.3.18',
     date: '2026-04-10',
     changes: [
