@@ -41,8 +41,9 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, File, Header, HTTPException, Query, UploadFile, status
 from fastapi.responses import FileResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies import CurrentUserId, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.bim_hub.schemas import (
     BIMElementBulkImport,
     BIMElementListResponse,
@@ -74,6 +75,81 @@ _BIM_DATA_DIR = pathlib.Path(__file__).resolve().parents[4] / "data" / "bim"
 
 def _get_service(session: SessionDep) -> BIMHubService:
     return BIMHubService(session)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Project-ownership authorization helper
+#
+# Every BIM endpoint that touches a project (directly via ?project_id= or
+# indirectly via a model/element/diff that belongs to a project) MUST call
+# ``_verify_project_access`` before returning data or mutating state.
+#
+# This closes the IDOR from the v1.3.13 audit: previously any authenticated
+# user could read/modify/delete models belonging to projects they do not own
+# simply by guessing UUIDs. We now resolve the underlying project, verify
+# ownership (or admin bypass) and return a 404 — not a 403 — so we also don't
+# leak the existence of UUIDs the caller is not allowed to see.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+async def _verify_project_access(
+    session: AsyncSession,
+    project_id: uuid.UUID,
+    user_id: str,
+) -> None:
+    """Raise 404 if the user is not the owner or an admin of the project.
+
+    Mirrors the central helper in ``erp_chat.tools._require_project_access``
+    but returns an HTTPException suitable for router use. Emits 404 (not 403)
+    on both "project missing" and "access denied" to avoid UUID enumeration.
+    """
+    from app.modules.projects.repository import ProjectRepository
+    from app.modules.users.repository import UserRepository
+
+    proj_repo = ProjectRepository(session)
+    project = await proj_repo.get_by_id(project_id)
+    if project is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found",
+        )
+
+    # Admin bypass — admins can touch any project regardless of ownership.
+    try:
+        user_repo = UserRepository(session)
+        user = await user_repo.get_by_id(uuid.UUID(str(user_id)))
+        if user is not None and getattr(user, "role", "") == "admin":
+            return
+    except Exception:
+        # If the role lookup explodes, fall through to the ownership check —
+        # never silently bypass authorization.
+        logger.exception("Admin-role lookup failed during BIM access check")
+
+    if str(project.owner_id) != str(user_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found",
+        )
+
+
+async def _verify_model_access(
+    service: "BIMHubService",
+    model_id: uuid.UUID,
+    user_id: str,
+) -> Any:
+    """Load a BIM model and verify the caller owns its project.
+
+    Returns the model object so callers can reuse it without a second query.
+    Raises 404 if the model is missing or the user has no access.
+    """
+    model = await service.get_model(model_id)
+    if model is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Model not found",
+        )
+    await _verify_project_access(service.session, model.project_id, user_id)
+    return model
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -485,6 +561,7 @@ async def upload_bim_data(
         default=None, description="DAE/COLLADA geometry file"
     ),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.create")),
     service: BIMHubService = Depends(_get_service),
 ) -> dict[str, Any]:
     """Upload BIM data from Cad2Data converter output.
@@ -508,6 +585,16 @@ async def upload_bim_data(
     Returns:
         Summary with model_id, element_count, storeys, and disciplines.
     """
+    # --- Verify project access (IDOR guard) ---
+    try:
+        project_uuid = uuid.UUID(project_id)
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid project_id: {exc}",
+        ) from exc
+    await _verify_project_access(service.session, project_uuid, user_id or "")
+
     # --- Validate data file ---
     data_filename = (data_file.filename or "").lower()
     if not data_filename.endswith((".csv", ".xlsx", ".xls")):
@@ -666,6 +753,7 @@ async def upload_cad_file(
     discipline: str = Query(default="architecture", max_length=50),
     file: UploadFile = File(..., description="CAD file (RVT, IFC, DWG, DGN, FBX, OBJ, 3DS)"),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.create")),
     service: BIMHubService = Depends(_get_service),
 ) -> dict:
     """Upload a raw CAD file for background processing.
@@ -677,6 +765,16 @@ async def upload_cad_file(
     Accepted extensions: .rvt, .ifc, .dwg, .dgn, .fbx, .obj, .3ds
     Max size: 500 MB
     """
+    # --- Verify project access (IDOR guard) ---
+    try:
+        project_uuid = uuid.UUID(project_id)
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid project_id: {exc}",
+        ) from exc
+    await _verify_project_access(service.session, project_uuid, user_id or "")
+
     filename = (file.filename or "").strip()
     if not filename:
         raise HTTPException(
@@ -899,7 +997,7 @@ async def get_model_geometry(
         )
 
     try:
-        decode_access_token(auth_token, get_settings())
+        payload = decode_access_token(auth_token, get_settings())
     except HTTPException:
         raise
     except Exception:
@@ -908,7 +1006,26 @@ async def get_model_geometry(
             detail="Invalid token",
         )
 
+    # Check the token-bearer actually has bim.read before we load data.
+    token_role = payload.get("role", "")
+    token_perms: list[str] = payload.get("permissions", [])
+    if token_role != "admin" and "bim.read" not in token_perms:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Missing permission: bim.read",
+        )
+
     model = await service.get_model(model_id)
+    if model is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Model not found",
+        )
+
+    # IDOR guard: verify the caller owns the project this model belongs to.
+    token_user_id = str(payload.get("sub") or "")
+    await _verify_project_access(service.session, model.project_id, token_user_id)
+
     project_id = str(model.project_id)
     geo_dir = _BIM_DATA_DIR / project_id / str(model_id)
 
@@ -948,9 +1065,11 @@ async def list_models(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=200),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.read")),
     service: BIMHubService = Depends(_get_service),
 ) -> BIMModelListResponse:
     """List BIM models for a project."""
+    await _verify_project_access(service.session, project_id, user_id or "")
     items, total = await service.list_models(project_id, offset=offset, limit=limit)
     return BIMModelListResponse(
         items=[BIMModelResponse.model_validate(m) for m in items],
@@ -964,9 +1083,11 @@ async def list_models(
 async def create_model(
     data: BIMModelCreate,
     user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bim.create")),
     service: BIMHubService = Depends(_get_service),
 ) -> BIMModelResponse:
     """Create a new BIM model record."""
+    await _verify_project_access(service.session, data.project_id, user_id)
     model = await service.create_model(data, user_id=user_id)
     return BIMModelResponse.model_validate(model)
 
@@ -975,10 +1096,11 @@ async def create_model(
 async def get_model(
     model_id: uuid.UUID,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.read")),
     service: BIMHubService = Depends(_get_service),
 ) -> BIMModelResponse:
     """Get a single BIM model by ID."""
-    model = await service.get_model(model_id)
+    model = await _verify_model_access(service, model_id, user_id or "")
     return BIMModelResponse.model_validate(model)
 
 
@@ -987,9 +1109,11 @@ async def update_model(
     model_id: uuid.UUID,
     data: BIMModelUpdate,
     user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bim.update")),
     service: BIMHubService = Depends(_get_service),
 ) -> BIMModelResponse:
     """Update a BIM model."""
+    await _verify_model_access(service, model_id, user_id)
     model = await service.update_model(model_id, data)
     return BIMModelResponse.model_validate(model)
 
@@ -998,9 +1122,11 @@ async def update_model(
 async def delete_model(
     model_id: uuid.UUID,
     user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bim.delete")),
     service: BIMHubService = Depends(_get_service),
 ) -> None:
     """Delete a BIM model and all its elements."""
+    await _verify_model_access(service, model_id, user_id)
     await service.delete_model(model_id)
 
 
@@ -1009,9 +1135,11 @@ async def cleanup_stale_processing(
     project_id: uuid.UUID = Query(...),
     max_age_hours: int = Query(default=1, ge=0),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.update")),
     service: BIMHubService = Depends(_get_service),
 ) -> dict[str, int]:
     """Remove models stuck in 'processing' with 0 elements older than max_age_hours."""
+    await _verify_project_access(service.session, project_id, user_id or "")
     count = await service.cleanup_stale_processing(project_id, max_age_hours=max_age_hours)
     return {"deleted": count}
 
@@ -1034,9 +1162,11 @@ async def list_elements(
     # geometry references.
     limit: int = Query(default=50000, ge=1, le=50000),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.read")),
     service: BIMHubService = Depends(_get_service),
 ) -> BIMElementListResponse:
     """List elements for a BIM model (paginated, filterable)."""
+    await _verify_model_access(service, model_id, user_id or "")
     items, total = await service.list_elements(
         model_id,
         element_type=element_type,
@@ -1062,9 +1192,11 @@ async def bulk_import_elements(
     model_id: uuid.UUID,
     data: BIMElementBulkImport,
     user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bim.create")),
     service: BIMHubService = Depends(_get_service),
 ) -> BIMElementListResponse:
     """Bulk import elements for a model (replaces existing)."""
+    await _verify_model_access(service, model_id, user_id)
     elements = await service.bulk_import_elements(model_id, data.elements)
     return BIMElementListResponse(
         items=[BIMElementResponse.model_validate(e) for e in elements],
@@ -1078,10 +1210,18 @@ async def bulk_import_elements(
 async def get_element(
     element_id: uuid.UUID,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.read")),
     service: BIMHubService = Depends(_get_service),
 ) -> BIMElementResponse:
     """Get a single BIM element by ID."""
     element = await service.get_element(element_id)
+    if element is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Element not found",
+        )
+    # Verify caller owns the project this element's model belongs to.
+    await _verify_model_access(service, element.model_id, user_id or "")
     return BIMElementResponse.model_validate(element)
 
 
@@ -1090,13 +1230,32 @@ async def get_element(
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
+async def _verify_boq_position_access(
+    service: "BIMHubService",
+    position_id: uuid.UUID,
+    user_id: str,
+) -> None:
+    """Resolve a BOQ position → project and verify the caller owns it."""
+    from app.modules.boq.repository import PositionRepository
+
+    position = await PositionRepository(service.session).get_by_id(position_id)
+    if position is None or position.project_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="BOQ position not found",
+        )
+    await _verify_project_access(service.session, position.project_id, user_id)
+
+
 @router.get("/links/", response_model=BOQElementLinkListResponse)
 async def list_links(
     boq_position_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.read")),
     service: BIMHubService = Depends(_get_service),
 ) -> BOQElementLinkListResponse:
     """List BIM element links for a BOQ position."""
+    await _verify_boq_position_access(service, boq_position_id, user_id or "")
     items = await service.list_links_for_position(boq_position_id)
     return BOQElementLinkListResponse(
         items=[BOQElementLinkResponse.model_validate(lnk) for lnk in items],
@@ -1108,9 +1267,20 @@ async def list_links(
 async def create_link(
     data: BOQElementLinkCreate,
     user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bim.create")),
     service: BIMHubService = Depends(_get_service),
 ) -> BOQElementLinkResponse:
     """Create a link between a BOQ position and a BIM element."""
+    # Verify both sides: the BOQ position's project AND the BIM element's
+    # model/project. Prevents cross-project link forgery.
+    await _verify_boq_position_access(service, data.boq_position_id, user_id)
+    element = await service.get_element(data.bim_element_id)
+    if element is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="BIM element not found",
+        )
+    await _verify_model_access(service, element.model_id, user_id)
     link = await service.create_link(data, user_id=user_id)
     return BOQElementLinkResponse.model_validate(link)
 
@@ -1119,9 +1289,26 @@ async def create_link(
 async def delete_link(
     link_id: uuid.UUID,
     user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bim.delete")),
     service: BIMHubService = Depends(_get_service),
 ) -> None:
     """Delete a BOQ-BIM link."""
+    # Resolve the link → element → model → project and verify access.
+    from app.modules.bim_hub.models import BOQElementLink
+
+    link = await service.session.get(BOQElementLink, link_id)
+    if link is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Link not found",
+        )
+    element = await service.get_element(link.bim_element_id)
+    if element is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Link not found",
+        )
+    await _verify_model_access(service, element.model_id, user_id)
     await service.delete_link(link_id)
 
 
@@ -1135,9 +1322,10 @@ async def list_quantity_maps(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=1, le=500),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.read")),
     service: BIMHubService = Depends(_get_service),
 ) -> BIMQuantityMapListResponse:
-    """List quantity mapping rules."""
+    """List quantity mapping rules (global + templates)."""
     items, total = await service.list_quantity_maps(offset=offset, limit=limit)
     return BIMQuantityMapListResponse(
         items=[BIMQuantityMapResponse.model_validate(m) for m in items],
@@ -1149,9 +1337,13 @@ async def list_quantity_maps(
 async def create_quantity_map(
     data: BIMQuantityMapCreate,
     user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bim.create")),
     service: BIMHubService = Depends(_get_service),
 ) -> BIMQuantityMapResponse:
     """Create a new quantity mapping rule."""
+    # If the rule is scoped to a specific project, enforce ownership.
+    if data.project_id is not None:
+        await _verify_project_access(service.session, data.project_id, user_id)
     qmap = await service.create_quantity_map(data)
     return BIMQuantityMapResponse.model_validate(qmap)
 
@@ -1161,9 +1353,21 @@ async def update_quantity_map(
     map_id: uuid.UUID,
     data: BIMQuantityMapUpdate,
     user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bim.update")),
     service: BIMHubService = Depends(_get_service),
 ) -> BIMQuantityMapResponse:
     """Update a quantity mapping rule."""
+    # If the existing rule is project-scoped, verify access to that project.
+    from app.modules.bim_hub.models import BIMQuantityMap
+
+    existing = await service.session.get(BIMQuantityMap, map_id)
+    if existing is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Quantity map not found",
+        )
+    if existing.project_id is not None:
+        await _verify_project_access(service.session, existing.project_id, user_id)
     qmap = await service.update_quantity_map(map_id, data)
     return BIMQuantityMapResponse.model_validate(qmap)
 
@@ -1172,9 +1376,11 @@ async def update_quantity_map(
 async def apply_quantity_maps(
     data: QuantityMapApplyRequest,
     user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bim.create")),
     service: BIMHubService = Depends(_get_service),
 ) -> QuantityMapApplyResult:
     """Apply quantity mapping rules to all elements in a model."""
+    await _verify_model_access(service, data.model_id, user_id)
     return await service.apply_quantity_maps(data)
 
 
@@ -1188,9 +1394,13 @@ async def compute_diff(
     model_id: uuid.UUID,
     old_id: uuid.UUID,
     user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bim.create")),
     service: BIMHubService = Depends(_get_service),
 ) -> BIMModelDiffResponse:
     """Compute diff between two model versions."""
+    # Both models must be readable by the caller.
+    await _verify_model_access(service, model_id, user_id)
+    await _verify_model_access(service, old_id, user_id)
     diff = await service.compute_diff(new_model_id=model_id, old_model_id=old_id)
     return BIMModelDiffResponse.model_validate(diff)
 
@@ -1199,8 +1409,16 @@ async def compute_diff(
 async def get_diff(
     diff_id: uuid.UUID,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.read")),
     service: BIMHubService = Depends(_get_service),
 ) -> BIMModelDiffResponse:
     """Get a model diff by ID."""
     diff = await service.get_diff(diff_id)
+    if diff is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Diff not found",
+        )
+    # Verify access via the new (or old) model's project.
+    await _verify_model_access(service, diff.new_model_id, user_id or "")
     return BIMModelDiffResponse.model_validate(diff)

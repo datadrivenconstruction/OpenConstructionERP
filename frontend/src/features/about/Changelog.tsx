@@ -14,6 +14,20 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.15',
+    date: '2026-04-10',
+    changes: [
+      'Security: bim_hub now has permission checks on all 21 endpoints (previously 0/22 — every model/element/geometry was readable across tenants)',
+      'Security: finance now has permission checks on all 17 endpoints (was 0/17)',
+      'Security: contacts now has permission checks on all 11 endpoints (was 0/11)',
+      'Security: rfq_bidding now has permission checks on all 11 endpoints (was 0/11)',
+      'Security: assemblies endpoints verify ownership — closes a cross-tenant data injection through apply-to-boq',
+      'Security: BOQ position update/delete/reorder now verify BOQ ownership',
+      'Security: /api/v1/projects/analytics/overview/ now scoped by owner (was leaking every project to every authenticated user). Also fixed an N+1 — analytics overview is now 3 queries instead of 3+N',
+      'Cleanup: 213 MB of orphan RVT files and pip cache removed from the public hosted demo',
+    ],
+  },
+  {
     version: '1.3.14',
     date: '2026-04-10',
     changes: [

@@ -1207,8 +1207,12 @@ async def dashboard_cards(
 async def analytics_overview(
     session: SessionDep,
     _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
 ) -> dict:
-    """Cross-project analytics — aggregated KPIs across all projects."""
+    """Cross-project analytics — aggregated KPIs across all projects.
+
+    Scoped to the current user's owned projects; admins see every project.
+    """
     from sqlalchemy import Float, func, select
     from sqlalchemy.sql.expression import cast
 
@@ -1216,30 +1220,57 @@ async def analytics_overview(
     from app.modules.costmodel.models import BudgetLine
     from app.modules.projects.models import Project
 
-    # Count projects
-    proj_count = (await session.execute(select(func.count(Project.id)))).scalar_one()
+    is_admin = bool(payload and payload.get("role") == "admin")
 
-    # Total budget across all projects
-    budget_stmt = select(
-        BudgetLine.project_id,
-        func.sum(cast(BudgetLine.planned_amount, Float)).label("planned"),
-        func.sum(cast(BudgetLine.actual_amount, Float)).label("actual"),
-    ).group_by(BudgetLine.project_id)
-    budget_result = await session.execute(budget_stmt)
-    budget_rows = budget_result.all()
+    # Per-project summary — owner-scoped for non-admins
+    proj_stmt = select(Project).order_by(Project.name)
+    if not is_admin:
+        proj_stmt = proj_stmt.where(Project.owner_id == _user_id)
+    proj_result = await session.execute(proj_stmt)
+    all_projects = list(proj_result.scalars().all())
 
-    total_planned = sum(r.planned or 0 for r in budget_rows)
-    total_actual = sum(r.actual or 0 for r in budget_rows)
+    project_ids = [p.id for p in all_projects]
+    proj_count = len(all_projects)
+
+    # Single grouped query for budget rows across the user's projects
+    if project_ids:
+        budget_stmt = (
+            select(
+                BudgetLine.project_id,
+                func.sum(cast(BudgetLine.planned_amount, Float)).label("planned"),
+                func.sum(cast(BudgetLine.actual_amount, Float)).label("actual"),
+            )
+            .where(BudgetLine.project_id.in_(project_ids))
+            .group_by(BudgetLine.project_id)
+        )
+        budget_rows = (await session.execute(budget_stmt)).all()
+    else:
+        budget_rows = []
+
+    budget_map: dict[str, tuple[float, float]] = {
+        str(r.project_id): (float(r.planned or 0), float(r.actual or 0)) for r in budget_rows
+    }
+
+    total_planned = sum(p for p, _ in budget_map.values())
+    total_actual = sum(a for _, a in budget_map.values())
 
     # Projects with budget
-    projects_with_budget = len(budget_rows)
+    projects_with_budget = len(budget_map)
+
+    # Single grouped query for BOQ counts (fixes N+1)
+    if project_ids:
+        boq_stmt = (
+            select(BOQ.project_id, func.count(BOQ.id))
+            .where(BOQ.project_id.in_(project_ids))
+            .group_by(BOQ.project_id)
+        )
+        boq_count_rows = (await session.execute(boq_stmt)).all()
+        boq_counts_map: dict[str, int] = {str(row[0]): int(row[1]) for row in boq_count_rows}
+    else:
+        boq_counts_map = {}
 
     # Per-project summary
     projects_data = []
-    proj_stmt = select(Project).order_by(Project.name)
-    proj_result = await session.execute(proj_stmt)
-    all_projects = proj_result.scalars().all()
-
     for p in all_projects:
         pid = str(p.id)
         pname = p.name
@@ -1247,15 +1278,12 @@ async def analytics_overview(
         pcurrency = p.currency
 
         # Find budget for this project
-        budget_row = next((r for r in budget_rows if str(r.project_id) == pid), None)
-        planned = float(budget_row.planned or 0) if budget_row else 0
-        actual = float(budget_row.actual or 0) if budget_row else 0
+        planned, actual = budget_map.get(pid, (0.0, 0.0))
         variance = planned - actual if planned > 0 else 0
         variance_pct = round((variance / planned * 100), 1) if planned > 0 else 0
 
-        # BOQ count
-        boq_count_stmt = select(func.count(BOQ.id)).where(BOQ.project_id == p.id)
-        boq_count = (await session.execute(boq_count_stmt)).scalar_one()
+        # BOQ count from pre-fetched map (single grouped query above)
+        boq_count = boq_counts_map.get(pid, 0)
 
         projects_data.append(
             {
