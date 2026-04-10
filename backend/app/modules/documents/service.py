@@ -139,6 +139,26 @@ class DocumentService:
                 detail="Failed to save file to disk.",
             )
 
+        # Publish document.uploaded event for notification/CDE workflows
+        try:
+            from app.core.events import event_bus
+
+            await event_bus.publish(
+                "document.uploaded",
+                {
+                    "project_id": str(project_id),
+                    "document_id": str(document.id),
+                    "name": safe_name,
+                    "category": category,
+                    "file_size": len(content),
+                    "mime_type": file.content_type or "",
+                    "uploaded_by": user_id,
+                },
+                source_module="oe_documents",
+            )
+        except Exception as exc:
+            logger.debug("Failed to publish document.uploaded event: %s", exc)
+
         logger.info(
             "Document uploaded: %s (%d bytes) for project %s",
             safe_name,

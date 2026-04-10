@@ -57,7 +57,9 @@ _TASK_STATUS_TRANSITIONS: dict[str, set[str]] = {
     "draft": {"open"},
     "open": {"in_progress", "completed", "draft"},
     "in_progress": {"completed", "open"},
-    "completed": set(),  # terminal
+    # Allow reopening completed tasks for rework / scope change scenarios.
+    # The audit log + event bus provide traceability for state changes.
+    "completed": {"open", "in_progress"},
 }
 
 
@@ -376,3 +378,45 @@ class TaskService:
             completed_count=completed_count,
             avg_checklist_progress=avg_checklist_progress,
         )
+
+    async def list_upcoming_tasks(
+        self,
+        project_id: uuid.UUID,
+        *,
+        days_ahead: int = 7,
+        responsible_id: str | None = None,
+    ) -> list[Task]:
+        """Return non-completed tasks with due_date within ``days_ahead`` days.
+
+        Used by reminder/notification workflows. Excludes tasks already overdue
+        (those are handled separately via get_stats overdue_count).
+
+        Args:
+            project_id: Scope to this project.
+            days_ahead: Window in days (default 7).
+            responsible_id: Optional — filter to a specific assignee.
+        """
+        from datetime import UTC, datetime, timedelta
+
+        from sqlalchemy import and_, select
+
+        today = datetime.now(UTC).date()
+        horizon = today + timedelta(days=days_ahead)
+        today_str = today.isoformat()
+        horizon_str = horizon.isoformat()
+
+        stmt = select(Task).where(
+            and_(
+                Task.project_id == project_id,
+                Task.status != "completed",
+                Task.due_date.isnot(None),
+                Task.due_date >= today_str,
+                Task.due_date <= horizon_str,
+            )
+        )
+        if responsible_id:
+            stmt = stmt.where(Task.responsible_id == responsible_id)
+        stmt = stmt.order_by(Task.due_date)
+
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())

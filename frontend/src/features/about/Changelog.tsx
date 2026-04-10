@@ -14,6 +14,23 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.2',
+    date: '2026-04-10',
+    changes: [
+      'Feature: Finance EVM — added EAC/VAC/ETC/TCPI forecast metrics (PMBOK standard)',
+      'Feature: Schedule CPM — persists ES/EF/LS/LF/float in activity metadata + supports all 4 dep types (FS/SS/FF/SF)',
+      'Feature: BOQ section delete — cascade option + scrubs dangling Activity.boq_position_ids refs',
+      'Feature: Tasks — completed tasks can now be reopened for rework scenarios',
+      'Feature: Tasks — new list_upcoming_tasks() for reminder/notification workflows',
+      'Feature: RFI — publishes rfi.responded + rfi.closed events for notification chains',
+      'Feature: Meetings — delete_meeting scrubs meeting_id from auto-created tasks',
+      'Feature: Submittals — publishes submitted/reviewed/approved events + first-submit sets revision=1',
+      'Feature: Documents — publishes document.uploaded event for CDE workflows',
+      'Security: Documents download/photo — path traversal hardening via Path.relative_to() + symlink rejection',
+      'Fix: Project Intelligence scorer — optional domains no longer unfairly penalize overall score',
+    ],
+  },
+  {
     version: '1.3.1',
     date: '2026-04-10',
     changes: [
