@@ -54,6 +54,12 @@ export interface BIMViewerProps {
   error?: string | null;
   /** URL to DAE/COLLADA geometry file (served from backend). */
   geometryUrl?: string | null;
+  /**
+   * Optional visibility predicate. When set, the viewer calls
+   * ElementManager.applyFilter(predicate) so only matching elements stay
+   * visible. Fast — no re-render, just mesh.visible toggles.
+   */
+  filterPredicate?: ((el: BIMElementData) => boolean) | null;
 }
 
 /* ── Properties Table ──────────────────────────────────────────────────── */
@@ -152,6 +158,7 @@ export function BIMViewer({
   isLoading = false,
   error = null,
   geometryUrl = null,
+  filterPredicate = null,
 }: BIMViewerProps) {
   const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -227,6 +234,18 @@ export function BIMViewer({
       });
     }
   }, [geometryUrl, elements]);
+
+  // Apply filter predicate whenever it changes. Predicates from BIMFilterPanel
+  // are rebuilt on every filter state change, so this effect fires fast but
+  // only toggles mesh.visible — no geometry regeneration.
+  useEffect(() => {
+    if (!elementMgrRef.current) return;
+    if (filterPredicate) {
+      elementMgrRef.current.applyFilter(filterPredicate);
+    } else {
+      elementMgrRef.current.showAll();
+    }
+  }, [filterPredicate, elements]);
 
   // Sync selection from parent
   useEffect(() => {

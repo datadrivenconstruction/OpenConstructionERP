@@ -14,6 +14,16 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.8',
+    date: '2026-04-10',
+    changes: [
+      'Feature: BIM viewer filter + group panel — free-text search, discipline toggles, storey filter, element type filter',
+      'Feature: BIM element explorer — groups by discipline/storey/type, click to select in viewer, expandable tree',
+      'Feature: ElementManager.applyFilter() — fast mesh visibility toggle for 16k+ elements (no re-render)',
+      'Feature: Filter button in BIM header with live visible count badge',
+    ],
+  },
+  {
     version: '1.3.7',
     date: '2026-04-10',
     changes: [

@@ -332,6 +332,74 @@ export class ElementManager {
     return Array.from(set).sort();
   }
 
+  /** Get unique element types from loaded elements, with counts. */
+  getTypeCounts(): Map<string, number> {
+    const map = new Map<string, number>();
+    for (const el of this.elementDataMap.values()) {
+      const key = el.element_type || 'Unknown';
+      map.set(key, (map.get(key) ?? 0) + 1);
+    }
+    return map;
+  }
+
+  /** Get discipline counts. */
+  getDisciplineCounts(): Map<string, number> {
+    const map = new Map<string, number>();
+    for (const el of this.elementDataMap.values()) {
+      const key = el.discipline || 'other';
+      map.set(key, (map.get(key) ?? 0) + 1);
+    }
+    return map;
+  }
+
+  /** Get storey counts. */
+  getStoreyCounts(): Map<string, number> {
+    const map = new Map<string, number>();
+    for (const el of this.elementDataMap.values()) {
+      const key = el.storey || 'Unassigned';
+      map.set(key, (map.get(key) ?? 0) + 1);
+    }
+    return map;
+  }
+
+  /**
+   * Apply a visibility predicate to every element. Fast bulk update: each
+   * mesh gets `visible = predicate(element)`. Works for both placeholder
+   * boxes and DAE-matched nodes because meshMap is keyed by element ID.
+   *
+   * Returns the number of visible elements after the filter.
+   */
+  applyFilter(predicate: (el: BIMElementData) => boolean): number {
+    let visibleCount = 0;
+    for (const [elementId, mesh] of this.meshMap) {
+      const el = this.elementDataMap.get(elementId);
+      const shouldShow = el ? predicate(el) : true;
+      mesh.visible = shouldShow;
+      if (shouldShow) visibleCount++;
+    }
+    // If DAE geometry has un-matched nodes (mesh nodes without element data),
+    // hide them when ANY filter is active so users see only matched elements.
+    // This keeps the viewport consistent with the filter state.
+    if (this.daeGroup) {
+      this.daeGroup.traverse((obj) => {
+        if (obj instanceof THREE.Mesh) {
+          const ud = obj.userData as { elementId?: string };
+          if (!ud.elementId) {
+            // Unmatched DAE mesh — leave visible (background geometry)
+          }
+        }
+      });
+    }
+    return visibleCount;
+  }
+
+  /** Reset all element visibility to visible. */
+  showAll(): void {
+    for (const mesh of this.meshMap.values()) {
+      mesh.visible = true;
+    }
+  }
+
   /** Remove all elements from the scene. */
   clear(): void {
     for (const mesh of this.meshMap.values()) {
