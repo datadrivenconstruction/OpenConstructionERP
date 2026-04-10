@@ -281,14 +281,38 @@ export function BIMViewer({
   // Apply filter predicate whenever it changes. Predicates from BIMFilterPanel
   // are rebuilt on every filter state change, so this effect fires fast but
   // only toggles mesh.visible — no geometry regeneration.
+  //
+  // After applying, we ZOOM the camera to the visible subset so the user gets
+  // immediate spatial feedback. For models where mesh ↔ element mapping is
+  // approximate (DDC RVT exports without stable IDs), the zoom gives the
+  // user a tangible "the filter did something" signal even when the per-mesh
+  // visibility isn't perfectly accurate.
   useEffect(() => {
-    if (!elementMgrRef.current) return;
+    if (!elementMgrRef.current || !sceneRef.current) return;
     if (isolatedIds && isolatedIds.length > 0) {
       elementMgrRef.current.isolate(isolatedIds);
+      const visibleMeshes = elementMgrRef.current
+        .getAllMeshes()
+        .filter((m) => m.visible);
+      if (visibleMeshes.length > 0) {
+        sceneRef.current.zoomToSelection(visibleMeshes);
+      }
     } else if (filterPredicate) {
-      elementMgrRef.current.applyFilter(filterPredicate);
+      const visibleCount = elementMgrRef.current.applyFilter(filterPredicate);
+      if (visibleCount > 0 && visibleCount < elementMgrRef.current.getAllMeshes().length) {
+        const visibleMeshes = elementMgrRef.current
+          .getAllMeshes()
+          .filter((m) => m.visible);
+        if (visibleMeshes.length > 0) {
+          sceneRef.current.zoomToSelection(visibleMeshes);
+        }
+      } else if (visibleCount === elementMgrRef.current.getAllMeshes().length) {
+        // All visible (e.g. cleared filter) — zoom back out to the full model
+        sceneRef.current.zoomToFit();
+      }
     } else {
       elementMgrRef.current.showAll();
+      sceneRef.current.zoomToFit();
     }
   }, [filterPredicate, isolatedIds, elements]);
 
