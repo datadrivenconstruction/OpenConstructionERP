@@ -30,6 +30,12 @@ import {
   X,
 } from 'lucide-react';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
+import {
+  bucketOf,
+  isNoiseCategory,
+  BUCKETS,
+  type BIMCategoryBucket,
+} from './bimCategoryTaxonomy';
 
 // ── Types ────────────────────────────────────────────────────────────────
 
@@ -41,6 +47,10 @@ export interface BIMFilterState {
   search: string;
   storeys: Set<string>; // empty = show all
   types: Set<string>; // empty = show all
+  /** When true, annotation/analytical categories are excluded from the
+   *  viewport regardless of explicit type-filter selection. Defaults to
+   *  true so first-time users see only real building elements. */
+  buildingsOnly: boolean;
   groupBy: GroupBy;
 }
 
@@ -120,15 +130,24 @@ export default function BIMFilterPanel({
     search: '',
     storeys: new Set(),
     types: new Set(),
+    buildingsOnly: true,
     groupBy: 'type',
   });
 
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  /** Which bucket sections in the Types panel are currently expanded.
+   *  Real building buckets are open by default, noise buckets are closed. */
+  const [expandedBuckets, setExpandedBuckets] = useState<Set<BIMCategoryBucket>>(
+    () => new Set(['structure', 'envelope', 'openings', 'mep']),
+  );
 
-  // ── Derived: counts per dimension ──────────────────────────────────
+  // ── Derived: counts per dimension + bucket grouping ─────────────────
   const counts = useMemo(() => {
     const byStorey = new Map<string, number>();
     const byType = new Map<string, number>();
+    /** bucket → ordered list of [typeName, count] */
+    const byBucket = new Map<BIMCategoryBucket, Map<string, number>>();
+    const bucketTotals = new Map<BIMCategoryBucket, number>();
 
     for (const el of elements) {
       const s = el.storey || '—';
@@ -136,6 +155,32 @@ export default function BIMFilterPanel({
 
       const tpe = getTypeKey(el, format);
       byType.set(tpe, (byType.get(tpe) ?? 0) + 1);
+
+      const bucket = bucketOf(tpe);
+      let perBucket = byBucket.get(bucket);
+      if (!perBucket) {
+        perBucket = new Map();
+        byBucket.set(bucket, perBucket);
+      }
+      perBucket.set(tpe, (perBucket.get(tpe) ?? 0) + 1);
+      bucketTotals.set(bucket, (bucketTotals.get(bucket) ?? 0) + 1);
+    }
+
+    // Sort buckets by their semantic order, then build the ordered
+    // (bucket → types[]) structure used by the renderer.
+    const orderedBuckets: Array<{
+      bucket: BIMCategoryBucket;
+      total: number;
+      types: Array<[string, number]>;
+    }> = [];
+    for (const meta of Object.values(BUCKETS).sort((a, b) => a.order - b.order)) {
+      const types = byBucket.get(meta.id);
+      if (!types || types.size === 0) continue;
+      orderedBuckets.push({
+        bucket: meta.id,
+        total: bucketTotals.get(meta.id) ?? 0,
+        types: Array.from(types.entries()).sort((a, b) => b[1] - a[1]),
+      });
     }
 
     return {
@@ -143,6 +188,7 @@ export default function BIMFilterPanel({
         a[0].localeCompare(b[0]),
       ),
       types: Array.from(byType.entries()).sort((a, b) => b[1] - a[1]),
+      buckets: orderedBuckets,
     };
   }, [elements, format]);
 
@@ -151,13 +197,16 @@ export default function BIMFilterPanel({
     (s: BIMFilterState) => {
       const search = s.search.trim().toLowerCase();
       const predicate = (el: BIMElementData): boolean => {
+        const tpe = getTypeKey(el, format);
+        // Buildings-only toggle hides annotation/analytical noise
+        if (s.buildingsOnly && isNoiseCategory(tpe)) return false;
         // Storey filter (empty set = show all)
         if (s.storeys.size > 0) {
           if (!s.storeys.has(el.storey || '—')) return false;
         }
         // Type filter
         if (s.types.size > 0) {
-          if (!s.types.has(getTypeKey(el, format))) return false;
+          if (!s.types.has(tpe)) return false;
         }
         // Search
         if (search) {
@@ -207,6 +256,29 @@ export default function BIMFilterPanel({
     }));
   }, []);
 
+  const toggleBucket = useCallback((bucket: BIMCategoryBucket) => {
+    setExpandedBuckets((prev) => {
+      const next = new Set(prev);
+      if (next.has(bucket)) next.delete(bucket);
+      else next.add(bucket);
+      return next;
+    });
+  }, []);
+
+  /** Toggle every type chip in a bucket on or off in one click. */
+  const toggleBucketSelection = useCallback((typesInBucket: string[]) => {
+    setState((prev) => {
+      const next = new Set(prev.types);
+      const allSelected = typesInBucket.every((t) => next.has(t));
+      if (allSelected) {
+        for (const t of typesInBucket) next.delete(t);
+      } else {
+        for (const t of typesInBucket) next.add(t);
+      }
+      return { ...prev, types: next };
+    });
+  }, []);
+
   const toggleGroup = useCallback((id: string) => {
     setExpandedGroups((prev) => {
       const next = new Set(prev);
@@ -223,10 +295,11 @@ export default function BIMFilterPanel({
   const visibleElements = useMemo(() => {
     const search = state.search.trim().toLowerCase();
     return elements.filter((el) => {
+      const tpe = getTypeKey(el, format);
+      if (state.buildingsOnly && isNoiseCategory(tpe)) return false;
       if (state.storeys.size > 0 && !state.storeys.has(el.storey || '—'))
         return false;
-      if (state.types.size > 0 && !state.types.has(getTypeKey(el, format)))
-        return false;
+      if (state.types.size > 0 && !state.types.has(tpe)) return false;
       if (search) {
         const hay = (
           (el.name || '') +
@@ -339,6 +412,33 @@ export default function BIMFilterPanel({
             </button>
           )}
         </div>
+
+        {/* Buildings-only toggle — hides annotation/analytical noise */}
+        <label className="flex items-center justify-between mt-2 text-[11px] text-content-secondary cursor-pointer select-none">
+          <span className="flex items-center gap-1.5">
+            <Package size={11} className="text-content-tertiary" />
+            {t('bim.filter_buildings_only', {
+              defaultValue: 'Building elements only',
+            })}
+          </span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={state.buildingsOnly}
+            onClick={() =>
+              setState((p) => ({ ...p, buildingsOnly: !p.buildingsOnly }))
+            }
+            className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors ${
+              state.buildingsOnly ? 'bg-oe-blue' : 'bg-surface-tertiary'
+            }`}
+          >
+            <span
+              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                state.buildingsOnly ? 'translate-x-3.5' : 'translate-x-0.5'
+              }`}
+            />
+          </button>
+        </label>
       </div>
 
       {/* Scroll area: Storeys + Types */}
@@ -367,21 +467,84 @@ export default function BIMFilterPanel({
           )}
         </FilterSection>
 
-        {/* Types (scrollable if many) */}
+        {/* Types — grouped by semantic bucket (Structure / Envelope / MEP / …)
+            Noise buckets (Annotations, Analytical) are hidden when
+            buildingsOnly is on, otherwise shown collapsed at the bottom. */}
         <FilterSection title={typesSectionTitle} icon={<Package size={12} />}>
-          <div className="max-h-64 overflow-y-auto pe-1 space-y-1">
-            {counts.types.map(([name, count]) => {
-              const active = state.types.has(name);
-              return (
-                <FilterChip
-                  key={name}
-                  label={name}
-                  count={count}
-                  active={active}
-                  onClick={() => toggleSet('types', name)}
-                />
-              );
-            })}
+          <div className="space-y-1">
+            {counts.buckets
+              .filter(({ bucket }) =>
+                state.buildingsOnly ? !BUCKETS[bucket].noise : true,
+              )
+              .map(({ bucket, total, types }) => {
+                const meta = BUCKETS[bucket];
+                const isOpen = expandedBuckets.has(bucket);
+                const typeNames = types.map(([n]) => n);
+                const allOn = typeNames.every((n) => state.types.has(n));
+                return (
+                  <div
+                    key={bucket}
+                    className="rounded border border-border-light/60 bg-surface-secondary/40"
+                  >
+                    <div className="flex items-center justify-between px-2 py-1">
+                      <button
+                        type="button"
+                        onClick={() => toggleBucket(bucket)}
+                        className="flex items-center gap-1.5 min-w-0 flex-1 text-left"
+                      >
+                        {isOpen ? (
+                          <ChevronDown size={11} className="text-content-tertiary shrink-0" />
+                        ) : (
+                          <ChevronRight size={11} className="text-content-tertiary shrink-0" />
+                        )}
+                        <span className={`text-[11px] font-semibold ${meta.color} truncate`}>
+                          {meta.label}
+                        </span>
+                        <span className="text-[10px] text-content-quaternary tabular-nums shrink-0">
+                          {total.toLocaleString()}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => toggleBucketSelection(typeNames)}
+                        className="text-[10px] px-1.5 py-0.5 rounded text-content-tertiary hover:text-oe-blue hover:bg-surface-primary"
+                        title={
+                          allOn
+                            ? t('bim.filter_bucket_clear', {
+                                defaultValue: 'Clear bucket',
+                              })
+                            : t('bim.filter_bucket_select_all', {
+                                defaultValue: 'Select all in bucket',
+                              })
+                        }
+                      >
+                        {allOn ? '✓' : '+'}
+                      </button>
+                    </div>
+                    {isOpen && (
+                      <div className="px-2 pb-1.5 pt-0.5 space-y-0.5">
+                        {types.map(([name, count]) => {
+                          const active = state.types.has(name);
+                          return (
+                            <FilterChip
+                              key={name}
+                              label={name}
+                              count={count}
+                              active={active}
+                              onClick={() => toggleSet('types', name)}
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            {counts.buckets.length === 0 && (
+              <div className="text-[10px] text-content-quaternary italic px-1">
+                {t('bim.filter_no_types', { defaultValue: 'No element types detected' })}
+              </div>
+            )}
           </div>
         </FilterSection>
 
