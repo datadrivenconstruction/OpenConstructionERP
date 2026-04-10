@@ -910,7 +910,11 @@ async def list_elements(
     storey: str | None = Query(default=None),
     discipline: str | None = Query(default=None),
     offset: int = Query(default=0, ge=0),
-    limit: int = Query(default=200, ge=1, le=5000),
+    # Cap raised to 50000 because the BIM viewer needs all elements at once to
+    # match COLLADA mesh nodes by stable_id. Real Revit models routinely have
+    # 10–30k elements; pagination on the viewer side would mean missing
+    # geometry references.
+    limit: int = Query(default=50000, ge=1, le=50000),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: BIMHubService = Depends(_get_service),
 ) -> BIMElementListResponse:

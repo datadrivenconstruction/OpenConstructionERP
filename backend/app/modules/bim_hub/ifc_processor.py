@@ -45,9 +45,16 @@ def _try_cad2data(ifc_path: Path, output_dir: Path) -> dict[str, Any] | None:
     ext = ifc_path.suffix.lower().lstrip(".")
 
     # --- Method 1: DDC Community Converter (same pipeline as Data Explorer) ---
-    # Run the converter directly with the EXACT args cad_import uses, since
-    # we're already in a worker thread (asyncio.to_thread wraps process_ifc_file)
-    # and don't need to wrap an async function inside another loop.
+    # The DDC RvtExporter / IfcExporter is dispatched by the OUTPUT FILE
+    # EXTENSION: .xlsx/.xls → Excel, .dae → COLLADA, .pdf → PDF.
+    # We invoke it TWICE so we get both:
+    #   1. Element list as Excel (parsed into BIMElement records)
+    #   2. Real 3D geometry as native COLLADA (saved as geometry.dae)
+    # The second call replaces the simplified box-grid we used to generate
+    # from element bounding boxes.
+    #
+    # CRITICAL: DDC needs cwd=converter.parent (Qt6Core.dll lives there),
+    # so all paths must be absolute or the converter reports "File does not exist".
     try:
         from app.modules.boq.cad_import import find_converter, parse_cad_excel
 
@@ -57,59 +64,91 @@ def _try_cad2data(ifc_path: Path, output_dir: Path) -> dict[str, Any] | None:
             logger.info("Using DDC Community Converter: %s", converter)
             output_dir.mkdir(parents=True, exist_ok=True)
 
-            # CLI: <input> <output.xlsx> [mode] [-no-collada]
-            # CRITICAL: DDC converter is invoked with cwd=converter.parent (so it
-            # finds Qt6Core.dll etc.), so RELATIVE paths break. Always pass
-            # absolute paths to both input file and output xlsx.
             input_abs = ifc_path.resolve()
-            output_xlsx = (output_dir / (ifc_path.stem + ".xlsx")).resolve()
-            args = [str(converter), str(input_abs), str(output_xlsx)]
-            if ext in ("rvt", "ifc"):
-                args.append("complete")
-            args.append("-no-collada")
 
-            try:
-                result = subprocess.run(
-                    args,
+            def _run_ddc(out_path: Path, *extra_args: str) -> tuple[int, bytes, bytes]:
+                """Invoke RvtExporter / IfcExporter with the given output target."""
+                args_list = [str(converter), str(input_abs), str(out_path)]
+                if ext in ("rvt", "ifc"):
+                    args_list.append("complete")
+                args_list.extend(extra_args)
+                logger.debug("DDC call: %s", args_list)
+                proc = subprocess.run(
+                    args_list,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
-                    cwd=str(converter.parent),  # DDC needs DLLs from its dir
-                    input=b"\n",  # handle "Press Enter" prompt
-                    timeout=600,  # 10 min for large RVT files
+                    cwd=str(converter.parent),
+                    input=b"\n",
+                    timeout=600,
                 )
+                return proc.returncode, proc.stdout, proc.stderr
+
+            # ── Pass 1: Excel ──────────────────────────────────────────
+            # `-no-collada` here just disables placeholder COLLADA we don't need
+            # for the Excel pass — the actual COLLADA comes from pass 2.
+            output_xlsx = (output_dir / (ifc_path.stem + ".xlsx")).resolve()
+            try:
+                rc, _stdout, stderr = _run_ddc(output_xlsx, "-no-collada")
             except subprocess.TimeoutExpired:
-                logger.error("DDC converter timed out after 600s for %s", ifc_path.name)
+                logger.error("DDC Excel pass timed out for %s", ifc_path.name)
+                return None
+            if rc != 0:
+                logger.warning(
+                    "DDC Excel pass exit %d: %s",
+                    rc, stderr.decode(errors="replace")[:300],
+                )
                 return None
 
-            if result.returncode != 0:
-                logger.warning(
-                    "DDC converter exit %d: stderr=%s | last_stdout=%s",
-                    result.returncode,
-                    result.stderr.decode(errors="replace")[:300],
-                    result.stdout.decode(errors="replace")[-300:],
+            excel_path: Path | None = None
+            if output_xlsx.exists() and output_xlsx.stat().st_size > 0:
+                excel_path = output_xlsx
+            else:
+                for f in output_dir.iterdir():
+                    if f.suffix in (".xlsx", ".xls") and f.stat().st_size > 0:
+                        excel_path = f
+                        break
+            if not excel_path:
+                logger.warning("DDC Excel pass produced no output file in %s", output_dir)
+                return None
+
+            raw_elements = parse_cad_excel(excel_path)
+            if not raw_elements:
+                logger.warning("DDC Excel pass produced empty file")
+                return None
+            logger.info(
+                "DDC converter extracted %d raw rows from %s",
+                len(raw_elements), ifc_path.name,
+            )
+
+            # ── Pass 2: native COLLADA geometry ────────────────────────
+            # Output filename MUST be `geometry.dae` so the existing
+            # BIM Hub geometry endpoint can locate it.
+            real_dae = (output_dir / "geometry.dae").resolve()
+            try:
+                rc2, _stdout2, stderr2 = _run_ddc(real_dae)
+            except subprocess.TimeoutExpired:
+                logger.warning("DDC COLLADA pass timed out — will fall back to box geometry")
+                rc2 = -1
+                stderr2 = b""
+
+            real_dae_path: Path | None = None
+            if rc2 == 0 and real_dae.exists() and real_dae.stat().st_size > 0:
+                real_dae_path = real_dae
+                logger.info(
+                    "DDC native COLLADA generated: %d bytes",
+                    real_dae.stat().st_size,
                 )
             else:
-                # Locate the generated Excel
-                excel_path = None
-                if output_xlsx.exists() and output_xlsx.stat().st_size > 0:
-                    excel_path = output_xlsx
-                else:
-                    for f in output_dir.iterdir():
-                        if f.suffix in (".xlsx", ".xls") and f.stat().st_size > 0:
-                            excel_path = f
-                            break
+                logger.warning(
+                    "DDC COLLADA pass failed (rc=%s, stderr=%s) — using box fallback",
+                    rc2, stderr2.decode(errors="replace")[:200] if stderr2 else "",
+                )
 
-                if excel_path:
-                    raw_elements = parse_cad_excel(excel_path)
-                    if raw_elements:
-                        logger.info(
-                            "DDC converter extracted %d raw rows from %s",
-                            len(raw_elements), ifc_path.name,
-                        )
-                        return _excel_elements_to_bim_result(raw_elements, output_dir)
-                    logger.warning("DDC converter produced Excel but parser returned 0 elements")
-                else:
-                    logger.warning("DDC converter exited 0 but no Excel file found in %s", output_dir)
+            return _excel_elements_to_bim_result(
+                raw_elements,
+                output_dir,
+                real_dae_path=real_dae_path,
+            )
     except ImportError:
         logger.debug("cad_import module not available")
     except Exception as e:
@@ -194,6 +233,8 @@ def _try_cad2data(ifc_path: Path, output_dir: Path) -> dict[str, Any] | None:
 def _excel_elements_to_bim_result(
     raw_elements: list[dict[str, Any]],
     output_dir: Path,
+    *,
+    real_dae_path: Path | None = None,
 ) -> dict[str, Any]:
     """Convert parsed Excel elements (from DDC converter) into BIM result format.
 
@@ -206,6 +247,10 @@ def _excel_elements_to_bim_result(
 
     We filter out non-element rows (sun studies, materials, viewports, etc.)
     and map the meaningful Revit categories into our generic element model.
+
+    If ``real_dae_path`` is provided (output of a separate RvtExporter call to
+    .dae), we use the real Revit COLLADA geometry instead of the placeholder
+    box-grid generated from element bounding boxes.
     """
     # Skip these categories — they're not building elements (settings, materials, etc.)
     SKIP_CATEGORIES = {
@@ -318,14 +363,23 @@ def _excel_elements_to_bim_result(
             "bounding_box": None,
         })
 
-    # Generate COLLADA boxes for 3D preview
-    geometry_path = None
+    # Geometry: prefer the real Revit COLLADA from the second DDC pass.
+    # Fall back to the simplified box-grid only when the real .dae is missing.
+    geometry_path: Path | None = None
     bounding_box = None
-    if elements:
+    if real_dae_path and real_dae_path.exists() and real_dae_path.stat().st_size > 0:
+        # Already named geometry.dae in output_dir — use as-is.
+        geometry_path = real_dae_path
+        logger.info(
+            "Using real Revit COLLADA geometry: %s (%d KB)",
+            real_dae_path.name, real_dae_path.stat().st_size // 1024,
+        )
+    elif elements:
         try:
             geometry_path, bounding_box = _generate_collada_boxes(elements, output_dir)
+            logger.info("Generated placeholder box geometry (no real COLLADA available)")
         except Exception as e:
-            logger.warning("COLLADA generation failed for DDC converter output: %s", e)
+            logger.warning("COLLADA box generation failed: %s", e)
 
     return {
         "elements": elements,
