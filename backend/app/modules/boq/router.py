@@ -1413,9 +1413,16 @@ async def update_position(
     position_id: uuid.UUID,
     data: PositionUpdate,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: BOQService = Depends(_get_service),
 ) -> PositionResponse:
     """Update a BOQ position. Recalculates total if quantity or unit_rate changed."""
+    # IDOR guard: load position → derive boq_id → verify ownership chain
+    existing = await service.position_repo.get_by_id(position_id)
+    if existing is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Position not found")
+    await _verify_boq_owner(session, existing.boq_id, user_id, payload)
     position = await service.update_position(position_id, data)
     return _position_to_response(position)
 
@@ -1429,6 +1436,8 @@ async def update_position(
 async def delete_position(
     position_id: uuid.UUID,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     cascade: bool = Query(
         default=False,
         description="If true, delete all descendant positions when deleting a section.",
@@ -1436,6 +1445,11 @@ async def delete_position(
     service: BOQService = Depends(_get_service),
 ) -> None:
     """Delete a single position. For sections, pass ?cascade=true to delete children."""
+    # IDOR guard: load position → derive boq_id → verify ownership chain
+    existing = await service.position_repo.get_by_id(position_id)
+    if existing is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Position not found")
+    await _verify_boq_owner(session, existing.boq_id, user_id, payload)
     await _log_activity(
         service,
         user_id=user_id,
@@ -1454,6 +1468,8 @@ async def delete_position(
 )
 async def reorder_positions(
     boq_id: uuid.UUID,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     data: dict = Body(...),
     user_id: CurrentUserId = None,
     service: BOQService = Depends(_get_service),
@@ -1463,6 +1479,8 @@ async def reorder_positions(
     Expects ``{"position_ids": ["uuid1", "uuid2", ...]}``.
     The list order determines the new ``sort_order`` for each position.
     """
+    # IDOR guard: verify BOQ ownership before any mutation
+    await _verify_boq_owner(session, boq_id, user_id, payload)
     raw_ids = data.get("position_ids", [])
     position_ids = [uuid.UUID(pid) if isinstance(pid, str) else pid for pid in raw_ids]
     await service.reorder_positions(boq_id, position_ids)
