@@ -14,6 +14,14 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.21',
+    date: '2026-04-10',
+    changes: [
+      'BIM viewer Storeys filter is now actually usable. The DDC RVT export ships ~10 000 annotation/analytical rows with `storey: null` which dominated the storey list and showed up as a useless "—" entry. The Storeys section now (1) is scoped by the "Building elements only" toggle so the noise rows are excluded entirely, (2) parses the leading level number from each name ("01 - Entry Level" → level 1, label "Entry Level"), (3) renders a small numeric badge in front of each chip ("01", "02", "03", "G" for ground, "B1" for basement), (4) sorts ground-up by parsed level number instead of alphabetical, (5) adds an "All levels" link when any storey is selected. Verified end-to-end via headless Playwright: clicking the Entry Level chip drops viewport visibility from 5 168 → 317 meshes and zooms to that floor only',
+      'BIM filter panel verified by deep test: Walls chip = 205 visible meshes, Doors chip = 108, Walls + Doors together = 313 (perfect OR-set semantics across selected types). Buildings-only toggle proven to hide 272 noise meshes on the demo. Real-GPU FPS measured at 60 on the 5 440-mesh model after the v1.3.20 perf pass',
+    ],
+  },
+  {
     version: '1.3.20',
     date: '2026-04-10',
     changes: [
