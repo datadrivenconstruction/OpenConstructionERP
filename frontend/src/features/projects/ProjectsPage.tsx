@@ -27,6 +27,7 @@ interface ProjectBOQStats {
   projectId: string;
   boqCount: number;
   totalValue: number;
+  hasError?: boolean;
 }
 
 type SortOption = 'name_asc' | 'newest' | 'oldest' | 'value';
@@ -108,21 +109,26 @@ export function ProjectsPage() {
   });
 
   /* Fetch BOQ stats for all projects (count + total value) — single request + parallel detail fetches */
-  const { data: boqStats } = useQuery({
+  const { data: boqStats, error: boqStatsError } = useQuery({
     queryKey: ['projects-boq-stats', projects],
     queryFn: async () => {
       if (!projects || projects.length === 0) return [];
 
       // Fetch BOQs per project (endpoint requires project_id)
+      // Track per-project errors so we can surface degraded loads to the UI.
       const perProject = await Promise.all(
         projects.map(async (p) => {
           try {
             const boqs = await apiGet<BOQBasic[]>(`/v1/boq/boqs/?project_id=${p.id}`);
-            return { projectId: p.id, boqs };
-          } catch {
-            return { projectId: p.id, boqs: [] as BOQBasic[] };
+            return { projectId: p.id, boqs, failed: false };
+          } catch (err) {
+            console.warn(`Failed to fetch BOQs for project ${p.id}:`, err);
+            return { projectId: p.id, boqs: [] as BOQBasic[], failed: true };
           }
         }),
+      );
+      const failedProjectIds = new Set(
+        perProject.filter((pp) => pp.failed).map((pp) => pp.projectId),
       );
       const allBoqs = perProject.flatMap((pp) => pp.boqs);
 
@@ -138,9 +144,10 @@ export function ProjectsPage() {
       const detailPromises = allBoqs.map(async (b) => {
         try {
           const full = await apiGet<BOQWithPositions>(`/v1/boq/boqs/${b.id}`);
-          return { boqId: b.id, projectId: b.project_id, grandTotal: full.grand_total };
-        } catch {
-          return { boqId: b.id, projectId: b.project_id, grandTotal: 0 };
+          return { boqId: b.id, projectId: b.project_id, grandTotal: full.grand_total, failed: false };
+        } catch (err) {
+          console.warn(`Failed to fetch BOQ ${b.id} detail:`, err);
+          return { boqId: b.id, projectId: b.project_id, grandTotal: 0, failed: true };
         }
       });
       const details = await Promise.all(detailPromises);
@@ -149,16 +156,25 @@ export function ProjectsPage() {
       const totalsByProject = new Map<string, number>();
       for (const d of details) {
         totalsByProject.set(d.projectId, (totalsByProject.get(d.projectId) ?? 0) + d.grandTotal);
+        if (d.failed) failedProjectIds.add(d.projectId);
       }
 
       return projects.map((p) => ({
         projectId: p.id,
         boqCount: boqsByProject.get(p.id)?.length ?? 0,
         totalValue: totalsByProject.get(p.id) ?? 0,
+        hasError: failedProjectIds.has(p.id),
       }));
     },
     enabled: !!projects && projects.length > 0,
   });
+
+  // Show a persistent warning if BOQ stats failed to load at the top level
+  useEffect(() => {
+    if (boqStatsError) {
+      console.error('BOQ stats query failed:', boqStatsError);
+    }
+  }, [boqStatsError]);
 
   const boqStatsMap = useMemo(() => {
     if (!boqStats) return new Map<string, ProjectBOQStats>();

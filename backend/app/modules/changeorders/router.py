@@ -43,9 +43,17 @@ def _get_service(session: SessionDep) -> ChangeOrderService:
 
 def _order_to_response(order: object) -> ChangeOrderResponse:
     """Build a ChangeOrderResponse from a ChangeOrder ORM object."""
+    # `items` may not be eager-loaded in async context — only attempt to access
+    # if the relationship was populated upstream (via selectinload or similar).
+    # Returning an empty list when unloaded is intentional: this response type
+    # only uses `item_count`, not the items themselves.
     try:
         items = list(order.items)  # type: ignore[attr-defined]
-    except Exception:
+    except Exception as exc:
+        import logging
+        logging.getLogger(__name__).debug(
+            "ChangeOrder items not loaded for response: %s", exc
+        )
         items = []
     return ChangeOrderResponse(
         id=order.id,  # type: ignore[attr-defined]
