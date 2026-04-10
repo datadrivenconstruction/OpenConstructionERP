@@ -14,7 +14,7 @@ Stateless service layer. Handles:
 import logging
 import math
 import uuid
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -1530,6 +1530,11 @@ class ScheduleService:
                     seen_pairs.add((pred_id, act_id))
 
         # --- Forward pass: compute ES, EF ---
+        # Supports all 4 dependency types per PMBOK:
+        #   FS (Finish-to-Start): successor starts after predecessor finishes (+lag)
+        #   SS (Start-to-Start):  successor starts after predecessor starts (+lag)
+        #   FF (Finish-to-Finish): successor finishes after predecessor finishes (+lag)
+        #   SF (Start-to-Finish): successor finishes after predecessor starts (+lag)
         es: dict[str, int] = {}
         ef: dict[str, int] = {}
         for ad in act_data:
@@ -1537,13 +1542,26 @@ class ScheduleService:
             dur = ad["duration_days"]
             act_es = 0
             for pred_id, dep_type, lag in deps[act_id]:
+                dep_type = (dep_type or "FS").upper()
                 pred_dur = idx[pred_id]["duration_days"]
+                pred_ef = ef.get(pred_id, pred_dur)
+                pred_es = es.get(pred_id, 0)
                 if dep_type == "FS":
-                    candidate = ef.get(pred_id, pred_dur) + lag
+                    candidate = pred_ef + lag
                 elif dep_type == "SS":
-                    candidate = es.get(pred_id, 0) + lag
+                    candidate = pred_es + lag
+                elif dep_type == "FF":
+                    # Successor finish ≥ predecessor finish + lag → ES = EF_succ - dur
+                    candidate = pred_ef + lag - dur
+                elif dep_type == "SF":
+                    # Successor finish ≥ predecessor start + lag → ES = SF - dur
+                    candidate = pred_es + lag - dur
                 else:
-                    candidate = ef.get(pred_id, pred_dur)
+                    logger.warning(
+                        "Unknown dependency type '%s' on activity %s; treating as FS",
+                        dep_type, act_id,
+                    )
+                    candidate = pred_ef + lag
                 act_es = max(act_es, candidate)
             es[act_id] = act_es
             ef[act_id] = act_es + dur
@@ -1565,13 +1583,27 @@ class ScheduleService:
             act_id = ad["id"]
             dur = ad["duration_days"]
             for succ_id, dep_type, lag in successors.get(act_id, []):
+                dep_type = (dep_type or "FS").upper()
+                succ_ls = ls.get(succ_id, project_duration)
+                succ_lf = lf.get(succ_id, project_duration)
                 if dep_type == "FS":
-                    lf[act_id] = min(lf[act_id], ls.get(succ_id, project_duration) - lag)
+                    # pred LF ≤ succ LS - lag
+                    lf[act_id] = min(lf[act_id], succ_ls - lag)
                 elif dep_type == "SS":
-                    lf[act_id] = min(
-                        lf[act_id],
-                        ls.get(succ_id, project_duration) - lag + dur,
+                    # pred LS ≤ succ LS - lag → LF = LS_succ - lag + dur
+                    lf[act_id] = min(lf[act_id], succ_ls - lag + dur)
+                elif dep_type == "FF":
+                    # pred LF ≤ succ LF - lag
+                    lf[act_id] = min(lf[act_id], succ_lf - lag)
+                elif dep_type == "SF":
+                    # pred LS ≤ succ LF - lag → LF = LF_succ - lag + dur
+                    lf[act_id] = min(lf[act_id], succ_lf - lag + dur)
+                else:
+                    logger.warning(
+                        "Unknown dependency type '%s' on backward pass %s → %s; treating as FS",
+                        dep_type, act_id, succ_id,
                     )
+                    lf[act_id] = min(lf[act_id], succ_ls - lag)
             ls[act_id] = lf[act_id] - dur
 
         # --- Compute float and identify critical path ---
@@ -1598,7 +1630,8 @@ class ScheduleService:
             if is_critical:
                 critical_results.append(result)
 
-            # Update activity color + CPM metadata
+            # Update activity color + CPM metadata — persist so the frontend
+            # can display ES/EF/LS/LF/float on next load without re-running CPM.
             cpm_meta = {
                 "es": es[act_id],
                 "ef": ef[act_id],
@@ -1606,11 +1639,21 @@ class ScheduleService:
                 "lf": lf[act_id],
                 "total_float": total_float,
                 "is_critical": is_critical,
+                "calculated_at": datetime.now(UTC).isoformat(),
             }
             new_color = "#ef4444" if is_critical else "#0071e3"
+            # Merge cpm into existing metadata_ so we don't clobber user-set keys
+            activity = idx.get(act_id)
+            existing_meta = {}
+            if activity:
+                raw_meta = activity.get("metadata_") or activity.get("metadata") or {}
+                if isinstance(raw_meta, dict):
+                    existing_meta = dict(raw_meta)
+            existing_meta["cpm"] = cpm_meta
             await self.activity_repo.update_fields(
                 uuid.UUID(act_id),
                 color=new_color,
+                metadata_=existing_meta,
             )
 
         await _safe_publish(

@@ -334,16 +334,24 @@ async def serve_photo_file(
     """Serve the actual photo file."""
     photo = await service.get_photo(photo_id)
     file_path = Path(photo.file_path).resolve()
-
-    # Security: ensure resolved path is within allowed photo directory
     photo_base = Path(PHOTO_BASE).resolve()
-    if not str(file_path).startswith(str(photo_base)):
+
+    # Security: Path.resolve().relative_to() handles case-insensitive FS + symlinks
+    try:
+        file_path.relative_to(photo_base)
+    except ValueError:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied",
         )
 
-    if not file_path.exists() or file_path.is_symlink():
+    if file_path.is_symlink():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Symlinks not permitted",
+        )
+
+    if not file_path.exists() or not file_path.is_file():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Photo file not found on disk",
@@ -579,25 +587,42 @@ async def get_document(
 # ── Download ─────────────────────────────────────────────────────────────────
 
 
-@router.get("/{document_id}/download/")
+@router.get(
+    "/{document_id}/download/",
+    dependencies=[Depends(RequirePermission("documents.read"))],
+)
 async def download_document(
     document_id: uuid.UUID,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    user_id: CurrentUserId,
     service: DocumentService = Depends(_get_service),
 ) -> FileResponse:
-    """Download a document file."""
+    """Download a document file.
+
+    Security: uses ``Path.resolve().relative_to()`` for containment check so
+    case-insensitive filesystems and symlinks cannot escape ``UPLOAD_BASE``.
+    """
     doc = await service.get_document(document_id)
     file_path = Path(doc.file_path).resolve()
-
-    # Security: ensure resolved path is within the allowed upload directory
     upload_base = Path(UPLOAD_BASE).resolve()
-    if not str(file_path).startswith(str(upload_base)):
+
+    # Security: path must be STRICTLY inside upload_base after full resolution.
+    # ``str.startswith`` can be fooled on Windows case-insensitive FS and by
+    # symlinks; ``relative_to`` rejects both cases explicitly.
+    try:
+        file_path.relative_to(upload_base)
+    except ValueError:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied",
         )
 
-    if not file_path.exists() or file_path.is_symlink():
+    if file_path.is_symlink():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Symlinks not permitted",
+        )
+
+    if not file_path.exists() or not file_path.is_file():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="File not found on disk",

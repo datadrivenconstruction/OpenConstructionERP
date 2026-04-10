@@ -232,7 +232,8 @@ class RFIService:
         """Record an official response to an RFI.
 
         Ball-in-court automatically flips to ``raised_by`` so the originator
-        can review the answer.
+        can review the answer. Publishes ``rfi.responded`` event so
+        subscribers (notifications, project intelligence) can react.
         """
         rfi = await self.get_rfi(rfi_id)
         if rfi.status in ("closed", "void"):
@@ -250,14 +251,29 @@ class RFIService:
             ball_in_court=str(rfi.raised_by),
         )
         await self.session.refresh(rfi)
+
+        await _safe_publish(
+            "rfi.responded",
+            {
+                "project_id": str(rfi.project_id),
+                "rfi_id": str(rfi_id),
+                "rfi_number": rfi.rfi_number,
+                "subject": rfi.subject,
+                "responded_by": responded_by,
+                "raised_by": str(rfi.raised_by) if rfi.raised_by else None,
+                "ball_in_court": str(rfi.raised_by) if rfi.raised_by else None,
+            },
+            source_module="oe_rfi",
+        )
+
         logger.info("RFI responded: %s by %s", rfi_id, responded_by)
         return rfi
 
-    async def close_rfi(self, rfi_id: uuid.UUID) -> RFI:
+    async def close_rfi(self, rfi_id: uuid.UUID, *, closed_by: str | None = None) -> RFI:
         """Close an RFI.
 
         Requires an official response before closing to prevent
-        unanswered RFIs from being silently closed.
+        unanswered RFIs from being silently closed. Publishes ``rfi.closed`` event.
         """
         rfi = await self.get_rfi(rfi_id)
         if rfi.status == "closed":
@@ -273,7 +289,20 @@ class RFIService:
 
         await self.repo.update_fields(rfi_id, status="closed", ball_in_court=None)
         await self.session.refresh(rfi)
-        logger.info("RFI closed: %s", rfi_id)
+
+        await _safe_publish(
+            "rfi.closed",
+            {
+                "project_id": str(rfi.project_id),
+                "rfi_id": str(rfi_id),
+                "rfi_number": rfi.rfi_number,
+                "subject": rfi.subject,
+                "closed_by": closed_by,
+            },
+            source_module="oe_rfi",
+        )
+
+        logger.info("RFI closed: %s by %s", rfi_id, closed_by)
         return rfi
 
     async def get_stats(self, project_id: uuid.UUID) -> RFIStatsResponse:

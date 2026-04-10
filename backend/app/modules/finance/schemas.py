@@ -385,6 +385,11 @@ class EVMSnapshotResponse(BaseModel):
     cv: str = "0"
     spi: str = "0"
     cpi: str = "0"
+    # Forecast metrics (EVM standard)
+    eac: str = "0"
+    vac: str = "0"
+    etc: str = "0"
+    tcpi: str = "0"
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime

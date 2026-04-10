@@ -338,15 +338,27 @@ def compute_score(state: ProjectState) -> ProjectScore:
     }
 
     # ── Overall weighted score ─────────────────────────────────────────
+    # Essential domains always count even if zero — they're required for any
+    # serious project. Optional domains (tendering, documents, reports) only
+    # contribute to the denominator when they have been touched, so a project
+    # that skips optional phases isn't unfairly penalized.
+    ESSENTIAL_DOMAINS = {"boq", "validation", "schedule", "cost_model"}
+
     weighted_sum = 0.0
     total_weight = 0.0
     for domain, weight in DOMAIN_WEIGHTS.items():
         score = domain_pcts.get(domain, 0.0)
-        weighted_sum += score * weight
-        total_weight += weight
+        is_essential = domain in ESSENTIAL_DOMAINS
+        # Count an optional domain only if it has any progress
+        if is_essential or score > 0:
+            weighted_sum += score * weight
+            total_weight += weight
 
     if total_weight > 0:
+        # `score` here is already a 0-1 float; multiply by 100 to get 0-100.
         result.overall = round(weighted_sum / total_weight * 100, 1)
+    else:
+        result.overall = 0.0
     result.overall_grade = _score_to_grade(result.overall)
 
     # ── Detect gaps ────────────────────────────────────────────────────
