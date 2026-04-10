@@ -14,6 +14,21 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.18',
+    date: '2026-04-10',
+    changes: [
+      'Fix: BIM viewer now shows COLLADA materials and colours from the source file — was overwriting every mesh with a flat default discipline material, making everything look uniformly white',
+      'Fix: BIM viewer camera fit now ignores the grid helper and lights — model is no longer dwarfed by the 100×100 grid bbox and visible immediately on load',
+      'Fix: BIM viewer colour-by reset now restores the original COLLADA material instead of falling back to the flat discipline colour',
+      'Cleanup: tighter inner padding on every page — main content area now uses px-2 sm:px-3 (was px-3 sm:px-4 lg:px-6) and the artificial max-w-content cap is gone, so dashboards, lists and editors fill the available width',
+      'Security: BIM model delete now removes the original RVT/IFC + COLLADA + Excel files from disk (was a leak — files accumulated indefinitely)',
+      'Security: new POST /api/v1/bim_hub/cleanup-orphans/ admin endpoint scans data/bim/ for files whose model row no longer exists and removes them',
+      'Fix: markups now save points in PDF user units (not canvas pixels), so an annotation drawn at 100% zoom renders correctly at 200% zoom or any other scale. Legacy pixel-coordinate markups still render via a backwards-compat flag',
+      'Fix: PDF.js memory leak in the markups inline annotator — pdfDoc is now destroyed and the in-flight RenderTask is cancelled on unmount / page change',
+      'Security: takeoff converter ZIP install now validates every member path against zip-slip — refuses absolute paths and `..` parent traversal that could write outside the install directory',
+    ],
+  },
+  {
     version: '1.3.17',
     date: '2026-04-10',
     changes: [

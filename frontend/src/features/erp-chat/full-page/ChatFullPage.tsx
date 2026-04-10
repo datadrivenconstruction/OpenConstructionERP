@@ -62,7 +62,7 @@ export default function ChatFullPage() {
 
   return (
     <div
-      className="-mx-3 sm:-mx-4 lg:-mx-6 -mt-6 -mb-6 border-l border-border-light"
+      className="-mx-2 sm:-mx-3 -mt-6 -mb-6 border-l border-border-light"
       data-chat-theme={resolvedTheme}
       style={{
         height: 'calc(100vh - 56px)',
