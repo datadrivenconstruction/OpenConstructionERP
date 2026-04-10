@@ -54,7 +54,7 @@ export default function InputBar({ onSend, isStreaming, suggestions }: InputBarP
     <div
       style={{
         borderTop: '1px solid var(--chat-border-subtle)',
-        padding: '10px 16px 12px',
+        padding: '10px 4px 12px',
         background: 'var(--chat-surface-1)',
       }}
     >
