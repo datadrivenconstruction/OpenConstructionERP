@@ -62,7 +62,7 @@ export default function ChatFullPage() {
 
   return (
     <div
-      className="-mx-3 sm:-mx-4 lg:-mx-6 -mt-4 -mb-4"
+      className="-mx-3 sm:-mx-4 lg:-mx-6 -mt-4 -mb-4 border-l border-border-light"
       data-chat-theme={resolvedTheme}
       style={{
         height: 'calc(100vh - 56px)',
@@ -99,7 +99,7 @@ export default function ChatFullPage() {
           <Separator
             style={{
               width: 4,
-              background: 'var(--chat-border-subtle)',
+              background: 'var(--chat-border)',
               cursor: 'col-resize',
               transition: 'background 0.15s',
             }}
