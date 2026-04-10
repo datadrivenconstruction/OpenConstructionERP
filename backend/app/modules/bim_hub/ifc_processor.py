@@ -45,6 +45,9 @@ def _try_cad2data(ifc_path: Path, output_dir: Path) -> dict[str, Any] | None:
     ext = ifc_path.suffix.lower().lstrip(".")
 
     # --- Method 1: DDC Community Converter (same pipeline as Data Explorer) ---
+    # Run the converter directly with the EXACT args cad_import uses, since
+    # we're already in a worker thread (asyncio.to_thread wraps process_ifc_file)
+    # and don't need to wrap an async function inside another loop.
     try:
         from app.modules.boq.cad_import import find_converter, parse_cad_excel
 
@@ -52,46 +55,65 @@ def _try_cad2data(ifc_path: Path, output_dir: Path) -> dict[str, Any] | None:
         if converter:
             import subprocess
             logger.info("Using DDC Community Converter: %s", converter)
-
             output_dir.mkdir(parents=True, exist_ok=True)
-            output_xlsx = output_dir / (ifc_path.stem + ".xlsx")
-            args = [str(converter), str(ifc_path), str(output_xlsx)]
+
+            # CLI: <input> <output.xlsx> [mode] [-no-collada]
+            # CRITICAL: DDC converter is invoked with cwd=converter.parent (so it
+            # finds Qt6Core.dll etc.), so RELATIVE paths break. Always pass
+            # absolute paths to both input file and output xlsx.
+            input_abs = ifc_path.resolve()
+            output_xlsx = (output_dir / (ifc_path.stem + ".xlsx")).resolve()
+            args = [str(converter), str(input_abs), str(output_xlsx)]
             if ext in ("rvt", "ifc"):
                 args.append("complete")
+            args.append("-no-collada")
 
-            converter_dir = converter.parent
-            result = subprocess.run(
-                args,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                cwd=str(converter_dir),
-                input=b"\n",
-                timeout=300,
-            )
+            try:
+                result = subprocess.run(
+                    args,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    cwd=str(converter.parent),  # DDC needs DLLs from its dir
+                    input=b"\n",  # handle "Press Enter" prompt
+                    timeout=600,  # 10 min for large RVT files
+                )
+            except subprocess.TimeoutExpired:
+                logger.error("DDC converter timed out after 600s for %s", ifc_path.name)
+                return None
 
             if result.returncode != 0:
-                logger.warning("DDC converter failed (exit %d): %s", result.returncode, result.stderr.decode(errors="replace")[:500])
+                logger.warning(
+                    "DDC converter exit %d: stderr=%s | last_stdout=%s",
+                    result.returncode,
+                    result.stderr.decode(errors="replace")[:300],
+                    result.stdout.decode(errors="replace")[-300:],
+                )
             else:
-                # Find output Excel
+                # Locate the generated Excel
                 excel_path = None
-                for f in output_dir.iterdir():
-                    if f.suffix in (".xlsx", ".xls"):
-                        excel_path = f
-                        break
-                if not excel_path and output_xlsx.exists():
+                if output_xlsx.exists() and output_xlsx.stat().st_size > 0:
                     excel_path = output_xlsx
+                else:
+                    for f in output_dir.iterdir():
+                        if f.suffix in (".xlsx", ".xls") and f.stat().st_size > 0:
+                            excel_path = f
+                            break
 
                 if excel_path:
                     raw_elements = parse_cad_excel(excel_path)
                     if raw_elements:
+                        logger.info(
+                            "DDC converter extracted %d raw rows from %s",
+                            len(raw_elements), ifc_path.name,
+                        )
                         return _excel_elements_to_bim_result(raw_elements, output_dir)
-                    logger.warning("DDC converter produced Excel but no elements")
+                    logger.warning("DDC converter produced Excel but parser returned 0 elements")
                 else:
-                    logger.warning("DDC converter produced no Excel output")
+                    logger.warning("DDC converter exited 0 but no Excel file found in %s", output_dir)
     except ImportError:
         logger.debug("cad_import module not available")
     except Exception as e:
-        logger.warning("DDC Community Converter error: %s", e)
+        logger.warning("DDC Community Converter error: %s", e, exc_info=True)
 
     # --- Method 2: cad2data binary on PATH ---
     import shutil
@@ -173,43 +195,124 @@ def _excel_elements_to_bim_result(
     raw_elements: list[dict[str, Any]],
     output_dir: Path,
 ) -> dict[str, Any]:
-    """Convert parsed Excel elements (from DDC converter) into BIM result format."""
+    """Convert parsed Excel elements (from DDC converter) into BIM result format.
+
+    DDC RvtExporter produces Excel rows with Revit-specific columns:
+    - ``category`` like "OST_Walls", "OST_Doors", "OST_PipeFitting"
+    - ``name``, ``type name``, ``family name``
+    - ``uniqueid`` (Revit GUID)
+    - ``level`` for storey, ``length``/``area``/``volume`` for quantities
+    - Many BuiltIn parameters like ``width``, ``height``, ``thickness``, etc.
+
+    We filter out non-element rows (sun studies, materials, viewports, etc.)
+    and map the meaningful Revit categories into our generic element model.
+    """
+    # Skip these categories — they're not building elements (settings, materials, etc.)
+    SKIP_CATEGORIES = {
+        None, "", "ost_materials", "ost_sunstudy", "ost_views", "ost_viewports",
+        "ost_grids", "ost_levels", "ost_sheets", "ost_titleblocks",
+        "ost_phases", "ost_previewlegendcomponents", "ost_designoptions",
+        "ost_paramelemelectricalloadclassification", "ost_hvac_load_space_types",
+        "ost_hvac_load_building_types", "ost_filldrawcolor", "ost_filllinepattern",
+    }
+
     elements: list[dict[str, Any]] = []
     storeys_set: set[str] = set()
     disciplines_set: set[str] = set()
 
     for i, row in enumerate(raw_elements):
-        etype = str(row.get("Type", row.get("type", row.get("Category", ""))))
-        name = str(row.get("Name", row.get("name", row.get("Family", ""))))
-        storey = str(row.get("Level", row.get("level", row.get("Storey", ""))))
-        discipline = _classify_discipline(etype)
+        # Normalize keys to lowercase for tolerant lookup
+        lc_row = {k.lower(): v for k, v in row.items()}
 
+        category = lc_row.get("category")
+        cat_lower = str(category or "").lower()
+
+        # Skip non-element rows: those with no category at all (likely orphan
+        # parameter rows from the DDC converter), and known non-element categories.
+        if not category or cat_lower in SKIP_CATEGORIES:
+            continue
+
+        # Friendly element type derived from OST_ category name
+        if cat_lower.startswith("ost_"):
+            etype = cat_lower[4:].replace("_", " ").title()
+        else:
+            etype = str(category) if category else "Unknown"
+
+        # Best-effort name resolution
+        name = (
+            lc_row.get("name")
+            or lc_row.get("type name")
+            or lc_row.get("family name")
+            or lc_row.get("mark")
+            or f"{etype}-{i}"
+        )
+        name = str(name)[:200]
+
+        storey = (
+            lc_row.get("level")
+            or lc_row.get("storey")
+            or lc_row.get("base level")
+            or ""
+        )
+        storey = str(storey).strip() if storey else ""
+
+        discipline = _classify_discipline(etype)
         if storey:
             storeys_set.add(storey)
         disciplines_set.add(discipline)
 
+        # Numeric quantity fields — handle Revit native (mm/m²/m³) units
         quantities: dict[str, float] = {}
-        for qkey in ("Area", "Volume", "Length", "Width", "Height", "Count",
-                      "area", "volume", "length", "width", "height", "count"):
-            val = row.get(qkey)
-            if val is not None:
-                try:
-                    quantities[qkey.title()] = float(val)
-                except (ValueError, TypeError):
-                    pass
+        for src_key, dest_key in (
+            ("length", "Length"), ("area", "Area"), ("volume", "Volume"),
+            ("width", "Width"), ("height", "Height"), ("thickness", "Thickness"),
+            ("perimeter", "Perimeter"), ("count", "Count"),
+        ):
+            val = lc_row.get(src_key)
+            if val is None:
+                continue
+            try:
+                quantities[dest_key] = float(val)
+            except (ValueError, TypeError):
+                pass
 
-        stable_id = str(row.get("GlobalId", row.get("global_id", row.get("Id", row.get("id", i)))))
+        # Stable ID — prefer Revit uniqueid, fall back to type ifcguid, then row index
+        stable_id = str(
+            lc_row.get("uniqueid")
+            or lc_row.get("type ifcguid")
+            or lc_row.get("globalid")
+            or lc_row.get("id")
+            or i
+        )
+
+        # Properties: keep human-meaningful BuiltIn params, drop noisy / structural keys
+        SKIP_PROP_KEYS = {
+            "id", "uniqueid", "versionguid", "design option", "workset",
+            "category", "name", "type name", "family name", "level", "storey",
+            "length", "area", "volume", "width", "height", "thickness",
+            "perimeter", "count", "globalid", "type ifcguid", "export type to ifc",
+        }
+        properties: dict[str, str] = {}
+        for k, v in row.items():
+            if k.lower() in SKIP_PROP_KEYS:
+                continue
+            if v is None:
+                continue
+            sval = str(v).strip()
+            if not sval or sval in ("None", "0"):
+                continue
+            # Cap value length to keep payloads reasonable
+            properties[k] = sval[:500]
+            if len(properties) >= 30:
+                break  # Cap properties per element
 
         elements.append({
             "stable_id": stable_id,
-            "element_type": etype or "Unknown",
-            "name": name or etype or f"Element-{i}",
+            "element_type": etype,
+            "name": name,
             "storey": storey or None,
             "discipline": discipline,
-            "properties": {k: str(v) for k, v in row.items() if k.lower() not in (
-                "globalid", "global_id", "id", "type", "name", "level", "storey",
-                "category", "family", "area", "volume", "length", "width", "height", "count",
-            ) and v is not None and str(v).strip()},
+            "properties": properties,
             "quantities": quantities,
             "geometry_hash": hashlib.md5(f"{stable_id}:{etype}:{name}".encode()).hexdigest()[:16],
             "bounding_box": None,
