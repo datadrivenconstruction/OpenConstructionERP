@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import ProjectSelector from './ProjectSelector';
 
 interface ChatTopBarProps {
   onClear: () => void;
@@ -67,9 +66,6 @@ export default function ChatTopBar({ onClear }: ChatTopBarProps) {
       >
         {t('chat.title', { defaultValue: 'ERP AI Assistant' })}
       </div>
-
-      {/* Project selector */}
-      <ProjectSelector />
 
       {/* Clear button */}
       <button

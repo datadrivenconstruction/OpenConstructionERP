@@ -47,6 +47,7 @@ import { Badge, EmptyState, Breadcrumb } from '@/shared/ui';
 import { BIMViewer } from '@/shared/ui/BIMViewer';
 import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
 import BIMFilterPanel from './BIMFilterPanel';
+import { BIMProcessingProgress, type BIMProcessingStage } from './BIMProcessingProgress';
 import { Filter } from 'lucide-react';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
@@ -181,9 +182,30 @@ function ModelCard({ model, isActive, onClick, onDelete }: {
 
 /* ── Upload Panel ────────────────────────────────────────────────────── */
 
-function UploadPanel({ projectId, onUploadComplete, onClose, initialAdvancedMode, initialModelName }: {
-  projectId: string; onUploadComplete: (modelId: string) => void; onClose: () => void;
-  initialAdvancedMode?: boolean; initialModelName?: string;
+interface ProcessingUpdate {
+  stage: BIMProcessingStage;
+  fileName?: string;
+  fileSize?: string;
+  elementCount?: number;
+  errorMessage?: string;
+}
+
+function UploadPanel({
+  projectId,
+  onUploadComplete,
+  onClose,
+  initialAdvancedMode,
+  initialModelName,
+  onProcessingUpdate,
+}: {
+  projectId: string;
+  onUploadComplete: (modelId: string) => void;
+  onClose: () => void;
+  initialAdvancedMode?: boolean;
+  initialModelName?: string;
+  /** Reports stage transitions to the parent so it can render a global
+   *  progress card over the viewport. */
+  onProcessingUpdate?: (update: ProcessingUpdate | null) => void;
 }) {
   const [file, setFile] = useState<File | null>(null);
   const [modelName, setModelName] = useState(initialModelName || '');
@@ -219,42 +241,179 @@ function UploadPanel({ projectId, onUploadComplete, onClose, initialAdvancedMode
 
   const handleUpload = useCallback(async () => {
     if (!projectId) return;
-    setUploading(true); setUploadError(null); setUploadProgress(0);
+    setUploading(true);
+    setUploadError(null);
+    setUploadProgress(0);
+
+    // The backend /upload-cad endpoint is synchronous — it runs the whole
+    // pipeline inline and only returns when processing is finished. Since
+    // there are no intermediate status events we simulate the 5 stages on
+    // a timer so the user sees steady progress. If the fetch resolves
+    // faster than the timer, we jump to the final stage immediately.
+    const activeFile = advancedMode ? dataFile : file;
+    const sizeLabel = activeFile ? formatFileSize(activeFile.size) : undefined;
+    const fileName = activeFile?.name;
+    onProcessingUpdate?.({ stage: 'uploading', fileName, fileSize: sizeLabel });
+    setUploadStage('Uploading…');
+    setUploadProgress(10);
+
+    // Drive the stepper forward while the fetch is in flight
+    const stageSchedule: BIMProcessingStage[] = [
+      'uploading',
+      'converting',
+      'parsing',
+      'indexing',
+      'linking',
+    ];
+    let stageIdx = 0;
+    const stageTimer = setInterval(() => {
+      if (stageIdx < stageSchedule.length - 1) {
+        stageIdx += 1;
+        onProcessingUpdate?.({
+          stage: stageSchedule[stageIdx]!,
+          fileName,
+          fileSize: sizeLabel,
+        });
+        setUploadStage(stageSchedule[stageIdx]!);
+        setUploadProgress((p) => Math.min(p + 15, 90));
+      }
+    }, 1500);
+
     try {
       if (advancedMode && dataFile) {
-        setUploadStage('Uploading data...'); setUploadProgress(30);
-        const res = await uploadBIMData(projectId, modelName || 'Imported', discipline, dataFile, geometryFile);
+        const res = await uploadBIMData(
+          projectId,
+          modelName || 'Imported',
+          discipline,
+          dataFile,
+          geometryFile,
+        );
+        clearInterval(stageTimer);
         setUploadProgress(100);
-        addToast({ type: 'success', title: 'BIM data uploaded', message: `${res.element_count} elements` });
-        onUploadComplete(res.model_id); resetForm();
+        onProcessingUpdate?.({
+          stage: 'ready',
+          fileName,
+          fileSize: sizeLabel,
+          elementCount: res.element_count,
+        });
+        addToast({
+          type: 'success',
+          title: 'BIM data uploaded',
+          message: `${res.element_count} elements`,
+        });
+        onUploadComplete(res.model_id);
+        resetForm();
       } else if (file) {
         const name = modelName || file.name.replace(/\.[^.]+$/, '');
         if (isCADFile(file.name)) {
-          setUploadStage('Uploading...'); setUploadProgress(20);
-          const iv = setInterval(() => setUploadProgress((p) => Math.min(p + 5, 85)), 500);
           const res = await uploadCADFile(projectId, name, discipline, file);
-          clearInterval(iv); setUploadProgress(100);
-          const st = (res as any).status || 'processing';
-          const cnt = (res as any).element_count || 0;
-          if (st === 'ready') addToast({ type: 'success', title: 'Model processed', message: `${cnt} elements` });
-          else if (st === 'needs_converter') addToast({ type: 'warning', title: 'Converter required', message: `${res.format.toUpperCase()} needs DDC cad2data` });
-          else if (st === 'error') addToast({ type: 'error', title: 'Processing failed', message: 'Could not extract elements' });
-          else addToast({ type: 'success', title: 'File uploaded', message: 'Processing queued' });
-          onUploadComplete(res.model_id); await new Promise((r) => setTimeout(r, 1500)); resetForm();
-        } else if (isDataFile(file.name)) {
-          setUploadStage('Importing...'); setUploadProgress(40);
-          const res = await uploadBIMData(projectId, name, discipline, file);
+          clearInterval(stageTimer);
           setUploadProgress(100);
-          addToast({ type: 'success', title: 'Imported', message: `${res.element_count} elements` });
-          onUploadComplete(res.model_id); resetForm();
+          const st = (res as { status?: string }).status || 'processing';
+          const cnt = (res as { element_count?: number }).element_count || 0;
+
+          if (st === 'ready') {
+            onProcessingUpdate?.({
+              stage: 'ready',
+              fileName,
+              fileSize: sizeLabel,
+              elementCount: cnt,
+            });
+            addToast({
+              type: 'success',
+              title: 'Model processed',
+              message: `${cnt} elements`,
+            });
+          } else if (st === 'needs_converter') {
+            onProcessingUpdate?.({
+              stage: 'needs_converter',
+              fileName,
+              fileSize: sizeLabel,
+              errorMessage: `${res.format.toUpperCase()} requires DDC cad2data. Convert to IFC first.`,
+            });
+            addToast({
+              type: 'warning',
+              title: 'Converter required',
+              message: `${res.format.toUpperCase()} needs DDC cad2data`,
+            });
+          } else if (st === 'error') {
+            onProcessingUpdate?.({
+              stage: 'error',
+              fileName,
+              fileSize: sizeLabel,
+              errorMessage: 'Could not extract elements from this CAD file.',
+            });
+            addToast({
+              type: 'error',
+              title: 'Processing failed',
+              message: 'Could not extract elements',
+            });
+          } else {
+            onProcessingUpdate?.({
+              stage: 'ready',
+              fileName,
+              fileSize: sizeLabel,
+              elementCount: cnt,
+            });
+            addToast({
+              type: 'success',
+              title: 'File uploaded',
+              message: 'Processing queued',
+            });
+          }
+          onUploadComplete(res.model_id);
+          // Give the user a moment to read the final stage before closing
+          await new Promise((r) => setTimeout(r, 600));
+          resetForm();
+        } else if (isDataFile(file.name)) {
+          const res = await uploadBIMData(projectId, name, discipline, file);
+          clearInterval(stageTimer);
+          setUploadProgress(100);
+          onProcessingUpdate?.({
+            stage: 'ready',
+            fileName,
+            fileSize: sizeLabel,
+            elementCount: res.element_count,
+          });
+          addToast({
+            type: 'success',
+            title: 'Imported',
+            message: `${res.element_count} elements`,
+          });
+          onUploadComplete(res.model_id);
+          resetForm();
         }
       }
     } catch (err) {
+      clearInterval(stageTimer);
       const msg = err instanceof Error ? err.message : String(err);
-      setUploadError(msg); setUploadProgress(0);
+      setUploadError(msg);
+      setUploadProgress(0);
+      onProcessingUpdate?.({
+        stage: 'error',
+        fileName,
+        fileSize: sizeLabel,
+        errorMessage: msg,
+      });
       addToast({ type: 'error', title: 'Upload failed', message: msg });
-    } finally { setUploading(false); setUploadStage(''); }
-  }, [projectId, file, advancedMode, dataFile, geometryFile, modelName, discipline, onUploadComplete, addToast, resetForm]);
+    } finally {
+      clearInterval(stageTimer);
+      setUploading(false);
+      setUploadStage('');
+    }
+  }, [
+    projectId,
+    file,
+    advancedMode,
+    dataFile,
+    geometryFile,
+    modelName,
+    discipline,
+    onUploadComplete,
+    onProcessingUpdate,
+    addToast,
+    resetForm,
+  ]);
 
   const canUpload = advancedMode ? !!dataFile && !uploading : !!file && !uploading;
   const disciplines = [
@@ -541,6 +700,8 @@ export function BIMPage() {
   const [visibleElementCount, setVisibleElementCount] = useState<number | null>(null);
   const [colorByMode, setColorByMode] = useState<'default' | 'storey' | 'type'>('default');
   const [isolatedIds, setIsolatedIds] = useState<string[] | null>(null);
+  const [processing, setProcessing] = useState<ProcessingUpdate | null>(null);
+  const [meshMatchRatio, setMeshMatchRatio] = useState<number | null>(null);
   const addToast = useToastStore((s) => s.addToast);
 
   const modelsQuery = useQuery({ queryKey: ['bim-models', projectId], queryFn: () => fetchBIMModels(projectId), enabled: !!projectId });
@@ -566,6 +727,23 @@ export function BIMPage() {
   }, [statusPollQuery.data, activeModel, queryClient, projectId, activeModelId]);
 
   useEffect(() => { if (models.length && !activeModelId) setActiveModelId(models[0]!.id); }, [models, activeModelId]);
+
+  // Reset transient viewer state when switching between models
+  useEffect(() => {
+    setMeshMatchRatio(null);
+    setFilterPredicate(null);
+    setVisibleElementCount(null);
+    setIsolatedIds(null);
+    setColorByMode('default');
+  }, [activeModelId]);
+
+  // Auto-dismiss the processing progress card 4 seconds after the model is
+  // ready (errors stay until the user clicks close).
+  useEffect(() => {
+    if (processing?.stage !== 'ready') return;
+    const timer = setTimeout(() => setProcessing(null), 4000);
+    return () => clearTimeout(timer);
+  }, [processing?.stage]);
 
   const elementsQuery = useQuery({
     queryKey: ['bim-elements', activeModelId],
@@ -759,6 +937,7 @@ export function BIMPage() {
             filterPredicate={filterPredicate}
             colorByMode={colorByMode}
             isolatedIds={isolatedIds}
+            onGeometryLoaded={setMeshMatchRatio}
             className="h-full"
           />
         ) : (
@@ -777,7 +956,46 @@ export function BIMPage() {
             onClose={() => { setUploadOpen(false); setUploadConvertedName(null); }}
             initialAdvancedMode={!!uploadConvertedName}
             initialModelName={uploadConvertedName || undefined}
+            onProcessingUpdate={setProcessing}
           />
+        )}
+
+        {/* Processing progress card (bottom-right of viewport) */}
+        {processing && (
+          <div className="absolute bottom-6 end-6 z-40 pointer-events-none">
+            <BIMProcessingProgress
+              stage={processing.stage}
+              fileName={processing.fileName}
+              fileSize={processing.fileSize}
+              elementCount={processing.elementCount}
+              errorMessage={processing.errorMessage}
+              onClose={() => setProcessing(null)}
+            />
+          </div>
+        )}
+
+        {/* Low mesh-match warning — shown when the loaded DAE has no per-element
+            mapping (e.g. DDC RVT exports with numeric node names), which means
+            element filters can't hide individual objects in the viewport. */}
+        {meshMatchRatio !== null && meshMatchRatio < 0.02 && elements.length > 0 && !isModelNonReady && (
+          <div className="absolute bottom-3 start-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 shadow-sm">
+              <AlertTriangle size={12} className="text-amber-600 dark:text-amber-400 shrink-0" />
+              <span className="text-[11px] text-amber-800 dark:text-amber-300">
+                {t('bim.no_mesh_mapping', {
+                  defaultValue:
+                    'Per-element filtering unavailable for this model (no stable_id → mesh mapping). Explorer still works.',
+                })}
+              </span>
+              <button
+                onClick={() => setMeshMatchRatio(null)}
+                className="text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-200"
+                aria-label="Dismiss"
+              >
+                <X size={11} />
+              </button>
+            </div>
+          </div>
         )}
         </div>
       </div>

@@ -766,9 +766,24 @@ def create_app() -> FastAPI:
         return {"status": "received"}
 
     # ── Lifecycle ───────────────────────────────────────────────────────
+    def _section(title: str) -> None:
+        """Log a visual section header during startup.
+
+        Makes it possible to scan a 60-line startup log and see at a glance
+        where the server got stuck. Keeps output machine-readable because
+        logger.info is still used.
+        """
+        logger.info("=== %s ===", title)
+
     @app.on_event("startup")
     async def startup() -> None:
-        logger.info("Starting %s v%s (%s)", settings.app_name, settings.app_version, settings.app_env)
+        _section("OpenConstructionERP")
+        logger.info(
+            "Starting %s v%s (env=%s)",
+            settings.app_name,
+            settings.app_version,
+            settings.app_env,
+        )
 
         # Validate secrets and configuration for production
         _insecure_secrets = {"change-me-in-production", "openestimate-local-dev-key", ""}
@@ -788,6 +803,7 @@ def create_app() -> FastAPI:
                 logger.warning("DATABASE_URL points to localhost in production")
 
         # Load translations (20 languages)
+        _section("i18n")
         from app.core.i18n import load_translations
 
         load_translations()
@@ -797,8 +813,17 @@ def create_app() -> FastAPI:
 
         register_core_permissions()
 
-        # Auto-create tables for SQLite dev mode (PostgreSQL uses Alembic)
-        if "sqlite" in settings.database_url:
+        # Auto-create tables for SQLite AND PostgreSQL on first start.
+        # Why for both: the v0.9.0 baseline Alembic migration is a no-op
+        # (it documents that tables are created via SQLAlchemy create_all),
+        # and the docker-compose.quickstart.yml entrypoint does not run
+        # `alembic upgrade head` before uvicorn. Result on a fresh PG
+        # volume: schema never created, login fails with
+        # `relation "oe_users_user" does not exist` (issue #42).
+        # SQLAlchemy create_all is idempotent on PG and harmless on existing
+        # databases — it only creates tables that do not yet exist.
+        _section("Database")
+        if "sqlite" in settings.database_url or "postgresql" in settings.database_url:
             # SQLite auto-migration: add missing columns before create_all
             from app.core import audit as _audit_core  # noqa: F401
             from app.core.sqlite_migrator import sqlite_auto_migrate
@@ -849,15 +874,24 @@ def create_app() -> FastAPI:
             from app.modules.users import models as _users_models  # noqa: F401
             from app.modules.validation import models as _validation_models  # noqa: F401
 
-            migrated = await sqlite_auto_migrate(engine, Base)
-            if migrated:
-                logger.info("SQLite auto-migration: %d columns added", migrated)
+            # SQLite-only: add missing columns to existing tables before
+            # create_all runs. PostgreSQL deployments must use Alembic for
+            # column-level migrations — sqlite_auto_migrate uses SQLite-
+            # specific PRAGMA / ALTER syntax.
+            if "sqlite" in settings.database_url:
+                migrated = await sqlite_auto_migrate(engine, Base)
+                if migrated:
+                    logger.info("SQLite auto-migration: %d columns added", migrated)
 
             async with engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
-            logger.info("SQLite tables created/verified")
+            db_kind = "SQLite" if "sqlite" in settings.database_url else "PostgreSQL"
+            logger.info("%s tables created/verified", db_kind)
+        else:
+            logger.info("Using external database (Alembic manages schema)")
 
         # Load all modules (triggers module on_startup hooks)
+        _section("Modules")
         await module_loader.load_all(app)
 
         # Mount OpenCDE API at the spec-compliant prefix /api/v1/opencde
@@ -903,14 +937,17 @@ def create_app() -> FastAPI:
         register_event_handlers()
 
         # Register built-in validation rules
+        _section("Validation")
         from app.core.validation.rules import register_builtin_rules
 
         register_builtin_rules()
 
         # Seed demo account + 3 demo projects (idempotent)
+        _section("Demo data")
         await _seed_demo_account()
 
         # Initialize vector database (LanceDB embedded, no Docker)
+        _section("Vector DB")
         _init_vector_db()
 
         # ── KPI auto-recalculation scheduler (24-hour interval) ──────────
@@ -938,7 +975,24 @@ def create_app() -> FastAPI:
 
         asyncio.create_task(_kpi_scheduler())
 
-        logger.info("Application started successfully")
+        _section("Ready")
+        # Friendly multi-line ready banner. The CLI (`openestimate serve`)
+        # exposes OE_CLI_HOST / OE_CLI_PORT / OE_CLI_DATA_DIR so we can show
+        # an accurate URL after the socket is actually bound. If those env
+        # vars are absent (e.g. `uvicorn app.main:create_app --factory`), we
+        # fall back to a generic message.
+        _cli_host = os.environ.get("OE_CLI_HOST")
+        _cli_port = os.environ.get("OE_CLI_PORT")
+        _cli_data_dir = os.environ.get("OE_CLI_DATA_DIR")
+        if _cli_host and _cli_port:
+            _url = f"http://{_cli_host}:{_cli_port}"
+            logger.info("OpenConstructionERP is ready at %s", _url)
+            logger.info("Demo login: demo@openestimator.io / DemoPass1234!")
+            if _cli_data_dir:
+                logger.info("Data directory: %s", _cli_data_dir)
+            logger.info("Press Ctrl+C to stop. Docs: https://openconstructionerp.com/docs")
+        else:
+            logger.info("Application started successfully")
 
         # NOTE: frontend static mounting moved to create_app() (below, before
         # the startup event runs). Registering the SPA 404 exception handler

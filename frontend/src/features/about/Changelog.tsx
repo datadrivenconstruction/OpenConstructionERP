@@ -14,6 +14,23 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.12',
+    date: '2026-04-10',
+    changes: [
+      'Fix #42: PostgreSQL quickstart now creates tables on first start (was missing schema, login broken)',
+      'Fix: BIM viewer fits the camera to the model on load — no more mousewheel hunting',
+      'Fix: BIM filters and isolate now work for Revit/RVT exports',
+      'Fix: BIM ingest fills in mesh_ref, level and bounding box on every element',
+      'New: 6-step progress bar after BIM upload (uploading → converting → parsing → indexing → linking → ready)',
+      'New: `openestimate doctor` command — runs 8 pre-flight checks before serve',
+      'New: `openestimate init-db` creates the full schema for all 43 modules',
+      'New: friendlier CLI startup banner with version, URL and demo login',
+      'Cleanup: removed duplicate project selector from chat top bar, tighter top spacing',
+      'Cleanup: rewritten README quickstart (3 commands) + troubleshooting table',
+      'Cleanup: install.ps1 is now a 5-step progress flow with check marks',
+    ],
+  },
+  {
     version: '1.3.11',
     date: '2026-04-10',
     changes: [
