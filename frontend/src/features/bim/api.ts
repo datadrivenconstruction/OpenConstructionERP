@@ -52,10 +52,15 @@ export async function fetchBIMModel(modelId: string): Promise<BIMModelData> {
   return apiGet<BIMModelData>(`/v1/bim_hub/${encodeURIComponent(modelId)}`);
 }
 
-/** Fetch elements for a specific BIM model. */
+/** Fetch elements for a specific BIM model.
+ *
+ * Default limit is 50000 because the 3D viewer needs every element loaded
+ * at once to match COLLADA mesh nodes by stable_id — pagination would mean
+ * missing geometry references.
+ */
 export async function fetchBIMElements(
   modelId: string,
-  limit = 1000,
+  limit = 50000,
   offset = 0,
 ): Promise<BIMElementsResponse> {
   return apiGet<BIMElementsResponse>(

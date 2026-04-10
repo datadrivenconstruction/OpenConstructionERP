@@ -6,6 +6,7 @@ import { useChatFullPage } from './useChatFullPage';
 import ChatTopBar from './topbar/ChatTopBar';
 import ChatLeftPanel from './left/ChatLeftPanel';
 import DataRightPanel from './right/DataRightPanel';
+import AIConfigBanner from './AIConfigBanner';
 import { useThemeStore } from '@/stores/useThemeStore';
 
 const PANEL_STORAGE_KEY = 'chat-panel-sizes';
@@ -73,6 +74,7 @@ export default function ChatFullPage() {
       }}
     >
       <ChatTopBar onClear={clearChat} />
+      <AIConfigBanner />
 
       <div style={{ flex: 1, overflow: 'hidden' }}>
         <Group
