@@ -27,6 +27,46 @@ MAX_AGENT_ROUNDS = 5
 # Timeout for AI API calls
 AI_TIMEOUT = 120.0
 
+# Maximum serialized size of a single tool result re-fed to the LLM.
+# ~8000 chars ≈ 2000 tokens — keeps the agent loop from blowing up the
+# context window on large `get_boq_items`/list-style tool returns.
+MAX_TOOL_RESULT_CHARS = 8000
+
+
+def _truncate_tool_result(result: Any) -> Any:
+    """Trim tool output to a safe size before re-injecting into the LLM context.
+
+    Strategy: if the result has a ``data`` list longer than 50 items, cap it.
+    Then serialize and, if still too large, return a compact summary skeleton.
+    Non-dict results are returned as-is.
+    """
+    if not isinstance(result, dict):
+        return result
+
+    # If result has a `data` list, cap it at 50 items
+    if isinstance(result.get("data"), list) and len(result["data"]) > 50:
+        original_len = len(result["data"])
+        result = {
+            **result,
+            "data": result["data"][:50],
+            "_truncated": f"showing 50 of {original_len} items",
+        }
+
+    # Final string-length check
+    serialized = json.dumps(result, default=str)
+    if len(serialized) > MAX_TOOL_RESULT_CHARS:
+        data = result.get("data")
+        return {
+            "summary": (result.get("summary") or "")[:1000],
+            "renderer": result.get("renderer", "generic_table"),
+            "data": data[:20] if isinstance(data, list) else None,
+            "_truncated": (
+                f"original size {len(serialized)} chars, "
+                "truncated to fit context window"
+            ),
+        }
+    return result
+
 
 def _sse(event_type: str, data: dict[str, Any]) -> str:
     """Format a Server-Sent Event string."""
@@ -482,13 +522,13 @@ class ERPChatService:
             # Add assistant message with tool_use blocks
             messages.append({"role": "assistant", "content": ai_result.get("content", [])})
 
-            # Add tool results
+            # Add tool results (truncated so large payloads do not blow the context window)
             tool_result_blocks = []
             for tr in tool_results:
                 tool_result_blocks.append({
                     "type": "tool_result",
                     "tool_use_id": tr["tool_id"],
-                    "content": json.dumps(tr["result"], default=str),
+                    "content": json.dumps(_truncate_tool_result(tr["result"]), default=str),
                 })
             messages.append({"role": "user", "content": tool_result_blocks})
 
@@ -497,12 +537,12 @@ class ERPChatService:
             msg = ai_result.get("choices", [{}])[0].get("message", {})
             messages.append(msg)
 
-            # Add tool result messages
+            # Add tool result messages (truncated so large payloads do not blow the context window)
             for tr in tool_results:
                 messages.append({
                     "role": "tool",
                     "tool_call_id": tr["tool_id"],
-                    "content": json.dumps(tr["result"], default=str),
+                    "content": json.dumps(_truncate_tool_result(tr["result"]), default=str),
                 })
 
         return messages

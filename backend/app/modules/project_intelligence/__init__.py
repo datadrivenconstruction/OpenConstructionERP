@@ -18,5 +18,9 @@ MODULE_METADATA = {
 
 
 async def on_startup() -> None:
-    """Module startup hook."""
-    pass
+    """Module startup hook — register permissions."""
+    from app.modules.project_intelligence.permissions import (
+        register_project_intelligence_permissions,
+    )
+
+    register_project_intelligence_permissions()
