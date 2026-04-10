@@ -14,6 +14,17 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.11',
+    date: '2026-04-10',
+    changes: [
+      'Feature: BIM viewer full-width layout — removed the outer page padding, added a thin left divider against the sidebar, so the 3D viewport and filter panel use the full available width on every screen size',
+      'Feature: BIM filter panel is now format-aware — detects whether the loaded model is a Revit (RVT) or IFC file and shows the right categorisation. Revit models show Levels + Revit Categories (Walls, Floors, Ceilings, Doors, Windows, Columns, Structural Framing, Furniture, Mechanical Equipment, Plumbing, Electrical, Generic Models). IFC models show IfcBuildingStorey + IfcEntity types (IfcWall, IfcSlab, IfcRoof, IfcDoor, IfcWindow, IfcColumn, IfcBeam, IfcFlowTerminal). A small RVT/IFC badge in the panel header confirms the detected format',
+      'Fix: removed the Discipline filter from the BIM viewer — disciplines were an artificial grouping that did not map cleanly to either Revit or IFC data models. All discipline UI, group-by option, and colour-by-discipline mode are gone; colour-by now exposes Category / Storey / Type instead',
+      'Feature: AI Chat page now matches the site theme — the dedicated GitHub-dark "keynote" colour palette has been replaced with the global OpenEstimate design tokens. Chat now follows the app light/dark mode toggle, uses the same background, surface, border and text colours as the rest of the product, and keeps the amber (#f0883e) only for genuine AI accent moments (streaming cursor, live indicator, highlighted tokens, tool name chips)',
+      'Feature: AI Chat page uses the full available width — removed the old max-width wrapper, added a thin left divider against the sidebar, same pattern as BIM and BOQ pages',
+    ],
+  },
+  {
     version: '1.3.10',
     date: '2026-04-10',
     changes: [

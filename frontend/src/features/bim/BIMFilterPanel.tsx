@@ -2,11 +2,12 @@
  * BIMFilterPanel — fast element filter + group sidebar for the BIM viewer.
  *
  * Supports:
- * - Free-text search across name / type / family
- * - Discipline toggles (architecture / structural / mep / other)
+ * - Free-text search across name / type / category / storey
  * - Storey/level multi-select
- * - Element type tree (categories like Walls, Doors, PipeFitting)
- * - Group-by selector (discipline / storey / type)
+ * - Type multi-select (model-format-aware)
+ *     - Revit models  → Revit Categories (Walls, Doors, Floors, Furniture, …)
+ *     - IFC models    → IFC Entities (IfcWall, IfcSlab, IfcDoor, …)
+ * - Group-by selector (storey / type)
  *
  * Performance:
  * - All counts are memoized from the `elements` prop (O(n) once per change)
@@ -21,7 +22,6 @@ import { useTranslation } from 'react-i18next';
 import {
   Search,
   Layers,
-  Building2,
   Package,
   ChevronRight,
   ChevronDown,
@@ -33,11 +33,12 @@ import type { BIMElementData } from '@/shared/ui/BIMViewer';
 
 // ── Types ────────────────────────────────────────────────────────────────
 
-export type GroupBy = 'discipline' | 'storey' | 'type';
+export type GroupBy = 'storey' | 'type';
+
+export type BIMModelFormat = 'rvt' | 'ifc' | 'other';
 
 export interface BIMFilterState {
   search: string;
-  disciplines: Set<string>; // empty = show all
   storeys: Set<string>; // empty = show all
   types: Set<string>; // empty = show all
   groupBy: GroupBy;
@@ -45,6 +46,8 @@ export interface BIMFilterState {
 
 interface BIMFilterPanelProps {
   elements: BIMElementData[];
+  /** Raw model_format string from backend ("rvt" / "ifc" / …). */
+  modelFormat?: string;
   onFilterChange: (
     predicate: (el: BIMElementData) => boolean,
     visibleCount: number,
@@ -53,73 +56,108 @@ interface BIMFilterPanelProps {
   onElementClick?: (elementId: string) => void;
 }
 
-const DISCIPLINE_COLORS: Record<string, string> = {
-  architecture: '#3b82f6',
-  structural: '#f97316',
-  mep: '#10b981',
-  other: '#6b7280',
-};
+// ── Helpers ──────────────────────────────────────────────────────────────
+
+/**
+ * Detect whether the loaded model is Revit or IFC.
+ * Priority: explicit `model_format` prop → element properties fallback.
+ */
+function detectModelFormat(
+  modelFormat: string | undefined,
+  elements: BIMElementData[],
+): BIMModelFormat {
+  const fmt = (modelFormat || '').toLowerCase();
+  if (fmt.includes('rvt') || fmt.includes('revit')) return 'rvt';
+  if (fmt.includes('ifc')) return 'ifc';
+
+  // Fallback: inspect first element
+  const first = elements[0];
+  if (first) {
+    if (first.element_type?.toLowerCase().startsWith('ifc')) return 'ifc';
+    const props = first.properties as Record<string, unknown> | undefined;
+    if (props) {
+      const hasRevitKey = Object.keys(props).some((k) =>
+        k.toLowerCase().includes('revit'),
+      );
+      if (hasRevitKey) return 'rvt';
+    }
+  }
+  return 'other';
+}
+
+/**
+ * Get the type/category label for an element depending on model format.
+ * - Revit: prefer `category` (e.g. "Walls"), fall back to `element_type`
+ * - IFC: use `element_type` which holds the IfcEntity name (e.g. "IfcWall")
+ */
+function getTypeKey(el: BIMElementData, format: BIMModelFormat): string {
+  if (format === 'rvt') {
+    return el.category || el.element_type || 'Unknown';
+  }
+  if (format === 'ifc') {
+    return el.element_type || el.category || 'Unknown';
+  }
+  return el.category || el.element_type || 'Unknown';
+}
 
 // ── Component ────────────────────────────────────────────────────────────
 
 export default function BIMFilterPanel({
   elements,
+  modelFormat,
   onFilterChange,
   onClose,
   onElementClick,
 }: BIMFilterPanelProps) {
   const { t } = useTranslation();
 
+  const format = useMemo(
+    () => detectModelFormat(modelFormat, elements),
+    [modelFormat, elements],
+  );
+
   const [state, setState] = useState<BIMFilterState>({
     search: '',
-    disciplines: new Set(),
     storeys: new Set(),
     types: new Set(),
-    groupBy: 'discipline',
+    groupBy: 'type',
   });
 
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   // ── Derived: counts per dimension ──────────────────────────────────
   const counts = useMemo(() => {
-    const byDiscipline = new Map<string, number>();
     const byStorey = new Map<string, number>();
     const byType = new Map<string, number>();
 
     for (const el of elements) {
-      const d = el.discipline || 'other';
-      byDiscipline.set(d, (byDiscipline.get(d) ?? 0) + 1);
-
       const s = el.storey || '—';
       byStorey.set(s, (byStorey.get(s) ?? 0) + 1);
 
-      const tpe = el.element_type || 'Unknown';
+      const tpe = getTypeKey(el, format);
       byType.set(tpe, (byType.get(tpe) ?? 0) + 1);
     }
 
     return {
-      disciplines: Array.from(byDiscipline.entries()).sort((a, b) => b[1] - a[1]),
-      storeys: Array.from(byStorey.entries()).sort((a, b) => a[0].localeCompare(b[0])),
+      storeys: Array.from(byStorey.entries()).sort((a, b) =>
+        a[0].localeCompare(b[0]),
+      ),
       types: Array.from(byType.entries()).sort((a, b) => b[1] - a[1]),
     };
-  }, [elements]);
+  }, [elements, format]);
 
   // ── Filter predicate ───────────────────────────────────────────────
   const applyFilters = useCallback(
     (s: BIMFilterState) => {
       const search = s.search.trim().toLowerCase();
       const predicate = (el: BIMElementData): boolean => {
-        // Discipline filter (empty set = show all)
-        if (s.disciplines.size > 0) {
-          if (!s.disciplines.has(el.discipline || 'other')) return false;
-        }
-        // Storey filter
+        // Storey filter (empty set = show all)
         if (s.storeys.size > 0) {
           if (!s.storeys.has(el.storey || '—')) return false;
         }
         // Type filter
         if (s.types.size > 0) {
-          if (!s.types.has(el.element_type || 'Unknown')) return false;
+          if (!s.types.has(getTypeKey(el, format))) return false;
         }
         // Search
         if (search) {
@@ -127,6 +165,8 @@ export default function BIMFilterPanel({
             (el.name || '') +
             ' ' +
             (el.element_type || '') +
+            ' ' +
+            (el.category || '') +
             ' ' +
             (el.storey || '')
           ).toLowerCase();
@@ -137,7 +177,7 @@ export default function BIMFilterPanel({
       const count = elements.filter(predicate).length;
       onFilterChange(predicate, count);
     },
-    [elements, onFilterChange],
+    [elements, onFilterChange, format],
   );
 
   // Re-apply whenever state changes
@@ -147,7 +187,7 @@ export default function BIMFilterPanel({
 
   // ── Handlers ───────────────────────────────────────────────────────
   const toggleSet = useCallback(
-    (key: 'disciplines' | 'storeys' | 'types', value: string) => {
+    (key: 'storeys' | 'types', value: string) => {
       setState((prev) => {
         const next = new Set(prev[key]);
         if (next.has(value)) next.delete(value);
@@ -162,7 +202,6 @@ export default function BIMFilterPanel({
     setState((prev) => ({
       ...prev,
       search: '',
-      disciplines: new Set(),
       storeys: new Set(),
       types: new Set(),
     }));
@@ -178,47 +217,57 @@ export default function BIMFilterPanel({
   }, []);
 
   const hasActiveFilters =
-    state.search.length > 0 ||
-    state.disciplines.size > 0 ||
-    state.storeys.size > 0 ||
-    state.types.size > 0;
+    state.search.length > 0 || state.storeys.size > 0 || state.types.size > 0;
 
   // ── Grouped element tree (for element explorer) ─────────────────────
   const visibleElements = useMemo(() => {
     const search = state.search.trim().toLowerCase();
     return elements.filter((el) => {
-      if (state.disciplines.size > 0 && !state.disciplines.has(el.discipline || 'other')) return false;
-      if (state.storeys.size > 0 && !state.storeys.has(el.storey || '—')) return false;
-      if (state.types.size > 0 && !state.types.has(el.element_type || 'Unknown')) return false;
+      if (state.storeys.size > 0 && !state.storeys.has(el.storey || '—'))
+        return false;
+      if (state.types.size > 0 && !state.types.has(getTypeKey(el, format)))
+        return false;
       if (search) {
-        const hay = ((el.name || '') + ' ' + (el.element_type || '')).toLowerCase();
+        const hay = (
+          (el.name || '') +
+          ' ' +
+          (el.element_type || '') +
+          ' ' +
+          (el.category || '')
+        ).toLowerCase();
         if (!hay.includes(search)) return false;
       }
       return true;
     });
-  }, [elements, state]);
+  }, [elements, state, format]);
 
   const groupedElements = useMemo(() => {
     const groups = new Map<string, BIMElementData[]>();
     for (const el of visibleElements) {
-      let key: string;
-      switch (state.groupBy) {
-        case 'storey':
-          key = el.storey || '—';
-          break;
-        case 'type':
-          key = el.element_type || 'Unknown';
-          break;
-        default:
-          key = el.discipline || 'other';
-      }
+      const key: string =
+        state.groupBy === 'storey' ? el.storey || '—' : getTypeKey(el, format);
       const arr = groups.get(key);
       if (arr) arr.push(el);
       else groups.set(key, [el]);
     }
     // Sort groups by size (biggest first)
     return Array.from(groups.entries()).sort((a, b) => b[1].length - a[1].length);
-  }, [visibleElements, state.groupBy]);
+  }, [visibleElements, state.groupBy, format]);
+
+  // Label for the types section changes depending on model format
+  const typesSectionTitle =
+    format === 'rvt'
+      ? t('bim.filter_revit_categories', { defaultValue: 'Revit Categories' })
+      : format === 'ifc'
+        ? t('bim.filter_ifc_entities', { defaultValue: 'IFC Entities' })
+        : t('bim.filter_types', { defaultValue: 'Element Types' });
+
+  const typeGroupLabel =
+    format === 'rvt'
+      ? t('bim.filter_group_category', { defaultValue: 'by Category' })
+      : format === 'ifc'
+        ? t('bim.filter_group_entity', { defaultValue: 'by Entity' })
+        : t('bim.filter_group_type', { defaultValue: 'by Type' });
 
   return (
     <div
@@ -232,6 +281,11 @@ export default function BIMFilterPanel({
           <h2 className="text-sm font-semibold text-content-primary">
             {t('bim.filter_title', { defaultValue: 'Filter & Group' })}
           </h2>
+          {format !== 'other' && (
+            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-surface-secondary text-content-tertiary border border-border-light">
+              {format}
+            </span>
+          )}
         </div>
         {onClose && (
           <button
@@ -255,7 +309,9 @@ export default function BIMFilterPanel({
             type="text"
             value={state.search}
             onChange={(e) => setState((p) => ({ ...p, search: e.target.value }))}
-            placeholder={t('bim.filter_search_placeholder', { defaultValue: 'Search name, type, storey…' })}
+            placeholder={t('bim.filter_search_placeholder', {
+              defaultValue: 'Search name, type, storey…',
+            })}
             className="w-full ps-8 pe-8 py-1.5 text-xs rounded-md bg-surface-secondary border border-border-light focus:outline-none focus:ring-1 focus:ring-oe-blue focus:border-oe-blue"
           />
           {state.search && (
@@ -278,39 +334,15 @@ export default function BIMFilterPanel({
             })}
           </span>
           {hasActiveFilters && (
-            <button
-              onClick={clearAll}
-              className="text-oe-blue hover:underline"
-            >
+            <button onClick={clearAll} className="text-oe-blue hover:underline">
               {t('bim.filter_clear', { defaultValue: 'Clear all' })}
             </button>
           )}
         </div>
       </div>
 
-      {/* Scroll area: Disciplines + Storeys + Types */}
+      {/* Scroll area: Storeys + Types */}
       <div className="flex-1 overflow-y-auto">
-        {/* Disciplines */}
-        <FilterSection
-          title={t('bim.filter_disciplines', { defaultValue: 'Disciplines' })}
-          icon={<Building2 size={12} />}
-        >
-          {counts.disciplines.map(([name, count]) => {
-            const active = state.disciplines.has(name);
-            const color = DISCIPLINE_COLORS[name] || DISCIPLINE_COLORS.other;
-            return (
-              <FilterChip
-                key={name}
-                label={name}
-                count={count}
-                active={active}
-                color={color}
-                onClick={() => toggleSet('disciplines', name)}
-              />
-            );
-          })}
-        </FilterSection>
-
         {/* Storeys */}
         <FilterSection
           title={t('bim.filter_storeys', { defaultValue: 'Storeys' })}
@@ -328,13 +360,15 @@ export default function BIMFilterPanel({
               />
             );
           })}
+          {counts.storeys.length === 0 && (
+            <div className="text-[10px] text-content-quaternary italic">
+              {t('bim.filter_no_storeys', { defaultValue: 'No storeys detected' })}
+            </div>
+          )}
         </FilterSection>
 
         {/* Types (scrollable if many) */}
-        <FilterSection
-          title={t('bim.filter_types', { defaultValue: 'Element Types' })}
-          icon={<Package size={12} />}
-        >
+        <FilterSection title={typesSectionTitle} icon={<Package size={12} />}>
           <div className="max-h-64 overflow-y-auto pe-1 space-y-1">
             {counts.types.map(([name, count]) => {
               const active = state.types.has(name);
@@ -364,13 +398,14 @@ export default function BIMFilterPanel({
               }
               className="text-[10px] py-0.5 px-1.5 rounded border border-border-light bg-surface-primary text-content-secondary focus:outline-none focus:ring-1 focus:ring-oe-blue"
             >
-              <option value="discipline">{t('bim.filter_group_discipline', { defaultValue: 'by Discipline' })}</option>
-              <option value="storey">{t('bim.filter_group_storey', { defaultValue: 'by Storey' })}</option>
-              <option value="type">{t('bim.filter_group_type', { defaultValue: 'by Type' })}</option>
+              <option value="storey">
+                {t('bim.filter_group_storey', { defaultValue: 'by Storey' })}
+              </option>
+              <option value="type">{typeGroupLabel}</option>
             </select>
           </div>
 
-          {/* Virtual-ish list: only render first 500 items per group when expanded */}
+          {/* Only render first 200 items per group when expanded */}
           <div className="divide-y divide-border-light/50">
             {groupedElements.map(([groupName, items]) => {
               const isExpanded = expandedGroups.has(groupName);
@@ -382,9 +417,15 @@ export default function BIMFilterPanel({
                   >
                     <div className="flex items-center gap-1.5 min-w-0">
                       {isExpanded ? (
-                        <ChevronDown size={12} className="text-content-tertiary shrink-0" />
+                        <ChevronDown
+                          size={12}
+                          className="text-content-tertiary shrink-0"
+                        />
                       ) : (
-                        <ChevronRight size={12} className="text-content-tertiary shrink-0" />
+                        <ChevronRight
+                          size={12}
+                          className="text-content-tertiary shrink-0"
+                        />
                       )}
                       <span className="text-xs font-medium text-content-primary truncate">
                         {groupName}
@@ -420,7 +461,9 @@ export default function BIMFilterPanel({
             })}
             {groupedElements.length === 0 && (
               <div className="px-4 py-4 text-[11px] text-content-quaternary text-center">
-                {t('bim.filter_no_results', { defaultValue: 'No elements match filters' })}
+                {t('bim.filter_no_results', {
+                  defaultValue: 'No elements match filters',
+                })}
               </div>
             )}
           </div>
@@ -458,13 +501,11 @@ function FilterChip({
   label,
   count,
   active,
-  color,
   onClick,
 }: {
   label: string;
   count: number;
   active: boolean;
-  color?: string;
   onClick: () => void;
 }) {
   return (
@@ -477,18 +518,12 @@ function FilterChip({
       }`}
     >
       <div className="flex items-center gap-1.5 min-w-0 flex-1">
-        {color && (
-          <span
-            className="w-2 h-2 rounded-full shrink-0"
-            style={{ background: color }}
-          />
-        )}
         {active ? (
           <Eye size={10} className="shrink-0" />
         ) : (
           <EyeOff size={10} className="shrink-0 opacity-40" />
         )}
-        <span className="truncate capitalize">{label}</span>
+        <span className="truncate">{label}</span>
       </div>
       <span className="text-[10px] text-content-quaternary tabular-nums shrink-0">
         {count.toLocaleString()}
