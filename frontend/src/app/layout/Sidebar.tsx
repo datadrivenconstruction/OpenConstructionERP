@@ -506,7 +506,8 @@ export function FloatingRecentButton() {
   const displayed = recentItems.slice(0, 5);
 
   return (
-    <div className="fixed bottom-4 end-4 z-40">
+    // Smaller, slightly higher than the Chat FAB so they stack visually
+    <div className="fixed bottom-24 end-4 z-40">
       {/* Popover */}
       {open && (
         <div className="absolute bottom-12 end-0 w-72 rounded-xl border border-border-light bg-surface-primary shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150">
@@ -554,5 +555,33 @@ export function FloatingRecentButton() {
         <History size={18} strokeWidth={2} />
       </button>
     </div>
+  );
+}
+
+/** Floating AI Chat button — large pill-shaped FAB in bottom-right that
+ *  navigates to /chat. Hidden when already on the chat page. */
+export function FloatingChatButton() {
+  const { t } = useTranslation();
+  const location = useLocation();
+
+  // Hide when already on the chat page so it doesn't overlap the chat itself
+  if (location.pathname.startsWith('/chat')) return null;
+
+  return (
+    <NavLink
+      to="/chat"
+      className="fixed bottom-6 end-6 z-40 group flex items-center gap-2.5 px-5 py-3.5 rounded-full bg-gradient-to-r from-oe-blue to-blue-600 text-white shadow-xl shadow-oe-blue/30 hover:shadow-2xl hover:shadow-oe-blue/40 hover:scale-105 active:scale-95 transition-all duration-200 border border-oe-blue/50"
+      title={t('nav.erp_chat', { defaultValue: 'AI Chat' })}
+    >
+      <MessageSquare size={20} strokeWidth={2.25} className="shrink-0" />
+      <span className="text-sm font-semibold whitespace-nowrap">
+        {t('nav.erp_chat', { defaultValue: 'AI Chat' })}
+      </span>
+      {/* Subtle pulse indicator */}
+      <span className="relative flex h-2 w-2">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+      </span>
+    </NavLink>
   );
 }
