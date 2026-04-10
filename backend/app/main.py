@@ -772,6 +772,7 @@ def create_app() -> FastAPI:
 
             # Enterprise / feature-pack modules
             from app.modules.enterprise_workflows import models as _enterprise_workflows_models  # noqa: F401
+            from app.modules.erp_chat import models as _erp_chat_models  # noqa: F401
             from app.modules.fieldreports import models as _fieldreports_models  # noqa: F401
             from app.modules.finance import models as _finance_models  # noqa: F401
             from app.modules.full_evm import models as _full_evm_models  # noqa: F401

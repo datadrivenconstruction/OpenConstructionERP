@@ -14,6 +14,17 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.7',
+    date: '2026-04-10',
+    changes: [
+      'Fix: BIM viewer now shows REAL Revit geometry (33 MB COLLADA) instead of 500 placeholder boxes — two-pass DDC converter (Excel + native .dae)',
+      'Fix: BIM element fetch limit raised from 1000 → 50000 — viewer now loads all 16k+ elements at once',
+      'Fix: ERP Chat tables missing in dev DB — added erp_chat models import to main.py so create_all picks them up',
+      'Feature: AI Config Banner on /chat — shown when no API key, includes "Open Settings" link with i18n',
+      'Feature: "AI Chat" sidebar label translated to all 21 languages (en, de, fr, es, pt, ru, zh, ar, hi, tr, it, nl, pl, cs, ja, ko, sv, no, da, fi, bg)',
+    ],
+  },
+  {
     version: '1.3.6',
     date: '2026-04-10',
     changes: [
