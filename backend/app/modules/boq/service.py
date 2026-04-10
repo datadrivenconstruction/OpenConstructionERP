@@ -1341,10 +1341,18 @@ class BOQService:
 
         return position
 
-    async def delete_position(self, position_id: uuid.UUID) -> None:
+    async def delete_position(self, position_id: uuid.UUID, *, cascade: bool = False) -> None:
         """Delete a position.
 
-        Raises HTTPException 404 if not found, 409 if BOQ is locked.
+        If the position is a section, children are orphaned via ``parent_id=NULL``
+        by the database (``ondelete="SET NULL"``). Set ``cascade=True`` to also
+        delete all descendant positions recursively — mirrors the UX contract
+        users expect when deleting a section header.
+
+        Raises:
+            HTTPException 404: Position not found.
+            HTTPException 409: BOQ is locked.
+            HTTPException 409: Section has children and cascade=False.
         """
         position = await self.position_repo.get_by_id(position_id)
         if position is None:
@@ -1355,15 +1363,104 @@ class BOQService:
         await self._ensure_not_locked(position.boq_id)
 
         boq_id = str(position.boq_id)
+        deleted_position_ids: list[str] = [str(position_id)]
+
+        # Section handling: collect and cascade-delete children so we don't
+        # orphan positions with parent_id = NULL.
+        if _is_section(position):
+            children = await self.position_repo.list_children(position_id)
+            if children and not cascade:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=(
+                        f"Section has {len(children)} child position(s). "
+                        "Pass ?cascade=true to delete them together, or move them first."
+                    ),
+                )
+            # Recursively collect descendant IDs for cascade delete
+            to_visit = list(children)
+            while to_visit:
+                child = to_visit.pop()
+                deleted_position_ids.append(str(child.id))
+                grandchildren = await self.position_repo.list_children(child.id)
+                to_visit.extend(grandchildren)
+
+            # Delete in reverse (leaves first) to respect FK hierarchy
+            for child_id_str in reversed(deleted_position_ids[1:]):
+                await self.position_repo.delete(uuid.UUID(child_id_str))
+
         await self.position_repo.delete(position_id)
 
-        await _safe_publish(
-            "boq.position.deleted",
-            {"position_id": str(position_id), "boq_id": boq_id},
-            source_module="oe_boq",
+        # Clean up Activity references to deleted positions so the schedule
+        # module doesn't retain dead IDs in Activity.boq_position_ids JSON arrays.
+        if deleted_position_ids:
+            await self._scrub_activity_position_refs(position.boq_id, deleted_position_ids)
+
+        for pid_str in deleted_position_ids:
+            await _safe_publish(
+                "boq.position.deleted",
+                {"position_id": pid_str, "boq_id": boq_id},
+                source_module="oe_boq",
+            )
+
+        logger.info(
+            "Position deleted: %s from BOQ %s (cascade=%d descendants)",
+            position_id, boq_id, len(deleted_position_ids) - 1,
         )
 
-        logger.info("Position deleted: %s from BOQ %s", position_id, boq_id)
+    async def _scrub_activity_position_refs(
+        self,
+        boq_id: uuid.UUID,
+        deleted_position_ids: list[str],
+    ) -> None:
+        """Remove deleted position IDs from Activity.boq_position_ids JSON arrays.
+
+        Schedule activities can link to BOQ positions via a JSON array of IDs;
+        when those positions are deleted, the activity holds dangling references.
+        This helper finds activities in the same project and scrubs the stale IDs.
+        """
+        try:
+            from sqlalchemy import select, update
+
+            from app.modules.boq.models import BOQ
+            from app.modules.schedule.models import Activity, Schedule
+
+            # Find all schedules in the same project as this BOQ
+            boq_row = (await self.session.execute(
+                select(BOQ.project_id).where(BOQ.id == boq_id)
+            )).first()
+            if not boq_row:
+                return
+            project_id = boq_row[0]
+
+            stmt = (
+                select(Activity)
+                .join(Schedule, Activity.schedule_id == Schedule.id)
+                .where(Schedule.project_id == project_id)
+            )
+            activities = (await self.session.execute(stmt)).scalars().all()
+            deleted_set = set(deleted_position_ids)
+            updated_count = 0
+            for act in activities:
+                current = list(act.boq_position_ids or [])
+                cleaned = [pid for pid in current if str(pid) not in deleted_set]
+                if len(cleaned) != len(current):
+                    await self.session.execute(
+                        update(Activity)
+                        .where(Activity.id == act.id)
+                        .values(boq_position_ids=cleaned)
+                    )
+                    updated_count += 1
+            if updated_count:
+                logger.info(
+                    "Scrubbed %d deleted position refs from %d activities (boq=%s)",
+                    len(deleted_position_ids), updated_count, boq_id,
+                )
+        except Exception as exc:  # best-effort cleanup — never fail the parent delete
+            logger.warning(
+                "Failed to scrub activity position refs for boq=%s: %s",
+                boq_id, exc,
+            )
 
     async def reorder_positions(self, boq_id: uuid.UUID, position_ids: list[uuid.UUID]) -> None:
         """Reorder positions within a BOQ.

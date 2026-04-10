@@ -415,5 +415,5 @@ async def close_rfi(
     service: RFIService = Depends(_get_service),
 ) -> RFIResponse:
     """Close an RFI."""
-    rfi = await service.close_rfi(rfi_id)
+    rfi = await service.close_rfi(rfi_id, closed_by=user_id)
     return _to_response(rfi)
