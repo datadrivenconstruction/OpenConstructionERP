@@ -20,10 +20,17 @@ from app.modules.risk.schemas import RiskCreate, RiskUpdate
 logger = logging.getLogger(__name__)
 
 SEVERITY_NUMERIC: dict[str, int] = {
-    "low": 1,
-    "medium": 2,
-    "high": 3,
-    "critical": 4,
+    "very_low": 1,
+    "low": 2,
+    "medium": 3,
+    "high": 4,
+    "critical": 5,
+    # Aliases for legacy / PMBOK-style enum values:
+    "negligible": 1,
+    "minor": 2,
+    "moderate": 3,
+    "major": 4,
+    "catastrophic": 5,
 }
 
 # 5x5 matrix scoring: maps probability to a 1-5 score
@@ -35,12 +42,25 @@ PROBABILITY_SCORE_MAP: list[tuple[float, int]] = [
     (1.0, 5),   # very high
 ]
 
-# Impact severity to 1-5 score for 5x5 matrix
+# Impact severity to 1-5 score for the canonical 5x5 PMBOK risk matrix.
+# The canonical level set is: very_low / low / medium / high / critical.
+# Legacy enum values (negligible / minor / moderate / major / catastrophic)
+# are accepted as aliases so existing seed / demo data keeps working.
+# TODO (v1.4): proper enum migration — right now `impact_severity` is a
+# free-text String(20) in the DB, so no CHECK constraint / Alembic step is
+# needed yet, but the schemas should be tightened alongside a data backfill.
 IMPACT_SCORE_MAP: dict[str, int] = {
-    "low": 1,
-    "medium": 2,
+    "very_low": 1,
+    "low": 2,
+    "medium": 3,
     "high": 4,
     "critical": 5,
+    # Aliases — same numeric scale as above:
+    "negligible": 1,
+    "minor": 2,
+    "moderate": 3,
+    "major": 4,
+    "catastrophic": 5,
 }
 
 
@@ -284,12 +304,21 @@ class RiskService:
         """Build 5x5 risk matrix data from project risks.
 
         Probability levels: 0.1 (very low), 0.3 (low), 0.5 (medium), 0.7 (high), 0.9 (very high)
-        Impact levels: low, medium, high, critical
+        Impact levels: very_low, low, medium, high, critical (canonical PMBOK 5-level scheme).
+        Legacy values (negligible / minor / moderate / major / catastrophic) are normalised
+        to the canonical set below so existing data still falls into a cell.
         """
         items = await self.repo.all_for_project(project_id)
 
         prob_levels = ["0.1", "0.3", "0.5", "0.7", "0.9"]
-        impact_levels = ["low", "medium", "high", "critical"]
+        impact_levels = ["very_low", "low", "medium", "high", "critical"]
+        legacy_impact_alias = {
+            "negligible": "very_low",
+            "minor": "low",
+            "moderate": "medium",
+            "major": "high",
+            "catastrophic": "critical",
+        }
 
         # Initialize cells
         cells: list[dict[str, Any]] = []
@@ -317,7 +346,10 @@ class RiskService:
                 prob_bucket = _nearest_prob(float(item.probability))
             except (ValueError, TypeError):
                 prob_bucket = "0.5"
-            severity = item.impact_severity if item.impact_severity in impact_levels else "medium"
+            raw_sev = item.impact_severity or "medium"
+            # Normalise legacy labels onto the canonical 5-level set.
+            raw_sev = legacy_impact_alias.get(raw_sev, raw_sev)
+            severity = raw_sev if raw_sev in impact_levels else "medium"
 
             for cell in cells:
                 if cell["probability_level"] == prob_bucket and cell["impact_level"] == severity:

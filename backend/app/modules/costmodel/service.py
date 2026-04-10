@@ -574,6 +574,17 @@ class CostModelService:
             6. EV  = BAC * schedule_progress%
             7. Derived indices: SV, CV, SPI, CPI, EAC, ETC, VAC, TCPI
 
+        Known limitation (v1.3.x):
+            PV is an approximation: ``BAC × time_elapsed%`` rather than a proper
+            time-phased baseline. When a project has not started yet (``time_elapsed%``
+            ~ 0) but activities already report progress, SPI = EV / PV explodes.
+            To prevent mathematically impossible values we clamp:
+                - ``pv`` to a minimum of ``1% × BAC`` (avoids divide-by-near-zero)
+                - ``spi`` to the ``[0.0, 5.0]`` range
+            and set ``spi_capped=True`` so the UI can label the figure as approximate.
+            TODO (v1.4): replace with a proper time-phased PV computed from
+            ``BudgetLine`` + ``Activity`` planned dates (see audit notes, Option A).
+
         Args:
             project_id: Target project.
 
@@ -625,16 +636,18 @@ class CostModelService:
             total_weighted_progress = 0.0
             total_weight = 0.0
 
+            # Build lookup: budget lines keyed by activity_id (hoisted out of the
+            # per-schedule loop — these lines are project-scoped, not schedule-scoped,
+            # so fetching once avoids an N+1 query).
+            budget_lines, _ = await self.budget_repo.list_for_project(project_id, limit=10000)
+            activity_budget: dict[str, float] = {}
+            for bl in budget_lines:
+                if bl.activity_id is not None:
+                    aid = str(bl.activity_id)
+                    activity_budget[aid] = activity_budget.get(aid, 0.0) + _str_to_float(bl.planned_amount)
+
             for schedule in schedules:
                 activities, _ = await activity_repo.list_for_schedule(schedule.id, limit=10000)
-
-                # Build lookup: budget lines keyed by activity_id
-                budget_lines, _ = await self.budget_repo.list_for_project(project_id, limit=10000)
-                activity_budget: dict[str, float] = {}
-                for bl in budget_lines:
-                    if bl.activity_id is not None:
-                        aid = str(bl.activity_id)
-                        activity_budget[aid] = activity_budget.get(aid, 0.0) + _str_to_float(bl.planned_amount)
 
                 for act in activities:
                     act_id = str(act.id)
@@ -664,12 +677,22 @@ class CostModelService:
                     schedule_progress_pct = (ev_snap / bac) * 100.0
 
         # ── Step 3: Compute EVM values ─────────────────────────────────────
-        pv = bac * (time_elapsed_pct / 100.0)
+        # PV is an approximation (BAC × time_elapsed%). See the function
+        # docstring for limitations. We clamp PV to a minimum of 1% × BAC so
+        # SPI never explodes toward infinity when the project has not really
+        # started yet but activities report nominal progress.
+        raw_pv = bac * (time_elapsed_pct / 100.0)
+        pv_floor = bac * 0.01  # 1% of BAC — prevents divide-by-near-zero
+        pv = max(raw_pv, pv_floor)
         ev = bac * (schedule_progress_pct / 100.0)
 
         sv = ev - pv
         cv = ev - ac
-        spi = _safe_divide(ev, pv)
+        raw_spi = _safe_divide(ev, pv)
+        # Clamp SPI into the [0, 5] band. Anything above 5 is almost certainly
+        # the PV proxy being unreliable (project hasn't actually started yet).
+        spi_capped = raw_spi > 5.0 or raw_spi < 0.0 or raw_pv < pv_floor
+        spi = min(max(raw_spi, 0.0), 5.0)
         cpi = _safe_divide(ev, ac)
         eac = _safe_divide(bac, cpi) if cpi != 0.0 else bac
         etc = max(0.0, eac - ac)
@@ -713,6 +736,7 @@ class CostModelService:
             time_elapsed_pct=round(time_elapsed_pct, 2),
             schedule_progress_pct=round(schedule_progress_pct, 2),
             status=evm_status,
+            spi_capped=spi_capped,
         )
 
     # ── What-If Scenarios ─────────────────────────────────────────────────
