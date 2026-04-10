@@ -130,11 +130,37 @@ export class SceneManager {
 
   /** Fit all objects (or a specific bounding box) into the camera view. */
   zoomToFit(bbox?: THREE.Box3): void {
-    // Use the simple recursive Three.js box-from-object on the whole scene.
-    // It walks Groups, Object3Ds, COLLADA-loaded hierarchies — everything
-    // the previous "Mesh-only" filter was missing on RVT exports where the
-    // geometry is several Group nodes deep.
-    const box = bbox ?? new THREE.Box3().setFromObject(this.scene);
+    // Build a content-only bounding box. We can't use a plain
+    // setFromObject(scene) here because the scene also contains the
+    // 100×100 GridHelper and the lights, and those dominate the bbox
+    // for any real-world model (~30 m), making the camera distance
+    // far too large and the model invisibly small in frame.
+    let box: THREE.Box3;
+    if (bbox) {
+      box = bbox;
+    } else {
+      box = new THREE.Box3();
+      const tmp = new THREE.Box3();
+      this.scene.traverse((obj) => {
+        // Skip helpers, grids, lights, cameras — anything that is not
+        // real BIM content. Walk INSIDE Groups so we still pick up
+        // every mesh nested under the COLLADA scene root.
+        if (
+          obj instanceof THREE.GridHelper ||
+          obj instanceof THREE.AxesHelper ||
+          obj instanceof THREE.Light ||
+          obj instanceof THREE.Camera
+        ) {
+          return;
+        }
+        if (obj instanceof THREE.Mesh && obj.geometry) {
+          tmp.setFromObject(obj);
+          if (!tmp.isEmpty() && Number.isFinite(tmp.min.x)) {
+            box.union(tmp);
+          }
+        }
+      });
+    }
     if (box.isEmpty()) return;
 
     const center = box.getCenter(new THREE.Vector3());

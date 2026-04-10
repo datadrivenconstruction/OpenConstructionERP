@@ -1144,6 +1144,21 @@ async def cleanup_stale_processing(
     return {"deleted": count}
 
 
+@router.post("/cleanup-orphans/")
+async def cleanup_orphan_bim_files(
+    _user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bim.delete")),
+    service: BIMHubService = Depends(_get_service),
+) -> dict[str, Any]:
+    """Scan ``data/bim/`` and remove directories with no matching DB row.
+
+    Admin-grade disk hygiene. Protects against orphaned RVT/IFC/COLLADA/Excel
+    artefacts left behind by failed uploads, crashed conversions, or manual
+    DB deletes that bypassed the service layer.
+    """
+    return await service.cleanup_orphan_bim_files()
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Elements
 # ═══════════════════════════════════════════════════════════════════════════════
