@@ -650,14 +650,19 @@ async def upload_cad_file(
     except Exception as exc:
         logger.warning("Failed to cross-link BIM to documents hub: %s", exc)
 
-    # Process IFC file — extract elements + generate COLLADA geometry
+    # Process the CAD file — extract elements + generate COLLADA geometry
+    # IFC: text-based parser (instant). RVT: requires DDC cad2data binary.
     final_status = "processing"
     element_count = 0
-    if ext == ".ifc":
+
+    processable = ext in (".ifc", ".rvt")
+    if processable:
         try:
+            import asyncio
             from app.modules.bim_hub.ifc_processor import process_ifc_file
 
-            result = process_ifc_file(cad_path, cad_dir)
+            # Run sync processor in thread to avoid blocking the event loop
+            result = await asyncio.to_thread(process_ifc_file, cad_path, cad_dir)
             element_count = result["element_count"]
 
             if element_count > 0:
@@ -690,13 +695,41 @@ async def upload_cad_file(
                 final_status = "ready"
 
                 logger.info(
-                    "IFC processed: %d elements, %d storeys → model %s is ready",
+                    "CAD processed: %d elements, %d storeys → model %s is ready",
                     element_count, len(result["storeys"]), model_id,
                 )
             else:
-                logger.warning("IFC processed but no elements found: %s", filename)
+                # No elements extracted — set informative status
+                if ext == ".rvt":
+                    model.status = "needs_converter"
+                    model.error_message = (
+                        "RVT files require the DDC cad2data converter. "
+                        "Install cad2data or convert to IFC first, then re-upload."
+                    )
+                else:
+                    model.status = "error"
+                    model.error_message = "No elements could be extracted from this IFC file."
+                await service.session.flush()
+                final_status = model.status
+                logger.warning("CAD processed but no elements found: %s", filename)
         except Exception as exc:
-            logger.warning("IFC processing failed (model stays in processing): %s", exc)
+            logger.warning("CAD processing failed for %s: %s", filename, exc)
+            model.status = "error"
+            model.error_message = f"Processing failed: {exc}"
+            try:
+                await service.session.flush()
+            except Exception:
+                pass
+            final_status = "error"
+    else:
+        # Non-processable format (DWG, DGN, FBX, etc.) — needs converter
+        model.status = "needs_converter"
+        model.error_message = (
+            f"{ext.upper().lstrip('.')} files require an external converter. "
+            "Convert to IFC first, then re-upload."
+        )
+        await service.session.flush()
+        final_status = "needs_converter"
 
     return {
         "model_id": str(model_id),

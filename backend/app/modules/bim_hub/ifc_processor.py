@@ -36,9 +36,65 @@ _STRING_RE = re.compile(r"'([^']*)'")
 
 
 def _try_cad2data(ifc_path: Path, output_dir: Path) -> dict[str, Any] | None:
-    """Try to use DDC cad2data for full conversion (IFC/RVT → CSV + DAE)."""
+    """Try to convert CAD files using DDC converters.
+
+    Pipeline (tried in order):
+    1. DDC Community Converter (RvtExporter.exe / IfcExporter.exe) → Excel → elements
+    2. cad2data binary on PATH → CSV + DAE
+    """
+    ext = ifc_path.suffix.lower().lstrip(".")
+
+    # --- Method 1: DDC Community Converter (same pipeline as Data Explorer) ---
+    try:
+        from app.modules.boq.cad_import import find_converter, parse_cad_excel
+
+        converter = find_converter(ext)
+        if converter:
+            import subprocess
+            logger.info("Using DDC Community Converter: %s", converter)
+
+            output_dir.mkdir(parents=True, exist_ok=True)
+            output_xlsx = output_dir / (ifc_path.stem + ".xlsx")
+            args = [str(converter), str(ifc_path), str(output_xlsx)]
+            if ext in ("rvt", "ifc"):
+                args.append("complete")
+
+            converter_dir = converter.parent
+            result = subprocess.run(
+                args,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                cwd=str(converter_dir),
+                input=b"\n",
+                timeout=300,
+            )
+
+            if result.returncode != 0:
+                logger.warning("DDC converter failed (exit %d): %s", result.returncode, result.stderr.decode(errors="replace")[:500])
+            else:
+                # Find output Excel
+                excel_path = None
+                for f in output_dir.iterdir():
+                    if f.suffix in (".xlsx", ".xls"):
+                        excel_path = f
+                        break
+                if not excel_path and output_xlsx.exists():
+                    excel_path = output_xlsx
+
+                if excel_path:
+                    raw_elements = parse_cad_excel(excel_path)
+                    if raw_elements:
+                        return _excel_elements_to_bim_result(raw_elements, output_dir)
+                    logger.warning("DDC converter produced Excel but no elements")
+                else:
+                    logger.warning("DDC converter produced no Excel output")
+    except ImportError:
+        logger.debug("cad_import module not available")
+    except Exception as e:
+        logger.warning("DDC Community Converter error: %s", e)
+
+    # --- Method 2: cad2data binary on PATH ---
     import shutil
-    import subprocess
     import csv
 
     cad2data_bin = shutil.which("cad2data")
@@ -47,6 +103,8 @@ def _try_cad2data(ifc_path: Path, output_dir: Path) -> dict[str, Any] | None:
 
     logger.info("Using DDC cad2data for conversion: %s", cad2data_bin)
     try:
+        import subprocess
+
         result = subprocess.run(
             [cad2data_bin, str(ifc_path), "--output-dir", str(output_dir), "--format", "csv,dae"],
             capture_output=True, text=True, timeout=300,
@@ -55,17 +113,14 @@ def _try_cad2data(ifc_path: Path, output_dir: Path) -> dict[str, Any] | None:
             logger.warning("cad2data failed: %s", result.stderr[:500])
             return None
 
-        # Parse CSV output
         csv_path = output_dir / "elements.csv"
         dae_path = output_dir / "geometry.dae"
-
         if not csv_path.exists():
-            # Try alternative names
             for p in output_dir.glob("*.csv"):
                 csv_path = p
                 break
 
-        elements = []
+        elements: list[dict[str, Any]] = []
         storeys_set: set[str] = set()
         disciplines_set: set[str] = set()
 
@@ -79,7 +134,7 @@ def _try_cad2data(ifc_path: Path, output_dir: Path) -> dict[str, Any] | None:
                         storeys_set.add(storey)
                     disciplines_set.add(discipline)
 
-                    quantities = {}
+                    quantities: dict[str, float] = {}
                     for qkey in ("area", "volume", "length", "width", "height"):
                         if qkey in row and row[qkey]:
                             try:
@@ -100,7 +155,6 @@ def _try_cad2data(ifc_path: Path, output_dir: Path) -> dict[str, Any] | None:
                     })
 
         has_geometry = dae_path.exists()
-
         return {
             "elements": elements,
             "storeys": sorted(storeys_set),
@@ -113,6 +167,72 @@ def _try_cad2data(ifc_path: Path, output_dir: Path) -> dict[str, Any] | None:
     except Exception as e:
         logger.warning("cad2data error: %s", e)
         return None
+
+
+def _excel_elements_to_bim_result(
+    raw_elements: list[dict[str, Any]],
+    output_dir: Path,
+) -> dict[str, Any]:
+    """Convert parsed Excel elements (from DDC converter) into BIM result format."""
+    elements: list[dict[str, Any]] = []
+    storeys_set: set[str] = set()
+    disciplines_set: set[str] = set()
+
+    for i, row in enumerate(raw_elements):
+        etype = str(row.get("Type", row.get("type", row.get("Category", ""))))
+        name = str(row.get("Name", row.get("name", row.get("Family", ""))))
+        storey = str(row.get("Level", row.get("level", row.get("Storey", ""))))
+        discipline = _classify_discipline(etype)
+
+        if storey:
+            storeys_set.add(storey)
+        disciplines_set.add(discipline)
+
+        quantities: dict[str, float] = {}
+        for qkey in ("Area", "Volume", "Length", "Width", "Height", "Count",
+                      "area", "volume", "length", "width", "height", "count"):
+            val = row.get(qkey)
+            if val is not None:
+                try:
+                    quantities[qkey.title()] = float(val)
+                except (ValueError, TypeError):
+                    pass
+
+        stable_id = str(row.get("GlobalId", row.get("global_id", row.get("Id", row.get("id", i)))))
+
+        elements.append({
+            "stable_id": stable_id,
+            "element_type": etype or "Unknown",
+            "name": name or etype or f"Element-{i}",
+            "storey": storey or None,
+            "discipline": discipline,
+            "properties": {k: str(v) for k, v in row.items() if k.lower() not in (
+                "globalid", "global_id", "id", "type", "name", "level", "storey",
+                "category", "family", "area", "volume", "length", "width", "height", "count",
+            ) and v is not None and str(v).strip()},
+            "quantities": quantities,
+            "geometry_hash": hashlib.md5(f"{stable_id}:{etype}:{name}".encode()).hexdigest()[:16],
+            "bounding_box": None,
+        })
+
+    # Generate COLLADA boxes for 3D preview
+    geometry_path = None
+    bounding_box = None
+    if elements:
+        try:
+            geometry_path, bounding_box = _generate_collada_boxes(elements, output_dir)
+        except Exception as e:
+            logger.warning("COLLADA generation failed for DDC converter output: %s", e)
+
+    return {
+        "elements": elements,
+        "storeys": sorted(storeys_set),
+        "disciplines": sorted(disciplines_set),
+        "element_count": len(elements),
+        "has_geometry": geometry_path is not None,
+        "geometry_path": str(geometry_path) if geometry_path else None,
+        "bounding_box": bounding_box,
+    }
 
 
 def process_ifc_file(

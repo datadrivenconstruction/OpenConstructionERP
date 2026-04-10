@@ -55,6 +55,9 @@ const CatalogPage = lazy(() =>
 const AdvisorPage = lazy(() =>
   import('@/features/ai/AdvisorPage').then((m) => ({ default: m.AdvisorPage }))
 );
+const ERPChatPage = lazy(() =>
+  import('@/features/erp-chat/full-page/ChatFullPage')
+);
 const ChangeOrdersPage = lazy(() =>
   import('@/features/changeorders/ChangeOrdersPage').then((m) => ({ default: m.ChangeOrdersPage }))
 );
@@ -282,6 +285,7 @@ export default function App() {
 
         <Route path="/ai-estimate" element={<P title="AI Quick Estimate"><QuickEstimatePage /></P>} />
         <Route path="/advisor" element={<P title="AI Cost Advisor"><AdvisorPage /></P>} />
+        <Route path="/chat" element={<P title="AI Chat"><ERPChatPage /></P>} />
         <Route path="/cad-takeoff" element={<Navigate to="/data-explorer" replace />} />
         <Route path="/data-explorer" element={<P title="Data Explorer"><CadDataExplorerPage /></P>} />
         <Route path="/bim" element={<P title="BIM Viewer"><BIMPage /></P>} />

@@ -65,7 +65,7 @@ export async function fetchBIMElements(
 
 /** Get the geometry file URL for a BIM model. */
 export function getGeometryUrl(modelId: string): string {
-  return `/api/v1/bim_hub/models/${encodeURIComponent(modelId)}/geometry`;
+  return `/api/v1/bim_hub/models/${encodeURIComponent(modelId)}/geometry/`;
 }
 
 /** Upload BIM data (DataFrame + optional geometry file). */
