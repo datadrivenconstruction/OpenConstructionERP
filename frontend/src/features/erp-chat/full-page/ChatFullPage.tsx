@@ -6,6 +6,7 @@ import { useChatFullPage } from './useChatFullPage';
 import ChatTopBar from './topbar/ChatTopBar';
 import ChatLeftPanel from './left/ChatLeftPanel';
 import DataRightPanel from './right/DataRightPanel';
+import { useThemeStore } from '@/stores/useThemeStore';
 
 const PANEL_STORAGE_KEY = 'chat-panel-sizes';
 
@@ -38,6 +39,9 @@ export default function ChatFullPage() {
     setActivePanelIndex,
   } = useChatFullPage();
 
+  // Mirror the site-wide theme so /chat respects light/dark preference.
+  const resolvedTheme = useThemeStore((s) => s.resolved);
+
   const savedLayout = loadSavedLayout();
 
   const handleLayoutChanged = useCallback((layout: Layout) => {
@@ -58,7 +62,7 @@ export default function ChatFullPage() {
   return (
     <div
       className="-mx-3 sm:-mx-4 lg:-mx-6 -mt-4 -mb-4"
-      data-chat-theme="dark"
+      data-chat-theme={resolvedTheme}
       style={{
         height: 'calc(100vh - 56px)',
         display: 'flex',

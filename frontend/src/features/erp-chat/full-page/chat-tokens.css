@@ -1,9 +1,45 @@
 /**
- * ERP AI Chat — Dark theme design tokens.
+ * ERP AI Chat — Theme tokens (light + dark).
  *
- * Scoped to [data-chat-theme="dark"] so they never leak
- * into the rest of the app.
+ * Scoped to [data-chat-theme="light|dark"] so they never leak
+ * into the rest of the app. The wrapper element ChatFullPage sets the
+ * attribute based on useThemeStore().resolved so the chat respects the
+ * site-wide theme preference.
  */
+
+[data-chat-theme='light'] {
+  /* Backgrounds — soft warm whites for premium light feel */
+  --chat-bg: #ffffff;
+  --chat-surface-1: #f7f8fa;
+  --chat-surface-2: #f0f2f5;
+  --chat-surface-3: #e6e9ed;
+
+  /* Borders */
+  --chat-border: #d1d6dc;
+  --chat-border-subtle: #e6e9ed;
+
+  /* Text */
+  --chat-text-primary: #1f2937;
+  --chat-text-secondary: #4b5563;
+  --chat-text-tertiary: #9ca3af;
+
+  /* Accent — keep amber for brand consistency */
+  --chat-accent: #ea580c;
+
+  /* Tool states */
+  --chat-tool-running: #2563eb;
+  --chat-tool-done: #16a34a;
+  --chat-tool-error: #dc2626;
+
+  /* Typography */
+  --chat-font-body: 'DM Sans', system-ui, sans-serif;
+  --chat-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Sizing */
+  --chat-radius: 8px;
+  --chat-radius-sm: 4px;
+  --chat-topbar-h: 52px;
+}
 
 [data-chat-theme='dark'] {
   /* Backgrounds */

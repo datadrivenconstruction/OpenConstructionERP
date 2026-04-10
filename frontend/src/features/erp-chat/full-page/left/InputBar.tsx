@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, type KeyboardEvent, type ChangeEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface InputBarProps {
   onSend: (text: string) => void;
@@ -9,6 +10,7 @@ interface InputBarProps {
 export default function InputBar({ onSend, isStreaming, suggestions }: InputBarProps) {
   const [value, setValue] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { t } = useTranslation();
 
   const handleChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
     setValue(e.target.value);
@@ -115,7 +117,11 @@ export default function InputBar({ onSend, isStreaming, suggestions }: InputBarP
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           disabled={isStreaming}
-          placeholder={isStreaming ? 'AI is responding...' : 'Ask anything about your ERP data...'}
+          placeholder={
+            isStreaming
+              ? t('chat.responding', { defaultValue: 'AI is responding...' })
+              : t('chat.placeholder', { defaultValue: 'Ask anything about your ERP data...' })
+          }
           rows={1}
           style={{
             flex: 1,
@@ -144,7 +150,7 @@ export default function InputBar({ onSend, isStreaming, suggestions }: InputBarP
           type="button"
           onClick={handleSend}
           disabled={!canSend}
-          aria-label="Send message"
+          aria-label={t('chat.send_message', { defaultValue: 'Send message' })}
           style={{
             width: 40,
             height: 40,
@@ -152,7 +158,7 @@ export default function InputBar({ onSend, isStreaming, suggestions }: InputBarP
             alignItems: 'center',
             justifyContent: 'center',
             background: canSend ? 'var(--chat-accent)' : 'var(--chat-surface-3)',
-            color: canSend ? '#0d1117' : 'var(--chat-text-tertiary)',
+            color: canSend ? '#ffffff' : 'var(--chat-text-tertiary)',
             border: 'none',
             borderRadius: 'var(--chat-radius)',
             cursor: canSend ? 'pointer' : 'not-allowed',
@@ -175,7 +181,7 @@ export default function InputBar({ onSend, isStreaming, suggestions }: InputBarP
           textAlign: 'center',
         }}
       >
-        Enter to send &middot; Shift+Enter for newline
+        {t('chat.kbd_hint', { defaultValue: 'Enter to send · Shift+Enter for newline' })}
       </div>
     </div>
   );
