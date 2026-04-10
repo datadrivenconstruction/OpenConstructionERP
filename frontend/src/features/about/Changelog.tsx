@@ -14,6 +14,17 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.17',
+    date: '2026-04-10',
+    changes: [
+      'Fix: EVM SPI no longer returns impossible values like 33 — clamped to [0, 5] when the time-phased PV proxy degenerates (set `spi_capped: true` in the response when the cap fired)',
+      'Fix: schedule CPM now sorts activities topologically before forward and backward passes — out-of-order DB rows used to silently produce wrong ES/EF dates',
+      'Fix: schedule CPM now detects dependency cycles and raises HTTP 400 with the affected activity names — used to silently produce nonsense',
+      'Fix: risk matrix is now a real 5×5 grid (very_low / low / medium / high / critical) — was effectively 5×4 because the impact map skipped level 3, shifting tier boundaries',
+      'Fix: costmodel.calculate_evm N+1 — budget_lines lookup hoisted out of the per-schedule loop',
+    ],
+  },
+  {
     version: '1.3.16',
     date: '2026-04-10',
     changes: [
