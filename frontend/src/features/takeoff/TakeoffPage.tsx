@@ -867,6 +867,8 @@ export function TakeoffPage() {
 
   const handleFilesSelected = useCallback(
     (files: File[]) => {
+      // Clear any previous upload error toast so stale errors don't linger on retry
+      setUploadErrorToast(null);
       for (const file of files) {
         // Create an optimistic local entry immediately
         const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
