@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import ProjectSelector from './ProjectSelector';
 
 interface ChatTopBarProps {
@@ -7,6 +8,7 @@ interface ChatTopBarProps {
 
 export default function ChatTopBar({ onClear }: ChatTopBarProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div
@@ -26,7 +28,7 @@ export default function ChatTopBar({ onClear }: ChatTopBarProps) {
       <button
         type="button"
         onClick={() => navigate('/')}
-        aria-label="Back to dashboard"
+        aria-label={t('chat.back_to_dashboard', { defaultValue: 'Back to dashboard' })}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -63,7 +65,7 @@ export default function ChatTopBar({ onClear }: ChatTopBarProps) {
           flex: 1,
         }}
       >
-        ERP AI Assistant
+        {t('chat.title', { defaultValue: 'ERP AI Assistant' })}
       </div>
 
       {/* Project selector */}
@@ -73,8 +75,8 @@ export default function ChatTopBar({ onClear }: ChatTopBarProps) {
       <button
         type="button"
         onClick={onClear}
-        aria-label="Clear chat"
-        title="Clear chat"
+        aria-label={t('chat.clear_chat', { defaultValue: 'Clear chat' })}
+        title={t('chat.clear_chat', { defaultValue: 'Clear chat' })}
         style={{
           display: 'flex',
           alignItems: 'center',
