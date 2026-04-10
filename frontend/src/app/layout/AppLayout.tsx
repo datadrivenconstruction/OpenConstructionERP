@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import clsx from 'clsx';
-import { Sidebar } from './Sidebar';
+import { Sidebar, FloatingRecentButton } from './Sidebar';
 import { Header } from './Header';
 import { FeedbackDialog, OnboardingTour } from '@/shared/ui';
 import { FloatingQueuePanel } from './FloatingQueuePanel';
@@ -103,6 +103,9 @@ export function AppLayout({ title, children }: AppLayoutProps) {
 
       {/* Floating queue panel — shows background task progress */}
       <FloatingQueuePanel />
+
+      {/* Floating Recent button — bottom-right corner */}
+      <FloatingRecentButton />
 
       {/* Onboarding tour — auto-starts on first visit */}
       <OnboardingTour />

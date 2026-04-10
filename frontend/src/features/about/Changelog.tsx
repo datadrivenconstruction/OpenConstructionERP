@@ -14,6 +14,21 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.0',
+    date: '2026-04-10',
+    changes: [
+      'New: AI Chat — full-page split-screen AI workspace (/chat) with tool-calling agent, 11 ERP tools, 9 live data renderers',
+      'New: BIM Viewer redesign — premium light UI, edge-to-edge viewport, model filmstrip, slide-in upload panel',
+      'New: BIM processing now uses DDC Community Converter pipeline (same as Data Explorer)',
+      'New: Floating Recent button — bottom-right FAB with last 5 visited items',
+      'New: About page links to openconstructionerp.com with UTM tracking',
+      'Fix: BIM RVT files no longer stuck in "processing" — shows clear "Needs Converter" status',
+      'Fix: BIM geometry URL now works for all ready models',
+      'Move: Project Intelligence → AI Tools sidebar group',
+      'Move: Recent section from sidebar to floating popover',
+    ],
+  },
+  {
     version: '1.0.0',
     date: '2026-04-08',
     changes: [

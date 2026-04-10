@@ -83,7 +83,6 @@ const navGroups: NavGroup[] = [
     items: [
       { labelKey: 'nav.dashboard', to: '/', icon: LayoutDashboard },
       { labelKey: 'projects.title', to: '/projects', icon: FolderOpen, tourId: 'projects' },
-      { labelKey: 'nav.project_intelligence', to: '/project-intelligence', icon: BrainCircuit },
     ],
   },
   {
@@ -116,6 +115,8 @@ const navGroups: NavGroup[] = [
     items: [
       { labelKey: 'nav.ai_estimate', to: '/ai-estimate', icon: Sparkles },
       { labelKey: 'nav.ai_advisor', to: '/advisor', icon: MessageSquare },
+      { labelKey: 'nav.project_intelligence', to: '/project-intelligence', icon: BrainCircuit },
+      { labelKey: 'nav.erp_chat', to: '/chat', icon: MessageSquare, highlight: true },
     ],
   },
   // ── PLANNING & CONTROL (advanced) ──────────────────────────────────
@@ -343,11 +344,6 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         })}
       </nav>
 
-      {/* Recent items */}
-      <div className="bg-black/[0.02] dark:bg-white/[0.02]">
-        <RecentSection onItemClick={onClose} />
-      </div>
-
       {/* Bottom navigation */}
       <div className="border-t border-border-light px-3 py-2 bg-black/[0.04] dark:bg-white/[0.03]">
         <ul className="space-y-0.5">
@@ -361,6 +357,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             </li>
           ))}
         </ul>
+
 
         {/* Update notification */}
         <UpdateNotification />
@@ -499,38 +496,63 @@ const RECENT_TYPE_ICONS: Record<string, LucideIcon> = {
   contact: Users,
 };
 
-function RecentSection({ onItemClick }: { onItemClick?: () => void }) {
+/** Floating Recent button — rendered by AppLayout in the bottom-right corner. */
+export function FloatingRecentButton() {
   const { t } = useTranslation();
   const recentItems = useRecentStore((s) => s.items);
+  const [open, setOpen] = useState(false);
 
   if (recentItems.length === 0) return null;
-
-  const displayed = recentItems.slice(0, 3);
+  const displayed = recentItems.slice(0, 5);
 
   return (
-    <div className="border-t border-border-light px-3 py-2">
-      <span className="mt-1 mb-1 flex items-center gap-1.5 px-2.5 text-2xs font-medium uppercase tracking-wider text-content-tertiary">
-        <History size={11} strokeWidth={2} />
-        {t('nav.recent', { defaultValue: 'Recent' })}
-      </span>
-      <ul className="space-y-0.5">
-        {displayed.map((item) => {
-          const Icon = RECENT_TYPE_ICONS[item.type] || FolderOpen;
-          return (
-            <li key={item.id}>
-              <NavLink
-                to={item.url}
-                onClick={onItemClick}
-                title={item.title}
-                className="flex items-center gap-2 rounded-md px-2.5 py-[5px] text-[13px] font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-all duration-fast ease-oe"
-              >
-                <Icon size={14} strokeWidth={1.75} className="shrink-0 text-content-tertiary" />
-                <span className="truncate">{item.title}</span>
-              </NavLink>
-            </li>
-          );
-        })}
-      </ul>
+    <div className="fixed bottom-4 end-4 z-40">
+      {/* Popover */}
+      {open && (
+        <div className="absolute bottom-12 end-0 w-72 rounded-xl border border-border-light bg-surface-primary shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150">
+          <div className="flex items-center justify-between px-4 py-2.5 border-b border-border-light">
+            <span className="text-xs font-semibold text-content-primary">{t('nav.recent', { defaultValue: 'Recent' })}</span>
+            <button onClick={() => setOpen(false)} className="p-0.5 rounded text-content-tertiary hover:text-content-primary">
+              <X size={14} />
+            </button>
+          </div>
+          <ul className="py-1.5 max-h-60 overflow-y-auto">
+            {displayed.map((item) => {
+              const Icon = RECENT_TYPE_ICONS[item.type] || FolderOpen;
+              return (
+                <li key={item.id}>
+                  <NavLink
+                    to={item.url}
+                    onClick={() => setOpen(false)}
+                    title={item.title}
+                    className="flex items-center gap-2.5 px-4 py-2 text-[13px] font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-all"
+                  >
+                    <Icon size={14} strokeWidth={1.75} className="shrink-0 text-content-tertiary" />
+                    <span className="truncate flex-1">{item.title}</span>
+                    <span className="text-[10px] text-content-quaternary shrink-0 tabular-nums">
+                      {new Date(item.visitedAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </NavLink>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+      {/* FAB button */}
+      <button
+        onClick={() => setOpen((p) => !p)}
+        className={clsx(
+          'w-10 h-10 rounded-full flex items-center justify-center shadow-lg border transition-all duration-200 hover:scale-105 active:scale-95',
+          open
+            ? 'bg-oe-blue text-white border-oe-blue shadow-oe-blue/20'
+            : 'bg-surface-primary text-content-secondary border-border-light hover:border-oe-blue/30 hover:text-oe-blue',
+        )}
+        title={t('nav.recent', { defaultValue: 'Recent' })}
+      >
+        <History size={18} strokeWidth={2} />
+      </button>
     </div>
   );
 }
