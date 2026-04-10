@@ -67,6 +67,13 @@ export interface BIMViewerProps {
   colorByMode?: 'default' | 'discipline' | 'storey' | 'type';
   /** Element IDs to isolate (hide everything else). Empty = show all. */
   isolatedIds?: string[] | null;
+  /**
+   * Called once DAE geometry finishes loading, with the ratio of elements
+   * whose mesh was successfully matched by stable_id/name (0..1). The
+   * parent uses this to warn users when per-element filters cannot affect
+   * the viewport (e.g. DDC RVT exports with numeric node names).
+   */
+  onGeometryLoaded?: (meshMatchRatio: number) => void;
 }
 
 /* ── Properties Table ──────────────────────────────────────────────────── */
@@ -168,6 +175,7 @@ export function BIMViewer({
   filterPredicate = null,
   colorByMode = 'default',
   isolatedIds = null,
+  onGeometryLoaded,
 }: BIMViewerProps) {
   const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -233,14 +241,25 @@ export function BIMViewer({
   }, [elements]);
 
   // Load DAE geometry when URL is available (after elements are loaded)
+  const onGeometryLoadedRef = useRef(onGeometryLoaded);
+  onGeometryLoadedRef.current = onGeometryLoaded;
   useEffect(() => {
     if (!elementMgrRef.current || !geometryUrl || !elements?.length) return;
     const mgr = elementMgrRef.current;
     // Only load if not already loaded for this URL
     if (!mgr.hasLoadedGeometry()) {
-      mgr.loadDAEGeometry(geometryUrl).catch(() => {
-        // Silently fall back to placeholder boxes (already rendered by loadElements)
-      });
+      mgr
+        .loadDAEGeometry(geometryUrl)
+        .then(() => {
+          onGeometryLoadedRef.current?.(mgr.getMeshMatchRatio());
+          // Re-fit the camera once DAE geometry is parented — belt & braces:
+          // some models have only the DAE group as visible content, so the
+          // initial zoom-to-fit inside ElementManager may run before layout.
+          sceneRef.current?.zoomToFit();
+        })
+        .catch(() => {
+          // Silently fall back to placeholder boxes (already rendered by loadElements)
+        });
     }
   }, [geometryUrl, elements]);
 

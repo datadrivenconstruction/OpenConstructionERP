@@ -317,7 +317,77 @@ Get productive in under 10 minutes:
 
 ## Quick Start
 
-### Fastest: One-Line Install
+The fastest way to run OpenConstructionERP locally — **three commands**, no Docker, no database setup:
+
+```bash
+pip install openconstructionerp
+openestimate init-db
+openestimate serve
+```
+
+That's it. Open **http://localhost:8080** in your browser and log in with the demo account below.
+
+> **Requires Python 3.12+** (check with `python --version`). Uses SQLite by default — no PostgreSQL, no Redis, no Docker required. The frontend is bundled inside the wheel, so a single `pip install` gets you the full app (backend + UI). Total install size: ~30 MB.
+
+### What you should see when it works
+
+```
+  ___                  ____                _                   _   _
+ / _ \ _ __   ___ _ _ / ___|___  _ __  ___| |_ _ _ _   _  ___ | |_(_) ___  _ _
+| | | | '_ \ / _ \ '_| |   / _ \| '_ \/ __| __| '_| | | |/ __|| __| |/ _ \| '_ \
+| |_| | |_) |  __/ | | |__| (_) | | | \__ \ |_| |  | |_| | (__ | |_| | (_) | | | |
+ \___/| .__/ \___|_|  \____\___/|_| |_|___/\__|_|   \__,_|\___(_)__|_|\___/|_| |_|
+      |_|                                                             ERP
+
+  OpenConstructionERP v1.3.11
+  Open-source construction cost estimation platform
+
+  Open in your browser:  http://127.0.0.1:8080
+  API docs:              http://127.0.0.1:8080/api/docs
+
+  Demo login (auto-created on first run)
+    Email:    demo@openestimator.io
+    Password: DemoPass1234!
+
+  Data directory: ~/.openestimate
+  Stop the server: Ctrl+C
+  Need help: https://openconstructionerp.com/docs
+```
+
+The first run takes 10–30 seconds while the server creates the SQLite database and seeds five demo projects. Subsequent runs start in 2–3 seconds.
+
+### Other install options
+
+<details>
+<summary><b>Open browser automatically</b></summary>
+
+```bash
+openestimate serve --open
+```
+</details>
+
+<details>
+<summary><b>Custom port or data directory</b></summary>
+
+```bash
+openestimate serve --port 9000 --data-dir ~/my-erp-data
+```
+</details>
+
+<details>
+<summary><b>Docker (PostgreSQL + Redis + MinIO)</b></summary>
+
+```bash
+git clone https://github.com/datadrivenconstruction/OpenConstructionERP.git
+cd OpenConstructionERP
+make quickstart
+```
+
+Open **http://localhost:8080** — builds everything in ~2 minutes. Recommended for multi-user deployments.
+</details>
+
+<details>
+<summary><b>One-line installer (auto-detects Docker / Python / uv)</b></summary>
 
 ```bash
 # Linux / macOS
@@ -326,47 +396,44 @@ curl -sSL https://raw.githubusercontent.com/datadrivenconstruction/OpenConstruct
 # Windows (PowerShell)
 irm https://raw.githubusercontent.com/datadrivenconstruction/OpenConstructionERP/main/scripts/install.ps1 | iex
 ```
+</details>
 
-Auto-detects Docker / Python / uv → installs and runs at **http://localhost:8080**
-
-### Option 1: Docker (recommended)
-
-```bash
-git clone https://github.com/datadrivenconstruction/OpenConstructionERP.git
-cd OpenConstructionERP
-make quickstart
-```
-
-Open **http://localhost:8080** — builds everything in ~2 minutes.
-
-### Option 2: Local Development (no Docker)
+<details>
+<summary><b>Local development from a git checkout</b></summary>
 
 ```bash
 git clone https://github.com/datadrivenconstruction/OpenConstructionERP.git
 cd OpenConstructionERP
 
-# Install dependencies
+# Backend
 cd backend && pip install -r requirements.txt && cd ..
-cd frontend && npm install && cd ..
 
-# Start (Linux/macOS)
-make dev
+# Frontend
+cd frontend && npm install && npm run build && cd ..
 
-# Start (Windows — two terminals)
-# Terminal 1: cd backend && uvicorn app.main:create_app --factory --reload --port 8000
-# Terminal 2: cd frontend && npm run dev
+# Run
+cd backend && uvicorn app.main:create_app --factory --reload --port 8000
 ```
 
-Open **http://localhost:5173** — requires Python 3.12+ and Node.js 20+. Uses SQLite by default — zero configuration needed.
+Open **http://localhost:8000**. Requires Python 3.12+ and Node.js 20+.
+</details>
 
-### Option 3: pip install (full app — backend + frontend)
+### Troubleshooting
 
-```bash
-pip install openconstructionerp
-openconstructionerp serve --open
-```
+If `openestimate serve` doesn't work, run **`openestimate doctor`** first — it checks the top failure modes and tells you exactly what to fix.
 
-One command installs everything. Opens browser at **http://localhost:8080** with full UI. Uses SQLite — zero config. [PyPI package](https://pypi.org/project/openconstructionerp/) (2.6 MB, includes pre-built frontend).
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| `Python 3.X is too old` | Python below 3.12 | Install Python 3.12+ from [python.org](https://www.python.org/downloads/) |
+| `port 8080 is already in use` | Another app on port 8080 | `openestimate serve --port 9000` |
+| `cannot write to ~/.openestimate` | Locked-down home directory | `openestimate serve --data-dir /tmp/erp-data` |
+| Process exits silently on Windows + Anaconda | torch/MKL DLL conflict (fixed in v1.3.10) | Upgrade: `pip install -U openconstructionerp` |
+| `command not found: openestimate` | Scripts dir not on PATH | Use `python -m app` or add `~/.local/bin` to PATH |
+| `no frontend found` | Wheel was built without bundled UI | `pip install --force-reinstall openconstructionerp` |
+| AI estimation buttons disabled | Optional `[ai]` extras not installed | `pip install 'openconstructionerp[ai]'` |
+| Semantic search disabled | Optional `[vector]` extras not installed | `pip install 'openconstructionerp[vector]'` |
+
+For anything else, copy the output of `openestimate doctor` into a [GitHub issue](https://github.com/datadrivenconstruction/OpenConstructionERP/issues).
 
 ### Demo Accounts
 

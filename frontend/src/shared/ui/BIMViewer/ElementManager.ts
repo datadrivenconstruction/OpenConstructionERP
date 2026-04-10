@@ -83,11 +83,23 @@ export class ElementManager {
   private sceneManager: SceneManager;
   private elementGroup: THREE.Group;
   private daeGroup: THREE.Group | null = null;
+  /** Meshes that have been linked to an element by stable_id / bbox. */
   private meshMap = new Map<string, THREE.Mesh>();
+  /** Every mesh that lives under `daeGroup`, matched or not. Needed so the
+   *  filter / color-by / isolate features still work for RVT/IFC exports
+   *  whose mesh nodes don't expose element stable_ids. */
+  private allDaeMeshes: THREE.Mesh[] = [];
   private elementDataMap = new Map<string, BIMElementData>();
   private baseMaterials = new Map<string, THREE.MeshStandardMaterial>();
   private wireframeEnabled = false;
   private geometryLoaded = false;
+  /**
+   * Fraction of loaded elements that the viewer was able to match to DAE
+   * mesh nodes by stable_id. < 0.02 means we effectively have no mesh-level
+   * mapping — the parent UI uses this to show a hint explaining why
+   * per-element filters don't affect the viewport.
+   */
+  private meshMatchRatio = 0;
 
   constructor(sceneManager: SceneManager) {
     this.sceneManager = sceneManager;
@@ -142,53 +154,65 @@ export class ElementManager {
           this.daeGroup.name = 'bim_dae_geometry';
           const scene = collada.scene;
 
-          // Build a lookup from stable_id (mesh_ref) to element data + element DB id
+          // Build two lookups: by stable_id (mesh_ref) and by element name.
+          // Different converters emit different node-name schemes:
+          //   · IFC       → nodes named after IfcGlobalId (matches stable_id)
+          //   · DDC RVT   → nodes named after numeric Revit IDs (no match)
+          //   · GLB / FBX → nodes named after mesh/asset names
           const stableIdToElement = new Map<string, BIMElementData>();
+          const nameToElement = new Map<string, BIMElementData>();
           for (const el of this.elementDataMap.values()) {
-            if (el.mesh_ref) {
-              stableIdToElement.set(el.mesh_ref, el);
-            }
+            if (el.mesh_ref) stableIdToElement.set(el.mesh_ref, el);
+            // Sometimes converters use the raw stable_id as the node name
+            stableIdToElement.set(el.id, el);
+            if (el.name) nameToElement.set(el.name, el);
           }
+
+          let matchedCount = 0;
+          this.allDaeMeshes = [];
 
           // Traverse the loaded DAE scene and match mesh nodes
           scene.traverse((child) => {
             if (child instanceof THREE.Mesh) {
               const nodeName = child.name || '';
-              // Try matching node name or parent node name to element stable_id
+              const parentName = child.parent?.name || '';
               const element =
                 stableIdToElement.get(nodeName) ||
-                stableIdToElement.get(child.parent?.name || '');
+                stableIdToElement.get(parentName) ||
+                nameToElement.get(nodeName) ||
+                nameToElement.get(parentName);
 
               if (element) {
-                // Apply discipline-based material
                 const discipline = element.discipline || 'other';
-                const material = this.getMaterial(discipline);
-                child.material = material;
+                child.material = this.getMaterial(discipline);
                 child.castShadow = true;
                 child.receiveShadow = true;
-
-                // Store element data for raycasting / picking
                 child.userData = {
                   elementId: element.id,
                   elementData: element,
                 };
-
                 this.meshMap.set(element.id, child);
+                matchedCount++;
               } else {
                 // Unmatched mesh — apply default material
-                const material = this.getMaterial('other');
-                child.material = material;
+                child.material = this.getMaterial('other');
                 child.castShadow = true;
                 child.receiveShadow = true;
+                child.userData = { elementId: null };
               }
+              // Track every mesh for bulk operations (filter / color-by / isolate)
+              this.allDaeMeshes.push(child);
             }
           });
+
+          const totalElements = this.elementDataMap.size;
+          this.meshMatchRatio = totalElements > 0 ? matchedCount / totalElements : 0;
 
           this.daeGroup.add(scene);
           this.elementGroup.add(this.daeGroup);
           this.geometryLoaded = true;
 
-          // Zoom to fit
+          // Fit camera to the newly added geometry
           this.sceneManager.zoomToFit();
 
           resolve();
@@ -206,6 +230,15 @@ export class ElementManager {
   /** Returns true if DAE geometry was loaded. */
   hasLoadedGeometry(): boolean {
     return this.geometryLoaded;
+  }
+
+  /**
+   * Ratio of elements whose DAE mesh was successfully identified by
+   * stable_id/name. The parent UI surfaces a hint when this is very low
+   * (i.e. filter chips can't hide individual objects in the viewport).
+   */
+  getMeshMatchRatio(): number {
+    return this.meshMatchRatio;
   }
 
   /** Remove placeholder box meshes (used when DAE geometry replaces them). */
@@ -271,8 +304,11 @@ export class ElementManager {
     return this.elementDataMap.get(elementId);
   }
 
-  /** Get all meshes for raycasting. */
+  /** Get all meshes for raycasting — includes both matched element meshes
+   *  and un-matched DAE background meshes so clicking the model always
+   *  hits something. */
   getAllMeshes(): THREE.Mesh[] {
+    if (this.allDaeMeshes.length > 0) return this.allDaeMeshes;
     return Array.from(this.meshMap.values());
   }
 
@@ -364,8 +400,14 @@ export class ElementManager {
 
   /**
    * Apply a visibility predicate to every element. Fast bulk update: each
-   * mesh gets `visible = predicate(element)`. Works for both placeholder
-   * boxes and DAE-matched nodes because meshMap is keyed by element ID.
+   * matched mesh gets `visible = predicate(element)`.
+   *
+   * Behaviour when DAE geometry is loaded but mesh-to-element matching is
+   * sparse (e.g. RVT exports where nodes are numeric IDs unrelated to
+   * element stable_ids): we still update matched meshes, but we also
+   * KEEP the un-matched DAE group fully visible so users at least see the
+   * rest of the model as a "context" background. If a mesh-level filter
+   * matters, the parent UI surfaces a hint via getMeshMatchRatio().
    *
    * Returns the number of visible elements after the filter.
    */
@@ -377,19 +419,14 @@ export class ElementManager {
       mesh.visible = shouldShow;
       if (shouldShow) visibleCount++;
     }
-    // If DAE geometry has un-matched nodes (mesh nodes without element data),
-    // hide them when ANY filter is active so users see only matched elements.
-    // This keeps the viewport consistent with the filter state.
-    if (this.daeGroup) {
-      this.daeGroup.traverse((obj) => {
-        if (obj instanceof THREE.Mesh) {
-          const ud = obj.userData as { elementId?: string };
-          if (!ud.elementId) {
-            // Unmatched DAE mesh — leave visible (background geometry)
-          }
-        }
-      });
+    // Un-matched DAE meshes act as background context. Ensure they are
+    // visible so the scene isn't blanked out by an active filter on a model
+    // without mesh mapping.
+    for (const mesh of this.allDaeMeshes) {
+      const ud = mesh.userData as { elementId?: string | null };
+      if (!ud.elementId) mesh.visible = true;
     }
+    if (this.daeGroup) this.daeGroup.visible = true;
     return visibleCount;
   }
 
@@ -398,6 +435,11 @@ export class ElementManager {
     for (const mesh of this.meshMap.values()) {
       mesh.visible = true;
     }
+    // DAE background meshes (unmatched) should also be restored
+    for (const mesh of this.allDaeMeshes) {
+      mesh.visible = true;
+    }
+    if (this.daeGroup) this.daeGroup.visible = true;
   }
 
   /** Isolate given element IDs — hide everything else. */
@@ -405,6 +447,15 @@ export class ElementManager {
     const keep = new Set(elementIds);
     for (const [id, mesh] of this.meshMap) {
       mesh.visible = keep.has(id);
+    }
+    // When isolating specific elements, hide unmatched DAE background so the
+    // isolated part actually stands out. If no meshes are matched at all we
+    // keep the DAE group visible — users still need to see the model.
+    if (this.meshMap.size > 0) {
+      for (const mesh of this.allDaeMeshes) {
+        const ud = mesh.userData as { elementId?: string | null };
+        if (!ud.elementId) mesh.visible = false;
+      }
     }
   }
 
@@ -488,6 +539,8 @@ export class ElementManager {
       this.elementGroup.remove(this.daeGroup);
       this.daeGroup = null;
     }
+    this.allDaeMeshes = [];
+    this.meshMatchRatio = 0;
     this.geometryLoaded = false;
     // Materials are reused — dispose them only on full destroy
   }
