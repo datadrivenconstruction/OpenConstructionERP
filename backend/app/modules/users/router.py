@@ -355,9 +355,34 @@ async def list_users(
     limit: int = Query(default=50, ge=1, le=100),
     is_active: bool | None = None,
 ) -> list[UserResponse]:
-    """List all users (admin/manager only)."""
+    """List all users (admin/manager only).
+
+    Demo-mode privacy: when ``OE_DEMO_MODE=true`` is set in the environment
+    (only on the public hosted demo), personal data is stripped from the
+    response — first/last names are blanked and the email's local part is
+    replaced with a hash. Only the email domain remains visible. This way
+    the public demo can show registration counts without leaking PII from
+    real users who signed up to try the product.
+    """
+    import os as _os
     users, _ = await service.list_users(offset=offset, limit=limit, is_active=is_active)
-    return [UserResponse.model_validate(u) for u in users]
+    responses = [UserResponse.model_validate(u) for u in users]
+
+    if _os.environ.get("OE_DEMO_MODE", "").lower() in ("1", "true", "yes"):
+        import hashlib as _hl
+
+        def _scrub(r: UserResponse) -> UserResponse:
+            data = r.model_dump()
+            email = (data.get("email") or "").strip()
+            if "@" in email:
+                local, domain = email.split("@", 1)
+                short = _hl.sha1(local.encode("utf-8")).hexdigest()[:6]
+                data["email"] = f"user-{short}@{domain}"
+            data["full_name"] = ""
+            return UserResponse.model_validate(data)
+
+        responses = [_scrub(r) for r in responses]
+    return responses
 
 
 @router.get(
