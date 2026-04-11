@@ -11,7 +11,7 @@
  * immediately shows the new "Linked requirements" entry.
  */
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import {
@@ -61,6 +61,24 @@ export default function LinkRequirementToBIMModal({
   const addToast = useToastStore((s) => s.addToast);
 
   const [search, setSearch] = useState('');
+  /** Paginated "show more" cursor — replaces the old hard 200-item cap
+   *  so the user can reach any filtered requirement, not just the first
+   *  two hundred. */
+  const PAGE_SIZE = 50;
+  const [visibleCount, setVisibleCount] = useState<number>(PAGE_SIZE);
+
+  // Reset transient UI state when the modal is reopened with a new
+  // element selection — mirrors AddToBOQModal's pattern.
+  useEffect(() => {
+    setSearch('');
+    setVisibleCount(PAGE_SIZE);
+  }, [elements]);
+
+  // Reset the page cursor whenever the search changes so the user sees
+  // the first page of results for their new query.
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [search]);
 
   // 1. Load all requirement sets in the project
   const setsQuery = useQuery({
@@ -229,7 +247,7 @@ export default function LinkRequirementToBIMModal({
             </div>
           ) : (
             <ul className="space-y-1">
-              {filtered.slice(0, 200).map((req) => {
+              {filtered.slice(0, visibleCount).map((req) => {
                 const linkedCount = Array.isArray(
                   (req.metadata as Record<string, unknown> | undefined)?.[
                     'bim_element_ids'
@@ -305,9 +323,23 @@ export default function LinkRequirementToBIMModal({
                   </li>
                 );
               })}
-              {filtered.length > 200 && (
-                <li className="text-center text-[10px] text-content-tertiary italic py-2">
-                  + {filtered.length - 200} more — refine the search
+              {filtered.length > visibleCount && (
+                <li className="py-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setVisibleCount((c) =>
+                        Math.min(c + PAGE_SIZE, filtered.length),
+                      )
+                    }
+                    className="w-full text-center text-[11px] text-oe-blue hover:bg-oe-blue/5 rounded py-1.5 border border-dashed border-oe-blue/30"
+                  >
+                    {t('bim.load_more', {
+                      defaultValue:
+                        'Load more ({{remaining}} remaining)',
+                      remaining: filtered.length - visibleCount,
+                    })}
+                  </button>
                 </li>
               )}
             </ul>

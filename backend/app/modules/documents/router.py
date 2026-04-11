@@ -793,61 +793,10 @@ async def delete_document(
 
 # ── Vector / semantic memory endpoints ───────────────────────────────────
 #
-# These three routes plug the Documents module into the cross-module
-# semantic memory layer (see ``app/core/vector_index.py``).  They are
-# intentionally uniform across every module that participates — only the
-# adapter and the row loader differ.
-
-
-@router.get(
-    "/vector/status/",
-    dependencies=[Depends(RequirePermission("documents.read"))],
-)
-async def documents_vector_status() -> dict:
-    """Return health + row count for the ``oe_documents`` collection.
-
-    Used by the admin panel and the global search status widget so the
-    user can tell at a glance whether semantic search over documents is
-    ready, partially indexed or empty.
-    """
-    from app.core.vector_index import COLLECTION_DOCUMENTS, collection_status
-
-    return collection_status(COLLECTION_DOCUMENTS)
-
-
-@router.post(
-    "/vector/reindex/",
-    dependencies=[Depends(RequirePermission("documents.update"))],
-)
-async def documents_vector_reindex(
-    session: SessionDep,
-    _user_id: CurrentUserId,
-    project_id: uuid.UUID | None = Query(default=None),
-    purge_first: bool = Query(default=False),
-) -> dict:
-    """Backfill the documents vector collection.
-
-    Optional ``project_id`` filter narrows the scope so users can reindex
-    one project at a time without re-embedding the entire tenant.  Set
-    ``purge_first=true`` to wipe the matching subset before re-encoding —
-    useful when the embedding model has changed.
-    """
-    from sqlalchemy import select
-
-    from app.core.vector_index import reindex_collection
-    from app.modules.documents.models import Document
-    from app.modules.documents.vector_adapter import document_vector_adapter
-
-    stmt = select(Document)
-    if project_id is not None:
-        stmt = stmt.where(Document.project_id == project_id)
-
-    rows = list((await session.execute(stmt)).scalars().all())
-    return await reindex_collection(
-        document_vector_adapter,
-        rows,
-        purge_first=purge_first,
-    )
+# ``/vector/status/`` and ``/vector/reindex/`` are wired via the shared
+# factory in ``app.core.vector_routes`` (see bottom of file for the
+# ``include_router`` call).  The ``/{id}/similar/`` endpoint remains
+# module-specific and is defined below.
 
 
 @router.get(
@@ -896,3 +845,23 @@ async def documents_similar(
         "cross_project": cross_project,
         "hits": [h.to_dict() for h in hits],
     }
+
+
+# ── Mount vector status + reindex via the shared factory ────────────────
+from app.core.vector_index import COLLECTION_DOCUMENTS  # noqa: E402
+from app.core.vector_routes import create_vector_routes  # noqa: E402
+from app.modules.documents.models import Document as _DocumentModel  # noqa: E402
+from app.modules.documents.vector_adapter import (  # noqa: E402
+    document_vector_adapter as _document_vector_adapter,
+)
+
+router.include_router(
+    create_vector_routes(
+        collection=COLLECTION_DOCUMENTS,
+        adapter=_document_vector_adapter,
+        model=_DocumentModel,
+        read_permission="documents.read",
+        write_permission="documents.update",
+        project_id_attr="project_id",
+    )
+)

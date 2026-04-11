@@ -33,17 +33,97 @@ export interface BIMUploadResponse {
 }
 
 export interface BIMCadUploadResponse {
-  model_id: string;
-  name: string;
+  /** Nullable — preflight `converter_required` rejects return `null`
+   *  because no BIMModel row is created in that path. */
+  model_id: string | null;
+  /** Nullable for the same reason as `model_id`. */
+  name: string | null;
   format: string;
   file_size: number;
-  /** Final status after processing — `'processing'`, `'ready'`,
-   *  `'needs_converter'`, or `'error'`. */
-  status: 'processing' | 'ready' | 'needs_converter' | 'error' | string;
+  /** Final status after processing. `'converter_required'` is a
+   *  preflight reject (no file saved); `'needs_converter'` is the
+   *  post-upload case where the file was accepted but could not
+   *  be processed. */
+  status:
+    | 'processing'
+    | 'ready'
+    | 'needs_converter'
+    | 'error'
+    | 'converter_required'
+    | string;
   /** Number of BIM elements extracted by the processor.  Always
    *  present in the backend response (defaults to 0 when no
    *  elements were extracted, e.g. unprocessable formats). */
   element_count: number;
+  // ── Added in v1.4.7 (converter preflight + auto-install) ──────────
+  /** Real backend error message from ``BIMModel.error_message`` —
+   *  surfaced so the frontend can show the actual reason instead
+   *  of a hardcoded generic string. */
+  error_message?: string | null;
+  /** Converter id (e.g. `"rvt"`) — present on `converter_required`
+   *  and `needs_converter` so the UI can offer a one-click install. */
+  converter_id?: string | null;
+  /** Absolute API path that triggers the install — present alongside
+   *  `converter_id` in the same statuses. */
+  install_endpoint?: string | null;
+  /** Human-readable message — present on `converter_required`
+   *  preflight rejects. */
+  message?: string | null;
+}
+
+/* ── Converter Management (BIM preflight + auto-install) ─────────────── */
+
+/** Single DDC converter entry as returned by the backend
+ *  `/v1/takeoff/converters/` endpoint. */
+export interface BIMConverterInfo {
+  /** Stable converter id — one of `'rvt'`, `'dwg'`, `'ifc'`, `'dgn'`. */
+  id: string;
+  name: string;
+  description: string;
+  engine: string;
+  extensions: string[];
+  exe: string;
+  version: string;
+  size_mb: number;
+  installed: boolean;
+  path: string | null;
+}
+
+/** Response payload of `GET /v1/takeoff/converters/`. */
+export interface BIMConvertersResponse {
+  converters: BIMConverterInfo[];
+  installed_count: number;
+  total_count: number;
+}
+
+/** Result of `POST /v1/takeoff/converters/{id}/install/`. */
+export interface BIMConverterInstallResult {
+  converter_id: string;
+  installed: boolean;
+  path: string;
+  already_installed?: boolean;
+  size_bytes?: number;
+  message: string;
+}
+
+/** List every DDC converter and its install status.  Shared with the
+ *  Quantities page — use the same `['bim-converters']` query key in
+ *  any component that renders converter state so cache invalidations
+ *  stay in sync. */
+export async function fetchBIMConverters(): Promise<BIMConvertersResponse> {
+  return apiGet<BIMConvertersResponse>('/v1/takeoff/converters/');
+}
+
+/** Trigger an auto-install of a DDC converter from GitHub releases.
+ *  The request is blocking on the backend (downloads + extracts +
+ *  verifies) and typically takes 60–120 s for the RVT converter. */
+export async function installBIMConverter(
+  converterId: string,
+): Promise<BIMConverterInstallResult> {
+  return apiPost<BIMConverterInstallResult>(
+    `/v1/takeoff/converters/${encodeURIComponent(converterId)}/install/`,
+    {},
+  );
 }
 
 /* ── API Functions ─────────────────────────────────────────────────────── */

@@ -318,6 +318,20 @@ async def list_snapshots(
     return [_snapshot_to_response(snap) for snap in snapshots]
 
 
+@router.delete(
+    "/projects/{project_id}/5d/snapshots/{snapshot_id}",
+    status_code=204,
+    dependencies=[Depends(RequirePermission("costmodel.write"))],
+)
+async def delete_snapshot(
+    project_id: uuid.UUID,  # noqa: ARG001 — part of URL scoping, enforced by service
+    snapshot_id: uuid.UUID,
+    service: CostModelService = Depends(_get_service),
+) -> None:
+    """Delete an EVM cost snapshot."""
+    await service.delete_snapshot(snapshot_id)
+
+
 # ── EVM (Earned Value Management) ───────────────────────────────────────────
 
 

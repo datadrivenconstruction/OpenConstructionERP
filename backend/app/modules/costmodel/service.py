@@ -220,6 +220,35 @@ class CostModelService:
             )
         return updated
 
+    async def delete_snapshot(self, snapshot_id: uuid.UUID) -> None:
+        """Delete an EVM cost snapshot. Raises 404 if not found.
+
+        Emits a ``costmodel.snapshot.deleted`` event so downstream
+        aggregates (portfolio dashboards, S-curve caches) can invalidate.
+        """
+        snapshot = await self.snapshot_repo.get_by_id(snapshot_id)
+        if snapshot is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Snapshot not found",
+            )
+
+        project_id = str(snapshot.project_id)
+        period = snapshot.period
+        await self.snapshot_repo.delete(snapshot_id)
+
+        await _safe_publish(
+            "costmodel.snapshot.deleted",
+            {
+                "snapshot_id": str(snapshot_id),
+                "project_id": project_id,
+                "period": period,
+            },
+            source_module="oe_costmodel",
+        )
+
+        logger.info("EVM snapshot deleted: %s", snapshot_id)
+
     # ── Dashboard ──────────────────────────────────────────────────────────
 
     async def get_dashboard(self, project_id: uuid.UUID) -> DashboardResponse:
@@ -613,6 +642,12 @@ class CostModelService:
 
         time_elapsed_pct = 0.0
         schedule_progress_pct = 0.0
+        # Tracks whether we actually have a usable schedule signal. When False,
+        # we surface this to the caller via evm_status="schedule_unknown"
+        # instead of silently falling back to a 50 % placeholder — the legacy
+        # fallback skewed portfolio-level reports by pretending half-elapsed
+        # progress on projects that had no schedule at all.
+        schedule_known = False
 
         if schedules:
             # Use the first (primary) schedule for time elapsed calculation
@@ -627,9 +662,22 @@ class CostModelService:
                     total_days = (end - start).days
                     if total_days > 0:
                         elapsed_days = (today - start).days
-                        time_elapsed_pct = max(0.0, min(100.0, (elapsed_days / total_days) * 100.0))
-                except (ValueError, TypeError):
-                    pass
+                        time_elapsed_pct = max(
+                            0.0, min(100.0, (elapsed_days / total_days) * 100.0)
+                        )
+                        schedule_known = True
+                except (ValueError, TypeError) as exc:
+                    # Log explicitly instead of swallowing silently. Bad schedule
+                    # dates are a data-quality issue worth surfacing to ops —
+                    # previously this bug masqueraded as "on track" projects.
+                    logger.warning(
+                        "Unparseable schedule dates on schedule_id=%s "
+                        "(start=%r, end=%r): %s",
+                        getattr(primary_schedule, "id", "<unknown>"),
+                        primary_schedule.start_date,
+                        primary_schedule.end_date,
+                        exc,
+                    )
 
             # Compute weighted schedule progress from all activities
             activity_repo = ActivityRepository(self.session)
@@ -666,11 +714,15 @@ class CostModelService:
             if total_weight > 0.0:
                 schedule_progress_pct = total_weighted_progress / total_weight
         else:
-            # No schedule — fall back to using time from latest snapshot period
+            # No schedule at all — try the latest snapshot as a weak signal,
+            # but do NOT fake a 50 % time_elapsed. The old 50 % placeholder
+            # silently labelled unscheduled projects as "half-elapsed",
+            # which skewed portfolio roll-ups and made at-risk projects look
+            # on-track. Instead we leave time_elapsed_pct at 0 and mark
+            # evm_status="schedule_unknown" further down so the UI/API caller
+            # can tell there is genuinely no schedule data.
             latest = await self.snapshot_repo.get_latest_for_project(project_id)
             if latest is not None:
-                time_elapsed_pct = 50.0  # conservative fallback
-                # Use latest snapshot EV/PV as approximation
                 pv_snap = _str_to_float(latest.planned_cost)
                 ev_snap = _str_to_float(latest.earned_value)
                 if pv_snap > 0.0:
@@ -700,7 +752,13 @@ class CostModelService:
         tcpi = _safe_divide(bac - ev, bac - ac)
 
         # ── Step 4: Determine project health status ────────────────────────
-        if spi >= 0.95 and cpi >= 0.95:
+        # When we have no schedule signal at all, any SPI-based classification
+        # is meaningless (see `schedule_known` comment above). Surface a
+        # distinct sentinel so dashboards can render "no schedule data" rather
+        # than a misleading "on track"/"at risk" badge.
+        if not schedule_known:
+            evm_status = "schedule_unknown"
+        elif spi >= 0.95 and cpi >= 0.95:
             evm_status = "on_track"
         elif spi >= 0.85 and cpi >= 0.85:
             evm_status = "at_risk"
