@@ -493,7 +493,41 @@ async function clickSidebarButton(page, matcher, label) {
       log('  AddToBOQ modal:', JSON.stringify(modalState));
       results.addToBOQModal = modalState;
       await page.screenshot({ path: path.join(OUT, '09-add-to-boq-modal.png') });
-      // Close the modal by clicking the X button or pressing Escape
+
+      // ── Actually click a position to fire the linkExistingMut →
+      //    POST /links/.  This is the path that returned 500 in the user
+      //    report — verify it now succeeds.
+      await page.waitForTimeout(500);
+      const clickRes = await page.evaluate(() => {
+        // Find the first picklist row inside the modal — it's a button
+        // with mono-font ordinal text inside it.
+        const buttons = Array.from(document.querySelectorAll('button'));
+        const pickRow = buttons.find((b) => {
+          const fontMono = b.querySelector('.font-mono');
+          return fontMono && /^\d+\.\d+$/.test((fontMono.textContent || '').trim());
+        });
+        if (!pickRow) return { ok: false };
+        const ordinal = pickRow.querySelector('.font-mono')?.textContent;
+        pickRow.click();
+        return { ok: true, ordinal };
+      });
+      log('  picked position:', JSON.stringify(clickRes));
+      // Wait for the POST /links/ to either succeed (toast) or fail (toast).
+      await page.waitForTimeout(2500);
+      const linkResult = await page.evaluate(() => {
+        const toasts = Array.from(document.querySelectorAll('[class*="toast"], [role="status"], [role="alert"]'));
+        const texts = toasts.map((t) => (t.textContent || '').trim()).filter(Boolean);
+        // Also check for any text node that says "Linked" or "Error"
+        const allText = document.body.textContent || '';
+        const success = /Linked\s+\d+\s+element/i.test(allText) || /linked/i.test(texts.join(' '));
+        const failure = /Internal server error|500|failed/i.test(allText) || /error/i.test(texts.join(' '));
+        return { toastCount: toasts.length, texts: texts.slice(0, 3), success, failure };
+      });
+      log('  link result:', JSON.stringify(linkResult));
+      results.linkAttempt = linkResult;
+      await page.screenshot({ path: path.join(OUT, '09b-after-link-click.png') });
+
+      // Close any modal still open
       await page.keyboard.press('Escape').catch(() => {});
       await page.waitForTimeout(300);
     }
@@ -575,20 +609,28 @@ async function clickSidebarButton(page, matcher, label) {
     return false;
   });
   log('  group submit clicked:', submitClicked, 'name=', groupName);
-  await page.waitForTimeout(2000); // wait for backend POST + invalidate
 
-  // 4) Verify the group now appears in the saved-groups section of the panel
-  const groupListed = await page.evaluate((name) => {
-    const sectionLabels = Array.from(document.querySelectorAll('span')).filter((s) =>
-      /Saved groups/i.test(s.textContent || ''),
-    );
-    if (sectionLabels.length === 0) return { sectionExists: false, hasGroup: false };
-    const groupSpans = Array.from(document.querySelectorAll('span'));
-    const hasGroup = groupSpans.some((s) =>
-      (s.textContent || '').trim() === name,
-    );
-    return { sectionExists: true, hasGroup };
-  }, groupName);
+  // 4) Poll up to 6 seconds for the group to appear in the panel.  The
+  //    save flow is:  POST /element-groups → toast success → close modal
+  //    → invalidate query → React Query refetch → re-render → section
+  //    appears.  That whole chain typically takes ~500 ms but we give it
+  //    margin so the test isn't flaky.
+  let groupListed = { sectionExists: false, hasGroup: false };
+  for (let attempt = 0; attempt < 12; attempt++) {
+    await page.waitForTimeout(500);
+    groupListed = await page.evaluate((name) => {
+      const sectionLabels = Array.from(document.querySelectorAll('span')).filter(
+        (s) => /Saved groups/i.test(s.textContent || ''),
+      );
+      if (sectionLabels.length === 0) return { sectionExists: false, hasGroup: false };
+      const groupSpans = Array.from(document.querySelectorAll('span'));
+      const hasGroup = groupSpans.some(
+        (s) => (s.textContent || '').trim() === name,
+      );
+      return { sectionExists: true, hasGroup };
+    }, groupName);
+    if (groupListed.hasGroup) break;
+  }
   log('  saved-groups section:', JSON.stringify(groupListed));
   results.savedGroupListed = groupListed;
   await page.screenshot({ path: path.join(OUT, '12-saved-groups-list.png') });

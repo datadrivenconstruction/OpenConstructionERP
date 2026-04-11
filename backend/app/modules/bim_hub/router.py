@@ -47,6 +47,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, File, Header, HTTPException, Query, UploadFile, status
 from fastapi.responses import RedirectResponse, StreamingResponse
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
@@ -1295,16 +1296,27 @@ async def _verify_boq_position_access(
     position_id: uuid.UUID,
     user_id: str,
 ) -> None:
-    """Resolve a BOQ position → project and verify the caller owns it."""
-    from app.modules.boq.repository import PositionRepository
+    """Resolve a BOQ position → its BOQ → project and verify the caller owns it.
 
-    position = await PositionRepository(service.session).get_by_id(position_id)
-    if position is None or position.project_id is None:
+    `Position` has no direct `project_id` column — the project lives on the
+    parent `BOQ` row reached via `position.boq_id`.  We do a single-row
+    SELECT joining position → boq so this stays one round-trip.
+    """
+    from app.modules.boq.models import BOQ as BOQModel, Position
+
+    stmt = (
+        select(BOQModel.project_id)
+        .join(Position, Position.boq_id == BOQModel.id)
+        .where(Position.id == position_id)
+    )
+    result = await service.session.execute(stmt)
+    project_id = result.scalar_one_or_none()
+    if project_id is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="BOQ position not found",
         )
-    await _verify_project_access(service.session, position.project_id, user_id)
+    await _verify_project_access(service.session, project_id, user_id)
 
 
 @router.get("/links/", response_model=BOQElementLinkListResponse)

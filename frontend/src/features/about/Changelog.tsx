@@ -14,6 +14,14 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.26',
+    date: '2026-04-11',
+    changes: [
+      'Fix: "Add to BOQ" link create returned 500 Internal Server Error on every click. Root cause: the v1.3.22 backend agent\'s ownership check `_verify_boq_position_access()` referenced `position.project_id` directly, but `Position` has no `project_id` column — the project lives on the parent `BOQ` row reached via `position.boq_id`. Fix: rewrote the helper as a single-row SELECT that joins Position → BOQ and pulls `BOQ.project_id` in one round-trip. Verified end-to-end via curl (link created, cad_element_ids synced, boq_links embedded in element response, delete works) and via the headless deep test',
+      'Fix: headless test for Save-as-group lifecycle was flaky — the assertion ran 2 s after the POST, but the React Query refetch + panel re-render chain sometimes took longer. Replaced the fixed timeout with a 6-s polling loop that breaks as soon as the saved-groups section appears, eliminating false-negative FAILs',
+    ],
+  },
+  {
     version: '1.3.25',
     date: '2026-04-11',
     changes: [
