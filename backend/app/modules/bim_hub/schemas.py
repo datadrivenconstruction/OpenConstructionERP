@@ -409,13 +409,21 @@ class QuantityMapApplyResult(BaseModel):
     ``links_created`` and ``positions_created`` are always reported — they
     stay at 0 on a ``dry_run`` so the caller can safely display them as
     "would-be" counters without extra branching.
+
+    ``skipped_count`` / ``skipped`` surface every (element, rule) pair
+    that the engine considered but could not extract a quantity from.
+    Each skip carries a ``reason`` so estimators can see at a glance
+    *why* their expected elements were excluded — the previous version
+    silently dropped these and made under-population invisible.
     """
 
     matched_elements: int = 0
     rules_applied: int = 0
     links_created: int = 0
     positions_created: int = 0
+    skipped_count: int = 0
     results: list[dict[str, Any]] = Field(default_factory=list)
+    skipped: list[dict[str, Any]] = Field(default_factory=list)
 
 
 # ── BIMModelDiff schemas ─────────────────────────────────────────────────────

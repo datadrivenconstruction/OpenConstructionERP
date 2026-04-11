@@ -113,11 +113,99 @@ class RequirementsService:
             status=status_filter,
         )
 
+    async def update_set(
+        self,
+        set_id: uuid.UUID,
+        fields: dict[str, Any],
+    ) -> RequirementSet:
+        """Patch fields on an existing requirement set.
+
+        Only known/whitelisted fields are accepted; the caller already
+        validated them via the ``RequirementSetUpdate`` Pydantic schema.
+        Returns the refreshed ORM row so the router can build a fresh
+        response without an extra round-trip.
+        """
+        item = await self.get_set(set_id)  # 404 if missing
+
+        if not fields:
+            return item
+
+        # Whitelist of safely-patchable columns + remap ``metadata`` →
+        # ``metadata_`` (the SQLAlchemy attribute) so the schema can
+        # use the friendlier public name.
+        safe_fields: dict[str, Any] = {}
+        for key in (
+            "name",
+            "description",
+            "source_type",
+            "source_filename",
+            "status",
+        ):
+            if key in fields and fields[key] is not None:
+                safe_fields[key] = fields[key]
+        if "metadata" in fields and fields["metadata"] is not None:
+            safe_fields["metadata_"] = fields["metadata"]
+
+        if not safe_fields:
+            return item
+
+        await self.set_repo.update_fields(set_id, **safe_fields)
+        await self.session.refresh(item)
+        logger.info(
+            "RequirementSet updated: %s (fields=%s)",
+            set_id,
+            list(safe_fields.keys()),
+        )
+        return item
+
     async def delete_set(self, set_id: uuid.UUID) -> None:
         """Delete a requirement set and all its requirements/gate results."""
         await self.get_set(set_id)  # Raises 404 if not found
         await self.set_repo.delete(set_id)
         logger.info("RequirementSet deleted: %s", set_id)
+
+    async def bulk_delete_requirements(
+        self,
+        set_id: uuid.UUID,
+        requirement_ids: list[uuid.UUID],
+    ) -> tuple[int, int]:
+        """Delete every requirement whose id is in the list.
+
+        Ids that do not exist or belong to a different set are
+        silently skipped — but the count is reported so callers can
+        flag a "you asked for 100, we deleted 87" mismatch in the UI.
+
+        Runs as a single transaction so a partial delete never leaks
+        half the rows on a mid-flight failure.  Each successful delete
+        publishes ``requirements.requirement.deleted`` so the vector
+        store stays in sync.
+        """
+        await self.get_set(set_id)  # 404 if set missing
+
+        deleted = 0
+        skipped = 0
+        for req_id in requirement_ids:
+            item = await self.req_repo.get_by_id(req_id)
+            if item is None or item.requirement_set_id != set_id:
+                skipped += 1
+                continue
+            await self.req_repo.delete(req_id)
+            deleted += 1
+            await _safe_publish(
+                "requirements.requirement.deleted",
+                {
+                    "requirement_id": str(req_id),
+                    "requirement_set_id": str(set_id),
+                },
+            )
+
+        logger.info(
+            "RequirementSet %s: bulk-deleted %d requirement(s), skipped %d",
+            set_id,
+            deleted,
+            skipped,
+        )
+        return deleted, skipped
 
     # ── Requirement CRUD ─────────────────────────────────────────────────
 
@@ -460,7 +548,7 @@ class RequirementsService:
             gate_number=gate_number,
             gate_name=gate_name,
             status=gate_status,
-            score=str(score),
+            score=float(score),
             findings=findings,
             executed_by=user_id,
         )

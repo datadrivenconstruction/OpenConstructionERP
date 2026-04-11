@@ -8,7 +8,7 @@ Tables:
 
 import uuid
 
-from sqlalchemy import JSON, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import GUID, Base
@@ -138,7 +138,9 @@ class GateResult(Base):
     gate_number: Mapped[int] = mapped_column(Integer, nullable=False)
     gate_name: Mapped[str] = mapped_column(String(100), nullable=False)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="skipped")
-    score: Mapped[str] = mapped_column(String(10), nullable=False, default="0")
+    score: Mapped[float] = mapped_column(
+        Float, nullable=False, default=0.0, server_default="0"
+    )
     findings: Mapped[list] = mapped_column(  # type: ignore[assignment]
         JSON,
         nullable=False,

@@ -336,3 +336,140 @@ class TestRequirementsBimCrossModule:
         assert resp.status_code == 400, (
             f"Expected 400 for mismatched set, got {resp.status_code}: {resp.text}"
         )
+
+    async def test_orphan_bim_ids_stripped_on_element_delete(
+        self, req_bim_client: AsyncClient, req_bim_auth: dict[str, str]
+    ) -> None:
+        """Pin a requirement and a task to a BIM element, then delete
+        the entire BIM model.  The cleanup subscriber wired in v1.4.5
+        (``bim_hub.events._cleanup_orphaned_links``) must strip the
+        deleted element id from BOTH JSON-array link sites so the
+        reverse-query helpers don't return zombies on the next read.
+
+        This is the regression test for the v1.4.x finding that 3 out
+        of 5 cross-module link types (Task / Activity / Requirement,
+        which use JSON arrays instead of FK tables) leaked stale
+        references on BIM element delete forever.
+        """
+        client = req_bim_client
+        auth = req_bim_auth
+
+        # Seed the domain.
+        project_id = await _create_project(client, auth)
+        set_id = await _create_requirement_set(client, auth, project_id)
+        req_id = await _add_requirement(client, auth, set_id)
+        model_id = await _create_bim_model(client, auth, project_id)
+        element_ids = await _bulk_import_elements(client, auth, model_id)
+        target_element_id = element_ids[0]
+
+        # Pin the requirement to the element via the v1.4.3 endpoint.
+        resp = await client.patch(
+            f"/api/v1/requirements/{set_id}/requirements/{req_id}/bim-links/",
+            json={"bim_element_ids": [target_element_id], "replace": True},
+            headers=auth,
+        )
+        assert resp.status_code == 200, resp.text
+        stored = (resp.json().get("metadata") or {}).get("bim_element_ids") or []
+        assert target_element_id in stored
+
+        # Pin a task to the same element via the tasks create endpoint.
+        resp = await client.post(
+            "/api/v1/tasks/",
+            json={
+                "project_id": project_id,
+                "title": "Inspect this wall",
+                "description": "Site inspection — pinned to wall element",
+                "task_type": "task",
+                "status": "open",
+                "priority": "normal",
+                "bim_element_ids": [target_element_id],
+            },
+            headers=auth,
+        )
+        assert resp.status_code == 201, f"Task create failed: {resp.text}"
+        task_id = resp.json()["id"]
+
+        # Sanity: tasks reverse query finds it before delete.
+        resp = await client.get(
+            "/api/v1/tasks/",
+            params={"project_id": project_id, "bim_element_id": target_element_id},
+            headers=auth,
+        )
+        assert resp.status_code == 200, resp.text
+        assert any(t["id"] == task_id for t in resp.json()), (
+            "Task should be reverse-discoverable BEFORE the element is deleted"
+        )
+
+        # Sanity: requirement reverse query finds it before delete.
+        resp = await client.get(
+            "/api/v1/requirements/by-bim-element/",
+            params={"bim_element_id": target_element_id, "project_id": project_id},
+            headers=auth,
+        )
+        assert resp.status_code == 200, resp.text
+        assert any(r["id"] == req_id for r in resp.json())
+
+        # Trigger element deletion via the bulk-import-replace path
+        # (which only needs bim.create, not bim.delete — the test user
+        # is registered as ``editor`` because the registration endpoint
+        # demotes everyone except the very first user to prevent
+        # privilege escalation, and bim.delete requires admin).
+        # ``bulk_import_elements`` deletes existing rows for the model
+        # AND fires ``bim_hub.element.deleted`` for each one before
+        # creating the new batch — exactly the event our cleanup
+        # subscriber listens for.
+        resp = await client.post(
+            f"/api/v1/bim_hub/models/{model_id}/elements/",
+            json={
+                "elements": [
+                    {
+                        "stable_id": "wall-replacement",
+                        "element_type": "IfcWall",
+                        "name": "Replacement wall",
+                        "storey": "L1",
+                        "discipline": "architecture",
+                        "properties": {},
+                        "quantities": {},
+                    },
+                ],
+            },
+            headers=auth,
+        )
+        assert resp.status_code == 201, f"Bulk replace failed: {resp.text}"
+
+        # The task should NO LONGER reference the deleted element.
+        resp = await client.get(
+            "/api/v1/tasks/",
+            params={"project_id": project_id, "bim_element_id": target_element_id},
+            headers=auth,
+        )
+        assert resp.status_code == 200, resp.text
+        assert resp.json() == [], (
+            f"Task still references deleted element {target_element_id}: "
+            f"{resp.json()}"
+        )
+
+        # The requirement reverse query should also return empty.
+        resp = await client.get(
+            "/api/v1/requirements/by-bim-element/",
+            params={"bim_element_id": target_element_id, "project_id": project_id},
+            headers=auth,
+        )
+        assert resp.status_code == 200, resp.text
+        assert resp.json() == [], (
+            f"Requirement still references deleted element {target_element_id}: "
+            f"{resp.json()}"
+        )
+
+        # And the requirement row itself should have the id stripped
+        # from its metadata array (defensive double-check).
+        resp = await client.get(
+            f"/api/v1/requirements/{set_id}",
+            headers=auth,
+        )
+        assert resp.status_code == 200, resp.text
+        detail = resp.json()
+        req = next(r for r in detail["requirements"] if r["id"] == req_id)
+        assert target_element_id not in (
+            (req.get("metadata") or {}).get("bim_element_ids") or []
+        ), "Requirement.metadata still carries the orphaned element id"
