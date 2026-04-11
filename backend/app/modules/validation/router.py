@@ -16,8 +16,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.modules.validation.bim_validation_service import BIMValidationService
 from app.modules.validation.models import ValidationReport
 from app.modules.validation.schemas import (
+    CheckBIMModelRequest,
     RunValidationRequest,
     RunValidationResponse,
     ValidationReportResponse,
@@ -171,6 +173,54 @@ async def run_validation(
             for r in result["results"]
         ],
     )
+
+
+# ── POST /check-bim-model — Run per-element BIM rules ───────────────────
+
+
+@router.post(
+    "/check-bim-model",
+    response_model=ValidationReportResponse,
+    dependencies=[Depends(RequirePermission("validation.create"))],
+)
+async def check_bim_model(
+    request: CheckBIMModelRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> ValidationReportResponse:
+    """Run per-element :class:`BIMElementRule` checks against a BIM model.
+
+    Persists a :class:`ValidationReport` row with ``target_type='bim_model'``
+    and ``results`` that carry ``element_id`` references so the UI can map
+    each failure back to the offending element. Large models are capped at
+    ``MAX_RESULTS_PER_REPORT`` failures with a ``_truncated`` sentinel.
+    """
+    # Ownership check — resolve the BIM model to its project first.
+    from app.modules.bim_hub.repository import BIMModelRepository
+
+    model_repo = BIMModelRepository(session)
+    model = await model_repo.get(request.model_id)
+    if model is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"BIM model {request.model_id} not found",
+        )
+    await _require_project_access(session, model.project_id, user_id)
+
+    service = BIMValidationService(session)
+    try:
+        report = await service.validate_bim_model(
+            model_id=request.model_id,
+            rule_ids=request.rule_ids,
+            user_id=user_id,
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+
+    return ValidationReportResponse.model_validate(report)
 
 
 # ── GET /reports — List validation reports ───────────────────────────────

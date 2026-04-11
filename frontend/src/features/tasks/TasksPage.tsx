@@ -22,6 +22,7 @@ import {
   Scale,
   UserCircle,
   AlertTriangle,
+  Box,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, SkeletonGrid } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
@@ -422,6 +423,32 @@ const TaskCard = React.memo(function TaskCard({
                     ? t('tasks.from_inspection', { defaultValue: 'From inspection' })
                     : t('tasks.source_linked', { defaultValue: 'Linked' })}
             </span>
+          )}
+          {/* BIM pin indicator — surfaces tasks that are spatially linked
+              to 3D model geometry.  Click jumps to the first pinned element
+              in the BIM viewer. */}
+          {task.bim_element_ids && task.bim_element_ids.length > 0 && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                const firstId = task.bim_element_ids?.[0];
+                if (firstId) {
+                  window.location.href = `/bim?element=${encodeURIComponent(firstId)}`;
+                }
+              }}
+              className="inline-flex items-center gap-1 mt-0.5 text-2xs text-emerald-700 dark:text-emerald-400 hover:underline"
+              title={t('tasks.bim_pinned_title', {
+                defaultValue: 'Pinned to {{count}} BIM element(s) — click to view in 3D',
+                count: task.bim_element_ids.length,
+              })}
+            >
+              <Box size={9} className="shrink-0" />
+              {t('tasks.bim_pinned', {
+                defaultValue: 'Pinned to {{count}} BIM element(s)',
+                count: task.bim_element_ids.length,
+              })}
+            </button>
           )}
         </div>
       </div>

@@ -7,7 +7,7 @@ BOQ links, quantity maps, element groups, and model diffs.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -193,6 +193,22 @@ class ActivityBrief(BaseModel):
     percent_complete: float = 0.0
 
 
+class ElementValidationSummary(BaseModel):
+    """Lightweight per-element validation finding.
+
+    Mirrors the shape stored inside ``ValidationReport.results`` when the
+    report's ``target_type`` is ``'bim_model'``. Only failing checks
+    produce these entries — a fully-passing element receives an empty
+    ``validation_results`` list and ``validation_status='pass'``.
+    """
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    rule_id: str
+    severity: Literal["error", "warning", "info"]
+    message: str
+
+
 class BIMElementResponse(BaseModel):
     """BIM element returned from the API."""
 
@@ -216,6 +232,8 @@ class BIMElementResponse(BaseModel):
     linked_documents: list[DocumentLinkBrief] = Field(default_factory=list)
     linked_tasks: list[TaskBrief] = Field(default_factory=list)
     linked_activities: list[ActivityBrief] = Field(default_factory=list)
+    validation_results: list[ElementValidationSummary] = Field(default_factory=list)
+    validation_status: Literal["pass", "warning", "error", "unchecked"] = "unchecked"
     created_at: datetime
     updated_at: datetime
 
