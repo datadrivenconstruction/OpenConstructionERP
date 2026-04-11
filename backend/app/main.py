@@ -1064,6 +1064,7 @@ def create_app() -> FastAPI:
             from app.modules.cde import models as _cde_models  # noqa: F401
             from app.modules.changeorders import models as _changeorders_models  # noqa: F401
             from app.modules.collaboration import models as _collaboration_models  # noqa: F401
+            from app.modules.collaboration_locks import models as _collaboration_locks_models  # noqa: F401
             from app.modules.contacts import models as _contacts_models  # noqa: F401
             from app.modules.correspondence import models as _correspondence_models  # noqa: F401
             from app.modules.costmodel import models as _cm_models  # noqa: F401
@@ -1246,6 +1247,15 @@ def create_app() -> FastAPI:
     async def shutdown() -> None:
         logger.info("Shutting down %s", settings.app_name)
         from app.database import engine
+
+        # Stop the collaboration-lock sweeper before closing the DB
+        # engine so its last iteration cannot hit a disposed pool.
+        try:
+            from app.modules.collaboration_locks.sweeper import stop_sweeper
+
+            stop_sweeper()
+        except Exception:
+            logger.debug("collab lock sweeper stop failed", exc_info=True)
 
         await engine.dispose()
 

@@ -5,6 +5,163 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.8] — 2026-04-11
+
+### Real-time collaboration L1 — soft locks + presence (issue #51)
+
+Maher00746 asked: "Does the platform support real-time collaboration
+when multiple users are working on the same BOQ?". The full collab
+plan has 3 layers: L1 (soft locks + presence), L2 (Yjs Y.Text on text
+fields), L3 (full CRDT BOQ rows). This release ships **L1**, which
+covers the maher00746 90% case ("two estimators editing the same
+position should not trample each other") without dragging in a CRDT
+runtime, Yjs, or Redis. L2 / L3 remain on the v1.5 / v2.0 roadmap.
+
+#### New module ``backend/app/modules/collaboration_locks/``
+Self-contained module with manifest, models, schemas, repository,
+service, router, presence hub, sweeper, and event bridge — 1,580
+backend LOC across 10 files. Mounted at ``/api/v1/collaboration_locks``.
+Named ``collaboration_locks`` (not ``collaboration``) so it does not
+collide with the existing comments / viewpoints module.
+
+- ``oe_collab_lock`` table (Alembic migration ``a1b2c3d4e5f6``) with
+  ``UniqueConstraint(entity_type, entity_id)`` so only one user can
+  hold a row at a time. Indexed on ``expires_at`` and ``user_id``.
+- **Atomic acquire** via read-then-insert-or-steal at the repository
+  level — cross-dialect (SQLite dev + PG prod), races handled by
+  catching ``IntegrityError`` and re-reading the winner. Expired
+  rows are stolen *in place* via UPDATE so the unique constraint
+  never trips.
+- **Heartbeat extends TTL** in 30s steps; rejected if the caller is
+  not the holder.
+- **Release** is idempotent and only honoured for the holder.
+- **Background sweeper** runs every 30s, purges rows where
+  ``expires_at < now()``. Uses its own session per iteration so a
+  sweeper failure cannot roll back any in-flight request.
+- **Entity-type allowlist** mirrors the existing ``collaboration``
+  module — clients cannot lock arbitrary strings. Returns 400 on
+  rejection.
+- **409 conflict body** is a distinct ``CollabLockConflict`` schema
+  with ``current_holder_user_id``, ``current_holder_name``,
+  ``locked_at``, ``expires_at``, ``remaining_seconds`` so the
+  frontend can render a useful toast without a follow-up GET.
+- **Naive datetime normalisation** via ``_as_aware()`` helpers in
+  repository + service — SQLite's ``DateTime(timezone=True)``
+  returns naive Python datetimes, so every comparison gets coerced
+  to UTC first. Same pattern already used in ``dependencies.py``
+  for ``password_changed_at``.
+
+#### Presence WebSocket
+``WS /collaboration_locks/presence/?entity_type=...&entity_id=...&token=<jwt>``
+broadcasts JSON frames to every connected client subscribed to the
+same entity. Auth via the ``token`` query param because browser
+WebSocket cannot set headers — same pattern as the BIM geometry
+endpoint. The ``PresenceHub`` is worker-local in v1.4.8 (single
+``presence_hub = PresenceHub()`` module-level instance, no Redis,
+no Postgres LISTEN/NOTIFY) — multi-worker deployments still get
+correct *locking* via the DB but presence broadcasts are
+worker-scoped. Documented in the module docstring; the upgrade
+path to LISTEN/NOTIFY is a single internal swap with no caller
+changes.
+
+Wire format (every frame is JSON ``{event, ts, ...}``):
+
+| event | extras | when |
+|---|---|---|
+| ``presence_snapshot`` | ``users[]``, ``lock`` | first frame after upgrade |
+| ``presence_join`` | ``user_id``, ``user_name`` | another user opened the entity |
+| ``presence_leave`` | ``user_id`` | user closed all their tabs on the entity |
+| ``lock_acquired`` | ``lock_id``, ``user_id``, ``user_name``, ``expires_at`` | any user claimed the lock |
+| ``lock_heartbeat`` | ``lock_id``, ``user_id``, ``user_name``, ``expires_at`` | holder renewed TTL |
+| ``lock_released`` | ``lock_id``, ``user_id``, ``user_name`` | holder voluntarily released |
+| ``lock_expired`` | ``lock_id``, ``user_id`` | sweeper removed a stale lock |
+| ``pong`` | — | response to client ``"ping"`` keepalive |
+
+The ``presence_join`` broadcast uses ``exclude=websocket`` so the
+joiner does not receive their own join event. ``lock_acquired``
+intentionally does NOT exclude — the holder *should* see the echo
+so the UI can confirm the state transition from the event stream
+(useful for multi-tab consistency).
+
+Multi-tab same user: the hub deduplicates by ``user_id`` in the
+roster. ``leave()`` walks remaining sockets to check whether the
+departing user still has another tab on this entity before
+broadcasting ``presence_leave``. The lock itself is idempotent per
+user (re-acquire refreshes TTL).
+
+#### Frontend hook + indicator + BOQ wiring
+``frontend/src/features/collab_locks/`` — 5 files, 636 LOC:
+- ``api.ts`` — typed clients with a tagged-union return type so
+  TypeScript narrows ``CollabLock`` vs ``CollabLockConflict``
+- ``useEntityLock.ts`` — auto-acquire on mount, 15s heartbeat,
+  cleanup-release on unmount. Catches every error and degrades
+  gracefully — a network drop transitions to ``'released'`` and
+  re-acquires on the next focus event. Worst case: user types
+  for ~15s without a live lock (race window between expiry and
+  next sweep at 60s TTL + 30s sweep interval).
+- ``usePresenceWebSocket.ts`` — JWT-via-query-param connection,
+  roster state, event stream
+- ``PresenceIndicator.tsx`` — green / amber / blue pill badge
+  ("You are editing" / "Locked by Anna 3:42 remaining" / "N viewers")
+- ``index.ts`` — barrel re-exports
+
+**BOQ wiring** in ``frontend/src/features/boq/BOQGrid.tsx``:
+- Acquires on ``onCellEditingStarted`` (per ROW, not per cell —
+  tracks held locks in a ``rowLockMapRef`` and re-uses on
+  subsequent cell edits within the same row)
+- Releases on new ``onCellEditingStopped`` callback
+- Releases all held row locks on unmount
+- 409 cancels the edit and shows a toast with the holder name +
+  remaining seconds. Network errors degrade silently — the user
+  can still edit, just without collab safety.
+
+9 new i18n keys (``collab_locks.lock_held_by_you``,
+``collab_locks.lock_held_by_other``, ``collab_locks.lock_conflict_toast``,
+``collab_locks.viewers_label`` etc.) all via ``t(key, { defaultValue })``
+so the UI works today without a translation pass.
+
+#### Tests — 17 / 17 passing
+
+``backend/tests/integration/test_collab_locks.py`` — 14 tests
+covering: acquire when free / conflict, idempotent re-acquire,
+heartbeat extends / rejects non-holder, release, idempotent
+release of missing-id, allowlist 400, ``GET /entity/`` returns
+none-or-holder, ``GET /my/`` lists my locks, expired-lock-can-be-
+stolen via direct DB forge, sweeper removes expired rows.
+
+``backend/tests/integration/test_collab_locks_ws.py`` — 3
+WebSocket tests: rejects missing token (1008), delivers
+``presence_snapshot`` + ``lock_acquired`` to subscribers, delivers
+``presence_join`` across two clients.
+
+#### What is deliberately NOT in v1.4.8
+
+- **L2 — Yjs Y.Text on description / notes** → v1.5. Requires
+  ``yjs`` + ``y-websocket`` deps + server-side CRDT state
+  persistence. Not needed for the maher00746 case.
+- **L3 — full CRDT BOQ rows** → v2.0. 3x the surface of L1 with
+  marginal UX gain over soft locks for our user base.
+- **Postgres LISTEN/NOTIFY fan-out** → only needed for multi-
+  worker deployments wanting cross-worker presence. The hub
+  interface stays stable; only ``_broadcast`` needs a second
+  implementation gated on settings.
+- **Audit log of lock events** → the event bus already publishes
+  ``collab.lock.*``; an audit subscriber can be added in a
+  follow-up without touching this module.
+- **Org-scoped RBAC** → ``org_id`` column exists but is unused.
+  Matches the current behaviour of the ``collaboration`` module.
+- **Frontend wiring for non-BOQ entities** → only BOQ row editing
+  is wired in this PR. Requirements / RFIs / tasks / BIM elements
+  are already in the allowlist; the hook + indicator are ready
+  to drop into any of those editors.
+
+### Verification
+- Backend ``ruff check`` clean across the new module + tests
+- 17/17 collab_locks integration tests passing in 65.7s
+- ``check_version_sync.py`` passes at 1.4.8
+- Frontend ``tsc --noEmit`` exit 0
+- Alembic migration chains correctly on top of head ``b2f4e1a3c907``
+
 ## [1.4.7] — 2026-04-11
 
 ### Added — UX polish + cross-module event hooks

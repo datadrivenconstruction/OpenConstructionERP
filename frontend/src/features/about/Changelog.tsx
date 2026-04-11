@@ -14,6 +14,21 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.4.8',
+    date: '2026-04-11',
+    changes: [
+      'Real-time collaboration L1 — soft locks + presence (issue #51). Maher00746 asked: "Does the platform support real-time collaboration when multiple users edit the same BOQ?". Full plan has 3 layers (L1 soft locks / L2 Yjs text / L3 full CRDT rows). v1.4.8 ships L1, which covers the 90% case ("two estimators editing the same position should not trample each other") without dragging in a CRDT runtime, Yjs, or Redis',
+      'New backend module collaboration_locks (1,580 LOC, 10 files) at /api/v1/collaboration_locks. oe_collab_lock table with UniqueConstraint(entity_type, entity_id). Atomic acquire via read-then-insert-or-steal at the repository level — cross-dialect (SQLite dev + PG prod), races handled by catching IntegrityError and re-reading the winner. Expired rows are stolen in place via UPDATE. Heartbeat extends TTL in 30s steps. Background sweeper runs every 30s. Entity-type allowlist mirrors the existing collaboration module',
+      'Presence WebSocket: WS /collaboration_locks/presence/?entity_type=...&entity_id=...&token=<jwt> broadcasts JSON frames {event, ts, ...} to every connected client subscribed to the same entity. Auth via token query param (browser WebSocket cannot set headers). Frame types: presence_snapshot, presence_join, presence_leave, lock_acquired, lock_heartbeat, lock_released, lock_expired, pong. Multi-tab dedup, presence_join excludes the joiner from its own broadcast, lock_acquired intentionally echoes to the holder for state confirmation',
+      'Worker-local presence hub (no Redis, no LISTEN/NOTIFY in v1.4.8 — single presence_hub = PresenceHub() module-level instance). Multi-worker deployments still get correct locking via the DB but presence broadcasts are worker-scoped. Documented upgrade path to LISTEN/NOTIFY is a single internal swap with no caller changes',
+      'Frontend useEntityLock hook (auto-acquire on mount, 15s heartbeat, cleanup-release on unmount, graceful network-error degradation), usePresenceWebSocket hook (JWT-via-query-param, roster state), PresenceIndicator component (green/amber/blue pill: "You are editing" / "Locked by Anna 3:42 remaining" / "N viewers"). 5 files, 636 LOC under frontend/src/features/collab_locks/',
+      'BOQ wiring in BOQGrid.tsx: acquires on onCellEditingStarted (per ROW not per cell — tracks held locks in rowLockMapRef and reuses on subsequent cell edits within the same row), releases on onCellEditingStopped, releases all held row locks on unmount. 409 cancels the edit and shows a toast with holder name + remaining seconds. Network errors degrade silently',
+      '17 / 17 integration tests passing — covering acquire-when-free, conflict-409, idempotent re-acquire, heartbeat-extends, heartbeat-rejects-non-holder, release, idempotent missing-id release, allowlist-400, GET /entity/ none-or-holder, GET /my/ list, expired-lock-can-be-stolen, sweeper, plus 3 WebSocket smoke tests (auth rejection, snapshot+broadcast delivery, presence_join across two clients)',
+      'Deferred to v1.5/v2.0: L2 (Yjs Y.Text on description/notes — needs yjs + y-websocket deps + server CRDT state), L3 (full CRDT BOQ rows — 3x the surface for marginal gain), Postgres LISTEN/NOTIFY fan-out (only needed for multi-worker deployments), audit log of lock events, org-scoped RBAC, frontend wiring for non-BOQ entities (the hook + indicator are ready to drop into requirements / RFIs / tasks / BIM elements editors)',
+      'Verification: backend ruff clean across the new module + tests, 17/17 integration tests in 65.7s, version sync at 1.4.8, frontend tsc --noEmit exit 0, Alembic migration a1b2c3d4e5f6 chains correctly on top of head b2f4e1a3c907',
+    ],
+  },
+  {
     version: '1.4.7',
     date: '2026-04-11',
     changes: [
