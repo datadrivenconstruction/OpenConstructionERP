@@ -4642,3 +4642,126 @@ async def renumber_positions(
         "renumbered": n_updated,
         "scheme": opts.scheme,
     }
+
+
+# ── Vector / semantic memory endpoints ───────────────────────────────────
+#
+# These three routes plug the BOQ module into the cross-module semantic
+# memory layer (see ``app/core/vector_index.py``).  They are intentionally
+# uniform across every module that participates — only the adapter and
+# the row loader differ.
+
+
+@router.get(
+    "/vector/status/",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def boq_vector_status() -> dict[str, Any]:
+    """Return health + row count for the ``oe_boq_positions`` collection.
+
+    Used by the admin panel and the global search status widget so the
+    user can tell at a glance whether semantic search over BOQ positions
+    is ready, partially indexed or empty.
+    """
+    from app.core.vector_index import COLLECTION_BOQ, collection_status
+
+    return collection_status(COLLECTION_BOQ)
+
+
+@router.post(
+    "/vector/reindex/",
+    dependencies=[Depends(RequirePermission("boq.write"))],
+)
+async def boq_vector_reindex(
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    project_id: uuid.UUID | None = Query(default=None),
+    boq_id: uuid.UUID | None = Query(default=None),
+    purge_first: bool = Query(default=False),
+) -> dict[str, Any]:
+    """Backfill the BOQ vector collection.
+
+    Optional filters narrow the scope so users can reindex one project or
+    even one BOQ at a time without re-embedding the entire tenant.  Set
+    ``purge_first=true`` to wipe the matching subset before re-encoding —
+    useful when the embedding model has changed.
+    """
+    from sqlalchemy import select
+    from sqlalchemy.orm import selectinload
+
+    from app.core.vector_index import reindex_collection
+    from app.modules.boq.models import BOQ as BOQModel
+    from app.modules.boq.models import Position
+    from app.modules.boq.vector_adapter import boq_position_adapter
+
+    stmt = select(Position).options(selectinload(Position.boq))
+    if boq_id is not None:
+        stmt = stmt.where(Position.boq_id == boq_id)
+    elif project_id is not None:
+        stmt = stmt.join(BOQModel, Position.boq_id == BOQModel.id).where(
+            BOQModel.project_id == project_id
+        )
+
+    rows = list((await session.execute(stmt)).scalars().all())
+    return await reindex_collection(
+        boq_position_adapter,
+        rows,
+        purge_first=purge_first,
+    )
+
+
+@router.get(
+    "/positions/{position_id}/similar/",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def boq_position_similar(
+    position_id: uuid.UUID,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    limit: int = Query(default=5, ge=1, le=20),
+    cross_project: bool = Query(default=True),
+) -> dict[str, Any]:
+    """Return BOQ positions semantically similar to the given one.
+
+    By default the search is **cross-project** — that's the highest-value
+    use case: estimators want to find how a similar position was priced
+    in past projects so they can reuse the unit rate.  Pass
+    ``cross_project=false`` to limit the search to the same project.
+
+    Returns a list of :class:`VectorHit` dicts plus the original row id
+    so the frontend can highlight the source.
+    """
+    from sqlalchemy import select
+    from sqlalchemy.orm import selectinload
+
+    from app.core.vector_index import find_similar
+    from app.modules.boq.models import Position
+    from app.modules.boq.vector_adapter import boq_position_adapter
+
+    stmt = (
+        select(Position)
+        .options(selectinload(Position.boq))
+        .where(Position.id == position_id)
+    )
+    row = (await session.execute(stmt)).scalar_one_or_none()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Position not found")
+
+    project_id = (
+        str(row.boq.project_id)
+        if row.boq is not None and row.boq.project_id is not None
+        else None
+    )
+    hits = await find_similar(
+        boq_position_adapter,
+        row,
+        project_id=project_id,
+        cross_project=cross_project,
+        limit=limit,
+    )
+    return {
+        "source_id": str(position_id),
+        "limit": limit,
+        "cross_project": cross_project,
+        "hits": [h.to_dict() for h in hits],
+    }

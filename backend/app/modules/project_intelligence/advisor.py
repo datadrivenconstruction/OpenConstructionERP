@@ -259,6 +259,48 @@ async def explain_gap(
     )
 
 
+async def _retrieve_relevant_chunks(
+    question: str,
+    project_id: str | None,
+    *,
+    limit: int = 12,
+) -> str:
+    """Pull top-K semantic hits from the unified search layer.
+
+    Returns a markdown-formatted "Relevant context" block that can be
+    appended to the advisor prompt.  Failures (vector backend down,
+    empty index, etc.) return an empty string so the caller falls back
+    to its existing behaviour without RAG augmentation.
+    """
+    if not question:
+        return ""
+    try:
+        from app.modules.search.service import unified_search_service
+
+        response = await unified_search_service(
+            query=question,
+            project_id=project_id,
+            limit_per_collection=4,
+            final_limit=limit,
+        )
+    except Exception:
+        logger.debug("Advisor RAG retrieval failed", exc_info=True)
+        return ""
+
+    if not response.hits:
+        return ""
+
+    lines: list[str] = ["Relevant context (semantic retrieval — verify before quoting):"]
+    for hit in response.hits:
+        snippet = hit.snippet or hit.text or ""
+        if len(snippet) > 280:
+            snippet = snippet[:277].rstrip() + "…"
+        lines.append(
+            f"- [{hit.module}] {hit.title} (score {hit.score:.2f}): {snippet}"
+        )
+    return "\n".join(lines)
+
+
 async def answer_question(
     session: AsyncSession,
     state: ProjectState,
@@ -288,11 +330,25 @@ async def answer_question(
             provider, api_key = provider_info
             system = _build_system_prompt(role, language, state.standard)
             context = _build_context_prompt(state, score)
-            prompt = (
-                f"Project context:\n{context}\n\n"
-                f"User question: {question}\n\n"
-                f"Provide a clear, specific answer based on the project data above."
+            # Pull semantically relevant chunks from BOQ / documents / tasks /
+            # risks / BIM elements via the unified vector search layer.  This
+            # turns the advisor from a structured-stats summarizer into a
+            # genuine RAG agent — answers stay anchored in real evidence
+            # instead of hallucinating from the structured project state alone.
+            project_id = (
+                str(getattr(state, "project_id", "")) or None
             )
+            rag_context = await _retrieve_relevant_chunks(question, project_id)
+            prompt_parts = [f"Project context:\n{context}"]
+            if rag_context:
+                prompt_parts.append(rag_context)
+            prompt_parts.append(f"User question: {question}")
+            prompt_parts.append(
+                "Provide a clear, specific answer based on the project data above. "
+                "When you cite a fact from the relevant context, mention which "
+                "module it came from in square brackets, e.g. [boq] or [risks]."
+            )
+            prompt = "\n\n".join(prompt_parts)
 
             text_response, _tokens = await call_ai(
                 provider=provider,

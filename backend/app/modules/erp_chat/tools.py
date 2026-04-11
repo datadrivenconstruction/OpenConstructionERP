@@ -279,6 +279,134 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
             "required": ["project_id", "description", "unit", "quantity", "unit_rate"],
         },
     },
+    # ── Semantic memory tools (vector-backed) ─────────────────────────────
+    #
+    # These tools let the AI query the cross-module vector store via the
+    # unified semantic search layer (``app.modules.search.service``).  Each
+    # tool returns a structured list of hits the AI can quote / reason
+    # about, and the chat panel renders them as compact result cards.
+    {
+        "name": "search_boq_positions",
+        "description": (
+            "Semantic search across BOQ positions — finds positions by meaning, "
+            "not exact match.  Use for queries like 'concrete walls 240mm', "
+            "'reinforcement Ø12 in slabs', 'waterproofing membrane'.  Optionally "
+            "scope to a single project."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Free-text search query"},
+                "project_id": {"type": "string", "description": "Optional project UUID filter"},
+                "limit": {"type": "integer", "description": "Max hits (1..20)", "default": 10},
+            },
+            "required": ["query"],
+        },
+    },
+    {
+        "name": "search_documents",
+        "description": (
+            "Semantic search across project documents (drawings, specs, RFIs, "
+            "submittals).  Use for queries like 'foundation rebar layout', "
+            "'fire rating spec for partition walls', 'RFI about delivery delay'."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Free-text search query"},
+                "project_id": {"type": "string", "description": "Optional project UUID filter"},
+                "limit": {"type": "integer", "description": "Max hits (1..20)", "default": 10},
+            },
+            "required": ["query"],
+        },
+    },
+    {
+        "name": "search_tasks",
+        "description": (
+            "Semantic search across project tasks / issues / defects.  Use for "
+            "queries like 'water leak in basement', 'incomplete fire stopping', "
+            "'open punch list items about doors'."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Free-text search query"},
+                "project_id": {"type": "string", "description": "Optional project UUID filter"},
+                "limit": {"type": "integer", "description": "Max hits (1..20)", "default": 10},
+            },
+            "required": ["query"],
+        },
+    },
+    {
+        "name": "search_risks",
+        "description": (
+            "Semantic search across the risk register — including mitigation "
+            "strategies and contingency plans.  KEY USE CASE: lessons-learned "
+            "reuse across projects.  Query examples: 'soil instability south "
+            "retaining wall', 'supplier bankruptcy concrete delivery'."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Free-text search query"},
+                "project_id": {
+                    "type": "string",
+                    "description": (
+                        "Optional project UUID filter.  Omit to search ACROSS all "
+                        "projects — usually what you want for lessons learned."
+                    ),
+                },
+                "limit": {"type": "integer", "description": "Max hits (1..20)", "default": 10},
+            },
+            "required": ["query"],
+        },
+    },
+    {
+        "name": "search_bim_elements",
+        "description": (
+            "Semantic search across BIM elements (Walls, Columns, Doors, MEP "
+            "fixtures, …) by name, type, category, discipline, storey and "
+            "material.  Use for 'load-bearing concrete walls on level 02', "
+            "'exterior glazing units', 'fire-rated doors in stair core'."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Free-text search query"},
+                "project_id": {"type": "string", "description": "Optional project UUID filter"},
+                "limit": {"type": "integer", "description": "Max hits (1..20)", "default": 10},
+            },
+            "required": ["query"],
+        },
+    },
+    {
+        "name": "search_anything",
+        "description": (
+            "Cross-collection semantic search — fans out to BOQ, documents, "
+            "tasks, risks and BIM elements at once and merges the results.  "
+            "Use this when the user asks an open-ended question and you don't "
+            "know which module the answer lives in (e.g. 'tell me everything "
+            "about the basement waterproofing scope')."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Free-text search query"},
+                "project_id": {"type": "string", "description": "Optional project UUID filter"},
+                "types": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": (
+                        "Optional whitelist of module short names: 'boq', "
+                        "'documents', 'tasks', 'risks', 'bim'.  Omit to search "
+                        "all collections."
+                    ),
+                },
+                "limit": {"type": "integer", "description": "Max final hits (1..50)", "default": 20},
+            },
+            "required": ["query"],
+        },
+    },
 ]
 
 
@@ -831,6 +959,173 @@ async def handle_create_boq_item(
         return {"renderer": "error", "data": {"error": str(exc)}, "summary": f"Error: {exc}"}
 
 
+# ── Semantic memory tool handlers ────────────────────────────────────────
+
+
+async def _generic_collection_search(
+    args: dict[str, Any],
+    *,
+    short_type: str,
+    summary_label: str,
+) -> dict[str, Any]:
+    """Shared implementation for the per-module search tools.
+
+    Forwards to the unified search service with a single ``types`` filter
+    so the AI can scope to BOQ / documents / tasks / risks / BIM in one
+    call.  Returns a renderer hint the chat UI can use to display the
+    matching cards.
+    """
+    from app.modules.search.service import unified_search_service
+
+    query = _parse_str(args, "query", required=True, max_len=500) or ""
+    project_id = args.get("project_id")
+    if isinstance(project_id, str) and not project_id.strip():
+        project_id = None
+    limit_raw = args.get("limit", 10)
+    try:
+        limit = max(1, min(int(limit_raw), 50))
+    except (TypeError, ValueError):
+        limit = 10
+
+    response = await unified_search_service(
+        query=query,
+        types=[short_type],
+        project_id=project_id if isinstance(project_id, str) else None,
+        limit_per_collection=limit,
+        final_limit=limit,
+    )
+    hits_payload = [
+        {
+            "id": hit.id,
+            "title": hit.title,
+            "snippet": hit.snippet,
+            "score": hit.score,
+            "module": hit.module,
+            "collection": hit.collection,
+            "project_id": hit.project_id,
+            "payload": hit.payload,
+        }
+        for hit in response.hits
+    ]
+    return {
+        "renderer": "semantic_search",
+        "data": {
+            "query": query,
+            "type": short_type,
+            "hits": hits_payload,
+            "total": response.total,
+            "facets": response.facets,
+        },
+        "summary": (
+            f"{summary_label}: {response.total} match(es) for '{query}'"
+            if response.total
+            else f"{summary_label}: no matches for '{query}'"
+        ),
+    }
+
+
+async def handle_search_boq_positions(
+    session: AsyncSession, args: dict[str, Any], user_id: str
+) -> dict[str, Any]:
+    _ = (session, user_id)
+    return await _generic_collection_search(
+        args, short_type="boq", summary_label="BOQ search"
+    )
+
+
+async def handle_search_documents(
+    session: AsyncSession, args: dict[str, Any], user_id: str
+) -> dict[str, Any]:
+    _ = (session, user_id)
+    return await _generic_collection_search(
+        args, short_type="documents", summary_label="Documents search"
+    )
+
+
+async def handle_search_tasks(
+    session: AsyncSession, args: dict[str, Any], user_id: str
+) -> dict[str, Any]:
+    _ = (session, user_id)
+    return await _generic_collection_search(
+        args, short_type="tasks", summary_label="Tasks search"
+    )
+
+
+async def handle_search_risks(
+    session: AsyncSession, args: dict[str, Any], user_id: str
+) -> dict[str, Any]:
+    _ = (session, user_id)
+    return await _generic_collection_search(
+        args, short_type="risks", summary_label="Risks search"
+    )
+
+
+async def handle_search_bim_elements(
+    session: AsyncSession, args: dict[str, Any], user_id: str
+) -> dict[str, Any]:
+    _ = (session, user_id)
+    return await _generic_collection_search(
+        args, short_type="bim", summary_label="BIM elements search"
+    )
+
+
+async def handle_search_anything(
+    session: AsyncSession, args: dict[str, Any], user_id: str
+) -> dict[str, Any]:
+    """Cross-collection unified search."""
+    _ = (session, user_id)
+    from app.modules.search.service import unified_search_service
+
+    query = _parse_str(args, "query", required=True, max_len=500) or ""
+    project_id = args.get("project_id")
+    if isinstance(project_id, str) and not project_id.strip():
+        project_id = None
+    types_raw = args.get("types") or []
+    types = [str(t) for t in types_raw if isinstance(t, str)] if isinstance(types_raw, list) else None
+    limit_raw = args.get("limit", 20)
+    try:
+        limit = max(1, min(int(limit_raw), 50))
+    except (TypeError, ValueError):
+        limit = 20
+
+    response = await unified_search_service(
+        query=query,
+        types=types,
+        project_id=project_id if isinstance(project_id, str) else None,
+        limit_per_collection=10,
+        final_limit=limit,
+    )
+    hits_payload = [
+        {
+            "id": hit.id,
+            "title": hit.title,
+            "snippet": hit.snippet,
+            "score": hit.score,
+            "module": hit.module,
+            "collection": hit.collection,
+            "project_id": hit.project_id,
+            "payload": hit.payload,
+        }
+        for hit in response.hits
+    ]
+    return {
+        "renderer": "semantic_search",
+        "data": {
+            "query": query,
+            "type": "all",
+            "hits": hits_payload,
+            "total": response.total,
+            "facets": response.facets,
+        },
+        "summary": (
+            f"Unified search: {response.total} hit(s) across "
+            f"{sum(1 for v in response.facets.values() if v > 0)} module(s) for '{query}'"
+            if response.total
+            else f"Unified search: no matches for '{query}'"
+        ),
+    }
+
+
 # ── Tool handler dispatch map ────────────────────────────────────────────────
 
 TOOL_HANDLER_MAP: dict[str, Any] = {
@@ -845,4 +1140,10 @@ TOOL_HANDLER_MAP: dict[str, Any] = {
     "compare_projects": handle_compare_projects,
     "run_validation": handle_run_validation,
     "create_boq_item": handle_create_boq_item,
+    "search_boq_positions": handle_search_boq_positions,
+    "search_documents": handle_search_documents,
+    "search_tasks": handle_search_tasks,
+    "search_risks": handle_search_risks,
+    "search_bim_elements": handle_search_bim_elements,
+    "search_anything": handle_search_anything,
 }

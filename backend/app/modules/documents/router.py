@@ -789,3 +789,110 @@ async def delete_document(
 ) -> None:
     """Delete a document and its file."""
     await service.delete_document(document_id)
+
+
+# ── Vector / semantic memory endpoints ───────────────────────────────────
+#
+# These three routes plug the Documents module into the cross-module
+# semantic memory layer (see ``app/core/vector_index.py``).  They are
+# intentionally uniform across every module that participates — only the
+# adapter and the row loader differ.
+
+
+@router.get(
+    "/vector/status/",
+    dependencies=[Depends(RequirePermission("documents.read"))],
+)
+async def documents_vector_status() -> dict:
+    """Return health + row count for the ``oe_documents`` collection.
+
+    Used by the admin panel and the global search status widget so the
+    user can tell at a glance whether semantic search over documents is
+    ready, partially indexed or empty.
+    """
+    from app.core.vector_index import COLLECTION_DOCUMENTS, collection_status
+
+    return collection_status(COLLECTION_DOCUMENTS)
+
+
+@router.post(
+    "/vector/reindex/",
+    dependencies=[Depends(RequirePermission("documents.update"))],
+)
+async def documents_vector_reindex(
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    project_id: uuid.UUID | None = Query(default=None),
+    purge_first: bool = Query(default=False),
+) -> dict:
+    """Backfill the documents vector collection.
+
+    Optional ``project_id`` filter narrows the scope so users can reindex
+    one project at a time without re-embedding the entire tenant.  Set
+    ``purge_first=true`` to wipe the matching subset before re-encoding —
+    useful when the embedding model has changed.
+    """
+    from sqlalchemy import select
+
+    from app.core.vector_index import reindex_collection
+    from app.modules.documents.models import Document
+    from app.modules.documents.vector_adapter import document_vector_adapter
+
+    stmt = select(Document)
+    if project_id is not None:
+        stmt = stmt.where(Document.project_id == project_id)
+
+    rows = list((await session.execute(stmt)).scalars().all())
+    return await reindex_collection(
+        document_vector_adapter,
+        rows,
+        purge_first=purge_first,
+    )
+
+
+@router.get(
+    "/{document_id}/similar/",
+    dependencies=[Depends(RequirePermission("documents.read"))],
+)
+async def documents_similar(
+    document_id: uuid.UUID,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    limit: int = Query(default=5, ge=1, le=20),
+    cross_project: bool = Query(default=True),
+) -> dict:
+    """Return documents semantically similar to the given one.
+
+    By default the search is **cross-project** — that's the highest-value
+    use case: engineers want to find how a similar drawing or spec was
+    handled on past projects so they can reuse context.  Pass
+    ``cross_project=false`` to limit the search to the same project.
+
+    Returns a list of :class:`VectorHit` dicts plus the original row id
+    so the frontend can highlight the source.
+    """
+    from sqlalchemy import select
+
+    from app.core.vector_index import find_similar
+    from app.modules.documents.models import Document
+    from app.modules.documents.vector_adapter import document_vector_adapter
+
+    stmt = select(Document).where(Document.id == document_id)
+    row = (await session.execute(stmt)).scalar_one_or_none()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    project_id = str(row.project_id) if row.project_id is not None else None
+    hits = await find_similar(
+        document_vector_adapter,
+        row,
+        project_id=project_id,
+        cross_project=cross_project,
+        limit=limit,
+    )
+    return {
+        "source_id": str(document_id),
+        "limit": limit,
+        "cross_project": cross_project,
+        "hits": [h.to_dict() for h in hits],
+    }

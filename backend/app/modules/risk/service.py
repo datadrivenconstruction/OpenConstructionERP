@@ -13,11 +13,25 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.events import event_bus
 from app.modules.risk.models import RiskItem
 from app.modules.risk.repository import RiskRepository
 from app.modules.risk.schemas import RiskCreate, RiskUpdate
 
 logger = logging.getLogger(__name__)
+_logger_events = logging.getLogger(__name__ + ".events")
+
+
+async def _safe_publish(
+    name: str,
+    data: dict[str, Any],
+    source_module: str = "oe_risk",
+) -> None:
+    """Publish event safely — best-effort, never blocks the caller."""
+    try:
+        await event_bus.publish(name, data, source_module=source_module)
+    except Exception:
+        _logger_events.debug("Event publish skipped: %s", name)
 
 SEVERITY_NUMERIC: dict[str, int] = {
     "very_low": 1,
@@ -137,6 +151,15 @@ class RiskService:
         )
         item = await self.repo.create(item)
         logger.info("Risk created: %s for project %s", code, data.project_id)
+        await _safe_publish(
+            "risk.risk.created",
+            {
+                "risk_id": str(item.id),
+                "project_id": str(data.project_id),
+                "code": code,
+                "title": data.title,
+            },
+        )
         return item
 
     # ── Read ──────────────────────────────────────────────────────────────
@@ -209,15 +232,31 @@ class RiskService:
         await self.session.refresh(item)
 
         logger.info("Risk updated: %s (fields=%s)", risk_id, list(fields.keys()))
+        await _safe_publish(
+            "risk.risk.updated",
+            {
+                "risk_id": str(risk_id),
+                "project_id": str(item.project_id),
+                "changes": list(fields.keys()),
+            },
+        )
         return item
 
     # ── Delete ────────────────────────────────────────────────────────────
 
     async def delete_risk(self, risk_id: uuid.UUID) -> None:
         """Delete a risk item."""
-        await self.get_risk(risk_id)  # Raises 404 if not found
+        item = await self.get_risk(risk_id)  # Raises 404 if not found
+        project_id = str(item.project_id)
         await self.repo.delete(risk_id)
         logger.info("Risk deleted: %s", risk_id)
+        await _safe_publish(
+            "risk.risk.deleted",
+            {
+                "risk_id": str(risk_id),
+                "project_id": project_id,
+            },
+        )
 
     # ── Summary ───────────────────────────────────────────────────────────
 

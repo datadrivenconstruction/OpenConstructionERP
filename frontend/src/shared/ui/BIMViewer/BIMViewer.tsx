@@ -37,6 +37,7 @@ import { SceneManager } from './SceneManager';
 import { ElementManager } from './ElementManager';
 import type { BIMElementData } from './ElementManager';
 import { SelectionManager } from './SelectionManager';
+import SimilarItemsPanel from '@/shared/ui/SimilarItemsPanel';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -1108,6 +1109,18 @@ export function BIMViewer({
                 )}
               </div>
             )}
+
+            {/* Semantic similarity — finds BIM elements like the selected one
+                across the rest of the model (and optionally other models).
+                Defaults to in-model search because that's the most useful
+                view for typical takeoff workflows. */}
+            <div>
+              <SimilarItemsPanel
+                module="bim_elements"
+                id={selectedElement.id}
+                limit={5}
+              />
+            </div>
 
             {/* Properties */}
             {Object.keys(elementProperties).length > 0 && (
