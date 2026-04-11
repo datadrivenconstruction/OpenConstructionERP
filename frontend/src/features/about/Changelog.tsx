@@ -14,6 +14,15 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.29',
+    date: '2026-04-11',
+    changes: [
+      'Chat page (/chat) — removed the redundant "ERP AI Assistant" top bar.  The app\'s main layout already provides a header; the chat-specific bar duplicated UI and didn\'t match the rest of the site palette.  Clear chat now lives in the input bar (left panel)',
+      'Release pipeline — synced root `CHANGELOG.md` with the in-app `Changelog.tsx` from v1.3.22 onwards.  The release workflow at `.github/workflows/release.yml` reads `## [VERSION]` patterns from CHANGELOG.md when a `v*` tag is pushed; without a matching section the GitHub release ships with a generic fallback message.  Now every v1.3.x release has a proper section in CHANGELOG.md with Added/Changed/Fixed bullets',
+      'Update notification badge — investigation: the `UpdateNotification` widget polls https://api.github.com/repos/datadrivenconstruction/OpenConstructionERP/releases/latest every hour and shows a sidebar card when the latest GitHub release is newer than the running app version.  The widget is working — the gap was that GitHub\'s latest release was still v0.8.0 because **no version tags had been pushed since v1.0.0**.  All v1.3.x bumps lived in local commits only.  To restore the badge for old installations: tag the current commit (`git tag v1.3.29 && git push origin v1.3.29`), the release workflow auto-builds Docker + creates the GitHub release, and within an hour every running v1.3.x install pings the GitHub API and lights up the update card',
+    ],
+  },
+  {
     version: '1.3.28',
     date: '2026-04-11',
     changes: [
