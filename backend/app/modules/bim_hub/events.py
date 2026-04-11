@@ -99,5 +99,10 @@ async def _on_element_deleted(event: Event) -> None:
 
 
 event_bus.subscribe("bim_hub.element.created", _on_element_created)
+# bim_hub.element.updated has no publisher today — BIM elements are
+# refreshed via the bulk import path which fires `created` for the new
+# rows.  The subscription is kept as a forward-compat hook so the day a
+# PATCH /elements/{id}/ endpoint lands (e.g. for manual classification
+# overrides), vector freshness will work without any wiring change.
 event_bus.subscribe("bim_hub.element.updated", _on_element_updated)
 event_bus.subscribe("bim_hub.element.deleted", _on_element_deleted)
