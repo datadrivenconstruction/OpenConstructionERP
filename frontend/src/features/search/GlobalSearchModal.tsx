@@ -52,6 +52,7 @@ const FACET_COLOR: Record<string, string> = {
   oe_tasks: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   oe_risks: 'bg-rose-50 text-rose-700 border-rose-200',
   oe_bim_elements: 'bg-amber-50 text-amber-700 border-amber-200',
+  oe_requirements: 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200',
   oe_validation: 'bg-orange-50 text-orange-700 border-orange-200',
   oe_chat: 'bg-slate-50 text-slate-700 border-slate-200',
 };

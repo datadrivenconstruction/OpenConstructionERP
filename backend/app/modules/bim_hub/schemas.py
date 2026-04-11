@@ -209,6 +209,34 @@ class ElementValidationSummary(BaseModel):
     message: str
 
 
+class RequirementBrief(BaseModel):
+    """Lightweight requirement summary embedded in a BIM element response.
+
+    Mirrors the relevant subset of
+    ``app.modules.requirements.schemas.RequirementResponse`` but is
+    defined locally to avoid a circular import between ``bim_hub`` and
+    ``requirements``.  The two shapes MUST stay in sync — add fields in
+    both files together.
+
+    Surfaces the EAC triplet (entity / attribute / constraint) so the
+    BIM viewer's "Linked requirements" section can render a meaningful
+    one-line summary without an extra Postgres roundtrip.
+    """
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    requirement_set_id: UUID
+    entity: str
+    attribute: str
+    constraint_type: str = "equals"
+    constraint_value: str
+    unit: str = ""
+    category: str = "general"
+    priority: str = "must"
+    status: str = "open"
+
+
 class BIMElementResponse(BaseModel):
     """BIM element returned from the API."""
 
@@ -232,6 +260,7 @@ class BIMElementResponse(BaseModel):
     linked_documents: list[DocumentLinkBrief] = Field(default_factory=list)
     linked_tasks: list[TaskBrief] = Field(default_factory=list)
     linked_activities: list[ActivityBrief] = Field(default_factory=list)
+    linked_requirements: list[RequirementBrief] = Field(default_factory=list)
     validation_results: list[ElementValidationSummary] = Field(default_factory=list)
     validation_status: Literal["pass", "warning", "error", "unchecked"] = "unchecked"
     created_at: datetime

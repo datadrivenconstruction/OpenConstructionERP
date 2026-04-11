@@ -22,6 +22,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.core.events import event_bus
 from app.modules.bim_hub import file_storage as bim_file_storage
 from app.modules.bim_hub.models import (
     BIMElement,
@@ -51,7 +52,6 @@ from app.modules.bim_hub.schemas import (
     QuantityMapApplyRequest,
     QuantityMapApplyResult,
 )
-from app.core.events import event_bus
 from app.modules.boq.models import BOQ, Position
 
 logger = logging.getLogger(__name__)
@@ -327,13 +327,16 @@ class BIMHubService:
         dict[uuid.UUID, list[dict[str, Any]]],
         dict[uuid.UUID, list[dict[str, Any]]],
         dict[uuid.UUID, list[dict[str, Any]]],
+        dict[uuid.UUID, list[dict[str, Any]]],
     ]:
-        """List elements AND their BOQ / Document / Task / Activity briefs.
+        """List elements AND their BOQ / Document / Task / Activity / Requirement briefs.
 
         Returns ``(elements, total, boq_links_by_element_id,
         doc_links_by_element_id, task_links_by_element_id,
-        activity_briefs_by_element_id)`` where each brief is a plain dict
-        with the fields expected by the corresponding Pydantic brief schema.
+        activity_briefs_by_element_id, requirement_briefs_by_element_id,
+        validation_summaries_by_element_id)`` where each brief is a plain
+        dict with the fields expected by the corresponding Pydantic brief
+        schema.
 
         BOQ briefs match ``BOQElementLinkBrief`` (id, boq_position_id,
         boq_position_ordinal, boq_position_description, link_type, confidence).
@@ -365,8 +368,9 @@ class BIMHubService:
                activities in the model's project.
         """
         # Local imports to avoid import-time cycles between bim_hub and
-        # documents / tasks / schedule.
+        # documents / tasks / schedule / requirements.
         from app.modules.documents.models import Document, DocumentBIMLink
+        from app.modules.requirements.models import Requirement, RequirementSet
         from app.modules.schedule.models import Activity, Schedule
         from app.modules.tasks.models import Task
 
@@ -532,6 +536,51 @@ class BIMHubService:
                     if str(eid) in matching:
                         activity_briefs_by_element_id.setdefault(eid, []).append(brief)
 
+        # ── Step 6.5: fetch Requirement rows for this project ──────────
+        # Requirements pin themselves to BIM elements via a JSON array
+        # in ``Requirement.metadata_["bim_element_ids"]`` (no dedicated
+        # column to keep migrations cheap).  We load every requirement
+        # in the project once and filter in Python — same cross-dialect
+        # reasoning as the task and activity loops above.
+        requirement_briefs_by_element_id: dict[uuid.UUID, list[dict[str, Any]]] = {
+            eid: [] for eid in element_ids
+        }
+        if element_ids:
+            element_id_strs = {str(eid) for eid in element_ids}
+            req_stmt = (
+                select(Requirement)
+                .join(
+                    RequirementSet,
+                    Requirement.requirement_set_id == RequirementSet.id,
+                )
+                .where(RequirementSet.project_id == model.project_id)
+            )
+            req_result = await self.session.execute(req_stmt)
+            for req in req_result.scalars().all():
+                raw_meta = req.metadata_ or {}
+                raw_ids = raw_meta.get("bim_element_ids") or []
+                if not isinstance(raw_ids, list) or not raw_ids:
+                    continue
+                req_ids_as_str = {str(x) for x in raw_ids}
+                matching = element_id_strs & req_ids_as_str
+                if not matching:
+                    continue
+                brief = {
+                    "id": req.id,
+                    "requirement_set_id": req.requirement_set_id,
+                    "entity": req.entity or "",
+                    "attribute": req.attribute or "",
+                    "constraint_type": req.constraint_type or "equals",
+                    "constraint_value": req.constraint_value or "",
+                    "unit": req.unit or "",
+                    "category": req.category or "general",
+                    "priority": req.priority or "must",
+                    "status": req.status or "open",
+                }
+                for eid in element_ids:
+                    if str(eid) in matching:
+                        requirement_briefs_by_element_id.setdefault(eid, []).append(brief)
+
         # ── Step 7: load latest ValidationReport for this model ──────────
         # Look up the most recent ``target_type='bim_model'`` report and
         # zip its per-element results into a dict keyed by element_id.
@@ -586,6 +635,7 @@ class BIMHubService:
             doc_links_by_element_id,
             task_links_by_element_id,
             activity_briefs_by_element_id,
+            requirement_briefs_by_element_id,
             validation_summaries_by_element_id,
         )
 
@@ -667,6 +717,17 @@ class BIMHubService:
         # Compute unique storeys
         storeys = {e.storey for e in created if e.storey}
 
+        # Eagerly capture the model name and the freshly-assigned
+        # element PKs BEFORE ``update_fields`` — the repository helper
+        # calls ``session.expire_all()`` which invalidates every mapped
+        # instance in this session (including ``model`` and every row
+        # we just created).  Attribute access after expire triggers a
+        # lazy reload that needs a greenlet context, and under the
+        # async HTTP test harness that lazy load raises
+        # ``MissingGreenlet`` while building the response.
+        model_name = model.name
+        created_ids = [elem.id for elem in created]
+
         # Update model counts
         await self.model_repo.update_fields(
             model_id,
@@ -675,13 +736,29 @@ class BIMHubService:
             status="active",
         )
 
+        # Re-fetch the newly-created elements in a single round trip so
+        # callers receive non-expired ORM instances that Pydantic can
+        # serialise without lazy loads.
+        refresh_stmt = (
+            select(BIMElement)
+            .where(BIMElement.id.in_(created_ids))
+            .options(selectinload(BIMElement.boq_links))
+        )
+        refreshed = list(
+            (await self.session.execute(refresh_stmt)).scalars().all()
+        )
+        # Preserve the insertion order the caller requested — the IN
+        # filter above returns in arbitrary order.
+        order_index = {rid: idx for idx, rid in enumerate(created_ids)}
+        refreshed.sort(key=lambda e: order_index.get(e.id, len(order_index)))
+
         logger.info(
             "Bulk imported %d elements for model %s (%d storeys)",
-            len(created),
-            model.name,
+            len(refreshed),
+            model_name,
             len(storeys),
         )
-        return created
+        return refreshed
 
     # ── BOQ Links ────────────────────────────────────────────────────────────
 
@@ -1759,10 +1836,9 @@ class BIMHubService:
                 cat = str(props.get("category") or "")
                 if cat not in category_values:
                     return False
-            for key, value in expected_props.items():
-                if props.get(key) != value:
-                    return False
-            return True
+            return all(
+                props.get(key) == value for key, value in expected_props.items()
+            )
 
         return [e.id for e in elements if _matches(e)]
 
