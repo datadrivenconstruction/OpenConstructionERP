@@ -112,7 +112,10 @@ export default function AddToBOQModal({
 
   const [tab, setTab] = useState<Tab>(elements.length > 1 ? 'new' : 'existing');
   const [search, setSearch] = useState('');
-  const [selectedBOQId, setSelectedBOQId] = useState<string | null>(null);
+  // User's explicit BOQ pick.  `null` = "use the default" (first BOQ in the
+  // list once it loads).  We derive the effective id via useMemo below so
+  // the positions query never fires with a stale/dangling id.
+  const [userSelectedBOQId, setUserSelectedBOQId] = useState<string | null>(null);
 
   // ── New position form state ─────────────────────────────────────────
   const defaultQty = useMemo(() => pickDefaultQuantity(elements), [elements]);
@@ -122,12 +125,21 @@ export default function AddToBOQModal({
   const [unitRate, setUnitRate] = useState('0');
   const [ordinal, setOrdinal] = useState('');
 
-  // Re-seed when the elements list changes (opening the modal from a new element)
+  // Re-seed when the elements list changes (opening the modal from a new
+  // element).  This also clears any transient UI state that would
+  // otherwise "leak" across reopens if the parent kept the component
+  // mounted between sessions — tab, search box, ordinal override, and
+  // unit-rate field all reset to the defaults for the new element(s).
   useEffect(() => {
     const d = pickDefaultQuantity(elements);
     setDescription(buildDefaultDescription(elements));
     setUnit(d.unit);
     setQuantity(d.quantity.toFixed(3));
+    setTab(elements.length > 1 ? 'new' : 'existing');
+    setSearch('');
+    setOrdinal('');
+    setUnitRate('0');
+    setUserSelectedBOQId(null);
   }, [elements]);
 
   // ── Cost auto-suggestions (CWICR / cost database) ───────────────────
@@ -180,16 +192,26 @@ export default function AddToBOQModal({
   });
   const boqs = boqsQuery.data ?? [];
 
-  // Default selected BOQ = first one
-  useEffect(() => {
-    if (!selectedBOQId && boqs.length > 0) setSelectedBOQId(boqs[0]!.id);
-  }, [boqs, selectedBOQId]);
+  // Effective BOQ id:
+  //   - if the user picked one AND it still exists in the current list, use it
+  //   - otherwise fall back to the first BOQ in the list (if any)
+  // Deriving via useMemo avoids the old race where `selectedBOQId` was
+  // initialised lazily via a useEffect AFTER first render — the positions
+  // query could fire with a stale/null id during that window.
+  const selectedBOQId = useMemo<string | null>(() => {
+    if (userSelectedBOQId && boqs.some((b) => b.id === userSelectedBOQId)) {
+      return userSelectedBOQId;
+    }
+    return boqs[0]?.id ?? null;
+  }, [boqs, userSelectedBOQId]);
 
   // ── Fetch positions for the selected BOQ (for the existing tab) ─────
+  // Guard is doubled: only fire once the BOQ list has actually loaded AND
+  // we have a concrete id, to avoid an enabled=true → queryFn(null) window.
   const positionsQuery = useQuery<BOQWithPositions>({
     queryKey: ['boq-positions-for-link', selectedBOQId],
     queryFn: () => boqApi.get(selectedBOQId!),
-    enabled: !!selectedBOQId,
+    enabled: !!selectedBOQId && !boqsQuery.isLoading,
   });
   const positions: Position[] = positionsQuery.data?.positions ?? [];
 
@@ -366,7 +388,7 @@ export default function AddToBOQModal({
           </label>
           <select
             value={selectedBOQId ?? ''}
-            onChange={(e) => setSelectedBOQId(e.target.value || null)}
+            onChange={(e) => setUserSelectedBOQId(e.target.value || null)}
             disabled={boqs.length === 0}
             className="w-full px-2 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue"
           >

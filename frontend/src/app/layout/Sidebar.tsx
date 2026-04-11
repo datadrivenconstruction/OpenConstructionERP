@@ -105,8 +105,8 @@ const navGroups: NavGroup[] = [
     items: [
       { labelKey: 'nav.pdf_measurements', to: '/takeoff?tab=measurements', icon: Ruler },
       { labelKey: 'nav.cad_bim_explorer', to: '/data-explorer', icon: TableProperties },
-      { labelKey: 'nav.bim_viewer', to: '/bim', icon: Box },
-      { labelKey: 'nav.bim_rules', to: '/bim/rules', icon: SlidersHorizontal },
+      { labelKey: 'nav.bim_viewer', to: '/bim', icon: Box, badge: 'BETA' },
+      { labelKey: 'nav.bim_rules', to: '/bim/rules', icon: SlidersHorizontal, badge: 'BETA' },
     ],
   },
   {
@@ -117,8 +117,8 @@ const navGroups: NavGroup[] = [
     items: [
       { labelKey: 'nav.ai_estimate', to: '/ai-estimate', icon: Sparkles },
       { labelKey: 'nav.ai_advisor', to: '/advisor', icon: MessageSquare },
-      { labelKey: 'nav.project_intelligence', to: '/project-intelligence', icon: BrainCircuit },
-      { labelKey: 'nav.erp_chat', to: '/chat', icon: MessageSquare, highlight: true },
+      { labelKey: 'nav.project_intelligence', to: '/project-intelligence', icon: BrainCircuit, badge: 'BETA' },
+      { labelKey: 'nav.erp_chat', to: '/chat', icon: MessageSquare, highlight: true, badge: 'BETA' },
     ],
   },
   // ── PLANNING & CONTROL (advanced) ──────────────────────────────────
@@ -476,13 +476,17 @@ function SidebarItem({ item, label, onClick, badge: numericBadge }: { item: NavI
         {item.badge && (
           <span
             className={clsx(
-              'ms-auto text-2xs font-semibold px-1.5 py-0.5 rounded-full',
-              item.highlight
-                ? 'bg-gradient-to-r from-[#7c3aed] to-[#0ea5e9] text-white'
-                : 'text-content-tertiary',
+              // BETA badge: tiny, subtle, lowercase, neutral grey.
+              // Reads as "this module is still in development" without
+              // visually competing for the user's attention.
+              item.badge === 'BETA'
+                ? 'ms-auto text-[9px] font-medium uppercase tracking-wide px-1.5 py-px rounded text-content-quaternary bg-surface-tertiary/60 dark:bg-surface-tertiary/40'
+                : item.highlight
+                  ? 'ms-auto text-2xs font-semibold px-1.5 py-0.5 rounded-full bg-gradient-to-r from-[#7c3aed] to-[#0ea5e9] text-white'
+                  : 'ms-auto text-2xs font-semibold px-1.5 py-0.5 rounded-full text-content-tertiary',
             )}
           >
-            {item.badge}
+            {item.badge === 'BETA' ? 'beta' : item.badge}
           </span>
         )}
       </NavLink>

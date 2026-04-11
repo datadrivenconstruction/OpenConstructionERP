@@ -350,6 +350,92 @@ def _match_bim_column(header: str) -> str | None:
     return normalised if normalised else None
 
 
+# Properties-blob keys we will scan, in priority order, when the upload
+# row has no top-level storey/level column. Most Revit and IFC exporters
+# put the building level under "Level"; some put the host constraint
+# under "Base Constraint" / "Reference Level" instead. Matched
+# case-insensitively against the props dict.
+_STOREY_PROPERTY_FALLBACK_KEYS: tuple[str, ...] = (
+    "level",
+    "base level",
+    "baselevel",
+    "base constraint",
+    "baseconstraint",
+    "reference level",
+    "referencelevel",
+    "host level",
+    "hostlevel",
+    "schedule level",
+    "schedulelevel",
+    "associated level",
+    "associatedlevel",
+    "building storey",
+    "buildingstorey",
+    "ifcbuildingstorey",
+    "storey",
+    "story",
+    "floor",
+    "etage",
+    "geschoss",
+)
+
+# Literal-string sentinels that mean "no storey assigned" — Revit
+# exports often write "None" / "<None>" instead of leaving the cell
+# blank.  Matched case-insensitively after stripping.
+_STOREY_NULL_LITERALS: frozenset[str] = frozenset({
+    "", "none", "null", "<none>", "n/a", "na", "-", "—",
+})
+
+
+def _normalise_storey(raw: Any) -> str | None:
+    """Coerce a raw storey value to a clean string or None.
+
+    Trims whitespace and treats common "no value" literals
+    (``"None"``, ``"<None>"``, ``"N/A"``, ``"-"``, …) as None so
+    they don't pollute the BIMFilterPanel storey list with a
+    bogus bucket.
+    """
+    if raw is None:
+        return None
+    text = str(raw).strip()
+    if text.lower() in _STOREY_NULL_LITERALS:
+        return None
+    return text
+
+
+def _extract_storey(row: dict[str, Any], props: dict[str, Any]) -> str | None:
+    """Resolve the building level for an element row.
+
+    Priority:
+        1. Top-level ``storey`` column (already aliased from ``level`` /
+           ``base_level`` / etc. via :data:`_BIM_COLUMN_ALIASES`).
+        2. Case-insensitive match against
+           :data:`_STOREY_PROPERTY_FALLBACK_KEYS` inside the
+           ``properties`` JSON blob — Revit/IFC exports frequently
+           bury "Level" inside the property bag instead of promoting
+           it to a column.
+
+    Returns None if nothing usable is found, so downstream consumers
+    can render the element as "no level" rather than crashing.
+    """
+    primary = _normalise_storey(row.get("storey"))
+    if primary:
+        return primary
+
+    if not props:
+        return None
+
+    # Build a lower-cased lookup once so we can match keys regardless
+    # of the export's casing convention ("Level" vs "level" vs "LEVEL").
+    lc_props = {str(k).strip().lower(): v for k, v in props.items()}
+    for key in _STOREY_PROPERTY_FALLBACK_KEYS:
+        if key in lc_props:
+            resolved = _normalise_storey(lc_props[key])
+            if resolved:
+                return resolved
+    return None
+
+
 def _safe_float(value: Any, default: float = 0.0) -> float:
     """Parse a value to float, returning *default* on failure."""
     if value is None:
@@ -549,7 +635,11 @@ def _rows_to_elements(
             "stable_id": eid,
             "element_type": str(row.get("element_type", "")).strip() or None,
             "name": str(row.get("name", "")).strip() or None,
-            "storey": str(row.get("storey", "")).strip() or None,
+            # Resolve storey from the top-level column first; if absent
+            # (or a "None"/"-" sentinel), fall back to scanning the
+            # properties blob for a "Level" / "Base Constraint" / etc.
+            # key. See _extract_storey for the full priority chain.
+            "storey": _extract_storey(row, props),
             "discipline": str(row.get("discipline", "")).strip() or None,
             "quantities": quantities,
             "properties": props,
@@ -761,6 +851,11 @@ async def upload_bim_data(
 _ALLOWED_CAD_EXTENSIONS = {".rvt", ".ifc", ".dwg", ".dgn", ".fbx", ".obj", ".3ds"}
 _CAD_MAX_SIZE = 500 * 1024 * 1024  # 500 MB
 
+# Formats that require an external converter binary. IFC has a built-in
+# text fallback parser, so it's NOT in this set; XLSX/CSV go through a
+# separate upload endpoint and aren't relevant here.
+_NEEDS_CONVERTER_EXTS = {".rvt", ".dwg", ".dgn"}
+
 
 @router.post("/upload-cad/", status_code=201)
 async def upload_cad_file(
@@ -807,6 +902,39 @@ async def upload_cad_file(
                 f"Accepted: {', '.join(sorted(_ALLOWED_CAD_EXTENSIONS))}"
             ),
         )
+
+    # Preflight: refuse uploads up-front when the required converter binary
+    # is not installed on this server. Returning a 200 with a dedicated
+    # ``converter_required`` status (instead of a 4xx) lets the frontend
+    # dispatch on the response body without falling into a generic error
+    # path — see BIMCadUploadResponse in frontend/src/features/bim/api.ts.
+    if ext in _NEEDS_CONVERTER_EXTS:
+        from app.modules.boq.cad_import import find_converter
+
+        if find_converter(ext.lstrip(".")) is None:
+            logger.info(
+                "Refusing %s upload — %s converter not installed",
+                ext, ext.lstrip(".").upper(),
+            )
+            return {
+                "status": "converter_required",
+                "format": ext.lstrip("."),
+                "converter_id": ext.lstrip("."),
+                "message": (
+                    f"{ext.upper().lstrip('.')} files require the "
+                    f"{ext.upper().lstrip('.')} converter, which is not "
+                    f"installed on this server. Install it from the BIM "
+                    f"converter banner and re-upload."
+                ),
+                "install_endpoint": (
+                    f"/api/v1/takeoff/converters/{ext.lstrip('.')}/install/"
+                ),
+                "model_id": None,
+                "name": None,
+                "file_size": 0,
+                "element_count": 0,
+                "error_message": None,
+            }
 
     content = await file.read()
     if not content:
@@ -1018,6 +1146,12 @@ async def upload_cad_file(
         "file_size": len(content),
         "status": final_status,
         "element_count": element_count,
+        "error_message": model.error_message,
+        "converter_id": ext.lstrip(".") if final_status == "needs_converter" else None,
+        "install_endpoint": (
+            f"/api/v1/takeoff/converters/{ext.lstrip('.')}/install/"
+            if final_status == "needs_converter" else None
+        ),
     }
 
 

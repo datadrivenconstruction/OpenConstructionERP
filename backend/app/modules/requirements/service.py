@@ -480,21 +480,56 @@ class RequirementsService:
         candidate requirements via the project filter (if supplied) so
         we don't scan the whole tenant on every selection click.
 
-        The match is performed in Python because ``metadata_`` is a
-        cross-dialect JSON column — neither SQLite nor PostgreSQL share
-        a portable JSON-array-contains operator we can rely on here.
+        Dialect-aware:
+
+        * **PostgreSQL** — uses the JSONB ``@>`` containment operator
+          at the SQL level so the database does the filtering and we
+          only ship matching rows over the wire.  This is O(matching)
+          instead of O(all-in-project), with a btree-style speedup
+          when ``metadata_`` has a GIN index (which the v1.4.7
+          migration adds).
+        * **SQLite (and any other dialect without JSONB)** — falls
+          back to the previous Python-side scan since SQLite has no
+          portable JSON-array-contains operator we can rely on across
+          versions.
+
+        Dialect detection mirrors the pattern in
+        ``tasks/service.py::get_tasks_for_bim_element``.
         """
+        target = str(bim_element_id)
+        bind = self.session.get_bind()
+        dialect_name = getattr(getattr(bind, "dialect", None), "name", "") or ""
+
+        if dialect_name == "postgresql":
+            # JSONB ``@>`` containment: rows where metadata_["bim_element_ids"]
+            # is a superset of ``[target]``.  Cast metadata_ to JSONB
+            # because the column is declared as JSON for cross-dialect
+            # parity, but PostgreSQL accepts the cast and applies the
+            # JSONB operator afterwards.
+            from sqlalchemy import cast
+            from sqlalchemy.dialects.postgresql import JSONB
+
+            stmt = select(Requirement).where(
+                cast(Requirement.metadata_, JSONB).contains(
+                    {"bim_element_ids": [target]}
+                )
+            )
+            if project_id is not None:
+                from app.modules.requirements.models import RequirementSet
+
+                stmt = stmt.join(
+                    RequirementSet,
+                    Requirement.requirement_set_id == RequirementSet.id,
+                ).where(RequirementSet.project_id == project_id)
+            return list((await self.session.execute(stmt)).scalars().all())
+
+        # SQLite / other: load candidates and filter in Python
         if project_id is not None:
             candidates = await self.req_repo.all_for_project(project_id)
         else:
-            stmt = select(Requirement).options(
-                # selectinload here would help if we needed the parent set
-                # for project resolution, but the caller already passed
-                # project_id so we can skip it.
-            )
+            stmt = select(Requirement)
             candidates = list((await self.session.execute(stmt)).scalars().all())
 
-        target = str(bim_element_id)
         out: list[Requirement] = []
         for req in candidates:
             ids = (req.metadata_ or {}).get("bim_element_ids") or []

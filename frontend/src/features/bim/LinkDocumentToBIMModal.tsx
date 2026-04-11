@@ -8,7 +8,7 @@
  * → done.
  */
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { X, Search, FileText, Link2, Loader2 } from 'lucide-react';
@@ -46,6 +46,12 @@ export default function LinkDocumentToBIMModal({
   const addToast = useToastStore((s) => s.addToast);
 
   const [search, setSearch] = useState('');
+
+  // Reset transient UI state whenever the modal is opened with a new
+  // element selection.  Mirrors the pattern in AddToBOQModal.
+  useEffect(() => {
+    setSearch('');
+  }, [elements]);
 
   const docsQuery = useQuery({
     queryKey: ['documents-for-bim-link', projectId],

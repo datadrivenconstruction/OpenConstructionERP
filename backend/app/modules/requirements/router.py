@@ -614,53 +614,11 @@ async def list_requirements_by_bim_element(
 
 
 # ── Vector / semantic memory endpoints ───────────────────────────────────
-
-
-@router.get(
-    "/vector/status/",
-    dependencies=[Depends(RequirePermission("requirements.read"))],
-)
-async def requirements_vector_status() -> dict[str, Any]:
-    """Return health + row count for the ``oe_requirements`` collection."""
-    from app.core.vector_index import COLLECTION_REQUIREMENTS, collection_status
-
-    return collection_status(COLLECTION_REQUIREMENTS)
-
-
-@router.post(
-    "/vector/reindex/",
-    dependencies=[Depends(RequirePermission("requirements.update"))],
-)
-async def requirements_vector_reindex(
-    session: SessionDep,
-    _user_id: CurrentUserId,
-    project_id: uuid.UUID | None = Query(default=None),
-    purge_first: bool = Query(default=False),
-) -> dict[str, Any]:
-    """Backfill the requirements vector collection.
-
-    Optional ``project_id`` filter narrows the scope so users can
-    reindex one project at a time.  Set ``purge_first=true`` to wipe
-    the matching subset before re-encoding — useful after the embedding
-    model is changed.
-    """
-    from sqlalchemy.orm import selectinload
-
-    from app.core.vector_index import reindex_collection
-    from app.modules.requirements.models import Requirement, RequirementSet
-    from app.modules.requirements.vector_adapter import requirement_vector_adapter
-
-    stmt = select(Requirement).options(selectinload(Requirement.requirement_set))
-    if project_id is not None:
-        stmt = stmt.join(
-            RequirementSet, Requirement.requirement_set_id == RequirementSet.id
-        ).where(RequirementSet.project_id == project_id)
-    rows = list((await session.execute(stmt)).scalars().all())
-    return await reindex_collection(
-        requirement_vector_adapter,
-        rows,
-        purge_first=purge_first,
-    )
+#
+# ``/vector/status/`` + ``/vector/reindex/`` are wired via the shared
+# factory (see ``include_router`` at the bottom of this file).  The
+# similar-requirements endpoint below stays module-specific because it
+# needs to validate set/req parent linkage.
 
 
 @router.get(
@@ -720,3 +678,48 @@ async def requirement_similar(
         "cross_project": cross_project,
         "hits": [h.to_dict() for h in hits],
     }
+
+
+# ── Mount vector status + reindex via the shared factory ────────────────
+#
+# Requirements rows are scoped by ``RequirementSet.project_id`` rather
+# than a direct column, so we pass a custom loader that performs the
+# join for us.
+from sqlalchemy.orm import selectinload as _selectinload  # noqa: E402
+
+from app.core.vector_index import COLLECTION_REQUIREMENTS  # noqa: E402
+from app.core.vector_routes import create_vector_routes  # noqa: E402
+from app.modules.requirements.models import (  # noqa: E402
+    Requirement as _Requirement,
+)
+from app.modules.requirements.models import (  # noqa: E402
+    RequirementSet as _RequirementSet,
+)
+from app.modules.requirements.vector_adapter import (  # noqa: E402
+    requirement_vector_adapter as _requirement_vector_adapter,
+)
+
+
+async def _requirements_loader(
+    session: Any, project_id: uuid.UUID | None
+) -> list[Any]:
+    stmt = select(_Requirement).options(
+        _selectinload(_Requirement.requirement_set)
+    )
+    if project_id is not None:
+        stmt = stmt.join(
+            _RequirementSet,
+            _Requirement.requirement_set_id == _RequirementSet.id,
+        ).where(_RequirementSet.project_id == project_id)
+    return list((await session.execute(stmt)).scalars().all())
+
+
+router.include_router(
+    create_vector_routes(
+        collection=COLLECTION_REQUIREMENTS,
+        adapter=_requirement_vector_adapter,
+        loader=_requirements_loader,
+        read_permission="requirements.read",
+        write_permission="requirements.update",
+    )
+)

@@ -5,6 +5,316 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.7] — 2026-04-11
+
+### Added — UX polish + cross-module event hooks
+
+#### BIM viewer geometry-loading progress bar
+The BIM viewer used to show only a generic spinner while the COLLADA
+geometry blob downloaded — a 100MB Revit model could take 30+ seconds
+with no visible progress, so users assumed the page had hung.
+``ElementManager.loadDAEGeometry`` now accepts an ``onProgress``
+callback that surfaces the XHR ``loaded / total`` ratio, and
+``BIMViewer`` renders a determinate progress bar with percentage
+indicator, gradient fill, and "Streaming geometry from server…" /
+"Finalising scene…" status text.
+
+#### Sidebar BETA badges (subtle, modern)
+``/bim``, ``/bim/rules``, and ``/chat`` are still under heavy
+development.  Added a tiny lowercase ``beta`` badge to each of those
+nav items so users know not to rely on those modules for production
+work yet.  The badge style is intentionally understated — neutral
+grey, 9px, lowercase — so it does not visually compete with the
+sidebar's normal items.
+
+#### Restored rich GitHub README
+``README.md`` was rewritten to a 53-line minimal version in d3d2319
+that dropped the Table of Contents menu, the comparison table, the
+feature gallery, and the workflow diagram.  This release restores
+the rich 450-line version (badges, ToC table, why-OpenConstructionERP
+table, vendor comparison, complete-estimation-workflow diagram, 12
+feature blocks with screenshots, regional standards table, tech
+stack, architecture diagram) — bumped to v1.4.6 in the version
+badge and footer.
+
+### Fixed
+
+#### Frontend correctness
+- **F1**: ``BIMPage.tsx:602`` dropped two ``(res as any)`` casts on
+  the upload response.  ``BIMCadUploadResponse`` now declares
+  ``element_count: number`` and a typed ``status`` union, so the
+  upload toast no longer guesses fields that may not exist.
+- **F5**: ``BIMFilterPanel`` now resets every transient filter slot
+  (search, storey checkboxes, type checkboxes, expanded headers,
+  active group highlight) when the user switches to a different
+  BIM model.  Previously the checkbox UI carried over Storey 5
+  selections from the old model into the new one — confusing UX
+  where the displayed filter did not match the applied predicate.
+
+#### Cross-module wiring
+- **T2.3**: ``Assembly.total_rate`` is no longer stale when a
+  ``CostItem.rate`` changes externally.  New ``assemblies/events.py``
+  subscribes to ``costs.item.updated``, finds every ``Component``
+  pointing at the updated cost item, refreshes the per-component
+  ``unit_cost`` + ``total``, and re-runs the parent assembly total
+  math (sum of components × ``bid_factor``).  BOQ positions
+  generated from an assembly BEFORE the rate change are intentionally
+  NOT touched — they're locked financial commitments at create time;
+  the next regenerate of the position picks up the new rate.
+- **T3.5**: ``requirements.list_by_bim_element`` now uses the
+  PostgreSQL JSONB ``@>`` containment operator at the SQL level when
+  the dialect is PG, so the database does the filtering instead of
+  loading every project requirement and filtering in Python.
+  SQLite still uses the Python fallback (no portable JSONB
+  operator).  Mirrors the dialect-aware pattern in
+  ``tasks/service.py::get_tasks_for_bim_element``.
+
+#### Test infrastructure
+- **T8 (deferred from v1.4.5)**: 12 broken integration tests that
+  failed since v1.3.x with 404 / 422 / 403 errors are now passing.
+  Root cause was a mix of:
+  - Trailing-slash mismatch (10 tests): tests called
+    ``/boqs/{id}/positions`` without the slash but the route is
+    ``/boqs/{id}/positions/``.  ``redirect_slashes=False`` is
+    intentional in main.py to kill CORS 307 redirect issues with
+    the frontend, so the FIX is to add the slash to the test
+    paths.  Audited every parametric POST in
+    ``test_cross_module_flows.py`` + ``test_api_smoke.py``.
+  - Missing required query param (1 test):
+    ``test_tendering_packages`` was hitting ``/tendering/packages/``
+    without the mandatory ``project_id`` (security: prevents
+    cross-tenant enumeration).  Fixed to create a throwaway project
+    first.
+  - Permission scope (1 test):
+    ``test_cost_regions`` and ``test_vector_status`` had no
+    auth header — the endpoints require ``contacts.read`` or
+    similar.  Fixed to pass ``auth_headers``.
+
+### Notifications subscriber dialect guard
+The S3 subscriber framework added in v1.4.6 (boq.created /
+meeting.action_items_created / cde.state_transitioned event hooks)
+opened its own short-lived session via ``async_session_factory()``
+to call ``NotificationService.create()``.  Under SQLite this
+deadlocked against the upstream service's still-open transaction
+because SQLite is single-writer per file.  The handlers now probe
+the dialect at entry and bail out fast on SQLite — production uses
+PostgreSQL where this is a non-issue, and the dev SQLite path
+simply skips the in-app notification (the upstream mutation still
+succeeds).  A v1.5 background-task refactor will move notification
+create out of the upstream transaction altogether.
+
+### Project Intelligence smart actions implementation (T2.1)
+The three "smart action" tiles on ``/project-intelligence`` were
+stub redirects that opened the validation / cost-catalog / scheduler
+pages and let the user finish the action manually.  ``actions.py``
+now actually performs the work:
+- ``run_validation`` loads the project's oldest BOQ, runs
+  ``ValidationModuleService.run_validation`` with
+  ``rule_sets=["din276","boq_quality"]``, and returns the new
+  ``ValidationReport`` id plus pass / warning / error counts.
+- ``match_cwicr_prices`` walks every leaf BOQ position with a
+  zero ``unit_rate``, calls ``CostItemService.suggest_for_bim_element``
+  with the position description and classification, and writes the
+  top match's rate back to ``unit_rate`` (with ``total = qty × rate``
+  recomputed and the matched code/score saved into ``metadata_``).
+  Publishes ``boq.prices.matched`` so vector re-indexing subscribers
+  can react.
+- ``generate_schedule`` refuses if a schedule already exists,
+  otherwise creates a draft ``Schedule`` keyed off
+  ``project.planned_start_date`` and delegates to
+  ``ScheduleService.generate_from_boq``, returning ``schedule_id``
+  + ``activity_count``.
+
+Every action wraps its body in try/except so failures surface as
+``ActionResult(success=False, message=...)`` rather than 500.
+9 new unit tests cover happy path + no-BOQ guards + service-raises
+branches.
+
+### Vector routes factory (T9)
+6 of 8 module routers were carrying ~50 lines each of copy-pasted
+``vector/status`` + ``vector/reindex`` boilerplate (documents,
+tasks, risk, validation, requirements, erp_chat).  Extracted the
+common shape into ``app/core/vector_routes.py:create_vector_routes()``
+which takes a model + project_id_attr (or a custom loader for
+parent-scoped modules), the read/write permissions, and a vector
+adapter.  Each module router now does ``include_router(create_vector_routes(...))``
+in 4 lines instead of 50.  Net result: **-105 LOC** in module
+routers, ~291 lines of duplicated boilerplate eliminated, all 16
+existing vector routes preserved exactly.  ``boq`` and ``bim_hub``
+keep their hand-written endpoints because they accept extra
+optional query params (``boq_id`` / ``model_id``) that the
+factory does not yet model.
+
+### Costmodel honest schedule reporting + delete-snapshot
+The 5D cost-model dashboard previously reported every project as
+"on_track / at_risk" even when no schedule data was available,
+because ``calculate_evm`` had a hard-coded ``time_elapsed_pct =
+50.0`` fallback.  This skewed portfolio rollups and made unscheduled
+projects look like they were silently 50 % done.
+
+- The fallback is gone.  ``schedule_known: bool`` is set only when
+  date parsing actually succeeds; otherwise ``evm_status`` is
+  ``schedule_unknown`` and the dashboard renders "no schedule yet"
+  instead of a fake percentage.
+- Bonus fix in ``full_evm/service.py``: TCPI was crashing on
+  ``Decimal(0)`` denominators.  Three-branch decision now yields
+  ``"inf"`` sentinel when remaining work exists but the budget is
+  exhausted, and ``Decimal(0)`` when both are zero.
+- New ``DELETE /api/v1/costmodel/projects/{pid}/5d/snapshots/{sid}``
+  endpoint (gated by ``costmodel.write``) for cleaning out stale
+  snapshots without dropping into a SQL shell.  Emits
+  ``costmodel.snapshot.deleted`` event.
+
+21 new unit tests, total suite 963 passing, zero regressions.
+
+### BIM frontend correctness wave (F2/F3/F4/F6)
+- **F4** — ``AddToBOQModal`` derived ``effectiveBOQId`` via
+  ``useMemo`` from ``(boqs, userSelectedBOQId)`` so a BOQ getting
+  removed mid-flow can not leave the modal pointing at a stale id.
+  Tightened the React Query ``enabled`` guard with
+  ``!boqsQuery.isLoading`` for first-render correctness.
+- **F2** — All four BIM link modals
+  (``AddToBOQModal``/``LinkDocumentToBIMModal``/``LinkActivityToBIMModal``/``LinkRequirementToBIMModal``)
+  reset their internal state when the parent's ``elements`` array
+  identity changes, so reopening the modal after switching elements
+  always starts clean.
+- **F3** — ``LinkActivityToBIMModal`` and
+  ``LinkRequirementToBIMModal`` replaced the hardcoded "showing
+  first 200, +N more…" stub with proper pagination
+  (``PAGE_SIZE = 50`` + "Load more (N remaining)" button), with
+  the page cursor resetting on both element change and search
+  text change.
+- **F6** — ``ElementManager`` now tracks every cloned ``THREE.Material``
+  it creates in ``colorByDirect``/``colorBy`` via a
+  ``createdMaterials`` set and disposes them in ``resetColors`` and
+  ``dispose``, plugging a slow GPU memory leak that grew every
+  time the user toggled status colouring.
+
+### Levels filter — rename "Storeys" → "Levels", real Level support
+The BIM filter panel labelled the storey filter "Storeys" but
+Revit users overwhelmingly think in terms of "Level" (the actual
+Revit property name).  Worse, when the upload row had no top-level
+``storey`` column the filter would silently miss elements whose
+level was buried inside the ``properties`` JSONB blob — common
+for Revit Excel exports where "Level" lives as a Type Parameter,
+not a column.
+
+- Backend ``_rows_to_elements`` (``bim_hub/router.py``) now calls
+  a new ``_extract_storey(row, props)`` helper that first checks
+  the top-level column (already aliased from ``level``,
+  ``base_constraint``, ``host_level_name``, etc. via
+  ``_BIM_COLUMN_ALIASES``), then falls back to a 20-key
+  case-insensitive scan of the ``properties`` blob: ``Level``,
+  ``Base Level``, ``Reference Level``, ``Schedule Level``,
+  ``Host Level``, ``IFCBuildingStorey``, ``Geschoss``, ``Etage``…
+- ``_normalise_storey()`` coerces literal ``"None"`` / ``"<None>"``
+  / ``"null"`` / ``"-"`` / ``"—"`` strings to None so they don't
+  pollute the filter panel with a fake "None (586)" bucket.  This
+  was visible in screenshots from real Revit exports.
+- Frontend ``BIMFilterPanel.tsx`` rename: "Storeys" → "Levels",
+  "by Storey" → "by Level", "No storeys detected" → "No levels
+  detected", search placeholder updated.  i18n keys renamed to
+  ``bim.filter_levels``, ``bim.filter_no_levels``,
+  ``bim.filter_group_level`` with English defaults.  Internal
+  state keys (``state.storeys``, ``el.storey``, API param
+  ``storey=``) are unchanged so saved filter groups and the
+  ``BIMQuantityRulesPage`` form continue to work.
+
+### BIM converter preflight + one-click auto-install
+Uploading a ``.rvt`` file at ``/bim`` previously consumed 18 MB of
+upload, saved it to disk, then silently failed with "Could not
+extract elements from this CAD file" when ``find_converter('rvt')``
+returned None and ``process_ifc_file`` returned an empty result.
+Two issues stacked: no preflight, and the frontend hardcoded a
+generic English error string instead of using the backend's
+``model.error_message``.  All the converter-install plumbing
+already existed (``GET /api/v1/takeoff/converters/`` +
+``POST /api/v1/takeoff/converters/{id}/install/``) but the BIM
+upload page never used it.
+
+**Backend preflight (``bim_hub/router.py``)** — new
+``_NEEDS_CONVERTER_EXTS = {".rvt", ".dwg", ".dgn"}``.  At the very
+top of ``upload_cad_file``, before ``await file.read()``, we call
+``find_converter(ext.lstrip("."))`` and refuse the upload up-front
+with ``status="converter_required"`` (200 OK, not error) when the
+binary is missing.  The response includes ``converter_id`` and
+``install_endpoint`` so the frontend can route the user straight
+into the install flow without wasting an upload roundtrip.  The
+success-path response was extended with ``error_message``,
+``converter_id``, and ``install_endpoint`` fields so the frontend
+can render the actual reason instead of guessing.
+
+**Real DDC repo (``takeoff/router.py``)** — the converter
+auto-installer was pointing at a non-existent
+``ddc-community-toolkit`` releases URL.  Rewritten to walk the
+real ``datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN``
+repository via the GitHub Contents API, recursively listing
+``DDC_WINDOWS_Converters/DDC_CONVERTER_{FORMAT}/`` and downloading
+each file from ``raw.githubusercontent.com``.  Verified live
+against the upstream repo: 175 files / 598 MB for RVT, 143 / 241
+MB IFC, 252 / 218 MB DWG, 252 / 217 MB DGN.
+
+- Files install into per-format directories
+  (``~/.openestimator/converters/{ext}_windows/``) so each
+  converter's bundled Qt6 DLLs and Teigha format readers do not
+  collide with other formats.
+- Downloads run in parallel via a ``ThreadPoolExecutor(max_workers=8)``
+  — RVT goes from ~5 minutes sequential to ~30-60 seconds without
+  tripping GitHub abuse detection.
+- Path traversal defence runs BEFORE any network IO so a
+  hostile listing fails fast instead of partway through 600 MB of
+  downloads.
+- Atomic rollback on partial failure (``shutil.rmtree`` of the
+  per-format dir) so a half-installed converter can not confuse
+  ``find_converter`` on the next call.
+- Linux returns ``platform_unsupported: true`` with the apt commands
+  needed to install ``ddc-rvtconverter`` etc. via the upstream
+  apt source ``pkg.datadrivenconstruction.io``.  We deliberately
+  do NOT auto-shell-out to ``sudo apt`` from a web handler.
+- macOS / other platforms get a graceful "convert to IFC first"
+  message — the IFC text parser works on every platform.
+
+``find_converter`` (``boq/cad_import.py``) extended to probe both
+the new per-format Windows install dirs and the Linux apt install
+paths (``/usr/bin/ddc-{ext}converter``,
+``/usr/local/bin/ddc-{ext}converter``) so installed converters
+are picked up instantly with no service restart.
+
+**Frontend banner + install prompt (``BIMConverterStatusBanner.tsx``,
+``InstallConverterPrompt.tsx``, +233 LOC in ``BIMPage.tsx``)** —
+new amber banner above the BIM page lists every converter that
+needs installation with name, real size in MB, and a one-click
+Install button.  Installs run via React Query mutation with
+spinner, success toast, and automatic banner refetch on completion.
+
+When the user drops a ``.rvt`` / ``.dwg`` / ``.dgn`` file and the
+converter is missing, a pre-upload guard intercepts the drop and
+opens ``InstallConverterPrompt`` instead of starting the upload —
+no megabytes wasted.  The prompt shows the converter name, real
+size from the GitHub-derived metadata, and an "Install &
+auto-retry upload" button that on success replays the original
+upload with the saved file bytes.  The previously hardcoded
+"Could not extract elements" error string is replaced with the
+backend's actual ``error_message``.  27 new i18n keys (all with
+English ``defaultValue``) so the UI works today without a
+translation pass.
+
+Backwards compatible: older backends that do not return
+``converter_id`` fall through to the legacy ``needs_converter``
+toast.
+
+### Verification
+- Backend ``ruff check`` clean across every v1.4.7-touched file
+- 16/16 tests in the BIM converter preflight + cross-module + PI
+  action suites passing in 34.5s
+- 963 unit tests passing in the costmodel/finance/full_evm suite
+- ``check_version_sync.py`` passes at 1.4.7
+- ``integrity_check.py`` passes (23 hits)
+- Frontend ``tsc --noEmit`` exit 0, zero errors
+- Live test of GitHub Contents API directory walk against the real
+  ``cad2data-Revit-IFC-DWG-DGN`` repo confirms ``RvtExporter.exe``
+  is reachable and 175 files enumerate cleanly
+
 ## [1.4.6] — 2026-04-11
 
 ### Security — IDOR fixes (driven by wave-2 deep audit)

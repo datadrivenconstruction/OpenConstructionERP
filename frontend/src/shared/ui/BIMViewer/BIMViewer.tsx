@@ -230,6 +230,13 @@ export function BIMViewer({
   const [gridVisible, setGridVisible] = useState(true);
   const [selectedElement, setSelectedElement] = useState<BIMElementData | null>(null);
   const [elementCount, setElementCount] = useState(0);
+  /** DAE/COLLADA download progress, in [0, 1].  ``null`` when no
+   *  geometry load is in flight; a fraction while bytes are streaming
+   *  in; ``1`` momentarily before the overlay hides itself.  Drives
+   *  the progress overlay rendered below the canvas while the geometry
+   *  blob downloads — a 100MB model can take 30+ seconds and the
+   *  previous spinner gave the user no signal anything was happening. */
+  const [geometryProgress, setGeometryProgress] = useState<number | null>(null);
 
   /** Health-stat rollup over the loaded elements.  Drives the banner at
    *  the top of the viewport: total / linked-to-BOQ / errors / warnings /
@@ -331,9 +338,22 @@ export function BIMViewer({
     const mgr = elementMgrRef.current;
     // Only load if not already loaded for this URL
     if (!mgr.hasLoadedGeometry()) {
+      // Reset progress state at the start of every load.  null →
+      // hide overlay; 0 → start animating in.
+      setGeometryProgress(0);
       mgr
-        .loadDAEGeometry(geometryUrl)
+        .loadDAEGeometry(geometryUrl, (fraction) => {
+          // ColladaLoader fires this on every XHR progress event,
+          // typically every few KB.  We clamp to [0, 1] defensively
+          // and let the React render schedule batch updates.
+          setGeometryProgress(Math.max(0, Math.min(1, fraction)));
+        })
         .then(() => {
+          // Final 100% tick is emitted by ElementManager itself
+          // (after parsing finishes); hide the overlay one frame
+          // later so the bar fully fills before disappearing.
+          setGeometryProgress(1);
+          setTimeout(() => setGeometryProgress(null), 200);
           onGeometryLoadedRef.current?.(mgr.getMeshMatchRatio());
           // Re-fit the camera AFTER the DAE scene has been parented and
           // the next render cycle had a chance to commit world matrices.
@@ -350,7 +370,10 @@ export function BIMViewer({
           setTimeout(fit, 250);
         })
         .catch(() => {
-          // Silently fall back to placeholder boxes (already rendered by loadElements)
+          // Silently fall back to placeholder boxes (already rendered
+          // by loadElements). Hide the progress overlay so the user
+          // is not stuck looking at a frozen bar.
+          setGeometryProgress(null);
         });
     }
   }, [geometryUrl, elements]);
@@ -516,14 +539,53 @@ export function BIMViewer({
     <div className={clsx('relative w-full h-full min-h-[400px] bg-surface-secondary rounded-lg overflow-hidden', className)}>
       <canvas ref={canvasRef} className="w-full h-full block" />
 
-      {/* Loading overlay */}
-      {isLoading && (
+      {/* Loading overlay — covers the canvas while either the
+          element list is being fetched OR the DAE/COLLADA geometry
+          blob is downloading.  When ``geometryProgress`` is non-null
+          we show a determinate progress bar with the percent
+          complete; otherwise (element fetch only) we show the
+          spinner with the generic "Loading model..." label. */}
+      {(isLoading || geometryProgress !== null) && (
         <div className="absolute inset-0 flex items-center justify-center bg-surface-secondary/80 backdrop-blur-sm z-10">
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 size={32} className="animate-spin text-oe-blue" />
-            <span className="text-sm text-content-secondary">
-              {t('bim.loading_model', { defaultValue: 'Loading model...' })}
-            </span>
+          <div className="flex flex-col items-center gap-4 w-72 max-w-[80%]">
+            <div className="relative">
+              <Loader2 size={36} className="animate-spin text-oe-blue" />
+              {geometryProgress !== null && geometryProgress < 1 && (
+                <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-oe-blue tabular-nums">
+                  {Math.round(geometryProgress * 100)}%
+                </span>
+              )}
+            </div>
+            <div className="flex flex-col items-center gap-2 w-full">
+              <span className="text-sm font-medium text-content-primary">
+                {geometryProgress !== null
+                  ? t('bim.loading_geometry', {
+                      defaultValue: 'Loading 3D geometry…',
+                    })
+                  : t('bim.loading_model', { defaultValue: 'Loading model…' })}
+              </span>
+              {geometryProgress !== null && (
+                <>
+                  <div className="h-2 w-full rounded-full bg-surface-tertiary overflow-hidden ring-1 ring-border-light">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-oe-blue via-blue-400 to-cyan-400 transition-all duration-150 ease-out"
+                      style={{
+                        width: `${Math.max(2, Math.round(geometryProgress * 100))}%`,
+                      }}
+                    />
+                  </div>
+                  <span className="text-[11px] text-content-tertiary text-center">
+                    {geometryProgress >= 0.95
+                      ? t('bim.loading_finalising', {
+                          defaultValue: 'Finalising scene…',
+                        })
+                      : t('bim.loading_streaming', {
+                          defaultValue: 'Streaming geometry from server…',
+                        })}
+                  </span>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}

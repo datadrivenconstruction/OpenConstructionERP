@@ -37,6 +37,31 @@ from app.modules.notifications.service import NotificationService
 logger = logging.getLogger(__name__)
 
 
+async def _can_open_isolated_session() -> bool:
+    """Return True if it is safe to open a write session right now.
+
+    Notification subscribers are invoked synchronously inside the
+    upstream service's transaction.  PostgreSQL handles concurrent
+    writers fine, but SQLite is single-writer per file — opening a
+    second write session inside the upstream transaction blocks on
+    the file lock and turns a 50ms request into a 60-second one.
+
+    On SQLite we therefore skip the cross-session notification
+    create entirely.  Production deployments use PostgreSQL where
+    this is a non-issue; the dev SQLite path simply does not get
+    in-app notifications until the v1.5 background-task refactor
+    moves notification create out of the upstream transaction
+    altogether.
+    """
+    try:
+        async with async_session_factory() as probe:
+            bind = probe.get_bind()
+            dialect = getattr(getattr(bind, "dialect", None), "name", "") or ""
+        return dialect == "postgresql"
+    except Exception:
+        return False
+
+
 # ── Per-event handlers ────────────────────────────────────────────────────
 #
 # Each handler:
@@ -55,6 +80,8 @@ logger = logging.getLogger(__name__)
 
 async def _on_boq_created(event: Event) -> None:
     """``boq.boq.created`` → notify the creator."""
+    if not await _can_open_isolated_session():
+        return
     data = event.data or {}
     actor_id = data.get("created_by") or data.get("user_id")
     boq_id = data.get("boq_id") or data.get("id")
@@ -87,6 +114,8 @@ async def _on_meeting_action_items_created(event: Event) -> None:
     Each item carries an ``owner_id`` if the meeting transcript
     extracted one.
     """
+    if not await _can_open_isolated_session():
+        return
     data = event.data or {}
     items = data.get("action_items") or []
     meeting_id = data.get("meeting_id")
@@ -139,6 +168,8 @@ async def _on_bim_element_deleted(event: Event) -> None:
 
 async def _on_cde_state_transitioned(event: Event) -> None:
     """``cde.container.state_transitioned`` → notify the actor."""
+    if not await _can_open_isolated_session():
+        return
     data = event.data or {}
     actor_id = data.get("user_id") or data.get("actor_id")
     container_id = data.get("container_id") or data.get("id")

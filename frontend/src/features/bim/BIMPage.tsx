@@ -49,6 +49,8 @@ import { BIMViewer } from '@/shared/ui/BIMViewer';
 import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
 import BIMFilterPanel from './BIMFilterPanel';
 import { BIMProcessingProgress, type BIMProcessingStage } from './BIMProcessingProgress';
+import { BIMConverterStatusBanner } from './BIMConverterStatusBanner';
+import { InstallConverterPrompt } from './InstallConverterPrompt';
 import AddToBOQModal from './AddToBOQModal';
 import SaveGroupModal from './SaveGroupModal';
 import CreateTaskFromBIMModal from './CreateTaskFromBIMModal';
@@ -64,6 +66,7 @@ import {
   fetchBIMModels,
   fetchBIMModel,
   fetchBIMElements,
+  fetchBIMConverters,
   uploadBIMData,
   uploadCADFile,
   getGeometryUrl,
@@ -72,6 +75,7 @@ import {
   listElementGroups,
   deleteElementGroup,
   type BIMElementGroup,
+  type BIMCadUploadResponse,
 } from './api';
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
@@ -203,6 +207,21 @@ interface ProcessingUpdate {
   errorMessage?: string;
 }
 
+/** State used by UploadPanel to remember an upload that was deferred
+ *  because the matching DDC converter was missing.  Once the user
+ *  confirms install via `InstallConverterPrompt`, the saved fields
+ *  are replayed through `uploadCADFile` without a second file pick. */
+interface InstallPromptState {
+  open: boolean;
+  converterId: string;
+  fileName: string;
+  fileSize: number;
+  pendingFile: File;
+  pendingProjectId: string;
+  pendingName: string;
+  pendingDiscipline: string;
+}
+
 function UploadPanel({
   projectId,
   onUploadComplete,
@@ -221,6 +240,7 @@ function UploadPanel({
   onProcessingUpdate?: (update: ProcessingUpdate | null) => void;
 }) {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [file, setFile] = useState<File | null>(null);
   const [modelName, setModelName] = useState(initialModelName || '');
   const [discipline, setDiscipline] = useState('architecture');
@@ -232,6 +252,8 @@ function UploadPanel({
   const [advancedMode, setAdvancedMode] = useState(initialAdvancedMode || false);
   const [dataFile, setDataFile] = useState<File | null>(null);
   const [geometryFile, setGeometryFile] = useState<File | null>(null);
+  const [installPromptState, setInstallPromptState] =
+    useState<InstallPromptState | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dataInputRef = useRef<HTMLInputElement>(null);
   const geoInputRef = useRef<HTMLInputElement>(null);
@@ -320,6 +342,50 @@ function UploadPanel({
       } else if (file) {
         const name = modelName || file.name.replace(/\.[^.]+$/, '');
         if (isCADFile(file.name)) {
+          // Pre-upload guard: if the dropped file is a format that needs
+          // a converter and the converter isn't installed locally, surface
+          // the install prompt BEFORE wasting an upload roundtrip.  The
+          // query result is cached under `['bim-converters']` so the
+          // banner and the prompt pick up the same data.
+          const lowerName = file.name.toLowerCase();
+          const needsConverterMatch = (
+            ['rvt', 'dwg', 'dgn'] as const
+          ).find((c) => lowerName.endsWith('.' + c));
+          if (needsConverterMatch) {
+            try {
+              const status = await queryClient.fetchQuery({
+                queryKey: ['bim-converters'],
+                queryFn: fetchBIMConverters,
+                staleTime: 30_000,
+              });
+              const conv = status.converters.find(
+                (c) => c.id === needsConverterMatch,
+              );
+              if (conv && !conv.installed) {
+                clearInterval(stageTimer);
+                setUploadProgress(0);
+                setUploadStage('');
+                onProcessingUpdate?.(null);
+                setInstallPromptState({
+                  open: true,
+                  converterId: needsConverterMatch,
+                  fileName: file.name,
+                  fileSize: file.size,
+                  pendingFile: file,
+                  pendingProjectId: projectId,
+                  pendingName: name,
+                  pendingDiscipline: discipline,
+                });
+                // Don't proceed to upload — prompt will retry on success.
+                return;
+              }
+            } catch (err) {
+              // If the converters endpoint fails, fall through to upload —
+              // the backend will preflight-reject and we'll catch it below.
+              console.warn('Converter preflight check failed:', err);
+            }
+          }
+
           const res = await uploadCADFile(projectId, name, discipline, file);
           clearInterval(stageTimer);
           setUploadProgress(100);
@@ -338,30 +404,99 @@ function UploadPanel({
               title: t('bim.toast_model_processed_title'),
               message: `${cnt} elements`,
             });
-          } else if (st === 'needs_converter') {
-            onProcessingUpdate?.({
-              stage: 'needs_converter',
-              fileName,
-              fileSize: sizeLabel,
-              errorMessage: `${res.format.toUpperCase()} requires DDC cad2data. Convert to IFC first.`,
+            if (res.model_id) onUploadComplete(res.model_id);
+            await new Promise((r) => setTimeout(r, 600));
+            resetForm();
+          } else if (st === 'converter_required') {
+            // Backend preflight rejected — no model row was created and
+            // no upload bytes were wasted.  Show the install prompt
+            // directly so the user can one-click install and retry.
+            onProcessingUpdate?.(null);
+            setInstallPromptState({
+              open: true,
+              converterId: (res.converter_id || needsConverterMatch || '') as string,
+              fileName: file.name,
+              fileSize: file.size,
+              pendingFile: file,
+              pendingProjectId: projectId,
+              pendingName: name,
+              pendingDiscipline: discipline,
             });
             addToast({
               type: 'warning',
               title: t('bim.toast_converter_required_title'),
-              message: `${res.format.toUpperCase()} needs DDC cad2data`,
+              message:
+                res.message ||
+                t('bim.toast_converter_required_msg', {
+                  defaultValue: '{{format}} converter not installed',
+                  format: (res.format || '').toUpperCase(),
+                }),
             });
+            return;
+          } else if (st === 'needs_converter') {
+            // Post-upload rejection — the file was saved but the
+            // processor couldn't run.  If the response includes a
+            // converter id (v1.4.7+), offer the install prompt so the
+            // user can fix it in one click; otherwise fall back to
+            // the old error-card behaviour.
+            const cid = (res as BIMCadUploadResponse).converter_id || undefined;
+            if (cid) {
+              setInstallPromptState({
+                open: true,
+                converterId: cid,
+                fileName: file.name,
+                fileSize: file.size,
+                pendingFile: file,
+                pendingProjectId: projectId,
+                pendingName: name,
+                pendingDiscipline: discipline,
+              });
+            }
+            onProcessingUpdate?.({
+              stage: 'needs_converter',
+              fileName,
+              fileSize: sizeLabel,
+              errorMessage:
+                res.error_message ||
+                t('bim.needs_converter_fallback_msg', {
+                  defaultValue:
+                    '{{format}} requires a converter. Install it or convert to IFC first.',
+                  format: (res.format || '').toUpperCase(),
+                }),
+            });
+            addToast({
+              type: 'warning',
+              title: t('bim.toast_converter_required_title'),
+              message:
+                res.error_message ||
+                t('bim.toast_converter_required_msg', {
+                  defaultValue: '{{format}} converter not installed',
+                  format: (res.format || '').toUpperCase(),
+                }),
+            });
+            if (res.model_id) onUploadComplete(res.model_id);
+            await new Promise((r) => setTimeout(r, 600));
+            resetForm();
           } else if (st === 'error') {
             onProcessingUpdate?.({
               stage: 'error',
               fileName,
               fileSize: sizeLabel,
-              errorMessage: 'Could not extract elements from this CAD file.',
+              errorMessage:
+                res.error_message ||
+                t('bim.error_generic_processing', {
+                  defaultValue: 'Could not extract elements from this CAD file.',
+                }),
             });
             addToast({
               type: 'error',
               title: t('bim.toast_processing_failed_title'),
-              message: t('bim.toast_processing_failed_msg'),
+              message:
+                res.error_message || t('bim.toast_processing_failed_msg'),
             });
+            if (res.model_id) onUploadComplete(res.model_id);
+            await new Promise((r) => setTimeout(r, 600));
+            resetForm();
           } else {
             onProcessingUpdate?.({
               stage: 'ready',
@@ -374,11 +509,10 @@ function UploadPanel({
               title: t('bim.toast_file_uploaded_title'),
               message: t('bim.toast_processing_queued_msg'),
             });
+            if (res.model_id) onUploadComplete(res.model_id);
+            await new Promise((r) => setTimeout(r, 600));
+            resetForm();
           }
-          onUploadComplete(res.model_id);
-          // Give the user a moment to read the final stage before closing
-          await new Promise((r) => setTimeout(r, 600));
-          resetForm();
         } else if (isDataFile(file.name)) {
           const res = await uploadBIMData(projectId, name, discipline, file);
           clearInterval(stageTimer);
@@ -427,7 +561,80 @@ function UploadPanel({
     onProcessingUpdate,
     addToast,
     resetForm,
+    queryClient,
+    t,
   ]);
+
+  /** Replay a deferred upload after the user installs a converter from
+   *  the prompt.  Uses the saved `pendingFile` + metadata so the user
+   *  never has to pick the file twice.  Runs outside the handleUpload
+   *  callback because the stage timer / error plumbing is simpler here
+   *  and the most critical thing is that the retry actually fires.  */
+  const retryUploadAfterInstall = useCallback(
+    async (pending: InstallPromptState) => {
+      const pendingFile = pending.pendingFile;
+      const sizeLabel = formatFileSize(pendingFile.size);
+      onProcessingUpdate?.({
+        stage: 'uploading',
+        fileName: pendingFile.name,
+        fileSize: sizeLabel,
+      });
+      try {
+        const res = await uploadCADFile(
+          pending.pendingProjectId,
+          pending.pendingName,
+          pending.pendingDiscipline,
+          pendingFile,
+        );
+        const st = (res as { status?: string }).status || 'processing';
+        const cnt = (res as { element_count?: number }).element_count || 0;
+        if (st === 'ready' || st === 'processing') {
+          onProcessingUpdate?.({
+            stage: 'ready',
+            fileName: pendingFile.name,
+            fileSize: sizeLabel,
+            elementCount: cnt,
+          });
+          addToast({
+            type: 'success',
+            title: t('bim.toast_model_processed_title'),
+            message: t('bim.toast_retry_success_msg', {
+              defaultValue: 'Upload retried — {{count}} elements',
+              count: cnt,
+            }),
+          });
+          if (res.model_id) onUploadComplete(res.model_id);
+        } else {
+          onProcessingUpdate?.({
+            stage: 'error',
+            fileName: pendingFile.name,
+            fileSize: sizeLabel,
+            errorMessage:
+              res.error_message ||
+              t('bim.error_generic_processing', {
+                defaultValue: 'Could not extract elements from this CAD file.',
+              }),
+          });
+          addToast({
+            type: 'error',
+            title: t('bim.toast_processing_failed_title'),
+            message:
+              res.error_message || t('bim.toast_processing_failed_msg'),
+          });
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        onProcessingUpdate?.({
+          stage: 'error',
+          fileName: pendingFile.name,
+          fileSize: sizeLabel,
+          errorMessage: msg,
+        });
+        addToast({ type: 'error', title: t('bim.upload_failed'), message: msg });
+      }
+    },
+    [addToast, onProcessingUpdate, onUploadComplete, t],
+  );
 
   const canUpload = advancedMode ? !!dataFile && !uploading : !!file && !uploading;
   const disciplines = [
@@ -438,6 +645,7 @@ function UploadPanel({
   ];
 
   return (
+    <>
     <div className="absolute top-0 end-0 h-full w-[380px] bg-surface-primary/95 backdrop-blur-xl border-s border-border-light shadow-2xl z-30 flex flex-col animate-in slide-in-from-right duration-200">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-border-light">
@@ -538,6 +746,26 @@ function UploadPanel({
         </button>
       </div>
     </div>
+
+    {/* Install-converter prompt — shown when a native CAD upload was
+        deferred by the pre-upload guard or rejected by the backend
+        preflight.  On success it replays the saved upload without a
+        second file-picker roundtrip. */}
+    {installPromptState && (
+      <InstallConverterPrompt
+        open={installPromptState.open}
+        converterId={installPromptState.converterId}
+        fileName={installPromptState.fileName}
+        fileSize={installPromptState.fileSize}
+        onClose={() => setInstallPromptState(null)}
+        onInstalledAndRetry={() => {
+          const pending = installPromptState;
+          setInstallPromptState(null);
+          void retryUploadAfterInstall(pending);
+        }}
+      />
+    )}
+    </>
   );
 }
 
@@ -603,7 +831,7 @@ function LandingPage({ projectId, onUploadComplete, breadcrumbItems }: {
         const cnt = res.element_count ?? 0;
         if (st === 'ready') addToast({ type: 'success', title: t('bim.toast_model_ready_title'), message: `${cnt} elements` });
         else addToast({ type: 'success', title: t('bim.toast_uploaded_title'), message: res.format.toUpperCase() });
-        onUploadComplete(res.model_id);
+        if (res.model_id) onUploadComplete(res.model_id);
       } else if (isDataFile(file.name)) {
         setUploadProgress(40);
         const res = await uploadBIMData(projectId, name, 'architecture', file);
@@ -1243,6 +1471,11 @@ export function BIMPage() {
         </div>
       </div>
 
+      {/* ── Converter status banner — surfaces any missing DDC
+            converters so the user can one-click install them before
+            dragging a native CAD file onto the upload zone. ── */}
+      <BIMConverterStatusBanner className="mx-3 mt-2" />
+
       {/* ── 3D Viewport with filter sidebar ── */}
       <div className="flex-1 min-h-0 relative bg-surface-secondary flex">
         {/* Filter sidebar — only when model has loaded elements */}
@@ -1250,6 +1483,7 @@ export function BIMPage() {
           <div className="shrink-0 h-full">
             <BIMFilterPanel
               elements={elements}
+              modelId={activeModelId ?? undefined}
               modelFormat={activeModel?.model_format || activeModel?.format}
               onFilterChange={handleFilterChange}
               onClose={() => setFilterPanelOpen(false)}

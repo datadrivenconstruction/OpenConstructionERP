@@ -168,7 +168,7 @@ async def _create_boq_with_positions(
 
     for i, (desc, unit, qty, rate) in enumerate(positions, start=1):
         resp = await client.post(
-            f"{BOQ_PREFIX}/boqs/{boq_id}/positions",
+            f"{BOQ_PREFIX}/boqs/{boq_id}/positions/",
             json={
                 "boq_id": boq_id,
                 "ordinal": f"01.01.{i:04d}",
@@ -214,7 +214,7 @@ class TestBOQLockCreatesBudget:
 
         # 3. Lock the BOQ
         resp = await client.post(
-            f"{BOQ_PREFIX}/boqs/{boq_id}/lock",
+            f"{BOQ_PREFIX}/boqs/{boq_id}/lock/",
             headers=auth,
         )
         assert resp.status_code == 200, f"BOQ lock failed: {resp.text}"
@@ -222,7 +222,7 @@ class TestBOQLockCreatesBudget:
 
         # 4. Create budget from BOQ
         resp = await client.post(
-            f"{BOQ_PREFIX}/boqs/{boq_id}/create-budget",
+            f"{BOQ_PREFIX}/boqs/{boq_id}/create-budget/",
             headers=auth,
         )
         assert resp.status_code == 201, f"Create budget failed: {resp.text}"
@@ -232,7 +232,7 @@ class TestBOQLockCreatesBudget:
 
         # 5. Verify budgets exist in finance module
         resp = await client.get(
-            f"/api/v1/finance/budgets?project_id={project_id}",
+            f"/api/v1/finance/budgets/?project_id={project_id}",
             headers=auth,
         )
         assert resp.status_code == 200
@@ -284,7 +284,7 @@ class TestRFICreatesVariation:
 
         # 3. Respond to RFI
         resp = await client.post(
-            f"/api/v1/rfi/{rfi_id}/respond",
+            f"/api/v1/rfi/{rfi_id}/respond/",
             json={
                 "official_response": "Approved: Use Sika 1K membrane system for all basement walls.",
             },
@@ -295,7 +295,7 @@ class TestRFICreatesVariation:
 
         # 4. Create variation from RFI
         resp = await client.post(
-            f"/api/v1/rfi/{rfi_id}/create-variation",
+            f"/api/v1/rfi/{rfi_id}/create-variation/",
             headers=auth,
         )
         assert resp.status_code == 201, f"Create variation failed: {resp.text}"
@@ -362,7 +362,7 @@ class TestInspectionFailCreatesDefect:
 
         # 3. Complete inspection with result="fail"
         resp = await client.post(
-            f"/api/v1/inspections/{inspection_id}/complete",
+            f"/api/v1/inspections/{inspection_id}/complete/",
             json={"result": "fail"},
             headers=auth,
         )
@@ -371,7 +371,7 @@ class TestInspectionFailCreatesDefect:
 
         # 4. Create defect from failed inspection
         resp = await client.post(
-            f"/api/v1/inspections/{inspection_id}/create-defect",
+            f"/api/v1/inspections/{inspection_id}/create-defect/",
             headers=auth,
         )
         assert resp.status_code == 201, f"Create defect failed: {resp.text}"
@@ -410,7 +410,7 @@ class TestPOIssueUpdatesBudget:
 
         # 2. Create budget line
         resp = await client.post(
-            "/api/v1/finance/budgets",
+            "/api/v1/finance/budgets/",
             json={
                 "project_id": project_id,
                 "category": "Substructure",
@@ -453,7 +453,7 @@ class TestPOIssueUpdatesBudget:
 
         # 4. Issue the PO
         resp = await client.post(
-            f"/api/v1/procurement/{po_id}/issue",
+            f"/api/v1/procurement/{po_id}/issue/",
             headers=auth,
         )
         # Issue may also have the lazy-load issue on response serialization.
@@ -465,7 +465,7 @@ class TestPOIssueUpdatesBudget:
 
         # 5. Verify via finance dashboard that the project has financial data
         resp = await client.get(
-            f"/api/v1/finance/dashboard?project_id={project_id}",
+            f"/api/v1/finance/dashboard/?project_id={project_id}",
             headers=auth,
         )
         assert resp.status_code == 200, f"Finance dashboard failed: {resp.text}"
@@ -474,7 +474,7 @@ class TestPOIssueUpdatesBudget:
 
         # 6. Verify budget still exists and is accessible
         resp = await client.get(
-            f"/api/v1/finance/budgets?project_id={project_id}",
+            f"/api/v1/finance/budgets/?project_id={project_id}",
             headers=auth,
         )
         assert resp.status_code == 200
@@ -531,7 +531,7 @@ class TestMeetingCreatesTasks:
 
         # 3. Complete meeting (triggers task creation from open action items)
         resp = await client.post(
-            f"/api/v1/meetings/{meeting_id}/complete",
+            f"/api/v1/meetings/{meeting_id}/complete/",
             headers=auth,
         )
         assert resp.status_code == 200, f"Meeting complete failed: {resp.text}"
@@ -597,7 +597,7 @@ class TestNCRCreatesVariation:
 
         # 3. Create variation from NCR
         resp = await client.post(
-            f"/api/v1/ncr/{ncr_id}/create-variation",
+            f"/api/v1/ncr/{ncr_id}/create-variation/",
             headers=auth,
         )
         assert resp.status_code == 201, f"Create variation from NCR failed: {resp.text}"
@@ -749,7 +749,7 @@ class TestProjectDashboardAggregation:
 
         # 5. Get project dashboard
         resp = await client.get(
-            f"/api/v1/projects/{project_id}/dashboard",
+            f"/api/v1/projects/{project_id}/dashboard/",
             headers=auth,
         )
         assert resp.status_code == 200, f"Dashboard failed: {resp.text}"
