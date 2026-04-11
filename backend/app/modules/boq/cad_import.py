@@ -114,6 +114,30 @@ def find_converter(extension: str) -> Path | None:
     if ddc_bin and ddc_bin not in search_paths:
         search_paths.insert(0, ddc_bin)
 
+    # Per-format Windows install dir written by the BIM converter
+    # auto-installer (takeoff/router.py:install_converter). The
+    # installer drops files at ~/.openestimator/converters/{ext}_windows/
+    # so multiple converters can coexist without their bundled Qt6
+    # DLLs colliding. Probe this location explicitly so an installed
+    # converter is picked up by the next find_converter() call without
+    # any service restart.
+    per_format_windows = (
+        Path.home() / ".openestimator" / "converters" / f"{extension}_windows"
+    )
+    if per_format_windows not in search_paths:
+        search_paths.insert(0, per_format_windows)
+
+    # Linux apt install puts the binaries on PATH under ddc-* names.
+    # We probe these locations BEFORE walking search_paths so a
+    # system-installed converter is found instantly.
+    linux_apt_candidates = [
+        Path("/usr/bin") / f"ddc-{extension}converter",
+        Path("/usr/local/bin") / f"ddc-{extension}converter",
+    ]
+    for cand in linux_apt_candidates:
+        if cand.exists() and cand.stat().st_size > 1024:
+            return cand
+
     for search_path in search_paths:
         exe_path = search_path / exe_name
         if exe_path.exists() and exe_path.stat().st_size > 1024:

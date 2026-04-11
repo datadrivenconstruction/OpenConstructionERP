@@ -185,6 +185,14 @@ export class ElementManager {
   private wireframeEnabled = false;
   private geometryLoaded = false;
   /**
+   * Every material we allocate via `clone()` inside `colorBy*` paths is
+   * tracked here so `resetColors()` / `dispose()` can free the GPU
+   * resources.  Without this set, rapid mode switching (validation →
+   * default → boq_coverage → …) leaks one WebGL program per element per
+   * switch — visible as VRAM growth in long sessions.
+   */
+  private createdMaterials = new Set<THREE.Material>();
+  /**
    * Fraction of loaded elements that the viewer was able to match to DAE
    * mesh nodes by stable_id. < 0.02 means we effectively have no mesh-level
    * mapping — the parent UI uses this to show a hint explaining why
@@ -243,7 +251,24 @@ export class ElementManager {
    * After loading, each mesh node whose name matches an element's stable_id
    * (mesh_ref) gets colored by discipline and wired up for selection.
    */
-  loadDAEGeometry(geometryUrl: string): Promise<void> {
+  /**
+   * Load the DAE/COLLADA geometry blob and bind every mesh to its
+   * BIM element by stable_id / mesh_ref / element name.
+   *
+   * The optional ``onProgress`` callback is invoked with a value in
+   * [0, 1] as the file downloads (``loaded / total`` from
+   * ColladaLoader's XHR progress event).  ColladaLoader emits the
+   * progress synchronously while the bytes stream in, so the caller
+   * can drive a UI progress bar without polling.
+   *
+   * After loading, each mesh node whose name matches an element's
+   * stable_id (mesh_ref) gets coloured by discipline and wired up
+   * for selection.
+   */
+  loadDAEGeometry(
+    geometryUrl: string,
+    onProgress?: (fraction: number) => void,
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       const loader = new ColladaLoader();
       loader.load(
@@ -426,9 +451,28 @@ export class ElementManager {
           // Fit camera to the newly added geometry
           this.sceneManager.zoomToFit();
 
+          // Final tick — geometry is fully loaded + parsed.
+          if (onProgress) onProgress(1);
           resolve();
         },
-        undefined, // onProgress
+        // onProgress: ColladaLoader forwards XHR progress events.
+        // event.lengthComputable is true when Content-Length is set,
+        // which is the common case for our static / S3 geometry.
+        // Otherwise we can't compute a fraction — fall back to a
+        // monotonic "indeterminate" 0.5 placeholder so the UI shows
+        // something happening even on chunked transfer.
+        (event: ProgressEvent) => {
+          if (!onProgress) return;
+          if (event.lengthComputable && event.total > 0) {
+            // Cap at 0.95 — the last 5% is parsing + scene wire-up
+            // which happens AFTER the bytes finish downloading; we
+            // emit 1.0 from the success callback above.
+            const fraction = Math.min(0.95, event.loaded / event.total);
+            onProgress(fraction);
+          } else {
+            onProgress(0.5);
+          }
+        },
         (error) => {
           console.warn('Failed to load DAE geometry:', error);
           // On failure, keep existing placeholder boxes
@@ -898,7 +942,10 @@ export class ElementManager {
         // Restore original material if we'd previously cloned one
         if (ud.customMaterial) {
           const old = mesh.material;
-          if (old instanceof THREE.MeshStandardMaterial) old.dispose();
+          if (old instanceof THREE.Material) {
+            this.createdMaterials.delete(old);
+            old.dispose();
+          }
           if (ud.originalMaterial) mesh.material = ud.originalMaterial;
           ud.customMaterial = false;
         }
@@ -909,7 +956,11 @@ export class ElementManager {
       if (!ud.customMaterial) {
         const base = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
         if (base && 'clone' in base) {
-          mesh.material = (base as THREE.Material & { clone(): THREE.Material }).clone();
+          const cloned = (
+            base as THREE.Material & { clone(): THREE.Material }
+          ).clone();
+          mesh.material = cloned;
+          this.createdMaterials.add(cloned);
           ud.customMaterial = true;
         }
       }
@@ -952,7 +1003,9 @@ export class ElementManager {
       if (!ud.customMaterial) {
         const base = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
         if (base instanceof THREE.MeshStandardMaterial) {
-          mesh.material = base.clone();
+          const cloned = base.clone();
+          mesh.material = cloned;
+          this.createdMaterials.add(cloned);
           ud.customMaterial = true;
         }
       }
@@ -975,7 +1028,8 @@ export class ElementManager {
       if (ud.customMaterial) {
         // Dispose the cloned material we created in colorBy()...
         const old = mesh.material;
-        if (old instanceof THREE.MeshStandardMaterial) {
+        if (old instanceof THREE.Material) {
+          this.createdMaterials.delete(old);
           old.dispose();
         }
         // ...and restore the COLLADA original if we cached one
@@ -989,6 +1043,14 @@ export class ElementManager {
         ud.customMaterial = false;
       }
     }
+    // Drain any orphaned clones that the per-mesh loop didn't see — e.g.
+    // materials whose mesh was removed from `meshMap` between recolor and
+    // reset.  Without this the set would grow unbounded across mode
+    // toggles.
+    for (const mat of this.createdMaterials) {
+      mat.dispose();
+    }
+    this.createdMaterials.clear();
   }
 
   /** Remove all elements from the scene. */
@@ -1029,6 +1091,11 @@ export class ElementManager {
       mat.dispose();
     }
     this.baseMaterials.clear();
+    // Dispose any per-mesh material clones still alive from colorBy* paths
+    for (const mat of this.createdMaterials) {
+      mat.dispose();
+    }
+    this.createdMaterials.clear();
     this.sceneManager.scene.remove(this.elementGroup);
   }
 }

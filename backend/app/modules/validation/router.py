@@ -307,44 +307,10 @@ async def list_rule_sets(
 
 
 # ── Vector / semantic memory endpoints ───────────────────────────────────
-
-
-@router.get(
-    "/vector/status/",
-    dependencies=[Depends(RequirePermission("validation.read"))],
-)
-async def validation_vector_status() -> dict[str, Any]:
-    """Return health + row count for the ``oe_validation`` collection."""
-    from app.core.vector_index import COLLECTION_VALIDATION, collection_status
-
-    return collection_status(COLLECTION_VALIDATION)
-
-
-@router.post(
-    "/vector/reindex/",
-    dependencies=[Depends(RequirePermission("validation.create"))],
-)
-async def validation_vector_reindex(
-    session: SessionDep,
-    _user_id: CurrentUserId,
-    project_id: uuid.UUID | None = Query(default=None),
-    purge_first: bool = Query(default=False),
-) -> dict[str, Any]:
-    """Backfill the validation vector collection."""
-    from sqlalchemy import select
-
-    from app.core.vector_index import reindex_collection
-    from app.modules.validation.vector_adapter import validation_report_adapter
-
-    stmt = select(ValidationReport)
-    if project_id is not None:
-        stmt = stmt.where(ValidationReport.project_id == project_id)
-    rows = list((await session.execute(stmt)).scalars().all())
-    return await reindex_collection(
-        validation_report_adapter,
-        rows,
-        purge_first=purge_first,
-    )
+#
+# ``/vector/status/`` + ``/vector/reindex/`` wired via the shared factory
+# (see ``include_router`` at the bottom of the file).  The
+# ``/{report_id}/similar/`` endpoint stays module-specific.
 
 
 @router.get(
@@ -379,3 +345,22 @@ async def validation_report_similar(
         "cross_project": cross_project,
         "hits": [h.to_dict() for h in hits],
     }
+
+
+# ── Mount vector status + reindex via the shared factory ────────────────
+from app.core.vector_index import COLLECTION_VALIDATION  # noqa: E402
+from app.core.vector_routes import create_vector_routes  # noqa: E402
+from app.modules.validation.vector_adapter import (  # noqa: E402
+    validation_report_adapter as _validation_report_adapter,
+)
+
+router.include_router(
+    create_vector_routes(
+        collection=COLLECTION_VALIDATION,
+        adapter=_validation_report_adapter,
+        model=ValidationReport,
+        read_permission="validation.read",
+        write_permission="validation.create",
+        project_id_attr="project_id",
+    )
+)

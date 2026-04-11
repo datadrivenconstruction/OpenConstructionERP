@@ -152,46 +152,13 @@ async def delete_session(
 
 
 # ── Vector / semantic memory endpoints ───────────────────────────────────
-
-
-@router.get("/vector/status/")
-async def chat_vector_status(_user_id: CurrentUserId) -> dict[str, Any]:
-    """Return health + row count for the ``oe_chat`` collection."""
-    from app.core.vector_index import COLLECTION_CHAT, collection_status
-
-    return collection_status(COLLECTION_CHAT)
-
-
-@router.post("/vector/reindex/")
-async def chat_vector_reindex(
-    session: SessionDep,
-    _user_id: CurrentUserId,
-    project_id: uuid.UUID | None = Query(default=None),
-    purge_first: bool = Query(default=False),
-) -> dict[str, Any]:
-    """Backfill the chat-message vector collection.
-
-    Loads every persisted ChatMessage (eager-loading the parent session
-    so the adapter can resolve project_id) and pushes the lot through
-    the multi-collection backfill helper.
-    """
-    from sqlalchemy import select
-    from sqlalchemy.orm import selectinload
-
-    from app.core.vector_index import reindex_collection
-    from app.modules.erp_chat.vector_adapter import chat_message_adapter
-
-    stmt = select(ChatMessage).options(selectinload(ChatMessage.session))
-    if project_id is not None:
-        stmt = stmt.join(ChatSession, ChatMessage.session_id == ChatSession.id).where(
-            ChatSession.project_id == project_id
-        )
-    rows = list((await session.execute(stmt)).scalars().all())
-    return await reindex_collection(
-        chat_message_adapter,
-        rows,
-        purge_first=purge_first,
-    )
+#
+# ``/vector/status/`` + ``/vector/reindex/`` are wired via the shared
+# factory (see ``include_router`` at the bottom of this file).  Chat
+# messages are scoped via a join through ``ChatSession.project_id``, so
+# we pass a custom loader.  These endpoints have no module-permission
+# check — any authenticated user can inspect / rebuild chat embeddings,
+# preserving the original behaviour.
 
 
 @router.get("/messages/{message_id}/similar/")
@@ -235,3 +202,35 @@ async def chat_message_similar(
         "cross_project": cross_project,
         "hits": [h.to_dict() for h in hits],
     }
+
+
+# ── Mount vector status + reindex via the shared factory ────────────────
+from sqlalchemy import select as _select  # noqa: E402
+from sqlalchemy.orm import selectinload as _selectinload  # noqa: E402
+
+from app.core.vector_index import COLLECTION_CHAT  # noqa: E402
+from app.core.vector_routes import create_vector_routes  # noqa: E402
+from app.modules.erp_chat.vector_adapter import (  # noqa: E402
+    chat_message_adapter as _chat_message_adapter,
+)
+
+
+async def _chat_loader(session: Any, project_id: uuid.UUID | None) -> list[Any]:
+    stmt = _select(ChatMessage).options(_selectinload(ChatMessage.session))
+    if project_id is not None:
+        stmt = stmt.join(
+            ChatSession, ChatMessage.session_id == ChatSession.id
+        ).where(ChatSession.project_id == project_id)
+    return list((await session.execute(stmt)).scalars().all())
+
+
+router.include_router(
+    create_vector_routes(
+        collection=COLLECTION_CHAT,
+        adapter=_chat_message_adapter,
+        loader=_chat_loader,
+        read_permission=None,
+        write_permission=None,
+    )
+)
+

@@ -261,62 +261,12 @@ async def delete_risk(
 
 # ── Vector / semantic memory endpoints ───────────────────────────────────
 #
-# These three routes plug the risk module into the cross-module semantic
-# memory layer (see ``app/core/vector_index.py``).  Risks are the single
-# highest-value collection for cross-project semantic search — lessons
-# learned reuse is why this infrastructure exists in the first place —
-# so the ``similar`` endpoint defaults to ``cross_project=true``.
-
-
-@router.get(
-    "/vector/status/",
-    dependencies=[Depends(RequirePermission("risk.read"))],
-)
-async def risk_vector_status() -> dict[str, Any]:
-    """Return health + row count for the ``oe_risks`` collection.
-
-    Used by the admin panel and the global search status widget so the
-    user can tell at a glance whether semantic search over risks is
-    ready, partially indexed or empty.
-    """
-    from app.core.vector_index import COLLECTION_RISKS, collection_status
-
-    return collection_status(COLLECTION_RISKS)
-
-
-@router.post(
-    "/vector/reindex/",
-    dependencies=[Depends(RequirePermission("risk.update"))],
-)
-async def risk_vector_reindex(
-    session: SessionDep,
-    _user_id: CurrentUserId,
-    project_id: uuid.UUID | None = Query(default=None),
-    purge_first: bool = Query(default=False),
-) -> dict[str, Any]:
-    """Backfill the risk vector collection.
-
-    Optional ``project_id`` narrows the scope so users can reindex one
-    project at a time without re-embedding the entire tenant.  Set
-    ``purge_first=true`` to wipe the matching subset before re-encoding
-    — useful when the embedding model has changed.
-    """
-    from sqlalchemy import select
-
-    from app.core.vector_index import reindex_collection
-    from app.modules.risk.models import RiskItem
-    from app.modules.risk.vector_adapter import risk_vector_adapter
-
-    stmt = select(RiskItem)
-    if project_id is not None:
-        stmt = stmt.where(RiskItem.project_id == project_id)
-
-    rows = list((await session.execute(stmt)).scalars().all())
-    return await reindex_collection(
-        risk_vector_adapter,
-        rows,
-        purge_first=purge_first,
-    )
+# ``/vector/status/`` + ``/vector/reindex/`` wired via the shared factory
+# (see the ``include_router`` call at the bottom of this file).  Risks
+# are the single highest-value collection for cross-project semantic
+# search — lessons learned reuse is why this infrastructure exists in
+# the first place — so the ``similar`` endpoint below defaults to
+# ``cross_project=true``.
 
 
 @router.get(
@@ -367,3 +317,23 @@ async def risk_similar(
         "cross_project": cross_project,
         "hits": [h.to_dict() for h in hits],
     }
+
+
+# ── Mount vector status + reindex via the shared factory ────────────────
+from app.core.vector_index import COLLECTION_RISKS  # noqa: E402
+from app.core.vector_routes import create_vector_routes  # noqa: E402
+from app.modules.risk.models import RiskItem as _RiskItemModel  # noqa: E402
+from app.modules.risk.vector_adapter import (  # noqa: E402
+    risk_vector_adapter as _risk_vector_adapter,
+)
+
+router.include_router(
+    create_vector_routes(
+        collection=COLLECTION_RISKS,
+        adapter=_risk_vector_adapter,
+        model=_RiskItemModel,
+        read_permission="risk.read",
+        write_permission="risk.update",
+        project_id_attr="project_id",
+    )
+)

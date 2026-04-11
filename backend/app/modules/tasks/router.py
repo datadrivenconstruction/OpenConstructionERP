@@ -750,61 +750,10 @@ async def update_task_bim_links(
 
 # ── Vector / semantic memory endpoints ───────────────────────────────────
 #
-# These three routes plug the Tasks module into the cross-module semantic
-# memory layer (see ``app/core/vector_index.py``).  They are intentionally
-# uniform across every module that participates — only the adapter and
-# the row loader differ.
-
-
-@router.get(
-    "/vector/status/",
-    dependencies=[Depends(RequirePermission("tasks.read"))],
-)
-async def tasks_vector_status() -> dict[str, Any]:
-    """Return health + row count for the ``oe_tasks`` collection.
-
-    Used by the admin panel and the global search status widget so the
-    user can tell at a glance whether semantic search over tasks is
-    ready, partially indexed or empty.
-    """
-    from app.core.vector_index import COLLECTION_TASKS, collection_status
-
-    return collection_status(COLLECTION_TASKS)
-
-
-@router.post(
-    "/vector/reindex/",
-    dependencies=[Depends(RequirePermission("tasks.update"))],
-)
-async def tasks_vector_reindex(
-    session: SessionDep,
-    _user_id: CurrentUserId,
-    project_id: uuid.UUID | None = Query(default=None),
-    purge_first: bool = Query(default=False),
-) -> dict[str, Any]:
-    """Backfill the Tasks vector collection.
-
-    Optional ``project_id`` narrows the scope so users can reindex one
-    project at a time without re-embedding the entire tenant.  Set
-    ``purge_first=true`` to wipe the matching subset before re-encoding —
-    useful when the embedding model has changed.
-    """
-    from sqlalchemy import select
-
-    from app.core.vector_index import reindex_collection
-    from app.modules.tasks.models import Task
-    from app.modules.tasks.vector_adapter import task_vector_adapter
-
-    stmt = select(Task)
-    if project_id is not None:
-        stmt = stmt.where(Task.project_id == project_id)
-
-    rows = list((await session.execute(stmt)).scalars().all())
-    return await reindex_collection(
-        task_vector_adapter,
-        rows,
-        purge_first=purge_first,
-    )
+# ``/vector/status/`` + ``/vector/reindex/`` are wired via the shared
+# factory in ``app.core.vector_routes`` (see the ``include_router`` call
+# at the bottom of this file).  The ``/{id}/similar/`` endpoint below
+# stays module-specific.
 
 
 @router.get(
@@ -853,3 +802,23 @@ async def tasks_similar(
         "cross_project": cross_project,
         "hits": [h.to_dict() for h in hits],
     }
+
+
+# ── Mount vector status + reindex via the shared factory ────────────────
+from app.core.vector_index import COLLECTION_TASKS  # noqa: E402
+from app.core.vector_routes import create_vector_routes  # noqa: E402
+from app.modules.tasks.models import Task as _TaskModel  # noqa: E402
+from app.modules.tasks.vector_adapter import (  # noqa: E402
+    task_vector_adapter as _task_vector_adapter,
+)
+
+router.include_router(
+    create_vector_routes(
+        collection=COLLECTION_TASKS,
+        adapter=_task_vector_adapter,
+        model=_TaskModel,
+        read_permission="tasks.read",
+        write_permission="tasks.update",
+        project_id_attr="project_id",
+    )
+)

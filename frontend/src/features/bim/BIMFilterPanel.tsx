@@ -83,6 +83,13 @@ export interface BIMFilterState {
 
 interface BIMFilterPanelProps {
   elements: BIMElementData[];
+  /** Active BIM model id — used as a useEffect dependency to reset
+   *  the panel's transient filter state (search / storey / type
+   *  selections / expanded headers / active group highlight) when
+   *  the user switches to a different model.  Without this the
+   *  filter UI shows checkboxes for storeys / types that don't
+   *  exist in the new model. */
+  modelId?: string;
   /** Raw model_format string from backend ("rvt" / "ifc" / …). */
   modelFormat?: string;
   onFilterChange: (
@@ -266,6 +273,7 @@ function formatLevelBadge(level: number | null): string {
 
 export default function BIMFilterPanel({
   elements,
+  modelId,
   modelFormat,
   onFilterChange,
   onClose,
@@ -313,6 +321,26 @@ export default function BIMFilterPanel({
   /** ID of the saved group whose filter is currently applied (if any) — used
    *  to highlight the active group row. */
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
+
+  // Reset every transient filter state slot when the user switches
+  // to a different BIM model.  Without this, checkboxes for storeys
+  // and types from the previous model linger in the panel UI even
+  // though the new model has nothing matching them — the predicate
+  // gets rebuilt by onFilterChange but the checkbox state is stale,
+  // so the displayed filter does not match the applied filter.
+  useEffect(() => {
+    setState({
+      search: '',
+      storeys: new Set(),
+      types: new Set(),
+      buildingsOnly: true,
+      groupBy: 'type',
+    });
+    setExpandedCategories(new Set());
+    setExpandedGroups(new Set());
+    setExpandedBuckets(new Set(['structure', 'envelope', 'openings', 'mep']));
+    setActiveGroupId(null);
+  }, [modelId]);
 
   /** Apply a saved group's `filter_criteria` to the panel state.  Converts
    *  the BIMGroupFilterCriteria array shape into the panel's Set shape. */
@@ -654,7 +682,7 @@ export default function BIMFilterPanel({
             value={state.search}
             onChange={(e) => setState((p) => ({ ...p, search: e.target.value }))}
             placeholder={t('bim.filter_search_placeholder', {
-              defaultValue: 'Search name, type, storey…',
+              defaultValue: 'Search name, type, level…',
             })}
             className="w-full ps-8 pe-8 py-1.5 text-xs rounded-md bg-surface-secondary border border-border-light focus:outline-none focus:ring-1 focus:ring-oe-blue focus:border-oe-blue"
           />
@@ -950,7 +978,7 @@ export default function BIMFilterPanel({
         {/* Storeys — sorted by parsed level number (B2 → G → 01 → 02 → …)
             with a small level badge on each chip. */}
         <FilterSection
-          title={t('bim.filter_storeys', { defaultValue: 'Storeys' })}
+          title={t('bim.filter_levels', { defaultValue: 'Levels' })}
           icon={<Layers size={12} />}
           action={
             counts.storeys.length > 0 && state.storeys.size > 0 ? (
@@ -995,9 +1023,10 @@ export default function BIMFilterPanel({
               </button>
             );
           })}
+          {/* fallback message tweaked for the renamed "Levels" label */}
           {counts.storeys.length === 0 && (
             <div className="text-[10px] text-content-quaternary italic">
-              {t('bim.filter_no_storeys', { defaultValue: 'No levels detected in this model' })}
+              {t('bim.filter_no_levels', { defaultValue: 'No levels detected in this model' })}
             </div>
           )}
         </FilterSection>
@@ -1262,7 +1291,7 @@ export default function BIMFilterPanel({
               className="text-[10px] py-0.5 px-1.5 rounded border border-border-light bg-surface-primary text-content-secondary focus:outline-none focus:ring-1 focus:ring-oe-blue"
             >
               <option value="storey">
-                {t('bim.filter_group_storey', { defaultValue: 'by Storey' })}
+                {t('bim.filter_group_level', { defaultValue: 'by Level' })}
               </option>
               <option value="type">{typeGroupLabel}</option>
             </select>
