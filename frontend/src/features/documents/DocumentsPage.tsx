@@ -86,6 +86,7 @@ function PreviewModal({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const kind = isPreviewable(doc.mime_type);
 
   useEffect(() => {
@@ -95,6 +96,20 @@ function PreviewModal({
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [onClose]);
+
+  // Reverse-direction lookup: every BIM element this document is linked to.
+  // The endpoint may not exist on older deployments — we tolerate a 404 by
+  // showing nothing instead of throwing.  Lazy-loaded only when the modal
+  // is open so we don't hammer the API on every documents-list render.
+  const { data: linkedElements } = useQuery({
+    queryKey: ['document-bim-links', doc.id],
+    queryFn: () =>
+      apiGet<{ items: Array<{ id: string; bim_element_id: string; document_id: string }> }>(
+        `/v1/documents/bim-links/?document_id=${encodeURIComponent(doc.id)}`,
+      ).catch(() => ({ items: [] })),
+    enabled: !!doc.id,
+    staleTime: 30_000,
+  });
 
   return (
     <div
@@ -149,6 +164,45 @@ function PreviewModal({
             />
           ) : null}
         </div>
+
+        {/* Linked BIM elements — appears at the bottom of the preview when
+            this document has any DocumentBIMLink rows.  Click → opens the
+            BIM viewer with the element preselected. */}
+        {linkedElements && linkedElements.items.length > 0 && (
+          <div className="border-t border-border-light px-5 py-3 bg-surface-primary shrink-0">
+            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-2">
+              {t('documents.linked_bim_elements', {
+                defaultValue: 'Linked BIM elements',
+              })}
+              <span className="ms-2 text-content-quaternary normal-case font-normal">
+                ({linkedElements.items.length})
+              </span>
+            </h4>
+            <div className="flex flex-wrap gap-1">
+              {linkedElements.items.slice(0, 12).map((link) => (
+                <button
+                  key={link.id}
+                  type="button"
+                  onClick={() => {
+                    navigate(`/bim?element=${encodeURIComponent(link.bim_element_id)}`);
+                    onClose();
+                  }}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-border-light text-[11px] text-content-secondary hover:text-oe-blue hover:bg-oe-blue/5"
+                  title={link.bim_element_id}
+                >
+                  <span className="font-mono text-[10px]">
+                    {link.bim_element_id.slice(0, 8)}
+                  </span>
+                </button>
+              ))}
+              {linkedElements.items.length > 12 && (
+                <span className="text-[10px] text-content-tertiary">
+                  + {linkedElements.items.length - 12} more
+                </span>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

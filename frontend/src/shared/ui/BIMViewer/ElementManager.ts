@@ -37,6 +37,36 @@ export interface BIMBOQLinkBrief {
   confidence: string | null;
 }
 
+/** Brief of a Document linked to this element. */
+export interface BIMDocumentLinkBrief {
+  id: string;
+  document_id: string;
+  document_name: string | null;
+  document_category: string | null;
+  link_type: 'manual' | 'auto';
+  confidence: string | null;
+}
+
+/** Brief of a Task linked to this element. */
+export interface BIMTaskBrief {
+  id: string;
+  project_id: string;
+  title: string;
+  status: string;
+  task_type: string | null;
+  due_date: string | null;
+}
+
+/** Brief of a Schedule Activity linked to this element. */
+export interface BIMActivityBrief {
+  id: string;
+  name: string;
+  start_date: string | null;
+  end_date: string | null;
+  status: string | null;
+  percent_complete: number | null;
+}
+
 export interface BIMElementData {
   id: string;
   name: string;
@@ -52,6 +82,13 @@ export interface BIMElementData {
   /** Links to BOQ positions — populated by the backend with every element
    *  fetch so the viewer can render link state without a second round-trip. */
   boq_links?: BIMBOQLinkBrief[];
+  /** Documents (drawings, photos, RFIs, specs) linked to this element.
+   *  Same eager-load pattern as boq_links. */
+  linked_documents?: BIMDocumentLinkBrief[];
+  /** Tasks / defects / issues spatially pinned to this element. */
+  linked_tasks?: BIMTaskBrief[];
+  /** Schedule activities (4D) that affect this element. */
+  linked_activities?: BIMActivityBrief[];
 }
 
 export interface BIMModelData {

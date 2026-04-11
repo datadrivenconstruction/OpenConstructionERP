@@ -827,6 +827,29 @@ export function BIMPage() {
     setLinkCandidates([element]);
   }, []);
 
+  // Cross-module navigation handlers — fired when the user clicks a row
+  // in the Linked Documents / Tasks / Activities sections of the
+  // selected-element panel.  Each one takes them to the relevant module
+  // and pre-selects the target.
+  const handleOpenDocument = useCallback(
+    (documentId: string) => {
+      navigate(`/documents?id=${encodeURIComponent(documentId)}`);
+    },
+    [navigate],
+  );
+  const handleOpenTask = useCallback(
+    (taskId: string) => {
+      navigate(`/tasks?id=${encodeURIComponent(taskId)}`);
+    },
+    [navigate],
+  );
+  const handleOpenActivity = useCallback(
+    (activityId: string) => {
+      navigate(`/schedule?activity=${encodeURIComponent(activityId)}`);
+    },
+    [navigate],
+  );
+
   // Link a saved group to a BOQ position — looks up every member element
   // by id from the current `elements` list and opens AddToBOQModal with
   // the resolved subset.  If some member ids aren't in the loaded element
@@ -1136,6 +1159,9 @@ export function BIMPage() {
             onGeometryLoaded={setMeshMatchRatio}
             onAddToBOQ={handleAddToBOQ}
             onUnlinkBOQ={handleUnlinkBOQ}
+            onOpenDocument={handleOpenDocument}
+            onOpenTask={handleOpenTask}
+            onOpenActivity={handleOpenActivity}
             className="h-full"
           />
         ) : (

@@ -230,6 +230,37 @@ class LinkPositionRequest(BaseModel):
     boq_position_id: UUID
 
 
+class ActivityBimLinkRequest(BaseModel):
+    """Request body for replacing the BIM element link set on an activity.
+
+    The full ``bim_element_ids`` list is replaced atomically — callers that
+    want to add/remove a single element should read the current list, mutate
+    it, then PATCH the whole array back.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    bim_element_ids: list[str] = Field(default_factory=list)
+
+
+class ActivityBrief(BaseModel):
+    """Lightweight activity summary embedded in a BIM element response.
+
+    Mirrors the ``ActivityBrief`` schema declared in ``bim_hub.schemas`` —
+    the two are kept in sync so the viewer can render schedule badges on
+    linked elements without a second round trip.
+    """
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    name: str
+    start_date: str | None = None
+    end_date: str | None = None
+    status: str
+    percent_complete: float = 0.0
+
+
 class ProgressUpdateRequest(BaseModel):
     """Request body for updating activity progress."""
 
