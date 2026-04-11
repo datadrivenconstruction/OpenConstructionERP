@@ -710,7 +710,14 @@ export function BIMPage() {
     ((el: BIMElementData) => boolean) | null
   >(null);
   const [visibleElementCount, setVisibleElementCount] = useState<number | null>(null);
-  const [colorByMode, setColorByMode] = useState<'default' | 'storey' | 'type'>('default');
+  const [colorByMode, setColorByMode] = useState<
+    | 'default'
+    | 'storey'
+    | 'type'
+    | 'validation'
+    | 'boq_coverage'
+    | 'document_coverage'
+  >('default');
   const [isolatedIds, setIsolatedIds] = useState<string[] | null>(null);
   const [processing, setProcessing] = useState<ProcessingUpdate | null>(null);
   const [meshMatchRatio, setMeshMatchRatio] = useState<number | null>(null);
@@ -824,6 +831,41 @@ export function BIMPage() {
       setVisibleElementCount(visibleCount);
     },
     [],
+  );
+
+  // Smart-filter chips emitted by BIMViewer's health stats banner.
+  // Each chip applies a one-shot predicate that narrows the viewport
+  // to elements matching a specific cross-module health bucket.
+  const handleSmartFilter = useCallback(
+    (filterId: 'errors' | 'warnings' | 'unlinked_boq' | 'has_tasks' | 'has_docs') => {
+      const predicates: Record<typeof filterId, (el: BIMElementData) => boolean> = {
+        errors: (el) => el.validation_status === 'error',
+        warnings: (el) => el.validation_status === 'warning',
+        unlinked_boq: (el) => (el.boq_links?.length ?? 0) === 0,
+        has_tasks: (el) => (el.linked_tasks?.length ?? 0) > 0,
+        has_docs: (el) => (el.linked_documents?.length ?? 0) > 0,
+      };
+      const predicate = predicates[filterId];
+      const subset = elements.filter(predicate);
+      setFilterPredicate(() => predicate);
+      setVisibleElementCount(subset.length);
+      const labels: Record<typeof filterId, string> = {
+        errors: t('bim.smart_filter_errors', { defaultValue: 'Validation errors' }),
+        warnings: t('bim.smart_filter_warnings', { defaultValue: 'Validation warnings' }),
+        unlinked_boq: t('bim.smart_filter_unlinked_boq', { defaultValue: 'Unlinked to BOQ' }),
+        has_tasks: t('bim.smart_filter_has_tasks', { defaultValue: 'With tasks' }),
+        has_docs: t('bim.smart_filter_has_docs', { defaultValue: 'With documents' }),
+      };
+      addToast({
+        type: subset.length === 0 ? 'info' : 'success',
+        title: labels[filterId],
+        message: t('bim.smart_filter_applied', {
+          count: subset.length,
+          defaultValue: '{{count}} elements match',
+        }),
+      });
+    },
+    [elements, t, addToast],
   );
 
   const handleFilterElementClick = useCallback((elementId: string) => {
@@ -1089,16 +1131,43 @@ export function BIMPage() {
                 )}
               </button>
 
-              {/* Color-by selector */}
+              {/* Color-by selector — three families:
+                  · Field-based (Storey / Type) use the hash-to-hue palette
+                  · Compliance-based (Validation / BOQ / Documents) use a
+                    fixed red/amber/green palette and turn the 3D viewer
+                    into a live compliance dashboard. */}
               <select
                 value={colorByMode}
-                onChange={(e) => setColorByMode(e.target.value as 'default' | 'storey' | 'type')}
+                onChange={(e) =>
+                  setColorByMode(
+                    e.target.value as
+                      | 'default'
+                      | 'storey'
+                      | 'type'
+                      | 'validation'
+                      | 'boq_coverage'
+                      | 'document_coverage',
+                  )
+                }
                 title={t('bim.color_by', { defaultValue: 'Color by' })}
                 className="text-[11px] py-1.5 px-2 rounded-lg border border-border-light bg-surface-secondary text-content-secondary hover:bg-surface-tertiary focus:outline-none focus:ring-1 focus:ring-oe-blue"
               >
-                <option value="default">{t('bim.color_default', { defaultValue: 'Color: Category' })}</option>
-                <option value="storey">{t('bim.color_storey', { defaultValue: 'Color: Storey' })}</option>
-                <option value="type">{t('bim.color_type', { defaultValue: 'Color: Type' })}</option>
+                <optgroup label={t('bim.color_group_field', { defaultValue: 'By field' })}>
+                  <option value="default">{t('bim.color_default', { defaultValue: 'Default' })}</option>
+                  <option value="storey">{t('bim.color_storey', { defaultValue: 'Storey' })}</option>
+                  <option value="type">{t('bim.color_type', { defaultValue: 'Category' })}</option>
+                </optgroup>
+                <optgroup label={t('bim.color_group_status', { defaultValue: 'By compliance' })}>
+                  <option value="validation">
+                    {t('bim.color_validation', { defaultValue: '🛡️ Validation status' })}
+                  </option>
+                  <option value="boq_coverage">
+                    {t('bim.color_boq_coverage', { defaultValue: '💰 BOQ link coverage' })}
+                  </option>
+                  <option value="document_coverage">
+                    {t('bim.color_doc_coverage', { defaultValue: '📄 Document coverage' })}
+                  </option>
+                </optgroup>
               </select>
 
               {/* Isolate toggle (when an element is selected) */}
@@ -1153,6 +1222,7 @@ export function BIMPage() {
               savedGroups={savedGroups}
               onLinkGroupToBOQ={handleLinkGroupToBOQ}
               onDeleteGroup={handleDeleteGroup}
+              onSmartFilter={handleSmartFilter}
             />
           </div>
         )}
@@ -1187,6 +1257,7 @@ export function BIMPage() {
             onCreateTask={handleCreateTask}
             onLinkDocument={handleLinkDocument}
             onLinkActivity={handleLinkActivity}
+            onSmartFilter={handleSmartFilter}
             className="h-full"
           />
         ) : (

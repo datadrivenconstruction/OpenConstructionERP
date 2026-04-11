@@ -853,6 +853,51 @@ export class ElementManager {
   }
 
   /**
+   * Re-color every mesh using a direct (element → Color | null) function.
+   * Returning null leaves the mesh at its original colour.  This is the
+   * fixed-palette path used by the "color by validation" / "color by BOQ
+   * coverage" / "color by document coverage" modes — where we want a
+   * meaningful red/amber/green colour scale, not the hash-to-hue rainbow
+   * the existing `colorBy()` produces.
+   */
+  colorByDirect(colorFn: (el: BIMElementData) => THREE.Color | null): void {
+    for (const [elementId, mesh] of this.meshMap) {
+      const el = this.elementDataMap.get(elementId);
+      if (!el) continue;
+      const color = colorFn(el);
+
+      const ud = mesh.userData as {
+        customMaterial?: boolean;
+        originalMaterial?: THREE.Material | THREE.Material[];
+      };
+
+      if (color === null) {
+        // Restore original material if we'd previously cloned one
+        if (ud.customMaterial) {
+          const old = mesh.material;
+          if (old instanceof THREE.MeshStandardMaterial) old.dispose();
+          if (ud.originalMaterial) mesh.material = ud.originalMaterial;
+          ud.customMaterial = false;
+        }
+        continue;
+      }
+
+      // Clone material on first recolor so we don't mutate the shared one
+      if (!ud.customMaterial) {
+        const base = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
+        if (base && 'clone' in base) {
+          mesh.material = (base as THREE.Material & { clone(): THREE.Material }).clone();
+          ud.customMaterial = true;
+        }
+      }
+      const mat = mesh.material as THREE.MeshStandardMaterial | THREE.MeshPhongMaterial;
+      if (mat && 'color' in mat && mat.color) {
+        mat.color.copy(color);
+      }
+    }
+  }
+
+  /**
    * Re-color every mesh based on a key-extractor function. A distinct color
    * is assigned to each unique key via a simple hash-to-hue mapping.
    * Used to implement "color by storey" and "color by type" modes.

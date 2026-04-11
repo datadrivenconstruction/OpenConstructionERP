@@ -17,12 +17,24 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { X, Search, Plus, CheckCircle2, Loader2, Link2 } from 'lucide-react';
-import { apiGet } from '@/shared/lib/api';
+import { X, Search, Plus, CheckCircle2, Loader2, Link2, Sparkles } from 'lucide-react';
+import { apiGet, apiPost } from '@/shared/lib/api';
 import { boqApi, type BOQ, type BOQWithPositions, type Position } from '@/features/boq/api';
 import { createLink } from './api';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
 import { useToastStore } from '@/stores/useToastStore';
+
+/** Backend response shape for POST /api/v1/costs/suggest-for-element/. */
+interface CostSuggestion {
+  cost_item_id: string;
+  code: string;
+  description: string;
+  unit: string;
+  unit_rate: number | string;
+  classification: Record<string, string>;
+  score: number;
+  match_reasons: string[];
+}
 
 interface AddToBOQModalProps {
   projectId: string;
@@ -117,6 +129,49 @@ export default function AddToBOQModal({
     setUnit(d.unit);
     setQuantity(d.quantity.toFixed(3));
   }, [elements]);
+
+  // ── Cost auto-suggestions (CWICR / cost database) ───────────────────
+  //
+  // Calls POST /api/v1/costs/suggest-for-element/ with the *first* element's
+  // attributes (the bulk case shares enough similarity that ranking the
+  // first item is a sound approximation).  Results are rendered as chips
+  // above the unit-rate field; clicking a chip fills description / unit /
+  // unit_rate so the estimator skips manual lookup.
+  const firstEl = elements[0];
+  const suggestionsQuery = useQuery<CostSuggestion[]>({
+    queryKey: [
+      'cost-suggestions-for-element',
+      firstEl?.id,
+      firstEl?.element_type,
+      firstEl?.name,
+    ],
+    enabled: !!firstEl && tab === 'new',
+    staleTime: 5 * 60 * 1000,
+    queryFn: () =>
+      apiPost<CostSuggestion[]>('/api/v1/costs/suggest-for-element/', {
+        element_type: firstEl?.element_type ?? null,
+        name: firstEl?.name ?? null,
+        discipline: firstEl?.discipline ?? null,
+        properties: firstEl?.properties ?? null,
+        quantities: firstEl?.quantities ?? null,
+        classification: firstEl?.classification ?? null,
+        limit: 5,
+      }),
+  });
+  const suggestions: CostSuggestion[] = suggestionsQuery.data ?? [];
+
+  /** Apply a clicked suggestion to the form fields.  We keep the user's
+   *  current quantity (it's geometric, not from CWICR) and only overwrite
+   *  description, unit and unit_rate. */
+  const applySuggestion = (s: CostSuggestion) => {
+    setDescription(s.description);
+    setUnit(s.unit);
+    const num =
+      typeof s.unit_rate === 'number'
+        ? s.unit_rate
+        : Number.parseFloat(String(s.unit_rate));
+    if (Number.isFinite(num)) setUnitRate(String(num));
+  };
 
   // ── Fetch BOQs for this project ────────────────────────────────────
   const boqsQuery = useQuery({
@@ -443,13 +498,100 @@ export default function AddToBOQModal({
               </div>
 
               <div>
-                <Label>{t('bim.form_unit_rate', { defaultValue: 'Unit rate' })}</Label>
+                <div className="flex items-center justify-between mb-0.5">
+                  <Label>{t('bim.form_unit_rate', { defaultValue: 'Unit rate' })}</Label>
+                  {suggestionsQuery.isLoading && (
+                    <span className="inline-flex items-center gap-1 text-[10px] text-content-tertiary">
+                      <Loader2 size={9} className="animate-spin" />
+                      {t('bim.suggesting_costs', {
+                        defaultValue: 'Suggesting…',
+                      })}
+                    </span>
+                  )}
+                </div>
                 <input
                   type="text"
                   value={unitRate}
                   onChange={(e) => setUnitRate(e.target.value)}
                   className="w-full px-2 py-1.5 text-sm rounded border border-border-light bg-surface-primary focus:outline-none focus:ring-1 focus:ring-oe-blue tabular-nums"
                 />
+
+                {/* Cost suggestion chips — top-N CWICR matches for this
+                    element.  Click any chip to populate description /
+                    unit / unit_rate from the matching cost item. */}
+                {suggestions.length > 0 && (
+                  <div className="mt-2">
+                    <div className="flex items-center gap-1 mb-1">
+                      <Sparkles size={10} className="text-amber-500" />
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+                        {t('bim.cost_suggestions', {
+                          defaultValue: 'Suggested rates',
+                        })}
+                      </span>
+                    </div>
+                    <ul className="space-y-1">
+                      {suggestions.map((s) => {
+                        const rateNum =
+                          typeof s.unit_rate === 'number'
+                            ? s.unit_rate
+                            : Number.parseFloat(String(s.unit_rate));
+                        const rateLabel = Number.isFinite(rateNum)
+                          ? rateNum.toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })
+                          : String(s.unit_rate);
+                        const confidencePct = Math.round(s.score * 100);
+                        const confColor =
+                          s.score >= 0.6
+                            ? 'bg-emerald-500'
+                            : s.score >= 0.35
+                              ? 'bg-amber-500'
+                              : 'bg-slate-400';
+                        return (
+                          <li key={s.cost_item_id}>
+                            <button
+                              type="button"
+                              onClick={() => applySuggestion(s)}
+                              title={
+                                s.match_reasons.length > 0
+                                  ? s.match_reasons.join(' • ')
+                                  : undefined
+                              }
+                              className="w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded border border-border-light bg-surface-secondary hover:bg-oe-blue/5 hover:border-oe-blue/40 text-start transition-colors"
+                            >
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-1.5">
+                                  <span
+                                    className={`inline-block h-1.5 w-1.5 rounded-full ${confColor}`}
+                                    aria-hidden
+                                  />
+                                  <span className="text-[10px] font-mono font-semibold text-content-primary">
+                                    {s.code}
+                                  </span>
+                                  <span className="text-[9px] text-content-quaternary tabular-nums">
+                                    {confidencePct}%
+                                  </span>
+                                </div>
+                                <div className="text-[11px] text-content-secondary truncate">
+                                  {s.description}
+                                </div>
+                              </div>
+                              <div className="text-right shrink-0">
+                                <div className="text-xs font-semibold text-content-primary tabular-nums">
+                                  {rateLabel}
+                                </div>
+                                <div className="text-[9px] text-content-tertiary">
+                                  / {s.unit}
+                                </div>
+                              </div>
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                )}
               </div>
 
               <div className="rounded-md border border-oe-blue/20 bg-oe-blue/5 p-2 text-[11px] text-content-secondary">

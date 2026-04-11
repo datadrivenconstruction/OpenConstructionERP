@@ -5,6 +5,34 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.32] — 2026-04-10
+
+### Added
+- **BIM viewer health stats banner** — top-of-viewport multi-pill banner
+  shows total elements, BOQ-linked count, validation errors, warnings,
+  has-tasks and has-documents counts.  Each pill is clickable and applies
+  the matching smart filter to the viewport in one click.
+- **Smart filter chips in BIMFilterPanel** — same five health buckets
+  exposed as chips at the top of the filter sidebar (errors, warnings,
+  unlinked-to-BOQ, has tasks, has documents).  Counts are computed from
+  the cross-module link arrays on each element.
+- **Color-by status modes** in the BIM viewer — three new colour-by
+  options grouped under "By compliance":  🛡️ Validation status (red /
+  amber / green), 💰 BOQ link coverage (red unlinked / green linked),
+  📄 Document coverage.  Implemented via a new
+  `ElementManager.colorByDirect()` helper that paints meshes from a
+  fixed palette without rebuilding materials.
+- **Cost auto-suggestion for BIM elements** — new
+  `POST /api/v1/costs/suggest-for-element/` endpoint ranks CWICR cost
+  items by classification overlap, element-type / material / family
+  keyword matches and discipline tag overlap.  Each result carries a
+  0..1 confidence score and human-readable match reasons.
+- **Cost suggestion chips in AddToBOQModal** — the "Create new position"
+  tab now fetches the top-5 ranked rates for the clicked element and
+  renders them as one-click chips with code, description, unit rate and
+  confidence dot.  Clicking a chip populates description / unit /
+  unit_rate from the matching cost item — no manual lookup needed.
+
 ## [1.3.31] — 2026-04-11
 
 ### Added
