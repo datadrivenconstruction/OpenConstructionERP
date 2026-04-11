@@ -127,6 +127,198 @@ def _init_vector_db() -> None:
         logger.warning("Vector DB init skipped: %s", exc)
 
 
+async def _auto_backfill_vector_collections() -> None:
+    """Backfill the multi-collection vector store from existing rows.
+
+    The event-driven indexing layer (added in v1.4.0) only fires for
+    rows that are created or updated AFTER the upgrade.  On a fresh
+    install with no data this is a no-op; on an existing v1.3.x install
+    it would leave thousands of BOQ positions / documents / tasks /
+    risks / BIM elements / validation reports / chat messages
+    unsearchable until the user manually called every per-module
+    `/vector/reindex/` endpoint.
+
+    This helper closes that gap automatically.  For each registered
+    collection it:
+
+    1. Reads the live row count from Postgres / SQLite
+    2. Reads the indexed row count from the vector store
+    3. If the vector store is short, runs ``reindex_collection`` for the
+       missing rows (capped by ``vector_backfill_max_rows`` per pass)
+
+    Designed to be **non-blocking** — it runs in a detached background
+    task so startup completes immediately even if the model loader has
+    to download a fresh embedding checkpoint.
+
+    All failures are logged and swallowed.  Disable entirely with
+    ``vector_auto_backfill=False`` in settings.
+    """
+    try:
+        from sqlalchemy import select
+
+        from app.config import get_settings
+        from app.core.vector import vector_count_collection
+        from app.core.vector_index import (
+            COLLECTION_BIM_ELEMENTS,
+            COLLECTION_BOQ,
+            COLLECTION_CHAT,
+            COLLECTION_DOCUMENTS,
+            COLLECTION_RISKS,
+            COLLECTION_TASKS,
+            COLLECTION_VALIDATION,
+            reindex_collection,
+        )
+        from app.database import async_session_factory
+
+        settings = get_settings()
+        if not settings.vector_auto_backfill:
+            logger.info("Vector auto-backfill disabled by settings; skipping")
+            return
+
+        cap = max(0, int(settings.vector_backfill_max_rows or 0))
+
+        async def _maybe_backfill(label: str, collection: str, loader, adapter) -> None:
+            try:
+                indexed = vector_count_collection(collection)
+            except Exception:
+                indexed = 0
+            try:
+                async with async_session_factory() as session:
+                    rows = await loader(session)
+            except Exception as exc:
+                logger.debug("Backfill loader %s failed: %s", label, exc)
+                return
+            if not rows:
+                return
+            live_total = len(rows)
+            if indexed >= live_total:
+                logger.debug(
+                    "Backfill %s: %d/%d already indexed; skipping",
+                    label,
+                    indexed,
+                    live_total,
+                )
+                return
+            if cap > 0 and live_total > cap:
+                rows = rows[:cap]
+                logger.info(
+                    "Backfill %s: %d live rows exceeds cap (%d); indexing first %d",
+                    label,
+                    live_total,
+                    cap,
+                    cap,
+                )
+            try:
+                result = await reindex_collection(adapter, rows)
+                logger.info(
+                    "Backfill %s: indexed=%d, skipped=%d (live=%d, was=%d)",
+                    label,
+                    result.get("indexed", 0),
+                    result.get("skipped", 0),
+                    live_total,
+                    indexed,
+                )
+            except Exception as exc:
+                logger.debug("Backfill %s reindex failed: %s", label, exc)
+
+        # ── BOQ positions ────────────────────────────────────────────────
+        async def _load_boq(session):
+            from sqlalchemy.orm import selectinload
+
+            from app.modules.boq.models import Position
+
+            stmt = select(Position).options(selectinload(Position.boq))
+            return list((await session.execute(stmt)).scalars().all())
+
+        from app.modules.boq.vector_adapter import boq_position_adapter
+
+        await _maybe_backfill("BOQ positions", COLLECTION_BOQ, _load_boq, boq_position_adapter)
+
+        # ── Documents ────────────────────────────────────────────────────
+        async def _load_documents(session):
+            from app.modules.documents.models import Document
+
+            return list((await session.execute(select(Document))).scalars().all())
+
+        from app.modules.documents.vector_adapter import document_vector_adapter
+
+        await _maybe_backfill(
+            "Documents", COLLECTION_DOCUMENTS, _load_documents, document_vector_adapter
+        )
+
+        # ── Tasks ────────────────────────────────────────────────────────
+        async def _load_tasks(session):
+            from app.modules.tasks.models import Task
+
+            return list((await session.execute(select(Task))).scalars().all())
+
+        from app.modules.tasks.vector_adapter import task_vector_adapter
+
+        await _maybe_backfill("Tasks", COLLECTION_TASKS, _load_tasks, task_vector_adapter)
+
+        # ── Risks ────────────────────────────────────────────────────────
+        async def _load_risks(session):
+            from app.modules.risk.models import RiskItem
+
+            return list((await session.execute(select(RiskItem))).scalars().all())
+
+        from app.modules.risk.vector_adapter import risk_vector_adapter
+
+        await _maybe_backfill("Risks", COLLECTION_RISKS, _load_risks, risk_vector_adapter)
+
+        # ── BIM elements ─────────────────────────────────────────────────
+        async def _load_bim_elements(session):
+            from sqlalchemy.orm import selectinload
+
+            from app.modules.bim_hub.models import BIMElement
+
+            stmt = select(BIMElement).options(selectinload(BIMElement.model))
+            return list((await session.execute(stmt)).scalars().all())
+
+        from app.modules.bim_hub.vector_adapter import bim_element_vector_adapter
+
+        await _maybe_backfill(
+            "BIM elements",
+            COLLECTION_BIM_ELEMENTS,
+            _load_bim_elements,
+            bim_element_vector_adapter,
+        )
+
+        # ── Validation reports ───────────────────────────────────────────
+        async def _load_validation(session):
+            from app.modules.validation.models import ValidationReport
+
+            return list(
+                (await session.execute(select(ValidationReport))).scalars().all()
+            )
+
+        from app.modules.validation.vector_adapter import validation_report_adapter
+
+        await _maybe_backfill(
+            "Validation reports",
+            COLLECTION_VALIDATION,
+            _load_validation,
+            validation_report_adapter,
+        )
+
+        # ── Chat messages ────────────────────────────────────────────────
+        async def _load_chat(session):
+            from sqlalchemy.orm import selectinload
+
+            from app.modules.erp_chat.models import ChatMessage
+
+            stmt = select(ChatMessage).options(selectinload(ChatMessage.session))
+            return list((await session.execute(stmt)).scalars().all())
+
+        from app.modules.erp_chat.vector_adapter import chat_message_adapter
+
+        await _maybe_backfill("Chat messages", COLLECTION_CHAT, _load_chat, chat_message_adapter)
+
+        logger.info("Vector auto-backfill pass complete")
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Vector auto-backfill skipped: %s", exc)
+
+
 async def _seed_demo_account() -> None:
     """Create demo user + 5 demo projects if they don't exist yet.
 
@@ -956,6 +1148,17 @@ def create_app() -> FastAPI:
         # Initialize vector database (LanceDB embedded, no Docker)
         _section("Vector DB")
         _init_vector_db()
+
+        # Auto-backfill the multi-collection vector store from existing
+        # rows.  Detached as a background task so a slow embedding model
+        # download or a large dataset doesn't delay startup — semantic
+        # search remains available the moment the model finishes loading.
+        try:
+            import asyncio as _asyncio_bf
+
+            _asyncio_bf.create_task(_auto_backfill_vector_collections())
+        except Exception:
+            logger.debug("Could not schedule vector backfill", exc_info=True)
 
         # ── KPI auto-recalculation scheduler (24-hour interval) ──────────
         import asyncio

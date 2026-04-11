@@ -87,6 +87,18 @@ class Settings(BaseSettings):
     embedding_model_name: str = "intfloat/multilingual-e5-small"
     embedding_model_dim: int = 384
     embedding_model_fallback: str = "sentence-transformers/all-MiniLM-L6-v2"
+    # On startup, scan every multi-collection vector store and backfill
+    # any rows that are not yet indexed.  Cheap on a fresh DB, useful when
+    # upgrading from a pre-v1.4.0 install where existing BOQ / Document /
+    # Task / Risk / BIM rows are not yet embedded.  Set ``false`` to
+    # disable in low-resource deployments where you'd rather call
+    # ``/vector/reindex/`` manually per module.
+    vector_auto_backfill: bool = True
+    # Per-collection cap for the auto backfill — protects against the
+    # case where someone enables backfill on a 5M-row tenant on first
+    # boot and the embedding loop saturates CPU for 30 minutes.  Set to
+    # 0 to disable the cap entirely.
+    vector_backfill_max_rows: int = 5000
     openai_api_key: str | None = None
     anthropic_api_key: str | None = None
     gemini_api_key: str | None = None
