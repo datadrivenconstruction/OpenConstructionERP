@@ -67,6 +67,25 @@ export interface BIMActivityBrief {
   percent_complete: number | null;
 }
 
+/** Brief of a Requirement (EAC triplet) pinned to this element.
+ *
+ *  The link is stored under `Requirement.metadata_["bim_element_ids"]`
+ *  on the backend; the BIM viewer surfaces it via the eager-load path
+ *  in `BIMHubService.list_elements_with_links` (Step 6.5).
+ */
+export interface BIMRequirementBrief {
+  id: string;
+  requirement_set_id: string;
+  entity: string;
+  attribute: string;
+  constraint_type: string;
+  constraint_value: string;
+  unit: string;
+  category: string;
+  priority: 'must' | 'should' | 'may' | string;
+  status: 'open' | 'verified' | 'linked' | 'conflict' | string;
+}
+
 /** Per-element validation summary embedded in the element response after
  *  the user runs POST /validation/check-bim-model. */
 export interface BIMValidationSummary {
@@ -97,6 +116,10 @@ export interface BIMElementData {
   linked_tasks?: BIMTaskBrief[];
   /** Schedule activities (4D) that affect this element. */
   linked_activities?: BIMActivityBrief[];
+  /** Requirements (EAC triplets) pinned to this element — the bridge
+   *  between client intent / spec and the executed model.  Surfaced as
+   *  the new "Linked requirements" section in the viewer details panel. */
+  linked_requirements?: BIMRequirementBrief[];
   /** Per-element validation summary from the most recent
    *  /validation/check-bim-model run. */
   validation_results?: BIMValidationSummary[];

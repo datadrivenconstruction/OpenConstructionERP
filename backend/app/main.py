@@ -163,6 +163,7 @@ async def _auto_backfill_vector_collections() -> None:
             COLLECTION_BOQ,
             COLLECTION_CHAT,
             COLLECTION_DOCUMENTS,
+            COLLECTION_REQUIREMENTS,
             COLLECTION_RISKS,
             COLLECTION_TASKS,
             COLLECTION_VALIDATION,
@@ -299,6 +300,28 @@ async def _auto_backfill_vector_collections() -> None:
             COLLECTION_VALIDATION,
             _load_validation,
             validation_report_adapter,
+        )
+
+        # ── Requirements (EAC triplets) ──────────────────────────────────
+        async def _load_requirements(session):
+            from sqlalchemy.orm import selectinload
+
+            from app.modules.requirements.models import Requirement
+
+            stmt = select(Requirement).options(
+                selectinload(Requirement.requirement_set)
+            )
+            return list((await session.execute(stmt)).scalars().all())
+
+        from app.modules.requirements.vector_adapter import (
+            requirement_vector_adapter,
+        )
+
+        await _maybe_backfill(
+            "Requirements",
+            COLLECTION_REQUIREMENTS,
+            _load_requirements,
+            requirement_vector_adapter,
         )
 
         # ── Chat messages ────────────────────────────────────────────────

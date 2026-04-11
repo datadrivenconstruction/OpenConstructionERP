@@ -5,6 +5,120 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.3] — 2026-04-11
+
+### Added — Requirements ↔ BIM cross-module integration
+
+The Requirements module is now the **5th cross-module link type** on
+BIM elements, mirroring the existing BOQ / Documents / Tasks /
+Schedule activities pattern.  Requirements (EAC triplets — Entity,
+Attribute, Constraint) are the bridge between client intent and the
+executed model — pinning them to BIM elements lets estimators trace
+*"this wall has fire-rating F90 because requirement REQ-042 says so"*
+in one click.
+
+#### Backend
+- **New `oe_requirements` vector collection** (8th total).  Embeds the
+  EAC triplet plus unit / category / priority / status / notes via
+  the new ``RequirementVectorAdapter`` in
+  ``backend/app/modules/requirements/vector_adapter.py``.  Multilingual
+  by default — works across English / German / Russian / Lithuanian /
+  French / Spanish / Italian / Polish / Portuguese.
+- **Requirements service event publishing** — new ``_safe_publish``
+  helper, plus standardised ``requirements.requirement.created /
+  updated / deleted / linked_bim`` events on every CRUD and link
+  operation.
+- **`link_to_bim_elements()` service method** — additive by default
+  (merges new ids with the existing array), pass ``replace=true`` to
+  overwrite.  Stored under ``Requirement.metadata_["bim_element_ids"]``
+  so no schema migration is needed.
+- **`list_by_bim_element()` reverse query** — every requirement that
+  pins a given BIM element id, scoped to a project for performance.
+- **New router endpoints** in ``requirements/router.py``:
+  - ``PATCH /requirements/{set_id}/requirements/{req_id}/bim-links/``
+  - ``GET  /requirements/by-bim-element/?bim_element_id=&project_id=``
+  - ``GET  /requirements/vector/status/``
+  - ``POST /requirements/vector/reindex/``
+  - ``GET  /requirements/{set_id}/requirements/{req_id}/similar/``
+- **`RequirementBrief` schema** in ``bim_hub/schemas.py`` — mirrors
+  the relevant subset of ``RequirementResponse`` to avoid a circular
+  import.  Added to ``BIMElementResponse.linked_requirements``.
+- **`BIMHubService.list_elements_with_links()` Step 6.5** — loads
+  every requirement in the project once and filters in Python on the
+  ``metadata_["bim_element_ids"]`` array, same cross-dialect pattern
+  as the task and activity loops.  Return tuple now has 8 entries.
+
+#### Frontend
+- **New `BIMRequirementBrief` interface** + ``linked_requirements``
+  field on ``BIMElementData``.
+- **New `LinkRequirementToBIMModal`** — mirrors ``LinkActivityToBIMModal``
+  exactly: loads every requirement set in the project, flattens
+  requirements into a searchable list, click → PATCH the bim-links
+  → invalidate the bim-elements query.  Color-coded by priority
+  (must / should / may) and status (verified / conflict / open).
+- **"Linked requirements" section in BIMViewer details panel** —
+  violet themed, slots between "Schedule activities" and the
+  semantic similarity panel.  Renders entity.attribute + constraint
+  + priority badge + click-to-open.
+- **BIMPage wiring** — new ``linkRequirementFor`` state +
+  ``handleLinkRequirement`` / ``handleOpenRequirement`` handlers,
+  modal mount, props passed to ``<BIMViewer>``.
+- **RequirementsPage badge** — the expanded row now shows a
+  "Pinned BIM elements" cell with the count read from
+  ``metadata.bim_element_ids``.  Click navigates to ``/bim?element=...``
+  with the first pinned element preselected.
+- **RequirementsPage deep link** — parses ``?id=<requirement_id>``,
+  fans out detail fetches across every set in the project to find
+  the owning set, switches to it and expands the row.  Strips the
+  param after one shot so refresh doesn't reapply.
+- **GlobalSearchModal facet support** — fuchsia color for the new
+  Requirements pill, ``oe_requirements`` mapped to ``/requirements?id=``
+  in ``hitToHref``.
+- **VectorStatusCard** picks up the new ``oe_requirements`` collection
+  via the existing ``REINDEX_PATH`` table — admins can trigger a
+  reindex from Settings.
+- **Auto-backfill on startup** now indexes the requirements collection
+  alongside the other 7 (capped by ``vector_backfill_max_rows``).
+
+### Fixed (polish bundled into this cut)
+- ``backend/pyproject.toml`` had silently drifted from the frontend
+  version since v1.3.31 — every bump from v1.3.32 → v1.4.2 updated
+  ``frontend/package.json`` but not the Python package.  ``/api/health``
+  has therefore been reporting ``version: "1.3.31"`` across the entire
+  v1.4.x series because ``app.config.Settings.app_version`` reads from
+  ``importlib.metadata.version("openconstructionerp")``.  Bumped
+  directly to ``1.4.3`` so the next deploy reports the real version.
+- ``bim_hub/router.py`` CAD upload handler referenced ``cad_path`` and
+  ``cad_dir`` variables that were never defined after the storage
+  abstraction was introduced — the IFC/RVT processing branch crashed
+  with ``NameError`` on every upload attempt (``ruff`` flagged the
+  same issue as ``F821``).  Replaced the ghost variables with a
+  ``tempfile.TemporaryDirectory`` workspace: the upload is materialised
+  locally for the sync processor, any generated geometry is uploaded
+  back through ``bim_file_storage.save_geometry`` before the tempdir
+  is cleaned up, and the Documents hub cross-link now stores the real
+  storage key returned by ``save_original_cad`` instead of the phantom
+  ``cad_path``.
+- ``SimilarItemsPanel`` no longer claims to support requirements —
+  the generic panel only knows the item id, but the requirement
+  similar endpoint is nested under the parent set
+  (``/requirements/{set_id}/requirements/{req_id}/similar/``), so
+  it needs both.  Requirement similarity is reachable only from the
+  set-scoped detail page; the generic cross-module panel would have
+  returned 404 for every call.  Removed the placeholder URL and the
+  ``'requirements'`` entry from ``SimilarModuleKind``.
+
+### Verification
+- 718 total routes mounted across 57 loaded modules (real count from
+  ``module_loader.load_all`` + ``fastapi.routing.APIRoute`` inspection)
+- 8 vector collections, all with real adapters and reindex endpoints
+- Frontend ``tsc --noEmit`` clean
+- Backend ``ruff check`` clean across every file touched in v1.4.3
+- New tests: unit coverage for ``RequirementVectorAdapter``
+  (``to_text`` / ``to_payload`` / ``project_id_of``) plus an integration
+  test that drives ``PATCH /bim-links/`` → ``GET /by-bim-element/``
+  → ``GET /models/{id}/elements/`` (Step 6.5) end-to-end
+
 ## [1.4.2] — 2026-04-11
 
 ### Security

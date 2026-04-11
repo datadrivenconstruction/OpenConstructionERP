@@ -21,9 +21,12 @@ import csv
 import io
 import logging
 import uuid
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import JSONResponse, StreamingResponse
+from pydantic import BaseModel
+from sqlalchemy import select
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.requirements.schemas import (
@@ -466,3 +469,179 @@ async def import_from_text(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Unable to import requirements from text — parsing incomplete",
         )
+
+
+# ── BIM linking endpoints ────────────────────────────────────────────────
+
+
+class BIMLinkBody(BaseModel):
+    """Request body for the requirement → BIM elements link endpoint."""
+
+    bim_element_ids: list[str]
+    replace: bool = False
+
+
+@router.patch(
+    "/{set_id}/requirements/{req_id}/bim-links/",
+    response_model=RequirementResponse,
+)
+async def link_requirement_to_bim(
+    set_id: uuid.UUID,
+    req_id: uuid.UUID,
+    body: BIMLinkBody,
+    _user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("requirements.update")),
+    service: RequirementsService = Depends(_get_service),
+) -> RequirementResponse:
+    """Pin a requirement to one or more BIM elements.
+
+    By default the new ids are merged with whatever was there
+    previously (additive linking — no accidental data loss).  Pass
+    ``replace=true`` to overwrite the array entirely.
+
+    The link is stored under ``metadata_["bim_element_ids"]`` so we
+    don't need a schema migration.  After mutation we publish the
+    standardized ``requirements.requirement.linked_bim`` event so the
+    vector indexer refreshes the embedding to reflect the new links.
+    """
+    item = await service.link_to_bim_elements(
+        req_id, body.bim_element_ids, replace=body.replace
+    )
+    if item.requirement_set_id != set_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Requirement does not belong to the specified set",
+        )
+    return _req_to_response(item)
+
+
+@router.get(
+    "/by-bim-element/",
+    response_model=list[RequirementResponse],
+)
+async def list_requirements_by_bim_element(
+    _user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("requirements.read")),
+    service: RequirementsService = Depends(_get_service),
+    bim_element_id: str = Query(..., description="UUID of the BIM element"),
+    project_id: uuid.UUID | None = Query(default=None),
+) -> list[RequirementResponse]:
+    """Reverse query: every requirement that pins ``bim_element_id``.
+
+    Used by the BIM viewer's element details panel and the AI advisor's
+    structured project state to surface requirements relevant to the
+    currently selected element.  Pass ``project_id`` to scope the
+    candidate set; otherwise all requirements the caller has access to
+    are scanned (slower but works for tenant-wide queries).
+    """
+    rows = await service.list_by_bim_element(bim_element_id, project_id=project_id)
+    return [_req_to_response(r) for r in rows]
+
+
+# ── Vector / semantic memory endpoints ───────────────────────────────────
+
+
+@router.get(
+    "/vector/status/",
+    dependencies=[Depends(RequirePermission("requirements.read"))],
+)
+async def requirements_vector_status() -> dict[str, Any]:
+    """Return health + row count for the ``oe_requirements`` collection."""
+    from app.core.vector_index import COLLECTION_REQUIREMENTS, collection_status
+
+    return collection_status(COLLECTION_REQUIREMENTS)
+
+
+@router.post(
+    "/vector/reindex/",
+    dependencies=[Depends(RequirePermission("requirements.update"))],
+)
+async def requirements_vector_reindex(
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    project_id: uuid.UUID | None = Query(default=None),
+    purge_first: bool = Query(default=False),
+) -> dict[str, Any]:
+    """Backfill the requirements vector collection.
+
+    Optional ``project_id`` filter narrows the scope so users can
+    reindex one project at a time.  Set ``purge_first=true`` to wipe
+    the matching subset before re-encoding — useful after the embedding
+    model is changed.
+    """
+    from sqlalchemy.orm import selectinload
+
+    from app.core.vector_index import reindex_collection
+    from app.modules.requirements.models import Requirement, RequirementSet
+    from app.modules.requirements.vector_adapter import requirement_vector_adapter
+
+    stmt = select(Requirement).options(selectinload(Requirement.requirement_set))
+    if project_id is not None:
+        stmt = stmt.join(
+            RequirementSet, Requirement.requirement_set_id == RequirementSet.id
+        ).where(RequirementSet.project_id == project_id)
+    rows = list((await session.execute(stmt)).scalars().all())
+    return await reindex_collection(
+        requirement_vector_adapter,
+        rows,
+        purge_first=purge_first,
+    )
+
+
+@router.get(
+    "/{set_id}/requirements/{req_id}/similar/",
+    dependencies=[Depends(RequirePermission("requirements.read"))],
+)
+async def requirement_similar(
+    set_id: uuid.UUID,
+    req_id: uuid.UUID,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    limit: int = Query(default=5, ge=1, le=20),
+    cross_project: bool = Query(default=True),
+) -> dict[str, Any]:
+    """Return requirements semantically similar to the given one.
+
+    Defaults to **cross-project** — that's the highest-value use case
+    for the requirements module: estimators want to find how a similar
+    constraint was handled on past projects so they can reuse the
+    spec text and the linked BOQ rate.
+    """
+    from sqlalchemy.orm import selectinload
+
+    from app.core.vector_index import find_similar
+    from app.modules.requirements.models import Requirement
+    from app.modules.requirements.vector_adapter import requirement_vector_adapter
+
+    stmt = (
+        select(Requirement)
+        .options(selectinload(Requirement.requirement_set))
+        .where(Requirement.id == req_id)
+    )
+    row = (await session.execute(stmt)).scalar_one_or_none()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Requirement not found")
+    if row.requirement_set_id != set_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Requirement does not belong to the specified set",
+        )
+
+    project_id = (
+        str(row.requirement_set.project_id)
+        if row.requirement_set is not None and row.requirement_set.project_id
+        else None
+    )
+    hits = await find_similar(
+        requirement_vector_adapter,
+        row,
+        project_id=project_id,
+        cross_project=cross_project,
+        limit=limit,
+    )
+    return {
+        "source_id": str(req_id),
+        "limit": limit,
+        "cross_project": cross_project,
+        "hits": [h.to_dict() for h in hits],
+    }
