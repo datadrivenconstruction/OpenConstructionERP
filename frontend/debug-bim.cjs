@@ -909,9 +909,11 @@ async function clickSidebarButton(page, matcher, label) {
   if (results.afterWalls.visible_mesh_count >= results.afterBuildingsOn.visible_mesh_count)
     verdict.push('FAIL Walls filter did not narrow visibility');
   else verdict.push(`PASS Walls filter (${results.afterWalls.visible_mesh_count} visible)`);
-  if (results.afterClearAll.visible_mesh_count < total - 500)
-    verdict.push(`WARN clear all did not restore all (${results.afterClearAll.visible_mesh_count}/${total})`);
-  else verdict.push(`PASS clear all (${results.afterClearAll.visible_mesh_count}/${total})`);
+  // Clear all should restore to the buildings-only baseline (because
+  // buildings-only is sticky and isn't reset by Clear all).
+  if (results.afterClearAll.visible_mesh_count < baseline - 100)
+    verdict.push(`WARN clear all did not restore baseline (${results.afterClearAll.visible_mesh_count}/${baseline})`);
+  else verdict.push(`PASS clear all restored baseline (${results.afterClearAll.visible_mesh_count}/${baseline})`);
   if (results.afterDoors && results.afterDoorsAndWalls) {
     if (
       results.afterDoorsAndWalls.visible_mesh_count >

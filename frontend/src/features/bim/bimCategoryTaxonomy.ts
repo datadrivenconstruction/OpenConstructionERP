@@ -52,6 +52,262 @@ export const BUCKETS: Record<BIMCategoryBucket, BucketMeta> = {
   analytical: { id: 'analytical', label: 'Analytical model', order: 210, noise: true, color: 'text-slate-400' },
 };
 
+/* ── Display prettifier ──────────────────────────────────────────────────
+ *
+ * Real-world Revit ingestion produces lowercase concatenated category
+ * names like "Curtainwallmullions" or "Structuralcolumns" instead of
+ * the natural "Curtain Wall Mullions" / "Structural Columns".  This
+ * helper provides a *display-only* pretty form for the chips, while
+ * the raw key stays unchanged for filter matching.
+ *
+ * Strategy: a curated lookup table of the well-known Revit categories
+ * that show up everywhere in real models.  For anything NOT in the
+ * table we return the raw value with the first letter capitalised —
+ * never try to guess word boundaries algorithmically because the
+ * wrong split ("Stair Srailingbaluster") is worse than an
+ * ugly-but-correct concatenated word.
+ */
+const KNOWN_CATEGORIES: Record<string, string> = {
+  none: 'Uncategorised',
+
+  // Architectural
+  walls: 'Walls',
+  doors: 'Doors',
+  windows: 'Windows',
+  floors: 'Floors',
+  ceilings: 'Ceilings',
+  roofs: 'Roofs',
+  stairs: 'Stairs',
+  ramps: 'Ramps',
+  columns: 'Columns',
+  furniture: 'Furniture',
+  casework: 'Casework',
+  rooms: 'Rooms',
+  areas: 'Areas',
+  spaces: 'Spaces',
+  curtainwall: 'Curtain Wall',
+  curtainwallmullions: 'Curtain Wall Mullions',
+  curtainwallpanels: 'Curtain Wall Panels',
+  curtaingridswall: 'Curtain Wall Grids',
+  curtaingridsroof: 'Curtain Roof Grids',
+  curtainsystem: 'Curtain System',
+  stairsrailing: 'Stair Railings',
+  stairsrailingbaluster: 'Stair Balusters',
+  stairsstringercarriage: 'Stair Stringers',
+  stairspaths: 'Stair Paths',
+  stairsruns: 'Stair Runs',
+  stairstrisers: 'Stair Risers',
+  stairscutmarks: 'Stair Cut Marks',
+  stairslandings: 'Stair Landings',
+  multistorystairs: 'Multistory Stairs',
+  railinghandrail: 'Railing Handrails',
+  railingtoprail: 'Railing Top Rails',
+  stackedwalls: 'Stacked Walls',
+  roofsoffit: 'Roof Soffit',
+  fascia: 'Fascia',
+  gutter: 'Gutter',
+  reveals: 'Reveals',
+  cornices: 'Cornices',
+  edgeslab: 'Slab Edges',
+
+  // Structural
+  structuralcolumns: 'Structural Columns',
+  structuralframing: 'Structural Framing',
+  structuralframingsystem: 'Structural Framing System',
+  structuralfoundation: 'Structural Foundation',
+  structuraltruss: 'Structural Truss',
+  structuralconnection: 'Structural Connections',
+  structuralrebar: 'Structural Rebar',
+  rebarbendingdetails: 'Rebar Bending Details',
+  reinforcingbar: 'Reinforcing Bars',
+  reinforcingmesh: 'Reinforcing Mesh',
+  pile: 'Piles',
+  piles: 'Piles',
+  foundation: 'Foundation',
+  beams: 'Beams',
+
+  // MEP
+  mechanicalequipment: 'Mechanical Equipment',
+  electricalequipment: 'Electrical Equipment',
+  electricalfixtures: 'Electrical Fixtures',
+  lightingfixtures: 'Lighting Fixtures',
+  lightingdevices: 'Lighting Devices',
+  plumbingfixtures: 'Plumbing Fixtures',
+  pipingsystem: 'Piping System',
+  pipesegments: 'Pipe Segments',
+  pipefittings: 'Pipe Fittings',
+  pipecurves: 'Pipe Curves',
+  pipeconnections: 'Pipe Connections',
+  pipeschedules: 'Pipe Schedules',
+  pipematerials: 'Pipe Materials',
+  flexpipecurves: 'Flex Pipe Curves',
+  ductsystem: 'Duct System',
+  ductsegments: 'Duct Segments',
+  ductfittings: 'Duct Fittings',
+  ductcurves: 'Duct Curves',
+  flexductcurves: 'Flex Duct Curves',
+  airterminal: 'Air Terminals',
+  cabletray: 'Cable Tray',
+  conduit: 'Conduit',
+  conduitstandards: 'Conduit Standards',
+  wire: 'Wires',
+  wireinsulations: 'Wire Insulations',
+  wirematerials: 'Wire Materials',
+  wiretemperatureratings: 'Wire Temperature Ratings',
+  fluids: 'Fluids',
+  electricalvoltage: 'Electrical Voltage',
+  elecdistributionsys: 'Electrical Distribution',
+  hvac: 'HVAC',
+  'hvac load schedules': 'HVAC Load Schedules',
+  'hvac zones': 'HVAC Zones',
+  mepsystemzone: 'MEP System Zones',
+  sprinklers: 'Sprinklers',
+  fireprotection: 'Fire Protection',
+  firealarmdevices: 'Fire Alarm Devices',
+  securitydevices: 'Security Devices',
+  communicationdevices: 'Communication Devices',
+  datadevices: 'Data Devices',
+  switchboardscheduletemplates: 'Switchboard Schedules',
+  branchpanelscheduletemplates: 'Branch Panel Schedules',
+  datapanelscheduletemplates: 'Data Panel Schedules',
+  electricaldemandfactordefinitions: 'Electrical Demand Factor',
+  electricalloadclassifications: 'Electrical Load Classifications',
+  pipeinsulations: 'Pipe Insulations',
+  ductinsulations: 'Duct Insulations',
+
+  // Site
+  topography: 'Topography',
+  topographycontours: 'Topography Contours',
+  toposolid: 'Topo Solid',
+  buildingpad: 'Building Pad',
+  parking: 'Parking',
+  planting: 'Planting',
+  entourage: 'Entourage',
+  siteproperty: 'Site Property',
+  sitepropertylinesegment: 'Site Property Lines',
+  sitepropertylinesegmenttags: 'Site Property Tags',
+
+  // Mass / massing
+  mass: 'Mass',
+  massform: 'Mass Form',
+  massfloor: 'Mass Floor',
+  massfloors: 'Mass Floors',
+  massfloorsall: 'Mass Floors (All)',
+  masswallsall: 'Mass Walls (All)',
+  massroof: 'Mass Roof',
+  massshade: 'Mass Shades',
+  massglazingall: 'Mass Glazing (All)',
+  massopening: 'Mass Openings',
+
+  // Generic / model groups
+  genericmodel: 'Generic Models',
+  genericannotation: 'Generic Annotations',
+  iosmodelgroups: 'Model Groups',
+  iosdetailgroups: 'Detail Groups',
+  iossketchgrid: 'Sketch Grids',
+  iosgeolocations: 'Geo Locations',
+  iosgeosite: 'Geo Site',
+  iosarrays: 'Arrays',
+
+  // Annotations / drafting / view-only
+  detailcomponents: 'Detail Components',
+  detailitems: 'Detail Items',
+  sketchlines: 'Sketch Lines',
+  weakdims: 'Weak Dimensions',
+  dimensions: 'Dimensions',
+  doortags: 'Door Tags',
+  windowtags: 'Window Tags',
+  roomtags: 'Room Tags',
+  walltags: 'Wall Tags',
+  areatags: 'Area Tags',
+  keynotetags: 'Keynote Tags',
+  materialtags: 'Material Tags',
+  revisioncloudtags: 'Revision Cloud Tags',
+  revisionclouds: 'Revision Clouds',
+  revisions: 'Revisions',
+  revisionnumberingsequences: 'Revision Sequences',
+  areaschemes: 'Area Schemes',
+  areaschemelines: 'Area Scheme Lines',
+  roomseparationlines: 'Room Separation Lines',
+  textnotes: 'Text Notes',
+  schedules: 'Schedules',
+  schedulegraphics: 'Schedule Graphics',
+  rasterimages: 'Raster Images',
+  colorfilllegends: 'Color Fill Legends',
+  colorfillschema: 'Color Fill Schema',
+  spotelevsymbols: 'Spot Elevation Symbols',
+  elevationmarks: 'Elevation Marks',
+  sectionheads: 'Section Heads',
+  sectionbox: 'Section Box',
+  callouthead: 'Callout Heads',
+  calloutheads: 'Callout Heads',
+  gridheads: 'Grid Heads',
+  levelheads: 'Level Heads',
+  matchline: 'Match Lines',
+  viewportlabel: 'Viewport Labels',
+  referenceviewersymbol: 'Reference Viewer',
+  multireferenceannotations: 'Multi-Reference Annotations',
+  profilefamilies: 'Profile Families',
+  profileplane: 'Profile Planes',
+  referenceplane: 'Reference Planes',
+  referenceline: 'Reference Lines',
+  constraints: 'Constraints',
+  loadcases: 'Load Cases',
+  tilepatterns: 'Tile Patterns',
+  divisionrules: 'Division Rules',
+  lines: 'Detail Lines',
+  clines: 'Construction Lines',
+  shaftopening: 'Shaft Openings',
+  swallrectopening: 'Wall Rect Openings',
+
+  // Analytical
+  analyticalnodes: 'Analytical Nodes',
+  analyticalmember: 'Analytical Members',
+  analyticalpipeconnections: 'Analytical Pipe Connections',
+  linksanalytical: 'Analytical Links',
+
+  // Project / system
+  projectinformation: 'Project Information',
+  projectbasepoint: 'Project Base Point',
+  sharedbasepoint: 'Shared Base Point',
+  coordinatesystem: 'Coordinate System',
+  eaconstructions: 'Energy Analysis Constructions',
+  covertype: 'Cover Types',
+  mechanicalequipmentset: 'Mechanical Equipment Set',
+};
+
+/**
+ * Pretty-print a normalised Revit/IFC category name for display.
+ *
+ * - Lookups in the curated `KNOWN_CATEGORIES` table win first.
+ * - "None" / empty → "Uncategorised".
+ * - Already-spaced strings ("Hvac Load Schedules") and IFC entities
+ *   ("IfcWall") pass through unchanged.
+ * - Anything else gets first-letter capitalised but is otherwise
+ *   un-touched — never algorithmically guessing word boundaries.
+ *
+ * Examples:
+ *   prettifyCategoryName("Walls")               → "Walls"
+ *   prettifyCategoryName("Curtainwallmullions") → "Curtain Wall Mullions"
+ *   prettifyCategoryName("Structuralcolumns")   → "Structural Columns"
+ *   prettifyCategoryName("Newcategory")         → "Newcategory"
+ *   prettifyCategoryName("None")                → "Uncategorised"
+ *   prettifyCategoryName("IfcWall")             → "IfcWall"
+ */
+export function prettifyCategoryName(raw: string | undefined | null): string {
+  if (!raw) return '—';
+  const trimmed = raw.trim();
+  if (trimmed === '') return '—';
+  const looked = KNOWN_CATEGORIES[trimmed.toLowerCase()];
+  if (looked !== undefined) return looked;
+  // Already has spaces → pass through
+  if (/\s/.test(trimmed)) return trimmed;
+  // IFC entity → pass through
+  if (/^Ifc[A-Z]/.test(trimmed)) return trimmed;
+  // Otherwise: just capitalise the first letter, leave the rest
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+}
+
 /* ── Mapping rules ───────────────────────────────────────────────────────
  *
  * Both Revit category names and IFC entity names are normalised
@@ -67,17 +323,18 @@ interface Rule {
 }
 
 const RULES: Rule[] = [
-  // ── Annotations / drafting noise (most specific first) ─────────────
-  { match: 'analyticalnode', bucket: 'analytical' },
-  { match: 'analyticalmember', bucket: 'analytical' },
+  // ── Universal junk: the "None" Revit ingest bucket (no category at all).
+  //    Treated as noise so the buildings-only view doesn't pollute the
+  //    real category list with thousands of uncategorised rows.
+  { match: 'none', bucket: 'annotation' },
+
+  // ── Analytical model (structural physics) ───────────────────────────
   { match: 'analytical', bucket: 'analytical' },
-  { match: 'weakdim', bucket: 'annotation' },
+
+  // ── Annotations / drafting / view-only categories ──────────────────
+  //    Conservative — only patterns that are universally annotation-only
+  //    across Revit + IFC + every other CAD source.
   { match: 'dimension', bucket: 'annotation' },
-  { match: 'areaschemeline', bucket: 'annotation' },
-  { match: 'areascheme', bucket: 'annotation' },
-  { match: 'arealine', bucket: 'annotation' },
-  { match: 'detailcomponent', bucket: 'annotation' },
-  { match: 'detailitem', bucket: 'annotation' },
   { match: 'genericannotation', bucket: 'annotation' },
   { match: 'annotation', bucket: 'annotation' },
   { match: 'tag', bucket: 'annotation' },
