@@ -29,6 +29,12 @@ Endpoints:
     Diffs:
         POST   /models/{model_id}/diff/{old_id}  — Compute diff
         GET    /diffs/{diff_id}                   — Get diff
+
+    Element Groups (saved selections):
+        GET    /element-groups/                   — List groups for a project
+        POST   /element-groups/                   — Create a group
+        PATCH  /element-groups/{group_id}         — Update a group
+        DELETE /element-groups/{group_id}         — Delete a group
 """
 
 import csv
@@ -40,12 +46,16 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, File, Header, HTTPException, Query, UploadFile, status
-from fastapi.responses import FileResponse
+from fastapi.responses import RedirectResponse, StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.modules.bim_hub import file_storage as bim_file_storage
 from app.modules.bim_hub.schemas import (
     BIMElementBulkImport,
+    BIMElementGroupCreate,
+    BIMElementGroupResponse,
+    BIMElementGroupUpdate,
     BIMElementListResponse,
     BIMElementResponse,
     BIMModelCreate,
@@ -70,7 +80,10 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-# Base directory for storing BIM geometry files
+# Legacy on-disk path kept only for backward compatibility with any
+# external code that may still import ``_BIM_DATA_DIR``.  New code MUST
+# go through :mod:`app.modules.bim_hub.file_storage` which wraps the
+# pluggable :class:`~app.core.storage.StorageBackend`.
 _BIM_DATA_DIR = pathlib.Path(__file__).resolve().parents[4] / "data" / "bim"
 
 
@@ -690,14 +703,15 @@ async def upload_bim_data(
     model = await service.create_model(model_data, user_id=user_id)
     model_id = model.id
 
-    # --- Save geometry file to disk ---
+    # --- Save geometry file to configured storage backend ---
     if has_geometry and geometry_content:
-        geo_dir = _BIM_DATA_DIR / str(project_id) / str(model_id)
-        geo_dir.mkdir(parents=True, exist_ok=True)
         ext = pathlib.Path(geometry_file.filename or "geometry.dae").suffix or ".dae"  # type: ignore[union-attr]
-        geo_path = geo_dir / f"geometry{ext}"
-        geo_path.write_bytes(geometry_content)
-        logger.info("Saved BIM geometry: %s (%d bytes)", geo_path, len(geometry_content))
+        await bim_file_storage.save_geometry(
+            project_id=project_id,
+            model_id=str(model_id),
+            ext=ext,
+            content=geometry_content,
+        )
 
     # --- Import elements ---
     from app.modules.bim_hub.schemas import BIMElementCreate
@@ -824,11 +838,13 @@ async def upload_cad_file(
     model = await service.create_model(model_data, user_id=user_id)
     model_id = model.id
 
-    # Save CAD file to disk
-    cad_dir = _BIM_DATA_DIR / str(project_id) / str(model_id)
-    cad_dir.mkdir(parents=True, exist_ok=True)
-    cad_path = cad_dir / f"original{ext}"
-    cad_path.write_bytes(content)
+    # Save CAD file via the configured storage backend
+    await bim_file_storage.save_original_cad(
+        project_id=project_id,
+        model_id=str(model_id),
+        ext=ext,
+        content=content,
+    )
 
     logger.info(
         "CAD file uploaded: %s (%s, %d bytes) -> model %s",
@@ -963,7 +979,7 @@ async def upload_cad_file(
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
-@router.get("/models/{model_id}/geometry/")
+@router.get("/models/{model_id}/geometry/", response_model=None)
 async def get_model_geometry(
     model_id: uuid.UUID,
     token: str | None = Query(
@@ -972,15 +988,17 @@ async def get_model_geometry(
     ),
     authorization: str | None = Header(default=None),
     service: BIMHubService = Depends(_get_service),
-) -> FileResponse:
+) -> StreamingResponse | RedirectResponse:
     """Serve the COLLADA/DAE geometry file for the 3D viewer.
 
     Auth: accepts either an Authorization header OR a ``?token=...`` query
     parameter. The query param exists because Three.js ColladaLoader cannot
     set custom headers — without this fallback the viewer would 401.
 
-    Looks for geometry files (DAE, GLB, glTF) saved during upload
-    at ``data/bim/{project_id}/{model_id}/geometry.*``.
+    The geometry blob is resolved through :mod:`app.modules.bim_hub.file_storage`
+    so both the local filesystem and S3 backends work transparently.  For S3
+    we redirect to a short-lived presigned URL; for the local backend we
+    stream the bytes directly through the route.
     """
     # Validate the token (header or query). ColladaLoader can't set headers,
     # so we accept ?token=<jwt> as an alternative auth mechanism.
@@ -1028,26 +1046,36 @@ async def get_model_geometry(
     await _verify_project_access(service.session, model.project_id, token_user_id)
 
     project_id = str(model.project_id)
-    geo_dir = _BIM_DATA_DIR / project_id / str(model_id)
 
-    # Try known extensions
-    for ext in (".dae", ".glb", ".gltf"):
-        geo_path = geo_dir / f"geometry{ext}"
-        if geo_path.is_file():
-            media_types = {
-                ".dae": "model/vnd.collada+xml",
-                ".glb": "model/gltf-binary",
-                ".gltf": "model/gltf+json",
-            }
-            return FileResponse(
-                path=str(geo_path),
-                media_type=media_types.get(ext, "application/octet-stream"),
-                filename=f"{model.name}{ext}",
-                headers={
-                    # Allow long browser caching since DAE content is content-addressed
-                    "Cache-Control": "private, max-age=3600",
-                },
-            )
+    # Resolve the geometry blob through the storage backend.
+    found = await bim_file_storage.find_geometry_key(project_id, model_id)
+    if found is not None:
+        key, ext = found
+        media_type = bim_file_storage.GEOMETRY_MEDIA_TYPES.get(
+            ext, "application/octet-stream"
+        )
+        cache_headers = {
+            # Allow long browser caching since DAE content is content-addressed
+            "Cache-Control": "private, max-age=3600",
+        }
+
+        # Prefer a presigned URL so the browser fetches directly from the
+        # bucket (S3).  Local backend returns None → fall back to streaming.
+        presigned = bim_file_storage.presigned_geometry_url(key)
+        if presigned:
+            return RedirectResponse(url=presigned, status_code=307)
+
+        stream = bim_file_storage.open_geometry_stream(key)
+        return StreamingResponse(
+            stream,
+            media_type=media_type,
+            headers={
+                **cache_headers,
+                "Content-Disposition": (
+                    f'inline; filename="{model.name}{ext}"'
+                ),
+            },
+        )
 
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
@@ -1454,3 +1482,112 @@ async def get_diff(
     # Verify access via the new (or old) model's project.
     await _verify_model_access(service, diff.new_model_id, user_id or "")
     return BIMModelDiffResponse.model_validate(diff)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Element Groups (saved selections)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+async def _verify_group_access(
+    service: "BIMHubService",
+    group_id: uuid.UUID,
+    user_id: str,
+) -> Any:
+    """Load a BIM element group and verify the caller owns its project.
+
+    Returns the loaded group so the caller can reuse it. Raises 404 on both
+    "not found" and "no access" to avoid UUID enumeration.
+    """
+    from app.modules.bim_hub.models import BIMElementGroup
+
+    group = await service.session.get(BIMElementGroup, group_id)
+    if group is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="BIM element group not found",
+        )
+    await _verify_project_access(service.session, group.project_id, user_id)
+    return group
+
+
+@router.get("/element-groups/", response_model=list[BIMElementGroupResponse])
+async def list_element_groups(
+    project_id: uuid.UUID = Query(...),
+    model_id: uuid.UUID | None = Query(default=None),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.read")),
+    service: BIMHubService = Depends(_get_service),
+) -> list[BIMElementGroupResponse]:
+    """List BIM element groups for a project, optionally scoped to one model."""
+    await _verify_project_access(service.session, project_id, user_id or "")
+    return await service.list_element_groups(project_id, model_id=model_id)
+
+
+@router.post(
+    "/element-groups/",
+    response_model=BIMElementGroupResponse,
+    status_code=201,
+)
+async def create_element_group(
+    data: BIMElementGroupCreate,
+    project_id: uuid.UUID = Query(...),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.create")),
+    service: BIMHubService = Depends(_get_service),
+) -> BIMElementGroupResponse:
+    """Create a new BIM element group (saved selection) in a project."""
+    await _verify_project_access(service.session, project_id, user_id or "")
+    # If the group is scoped to a specific model, verify the model belongs
+    # to the same project the caller is creating the group in.
+    if data.model_id is not None:
+        model = await _verify_model_access(service, data.model_id, user_id or "")
+        if model.project_id != project_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="model_id does not belong to the supplied project_id",
+            )
+    user_uuid: uuid.UUID | None = None
+    if user_id:
+        try:
+            user_uuid = uuid.UUID(str(user_id))
+        except (ValueError, TypeError):
+            user_uuid = None
+    return await service.create_element_group(project_id, data, user_uuid)
+
+
+@router.patch(
+    "/element-groups/{group_id}",
+    response_model=BIMElementGroupResponse,
+)
+async def update_element_group(
+    group_id: uuid.UUID,
+    data: BIMElementGroupUpdate,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.update")),
+    service: BIMHubService = Depends(_get_service),
+) -> BIMElementGroupResponse:
+    """Partially update a BIM element group."""
+    group = await _verify_group_access(service, group_id, user_id or "")
+    # If the caller is moving the group to a different model, validate that
+    # model belongs to the same project.
+    if data.model_id is not None:
+        model = await _verify_model_access(service, data.model_id, user_id or "")
+        if model.project_id != group.project_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="model_id does not belong to the group's project",
+            )
+    return await service.update_element_group(group_id, data)
+
+
+@router.delete("/element-groups/{group_id}", status_code=204)
+async def delete_element_group(
+    group_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.delete")),
+    service: BIMHubService = Depends(_get_service),
+) -> None:
+    """Delete a BIM element group."""
+    await _verify_group_access(service, group_id, user_id or "")
+    await service.delete_element_group(group_id)

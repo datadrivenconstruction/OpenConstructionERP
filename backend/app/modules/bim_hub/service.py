@@ -22,8 +22,10 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.modules.bim_hub import file_storage as bim_file_storage
 from app.modules.bim_hub.models import (
     BIMElement,
+    BIMElementGroup,
     BIMModel,
     BIMModelDiff,
     BIMQuantityMap,
@@ -38,6 +40,9 @@ from app.modules.bim_hub.repository import (
 )
 from app.modules.bim_hub.schemas import (
     BIMElementCreate,
+    BIMElementGroupCreate,
+    BIMElementGroupResponse,
+    BIMElementGroupUpdate,
     BIMModelCreate,
     BIMModelUpdate,
     BIMQuantityMapCreate,
@@ -142,9 +147,9 @@ class BIMHubService:
         return updated
 
     async def delete_model(self, model_id: uuid.UUID) -> None:
-        """Delete a BIM model, all its elements, and on-disk geometry files.
+        """Delete a BIM model, all its elements, and stored geometry blobs.
 
-        Disk cleanup is best-effort — a failure to remove the directory MUST
+        Blob cleanup is best-effort — a failure to remove the blobs MUST
         NOT fail the delete operation (the DB row is already gone and the
         orphan sweeper can pick up any stragglers later).
         """
@@ -153,17 +158,10 @@ class BIMHubService:
         await self.model_repo.delete(model_id)
         logger.info("BIM model deleted: %s", model_id)
 
-        # Best-effort disk cleanup (after DB delete so we never strand files
-        # belonging to a still-live DB row).
-        geo_dir = _BIM_DATA_DIR / str(project_id) / str(model_id)
-        try:
-            if geo_dir.is_dir():
-                shutil.rmtree(geo_dir, ignore_errors=True)
-                logger.info("BIM geometry dir removed: %s", geo_dir)
-        except Exception as exc:  # noqa: BLE001 — disk I/O must never block delete
-            logger.warning(
-                "Failed to remove BIM geometry dir %s: %s", geo_dir, exc
-            )
+        # Best-effort blob cleanup (after DB delete so we never strand
+        # files belonging to a still-live DB row).  Routed through the
+        # storage backend so S3 deployments work transparently.
+        await bim_file_storage.delete_model_blobs(project_id, model_id)
 
     async def cleanup_orphan_bim_files(self) -> dict[str, Any]:
         """Scan ``data/bim/`` and remove directories with no matching DB row.
@@ -1192,3 +1190,328 @@ class BIMHubService:
                 detail="Model diff not found",
             )
         return diff
+
+    # ── Element Groups ───────────────────────────────────────────────────────
+
+    async def list_element_groups(
+        self,
+        project_id: uuid.UUID,
+        *,
+        model_id: uuid.UUID | None = None,
+    ) -> list[BIMElementGroupResponse]:
+        """List element groups for a project, optionally scoped to one model.
+
+        For dynamic groups the cached ``element_ids`` snapshot is returned as
+        ``member_element_ids``; it is NOT re-resolved on list calls. Callers
+        that need up-to-the-second membership should PATCH the group (which
+        triggers a re-resolve) or fetch via the dedicated resolve endpoint.
+        """
+        stmt = select(BIMElementGroup).where(BIMElementGroup.project_id == project_id)
+        if model_id is not None:
+            stmt = stmt.where(BIMElementGroup.model_id == model_id)
+        stmt = stmt.order_by(BIMElementGroup.created_at.asc())
+        result = await self.session.execute(stmt)
+        groups = list(result.scalars().all())
+        return [self._group_to_response(g) for g in groups]
+
+    async def get_element_group(self, group_id: uuid.UUID) -> BIMElementGroup:
+        """Get a BIM element group by id. Raises 404 if not found."""
+        group = await self.session.get(BIMElementGroup, group_id)
+        if group is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="BIM element group not found",
+            )
+        return group
+
+    async def create_element_group(
+        self,
+        project_id: uuid.UUID,
+        payload: BIMElementGroupCreate,
+        user_id: uuid.UUID | None,
+    ) -> BIMElementGroupResponse:
+        """Create a new element group.
+
+        If ``payload.is_dynamic`` is True, the filter is evaluated immediately
+        and the resolved element ids are cached in ``element_ids`` +
+        ``element_count``. Otherwise the explicit ``element_ids`` list from
+        the payload is stored verbatim.
+        """
+        group = BIMElementGroup(
+            project_id=project_id,
+            model_id=payload.model_id,
+            name=payload.name,
+            description=payload.description,
+            is_dynamic=payload.is_dynamic,
+            filter_criteria=payload.filter_criteria or {},
+            element_ids=[str(eid) for eid in (payload.element_ids or [])],
+            element_count=len(payload.element_ids or []),
+            color=payload.color,
+            created_by=user_id,
+            metadata_=payload.metadata or {},
+        )
+        self.session.add(group)
+        try:
+            await self.session.flush()
+        except IntegrityError as exc:
+            await self.session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="An element group with this name already exists in the project",
+            ) from exc
+
+        # Dynamic groups: resolve membership now and cache it.
+        if group.is_dynamic:
+            resolved = await self._resolve_members_for_group(group)
+            group.element_ids = [str(eid) for eid in resolved]
+            group.element_count = len(resolved)
+            await self.session.flush()
+
+        await self.session.refresh(group)
+        logger.info(
+            "BIM element group created: %s (project=%s, dynamic=%s, count=%d)",
+            group.name,
+            project_id,
+            group.is_dynamic,
+            group.element_count,
+        )
+        return self._group_to_response(group)
+
+    async def update_element_group(
+        self,
+        group_id: uuid.UUID,
+        payload: BIMElementGroupUpdate,
+    ) -> BIMElementGroupResponse:
+        """Patch fields on a group and re-resolve the cache if needed.
+
+        Re-resolution is triggered whenever ``filter_criteria``, ``model_id``,
+        or ``is_dynamic`` is touched by the payload, OR when
+        ``is_dynamic`` stays True and the caller supplied a new filter.
+        """
+        group = await self.get_element_group(group_id)
+
+        fields = payload.model_dump(exclude_unset=True)
+        if "metadata" in fields:
+            fields["metadata_"] = fields.pop("metadata")
+
+        # Normalise UUID list to str for JSON storage.
+        if "element_ids" in fields and fields["element_ids"] is not None:
+            fields["element_ids"] = [str(eid) for eid in fields["element_ids"]]
+            fields["element_count"] = len(fields["element_ids"])
+
+        re_resolve = (
+            "filter_criteria" in fields
+            or "model_id" in fields
+            or "is_dynamic" in fields
+        )
+
+        for key, value in fields.items():
+            setattr(group, key, value)
+
+        try:
+            await self.session.flush()
+        except IntegrityError as exc:
+            await self.session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="An element group with this name already exists in the project",
+            ) from exc
+
+        # Re-resolve the cache only for dynamic groups when their inputs moved.
+        if re_resolve and group.is_dynamic:
+            resolved = await self._resolve_members_for_group(group)
+            group.element_ids = [str(eid) for eid in resolved]
+            group.element_count = len(resolved)
+            await self.session.flush()
+
+        await self.session.refresh(group)
+        logger.info(
+            "BIM element group updated: %s (fields=%s)",
+            group_id,
+            list(fields.keys()),
+        )
+        return self._group_to_response(group)
+
+    async def delete_element_group(self, group_id: uuid.UUID) -> None:
+        """Delete a BIM element group. Raises 404 if not found."""
+        group = await self.get_element_group(group_id)
+        await self.session.delete(group)
+        await self.session.flush()
+        logger.info("BIM element group deleted: %s", group_id)
+
+    async def resolve_element_group_members(
+        self,
+        group_id: uuid.UUID,
+    ) -> list[uuid.UUID]:
+        """Recompute the member list for a group and update its cache.
+
+        Runs the current ``filter_criteria`` against ``oe_bim_element``,
+        scoped to ``model_id`` (or all models in the project if
+        ``model_id`` is NULL). Persists the refreshed ``element_ids`` +
+        ``element_count`` snapshot and returns the new list.
+
+        This works for both dynamic and static groups, but a static group
+        will still overwrite its cached snapshot — callers that want to
+        preserve a hand-curated static list should NOT call this method.
+        """
+        group = await self.get_element_group(group_id)
+        resolved = await self._resolve_members_for_group(group)
+        group.element_ids = [str(eid) for eid in resolved]
+        group.element_count = len(resolved)
+        await self.session.flush()
+        return resolved
+
+    async def _resolve_members_for_group(
+        self,
+        group: BIMElementGroup,
+    ) -> list[uuid.UUID]:
+        """Execute the filter against oe_bim_element for a group.
+
+        Supported filter keys (``filter_criteria``):
+
+        - ``element_type``: str | list[str] — exact match (OR across list).
+        - ``category``: str | list[str] — match against ``properties.category``.
+        - ``discipline``: str | list[str] — exact match.
+        - ``storey``: str | list[str] — exact match.
+        - ``property_filter``: dict[str, Any] — every key/value pair must be
+          present inside ``properties`` JSON. On Postgres we use the native
+          JSONB containment operator (``@>``); on SQLite we fall back to
+          loading the candidates and filtering in Python.
+        - ``name_contains``: str — case-insensitive substring match using
+          ILIKE.
+
+        Scope:
+        - If ``group.model_id`` is set, we filter to that model only.
+        - Otherwise we walk every ``BIMModel`` in ``group.project_id``.
+
+        If the filter is empty and the group is static, we return the cached
+        ``element_ids`` untouched so a static group's snapshot survives a
+        re-resolve trigger; for dynamic empty filters we return the empty
+        list.
+        """
+        criteria = group.filter_criteria or {}
+
+        # Static group with no criteria: preserve the hand-curated snapshot.
+        if not criteria and not group.is_dynamic:
+            return [uuid.UUID(str(eid)) for eid in (group.element_ids or [])]
+
+        base = select(BIMElement)
+
+        if group.model_id is not None:
+            base = base.where(BIMElement.model_id == group.model_id)
+        else:
+            # Constrain to every model belonging to the project.
+            model_ids_stmt = select(BIMModel.id).where(BIMModel.project_id == group.project_id)
+            model_ids_result = await self.session.execute(model_ids_stmt)
+            model_ids = [row[0] for row in model_ids_result.all()]
+            if not model_ids:
+                return []
+            base = base.where(BIMElement.model_id.in_(model_ids))
+
+        # element_type (str or list) — OR-match.
+        element_type = criteria.get("element_type")
+        if element_type:
+            values = element_type if isinstance(element_type, list) else [element_type]
+            values = [v for v in values if v]
+            if values:
+                base = base.where(BIMElement.element_type.in_(values))
+
+        # discipline (str or list) — OR-match.
+        discipline = criteria.get("discipline")
+        if discipline:
+            values = discipline if isinstance(discipline, list) else [discipline]
+            values = [v for v in values if v]
+            if values:
+                base = base.where(BIMElement.discipline.in_(values))
+
+        # storey (str or list) — OR-match.
+        storey = criteria.get("storey")
+        if storey:
+            values = storey if isinstance(storey, list) else [storey]
+            values = [v for v in values if v]
+            if values:
+                base = base.where(BIMElement.storey.in_(values))
+
+        # name_contains — case-insensitive substring.
+        name_contains = criteria.get("name_contains")
+        if name_contains:
+            base = base.where(BIMElement.name.ilike(f"%{name_contains}%"))
+
+        # Detect dialect for JSON-based filters.
+        dialect_name = self.session.bind.dialect.name if self.session.bind else ""
+        is_postgres = dialect_name in ("postgresql", "postgres")
+
+        # category — lives inside the JSON ``properties`` column.
+        category = criteria.get("category")
+        property_filter = criteria.get("property_filter") or {}
+        if not isinstance(property_filter, dict):
+            property_filter = {}
+
+        # Assemble the full expected-properties dict for JSON containment.
+        expected_props: dict[str, Any] = dict(property_filter)
+        category_values: list[str] = []
+        if category:
+            category_values = category if isinstance(category, list) else [category]
+            category_values = [str(v) for v in category_values if v]
+
+        # On Postgres: use @> JSON containment when possible (property_filter
+        # only; category with multiple values still needs Python-side check).
+        if is_postgres and expected_props and not category_values:
+            from sqlalchemy import cast
+            from sqlalchemy.dialects.postgresql import JSONB
+
+            base = base.where(cast(BIMElement.properties, JSONB).contains(expected_props))
+            result = await self.session.execute(base)
+            elements = list(result.scalars().all())
+            return [e.id for e in elements]
+
+        # Fallback: load candidates and filter in Python. This is the path
+        # used on SQLite and whenever we need list-semantics for ``category``.
+        result = await self.session.execute(base)
+        elements = list(result.scalars().all())
+
+        def _matches(elem: BIMElement) -> bool:
+            props = elem.properties or {}
+            if category_values:
+                cat = str(props.get("category") or "")
+                if cat not in category_values:
+                    return False
+            for key, value in expected_props.items():
+                if props.get(key) != value:
+                    return False
+            return True
+
+        return [e.id for e in elements if _matches(e)]
+
+    @staticmethod
+    def _group_to_response(group: BIMElementGroup) -> BIMElementGroupResponse:
+        """Convert a ``BIMElementGroup`` ORM row to its API response.
+
+        Populates ``member_element_ids`` from the cached ``element_ids``
+        snapshot (which, for dynamic groups, is refreshed by the service
+        whenever the filter or scope moves).
+        """
+        raw_ids = list(group.element_ids or [])
+        parsed_ids: list[uuid.UUID] = []
+        for raw in raw_ids:
+            try:
+                parsed_ids.append(uuid.UUID(str(raw)))
+            except (ValueError, TypeError):
+                continue
+        return BIMElementGroupResponse(
+            id=group.id,
+            project_id=group.project_id,
+            model_id=group.model_id,
+            name=group.name,
+            description=group.description,
+            is_dynamic=group.is_dynamic,
+            filter_criteria=group.filter_criteria or {},
+            element_ids=parsed_ids,
+            element_count=group.element_count,
+            color=group.color,
+            created_by=group.created_by,
+            metadata_=group.metadata_ or {},
+            created_at=group.created_at,
+            updated_at=group.updated_at,
+            member_element_ids=parsed_ids,
+        )

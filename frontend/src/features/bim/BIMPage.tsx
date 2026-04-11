@@ -50,6 +50,8 @@ import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
 import BIMFilterPanel from './BIMFilterPanel';
 import { BIMProcessingProgress, type BIMProcessingStage } from './BIMProcessingProgress';
 import AddToBOQModal from './AddToBOQModal';
+import SaveGroupModal from './SaveGroupModal';
+import type { BIMGroupFilterCriteria } from './api';
 import { Filter } from 'lucide-react';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
@@ -710,6 +712,11 @@ export function BIMPage() {
    *  when the user clicks an element; multiple elements when "quick
    *  takeoff" on a filtered category. */
   const [linkCandidates, setLinkCandidates] = useState<BIMElementData[] | null>(null);
+  /** Save-as-group modal state — captures the current filter snapshot. */
+  const [saveGroupState, setSaveGroupState] = useState<{
+    filterCriteria: BIMGroupFilterCriteria;
+    elementIds: string[];
+  } | null>(null);
   const addToast = useToastStore((s) => s.addToast);
 
   /* ── Cross-highlight bridge to BOQ editor ───────────────────────── */
@@ -805,6 +812,38 @@ export function BIMPage() {
   const handleAddToBOQ = useCallback((element: BIMElementData) => {
     setLinkCandidates([element]);
   }, []);
+
+  // Convert the filter panel's local state into the backend's
+  // BIMGroupFilterCriteria shape so the SaveGroupModal can persist it.
+  // The filter panel stores set-based selections; the backend takes
+  // arrays.  We deliberately drop the `groupBy` axis (which is purely
+  // a UI grouping choice and not part of the predicate) and the
+  // `buildingsOnly` toggle (which is a viewport-level setting, not a
+  // group definition — saved groups always include their full member
+  // set even if they're noise/annotations).
+  type FilterStateShape = {
+    search: string;
+    storeys: Set<string>;
+    types: Set<string>;
+  };
+  const handleSaveAsGroup = useCallback(
+    (filter: FilterStateShape, visibleElementIds: string[]) => {
+      const criteria: BIMGroupFilterCriteria = {};
+      if (filter.storeys.size > 0) {
+        criteria.storey = Array.from(filter.storeys);
+      }
+      if (filter.types.size > 0) {
+        criteria.element_type = Array.from(filter.types);
+      }
+      const search = filter.search.trim();
+      if (search) criteria.name_contains = search;
+      setSaveGroupState({
+        filterCriteria: criteria,
+        elementIds: visibleElementIds,
+      });
+    },
+    [],
+  );
 
   // Remove a BIM↔BOQ link — fires from the properties panel's unlink button.
   const handleUnlinkBOQ = useCallback(
@@ -994,6 +1033,7 @@ export function BIMPage() {
               onElementClick={handleFilterElementClick}
               onQuickTakeoff={handleQuickTakeoff}
               visibleElementCount={visibleElementCount}
+              onSaveAsGroup={handleSaveAsGroup}
             />
           </div>
         )}
@@ -1112,6 +1152,23 @@ export function BIMPage() {
           onClose={() => setLinkCandidates(null)}
           onLinked={() => {
             queryClient.invalidateQueries({ queryKey: ['bim-elements', activeModelId] });
+          }}
+        />
+      )}
+
+      {/* Save-as-group modal — opened from the filter panel "Save as group"
+          button.  Captures the current filter criteria + visible element ids
+          and persists them as a BIMElementGroup row. */}
+      {saveGroupState && projectId && (
+        <SaveGroupModal
+          projectId={projectId}
+          modelId={activeModelId}
+          filterCriteria={saveGroupState.filterCriteria}
+          elementIds={saveGroupState.elementIds}
+          visibleCount={saveGroupState.elementIds.length}
+          onClose={() => setSaveGroupState(null)}
+          onSaved={() => {
+            // SavedGroupModal already invalidates the query; nothing extra here
           }}
         />
       )}

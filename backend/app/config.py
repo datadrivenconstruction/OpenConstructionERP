@@ -55,7 +55,11 @@ class Settings(BaseSettings):
     # ── Redis ────────────────────────────────────────────────────────────
     redis_url: str | None = "redis://localhost:6379/0"
 
-    # ── Storage (S3/MinIO) ───────────────────────────────────────────────
+    # ── Storage (Local filesystem or S3/MinIO) ───────────────────────────
+    # Set ``storage_backend=s3`` to push BIM/CAD blobs to an S3-compatible
+    # bucket instead of the local filesystem.  The S3 credentials below
+    # are only consulted when ``storage_backend="s3"``.
+    storage_backend: Literal["local", "s3"] = "local"
     s3_endpoint: str = "http://localhost:9000"
     s3_access_key: str = ""
     s3_secret_key: str = ""
