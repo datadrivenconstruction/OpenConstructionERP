@@ -155,15 +155,23 @@ class ContactService:
         country_code: str | None = None,
         search: str | None = None,
         is_active: bool = True,
+        owner_id: str | None = None,
         limit: int = 50,
         offset: int = 0,
     ) -> tuple[list[Contact], int]:
-        """List contacts with filters."""
+        """List contacts with filters.
+
+        ``owner_id`` scopes the result via the ``created_by`` proxy
+        (until a real ``tenant_id`` schema lands).  Pass ``None`` to
+        opt out of the scope filter — only admin callers should do
+        that.
+        """
         return await self.repo.list(
             contact_type=contact_type,
             country_code=country_code,
             search=search,
             is_active=is_active,
+            owner_id=owner_id,
             limit=limit,
             offset=offset,
         )
@@ -250,9 +258,13 @@ class ContactService:
 
     # ── Stats ────────────────────────────────────────────────────────────
 
-    async def get_stats(self) -> dict:
-        """Return aggregate contact statistics."""
-        return await self.repo.stats()
+    async def get_stats(self, *, owner_id: str | None = None) -> dict:
+        """Return aggregate contact statistics.
+
+        ``owner_id`` scopes the aggregates to the caller's contacts;
+        ``None`` is the global view (admin-only).
+        """
+        return await self.repo.stats(owner_id=owner_id)
 
     # ── By Company ───────────────────────────────────────────────────────
 
@@ -260,12 +272,17 @@ class ContactService:
         self,
         company_name: str,
         *,
+        owner_id: str | None = None,
         limit: int = 50,
         offset: int = 0,
     ) -> tuple[list[Contact], int]:
-        """List contacts grouped by company name."""
+        """List contacts grouped by company name.
+
+        ``owner_id`` scopes the result via the ``created_by`` proxy.
+        """
         return await self.repo.list_by_company(
             company_name,
+            owner_id=owner_id,
             limit=limit,
             offset=offset,
         )

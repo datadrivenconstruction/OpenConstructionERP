@@ -1860,41 +1860,31 @@ async def upload_document(
         project_id=project_id,
     )
 
-    # Cross-link: create Document record so takeoff PDFs appear in Documents hub
+    # Cross-link: create Document record so takeoff PDFs appear in
+    # Documents hub.  Uses the ORM Document model directly so the row
+    # picks up timestamps + defaults from the Base mixin and stays in
+    # sync with any future schema migration.  Best-effort: failure
+    # here MUST NOT break the upload — the takeoff doc is already
+    # persisted via service.upload_document().
     if project_id:
         try:
-            import json as _json
-            from datetime import UTC, datetime
+            from app.modules.documents.models import Document
 
-            from sqlalchemy import text as _text
-
-            xlink_id = str(_uuid.uuid4())
-            now = datetime.now(UTC).isoformat()
-            tags_json = _json.dumps(["takeoff", "pdf"])
-            await service.session.execute(
-                _text(
-                    "INSERT INTO oe_documents_document "
-                    "(id, project_id, name, description, category, file_size, "
-                    "mime_type, file_path, version, uploaded_by, tags, metadata, "
-                    "created_at, updated_at) "
-                    "VALUES (:id, :pid, :name, :desc, :cat, :fsize, :mime, "
-                    ":fpath, 1, :by, :tags, '{}', :now, :now)"
-                ),
-                {
-                    "id": xlink_id,
-                    "pid": project_id,
-                    "name": file.filename,
-                    "desc": "Takeoff document",
-                    "cat": "drawing",
-                    "fsize": len(content),
-                    "mime": "application/pdf",
-                    "fpath": doc.file_path or "",
-                    "by": user_id or "",
-                    "tags": tags_json,
-                    "now": now,
-                },
+            xlink_doc = Document(
+                project_id=_uuid.UUID(project_id),
+                name=file.filename,
+                description="Takeoff document",
+                category="drawing",
+                file_size=len(content),
+                mime_type="application/pdf",
+                file_path=doc.file_path or "",
+                version=1,
+                uploaded_by=user_id or "",
+                tags=["takeoff", "pdf"],
             )
-            logger.info("Cross-linked takeoff doc %s -> document %s", doc.id, xlink_id)
+            service.session.add(xlink_doc)
+            await service.session.flush()
+            logger.info("Cross-linked takeoff doc %s -> document %s", doc.id, xlink_doc.id)
         except Exception:
             logger.exception("Failed to cross-link takeoff document to Documents hub")
 
