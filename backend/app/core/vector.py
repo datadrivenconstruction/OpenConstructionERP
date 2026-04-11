@@ -301,6 +301,32 @@ def _lancedb_status() -> dict[str, Any]:
 # ── Multi-collection LanceDB helpers ─────────────────────────────────────
 
 
+def _safe_quote_ids(raw_ids: list[Any]) -> list[str]:
+    """Validate and quote a list of row ids for inclusion in a LanceDB SQL filter.
+
+    LanceDB has no parameterised query API for the ``WHERE`` clause we
+    need on ``DELETE``, so we have to interpolate strings.  This helper
+    is the boundary check that prevents SQL injection: every id is
+    re-parsed as a strict UUID, and anything that fails parsing is
+    silently dropped (the adapter layer always passes UUIDs from
+    SQLAlchemy ``GUID()`` columns, so a parse failure indicates either a
+    bug or an attack).
+
+    Returns a list of single-quoted UUID strings ready for ``IN (...)``.
+    """
+    import uuid as _uuid
+
+    out: list[str] = []
+    for raw in raw_ids:
+        try:
+            parsed = _uuid.UUID(str(raw))
+        except (ValueError, AttributeError, TypeError):
+            logger.debug("Dropping non-UUID id from LanceDB filter: %r", raw)
+            continue
+        out.append(f"'{parsed}'")
+    return out
+
+
 def _ensure_generic_table(db: Any, collection_name: str, dim: int) -> bool:
     """Ensure a generic LanceDB table for a non-cost collection exists.
 
@@ -348,11 +374,10 @@ def _lancedb_index_generic(collection_name: str, items: list[dict], dim: int) ->
         raise RuntimeError(f"Cannot ensure collection {collection_name}")
 
     tbl = db.open_table(collection_name)
-    ids = [it["id"] for it in items]
-    if ids:
+    quoted_ids = _safe_quote_ids([it["id"] for it in items])
+    if quoted_ids:
         try:
-            id_list = ", ".join(f"'{i}'" for i in ids)
-            tbl.delete(f"id IN ({id_list})")
+            tbl.delete(f"id IN ({', '.join(quoted_ids)})")
         except Exception:
             pass
     tbl.add(items)
@@ -406,7 +431,13 @@ def _lancedb_search_generic(
 
 
 def _lancedb_delete_generic(collection_name: str, ids: list[str]) -> int:
-    """Delete items by id from a generic collection."""
+    """Delete items by id from a generic collection.
+
+    Each id is validated as a strict UUID before being interpolated into
+    the LanceDB filter via :func:`_safe_quote_ids`, blocking the
+    string-interpolation injection vector that would otherwise exist on
+    a backend that takes attacker-supplied row ids.
+    """
     db = _get_lancedb()
     if db is None or not ids:
         return 0
@@ -414,9 +445,11 @@ def _lancedb_delete_generic(collection_name: str, ids: list[str]) -> int:
         if collection_name not in db.table_names():
             return 0
         tbl = db.open_table(collection_name)
-        id_list = ", ".join(f"'{i}'" for i in ids)
-        tbl.delete(f"id IN ({id_list})")
-        return len(ids)
+        quoted_ids = _safe_quote_ids(ids)
+        if not quoted_ids:
+            return 0
+        tbl.delete(f"id IN ({', '.join(quoted_ids)})")
+        return len(quoted_ids)
     except Exception as exc:
         logger.warning("delete_generic %s failed: %s", collection_name, exc)
         return 0
@@ -436,7 +469,12 @@ def _lancedb_count_generic(collection_name: str) -> int:
 
 
 def _lancedb_index(items: list[dict]) -> int:
-    """Index items into LanceDB. Each item: {id, vector, code, description, unit, rate, region}."""
+    """Index items into LanceDB. Each item: {id, vector, code, description, unit, rate, region}.
+
+    Cost item IDs originate from ``CostItem.id`` (a SQLAlchemy ``GUID()``
+    column) so they're always UUID strings — :func:`_safe_quote_ids`
+    enforces that as a defence-in-depth boundary check.
+    """
     db = _get_lancedb()
     if db is None:
         raise RuntimeError("LanceDB not available")
@@ -448,12 +486,12 @@ def _lancedb_index(items: list[dict]) -> int:
     tbl = db.open_table(COST_TABLE)
 
     # Delete existing items with same IDs (upsert)
-    ids = [it["id"] for it in items]
-    try:
-        id_list = ", ".join(f"'{i}'" for i in ids)
-        tbl.delete(f"id IN ({id_list})")
-    except Exception:
-        pass  # Table might be empty
+    quoted_ids = _safe_quote_ids([it["id"] for it in items])
+    if quoted_ids:
+        try:
+            tbl.delete(f"id IN ({', '.join(quoted_ids)})")
+        except Exception:
+            pass  # Table might be empty
 
     tbl.add(items)
     return len(items)
@@ -720,13 +758,25 @@ def vector_search_collection(
             return []
         import json as _json
 
+        # Reserved keys are extracted from the Qdrant payload via ``get``
+        # (NOT ``pop``) so we never mutate the source dict — the qdrant
+        # client may cache result objects and other consumers downstream
+        # would otherwise see a stripped payload.
+        _RESERVED = {"text", "tenant_id", "project_id", "module"}
         out: list[dict] = []
         for h in results:
-            payload = h.payload or {}
-            text = payload.pop("text", "") if isinstance(payload, dict) else ""
-            tid = payload.pop("tenant_id", "") if isinstance(payload, dict) else ""
-            pid = payload.pop("project_id", "") if isinstance(payload, dict) else ""
-            mod = payload.pop("module", "") if isinstance(payload, dict) else ""
+            raw_payload = h.payload or {}
+            if not isinstance(raw_payload, dict):
+                raw_payload = {}
+            text = str(raw_payload.get("text") or "")
+            tid = str(raw_payload.get("tenant_id") or "")
+            pid = str(raw_payload.get("project_id") or "")
+            mod = str(raw_payload.get("module") or "")
+            # Build the user-facing payload without the reserved keys, but
+            # without touching the qdrant-owned dict.
+            user_payload = {
+                k: v for k, v in raw_payload.items() if k not in _RESERVED
+            }
             out.append(
                 {
                     "id": str(h.id),
@@ -735,7 +785,7 @@ def vector_search_collection(
                     "tenant_id": tid,
                     "project_id": pid,
                     "module": mod,
-                    "payload": _json.dumps(payload, ensure_ascii=False),
+                    "payload": _json.dumps(user_payload, ensure_ascii=False),
                 }
             )
         return out

@@ -1,6 +1,7 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import {
   ShieldAlert, Plus, ChevronRight, ArrowLeft, DollarSign,
   AlertTriangle, Shield, Trash2, X, Search, Filter,
@@ -400,6 +401,20 @@ export function RiskRegisterPage() {
   const [filterCategory, setFilterCategory] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+
+  // Deep-link auto-select: Cmd+Shift+K global search lands here with
+  // ?id=<risk_id> — open the matching risk detail view immediately and
+  // strip the query param so a refresh doesn't reopen it forever.
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const deepLinkId = searchParams.get('id');
+    if (deepLinkId && deepLinkId !== selectedRiskId) {
+      setSelectedRiskId(deepLinkId);
+      const next = new URLSearchParams(searchParams);
+      next.delete('id');
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, selectedRiskId, setSearchParams]);
 
   const { data: projects = [] } = useQuery({ queryKey: ['projects'], queryFn: () => apiGet<Project[]>('/v1/projects/') });
   const projectId = activeProjectId || projects[0]?.id || '';

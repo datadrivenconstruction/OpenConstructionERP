@@ -5,6 +5,88 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.2] — 2026-04-11
+
+### Security
+- **SQL injection guard in LanceDB id-quoting** — every row id passed
+  to ``_lancedb_index_generic``, ``_lancedb_delete_generic`` and the
+  legacy ``_lancedb_index`` cost-collection upsert is now re-parsed as
+  a strict ``uuid.UUID`` before being interpolated into the
+  ``id IN (...)`` filter via the new ``_safe_quote_ids`` helper.
+  Defence-in-depth — the adapter layer always passes UUIDs from
+  SQLAlchemy ``GUID()`` columns, so a parse failure now indicates a
+  bug or attack and the row is silently dropped.
+- **Qdrant search payload mutation** — ``vector_search_collection``
+  was using ``payload.pop()`` to extract reserved fields, which
+  mutated the qdrant client's cached result objects.  Replaced with
+  ``get()`` + a non-mutating dict comprehension.
+
+### Fixed
+- **Token-aware text clipping** — ``_safe_text`` now uses the active
+  SentenceTransformer's tokenizer (when available) to clip at 510
+  tokens instead of the previous 4000-character cap.  4000 chars
+  routinely exceeded the 512-token cap of small SBERT models, causing
+  silent in-model truncation that lost meaningful tail content.
+  Falls back to the character cap when the tokenizer isn't available.
+- **Frontend deep links now actually work** — `hitToHref` was
+  generating route formats that no destination page parsed:
+  - BOQ now uses ``/boq/<boqId>?highlight=<positionId>`` matching the
+    real ``BOQEditorPage`` route + query.
+  - DocumentsPage parses ``?id=<docId>`` and auto-opens the preview.
+  - TasksPage parses ``?id=<taskId>``, scrolls the matching card into
+    view, and adds a 2.5s ring highlight.
+  - RiskRegisterPage parses ``?id=<riskId>`` and opens detail view.
+  - BIMPage parses ``?element=<elementId>`` and selects the element
+    once the elements list resolves.
+  - Chat hits navigate to ``?session=<sessionId>`` from the new chat
+    payload field.
+  Each deep-link parser strips the query param after one shot so a
+  refresh doesn't keep re-applying it.
+
+### Added — BIM cross-module gap closure
+- **`GET /api/v1/bim_hub/coverage-summary/?project_id=...`** — new
+  aggregation endpoint returning ``{elements_total,
+  elements_linked_to_boq, elements_costed, elements_validated,
+  elements_with_documents, elements_with_tasks,
+  elements_with_activities}`` plus matching percentages.  Each count is
+  a single SELECT in the same async session — no N+1.  Documents,
+  tasks, activities and validation are fetched defensively so a
+  missing optional module doesn't 500 the call.
+- **Dashboard `BIMCoverageCard`** — new widget rendering 6 progress
+  bars + a headline percentage (avg of all 6 metrics).  Hides itself
+  entirely on projects with zero BIM elements so non-BIM workflows
+  stay clean.  Color-coded by completeness (green ≥75% / amber ≥40% /
+  rose otherwise).
+- **BOQ position BIM badge is now clickable** — the `OrdinalCellRenderer`
+  blue pill that shows the linked BIM element count is no longer a
+  read-only `<span>`; it's a `<button>` that navigates to
+  ``/bim?element=<first_id>``.  Estimators can finally jump from a
+  BOQ row to the 3D model element it was created from in one click.
+- **Schedule activity BIM badge** — Gantt activity rows now render a
+  small amber pill with the count of pinned BIM elements when
+  ``activity.bim_element_ids`` is non-empty.  Click navigates to the
+  BIM viewer with the first pinned element preselected.  Closes the
+  4D-schedule reverse-nav gap.
+- **BIM Quantity Rules page — Suggest from CWICR** — when a rule's
+  target is "auto-create", the editor now exposes a "Default unit
+  rate" field plus a one-click "Suggest from CWICR" button that calls
+  ``/api/v1/costs/suggest-for-element/`` with the rule's filter
+  context (element_type_filter, name, property_filter material) and
+  prefills the top match.  The rate persists into
+  ``boq_target.unit_rate`` and is read by the apply path
+  (``_auto_create_position_for_rule``) so the new BOQ position lands
+  fully priced — no second pass in the BOQ editor.
+
+### Verification
+- 766 total routes mounted (up from 765 in v1.4.1).  New routes:
+  ``/api/v1/bim_hub/coverage-summary/``.
+- Frontend ``tsc --noEmit`` clean.
+- Backend ``ruff check`` clean across every file touched in v1.4.2
+  (4 pre-existing warnings in unrelated bim_hub/router.py CAD upload
+  and BOQ-access-verifier code paths are not from this sweep).
+- ``_safe_quote_ids`` smoke-tested against literal SQL injection
+  payloads and confirms attacker strings are dropped.
+
 ## [1.4.1] — 2026-04-11
 
 ### Added

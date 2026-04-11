@@ -28,6 +28,9 @@ export interface Activity {
   dependencies: Array<{ activity_id: string; type: string; lag_days: number }>;
   resources: Array<{ name: string; type: string; allocation_pct: number }>;
   boq_position_ids: string[];
+  /** BIM elements pinned to this activity for 4D scheduling.  Backend
+   *  populates this from the `Activity.bim_element_ids` JSON column. */
+  bim_element_ids?: string[] | null;
   color: string;
   sort_order: number;
 }
