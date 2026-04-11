@@ -42,15 +42,18 @@ import {
   ArrowRight,
   Plus,
   Cuboid,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { Badge, EmptyState, Breadcrumb } from '@/shared/ui';
 import { BIMViewer } from '@/shared/ui/BIMViewer';
 import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
 import BIMFilterPanel from './BIMFilterPanel';
 import { BIMProcessingProgress, type BIMProcessingStage } from './BIMProcessingProgress';
+import AddToBOQModal from './AddToBOQModal';
 import { Filter } from 'lucide-react';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
+import { useBIMLinkSelectionStore } from '@/stores/useBIMLinkSelectionStore';
 import {
   fetchBIMModels,
   fetchBIMModel,
@@ -59,6 +62,7 @@ import {
   uploadCADFile,
   getGeometryUrl,
   deleteBIMModel,
+  deleteLink,
 } from './api';
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
@@ -702,7 +706,16 @@ export function BIMPage() {
   const [isolatedIds, setIsolatedIds] = useState<string[] | null>(null);
   const [processing, setProcessing] = useState<ProcessingUpdate | null>(null);
   const [meshMatchRatio, setMeshMatchRatio] = useState<number | null>(null);
+  /** Elements queued for linking via the AddToBOQ modal. Single element
+   *  when the user clicks an element; multiple elements when "quick
+   *  takeoff" on a filtered category. */
+  const [linkCandidates, setLinkCandidates] = useState<BIMElementData[] | null>(null);
   const addToast = useToastStore((s) => s.addToast);
+
+  /* ── Cross-highlight bridge to BOQ editor ───────────────────────── */
+  const highlightedBIMElementIds = useBIMLinkSelectionStore((s) => s.highlightedBIMElementIds);
+  const setBIMSelection = useBIMLinkSelectionStore((s) => s.setBIMSelection);
+  const clearBIMLinkSelection = useBIMLinkSelectionStore((s) => s.clear);
 
   const modelsQuery = useQuery({ queryKey: ['bim-models', projectId], queryFn: () => fetchBIMModels(projectId), enabled: !!projectId });
   const models = modelsQuery.data?.items ?? [];
@@ -758,7 +771,21 @@ export function BIMPage() {
     return null;
   }, [activeModelId, activeModel, elements]);
 
-  const handleElementSelect = useCallback((id: string | null) => setSelectedElementId(id), []);
+  const handleElementSelect = useCallback(
+    (id: string | null) => {
+      setSelectedElementId(id);
+      // Publish the click to the cross-highlight store so the BOQ editor
+      // can scroll to any linked row.
+      setBIMSelection(id ? [id] : []);
+    },
+    [setBIMSelection],
+  );
+
+  // Clear the cross-highlight store when leaving the BIM page so the BOQ
+  // editor doesn't keep a stale highlight from a previous session.
+  useEffect(() => {
+    return () => clearBIMLinkSelection();
+  }, [clearBIMLinkSelection]);
 
   // Stable callback for BIMFilterPanel — uses functional setState so it
   // doesn't need to track filterPredicate in its dependency list.
@@ -773,6 +800,55 @@ export function BIMPage() {
   const handleFilterElementClick = useCallback((elementId: string) => {
     setSelectedElementId(elementId);
   }, []);
+
+  // Open the AddToBOQ modal for a single clicked element.
+  const handleAddToBOQ = useCallback((element: BIMElementData) => {
+    setLinkCandidates([element]);
+  }, []);
+
+  // Remove a BIM↔BOQ link — fires from the properties panel's unlink button.
+  const handleUnlinkBOQ = useCallback(
+    async (linkId: string) => {
+      try {
+        await deleteLink(linkId);
+        addToast({
+          type: 'success',
+          title: t('bim.link_removed_title', { defaultValue: 'Unlinked' }),
+          message: t('bim.link_removed', { defaultValue: 'BIM ↔ BOQ link removed' }),
+        });
+        queryClient.invalidateQueries({ queryKey: ['bim-elements', activeModelId] });
+      } catch (err) {
+        addToast({
+          type: 'error',
+          title: t('common.error', { defaultValue: 'Error' }),
+          message: err instanceof Error ? err.message : String(err),
+        });
+      }
+    },
+    [activeModelId, addToast, queryClient, t],
+  );
+
+  // Kick a "quick takeoff" from the currently-applied filter — aggregate all
+  // elements that match the active filter predicate and open AddToBOQ with
+  // the full subset so the user can generate one BOQ position from e.g.
+  // "all walls on level 1".
+  const handleQuickTakeoff = useCallback(() => {
+    if (!elementsQuery.data || elementsQuery.data.items.length === 0) return;
+    const subset = filterPredicate
+      ? elementsQuery.data.items.filter(filterPredicate)
+      : elementsQuery.data.items;
+    if (subset.length === 0) {
+      addToast({
+        type: 'info',
+        title: t('bim.quick_takeoff_empty_title', { defaultValue: 'Nothing to link' }),
+        message: t('bim.quick_takeoff_empty', {
+          defaultValue: 'Current filter has no elements to link',
+        }),
+      });
+      return;
+    }
+    setLinkCandidates(subset);
+  }, [elementsQuery.data, filterPredicate, addToast, t]);
 
   const handleUploadComplete = useCallback((modelId: string) => {
     setActiveModelId(modelId); setShowUploadOverride(false); setSelectedElementId(null);
@@ -891,6 +967,9 @@ export function BIMPage() {
               <button onClick={() => navigate('/boq')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-content-secondary bg-surface-secondary border border-border-light hover:bg-surface-tertiary transition-colors">
                 <Link2 size={13} /> Link to BOQ
               </button>
+              <button onClick={() => navigate('/bim/rules')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-content-secondary bg-surface-secondary border border-border-light hover:bg-surface-tertiary transition-colors">
+                <SlidersHorizontal size={13} /> {t('bim.rules_button', { defaultValue: 'Rules' })}
+              </button>
               <button onClick={() => navigate('/schedule')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-content-secondary bg-surface-secondary border border-border-light hover:bg-surface-tertiary transition-colors">
                 <CalendarDays size={13} /> 4D Schedule
               </button>
@@ -913,6 +992,8 @@ export function BIMPage() {
               onFilterChange={handleFilterChange}
               onClose={() => setFilterPanelOpen(false)}
               onElementClick={handleFilterElementClick}
+              onQuickTakeoff={handleQuickTakeoff}
+              visibleElementCount={visibleElementCount}
             />
           </div>
         )}
@@ -930,6 +1011,7 @@ export function BIMPage() {
             projectId={projectId}
             selectedElementIds={selectedElementIds}
             onElementSelect={handleElementSelect}
+            highlightedIds={highlightedBIMElementIds.length > 0 ? highlightedBIMElementIds : null}
             elements={elements}
             isLoading={elementsQuery.isLoading}
             error={elementsQuery.error ? 'Failed to load model elements. Check the server connection.' : null}
@@ -938,6 +1020,8 @@ export function BIMPage() {
             colorByMode={colorByMode}
             isolatedIds={isolatedIds}
             onGeometryLoaded={setMeshMatchRatio}
+            onAddToBOQ={handleAddToBOQ}
+            onUnlinkBOQ={handleUnlinkBOQ}
             className="h-full"
           />
         ) : (
@@ -1017,6 +1101,20 @@ export function BIMPage() {
           )}
         </div>
       </div>
+
+      {/* BIM ↔ BOQ linking modal — opened from the properties panel
+          ("Add to BOQ" button) or the filter panel's quick-takeoff
+          action.  Renders a single-element or bulk-element linker. */}
+      {linkCandidates && linkCandidates.length > 0 && projectId && (
+        <AddToBOQModal
+          projectId={projectId}
+          elements={linkCandidates}
+          onClose={() => setLinkCandidates(null)}
+          onLinked={() => {
+            queryClient.invalidateQueries({ queryKey: ['bim-elements', activeModelId] });
+          }}
+        />
+      )}
     </div>
   );
 }

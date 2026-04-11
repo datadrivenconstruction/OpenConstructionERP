@@ -236,6 +236,11 @@ export function OrdinalCellRenderer(params: ICellRendererParams) {
   const hasResources = Array.isArray(data.metadata?.resources) && data.metadata.resources.length > 0;
   const isExpanded = ctx?.expandedPositions?.has(data.id) ?? false;
 
+  // BIM link count — shown as a small blue pill when the position is
+  // linked to one or more BIM elements (cross-highlight source).
+  const bimLinks: unknown = data.cad_element_ids;
+  const bimLinkCount = Array.isArray(bimLinks) ? bimLinks.length : 0;
+
   return (
     <div className="flex items-center gap-1 overflow-hidden">
       {hasResources ? (
@@ -259,6 +264,14 @@ export function OrdinalCellRenderer(params: ICellRendererParams) {
         className={`inline-block h-2 w-2 shrink-0 rounded-full ${dotColor}`}
         title={status}
       />
+      {bimLinkCount > 0 && (
+        <span
+          className="shrink-0 inline-flex items-center justify-center min-w-[16px] h-[14px] px-1 rounded-full bg-oe-blue/10 text-oe-blue text-[10px] font-semibold leading-none"
+          title={`${bimLinkCount} linked BIM element${bimLinkCount === 1 ? '' : 's'}`}
+        >
+          {bimLinkCount}
+        </span>
+      )}
     </div>
   );
 }

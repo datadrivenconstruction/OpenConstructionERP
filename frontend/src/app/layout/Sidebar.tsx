@@ -42,6 +42,7 @@ import {
   Send,
   History,
   BrainCircuit,
+  SlidersHorizontal,
   type LucideIcon,
 } from 'lucide-react';
 import { useModuleStore } from '@/stores/useModuleStore';
@@ -105,6 +106,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.pdf_measurements', to: '/takeoff?tab=measurements', icon: Ruler },
       { labelKey: 'nav.cad_bim_explorer', to: '/data-explorer', icon: TableProperties },
       { labelKey: 'nav.bim_viewer', to: '/bim', icon: Box },
+      { labelKey: 'nav.bim_rules', to: '/bim/rules', icon: SlidersHorizontal },
     ],
   },
   {
