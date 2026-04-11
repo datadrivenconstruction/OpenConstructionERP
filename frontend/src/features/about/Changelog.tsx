@@ -14,6 +14,22 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.22',
+    date: '2026-04-11',
+    changes: [
+      'BIM ↔ BOQ linking — the headline feature. The backend link infrastructure was fully built but had zero UI until now. Closing the gap end-to-end: (1) BIMElementResponse now embeds a boq_links array of BOQElementLinkBrief objects so the viewer knows per-element link state on first fetch, (2) the element details panel in the viewer renders a "Linked BOQ positions" section on every selected element with ordinal/description/link-type badge and an unlink button per link, (3) a new "Add to BOQ" modal (features/bim/AddToBOQModal.tsx, ~550 lines) offers two tabs — "Link to existing position" (searchable list of BOQ positions for the project) and "Create new position" (pre-filled form with aggregated quantities, unit, description, classification from the element) — both single-element and bulk-element paths in one shot',
+      'Quick takeoff: a new "Link N visible elements to BOQ" button in the filter panel runs AddToBOQ on the current filtered subset, so clicking Walls + 01 Entry Level + Quick Takeoff creates one BOQ position linked to all 211 walls on the ground floor in three clicks',
+      'BIM Quantity Rules page at /bim/rules — dedicated UI for rule-based bulk linking (the professional Vico/iTWO/Solibri approach). Define patterns like "IFC WALL + material=Concrete + thickness≥0.24 → DIN 276 330", preview matches via dry-run, then apply to create BOQElementLink rows + auto-created BOQ positions in bulk. Integrates with the existing BIMQuantityMap backend model and the /quantity-maps/ endpoints',
+      'apply_quantity_maps now actually persists — previously it returned a preview and never wrote anything. It now honours the dry_run flag (default True for safety), wraps each rule in a savepoint, skips duplicate (position, element) pairs, supports auto-creating BOQ positions when the rule has auto_create:true, and returns new links_created + positions_created counters',
+      'Position.cad_element_ids is auto-synced on link CRUD — every create_link / delete_link now updates the JSON array on the corresponding BOQ position so the existing "is linked" checks everywhere in the codebase stay consistent. Added a sync_cad_element_ids(project_id) back-fill service method for legacy rows',
+      'Bi-directional selection sync — new useBIMLinkSelectionStore (Zustand) publishes "BOQ row selected → highlight linked BIM elements in orange" and "BIM element selected → scroll BOQ row into view". Cross-highlighting works even when both pages are open in split-view',
+      'Linked-count badge — a green "N linked" chip in the viewer top-right shows at-a-glance how many elements already have BOQ links, so the user can see takeoff progress without opening the BOQ editor',
+      'Viewer toolbar rework — removed the broken 4D/5D view-mode stubs (visual-only, never wired to cost or schedule data), added a camera preset group (Fit / Isometric / Top / Front / Side) via SceneManager.setCameraPreset, wired the existing toggleGrid() to a Grid button, and consolidated every button into a single bordered row with function-group dividers (Camera | Selection | Visibility). Professional toolbar taxonomy per the Vico / Forge / BIMcollab research brief',
+      'New BIMElement.highlight(elementIds) method on ElementManager — colours matching meshes orange WITHOUT hiding the rest, so the user sees the spatial distribution of whichever BOQ position they clicked. Driven by the new highlightedIds prop on BIMViewer',
+      'Per-project link count visible in the BOQ grid — positions with cad_element_ids.length > 0 now render a small blue pill showing the link count in their row, so estimators see takeoff coverage at a glance while scrolling through the BOQ',
+    ],
+  },
+  {
     version: '1.3.21',
     date: '2026-04-10',
     changes: [

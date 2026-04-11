@@ -118,6 +118,23 @@ class BIMElementBulkImport(BaseModel):
     elements: list[BIMElementCreate] = Field(..., min_length=1, max_length=50000)
 
 
+class BOQElementLinkBrief(BaseModel):
+    """Lightweight BOQ link summary embedded in a BIM element response.
+
+    Contains just enough data for the viewer to render a link badge and
+    navigate to the linked BOQ position without a second round trip.
+    """
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    boq_position_id: UUID
+    boq_position_ordinal: str | None = None
+    boq_position_description: str | None = None
+    link_type: str
+    confidence: str | None = None
+
+
 class BIMElementResponse(BaseModel):
     """BIM element returned from the API."""
 
@@ -137,6 +154,7 @@ class BIMElementResponse(BaseModel):
     mesh_ref: str | None = None
     lod_variants: dict[str, Any] | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    boq_links: list[BOQElementLinkBrief] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
 
@@ -267,14 +285,28 @@ class QuantityMapApplyRequest(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     model_id: UUID
-    dry_run: bool = Field(default=False, description="If True, return results without creating links")
+    dry_run: bool = Field(
+        default=True,
+        description=(
+            "If True (default), return the preview without creating any "
+            "BOQElementLink or BOQPosition rows. Set to False to actually "
+            "persist links and auto-created positions."
+        ),
+    )
 
 
 class QuantityMapApplyResult(BaseModel):
-    """Result of applying quantity mapping rules."""
+    """Result of applying quantity mapping rules.
+
+    ``links_created`` and ``positions_created`` are always reported — they
+    stay at 0 on a ``dry_run`` so the caller can safely display them as
+    "would-be" counters without extra branching.
+    """
 
     matched_elements: int = 0
     rules_applied: int = 0
+    links_created: int = 0
+    positions_created: int = 0
     results: list[dict[str, Any]] = Field(default_factory=list)
 
 

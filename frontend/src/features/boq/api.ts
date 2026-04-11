@@ -29,6 +29,8 @@ export interface Position {
   confidence: number | null;
   sort_order: number;
   validation_status: string;
+  /** BIM element IDs linked to this position (cross-highlight source). */
+  cad_element_ids?: string[];
   /** Backend returns `metadata_` (aliased) — normalize to `metadata` in fetch layer */
   metadata: Record<string, unknown>;
   metadata_?: Record<string, unknown>;
