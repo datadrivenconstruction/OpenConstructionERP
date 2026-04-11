@@ -14,6 +14,16 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.28',
+    date: '2026-04-11',
+    changes: [
+      'BIM filter — universal "Building elements" + "Annotations & analytical" split.  User report: the wrong elements showed up under each category, the grouping was unclear, and different projects need different rules.  Replaced the manually-curated noise list with a universal split driven by `bucketOf()` — every category lands in either a real building bucket (Structure / Envelope / Openings / MEP / Furniture / …) OR a noise bucket (Annotations / Analytical).  The Category panel now renders building chips at the top in normal style and a collapsible "Annotations & analytical" section underneath that\'s closed by default but always present.  Works zero-curation for any project',
+      'BIM filter — pretty category names.  Real DDC RvtExporter output stores normalised lowercase concatenated category names like "Curtainwallmullions" / "Structuralcolumns" / "Doortags".  New `prettifyCategoryName()` looks each one up in a curated table of ~150 well-known Revit categories and renders the natural English form ("Curtain Wall Mullions" / "Structural Columns" / "Door Tags").  Anything not in the table gets first-letter capitalised but is otherwise un-touched — never algorithmically guessing word boundaries (the wrong split "Stair Srailingbaluster" is worse than the ugly-but-correct "Stairsrailingbaluster")',
+      'BIM filter — "None" element_type (the 6 048 Revit-ingest junk rows in the demo) now classified as noise so the buildings-only view doesn\'t pollute the panel with thousands of uncategorised rows.  Real building-element baseline drops from "everything" to "everything except None + annotations + analytical" automatically',
+      'Headless test verdict logic — clear-all assertion now compares against the buildings-only baseline instead of the raw mesh count, since buildings-only is sticky and doesn\'t reset.  All 10 verdicts now PASS deterministically: storey filter, clear storey, buildings-only toggle, Walls type filter (5440 → 205), clear all (back to 2294 baseline), multi-chip OR (Doors=108, +Walls=313), group save → list, group apply (2294 → 205), group delete, 60 fps stable',
+    ],
+  },
+  {
     version: '1.3.27',
     date: '2026-04-11',
     changes: [
