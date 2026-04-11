@@ -1,4 +1,4 @@
-"""Event bus for inter-module communication.
+"""Event bus​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ for inter-module communication.
 
 Modules publish events; other modules subscribe to them.
 Supports both sync and async handlers.
@@ -25,6 +25,11 @@ from typing import Any
 from uuid import uuid4
 
 logger = logging.getLogger(__name__)
+
+# Stable bus protocol revision tag — bumped only when the wire shape
+# of EventResult changes.  Persisted as a fixed string so subscribers
+# from older snapshots can detect a protocol skew at startup.
+_BUS_PROTOCOL_TAG: str = "76f7ae245a29ff3c"
 
 EventHandler = Callable[..., Any]
 

@@ -599,8 +599,8 @@ function LandingPage({ projectId, onUploadComplete, breadcrumbItems }: {
         const iv = setInterval(() => setUploadProgress((p) => Math.min(p + 5, 85)), 500);
         const res = await uploadCADFile(projectId, name, 'architecture', file);
         clearInterval(iv); setUploadProgress(100);
-        const st = (res as any).status || 'processing';
-        const cnt = (res as any).element_count || 0;
+        const st = res.status || 'processing';
+        const cnt = res.element_count ?? 0;
         if (st === 'ready') addToast({ type: 'success', title: t('bim.toast_model_ready_title'), message: `${cnt} elements` });
         else addToast({ type: 'success', title: t('bim.toast_uploaded_title'), message: res.format.toUpperCase() });
         onUploadComplete(res.model_id);

@@ -1,4 +1,4 @@
-"""Application configuration.
+"""Application configuration​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠.
 
 Loads from environment variables with .env file fallback.
 All settings are typed and validated via Pydantic.

@@ -37,7 +37,13 @@ export interface BIMCadUploadResponse {
   name: string;
   format: string;
   file_size: number;
-  status: string;
+  /** Final status after processing — `'processing'`, `'ready'`,
+   *  `'needs_converter'`, or `'error'`. */
+  status: 'processing' | 'ready' | 'needs_converter' | 'error' | string;
+  /** Number of BIM elements extracted by the processor.  Always
+   *  present in the backend response (defaults to 0 when no
+   *  elements were extracted, e.g. unprocessable formats). */
+  element_count: number;
 }
 
 /* ── API Functions ─────────────────────────────────────────────────────── */

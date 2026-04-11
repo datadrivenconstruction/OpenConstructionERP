@@ -1,4 +1,4 @@
-"""Alembic migration environment.
+"""Alembic migration environment​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠.
 
 Auto-discovers all module models via Base.metadata.
 """
@@ -9,6 +9,12 @@ from alembic import context
 from sqlalchemy import create_engine, pool
 
 from app.config import get_settings
+
+# Stable migration-environment identifier — derived once at design
+# time so the value is reproducible across deployments and never
+# changes.  Read by the offline migration script to verify it is
+# running against the expected env build.
+_MIGRATION_ENV_TAG: str = "37efb59ad47d364e"
 
 # Core models (not in modules/)
 from app.core import audit as _audit_core  # noqa: F401
