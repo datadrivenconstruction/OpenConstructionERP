@@ -5,6 +5,113 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.4] — 2026-04-11
+
+### Fixed — backend hardening cut
+
+A focused stability + correctness pass driven by a multi-agent quality
+audit of the v1.4.x backend.  No new user-visible features; the goal
+is "everything that already exists works at scale and stays honest
+about what version it is".
+
+#### Memory hazard in vector auto-backfill
+- ``backend/app/main.py::_auto_backfill_vector_collections`` used to
+  ``SELECT *`` from each indexed table on startup, materialise the
+  full result set into a Python list, and only THEN slice it down to
+  ``vector_backfill_max_rows``.  On a 2M-row production deployment
+  that allocated **gigabytes** of RAM at startup before the cap could
+  even kick in.
+- The new implementation issues a cheap ``SELECT COUNT(*)`` first to
+  decide whether reindexing is needed, then pulls only the capped
+  number of rows with ``LIMIT`` applied at the SQL level.  Memory
+  usage is now bounded by ``vector_backfill_max_rows`` regardless of
+  table size.
+- Side benefit: the per-collection ``_load_X`` closures collapsed
+  into a single declarative ``backfill_targets`` registry — 8 modules
+  × ~12 LOC of copy-pasted loaders → one tuple per collection.  Total
+  reduction in main.py: ~80 LOC.  This is also the foundation
+  v1.4.5's full ``create_vector_routes()`` factory will build on.
+
+#### Deprecated ``datetime.utcnow()`` removed (Python 3.14 readiness)
+- ``datetime.utcnow()`` was deprecated in Python 3.12 and becomes a
+  hard error in 3.14.  Replaced with ``datetime.now(UTC)`` across
+  **8 call sites**: ``boq/router.py:2991``, ``documents/service.py:475``,
+  ``tendering/router.py:378``, ``project_intelligence/collector.py:680``,
+  ``punchlist/router.py:299``, ``meetings/router.py:984``,
+  ``takeoff/router.py:1872``, plus ``bim_hub/router.py:869`` (which
+  also got rewritten as part of the next bullet).
+- The original quality audit only flagged 4 of these 8 sites; a
+  follow-up grep across the whole backend caught the remaining 4.
+
+#### Raw SQL → ORM in BIM upload cross-link
+- ``bim_hub/router.py::upload_cad`` was using a hand-rolled
+  ``INSERT INTO oe_documents_document`` via ``text()`` to create the
+  Documents-hub cross-link entry.  The parameter binding was safe in
+  practice but the pattern was fragile (any future schema change to
+  ``Document`` would silently break the cross-link without test
+  coverage), and it shipped a stray ``datetime.utcnow()``.
+- Replaced with a clean ``Document(...)`` ORM insert that picks up
+  every default + timestamp from the model and the ``Base`` mixin.
+  The cross-link stays a best-effort try/except — it's convenience
+  glue, not load-bearing on the main upload flow.
+
+#### Functional ruff cleanup
+- ``F401`` unused imports removed from ``boq/events.py``,
+  ``project_intelligence/collector.py`` (``uuid``),
+  ``project_intelligence/scorer.py`` (``Callable``),
+  ``search/router.py`` (``Depends``).
+- ``F541`` f-string without placeholders fixed in
+  ``project_intelligence/advisor.py:399``.
+- ``B905`` ``zip()`` without ``strict=`` fixed in
+  ``costs/router.py:1742``.  This is the cost-database resource
+  loader — without ``strict=True`` an array length drift would
+  silently truncate component rows mid-import and corrupt the
+  assembly composition with no audit trail.  ``strict=True`` raises
+  immediately so the error is visible.
+- Ruff style issues (``UP037``, ``UP041``, ``I001``) auto-fixed in
+  ``costs/router.py``, ``project_intelligence/router.py`` /
+  ``schemas.py``, ``documents/service.py``.
+
+#### Version-sync CI guard (NEW)
+- ``backend/pyproject.toml`` silently drifted from ``frontend/package.json``
+  for **four minor versions** (v1.3.32 → v1.4.2 all shipped with
+  the Python package stuck on ``1.3.31``, so ``/api/health`` lied
+  about which version users were actually getting because
+  ``Settings.app_version`` reads from ``importlib.metadata``).  v1.4.3
+  retro-fixed the literal but left the door open for the same gap.
+- New ``scripts/check_version_sync.py`` reads both files plus the top
+  entries of ``CHANGELOG.md`` and ``frontend/src/features/about/Changelog.tsx``,
+  and exits non-zero on any mismatch.  Wired into:
+  - ``.pre-commit-config.yaml`` as a local hook on the four version
+    files (so a bump that touches only one file is rejected
+    before it can be committed)
+  - ``.github/workflows/ci.yml`` as a dedicated ``version-sync`` job
+    that runs in parallel with backend + frontend lanes
+- Tested negatively (script catches drift) and positively (passes
+  with all four files at ``1.4.4``).
+
+### Verification
+- Backend ``ruff check`` clean across every file touched in v1.4.4
+- Backend ``python -m uvicorn app.main:create_app --factory`` boots
+  cleanly via ``app.router.lifespan_context`` smoke test:
+  57 modules loaded, 217k vectors indexed, no startup errors
+- ``scripts/check_version_sync.py`` passes at ``1.4.4`` after the
+  bump (negative test confirmed it would fail at ``1.4.99``)
+
+### Deferred to v1.4.5
+- BIMPage.tsx i18n compliance (11+ hardcoded English strings flagged
+  by frontend audit; needs sub-component ``useTranslation()``)
+- ``create_vector_routes()`` factory + reduce ~250 LOC of duplicated
+  ``vector/status`` and ``vector/reindex`` endpoints across 8 modules
+- Trailing-slash audit of ``test_cross_module_flows.py`` and
+  ``test_api_smoke.py`` (12 failing tests, all caused by missing
+  trailing slashes — ``redirect_slashes=False`` is intentional,
+  fixes a CORS 307 issue with the frontend)
+- Deep-dive audit of recently-added modules (``requirements``,
+  ``erp_chat``, ``project_intelligence``, ``bim_hub`` element groups,
+  cross-module linking infrastructure) — looking for hacks,
+  half-baked logic, missing cross-module wiring
+
 ## [1.4.3] — 2026-04-11
 
 ### Added — Requirements ↔ BIM cross-module integration

@@ -19,7 +19,7 @@ from app.core.events import Event, event_bus
 from app.core.vector_index import delete_one as vector_delete_one
 from app.core.vector_index import index_one as vector_index_one
 from app.database import async_session_factory
-from app.modules.boq.models import BOQ, BOQActivityLog, Position
+from app.modules.boq.models import BOQActivityLog, Position
 from app.modules.boq.vector_adapter import boq_position_adapter
 
 logger = logging.getLogger(__name__)

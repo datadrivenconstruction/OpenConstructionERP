@@ -8,7 +8,7 @@ Routes:
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Query
 
 from app.dependencies import CurrentUserId
 from app.modules.search.schemas import (

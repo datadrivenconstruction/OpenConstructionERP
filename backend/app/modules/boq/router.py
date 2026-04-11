@@ -49,7 +49,7 @@ import random
 import tempfile
 import uuid
 from collections.abc import Iterator
-from datetime import UTC
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 
@@ -2988,7 +2988,7 @@ async def import_boq_excel(
                 "original_columns": import_meta.get("original_columns", []),
                 "column_mapping": import_meta.get("column_mapping", {}),
                 "total_imported": imported,
-                "import_date": __import__("datetime").datetime.utcnow().isoformat(),
+                "import_date": datetime.now(UTC).isoformat(),
             }
             boq.metadata_ = meta
             await service.session.flush()
@@ -4690,7 +4690,7 @@ async def boq_vector_reindex(
     from sqlalchemy.orm import selectinload
 
     from app.core.vector_index import reindex_collection
-    from app.modules.boq.models import BOQ as BOQModel
+    from app.modules.boq.models import BOQ as BOQModel  # noqa: N811  -- domain class, not constant
     from app.modules.boq.models import Position
     from app.modules.boq.vector_adapter import boq_position_adapter
 
