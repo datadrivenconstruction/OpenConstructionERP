@@ -178,37 +178,84 @@ async def _auto_backfill_vector_collections() -> None:
 
         cap = max(0, int(settings.vector_backfill_max_rows or 0))
 
-        async def _maybe_backfill(label: str, collection: str, loader, adapter) -> None:
+        from sqlalchemy import func
+        from sqlalchemy.orm import selectinload
+
+        async def _maybe_backfill(
+            label: str,
+            collection: str,
+            model,
+            adapter,
+            *,
+            options: list | None = None,
+        ) -> None:
+            """Backfill ``collection`` from ``model`` rows in a memory-safe way.
+
+            Steps:
+                1. Read the indexed-row count from the vector store (cheap).
+                2. Issue a ``SELECT COUNT(*)`` against the model — also cheap.
+                3. Skip if the index already has at least as many rows.
+                4. Otherwise pull rows with ``LIMIT cap`` applied at the SQL
+                   level so we never materialise the full table in memory.
+
+            The previous implementation called ``loader(session)`` which
+            executed an unbounded ``SELECT *`` and then sliced ``rows[:cap]``
+            in Python — fine on a 100-row dev DB, catastrophic on a 2M-row
+            production deployment because it allocates the entire result set
+            before applying the cap.  Now the cap is enforced before the
+            scan reaches the network.
+            """
             try:
-                indexed = vector_count_collection(collection)
+                indexed = vector_count_collection(collection) or 0
             except Exception:
                 indexed = 0
+
             try:
                 async with async_session_factory() as session:
-                    rows = await loader(session)
+                    # Step 1: cheap COUNT(*) — never materialises rows.
+                    live_total = (
+                        await session.execute(select(func.count()).select_from(model))
+                    ).scalar_one() or 0
+
+                    if not live_total:
+                        return
+                    if indexed >= live_total:
+                        logger.debug(
+                            "Backfill %s: %d/%d already indexed; skipping",
+                            label,
+                            indexed,
+                            live_total,
+                        )
+                        return
+
+                    # Step 2: decide how many rows to actually pull.
+                    if cap > 0 and live_total > cap:
+                        limit_to = cap
+                        logger.info(
+                            "Backfill %s: %d live rows exceeds cap (%d); "
+                            "indexing first %d",
+                            label,
+                            live_total,
+                            cap,
+                            cap,
+                        )
+                    else:
+                        limit_to = live_total
+
+                    # Step 3: pull only what we need, with relationship
+                    # eager-loads if the adapter needs them.
+                    stmt = select(model)
+                    if options:
+                        stmt = stmt.options(*options)
+                    stmt = stmt.limit(limit_to)
+                    rows = list((await session.execute(stmt)).scalars().all())
             except Exception as exc:
-                logger.debug("Backfill loader %s failed: %s", label, exc)
+                logger.debug("Backfill %s loader failed: %s", label, exc)
                 return
+
             if not rows:
                 return
-            live_total = len(rows)
-            if indexed >= live_total:
-                logger.debug(
-                    "Backfill %s: %d/%d already indexed; skipping",
-                    label,
-                    indexed,
-                    live_total,
-                )
-                return
-            if cap > 0 and live_total > cap:
-                rows = rows[:cap]
-                logger.info(
-                    "Backfill %s: %d live rows exceeds cap (%d); indexing first %d",
-                    label,
-                    live_total,
-                    cap,
-                    cap,
-                )
+
             try:
                 result = await reindex_collection(adapter, rows)
                 logger.info(
@@ -222,120 +269,79 @@ async def _auto_backfill_vector_collections() -> None:
             except Exception as exc:
                 logger.debug("Backfill %s reindex failed: %s", label, exc)
 
-        # ── BOQ positions ────────────────────────────────────────────────
-        async def _load_boq(session):
-            from sqlalchemy.orm import selectinload
-
-            from app.modules.boq.models import Position
-
-            stmt = select(Position).options(selectinload(Position.boq))
-            return list((await session.execute(stmt)).scalars().all())
-
-        from app.modules.boq.vector_adapter import boq_position_adapter
-
-        await _maybe_backfill("BOQ positions", COLLECTION_BOQ, _load_boq, boq_position_adapter)
-
-        # ── Documents ────────────────────────────────────────────────────
-        async def _load_documents(session):
-            from app.modules.documents.models import Document
-
-            return list((await session.execute(select(Document))).scalars().all())
-
-        from app.modules.documents.vector_adapter import document_vector_adapter
-
-        await _maybe_backfill(
-            "Documents", COLLECTION_DOCUMENTS, _load_documents, document_vector_adapter
-        )
-
-        # ── Tasks ────────────────────────────────────────────────────────
-        async def _load_tasks(session):
-            from app.modules.tasks.models import Task
-
-            return list((await session.execute(select(Task))).scalars().all())
-
-        from app.modules.tasks.vector_adapter import task_vector_adapter
-
-        await _maybe_backfill("Tasks", COLLECTION_TASKS, _load_tasks, task_vector_adapter)
-
-        # ── Risks ────────────────────────────────────────────────────────
-        async def _load_risks(session):
-            from app.modules.risk.models import RiskItem
-
-            return list((await session.execute(select(RiskItem))).scalars().all())
-
-        from app.modules.risk.vector_adapter import risk_vector_adapter
-
-        await _maybe_backfill("Risks", COLLECTION_RISKS, _load_risks, risk_vector_adapter)
-
-        # ── BIM elements ─────────────────────────────────────────────────
-        async def _load_bim_elements(session):
-            from sqlalchemy.orm import selectinload
-
-            from app.modules.bim_hub.models import BIMElement
-
-            stmt = select(BIMElement).options(selectinload(BIMElement.model))
-            return list((await session.execute(stmt)).scalars().all())
-
+        # ── Declarative collection registry ──────────────────────────────
+        # Each tuple is (label, collection_constant, model_loader, adapter_loader,
+        # options_factory).  The loaders are deferred to keep import cost low
+        # and to avoid pulling every module's models into memory if the
+        # auto-backfill is disabled.
+        from app.modules.bim_hub.models import BIMElement
         from app.modules.bim_hub.vector_adapter import bim_element_vector_adapter
-
-        await _maybe_backfill(
-            "BIM elements",
-            COLLECTION_BIM_ELEMENTS,
-            _load_bim_elements,
-            bim_element_vector_adapter,
-        )
-
-        # ── Validation reports ───────────────────────────────────────────
-        async def _load_validation(session):
-            from app.modules.validation.models import ValidationReport
-
-            return list(
-                (await session.execute(select(ValidationReport))).scalars().all()
-            )
-
-        from app.modules.validation.vector_adapter import validation_report_adapter
-
-        await _maybe_backfill(
-            "Validation reports",
-            COLLECTION_VALIDATION,
-            _load_validation,
-            validation_report_adapter,
-        )
-
-        # ── Requirements (EAC triplets) ──────────────────────────────────
-        async def _load_requirements(session):
-            from sqlalchemy.orm import selectinload
-
-            from app.modules.requirements.models import Requirement
-
-            stmt = select(Requirement).options(
-                selectinload(Requirement.requirement_set)
-            )
-            return list((await session.execute(stmt)).scalars().all())
-
+        from app.modules.boq.models import Position
+        from app.modules.boq.vector_adapter import boq_position_adapter
+        from app.modules.documents.models import Document
+        from app.modules.documents.vector_adapter import document_vector_adapter
+        from app.modules.erp_chat.models import ChatMessage
+        from app.modules.erp_chat.vector_adapter import chat_message_adapter
+        from app.modules.requirements.models import Requirement
         from app.modules.requirements.vector_adapter import (
             requirement_vector_adapter,
         )
+        from app.modules.risk.models import RiskItem
+        from app.modules.risk.vector_adapter import risk_vector_adapter
+        from app.modules.tasks.models import Task
+        from app.modules.tasks.vector_adapter import task_vector_adapter
+        from app.modules.validation.models import ValidationReport
+        from app.modules.validation.vector_adapter import validation_report_adapter
 
-        await _maybe_backfill(
-            "Requirements",
-            COLLECTION_REQUIREMENTS,
-            _load_requirements,
-            requirement_vector_adapter,
-        )
+        backfill_targets = [
+            (
+                "BOQ positions",
+                COLLECTION_BOQ,
+                Position,
+                boq_position_adapter,
+                [selectinload(Position.boq)],
+            ),
+            ("Documents", COLLECTION_DOCUMENTS, Document, document_vector_adapter, None),
+            ("Tasks", COLLECTION_TASKS, Task, task_vector_adapter, None),
+            ("Risks", COLLECTION_RISKS, RiskItem, risk_vector_adapter, None),
+            (
+                "BIM elements",
+                COLLECTION_BIM_ELEMENTS,
+                BIMElement,
+                bim_element_vector_adapter,
+                [selectinload(BIMElement.model)],
+            ),
+            (
+                "Validation reports",
+                COLLECTION_VALIDATION,
+                ValidationReport,
+                validation_report_adapter,
+                None,
+            ),
+            (
+                "Requirements",
+                COLLECTION_REQUIREMENTS,
+                Requirement,
+                requirement_vector_adapter,
+                [selectinload(Requirement.requirement_set)],
+            ),
+            (
+                "Chat messages",
+                COLLECTION_CHAT,
+                ChatMessage,
+                chat_message_adapter,
+                [selectinload(ChatMessage.session)],
+            ),
+        ]
 
-        # ── Chat messages ────────────────────────────────────────────────
-        async def _load_chat(session):
-            from sqlalchemy.orm import selectinload
-
-            from app.modules.erp_chat.models import ChatMessage
-
-            stmt = select(ChatMessage).options(selectinload(ChatMessage.session))
-            return list((await session.execute(stmt)).scalars().all())
-
-        from app.modules.erp_chat.vector_adapter import chat_message_adapter
-
-        await _maybe_backfill("Chat messages", COLLECTION_CHAT, _load_chat, chat_message_adapter)
+        for label, collection_id, model, adapter, options in backfill_targets:
+            await _maybe_backfill(
+                label,
+                collection_id,
+                model,
+                adapter,
+                options=options,
+            )
 
         logger.info("Vector auto-backfill pass complete")
     except Exception as exc:  # noqa: BLE001

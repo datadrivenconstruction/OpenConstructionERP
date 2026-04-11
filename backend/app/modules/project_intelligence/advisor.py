@@ -396,7 +396,7 @@ def _generate_fallback_recommendations(
         lines.append(f"{i}. [{gap.severity.upper()}] {gap.title}")
         lines.append(f"   {gap.description}")
         if gap.action_id:
-            lines.append(f"   Action available: use the button to resolve this.")
+            lines.append("   Action available: use the button to resolve this.")
         lines.append("")
 
     if score.achievements:

@@ -15,7 +15,7 @@ Endpoints:
 import io
 import logging
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
@@ -375,7 +375,7 @@ async def export_tender_pdf(
     lines.append(f"Tender Package: {package.name}")
     lines.append(f"Status: {package.status}")
     lines.append(f"Deadline: {package.deadline or 'N/A'}")
-    lines.append(f"Generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}")
+    lines.append(f"Generated: {datetime.now(UTC).strftime('%Y-%m-%d %H:%M UTC')}")
     lines.append("")
     lines.append(f"Budget Total: {comparison.budget_total:,.2f}")
     lines.append(f"Number of Bids: {comparison.bid_count}")
