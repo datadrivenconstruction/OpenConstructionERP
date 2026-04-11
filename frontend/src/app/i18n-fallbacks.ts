@@ -938,6 +938,7 @@ export const fallbackResources = {
       'nav.cad_takeoff': 'CAD/BIM Takeoff',
       'nav.cad_bim_explorer': 'CAD-BIM Explorer',
       'nav.bim_viewer': 'BIM 3D Viewer',
+      'nav.bim_rules': 'BIM Rules',
       'bim.title': 'BIM Viewer',
       'bim.models': 'Models',
       'bim.element_tree': 'Element Tree',

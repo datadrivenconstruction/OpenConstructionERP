@@ -14,6 +14,16 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.23',
+    date: '2026-04-11',
+    changes: [
+      'BIM viewer is verified end-to-end via headless deep test (debug-bim.cjs): all camera presets (Top/Front/Side/Iso/Fit) move the camera to the correct position, grid toggle flips visibility, element click opens the properties panel with "Linked BOQ positions" section, "Add to BOQ" button opens the modal with both tabs populated by real BOQ positions from the demo project, /bim/rules page renders the empty state, and the storey + buildings-only + Walls type filter + clear all + multi-chip OR all pass with 60 fps on real GPU',
+      'BIM viewer headless test (frontend/debug-bim.cjs) was extended with 4 new test groups: camera preset verification (TEST 6), grid toggle (TEST 7), element click → AddToBOQ modal (TEST 7b), navigation to /bim/rules (TEST 8), and a synthetic stress test that clones the demo scene 4× to ~21 760 meshes (TEST 9). The stress test confirms the per-mesh path holds 60 fps up to ~5 000 meshes and degrades to ~2 fps at 21 000 — informing the BatchedMesh follow-up below',
+      'Fix: sidebar now shows "BIM Rules" instead of the raw `nav.bim_rules` translation key — added the missing English fallback in i18n-fallbacks.ts',
+      'Internal: ElementManager now contains a `batchMeshesByMaterial()` method that uses Three.js BatchedMesh to collapse same-material meshes into one draw call per material (groups with ≥10 instances).  Currently gated behind a 50 000-mesh threshold so it never triggers on real-world models — Three.js BatchedMesh.setVisibleAt has subtle GPU-sync issues that cause partial renders when filters change rapidly, so the per-mesh path is the default for everything below 50 k meshes (which is comfortably 60 fps).  The proper fix is to pre-bake batched meshes on the BACKEND side as part of the canonical-format conversion, which is the storage architecture work in progress',
+    ],
+  },
+  {
     version: '1.3.22',
     date: '2026-04-11',
     changes: [
