@@ -594,5 +594,39 @@ class ERPChatService:
             )
             self.session.add(assistant_msg)
             await self.session.flush()
+
+            # Publish standardized events so the vector indexer can react.
+            # Best-effort — failures must never break the chat persistence
+            # path.  We pass the project_id from the parent session so the
+            # handler doesn't have to do an extra lookup.
+            try:
+                from app.core.events import event_bus
+
+                project_id = (
+                    str(chat_session.project_id)
+                    if getattr(chat_session, "project_id", None)
+                    else None
+                )
+                for msg, role in (
+                    (user_msg, "user"),
+                    (assistant_msg, "assistant"),
+                ):
+                    if msg.id is None:
+                        continue
+                    await event_bus.publish(
+                        "erp_chat.message.created",
+                        {
+                            "message_id": str(msg.id),
+                            "session_id": str(chat_session.id),
+                            "project_id": project_id,
+                            "role": role,
+                        },
+                        source_module="oe_erp_chat",
+                    )
+            except Exception:
+                logger.debug(
+                    "Failed to publish erp_chat.message.created events",
+                    exc_info=True,
+                )
         except Exception:
             logger.exception("Failed to persist chat messages")
