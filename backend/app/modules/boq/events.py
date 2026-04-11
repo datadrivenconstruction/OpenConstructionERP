@@ -1,8 +1,9 @@
-"""BOQ event handlers — activity log integration.
+"""BOQ event handlers — activity log integration + vector indexing.
 
 Subscribes to all ``boq.*`` events and creates activity log entries
-for audit trail purposes.  The handler extracts relevant information
-from each event and writes a BOQActivityLog row.
+for audit trail purposes.  Also keeps the ``oe_boq_positions`` vector
+collection in sync with the underlying Position rows so semantic search
+and the per-row "Similar items" panel always reflect the latest data.
 
 This module is auto-imported by the module loader when the ``oe_boq``
 module is loaded (see ``module_loader._load_module`` → ``events.py``).
@@ -11,9 +12,15 @@ module is loaded (see ``module_loader._load_module`` → ``events.py``).
 import logging
 import uuid
 
-from app.core.events import Event
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+
+from app.core.events import Event, event_bus
+from app.core.vector_index import delete_one as vector_delete_one
+from app.core.vector_index import index_one as vector_index_one
 from app.database import async_session_factory
-from app.modules.boq.models import BOQActivityLog
+from app.modules.boq.models import BOQ, BOQActivityLog, Position
+from app.modules.boq.vector_adapter import boq_position_adapter
 
 logger = logging.getLogger(__name__)
 
@@ -152,3 +159,76 @@ async def _log_boq_activity(event: Event) -> None:
             await session.commit()
     except Exception:
         logger.exception("Failed to write activity log for event '%s'", event.name)
+
+
+# ── Vector indexing subscribers ──────────────────────────────────────────
+#
+# Keep the ``oe_boq_positions`` collection in sync with the live Position
+# rows.  Each handler opens its own short-lived session, eager-loads the
+# parent BOQ so ``project_id_of`` resolves cleanly, and forwards the row
+# to the adapter.  Failures are logged and swallowed — vector indexing is
+# best-effort and must never break a normal CRUD path.
+
+
+async def _index_position(event: Event) -> None:
+    """Re-embed a single Position row after create / update."""
+    pid_raw = (event.data or {}).get("position_id")
+    if not pid_raw:
+        return
+    try:
+        position_id = uuid.UUID(str(pid_raw))
+    except (ValueError, AttributeError):
+        return
+
+    try:
+        async with async_session_factory() as session:
+            stmt = (
+                select(Position)
+                .options(selectinload(Position.boq))
+                .where(Position.id == position_id)
+            )
+            row = (await session.execute(stmt)).scalar_one_or_none()
+            if row is None:
+                # Race: row was deleted between publish and handler.
+                await vector_delete_one(boq_position_adapter, str(position_id))
+                return
+            project_id = None
+            if row.boq is not None and row.boq.project_id is not None:
+                project_id = str(row.boq.project_id)
+            await vector_index_one(
+                boq_position_adapter,
+                row,
+                project_id=project_id,
+            )
+    except Exception:
+        logger.debug("BOQ vector index failed for %s", pid_raw, exc_info=True)
+
+
+async def _delete_position_vector(event: Event) -> None:
+    """Remove a deleted Position row from the vector store."""
+    pid_raw = (event.data or {}).get("position_id")
+    if not pid_raw:
+        return
+    try:
+        await vector_delete_one(boq_position_adapter, str(pid_raw))
+    except Exception:
+        logger.debug("BOQ vector delete failed for %s", pid_raw, exc_info=True)
+
+
+# Wrappers that match the EventBus handler signature (Event → awaitable).
+async def _on_position_created(event: Event) -> None:
+    await _index_position(event)
+
+
+async def _on_position_updated(event: Event) -> None:
+    await _index_position(event)
+
+
+async def _on_position_deleted(event: Event) -> None:
+    await _delete_position_vector(event)
+
+
+event_bus.subscribe("boq.position.created", _on_position_created)
+event_bus.subscribe("boq.position.updated", _on_position_updated)
+event_bus.subscribe("boq.position.deleted", _on_position_deleted)
+event_bus.subscribe("boq.position.duplicated", _on_position_created)

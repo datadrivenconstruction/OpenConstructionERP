@@ -18,6 +18,8 @@ import { IntegrationsPage } from '@/features/integrations';
 import { AboutPage } from '@/features/about/AboutPage';
 import { QuickEstimatePage } from '@/features/ai';
 import { Logo, ShortcutsDialog, CommandPalette, ToastContainer, ErrorBoundary, NotFoundPage } from '@/shared/ui';
+import GlobalSearchModal from '@/features/search/GlobalSearchModal';
+import { useGlobalSearchStore } from '@/stores/useGlobalSearchStore';
 import { FloatingQueuePanel } from './layout/FloatingQueuePanel';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useThemeStore } from '@/stores/useThemeStore';
@@ -198,11 +200,27 @@ function GlobalShortcuts() {
   // and cannot be intercepted reliably — use the `n p` two-key sequence instead.
   // Ctrl+Shift+V is reserved for Excel paste in BOQ Editor — don't bind it globally.
 
+  const openGlobalSearch = useGlobalSearchStore((s) => s.openModal);
+  const toggleGlobalSearch = useGlobalSearchStore((s) => s.toggleModal);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const mod = e.ctrlKey || e.metaKey;
       const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      const isTextField =
+        tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+
+      // Cmd/Ctrl+Shift+K → semantic search modal (cross-module vector search).
+      // Bound BEFORE the plain Cmd+K branch so the shift modifier short-
+      // circuits the navigation palette.  Works even from text fields so
+      // estimators can trigger semantic search while editing a BOQ row.
+      if (mod && e.shiftKey && (e.key === 'K' || e.key === 'k')) {
+        e.preventDefault();
+        toggleGlobalSearch();
+        return;
+      }
+
+      if (isTextField) return;
 
       if (mod && e.key === 'k') {
         e.preventDefault();
@@ -215,12 +233,13 @@ function GlobalShortcuts() {
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, []);
+  }, [toggleGlobalSearch, openGlobalSearch]);
 
   return (
     <>
       <ShortcutsDialog open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <GlobalSearchModal />
     </>
   );
 }
