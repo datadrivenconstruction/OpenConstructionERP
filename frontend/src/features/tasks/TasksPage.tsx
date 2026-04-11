@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   ClipboardList,
@@ -381,6 +381,7 @@ const TaskCard = React.memo(function TaskCard({
 
   return (
     <Card
+      data-task-id={task.id}
       className={clsx(
         'p-3 mb-2 hover:shadow-md transition-shadow',
         isOverdue && 'bg-red-50/40 dark:bg-red-950/15',
@@ -552,6 +553,34 @@ export function TasksPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<TaskType | ''>('');
   const [myTasksOnly, setMyTasksOnly] = useState(false);
+
+  // Deep-link auto-scroll: Cmd+Shift+K global semantic search lands here
+  // with `?id=<task_id>` — scroll the matching task card into view and
+  // briefly highlight it.  Cleared from the URL after one shot so a
+  // refresh doesn't keep re-scrolling.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const deepLinkTaskId = searchParams.get('id');
+  useEffect(() => {
+    if (!deepLinkTaskId) return;
+    // Defer until the next tick so the task list has had a chance to
+    // render after the data fetch finishes.
+    const timer = setTimeout(() => {
+      const node = document.querySelector(
+        `[data-task-id="${CSS.escape(deepLinkTaskId)}"]`,
+      );
+      if (node) {
+        node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        node.classList.add('ring-2', 'ring-oe-blue', 'ring-offset-2');
+        setTimeout(() => {
+          node.classList.remove('ring-2', 'ring-oe-blue', 'ring-offset-2');
+        }, 2500);
+      }
+      const next = new URLSearchParams(searchParams);
+      next.delete('id');
+      setSearchParams(next, { replace: true });
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [deepLinkTaskId, searchParams, setSearchParams]);
 
   // "n" shortcut → open new task form
   useCreateShortcut(

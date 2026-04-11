@@ -1155,6 +1155,26 @@ class BIMHubService:
         )
         max_order = (await self.session.execute(max_order_stmt)).scalar_one() or 0
 
+        # Pull a default unit_rate from the rule's boq_target dict if the
+        # author prefilled one (e.g. via the "Suggest from CWICR" button
+        # in the rule editor).  When non-zero we also compute the line
+        # total here so the new position lands fully priced — no second
+        # pass needed in the BOQ editor.
+        default_rate = "0"
+        target_dict = rule.boq_target or {}
+        if isinstance(target_dict, dict):
+            raw_rate = target_dict.get("unit_rate")
+            if isinstance(raw_rate, (int, float)):
+                default_rate = str(raw_rate)
+            elif isinstance(raw_rate, str) and raw_rate.strip():
+                default_rate = raw_rate.strip()
+
+        try:
+            rate_decimal = Decimal(default_rate)
+        except Exception:
+            rate_decimal = Decimal("0")
+        line_total = total_qty * rate_decimal
+
         position = Position(
             boq_id=boq.id,
             parent_id=None,
@@ -1162,8 +1182,8 @@ class BIMHubService:
             description=rule.name,
             unit=rule.unit or "pcs",
             quantity=str(total_qty),
-            unit_rate="0",
-            total="0",
+            unit_rate=default_rate,
+            total=str(line_total),
             classification=classification,
             source="cad_import",
             confidence=None,
