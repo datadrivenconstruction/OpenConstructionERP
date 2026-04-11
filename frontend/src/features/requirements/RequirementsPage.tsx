@@ -1,6 +1,7 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   ClipboardCheck,
@@ -23,6 +24,7 @@ import {
   FileJson,
   FileText,
   AlertCircle,
+  Cuboid,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
 import { apiGet, triggerDownload } from '@/shared/lib/api';
@@ -1386,6 +1388,17 @@ function CreateSetModal({
 
 function ExpandedRow({ req }: { req: Requirement }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  // Pull pinned BIM elements out of metadata.bim_element_ids — the same
+  // array linkRequirementToBIMElements writes via PATCH /bim-links.
+  const bimIds = useMemo<string[]>(() => {
+    const raw = (req.metadata as Record<string, unknown> | undefined)?.[
+      'bim_element_ids'
+    ];
+    if (!Array.isArray(raw)) return [];
+    return raw.filter((x): x is string => typeof x === 'string' && x.length > 0);
+  }, [req.metadata]);
+
   return (
     <tr className="bg-surface-secondary/30">
       <td colSpan={11} className="px-6 py-4">
@@ -1415,12 +1428,41 @@ function ExpandedRow({ req }: { req: Requirement }) {
           </div>
           <div>
             <p className="text-2xs uppercase tracking-wide text-content-tertiary mb-1">
-              {t('requirements.notes', { defaultValue: 'Notes' })}
+              {t('requirements.linked_bim', { defaultValue: 'Pinned BIM elements' })}
             </p>
-            <p className="text-content-primary whitespace-pre-wrap">
-              {req.notes || t('common.none', { defaultValue: 'None' })}
-            </p>
+            {bimIds.length > 0 ? (
+              <button
+                type="button"
+                onClick={() =>
+                  navigate(`/bim?element=${encodeURIComponent(bimIds[0]!)}`)
+                }
+                className="inline-flex items-center gap-1 text-violet-700 dark:text-violet-300 hover:underline"
+                title={t('requirements.linked_bim_count_title', {
+                  defaultValue:
+                    'Pinned to {{count}} BIM element(s) — click to open the viewer',
+                  count: bimIds.length,
+                })}
+              >
+                <Cuboid size={12} />
+                {t('requirements.linked_bim_count', {
+                  defaultValue: '{{count}} pinned',
+                  count: bimIds.length,
+                })}
+              </button>
+            ) : (
+              <span className="text-content-tertiary italic">
+                {t('common.none', { defaultValue: 'None' })}
+              </span>
+            )}
           </div>
+          {req.notes && (
+            <div className="sm:col-span-3">
+              <p className="text-2xs uppercase tracking-wide text-content-tertiary mb-1">
+                {t('requirements.notes', { defaultValue: 'Notes' })}
+              </p>
+              <p className="text-content-primary whitespace-pre-wrap">{req.notes}</p>
+            </div>
+          )}
         </div>
       </td>
     </tr>
@@ -1448,6 +1490,13 @@ export function RequirementsPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [runningGate, setRunningGate] = useState<number | null>(null);
   const [activeSetId, setActiveSetId] = useState<string | null>(null);
+
+  // Deep-link auto-expand: Cmd+Shift+K global search and the BIM viewer
+  // both deep-link here with `?id=<requirement_id>`.  When that param
+  // is present we look the requirement up across every set, switch to
+  // the owning set, expand the row and clear the param.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const deepLinkReqId = searchParams.get('id');
 
   // Data queries
   const { data: projects = [] } = useQuery({
@@ -1484,6 +1533,54 @@ export function RequirementsPage() {
 
   const requirements = detail?.requirements || [];
   const gates = detail?.gate_results || [];
+
+  // Resolve a deep-link `?id=` against the active set's requirements.
+  // If the requirement belongs to a different set, switch to it; the
+  // effect re-fires once the new detail loads and finally expands the
+  // row.  We strip the param at the end so refresh doesn't reapply.
+  useEffect(() => {
+    if (!deepLinkReqId) return;
+    // Pass 1: requirement is already in the loaded detail → expand it.
+    const found = requirements.find((r) => r.id === deepLinkReqId);
+    if (found) {
+      setExpandedRowId(found.id);
+      const next = new URLSearchParams(searchParams);
+      next.delete('id');
+      setSearchParams(next, { replace: true });
+      return;
+    }
+    // Pass 2: requirement might live in a different set — fan out a
+    // one-shot detail fetch over every set, switch the UI to the
+    // owning set when found, and let the effect re-fire on Pass 1.
+    if (sets.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      for (const s of sets) {
+        if (cancelled) break;
+        if (s.id === currentSetId) continue; // already searched
+        try {
+          const d = await fetchRequirementSetDetail(s.id);
+          const hit = (d.requirements ?? []).find((r) => r.id === deepLinkReqId);
+          if (hit) {
+            setActiveSetId(s.id);
+            return;
+          }
+        } catch {
+          // ignore individual set failures
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    deepLinkReqId,
+    requirements,
+    sets,
+    currentSetId,
+    searchParams,
+    setSearchParams,
+  ]);
 
   // Filtered requirements
   const filteredReqs = useMemo(() => {

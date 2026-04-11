@@ -18,6 +18,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.events import event_bus
 from app.modules.requirements.models import GateResult, Requirement, RequirementSet
 from app.modules.requirements.repository import (
     GateResultRepository,
@@ -32,6 +33,20 @@ from app.modules.requirements.schemas import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+async def _safe_publish(name: str, data: dict[str, Any]) -> None:
+    """Best-effort event publish — never raises into the calling path.
+
+    The vector indexer in :mod:`app.modules.requirements.events` and any
+    future cross-module subscriber consume the events emitted here.
+    Failures are logged at debug level only because event publishing
+    must never break a successful CRUD or link operation.
+    """
+    try:
+        await event_bus.publish(name, data, source_module="oe_requirements")
+    except Exception:
+        logger.debug("Failed to publish requirements event '%s'", name, exc_info=True)
 
 # Gate definitions
 GATE_NAMES: dict[int, str] = {
@@ -137,6 +152,13 @@ class RequirementsService:
             data.attribute,
             set_id,
         )
+        await _safe_publish(
+            "requirements.requirement.created",
+            {
+                "requirement_id": str(item.id),
+                "requirement_set_id": str(set_id),
+            },
+        )
         return item
 
     async def update_requirement(
@@ -167,6 +189,13 @@ class RequirementsService:
         await self.session.refresh(item)
 
         logger.info("Requirement updated: %s (fields=%s)", req_id, list(fields.keys()))
+        await _safe_publish(
+            "requirements.requirement.updated",
+            {
+                "requirement_id": str(req_id),
+                "requirement_set_id": str(item.requirement_set_id),
+            },
+        )
         return item
 
     async def delete_requirement(self, set_id: uuid.UUID, req_id: uuid.UUID) -> None:
@@ -184,6 +213,13 @@ class RequirementsService:
             )
         await self.req_repo.delete(req_id)
         logger.info("Requirement deleted: %s from set %s", req_id, set_id)
+        await _safe_publish(
+            "requirements.requirement.deleted",
+            {
+                "requirement_id": str(req_id),
+                "requirement_set_id": str(set_id),
+            },
+        )
 
     async def bulk_add_requirements(
         self,
@@ -249,7 +285,134 @@ class RequirementsService:
         await self.session.refresh(item)
 
         logger.info("Requirement %s linked to position %s", req_id, position_id)
+        await _safe_publish(
+            "requirements.requirement.updated",
+            {
+                "requirement_id": str(req_id),
+                "requirement_set_id": str(item.requirement_set_id),
+                "link_type": "boq_position",
+                "linked_position_id": str(position_id),
+            },
+        )
         return item
+
+    # ── Link to BIM elements (cross-module spatial linkage) ──────────────
+
+    async def link_to_bim_elements(
+        self,
+        req_id: uuid.UUID,
+        bim_element_ids: list[str],
+        *,
+        replace: bool = False,
+    ) -> Requirement:
+        """Pin a requirement to one or more BIM elements.
+
+        Stores the array under ``metadata_["bim_element_ids"]`` so we
+        don't need a schema migration just for this link type.  By
+        default the new ids are **merged** with whatever was there
+        previously (additive linking — no accidental data loss).  Pass
+        ``replace=True`` to overwrite the array entirely.
+
+        After mutation we publish ``requirements.requirement.linked_bim``
+        which the events module subscribes to in order to refresh the
+        vector embedding (so semantic search reflects the new link).
+
+        Returns the updated row with a refreshed ``metadata_`` snapshot.
+        """
+        item = await self.req_repo.get_by_id(req_id)
+        if item is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Requirement not found",
+            )
+
+        # Normalise + deduplicate the incoming ids — accept anything that
+        # round-trips through str(uuid) so the caller doesn't have to
+        # pre-coerce.
+        clean_ids: list[str] = []
+        seen: set[str] = set()
+        for raw in bim_element_ids:
+            if raw is None:
+                continue
+            try:
+                cleaned = str(uuid.UUID(str(raw)))
+            except (ValueError, AttributeError, TypeError):
+                continue
+            if cleaned not in seen:
+                seen.add(cleaned)
+                clean_ids.append(cleaned)
+
+        existing_meta = dict(item.metadata_ or {})
+        if replace:
+            merged = clean_ids
+        else:
+            previous = existing_meta.get("bim_element_ids") or []
+            previous_clean: list[str] = []
+            previous_set: set[str] = set()
+            for raw in previous:
+                if isinstance(raw, str) and raw and raw not in previous_set:
+                    previous_set.add(raw)
+                    previous_clean.append(raw)
+            # Append-only union, preserving order: existing first, then new.
+            merged = previous_clean + [c for c in clean_ids if c not in previous_set]
+
+        existing_meta["bim_element_ids"] = merged
+        await self.req_repo.update_fields(
+            req_id,
+            metadata_=existing_meta,
+        )
+        await self.session.refresh(item)
+
+        logger.info(
+            "Requirement %s linked to %d BIM element(s) (replace=%s)",
+            req_id,
+            len(merged),
+            replace,
+        )
+        await _safe_publish(
+            "requirements.requirement.linked_bim",
+            {
+                "requirement_id": str(req_id),
+                "requirement_set_id": str(item.requirement_set_id),
+                "bim_element_ids": merged,
+                "replace": replace,
+            },
+        )
+        return item
+
+    async def list_by_bim_element(
+        self,
+        bim_element_id: str,
+        project_id: uuid.UUID | None = None,
+    ) -> list[Requirement]:
+        """Reverse query: every requirement that pins ``bim_element_id``.
+
+        Used by the BIM viewer's element details panel to render the
+        "Linked requirements" section without N+1 queries.  Loads the
+        candidate requirements via the project filter (if supplied) so
+        we don't scan the whole tenant on every selection click.
+
+        The match is performed in Python because ``metadata_`` is a
+        cross-dialect JSON column — neither SQLite nor PostgreSQL share
+        a portable JSON-array-contains operator we can rely on here.
+        """
+        if project_id is not None:
+            candidates = await self.req_repo.all_for_project(project_id)
+        else:
+            stmt = select(Requirement).options(
+                # selectinload here would help if we needed the parent set
+                # for project resolution, but the caller already passed
+                # project_id so we can skip it.
+            )
+            candidates = list((await self.session.execute(stmt)).scalars().all())
+
+        target = str(bim_element_id)
+        out: list[Requirement] = []
+        for req in candidates:
+            ids = (req.metadata_ or {}).get("bim_element_ids") or []
+            if isinstance(ids, list) and target in {str(x) for x in ids}:
+                out.append(req)
+        return out
 
     # ── Quality Gates ────────────────────────────────────────────────────
 
