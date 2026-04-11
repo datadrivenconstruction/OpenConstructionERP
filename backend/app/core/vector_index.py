@@ -53,6 +53,8 @@ from app.core.vector import (
     vector_delete_collection,
     vector_index_collection,
     vector_search_collection,
+)
+from app.core.vector import (
     vector_status as _vector_status_raw,
 )
 
@@ -219,15 +221,60 @@ def _coerce_id(row_id: Any) -> str:
     return str(row_id)
 
 
+# Hard character cap that protects the embedder when its tokenizer is
+# unavailable.  4000 chars works out to roughly 800-1200 tokens depending
+# on the language and tokenizer — well above the 512-token cap of every
+# small SBERT model we ship by default — so the model will silently
+# truncate the tail.  When the tokenizer IS available we clip by tokens
+# instead so we never lose meaningful content past position N.
+_HARD_CHAR_CAP = 4000
+_TOKEN_BUDGET = 510  # leave 2 tokens for [CLS] / [SEP]
+
+
 def _safe_text(text: str | None) -> str:
-    """Strip and clip text for embedding.  Empty input → empty string."""
+    """Strip and clip text for embedding.
+
+    Returns ``""`` for empty input.  Otherwise:
+
+    1. Strips whitespace
+    2. If the active embedding model exposes a HuggingFace tokenizer,
+       tokenises the text and clips to ``_TOKEN_BUDGET`` tokens (default
+       510, leaving 2 for the model's special tokens).  This is the
+       optimal path because nothing is silently truncated by the model.
+    3. Otherwise falls back to the ``_HARD_CHAR_CAP`` character cap so
+       absurdly long inputs don't OOM the embedder.
+    """
     if not text:
         return ""
     cleaned = text.strip()
-    # Sentence-transformers handles up to 512 tokens; clip well under to
-    # avoid silent truncation surprises.
-    if len(cleaned) > 4000:
-        cleaned = cleaned[:4000]
+    if not cleaned:
+        return ""
+
+    # Try the token-aware path.  ``encode`` is the HuggingFace tokenizer
+    # API exposed by sentence-transformers under ``model.tokenizer``.
+    try:
+        from app.core.vector import get_embedder
+
+        embedder = get_embedder()
+        tokenizer = getattr(embedder, "tokenizer", None) if embedder is not None else None
+        if tokenizer is not None and hasattr(tokenizer, "encode") and hasattr(
+            tokenizer, "decode"
+        ):
+            ids = tokenizer.encode(cleaned, add_special_tokens=False)
+            if len(ids) > _TOKEN_BUDGET:
+                ids = ids[:_TOKEN_BUDGET]
+                clipped = tokenizer.decode(ids, skip_special_tokens=True)
+                # Decoded text often has spurious leading whitespace from
+                # the tokenizer's piece prefix — strip it for consistency.
+                return clipped.strip()
+            return cleaned
+    except Exception:
+        # Tokeniser not available or model not loaded yet — fall through
+        # to the character-cap fallback below.
+        pass
+
+    if len(cleaned) > _HARD_CHAR_CAP:
+        cleaned = cleaned[:_HARD_CHAR_CAP]
     return cleaned
 
 

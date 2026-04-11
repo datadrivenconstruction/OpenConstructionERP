@@ -217,6 +217,13 @@ export interface QuantityMapTarget {
   auto_create?: boolean;
   /** Classification JSON to attach to the auto-created position. */
   classification?: Record<string, string>;
+  /** Default unit rate for auto-created positions.  Typically populated
+   *  via the "Suggest from CWICR" button which calls
+   *  `/api/v1/costs/suggest-for-element/` and inserts the top match. */
+  unit_rate?: string;
+  /** Cost item id this rule was matched against — kept around so the
+   *  estimator can audit which CWICR row supplied the rate. */
+  cost_item_id?: string;
 }
 
 export interface BIMQuantityMap {

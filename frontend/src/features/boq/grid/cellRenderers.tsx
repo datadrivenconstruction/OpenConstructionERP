@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { ICellRendererParams } from 'ag-grid-community';
 import {
   ChevronDown,
@@ -235,11 +236,17 @@ export function OrdinalCellRenderer(params: ICellRendererParams) {
   const ctx = context as ResourceGridContext | undefined;
   const hasResources = Array.isArray(data.metadata?.resources) && data.metadata.resources.length > 0;
   const isExpanded = ctx?.expandedPositions?.has(data.id) ?? false;
+  const navigate = useNavigate();
 
   // BIM link count — shown as a small blue pill when the position is
-  // linked to one or more BIM elements (cross-highlight source).
+  // linked to one or more BIM elements.  Click navigates to the BIM
+  // viewer with the first linked element preselected (deep link).
   const bimLinks: unknown = data.cad_element_ids;
-  const bimLinkCount = Array.isArray(bimLinks) ? bimLinks.length : 0;
+  const bimLinkIds: string[] = Array.isArray(bimLinks)
+    ? bimLinks.filter((x): x is string => typeof x === 'string' && x.length > 0)
+    : [];
+  const bimLinkCount = bimLinkIds.length;
+  const firstBimElementId = bimLinkIds[0] ?? null;
 
   return (
     <div className="flex items-center gap-1 overflow-hidden">
@@ -265,12 +272,27 @@ export function OrdinalCellRenderer(params: ICellRendererParams) {
         title={status}
       />
       {bimLinkCount > 0 && (
-        <span
-          className="shrink-0 inline-flex items-center justify-center min-w-[16px] h-[14px] px-1 rounded-full bg-oe-blue/10 text-oe-blue text-[10px] font-semibold leading-none"
-          title={`${bimLinkCount} linked BIM element${bimLinkCount === 1 ? '' : 's'}`}
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={(e) => {
+            e.stopPropagation();
+            // Deep-link to the BIM viewer with the first linked element
+            // preselected.  BIMPage parses ?element=<id> on mount and
+            // calls setSelectedElementId so the user lands directly on
+            // the model element this BOQ row was created from.
+            if (firstBimElementId) {
+              navigate(`/bim?element=${encodeURIComponent(firstBimElementId)}`);
+            } else {
+              navigate('/bim');
+            }
+          }}
+          className="shrink-0 inline-flex items-center justify-center min-w-[16px] h-[14px] px-1 rounded-full bg-oe-blue/10 text-oe-blue text-[10px] font-semibold leading-none hover:bg-oe-blue/20 hover:scale-110 transition-all cursor-pointer"
+          title={`Open ${bimLinkCount} linked BIM element${bimLinkCount === 1 ? '' : 's'} in viewer`}
+          aria-label={`Open BIM viewer for this position`}
         >
           {bimLinkCount}
-        </span>
+        </button>
       )}
     </div>
   );
