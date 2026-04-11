@@ -16,7 +16,7 @@ import os
 import re
 import uuid
 from collections import defaultdict
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -469,10 +469,11 @@ class PhotoService:
         # Also create a Document record so photos appear in Documents hub
         try:
             import json as _json
+
             from sqlalchemy import text as _text
 
             doc_id = str(uuid.uuid4())
-            now = datetime.utcnow().isoformat()
+            now = datetime.now(UTC).isoformat()
             tags_json = _json.dumps(["photo", category or "site"])
             await self.session.execute(
                 _text(

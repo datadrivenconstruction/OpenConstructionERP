@@ -1864,12 +1864,12 @@ async def upload_document(
     if project_id:
         try:
             import json as _json
-            from datetime import datetime as _dt
+            from datetime import UTC, datetime
 
             from sqlalchemy import text as _text
 
             xlink_id = str(_uuid.uuid4())
-            now = _dt.utcnow().isoformat()
+            now = datetime.now(UTC).isoformat()
             tags_json = _json.dumps(["takeoff", "pdf"])
             await service.session.execute(
                 _text(

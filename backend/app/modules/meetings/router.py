@@ -967,7 +967,6 @@ async def import_meeting_summary(
     # Cross-link: save transcript and create Document record in Documents hub
     try:
         import json as _json
-        from datetime import datetime as _dt
         from pathlib import Path as _Path
 
         from sqlalchemy import text as _text
@@ -981,7 +980,7 @@ async def import_meeting_summary(
         transcript_path.write_bytes(content)
 
         doc_id = str(uuid.uuid4())
-        now = _dt.utcnow().isoformat()
+        now = datetime.now(UTC).isoformat()
         tags_json = _json.dumps(["meeting", "transcript"])
         mime = file.content_type or "text/plain"
         await service.session.execute(

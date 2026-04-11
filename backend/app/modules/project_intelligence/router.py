@@ -27,14 +27,18 @@ from app.modules.project_intelligence.actions import (
 )
 from app.modules.project_intelligence.advisor import (
     answer_question as ai_answer_question,
+)
+from app.modules.project_intelligence.advisor import (
     explain_gap as ai_explain_gap,
+)
+from app.modules.project_intelligence.advisor import (
     generate_recommendations,
 )
 from app.modules.project_intelligence.collector import collect_project_state
 from app.modules.project_intelligence.schemas import (
+    AchievementResponse,
     ActionDefinitionResponse,
     ActionResponse,
-    AchievementResponse,
     ChatRequest,
     CriticalGapResponse,
     ExplainGapRequest,

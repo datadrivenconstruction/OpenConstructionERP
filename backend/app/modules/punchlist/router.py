@@ -290,13 +290,13 @@ async def upload_photo(
     # Cross-link: create Document record so punch photos appear in Documents hub
     try:
         import json as _json
-        from datetime import datetime as _dt
+        from datetime import UTC, datetime
 
         from sqlalchemy import text as _text
 
         punch_project_id = item.project_id  # type: ignore[attr-defined]
         doc_id = str(uuid.uuid4())
-        now = _dt.utcnow().isoformat()
+        now = datetime.now(UTC).isoformat()
         tags_json = _json.dumps(["punchlist", "photo"])
         await service.session.execute(
             _text(
