@@ -964,12 +964,16 @@ async def import_meeting_summary(
         ai_used,
     )
 
-    # Cross-link: save transcript and create Document record in Documents hub
+    # Cross-link: save transcript and create Document record in
+    # Documents hub.  Uses the ORM Document model directly so the row
+    # picks up timestamps + defaults from the Base mixin and stays in
+    # sync with any future schema migration.  Best-effort: a failure
+    # here MUST NOT break the meeting create — the transcript file is
+    # already on disk and the meeting itself is persisted.
     try:
-        import json as _json
         from pathlib import Path as _Path
 
-        from sqlalchemy import text as _text
+        from app.modules.documents.models import Document
 
         upload_dir = _Path.home() / ".openestimator" / "uploads" / str(project_id)
         upload_dir.mkdir(parents=True, exist_ok=True)
@@ -979,34 +983,21 @@ async def import_meeting_summary(
         transcript_path = upload_dir / storage_name
         transcript_path.write_bytes(content)
 
-        doc_id = str(uuid.uuid4())
-        now = datetime.now(UTC).isoformat()
-        tags_json = _json.dumps(["meeting", "transcript"])
-        mime = file.content_type or "text/plain"
-        await service.session.execute(
-            _text(
-                "INSERT INTO oe_documents_document "
-                "(id, project_id, name, description, category, file_size, mime_type, "
-                "file_path, version, uploaded_by, tags, metadata, "
-                "created_at, updated_at) "
-                "VALUES (:id, :pid, :name, :desc, :cat, :fsize, :mime, :fpath, "
-                "1, :by, :tags, '{}', :now, :now)"
-            ),
-            {
-                "id": doc_id,
-                "pid": str(project_id),
-                "name": file.filename or "transcript",
-                "desc": f"Meeting transcript: {extracted.get('title', '')}",
-                "cat": "correspondence",
-                "fsize": len(content),
-                "mime": mime,
-                "fpath": str(transcript_path),
-                "by": str(user_id) if user_id else "",
-                "tags": tags_json,
-                "now": now,
-            },
+        doc = Document(
+            project_id=project_id,
+            name=file.filename or "transcript",
+            description=f"Meeting transcript: {extracted.get('title', '')}",
+            category="correspondence",
+            file_size=len(content),
+            mime_type=file.content_type or "text/plain",
+            file_path=str(transcript_path),
+            version=1,
+            uploaded_by=str(user_id) if user_id else "",
+            tags=["meeting", "transcript"],
         )
-        logger.info("Cross-linked meeting transcript -> document %s", doc_id)
+        service.session.add(doc)
+        await service.session.flush()
+        logger.info("Cross-linked meeting transcript -> document %s", doc.id)
     except Exception:
         logger.exception("Failed to cross-link meeting transcript to Documents hub")
 

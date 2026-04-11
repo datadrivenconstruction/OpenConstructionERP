@@ -127,6 +127,62 @@ class CostModelState:
     completion_pct: float = 0.0
 
 
+# ── v1.4.6: 4 newly-wired domains ─────────────────────────────────────────
+#
+# These 4 modules existed but the collector was blind to them — score
+# was a partial picture.  Each new dataclass mirrors the shape of the
+# pre-existing ones (one ``completion_pct`` for the dashboard, plus the
+# few counts the scorer needs to detect "missing" gaps).
+
+
+@dataclass
+class RequirementsState:
+    """Requirements & Quality Gates domain state (v1.4.6)."""
+
+    total_sets: int = 0
+    total_items: int = 0
+    items_linked_to_boq: int = 0
+    items_linked_to_bim: int = 0
+    gate_pass_rate: float = 0.0
+    last_modified: str | None = None
+    completion_pct: float = 0.0
+
+
+@dataclass
+class BIMState:
+    """BIM Hub domain state (v1.4.6)."""
+
+    models_count: int = 0
+    models_ready: int = 0
+    elements_total: int = 0
+    elements_linked_to_boq: int = 0
+    elements_with_validation: int = 0
+    last_modified: str | None = None
+    completion_pct: float = 0.0
+
+
+@dataclass
+class TasksState:
+    """Tasks / defects / inspections domain state (v1.4.6)."""
+
+    total_tasks: int = 0
+    open_tasks: int = 0
+    overdue_tasks: int = 0
+    tasks_linked_to_bim: int = 0
+    completion_pct: float = 0.0
+
+
+@dataclass
+class AssembliesState:
+    """Assemblies / calculations domain state (v1.4.6)."""
+
+    total_assemblies: int = 0
+    project_assemblies: int = 0
+    template_assemblies: int = 0
+    components_total: int = 0
+    completion_pct: float = 0.0
+
+
 @dataclass
 class ProjectState:
     """Complete snapshot of a project's state across all modules."""
@@ -149,6 +205,10 @@ class ProjectState:
     documents: DocumentsState = field(default_factory=DocumentsState)
     reports: ReportsState = field(default_factory=ReportsState)
     cost_model: CostModelState = field(default_factory=CostModelState)
+    requirements: RequirementsState = field(default_factory=RequirementsState)
+    bim: BIMState = field(default_factory=BIMState)
+    tasks: TasksState = field(default_factory=TasksState)
+    assemblies: AssembliesState = field(default_factory=AssembliesState)
 
 
 # ── Collector ──────────────────────────────────────────────────────────────
@@ -660,6 +720,271 @@ async def _collect_cost_model(
     return state
 
 
+# ── v1.4.6: 4 newly-wired collectors ──────────────────────────────────────
+
+
+async def _collect_requirements(
+    session: AsyncSession,
+    project_id: str,
+) -> RequirementsState:
+    """Collect Requirements & Quality Gates domain state."""
+    state = RequirementsState()
+    try:
+        # Count sets + items.  Items live under sets, so we join through.
+        sets_row = (
+            await session.execute(
+                text(
+                    "SELECT COUNT(DISTINCT s.id), COUNT(i.id), MAX(i.updated_at) "
+                    "FROM oe_requirements_set s "
+                    "LEFT JOIN oe_requirements_item i "
+                    "  ON i.requirement_set_id = s.id "
+                    "WHERE s.project_id = :pid"
+                ),
+                {"pid": project_id},
+            )
+        ).first()
+        if sets_row:
+            state.total_sets = int(sets_row[0] or 0)
+            state.total_items = int(sets_row[1] or 0)
+            state.last_modified = str(sets_row[2]) if sets_row[2] else None
+
+        if state.total_items > 0:
+            # Count items linked to a BOQ position via the FK column.
+            linked_boq_row = (
+                await session.execute(
+                    text(
+                        "SELECT COUNT(i.id) FROM oe_requirements_item i "
+                        "JOIN oe_requirements_set s "
+                        "  ON i.requirement_set_id = s.id "
+                        "WHERE s.project_id = :pid "
+                        "  AND i.linked_position_id IS NOT NULL"
+                    ),
+                    {"pid": project_id},
+                )
+            ).scalar()
+            state.items_linked_to_boq = int(linked_boq_row or 0)
+
+            # Count items pinned to BIM elements via the JSON metadata
+            # array.  Cross-dialect: we can't use a JSON-array operator
+            # so we fall back to LIKE on the serialised JSON which
+            # works on both SQLite and PostgreSQL JSON-as-text columns.
+            linked_bim_row = (
+                await session.execute(
+                    text(
+                        "SELECT COUNT(i.id) FROM oe_requirements_item i "
+                        "JOIN oe_requirements_set s "
+                        "  ON i.requirement_set_id = s.id "
+                        "WHERE s.project_id = :pid "
+                        "  AND CAST(i.metadata AS TEXT) LIKE '%\"bim_element_ids\"%'"
+                    ),
+                    {"pid": project_id},
+                )
+            ).scalar()
+            state.items_linked_to_bim = int(linked_bim_row or 0)
+
+        # Compute gate pass rate from the most recent gate result per gate.
+        gate_row = (
+            await session.execute(
+                text(
+                    "SELECT g.status FROM oe_requirements_gate_result g "
+                    "JOIN oe_requirements_set s "
+                    "  ON g.requirement_set_id = s.id "
+                    "WHERE s.project_id = :pid"
+                ),
+                {"pid": project_id},
+            )
+        ).all()
+        if gate_row:
+            passes = sum(1 for r in gate_row if r[0] == "pass")
+            state.gate_pass_rate = round((passes / len(gate_row)) * 100.0, 1)
+
+        # Completion: 0% if no requirements, 50% if at least one set,
+        # +25% if any item is linked to BOQ, +25% if gates pass.
+        if state.total_sets > 0:
+            state.completion_pct = 50.0
+            if state.items_linked_to_boq > 0:
+                state.completion_pct += 25.0
+            if state.gate_pass_rate >= 80.0:
+                state.completion_pct += 25.0
+    except Exception:
+        logger.warning(
+            "Could not collect requirements state for %s", project_id, exc_info=True
+        )
+    return state
+
+
+async def _collect_bim(
+    session: AsyncSession,
+    project_id: str,
+) -> BIMState:
+    """Collect BIM Hub domain state."""
+    state = BIMState()
+    try:
+        models_row = (
+            await session.execute(
+                text(
+                    "SELECT COUNT(*), "
+                    "       SUM(CASE WHEN status = 'ready' THEN 1 ELSE 0 END), "
+                    "       MAX(updated_at) "
+                    "FROM oe_bim_model WHERE project_id = :pid"
+                ),
+                {"pid": project_id},
+            )
+        ).first()
+        if models_row:
+            state.models_count = int(models_row[0] or 0)
+            state.models_ready = int(models_row[1] or 0)
+            state.last_modified = str(models_row[2]) if models_row[2] else None
+
+        if state.models_count > 0:
+            elements_row = (
+                await session.execute(
+                    text(
+                        "SELECT COUNT(e.id) FROM oe_bim_element e "
+                        "JOIN oe_bim_model m ON e.model_id = m.id "
+                        "WHERE m.project_id = :pid"
+                    ),
+                    {"pid": project_id},
+                )
+            ).scalar()
+            state.elements_total = int(elements_row or 0)
+
+            linked_row = (
+                await session.execute(
+                    text(
+                        "SELECT COUNT(DISTINCT l.bim_element_id) "
+                        "FROM oe_bim_boq_link l "
+                        "JOIN oe_bim_element e ON l.bim_element_id = e.id "
+                        "JOIN oe_bim_model m ON e.model_id = m.id "
+                        "WHERE m.project_id = :pid"
+                    ),
+                    {"pid": project_id},
+                )
+            ).scalar()
+            state.elements_linked_to_boq = int(linked_row or 0)
+
+        # Completion: scaled by ratio of ready models to total models +
+        # bonus if at least one element is BOQ-linked.
+        if state.models_count > 0:
+            state.completion_pct = (state.models_ready / state.models_count) * 60.0
+            if state.elements_linked_to_boq > 0:
+                state.completion_pct += 40.0
+            state.completion_pct = round(min(100.0, state.completion_pct), 1)
+    except Exception:
+        logger.warning(
+            "Could not collect bim state for %s", project_id, exc_info=True
+        )
+    return state
+
+
+async def _collect_tasks(
+    session: AsyncSession,
+    project_id: str,
+) -> TasksState:
+    """Collect tasks / defects / inspections domain state."""
+    state = TasksState()
+    try:
+        row = (
+            await session.execute(
+                text(
+                    "SELECT COUNT(*), "
+                    "       SUM(CASE WHEN status IN ('open', 'in_progress', 'draft') "
+                    "                THEN 1 ELSE 0 END), "
+                    "       SUM(CASE WHEN due_date IS NOT NULL "
+                    "                AND due_date < date('now') "
+                    "                AND status != 'completed' "
+                    "                THEN 1 ELSE 0 END) "
+                    "FROM oe_tasks_task WHERE project_id = :pid"
+                ),
+                {"pid": project_id},
+            )
+        ).first()
+        if row:
+            state.total_tasks = int(row[0] or 0)
+            state.open_tasks = int(row[1] or 0)
+            state.overdue_tasks = int(row[2] or 0)
+
+        if state.total_tasks > 0:
+            # Tasks linked to BIM via the JSON array column.
+            linked_row = (
+                await session.execute(
+                    text(
+                        "SELECT COUNT(*) FROM oe_tasks_task "
+                        "WHERE project_id = :pid "
+                        "  AND bim_element_ids IS NOT NULL "
+                        "  AND CAST(bim_element_ids AS TEXT) NOT IN ('[]', '')"
+                    ),
+                    {"pid": project_id},
+                )
+            ).scalar()
+            state.tasks_linked_to_bim = int(linked_row or 0)
+
+        # Completion: 0% if no tasks, otherwise (closed/total) × 100.
+        if state.total_tasks > 0:
+            closed = state.total_tasks - state.open_tasks
+            state.completion_pct = round((closed / state.total_tasks) * 100.0, 1)
+    except Exception:
+        logger.warning(
+            "Could not collect tasks state for %s", project_id, exc_info=True
+        )
+    return state
+
+
+async def _collect_assemblies(
+    session: AsyncSession,
+    project_id: str,
+) -> AssembliesState:
+    """Collect assemblies / calculations domain state."""
+    state = AssembliesState()
+    try:
+        # Project-scoped + template assemblies — templates are global
+        # but available to every project, so we count both.
+        row = (
+            await session.execute(
+                text(
+                    "SELECT COUNT(*), "
+                    "       SUM(CASE WHEN project_id = :pid THEN 1 ELSE 0 END), "
+                    "       SUM(CASE WHEN is_template = 1 OR is_template = TRUE "
+                    "                THEN 1 ELSE 0 END) "
+                    "FROM oe_assemblies_assembly "
+                    "WHERE project_id = :pid OR is_template = 1 "
+                    "   OR is_template = TRUE"
+                ),
+                {"pid": project_id},
+            )
+        ).first()
+        if row:
+            state.total_assemblies = int(row[0] or 0)
+            state.project_assemblies = int(row[1] or 0)
+            state.template_assemblies = int(row[2] or 0)
+
+        if state.project_assemblies > 0:
+            comp_row = (
+                await session.execute(
+                    text(
+                        "SELECT COUNT(c.id) FROM oe_assemblies_component c "
+                        "JOIN oe_assemblies_assembly a "
+                        "  ON c.assembly_id = a.id "
+                        "WHERE a.project_id = :pid"
+                    ),
+                    {"pid": project_id},
+                )
+            ).scalar()
+            state.components_total = int(comp_row or 0)
+
+        # Completion: 50% if at least one project assembly,
+        # +50% if it has any components.
+        if state.project_assemblies > 0:
+            state.completion_pct = 50.0
+            if state.components_total > 0:
+                state.completion_pct += 50.0
+    except Exception:
+        logger.warning(
+            "Could not collect assemblies state for %s", project_id, exc_info=True
+        )
+    return state
+
+
 # ── Main collector function ────────────────────────────────────────────────
 
 
@@ -678,7 +1003,11 @@ async def collect_project_state(
     """
     now = datetime.now(UTC).isoformat()
 
-    # Run all collectors in parallel
+    # Run all collectors in parallel.  v1.4.6 added the last 4
+    # entries (requirements / bim / tasks / assemblies) — the
+    # collector was previously blind to these domains so the score
+    # was a partial picture and the advisor could not surface gaps
+    # like "no requirements defined" or "BIM elements not linked".
     results = await asyncio.gather(
         _collect_project_info(session, project_id),
         _collect_boq(session, project_id),
@@ -690,6 +1019,10 @@ async def collect_project_state(
         _collect_documents(session, project_id),
         _collect_reports(session, project_id),
         _collect_cost_model(session, project_id),
+        _collect_requirements(session, project_id),
+        _collect_bim(session, project_id),
+        _collect_tasks(session, project_id),
+        _collect_assemblies(session, project_id),
         return_exceptions=True,
     )
 
@@ -704,6 +1037,14 @@ async def collect_project_state(
     documents = results[7] if not isinstance(results[7], Exception) else DocumentsState()
     reports = results[8] if not isinstance(results[8], Exception) else ReportsState()
     cost_model = results[9] if not isinstance(results[9], Exception) else CostModelState()
+    requirements = (
+        results[10] if not isinstance(results[10], Exception) else RequirementsState()
+    )
+    bim = results[11] if not isinstance(results[11], Exception) else BIMState()
+    tasks_state = results[12] if not isinstance(results[12], Exception) else TasksState()
+    assemblies = (
+        results[13] if not isinstance(results[13], Exception) else AssembliesState()
+    )
 
     return ProjectState(
         project_id=project_id,
@@ -723,4 +1064,8 @@ async def collect_project_state(
         documents=documents,
         reports=reports,
         cost_model=cost_model,
+        requirements=requirements,
+        bim=bim,
+        tasks=tasks_state,
+        assemblies=assemblies,
     )

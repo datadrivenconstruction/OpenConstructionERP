@@ -287,41 +287,31 @@ async def upload_photo(
     photo_path = f"punchlist/photos/{filename}"
     item = await service.add_photo(item_id, photo_path)
 
-    # Cross-link: create Document record so punch photos appear in Documents hub
+    # Cross-link: create Document record so punch photos appear in
+    # Documents hub.  Uses the ORM model directly (NOT raw SQL) so
+    # timestamps + defaults are filled by SQLAlchemy / Base mixin and
+    # the row stays in sync with the rest of the documents module if
+    # its schema evolves.  Best-effort: a failure here MUST NOT break
+    # the upload — the photo itself is already persisted.
     try:
-        import json as _json
-        from datetime import UTC, datetime
-
-        from sqlalchemy import text as _text
+        from app.modules.documents.models import Document
 
         punch_project_id = item.project_id  # type: ignore[attr-defined]
-        doc_id = str(uuid.uuid4())
-        now = datetime.now(UTC).isoformat()
-        tags_json = _json.dumps(["punchlist", "photo"])
-        await service.session.execute(
-            _text(
-                "INSERT INTO oe_documents_document "
-                "(id, project_id, name, description, category, file_size, mime_type, "
-                "file_path, version, uploaded_by, tags, metadata, "
-                "created_at, updated_at) "
-                "VALUES (:id, :pid, :name, :desc, :cat, :fsize, :mime, :fpath, "
-                "1, :by, :tags, '{}', :now, :now)"
-            ),
-            {
-                "id": doc_id,
-                "pid": str(punch_project_id),
-                "name": filename,
-                "desc": f"Punch list photo for item {item_id}",
-                "cat": "photo",
-                "fsize": len(content),
-                "mime": file.content_type or "image/jpeg",
-                "fpath": str(filepath),
-                "by": user_id or "",
-                "tags": tags_json,
-                "now": now,
-            },
+        doc = Document(
+            project_id=punch_project_id,
+            name=filename,
+            description=f"Punch list photo for item {item_id}",
+            category="photo",
+            file_size=len(content),
+            mime_type=file.content_type or "image/jpeg",
+            file_path=str(filepath),
+            version=1,
+            uploaded_by=user_id or "",
+            tags=["punchlist", "photo"],
         )
-        logger.info("Cross-linked punch photo -> document %s", doc_id)
+        service.session.add(doc)
+        await service.session.flush()
+        logger.info("Cross-linked punch photo -> document %s", doc.id)
     except Exception:
         logger.exception("Failed to cross-link punch photo to Documents hub")
 

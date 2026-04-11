@@ -14,6 +14,20 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.4.6',
+    date: '2026-04-11',
+    changes: [
+      'Security: contacts module IDOR fix. List/search/by-company/stats endpoints used to return EVERY contact in the database to anyone with contacts.read — 3 TODO(v1.4-tenancy) markers acknowledged the gap. Now scoped via owner_id (created_by proxy) at the repository layer; admins still see the global view via _is_admin() bypass',
+      'Security: collaboration module had ZERO permission checks. No RequirePermission on any of the 7 endpoints, no project access validation — any authenticated user could list/create/edit/delete comments and viewpoints across project boundaries. Now wired via new collaboration/permissions.py registering 4 perms (Viewer/Editor) plus an entity_type allowlist (16 entries) that rejects orphaned metadata at the router boundary',
+      'Notifications subscriber framework: notifications was a ghost component since day one — service had create()/notify_users() but nothing in the platform called them. New notifications/events.py wires a declarative subscription map: boq.boq.created → creator notify, meeting.action_items_created → per-task-owner notifies, cde.container.state_transitioned → actor notify. Adding a new trigger is now a one-line entry',
+      'Raw SQL → ORM in 3 remaining cross-link sites (punchlist/meetings/takeoff). v1.4.4 fixed bim_hub upload, but the same hand-rolled INSERT INTO oe_documents_document via text() pattern lived in punch photos, meeting transcripts, and takeoff PDFs. All replaced with clean Document(...) ORM inserts. Verified zero raw INSERTs remain across all 4 sites',
+      'Meetings complete: stop publishing meeting.action_items_created event when task creation fails. The endpoint used to wrap task creation in try/except that swallowed all errors then published the event regardless — telling notifications + vector indexer "tasks created" even when zero made it to the DB. Now per-item isolation, separate created/failed lists, only publish when at least one task persisted, payload carries created_count + failed_count for "3 of 5" UI display',
+      'project_intelligence collector now reads from requirements / bim_hub / tasks / assemblies. Previously blind to all 4 modules — score was a partial picture and the AI advisor could not surface gaps like "no requirements defined" or "BIM elements not linked to BOQ". Added 4 new state dataclasses + 4 parallel collectors via asyncio.gather. Smoke-tested against the live DB with the 5 most recent projects (collector now sees req=1 / bim=2 / tasks=1 etc on projects from the v1.4.5 cross-module integration tests)',
+      'Verification: backend ruff clean across every v1.4.6-touched file, 174 unit+integration tests passing, version sync at 1.4.6, integrity check passes',
+      'Deferred to v1.4.7+: project_intelligence actions implementation (3 dead-code endpoints), costmodel vs full_evm consolidation, costmodel PV approximation flaw, BIM frontend 14 findings (200-item modal caps, type-unsafe casts, modal pattern drift), assembly total_rate invalidation, create_vector_routes factory, trailing-slash test fixes, test coverage push for costmodel/finance/full_evm + 6 shared infra modules',
+    ],
+  },
+  {
     version: '1.4.5',
     date: '2026-04-11',
     changes: [
