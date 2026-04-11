@@ -29,6 +29,7 @@ import {
   EyeOff,
   X,
   Link2,
+  Bookmark,
 } from 'lucide-react';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
 import {
@@ -70,6 +71,9 @@ interface BIMFilterPanelProps {
   onQuickTakeoff?: () => void;
   /** Current visible-element count from the parent (after applyFilter). */
   visibleElementCount?: number | null;
+  /** When set, the panel shows a "Save as group" button that opens the
+   *  SaveGroupModal pre-filled with the current filter criteria. */
+  onSaveAsGroup?: (filter: BIMFilterState, visibleElementIds: string[]) => void;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────
@@ -193,6 +197,7 @@ export default function BIMFilterPanel({
   onElementClick,
   onQuickTakeoff,
   visibleElementCount: _visibleElementCount,
+  onSaveAsGroup,
 }: BIMFilterPanelProps) {
   const { t } = useTranslation();
 
@@ -511,24 +516,47 @@ export default function BIMFilterPanel({
           )}
         </div>
 
-        {/* Quick-takeoff button — opens AddToBOQ with every element currently
-            visible after the filter.  This is the headline "10-click workflow
-            from open model to wall quantities in BOQ" from the research brief. */}
-        {onQuickTakeoff && visibleElements.length > 0 && visibleElements.length < elements.length && (
-          <button
-            type="button"
-            onClick={onQuickTakeoff}
-            className="w-full mt-2 inline-flex items-center justify-center gap-1.5 px-2 py-1.5 text-[11px] font-medium rounded-md bg-oe-blue text-white hover:bg-oe-blue-dark transition-colors"
-            title={t('bim.quick_takeoff_title', {
-              defaultValue: 'Create a BOQ position from the current filter',
-            })}
-          >
-            <Link2 size={11} />
-            {t('bim.quick_takeoff', {
-              defaultValue: 'Link {{count}} visible elements to BOQ',
-              count: visibleElements.length,
-            })}
-          </button>
+        {/* Quick-takeoff button + Save as group button — both act on the
+            currently filtered subset.  Quick takeoff opens AddToBOQ; Save
+            as group opens SaveGroupModal so the user can name the
+            selection and reuse it later. */}
+        {visibleElements.length > 0 && visibleElements.length < elements.length && (
+          <div className="mt-2 flex gap-1">
+            {onQuickTakeoff && (
+              <button
+                type="button"
+                onClick={onQuickTakeoff}
+                className="flex-1 inline-flex items-center justify-center gap-1.5 px-2 py-1.5 text-[11px] font-medium rounded-md bg-oe-blue text-white hover:bg-oe-blue-dark transition-colors"
+                title={t('bim.quick_takeoff_title', {
+                  defaultValue: 'Create a BOQ position from the current filter',
+                })}
+              >
+                <Link2 size={11} />
+                {t('bim.quick_takeoff', {
+                  defaultValue: 'Link {{count}} to BOQ',
+                  count: visibleElements.length,
+                })}
+              </button>
+            )}
+            {onSaveAsGroup && (
+              <button
+                type="button"
+                onClick={() =>
+                  onSaveAsGroup(
+                    state,
+                    visibleElements.map((el) => el.id),
+                  )
+                }
+                className="inline-flex items-center justify-center gap-1.5 px-2 py-1.5 text-[11px] font-medium rounded-md border border-oe-blue/40 text-oe-blue bg-oe-blue/5 hover:bg-oe-blue/10 transition-colors"
+                title={t('bim.save_as_group_title', {
+                  defaultValue: 'Save the current filter as a named group',
+                })}
+              >
+                <Bookmark size={11} />
+                {t('bim.save_as_group', { defaultValue: 'Save as group' })}
+              </button>
+            )}
+          </div>
         )}
 
         {/* Buildings-only toggle — hides annotation/analytical noise */}

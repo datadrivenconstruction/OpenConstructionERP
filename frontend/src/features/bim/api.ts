@@ -324,6 +324,93 @@ export async function applyQuantityMaps(
   );
 }
 
+/* ── BIM Element Groups (saved selections) ────────────────────────────── */
+
+/** Filter predicate for a dynamic group.  Every field is optional and
+ *  multi-valued where it makes sense.  An empty filter matches every
+ *  element. */
+export interface BIMGroupFilterCriteria {
+  element_type?: string | string[];
+  category?: string | string[];
+  discipline?: string | string[];
+  storey?: string | string[];
+  name_contains?: string;
+  property_filter?: Record<string, string>;
+}
+
+export interface BIMElementGroup {
+  id: string;
+  project_id: string;
+  model_id: string | null;
+  name: string;
+  description: string | null;
+  is_dynamic: boolean;
+  filter_criteria: BIMGroupFilterCriteria;
+  element_ids: string[];
+  element_count: number;
+  color: string | null;
+  created_by: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+  /** Resolved member element UUIDs (computed by the backend on read for
+   *  dynamic groups; equal to `element_ids` for static groups). */
+  member_element_ids: string[];
+}
+
+export interface BIMElementGroupCreate {
+  name: string;
+  description?: string;
+  model_id?: string | null;
+  is_dynamic?: boolean;
+  filter_criteria?: BIMGroupFilterCriteria;
+  element_ids?: string[];
+  color?: string;
+}
+
+export type BIMElementGroupUpdate = Partial<BIMElementGroupCreate>;
+
+/** List every saved element group for the project, optionally scoped to one model. */
+export async function listElementGroups(
+  projectId: string,
+  modelId?: string | null,
+): Promise<BIMElementGroup[]> {
+  const params = new URLSearchParams({ project_id: projectId });
+  if (modelId) params.set('model_id', modelId);
+  return apiGet<BIMElementGroup[]>(
+    `/v1/bim_hub/element-groups/?${params.toString()}`,
+  );
+}
+
+/** Create a new element group.  Returns the created record with member ids resolved. */
+export async function createElementGroup(
+  projectId: string,
+  payload: BIMElementGroupCreate,
+): Promise<BIMElementGroup> {
+  return apiPost<BIMElementGroup, BIMElementGroupCreate>(
+    `/v1/bim_hub/element-groups/?project_id=${encodeURIComponent(projectId)}`,
+    payload,
+  );
+}
+
+/** Patch an existing element group.  When filter_criteria changes the
+ *  member ids are recomputed and re-cached on the backend side. */
+export async function updateElementGroup(
+  groupId: string,
+  payload: BIMElementGroupUpdate,
+): Promise<BIMElementGroup> {
+  return apiPatch<BIMElementGroup, BIMElementGroupUpdate>(
+    `/v1/bim_hub/element-groups/${encodeURIComponent(groupId)}`,
+    payload,
+  );
+}
+
+/** Delete an element group.  Existing BIMElementLink rows referencing
+ *  members of the group are NOT touched — the group is just metadata. */
+export async function deleteElementGroup(groupId: string): Promise<void> {
+  await apiDelete(`/v1/bim_hub/element-groups/${encodeURIComponent(groupId)}`);
+}
+
 /** Upload a raw CAD file (RVT, IFC, DWG, DGN, FBX, OBJ, 3DS) for background processing. */
 export async function uploadCADFile(
   projectId: string,

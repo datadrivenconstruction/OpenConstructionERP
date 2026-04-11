@@ -499,6 +499,48 @@ async function clickSidebarButton(page, matcher, label) {
     }
   }
 
+  // ── TEST 7c: SAVE AS GROUP modal — verify the new element-groups UX
+  log('--- TEST 7c: save as group ---');
+  // Re-apply a filter so the visible/total mismatch shows the button
+  await clickSidebarButton(page, (txt) => /^Walls\d/.test(txt), 'walls-for-group');
+  await page.waitForTimeout(400);
+  // Click "Save as group"
+  const saveBtnClicked = await page.evaluate(() => {
+    const btn = Array.from(document.querySelectorAll('button')).find((b) =>
+      /Save as group/i.test((b.textContent || '').trim()),
+    );
+    if (btn) {
+      btn.click();
+      return true;
+    }
+    return false;
+  });
+  log('  Save-as-group clicked:', saveBtnClicked);
+  await page.waitForTimeout(700);
+  const groupModalState = await page.evaluate(() => {
+    const headers = Array.from(document.querySelectorAll('h2'));
+    const hasHeader = headers.some((h) =>
+      /Save current filter as group|Save.*group/i.test(h.textContent || ''),
+    );
+    const nameInput = !!document.querySelector('input[type="text"][placeholder*="Walls"]');
+    const dynRadios = Array.from(document.querySelectorAll('input[type="radio"]'));
+    return { hasHeader, nameInput, radioCount: dynRadios.length };
+  });
+  log('  SaveGroup modal:', JSON.stringify(groupModalState));
+  results.saveGroupModal = groupModalState;
+  await page.screenshot({ path: path.join(OUT, '11-save-group-modal.png') });
+  // Close modal
+  await page.keyboard.press('Escape').catch(() => {});
+  await page.waitForTimeout(300);
+  // Clear filter
+  await page.evaluate(() => {
+    const all = Array.from(document.querySelectorAll('button')).filter((b) =>
+      /^Clear all$/i.test((b.textContent || '').trim()),
+    );
+    if (all[0]) (all[0]).click();
+  });
+  await page.waitForTimeout(400);
+
   // ── TEST 9: STRESS TEST — clone the scene meshes 4x in-place to
   //    simulate a 4x bigger model (~21 760 meshes) and re-measure fps.
   log('--- TEST 9: stress test (clone scene 4×) ---');

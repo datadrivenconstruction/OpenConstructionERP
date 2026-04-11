@@ -1,8 +1,10 @@
 """BIM Hub Pydantic schemas — request/response models.
 
 Defines create, update, and response schemas for BIM models, elements,
-BOQ links, quantity maps, and model diffs.
+BOQ links, quantity maps, element groups, and model diffs.
 """
+
+from __future__ import annotations
 
 from datetime import datetime
 from typing import Any
@@ -326,3 +328,78 @@ class BIMModelDiffResponse(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+
+
+# ── BIMElementGroup schemas ──────────────────────────────────────────────────
+
+
+class BIMElementGroupCreate(BaseModel):
+    """Create a new BIM element group (saved selection).
+
+    When ``is_dynamic`` is True (default), ``filter_criteria`` is evaluated
+    against ``oe_bim_element`` at create time and the resolved ids are cached
+    in ``element_ids`` automatically; callers do not need to send
+    ``element_ids``.
+
+    When ``is_dynamic`` is False, the caller is expected to send an explicit
+    ``element_ids`` list.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: str = Field(..., min_length=1, max_length=255)
+    description: str | None = None
+    model_id: UUID | None = None
+    is_dynamic: bool = True
+    filter_criteria: dict[str, Any] = Field(default_factory=dict)
+    element_ids: list[UUID] = Field(default_factory=list)
+    color: str | None = Field(default=None, max_length=20)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class BIMElementGroupUpdate(BaseModel):
+    """Partial update for a BIM element group.
+
+    Any field can be omitted. If ``filter_criteria`` or ``is_dynamic`` is
+    supplied, the service re-resolves the member list and re-caches
+    ``element_ids`` + ``element_count``.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    description: str | None = None
+    model_id: UUID | None = None
+    is_dynamic: bool | None = None
+    filter_criteria: dict[str, Any] | None = None
+    element_ids: list[UUID] | None = None
+    color: str | None = Field(default=None, max_length=20)
+    metadata: dict[str, Any] | None = None
+
+
+class BIMElementGroupResponse(BaseModel):
+    """BIM element group returned from the API.
+
+    ``member_element_ids`` is the resolved list of element UUIDs. For dynamic
+    groups this mirrors the freshly-recomputed cache; for static groups it
+    mirrors the persisted ``element_ids`` snapshot. Clients should use this
+    field for rendering instead of ``element_ids``.
+    """
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    project_id: UUID
+    model_id: UUID | None = None
+    name: str
+    description: str | None = None
+    is_dynamic: bool
+    filter_criteria: dict[str, Any] = Field(default_factory=dict)
+    element_ids: list[UUID] = Field(default_factory=list)
+    element_count: int = 0
+    color: str | None = None
+    created_by: UUID | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    created_at: datetime
+    updated_at: datetime
+    member_element_ids: list[UUID] = Field(default_factory=list)
