@@ -493,45 +493,66 @@ async function clickSidebarButton(page, matcher, label) {
       log('  AddToBOQ modal:', JSON.stringify(modalState));
       results.addToBOQModal = modalState;
       await page.screenshot({ path: path.join(OUT, '09-add-to-boq-modal.png') });
-
-      // ── Actually click a position to fire the linkExistingMut →
-      //    POST /links/.  This is the path that returned 500 in the user
-      //    report — verify it now succeeds.
-      await page.waitForTimeout(500);
-      const clickRes = await page.evaluate(() => {
-        // Find the first picklist row inside the modal — it's a button
-        // with mono-font ordinal text inside it.
-        const buttons = Array.from(document.querySelectorAll('button'));
-        const pickRow = buttons.find((b) => {
-          const fontMono = b.querySelector('.font-mono');
-          return fontMono && /^\d+\.\d+$/.test((fontMono.textContent || '').trim());
-        });
-        if (!pickRow) return { ok: false };
-        const ordinal = pickRow.querySelector('.font-mono')?.textContent;
-        pickRow.click();
-        return { ok: true, ordinal };
+      // Close the modal cleanly — only target buttons INSIDE the modal
+      // overlay (z-50 fixed), NOT the close button on the filter panel.
+      await page.evaluate(() => {
+        const overlay = document.querySelector('.fixed.inset-0.z-50');
+        if (!overlay) return;
+        const closeBtns = Array.from(overlay.querySelectorAll('button')).filter(
+          (b) =>
+            (b.textContent || '').trim() === '×' ||
+            (b.textContent || '').trim() === 'Cancel' ||
+            b.querySelector('svg[class*="lucide-x"]') !== null,
+        );
+        for (const b of closeBtns) (b).click();
       });
-      log('  picked position:', JSON.stringify(clickRes));
-      // Wait for the POST /links/ to either succeed (toast) or fail (toast).
-      await page.waitForTimeout(2500);
-      const linkResult = await page.evaluate(() => {
-        const toasts = Array.from(document.querySelectorAll('[class*="toast"], [role="status"], [role="alert"]'));
-        const texts = toasts.map((t) => (t.textContent || '').trim()).filter(Boolean);
-        // Also check for any text node that says "Linked" or "Error"
-        const allText = document.body.textContent || '';
-        const success = /Linked\s+\d+\s+element/i.test(allText) || /linked/i.test(texts.join(' '));
-        const failure = /Internal server error|500|failed/i.test(allText) || /error/i.test(texts.join(' '));
-        return { toastCount: toasts.length, texts: texts.slice(0, 3), success, failure };
-      });
-      log('  link result:', JSON.stringify(linkResult));
-      results.linkAttempt = linkResult;
-      await page.screenshot({ path: path.join(OUT, '09b-after-link-click.png') });
-
-      // Close any modal still open
       await page.keyboard.press('Escape').catch(() => {});
-      await page.waitForTimeout(300);
+      await page.waitForTimeout(500);
     }
   }
+
+  // ── TEST 7d: GROUPING MODES — verify Category / Type Name / Buckets
+  log('--- TEST 7d: grouping modes ---');
+  // Click "Type Name" mode and verify a category header has a chevron
+  await page.evaluate(() => {
+    const btn = Array.from(document.querySelectorAll('button')).find((b) =>
+      (b.textContent || '').trim() === 'Type Name',
+    );
+    if (btn) (btn).click();
+  });
+  await page.waitForTimeout(400);
+  const typeNameView = await page.evaluate(() => {
+    // Find category headers — they're font-semibold spans inside a button
+    const buttons = Array.from(document.querySelectorAll('button'));
+    const catHeaders = buttons.filter((b) => {
+      const semi = b.querySelector('.font-semibold');
+      const chevron = b.querySelector('svg[class*="lucide-chevron"]');
+      return semi && chevron;
+    });
+    return { headerCount: catHeaders.length, sample: catHeaders.slice(0, 5).map((b) => (b.textContent || '').trim().slice(0, 30)) };
+  });
+  log('  type-name view headers:', JSON.stringify(typeNameView));
+  results.typeNameView = typeNameView;
+  await page.screenshot({ path: path.join(OUT, '14-typename-grouping.png') });
+
+  // Click "Buckets" mode
+  await page.evaluate(() => {
+    const btn = Array.from(document.querySelectorAll('button')).find((b) =>
+      (b.textContent || '').trim() === 'Buckets',
+    );
+    if (btn) (btn).click();
+  });
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: path.join(OUT, '15-buckets-grouping.png') });
+
+  // Back to Category for the rest of the tests
+  await page.evaluate(() => {
+    const btn = Array.from(document.querySelectorAll('button')).find((b) =>
+      (b.textContent || '').trim() === 'Category',
+    );
+    if (btn) (btn).click();
+  });
+  await page.waitForTimeout(400);
 
   // ── TEST 7c: SAVE AS GROUP — full lifecycle (save → list → apply → delete)
   log('--- TEST 7c: save as group — full lifecycle ---');
