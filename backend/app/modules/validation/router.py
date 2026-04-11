@@ -304,3 +304,78 @@ async def list_rule_sets(
     public documentation pages.
     """
     return service.get_available_rule_sets()
+
+
+# ── Vector / semantic memory endpoints ───────────────────────────────────
+
+
+@router.get(
+    "/vector/status/",
+    dependencies=[Depends(RequirePermission("validation.read"))],
+)
+async def validation_vector_status() -> dict[str, Any]:
+    """Return health + row count for the ``oe_validation`` collection."""
+    from app.core.vector_index import COLLECTION_VALIDATION, collection_status
+
+    return collection_status(COLLECTION_VALIDATION)
+
+
+@router.post(
+    "/vector/reindex/",
+    dependencies=[Depends(RequirePermission("validation.create"))],
+)
+async def validation_vector_reindex(
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    project_id: uuid.UUID | None = Query(default=None),
+    purge_first: bool = Query(default=False),
+) -> dict[str, Any]:
+    """Backfill the validation vector collection."""
+    from sqlalchemy import select
+
+    from app.core.vector_index import reindex_collection
+    from app.modules.validation.vector_adapter import validation_report_adapter
+
+    stmt = select(ValidationReport)
+    if project_id is not None:
+        stmt = stmt.where(ValidationReport.project_id == project_id)
+    rows = list((await session.execute(stmt)).scalars().all())
+    return await reindex_collection(
+        validation_report_adapter,
+        rows,
+        purge_first=purge_first,
+    )
+
+
+@router.get(
+    "/{report_id}/similar/",
+    dependencies=[Depends(RequirePermission("validation.read"))],
+)
+async def validation_report_similar(
+    report_id: uuid.UUID,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    limit: int = Query(default=5, ge=1, le=20),
+    cross_project: bool = Query(default=True),
+) -> dict[str, Any]:
+    """Return validation reports semantically similar to the given one."""
+    from app.core.vector_index import find_similar
+    from app.modules.validation.vector_adapter import validation_report_adapter
+
+    row = await session.get(ValidationReport, report_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Validation report not found")
+    project_id = str(row.project_id) if row.project_id else None
+    hits = await find_similar(
+        validation_report_adapter,
+        row,
+        project_id=project_id,
+        cross_project=cross_project,
+        limit=limit,
+    )
+    return {
+        "source_id": str(report_id),
+        "limit": limit,
+        "cross_project": cross_project,
+        "hits": [h.to_dict() for h in hits],
+    }

@@ -5,6 +5,55 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] — 2026-04-11
+
+### Added
+- **Validation reports vector adapter** — `oe_validation` collection now
+  has a real adapter (`backend/app/modules/validation/vector_adapter.py`),
+  event subscribers wired to the new `validation.report.created/deleted`
+  publishes, and `/api/v1/validation/vector/status/`,
+  `/vector/reindex/`, `/{id}/similar/` endpoints.  Semantic search across
+  validation history (e.g. "find reports about missing classification
+  codes") now works.
+- **Chat messages vector adapter** — `oe_chat` collection now has a real
+  adapter (`backend/app/modules/erp_chat/vector_adapter.py`).  User and
+  assistant messages with non-empty content are auto-indexed via the new
+  `erp_chat.message.created` event publish in
+  `service.py:_persist_messages`.  Long-term semantic memory for the
+  AI advisor and per-message similarity search both now functional.
+- **Auto-backfill on startup** — new `_auto_backfill_vector_collections`
+  helper in `backend/app/main.py` runs as a detached background task
+  during the lifespan startup.  For each of the 7 collections it
+  compares the live row count to the indexed count and backfills any
+  missing rows (capped by `vector_backfill_max_rows=5000` per pass to
+  protect against multi-million-row tenants).  Disable with
+  `vector_auto_backfill=False` in settings.  This closes the upgrade
+  gap where existing v1.3.x BOQ / Document / Task / Risk / BIM / chat
+  rows were unsearchable until the user manually called every per-module
+  reindex endpoint.
+- **Settings → Semantic Search Status panel** — new `VectorStatusCard`
+  in `frontend/src/features/settings/`.  Renders a per-collection
+  health table fetched from `/api/v1/search/status/` with one-click
+  reindex buttons (POST to the matching `/vector/reindex/` route),
+  engine + model + dimension + total-vectors badges, connection
+  indicator and a "purge first" toggle for embedding-model migrations.
+
+### Fixed
+- The `bim_hub.element.updated` event subscription is now documented
+  as a forward-compat hook (no current publisher — BIM elements are
+  refreshed via the bulk-import path which already publishes
+  `created`).  The day a `PATCH /elements/{id}/` endpoint lands, vector
+  freshness will work without any wiring change.
+- Backend `ruff check` clean across every file touched in this sweep
+  (auto-fixed I001 import-order issues in two files).
+
+### Verification
+- Full app boot: 765 routes, 34 vector / similar / search routes (up
+  from 28 in v1.4.0).  All 7 collections now have real adapters.
+- `intfloat/multilingual-e5-small` model loads from HuggingFace cache
+  on first encode call — confirmed by Python boot.
+- Frontend `tsc --noEmit` clean.
+
 ## [1.4.0] — 2026-04-11
 
 ### Added
