@@ -5,6 +5,7 @@ import { getIntlLocale } from '@/shared/lib/formatters';
 import { TranslationManager } from './TranslationManager';
 import { BackupRestore } from './BackupRestore';
 import { RegionalSettings } from './RegionalSettings';
+import VectorStatusCard from './VectorStatusCard';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Eye,
@@ -926,6 +927,9 @@ export function SettingsPage() {
       <div className="animate-card-in" style={{ animationDelay: '370ms' }}>
         <BackupRestore />
       </div>
+
+      {/* Semantic Search status — per-collection vector store health */}
+      <VectorStatusCard />
 
       {/* Databases & Resources */}
       <Card className="animate-card-in" style={{ animationDelay: '400ms' }}>

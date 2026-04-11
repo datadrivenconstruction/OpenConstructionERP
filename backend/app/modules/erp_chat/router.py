@@ -10,12 +10,13 @@ Endpoints:
 
 import logging
 import uuid
+from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
 
 from app.dependencies import CurrentUserId, SessionDep, check_ai_rate_limit
-from app.modules.erp_chat.models import ChatSession
+from app.modules.erp_chat.models import ChatMessage, ChatSession
 from app.modules.erp_chat.schemas import (
     ChatMessageResponse,
     ChatSessionCreate,
@@ -148,3 +149,89 @@ async def delete_session(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Chat session not found",
         )
+
+
+# ── Vector / semantic memory endpoints ───────────────────────────────────
+
+
+@router.get("/vector/status/")
+async def chat_vector_status(_user_id: CurrentUserId) -> dict[str, Any]:
+    """Return health + row count for the ``oe_chat`` collection."""
+    from app.core.vector_index import COLLECTION_CHAT, collection_status
+
+    return collection_status(COLLECTION_CHAT)
+
+
+@router.post("/vector/reindex/")
+async def chat_vector_reindex(
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    project_id: uuid.UUID | None = Query(default=None),
+    purge_first: bool = Query(default=False),
+) -> dict[str, Any]:
+    """Backfill the chat-message vector collection.
+
+    Loads every persisted ChatMessage (eager-loading the parent session
+    so the adapter can resolve project_id) and pushes the lot through
+    the multi-collection backfill helper.
+    """
+    from sqlalchemy import select
+    from sqlalchemy.orm import selectinload
+
+    from app.core.vector_index import reindex_collection
+    from app.modules.erp_chat.vector_adapter import chat_message_adapter
+
+    stmt = select(ChatMessage).options(selectinload(ChatMessage.session))
+    if project_id is not None:
+        stmt = stmt.join(ChatSession, ChatMessage.session_id == ChatSession.id).where(
+            ChatSession.project_id == project_id
+        )
+    rows = list((await session.execute(stmt)).scalars().all())
+    return await reindex_collection(
+        chat_message_adapter,
+        rows,
+        purge_first=purge_first,
+    )
+
+
+@router.get("/messages/{message_id}/similar/")
+async def chat_message_similar(
+    message_id: uuid.UUID,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    limit: int = Query(default=5, ge=1, le=20),
+    cross_project: bool = Query(default=True),
+) -> dict[str, Any]:
+    """Return chat messages semantically similar to the given one."""
+    from sqlalchemy import select
+    from sqlalchemy.orm import selectinload
+
+    from app.core.vector_index import find_similar
+    from app.modules.erp_chat.vector_adapter import chat_message_adapter
+
+    stmt = (
+        select(ChatMessage)
+        .options(selectinload(ChatMessage.session))
+        .where(ChatMessage.id == message_id)
+    )
+    row = (await session.execute(stmt)).scalar_one_or_none()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Chat message not found")
+    project_id = (
+        str(row.session.project_id)
+        if row.session is not None and getattr(row.session, "project_id", None)
+        else None
+    )
+    hits = await find_similar(
+        chat_message_adapter,
+        row,
+        project_id=project_id,
+        cross_project=cross_project,
+        limit=limit,
+    )
+    return {
+        "source_id": str(message_id),
+        "limit": limit,
+        "cross_project": cross_project,
+        "hits": [h.to_dict() for h in hits],
+    }

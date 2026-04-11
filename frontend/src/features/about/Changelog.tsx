@@ -14,6 +14,19 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.4.1',
+    date: '2026-04-11',
+    changes: [
+      'Validation reports vector adapter — oe_validation collection now has a real adapter, event subscribers wired to validation.report.created/deleted publishes, and /api/v1/validation/vector/status/, /vector/reindex/, /{id}/similar/ endpoints. Semantic search across validation history (e.g. "find reports about missing classification codes") now works',
+      'Chat messages vector adapter — oe_chat collection now has a real adapter. User and assistant messages with non-empty content are auto-indexed via a new erp_chat.message.created event publish in service.py. Long-term semantic memory for the AI advisor and per-message similarity search both now functional',
+      'Auto-backfill on startup — new helper in main.py runs as a detached background task during lifespan startup. For each of the 7 collections it compares the live row count to the indexed count and backfills any missing rows (capped by vector_backfill_max_rows=5000 per pass). Disable with vector_auto_backfill=False. This closes the upgrade gap where existing v1.3.x BOQ / Document / Task / Risk / BIM / chat rows were unsearchable until the user manually called every per-module reindex endpoint',
+      'Settings → Semantic Search Status panel — new VectorStatusCard renders a per-collection health table fetched from /api/v1/search/status/ with one-click reindex buttons, engine + model + dimension badges, connection indicator and a "purge first" toggle for embedding-model migrations',
+      'BIM element update event subscription is now documented as a forward-compat hook (no current publisher — BIM elements are refreshed via bulk-import which already publishes created). The day a PATCH /elements/{id}/ endpoint lands, vector freshness will work without any wiring change',
+      'Backend ruff check clean across every file touched in this sweep (auto-fixed import-order issues in two files)',
+      'Verification: full app boot 765 routes, 34 vector/similar/search routes (up from 28 in v1.4.0). All 7 collections now have real adapters. multilingual-e5-small model loads from HuggingFace cache on first encode call. Frontend tsc --noEmit clean',
+    ],
+  },
+  {
     version: '1.4.0',
     date: '2026-04-11',
     changes: [
