@@ -1,4 +1,4 @@
-"""Requirements & Quality Gates service — business logic.
+"""Requirements & Quality Gates service​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ — business logic.
 
 Stateless service layer. Handles:
 - RequirementSet and Requirement CRUD

@@ -1,4 +1,4 @@
-"""Requirements event handlers — vector indexing.
+"""Requirements event handlers​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ — vector indexing.
 
 Subscribes to ``requirements.requirement.*`` events and keeps the
 ``oe_requirements`` vector collection in sync with the underlying

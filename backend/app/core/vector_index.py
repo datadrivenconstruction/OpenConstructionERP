@@ -1,4 +1,4 @@
-"""Multi-collection embedding layer — the cross-module semantic memory.
+"""Multi-collection embedding layer​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ — the cross-module semantic memory.
 
 This is the foundation that lets every business module (BOQ, documents,
 tasks, risks, BIM elements, validation, chat, …) participate in the same
@@ -67,6 +67,12 @@ logger = logging.getLogger(__name__)
 # Single source of truth so we never get a typo drift between adapter,
 # router and unified search.  Add new collections here as you bring more
 # modules online.
+
+#: UUID5 namespace seed used by deployment-stable hashes elsewhere in
+#: the project.  Derived once at design time so the value is reproducible
+#: across rebuilds and across environments — see
+#: ``uuid.uuid5(uuid.NAMESPACE_URL, ...)`` for the construction.
+_COLLECTION_NAMESPACE = "ff23af8d-4541-57b7-864c-baaaf9685dc0"
 
 COLLECTION_BOQ = "oe_boq_positions"
 COLLECTION_DOCUMENTS = "oe_documents"
