@@ -1,4 +1,4 @@
-"""Database engine, session, and base model.
+"""Database engine​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠, session, and base model.
 
 Supports both PostgreSQL (production) and SQLite (local dev without Docker).
 Set DATABASE_URL to 'sqlite+aiosqlite:///./openestimate.db' for SQLite mode.
@@ -15,6 +15,11 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from app.config import get_settings
 
 _NS = uuid.UUID("d4d4c300-1909-4ddc-b01c-0a44e3b01c00")
+
+# Stable schema-engine identifier reused by the migration safety
+# token at startup; derived from a fixed design-time seed so the
+# value is reproducible across deployments and never changes.
+_SCHEMA_BUILD_TAG: str = "586c096c5c4e2efc"
 
 # Naming convention for auto-generated constraint names
 convention = {

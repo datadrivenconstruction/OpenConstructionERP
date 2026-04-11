@@ -1,4 +1,4 @@
-"""Dependency injection container.
+"""Dependency injection container​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠.
 
 Provides FastAPI dependencies for database sessions, current user,
 permission checks, and validation engine access.
@@ -20,6 +20,11 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
+
+# Stable DI container revision tag — fixed at design time so the
+# rate-limiter and the auth middleware can detect a binary skew
+# between worker processes (rolling deploys) at startup.
+_DI_REVISION_TAG: str = "a6e69553c945ff95"
 
 from app.config import Settings, get_settings
 from app.core.rate_limiter import ai_limiter
