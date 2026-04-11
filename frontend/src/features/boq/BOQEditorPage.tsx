@@ -10,6 +10,7 @@ import { apiGet, apiPost, triggerDownload } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useRecentStore } from '@/stores/useRecentStore';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useBIMLinkSelectionStore } from '@/stores/useBIMLinkSelectionStore';
 import {
   boqApi,
   groupPositionsIntoSections,
@@ -660,9 +661,50 @@ export function BOQEditorPage() {
     boqGridRef.current?.clearSelection();
   }, []);
 
-  const handleSelectionChanged = useCallback((ids: string[]) => {
-    setSelectedPositionIds(ids);
-  }, []);
+  /* ── Cross-highlight bridge to BIM viewer ───────────────────────── */
+  const setBOQLinkSelection = useBIMLinkSelectionStore((s) => s.setBOQSelection);
+  const clearBIMLinkSelection = useBIMLinkSelectionStore((s) => s.clear);
+  const bimSelectedElementIds = useBIMLinkSelectionStore((s) => s.selectedBIMElementIds);
+  /** Position ID to scroll-to-and-flash when a BIM mesh click arrives. */
+  const [bimScrollTargetId, setBimScrollTargetId] = useState<string | undefined>(undefined);
+
+  const handleSelectionChanged = useCallback(
+    (ids: string[]) => {
+      setSelectedPositionIds(ids);
+      // Publish to the cross-highlight store so the BIM viewer lights up
+      // linked elements in orange. Only single-row selection drives it —
+      // multi-select clears any existing highlight.
+      if (ids.length === 1) {
+        const pos = boq?.positions.find((p) => p.id === ids[0]);
+        const cadIds = pos?.cad_element_ids ?? [];
+        setBOQLinkSelection(pos?.id ?? null, cadIds);
+      } else {
+        setBOQLinkSelection(null, []);
+      }
+    },
+    [boq?.positions, setBOQLinkSelection],
+  );
+
+  // Clear the cross-highlight store on unmount or when switching BOQs so
+  // the BIM viewer doesn't keep a stale highlight from a different BOQ.
+  useEffect(() => {
+    return () => clearBIMLinkSelection();
+  }, [boqId, clearBIMLinkSelection]);
+
+  // Viewer → editor: when the user clicks a mesh in the BIM viewer, scroll
+  // to the first BOQ position whose `cad_element_ids` contains that ID.
+  useEffect(() => {
+    if (bimSelectedElementIds.length === 0) {
+      setBimScrollTargetId(undefined);
+      return;
+    }
+    const positions = boq?.positions ?? [];
+    const bimIdSet = new Set(bimSelectedElementIds);
+    const match = positions.find((p) =>
+      (p.cad_element_ids ?? []).some((cid) => bimIdSet.has(cid)),
+    );
+    if (match) setBimScrollTargetId(match.id);
+  }, [bimSelectedElementIds, boq?.positions]);
 
   const handleUndo = useCallback(() => {
     const entry = undoStackRef.current.pop();
@@ -2318,7 +2360,7 @@ export function BOQEditorPage() {
           onReorderPositions={handleReorderPositions}
           collapsedSections={collapsedSections}
           onToggleSection={toggleSection}
-          highlightPositionId={newPositionId ?? undefined}
+          highlightPositionId={newPositionId ?? bimScrollTargetId ?? undefined}
           currencySymbol={currencySymbol}
           currencyCode={currencyCode}
           locale={locale}

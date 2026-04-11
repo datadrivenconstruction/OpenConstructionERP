@@ -8,7 +8,7 @@
  *   GET  /v1/bim_hub/models/{id}/geometry   — serve DAE geometry file
  */
 
-import { apiGet, apiDelete } from '@/shared/lib/api';
+import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
 
@@ -139,6 +139,189 @@ export async function uploadBIMData(
 /** Delete a BIM model and all its elements. */
 export async function deleteBIMModel(modelId: string): Promise<void> {
   await apiDelete(`/v1/bim_hub/${encodeURIComponent(modelId)}`);
+}
+
+/* ── BIM ↔ BOQ Linking ─────────────────────────────────────────────────── */
+
+/** A single link between a BIM element and a BOQ position. */
+export interface BOQElementLink {
+  id: string;
+  boq_position_id: string;
+  bim_element_id: string;
+  link_type: 'manual' | 'auto' | 'rule_based';
+  confidence: string | null;
+  rule_id: string | null;
+  created_by: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Brief embedded in the element response: the linked BOQ position's key fields. */
+export interface BOQElementLinkBrief {
+  id: string;
+  boq_position_id: string;
+  boq_position_ordinal: string | null;
+  boq_position_description: string | null;
+  link_type: 'manual' | 'auto' | 'rule_based';
+  confidence: string | null;
+}
+
+export interface BOQElementLinkListResponse {
+  items: BOQElementLink[];
+  total: number;
+}
+
+export interface CreateBOQElementLinkRequest {
+  boq_position_id: string;
+  bim_element_id: string;
+  link_type?: 'manual' | 'auto' | 'rule_based';
+  confidence?: string;
+  rule_id?: string;
+  metadata?: Record<string, unknown>;
+}
+
+/** List every BIM element link attached to a given BOQ position. */
+export async function listLinks(
+  boqPositionId: string,
+): Promise<BOQElementLinkListResponse> {
+  return apiGet<BOQElementLinkListResponse>(
+    `/v1/bim_hub/links/?boq_position_id=${encodeURIComponent(boqPositionId)}`,
+  );
+}
+
+/** Create a new BIM ↔ BOQ link. Returns the created record. */
+export async function createLink(
+  payload: CreateBOQElementLinkRequest,
+): Promise<BOQElementLink> {
+  return apiPost<BOQElementLink, CreateBOQElementLinkRequest>(
+    '/v1/bim_hub/links/',
+    payload,
+  );
+}
+
+/** Remove a BIM ↔ BOQ link by its row id. */
+export async function deleteLink(linkId: string): Promise<void> {
+  await apiDelete(`/v1/bim_hub/links/${encodeURIComponent(linkId)}`);
+}
+
+/* ── Quantity Maps (rule-based bulk linking) ───────────────────────────── */
+
+/** Optional target for a quantity-map rule. */
+export interface QuantityMapTarget {
+  /** Existing position to link to (preferred). */
+  position_id?: string;
+  /** Existing position to link to, looked up by its ordinal inside the project. */
+  position_ordinal?: string;
+  /** If true and no position resolves, auto-create one with the rule's name. */
+  auto_create?: boolean;
+  /** Classification JSON to attach to the auto-created position. */
+  classification?: Record<string, string>;
+}
+
+export interface BIMQuantityMap {
+  id: string;
+  org_id: string | null;
+  project_id: string | null;
+  name: string;
+  name_translations: Record<string, string> | null;
+  element_type_filter: string;
+  property_filter: Record<string, string> | null;
+  quantity_source: string;
+  multiplier: string;
+  unit: string;
+  waste_factor_pct: string | null;
+  boq_target: QuantityMapTarget | null;
+  is_active: boolean;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BIMQuantityMapListResponse {
+  items: BIMQuantityMap[];
+  total: number;
+}
+
+export type CreateBIMQuantityMapRequest = Omit<
+  BIMQuantityMap,
+  'id' | 'created_at' | 'updated_at'
+>;
+
+export type PatchBIMQuantityMapRequest = Partial<CreateBIMQuantityMapRequest>;
+
+export interface QuantityMapApplyRequest {
+  model_id: string;
+  dry_run: boolean;
+}
+
+export interface QuantityMapApplyResultItem {
+  element_id: string;
+  stable_id: string;
+  element_type: string;
+  rule_id: string;
+  rule_name: string;
+  quantity_source: string;
+  raw_quantity: number;
+  adjusted_quantity: number;
+  unit: string;
+  boq_target: QuantityMapTarget | null;
+}
+
+export interface QuantityMapApplyResult {
+  matched_elements: number;
+  rules_applied: number;
+  links_created: number;
+  positions_created: number;
+  results: QuantityMapApplyResultItem[];
+}
+
+/** List every quantity-map rule visible to the current user. */
+export async function listQuantityMaps(
+  offset = 0,
+  limit = 100,
+): Promise<BIMQuantityMapListResponse> {
+  return apiGet<BIMQuantityMapListResponse>(
+    `/v1/bim_hub/quantity-maps/?offset=${offset}&limit=${limit}`,
+  );
+}
+
+/** Create a new quantity-map rule. */
+export async function createQuantityMap(
+  payload: CreateBIMQuantityMapRequest,
+): Promise<BIMQuantityMap> {
+  return apiPost<BIMQuantityMap, CreateBIMQuantityMapRequest>(
+    '/v1/bim_hub/quantity-maps/',
+    payload,
+  );
+}
+
+/** Patch a quantity-map rule. */
+export async function patchQuantityMap(
+  mapId: string,
+  payload: PatchBIMQuantityMapRequest,
+): Promise<BIMQuantityMap> {
+  return apiPatch<BIMQuantityMap, PatchBIMQuantityMapRequest>(
+    `/v1/bim_hub/quantity-maps/${encodeURIComponent(mapId)}`,
+    payload,
+  );
+}
+
+/** Apply every active quantity-map rule to the given model.
+ *
+ * When `dry_run` is true (the default), the endpoint returns a preview of
+ * what would be linked without writing anything.  When false, it creates
+ * real `BOQElementLink` rows (and, for rules with `auto_create: true`,
+ * creates fresh BOQ positions) inside a transaction per rule.
+ */
+export async function applyQuantityMaps(
+  modelId: string,
+  dryRun = true,
+): Promise<QuantityMapApplyResult> {
+  return apiPost<QuantityMapApplyResult, QuantityMapApplyRequest>(
+    '/v1/bim_hub/quantity-maps/apply/',
+    { model_id: modelId, dry_run: dryRun },
+  );
 }
 
 /** Upload a raw CAD file (RVT, IFC, DWG, DGN, FBX, OBJ, 3DS) for background processing. */

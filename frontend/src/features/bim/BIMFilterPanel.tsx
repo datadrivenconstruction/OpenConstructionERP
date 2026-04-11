@@ -28,6 +28,7 @@ import {
   Eye,
   EyeOff,
   X,
+  Link2,
 } from 'lucide-react';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
 import {
@@ -64,6 +65,11 @@ interface BIMFilterPanelProps {
   ) => void;
   onClose?: () => void;
   onElementClick?: (elementId: string) => void;
+  /** When set, the panel shows a "Link to BOQ" button that opens the
+   *  AddToBOQ modal populated with the current filtered subset. */
+  onQuickTakeoff?: () => void;
+  /** Current visible-element count from the parent (after applyFilter). */
+  visibleElementCount?: number | null;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────
@@ -185,6 +191,8 @@ export default function BIMFilterPanel({
   onFilterChange,
   onClose,
   onElementClick,
+  onQuickTakeoff,
+  visibleElementCount: _visibleElementCount,
 }: BIMFilterPanelProps) {
   const { t } = useTranslation();
 
@@ -502,6 +510,26 @@ export default function BIMFilterPanel({
             </button>
           )}
         </div>
+
+        {/* Quick-takeoff button — opens AddToBOQ with every element currently
+            visible after the filter.  This is the headline "10-click workflow
+            from open model to wall quantities in BOQ" from the research brief. */}
+        {onQuickTakeoff && visibleElements.length > 0 && visibleElements.length < elements.length && (
+          <button
+            type="button"
+            onClick={onQuickTakeoff}
+            className="w-full mt-2 inline-flex items-center justify-center gap-1.5 px-2 py-1.5 text-[11px] font-medium rounded-md bg-oe-blue text-white hover:bg-oe-blue-dark transition-colors"
+            title={t('bim.quick_takeoff_title', {
+              defaultValue: 'Create a BOQ position from the current filter',
+            })}
+          >
+            <Link2 size={11} />
+            {t('bim.quick_takeoff', {
+              defaultValue: 'Link {{count}} visible elements to BOQ',
+              count: visibleElements.length,
+            })}
+          </button>
+        )}
 
         {/* Buildings-only toggle — hides annotation/analytical noise */}
         <label className="flex items-center justify-between mt-2 text-[11px] text-content-secondary cursor-pointer select-none">

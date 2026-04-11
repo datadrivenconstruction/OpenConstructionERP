@@ -251,6 +251,68 @@ export class SceneManager {
     this.controls.update();
   }
 
+  /** Snap the camera to a canonical view of the current scene bounding box.
+   *
+   * `view` is one of:
+   *   - `'top'`   — looking straight down (plan view)
+   *   - `'front'` — looking at the +Z face
+   *   - `'side'`  — looking at the +X face
+   *   - `'iso'`   — the default 3/4 orthographic-ish perspective angle
+   */
+  setCameraPreset(view: 'top' | 'front' | 'side' | 'iso'): void {
+    // Recompute the scene bounding box (same walker that zoomToFit uses,
+    // minus the helpers) so the preset always matches what's currently loaded.
+    this.scene.updateMatrixWorld(true);
+    const box = new THREE.Box3();
+    const tmp = new THREE.Box3();
+    this.scene.traverse((obj) => {
+      if (
+        obj instanceof THREE.GridHelper ||
+        obj instanceof THREE.AxesHelper ||
+        obj instanceof THREE.Light ||
+        obj instanceof THREE.Camera
+      ) {
+        return;
+      }
+      if (obj instanceof THREE.Mesh && obj.geometry) {
+        if (!obj.geometry.boundingBox) obj.geometry.computeBoundingBox();
+        tmp.setFromObject(obj);
+        if (!tmp.isEmpty() && Number.isFinite(tmp.min.x)) box.union(tmp);
+      }
+    });
+    if (box.isEmpty()) return;
+
+    const center = box.getCenter(new THREE.Vector3());
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    if (!Number.isFinite(maxDim) || maxDim <= 0) return;
+    const fov = this.camera.fov * (Math.PI / 180);
+    const dist = (maxDim / (2 * Math.tan(fov / 2))) * 1.1;
+
+    this.controls.target.copy(center);
+    switch (view) {
+      case 'top':
+        this.camera.position.set(center.x, center.y + dist, center.z + 0.001);
+        break;
+      case 'front':
+        this.camera.position.set(center.x, center.y, center.z + dist);
+        break;
+      case 'side':
+        this.camera.position.set(center.x + dist, center.y, center.z);
+        break;
+      case 'iso':
+      default:
+        this.camera.position.set(
+          center.x + dist * 0.6,
+          center.y + dist * 0.5,
+          center.z + dist * 0.6,
+        );
+        break;
+    }
+    this.camera.lookAt(center);
+    this.controls.update();
+  }
+
   /** Get current camera viewpoint. */
   getViewpoint(): Viewpoint {
     return {

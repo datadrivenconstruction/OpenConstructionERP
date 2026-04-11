@@ -57,6 +57,7 @@ from app.modules.bim_hub.schemas import (
     BIMQuantityMapListResponse,
     BIMQuantityMapResponse,
     BIMQuantityMapUpdate,
+    BOQElementLinkBrief,
     BOQElementLinkCreate,
     BOQElementLinkListResponse,
     BOQElementLinkResponse,
@@ -1180,9 +1181,14 @@ async def list_elements(
     _perm: None = Depends(RequirePermission("bim.read")),
     service: BIMHubService = Depends(_get_service),
 ) -> BIMElementListResponse:
-    """List elements for a BIM model (paginated, filterable)."""
+    """List elements for a BIM model (paginated, filterable).
+
+    Each element in the response includes a ``boq_links`` array of
+    ``BOQElementLinkBrief`` entries so the viewer can render link badges
+    without a second round trip.
+    """
     await _verify_model_access(service, model_id, user_id or "")
-    items, total = await service.list_elements(
+    items, total, links_by_id = await service.list_elements_with_links(
         model_id,
         element_type=element_type,
         storey=storey,
@@ -1190,8 +1196,19 @@ async def list_elements(
         offset=offset,
         limit=limit,
     )
+
+    responses: list[BIMElementResponse] = []
+    for elem in items:
+        briefs = [
+            BOQElementLinkBrief.model_validate(b)
+            for b in links_by_id.get(elem.id, [])
+        ]
+        resp = BIMElementResponse.model_validate(elem)
+        resp.boq_links = briefs
+        responses.append(resp)
+
     return BIMElementListResponse(
-        items=[BIMElementResponse.model_validate(e) for e in items],
+        items=responses,
         total=total,
         offset=offset,
         limit=limit,
