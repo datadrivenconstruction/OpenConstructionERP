@@ -5,6 +5,101 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.29] — 2026-04-11
+
+### Changed
+- **Chat page** — removed the redundant "ERP AI Assistant" top bar. The
+  app's main layout already provides a header; the chat-specific bar
+  duplicated UI and didn't match the rest of the site palette. Clear
+  chat now lives in the input bar.
+- **Release process** — CHANGELOG.md now mirrors the in-app
+  `Changelog.tsx` so the GitHub release workflow can extract the right
+  section when a tag is pushed (the workflow at `.github/workflows/release.yml`
+  reads `## [VERSION]` patterns from this file).
+
+## [1.3.28] — 2026-04-11
+
+### Added
+- **Universal Building / Other split** in BIM filter — every category
+  is classified by its semantic bucket and rendered in either a
+  "real building elements" section (chips at top) or a collapsible
+  "Annotations & analytical" section (closed by default). Works
+  zero-curation for any project.
+- **Pretty category names** for ~150 well-known Revit categories
+  ("Curtainwallmullions" → "Curtain Wall Mullions", "Doortags" → "Door Tags").
+  Anything not in the table passes through with first-letter
+  capitalised — no wrong algorithmic word splits.
+
+### Fixed
+- BIM filter "None" element_type (the 6 048 Revit-ingest junk rows in
+  the demo) now classified as noise.
+- Headless test verdict baseline comparison.
+
+## [1.3.27] — 2026-04-11
+
+### Added
+- **3 grouping modes** in BIM filter via segmented control:
+  **By Category** (flat, default), **By Type Name** (Revit Browser
+  hierarchy), **Buckets** (semantic).
+
+## [1.3.26] — 2026-04-11
+
+### Fixed
+- **"Add to BOQ" 500** — the v1.3.22 backend agent's ownership check
+  referenced `position.project_id` but Position has no such column;
+  the project lives on the parent BOQ via `position.boq_id`. Fix:
+  rewrote `_verify_boq_position_access` as a single-row SELECT joining
+  Position → BOQ.
+
+## [1.3.25] — 2026-04-11
+
+### Added
+- **Saved Groups panel section** in BIMFilterPanel — collapsible,
+  one-click apply, hover-revealed link/delete actions.
+- Headless test full saved-group lifecycle (save → list → apply → delete).
+
+## [1.3.24] — 2026-04-11
+
+### Added
+- **Pluggable storage backend** (`app/core/storage.py`) with
+  `LocalStorageBackend` (default) and `S3StorageBackend` (opt-in via
+  `pip install openconstructionerp[s3]`). Supports MinIO / AWS / Backblaze /
+  DigitalOcean Spaces.
+- **BIM Element Groups** — new `oe_bim_element_group` table for saved
+  selections. Dynamic groups recompute members from a filter; static
+  groups freeze the snapshot.
+- **SaveGroupModal** for saving the current filter as a named group.
+- **Architecture doc** — `docs/BIM-STORAGE-ARCHITECTURE.md` with the
+  three-layer design + migration path.
+
+## [1.3.23] — 2026-04-11
+
+### Added
+- Headless deep test (`frontend/debug-bim.cjs`) extended with 4 new
+  test groups verifying every UI surface from v1.3.22.
+- `ElementManager.batchMeshesByMaterial()` — three.js BatchedMesh
+  collapse for big-model perf (gated at 50 000+ meshes pending GPU
+  visibility-sync work).
+
+### Fixed
+- Sidebar `nav.bim_rules` translation key.
+
+## [1.3.22] — 2026-04-11
+
+### Added
+- **BIM ↔ BOQ linking** end-to-end. Backend embeds `boq_links` in
+  element response; `apply_quantity_maps` actually persists; `Position.cad_element_ids`
+  auto-syncs on link CRUD.
+- **Add to BOQ modal** — Link to existing position OR create new with
+  pre-filled quantities, single-element and bulk modes.
+- **Quick takeoff** button in filter panel — bulk-link visible elements.
+- **BIM Quantity Rules page** at `/bim/rules` — dedicated UI for rule-based
+  bulk linking.
+- **Selection sync store** — BOQ row click highlights linked BIM
+  elements orange and vice versa.
+- **Toolbar rework** — removed broken 4D/5D stubs, added camera
+  presets (Fit / Iso / Top / Front / Side), grid toggle.
+
 ## [1.2.0] — 2026-04-09
 
 ### Added

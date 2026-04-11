@@ -3,7 +3,6 @@ import { Group, Panel, Separator } from 'react-resizable-panels';
 import type { Layout } from 'react-resizable-panels';
 import './chat-tokens.css';
 import { useChatFullPage } from './useChatFullPage';
-import ChatTopBar from './topbar/ChatTopBar';
 import ChatLeftPanel from './left/ChatLeftPanel';
 import DataRightPanel from './right/DataRightPanel';
 import AIConfigBanner from './AIConfigBanner';
@@ -39,6 +38,10 @@ export default function ChatFullPage() {
     clearChat,
     setActivePanelIndex,
   } = useChatFullPage();
+  // Reference clearChat so the import warning doesn't fire — the action
+  // is now exposed via ChatLeftPanel's "New chat" link in the input bar
+  // header instead of the removed ChatTopBar.
+  void clearChat;
 
   // Mirror the site-wide theme so /chat respects light/dark preference.
   const resolvedTheme = useThemeStore((s) => s.resolved);
@@ -73,7 +76,11 @@ export default function ChatFullPage() {
         overflow: 'hidden',
       }}
     >
-      <ChatTopBar onClear={clearChat} />
+      {/* The redundant chat-specific top bar ("ERP AI Assistant" + back +
+          clear) was removed in v1.3.29 — the app's main layout already
+          provides a header, so the chat bar duplicated UI and didn't
+          match the rest of the site. Clear chat now lives in the input
+          bar (left panel). */}
       <AIConfigBanner />
 
       <div style={{ flex: 1, overflow: 'hidden' }}>
