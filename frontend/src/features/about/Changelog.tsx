@@ -14,6 +14,19 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.30',
+    date: '2026-04-11',
+    changes: [
+      'BIM viewer is now deeply connected to Documents, Tasks, and Schedule (4D) — the BIM element details panel shows four cross-module link sections in one place: Linked BOQ Positions (existing), Linked Documents (drawings/RFIs/photos), Linked Tasks (defects/issues), and Schedule Activities (4D timeline).  Each section is collapsible, shows count badges, and clicking any row navigates to the matching detail page in the other module',
+      'New `oe_documents_bim_link` table — joins Documents to BIM Elements with link_type (manual/auto), confidence, and a future-proof region_bbox column for PDF region markup.  Endpoints: GET/POST/DELETE under /api/v1/documents/bim-links/.  Bidirectional querying: filter by element_id OR document_id.  Eager-loaded into BIMElementResponse.linked_documents with document_name + document_category briefs in one round-trip',
+      'New `Task.bim_element_ids` JSON column on `oe_tasks_task` — spatial defect management.  PATCH /api/v1/tasks/{id}/bim-links replaces the array, GET /api/v1/tasks/?bim_element_id=… is the reverse query.  Eager-loaded into BIMElementResponse.linked_tasks with title + status + task_type + due_date',
+      'Schedule activity ↔ BIM linking — `Activity.bim_element_ids` field has existed since v1.x but was never wired up.  v1.3.30 adds: PATCH /api/v1/schedule/activities/{id}/bim-links, GET /api/v1/schedule/activities/by-bim-element/?element_id=…&project_id=…, and embedded brief in BIMElementResponse.linked_activities with name + start/end dates + percent_complete.  No migration needed (column was already there)',
+      'Documents page preview modal — when previewing a drawing, a new "Linked BIM elements" footer strip lists every BIM element this document is linked to.  Click any element chip → navigates to /bim?element=… with the element preselected (reverse-direction navigation)',
+      'Frontend API wrappers — added `listDocumentsForElement` / `listElementsForDocument` / `createDocumentBIMLink` / `deleteDocumentBIMLink` / `updateTaskBIMLinks` / `listTasksForElement` / `updateActivityBIMLinks` / `listActivitiesForElement` to features/bim/api.ts.  Type definitions for `BIMDocumentLinkBrief` / `BIMTaskBrief` / `BIMActivityBrief` added to ElementManager.ts',
+      'Verification — three Alembic migrations applied (1f58eec86764 + ffe3f561e2c1), all backend files compile clean, frontend tsc clean, end-to-end curl test creates a document↔element link and the link instantly appears in the element response with full document_name + document_category populated, headless deep test still 10/10 PASS at 60 fps',
+    ],
+  },
+  {
     version: '1.3.29',
     date: '2026-04-11',
     changes: [

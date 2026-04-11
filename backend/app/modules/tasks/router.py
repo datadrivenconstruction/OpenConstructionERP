@@ -11,7 +11,10 @@ Endpoints:
     PATCH  /{task_id}            - Update task
     DELETE /{task_id}            - Delete task
     POST   /{task_id}/complete   - Mark task as completed
+    PATCH  /{task_id}/bim-links  - Replace linked BIM element ids
 """
+
+from __future__ import annotations
 
 import csv
 import io
@@ -27,6 +30,7 @@ from fastapi.responses import StreamingResponse
 from app.core.bulk_ops import BulkAssignRequest, BulkDeleteRequest, BulkStatusRequest
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.tasks.schemas import (
+    TaskBimLinkRequest,
     TaskCompleteRequest,
     TaskCreate,
     TaskResponse,
@@ -87,6 +91,9 @@ def _to_response(item: object) -> TaskResponse:
         result=item.result,  # type: ignore[attr-defined]
         is_private=item.is_private,  # type: ignore[attr-defined]
         created_by=item.created_by,  # type: ignore[attr-defined]
+        bim_element_ids=[
+            str(x) for x in (getattr(item, "bim_element_ids", None) or [])
+        ],
         metadata=getattr(item, "metadata_", {}),
         created_at=item.created_at,  # type: ignore[attr-defined]
         updated_at=item.updated_at,  # type: ignore[attr-defined]
@@ -105,6 +112,13 @@ async def list_tasks(
     priority: str | None = Query(default=None),
     responsible_id: str | None = Query(default=None),
     meeting_id: str | None = Query(default=None),
+    bim_element_id: str | None = Query(
+        default=None,
+        description=(
+            "Filter tasks to those whose bim_element_ids JSON array contains "
+            "this element id (used by the BIM viewer to show linked defects)."
+        ),
+    ),
     search: str | None = Query(
         default=None,
         max_length=200,
@@ -114,8 +128,44 @@ async def list_tasks(
 ) -> list[TaskResponse]:
     """List tasks for a project with optional filters.
 
-    Private tasks are only visible to their creator.
+    Private tasks are only visible to their creator. When ``bim_element_id``
+    is supplied, the result is filtered to tasks whose ``bim_element_ids``
+    list includes that element id. All other filters still apply on top.
     """
+    if bim_element_id:
+        # JSON-contains filter — delegated to the service for dialect handling.
+        tasks_with_bim = await service.get_tasks_for_bim_element(
+            bim_element_id,
+            project_id=project_id,
+            current_user_id=user_id,
+        )
+        # Apply the remaining lightweight filters in memory. The element
+        # filter is typically very selective (O(handful)) so this is fine.
+        if type_filter is not None:
+            tasks_with_bim = [t for t in tasks_with_bim if t.task_type == type_filter]
+        if status_filter is not None:
+            tasks_with_bim = [t for t in tasks_with_bim if t.status == status_filter]
+        if priority is not None:
+            tasks_with_bim = [t for t in tasks_with_bim if t.priority == priority]
+        if responsible_id is not None:
+            tasks_with_bim = [
+                t
+                for t in tasks_with_bim
+                if str(t.responsible_id or "") == responsible_id
+            ]
+        if meeting_id is not None:
+            tasks_with_bim = [t for t in tasks_with_bim if t.meeting_id == meeting_id]
+        if search and search.strip():
+            needle = search.strip().lower()
+            tasks_with_bim = [
+                t
+                for t in tasks_with_bim
+                if needle in (t.title or "").lower()
+                or needle in (t.description or "").lower()
+                or needle in (t.result or "").lower()
+            ]
+        return [_to_response(t) for t in tasks_with_bim[offset : offset + limit]]
+
     tasks, _ = await service.list_tasks(
         project_id,
         current_user_id=user_id,
@@ -673,4 +723,26 @@ async def complete_task(
     """Mark a task as completed with optional result text."""
     result = body.result if body else None
     task = await service.complete_task(task_id, result=result, current_user_id=user_id)
+    return _to_response(task)
+
+
+@router.patch("/{task_id}/bim-links", response_model=TaskResponse)
+async def update_task_bim_links(
+    task_id: uuid.UUID,
+    body: TaskBimLinkRequest,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("tasks.update")),
+    service: TaskService = Depends(_get_service),
+) -> TaskResponse:
+    """Replace the full set of BIM element ids linked to this task.
+
+    Idempotent set semantics — the incoming ``bim_element_ids`` list
+    fully overwrites the previously stored list. Sending an empty list
+    clears all links.
+    """
+    task = await service.update_bim_links(
+        task_id,
+        body.bim_element_ids,
+        current_user_id=user_id,
+    )
     return _to_response(task)

@@ -6,7 +6,10 @@ Stateless service layer. Handles:
 - Summary aggregation
 - Photo gallery CRUD
 - Sheet management (PDF split, OCR detection)
+- Document ↔ BIM element linking
 """
+
+from __future__ import annotations
 
 import logging
 import os
@@ -18,11 +21,19 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import HTTPException, UploadFile, status
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.documents.models import Document, ProjectPhoto, Sheet
+from app.modules.bim_hub.models import BIMElement
+from app.modules.documents.models import Document, DocumentBIMLink, ProjectPhoto, Sheet
 from app.modules.documents.repository import DocumentRepository, PhotoRepository, SheetRepository
-from app.modules.documents.schemas import DocumentUpdate, PhotoUpdate, SheetUpdate
+from app.modules.documents.schemas import (
+    DocumentBIMLinkCreate,
+    DocumentUpdate,
+    PhotoUpdate,
+    SheetUpdate,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -827,3 +838,110 @@ class SheetService:
             project_id,
         )
         return sheets
+
+
+# ── DocumentBIMLink service ──────────────────────────────────────────────
+
+
+class DocumentBIMLinkService:
+    """Business logic for Document ↔ BIM element links.
+
+    Mirrors the ``BOQElementLink`` flow in ``bim_hub.service`` but connects
+    documents to BIM elements so the viewer and document hub can cross-link.
+    """
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def list_links_for_element(
+        self,
+        bim_element_id: uuid.UUID,
+    ) -> list[DocumentBIMLink]:
+        """Return every DocumentBIMLink pointing at a given BIM element."""
+        stmt = (
+            select(DocumentBIMLink)
+            .where(DocumentBIMLink.bim_element_id == bim_element_id)
+            .order_by(DocumentBIMLink.created_at.desc())
+        )
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def list_links_for_document(
+        self,
+        document_id: uuid.UUID,
+    ) -> list[DocumentBIMLink]:
+        """Return every DocumentBIMLink attached to a given document."""
+        stmt = (
+            select(DocumentBIMLink)
+            .where(DocumentBIMLink.document_id == document_id)
+            .order_by(DocumentBIMLink.created_at.desc())
+        )
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def create_link(
+        self,
+        payload: DocumentBIMLinkCreate,
+        user_id: uuid.UUID | None = None,
+    ) -> DocumentBIMLink:
+        """Create a new Document ↔ BIM element link.
+
+        Raises:
+            HTTPException(404): if document or BIM element does not exist.
+            HTTPException(409): if a link for this (document, element) pair
+                already exists.
+        """
+        # Verify document exists
+        document = await self.session.get(Document, payload.document_id)
+        if document is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Document not found",
+            )
+
+        # Verify BIM element exists
+        element = await self.session.get(BIMElement, payload.bim_element_id)
+        if element is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="BIM element not found",
+            )
+
+        link = DocumentBIMLink(
+            document_id=payload.document_id,
+            bim_element_id=payload.bim_element_id,
+            link_type=payload.link_type,
+            confidence=payload.confidence,
+            region_bbox=payload.region_bbox,
+            created_by=user_id,
+            metadata_=payload.metadata or {},
+        )
+        self.session.add(link)
+        try:
+            await self.session.flush()
+        except IntegrityError as exc:
+            await self.session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Document is already linked to this BIM element",
+            ) from exc
+
+        logger.info(
+            "DocumentBIMLink created: doc=%s element=%s type=%s",
+            payload.document_id,
+            payload.bim_element_id,
+            payload.link_type,
+        )
+        return link
+
+    async def delete_link(self, link_id: uuid.UUID) -> None:
+        """Delete a DocumentBIMLink. Raises 404 if not found."""
+        link = await self.session.get(DocumentBIMLink, link_id)
+        if link is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="DocumentBIMLink not found",
+            )
+        await self.session.delete(link)
+        await self.session.flush()
+        logger.info("DocumentBIMLink deleted: %s", link_id)

@@ -49,6 +49,17 @@ class Task(Base):
         server_default="[]",
     )
 
+    # Linked BIM elements — denormalised list of bim_element UUID strings on
+    # the task row (mirrors the Position.cad_element_ids pattern). Kept as a
+    # plain JSON array so we don't need a separate link table for the small
+    # number of elements typically attached to a task (defect / inspection).
+    bim_element_ids: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
+    )
+
     due_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
     milestone_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     meeting_id: Mapped[str | None] = mapped_column(String(36), nullable=True)

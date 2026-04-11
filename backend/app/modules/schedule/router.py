@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 
 from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermission, SessionDep
 from app.modules.schedule.schemas import (
+    ActivityBimLinkRequest,
     ActivityCreate,
     ActivityResponse,
     ActivityUpdate,
@@ -496,6 +497,59 @@ async def update_activity_progress(
     """Update activity progress percentage. Auto-adjusts status."""
     activity = await service.update_progress(activity_id, body.progress_pct)
     return _activity_to_response(activity)
+
+
+@router.patch(
+    "/activities/{activity_id}/bim-links",
+    response_model=ActivityResponse,
+    summary="Replace BIM element links on an activity",
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
+async def update_activity_bim_links(
+    activity_id: uuid.UUID,
+    body: ActivityBimLinkRequest,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ScheduleService = Depends(_get_service),
+) -> ActivityResponse:
+    """Replace the full ``bim_element_ids`` array on an activity (4D linking).
+
+    The caller supplies the complete desired list; partial add/remove should
+    be handled client-side by reading the current value first.
+    """
+    activity = await service.get_activity(activity_id)
+    await _verify_schedule_owner(
+        service, session, activity.schedule_id, _user_id, payload
+    )
+    updated = await service.update_bim_links(activity_id, body.bim_element_ids)
+    return _activity_to_response(updated)
+
+
+@router.get(
+    "/activities/by-bim-element/",
+    response_model=list[ActivityResponse],
+    summary="List activities linked to a BIM element",
+    dependencies=[Depends(RequirePermission("schedule.read"))],
+)
+async def list_activities_by_bim_element(
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    element_id: str = Query(..., description="BIM element UUID to look up"),
+    project_id: uuid.UUID = Query(
+        ..., description="Project scope for the search"
+    ),
+    service: ScheduleService = Depends(_get_service),
+) -> list[ActivityResponse]:
+    """Reverse query: return every activity in ``project_id`` whose
+    ``bim_element_ids`` array contains ``element_id``.
+    """
+    await _verify_schedule_project_owner(session, project_id, _user_id, payload)
+    activities = await service.get_activities_for_bim_element(
+        element_id, project_id
+    )
+    return [_activity_to_response(act) for act in activities]
 
 
 # ── Work Order CRUD ──────────────────────────────────────────────────────────

@@ -3,11 +3,14 @@
 - Event publishing on create/update/delete
 """
 
+from __future__ import annotations
+
 import logging
 import uuid
 from typing import Any
 
 from fastapi import HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
@@ -108,6 +111,7 @@ class TaskService:
             result=data.result,
             is_private=data.is_private,
             depends_on=data.depends_on,
+            bim_element_ids=list(data.bim_element_ids or []),
             created_by=user_id,
             metadata_=data.metadata,
         )
@@ -189,6 +193,107 @@ class TaskService:
             meeting_id=meeting_id,
             search=search,
         )
+
+    async def update_bim_links(
+        self,
+        task_id: uuid.UUID,
+        bim_element_ids: list[str],
+        *,
+        current_user_id: str | None = None,
+    ) -> Task:
+        """Replace the full set of BIM element ids linked to a task.
+
+        Idempotent set semantics — the incoming list overwrites whatever
+        was previously stored. De-duplication is applied while preserving
+        first-seen order so the viewer sees a stable list on re-render.
+        """
+        task = await self.get_task(task_id, current_user_id=current_user_id)
+
+        seen: set[str] = set()
+        deduped: list[str] = []
+        for raw in bim_element_ids or []:
+            if raw is None:
+                continue
+            val = str(raw).strip()
+            if not val or val in seen:
+                continue
+            seen.add(val)
+            deduped.append(val)
+
+        await self.repo.update_fields(task_id, bim_element_ids=deduped)
+        await self.session.refresh(task)
+
+        await _safe_audit(
+            self.session,
+            action="update",
+            entity_type="task",
+            entity_id=str(task_id),
+            user_id=current_user_id,
+            details={
+                "title": task.title[:100],
+                "updated_fields": ["bim_element_ids"],
+                "bim_element_count": len(deduped),
+            },
+        )
+        logger.info(
+            "Task %s bim_element_ids updated: %d element(s)",
+            task_id,
+            len(deduped),
+        )
+        return task
+
+    async def get_tasks_for_bim_element(
+        self,
+        bim_element_id: str,
+        *,
+        project_id: uuid.UUID | None = None,
+        current_user_id: str | None = None,
+    ) -> list[Task]:
+        """Return all tasks that include ``bim_element_id`` in their list.
+
+        Uses the PostgreSQL JSONB ``@>`` containment operator on PG and
+        falls back to a Python-side filter on SQLite. Dialect is detected
+        from ``session.bind.dialect.name``.
+        """
+        element_id = str(bim_element_id).strip()
+        if not element_id:
+            return []
+
+        bind = self.session.get_bind()
+        dialect_name = getattr(getattr(bind, "dialect", None), "name", "") or ""
+
+        stmt = select(Task)
+        if project_id is not None:
+            stmt = stmt.where(Task.project_id == project_id)
+
+        if dialect_name == "postgresql":
+            # JSONB ``@>`` containment: rows where bim_element_ids ⊇ [element_id]
+            stmt = stmt.where(Task.bim_element_ids.contains([element_id]))
+            result = await self.session.execute(stmt)
+            tasks = list(result.scalars().all())
+        else:
+            # SQLite (and anything else) — filter in Python. The query is
+            # project-scoped when possible so we don't pull the entire table.
+            result = await self.session.execute(stmt)
+            all_tasks = list(result.scalars().all())
+            tasks = [
+                t
+                for t in all_tasks
+                if t.bim_element_ids
+                and element_id in [str(x) for x in t.bim_element_ids]
+            ]
+
+        # Respect private task visibility
+        if current_user_id is not None:
+            tasks = [
+                t
+                for t in tasks
+                if not t.is_private or (t.created_by == current_user_id)
+            ]
+        else:
+            tasks = [t for t in tasks if not t.is_private]
+
+        return tasks
 
     async def list_my_tasks(
         self,
