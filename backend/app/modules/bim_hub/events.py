@@ -1,4 +1,4 @@
-"""BIM Hub event handlers — vector indexing for BIM elements.
+"""BIM Hub event handlers​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ — vector indexing for BIM elements.
 
 Subscribes to ``bim_hub.element.*`` events and keeps the
 ``oe_bim_elements`` vector collection in sync with the underlying

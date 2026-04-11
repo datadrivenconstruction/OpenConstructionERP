@@ -1,4 +1,4 @@
-"""Module loader — discovers, loads, and manages business modules.
+"""Module loader​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ — discovers, loads, and manages business modules.
 
 Each module is a Python package under app/modules/ with a manifest.py.
 The loader handles dependency resolution, lifecycle, and route mounting.
