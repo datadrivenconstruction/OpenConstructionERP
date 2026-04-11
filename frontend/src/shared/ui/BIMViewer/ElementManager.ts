@@ -103,6 +103,10 @@ export class ElementManager {
    *  filter / color-by / isolate features still work for RVT/IFC exports
    *  whose mesh nodes don't expose element stable_ids. */
   private allDaeMeshes: THREE.Mesh[] = [];
+  /** BatchedMesh objects created by `batchMeshesByMaterial` for big-model
+   *  perf.  Sits beside `daeGroup` directly under the scene root.  Tracked
+   *  here so `clear()` can dispose their internal buffers. */
+  private batchedMeshes: THREE.BatchedMesh[] = [];
   private elementDataMap = new Map<string, BIMElementData>();
   private baseMaterials = new Map<string, THREE.MeshStandardMaterial>();
   private wireframeEnabled = false;
@@ -324,6 +328,28 @@ export class ElementManager {
           this.elementGroup.add(this.daeGroup);
           this.geometryLoaded = true;
 
+          // Force a world-matrix update before batching so each instance
+          // gets the correct transform.
+          this.sceneManager.scene.updateMatrixWorld(true);
+
+          // Big-model perf path: collapse same-material meshes into BatchedMesh
+          // groups.  Currently disabled by default (threshold = 50 000)
+          // because three.js BatchedMesh.setVisibleAt has subtle GPU-sync
+          // issues that cause partial renders when filters change rapidly.
+          // The per-mesh path holds 60 fps comfortably up to ~10 000 meshes,
+          // and the storage architecture work in progress will let us
+          // pre-bake BatchedMesh on the BACKEND side (canonical format)
+          // instead of doing it client-side, which avoids the visibility
+          // sync problem entirely.  See `batchMeshesByMaterial`.
+          if (this.allDaeMeshes.length >= 50000) {
+            try {
+              this.batchMeshesByMaterial();
+            } catch (err) {
+              // eslint-disable-next-line no-console
+              console.warn('[BIM] BatchedMesh path failed, falling back to individual meshes', err);
+            }
+          }
+
           // Fit camera to the newly added geometry
           this.sceneManager.zoomToFit();
 
@@ -337,6 +363,131 @@ export class ElementManager {
         },
       );
     });
+  }
+
+  /**
+   * Big-model perf optimisation: collapse same-material meshes into one
+   * `THREE.BatchedMesh` per material.  Replaces N draw calls with
+   * (number of unique materials) draw calls — typically 5 000 → ~30
+   * for a real Revit export.
+   *
+   * The original `THREE.Mesh` objects stay in `meshMap` and `allDaeMeshes`
+   * (so raycasting and the existing per-mesh API keep working) but they
+   * are REMOVED from the scene graph so the renderer doesn't draw them
+   * twice.  Every batched mesh gets a `userData.batchHandle` pointing
+   * back at its (BatchedMesh, instanceId) pair so visibility/colour
+   * updates can be forwarded.
+   *
+   * Groups with fewer than 10 meshes are left as individual draw calls
+   * — the BatchedMesh fixed-size buffer overhead isn't worth it.
+   */
+  private batchMeshesByMaterial(): void {
+    interface Group {
+      material: THREE.Material;
+      meshes: THREE.Mesh[];
+      totalVertices: number;
+      totalIndices: number;
+    }
+    const groups = new Map<string, Group>();
+
+    for (const mesh of this.allDaeMeshes) {
+      const mat = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
+      if (!mat) continue;
+      const key = mat.uuid;
+      const posCount = (mesh.geometry.attributes.position as THREE.BufferAttribute | undefined)?.count ?? 0;
+      const idxCount = mesh.geometry.index?.count ?? posCount;
+      let g = groups.get(key);
+      if (!g) {
+        g = { material: mat, meshes: [], totalVertices: 0, totalIndices: 0 };
+        groups.set(key, g);
+      }
+      g.meshes.push(mesh);
+      g.totalVertices += posCount;
+      g.totalIndices += idxCount;
+    }
+
+    let batchedMeshes = 0;
+    let batchedInstances = 0;
+    let drawCallsBefore = this.allDaeMeshes.length;
+    let drawCallsAfter = 0;
+
+    for (const group of groups.values()) {
+      if (group.meshes.length < 10) {
+        // Tiny group — leave as individual meshes
+        drawCallsAfter += group.meshes.length;
+        continue;
+      }
+
+      // BatchedMesh constructor: (maxInstanceCount, maxVertexCount, maxIndexCount, material)
+      // Add a small slack (10%) so we don't run out mid-batch.
+      const maxInstances = Math.ceil(group.meshes.length * 1.1);
+      const maxVertices = Math.ceil(group.totalVertices * 1.1);
+      const maxIndices = Math.ceil(group.totalIndices * 1.1);
+
+      let batched: THREE.BatchedMesh;
+      try {
+        batched = new THREE.BatchedMesh(
+          maxInstances,
+          maxVertices,
+          maxIndices,
+          group.material,
+        );
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn('[BIM] BatchedMesh ctor failed for material group, falling back', err);
+        drawCallsAfter += group.meshes.length;
+        continue;
+      }
+      batched.frustumCulled = true;
+      batched.castShadow = false;
+      batched.receiveShadow = false;
+      batched.name = `bim_batched_${group.material.uuid.slice(0, 8)}`;
+
+      let added = 0;
+      for (const mesh of group.meshes) {
+        try {
+          const geomId = batched.addGeometry(mesh.geometry);
+          const instId = batched.addInstance(geomId);
+          batched.setMatrixAt(instId, mesh.matrixWorld);
+          (mesh.userData as { batchHandle?: { batched: THREE.BatchedMesh; instanceId: number } }).batchHandle = {
+            batched,
+            instanceId: instId,
+          };
+          // Hide the original mesh from rendering — the BatchedMesh draws
+          // it now. We KEEP it in the scene graph (don't reparent) so its
+          // matrixWorld + bbox stay accurate for zoomToSelection / picking.
+          mesh.visible = false;
+          added++;
+        } catch (err) {
+          // Geometry didn't fit (e.g. because of mismatched attribute formats
+          // between source meshes); leave this one as an individual mesh.
+          // eslint-disable-next-line no-console
+          console.warn('[BIM] addInstance failed, leaving mesh standalone', err);
+        }
+      }
+
+      if (added > 0) {
+        // Add the BatchedMesh to the SCENE ROOT, not to daeGroup, so the
+        // per-instance world matrices we set via setMatrixAt aren't double-
+        // transformed by the daeGroup's parent chain.  daeGroup keeps the
+        // un-batched leftover meshes; the BatchedMesh sits beside it.
+        this.sceneManager.scene.add(batched);
+        this.batchedMeshes.push(batched);
+        batchedMeshes++;
+        batchedInstances += added;
+        drawCallsAfter += 1; // one draw call per BatchedMesh
+      } else {
+        // Nothing added — drop the empty batched mesh and keep originals
+        drawCallsAfter += group.meshes.length;
+      }
+    }
+
+    // eslint-disable-next-line no-console
+    console.info(
+      `[BIM] BatchedMesh: ${batchedMeshes} batches holding ${batchedInstances} instances; ` +
+        `draw calls ${drawCallsBefore} → ${drawCallsAfter} ` +
+        `(${Math.round((1 - drawCallsAfter / Math.max(1, drawCallsBefore)) * 100)}% reduction)`,
+    );
   }
 
   /** Returns true if DAE geometry was loaded. */
@@ -528,15 +679,30 @@ export class ElementManager {
     for (const [elementId, mesh] of this.meshMap) {
       const el = this.elementDataMap.get(elementId);
       const shouldShow = el ? predicate(el) : true;
-      mesh.visible = shouldShow;
+      // Batched meshes: drive visibility through the handle ONLY. The
+      // original mesh's `visible` flag is kept at false because the
+      // BatchedMesh is the actual draw surface — touching mesh.visible
+      // would either be a no-op or cause double-rendering.
+      const handle = (mesh.userData as { batchHandle?: { batched: THREE.BatchedMesh; instanceId: number } }).batchHandle;
+      if (handle) {
+        handle.batched.setVisibleAt(handle.instanceId, shouldShow);
+      } else {
+        mesh.visible = shouldShow;
+      }
       if (shouldShow) visibleCount++;
     }
     // Un-matched DAE meshes act as background context. Ensure they are
     // visible so the scene isn't blanked out by an active filter on a model
     // without mesh mapping.
     for (const mesh of this.allDaeMeshes) {
-      const ud = mesh.userData as { elementId?: string | null };
-      if (!ud.elementId) mesh.visible = true;
+      const ud = mesh.userData as { elementId?: string | null; batchHandle?: { batched: THREE.BatchedMesh; instanceId: number } };
+      if (!ud.elementId) {
+        if (ud.batchHandle) {
+          ud.batchHandle.batched.setVisibleAt(ud.batchHandle.instanceId, true);
+        } else {
+          mesh.visible = true;
+        }
+      }
     }
     if (this.daeGroup) this.daeGroup.visible = true;
     return visibleCount;
@@ -545,11 +711,21 @@ export class ElementManager {
   /** Reset all element visibility to visible. */
   showAll(): void {
     for (const mesh of this.meshMap.values()) {
-      mesh.visible = true;
+      const handle = (mesh.userData as { batchHandle?: { batched: THREE.BatchedMesh; instanceId: number } }).batchHandle;
+      if (handle) {
+        handle.batched.setVisibleAt(handle.instanceId, true);
+      } else {
+        mesh.visible = true;
+      }
     }
     // DAE background meshes (unmatched) should also be restored
     for (const mesh of this.allDaeMeshes) {
-      mesh.visible = true;
+      const handle = (mesh.userData as { batchHandle?: { batched: THREE.BatchedMesh; instanceId: number } }).batchHandle;
+      if (handle) {
+        handle.batched.setVisibleAt(handle.instanceId, true);
+      } else {
+        mesh.visible = true;
+      }
     }
     if (this.daeGroup) this.daeGroup.visible = true;
   }
@@ -601,15 +777,27 @@ export class ElementManager {
   isolate(elementIds: string[]): void {
     const keep = new Set(elementIds);
     for (const [id, mesh] of this.meshMap) {
-      mesh.visible = keep.has(id);
+      const v = keep.has(id);
+      const handle = (mesh.userData as { batchHandle?: { batched: THREE.BatchedMesh; instanceId: number } }).batchHandle;
+      if (handle) {
+        handle.batched.setVisibleAt(handle.instanceId, v);
+      } else {
+        mesh.visible = v;
+      }
     }
     // When isolating specific elements, hide unmatched DAE background so the
     // isolated part actually stands out. If no meshes are matched at all we
     // keep the DAE group visible — users still need to see the model.
     if (this.meshMap.size > 0) {
       for (const mesh of this.allDaeMeshes) {
-        const ud = mesh.userData as { elementId?: string | null };
-        if (!ud.elementId) mesh.visible = false;
+        const ud = mesh.userData as { elementId?: string | null; batchHandle?: { batched: THREE.BatchedMesh; instanceId: number } };
+        if (!ud.elementId) {
+          if (ud.batchHandle) {
+            ud.batchHandle.batched.setVisibleAt(ud.batchHandle.instanceId, false);
+          } else {
+            mesh.visible = false;
+          }
+        }
       }
     }
   }
@@ -704,6 +892,12 @@ export class ElementManager {
       this.elementGroup.remove(this.daeGroup);
       this.daeGroup = null;
     }
+    // Dispose every BatchedMesh added by the big-model perf path
+    for (const batched of this.batchedMeshes) {
+      this.sceneManager.scene.remove(batched);
+      batched.dispose();
+    }
+    this.batchedMeshes = [];
     this.allDaeMeshes = [];
     this.meshMatchRatio = 0;
     this.geometryLoaded = false;
