@@ -66,6 +66,17 @@ class RequirementVectorAdapter:
             # Notes are free-form prose — kept verbatim because that's
             # often where the most semantically rich content lives.
             parts.append(row.notes.strip())
+        # Embed a sample of pinned BIM element ids so semantic search
+        # like "requirements linked to roof elements" can route from a
+        # selected element back to the requirements that pin it.  We
+        # cap the sample at 5 because the vector store payload budget
+        # is tight and the full id list lives in metadata_ anyway.
+        meta = getattr(row, "metadata_", None) or {}
+        bim_ids = meta.get("bim_element_ids") if isinstance(meta, dict) else None
+        if isinstance(bim_ids, list) and bim_ids:
+            sample = ",".join(str(x) for x in bim_ids[:5] if x)
+            if sample:
+                parts.append(f"bim_element_ids={sample}")
         return " | ".join(p for p in parts if p)
 
     def to_payload(self, row: Requirement) -> dict[str, Any]:

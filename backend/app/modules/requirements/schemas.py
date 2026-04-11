@@ -108,6 +108,52 @@ class RequirementSetCreate(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
+class RequirementSetUpdate(BaseModel):
+    """Partial update for a requirement set.
+
+    All fields are optional — pass only what should change.  Project
+    re-assignment is intentionally NOT supported here (sets are
+    project-scoped at creation; moving them would silently break
+    every BIM/BOQ link they own).
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    description: str | None = None
+    source_type: str | None = Field(
+        default=None,
+        pattern=r"^(manual|pdf|cad|bim|specification)$",
+    )
+    source_filename: str | None = Field(default=None, max_length=500)
+    status: str | None = Field(
+        default=None,
+        pattern=r"^(draft|active|locked|archived)$",
+    )
+    metadata: dict[str, Any] | None = None
+
+
+class RequirementBulkDeleteRequest(BaseModel):
+    """Body of the bulk-delete endpoint.
+
+    A single transaction deletes every requirement whose id is in the
+    list.  Ids that do not belong to the path's ``set_id`` are silently
+    skipped — the endpoint reports the actual delete count so callers
+    can detect that case.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    requirement_ids: list[UUID] = Field(..., min_length=1, max_length=500)
+
+
+class RequirementBulkDeleteResult(BaseModel):
+    """Response from the bulk-delete endpoint."""
+
+    deleted_count: int = 0
+    skipped_count: int = 0
+
+
 class RequirementSetResponse(BaseModel):
     """Requirement set returned from the API (without nested requirements)."""
 

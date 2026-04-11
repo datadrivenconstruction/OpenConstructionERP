@@ -5,6 +5,149 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.5] — 2026-04-11
+
+### Fixed — deep-audit cut driven by 3 parallel sub-agents
+
+Three multi-agent deep audits of the recently-added v1.4.x modules
+(requirements, project_intelligence, erp_chat, vector_index, bim_hub
+element groups, quantity maps, assemblies) flagged 40+ findings.
+This cut tackles the cross-module-correctness ones — fixes that
+make existing features actually do what they advertise — plus the
+biggest test-coverage holes.
+
+#### Cross-module data integrity
+- **Orphaned BIM element ids cleaned up on element delete**.  Three
+  of five cross-module link types denormalise BIM ids into JSON
+  arrays (Task.bim_element_ids, Activity.bim_element_ids,
+  Requirement.metadata_["bim_element_ids"]) instead of FK tables.
+  The FK-based ones (BOQElementLink, DocumentBIMLink) cleaned
+  themselves up via ``ondelete='CASCADE'``; the JSON ones leaked
+  stale references **forever**, confusing the BIM viewer's
+  "linked tasks/activities/requirements" panel and every reverse
+  query helper.  New ``bim_hub.service._strip_orphaned_bim_links``
+  runs INLINE on the active session inside ``bulk_import_elements``
+  and ``delete_model``, so the cleanup shares the upstream
+  transaction (no SQLite write-lock contention) and rolls back
+  atomically on failure.  Integration test
+  ``test_orphan_bim_ids_stripped_on_element_delete`` pins the
+  behaviour end-to-end.
+- **Requirement embeddings now include pinned BIM element ids**.
+  After ``link_to_bim_elements`` fired the linked_bim event the
+  vector indexer re-embedded the row, but
+  ``RequirementVectorAdapter.to_text()`` never read
+  ``metadata_["bim_element_ids"]`` so the embedding was unchanged
+  and semantic search like *"requirements linked to roof elements"*
+  returned zero.  ``to_text()`` now appends a sample of up to 5
+  pinned ids; the full list still lives in metadata.  5 new unit
+  tests cover present/empty/missing/non-dict metadata edge cases.
+
+#### Hacks → real implementations
+- **Property filter ``_matches`` is now type-aware**.  The dynamic
+  element-group predicate used exact equality
+  ``props.get(key) == value`` and the quantity-map rule engine
+  used ``str(value).lower()``.  Both silently failed on multi-valued
+  IFC properties (e.g. ``materials = ["steel", "concrete"]``
+  vs filter ``materials = "steel"`` returned False because list !=
+  string).  New shared helper
+  ``BIMHubService._property_value_matches`` handles strings via
+  fnmatch, lists via membership/intersection, dicts via recursive
+  containment, and ``None`` via explicit "must not be set"
+  semantics.  20 unit tests pin every branch.
+- **Quantity map applies surface skipped (element, rule) pairs**.
+  ``_extract_quantity`` returned ``None`` when the source property
+  was missing and the loop just ``continue``'d, so estimators saw
+  unexpectedly-empty BOQ populations with no clue why.  Skips are
+  now collected with a structured ``reason`` (``missing_property``
+  or ``invalid_decimal``), surfaced via two new fields on
+  ``QuantityMapApplyResult`` (``skipped_count`` + ``skipped[]``),
+  and the service logs a warning with the first skip when any are
+  detected.
+
+#### Concurrency
+- **Per-collection ``asyncio.Lock`` on ``reindex_collection``**.
+  Two concurrent reindex requests against the same vector
+  collection (e.g. startup auto-backfill racing an admin-triggered
+  ``POST /vector/reindex/``) could interleave purge + index ops
+  and leave the store in an inconsistent state with partial
+  indexes, duplicate ids, and ghost rows.  Now serialised by a
+  module-level ``dict[str, asyncio.Lock]`` lazily populated via
+  ``_get_reindex_lock``.  Reindexes against DIFFERENT collections
+  still run in parallel — the locks are per-name.
+
+#### Missing CRUD
+- **``PATCH /requirements/{set_id}``** — lets users rename a set,
+  edit its description, change source type, or update workflow
+  status without delete-and-recreate (which lost history and any
+  BIM/BOQ links the set's requirements owned).  Project re-assignment
+  is intentionally NOT supported — sets are project-scoped at
+  creation.
+- **``POST /requirements/{set_id}/requirements/bulk-delete/``** —
+  delete up to 500 requirements in a single transaction.  Ids
+  belonging to a different set are silently skipped; the response
+  carries ``deleted_count`` and ``skipped_count`` so the UI can
+  surface "deleted N of M" mismatches.  Each successful delete
+  fires the standard ``requirements.requirement.deleted`` event.
+
+#### Type discipline
+- **``GateResult.score`` migrated from ``String(10)`` to ``Float``**.
+  The column stored a stringified percentage like ``"85.5"`` but
+  the Pydantic schema and router both treated it as a float —
+  every write went through ``str(score)`` and every read through
+  ``float(score_raw)``.  Worse, ``ORDER BY score DESC`` returned
+  ``"9.5"`` above ``"85.0"`` because string comparison happens
+  character by character (any "top N gate runs" report was
+  silently wrong).  New Alembic migration ``b2f4e1a3c907`` runs an
+  idempotent batch-alter that coerces unparseable rows to ``0``
+  before the type change.  Service writes a real ``float`` now;
+  the router still calls ``float()`` defensively for backward
+  compat with un-migrated databases.
+
+#### Test coverage push
+- **Unit tests for 7 of 8 vector adapters** (BOQ, Documents, Tasks,
+  Risks, BIM elements, Validation, Chat).  Previously only the
+  Requirements adapter (added in v1.4.3) had unit coverage; the
+  other 7 were untested. **113 new test cases** following the
+  canonical template — collection_name singleton, to_text full row
+  + empty + None tolerant, to_payload title build + UUID stringify
+  + clipping + fallback, project_id_of resolves + None fallback.
+- **`backend/tests/unit/test_bim_property_matcher.py`** — 20 tests
+  pinning every branch of the new type-aware property matcher.
+- **`backend/tests/integration/test_requirements_bim_cross.py`** —
+  3rd test ``test_orphan_bim_ids_stripped_on_element_delete``
+  drives the full orphan-cleanup flow end-to-end.
+
+#### Frontend i18n compliance
+- **BIMPage.tsx hardcoded English strings replaced** with i18n
+  keys (deferred from the v1.4.4 frontend audit).  ``UploadPanel``,
+  ``NonReadyOverlay``, and the empty-state branch now go through
+  ``useTranslation()`` — the HARD rule from CLAUDE.md
+  (*"ALL user-visible strings go through i18next. No exceptions."*)
+  is honoured across the BIM module.  New ``bim.upload_*`` and
+  ``bim.overlay_*`` keys added to ``i18n-fallbacks.ts``.
+
+### Verification
+- 113 new unit tests passing across 7 vector adapter files
+- 20 new unit tests passing for the BIM property matcher
+- 3 integration tests passing for the requirements↔BIM cross-module
+  flow including the new orphan-cleanup regression test
+- Backend ``ruff check`` clean across every file touched in v1.4.5
+- Frontend ``tsc --noEmit`` clean
+- ``scripts/check_version_sync.py`` passes at 1.4.5
+- 21 routes mounted under ``/api/v1/requirements/`` (up from 19)
+
+### Deferred to v1.4.6
+- ``project_intelligence.collector`` blind to requirements / bim_hub /
+  tasks / assemblies — score is currently a partial picture
+- ``project_intelligence/actions.py`` 3 of 8 actions are dead code
+  (run_validation / match_cwicr_prices / generate_schedule fall
+  back to redirect lying about execution)
+- Assembly ``total_rate`` invalidation when CostItem.rate changes
+- ``create_vector_routes()`` factory + reduce ~250 LOC of duplicated
+  ``vector/status`` and ``vector/reindex`` endpoints
+- Trailing-slash audit of 12 broken integration tests
+- requirements.list_by_bim_element PostgreSQL JSONB fast path
+
 ## [1.4.4] — 2026-04-11
 
 ### Fixed — backend hardening cut
