@@ -1,4 +1,4 @@
-"""BIM Hub service — business logic for BIM data management.
+"""BIM Hub service​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ — business logic for BIM data management.
 
 Stateless service layer. Handles:
 - BIM model CRUD

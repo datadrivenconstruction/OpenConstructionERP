@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify backend and frontend version literals are in sync.
+"""Verify backend and frontend​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ version literals are in sync.
 
 The OpenConstructionERP frontend (``frontend/package.json``) and the
 Python package (``backend/pyproject.toml``) MUST report the same version

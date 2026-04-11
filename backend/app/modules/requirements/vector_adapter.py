@@ -1,4 +1,4 @@
-"""Requirement vector adapter — feeds the ``oe_requirements`` collection.
+"""Requirement vector adapter​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ — feeds the ``oe_requirements`` collection.
 
 Each :class:`~app.modules.requirements.models.Requirement` row is
 embedded as the EAC triplet (entity / attribute / constraint) plus the

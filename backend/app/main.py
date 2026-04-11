@@ -2,7 +2,7 @@
 # CWICR Cost Database Engine · CAD2DATA Pipeline
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 # AGPL-3.0 License · DDC-CWICR-OE-2026
-"""OpenEstimate — FastAPI application factory.
+"""OpenEstimate​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ — FastAPI application factory.
 
 Usage:
     uvicorn app.main:create_app --factory --reload --port 8000
