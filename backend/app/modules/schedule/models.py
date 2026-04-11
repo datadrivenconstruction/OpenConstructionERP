@@ -135,9 +135,17 @@ class Activity(Base):
     )  # ACT-001, ACT-002
 
     # BIM integration
-    bim_element_ids: Mapped[dict | None] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=True
-    )  # list of element IDs for 4D
+    bim_element_ids: Mapped[list | None] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=True,
+        default=None,
+    )  # list of BIM element UUIDs (strings) — populated for 4D linking.
+    # NOTE: the underlying JSON column has existed since v1.x with a ``dict``
+    # Python annotation, but no production code ever wrote a dict into it.
+    # We now treat the value as ``list[str] | None``; any legacy dict-shaped
+    # payload found on read should be treated as an empty list (callers use
+    # ``list(activity.bim_element_ids or [])`` so a dict simply yields its
+    # keys — we do not rely on that, we normalise in service code).
 
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",

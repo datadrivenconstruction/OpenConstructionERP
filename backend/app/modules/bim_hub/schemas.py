@@ -137,6 +137,62 @@ class BOQElementLinkBrief(BaseModel):
     confidence: str | None = None
 
 
+class DocumentLinkBrief(BaseModel):
+    """Lightweight Document link summary embedded in a BIM element response.
+
+    Mirrors ``BOQElementLinkBrief`` but lives in ``bim_hub.schemas`` to avoid
+    a circular import with ``documents.schemas.DocumentBIMLinkBrief``. The
+    two shapes must stay in sync — add fields in both files.
+    """
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    document_id: UUID
+    document_name: str | None = None
+    document_category: str | None = None
+    link_type: str
+    confidence: str | None = None
+
+
+class TaskBrief(BaseModel):
+    """Lightweight Task summary embedded in a BIM element response.
+
+    Mirrors ``app.modules.tasks.schemas.TaskBrief`` but is defined locally
+    here to avoid a circular import between ``bim_hub.schemas`` and
+    ``tasks.schemas``. The two shapes MUST stay in sync — add fields in
+    both files.
+    """
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    project_id: UUID
+    title: str
+    status: str
+    task_type: str
+    due_date: str | None = None
+
+
+class ActivityBrief(BaseModel):
+    """Lightweight schedule activity summary embedded in a BIM element response.
+
+    Mirrors ``app.modules.schedule.schemas.ActivityBrief`` but is defined
+    locally here to avoid a circular import between ``bim_hub.schemas`` and
+    ``schedule.schemas``. The two shapes MUST stay in sync — add fields in
+    both files.
+    """
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    name: str
+    start_date: str | None = None
+    end_date: str | None = None
+    status: str
+    percent_complete: float = 0.0
+
+
 class BIMElementResponse(BaseModel):
     """BIM element returned from the API."""
 
@@ -157,6 +213,9 @@ class BIMElementResponse(BaseModel):
     lod_variants: dict[str, Any] | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     boq_links: list[BOQElementLinkBrief] = Field(default_factory=list)
+    linked_documents: list[DocumentLinkBrief] = Field(default_factory=list)
+    linked_tasks: list[TaskBrief] = Field(default_factory=list)
+    linked_activities: list[ActivityBrief] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
 

@@ -1,5 +1,7 @@
 """Tasks Pydantic schemas — request/response models."""
 
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Any
 from uuid import UUID
@@ -46,6 +48,10 @@ class TaskCreate(BaseModel):
     depends_on: UUID | None = Field(
         default=None,
         description="Task UUID this task depends on. Cannot be completed until predecessor is completed.",
+    )
+    bim_element_ids: list[str] = Field(
+        default_factory=list,
+        description="BIM element UUIDs spatially linked to this task (defects, inspections).",
     )
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -113,6 +119,7 @@ class TaskResponse(BaseModel):
     is_private: bool = False
     created_by: str | None = None
     depends_on: UUID | None = None
+    bim_element_ids: list[str] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
@@ -126,6 +133,34 @@ class TaskResponse(BaseModel):
         default=0,
         description="Number of incomplete predecessor tasks (computed from depends_on chain).",
     )
+
+
+class TaskBimLinkRequest(BaseModel):
+    """Replace the set of BIM elements linked to a task (idempotent set)."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    bim_element_ids: list[str] = Field(
+        default_factory=list,
+        description="Full replacement list of BIM element UUIDs for this task.",
+    )
+
+
+class TaskBrief(BaseModel):
+    """Lightweight task summary embedded in BIM element responses.
+
+    Contains just enough data for the viewer to render a task badge and
+    navigate to the linked task without a second round trip.
+    """
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    project_id: UUID
+    title: str
+    status: str
+    task_type: str
+    due_date: str | None = None
 
 
 class TaskStatsResponse(BaseModel):

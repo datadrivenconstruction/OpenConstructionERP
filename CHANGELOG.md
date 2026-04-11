@@ -5,6 +5,26 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.30] — 2026-04-11
+
+### Added
+- **BIM viewer cross-module deep integration** — element details panel now
+  shows four collapsible link sections in one place: Linked BOQ Positions
+  (existing), Linked Documents (drawings/RFIs/photos), Linked Tasks
+  (defects/issues), Schedule Activities (4D timeline). Each section has
+  count badges, clicking any row navigates to the target detail page.
+- **Documents ↔ BIM** — new `oe_documents_bim_link` table + GET/POST/DELETE
+  endpoints under `/api/v1/documents/bim-links/`. Bidirectional querying.
+  Eager-loaded into `BIMElementResponse.linked_documents`.
+- **Tasks ↔ BIM** — new `Task.bim_element_ids` JSON column. PATCH
+  `/api/v1/tasks/{id}/bim-links` + reverse query. Eager-loaded into
+  `BIMElementResponse.linked_tasks`.
+- **Schedule ↔ BIM** — wired up the dormant `Activity.bim_element_ids` field
+  with PATCH endpoint and `/api/v1/schedule/activities/by-bim-element/`
+  reverse query. Eager-loaded into `BIMElementResponse.linked_activities`.
+- **Documents preview modal** — new "Linked BIM elements" footer strip with
+  click-to-navigate chips.
+
 ## [1.3.29] — 2026-04-11
 
 ### Changed
