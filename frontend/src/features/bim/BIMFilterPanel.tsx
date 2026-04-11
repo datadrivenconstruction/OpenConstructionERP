@@ -30,7 +30,9 @@ import {
   X,
   Link2,
   Bookmark,
+  Trash2,
 } from 'lucide-react';
+import type { BIMElementGroup } from './api';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
 import {
   bucketOf,
@@ -74,6 +76,15 @@ interface BIMFilterPanelProps {
   /** When set, the panel shows a "Save as group" button that opens the
    *  SaveGroupModal pre-filled with the current filter criteria. */
   onSaveAsGroup?: (filter: BIMFilterState, visibleElementIds: string[]) => void;
+  /** Saved element groups for the current model — rendered at the top of
+   *  the panel as a one-click apply / link / delete row. */
+  savedGroups?: BIMElementGroup[];
+  /** User clicked a saved group → apply its filter_criteria to the panel. */
+  onApplyGroup?: (group: BIMElementGroup) => void;
+  /** User clicked the link icon on a saved group → link it to BOQ. */
+  onLinkGroupToBOQ?: (group: BIMElementGroup) => void;
+  /** User clicked the delete icon on a saved group. */
+  onDeleteGroup?: (group: BIMElementGroup) => void;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────
@@ -198,6 +209,10 @@ export default function BIMFilterPanel({
   onQuickTakeoff,
   visibleElementCount: _visibleElementCount,
   onSaveAsGroup,
+  savedGroups,
+  onApplyGroup,
+  onLinkGroupToBOQ,
+  onDeleteGroup,
 }: BIMFilterPanelProps) {
   const { t } = useTranslation();
 
@@ -220,6 +235,29 @@ export default function BIMFilterPanel({
   const [expandedBuckets, setExpandedBuckets] = useState<Set<BIMCategoryBucket>>(
     () => new Set(['structure', 'envelope', 'openings', 'mep']),
   );
+  /** Whether the "Saved Groups" section at the top of the panel is expanded. */
+  const [groupsExpanded, setGroupsExpanded] = useState(true);
+  /** ID of the saved group whose filter is currently applied (if any) — used
+   *  to highlight the active group row. */
+  const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
+
+  /** Apply a saved group's `filter_criteria` to the panel state.  Converts
+   *  the BIMGroupFilterCriteria array shape into the panel's Set shape. */
+  const applyGroupAsFilter = useCallback((group: BIMElementGroup) => {
+    const fc = group.filter_criteria || {};
+    const toSet = (v: string | string[] | undefined): Set<string> => {
+      if (!v) return new Set();
+      return new Set(Array.isArray(v) ? v : [v]);
+    };
+    setState((prev) => ({
+      ...prev,
+      search: typeof fc.name_contains === 'string' ? fc.name_contains : '',
+      storeys: toSet(fc.storey),
+      types: toSet(fc.element_type),
+    }));
+    setActiveGroupId(group.id);
+    onApplyGroup?.(group);
+  }, [onApplyGroup]);
 
   // ── Derived: counts per dimension + bucket grouping ─────────────────
   //
@@ -346,6 +384,9 @@ export default function BIMFilterPanel({
         else next.add(value);
         return { ...prev, [key]: next };
       });
+      // Manual filter change drops the "applied group" highlight — the
+      // filter is no longer 1:1 with the group's filter_criteria.
+      setActiveGroupId(null);
     },
     [],
   );
@@ -589,6 +630,107 @@ export default function BIMFilterPanel({
 
       {/* Scroll area: Storeys + Types */}
       <div className="flex-1 overflow-y-auto">
+        {/* Saved Groups — appears at the top of the scroll area when the
+            project has any saved BIMElementGroup rows.  Each row is a
+            one-click "apply this filter", with link-to-BOQ + delete
+            actions on hover. */}
+        {savedGroups && savedGroups.length > 0 && (
+          <div className="border-b border-border-light py-3 px-4">
+            <button
+              type="button"
+              onClick={() => setGroupsExpanded((v) => !v)}
+              className="w-full flex items-center justify-between gap-1.5 mb-2"
+            >
+              <div className="flex items-center gap-1.5">
+                <Bookmark size={12} className="text-oe-blue" />
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+                  {t('bim.saved_groups', { defaultValue: 'Saved groups' })}
+                </span>
+                <span className="text-[10px] text-content-quaternary tabular-nums">
+                  {savedGroups.length}
+                </span>
+              </div>
+              {groupsExpanded ? (
+                <ChevronDown size={11} className="text-content-tertiary" />
+              ) : (
+                <ChevronRight size={11} className="text-content-tertiary" />
+              )}
+            </button>
+            {groupsExpanded && (
+              <div className="space-y-1">
+                {savedGroups.map((g) => {
+                  const active = activeGroupId === g.id;
+                  return (
+                    <div
+                      key={g.id}
+                      className={`group flex items-center gap-1 px-1.5 py-1 rounded transition-colors ${
+                        active
+                          ? 'bg-oe-blue/10 border border-oe-blue/40'
+                          : 'border border-transparent hover:bg-surface-secondary'
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => applyGroupAsFilter(g)}
+                        className="flex-1 flex items-center gap-1.5 min-w-0 text-left"
+                        title={
+                          g.description ||
+                          t('bim.apply_group_title', {
+                            defaultValue: 'Apply this group as a filter',
+                          })
+                        }
+                      >
+                        <span
+                          className="inline-block h-2 w-2 rounded-full shrink-0"
+                          style={{ background: g.color || '#2979ff' }}
+                        />
+                        <span
+                          className={`text-[11px] truncate ${
+                            active ? 'font-medium text-oe-blue' : 'text-content-primary'
+                          }`}
+                        >
+                          {g.name}
+                        </span>
+                        <span className="text-[10px] text-content-quaternary tabular-nums shrink-0 ms-auto">
+                          {g.element_count.toLocaleString()}
+                        </span>
+                      </button>
+                      {onLinkGroupToBOQ && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onLinkGroupToBOQ(g);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 p-1 rounded text-content-tertiary hover:text-oe-blue hover:bg-surface-primary"
+                          title={t('bim.group_link_boq', {
+                            defaultValue: 'Link this group to BOQ',
+                          })}
+                        >
+                          <Link2 size={10} />
+                        </button>
+                      )}
+                      {onDeleteGroup && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteGroup(g);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 p-1 rounded text-content-tertiary hover:text-rose-600 hover:bg-rose-50"
+                          title={t('bim.group_delete', { defaultValue: 'Delete group' })}
+                        >
+                          <Trash2 size={10} />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Storeys — sorted by parsed level number (B2 → G → 01 → 02 → …)
             with a small level badge on each chip. */}
         <FilterSection

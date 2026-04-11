@@ -499,12 +499,31 @@ async function clickSidebarButton(page, matcher, label) {
     }
   }
 
-  // ── TEST 7c: SAVE AS GROUP modal — verify the new element-groups UX
-  log('--- TEST 7c: save as group ---');
-  // Re-apply a filter so the visible/total mismatch shows the button
+  // ── TEST 7c: SAVE AS GROUP — full lifecycle (save → list → apply → delete)
+  log('--- TEST 7c: save as group — full lifecycle ---');
+  // First, defensively close any modal that might be lingering from the
+  // previous test (the AddToBOQ modal in TEST 7b sometimes survives the
+  // Escape press if focus is on a select).  Click outside the modal AND
+  // press Escape several times.
+  await page.evaluate(() => {
+    // Find any rendered modal X close button and click it
+    const closeBtns = Array.from(document.querySelectorAll('button')).filter(
+      (b) =>
+        (b.getAttribute('aria-label') === 'Close' ||
+          (b.textContent || '').trim() === '×' ||
+          (b.textContent || '').trim() === 'Cancel') &&
+        b.offsetParent !== null,
+    );
+    for (const b of closeBtns) (b).click();
+  });
+  await page.keyboard.press('Escape').catch(() => {});
+  await page.waitForTimeout(300);
+  await page.keyboard.press('Escape').catch(() => {});
+  await page.waitForTimeout(300);
+  // 1) Re-apply a filter so the Save-as-group button appears
   await clickSidebarButton(page, (txt) => /^Walls\d/.test(txt), 'walls-for-group');
   await page.waitForTimeout(400);
-  // Click "Save as group"
+  // 2) Click "Save as group" → modal opens
   const saveBtnClicked = await page.evaluate(() => {
     const btn = Array.from(document.querySelectorAll('button')).find((b) =>
       /Save as group/i.test((b.textContent || '').trim()),
@@ -522,17 +541,129 @@ async function clickSidebarButton(page, matcher, label) {
     const hasHeader = headers.some((h) =>
       /Save current filter as group|Save.*group/i.test(h.textContent || ''),
     );
-    const nameInput = !!document.querySelector('input[type="text"][placeholder*="Walls"]');
+    const nameInput = !!document.querySelector(
+      'input[type="text"][placeholder*="Walls"]',
+    );
     const dynRadios = Array.from(document.querySelectorAll('input[type="radio"]'));
     return { hasHeader, nameInput, radioCount: dynRadios.length };
   });
   log('  SaveGroup modal:', JSON.stringify(groupModalState));
   results.saveGroupModal = groupModalState;
   await page.screenshot({ path: path.join(OUT, '11-save-group-modal.png') });
-  // Close modal
-  await page.keyboard.press('Escape').catch(() => {});
-  await page.waitForTimeout(300);
-  // Clear filter
+
+  // 3) Type a unique name and click "Save group"
+  const groupName = `e2e-walls-${Date.now().toString().slice(-6)}`;
+  await page.evaluate((name) => {
+    const input = document.querySelector(
+      'input[type="text"][placeholder*="Walls"]',
+    );
+    if (input) {
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+      setter.call(input, name);
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }, groupName);
+  await page.waitForTimeout(200);
+  const submitClicked = await page.evaluate(() => {
+    const btn = Array.from(document.querySelectorAll('button')).find((b) =>
+      /^Save group$/.test((b.textContent || '').trim()),
+    );
+    if (btn) {
+      btn.click();
+      return true;
+    }
+    return false;
+  });
+  log('  group submit clicked:', submitClicked, 'name=', groupName);
+  await page.waitForTimeout(2000); // wait for backend POST + invalidate
+
+  // 4) Verify the group now appears in the saved-groups section of the panel
+  const groupListed = await page.evaluate((name) => {
+    const sectionLabels = Array.from(document.querySelectorAll('span')).filter((s) =>
+      /Saved groups/i.test(s.textContent || ''),
+    );
+    if (sectionLabels.length === 0) return { sectionExists: false, hasGroup: false };
+    const groupSpans = Array.from(document.querySelectorAll('span'));
+    const hasGroup = groupSpans.some((s) =>
+      (s.textContent || '').trim() === name,
+    );
+    return { sectionExists: true, hasGroup };
+  }, groupName);
+  log('  saved-groups section:', JSON.stringify(groupListed));
+  results.savedGroupListed = groupListed;
+  await page.screenshot({ path: path.join(OUT, '12-saved-groups-list.png') });
+
+  // 5) Click "Clear all" to drop the active filter
+  await page.evaluate(() => {
+    const all = Array.from(document.querySelectorAll('button')).filter((b) =>
+      /^Clear all$/i.test((b.textContent || '').trim()),
+    );
+    if (all[0]) (all[0]).click();
+  });
+  await page.waitForTimeout(400);
+  const beforeApply = await readScene(page);
+
+  // 6) Click the saved group row to re-apply the filter via the new "apply group" path
+  const applyClicked = await page.evaluate((name) => {
+    const buttons = Array.from(document.querySelectorAll('button'));
+    const groupBtn = buttons.find((b) => {
+      const text = (b.textContent || '').trim();
+      return text.startsWith(name);
+    });
+    if (groupBtn) {
+      groupBtn.click();
+      return true;
+    }
+    return false;
+  }, groupName);
+  log('  apply group clicked:', applyClicked);
+  await page.waitForTimeout(800);
+  const afterApply = await readScene(page);
+  log('  before/after apply group:', beforeApply.visible_mesh_count, '→', afterApply.visible_mesh_count);
+  results.applyGroup = { before: beforeApply.visible_mesh_count, after: afterApply.visible_mesh_count };
+
+  // 7) Click the trash icon on the group to delete it.  Need to bypass the
+  //    window.confirm dialog that the delete handler uses.
+  await page.evaluate(() => {
+    window.confirm = () => true;
+  });
+  // The delete button is opacity-0 group-hover:opacity-100 — reveal first
+  const deleteClicked = await page.evaluate((name) => {
+    const buttons = Array.from(document.querySelectorAll('button'));
+    // Find the row by its name span, then look for the delete button that's
+    // a sibling of the row's main click target.
+    const span = Array.from(document.querySelectorAll('span')).find(
+      (s) => (s.textContent || '').trim() === name,
+    );
+    if (!span) return false;
+    let row = span;
+    for (let i = 0; i < 6 && row; i++) {
+      if (row.classList && row.classList.contains('group')) break;
+      row = row.parentElement;
+    }
+    if (!row) return false;
+    const deleteBtn = Array.from(row.querySelectorAll('button')).find((b) =>
+      /Delete group/i.test(b.title || ''),
+    );
+    if (deleteBtn) {
+      deleteBtn.click();
+      return true;
+    }
+    return false;
+  }, groupName);
+  log('  delete group clicked:', deleteClicked);
+  await page.waitForTimeout(2000); // wait for DELETE + invalidate
+
+  // 8) Verify the group is gone from the panel
+  const groupGone = await page.evaluate((name) => {
+    const groupSpans = Array.from(document.querySelectorAll('span'));
+    return !groupSpans.some((s) => (s.textContent || '').trim() === name);
+  }, groupName);
+  log('  group gone:', groupGone);
+  results.groupGone = groupGone;
+  await page.screenshot({ path: path.join(OUT, '13-after-group-delete.png') });
+
+  // Clear filter for downstream tests
   await page.evaluate(() => {
     const all = Array.from(document.querySelectorAll('button')).filter((b) =>
       /^Clear all$/i.test((b.textContent || '').trim()),
@@ -694,13 +825,21 @@ async function clickSidebarButton(page, matcher, label) {
   log('--- VERDICT ---');
   const verdict = [];
   const total = initial.mesh_count;
+  // The "buildings-only" toggle is ON by default and hides ~272 noise
+  // meshes — that's the *expected baseline* for every filter test that
+  // happens with buildingsOnly=true.  We use the toggle-on count from
+  // TEST 2 as the comparison baseline, not the raw `total`, so the
+  // verdict logic doesn't false-positive on the noise reduction.
+  const baseline = results.afterBuildingsOn?.visible_mesh_count ?? total;
   if (total === 0) verdict.push('FAIL scene empty');
   if (results.afterStorey1.visible_mesh_count >= total)
     verdict.push('FAIL storey filter did not hide anything');
   else verdict.push(`PASS storey filter (${results.afterStorey1.visible_mesh_count}/${total} visible)`);
-  if (results.afterClearStorey.visible_mesh_count !== total)
-    verdict.push(`WARN clear storey did not restore all (${results.afterClearStorey.visible_mesh_count}/${total})`);
-  else verdict.push('PASS clear storey restored full visibility');
+  // After clearing the storey filter, visibility should be back to the
+  // *baseline* (buildings-only on, no other filter), not to the raw total.
+  if (results.afterClearStorey.visible_mesh_count !== baseline)
+    verdict.push(`WARN clear storey did not restore baseline (${results.afterClearStorey.visible_mesh_count}/${baseline})`);
+  else verdict.push(`PASS clear storey restored baseline (${baseline})`);
   if (results.afterBuildingsOff.visible_mesh_count <= results.afterBuildingsOn.visible_mesh_count)
     verdict.push('FAIL buildings-only toggle had no effect');
   else verdict.push(`PASS buildings-only (off=${results.afterBuildingsOff.visible_mesh_count} on=${results.afterBuildingsOn.visible_mesh_count})`);
@@ -720,6 +859,34 @@ async function clickSidebarButton(page, matcher, label) {
       );
     } else {
       verdict.push('FAIL multi-chip OR did not increase visible count');
+    }
+  }
+  // Saved-group lifecycle assertions
+  if (results.savedGroupListed) {
+    if (results.savedGroupListed.sectionExists && results.savedGroupListed.hasGroup) {
+      verdict.push('PASS group save → list (group appeared in panel)');
+    } else {
+      verdict.push(
+        `FAIL group save → list (section=${results.savedGroupListed.sectionExists}, hasGroup=${results.savedGroupListed.hasGroup})`,
+      );
+    }
+  }
+  if (results.applyGroup) {
+    if (results.applyGroup.after < results.applyGroup.before) {
+      verdict.push(
+        `PASS group apply (visible ${results.applyGroup.before} → ${results.applyGroup.after})`,
+      );
+    } else {
+      verdict.push(
+        `FAIL group apply did not narrow visibility (${results.applyGroup.before} → ${results.applyGroup.after})`,
+      );
+    }
+  }
+  if (results.groupGone !== undefined) {
+    if (results.groupGone) {
+      verdict.push('PASS group delete (group disappeared from panel)');
+    } else {
+      verdict.push('FAIL group delete (still listed)');
     }
   }
   verdict.push(`fps=${fps}`);
