@@ -6,6 +6,7 @@ import {
   AlertTriangle, Shield, Trash2, X, Search, Filter,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog } from '@/shared/ui';
+import SimilarItemsPanel from '@/shared/ui/SimilarItemsPanel';
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
@@ -374,6 +375,13 @@ function DetailView({ riskId, onBack }: { riskId: string; onBack: () => void }) 
           </Card>
         </div>
       )}
+
+      {/* Cross-project lessons learned via semantic search.  Defaults to
+          cross_project=true so the panel surfaces similar risks (and their
+          mitigations) from EVERY project the user has access to. */}
+      <div className="mt-6">
+        <SimilarItemsPanel module="risks" id={risk.id} crossProject limit={6} />
+      </div>
     </div>
   );
 }

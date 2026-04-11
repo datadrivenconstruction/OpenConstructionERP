@@ -170,6 +170,27 @@ class DocumentService:
         except Exception as exc:
             logger.debug("Failed to publish document.uploaded event: %s", exc)
 
+        # Publish the standardized documents.document.created event so
+        # cross-module subscribers (vector indexer, activity log, …) get
+        # a consistent name per OpenEstimate event conventions.
+        try:
+            from app.core.events import event_bus
+
+            await event_bus.publish(
+                "documents.document.created",
+                {
+                    "project_id": str(project_id),
+                    "document_id": str(document.id),
+                    "name": safe_name,
+                    "category": category,
+                },
+                source_module="oe_documents",
+            )
+        except Exception as exc:
+            logger.debug(
+                "Failed to publish documents.document.created event: %s", exc
+            )
+
         logger.info(
             "Document uploaded: %s (%d bytes) for project %s",
             safe_name,
@@ -255,6 +276,26 @@ class DocumentService:
         await self.session.refresh(document)
 
         logger.info("Document updated: %s (fields=%s)", document_id, list(fields.keys()))
+
+        # Publish documents.document.updated so the vector indexer and
+        # other subscribers can re-embed the row with the fresh metadata.
+        try:
+            from app.core.events import event_bus
+
+            await event_bus.publish(
+                "documents.document.updated",
+                {
+                    "project_id": str(document.project_id),
+                    "document_id": str(document.id),
+                    "fields": list(fields.keys()),
+                },
+                source_module="oe_documents",
+            )
+        except Exception as exc:
+            logger.debug(
+                "Failed to publish documents.document.updated event: %s", exc
+            )
+
         return document
 
     # ── Delete ─────────────────────────────────────────────────────────────
@@ -268,10 +309,29 @@ class DocumentService:
         """
         document = await self.get_document(document_id)
         file_path_str = document.file_path
+        project_id = document.project_id
 
         # Delete DB record FIRST — this is the authoritative state
         await self.repo.delete(document_id)
         logger.info("Document deleted: %s", document_id)
+
+        # Publish documents.document.deleted so the vector indexer and
+        # other subscribers can evict the row from their stores.
+        try:
+            from app.core.events import event_bus
+
+            await event_bus.publish(
+                "documents.document.deleted",
+                {
+                    "project_id": str(project_id) if project_id else "",
+                    "document_id": str(document_id),
+                },
+                source_module="oe_documents",
+            )
+        except Exception as exc:
+            logger.debug(
+                "Failed to publish documents.document.deleted event: %s", exc
+            )
 
         # Then remove file from disk (best-effort)
         try:

@@ -746,3 +746,110 @@ async def update_task_bim_links(
         current_user_id=user_id,
     )
     return _to_response(task)
+
+
+# ── Vector / semantic memory endpoints ───────────────────────────────────
+#
+# These three routes plug the Tasks module into the cross-module semantic
+# memory layer (see ``app/core/vector_index.py``).  They are intentionally
+# uniform across every module that participates — only the adapter and
+# the row loader differ.
+
+
+@router.get(
+    "/vector/status/",
+    dependencies=[Depends(RequirePermission("tasks.read"))],
+)
+async def tasks_vector_status() -> dict[str, Any]:
+    """Return health + row count for the ``oe_tasks`` collection.
+
+    Used by the admin panel and the global search status widget so the
+    user can tell at a glance whether semantic search over tasks is
+    ready, partially indexed or empty.
+    """
+    from app.core.vector_index import COLLECTION_TASKS, collection_status
+
+    return collection_status(COLLECTION_TASKS)
+
+
+@router.post(
+    "/vector/reindex/",
+    dependencies=[Depends(RequirePermission("tasks.update"))],
+)
+async def tasks_vector_reindex(
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    project_id: uuid.UUID | None = Query(default=None),
+    purge_first: bool = Query(default=False),
+) -> dict[str, Any]:
+    """Backfill the Tasks vector collection.
+
+    Optional ``project_id`` narrows the scope so users can reindex one
+    project at a time without re-embedding the entire tenant.  Set
+    ``purge_first=true`` to wipe the matching subset before re-encoding —
+    useful when the embedding model has changed.
+    """
+    from sqlalchemy import select
+
+    from app.core.vector_index import reindex_collection
+    from app.modules.tasks.models import Task
+    from app.modules.tasks.vector_adapter import task_vector_adapter
+
+    stmt = select(Task)
+    if project_id is not None:
+        stmt = stmt.where(Task.project_id == project_id)
+
+    rows = list((await session.execute(stmt)).scalars().all())
+    return await reindex_collection(
+        task_vector_adapter,
+        rows,
+        purge_first=purge_first,
+    )
+
+
+@router.get(
+    "/{task_id}/similar/",
+    dependencies=[Depends(RequirePermission("tasks.read"))],
+)
+async def tasks_similar(
+    task_id: uuid.UUID,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    limit: int = Query(default=5, ge=1, le=20),
+    cross_project: bool = Query(default=True),
+) -> dict[str, Any]:
+    """Return tasks semantically similar to the given one.
+
+    By default the search is **cross-project** — that's the highest-value
+    use case: users want to find how a similar task / defect / inspection
+    was handled in past projects so they can reuse the resolution.  Pass
+    ``cross_project=false`` to limit the search to the same project.
+
+    Returns a list of :class:`VectorHit` dicts plus the original row id
+    so the frontend can highlight the source.
+    """
+    from sqlalchemy import select
+
+    from app.core.vector_index import find_similar
+    from app.modules.tasks.models import Task
+    from app.modules.tasks.vector_adapter import task_vector_adapter
+
+    stmt = select(Task).where(Task.id == task_id)
+    row = (await session.execute(stmt)).scalar_one_or_none()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    project_id = str(row.project_id) if row.project_id is not None else None
+    hits = await find_similar(
+        task_vector_adapter,
+        row,
+        project_id=project_id,
+        cross_project=cross_project,
+        limit=limit,
+    )
+    return {
+        "source_id": str(task_id),
+        "limit": limit,
+        "cross_project": cross_project,
+        "hits": [h.to_dict() for h in hits],
+    }

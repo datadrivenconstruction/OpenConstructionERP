@@ -1339,6 +1339,16 @@ class BOQService:
             await self.session.flush()
             await self.session.refresh(position)
 
+        await _safe_publish(
+            "boq.position.updated",
+            {
+                "position_id": str(position.id),
+                "boq_id": str(position.boq_id),
+                "ordinal": position.ordinal,
+            },
+            source_module="oe_boq",
+        )
+
         return position
 
     async def delete_position(self, position_id: uuid.UUID, *, cascade: bool = False) -> None:

@@ -1659,3 +1659,119 @@ async def delete_element_group(
     """Delete a BIM element group."""
     await _verify_group_access(service, group_id, user_id or "")
     await service.delete_element_group(group_id)
+
+
+# ── Vector / semantic memory endpoints ───────────────────────────────────
+#
+# These three routes plug the BIM Hub module into the cross-module
+# semantic memory layer (see ``app/core/vector_index.py``).  They are
+# intentionally uniform across every module that participates — only
+# the adapter and the row loader differ.
+
+
+@router.get("/vector/status/")
+async def bim_vector_status(
+    _perm: None = Depends(RequirePermission("bim.read")),
+) -> dict[str, Any]:
+    """Return health + row count for the ``oe_bim_elements`` collection.
+
+    Used by the admin panel and the global search status widget so the
+    user can tell at a glance whether semantic search over BIM elements
+    is ready, partially indexed or empty.
+    """
+    from app.core.vector_index import COLLECTION_BIM_ELEMENTS, collection_status
+
+    return collection_status(COLLECTION_BIM_ELEMENTS)
+
+
+@router.post("/vector/reindex/")
+async def bim_vector_reindex(
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    project_id: uuid.UUID | None = Query(default=None),
+    model_id: uuid.UUID | None = Query(default=None),
+    purge_first: bool = Query(default=False),
+    _perm: None = Depends(RequirePermission("bim.update")),
+) -> dict[str, Any]:
+    """Backfill the BIM element vector collection.
+
+    Optional filters narrow the scope so users can reindex one project
+    or even one model at a time without re-embedding the entire
+    tenant.  Set ``purge_first=true`` to wipe the matching subset
+    before re-encoding — useful when the embedding model has changed.
+    """
+    from sqlalchemy.orm import selectinload
+
+    from app.core.vector_index import reindex_collection
+    from app.modules.bim_hub.models import BIMElement, BIMModel
+    from app.modules.bim_hub.vector_adapter import bim_element_vector_adapter
+
+    stmt = select(BIMElement).options(selectinload(BIMElement.model))
+    if model_id is not None:
+        stmt = stmt.where(BIMElement.model_id == model_id)
+    elif project_id is not None:
+        stmt = stmt.join(BIMModel, BIMElement.model_id == BIMModel.id).where(
+            BIMModel.project_id == project_id
+        )
+
+    rows = list((await session.execute(stmt)).scalars().all())
+    return await reindex_collection(
+        bim_element_vector_adapter,
+        rows,
+        purge_first=purge_first,
+    )
+
+
+@router.get("/elements/{element_id}/similar/")
+async def bim_element_similar(
+    element_id: uuid.UUID,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    limit: int = Query(default=5, ge=1, le=20),
+    cross_project: bool = Query(default=False),
+    _perm: None = Depends(RequirePermission("bim.read")),
+) -> dict[str, Any]:
+    """Return BIM elements semantically similar to the given one.
+
+    By default the search is scoped **to the source element's own
+    project** — typically users want to find sibling elements inside
+    the same model ("other exterior walls like this one") rather than
+    fishing across the whole tenant.  Pass ``cross_project=true`` to
+    broaden the search to every project the caller has access to.
+
+    Returns a list of :class:`VectorHit` dicts plus the original row
+    id so the frontend can highlight the source.
+    """
+    from sqlalchemy.orm import selectinload
+
+    from app.core.vector_index import find_similar
+    from app.modules.bim_hub.models import BIMElement
+    from app.modules.bim_hub.vector_adapter import bim_element_vector_adapter
+
+    stmt = (
+        select(BIMElement)
+        .options(selectinload(BIMElement.model))
+        .where(BIMElement.id == element_id)
+    )
+    row = (await session.execute(stmt)).scalar_one_or_none()
+    if row is None:
+        raise HTTPException(status_code=404, detail="BIM element not found")
+
+    project_id = (
+        str(row.model.project_id)
+        if row.model is not None and row.model.project_id is not None
+        else None
+    )
+    hits = await find_similar(
+        bim_element_vector_adapter,
+        row,
+        project_id=project_id,
+        cross_project=cross_project,
+        limit=limit,
+    )
+    return {
+        "source_id": str(element_id),
+        "limit": limit,
+        "cross_project": cross_project,
+        "hits": [h.to_dict() for h in hits],
+    }
