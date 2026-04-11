@@ -74,6 +74,143 @@ async def _safe_publish(
 # element passed" vs "no report at all" by checking this key's presence.
 _VALIDATION_REPORT_SENTINEL: uuid.UUID = uuid.UUID(int=0)
 
+
+async def _strip_orphaned_bim_links(
+    session: AsyncSession,
+    deleted_element_ids: list[str],
+    project_id: uuid.UUID | None,
+) -> None:
+    """Strip ``deleted_element_ids`` from every JSON-array link site.
+
+    Three cross-module link types denormalise BIM element ids into JSON
+    array columns instead of FK tables (Task.bim_element_ids,
+    Activity.bim_element_ids, Requirement.metadata_["bim_element_ids"]).
+    The FK-based link types (BOQElementLink, DocumentBIMLink) clean
+    themselves up via ``ondelete='CASCADE'``; the JSON ones do not, so
+    deleted element ids would otherwise leak forever and confuse the
+    BIM viewer's "linked tasks/activities/requirements" panel as well
+    as any reverse-query helper.
+
+    Runs INLINE on the caller's session — must NOT open a new session.
+    The previous implementation lived in an event subscriber that
+    opened ``async_session_factory()``, but under SQLite write-lock
+    contention (the upstream service is mid-transaction) the new
+    session deadlocked.  Sharing the active session means the cleanup
+    runs inside the same transaction so a failure rolls back atomically
+    with the upstream delete, and there is no lock contention.
+
+    The actual filter happens in Python because neither SQLite nor
+    PostgreSQL share a portable JSON-array-contains/remove operator
+    we can use for cross-dialect bulk updates.  ``project_id`` scopes
+    the candidate set so the scan stays bounded.
+    """
+    if not deleted_element_ids:
+        return
+
+    targets: set[str] = {str(eid) for eid in deleted_element_ids if eid}
+    if not targets:
+        return
+
+    # Defer imports so this helper can be loaded by the bim_hub module
+    # without dragging tasks/schedule/requirements into the import graph
+    # at module level (the loader auto-imports modules in dependency order
+    # and bim_hub's manifest doesn't list these as hard dependencies).
+    from app.modules.requirements.models import Requirement, RequirementSet
+    from app.modules.schedule.models import Activity, Schedule
+    from app.modules.tasks.models import Task
+
+    # ── Tasks ──────────────────────────────────────────────────────────
+    try:
+        task_stmt = select(Task)
+        if project_id is not None:
+            task_stmt = task_stmt.where(Task.project_id == project_id)
+        task_rows = (await session.execute(task_stmt)).scalars().all()
+        cleaned_tasks = 0
+        for task in task_rows:
+            ids = task.bim_element_ids or []
+            if not isinstance(ids, list):
+                continue
+            kept = [x for x in ids if str(x) not in targets]
+            if len(kept) != len(ids):
+                task.bim_element_ids = kept
+                cleaned_tasks += 1
+        if cleaned_tasks:
+            logger.info(
+                "Orphan cleanup: stripped %d element id(s) from %d task(s)",
+                len(targets),
+                cleaned_tasks,
+            )
+    except Exception:  # noqa: BLE001 — best-effort, never break upstream
+        logger.warning(
+            "Orphan cleanup failed for tasks (project=%s)",
+            project_id,
+            exc_info=True,
+        )
+
+    # ── Activities ─────────────────────────────────────────────────────
+    try:
+        act_stmt = select(Activity).where(Activity.bim_element_ids.isnot(None))
+        if project_id is not None:
+            act_stmt = act_stmt.join(
+                Schedule, Activity.schedule_id == Schedule.id
+            ).where(Schedule.project_id == project_id)
+        act_rows = (await session.execute(act_stmt)).scalars().all()
+        cleaned_activities = 0
+        for activity in act_rows:
+            ids = activity.bim_element_ids
+            if not isinstance(ids, list):
+                continue
+            kept = [x for x in ids if str(x) not in targets]
+            if len(kept) != len(ids):
+                activity.bim_element_ids = kept
+                cleaned_activities += 1
+        if cleaned_activities:
+            logger.info(
+                "Orphan cleanup: stripped %d element id(s) from %d activity(s)",
+                len(targets),
+                cleaned_activities,
+            )
+    except Exception:  # noqa: BLE001
+        logger.warning(
+            "Orphan cleanup failed for activities (project=%s)",
+            project_id,
+            exc_info=True,
+        )
+
+    # ── Requirements ───────────────────────────────────────────────────
+    try:
+        req_stmt = select(Requirement)
+        if project_id is not None:
+            req_stmt = req_stmt.join(
+                RequirementSet, Requirement.requirement_set_id == RequirementSet.id
+            ).where(RequirementSet.project_id == project_id)
+        req_rows = (await session.execute(req_stmt)).scalars().all()
+        cleaned_reqs = 0
+        for req in req_rows:
+            meta = dict(req.metadata_ or {})
+            ids = meta.get("bim_element_ids")
+            if not isinstance(ids, list):
+                continue
+            kept = [x for x in ids if str(x) not in targets]
+            if len(kept) != len(ids):
+                meta["bim_element_ids"] = kept
+                req.metadata_ = meta
+                cleaned_reqs += 1
+        if cleaned_reqs:
+            logger.info(
+                "Orphan cleanup: stripped %d element id(s) from %d requirement(s)",
+                len(targets),
+                cleaned_reqs,
+            )
+    except Exception:  # noqa: BLE001
+        logger.warning(
+            "Orphan cleanup failed for requirements (project=%s)",
+            project_id,
+            exc_info=True,
+        )
+
+    await session.flush()
+
 # On-disk directory for BIM geometry files (original.{ext}, geometry.dae,
 # dataframe.xlsx, …). Matches the layout used by ``bim_hub.router`` which
 # writes to ``<repo>/data/bim/{project_id}/{model_id}/``.
@@ -184,6 +321,16 @@ class BIMHubService:
 
         await self.model_repo.delete(model_id)
         logger.info("BIM model deleted: %s", model_id)
+
+        # Strip the deleted element ids from every JSON-array link
+        # site (Tasks, Activities, Requirements) BEFORE we publish the
+        # vector-store delete events.  Runs on this same session so we
+        # share the active transaction with the upstream delete.
+        await _strip_orphaned_bim_links(
+            self.session,
+            [str(eid) for eid in doomed_ids],
+            project_id,
+        )
 
         for old_id in doomed_ids:
             await _safe_publish(
@@ -673,6 +820,16 @@ class BIMHubService:
         if deleted:
             logger.info("Deleted %d existing elements for model %s", deleted, model_id)
 
+        # Strip orphaned references from JSON-array link sites (Tasks,
+        # Activities, Requirements) BEFORE we fan out the vector-delete
+        # events.  Runs inline on the active session so SQLite write-lock
+        # contention can not bite us.
+        await _strip_orphaned_bim_links(
+            self.session,
+            [str(eid) for eid in existing_ids],
+            model.project_id,
+        )
+
         for old_id in existing_ids:
             await _safe_publish(
                 "bim_hub.element.deleted",
@@ -974,8 +1131,15 @@ class BIMHubService:
 
         # ── Step 1: compute matches per rule (same math regardless of
         # dry_run so the preview stays identical across modes). ───────────
+        # Tracks (element, rule) pairs that fired the rule but were
+        # then dropped because the quantity could not be extracted —
+        # most often because the element is missing the property the
+        # rule reads.  We surface this in the result so the dry-run
+        # preview can show *why* a population is smaller than expected
+        # instead of silently dropping rows.
         per_rule_matches: dict[uuid.UUID, list[tuple[BIMElement, Decimal, Decimal]]] = {}
         results: list[dict[str, Any]] = []
+        skipped: list[dict[str, Any]] = []
         matched_element_ids: set[uuid.UUID] = set()
 
         for element in elements:
@@ -985,13 +1149,40 @@ class BIMHubService:
 
                 qty = self._extract_quantity(element, rule.quantity_source)
                 if qty is None:
+                    skipped.append({
+                        "element_id": str(element.id),
+                        "stable_id": element.stable_id,
+                        "element_type": element.element_type,
+                        "rule_id": str(rule.id),
+                        "rule_name": rule.name,
+                        "quantity_source": rule.quantity_source,
+                        "reason": "missing_property",
+                        "detail": (
+                            f"element has no value for "
+                            f"'{rule.quantity_source}' (property/quantity key)"
+                        ),
+                    })
                     continue
 
                 try:
                     multiplier = Decimal(rule.multiplier or "1")
                     waste_pct = Decimal(rule.waste_factor_pct or "0")
                     adjusted = qty * multiplier * (Decimal("1") + waste_pct / Decimal("100"))
-                except (InvalidOperation, ValueError):
+                except (InvalidOperation, ValueError) as exc:
+                    skipped.append({
+                        "element_id": str(element.id),
+                        "stable_id": element.stable_id,
+                        "element_type": element.element_type,
+                        "rule_id": str(rule.id),
+                        "rule_name": rule.name,
+                        "quantity_source": rule.quantity_source,
+                        "reason": "invalid_decimal",
+                        "detail": (
+                            f"could not convert quantity {qty!r} with "
+                            f"multiplier={rule.multiplier!r} / "
+                            f"waste={rule.waste_factor_pct!r}: {exc}"
+                        ),
+                    })
                     continue
 
                 per_rule_matches.setdefault(rule.id, []).append(
@@ -1044,13 +1235,30 @@ class BIMHubService:
                     )
                     # Savepoint already rolled back; continue with next rule.
 
+        # Surface skip count alongside match counts so operators can
+        # tell at-a-glance whether the population is honest.  A high
+        # skip count almost always means the rule's ``quantity_source``
+        # is wrong or the IFC export is missing a column.
+        if skipped:
+            logger.warning(
+                "Quantity maps: %d (element, rule) pair(s) skipped on "
+                "model %s — most common reason is a missing property "
+                "(rule expects something the BIM export did not provide). "
+                "First skipped pair: %s",
+                len(skipped),
+                model.name,
+                skipped[0],
+            )
+
         logger.info(
             "Quantity maps applied: %d elements matched, %d rules applied, "
-            "%d links created, %d positions created for model %s (dry_run=%s)",
+            "%d links created, %d positions created, %d skipped for model "
+            "%s (dry_run=%s)",
             matched_elements,
             rules_applied,
             links_created,
             positions_created,
+            len(skipped),
             model.name,
             request.dry_run,
         )
@@ -1060,7 +1268,9 @@ class BIMHubService:
             rules_applied=rules_applied,
             links_created=links_created,
             positions_created=positions_created,
+            skipped_count=len(skipped),
             results=results,
+            skipped=skipped,
         )
 
     async def _persist_rule_matches(
@@ -1376,17 +1586,86 @@ class BIMHubService:
                 if not fnmatch.fnmatch(element.element_type.lower(), rule.element_type_filter.lower()):
                     return False
 
-        # Check property_filter
+        # Check property_filter via the shared type-aware helper so we
+        # match dynamic-element-group semantics: list values fall back
+        # to membership, dict values to recursive containment, None to
+        # explicit "not set" handling.  The previous implementation
+        # str()'d everything, which collapsed ``["steel","concrete"]``
+        # into the literal string ``"['steel', 'concrete']"`` and made
+        # multi-valued IFC properties unmatchable.
         if rule.property_filter:
             props = element.properties or {}
             for key, pattern in rule.property_filter.items():
-                value = props.get(key)
-                if value is None:
-                    return False
-                if not fnmatch.fnmatch(str(value).lower(), str(pattern).lower()):
+                if not BIMHubService._property_value_matches(props.get(key), pattern):
                     return False
 
         return True
+
+    @staticmethod
+    def _property_value_matches(actual: Any, expected: Any) -> bool:  # noqa: PLR0911
+        """Type-aware comparison for BIM property filters.
+
+        Used by both the dynamic-element-group ``_matches`` predicate
+        and the quantity-map rule engine, so multi-valued IFC properties
+        (lists, nested dicts) and missing properties behave consistently
+        across the two callers.
+
+        Rules:
+            * ``expected is None`` matches when ``actual is None`` (explicit
+              "this property must not be set").
+            * ``actual is None`` otherwise → ``False`` (the filter wants
+              a value but the element has none).
+            * ``actual`` is a list →
+                - ``expected`` is a list  → non-empty set intersection
+                - ``expected`` is a scalar → membership test (with
+                  fnmatch wildcards on each list item if it's a string)
+            * ``actual`` is a dict + ``expected`` is a dict → recursive
+              containment (every key in ``expected`` must match the
+              corresponding key in ``actual``).
+            * Both are strings → fnmatch (case-insensitive, supports
+              ``*`` and ``?`` wildcards).
+            * Otherwise → exact equality after stringifying.
+
+        Returns ``True`` when the actual value satisfies the expected
+        pattern, ``False`` otherwise.
+        """
+        # Explicit "must not be set" filter
+        if expected is None:
+            return actual is None
+        if actual is None:
+            return False
+
+        # List actual: membership / intersection semantics
+        if isinstance(actual, list):
+            if isinstance(expected, list):
+                return any(
+                    BIMHubService._property_value_matches(item, exp_item)
+                    for item in actual
+                    for exp_item in expected
+                )
+            # Scalar expected → does the list contain a matching item?
+            return any(
+                BIMHubService._property_value_matches(item, expected)
+                for item in actual
+            )
+
+        # Dict actual + dict expected: recursive containment
+        if isinstance(actual, dict) and isinstance(expected, dict):
+            return all(
+                BIMHubService._property_value_matches(actual.get(k), v)
+                for k, v in expected.items()
+            )
+
+        # String values: fnmatch wildcards (existing _rule_matches_element
+        # behaviour, kept for backwards compatibility with rules that use
+        # ``*`` and ``?`` patterns).
+        if isinstance(actual, str) and isinstance(expected, str):
+            return fnmatch.fnmatch(actual.lower(), expected.lower())
+
+        # Booleans / numerics / mixed types → fall back to exact equality
+        # via string coercion.  This handles e.g. ``actual=42`` against
+        # ``expected="42"`` and ``actual=True`` against ``expected="true"``.
+        return str(actual).lower() == str(expected).lower()
 
     @staticmethod
     def _extract_quantity(element: BIMElement, source: str) -> Decimal | None:
@@ -1836,8 +2115,13 @@ class BIMHubService:
                 cat = str(props.get("category") or "")
                 if cat not in category_values:
                     return False
+            # Use the shared type-aware helper so list/dict/None
+            # property values match consistently with the quantity-map
+            # rule engine.  Previously this used exact equality which
+            # silently failed for multi-valued IFC properties.
             return all(
-                props.get(key) == value for key, value in expected_props.items()
+                BIMHubService._property_value_matches(props.get(key), value)
+                for key, value in expected_props.items()
             )
 
         return [e.id for e in elements if _matches(e)]

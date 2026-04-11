@@ -220,6 +220,7 @@ function UploadPanel({
    *  progress card over the viewport. */
   onProcessingUpdate?: (update: ProcessingUpdate | null) => void;
 }) {
+  const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
   const [modelName, setModelName] = useState(initialModelName || '');
   const [discipline, setDiscipline] = useState('architecture');
@@ -241,11 +242,11 @@ function UploadPanel({
 
   const handleFileSelect = useCallback((f: File) => {
     const ext = getFileExtension(f.name);
-    if (!CAD_EXTENSIONS.has(ext) && !DATA_EXTENSIONS.has(ext)) { setUploadError('Unsupported format.'); return; }
+    if (!CAD_EXTENSIONS.has(ext) && !DATA_EXTENSIONS.has(ext)) { setUploadError(t('bim.upload_unsupported_format')); return; }
     setFile(f);
-    setUploadError(ext === '.rvt' ? 'Note: RVT files require DDC cad2data. Consider IFC.' : null);
+    setUploadError(ext === '.rvt' ? t('bim.upload_rvt_note') : null);
     if (!modelName) setModelName(f.name.replace(/\.[^.]+$/, ''));
-  }, [modelName]);
+  }, [modelName, t]);
 
   const resetForm = useCallback(() => {
     setFile(null); setDataFile(null); setGeometryFile(null); setModelName(''); setUploadError(null);
@@ -311,7 +312,7 @@ function UploadPanel({
         });
         addToast({
           type: 'success',
-          title: 'BIM data uploaded',
+          title: t('bim.upload_success'),
           message: `${res.element_count} elements`,
         });
         onUploadComplete(res.model_id);
@@ -334,7 +335,7 @@ function UploadPanel({
             });
             addToast({
               type: 'success',
-              title: 'Model processed',
+              title: t('bim.toast_model_processed_title'),
               message: `${cnt} elements`,
             });
           } else if (st === 'needs_converter') {
@@ -346,7 +347,7 @@ function UploadPanel({
             });
             addToast({
               type: 'warning',
-              title: 'Converter required',
+              title: t('bim.toast_converter_required_title'),
               message: `${res.format.toUpperCase()} needs DDC cad2data`,
             });
           } else if (st === 'error') {
@@ -358,8 +359,8 @@ function UploadPanel({
             });
             addToast({
               type: 'error',
-              title: 'Processing failed',
-              message: 'Could not extract elements',
+              title: t('bim.toast_processing_failed_title'),
+              message: t('bim.toast_processing_failed_msg'),
             });
           } else {
             onProcessingUpdate?.({
@@ -370,8 +371,8 @@ function UploadPanel({
             });
             addToast({
               type: 'success',
-              title: 'File uploaded',
-              message: 'Processing queued',
+              title: t('bim.toast_file_uploaded_title'),
+              message: t('bim.toast_processing_queued_msg'),
             });
           }
           onUploadComplete(res.model_id);
@@ -390,7 +391,7 @@ function UploadPanel({
           });
           addToast({
             type: 'success',
-            title: 'Imported',
+            title: t('bim.toast_imported_title'),
             message: `${res.element_count} elements`,
           });
           onUploadComplete(res.model_id);
@@ -408,7 +409,7 @@ function UploadPanel({
         fileSize: sizeLabel,
         errorMessage: msg,
       });
-      addToast({ type: 'error', title: 'Upload failed', message: msg });
+      addToast({ type: 'error', title: t('bim.upload_failed'), message: msg });
     } finally {
       clearInterval(stageTimer);
       setUploading(false);
@@ -430,10 +431,10 @@ function UploadPanel({
 
   const canUpload = advancedMode ? !!dataFile && !uploading : !!file && !uploading;
   const disciplines = [
-    { v: 'architecture', l: 'Architecture' }, { v: 'structural', l: 'Structural' },
-    { v: 'mechanical', l: 'Mechanical' }, { v: 'electrical', l: 'Electrical' },
-    { v: 'plumbing', l: 'Plumbing' }, { v: 'fire_protection', l: 'Fire Protection' },
-    { v: 'civil', l: 'Civil' }, { v: 'mixed', l: 'Multi-discipline' },
+    { v: 'architecture', l: t('bim.disc_architecture') }, { v: 'structural', l: t('bim.disc_structural') },
+    { v: 'mechanical', l: t('bim.disc_mechanical') }, { v: 'electrical', l: t('bim.disc_electrical') },
+    { v: 'plumbing', l: t('bim.disc_plumbing') }, { v: 'fire_protection', l: t('bim.disc_fire') },
+    { v: 'civil', l: t('bim.disc_civil') }, { v: 'mixed', l: t('bim.disc_mixed') },
   ];
 
   return (
@@ -445,8 +446,8 @@ function UploadPanel({
             <Upload size={16} className="text-oe-blue" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-content-primary">Upload Model</h2>
-            <p className="text-[10px] text-content-quaternary">IFC, RVT, CSV, Excel</p>
+            <h2 className="text-sm font-bold text-content-primary">{t('bim.upload_panel_title')}</h2>
+            <p className="text-[10px] text-content-quaternary">{t('bim.upload_panel_subtitle')}</p>
           </div>
         </div>
         <button onClick={onClose} className="p-1.5 rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors">
@@ -470,13 +471,13 @@ function UploadPanel({
                 <div className="w-10 h-10 rounded-xl bg-oe-blue/10 flex items-center justify-center"><CheckCircle2 size={20} className="text-oe-blue" /></div>
                 <p className="text-sm font-medium text-content-primary">{file.name}</p>
                 <p className="text-[10px] text-content-quaternary">{formatFileSize(file.size)}</p>
-                <button type="button" onClick={(e) => { e.preventDefault(); setFile(null); setUploadError(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="text-[10px] text-content-tertiary hover:text-red-500 underline">Remove</button>
+                <button type="button" onClick={(e) => { e.preventDefault(); setFile(null); setUploadError(null); if (fileInputRef.current) fileInputRef.current.value = ''; }} className="text-[10px] text-content-tertiary hover:text-red-500 underline">{t('bim.upload_remove_file')}</button>
               </>
             ) : (
               <>
                 <div className="w-12 h-12 rounded-xl bg-surface-secondary border border-border-light flex items-center justify-center"><FileUp size={22} className="text-content-quaternary" /></div>
-                <p className="text-sm font-medium text-content-primary">Drop file here</p>
-                <p className="text-[10px] text-content-quaternary">Revit (.rvt), IFC (.ifc) &middot; Max 500 MB</p>
+                <p className="text-sm font-medium text-content-primary">{t('bim.upload_drop_here')}</p>
+                <p className="text-[10px] text-content-quaternary">{t('bim.upload_size_hint')}</p>
               </>
             )}
             <input ref={fileInputRef} type="file" accept=".rvt,.ifc,.csv,.xlsx,.xls" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); }} />
@@ -485,15 +486,15 @@ function UploadPanel({
           <div className="grid grid-cols-2 gap-3">
             <label className="flex flex-col items-center gap-2 border-2 border-dashed border-border-medium rounded-xl p-4 text-center cursor-pointer hover:border-oe-blue/50 hover:bg-surface-secondary transition-all">
               <Database size={20} className="text-content-quaternary" />
-              <span className="text-[11px] font-medium text-content-primary">Element Data</span>
-              <span className="text-[9px] text-content-quaternary">CSV / Excel</span>
+              <span className="text-[11px] font-medium text-content-primary">{t('bim.upload_advanced_element_data')}</span>
+              <span className="text-[9px] text-content-quaternary">{t('bim.upload_advanced_element_data_hint')}</span>
               {dataFile && <Badge variant="blue" size="sm">{dataFile.name}</Badge>}
               <input ref={dataInputRef} type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={(e) => { setDataFile(e.target.files?.[0] ?? null); if (e.target.files?.[0] && !modelName) setModelName(e.target.files[0].name.replace(/\.\w+$/, '')); }} />
             </label>
             <label className="flex flex-col items-center gap-2 border-2 border-dashed border-border-medium rounded-xl p-4 text-center cursor-pointer hover:border-oe-blue/50 hover:bg-surface-secondary transition-all">
               <FileBox size={20} className="text-content-quaternary" />
-              <span className="text-[11px] font-medium text-content-primary">3D Geometry</span>
-              <span className="text-[9px] text-content-quaternary">DAE / COLLADA</span>
+              <span className="text-[11px] font-medium text-content-primary">{t('bim.upload_advanced_geometry')}</span>
+              <span className="text-[9px] text-content-quaternary">{t('bim.upload_advanced_geometry_hint')}</span>
               {geometryFile && <Badge variant="blue" size="sm">{geometryFile.name}</Badge>}
               <input ref={geoInputRef} type="file" accept=".dae,.glb,.gltf" className="hidden" onChange={(e) => setGeometryFile(e.target.files?.[0] ?? null)} />
             </label>
@@ -501,11 +502,11 @@ function UploadPanel({
         )}
 
         <div>
-          <label className="block text-[10px] font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">Model Name</label>
-          <input type="text" className="w-full text-sm py-2 px-3 rounded-lg border border-border-light bg-surface-secondary text-content-primary placeholder-content-quaternary focus:outline-none focus:ring-1 focus:ring-oe-blue" placeholder="e.g. Building A" value={modelName} onChange={(e) => setModelName(e.target.value)} />
+          <label className="block text-[10px] font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">{t('bim.upload_model_name_label')}</label>
+          <input type="text" className="w-full text-sm py-2 px-3 rounded-lg border border-border-light bg-surface-secondary text-content-primary placeholder-content-quaternary focus:outline-none focus:ring-1 focus:ring-oe-blue" placeholder={t('bim.upload_model_name_placeholder')} value={modelName} onChange={(e) => setModelName(e.target.value)} />
         </div>
         <div>
-          <label className="block text-[10px] font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">Discipline</label>
+          <label className="block text-[10px] font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">{t('bim.upload_discipline_label')}</label>
           <select className="w-full text-sm py-2 px-3 rounded-lg border border-border-light bg-surface-secondary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue" value={discipline} onChange={(e) => setDiscipline(e.target.value)}>
             {disciplines.map((d) => <option key={d.v} value={d.v}>{d.l}</option>)}
           </select>
@@ -525,7 +526,7 @@ function UploadPanel({
         )}
         <button type="button" onClick={() => { setAdvancedMode((p) => !p); setFile(null); setDataFile(null); setGeometryFile(null); }} className="flex items-center gap-1.5 text-[11px] text-content-tertiary hover:text-content-secondary transition-colors">
           {advancedMode ? <ChevronUp size={12} /> : <ChevronRight size={12} />}
-          {advancedMode ? 'Switch to simple mode' : 'Already converted? Upload data + geometry separately'}
+          {advancedMode ? t('bim.upload_simple_mode_toggle') : t('bim.upload_advanced_mode_toggle')}
         </button>
       </div>
 
@@ -533,7 +534,7 @@ function UploadPanel({
       <div className="px-5 py-4 border-t border-border-light">
         <button onClick={handleUpload} disabled={!canUpload} className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed bg-oe-blue text-white hover:bg-oe-blue-dark active:scale-[0.98] shadow-sm hover:shadow-md">
           {uploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
-          {uploading ? 'Uploading...' : 'Upload Model'}
+          {uploading ? t('bim.uploading') : t('bim.upload_panel_title')}
         </button>
       </div>
     </div>
@@ -545,11 +546,12 @@ function UploadPanel({
 function NonReadyOverlay({ model, onUploadConverted, onDelete }: {
   model: BIMModelData; onUploadConverted: () => void; onDelete: () => void;
 }) {
+  const { t } = useTranslation();
   const fmt = (model.model_format || model.format || '').toUpperCase();
   const configs = {
-    processing: { icon: <Loader2 size={32} className="text-blue-500 animate-spin" />, bg: 'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800', title: 'Processing Model...', desc: `Extracting elements from your ${fmt} file. This may take a moment.` },
-    needs_converter: { icon: <AlertTriangle size={32} className="text-amber-500" />, bg: 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800', title: 'Converter Required', desc: `${fmt} files require DDC cad2data for extraction. Convert to IFC first, or upload pre-converted data.` },
-    error: { icon: <AlertCircle size={32} className="text-red-500" />, bg: 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800', title: 'Processing Failed', desc: 'Could not extract elements. Try converting to IFC first or upload data manually.' },
+    processing: { icon: <Loader2 size={32} className="text-blue-500 animate-spin" />, bg: 'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800', title: t('bim.overlay_processing_title'), desc: t('bim.overlay_processing_desc', { format: fmt }) },
+    needs_converter: { icon: <AlertTriangle size={32} className="text-amber-500" />, bg: 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800', title: t('bim.overlay_needs_converter_title'), desc: t('bim.overlay_needs_converter_desc', { format: fmt }) },
+    error: { icon: <AlertCircle size={32} className="text-red-500" />, bg: 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800', title: t('bim.overlay_error_title'), desc: t('bim.overlay_error_desc') },
   };
   const c = configs[model.status as keyof typeof configs] ?? configs.error;
 
@@ -562,10 +564,10 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete }: {
         <p className="text-[11px] text-content-quaternary mb-6">{model.name}{model.file_size ? ` · ${formatFileSize(model.file_size)}` : ''}</p>
         <div className="flex items-center justify-center gap-3">
           <button onClick={onUploadConverted} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-oe-blue text-white text-sm font-semibold hover:bg-oe-blue-dark transition-colors shadow-sm">
-            <UploadCloud size={15} /> Upload Converted Data
+            <UploadCloud size={15} /> {t('bim.overlay_upload_converted_btn')}
           </button>
           <button onClick={onDelete} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-primary border border-border-light text-content-secondary text-sm font-medium hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors">
-            <Trash2 size={15} /> Delete
+            <Trash2 size={15} /> {t('bim.overlay_delete_btn')}
           </button>
         </div>
       </div>
@@ -578,6 +580,7 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete }: {
 function LandingPage({ projectId, onUploadComplete, breadcrumbItems }: {
   projectId: string; onUploadComplete: (modelId: string) => void; breadcrumbItems: { label: string; to?: string }[];
 }) {
+  const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
   const [modelName, setModelName] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -598,14 +601,14 @@ function LandingPage({ projectId, onUploadComplete, breadcrumbItems }: {
         clearInterval(iv); setUploadProgress(100);
         const st = (res as any).status || 'processing';
         const cnt = (res as any).element_count || 0;
-        if (st === 'ready') addToast({ type: 'success', title: 'Model ready', message: `${cnt} elements` });
-        else addToast({ type: 'success', title: 'Uploaded', message: res.format.toUpperCase() });
+        if (st === 'ready') addToast({ type: 'success', title: t('bim.toast_model_ready_title'), message: `${cnt} elements` });
+        else addToast({ type: 'success', title: t('bim.toast_uploaded_title'), message: res.format.toUpperCase() });
         onUploadComplete(res.model_id);
       } else if (isDataFile(file.name)) {
         setUploadProgress(40);
         const res = await uploadBIMData(projectId, name, 'architecture', file);
         setUploadProgress(100);
-        addToast({ type: 'success', title: 'Imported', message: `${res.element_count} elements` });
+        addToast({ type: 'success', title: t('bim.toast_imported_title'), message: `${res.element_count} elements` });
         onUploadComplete(res.model_id);
       }
     } catch (err) { setUploadError(err instanceof Error ? err.message : String(err)); }
@@ -613,12 +616,12 @@ function LandingPage({ projectId, onUploadComplete, breadcrumbItems }: {
   }, [file, projectId, modelName, onUploadComplete, addToast]);
 
   const features = [
-    { icon: Eye, color: 'bg-blue-50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-800', ic: 'text-blue-500', title: '3D Visualization', desc: 'Interactive Three.js viewer with storey filtering, discipline coloring, and element selection.' },
-    { icon: Layers, color: 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-800', ic: 'text-emerald-500', title: 'Element Extraction', desc: 'Walls, slabs, columns, beams, MEP — with properties, areas, volumes, and classification.' },
-    { icon: Link2, color: 'bg-violet-50 dark:bg-violet-950/20 border-violet-100 dark:border-violet-800', ic: 'text-violet-500', title: 'BOQ Linking', desc: 'Connect BIM elements to cost items for automated quantity verification and 5D take-off.' },
-    { icon: Ruler, color: 'bg-orange-50 dark:bg-orange-950/20 border-orange-100 dark:border-orange-800', ic: 'text-orange-500', title: 'Quantity Maps', desc: 'Define rules to extract area, volume, and length — apply to your entire model at once.' },
-    { icon: Building2, color: 'bg-pink-50 dark:bg-pink-950/20 border-pink-100 dark:border-pink-800', ic: 'text-pink-500', title: 'Model Comparison', desc: 'Compare versions to detect added, removed, and modified elements automatically.' },
-    { icon: Globe2, color: 'bg-cyan-50 dark:bg-cyan-950/20 border-cyan-100 dark:border-cyan-800', ic: 'text-cyan-500', title: 'Format Agnostic', desc: 'IFC processed instantly. RVT via DDC cad2data. CSV/Excel for pre-converted data.' },
+    { icon: Eye, color: 'bg-blue-50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-800', ic: 'text-blue-500', title: t('bim.landing_feat_3d_title'), desc: t('bim.landing_feat_3d_desc') },
+    { icon: Layers, color: 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-800', ic: 'text-emerald-500', title: t('bim.landing_feat_extract_title'), desc: t('bim.landing_feat_extract_desc') },
+    { icon: Link2, color: 'bg-violet-50 dark:bg-violet-950/20 border-violet-100 dark:border-violet-800', ic: 'text-violet-500', title: t('bim.landing_feat_boq_title'), desc: t('bim.landing_feat_boq_desc') },
+    { icon: Ruler, color: 'bg-orange-50 dark:bg-orange-950/20 border-orange-100 dark:border-orange-800', ic: 'text-orange-500', title: t('bim.landing_feat_qty_title'), desc: t('bim.landing_feat_qty_desc') },
+    { icon: Building2, color: 'bg-pink-50 dark:bg-pink-950/20 border-pink-100 dark:border-pink-800', ic: 'text-pink-500', title: t('bim.landing_feat_compare_title'), desc: t('bim.landing_feat_compare_desc') },
+    { icon: Globe2, color: 'bg-cyan-50 dark:bg-cyan-950/20 border-cyan-100 dark:border-cyan-800', ic: 'text-cyan-500', title: t('bim.landing_feat_format_title'), desc: t('bim.landing_feat_format_desc') },
   ];
 
   return (
@@ -631,9 +634,9 @@ function LandingPage({ projectId, onUploadComplete, breadcrumbItems }: {
             <div className="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-oe-blue/10 to-blue-100 dark:to-blue-950/30 border border-oe-blue/20 flex items-center justify-center mb-5 shadow-lg shadow-oe-blue/5">
               <Cuboid size={36} className="text-oe-blue" />
             </div>
-            <h1 className="text-3xl font-bold text-content-primary tracking-tight">BIM 3D Viewer</h1>
+            <h1 className="text-3xl font-bold text-content-primary tracking-tight">{t('bim.landing_hero_title')}</h1>
             <p className="text-base text-content-secondary mt-3 max-w-lg mx-auto leading-relaxed">
-              Upload IFC or Revit files to visualize building elements, extract quantities, and link to your Bill of Quantities.
+              {t('bim.landing_hero_subtitle')}
             </p>
           </div>
 
@@ -655,20 +658,20 @@ function LandingPage({ projectId, onUploadComplete, breadcrumbItems }: {
               ) : (
                 <>
                   <div className="w-14 h-14 rounded-xl bg-surface-secondary border border-border-light flex items-center justify-center"><FileUp size={24} className="text-content-quaternary" /></div>
-                  <p className="text-base font-semibold text-content-primary">Drop your file here</p>
-                  <p className="text-xs text-content-quaternary">IFC, Revit, CSV, or Excel &middot; Max 500 MB</p>
+                  <p className="text-base font-semibold text-content-primary">{t('bim.landing_drop_here')}</p>
+                  <p className="text-xs text-content-quaternary">{t('bim.landing_size_hint')}</p>
                 </>
               )}
               <input ref={fileInputRef} type="file" accept=".rvt,.ifc,.csv,.xlsx,.xls" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) { setFile(f); if (!modelName) setModelName(f.name.replace(/\.[^.]+$/, '')); } }} />
             </label>
             {file && (
               <div className="mt-4 space-y-3">
-                <input type="text" className="w-full text-sm py-2.5 px-4 rounded-xl border border-border-light bg-surface-secondary text-content-primary placeholder-content-quaternary focus:outline-none focus:ring-1 focus:ring-oe-blue" placeholder="Model name" value={modelName} onChange={(e) => setModelName(e.target.value)} />
+                <input type="text" className="w-full text-sm py-2.5 px-4 rounded-xl border border-border-light bg-surface-secondary text-content-primary placeholder-content-quaternary focus:outline-none focus:ring-1 focus:ring-oe-blue" placeholder={t('bim.model_name')} value={modelName} onChange={(e) => setModelName(e.target.value)} />
                 {uploading && <div className="h-1.5 rounded-full bg-surface-tertiary overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-300" style={{ width: `${uploadProgress}%` }} /></div>}
                 {uploadError && <p className="text-xs text-red-500">{uploadError}</p>}
                 <button onClick={handleUpload} disabled={uploading} className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-50 bg-oe-blue text-white hover:bg-oe-blue-dark active:scale-[0.98] shadow-sm hover:shadow-md">
                   {uploading ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
-                  {uploading ? 'Processing...' : 'Upload & Process'}
+                  {uploading ? t('bim.landing_processing') : t('bim.landing_upload_process')}
                 </button>
               </div>
             )}
@@ -1089,19 +1092,19 @@ export function BIMPage() {
   }, [queryClient, projectId]);
 
   const handleDeleteModel = useCallback(async (modelId: string, name: string) => {
-    if (!window.confirm(`Delete "${name}"? All elements will be removed.`)) return;
+    if (!window.confirm(t('bim.confirm_delete_model', { name }))) return;
     try {
       await deleteBIMModel(modelId);
-      addToast({ type: 'success', title: 'Model deleted', message: name });
+      addToast({ type: 'success', title: t('bim.toast_model_deleted_title'), message: name });
       if (activeModelId === modelId) { setActiveModelId(null); setSelectedElementId(null); }
       queryClient.invalidateQueries({ queryKey: ['bim-models', projectId] });
-    } catch (err) { addToast({ type: 'error', title: 'Delete failed', message: err instanceof Error ? err.message : String(err) }); }
-  }, [activeModelId, addToast, queryClient, projectId]);
+    } catch (err) { addToast({ type: 'error', title: t('bim.toast_delete_failed_title'), message: err instanceof Error ? err.message : String(err) }); }
+  }, [activeModelId, addToast, queryClient, projectId, t]);
 
   const breadcrumbItems = useMemo(() => {
     const items: { label: string; to?: string }[] = [{ label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' }];
     if (projectId && contextProjectName) items.push({ label: contextProjectName, to: `/projects/${projectId}` });
-    items.push({ label: 'BIM Viewer' });
+    items.push({ label: t('bim.title') });
     return items;
   }, [t, projectId, contextProjectName]);
 
@@ -1110,7 +1113,7 @@ export function BIMPage() {
   if (!projectId) {
     return (
       <div className="flex items-center justify-center -mx-2 sm:-mx-3 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
-        <EmptyState icon={<FolderOpen size={32} />} title="No project selected" description="Select a project to view BIM models." />
+        <EmptyState icon={<FolderOpen size={32} />} title={t('bim.no_project')} description={t('bim.no_project_desc')} />
       </div>
     );
   }

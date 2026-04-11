@@ -85,6 +85,15 @@ async def _delete_element_vector(event: Event) -> None:
         logger.debug("BIM vector delete failed for %s", eid_raw, exc_info=True)
 
 
+# NOTE: orphan-link cleanup used to live here as an event subscriber, but
+# the subscriber opened its own session and crashed under SQLite write
+# lock contention when the upstream service was still mid-transaction.
+# The cleanup now runs INLINE in the service layer (see
+# ``bim_hub.service._strip_orphaned_bim_links``) so it shares the active
+# request session, has no lock contention, and runs inside the same
+# transaction so a failure rolls back atomically with the upstream delete.
+
+
 # Wrappers that match the EventBus handler signature (Event → awaitable).
 async def _on_element_created(event: Event) -> None:
     await _index_element(event)
