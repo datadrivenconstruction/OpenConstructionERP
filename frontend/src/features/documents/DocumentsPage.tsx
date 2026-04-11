@@ -7,6 +7,7 @@ import {
   MoreHorizontal, Pencil, Tag, Ruler, Send,
 } from 'lucide-react';
 import { Card, Button, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
+import SimilarItemsPanel from '@/shared/ui/SimilarItemsPanel';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { apiGet, apiDelete, apiPatch } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
@@ -163,6 +164,14 @@ function PreviewModal({
               className="max-w-full max-h-[80vh] object-contain"
             />
           ) : null}
+        </div>
+
+        {/* Semantic similarity — finds documents with related content
+            across all projects (drawings about the same scope, RFIs on
+            the same trade, etc.).  Cross-project default is on so the
+            estimator gets cross-pollination from past work. */}
+        <div className="border-t border-border-light px-5 py-3 bg-surface-primary shrink-0">
+          <SimilarItemsPanel module="documents" id={doc.id} crossProject limit={5} />
         </div>
 
         {/* Linked BIM elements — appears at the bottom of the preview when

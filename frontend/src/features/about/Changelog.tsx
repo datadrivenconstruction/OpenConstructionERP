@@ -14,6 +14,22 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.4.0',
+    date: '2026-04-11',
+    changes: [
+      'Cross-module semantic memory layer — every business module now participates in a unified vector store via the new `EmbeddingAdapter` protocol. Six new collections live alongside the existing CWICR cost index: oe_boq_positions, oe_documents, oe_tasks, oe_risks, oe_bim_elements, oe_validation, oe_chat. All collections share one schema so the unified search layer writes to any of them through one code path',
+      'Multilingual embedding model — switched the default from all-MiniLM-L6-v2 (English-only) to intfloat/multilingual-e5-small (50+ languages, same 384-dim). CWICR\'s 9-language cost database now ranks correctly across English, German, Russian, Lithuanian, French, Spanish, Italian, Polish and Portuguese. The legacy model is kept as a graceful fallback so existing LanceDB tables stay loadable',
+      'Event-driven indexing — every Position / Document / Task / Risk / BIM Element create/update/delete event triggers an automatic upsert into the matching vector collection. No cron jobs, no Celery workers, no manual reindex needed for normal operation. Failures are logged and swallowed so vector indexing can never break a CRUD path',
+      'Per-module reindex / status / similar endpoints — every participating module now exposes GET /vector/status/, POST /vector/reindex/?project_id=...&purge_first=false, and GET /{id}/similar/?limit=5&cross_project=true. Live for BOQ, Documents, Tasks, Risks and BIM elements',
+      'Unified cross-collection search API — new oe_search module with GET /api/v1/search/?q=...&types=boq,documents,risks fans out to every selected collection in parallel and merges via Reciprocal Rank Fusion. Plus /search/status/ and /search/types/',
+      'Cmd+Shift+K Global Search modal — frontend GlobalSearchModal with debounced input, facet pills (BOQ / Documents / Tasks / Risks / BIM / Validation / Chat) showing per-collection hit counts, current project scope toggle, grouped results and click-to-navigate routing. Works from any page including text fields',
+      'Universal "Similar items" panel — drop-in <SimilarItemsPanel module="risks" id={...} /> component for any record card. Embedded in Risk Register detail (cross-project lessons learned reuse), BIM viewer element details, and Documents preview modal',
+      'AI Chat semantic tools — six new tool definitions: search_boq_positions, search_documents, search_tasks, search_risks, search_bim_elements, search_anything. Each tool returns ranked hits with confidence scores. System prompt updated to prefer semantic tools for free-text questions and to quote provenance in responses',
+      'AI Advisor RAG injection — project_intelligence/advisor.py answer_question() now retrieves the top-12 semantic hits from the unified search layer and injects them into the LLM prompt as a "Relevant context (semantic retrieval)" block. The advisor is now a proper RAG agent — answers stay anchored in real evidence instead of hallucinating',
+      'Verification: 759 total routes mounted, 28 vector / similar / search routes wired end-to-end, 217 487 CWICR cost vectors auto-loaded on startup, frontend tsc --noEmit clean, backend imports clean across foundation + 5 modules + unified search + 6 new chat tools + advisor RAG',
+    ],
+  },
+  {
     version: '1.3.32',
     date: '2026-04-10',
     changes: [

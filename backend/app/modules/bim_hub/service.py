@@ -51,9 +51,23 @@ from app.modules.bim_hub.schemas import (
     QuantityMapApplyRequest,
     QuantityMapApplyResult,
 )
+from app.core.events import event_bus
 from app.modules.boq.models import BOQ, Position
 
 logger = logging.getLogger(__name__)
+_logger_events = logging.getLogger(__name__ + ".events")
+
+
+async def _safe_publish(
+    name: str,
+    data: dict[str, Any],
+    source_module: str = "oe_bim_hub",
+) -> None:
+    """Publish event safely — ignores MissingGreenlet errors with SQLite async."""
+    try:
+        await event_bus.publish(name, data, source_module=source_module)
+    except Exception:
+        _logger_events.debug("Event publish skipped (SQLite async): %s", name)
 
 # Sentinel key used by ``list_elements_with_links`` to signal that a
 # BIM-model validation report exists. Routers can detect "report ran but
@@ -160,8 +174,26 @@ class BIMHubService:
         """
         model = await self.get_model(model_id)  # 404 check
         project_id = model.project_id
+
+        # Capture element ids so we can drop them from the vector store
+        # after the cascade delete removes them from the DB.
+        elem_ids_stmt = select(BIMElement.id).where(BIMElement.model_id == model_id)
+        doomed_ids = [
+            row_id for (row_id,) in (await self.session.execute(elem_ids_stmt)).all()
+        ]
+
         await self.model_repo.delete(model_id)
         logger.info("BIM model deleted: %s", model_id)
+
+        for old_id in doomed_ids:
+            await _safe_publish(
+                "bim_hub.element.deleted",
+                {
+                    "element_id": str(old_id),
+                    "model_id": str(model_id),
+                    "project_id": str(project_id) if project_id else None,
+                },
+            )
 
         # Best-effort blob cleanup (after DB delete so we never strand
         # files belonging to a still-live DB row).  Routed through the
@@ -579,10 +611,27 @@ class BIMHubService:
         """
         model = await self.get_model(model_id)
 
+        # Capture existing element ids so we can emit element.deleted
+        # events for the vector store before wiping them.
+        existing_ids_stmt = select(BIMElement.id).where(BIMElement.model_id == model_id)
+        existing_ids = [
+            row_id for (row_id,) in (await self.session.execute(existing_ids_stmt)).all()
+        ]
+
         # Delete existing elements
         deleted = await self.element_repo.delete_all_for_model(model_id)
         if deleted:
             logger.info("Deleted %d existing elements for model %s", deleted, model_id)
+
+        for old_id in existing_ids:
+            await _safe_publish(
+                "bim_hub.element.deleted",
+                {
+                    "element_id": str(old_id),
+                    "model_id": str(model_id),
+                    "project_id": str(model.project_id) if model.project_id else None,
+                },
+            )
 
         # Create new elements
         elements = [
@@ -604,6 +653,16 @@ class BIMHubService:
             for e in elements_data
         ]
         created = await self.element_repo.bulk_create(elements)
+
+        for elem in created:
+            await _safe_publish(
+                "bim_hub.element.created",
+                {
+                    "element_id": str(elem.id),
+                    "model_id": str(model_id),
+                    "project_id": str(model.project_id) if model.project_id else None,
+                },
+            )
 
         # Compute unique storeys
         storeys = {e.storey for e in created if e.storey}

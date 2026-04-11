@@ -12,6 +12,7 @@ Endpoints:
 
 import logging
 import uuid
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
@@ -256,3 +257,113 @@ async def delete_risk(
 ) -> None:
     """Delete a risk item."""
     await service.delete_risk(risk_id)
+
+
+# ── Vector / semantic memory endpoints ───────────────────────────────────
+#
+# These three routes plug the risk module into the cross-module semantic
+# memory layer (see ``app/core/vector_index.py``).  Risks are the single
+# highest-value collection for cross-project semantic search — lessons
+# learned reuse is why this infrastructure exists in the first place —
+# so the ``similar`` endpoint defaults to ``cross_project=true``.
+
+
+@router.get(
+    "/vector/status/",
+    dependencies=[Depends(RequirePermission("risk.read"))],
+)
+async def risk_vector_status() -> dict[str, Any]:
+    """Return health + row count for the ``oe_risks`` collection.
+
+    Used by the admin panel and the global search status widget so the
+    user can tell at a glance whether semantic search over risks is
+    ready, partially indexed or empty.
+    """
+    from app.core.vector_index import COLLECTION_RISKS, collection_status
+
+    return collection_status(COLLECTION_RISKS)
+
+
+@router.post(
+    "/vector/reindex/",
+    dependencies=[Depends(RequirePermission("risk.update"))],
+)
+async def risk_vector_reindex(
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    project_id: uuid.UUID | None = Query(default=None),
+    purge_first: bool = Query(default=False),
+) -> dict[str, Any]:
+    """Backfill the risk vector collection.
+
+    Optional ``project_id`` narrows the scope so users can reindex one
+    project at a time without re-embedding the entire tenant.  Set
+    ``purge_first=true`` to wipe the matching subset before re-encoding
+    — useful when the embedding model has changed.
+    """
+    from sqlalchemy import select
+
+    from app.core.vector_index import reindex_collection
+    from app.modules.risk.models import RiskItem
+    from app.modules.risk.vector_adapter import risk_vector_adapter
+
+    stmt = select(RiskItem)
+    if project_id is not None:
+        stmt = stmt.where(RiskItem.project_id == project_id)
+
+    rows = list((await session.execute(stmt)).scalars().all())
+    return await reindex_collection(
+        risk_vector_adapter,
+        rows,
+        purge_first=purge_first,
+    )
+
+
+@router.get(
+    "/{risk_id}/similar/",
+    dependencies=[Depends(RequirePermission("risk.read"))],
+)
+async def risk_similar(
+    risk_id: uuid.UUID,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    limit: int = Query(default=5, ge=1, le=20),
+    cross_project: bool = Query(default=True),
+) -> dict[str, Any]:
+    """Return risks semantically similar to the given one.
+
+    Defaults to **cross-project** search — this is the whole point of
+    the risk vector collection.  Estimators starting a new project want
+    to instantly surface "risks like this one that we already faced on
+    past jobs" so they can reuse the mitigation strategy, contingency
+    plan and budget reserve.  Pass ``cross_project=false`` to restrict
+    the search to the same project (rarely the right choice for risks).
+
+    Returns a list of :class:`VectorHit` dicts plus the source row id so
+    the frontend can highlight the origin.
+    """
+    from sqlalchemy import select
+
+    from app.core.vector_index import find_similar
+    from app.modules.risk.models import RiskItem
+    from app.modules.risk.vector_adapter import risk_vector_adapter
+
+    stmt = select(RiskItem).where(RiskItem.id == risk_id)
+    row = (await session.execute(stmt)).scalar_one_or_none()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Risk not found")
+
+    project_id = str(row.project_id) if row.project_id is not None else None
+    hits = await find_similar(
+        risk_vector_adapter,
+        row,
+        project_id=project_id,
+        cross_project=cross_project,
+        limit=limit,
+    )
+    return {
+        "source_id": str(risk_id),
+        "limit": limit,
+        "cross_project": cross_project,
+        "hits": [h.to_dict() for h in hits],
+    }

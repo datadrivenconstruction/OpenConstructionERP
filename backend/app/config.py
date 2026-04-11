@@ -76,6 +76,17 @@ class Settings(BaseSettings):
     vector_backend: str = "lancedb"  # "lancedb" (embedded, default) or "qdrant" (server)
     qdrant_url: str | None = "http://localhost:6333"
     vector_data_dir: str = ""  # LanceDB storage path, default: ~/.openestimator/data/vectors
+    # Embedding model used by the multi-collection semantic memory layer.
+    # Default is multilingual so the CWICR cost database (9 languages) and
+    # cross-module collections (BOQ, documents, tasks, risks, BIM elements,
+    # etc.) all rank correctly across English, German, Russian, Lithuanian,
+    # French, Spanish, Italian, Polish and Portuguese.  All-MiniLM-L6-v2 is
+    # kept as a fallback because the existing CWICR LanceDB index was built
+    # with it (same 384-dim, so the snapshot is dim-compatible until you
+    # explicitly reindex via `make vector-reindex-costs`).
+    embedding_model_name: str = "intfloat/multilingual-e5-small"
+    embedding_model_dim: int = 384
+    embedding_model_fallback: str = "sentence-transformers/all-MiniLM-L6-v2"
     openai_api_key: str | None = None
     anthropic_api_key: str | None = None
     gemini_api_key: str | None = None

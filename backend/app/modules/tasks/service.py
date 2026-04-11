@@ -132,6 +132,17 @@ class TaskService:
 
         logger.info("Task created: %s (%s) for project %s", task.title[:40], data.task_type, data.project_id)
 
+        # Publish lifecycle event for vector indexing + other subscribers
+        await _safe_publish(
+            "tasks.task.created",
+            {
+                "task_id": str(task.id),
+                "project_id": str(data.project_id),
+                "task_type": data.task_type,
+            },
+            source_module="oe_tasks",
+        )
+
         # Publish task.assigned event so notification handlers fire
         if data.responsible_id:
             await _safe_publish(
@@ -394,6 +405,17 @@ class TaskService:
 
         logger.info("Task updated: %s (fields=%s)", task_id, list(fields.keys()))
 
+        # Publish lifecycle event for vector indexing + other subscribers
+        await _safe_publish(
+            "tasks.task.updated",
+            {
+                "task_id": str(task_id),
+                "project_id": str(task.project_id),
+                "updated_fields": list(fields.keys()),
+            },
+            source_module="oe_tasks",
+        )
+
         # Fire task.assigned when responsible_id changes to a new user
         if (
             new_responsible is not None
@@ -418,9 +440,20 @@ class TaskService:
         task_id: uuid.UUID,
         current_user_id: str | None = None,
     ) -> None:
-        await self.get_task(task_id, current_user_id=current_user_id)
+        task = await self.get_task(task_id, current_user_id=current_user_id)
+        project_id = str(task.project_id) if task.project_id else ""
         await self.repo.delete(task_id)
         logger.info("Task deleted: %s", task_id)
+
+        # Publish lifecycle event for vector indexing + other subscribers
+        await _safe_publish(
+            "tasks.task.deleted",
+            {
+                "task_id": str(task_id),
+                "project_id": project_id,
+            },
+            source_module="oe_tasks",
+        )
 
     async def complete_task(
         self,
