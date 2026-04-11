@@ -14,6 +14,17 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.27',
+    date: '2026-04-11',
+    changes: [
+      'BIM filter panel — three professional grouping modes via a new segmented control: **By Category** (flat list of every Revit category / IFC entity, default — works for both formats with zero curation), **By Type Name** (hierarchical Category → Family/Type Name like the Revit Browser, with chevron-collapsible category headers), and **Buckets** (existing semantic Structure / Envelope / MEP / … grouping kept as a third option).  Fixes the user complaint that the bucket-only view felt incomplete and unclear about how filters were structured',
+      'New `getTypeNameKey()` helper resolves the second-level Type Name from `el.name` first, then `properties.family`, `properties["family and type"]`, or `properties.type`.  Real Revit data has 100% `name` coverage and 75% `properties.family` coverage, so the type-name view always populates',
+      'Added explicit "Clear types" link in the type-filter section header (matches the existing "All levels" link in the storey section) so users have a one-click way to drop type selections without re-clicking each chip',
+      'Headless test extended (TEST 7d) — verifies all three grouping modes by clicking the segmented control buttons and counting category headers: 127 category headers rendered in Type Name mode on the demo (every distinct element_type gets its own collapsible header).  Screenshots saved at 14-typename-grouping.png and 15-buckets-grouping.png',
+      'Headless test fix — TEST 7b\'s modal-close button selector was matching the close button on the BIM filter panel itself (both are X-icon lucide buttons), accidentally closing the panel between tests and breaking TEST 7c.  Scoped the close-button query to elements inside the `.fixed.inset-0.z-50` modal overlay only.  All 10 verdicts now PASS deterministically',
+    ],
+  },
+  {
     version: '1.3.26',
     date: '2026-04-11',
     changes: [

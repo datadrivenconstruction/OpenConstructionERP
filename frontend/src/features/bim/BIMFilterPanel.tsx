@@ -45,6 +45,23 @@ import {
 
 export type GroupBy = 'storey' | 'type';
 
+/** Top-level grouping mode for the type filter section.
+ *
+ *   • category — flat list of every unique element_type / IfcEntity,
+ *                sorted by count.  Best matches "show me all the
+ *                Revit categories / all the IfcEntities".  This is
+ *                the default because it works for BOTH Revit and IFC
+ *                without any noise / curation.
+ *   • typename — hierarchical Category → Type Name (Revit Browser
+ *                style: "Walls > Generic - 200mm").  Best for picking
+ *                a single type out of a complex model.
+ *   • buckets  — semantic buckets (Structure / Envelope / MEP / …)
+ *                that aggregate categories into estimator-friendly
+ *                groups.  Useful when you want a quick overview but
+ *                hides the raw category names.
+ */
+export type GroupingMode = 'category' | 'typename' | 'buckets';
+
 export type BIMModelFormat = 'rvt' | 'ifc' | 'other';
 
 export interface BIMFilterState {
@@ -117,9 +134,18 @@ function detectModelFormat(
 }
 
 /**
- * Get the type/category label for an element depending on model format.
- * - Revit: prefer `category` (e.g. "Walls"), fall back to `element_type`
- * - IFC: use `element_type` which holds the IfcEntity name (e.g. "IfcWall")
+ * Get the top-level category label for an element depending on model format.
+ *
+ *   • Revit  →  the Category (Walls, Doors, Curtain Wall Mullions, …).
+ *               Stored on `el.category` if the converter populated it,
+ *               otherwise we fall back to `el.element_type` which the
+ *               Excel/parquet conversion uses as the category column.
+ *   • IFC    →  the IfcEntity (IfcWall, IfcSlab, IfcDoor, …) which is
+ *               always on `el.element_type`.
+ *
+ * Both formats end up using `element_type` as the primary axis when
+ * `category` isn't populated — that's the "Category" view in the
+ * filter panel grouping selector.
  */
 function getTypeKey(el: BIMElementData, format: BIMModelFormat): string {
   if (format === 'rvt') {
@@ -129,6 +155,31 @@ function getTypeKey(el: BIMElementData, format: BIMModelFormat): string {
     return el.element_type || el.category || 'Unknown';
   }
   return el.category || el.element_type || 'Unknown';
+}
+
+/**
+ * Get the second-level Type Name for an element — e.g. "Generic - 200mm"
+ * for a Wall, "0915 x 1220mm" for a Door, "L Mullion 1" for a curtain
+ * wall mullion.  This is the Revit "Family/Type Name" axis.
+ *
+ * Source preference order:
+ *   1. `el.name` (always populated by the parquet ingestion path)
+ *   2. `el.properties.family` (Revit Family parameter)
+ *   3. `el.properties["family and type"]` (combined Revit param)
+ *   4. `el.properties.type` (Revit Type parameter)
+ *   5. fallback to "Unspecified"
+ */
+function getTypeNameKey(el: BIMElementData): string {
+  if (el.name && el.name !== 'None' && el.name !== '') return el.name;
+  const props = (el.properties || {}) as Record<string, unknown>;
+  const cand =
+    props['family'] ??
+    props['family and type'] ??
+    props['type'] ??
+    props['Family'] ??
+    props['Type'];
+  if (typeof cand === 'string' && cand !== '' && cand !== 'None') return cand;
+  return 'Unspecified';
 }
 
 /**
@@ -228,6 +279,14 @@ export default function BIMFilterPanel({
     buildingsOnly: true,
     groupBy: 'type',
   });
+  /** Top-level grouping selector — defaults to "By Category" because
+   *  it works equally well for Revit (categories) and IFC (entities)
+   *  with zero curation. */
+  const [groupingMode, setGroupingMode] = useState<GroupingMode>('category');
+  /** Which Category headers in the "By Type Name" view are expanded. */
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
+    () => new Set(),
+  );
 
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   /** Which bucket sections in the Types panel are currently expanded.
@@ -272,6 +331,8 @@ export default function BIMFilterPanel({
     /** bucket → ordered list of [typeName, count] */
     const byBucket = new Map<BIMCategoryBucket, Map<string, number>>();
     const bucketTotals = new Map<BIMCategoryBucket, number>();
+    /** Category → (TypeName → count) — Revit Browser hierarchy */
+    const byCategoryThenType = new Map<string, Map<string, number>>();
 
     for (const el of elements) {
       const tpe = getTypeKey(el, format);
@@ -284,7 +345,20 @@ export default function BIMFilterPanel({
         byStorey.set(el.storey, (byStorey.get(el.storey) ?? 0) + 1);
       }
 
-      byType.set(tpe, (byType.get(tpe) ?? 0) + 1);
+      // Skip noise rows from the flat category counts when buildingsOnly
+      // is on, so the user sees a clean list of real categories.
+      if (!(state.buildingsOnly && isNoise)) {
+        byType.set(tpe, (byType.get(tpe) ?? 0) + 1);
+
+        // Hierarchical Category → Type Name (Revit Browser style)
+        const typeName = getTypeNameKey(el);
+        let perCat = byCategoryThenType.get(tpe);
+        if (!perCat) {
+          perCat = new Map();
+          byCategoryThenType.set(tpe, perCat);
+        }
+        perCat.set(typeName, (perCat.get(typeName) ?? 0) + 1);
+      }
 
       const bucket = bucketOf(tpe);
       let perBucket = byBucket.get(bucket);
@@ -326,10 +400,29 @@ export default function BIMFilterPanel({
         return a.raw.localeCompare(b.raw);
       });
 
+    // Hierarchical Category → Type Name list, sorted by category total
+    // descending then by type-name count descending.  Filters out noise
+    // categories when buildingsOnly is on.
+    const categoriesWithTypes: Array<{
+      category: string;
+      total: number;
+      types: Array<[string, number]>;
+    }> = [];
+    for (const [cat, typeMap] of byCategoryThenType.entries()) {
+      const total = Array.from(typeMap.values()).reduce((s, n) => s + n, 0);
+      categoriesWithTypes.push({
+        category: cat,
+        total,
+        types: Array.from(typeMap.entries()).sort((a, b) => b[1] - a[1]),
+      });
+    }
+    categoriesWithTypes.sort((a, b) => b.total - a.total);
+
     return {
       storeys: storeysOrdered,
       types: Array.from(byType.entries()).sort((a, b) => b[1] - a[1]),
       buckets: orderedBuckets,
+      categoriesWithTypes,
     };
   }, [elements, format, state.buildingsOnly]);
 
@@ -786,85 +879,258 @@ export default function BIMFilterPanel({
           )}
         </FilterSection>
 
-        {/* Types — grouped by semantic bucket (Structure / Envelope / MEP / …)
-            Noise buckets (Annotations, Analytical) are hidden when
-            buildingsOnly is on, otherwise shown collapsed at the bottom. */}
-        <FilterSection title={typesSectionTitle} icon={<Package size={12} />}>
-          <div className="space-y-1">
-            {counts.buckets
-              .filter(({ bucket }) =>
-                state.buildingsOnly ? !BUCKETS[bucket].noise : true,
-              )
-              .map(({ bucket, total, types }) => {
-                const meta = BUCKETS[bucket];
-                const isOpen = expandedBuckets.has(bucket);
-                const typeNames = types.map(([n]) => n);
-                const allOn = typeNames.every((n) => state.types.has(n));
-                return (
-                  <div
-                    key={bucket}
-                    className="rounded border border-border-light/60 bg-surface-secondary/40"
-                  >
-                    <div className="flex items-center justify-between px-2 py-1">
-                      <button
-                        type="button"
-                        onClick={() => toggleBucket(bucket)}
-                        className="flex items-center gap-1.5 min-w-0 flex-1 text-left"
-                      >
-                        {isOpen ? (
-                          <ChevronDown size={11} className="text-content-tertiary shrink-0" />
-                        ) : (
-                          <ChevronRight size={11} className="text-content-tertiary shrink-0" />
-                        )}
-                        <span className={`text-[11px] font-semibold ${meta.color} truncate`}>
-                          {meta.label}
-                        </span>
-                        <span className="text-[10px] text-content-quaternary tabular-nums shrink-0">
-                          {total.toLocaleString()}
-                        </span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => toggleBucketSelection(typeNames)}
-                        className="text-[10px] px-1.5 py-0.5 rounded text-content-tertiary hover:text-oe-blue hover:bg-surface-primary"
-                        title={
-                          allOn
-                            ? t('bim.filter_bucket_clear', {
-                                defaultValue: 'Clear bucket',
-                              })
-                            : t('bim.filter_bucket_select_all', {
-                                defaultValue: 'Select all in bucket',
-                              })
-                        }
-                      >
-                        {allOn ? '✓' : '+'}
-                      </button>
-                    </div>
-                    {isOpen && (
-                      <div className="px-2 pb-1.5 pt-0.5 space-y-0.5">
-                        {types.map(([name, count]) => {
-                          const active = state.types.has(name);
-                          return (
-                            <FilterChip
-                              key={name}
-                              label={name}
-                              count={count}
-                              active={active}
-                              onClick={() => toggleSet('types', name)}
-                            />
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            {counts.buckets.length === 0 && (
-              <div className="text-[10px] text-content-quaternary italic px-1">
-                {t('bim.filter_no_types', { defaultValue: 'No element types detected' })}
-              </div>
-            )}
+        {/* Type filter — three grouping modes:
+              By Category   → flat list of every element_type / IfcEntity
+              By Type Name  → hierarchical Category → TypeName (Revit Browser)
+              Buckets       → semantic buckets (Structure/Envelope/MEP/…)
+            The segmented control at the top lets the user pick. */}
+        <FilterSection
+          title={typesSectionTitle}
+          icon={<Package size={12} />}
+          action={
+            counts.types.length > 0 && state.types.size > 0 ? (
+              <button
+                type="button"
+                onClick={() => setState((p) => ({ ...p, types: new Set() }))}
+                className="text-[10px] text-content-tertiary hover:text-oe-blue"
+              >
+                {t('bim.filter_clear_types', { defaultValue: 'Clear types' })}
+              </button>
+            ) : null
+          }
+        >
+          {/* Segmented mode picker */}
+          <div className="flex items-center gap-0.5 mb-2 p-0.5 rounded bg-surface-secondary border border-border-light">
+            {(
+              [
+                {
+                  id: 'category' as const,
+                  label: t('bim.group_by_category', { defaultValue: 'Category' }),
+                  title: t('bim.group_by_category_title', {
+                    defaultValue:
+                      'Flat list of every Revit category / IFC entity, sorted by count',
+                  }),
+                },
+                {
+                  id: 'typename' as const,
+                  label: t('bim.group_by_typename', { defaultValue: 'Type Name' }),
+                  title: t('bim.group_by_typename_title', {
+                    defaultValue: 'Category → Type Name hierarchy (Revit Browser style)',
+                  }),
+                },
+                {
+                  id: 'buckets' as const,
+                  label: t('bim.group_by_bucket', { defaultValue: 'Buckets' }),
+                  title: t('bim.group_by_bucket_title', {
+                    defaultValue: 'Semantic buckets (Structure / Envelope / MEP / …)',
+                  }),
+                },
+              ] as const
+            ).map((opt) => (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => setGroupingMode(opt.id)}
+                title={opt.title}
+                className={`flex-1 py-0.5 text-[10px] font-medium rounded transition-colors ${
+                  groupingMode === opt.id
+                    ? 'bg-oe-blue text-white'
+                    : 'text-content-tertiary hover:text-content-primary'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
           </div>
+
+          {/* ── Mode 1: By Category — flat chip list ────────────────── */}
+          {groupingMode === 'category' && (
+            <div className="space-y-0.5">
+              {counts.types.length === 0 ? (
+                <div className="text-[10px] text-content-quaternary italic px-1">
+                  {t('bim.filter_no_types', {
+                    defaultValue: 'No element types detected',
+                  })}
+                </div>
+              ) : (
+                counts.types.map(([name, count]) => {
+                  const active = state.types.has(name);
+                  return (
+                    <FilterChip
+                      key={name}
+                      label={name}
+                      count={count}
+                      active={active}
+                      onClick={() => toggleSet('types', name)}
+                    />
+                  );
+                })
+              )}
+            </div>
+          )}
+
+          {/* ── Mode 2: By Type Name — Category → Type Name hierarchy ─ */}
+          {groupingMode === 'typename' && (
+            <div className="space-y-1">
+              {counts.categoriesWithTypes.length === 0 ? (
+                <div className="text-[10px] text-content-quaternary italic px-1">
+                  {t('bim.filter_no_types', { defaultValue: 'No element types detected' })}
+                </div>
+              ) : (
+                counts.categoriesWithTypes.map(({ category, total, types }) => {
+                  const isOpen = expandedCategories.has(category);
+                  const active = state.types.has(category);
+                  return (
+                    <div
+                      key={category}
+                      className="rounded border border-border-light/60 bg-surface-secondary/40"
+                    >
+                      <div className="flex items-center justify-between gap-1 px-2 py-1">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setExpandedCategories((prev) => {
+                              const next = new Set(prev);
+                              if (next.has(category)) next.delete(category);
+                              else next.add(category);
+                              return next;
+                            })
+                          }
+                          className="flex items-center gap-1 min-w-0 flex-1 text-left"
+                        >
+                          {isOpen ? (
+                            <ChevronDown size={11} className="text-content-tertiary shrink-0" />
+                          ) : (
+                            <ChevronRight size={11} className="text-content-tertiary shrink-0" />
+                          )}
+                          <span
+                            className={`text-[11px] font-semibold truncate ${
+                              active ? 'text-oe-blue' : 'text-content-primary'
+                            }`}
+                          >
+                            {category}
+                          </span>
+                          <span className="text-[10px] text-content-quaternary tabular-nums shrink-0 ms-auto">
+                            {total.toLocaleString()}
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => toggleSet('types', category)}
+                          className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 ${
+                            active
+                              ? 'bg-oe-blue text-white'
+                              : 'text-content-tertiary hover:text-oe-blue hover:bg-surface-primary'
+                          }`}
+                          title={
+                            active
+                              ? t('bim.deselect_category', { defaultValue: 'Deselect category' })
+                              : t('bim.select_category', { defaultValue: 'Filter by this category' })
+                          }
+                        >
+                          {active ? '✓' : '+'}
+                        </button>
+                      </div>
+                      {isOpen && (
+                        <ul className="px-2 pb-1.5 pt-0.5 space-y-0.5">
+                          {types.map(([typeName, count]) => (
+                            <li
+                              key={typeName}
+                              className="flex items-center justify-between gap-1 px-1.5 py-0.5 rounded text-[10px] text-content-secondary hover:bg-surface-primary"
+                            >
+                              <span className="truncate" title={typeName}>
+                                {typeName}
+                              </span>
+                              <span className="text-content-quaternary tabular-nums shrink-0">
+                                {count.toLocaleString()}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
+
+          {/* ── Mode 3: Buckets — semantic groups ─────────────────────── */}
+          {groupingMode === 'buckets' && (
+            <div className="space-y-1">
+              {counts.buckets
+                .filter(({ bucket }) =>
+                  state.buildingsOnly ? !BUCKETS[bucket].noise : true,
+                )
+                .map(({ bucket, total, types }) => {
+                  const meta = BUCKETS[bucket];
+                  const isOpen = expandedBuckets.has(bucket);
+                  const typeNames = types.map(([n]) => n);
+                  const allOn = typeNames.every((n) => state.types.has(n));
+                  return (
+                    <div
+                      key={bucket}
+                      className="rounded border border-border-light/60 bg-surface-secondary/40"
+                    >
+                      <div className="flex items-center justify-between px-2 py-1">
+                        <button
+                          type="button"
+                          onClick={() => toggleBucket(bucket)}
+                          className="flex items-center gap-1.5 min-w-0 flex-1 text-left"
+                        >
+                          {isOpen ? (
+                            <ChevronDown size={11} className="text-content-tertiary shrink-0" />
+                          ) : (
+                            <ChevronRight size={11} className="text-content-tertiary shrink-0" />
+                          )}
+                          <span className={`text-[11px] font-semibold ${meta.color} truncate`}>
+                            {meta.label}
+                          </span>
+                          <span className="text-[10px] text-content-quaternary tabular-nums shrink-0">
+                            {total.toLocaleString()}
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => toggleBucketSelection(typeNames)}
+                          className="text-[10px] px-1.5 py-0.5 rounded text-content-tertiary hover:text-oe-blue hover:bg-surface-primary"
+                          title={
+                            allOn
+                              ? t('bim.filter_bucket_clear', { defaultValue: 'Clear bucket' })
+                              : t('bim.filter_bucket_select_all', {
+                                  defaultValue: 'Select all in bucket',
+                                })
+                          }
+                        >
+                          {allOn ? '✓' : '+'}
+                        </button>
+                      </div>
+                      {isOpen && (
+                        <div className="px-2 pb-1.5 pt-0.5 space-y-0.5">
+                          {types.map(([name, count]) => {
+                            const active = state.types.has(name);
+                            return (
+                              <FilterChip
+                                key={name}
+                                label={name}
+                                count={count}
+                                active={active}
+                                onClick={() => toggleSet('types', name)}
+                              />
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              {counts.buckets.length === 0 && (
+                <div className="text-[10px] text-content-quaternary italic px-1">
+                  {t('bim.filter_no_types', { defaultValue: 'No element types detected' })}
+                </div>
+              )}
+            </div>
+          )}
         </FilterSection>
 
         {/* Element explorer (grouped) */}
