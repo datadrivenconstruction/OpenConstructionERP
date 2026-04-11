@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, Field
 
 # ── Result item (single rule check) ────────────────────────────────
 
@@ -49,7 +49,17 @@ class ValidationReportResponse(BaseModel):
     results: list[dict[str, Any]] = Field(default_factory=list)
     created_by: UUID | None = None
     created_at: datetime | None = None
-    metadata_: dict[str, Any] = Field(default_factory=dict, alias="metadata")
+    # NB: SQLAlchemy declarative reserves `metadata` for the class-level
+    # MetaData() registry, so reading `report.metadata` returns the
+    # SQLAlchemy registry object — not our column.  We use AliasChoices
+    # to make Pydantic try `metadata_` (the python attribute name) FIRST
+    # when `from_attributes=True` is on, falling back to `metadata` for
+    # the JSON-input case.
+    metadata_: dict[str, Any] = Field(
+        default_factory=dict,
+        validation_alias=AliasChoices("metadata_", "metadata"),
+        serialization_alias="metadata",
+    )
 
     model_config = {"from_attributes": True, "populate_by_name": True}
 
@@ -82,6 +92,26 @@ class RunValidationResponse(BaseModel):
     rule_sets: list[str]
     duration_ms: float
     results: list[ValidationResultItem]
+
+
+# ── BIM per-element validation ────────────────────────────────────────────
+
+
+class CheckBIMModelRequest(BaseModel):
+    """Request body for POST /validation/check-bim-model.
+
+    ``rule_ids`` is optional; if omitted the full enabled set of universal
+    BIM element rules runs.
+    """
+
+    model_id: UUID
+    rule_ids: list[str] | None = Field(
+        default=None,
+        description=(
+            "Optional subset of BIMElementRule ids to run "
+            "(e.g. ['bim.wall.has_thickness']). None runs all enabled rules."
+        ),
+    )
 
 
 # ── Rule sets ─────────────────────────────────────────────────────────────

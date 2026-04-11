@@ -5,6 +5,29 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.31] — 2026-04-11
+
+### Added
+- **Inline create-from-element modals** in BIM viewer — three new
+  modals (`CreateTaskFromBIMModal`, `LinkDocumentToBIMModal`,
+  `LinkActivityToBIMModal`) let the user create new tasks, link existing
+  documents, and link existing schedule activities to a BIM element
+  WITHOUT leaving the viewer.
+- **Validation ↔ BIM per-element rules engine** — new
+  `POST /api/v1/validation/check-bim-model` endpoint runs universal
+  BIM rules (wall has thickness, structural has material, fire-rating
+  present, MEP has system, etc.) against every element in a model.
+  Per-element results eager-loaded into `BIMElementResponse.validation_results`
+  + worst-severity rollup in `validation_status`.
+- **Per-element validation badge** in the BIM viewer details panel,
+  colour-coded by worst severity.
+- **Tasks page** — `TaskCard` now renders a "Pinned to N BIM element(s)"
+  badge with click-to-jump navigation.
+
+### Fixed
+- `ValidationReportResponse` pydantic schema collision with SQLAlchemy
+  `MetaData()` class-level registry — switched to `validation_alias`.
+
 ## [1.3.30] — 2026-04-11
 
 ### Added
