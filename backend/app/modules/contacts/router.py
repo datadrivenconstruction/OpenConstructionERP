@@ -118,6 +118,7 @@ async def _require_contact_access(
     "country, and active status. Returns total count for pagination.",
 )
 async def list_contacts(
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     contact_type: str | None = Query(default=None),
     country_code: str | None = Query(default=None),
@@ -129,14 +130,16 @@ async def list_contacts(
 ) -> ContactListResponse:
     """List contacts with optional filters.
 
-    TODO(v1.4-tenancy): scope results by ``tenant_id`` once the schema
-    migration lands. Today the service returns all rows and scoping would
-    require a repository-level filter by ``created_by``.
+    Results are scoped to the caller's own contacts via the
+    ``created_by`` proxy (until a real ``tenant_id`` migration lands).
+    Admins bypass the scope and see every contact in the database.
     """
+    owner_filter: str | None = None if await _is_admin(session, user_id) else user_id
     items, total = await service.list_contacts(
         contact_type=contact_type,
         country_code=country_code,
         is_active=is_active,
+        owner_id=owner_filter,
         offset=offset,
         limit=limit,
     )
@@ -159,6 +162,7 @@ async def list_contacts(
     "Supports optional type filter and pagination.",
 )
 async def search_contacts(
+    session: SessionDep,
     q: str = Query(..., min_length=1, max_length=200),
     contact_type: str | None = Query(default=None),
     is_active: bool = Query(default=True),
@@ -168,11 +172,16 @@ async def search_contacts(
     _perm: None = Depends(RequirePermission("contacts.read")),
     service: ContactService = Depends(_get_service),
 ) -> ContactListResponse:
-    """Search contacts across name, company, email."""
+    """Search contacts across name, company, email.
+
+    Scoped to the caller's own contacts; admins see everything.
+    """
+    owner_filter: str | None = None if await _is_admin(session, user_id) else user_id
     items, total = await service.list_contacts(
         search=q,
         contact_type=contact_type,
         is_active=is_active,
+        owner_id=owner_filter,
         offset=offset,
         limit=limit,
     )
@@ -195,6 +204,8 @@ async def search_contacts(
     "and count of contacts with expiring prequalification.",
 )
 async def contact_stats(
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("contacts.read")),
     service: ContactService = Depends(_get_service),
 ) -> ContactStatsResponse:
@@ -202,8 +213,11 @@ async def contact_stats(
 
     Returns total, breakdown by type and country (top 10), and count of
     contacts with approved prequalification that have qualified_until set.
+    Stats are scoped to the caller's own contacts; admins see global
+    aggregates.
     """
-    raw = await service.get_stats()
+    owner_filter: str | None = None if await _is_admin(session, user_id) else user_id
+    raw = await service.get_stats(owner_id=owner_filter)
     return ContactStatsResponse(
         total=raw["total"],
         by_type=raw["by_type"],
@@ -222,15 +236,22 @@ async def contact_stats(
     description="Find all contacts belonging to the same company (case-insensitive match).",
 )
 async def contacts_by_company(
+    session: SessionDep,
     company_name: str = Query(..., min_length=1, max_length=255),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("contacts.read")),
     service: ContactService = Depends(_get_service),
 ) -> ContactListResponse:
-    """List all contacts at the same company (case-insensitive match)."""
+    """List all contacts at the same company (case-insensitive match).
+
+    Scoped to the caller's own contacts; admins see everything.
+    """
+    owner_filter: str | None = None if await _is_admin(session, user_id) else user_id
     items, total = await service.list_by_company(
         company_name,
+        owner_id=owner_filter,
         offset=offset,
         limit=limit,
     )
