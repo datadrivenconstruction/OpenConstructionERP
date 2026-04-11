@@ -25,6 +25,10 @@ import {
   Camera,
   Square,
   CornerUpLeft,
+  FileText,
+  CheckSquare,
+  Calendar,
+  ExternalLink,
 } from 'lucide-react';
 import { SceneManager } from './SceneManager';
 import { ElementManager } from './ElementManager';
@@ -89,6 +93,13 @@ export interface BIMViewerProps {
   onAddToBOQ?: (element: BIMElementData) => void;
   /** User clicked "Unlink" on a specific link in the properties panel. */
   onUnlinkBOQ?: (linkId: string) => void;
+  /** User clicked a linked document in the properties panel — parent
+   *  navigates to /documents/{id} or opens an embedded preview. */
+  onOpenDocument?: (documentId: string) => void;
+  /** User clicked a linked task in the properties panel. */
+  onOpenTask?: (taskId: string) => void;
+  /** User clicked a linked schedule activity in the properties panel. */
+  onOpenActivity?: (activityId: string) => void;
 }
 
 /* ── Properties Table ──────────────────────────────────────────────────── */
@@ -157,6 +168,9 @@ export function BIMViewer({
   onGeometryLoaded,
   onAddToBOQ,
   onUnlinkBOQ,
+  onOpenDocument,
+  onOpenTask,
+  onOpenActivity,
 }: BIMViewerProps) {
   const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -658,6 +672,136 @@ export function BIMViewer({
                 </div>
               )}
             </div>
+
+            {/* Linked Documents — drawings, RFIs, photos pinned to this element.
+                Only renders when the backend response includes the embedded
+                briefs (v1.3.30+).  Empty state is hidden — no point showing
+                "0 documents" everywhere if the user hasn't started linking yet. */}
+            {selectedElement.linked_documents && selectedElement.linked_documents.length > 0 && (
+              <div className="rounded-md border border-violet-300/50 bg-violet-50/40 dark:bg-violet-950/20 p-2">
+                <h4 className="text-xs font-semibold text-violet-700 dark:text-violet-300 flex items-center gap-1 mb-1.5">
+                  <FileText size={11} />
+                  {t('bim.linked_documents', { defaultValue: 'Linked documents' })}
+                  <span className="text-[10px] text-content-tertiary font-normal">
+                    ({selectedElement.linked_documents.length})
+                  </span>
+                </h4>
+                <ul className="space-y-1">
+                  {selectedElement.linked_documents.map((d) => (
+                    <li
+                      key={d.id}
+                      className="flex items-center justify-between gap-1 px-1.5 py-1 rounded bg-surface-primary border border-border-light"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => onOpenDocument?.(d.document_id)}
+                        className="flex-1 min-w-0 text-left"
+                      >
+                        <div className="text-[11px] text-content-primary truncate" title={d.document_name || ''}>
+                          {d.document_name || '—'}
+                        </div>
+                        {d.document_category && (
+                          <div className="text-[9px] text-content-tertiary uppercase tracking-wider">
+                            {d.document_category}
+                          </div>
+                        )}
+                      </button>
+                      <ExternalLink size={10} className="text-content-tertiary shrink-0" />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Linked Tasks — defects / issues / RFIs spatially pinned to
+                this element. */}
+            {selectedElement.linked_tasks && selectedElement.linked_tasks.length > 0 && (
+              <div className="rounded-md border border-amber-300/50 bg-amber-50/40 dark:bg-amber-950/20 p-2">
+                <h4 className="text-xs font-semibold text-amber-700 dark:text-amber-300 flex items-center gap-1 mb-1.5">
+                  <CheckSquare size={11} />
+                  {t('bim.linked_tasks', { defaultValue: 'Linked tasks' })}
+                  <span className="text-[10px] text-content-tertiary font-normal">
+                    ({selectedElement.linked_tasks.length})
+                  </span>
+                </h4>
+                <ul className="space-y-1">
+                  {selectedElement.linked_tasks.map((task) => (
+                    <li
+                      key={task.id}
+                      className="flex items-center justify-between gap-1 px-1.5 py-1 rounded bg-surface-primary border border-border-light"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => onOpenTask?.(task.id)}
+                        className="flex-1 min-w-0 text-left"
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <span
+                            className={`text-[9px] px-1 rounded uppercase tracking-wider ${
+                              task.status === 'closed' || task.status === 'done'
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : task.status === 'in_progress'
+                                  ? 'bg-sky-100 text-sky-700'
+                                  : 'bg-amber-100 text-amber-700'
+                            }`}
+                          >
+                            {task.status}
+                          </span>
+                          {task.task_type && (
+                            <span className="text-[9px] text-content-tertiary">{task.task_type}</span>
+                          )}
+                        </div>
+                        <div className="text-[11px] text-content-primary truncate" title={task.title}>
+                          {task.title}
+                        </div>
+                      </button>
+                      <ExternalLink size={10} className="text-content-tertiary shrink-0" />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Linked Schedule Activities (4D) — activities that build,
+                modify, or affect this element on the project timeline. */}
+            {selectedElement.linked_activities && selectedElement.linked_activities.length > 0 && (
+              <div className="rounded-md border border-emerald-300/50 bg-emerald-50/40 dark:bg-emerald-950/20 p-2">
+                <h4 className="text-xs font-semibold text-emerald-700 dark:text-emerald-300 flex items-center gap-1 mb-1.5">
+                  <Calendar size={11} />
+                  {t('bim.linked_activities', { defaultValue: 'Schedule activities (4D)' })}
+                  <span className="text-[10px] text-content-tertiary font-normal">
+                    ({selectedElement.linked_activities.length})
+                  </span>
+                </h4>
+                <ul className="space-y-1">
+                  {selectedElement.linked_activities.map((act) => (
+                    <li
+                      key={act.id}
+                      className="flex items-center justify-between gap-1 px-1.5 py-1 rounded bg-surface-primary border border-border-light"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => onOpenActivity?.(act.id)}
+                        className="flex-1 min-w-0 text-left"
+                      >
+                        <div className="text-[11px] text-content-primary truncate" title={act.name}>
+                          {act.name}
+                        </div>
+                        <div className="flex items-center gap-1.5 text-[9px] text-content-tertiary tabular-nums">
+                          {act.start_date && <span>{act.start_date.slice(0, 10)}</span>}
+                          {act.start_date && act.end_date && <span>→</span>}
+                          {act.end_date && <span>{act.end_date.slice(0, 10)}</span>}
+                          {typeof act.percent_complete === 'number' && (
+                            <span className="ms-auto font-medium">{act.percent_complete}%</span>
+                          )}
+                        </div>
+                      </button>
+                      <ExternalLink size={10} className="text-content-tertiary shrink-0" />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* Properties */}
             {Object.keys(elementProperties).length > 0 && (

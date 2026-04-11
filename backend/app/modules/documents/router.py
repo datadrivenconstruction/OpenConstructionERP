@@ -30,6 +30,9 @@ from fastapi.responses import FileResponse
 from app.core.bulk_ops import BulkDeleteRequest
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.documents.schemas import (
+    DocumentBIMLinkCreate,
+    DocumentBIMLinkListResponse,
+    DocumentBIMLinkResponse,
     DocumentResponse,
     DocumentSummary,
     DocumentUpdate,
@@ -44,6 +47,7 @@ from app.modules.documents.service import (
     MAX_FILE_SIZE,
     PHOTO_BASE,
     UPLOAD_BASE,
+    DocumentBIMLinkService,
     DocumentService,
     PhotoService,
     SheetService,
@@ -564,6 +568,86 @@ async def get_sheet_versions(
         current=_sheet_to_response(result["current"]),
         history=[_sheet_to_response(s) for s in result["history"]],
     )
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# Document ↔ BIM element links
+# NOTE: These MUST come BEFORE /{document_id} parametric routes to avoid
+#       FastAPI matching "/bim-links" as a document_id (route shadowing).
+# ══════════════════════════════════════════════════════════════════════════
+
+
+def _get_bim_link_service(session: SessionDep) -> DocumentBIMLinkService:
+    return DocumentBIMLinkService(session)
+
+
+def _bim_link_to_response(link: object) -> DocumentBIMLinkResponse:
+    """Build a DocumentBIMLinkResponse from a DocumentBIMLink ORM object."""
+    return DocumentBIMLinkResponse.model_validate(link)
+
+
+@router.get("/bim-links/", response_model=DocumentBIMLinkListResponse)
+async def list_bim_links(
+    element_id: uuid.UUID | None = Query(default=None),
+    document_id: uuid.UUID | None = Query(default=None),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("documents.read")),
+    service: DocumentBIMLinkService = Depends(_get_bim_link_service),
+) -> DocumentBIMLinkListResponse:
+    """List Document ↔ BIM element links.
+
+    Exactly one of ``element_id`` or ``document_id`` must be supplied:
+    - ``element_id=X`` — every document linked to BIM element X
+    - ``document_id=Y`` — every BIM element linked from document Y
+    """
+    if (element_id is None) == (document_id is None):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Exactly one of 'element_id' or 'document_id' must be provided",
+        )
+
+    if element_id is not None:
+        links = await service.list_links_for_element(element_id)
+    else:
+        assert document_id is not None  # narrowing for type-checkers
+        links = await service.list_links_for_document(document_id)
+
+    items = [_bim_link_to_response(link) for link in links]
+    return DocumentBIMLinkListResponse(items=items, total=len(items))
+
+
+@router.post(
+    "/bim-links/",
+    response_model=DocumentBIMLinkResponse,
+    status_code=201,
+)
+async def create_bim_link(
+    payload: DocumentBIMLinkCreate,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("documents.create")),
+    service: DocumentBIMLinkService = Depends(_get_bim_link_service),
+) -> DocumentBIMLinkResponse:
+    """Create a new Document ↔ BIM element link."""
+    parsed_user_id: uuid.UUID | None = None
+    if user_id:
+        try:
+            parsed_user_id = uuid.UUID(str(user_id))
+        except (ValueError, TypeError):
+            parsed_user_id = None
+
+    link = await service.create_link(payload, user_id=parsed_user_id)
+    return _bim_link_to_response(link)
+
+
+@router.delete("/bim-links/{link_id}", status_code=204)
+async def delete_bim_link(
+    link_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("documents.delete")),
+    service: DocumentBIMLinkService = Depends(_get_bim_link_service),
+) -> None:
+    """Delete a Document ↔ BIM element link."""
+    await service.delete_link(link_id)
 
 
 # ══════════════════════════════════════════════════════════════════════════

@@ -17,7 +17,9 @@ import uuid
 from datetime import UTC, date, datetime, timedelta
 
 from fastapi import HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import noload
 
 from app.core.events import event_bus
 
@@ -674,6 +676,94 @@ class ScheduleService:
 
         logger.info("Activity %s progress updated to %.1f%%", activity_id, progress_pct)
         return await self.get_activity(activity_id)
+
+    # ── BIM ↔ Activity linking ─────────────────────────────────────────────
+
+    async def update_bim_links(
+        self,
+        activity_id: uuid.UUID,
+        bim_element_ids: list[str],
+    ) -> Activity:
+        """Replace the BIM element link set on an activity.
+
+        Args:
+            activity_id: Target activity identifier.
+            bim_element_ids: Full list of BIM element UUIDs (as strings) to
+                store on the activity. The existing list is replaced, not
+                merged.
+
+        Returns:
+            The updated activity (re-fetched from the database).
+
+        Raises:
+            HTTPException 404 if the activity does not exist.
+        """
+        activity = await self.get_activity(activity_id)
+        schedule_id_str = str(activity.schedule_id)
+
+        # Normalise to a list of plain strings so we never write a dict to
+        # the JSON column (legacy values may have been dict-shaped).
+        normalised = [str(eid) for eid in bim_element_ids]
+
+        await self.activity_repo.update_fields(
+            activity_id,
+            bim_element_ids=normalised,
+        )
+
+        await _safe_publish(
+            "schedule.activity.bim_links_updated",
+            {
+                "activity_id": str(activity_id),
+                "schedule_id": schedule_id_str,
+                "bim_element_ids": normalised,
+                "count": len(normalised),
+            },
+            source_module="oe_schedule",
+        )
+
+        logger.info(
+            "Activity %s BIM links replaced (%d element(s))",
+            activity_id,
+            len(normalised),
+        )
+        return await self.get_activity(activity_id)
+
+    async def get_activities_for_bim_element(
+        self,
+        bim_element_id: str,
+        project_id: uuid.UUID,
+    ) -> list[Activity]:
+        """Return all activities in ``project_id`` that reference ``bim_element_id``.
+
+        The ``bim_element_ids`` JSON column is stored as a plain list so we
+        filter on the Python side (works across SQLite and PostgreSQL without
+        a dialect-specific JSON contains operator). Scoping by project keeps
+        the scan bounded.
+        """
+        target = str(bim_element_id)
+
+        stmt = (
+            select(Activity)
+            .join(Schedule, Activity.schedule_id == Schedule.id)
+            .where(Schedule.project_id == project_id)
+            .where(Activity.bim_element_ids.isnot(None))
+            .options(
+                noload(Activity.children),
+                noload(Activity.work_orders),
+            )
+            .order_by(Activity.sort_order, Activity.wbs_code)
+        )
+        result = await self.session.execute(stmt)
+        candidates = list(result.scalars().all())
+
+        matched: list[Activity] = []
+        for act in candidates:
+            raw = act.bim_element_ids
+            # Legacy dict-shaped values are treated as empty.
+            if isinstance(raw, list):
+                if target in (str(eid) for eid in raw):
+                    matched.append(act)
+        return matched
 
     # ── Work Order operations ──────────────────────────────────────────────
 

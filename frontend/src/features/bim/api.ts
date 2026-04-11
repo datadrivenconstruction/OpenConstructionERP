@@ -411,6 +411,125 @@ export async function deleteElementGroup(groupId: string): Promise<void> {
   await apiDelete(`/v1/bim_hub/element-groups/${encodeURIComponent(groupId)}`);
 }
 
+/* ── Cross-module link wrappers (Documents / Tasks / Schedule) ───────── */
+
+/** A document ↔ BIM element link. */
+export interface DocumentBIMLink {
+  id: string;
+  document_id: string;
+  bim_element_id: string;
+  link_type: 'manual' | 'auto';
+  confidence: string | null;
+  region_bbox: Record<string, unknown> | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DocumentBIMLinkListResponse {
+  items: DocumentBIMLink[];
+  total: number;
+}
+
+export interface CreateDocumentBIMLinkRequest {
+  document_id: string;
+  bim_element_id: string;
+  link_type?: 'manual' | 'auto';
+  confidence?: string;
+  region_bbox?: Record<string, unknown>;
+}
+
+/** List documents linked to a BIM element. */
+export async function listDocumentsForElement(
+  elementId: string,
+): Promise<DocumentBIMLinkListResponse> {
+  return apiGet<DocumentBIMLinkListResponse>(
+    `/v1/documents/bim-links/?element_id=${encodeURIComponent(elementId)}`,
+  );
+}
+
+/** List BIM elements linked from a document. */
+export async function listElementsForDocument(
+  documentId: string,
+): Promise<DocumentBIMLinkListResponse> {
+  return apiGet<DocumentBIMLinkListResponse>(
+    `/v1/documents/bim-links/?document_id=${encodeURIComponent(documentId)}`,
+  );
+}
+
+/** Create a new document ↔ BIM element link. */
+export async function createDocumentBIMLink(
+  payload: CreateDocumentBIMLinkRequest,
+): Promise<DocumentBIMLink> {
+  return apiPost<DocumentBIMLink, CreateDocumentBIMLinkRequest>(
+    '/v1/documents/bim-links/',
+    payload,
+  );
+}
+
+/** Remove a document ↔ BIM element link by id. */
+export async function deleteDocumentBIMLink(linkId: string): Promise<void> {
+  await apiDelete(`/v1/documents/bim-links/${encodeURIComponent(linkId)}`);
+}
+
+/* ── Tasks ↔ BIM element wrappers ────────────────────────────────────── */
+
+export interface TaskBimLinkRequest {
+  bim_element_ids: string[];
+}
+
+/** Replace the bim_element_ids list on a task. */
+export async function updateTaskBIMLinks(
+  taskId: string,
+  bimElementIds: string[],
+): Promise<unknown> {
+  return apiPatch<unknown, TaskBimLinkRequest>(
+    `/v1/tasks/${encodeURIComponent(taskId)}/bim-links`,
+    { bim_element_ids: bimElementIds },
+  );
+}
+
+/** List tasks that include the given BIM element id. */
+export async function listTasksForElement(
+  bimElementId: string,
+  projectId?: string,
+): Promise<unknown> {
+  const params = new URLSearchParams({ bim_element_id: bimElementId });
+  if (projectId) params.set('project_id', projectId);
+  return apiGet<unknown>(`/v1/tasks/?${params.toString()}`);
+}
+
+/* ── Schedule activity ↔ BIM element wrappers ────────────────────────── */
+
+export interface ActivityBimLinkRequest {
+  bim_element_ids: string[];
+}
+
+/** Replace the bim_element_ids list on a schedule activity. */
+export async function updateActivityBIMLinks(
+  activityId: string,
+  bimElementIds: string[],
+): Promise<unknown> {
+  return apiPatch<unknown, ActivityBimLinkRequest>(
+    `/v1/schedule/activities/${encodeURIComponent(activityId)}/bim-links`,
+    { bim_element_ids: bimElementIds },
+  );
+}
+
+/** List schedule activities that include the given BIM element id. */
+export async function listActivitiesForElement(
+  bimElementId: string,
+  projectId: string,
+): Promise<unknown> {
+  const params = new URLSearchParams({
+    element_id: bimElementId,
+    project_id: projectId,
+  });
+  return apiGet<unknown>(
+    `/v1/schedule/activities/by-bim-element/?${params.toString()}`,
+  );
+}
+
 /** Upload a raw CAD file (RVT, IFC, DWG, DGN, FBX, OBJ, 3DS) for background processing. */
 export async function uploadCADFile(
   projectId: string,

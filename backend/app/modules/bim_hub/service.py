@@ -282,22 +282,59 @@ class BIMHubService:
         discipline: str | None = None,
         offset: int = 0,
         limit: int = 200,
-    ) -> tuple[list[BIMElement], int, dict[uuid.UUID, list[dict[str, Any]]]]:
-        """List elements AND their BOQElementLink briefs in two SQL round trips.
+    ) -> tuple[
+        list[BIMElement],
+        int,
+        dict[uuid.UUID, list[dict[str, Any]]],
+        dict[uuid.UUID, list[dict[str, Any]]],
+        dict[uuid.UUID, list[dict[str, Any]]],
+        dict[uuid.UUID, list[dict[str, Any]]],
+    ]:
+        """List elements AND their BOQ / Document / Task / Activity briefs.
 
-        Returns ``(elements, total, links_by_element_id)`` where each brief
-        is a plain dict with the fields expected by ``BOQElementLinkBrief``
-        (id, boq_position_id, boq_position_ordinal, boq_position_description,
-        link_type, confidence).
+        Returns ``(elements, total, boq_links_by_element_id,
+        doc_links_by_element_id, task_links_by_element_id,
+        activity_briefs_by_element_id)`` where each brief is a plain dict
+        with the fields expected by the corresponding Pydantic brief schema.
 
-        This avoids an N+1 (one query per element for links + one for each
-        linked position) by issuing:
+        BOQ briefs match ``BOQElementLinkBrief`` (id, boq_position_id,
+        boq_position_ordinal, boq_position_description, link_type, confidence).
+
+        Document briefs match ``DocumentLinkBrief`` (id, document_id,
+        document_name, document_category, link_type, confidence).
+
+        Task briefs match ``bim_hub.schemas.TaskBrief`` (id, project_id,
+        title, status, task_type, due_date). Tasks are denormalised — each
+        ``Task`` row carries a JSON ``bim_element_ids`` array — so we load
+        all project tasks once and filter in Python. This is cross-dialect
+        safe and correct for the bounded sizes we expect (< a few thousand
+        tasks per project).
+
+        Activity briefs match ``bim_hub.schemas.ActivityBrief`` (id, name,
+        start_date, end_date, status, percent_complete). Activities are
+        loaded through ``oe_schedule_schedule`` for the model's project and
+        filtered in Python on their ``bim_element_ids`` JSON array — same
+        rationale as tasks.
+
+        This avoids an N+1 by issuing:
             1. A single SELECT on BIMElement with ``selectinload(boq_links)``.
             2. A single SELECT on Position for all distinct linked position ids.
+            3. A single SELECT joining ``oe_documents_bim_link`` → ``oe_documents_document``
+               filtered by the element ids in the current page.
+            4. A single SELECT on Task for all tasks in the project containing
+               the model.
+            5. A single SELECT on Activity joined to Schedule for all
+               activities in the model's project.
         """
-        await self.get_model(model_id)  # 404 check
+        # Local imports to avoid import-time cycles between bim_hub and
+        # documents / tasks / schedule.
+        from app.modules.documents.models import Document, DocumentBIMLink
+        from app.modules.schedule.models import Activity, Schedule
+        from app.modules.tasks.models import Task
 
-        # ── Step 1: load elements with links eagerly ────────────────────
+        model = await self.get_model(model_id)  # 404 check + need project_id
+
+        # ── Step 1: load elements with BOQ links eagerly ────────────────
         base = select(BIMElement).where(BIMElement.model_id == model_id)
         if element_type is not None:
             base = base.where(BIMElement.element_type == element_type)
@@ -317,6 +354,7 @@ class BIMHubService:
         )
         result = await self.session.execute(stmt)
         elements = list(result.scalars().all())
+        element_ids = [elem.id for elem in elements]
 
         # ── Step 2: fetch ordinals/descriptions for every linked position
         pos_ids: set[uuid.UUID] = set()
@@ -333,8 +371,8 @@ class BIMHubService:
             for pid, ordinal, desc in pos_result.all():
                 pos_info[pid] = (ordinal, desc)
 
-        # ── Step 3: build brief dicts per element ───────────────────────
-        links_by_element_id: dict[uuid.UUID, list[dict[str, Any]]] = {}
+        # ── Step 3: build BOQ brief dicts per element ───────────────────
+        boq_links_by_element_id: dict[uuid.UUID, list[dict[str, Any]]] = {}
         for elem in elements:
             briefs: list[dict[str, Any]] = []
             for lnk in elem.boq_links or []:
@@ -349,9 +387,121 @@ class BIMHubService:
                         "confidence": lnk.confidence,
                     }
                 )
-            links_by_element_id[elem.id] = briefs
+            boq_links_by_element_id[elem.id] = briefs
 
-        return elements, total, links_by_element_id
+        # ── Step 4: fetch DocumentBIMLink rows joined with Document for this page
+        doc_links_by_element_id: dict[uuid.UUID, list[dict[str, Any]]] = {
+            eid: [] for eid in element_ids
+        }
+        if element_ids:
+            doc_link_stmt = (
+                select(
+                    DocumentBIMLink.id,
+                    DocumentBIMLink.bim_element_id,
+                    DocumentBIMLink.document_id,
+                    DocumentBIMLink.link_type,
+                    DocumentBIMLink.confidence,
+                    Document.name,
+                    Document.category,
+                )
+                .join(Document, Document.id == DocumentBIMLink.document_id)
+                .where(DocumentBIMLink.bim_element_id.in_(element_ids))
+                .order_by(DocumentBIMLink.created_at.desc())
+            )
+            doc_link_result = await self.session.execute(doc_link_stmt)
+            for row in doc_link_result.all():
+                link_id, elem_id, doc_id, link_type, confidence, doc_name, doc_cat = row
+                doc_links_by_element_id.setdefault(elem_id, []).append(
+                    {
+                        "id": link_id,
+                        "document_id": doc_id,
+                        "document_name": doc_name,
+                        "document_category": doc_cat,
+                        "link_type": link_type,
+                        "confidence": confidence,
+                    }
+                )
+
+        # ── Step 5: fetch Task rows for this project and filter in Python ──
+        # Tasks store bim_element_ids as a denormalised JSON array; pulling all
+        # project tasks once and filtering in memory is cross-dialect safe and
+        # fine for the bounded sizes we expect.
+        task_links_by_element_id: dict[uuid.UUID, list[dict[str, Any]]] = {
+            eid: [] for eid in element_ids
+        }
+        if element_ids:
+            element_id_strs = {str(eid) for eid in element_ids}
+            task_stmt = select(Task).where(Task.project_id == model.project_id)
+            task_result = await self.session.execute(task_stmt)
+            for task in task_result.scalars().all():
+                raw_ids = task.bim_element_ids or []
+                if not raw_ids:
+                    continue
+                task_ids_as_str = {str(x) for x in raw_ids}
+                matching = element_id_strs & task_ids_as_str
+                if not matching:
+                    continue
+                brief = {
+                    "id": task.id,
+                    "project_id": task.project_id,
+                    "title": task.title,
+                    "status": task.status,
+                    "task_type": task.task_type,
+                    "due_date": task.due_date,
+                }
+                for eid in element_ids:
+                    if str(eid) in matching:
+                        task_links_by_element_id.setdefault(eid, []).append(brief)
+
+        # ── Step 6: fetch Schedule Activities for this project and filter ──
+        # Activities store ``bim_element_ids`` as a JSON list on each row.
+        # We join through ``oe_schedule_schedule`` to scope by the model's
+        # project, then filter in Python — same cross-dialect reasoning as
+        # the task loop above.
+        activity_briefs_by_element_id: dict[uuid.UUID, list[dict[str, Any]]] = {
+            eid: [] for eid in element_ids
+        }
+        if element_ids:
+            element_id_strs = {str(eid) for eid in element_ids}
+            activity_stmt = (
+                select(Activity)
+                .join(Schedule, Activity.schedule_id == Schedule.id)
+                .where(Schedule.project_id == model.project_id)
+                .where(Activity.bim_element_ids.isnot(None))
+            )
+            activity_result = await self.session.execute(activity_stmt)
+            for act in activity_result.scalars().all():
+                raw_ids = act.bim_element_ids
+                if not isinstance(raw_ids, list) or not raw_ids:
+                    continue
+                act_ids_as_str = {str(x) for x in raw_ids}
+                matching = element_id_strs & act_ids_as_str
+                if not matching:
+                    continue
+                try:
+                    pct = float(act.progress_pct) if act.progress_pct else 0.0
+                except (TypeError, ValueError):
+                    pct = 0.0
+                brief = {
+                    "id": act.id,
+                    "name": act.name,
+                    "start_date": act.start_date,
+                    "end_date": act.end_date,
+                    "status": act.status,
+                    "percent_complete": pct,
+                }
+                for eid in element_ids:
+                    if str(eid) in matching:
+                        activity_briefs_by_element_id.setdefault(eid, []).append(brief)
+
+        return (
+            elements,
+            total,
+            boq_links_by_element_id,
+            doc_links_by_element_id,
+            task_links_by_element_id,
+            activity_briefs_by_element_id,
+        )
 
     async def get_element(self, element_id: uuid.UUID) -> BIMElement:
         """Get a single element by ID. Raises 404 if not found."""

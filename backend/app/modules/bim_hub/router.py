@@ -1213,11 +1213,26 @@ async def list_elements(
     """List elements for a BIM model (paginated, filterable).
 
     Each element in the response includes a ``boq_links`` array of
-    ``BOQElementLinkBrief`` entries so the viewer can render link badges
-    without a second round trip.
+    ``BOQElementLinkBrief`` entries, a ``linked_documents`` array of
+    ``DocumentLinkBrief`` entries, a ``linked_tasks`` array of ``TaskBrief``
+    entries, and a ``linked_activities`` array of ``ActivityBrief`` entries
+    so the viewer can render link badges without a second round trip.
     """
+    from app.modules.bim_hub.schemas import (
+        ActivityBrief,
+        DocumentLinkBrief,
+        TaskBrief,
+    )
+
     await _verify_model_access(service, model_id, user_id or "")
-    items, total, links_by_id = await service.list_elements_with_links(
+    (
+        items,
+        total,
+        boq_links_by_id,
+        doc_links_by_id,
+        task_links_by_id,
+        activity_briefs_by_id,
+    ) = await service.list_elements_with_links(
         model_id,
         element_type=element_type,
         storey=storey,
@@ -1228,12 +1243,27 @@ async def list_elements(
 
     responses: list[BIMElementResponse] = []
     for elem in items:
-        briefs = [
+        boq_briefs = [
             BOQElementLinkBrief.model_validate(b)
-            for b in links_by_id.get(elem.id, [])
+            for b in boq_links_by_id.get(elem.id, [])
+        ]
+        doc_briefs = [
+            DocumentLinkBrief.model_validate(b)
+            for b in doc_links_by_id.get(elem.id, [])
+        ]
+        task_briefs = [
+            TaskBrief.model_validate(b)
+            for b in task_links_by_id.get(elem.id, [])
+        ]
+        activity_briefs = [
+            ActivityBrief.model_validate(b)
+            for b in activity_briefs_by_id.get(elem.id, [])
         ]
         resp = BIMElementResponse.model_validate(elem)
-        resp.boq_links = briefs
+        resp.boq_links = boq_briefs
+        resp.linked_documents = doc_briefs
+        resp.linked_tasks = task_briefs
+        resp.linked_activities = activity_briefs
         responses.append(resp)
 
     return BIMElementListResponse(
