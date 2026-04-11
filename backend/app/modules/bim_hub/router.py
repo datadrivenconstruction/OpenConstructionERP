@@ -839,8 +839,10 @@ async def upload_cad_file(
     model = await service.create_model(model_data, user_id=user_id)
     model_id = model.id
 
-    # Save CAD file via the configured storage backend
-    await bim_file_storage.save_original_cad(
+    # Save CAD file via the configured storage backend — returns the
+    # storage key that the Documents hub cross-link and downstream
+    # diagnostics use to refer back to the stored blob.
+    saved_cad_key = await bim_file_storage.save_original_cad(
         project_id=project_id,
         model_id=str(model_id),
         ext=ext,
@@ -848,11 +850,12 @@ async def upload_cad_file(
     )
 
     logger.info(
-        "CAD file uploaded: %s (%s, %d bytes) -> model %s",
+        "CAD file uploaded: %s (%s, %d bytes) -> model %s (key=%s)",
         filename,
         ext,
         len(content),
         model_id,
+        saved_cad_key,
     )
 
     # Cross-link: create Document record so BIM files appear in Documents hub
@@ -876,7 +879,7 @@ async def upload_cad_file(
                 "id": doc_id, "pid": project_id, "name": filename,
                 "desc": f"BIM model: {model_name}", "cat": "drawing",
                 "fsize": len(content), "mime": f"application/{model_format}",
-                "fpath": str(cad_path), "by": user_id or "",
+                "fpath": saved_cad_key, "by": user_id or "",
                 "tags": tags_json, "now": now,
             },
         )
@@ -884,8 +887,16 @@ async def upload_cad_file(
     except Exception as exc:
         logger.warning("Failed to cross-link BIM to documents hub: %s", exc)
 
-    # Process the CAD file — extract elements + generate COLLADA geometry
+    # Process the CAD file — extract elements + generate COLLADA geometry.
     # IFC: text-based parser (instant). RVT: requires DDC cad2data binary.
+    #
+    # ``process_ifc_file`` is a sync function that needs real on-disk
+    # paths for both the input CAD and the output geometry directory,
+    # so we materialise the upload into a short-lived temp workspace,
+    # run the processor there, then upload any generated geometry back
+    # through the storage abstraction BEFORE the tempdir is cleaned up.
+    # This keeps the router storage-backend-agnostic — the same code
+    # path works for the local filesystem backend and future S3.
     final_status = "processing"
     element_count = 0
 
@@ -893,12 +904,45 @@ async def upload_cad_file(
     if processable:
         try:
             import asyncio
+            import tempfile
+            from pathlib import Path as _Path
 
             from app.modules.bim_hub.ifc_processor import process_ifc_file
 
-            # Run sync processor in thread to avoid blocking the event loop
-            result = await asyncio.to_thread(process_ifc_file, cad_path, cad_dir)
-            element_count = result["element_count"]
+            with tempfile.TemporaryDirectory(prefix="oe-bim-") as _tmp_str:
+                _tmp_dir = _Path(_tmp_str)
+                _tmp_cad_path = _tmp_dir / f"original{ext}"
+                # Materialise the upload so the sync processor can open it.
+                await asyncio.to_thread(_tmp_cad_path.write_bytes, content)
+
+                # Run sync processor in thread to avoid blocking the event loop
+                result = await asyncio.to_thread(
+                    process_ifc_file, _tmp_cad_path, _tmp_dir
+                )
+                element_count = result["element_count"]
+
+                # Persist any generated geometry through the storage
+                # abstraction BEFORE the tempdir vanishes.  We set
+                # ``canonical_file_path`` to the real storage key so later
+                # introspection tools don't dereference a stale temp path.
+                geo_local = result.get("geometry_path")
+                if geo_local:
+                    _geo_path = _Path(geo_local)
+                    if _geo_path.is_file():
+                        _geo_bytes = await asyncio.to_thread(_geo_path.read_bytes)
+                        _geo_ext = _geo_path.suffix or ".dae"
+                        _geo_key = await bim_file_storage.save_geometry(
+                            project_id=project_id,
+                            model_id=str(model_id),
+                            ext=_geo_ext,
+                            content=_geo_bytes,
+                        )
+                        model.canonical_file_path = _geo_key
+                    else:
+                        logger.warning(
+                            "Processor reported geometry_path=%s but file is missing",
+                            geo_local,
+                        )
 
             if element_count > 0:
                 # Insert elements into DB
@@ -920,13 +964,15 @@ async def upload_cad_file(
                     )
                     service.session.add(el)
 
-                # Update model record
+                # Update model record.  ``canonical_file_path`` was already
+                # assigned inside the tempdir block above (pointing at the
+                # real storage key for the uploaded geometry blob), so we
+                # don't touch it again here — overwriting with
+                # ``result["geometry_path"]`` would leak a stale temp path.
                 model.status = "ready"
                 model.element_count = element_count
                 model.storey_count = len(result["storeys"])
                 model.bounding_box = result.get("bounding_box")
-                if result.get("geometry_path"):
-                    model.canonical_file_path = result["geometry_path"]
                 await service.session.flush()
                 final_status = "ready"
 
@@ -1224,6 +1270,7 @@ async def list_elements(
         ActivityBrief,
         DocumentLinkBrief,
         ElementValidationSummary,
+        RequirementBrief,
         TaskBrief,
     )
 
@@ -1235,6 +1282,7 @@ async def list_elements(
         doc_links_by_id,
         task_links_by_id,
         activity_briefs_by_id,
+        requirement_briefs_by_id,
         validation_summaries_by_id,
     ) = await service.list_elements_with_links(
         model_id,
@@ -1271,6 +1319,10 @@ async def list_elements(
             ActivityBrief.model_validate(b)
             for b in activity_briefs_by_id.get(elem.id, [])
         ]
+        requirement_briefs = [
+            RequirementBrief.model_validate(b)
+            for b in requirement_briefs_by_id.get(elem.id, [])
+        ]
         raw_val = validation_summaries_by_id.get(elem.id, [])
         validation_summaries = [
             ElementValidationSummary.model_validate(v) for v in raw_val
@@ -1290,6 +1342,7 @@ async def list_elements(
         resp.linked_documents = doc_briefs
         resp.linked_tasks = task_briefs
         resp.linked_activities = activity_briefs
+        resp.linked_requirements = requirement_briefs
         resp.validation_results = validation_summaries
         resp.validation_status = val_status  # type: ignore[assignment]
         responses.append(resp)
@@ -1360,7 +1413,10 @@ async def _verify_boq_position_access(
     parent `BOQ` row reached via `position.boq_id`.  We do a single-row
     SELECT joining position → boq so this stays one round-trip.
     """
-    from app.modules.boq.models import BOQ as BOQModel
+    # ``BOQ`` is the class name exposed by ``boq.models`` and it refers to
+    # the Bill-of-Quantities aggregate, not a module-level constant — the
+    # ``N811`` noqa below suppresses ruff's all-caps-is-a-constant heuristic.
+    from app.modules.boq.models import BOQ as BOQModel  # noqa: N811
     from app.modules.boq.models import Position
 
     stmt = (

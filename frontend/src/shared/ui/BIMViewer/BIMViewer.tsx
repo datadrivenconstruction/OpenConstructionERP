@@ -28,6 +28,7 @@ import {
   FileText,
   CheckSquare,
   Calendar,
+  ClipboardCheck,
   ExternalLink,
   ShieldCheck,
   ShieldAlert,
@@ -122,6 +123,8 @@ export interface BIMViewerProps {
   onOpenTask?: (taskId: string) => void;
   /** User clicked a linked schedule activity in the properties panel. */
   onOpenActivity?: (activityId: string) => void;
+  /** User clicked a linked requirement in the properties panel. */
+  onOpenRequirement?: (requirementId: string) => void;
   /** User clicked "+ New" in the Linked Tasks section — parent opens
    *  CreateTaskFromBIMModal pre-filled with this element. */
   onCreateTask?: (element: BIMElementData) => void;
@@ -130,6 +133,9 @@ export interface BIMViewerProps {
   onLinkDocument?: (element: BIMElementData) => void;
   /** User clicked "+ Link" in the Schedule Activities section. */
   onLinkActivity?: (element: BIMElementData) => void;
+  /** User clicked "+ Link" in the Linked Requirements section — parent
+   *  opens the LinkRequirementToBIMModal picker. */
+  onLinkRequirement?: (element: BIMElementData) => void;
   /** User clicked one of the smart-filter pills in the health stats
    *  banner. The parent applies the matching predicate via setFilterPredicate
    *  so the 3D viewport narrows to "errors only" / "unlinked only" / etc. */
@@ -207,9 +213,11 @@ export function BIMViewer({
   onOpenDocument,
   onOpenTask,
   onOpenActivity,
+  onOpenRequirement,
   onCreateTask,
   onLinkDocument,
   onLinkActivity,
+  onLinkRequirement,
   onSmartFilter,
 }: BIMViewerProps) {
   const { t } = useTranslation();
@@ -1104,6 +1112,97 @@ export function BIMViewer({
                   <div className="text-[10px] text-content-tertiary italic">
                     {t('bim.acts_empty', {
                       defaultValue: 'No 4D activities yet — click "Link" to attach a schedule activity',
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Linked Requirements (EAC triplets — the bridge between
+                client intent / spec and the executed model).  Stored on
+                the requirement side under metadata_["bim_element_ids"]
+                and surfaced here via the bim_hub eager-load path. */}
+            {(onLinkRequirement ||
+              (selectedElement.linked_requirements &&
+                selectedElement.linked_requirements.length > 0)) && (
+              <div className="rounded-md border border-violet-300/50 bg-violet-50/40 dark:bg-violet-950/20 p-2">
+                <div className="flex items-center justify-between mb-1.5">
+                  <h4 className="text-xs font-semibold text-violet-700 dark:text-violet-300 flex items-center gap-1">
+                    <ClipboardCheck size={11} />
+                    {t('bim.linked_requirements', {
+                      defaultValue: 'Linked requirements',
+                    })}
+                    <span className="text-[10px] text-content-tertiary font-normal">
+                      ({selectedElement.linked_requirements?.length ?? 0})
+                    </span>
+                  </h4>
+                  {onLinkRequirement && (
+                    <button
+                      type="button"
+                      onClick={() => onLinkRequirement(selectedElement)}
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-violet-600 text-white hover:bg-violet-700"
+                      title={t('bim.link_requirement', {
+                        defaultValue: 'Pin a requirement to this element',
+                      })}
+                    >
+                      <Plus size={10} />
+                      {t('bim.link', { defaultValue: 'Link' })}
+                    </button>
+                  )}
+                </div>
+                {selectedElement.linked_requirements &&
+                selectedElement.linked_requirements.length > 0 ? (
+                  <ul className="space-y-1">
+                    {selectedElement.linked_requirements.map((req) => {
+                      const priorityColor =
+                        req.priority === 'must'
+                          ? 'text-rose-600'
+                          : req.priority === 'should'
+                            ? 'text-amber-600'
+                            : 'text-slate-500';
+                      return (
+                        <li
+                          key={req.id}
+                          className="flex items-center justify-between gap-1 px-1.5 py-1 rounded bg-surface-primary border border-border-light"
+                        >
+                          <button
+                            type="button"
+                            onClick={() => onOpenRequirement?.(req.id)}
+                            className="flex-1 min-w-0 text-left"
+                          >
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[11px] font-medium text-content-primary truncate">
+                                {req.entity}
+                                {req.attribute && (
+                                  <span className="text-content-tertiary">
+                                    .{req.attribute}
+                                  </span>
+                                )}
+                              </span>
+                              <span
+                                className={`text-[9px] font-bold uppercase shrink-0 ${priorityColor}`}
+                              >
+                                {req.priority}
+                              </span>
+                            </div>
+                            <div className="text-[9px] font-mono text-content-tertiary tabular-nums truncate">
+                              {req.constraint_type} {req.constraint_value}
+                              {req.unit ? ` ${req.unit}` : ''}
+                            </div>
+                          </button>
+                          <ExternalLink
+                            size={10}
+                            className="text-content-tertiary shrink-0"
+                          />
+                        </li>
+                      );
+                    })}
+                  </ul>
+                ) : (
+                  <div className="text-[10px] text-content-tertiary italic">
+                    {t('bim.req_empty', {
+                      defaultValue:
+                        'No requirements yet — click "Link" to pin a constraint to this element',
                     })}
                   </div>
                 )}

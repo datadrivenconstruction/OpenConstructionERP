@@ -54,6 +54,7 @@ import SaveGroupModal from './SaveGroupModal';
 import CreateTaskFromBIMModal from './CreateTaskFromBIMModal';
 import LinkDocumentToBIMModal from './LinkDocumentToBIMModal';
 import LinkActivityToBIMModal from './LinkActivityToBIMModal';
+import LinkRequirementToBIMModal from './LinkRequirementToBIMModal';
 import type { BIMGroupFilterCriteria } from './api';
 import { Filter } from 'lucide-react';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -742,6 +743,9 @@ export function BIMPage() {
   const [createTaskFor, setCreateTaskFor] = useState<BIMElementData[] | null>(null);
   const [linkDocumentFor, setLinkDocumentFor] = useState<BIMElementData[] | null>(null);
   const [linkActivityFor, setLinkActivityFor] = useState<BIMElementData[] | null>(null);
+  const [linkRequirementFor, setLinkRequirementFor] = useState<
+    BIMElementData[] | null
+  >(null);
   const addToast = useToastStore((s) => s.addToast);
 
   /* ── Cross-highlight bridge to BOQ editor ───────────────────────── */
@@ -935,6 +939,15 @@ export function BIMPage() {
   const handleLinkActivity = useCallback((element: BIMElementData) => {
     setLinkActivityFor([element]);
   }, []);
+  const handleLinkRequirement = useCallback((element: BIMElementData) => {
+    setLinkRequirementFor([element]);
+  }, []);
+  const handleOpenRequirement = useCallback(
+    (requirementId: string) => {
+      navigate(`/requirements?id=${encodeURIComponent(requirementId)}`);
+    },
+    [navigate],
+  );
 
   // Link a saved group to a BOQ position — looks up every member element
   // by id from the current `elements` list and opens AddToBOQModal with
@@ -1276,9 +1289,11 @@ export function BIMPage() {
             onOpenDocument={handleOpenDocument}
             onOpenTask={handleOpenTask}
             onOpenActivity={handleOpenActivity}
+            onOpenRequirement={handleOpenRequirement}
             onCreateTask={handleCreateTask}
             onLinkDocument={handleLinkDocument}
             onLinkActivity={handleLinkActivity}
+            onLinkRequirement={handleLinkRequirement}
             onSmartFilter={handleSmartFilter}
             className="h-full"
           />
@@ -1414,6 +1429,13 @@ export function BIMPage() {
           projectId={projectId}
           elements={linkActivityFor}
           onClose={() => setLinkActivityFor(null)}
+        />
+      )}
+      {linkRequirementFor && projectId && (
+        <LinkRequirementToBIMModal
+          projectId={projectId}
+          elements={linkRequirementFor}
+          onClose={() => setLinkRequirementFor(null)}
         />
       )}
     </div>

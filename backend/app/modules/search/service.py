@@ -35,6 +35,8 @@ _SHORT_NAME_ALIASES: dict[str, str] = {
     "risk": "oe_risks",
     "bim": "oe_bim_elements",
     "bim_elements": "oe_bim_elements",
+    "requirements": "oe_requirements",
+    "reqs": "oe_requirements",
     "validation": "oe_validation",
     "chat": "oe_chat",
 }

@@ -133,6 +133,13 @@ const MODULE_PATH: Record<SimilarModuleKind, (id: string) => string> = {
   risks: (id) => `/api/v1/risk/${encodeURIComponent(id)}/similar/`,
   bim_elements: (id) =>
     `/api/v1/bim_hub/elements/${encodeURIComponent(id)}/similar/`,
+  // NOTE: `requirements` is intentionally absent from this table.
+  // The similar-requirements route is nested under the parent set
+  // (`/requirements/{set_id}/requirements/{req_id}/similar/`), so
+  // the generic `SimilarItemsPanel` — which only knows the item id
+  // — cannot build a URL for it.  Requirement similarity is surfaced
+  // via the set-scoped detail page directly, not through this
+  // generic cross-module panel.
 };
 
 export async function fetchSimilarItems(
@@ -187,6 +194,8 @@ export function hitToHref(hit: UnifiedSearchHit): string {
       return `/risks?id=${encodeURIComponent(hit.id)}`;
     case 'oe_bim_elements':
       return `/bim?element=${encodeURIComponent(hit.id)}`;
+    case 'oe_requirements':
+      return `/requirements?id=${encodeURIComponent(hit.id)}`;
     case 'oe_validation':
       return `/validation?id=${encodeURIComponent(hit.id)}`;
     case 'oe_chat': {
@@ -216,6 +225,8 @@ export function collectionLabel(collection: string): string {
       return 'Risks';
     case 'oe_bim_elements':
       return 'BIM';
+    case 'oe_requirements':
+      return 'Requirements';
     case 'oe_validation':
       return 'Validation';
     case 'oe_chat':

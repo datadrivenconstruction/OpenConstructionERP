@@ -14,6 +14,25 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.4.3',
+    date: '2026-04-11',
+    changes: [
+      'Requirements ↔ BIM cross-module integration — Requirements (EAC triplets — Entity / Attribute / Constraint) are now the 5th cross-module link type on BIM elements, mirroring the existing BOQ / Documents / Tasks / Schedule activities pattern. Pin a constraint like "fire_rating = F90" to a wall element with one click and trace it back from either side',
+      'New oe_requirements vector collection (8th total) — embeds the EAC triplet plus unit / category / priority / status / notes via a new RequirementVectorAdapter. Multilingual by default, works across English / German / Russian / Lithuanian / French / Spanish / Italian / Polish / Portuguese',
+      'Requirements service event publishing — new _safe_publish helper plus standardised requirements.requirement.created/updated/deleted/linked_bim events on every CRUD and link operation. The vector indexer subscribes and refreshes the embedding automatically',
+      'New service methods: link_to_bim_elements (additive by default; pass replace=true to overwrite) stored under metadata_["bim_element_ids"] so no schema migration needed; list_by_bim_element reverse query scoped to a project for performance',
+      'New router endpoints: PATCH /requirements/{set_id}/requirements/{req_id}/bim-links/, GET /requirements/by-bim-element/?bim_element_id=&project_id=, GET /requirements/vector/status/, POST /requirements/vector/reindex/, GET /requirements/{set_id}/requirements/{req_id}/similar/',
+      'New RequirementBrief in bim_hub schemas + linked_requirements field on BIMElementResponse. BIMHubService.list_elements_with_links() Step 6.5 loads every requirement in the project and filters in Python on the bim_element_ids array',
+      'New LinkRequirementToBIMModal — mirrors LinkActivityToBIMModal exactly: loads every requirement set in the project, flattens into a searchable list, click → PATCH bim-links → invalidate the bim-elements query. Color-coded by priority (must / should / may) and status (verified / conflict / open)',
+      '"Linked requirements" section in BIMViewer element details panel — violet themed, slots between "Schedule activities" and semantic similarity. Renders entity.attribute + constraint + priority badge + click-to-open',
+      'BIMPage wiring — new linkRequirementFor state + handleLinkRequirement/handleOpenRequirement handlers, modal mount, props passed to BIMViewer',
+      'RequirementsPage expanded row now shows a "Pinned BIM elements" cell with the count read from metadata.bim_element_ids. Click navigates to /bim?element= with the first pinned element preselected. Plus deep-link parsing for ?id=<requirement_id> that fans out detail fetches across every set to find the owning set, switches to it and expands the row',
+      'GlobalSearchModal facet support — fuchsia color for the new Requirements pill, oe_requirements mapped to /requirements?id= in hitToHref. VectorStatusCard picks up the new collection via REINDEX_PATH so admins can trigger a reindex from Settings. Auto-backfill on startup now indexes requirements alongside the other 7 collections',
+      'Also fixed (polish bundled into this cut): backend/pyproject.toml had silently drifted from the frontend version since v1.3.31 — every v1.4.x release reported "1.3.31" via /api/health because app_version reads from the Python package — bumped directly to 1.4.3. BIM CAD upload handler referenced ghost cad_path/cad_dir variables left over from the storage abstraction refactor, so IFC/RVT processing crashed with NameError on every upload attempt — replaced with a tempfile.TemporaryDirectory workspace that materialises the upload locally, runs the sync processor, uploads any geometry back through save_geometry, and stores the real storage key as canonical_file_path. SimilarItemsPanel no longer advertises requirements — the panel only knows the item id but the similar requirement route is nested under the parent set, so the placeholder URL would have 404-ed on every call',
+      'Verification: 718 total routes mounted across 57 loaded modules (real count from module_loader.load_all + APIRoute inspection), 8 vector collections all with real adapters and reindex endpoints, frontend tsc --noEmit clean, backend ruff check clean across every v1.4.3-touched file, new unit coverage for RequirementVectorAdapter plus an integration test driving PATCH /bim-links/ → GET /by-bim-element/ → GET /models/{id}/elements/ (Step 6.5) end-to-end',
+    ],
+  },
+  {
     version: '1.4.2',
     date: '2026-04-11',
     changes: [
