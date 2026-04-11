@@ -14,6 +14,16 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.25',
+    date: '2026-04-11',
+    changes: [
+      'BIM saved groups — full lifecycle UI completed.  v1.3.24 added the SaveGroupModal, but the saved groups had nowhere to live afterwards.  v1.3.25 adds a "Saved groups" section at the top of the BIMFilterPanel scroll area listing every group for the current model with one-click apply, link-to-BOQ, and delete actions.  Each row shows the group\'s color dot, name, and cached member count.  Clicking a group converts its `filter_criteria` back into the panel\'s Set-based filter state and highlights the row as the active group.  Manual filter changes drop the highlight automatically because the filter is no longer 1:1 with the group',
+      'BIM saved groups — fetched via `useQuery(["bim-element-groups", projectId, modelId])` from the new `/api/v1/bim_hub/element-groups/` endpoint, with React Query auto-refetch on save / delete via `invalidateQueries`.  Delete uses a confirmation dialog and the new `deleteElementGroup` API wrapper.  Link-to-BOQ resolves the group\'s `member_element_ids` against the loaded element list and opens AddToBOQModal with the resolved subset',
+      'Headless deep test (debug-bim.cjs TEST 7c) now exercises the FULL lifecycle: filter Walls → click "Save as group" → type a unique group name → click "Save group" → verify the new SAVED GROUPS section lists it → click Clear all → click the saved group row → verify mesh visibility re-narrows to the original 205 walls → click the trash icon → confirm bypassed → verify the group disappears.  All five sub-assertions PASS — group save → list, group apply, group delete',
+      'Test verdict logic — clear-storey now compares against the buildings-only baseline (5168) instead of the raw mesh count (5440), so the previous WARN flips to PASS.  The buildings-only toggle hides 272 noise meshes by default, which is the expected baseline for every filter test',
+    ],
+  },
+  {
     version: '1.3.24',
     date: '2026-04-11',
     changes: [
