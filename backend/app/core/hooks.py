@@ -1,4 +1,4 @@
-"""Hook system for data transformation and action injection.
+"""Hook system​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ for data transformation and action injection.
 
 Two types:
 - **Filters**: transform data through a chain of handlers (like WordPress filters).
