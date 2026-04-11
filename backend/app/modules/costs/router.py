@@ -10,7 +10,11 @@ Endpoints:
     POST /bulk            -- Bulk import cost items (auth required)
     POST /import/file     -- Import cost items from Excel/CSV file (auth required)
     POST /load-cwicr/{db_id} -- Load CWICR regional database (auth required)
+    POST /suggest-for-element          -- Rank cost items for a BIM element body
+    POST /suggest-for-element/{id}     -- Same, loading the element by its UUID
 """
+
+from __future__ import annotations
 
 import csv
 import io
@@ -31,6 +35,8 @@ from app.modules.costs.schemas import (
     CostItemUpdate,
     CostSearchQuery,
     CostSearchResponse,
+    CostSuggestion,
+    SuggestCostsForElementRequest,
 )
 from app.modules.costs.service import CostItemService
 
@@ -2172,4 +2178,99 @@ async def export_cost_database(
         output,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": 'attachment; filename="cost_database.xlsx"'},
+    )
+
+
+# ── BIM-element cost suggestions ─────────────────────────────────────────────
+
+
+@router.post(
+    "/suggest-for-element/",
+    response_model=list[CostSuggestion],
+    dependencies=[Depends(RequirePermission("costs.read"))],
+)
+async def suggest_costs_for_element(
+    request: SuggestCostsForElementRequest,
+    _user_id: CurrentUserId,
+    service: CostItemService = Depends(_get_service),
+) -> list[CostSuggestion]:
+    """Rank cost items that match a BIM element (body-only variant).
+
+    The frontend already has the element loaded in the viewer, so the
+    cheapest path is to pass the fields inline and avoid a second DB
+    round-trip.  Returns at most ``request.limit`` suggestions sorted by
+    relevance score (0..1).
+    """
+    return await service.suggest_for_bim_element(
+        element_type=request.element_type,
+        name=request.name,
+        discipline=request.discipline,
+        properties=request.properties,
+        quantities=request.quantities,
+        classification=request.classification,
+        limit=request.limit,
+        region=request.region,
+    )
+
+
+@router.post(
+    "/suggest-for-element/{bim_element_id}/",
+    response_model=list[CostSuggestion],
+    dependencies=[Depends(RequirePermission("costs.read"))],
+)
+async def suggest_costs_for_element_by_id(
+    bim_element_id: uuid.UUID,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    limit: int = Query(default=5, ge=1, le=50),
+    region: str | None = Query(default=None),
+    service: CostItemService = Depends(_get_service),
+) -> list[CostSuggestion]:
+    """Convenience: load a ``BIMElement`` by ID and rank cost suggestions.
+
+    Raises 404 if the element does not exist.  Classification is pulled
+    from ``element.metadata_['classification']`` when present (BIM elements
+    do not have a dedicated classification column).
+    """
+    # Local import to avoid a hard dependency loop between costs and bim_hub.
+    from app.modules.bim_hub.service import BIMHubService
+
+    bim_service = BIMHubService(session)
+    try:
+        element = await bim_service.get_element(bim_element_id)
+    except HTTPException:
+        raise
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.exception("suggest_costs_for_element_by_id: failed to load element")
+        raise HTTPException(status_code=500, detail="Failed to load BIM element") from exc
+
+    # BIMElement has no `classification` column; pull from metadata if present.
+    classification: dict[str, str] | None = None
+    meta = getattr(element, "metadata_", None)
+    if isinstance(meta, dict):
+        candidate = meta.get("classification")
+        if isinstance(candidate, dict):
+            classification = {
+                k: str(v) for k, v in candidate.items() if isinstance(v, (str, int))
+            }
+
+    # Quantities may contain non-float entries in practice; coerce safely.
+    quantities_raw = getattr(element, "quantities", None) or {}
+    quantities: dict[str, float] = {}
+    if isinstance(quantities_raw, dict):
+        for key, val in quantities_raw.items():
+            try:
+                quantities[str(key)] = float(val)
+            except (TypeError, ValueError):
+                continue
+
+    return await service.suggest_for_bim_element(
+        element_type=getattr(element, "element_type", None),
+        name=getattr(element, "name", None),
+        discipline=getattr(element, "discipline", None),
+        properties=getattr(element, "properties", None),
+        quantities=quantities,
+        classification=classification,
+        limit=limit,
+        region=region,
     )

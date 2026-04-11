@@ -1,5 +1,7 @@
 """Cost item Pydantic schemas for request/response validation."""
 
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Any
 from uuid import UUID
@@ -126,3 +128,45 @@ class CostSearchResponse(BaseModel):
     total: int
     limit: int
     offset: int
+
+
+# ── BIM suggestion ────────────────────────────────────────────────────────
+
+
+class CostSuggestion(BaseModel):
+    """A ranked cost-item suggestion for a BIM element.
+
+    Returned by ``POST /api/v1/costs/suggest-for-element``.  The frontend
+    renders these as chips in the AddToBOQ modal so the estimator can
+    one-click populate a BOQ position's unit rate.
+    """
+
+    cost_item_id: str = Field(..., description="UUID of the underlying CostItem")
+    code: str = Field(..., description="CWICR rate code / cost item code")
+    description: str = Field(..., description="Human-readable description")
+    unit: str = Field(..., description="Unit of measurement")
+    unit_rate: float | str = Field(..., description="Unit rate (numeric if parseable)")
+    classification: dict[str, str] = Field(
+        default_factory=dict,
+        description="Classification codes forwarded from the CostItem",
+    )
+    score: float = Field(
+        ..., ge=0.0, le=1.0, description="Relevance score 0..1 (higher = better)"
+    )
+    match_reasons: list[str] = Field(
+        default_factory=list,
+        description="Short human-readable strings explaining why this matched",
+    )
+
+
+class SuggestCostsForElementRequest(BaseModel):
+    """Request body for BIM-element cost suggestion endpoint."""
+
+    element_type: str | None = None
+    name: str | None = None
+    discipline: str | None = None
+    properties: dict[str, Any] | None = None
+    quantities: dict[str, float] | None = None
+    classification: dict[str, str] | None = None
+    limit: int = Field(default=5, ge=1, le=50)
+    region: str | None = None
