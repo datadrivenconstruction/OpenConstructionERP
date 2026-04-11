@@ -5,6 +5,149 @@ All notable changes to OpenConstructionERP are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.6] — 2026-04-11
+
+### Security — IDOR fixes (driven by wave-2 deep audit)
+
+#### S1 — Contacts module: query scoping
+Three TODO(v1.4-tenancy) markers in ``contacts/router.py`` flagged
+that ``Contact`` had no ``tenant_id`` and any authenticated user with
+``contacts.read`` could read **every** contact in the database.  The
+get/patch/delete endpoints already had a ``_require_contact_access``
+gate, but the list/search/by-company/stats endpoints were unscoped.
+Fixed by threading an ``owner_id`` parameter through repository →
+service → router that filters on the ``created_by`` proxy column.
+Admins still bypass and see the global view.
+
+- ``contacts/repository.py`` — ``list()``, ``stats()``, ``list_by_company()``
+  all accept an optional ``owner_id`` filter
+- ``contacts/service.py`` — same
+- ``contacts/router.py`` — list/search/stats/by-company endpoints now
+  resolve the caller's role via ``_is_admin()`` and pass either
+  ``user_id`` (non-admin) or ``None`` (admin) as the owner filter
+
+#### S2 — Collaboration module: permissions + entity allowlist
+``collaboration/router.py`` had **zero** permission checks.  No
+``RequirePermission`` decorator on any endpoint, no entity access
+validation.  Any authenticated user could list / create / edit /
+delete comments and viewpoints across project boundaries.  Fixed by:
+
+- New ``collaboration/permissions.py`` — registers
+  ``collaboration.read`` (Viewer), ``collaboration.create`` /
+  ``.update`` / ``.delete`` (Editor)
+- New ``collaboration/__init__.py`` ``on_startup`` hook that wires
+  the registration
+- ``collaboration/router.py`` rewritten to add ``RequirePermission``
+  to all 7 endpoints
+- New ``_ALLOWED_ENTITY_TYPES`` allowlist (16 entries: project, boq,
+  document, task, requirement, bim_element, etc.) — any other value
+  is rejected at the router boundary so we never persist orphaned
+  metadata.  Fixes the prior bug where ``entity_type='unicorn'``
+  was silently accepted.
+
+### Cross-module wiring
+
+#### S3 — Notifications subscriber framework
+The notifications module had ``create()`` and ``notify_users()`` since
+day one but **nothing in the platform actually called them** —
+contacts / collaboration / cde / transmittals / teams all silent on
+mutations.  Created ``notifications/events.py`` with a declarative
+``_SUBSCRIPTIONS`` map and an ``on_startup`` hook that wires the
+event bus on module load.  Initial subscriptions:
+
+- ``boq.boq.created`` → notify the creator (info)
+- ``meeting.action_items_created`` → notify each task owner
+  (task_assigned) for the items that ACTUALLY produced a Task row
+- ``cde.container.state_transitioned`` → notify the actor (info)
+- ``bim_hub.element.deleted`` → audit echo skeleton (no-op until
+  the upstream payload includes a user-id target)
+
+Adding a new event trigger is now a one-line entry in
+``_SUBSCRIPTIONS`` — keeps the cross-module event topology auditable
+from a single grep.
+
+#### C5 — Raw SQL → ORM in 3 remaining cross-link sites
+v1.4.4 fixed the bim_hub upload cross-link.  The same fragile
+hand-rolled ``INSERT INTO oe_documents_document`` via ``text()``
+pattern still existed in three other places — replaced each with a
+clean ``Document(...)`` ORM insert that picks up timestamps + defaults
+from the Base mixin and stays in sync with any future schema
+migration:
+
+- ``punchlist/router.py:288`` (punch photos)
+- ``meetings/router.py:967`` (meeting transcripts)
+- ``takeoff/router.py:1855`` (takeoff PDFs)
+
+All four cross-link sites now use the ORM.  Verified with
+``grep -c "INSERT INTO oe_documents_document"`` returning 0 across
+all four files.
+
+#### C6 — Meetings: stop publishing event when task creation fails
+``meetings/service.py::complete_meeting`` wrapped task creation from
+action items in a try/except that swallowed all errors with
+"best-effort" logging — and then published
+``meeting.action_items_created`` regardless.  Downstream subscribers
+(notifications, vector indexer) were told the work was done even
+when zero tasks made it into the DB.  Fixed by:
+
+- Per-action-item isolation: a single failed item no longer aborts
+  the others
+- Track ``created_action_items`` and ``failed_action_items``
+  separately, surface both via the response
+- Only publish the event when at least one task actually persisted;
+  payload now carries ``created_count`` / ``failed_count`` so
+  notification subscribers can show "3 of 5 tasks created"
+
+### Project Intelligence
+
+#### T1.1 — Collector wires 4 missing modules
+``project_intelligence/collector.py`` collected state from 9 domains
+(BOQ, schedule, takeoff, validation, risk, tendering, documents,
+reports, costmodel) but was **completely blind** to requirements,
+bim_hub, tasks, and assemblies.  ``ProjectState`` had no fields for
+them.  Score lied — a project with perfect BOQ but zero requirements
+got a falsely high score.  Fixed by:
+
+- New ``RequirementsState`` / ``BIMState`` / ``TasksState`` /
+  ``AssembliesState`` dataclasses
+- New ``_collect_requirements`` / ``_collect_bim`` / ``_collect_tasks``
+  / ``_collect_assemblies`` parallel collectors
+- Each new collector uses cross-dialect SQL (works on SQLite +
+  PostgreSQL) and falls back to default state on exception with a
+  WARNING-level log instead of the previous DEBUG-level swallow
+- ``collect_project_state`` now ``asyncio.gather``s 14 collectors
+  instead of 10
+- ``ProjectState`` exposes 4 new fields so the scorer / advisor /
+  dashboard can surface gaps like "no requirements defined" or
+  "BIM elements not linked to BOQ"
+
+Smoke-tested against the live database — collectors return real
+counts for the 5 most recent projects (which include data created
+by the v1.4.5 cross-module integration tests).
+
+### Verification
+- Backend ``ruff check`` clean across every file touched in v1.4.6
+- 174 unit + integration tests passing (vector adapters x7 +
+  property matcher + requirements↔BIM cross-flow + BIM processor)
+- ``scripts/check_version_sync.py`` passes at 1.4.6
+- ``scripts/integrity_check.py`` passes (10 hits)
+
+### Deferred to v1.4.7 / v1.5.0
+- ``project_intelligence/actions.py`` 3 of 8 actions still dead code
+  (run_validation / match_cwicr_prices / generate_schedule fall back
+  to redirect lying about execution)
+- ``costmodel`` vs ``full_evm`` redundancy — both compute EVM with
+  different logic, frontend uses neither, needs strategic decision
+- ``costmodel`` PV approximation flaw (BAC × time_elapsed%)
+- BIM frontend correctness: 14 findings in BIMPage.tsx + 5 link
+  modals (200-item caps, modal pattern inconsistency, race
+  conditions, type-unsafe casts)
+- Assembly ``total_rate`` invalidation on CostItem.rate change
+- ``create_vector_routes()`` factory + reduce ~250 LOC duplication
+- Trailing-slash audit of 12 broken integration tests
+- Test coverage push: 0 tests for costmodel/finance/full_evm and 6
+  of 8 shared infra modules
+
 ## [1.4.5] — 2026-04-11
 
 ### Fixed — deep-audit cut driven by 3 parallel sub-agents
