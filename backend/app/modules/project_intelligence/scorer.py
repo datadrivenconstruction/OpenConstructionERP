@@ -9,7 +9,7 @@ Takes a ProjectState and produces a ProjectScore with:
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any
 
 from app.modules.project_intelligence.collector import ProjectState
 

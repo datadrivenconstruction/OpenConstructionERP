@@ -14,6 +14,20 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.4.4',
+    date: '2026-04-11',
+    changes: [
+      'Backend hardening cut driven by a multi-agent quality audit. No new user-visible features — focus is "everything that already exists works at scale and stays honest about which version it is"',
+      'Memory hazard fix in vector auto-backfill: previously _auto_backfill_vector_collections did SELECT * on each indexed table at startup, materialised the full result set into a Python list, and only THEN sliced down to vector_backfill_max_rows — on a 2M-row deployment that allocated gigabytes of RAM before the cap could even kick in. Now issues a cheap COUNT(*) first to decide whether reindexing is needed, then pulls only the capped number of rows with LIMIT applied at the SQL level. Side benefit: 8 per-collection _load_X closures collapsed into a single declarative backfill_targets registry, ~80 LOC reduction in main.py',
+      'Python 3.14 readiness: replaced datetime.utcnow() (deprecated since 3.12) with datetime.now(UTC) across 8 call sites — boq/router.py:2991, documents/service.py:475, tendering/router.py:378, project_intelligence/collector.py:680, punchlist/router.py:299, meetings/router.py:984, takeoff/router.py:1872, plus bim_hub/router.py:869 (rewritten as ORM insert, see below)',
+      'Replaced raw SQL INSERT with ORM Document(...) in bim_hub/router.py upload_cad cross-link to Documents hub — the parameter binding was safe but the pattern was fragile (any future Document schema change would silently break the cross-link without test coverage) and shipped a stray utcnow(). Now uses the model directly with all defaults + timestamps inherited from Base',
+      'Functional ruff cleanup: F401 unused imports removed from boq/events.py, project_intelligence/collector.py (uuid), project_intelligence/scorer.py (Callable), search/router.py (Depends). F541 f-string without placeholders fixed in project_intelligence/advisor.py:399. B905 zip() without strict= fixed in costs/router.py:1742 (the cost-database resource loader — without strict=True an array length drift would silently corrupt assembly composition mid-import). Plus auto-fixed UP037/UP041/I001 style issues',
+      'Version-sync CI guard (NEW): backend/pyproject.toml silently drifted from frontend/package.json for FOUR minor versions (v1.3.32 → v1.4.2 all shipped with the Python package stuck on 1.3.31, so /api/health lied because Settings.app_version reads from importlib.metadata). v1.4.3 retro-fixed the literal but left the door open. New scripts/check_version_sync.py reads both files plus the top entries of CHANGELOG.md and Changelog.tsx and exits non-zero on mismatch. Wired into both .pre-commit-config.yaml as a local hook AND .github/workflows/ci.yml as a dedicated version-sync job that runs in parallel with backend+frontend lanes. Tested negatively (catches drift) and positively (passes at 1.4.4)',
+      'Verification: Backend ruff check clean across every file touched in v1.4.4. Backend boots cleanly via app.router.lifespan_context smoke test (57 modules loaded, 217k vectors indexed, no startup errors). check_version_sync.py passes at 1.4.4',
+      'Deferred to v1.4.5: BIMPage.tsx i18n compliance (11+ hardcoded strings), create_vector_routes() factory (~250 LOC duplication across 8 modules), trailing-slash audit of 12 broken integration tests (redirect_slashes=False is intentional — fixes CORS 307 issue), deep-dive audit of recently-added modules looking for hacks, half-baked logic, and missing cross-module wiring',
+    ],
+  },
+  {
     version: '1.4.3',
     date: '2026-04-11',
     changes: [

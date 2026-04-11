@@ -858,32 +858,30 @@ async def upload_cad_file(
         saved_cad_key,
     )
 
-    # Cross-link: create Document record so BIM files appear in Documents hub
+    # Cross-link: create Document record so BIM files appear in Documents hub.
+    # Uses the ORM model directly (NOT raw SQL) so timestamps + defaults are
+    # filled by SQLAlchemy / Base mixin and the row stays in sync with the
+    # rest of the documents module if its schema evolves.  Failures are
+    # swallowed because the cross-link is convenience-only — the BIM model
+    # itself is already saved by the time we get here.
     try:
-        import json as _json
-        from datetime import datetime as _dt
+        from app.modules.documents.models import Document
 
-        from sqlalchemy import text as _text
-
-        doc_id = str(uuid.uuid4())
-        now = _dt.utcnow().isoformat()
-        tags_json = _json.dumps(["bim", model_format, discipline])
-        await service.session.execute(
-            _text(
-                "INSERT INTO oe_documents_document "
-                "(id, project_id, name, description, category, file_size, mime_type, "
-                "file_path, version, uploaded_by, tags, metadata, created_at, updated_at) "
-                "VALUES (:id, :pid, :name, :desc, :cat, :fsize, :mime, :fpath, 1, :by, :tags, '{}', :now, :now)"
-            ),
-            {
-                "id": doc_id, "pid": project_id, "name": filename,
-                "desc": f"BIM model: {model_name}", "cat": "drawing",
-                "fsize": len(content), "mime": f"application/{model_format}",
-                "fpath": saved_cad_key, "by": user_id or "",
-                "tags": tags_json, "now": now,
-            },
+        doc = Document(
+            project_id=uuid.UUID(project_id),
+            name=filename,
+            description=f"BIM model: {model_name}",
+            category="drawing",
+            file_size=len(content),
+            mime_type=f"application/{model_format}",
+            file_path=saved_cad_key,
+            version=1,
+            uploaded_by=user_id or "",
+            tags=["bim", model_format, discipline],
         )
-        logger.info("Cross-linked BIM model %s → document %s", model_id, doc_id)
+        service.session.add(doc)
+        await service.session.flush()
+        logger.info("Cross-linked BIM model %s → document %s", model_id, doc.id)
     except Exception as exc:
         logger.warning("Failed to cross-link BIM to documents hub: %s", exc)
 

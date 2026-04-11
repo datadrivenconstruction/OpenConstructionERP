@@ -399,7 +399,7 @@ async def vectorize_cost_items(
                 "message": "Vector indexing is not available: no embedding model found. "
                 "Install sentence-transformers (pip install sentence-transformers).",
             }
-    except asyncio.TimeoutError:
+    except TimeoutError:
         return {
             "indexed": 0,
             "message": "Vector indexing is not available: embedding model loading timed out. "
@@ -1528,7 +1528,7 @@ async def load_cwicr_database(
 
     _path = cwicr_path
 
-    def _read_file() -> "pd.DataFrame":
+    def _read_file() -> pd.DataFrame:
         if _path.suffix == ".parquet":
             return pd.read_parquet(_path)
         return pd.read_excel(_path, engine="openpyxl")
@@ -1739,8 +1739,20 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
             cost_arr = res_df["_cost_v"].to_numpy()
             type_arr = res_df["_type"].to_numpy()
 
+            # strict=True surfaces array length drift immediately instead of
+            # silently truncating component rows mid-import — important for a
+            # cost-data pipeline where a missing column would otherwise corrupt
+            # the assembly composition without leaving any audit trail.
             for rc, nm, cd, un, qt, rt, cs, tp in zip(
-                rc_arr, name_arr, code_arr, unit_arr, qty_arr, rate_arr, cost_arr, type_arr
+                rc_arr,
+                name_arr,
+                code_arr,
+                unit_arr,
+                qty_arr,
+                rate_arr,
+                cost_arr,
+                type_arr,
+                strict=True,
             ):
                 comps = resources_by_code.get(rc)
                 if comps is None:
@@ -1869,7 +1881,7 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
     }
 
 
-def _build_cwicr_items(df: "pd.DataFrame", db_id: str) -> list[dict[str, Any]]:  # noqa: F821
+def _build_cwicr_items(df: pd.DataFrame, db_id: str) -> list[dict[str, Any]]:  # noqa: F821
     """Legacy — kept for reference but no longer called."""
     import math
 

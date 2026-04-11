@@ -7,9 +7,8 @@ and run in parallel via asyncio.gather().
 
 import asyncio
 import logging
-import uuid
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import text
@@ -677,7 +676,7 @@ async def collect_project_state(
     Returns:
         ProjectState with all domain states populated.
     """
-    now = datetime.utcnow().isoformat()
+    now = datetime.now(UTC).isoformat()
 
     # Run all collectors in parallel
     results = await asyncio.gather(
