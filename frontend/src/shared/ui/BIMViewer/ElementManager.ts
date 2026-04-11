@@ -26,6 +26,17 @@ export interface BIMBoundingBox {
   max_z: number;
 }
 
+/** Brief of a BOQ position linked to this element, embedded in the element
+ *  response by the backend. See `BOQElementLinkBrief` in `features/bim/api.ts`. */
+export interface BIMBOQLinkBrief {
+  id: string;
+  boq_position_id: string;
+  boq_position_ordinal: string | null;
+  boq_position_description: string | null;
+  link_type: 'manual' | 'auto' | 'rule_based';
+  confidence: string | null;
+}
+
 export interface BIMElementData {
   id: string;
   name: string;
@@ -38,6 +49,9 @@ export interface BIMElementData {
   properties?: Record<string, unknown>;
   quantities?: Record<string, number>;
   classification?: Record<string, string>;
+  /** Links to BOQ positions — populated by the backend with every element
+   *  fetch so the viewer can render link state without a second round-trip. */
+  boq_links?: BIMBOQLinkBrief[];
 }
 
 export interface BIMModelData {
@@ -538,6 +552,49 @@ export class ElementManager {
       mesh.visible = true;
     }
     if (this.daeGroup) this.daeGroup.visible = true;
+  }
+
+  /**
+   * Highlight elements without hiding the rest of the model.  Used to show
+   * which BIM elements are linked to the currently-selected BOQ position:
+   * the caller passes the `cad_element_ids` list and the viewer colours
+   * every matching mesh orange while leaving the rest at normal colour.
+   *
+   * Passing an empty array clears the highlight and restores original colours.
+   */
+  highlight(elementIds: string[]): void {
+    const highlightColor = new THREE.Color(0xff9500); // orange
+    const keep = new Set(elementIds);
+    for (const [id, mesh] of this.meshMap) {
+      const ud = mesh.userData as {
+        customMaterial?: boolean;
+        originalMaterial?: THREE.Material | THREE.Material[];
+      };
+      if (keep.has(id)) {
+        // Clone material so we can recolour independently of the base.
+        if (!ud.customMaterial) {
+          const base = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
+          if (base && 'clone' in base) {
+            mesh.material = (base as THREE.Material & { clone(): THREE.Material }).clone();
+            ud.customMaterial = true;
+          }
+        }
+        const mat = mesh.material as THREE.MeshStandardMaterial | THREE.MeshPhongMaterial;
+        if (mat && 'color' in mat && mat.color) {
+          mat.color.copy(highlightColor);
+        }
+      } else if (ud.customMaterial) {
+        // Restore original material on meshes that were previously highlighted.
+        const old = mesh.material;
+        if (old && 'dispose' in old) {
+          (old as THREE.Material & { dispose(): void }).dispose();
+        }
+        if (ud.originalMaterial) {
+          mesh.material = ud.originalMaterial;
+        }
+        ud.customMaterial = false;
+      }
+    }
   }
 
   /** Isolate given element IDs — hide everything else. */

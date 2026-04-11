@@ -17,8 +17,10 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.modules.bim_hub.models import (
     BIMElement,
@@ -44,6 +46,7 @@ from app.modules.bim_hub.schemas import (
     QuantityMapApplyRequest,
     QuantityMapApplyResult,
 )
+from app.modules.boq.models import BOQ, Position
 
 logger = logging.getLogger(__name__)
 
@@ -272,6 +275,86 @@ class BIMHubService:
             limit=limit,
         )
 
+    async def list_elements_with_links(
+        self,
+        model_id: uuid.UUID,
+        *,
+        element_type: str | None = None,
+        storey: str | None = None,
+        discipline: str | None = None,
+        offset: int = 0,
+        limit: int = 200,
+    ) -> tuple[list[BIMElement], int, dict[uuid.UUID, list[dict[str, Any]]]]:
+        """List elements AND their BOQElementLink briefs in two SQL round trips.
+
+        Returns ``(elements, total, links_by_element_id)`` where each brief
+        is a plain dict with the fields expected by ``BOQElementLinkBrief``
+        (id, boq_position_id, boq_position_ordinal, boq_position_description,
+        link_type, confidence).
+
+        This avoids an N+1 (one query per element for links + one for each
+        linked position) by issuing:
+            1. A single SELECT on BIMElement with ``selectinload(boq_links)``.
+            2. A single SELECT on Position for all distinct linked position ids.
+        """
+        await self.get_model(model_id)  # 404 check
+
+        # ── Step 1: load elements with links eagerly ────────────────────
+        base = select(BIMElement).where(BIMElement.model_id == model_id)
+        if element_type is not None:
+            base = base.where(BIMElement.element_type == element_type)
+        if storey is not None:
+            base = base.where(BIMElement.storey == storey)
+        if discipline is not None:
+            base = base.where(BIMElement.discipline == discipline)
+
+        count_stmt = select(func.count()).select_from(base.subquery())
+        total = (await self.session.execute(count_stmt)).scalar_one()
+
+        stmt = (
+            base.options(selectinload(BIMElement.boq_links))
+            .order_by(BIMElement.created_at)
+            .offset(offset)
+            .limit(limit)
+        )
+        result = await self.session.execute(stmt)
+        elements = list(result.scalars().all())
+
+        # ── Step 2: fetch ordinals/descriptions for every linked position
+        pos_ids: set[uuid.UUID] = set()
+        for elem in elements:
+            for lnk in elem.boq_links or []:
+                pos_ids.add(lnk.boq_position_id)
+
+        pos_info: dict[uuid.UUID, tuple[str | None, str | None]] = {}
+        if pos_ids:
+            pos_stmt = select(
+                Position.id, Position.ordinal, Position.description
+            ).where(Position.id.in_(pos_ids))
+            pos_result = await self.session.execute(pos_stmt)
+            for pid, ordinal, desc in pos_result.all():
+                pos_info[pid] = (ordinal, desc)
+
+        # ── Step 3: build brief dicts per element ───────────────────────
+        links_by_element_id: dict[uuid.UUID, list[dict[str, Any]]] = {}
+        for elem in elements:
+            briefs: list[dict[str, Any]] = []
+            for lnk in elem.boq_links or []:
+                ordinal, desc = pos_info.get(lnk.boq_position_id, (None, None))
+                briefs.append(
+                    {
+                        "id": lnk.id,
+                        "boq_position_id": lnk.boq_position_id,
+                        "boq_position_ordinal": ordinal,
+                        "boq_position_description": desc,
+                        "link_type": lnk.link_type,
+                        "confidence": lnk.confidence,
+                    }
+                )
+            links_by_element_id[elem.id] = briefs
+
+        return elements, total, links_by_element_id
+
     async def get_element(self, element_id: uuid.UUID) -> BIMElement:
         """Get a single element by ID. Raises 404 if not found."""
         element = await self.element_repo.get(element_id)
@@ -353,7 +436,12 @@ class BIMHubService:
         data: BOQElementLinkCreate,
         user_id: str | None = None,
     ) -> BOQElementLink:
-        """Create a link between a BOQ position and a BIM element."""
+        """Create a link between a BOQ position and a BIM element.
+
+        Also mirrors the BIM element id into ``Position.cad_element_ids``
+        so legacy consumers that read that JSON array stay in sync with
+        the canonical ``oe_bim_boq_link`` table.
+        """
         # Verify element exists
         element = await self.element_repo.get(data.bim_element_id)
         if element is None:
@@ -372,6 +460,12 @@ class BIMHubService:
             metadata_=data.metadata,
         )
         link = await self.link_repo.create(link)
+
+        # Keep Position.cad_element_ids in sync (legacy JSON mirror).
+        await self._append_cad_element_id(
+            data.boq_position_id, data.bim_element_id
+        )
+
         logger.info(
             "BOQ-BIM link created: pos=%s elem=%s type=%s",
             data.boq_position_id,
@@ -381,15 +475,61 @@ class BIMHubService:
         return link
 
     async def delete_link(self, link_id: uuid.UUID) -> None:
-        """Delete a BOQ-BIM link."""
+        """Delete a BOQ-BIM link and drop the mirrored id from the position."""
         link = await self.link_repo.get(link_id)
         if link is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="BOQ-BIM link not found",
             )
+        position_id = link.boq_position_id
+        element_id = link.bim_element_id
         await self.link_repo.delete(link_id)
+
+        # Remove the mirrored id from Position.cad_element_ids.
+        await self._remove_cad_element_id(position_id, element_id)
+
         logger.info("BOQ-BIM link deleted: %s", link_id)
+
+    # ── cad_element_ids sync helpers ─────────────────────────────────────
+
+    async def _append_cad_element_id(
+        self,
+        position_id: uuid.UUID,
+        element_id: uuid.UUID,
+    ) -> None:
+        """Append ``element_id`` to ``Position.cad_element_ids`` if missing.
+
+        Initialises the array when the column is NULL (legacy rows) and
+        skips duplicates. No-op when the position no longer exists — the
+        caller is responsible for verifying position existence beforehand.
+        """
+        pos = await self.session.get(Position, position_id)
+        if pos is None:
+            return
+        current = list(pos.cad_element_ids or [])
+        elem_str = str(element_id)
+        if elem_str not in current:
+            current.append(elem_str)
+            pos.cad_element_ids = current
+            # Re-assign to force SQLAlchemy to notice the mutation on JSON.
+            await self.session.flush()
+
+    async def _remove_cad_element_id(
+        self,
+        position_id: uuid.UUID,
+        element_id: uuid.UUID,
+    ) -> None:
+        """Remove ``element_id`` from ``Position.cad_element_ids`` if present."""
+        pos = await self.session.get(Position, position_id)
+        if pos is None:
+            return
+        current = list(pos.cad_element_ids or [])
+        elem_str = str(element_id)
+        if elem_str in current:
+            current.remove(elem_str)
+            pos.cad_element_ids = current
+            await self.session.flush()
 
     # ── Quantity Maps ────────────────────────────────────────────────────────
 
@@ -461,11 +601,28 @@ class BIMHubService:
     ) -> QuantityMapApplyResult:
         """Apply quantity mapping rules to all elements in a model.
 
-        For each element, checks which rules match (by element_type_filter
-        and property_filter), then extracts the quantity from quantity_source,
-        applies multiplier and waste factor.
+        Two modes, selected by ``request.dry_run``:
 
-        Returns a summary of matched elements and applied rules.
+        **dry_run=True (default)** — compute and return a preview only.
+            No ``BOQElementLink`` rows and no ``Position`` rows are created.
+            ``links_created`` and ``positions_created`` stay at 0.
+
+        **dry_run=False** — actually persist the result:
+            * For every rule with a resolvable ``boq_target``, create a
+              ``BOQElementLink`` (link_type="rule_based", confidence="high",
+              rule_id=rule.id) for each matched element, skipping any
+              (position_id, element_id) pair that already exists.
+            * If a rule's ``boq_target`` does not resolve to an existing
+              position **and** the target dict has ``auto_create: True``,
+              a new ``Position`` is inserted into the project's first BOQ
+              with quantity = Σ(adjusted quantity across matched elements)
+              and then the links are created against the new position.
+            * Each rule's writes run inside a single savepoint
+              (``session.begin_nested``) — a failure while processing one
+              rule rolls that rule back cleanly without aborting the
+              others or the outer request transaction.
+            * Also keeps ``Position.cad_element_ids`` in sync via
+              ``_append_cad_element_id``.
         """
         model = await self.get_model(request.model_id)
 
@@ -477,12 +634,13 @@ class BIMHubService:
         # Get active rules (project-scoped first, then global)
         rules = await self.qmap_repo.list_active(project_id=model.project_id)
 
+        # ── Step 1: compute matches per rule (same math regardless of
+        # dry_run so the preview stays identical across modes). ───────────
+        per_rule_matches: dict[uuid.UUID, list[tuple[BIMElement, Decimal, Decimal]]] = {}
         results: list[dict[str, Any]] = []
-        matched_elements = 0
-        rules_applied = 0
+        matched_element_ids: set[uuid.UUID] = set()
 
         for element in elements:
-            element_matched = False
             for rule in rules:
                 if not self._rule_matches_element(rule, element):
                     continue
@@ -498,6 +656,11 @@ class BIMHubService:
                 except (InvalidOperation, ValueError):
                     continue
 
+                per_rule_matches.setdefault(rule.id, []).append(
+                    (element, qty, adjusted)
+                )
+                matched_element_ids.add(element.id)
+
                 results.append({
                     "element_id": str(element.id),
                     "stable_id": element.stable_id,
@@ -510,24 +673,339 @@ class BIMHubService:
                     "unit": rule.unit,
                     "boq_target": rule.boq_target,
                 })
-                element_matched = True
-                rules_applied += 1
 
-            if element_matched:
-                matched_elements += 1
+        matched_elements = len(matched_element_ids)
+        rules_applied = sum(1 for matches in per_rule_matches.values() if matches)
+        links_created = 0
+        positions_created = 0
+
+        # ── Step 2: persist (only when dry_run is False) ───────────────
+        if not request.dry_run and per_rule_matches:
+            rules_by_id = {rule.id: rule for rule in rules}
+            for rule_id, matches in per_rule_matches.items():
+                rule = rules_by_id.get(rule_id)
+                if rule is None or not matches:
+                    continue
+
+                try:
+                    async with self.session.begin_nested():
+                        created_links, created_positions = (
+                            await self._persist_rule_matches(
+                                rule=rule,
+                                model=model,
+                                matches=matches,
+                            )
+                        )
+                        links_created += created_links
+                        positions_created += created_positions
+                except Exception:  # noqa: BLE001 — per-rule isolation
+                    logger.exception(
+                        "Failed to persist quantity map rule %s on model %s",
+                        rule_id,
+                        model.id,
+                    )
+                    # Savepoint already rolled back; continue with next rule.
 
         logger.info(
-            "Quantity maps applied: %d elements matched, %d rules applied for model %s",
+            "Quantity maps applied: %d elements matched, %d rules applied, "
+            "%d links created, %d positions created for model %s (dry_run=%s)",
             matched_elements,
             rules_applied,
+            links_created,
+            positions_created,
             model.name,
+            request.dry_run,
         )
 
         return QuantityMapApplyResult(
             matched_elements=matched_elements,
             rules_applied=rules_applied,
+            links_created=links_created,
+            positions_created=positions_created,
             results=results,
         )
+
+    async def _persist_rule_matches(
+        self,
+        *,
+        rule: BIMQuantityMap,
+        model: BIMModel,
+        matches: list[tuple[BIMElement, Decimal, Decimal]],
+    ) -> tuple[int, int]:
+        """Create BOQElementLink (and optionally a Position) for one rule.
+
+        Called from ``apply_quantity_maps`` inside a savepoint. Returns
+        ``(links_created, positions_created)``.
+        """
+        if not matches:
+            return 0, 0
+
+        target = rule.boq_target or {}
+        if not isinstance(target, dict):
+            logger.warning(
+                "Rule %s has non-dict boq_target; skipping persistence", rule.id
+            )
+            return 0, 0
+
+        # ── Resolve the target Position ───────────────────────────────
+        position = await self._resolve_boq_target_position(
+            target=target,
+            project_id=model.project_id,
+        )
+        positions_created = 0
+
+        if position is None:
+            if not target.get("auto_create"):
+                logger.info(
+                    "Rule %s: boq_target unresolved and auto_create is false; skipping",
+                    rule.id,
+                )
+                return 0, 0
+
+            position = await self._auto_create_position_for_rule(
+                rule=rule,
+                project_id=model.project_id,
+                matches=matches,
+            )
+            if position is None:
+                return 0, 0
+            positions_created = 1
+
+        # ── Create links for every matched element ────────────────────
+        links_created = 0
+        existing_elem_ids = await self._existing_link_element_ids(position.id)
+
+        for element, _raw, _adjusted in matches:
+            if element.id in existing_elem_ids:
+                continue  # idempotent — dup UNIQUE would 500 us otherwise
+
+            link = BOQElementLink(
+                boq_position_id=position.id,
+                bim_element_id=element.id,
+                link_type="rule_based",
+                confidence="high",
+                rule_id=str(rule.id),
+                metadata_={},
+            )
+            try:
+                await self.link_repo.create(link)
+            except IntegrityError:
+                # Race with a concurrent writer — treat as already linked.
+                logger.debug(
+                    "IntegrityError creating link pos=%s elem=%s (treated as duplicate)",
+                    position.id,
+                    element.id,
+                )
+                continue
+
+            await self._append_cad_element_id(position.id, element.id)
+            existing_elem_ids.add(element.id)
+            links_created += 1
+
+        return links_created, positions_created
+
+    async def _resolve_boq_target_position(
+        self,
+        *,
+        target: dict[str, Any],
+        project_id: uuid.UUID,
+    ) -> Position | None:
+        """Look up a Position from a rule's ``boq_target`` dict.
+
+        Supports two lookup keys:
+            - ``position_id``: direct UUID lookup (scoped to project).
+            - ``position_ordinal``: match by ordinal within any BOQ of the
+              given project (returns the first match).
+        """
+        raw_pid = target.get("position_id")
+        if raw_pid:
+            try:
+                pid = uuid.UUID(str(raw_pid))
+            except (ValueError, TypeError):
+                return None
+            pos = await self.session.get(Position, pid)
+            if pos is None:
+                return None
+            # Make sure the position belongs to the same project.
+            boq = await self.session.get(BOQ, pos.boq_id)
+            if boq is None or boq.project_id != project_id:
+                return None
+            return pos
+
+        ordinal = target.get("position_ordinal")
+        if ordinal:
+            stmt = (
+                select(Position)
+                .join(BOQ, BOQ.id == Position.boq_id)
+                .where(BOQ.project_id == project_id, Position.ordinal == str(ordinal))
+                .limit(1)
+            )
+            result = await self.session.execute(stmt)
+            return result.scalar_one_or_none()
+
+        return None
+
+    async def _auto_create_position_for_rule(
+        self,
+        *,
+        rule: BIMQuantityMap,
+        project_id: uuid.UUID,
+        matches: list[tuple[BIMElement, Decimal, Decimal]],
+    ) -> Position | None:
+        """Insert a new Position in the project's first/default BOQ.
+
+        Quantity = sum of adjusted quantities across all matches for this
+        rule. Unit = rule.unit (fallback "pcs"). Classification is lifted
+        from ``rule.metadata_["classification"]`` when present.
+        Returns ``None`` if the project has no BOQ to attach to.
+        """
+        # Find the project's first BOQ (oldest created_at, same as
+        # ``BOQRepository.list_for_project`` order inverted).
+        stmt = (
+            select(BOQ)
+            .where(BOQ.project_id == project_id)
+            .order_by(BOQ.created_at.asc())
+            .limit(1)
+        )
+        boq = (await self.session.execute(stmt)).scalar_one_or_none()
+        if boq is None:
+            logger.warning(
+                "Auto-create requested for rule %s but project %s has no BOQ",
+                rule.id,
+                project_id,
+            )
+            return None
+
+        # Aggregate the adjusted quantity across all matched elements.
+        total_qty = sum((adjusted for _, _, adjusted in matches), Decimal("0"))
+
+        # Pull classification out of the rule's metadata if present.
+        rule_meta = rule.metadata_ or {}
+        classification = rule_meta.get("classification") or {}
+        if not isinstance(classification, dict):
+            classification = {}
+
+        # Pick a free ordinal — "BIM-<short rule id>" — unlikely to clash.
+        ordinal = f"BIM-{str(rule.id)[:8]}"
+
+        # Determine sort_order: after everything else.
+        max_order_stmt = select(func.coalesce(func.max(Position.sort_order), 0)).where(
+            Position.boq_id == boq.id
+        )
+        max_order = (await self.session.execute(max_order_stmt)).scalar_one() or 0
+
+        position = Position(
+            boq_id=boq.id,
+            parent_id=None,
+            ordinal=ordinal,
+            description=rule.name,
+            unit=rule.unit or "pcs",
+            quantity=str(total_qty),
+            unit_rate="0",
+            total="0",
+            classification=classification,
+            source="cad_import",
+            confidence=None,
+            cad_element_ids=[],
+            validation_status="pending",
+            metadata_={"auto_created_by_rule": str(rule.id)},
+            sort_order=max_order + 1,
+        )
+        self.session.add(position)
+        await self.session.flush()
+        logger.info(
+            "Auto-created Position %s (ordinal=%s) for rule %s in BOQ %s",
+            position.id,
+            ordinal,
+            rule.id,
+            boq.id,
+        )
+        return position
+
+    async def _existing_link_element_ids(
+        self,
+        position_id: uuid.UUID,
+    ) -> set[uuid.UUID]:
+        """Return the set of bim_element_ids already linked to a position."""
+        stmt = select(BOQElementLink.bim_element_id).where(
+            BOQElementLink.boq_position_id == position_id
+        )
+        result = await self.session.execute(stmt)
+        return {row[0] for row in result.all()}
+
+    async def sync_cad_element_ids(
+        self,
+        project_id: uuid.UUID | None = None,
+    ) -> dict[str, int]:
+        """Rewrite ``Position.cad_element_ids`` from ``oe_bim_boq_link``.
+
+        Idempotent back-fill helper. Walks every ``BOQElementLink`` in the
+        database (optionally scoped to a single project) and overwrites
+        the JSON array on the linked ``Position`` with the sorted list of
+        bim_element_id strings. Use this when:
+
+            * the app shipped before the link↔position mirror existed and
+              legacy rows have out-of-date or empty ``cad_element_ids``;
+            * a bulk DB import bypassed the service layer;
+            * a migration has added/removed links in bulk.
+
+        Returns a small summary ``{"links_scanned", "positions_updated"}``.
+        """
+        # ── Load links (optionally scoped to project) ─────────────────
+        if project_id is not None:
+            stmt = (
+                select(BOQElementLink.boq_position_id, BOQElementLink.bim_element_id)
+                .join(Position, Position.id == BOQElementLink.boq_position_id)
+                .join(BOQ, BOQ.id == Position.boq_id)
+                .where(BOQ.project_id == project_id)
+            )
+        else:
+            stmt = select(
+                BOQElementLink.boq_position_id, BOQElementLink.bim_element_id
+            )
+
+        result = await self.session.execute(stmt)
+        grouped: dict[uuid.UUID, set[str]] = {}
+        links_scanned = 0
+        for pos_id, elem_id in result.all():
+            links_scanned += 1
+            grouped.setdefault(pos_id, set()).add(str(elem_id))
+
+        # Also make sure positions that exist in the project but have NO
+        # links get their cad_element_ids reset to [] (so stale ids from a
+        # previous state are cleared).
+        if project_id is not None:
+            all_pos_stmt = (
+                select(Position.id)
+                .join(BOQ, BOQ.id == Position.boq_id)
+                .where(BOQ.project_id == project_id)
+            )
+            all_pos = (await self.session.execute(all_pos_stmt)).scalars().all()
+            for pid in all_pos:
+                grouped.setdefault(pid, set())
+
+        positions_updated = 0
+        for pos_id, elem_ids in grouped.items():
+            pos = await self.session.get(Position, pos_id)
+            if pos is None:
+                continue
+            desired = sorted(elem_ids)
+            current = list(pos.cad_element_ids or [])
+            if sorted(current) != desired:
+                pos.cad_element_ids = desired
+                positions_updated += 1
+
+        await self.session.flush()
+        logger.info(
+            "sync_cad_element_ids: scanned %d links, updated %d positions (project=%s)",
+            links_scanned,
+            positions_updated,
+            project_id,
+        )
+        return {
+            "links_scanned": links_scanned,
+            "positions_updated": positions_updated,
+        }
 
     @staticmethod
     def _rule_matches_element(rule: BIMQuantityMap, element: BIMElement) -> bool:

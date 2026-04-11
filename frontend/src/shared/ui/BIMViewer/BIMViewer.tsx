@@ -19,6 +19,12 @@ import {
   Maximize2,
   Loader2,
   AlertCircle,
+  Link2,
+  Link2Off,
+  Plus,
+  Camera,
+  Square,
+  CornerUpLeft,
 } from 'lucide-react';
 import { SceneManager } from './SceneManager';
 import { ElementManager } from './ElementManager';
@@ -67,6 +73,10 @@ export interface BIMViewerProps {
   colorByMode?: 'default' | 'discipline' | 'storey' | 'type';
   /** Element IDs to isolate (hide everything else). Empty = show all. */
   isolatedIds?: string[] | null;
+  /** Element IDs to highlight in orange WITHOUT hiding the rest of the
+   *  model — used to show which BIM elements are linked to the currently
+   *  selected BOQ position.  Pass null/empty to clear. */
+  highlightedIds?: string[] | null;
   /**
    * Called once DAE geometry finishes loading, with the ratio of elements
    * whose mesh was successfully matched by stable_id/name (0..1). The
@@ -74,6 +84,11 @@ export interface BIMViewerProps {
    * the viewport (e.g. DDC RVT exports with numeric node names).
    */
   onGeometryLoaded?: (meshMatchRatio: number) => void;
+  /** User clicked "Add to BOQ" on the selected element — parent opens the
+   *  AddToBOQModal pre-filled with this element. */
+  onAddToBOQ?: (element: BIMElementData) => void;
+  /** User clicked "Unlink" on a specific link in the properties panel. */
+  onUnlinkBOQ?: (linkId: string) => void;
 }
 
 /* ── Properties Table ──────────────────────────────────────────────────── */
@@ -120,43 +135,6 @@ function QuantitiesTable({ quantities }: { quantities: Record<string, number> })
   );
 }
 
-/* ── View Mode Selector ────────────────────────────────────────────────── */
-
-function ViewModeSelector({
-  value,
-  onChange,
-}: {
-  value: BIMViewMode;
-  onChange: (mode: BIMViewMode) => void;
-}) {
-  const { t } = useTranslation();
-  const modes: { id: BIMViewMode; label: string }[] = [
-    { id: 'default', label: t('bim.view_default', { defaultValue: 'Default' }) },
-    { id: 'discipline', label: t('bim.view_discipline', { defaultValue: 'Discipline' }) },
-    { id: '5d_cost', label: t('bim.view_5d', { defaultValue: '5D Cost' }) },
-    { id: '4d_schedule', label: t('bim.view_4d', { defaultValue: '4D Schedule' }) },
-  ];
-
-  return (
-    <div className="flex bg-surface-primary/90 backdrop-blur rounded-lg border border-border-light shadow-sm">
-      {modes.map((mode) => (
-        <button
-          key={mode.id}
-          onClick={() => onChange(mode.id)}
-          className={clsx(
-            'px-3 py-1.5 text-xs font-medium transition-colors first:rounded-s-lg last:rounded-e-lg',
-            value === mode.id
-              ? 'bg-oe-blue text-white'
-              : 'text-content-secondary hover:bg-surface-secondary',
-          )}
-        >
-          {mode.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
 /* ── BIM Viewer Component ──────────────────────────────────────────────── */
 
 export function BIMViewer({
@@ -175,7 +153,10 @@ export function BIMViewer({
   filterPredicate = null,
   colorByMode = 'default',
   isolatedIds = null,
+  highlightedIds = null,
   onGeometryLoaded,
+  onAddToBOQ,
+  onUnlinkBOQ,
 }: BIMViewerProps) {
   const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -184,9 +165,17 @@ export function BIMViewer({
   const selectionMgrRef = useRef<SelectionManager | null>(null);
 
   const [wireframe, setWireframe] = useState(false);
-  const [internalViewMode, setInternalViewMode] = useState<BIMViewMode>(_viewMode);
+  const [gridVisible, setGridVisible] = useState(true);
   const [selectedElement, setSelectedElement] = useState<BIMElementData | null>(null);
   const [elementCount, setElementCount] = useState(0);
+
+  /** Number of elements that have at least one BOQ link.  Derived from
+   *  the elements prop so it updates whenever the parent re-fetches after
+   *  a link is created or deleted. */
+  const linkedCount = useMemo(
+    () => (elements ?? []).filter((el) => (el.boq_links?.length ?? 0) > 0).length,
+    [elements],
+  );
 
   // Initialize Three.js scene on mount
   useEffect(() => {
@@ -316,6 +305,15 @@ export function BIMViewer({
     }
   }, [filterPredicate, isolatedIds, elements]);
 
+  // Highlight linked elements in orange when the parent passes a set of
+  // IDs.  Unlike isolate(), this does NOT hide the rest of the model —
+  // it just recolours the matched meshes so the user sees the spatial
+  // distribution of whichever BOQ position they're inspecting.
+  useEffect(() => {
+    if (!elementMgrRef.current) return;
+    elementMgrRef.current.highlight(highlightedIds ?? []);
+  }, [highlightedIds, elements]);
+
   // Apply color-by mode when it changes.
   useEffect(() => {
     if (!elementMgrRef.current || !elements?.length) return;
@@ -372,6 +370,15 @@ export function BIMViewer({
     onElementSelect?.(null);
   }, [onElementSelect]);
 
+  const handleToggleGrid = useCallback(() => {
+    sceneRef.current?.toggleGrid();
+    setGridVisible((v) => !v);
+  }, []);
+
+  const handleCameraPreset = useCallback((view: 'top' | 'front' | 'side' | 'iso') => {
+    sceneRef.current?.setCameraPreset(view);
+  }, []);
+
   // Memoize the element properties/quantities for the panel
   const elementProperties = useMemo(() => {
     if (!selectedElement?.properties) return {};
@@ -421,33 +428,94 @@ export function BIMViewer({
         </div>
       )}
 
-      {/* Toolbar overlay */}
-      <div className="absolute top-3 start-3 flex gap-1.5 z-20">
+      {/* Toolbar overlay — organised by function group with dividers.
+          Grouping follows the professional 6-group taxonomy from the research
+          brief: Camera | Selection | Visibility | (contextual tools follow). */}
+      <div className="absolute top-3 start-3 flex items-center gap-1 z-20 rounded-lg bg-surface-primary/90 backdrop-blur border border-border-light shadow-sm p-1">
+        {/* Camera group — presets + fit */}
         <ToolbarButton
           icon={Home}
           label={t('bim.zoom_fit', { defaultValue: 'Fit all' })}
           onClick={handleZoomToFit}
+          variant="group"
         />
+        <ToolbarButton
+          icon={Box}
+          label={t('bim.view_iso', { defaultValue: 'Isometric view' })}
+          onClick={() => handleCameraPreset('iso')}
+          variant="group"
+        />
+        <ToolbarButton
+          icon={Square}
+          label={t('bim.view_top', { defaultValue: 'Top view' })}
+          onClick={() => handleCameraPreset('top')}
+          variant="group"
+        />
+        <ToolbarButton
+          icon={CornerUpLeft}
+          label={t('bim.view_front', { defaultValue: 'Front view' })}
+          onClick={() => handleCameraPreset('front')}
+          variant="group"
+        />
+        <ToolbarButton
+          icon={Camera}
+          label={t('bim.view_side', { defaultValue: 'Side view' })}
+          onClick={() => handleCameraPreset('side')}
+          variant="group"
+        />
+        <div className="w-px h-5 bg-border-light mx-0.5" />
+        {/* Selection group */}
+        <ToolbarButton
+          icon={Maximize2}
+          label={t('bim.zoom_selection', { defaultValue: 'Zoom to selection' })}
+          onClick={handleZoomToSelection}
+          variant="group"
+        />
+        <div className="w-px h-5 bg-border-light mx-0.5" />
+        {/* Visibility group */}
         <ToolbarButton
           icon={Grid3X3}
           label={t('bim.wireframe', { defaultValue: 'Wireframe' })}
           onClick={handleToggleWireframe}
           active={wireframe}
+          variant="group"
         />
         <ToolbarButton
-          icon={Maximize2}
-          label={t('bim.zoom_selection', { defaultValue: 'Zoom to selection' })}
-          onClick={handleZoomToSelection}
+          icon={gridVisible ? Eye : EyeOff}
+          label={
+            gridVisible
+              ? t('bim.hide_grid', { defaultValue: 'Hide grid' })
+              : t('bim.show_grid', { defaultValue: 'Show grid' })
+          }
+          onClick={handleToggleGrid}
+          active={gridVisible}
+          variant="group"
         />
       </div>
 
-      {/* Element count badge */}
+      {/* Element count + link-progress badge. Shows total element count
+          plus a "N linked" chip (green) that counts how many elements
+          have at least one BOQ link — gives the user at-a-glance progress
+          on the takeoff workflow. */}
       {elementCount > 0 && (
-        <div className="absolute top-3 end-3 z-20">
+        <div className="absolute top-3 end-3 z-20 flex items-center gap-2">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-surface-primary/90 backdrop-blur text-content-secondary border border-border-light shadow-sm">
             <Box size={12} />
             {t('bim.element_count', { defaultValue: '{{count}} elements', count: elementCount })}
           </span>
+          {linkedCount > 0 && (
+            <span
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm"
+              title={t('bim.linked_count_title', {
+                defaultValue: '{{linked}} of {{total}} elements are linked to a BOQ position',
+                linked: linkedCount,
+                total: elementCount,
+              })}
+            >
+              <Link2 size={12} />
+              {t('bim.linked_count', { defaultValue: '{{count}} linked', count: linkedCount })}
+            </span>
+          )}
         </div>
       )}
 
@@ -512,6 +580,85 @@ export function BIMViewer({
               </div>
             )}
 
+            {/* BOQ Links — the headline integration feature.
+                Shows every BOQ position this element is linked to, with an
+                "Unlink" action on each, plus an "Add to BOQ" button that
+                opens the AddToBOQModal in the parent. */}
+            <div className="rounded-md border border-oe-blue/30 bg-oe-blue/5 p-2">
+              <div className="flex items-center justify-between mb-1.5">
+                <h4 className="text-xs font-semibold text-oe-blue flex items-center gap-1">
+                  <Link2 size={11} />
+                  {t('bim.linked_boq', { defaultValue: 'Linked BOQ positions' })}
+                  {selectedElement.boq_links && selectedElement.boq_links.length > 0 && (
+                    <span className="text-[10px] text-content-tertiary font-normal">
+                      ({selectedElement.boq_links.length})
+                    </span>
+                  )}
+                </h4>
+                {onAddToBOQ && (
+                  <button
+                    type="button"
+                    onClick={() => onAddToBOQ(selectedElement)}
+                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-oe-blue text-white hover:bg-oe-blue-dark"
+                    title={t('bim.link_add_title', { defaultValue: 'Add this element to a BOQ position' })}
+                  >
+                    <Plus size={10} />
+                    {t('bim.link_add', { defaultValue: 'Add to BOQ' })}
+                  </button>
+                )}
+              </div>
+              {selectedElement.boq_links && selectedElement.boq_links.length > 0 ? (
+                <ul className="space-y-1">
+                  {selectedElement.boq_links.map((link) => (
+                    <li
+                      key={link.id}
+                      className="flex items-center justify-between gap-1 px-1.5 py-1 rounded bg-surface-primary border border-border-light"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          {link.boq_position_ordinal && (
+                            <span className="text-[10px] font-mono font-semibold text-content-primary tabular-nums">
+                              {link.boq_position_ordinal}
+                            </span>
+                          )}
+                          <span
+                            className={`text-[9px] px-1 rounded ${
+                              link.link_type === 'manual'
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : link.link_type === 'rule_based'
+                                  ? 'bg-violet-100 text-violet-700'
+                                  : 'bg-sky-100 text-sky-700'
+                            }`}
+                          >
+                            {link.link_type.replace('_', ' ')}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-content-secondary truncate" title={link.boq_position_description || ''}>
+                          {link.boq_position_description || '—'}
+                        </div>
+                      </div>
+                      {onUnlinkBOQ && (
+                        <button
+                          type="button"
+                          onClick={() => onUnlinkBOQ(link.id)}
+                          className="p-1 rounded text-content-tertiary hover:text-rose-600 hover:bg-rose-50"
+                          title={t('bim.link_remove', { defaultValue: 'Remove link' })}
+                        >
+                          <Link2Off size={11} />
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-[10px] text-content-tertiary italic">
+                  {t('bim.link_empty', {
+                    defaultValue: 'Not linked — click "Add to BOQ" to link this element to a cost position',
+                  })}
+                </div>
+              )}
+            </div>
+
             {/* Properties */}
             {Object.keys(elementProperties).length > 0 && (
               <div>
@@ -525,10 +672,12 @@ export function BIMViewer({
         </div>
       )}
 
-      {/* View mode controls */}
-      <div className="absolute bottom-3 start-3 z-20">
-        <ViewModeSelector value={internalViewMode} onChange={setInternalViewMode} />
-      </div>
+      {/* Note: the old bottom-left view-mode selector (Default / Discipline /
+          5D Cost / 4D Schedule) has been removed in v1.3.22.  It was a
+          visual-only stub with no backend — the 5D and 4D modes were never
+          wired to cost or schedule data.  Coloring by discipline / storey /
+          type now lives in the top toolbar of BIMPage via the colorByMode
+          dropdown, which is the single source of truth. */}
     </div>
   );
 }
@@ -540,24 +689,30 @@ function ToolbarButton({
   label,
   onClick,
   active = false,
+  variant = 'standalone',
 }: {
   icon: React.ElementType;
   label: string;
   onClick: () => void;
   active?: boolean;
+  /** `standalone` renders with its own background + border + shadow.
+   *  `group` renders flat so it slots into a shared container (the reorganised
+   *  toolbar wraps every button in one bordered row). */
+  variant?: 'standalone' | 'group';
 }) {
   return (
     <button
       onClick={onClick}
       title={label}
       className={clsx(
-        'flex h-8 w-8 items-center justify-center rounded-lg transition-colors shadow-sm border',
+        'flex h-7 w-7 items-center justify-center rounded transition-colors',
+        variant === 'standalone' && 'shadow-sm border bg-surface-primary/90 backdrop-blur border-border-light',
         active
-          ? 'bg-oe-blue text-white border-oe-blue'
-          : 'bg-surface-primary/90 backdrop-blur text-content-secondary border-border-light hover:bg-surface-secondary hover:text-content-primary',
+          ? 'bg-oe-blue text-white' + (variant === 'standalone' ? ' border-oe-blue' : '')
+          : 'text-content-secondary hover:bg-surface-secondary hover:text-content-primary',
       )}
     >
-      <Icon size={16} />
+      <Icon size={14} />
     </button>
   );
 }
