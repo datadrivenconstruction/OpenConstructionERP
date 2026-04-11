@@ -65,6 +65,9 @@ import {
   getGeometryUrl,
   deleteBIMModel,
   deleteLink,
+  listElementGroups,
+  deleteElementGroup,
+  type BIMElementGroup,
 } from './api';
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
@@ -772,6 +775,17 @@ export function BIMPage() {
   });
   const elements: BIMElementData[] = elementsQuery.data?.items ?? [];
 
+  // Saved element groups for the current model — populated by the
+  // /api/v1/bim_hub/element-groups/ endpoint and rendered at the top
+  // of BIMFilterPanel for one-click apply.  Refetch is triggered by
+  // the SaveGroupModal's success path via React Query invalidation.
+  const groupsQuery = useQuery({
+    queryKey: ['bim-element-groups', projectId, activeModelId],
+    queryFn: () => listElementGroups(projectId, activeModelId),
+    enabled: !!projectId && !!activeModelId,
+  });
+  const savedGroups: BIMElementGroup[] = groupsQuery.data ?? [];
+
   const geometryUrl = useMemo(() => {
     if (!activeModelId || activeModel?.status !== 'ready') return null;
     if ((activeModel?.element_count ?? 0) > 0 || elements.some((el) => !!el.mesh_ref)) return getGeometryUrl(activeModelId);
@@ -812,6 +826,63 @@ export function BIMPage() {
   const handleAddToBOQ = useCallback((element: BIMElementData) => {
     setLinkCandidates([element]);
   }, []);
+
+  // Link a saved group to a BOQ position — looks up every member element
+  // by id from the current `elements` list and opens AddToBOQModal with
+  // the resolved subset.  If some member ids aren't in the loaded element
+  // list (e.g. the group references elements from a different model that
+  // happen to share an id), they're silently dropped.
+  const handleLinkGroupToBOQ = useCallback(
+    (group: BIMElementGroup) => {
+      const memberIds = new Set(group.member_element_ids);
+      const subset = elements.filter((el) => memberIds.has(el.id));
+      if (subset.length === 0) {
+        addToast({
+          type: 'info',
+          title: t('bim.group_empty_title', { defaultValue: 'Empty group' }),
+          message: t('bim.group_empty_msg', {
+            defaultValue: 'This group has no members in the current model.',
+          }),
+        });
+        return;
+      }
+      setLinkCandidates(subset);
+    },
+    [elements, addToast, t],
+  );
+
+  // Delete a saved group via the backend, refresh the list.
+  const handleDeleteGroup = useCallback(
+    async (group: BIMElementGroup) => {
+      if (
+        !window.confirm(
+          t('bim.group_delete_confirm', {
+            defaultValue: 'Delete the saved group "{{name}}"?',
+            name: group.name,
+          }),
+        )
+      )
+        return;
+      try {
+        await deleteElementGroup(group.id);
+        addToast({
+          type: 'success',
+          title: t('bim.group_deleted_title', { defaultValue: 'Group deleted' }),
+          message: group.name,
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['bim-element-groups', projectId, activeModelId],
+        });
+      } catch (err) {
+        addToast({
+          type: 'error',
+          title: t('common.error', { defaultValue: 'Error' }),
+          message: err instanceof Error ? err.message : String(err),
+        });
+      }
+    },
+    [addToast, queryClient, projectId, activeModelId, t],
+  );
 
   // Convert the filter panel's local state into the backend's
   // BIMGroupFilterCriteria shape so the SaveGroupModal can persist it.
@@ -1034,6 +1105,9 @@ export function BIMPage() {
               onQuickTakeoff={handleQuickTakeoff}
               visibleElementCount={visibleElementCount}
               onSaveAsGroup={handleSaveAsGroup}
+              savedGroups={savedGroups}
+              onLinkGroupToBOQ={handleLinkGroupToBOQ}
+              onDeleteGroup={handleDeleteGroup}
             />
           </div>
         )}
