@@ -154,15 +154,30 @@ export async function fetchSimilarItems(
 }
 
 /** Build a deep-link URL for a unified-search hit so the modal can
- *  navigate the user to the matching native page on click. */
+ *  navigate the user to the matching native page on click.
+ *
+ *  Each route is matched against the actual `App.tsx` route table:
+ *
+ *    /boq/:boqId?highlight=<position_id>     → BOQEditorPage
+ *    /documents?id=<doc_id>                  → DocumentsPage
+ *    /tasks?id=<task_id>                     → TasksPage
+ *    /risks?id=<risk_id>                     → RiskRegisterPage
+ *    /bim?element=<element_id>               → BIMPage
+ *    /validation?id=<report_id>              → ValidationPage
+ *    /chat?session=<session_id>              → ERP Chat full page
+ *
+ *  Returns ``#`` for unknown collections so the click is a safe no-op.
+ */
 export function hitToHref(hit: UnifiedSearchHit): string {
   switch (hit.collection) {
     case 'oe_boq_positions': {
       const boqId =
         typeof hit.payload?.boq_id === 'string' ? hit.payload.boq_id : '';
-      return boqId
-        ? `/boq?boq=${encodeURIComponent(boqId)}&position=${encodeURIComponent(hit.id)}`
-        : `/boq?position=${encodeURIComponent(hit.id)}`;
+      // BOQ editor uses a path-segment for the BOQ id and a `highlight`
+      // query for the position.  Without a boq_id we can only land on
+      // the list page — fail soft.
+      if (!boqId) return '/boq';
+      return `/boq/${encodeURIComponent(boqId)}?highlight=${encodeURIComponent(hit.id)}`;
     }
     case 'oe_documents':
       return `/documents?id=${encodeURIComponent(hit.id)}`;
@@ -174,8 +189,15 @@ export function hitToHref(hit: UnifiedSearchHit): string {
       return `/bim?element=${encodeURIComponent(hit.id)}`;
     case 'oe_validation':
       return `/validation?id=${encodeURIComponent(hit.id)}`;
-    case 'oe_chat':
-      return `/chat?message=${encodeURIComponent(hit.id)}`;
+    case 'oe_chat': {
+      // Jump to the chat session that contains the message — the
+      // session_id rides in the payload from the chat vector adapter.
+      const sessionId =
+        typeof hit.payload?.session_id === 'string' ? hit.payload.session_id : '';
+      return sessionId
+        ? `/chat?session=${encodeURIComponent(sessionId)}`
+        : '/chat';
+    }
     default:
       return '#';
   }

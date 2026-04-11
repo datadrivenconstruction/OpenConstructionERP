@@ -36,6 +36,7 @@ import {
   Loader2,
   Boxes,
   BookOpen,
+  Sparkles,
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -76,6 +77,9 @@ interface RuleFormState {
   target_kind: TargetKind;
   target_boq_id: string;
   target_position_id: string;
+  /** Default unit rate for auto-created positions, persisted into
+   *  ``boq_target.unit_rate``. */
+  target_unit_rate: string;
   is_active: boolean;
 }
 
@@ -103,6 +107,7 @@ function blankForm(): RuleFormState {
     target_kind: 'auto_create',
     target_boq_id: '',
     target_position_id: '',
+    target_unit_rate: '',
     is_active: true,
   };
 }
@@ -136,6 +141,7 @@ function toFormState(rule: BIMQuantityMap, boqPositionLookup: Map<string, string
     target_kind: targetKind,
     target_boq_id: boqId,
     target_position_id: existingPositionId,
+    target_unit_rate: typeof target.unit_rate === 'string' ? target.unit_rate : '',
     is_active: rule.is_active,
   };
 }
@@ -160,6 +166,15 @@ function buildPayload(
     boqTarget.position_id = form.target_position_id;
   } else {
     boqTarget.auto_create = true;
+    // Persist a default unit_rate when the user has prefilled one
+    // (typically via the "Suggest from CWICR" button).  The backend
+    // apply path reads this from boq_target.unit_rate and creates the
+    // new Position with a non-zero rate so the user doesn't have to
+    // chase up the BOQ editor afterwards.
+    const trimmedRate = form.target_unit_rate.trim();
+    if (trimmedRate) {
+      boqTarget.unit_rate = trimmedRate;
+    }
   }
 
   return {
@@ -636,12 +651,93 @@ function RuleEditorModal({
               )}
 
               {form.target_kind === 'auto_create' && (
-                <p className="rounded-lg border border-dashed border-border-light px-3 py-2 text-[11px] text-content-tertiary">
-                  {t('bim_rules.auto_create_hint', {
-                    defaultValue:
-                      'On apply, a new BOQ position will be created using this rule\'s name as the description. Quantities will be computed at apply time.',
-                  })}
-                </p>
+                <div className="space-y-2 rounded-lg border border-dashed border-border-light p-3">
+                  <p className="text-[11px] text-content-tertiary">
+                    {t('bim_rules.auto_create_hint', {
+                      defaultValue:
+                        "On apply, a new BOQ position will be created using this rule's name as the description. Quantities will be computed at apply time.",
+                    })}
+                  </p>
+                  {/* Unit-rate prefill — calls the cost suggestion endpoint
+                      with the rule's filter context to get the top CWICR
+                      match.  When set, the apply path uses this rate so
+                      the new position lands fully priced. */}
+                  <div className="flex items-end gap-2">
+                    <div className="flex-1">
+                      <label
+                        htmlFor="rule-unit-rate"
+                        className="mb-1 block text-[11px] font-medium text-content-secondary"
+                      >
+                        {t('bim_rules.field_default_rate', {
+                          defaultValue: 'Default unit rate',
+                        })}
+                      </label>
+                      <input
+                        id="rule-unit-rate"
+                        type="text"
+                        value={form.target_unit_rate}
+                        onChange={(e) => updateField('target_unit_rate', e.target.value)}
+                        placeholder="0.00"
+                        className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none tabular-nums"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          const { apiPost } = await import('@/shared/lib/api');
+                          // Construct a synthetic element from the rule's
+                          // filters so the cost ranker has something to
+                          // match against.  We pull element_type from
+                          // element_type_filter, plus material/family
+                          // from the property_filter rows when present.
+                          const props: Record<string, string> = {};
+                          for (const row of form.property_filter) {
+                            if (row.key.trim()) props[row.key.trim()] = row.value;
+                          }
+                          const suggestions = await apiPost<
+                            Array<{
+                              cost_item_id: string;
+                              code: string;
+                              description: string;
+                              unit: string;
+                              unit_rate: number | string;
+                              score: number;
+                            }>
+                          >('/api/v1/costs/suggest-for-element/', {
+                            element_type: form.element_type_filter || null,
+                            name: form.name || null,
+                            properties: Object.keys(props).length > 0 ? props : null,
+                            limit: 1,
+                          });
+                          const top = suggestions?.[0];
+                          if (top) {
+                            const rateStr =
+                              typeof top.unit_rate === 'number'
+                                ? String(top.unit_rate)
+                                : String(top.unit_rate);
+                            updateField('target_unit_rate', rateStr);
+                          }
+                        } catch (err) {
+                          // Soft-fail — the cost endpoint is optional and
+                          // shouldn't block rule editing if it errors.
+                          // eslint-disable-next-line no-console
+                          console.warn('Cost suggestion failed', err);
+                        }
+                      }}
+                      className="inline-flex items-center gap-1 rounded-lg border border-oe-blue/40 bg-oe-blue/5 px-2 py-1.5 text-[11px] font-medium text-oe-blue hover:bg-oe-blue/10"
+                      title={t('bim_rules.suggest_rate_title', {
+                        defaultValue:
+                          'Use the rule filter to look up a matching CWICR cost item and prefill its unit rate',
+                      })}
+                    >
+                      <Sparkles size={11} />
+                      {t('bim_rules.suggest_rate', {
+                        defaultValue: 'Suggest from CWICR',
+                      })}
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
 

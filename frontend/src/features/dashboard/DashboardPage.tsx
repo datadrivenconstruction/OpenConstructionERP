@@ -40,6 +40,7 @@ import {
   Rocket,
 } from 'lucide-react';
 import { Card, CardHeader, CardContent, Button, Badge, Skeleton, InfoHint, ActivityFeed as CrossModuleActivityFeed } from '@/shared/ui';
+import BIMCoverageCard from './BIMCoverageCard';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 
 /* ── Types ────────────────────────────────────────────────────────────── */
@@ -1851,6 +1852,14 @@ export function DashboardPage() {
 
       {/* KPI Ribbon */}
       <KpiRibbon boqs={allBoqs} schedules={allSchedules} projects={projects} />
+
+      {/* BIM coverage card — only renders when the active project has at
+          least one BIM model.  Shows what fraction of elements is linked
+          to BOQ, costed, validated, has tasks / docs.  One of the
+          deepest cross-module integration signals — answers the question
+          "how complete is the model integration on this project?" */}
+      <BIMCoverageCard />
+
 
       {/* Workflow Guide — step-by-step for new users */}
       <WorkflowGuide projects={projects} boqs={allBoqs} schedules={allSchedules} />

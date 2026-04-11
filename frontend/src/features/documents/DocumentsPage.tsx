@@ -14,7 +14,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useUploadQueueStore } from '@/stores/useUploadQueueStore';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { listSessions } from '../cad-explorer/api';
 
 /* ── Types ───────────────────────────────────────────────────────────── */
@@ -312,6 +312,14 @@ export function DocumentsPage() {
   const navigate = useNavigate();
   const projectId = activeProjectId;
 
+  /* ── Deep-link auto-preview ─────────────────────────────────────────────
+   * Cmd+Shift+K global semantic search and other deep links land here
+   * with `?id=<document_id>` — open the matching document in the preview
+   * modal as soon as it loads.  Cleans up the param afterwards so a
+   * page refresh doesn't keep re-opening the modal. */
+  const [searchParams, setSearchParams] = useSearchParams();
+  const deepLinkDocId = searchParams.get('id');
+
   /* ── Data fetching ──────────────────────────────────────────────────── */
 
   const { data: documents, isLoading } = useQuery({
@@ -325,6 +333,20 @@ export function DocumentsPage() {
     },
     enabled: !!projectId,
   });
+
+  // Open the deep-linked document in the preview modal as soon as it
+  // appears in the list.  We clear the `?id=` query param immediately
+  // afterwards so a refresh doesn't keep re-opening the modal.
+  useEffect(() => {
+    if (!deepLinkDocId || !documents) return;
+    const target = documents.find((d) => d.id === deepLinkDocId);
+    if (target) {
+      setPreviewDoc(target);
+      const next = new URLSearchParams(searchParams);
+      next.delete('id');
+      setSearchParams(next, { replace: true });
+    }
+  }, [deepLinkDocId, documents, searchParams, setSearchParams]);
 
   /* ── CAD/BIM models (saved sessions) ─────────────────────────────────── */
 

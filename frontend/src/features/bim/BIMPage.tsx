@@ -13,7 +13,7 @@
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Box,
@@ -702,6 +702,13 @@ export function BIMPage() {
 
   const [activeModelId, setActiveModelId] = useState<string | null>(null);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+
+  // Deep-link auto-select: Cmd+Shift+K global semantic search and the
+  // similar-items panel land here with `?element=<element_id>` — pick
+  // the matching element as soon as the elements list resolves.  Cleared
+  // from the URL after one shot so a refresh doesn't reapply it.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const deepLinkElementId = searchParams.get('element');
   const [uploadOpen, setUploadOpen] = useState(false);
   const [uploadConvertedName, setUploadConvertedName] = useState<string | null>(null);
   const [showUploadOverride, setShowUploadOverride] = useState<boolean | null>(null);
@@ -789,6 +796,21 @@ export function BIMPage() {
     enabled: !!activeModelId && activeModel?.status === 'ready',
   });
   const elements: BIMElementData[] = elementsQuery.data?.items ?? [];
+
+  // Apply the deep-link element selection as soon as the elements list
+  // resolves.  Strips the query param afterwards so a refresh doesn't
+  // keep re-selecting the same element.
+  useEffect(() => {
+    if (!deepLinkElementId || elements.length === 0) return;
+    const target = elements.find((e) => e.id === deepLinkElementId);
+    if (target) {
+      setSelectedElementId(deepLinkElementId);
+      setBIMSelection([deepLinkElementId]);
+      const next = new URLSearchParams(searchParams);
+      next.delete('element');
+      setSearchParams(next, { replace: true });
+    }
+  }, [deepLinkElementId, elements, searchParams, setSearchParams, setBIMSelection]);
 
   // Saved element groups for the current model — populated by the
   // /api/v1/bim_hub/element-groups/ endpoint and rendered at the top

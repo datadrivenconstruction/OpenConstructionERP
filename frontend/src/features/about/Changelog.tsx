@@ -14,6 +14,22 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.4.2',
+    date: '2026-04-11',
+    changes: [
+      'Security: SQL injection guard in LanceDB id-quoting — every row id passed to vector_index_collection / vector_delete_collection / legacy cost-collection upsert is now re-parsed as a strict uuid.UUID before being interpolated into the id IN (...) filter. Defence-in-depth — the adapter layer always passes UUIDs from SQLAlchemy GUID() columns, so a parse failure now indicates a bug or attack and the row is silently dropped',
+      'Security: Qdrant search payload mutation fix — vector_search_collection was using payload.pop() to extract reserved fields, mutating the qdrant client cached result objects. Replaced with non-mutating get() + dict comprehension',
+      'Token-aware text clipping — _safe_text now uses the active SentenceTransformer tokenizer (when available) to clip at 510 tokens instead of the previous 4000-char cap. The character cap routinely exceeded the 512-token limit of small SBERT models, silently truncating tail content during embedding',
+      'Frontend deep links now actually work — hitToHref was generating route formats that no destination page parsed. BOQ now uses /boq/<boqId>?highlight=<positionId>, DocumentsPage parses ?id= and auto-opens preview, TasksPage parses ?id= and scrolls + ring-highlights the matching card, RiskRegisterPage parses ?id= and opens detail view, BIMPage parses ?element= and selects after the elements list resolves. Each parser strips the param after one shot so refresh does not re-trigger',
+      'New GET /api/v1/bim_hub/coverage-summary/?project_id=... — aggregates elements_total / elements_linked_to_boq / elements_costed / elements_validated / elements_with_documents / elements_with_tasks / elements_with_activities plus matching percentages. Documents/tasks/activities/validation lookups are wrapped defensively so a missing optional module does not 500 the call',
+      'New BIMCoverageCard on the dashboard — 6 progress bars + headline percentage (avg of all metrics). Hides itself on projects with zero BIM elements so non-BIM workflows stay clean. Color-coded by completeness (green ≥75% / amber ≥40% / rose otherwise) with click-through to the BIM viewer',
+      'BOQ position BIM badge is now clickable — the blue pill that shows the linked BIM element count was a read-only span; it is now a button that navigates to /bim?element=<first_id>. Estimators can finally jump from a BOQ row to the 3D model element it was created from in one click',
+      'Schedule activity BIM badge — Gantt activity rows render a small amber pill with the count of pinned BIM elements when activity.bim_element_ids is non-empty. Click navigates to the BIM viewer with the first pinned element preselected. Closes the 4D-schedule reverse-nav gap',
+      'BIM Quantity Rules page Suggest from CWICR — when a rule target is auto-create, the editor exposes a "Default unit rate" field plus a "Suggest from CWICR" button that calls /api/v1/costs/suggest-for-element/ with the rule filter context and prefills the top match. The rate persists into boq_target.unit_rate and is read by the apply path so the new BOQ position lands fully priced — no second pass in the BOQ editor',
+      'Verification: 766 total routes mounted (up from 765 in v1.4.1). Frontend tsc --noEmit clean. Backend ruff check clean across every file touched in v1.4.2. _safe_quote_ids smoke-tested against literal SQL injection payloads and confirms attacker strings are dropped',
+    ],
+  },
+  {
     version: '1.4.1',
     date: '2026-04-11',
     changes: [
