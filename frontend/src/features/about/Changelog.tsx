@@ -14,6 +14,19 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.24',
+    date: '2026-04-11',
+    changes: [
+      'BIM storage architecture — three layers landed end-to-end. (1) Pluggable storage backend abstraction in `app/core/storage.py` with LocalStorageBackend (default, byte-for-byte identical to v1.3.23) and S3StorageBackend (opt-in via `pip install openconstructionerp[s3]`, supports MinIO / AWS / Backblaze / DigitalOcean Spaces). (2) New `oe_bim_element_group` table for saved selections — dynamic groups recompute members from a filter predicate, static groups freeze the snapshot. (3) Full design captured in `docs/BIM-STORAGE-ARCHITECTURE.md` covering the three layers, the cross-module link unification roadmap, and the migration path for existing deployments',
+      'BIM Element Groups (saved selections) — backend complete: new `BIMElementGroup` SQLAlchemy model + Pydantic schemas + service methods (list/create/update/delete + resolve_element_group_members) + 4 endpoints under /api/v1/bim_hub/element-groups/ + Alembic migration `f22fa2934807_add_bim_element_group_table`. The resolve method handles all filter_criteria keys (element_type, category, discipline, storey, name_contains, property_filter) with PostgreSQL JSON containment for property matching and a Python-side fallback for SQLite',
+      'Frontend element groups UX — new `SaveGroupModal` (~210 lines) opens from a "Save as group" button next to the Quick Takeoff button in the filter panel. Captures the current filter criteria + visible element ids, lets the user pick dynamic vs static, set a name + description + colour, then POSTs to the new endpoint. Verified end-to-end via headless test: button shows when filter is active, click opens modal with header + name input + radio toggles, both screenshot inspection and DOM assertions pass',
+      'Storage backend tests — new `backend/tests/unit/test_storage.py` covers LocalStorageBackend round-trip (write → read → verify → delete → verify gone) and the storage factory (settings → correct backend instance). Both tests pass cleanly with `pytest tests/unit/test_storage.py -v`',
+      'Storage migration helper — new `backend/scripts/migrate_bim_to_s3.py` walks `data/bim/` and uploads every existing file to the configured S3 bucket via the new abstraction. One-time runner for deployments switching from local to cloud storage',
+      'New optional dependency — `aioboto3>=12.0.0` added under `[project.optional-dependencies] s3` in `backend/pyproject.toml`. `pip install openconstructionerp` continues to work without it; users only install `[s3]` extras when they actually want cloud storage. Importing S3StorageBackend without aioboto3 raises a clear ImportError instead of crashing at startup',
+      'BIM viewer filter panel re-tested end-to-end after the SaveGroup wiring: storey filter (5440→317), buildings-only toggle (5440↔5168), Walls type filter (→205), clear all (→5168), multi-chip OR (Doors=108, Doors+Walls=313), all 5 camera presets, grid toggle, element click → AddToBOQ modal with real BOQ positions, Save as group → SaveGroupModal renders. 60 fps stable on the 5 440-mesh demo model',
+    ],
+  },
+  {
     version: '1.3.23',
     date: '2026-04-11',
     changes: [
