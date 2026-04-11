@@ -31,6 +31,11 @@ import {
   Link2,
   Bookmark,
   Trash2,
+  AlertOctagon,
+  AlertTriangle,
+  Unlink,
+  CheckSquare,
+  FileText,
 } from 'lucide-react';
 import type { BIMElementGroup } from './api';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
@@ -103,6 +108,13 @@ interface BIMFilterPanelProps {
   onLinkGroupToBOQ?: (group: BIMElementGroup) => void;
   /** User clicked the delete icon on a saved group. */
   onDeleteGroup?: (group: BIMElementGroup) => void;
+  /** Smart filter chip clicked — applies a one-shot health-bucket filter
+   *  (validation errors / unlinked / has tasks / has docs).  Routed up to
+   *  BIMPage.handleSmartFilter which sets the same predicate as the
+   *  in-viewport health stats banner. */
+  onSmartFilter?: (
+    filterId: 'errors' | 'warnings' | 'unlinked_boq' | 'has_tasks' | 'has_docs',
+  ) => void;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────
@@ -265,6 +277,7 @@ export default function BIMFilterPanel({
   onApplyGroup,
   onLinkGroupToBOQ,
   onDeleteGroup,
+  onSmartFilter,
 }: BIMFilterPanelProps) {
   const { t } = useTranslation();
 
@@ -318,6 +331,26 @@ export default function BIMFilterPanel({
     setActiveGroupId(group.id);
     onApplyGroup?.(group);
   }, [onApplyGroup]);
+
+  /** Smart-filter chip counts — computed once per `elements` change so the
+   *  chips can show how many elements would be selected by each filter
+   *  (e.g. "Errors 12", "Unlinked 423").  Same buckets the BIMViewer
+   *  health stats banner emits. */
+  const smartFilterCounts = useMemo(() => {
+    let errors = 0;
+    let warnings = 0;
+    let unlinkedBoq = 0;
+    let hasTasks = 0;
+    let hasDocs = 0;
+    for (const el of elements) {
+      if (el.validation_status === 'error') errors++;
+      else if (el.validation_status === 'warning') warnings++;
+      if ((el.boq_links?.length ?? 0) === 0) unlinkedBoq++;
+      if ((el.linked_tasks?.length ?? 0) > 0) hasTasks++;
+      if ((el.linked_documents?.length ?? 0) > 0) hasDocs++;
+    }
+    return { errors, warnings, unlinkedBoq, hasTasks, hasDocs };
+  }, [elements]);
 
   // ── Derived: counts per dimension + bucket grouping ─────────────────
   //
@@ -689,6 +722,95 @@ export default function BIMFilterPanel({
               >
                 <Bookmark size={11} />
                 {t('bim.save_as_group', { defaultValue: 'Save as group' })}
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Smart filter chips — one-click cross-module health filters.
+            Each chip narrows the viewport to a specific bucket (errors,
+            unlinked-to-BOQ, has tasks, has documents).  Counts are
+            derived from the cross-module link arrays on each element. */}
+        {onSmartFilter && (
+          <div className="mt-2 -mx-1 flex flex-wrap gap-1">
+            {smartFilterCounts.errors > 0 && (
+              <button
+                type="button"
+                onClick={() => onSmartFilter('errors')}
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors"
+                title={t('bim.smart_filter_errors_title', {
+                  defaultValue: 'Show only elements with validation errors',
+                })}
+              >
+                <AlertOctagon size={10} />
+                {t('bim.smart_filter_errors_chip', {
+                  defaultValue: 'Errors {{count}}',
+                  count: smartFilterCounts.errors,
+                })}
+              </button>
+            )}
+            {smartFilterCounts.warnings > 0 && (
+              <button
+                type="button"
+                onClick={() => onSmartFilter('warnings')}
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors"
+                title={t('bim.smart_filter_warnings_title', {
+                  defaultValue: 'Show only elements with validation warnings',
+                })}
+              >
+                <AlertTriangle size={10} />
+                {t('bim.smart_filter_warnings_chip', {
+                  defaultValue: 'Warnings {{count}}',
+                  count: smartFilterCounts.warnings,
+                })}
+              </button>
+            )}
+            {smartFilterCounts.unlinkedBoq > 0 && (
+              <button
+                type="button"
+                onClick={() => onSmartFilter('unlinked_boq')}
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                title={t('bim.smart_filter_unlinked_boq_title', {
+                  defaultValue: 'Show only elements not linked to any BOQ position',
+                })}
+              >
+                <Unlink size={10} />
+                {t('bim.smart_filter_unlinked_chip', {
+                  defaultValue: 'Unlinked {{count}}',
+                  count: smartFilterCounts.unlinkedBoq,
+                })}
+              </button>
+            )}
+            {smartFilterCounts.hasTasks > 0 && (
+              <button
+                type="button"
+                onClick={() => onSmartFilter('has_tasks')}
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors"
+                title={t('bim.smart_filter_has_tasks_title', {
+                  defaultValue: 'Show only elements that have linked tasks',
+                })}
+              >
+                <CheckSquare size={10} />
+                {t('bim.smart_filter_has_tasks_chip', {
+                  defaultValue: 'Tasks {{count}}',
+                  count: smartFilterCounts.hasTasks,
+                })}
+              </button>
+            )}
+            {smartFilterCounts.hasDocs > 0 && (
+              <button
+                type="button"
+                onClick={() => onSmartFilter('has_docs')}
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium rounded border border-violet-200 dark:border-violet-900/60 bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-colors"
+                title={t('bim.smart_filter_has_docs_title', {
+                  defaultValue: 'Show only elements with linked documents',
+                })}
+              >
+                <FileText size={10} />
+                {t('bim.smart_filter_has_docs_chip', {
+                  defaultValue: 'Docs {{count}}',
+                  count: smartFilterCounts.hasDocs,
+                })}
               </button>
             )}
           </div>

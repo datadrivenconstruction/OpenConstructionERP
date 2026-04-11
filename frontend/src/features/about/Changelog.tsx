@@ -14,6 +14,18 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.32',
+    date: '2026-04-10',
+    changes: [
+      'BIM viewer now shows a top-of-viewport health stats banner with multi-pill clickable chips: total elements, BOQ-linked count, validation errors, warnings, has-tasks and has-documents.  Each pill is a one-click smart filter that narrows the viewport to the matching element bucket — instant triage of model health without opening the filter sidebar',
+      'BIMFilterPanel exposes the same five smart-filter chips at the top of the sidebar (errors / warnings / unlinked-to-BOQ / has tasks / has documents) with live counts derived from the cross-module link arrays on each element.  Chips only render when the bucket has matches so the panel stays clean on a healthy model',
+      'Three new color-by modes for the BIM viewer grouped under "By compliance": 🛡️ Validation status (red error / amber warning / green pass / grey unchecked), 💰 BOQ link coverage (red unlinked / green linked), 📄 Document coverage.  Implemented via a new `ElementManager.colorByDirect()` helper that paints meshes from a fixed palette without rebuilding materials — keeps 60 fps even on 16k+ element models',
+      'New `POST /api/v1/costs/suggest-for-element/` endpoint ranks CWICR cost items for a BIM element by classification overlap (DIN 276 / OmniClass), element-type / material / family keyword matches in description and code, and discipline tag overlap.  Each result returns a 0..1 confidence score plus human-readable match_reasons.  DB-agnostic (works on PostgreSQL AND SQLite), no pgvector required, candidate window capped at 200 with Python-side ranking',
+      'AddToBOQModal "Create new position" tab now fetches the top-5 ranked rates for the clicked element on open and renders them as one-click chips with code, description, unit rate, unit, confidence dot (green ≥60% / amber ≥35% / grey otherwise) and a hover tooltip listing match reasons.  Clicking a chip populates description / unit / unit_rate from the matching CWICR item — no manual lookup needed.  Quantity is preserved (it comes from BIM geometry, not the cost database)',
+      'Verification: tsc --noEmit clean, backend imports clean, both new endpoints and 13 existing routes mounted, smart filter chips + banner + colour modes wire end-to-end through BIMPage → BIMViewer → BIMFilterPanel without prop drilling spaghetti',
+    ],
+  },
+  {
     version: '1.3.31',
     date: '2026-04-11',
     changes: [

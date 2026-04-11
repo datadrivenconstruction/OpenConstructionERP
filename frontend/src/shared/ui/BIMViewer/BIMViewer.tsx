@@ -74,10 +74,28 @@ export interface BIMViewerProps {
    */
   filterPredicate?: ((el: BIMElementData) => boolean) | null;
   /**
-   * Color-by mode. ``'default'`` uses discipline colors, other modes recolor
-   * meshes based on the chosen element field via a golden-angle palette.
+   * Color-by mode.  Two families of modes:
+   *
+   * Field-based (golden-angle palette over a string key):
+   *   - 'default'    — restore original COLLADA materials
+   *   - 'discipline' — color by element.discipline
+   *   - 'storey'     — color by element.storey
+   *   - 'type'       — color by element.element_type
+   *
+   * Compliance-based (fixed red/amber/green palette, drives a real
+   * compliance dashboard out of the 3D viewer):
+   *   - 'validation'        — red=error, amber=warning, green=pass, grey=unchecked
+   *   - 'boq_coverage'      — green=linked to ≥1 BOQ position, red=unlinked
+   *   - 'document_coverage' — green=has ≥1 linked drawing/RFI, red=none
    */
-  colorByMode?: 'default' | 'discipline' | 'storey' | 'type';
+  colorByMode?:
+    | 'default'
+    | 'discipline'
+    | 'storey'
+    | 'type'
+    | 'validation'
+    | 'boq_coverage'
+    | 'document_coverage';
   /** Element IDs to isolate (hide everything else). Empty = show all. */
   isolatedIds?: string[] | null;
   /** Element IDs to highlight in orange WITHOUT hiding the rest of the
@@ -111,6 +129,12 @@ export interface BIMViewerProps {
   onLinkDocument?: (element: BIMElementData) => void;
   /** User clicked "+ Link" in the Schedule Activities section. */
   onLinkActivity?: (element: BIMElementData) => void;
+  /** User clicked one of the smart-filter pills in the health stats
+   *  banner. The parent applies the matching predicate via setFilterPredicate
+   *  so the 3D viewport narrows to "errors only" / "unlinked only" / etc. */
+  onSmartFilter?: (
+    filterId: 'errors' | 'warnings' | 'unlinked_boq' | 'has_tasks' | 'has_docs',
+  ) => void;
 }
 
 /* ── Properties Table ──────────────────────────────────────────────────── */
@@ -185,6 +209,7 @@ export function BIMViewer({
   onCreateTask,
   onLinkDocument,
   onLinkActivity,
+  onSmartFilter,
 }: BIMViewerProps) {
   const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -197,13 +222,39 @@ export function BIMViewer({
   const [selectedElement, setSelectedElement] = useState<BIMElementData | null>(null);
   const [elementCount, setElementCount] = useState(0);
 
-  /** Number of elements that have at least one BOQ link.  Derived from
-   *  the elements prop so it updates whenever the parent re-fetches after
-   *  a link is created or deleted. */
-  const linkedCount = useMemo(
-    () => (elements ?? []).filter((el) => (el.boq_links?.length ?? 0) > 0).length,
-    [elements],
-  );
+  /** Health-stat rollup over the loaded elements.  Drives the banner at
+   *  the top of the viewport: total / linked-to-BOQ / errors / warnings /
+   *  has-tasks / has-documents.  Pure derived state so it updates the
+   *  moment the parent re-fetches after any link/unlink/validation run. */
+  const healthStats = useMemo(() => {
+    const els = elements ?? [];
+    let linkedToBoq = 0;
+    let errors = 0;
+    let warnings = 0;
+    let hasTasks = 0;
+    let hasDocs = 0;
+    let hasActivities = 0;
+    let validated = 0;
+    for (const el of els) {
+      if ((el.boq_links?.length ?? 0) > 0) linkedToBoq++;
+      if (el.validation_status && el.validation_status !== 'unchecked') validated++;
+      if (el.validation_status === 'error') errors++;
+      else if (el.validation_status === 'warning') warnings++;
+      if ((el.linked_tasks?.length ?? 0) > 0) hasTasks++;
+      if ((el.linked_documents?.length ?? 0) > 0) hasDocs++;
+      if ((el.linked_activities?.length ?? 0) > 0) hasActivities++;
+    }
+    return {
+      total: els.length,
+      linkedToBoq,
+      errors,
+      warnings,
+      hasTasks,
+      hasDocs,
+      hasActivities,
+      validated,
+    };
+  }, [elements]);
 
   // Initialize Three.js scene on mount
   useEffect(() => {
@@ -343,6 +394,9 @@ export function BIMViewer({
   }, [highlightedIds, elements]);
 
   // Apply color-by mode when it changes.
+  // Field-based modes use the existing hash-to-hue palette via colorBy().
+  // Compliance modes use a fixed red/amber/green palette via colorByDirect()
+  // so the 3D viewer becomes a live compliance dashboard.
   useEffect(() => {
     if (!elementMgrRef.current || !elements?.length) return;
     const mgr = elementMgrRef.current;
@@ -350,6 +404,37 @@ export function BIMViewer({
       mgr.colorBy((el) => el.storey || 'Unassigned');
     } else if (colorByMode === 'type') {
       mgr.colorBy((el) => el.element_type || 'Unknown');
+    } else if (colorByMode === 'validation') {
+      // Lazy import THREE so we don't blow up SSR / type-only consumers.
+      import('three').then((THREE) => {
+        const RED = new THREE.Color('#ef4444');
+        const AMBER = new THREE.Color('#f59e0b');
+        const GREEN = new THREE.Color('#10b981');
+        const GREY = new THREE.Color('#9ca3af');
+        mgr.colorByDirect((el) => {
+          const status = el.validation_status ?? 'unchecked';
+          if (status === 'error') return RED;
+          if (status === 'warning') return AMBER;
+          if (status === 'pass') return GREEN;
+          return GREY;
+        });
+      });
+    } else if (colorByMode === 'boq_coverage') {
+      import('three').then((THREE) => {
+        const RED = new THREE.Color('#ef4444');
+        const GREEN = new THREE.Color('#10b981');
+        mgr.colorByDirect((el) =>
+          (el.boq_links?.length ?? 0) > 0 ? GREEN : RED,
+        );
+      });
+    } else if (colorByMode === 'document_coverage') {
+      import('three').then((THREE) => {
+        const RED = new THREE.Color('#ef4444');
+        const GREEN = new THREE.Color('#10b981');
+        mgr.colorByDirect((el) =>
+          (el.linked_documents?.length ?? 0) > 0 ? GREEN : RED,
+        );
+      });
     } else {
       mgr.resetColors();
     }
@@ -521,28 +606,104 @@ export function BIMViewer({
         />
       </div>
 
-      {/* Element count + link-progress badge. Shows total element count
-          plus a "N linked" chip (green) that counts how many elements
-          have at least one BOQ link — gives the user at-a-glance progress
-          on the takeoff workflow. */}
+      {/* Health stats banner — top-right, multi-pill clickable counts.
+          The pills are smart filters: clicking "Errors" narrows the
+          3D viewport to elements with validation_status='error', etc.
+          The parent applies the predicate via onSmartFilter. */}
       {elementCount > 0 && (
-        <div className="absolute top-3 end-3 z-20 flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-surface-primary/90 backdrop-blur text-content-secondary border border-border-light shadow-sm">
-            <Box size={12} />
-            {t('bim.element_count', { defaultValue: '{{count}} elements', count: elementCount })}
+        <div className="absolute top-3 end-3 z-20 flex items-center gap-1.5 flex-wrap justify-end max-w-[calc(100%-280px)]">
+          {/* Total elements pill — not clickable, just informational */}
+          <span
+            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-surface-primary/90 backdrop-blur text-content-secondary border border-border-light shadow-sm"
+            title={t('bim.element_count_title', {
+              defaultValue: '{{count}} elements loaded in this model',
+              count: elementCount,
+            })}
+          >
+            <Box size={11} />
+            {elementCount.toLocaleString()}
           </span>
-          {linkedCount > 0 && (
-            <span
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm"
+
+          {/* BOQ-linked count — clickable, narrows to linked-to-BOQ elements */}
+          {healthStats.linkedToBoq > 0 && (
+            <button
+              type="button"
+              onClick={() => onSmartFilter?.('unlinked_boq')}
+              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm hover:bg-emerald-100"
               title={t('bim.linked_count_title', {
-                defaultValue: '{{linked}} of {{total}} elements are linked to a BOQ position',
-                linked: linkedCount,
+                defaultValue:
+                  '{{linked}} of {{total}} linked to BOQ — click to show ONLY the unlinked',
+                linked: healthStats.linkedToBoq,
                 total: elementCount,
               })}
             >
-              <Link2 size={12} />
-              {t('bim.linked_count', { defaultValue: '{{count}} linked', count: linkedCount })}
-            </span>
+              <Link2 size={11} />
+              {healthStats.linkedToBoq.toLocaleString()}/{elementCount.toLocaleString()} BOQ
+            </button>
+          )}
+
+          {/* Validation errors — clickable, narrows to errors only */}
+          {healthStats.errors > 0 && (
+            <button
+              type="button"
+              onClick={() => onSmartFilter?.('errors')}
+              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-rose-50 text-rose-700 border border-rose-200 shadow-sm hover:bg-rose-100"
+              title={t('bim.errors_count_title', {
+                defaultValue: '{{count}} elements with validation errors — click to filter',
+                count: healthStats.errors,
+              })}
+            >
+              <AlertCircle size={11} />
+              {healthStats.errors.toLocaleString()} errors
+            </button>
+          )}
+
+          {/* Validation warnings */}
+          {healthStats.warnings > 0 && (
+            <button
+              type="button"
+              onClick={() => onSmartFilter?.('warnings')}
+              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200 shadow-sm hover:bg-amber-100"
+              title={t('bim.warnings_count_title', {
+                defaultValue: '{{count}} elements with validation warnings — click to filter',
+                count: healthStats.warnings,
+              })}
+            >
+              <AlertCircle size={11} />
+              {healthStats.warnings.toLocaleString()} warn
+            </button>
+          )}
+
+          {/* Open tasks */}
+          {healthStats.hasTasks > 0 && (
+            <button
+              type="button"
+              onClick={() => onSmartFilter?.('has_tasks')}
+              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-800 border border-amber-200 shadow-sm hover:bg-amber-100"
+              title={t('bim.tasks_count_title', {
+                defaultValue: '{{count}} elements have linked tasks — click to filter',
+                count: healthStats.hasTasks,
+              })}
+            >
+              <CheckSquare size={11} />
+              {healthStats.hasTasks.toLocaleString()}
+            </button>
+          )}
+
+          {/* Linked documents */}
+          {healthStats.hasDocs > 0 && (
+            <button
+              type="button"
+              onClick={() => onSmartFilter?.('has_docs')}
+              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-violet-50 text-violet-700 border border-violet-200 shadow-sm hover:bg-violet-100"
+              title={t('bim.docs_count_title', {
+                defaultValue: '{{count}} elements have linked documents — click to filter',
+                count: healthStats.hasDocs,
+              })}
+            >
+              <FileText size={11} />
+              {healthStats.hasDocs.toLocaleString()}
+            </button>
           )}
         </div>
       )}
