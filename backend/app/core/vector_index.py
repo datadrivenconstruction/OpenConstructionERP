@@ -42,6 +42,7 @@ imports them rather than hard-coding strings.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 from dataclasses import dataclass, field
@@ -232,6 +233,28 @@ def _coerce_id(row_id: Any) -> str:
 # instead so we never lose meaningful content past position N.
 _HARD_CHAR_CAP = 4000
 _TOKEN_BUDGET = 510  # leave 2 tokens for [CLS] / [SEP]
+
+
+# Per-collection mutex used by ``reindex_collection`` to serialise
+# concurrent reindex requests against the same collection.  Without
+# this, two simultaneous reindex calls (e.g. the startup auto-backfill
+# racing against an admin clicking ``POST /vector/reindex/{name}/``)
+# can interleave purge + index ops and leave the vector store in an
+# inconsistent state — partial indexes, duplicate ids, ghost rows.
+# The lock is per-collection so reindexing different collections in
+# parallel is still allowed.
+_REINDEX_LOCKS: dict[str, asyncio.Lock] = {}
+_REINDEX_LOCKS_GUARD = asyncio.Lock()
+
+
+async def _get_reindex_lock(collection_name: str) -> asyncio.Lock:
+    """Return (lazily creating) the per-collection reindex lock."""
+    async with _REINDEX_LOCKS_GUARD:
+        lock = _REINDEX_LOCKS.get(collection_name)
+        if lock is None:
+            lock = asyncio.Lock()
+            _REINDEX_LOCKS[collection_name] = lock
+        return lock
 
 
 def _safe_text(text: str | None) -> str:
@@ -658,26 +681,35 @@ async def reindex_collection(
     new rows are indexed — useful when the embedding model changes and a
     full reindex is needed.
 
+    Serialised by a per-collection ``asyncio.Lock`` so two concurrent
+    reindex requests against the SAME collection (e.g. startup
+    auto-backfill racing an admin-triggered ``/vector/reindex/``) can
+    not interleave their purge / index ops and leave the vector store
+    in an inconsistent state.  Reindexes against DIFFERENT collections
+    still run in parallel — the locks are per-name.
+
     Returns ``{"indexed": int, "skipped": int, "purged": bool}``.
     """
-    purged = False
-    if purge_first and rows:
-        ids = [_coerce_id(getattr(r, "id", None)) for r in rows]
-        try:
-            vector_delete_collection(adapter.collection_name, [i for i in ids if i])
-            purged = True
-        except Exception as exc:
-            logger.debug("reindex_collection: purge failed: %s", exc)
+    lock = await _get_reindex_lock(adapter.collection_name)
+    async with lock:
+        purged = False
+        if purge_first and rows:
+            ids = [_coerce_id(getattr(r, "id", None)) for r in rows]
+            try:
+                vector_delete_collection(adapter.collection_name, [i for i in ids if i])
+                purged = True
+            except Exception as exc:
+                logger.debug("reindex_collection: purge failed: %s", exc)
 
-    indexed = await index_many(
-        adapter,
-        rows,
-        tenant_id=tenant_id,
-        project_id=project_id,
-    )
-    return {
-        "indexed": indexed,
-        "skipped": max(0, len(rows) - indexed),
-        "purged": purged,
-        "collection": adapter.collection_name,
-    }
+        indexed = await index_many(
+            adapter,
+            rows,
+            tenant_id=tenant_id,
+            project_id=project_id,
+        )
+        return {
+            "indexed": indexed,
+            "skipped": max(0, len(rows) - indexed),
+            "purged": purged,
+            "collection": adapter.collection_name,
+        }

@@ -234,3 +234,62 @@ def test_project_id_of_returns_none_when_set_has_no_project() -> None:
     adapter = RequirementVectorAdapter()
     row = _make_row(requirement_set=SimpleNamespace(project_id=None))
     assert adapter.project_id_of(row) is None
+
+
+# ── bim_element_ids in embedding (v1.4.5) ────────────────────────────────
+
+
+def test_to_text_includes_bim_element_ids_sample() -> None:
+    """A requirement pinned to BIM elements must surface a sample of
+    those ids in the embedded text so semantic queries like
+    *"requirements linked to roof elements"* can route from a selected
+    BIM element back to the requirements that pin it."""
+    adapter = RequirementVectorAdapter()
+    elem_a = str(uuid.uuid4())
+    elem_b = str(uuid.uuid4())
+    row = _make_row(metadata_={"bim_element_ids": [elem_a, elem_b]})
+    text = adapter.to_text(row)
+    assert "bim_element_ids=" in text
+    assert elem_a in text
+    assert elem_b in text
+
+
+def test_to_text_caps_bim_element_ids_at_five() -> None:
+    """Vector store payload budget is tight — only the first 5 ids are
+    embedded.  The full list still lives in metadata_ for round-trips."""
+    adapter = RequirementVectorAdapter()
+    ids = [str(uuid.uuid4()) for _ in range(8)]
+    row = _make_row(metadata_={"bim_element_ids": ids})
+    text = adapter.to_text(row)
+    for kept in ids[:5]:
+        assert kept in text
+    for dropped in ids[5:]:
+        assert dropped not in text
+
+
+def test_to_text_no_bim_section_when_metadata_absent() -> None:
+    """Backward compat: existing requirement rows without ``metadata_``
+    or with an empty dict must produce the SAME text as before — no
+    stray ``bim_element_ids=`` fragment polluting the embedding."""
+    adapter = RequirementVectorAdapter()
+    # No metadata_ attribute set on the duck-typed row at all.
+    row = _make_row()
+    assert "bim_element_ids" not in adapter.to_text(row)
+
+
+def test_to_text_no_bim_section_when_array_empty() -> None:
+    adapter = RequirementVectorAdapter()
+    row = _make_row(metadata_={"bim_element_ids": []})
+    assert "bim_element_ids" not in adapter.to_text(row)
+
+
+def test_to_text_tolerates_non_dict_metadata() -> None:
+    """Defensive: ORM may hand us None or a list if a migration is
+    in flight.  The adapter must not crash."""
+    adapter = RequirementVectorAdapter()
+    for bad in (None, [], "not a dict", 42):
+        row = _make_row(metadata_=bad)
+        # Just verify no exception is raised — the result text is
+        # allowed to be the pre-v1.4.5 string in this case.
+        text = adapter.to_text(row)
+        assert "bim_element_ids" not in text

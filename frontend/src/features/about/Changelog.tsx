@@ -14,6 +14,24 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.4.5',
+    date: '2026-04-11',
+    changes: [
+      'Deep-audit cut driven by 3 parallel sub-agents that investigated requirements, project_intelligence, erp_chat, vector_index, bim_hub element groups, quantity maps, and assemblies for hacks, half-baked logic, and missing cross-module wiring. 40+ findings; this cut tackles the cross-module correctness ones plus the biggest test coverage holes',
+      'Cross-module data integrity: orphaned BIM element ids cleaned up on element delete. 3 of 5 link types denormalise BIM ids into JSON arrays (Task / Activity / Requirement) instead of FK tables — they used to leak stale refs FOREVER. New _strip_orphaned_bim_links runs inline on the active session inside bulk_import_elements + delete_model so it shares the upstream transaction (no SQLite write-lock contention) and rolls back atomically on failure',
+      'Requirement embeddings now include pinned bim_element_ids in to_text() so semantic search like "requirements linked to roof elements" actually works. The link event used to re-embed the row but the embedding was unchanged because to_text() never read metadata_["bim_element_ids"]',
+      'Property filter _matches is now type-aware: handles strings via fnmatch, lists via membership/intersection, dicts via recursive containment, None via explicit "must not be set" semantics. Was exact equality before, silently broke on multi-valued IFC properties (materials=["steel"] vs filter "steel" returned False). 20 new unit tests pin every branch',
+      'Quantity map applies now surface skipped (element, rule) pairs with structured reason ("missing_property" or "invalid_decimal") via new skipped_count + skipped[] fields on QuantityMapApplyResult. Estimators used to see empty populations with no clue why',
+      'Per-collection asyncio.Lock on reindex_collection prevents two concurrent reindex requests against the same vector collection from interleaving purge+index ops and leaving the store with partial indexes / dup ids / ghost rows. Different collections still reindex in parallel',
+      'Missing CRUD: PATCH /requirements/{set_id} (rename / edit / change status without delete-and-recreate) and POST /requirements/{set_id}/requirements/bulk-delete/ (up to 500 ids in a single transaction with skipped count surfaced). Routes mounted: 19 → 21',
+      'Type discipline: GateResult.score migrated from String(10) to Float via Alembic migration b2f4e1a3c907 (idempotent batch-alter). Lexicographic sort meant "9.5" > "85.0" — every "top N gate runs" report was silently wrong',
+      'Test coverage push: 113 new unit tests across 7 vector adapter files (BOQ, Documents, Tasks, Risks, BIM elements, Validation, Chat — previously only Requirements had coverage). 20 new tests for the property matcher. 1 new end-to-end integration test for orphan cleanup. Total ~135 new tests',
+      'Frontend: BIMPage.tsx hardcoded English strings replaced with i18n keys (deferred from v1.4.4 audit). UploadPanel + NonReadyOverlay + empty-state now go through useTranslation(). New bim.upload_* / bim.overlay_* keys added to i18n-fallbacks.ts. The HARD rule from CLAUDE.md is now honoured',
+      'Verification: 113 vector adapter tests + 20 property matcher tests + 3 integration tests all green, ruff clean across every v1.4.5-touched file, frontend tsc --noEmit clean, version sync at 1.4.5',
+      'Deferred to v1.4.6: project_intelligence.collector wiring 4 missing modules, project_intelligence actions implementation (3 of 8 are dead code lying to users), assembly total_rate invalidation, create_vector_routes factory (~250 LOC dedup), 12 broken integration tests trailing-slash audit',
+    ],
+  },
+  {
     version: '1.4.4',
     date: '2026-04-11',
     changes: [

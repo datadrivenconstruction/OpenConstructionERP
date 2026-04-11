@@ -31,11 +31,14 @@ from sqlalchemy import select
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.requirements.schemas import (
     GateResultResponse,
+    RequirementBulkDeleteRequest,
+    RequirementBulkDeleteResult,
     RequirementCreate,
     RequirementResponse,
     RequirementSetCreate,
     RequirementSetDetail,
     RequirementSetResponse,
+    RequirementSetUpdate,
     RequirementStats,
     RequirementUpdate,
     TextImportRequest,
@@ -268,6 +271,38 @@ async def export_requirements(
     )
 
 
+# ── Update set (PATCH) ──────────────────────────────────────────────────────
+
+
+@router.patch("/{set_id}", response_model=RequirementSetResponse)
+async def update_set(
+    set_id: uuid.UUID,
+    data: RequirementSetUpdate,
+    _user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("requirements.update")),
+    service: RequirementsService = Depends(_get_service),
+) -> RequirementSetResponse:
+    """Patch fields on a requirement set after creation.
+
+    Lets users rename a set, edit its description, change the source
+    type, or update the workflow status without having to delete and
+    recreate (which would lose history and any BIM/BOQ links the set's
+    requirements own).  Project re-assignment is intentionally NOT
+    supported here — sets are project-scoped at creation.
+    """
+    try:
+        item = await service.update_set(set_id, data.model_dump(exclude_unset=True))
+        return _set_to_response(item)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Unable to update requirement set")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to update requirement set",
+        )
+
+
 # ── Delete set ──────────────────────────────────────────────────────────────
 
 
@@ -280,6 +315,46 @@ async def delete_set(
 ) -> None:
     """Delete a requirement set and all its data."""
     await service.delete_set(set_id)
+
+
+# ── Bulk delete requirements ────────────────────────────────────────────────
+
+
+@router.post(
+    "/{set_id}/requirements/bulk-delete/",
+    response_model=RequirementBulkDeleteResult,
+)
+async def bulk_delete_requirements(
+    set_id: uuid.UUID,
+    data: RequirementBulkDeleteRequest,
+    _user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("requirements.delete")),
+    service: RequirementsService = Depends(_get_service),
+) -> RequirementBulkDeleteResult:
+    """Delete every requirement whose id is in the list (single transaction).
+
+    Ids that do not exist OR belong to a different set are silently
+    skipped — the response carries the actual delete count and skipped
+    count so the UI can show "deleted N of M" if there is a mismatch.
+    Each successful delete fires the standard
+    ``requirements.requirement.deleted`` event so vector indexes stay
+    in sync.
+    """
+    try:
+        deleted, skipped = await service.bulk_delete_requirements(
+            set_id, data.requirement_ids
+        )
+        return RequirementBulkDeleteResult(
+            deleted_count=deleted, skipped_count=skipped
+        )
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Unable to bulk-delete requirements for set %s", set_id)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to bulk-delete requirements",
+        )
 
 
 # ── Add requirement ─────────────────────────────────────────────────────────
