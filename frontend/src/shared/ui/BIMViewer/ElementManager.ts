@@ -67,6 +67,14 @@ export interface BIMActivityBrief {
   percent_complete: number | null;
 }
 
+/** Per-element validation summary embedded in the element response after
+ *  the user runs POST /validation/check-bim-model. */
+export interface BIMValidationSummary {
+  rule_id: string;
+  severity: 'error' | 'warning' | 'info';
+  message: string;
+}
+
 export interface BIMElementData {
   id: string;
   name: string;
@@ -89,6 +97,11 @@ export interface BIMElementData {
   linked_tasks?: BIMTaskBrief[];
   /** Schedule activities (4D) that affect this element. */
   linked_activities?: BIMActivityBrief[];
+  /** Per-element validation summary from the most recent
+   *  /validation/check-bim-model run. */
+  validation_results?: BIMValidationSummary[];
+  /** Worst-severity rollup: 'error' > 'warning' > 'pass' > 'unchecked'. */
+  validation_status?: 'pass' | 'warning' | 'error' | 'unchecked';
 }
 
 export interface BIMModelData {

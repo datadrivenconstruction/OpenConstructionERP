@@ -55,6 +55,11 @@ from app.modules.boq.models import BOQ, Position
 
 logger = logging.getLogger(__name__)
 
+# Sentinel key used by ``list_elements_with_links`` to signal that a
+# BIM-model validation report exists. Routers can detect "report ran but
+# element passed" vs "no report at all" by checking this key's presence.
+_VALIDATION_REPORT_SENTINEL: uuid.UUID = uuid.UUID(int=0)
+
 # On-disk directory for BIM geometry files (original.{ext}, geometry.dae,
 # dataframe.xlsx, …). Matches the layout used by ``bim_hub.router`` which
 # writes to ``<repo>/data/bim/{project_id}/{model_id}/``.
@@ -289,6 +294,7 @@ class BIMHubService:
         dict[uuid.UUID, list[dict[str, Any]]],
         dict[uuid.UUID, list[dict[str, Any]]],
         dict[uuid.UUID, list[dict[str, Any]]],
+        dict[uuid.UUID, list[dict[str, Any]]],
     ]:
         """List elements AND their BOQ / Document / Task / Activity briefs.
 
@@ -494,6 +500,53 @@ class BIMHubService:
                     if str(eid) in matching:
                         activity_briefs_by_element_id.setdefault(eid, []).append(brief)
 
+        # ── Step 7: load latest ValidationReport for this model ──────────
+        # Look up the most recent ``target_type='bim_model'`` report and
+        # zip its per-element results into a dict keyed by element_id.
+        # Missing reports are fine — the router falls back to 'unchecked'.
+        #
+        # To distinguish "report exists, element passed" from "no report
+        # exists at all", we stash a sentinel entry under
+        # ``_VALIDATION_REPORT_SENTINEL`` (UUID(int=0)) whose list contains
+        # a single marker dict. The router inspects this key before the
+        # per-element loop.
+        validation_summaries_by_element_id: dict[uuid.UUID, list[dict[str, Any]]] = {
+            eid: [] for eid in element_ids
+        }
+        if element_ids:
+            from app.modules.validation.repository import ValidationReportRepository
+
+            val_repo = ValidationReportRepository(self.session)
+            latest_report = await val_repo.get_latest_for_target(
+                target_type="bim_model",
+                target_id=str(model_id),
+            )
+            if latest_report is not None:
+                validation_summaries_by_element_id[_VALIDATION_REPORT_SENTINEL] = [
+                    {"report_id": str(latest_report.id)}
+                ]
+                element_id_strs = {str(eid): eid for eid in element_ids}
+                raw_results = latest_report.results or []
+                for entry in raw_results:
+                    if not isinstance(entry, dict):
+                        continue
+                    entry_eid = entry.get("element_id")
+                    if not entry_eid:
+                        continue
+                    key_uuid = element_id_strs.get(str(entry_eid))
+                    if key_uuid is None:
+                        continue
+                    severity = entry.get("severity") or "info"
+                    if severity not in ("error", "warning", "info"):
+                        severity = "info"
+                    validation_summaries_by_element_id.setdefault(key_uuid, []).append(
+                        {
+                            "rule_id": entry.get("rule_id", ""),
+                            "severity": severity,
+                            "message": entry.get("message", ""),
+                        }
+                    )
+
         return (
             elements,
             total,
@@ -501,6 +554,7 @@ class BIMHubService:
             doc_links_by_element_id,
             task_links_by_element_id,
             activity_briefs_by_element_id,
+            validation_summaries_by_element_id,
         )
 
     async def get_element(self, element_id: uuid.UUID) -> BIMElement:

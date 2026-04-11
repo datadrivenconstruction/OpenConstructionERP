@@ -14,6 +14,22 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.3.31',
+    date: '2026-04-11',
+    changes: [
+      'BIM viewer cross-module panel is now READ-WRITE — three new inline modals let the user create new tasks, link existing documents, and link existing schedule activities to the selected BIM element WITHOUT leaving the BIM viewer.  No more navigating to /tasks → fill form → come back → reload to see the link.  Each section in the element details panel now has a "+ New" or "+ Link" button right next to its count badge',
+      'New CreateTaskFromBIMModal — clicks "+ New" in the Linked Tasks section.  Pre-fills the title with element type ("Issue on Walls"), pins bim_element_ids on create so the new task instantly appears in the panel via React Query invalidation.  Type / priority / due date selectors built in.  Multi-element bulk-pin supported — when called with N elements the new task lands on all of them in one shot',
+      'New LinkDocumentToBIMModal — clicks "+ Link" in the Linked Documents section.  Lists every document in the active project with searchable name / category / drawing-number / discipline filter.  Click a row → POST to /documents/bim-links/ → invalidates the bim-elements query → link badge appears in the panel without page reload',
+      'New LinkActivityToBIMModal — clicks "+ Link" in the Schedule Activities section.  Loads every activity from every schedule in the project (parallel fetch, capped at 200 visible).  Click a row → PATCH /schedule/activities/{id}/bim-links additively (existing pinned elements are preserved, new ones appended) → invalidates the bim-elements query',
+      'Cross-module sections always render — the four section blocks (BOQ / Documents / Tasks / Activities) used to be conditionally rendered only when the element had at least one link.  Now they always render with empty-state placeholders + the "+ Add" buttons so first-time users can discover the linking workflow without needing a pre-existing link to find the section',
+      'Validation ↔ BIM per-element rules engine — new POST /api/v1/validation/check-bim-model endpoint runs universal BIM rules (wall has thickness, structural has material, fire-rating present, MEP has system, etc.) against every element in a model.  Live test on the demo: 33 962 rule checks → 22 610 passed / 10 497 warnings / 1 163 errors in one shot.  Per-element results are eager-loaded into BIMElementResponse.validation_results + the worst severity is rolled up into BIMElementResponse.validation_status (pass / warning / error / unchecked)',
+      'BIM viewer renders per-element validation badge — new "Validation results" section appears in the element details panel when the element has at least one validation result, colour-coded by worst severity (rose for error, amber for warning, emerald for pass) with a ShieldX / ShieldAlert / ShieldCheck icon.  Lists up to 6 failed rules with rule_id + message preview',
+      'Tasks page TaskCard renders a "Pinned to N BIM element(s)" badge in the source-indicator slot when the task has bim_element_ids populated.  Click the badge → /bim?element=… opens the BIM viewer with the first pinned element preselected.  Reverse-direction navigation symmetric with the existing Documents preview footer',
+      'Bug fix — ValidationReportResponse pydantic schema was reading `report.metadata` from the SQLAlchemy ORM, which collides with the SQLAlchemy class-level `MetaData()` registry.  Switched to `validation_alias=AliasChoices("metadata_", "metadata")` so Pydantic reads the python attribute name first.  All validation routes (existing and the new check-bim-model) now serialise correctly',
+      'Verification: 16 backend files compile clean, 5 new frontend files added (3 inline modals + extended types), tsc --noEmit clean, headless deep test 10/10 PASS at 60 fps, end-to-end curl tests pass for: validation run (33 962 checks), per-element validation embed, document link create + delete',
+    ],
+  },
+  {
     version: '1.3.30',
     date: '2026-04-11',
     changes: [

@@ -1221,6 +1221,7 @@ async def list_elements(
     from app.modules.bim_hub.schemas import (
         ActivityBrief,
         DocumentLinkBrief,
+        ElementValidationSummary,
         TaskBrief,
     )
 
@@ -1232,6 +1233,7 @@ async def list_elements(
         doc_links_by_id,
         task_links_by_id,
         activity_briefs_by_id,
+        validation_summaries_by_id,
     ) = await service.list_elements_with_links(
         model_id,
         element_type=element_type,
@@ -1240,6 +1242,14 @@ async def list_elements(
         offset=offset,
         limit=limit,
     )
+
+    # The service stashes a sentinel entry under ``_VALIDATION_REPORT_SENTINEL``
+    # (UUID(int=0)) when a ``target_type='bim_model'`` report exists. We pop
+    # it so it never reaches the per-element loop.
+    from app.modules.bim_hub.service import _VALIDATION_REPORT_SENTINEL
+
+    report_exists = _VALIDATION_REPORT_SENTINEL in validation_summaries_by_id
+    validation_summaries_by_id.pop(_VALIDATION_REPORT_SENTINEL, None)
 
     responses: list[BIMElementResponse] = []
     for elem in items:
@@ -1259,11 +1269,27 @@ async def list_elements(
             ActivityBrief.model_validate(b)
             for b in activity_briefs_by_id.get(elem.id, [])
         ]
+        raw_val = validation_summaries_by_id.get(elem.id, [])
+        validation_summaries = [
+            ElementValidationSummary.model_validate(v) for v in raw_val
+        ]
+        # Derive worst-severity status; 'unchecked' iff no report exists
+        # at all (any element had at least one entry → report_exists).
+        if not report_exists:
+            val_status: str = "unchecked"
+        elif any(v.severity == "error" for v in validation_summaries):
+            val_status = "error"
+        elif any(v.severity == "warning" for v in validation_summaries):
+            val_status = "warning"
+        else:
+            val_status = "pass"
         resp = BIMElementResponse.model_validate(elem)
         resp.boq_links = boq_briefs
         resp.linked_documents = doc_briefs
         resp.linked_tasks = task_briefs
         resp.linked_activities = activity_briefs
+        resp.validation_results = validation_summaries
+        resp.validation_status = val_status  # type: ignore[assignment]
         responses.append(resp)
 
     return BIMElementListResponse(

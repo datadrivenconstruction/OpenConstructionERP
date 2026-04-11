@@ -51,6 +51,9 @@ import BIMFilterPanel from './BIMFilterPanel';
 import { BIMProcessingProgress, type BIMProcessingStage } from './BIMProcessingProgress';
 import AddToBOQModal from './AddToBOQModal';
 import SaveGroupModal from './SaveGroupModal';
+import CreateTaskFromBIMModal from './CreateTaskFromBIMModal';
+import LinkDocumentToBIMModal from './LinkDocumentToBIMModal';
+import LinkActivityToBIMModal from './LinkActivityToBIMModal';
 import type { BIMGroupFilterCriteria } from './api';
 import { Filter } from 'lucide-react';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -720,6 +723,11 @@ export function BIMPage() {
     filterCriteria: BIMGroupFilterCriteria;
     elementIds: string[];
   } | null>(null);
+  /** Inline create-from-element modal targets.  Each one stores the
+   *  elements the user wants to link from — typically [singleClickedElement]. */
+  const [createTaskFor, setCreateTaskFor] = useState<BIMElementData[] | null>(null);
+  const [linkDocumentFor, setLinkDocumentFor] = useState<BIMElementData[] | null>(null);
+  const [linkActivityFor, setLinkActivityFor] = useState<BIMElementData[] | null>(null);
   const addToast = useToastStore((s) => s.addToast);
 
   /* ── Cross-highlight bridge to BOQ editor ───────────────────────── */
@@ -849,6 +857,20 @@ export function BIMPage() {
     },
     [navigate],
   );
+
+  // Inline-create handlers — fired when the user clicks "+ New" / "+ Link"
+  // in the cross-module sections of the selected-element panel.  These
+  // open the inline modals so the user never has to leave the BIM viewer
+  // to create a task, link a drawing, or attach a schedule activity.
+  const handleCreateTask = useCallback((element: BIMElementData) => {
+    setCreateTaskFor([element]);
+  }, []);
+  const handleLinkDocument = useCallback((element: BIMElementData) => {
+    setLinkDocumentFor([element]);
+  }, []);
+  const handleLinkActivity = useCallback((element: BIMElementData) => {
+    setLinkActivityFor([element]);
+  }, []);
 
   // Link a saved group to a BOQ position — looks up every member element
   // by id from the current `elements` list and opens AddToBOQModal with
@@ -1162,6 +1184,9 @@ export function BIMPage() {
             onOpenDocument={handleOpenDocument}
             onOpenTask={handleOpenTask}
             onOpenActivity={handleOpenActivity}
+            onCreateTask={handleCreateTask}
+            onLinkDocument={handleLinkDocument}
+            onLinkActivity={handleLinkActivity}
             className="h-full"
           />
         ) : (
@@ -1270,6 +1295,32 @@ export function BIMPage() {
           onSaved={() => {
             // SavedGroupModal already invalidates the query; nothing extra here
           }}
+        />
+      )}
+
+      {/* Inline create-from-element modals — opened from the "+ New" /
+          "+ Link" buttons in the cross-module sections of the selected-
+          element panel.  Each one POSTs to the relevant module + invalidates
+          the bim-elements query so the new link badge appears instantly. */}
+      {createTaskFor && projectId && (
+        <CreateTaskFromBIMModal
+          projectId={projectId}
+          elements={createTaskFor}
+          onClose={() => setCreateTaskFor(null)}
+        />
+      )}
+      {linkDocumentFor && projectId && (
+        <LinkDocumentToBIMModal
+          projectId={projectId}
+          elements={linkDocumentFor}
+          onClose={() => setLinkDocumentFor(null)}
+        />
+      )}
+      {linkActivityFor && projectId && (
+        <LinkActivityToBIMModal
+          projectId={projectId}
+          elements={linkActivityFor}
+          onClose={() => setLinkActivityFor(null)}
         />
       )}
     </div>
