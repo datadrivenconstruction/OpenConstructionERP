@@ -37,6 +37,7 @@ import type { BIMElementData } from '@/shared/ui/BIMViewer';
 import {
   bucketOf,
   isNoiseCategory,
+  prettifyCategoryName,
   BUCKETS,
   type BIMCategoryBucket,
 } from './bimCategoryTaxonomy';
@@ -345,20 +346,20 @@ export default function BIMFilterPanel({
         byStorey.set(el.storey, (byStorey.get(el.storey) ?? 0) + 1);
       }
 
-      // Skip noise rows from the flat category counts when buildingsOnly
-      // is on, so the user sees a clean list of real categories.
-      if (!(state.buildingsOnly && isNoise)) {
-        byType.set(tpe, (byType.get(tpe) ?? 0) + 1);
+      // ALL categories go into the byType map regardless of the
+      // buildingsOnly toggle — the split into "building" vs "other" now
+      // happens in the render layer (CategoryFlatList) so the user always
+      // sees what's available, with annotations collapsed by default.
+      byType.set(tpe, (byType.get(tpe) ?? 0) + 1);
 
-        // Hierarchical Category → Type Name (Revit Browser style)
-        const typeName = getTypeNameKey(el);
-        let perCat = byCategoryThenType.get(tpe);
-        if (!perCat) {
-          perCat = new Map();
-          byCategoryThenType.set(tpe, perCat);
-        }
-        perCat.set(typeName, (perCat.get(typeName) ?? 0) + 1);
+      // Hierarchical Category → Type Name (Revit Browser style)
+      const typeName = getTypeNameKey(el);
+      let perCat = byCategoryThenType.get(tpe);
+      if (!perCat) {
+        perCat = new Map();
+        byCategoryThenType.set(tpe, perCat);
       }
+      perCat.set(typeName, (perCat.get(typeName) ?? 0) + 1);
 
       const bucket = bucketOf(tpe);
       let perBucket = byBucket.get(bucket);
@@ -943,30 +944,21 @@ export default function BIMFilterPanel({
             ))}
           </div>
 
-          {/* ── Mode 1: By Category — flat chip list ────────────────── */}
+          {/* ── Mode 1: By Category — split into "Building" + "Other" ──
+              Universal logic: every category is bucketed via bucketOf()
+              and we split by whether the bucket is `noise`. Building
+              chips render at top in normal style; annotation/analytical
+              chips render below in a collapsed "Other" section so they're
+              visible but never crowd out the real building elements.
+              Works across every project regardless of which categories
+              the source CAD tool emits. */}
           {groupingMode === 'category' && (
-            <div className="space-y-0.5">
-              {counts.types.length === 0 ? (
-                <div className="text-[10px] text-content-quaternary italic px-1">
-                  {t('bim.filter_no_types', {
-                    defaultValue: 'No element types detected',
-                  })}
-                </div>
-              ) : (
-                counts.types.map(([name, count]) => {
-                  const active = state.types.has(name);
-                  return (
-                    <FilterChip
-                      key={name}
-                      label={name}
-                      count={count}
-                      active={active}
-                      onClick={() => toggleSet('types', name)}
-                    />
-                  );
-                })
-              )}
-            </div>
+            <CategoryFlatList
+              types={counts.types}
+              activeSet={state.types}
+              onToggle={(n) => toggleSet('types', n)}
+              t={t}
+            />
           )}
 
           {/* ── Mode 2: By Type Name — Category → Type Name hierarchy ─ */}
@@ -1007,8 +999,9 @@ export default function BIMFilterPanel({
                             className={`text-[11px] font-semibold truncate ${
                               active ? 'text-oe-blue' : 'text-content-primary'
                             }`}
+                            title={category}
                           >
-                            {category}
+                            {prettifyCategoryName(category)}
                           </span>
                           <span className="text-[10px] text-content-quaternary tabular-nums shrink-0 ms-auto">
                             {total.toLocaleString()}
@@ -1112,7 +1105,7 @@ export default function BIMFilterPanel({
                             return (
                               <FilterChip
                                 key={name}
-                                label={name}
+                                label={prettifyCategoryName(name)}
                                 count={count}
                                 active={active}
                                 onClick={() => toggleSet('types', name)}
@@ -1222,6 +1215,112 @@ export default function BIMFilterPanel({
 }
 
 // ── Sub-components ───────────────────────────────────────────────────────
+
+/**
+ * Category flat-list view — splits every category into "Building elements"
+ * (real things you'd estimate) and "Annotations & analytical" (drafting +
+ * analytical-model junk).  Universal: works for any project because the
+ * split is driven by `bucketOf()` which classifies every category by its
+ * semantic bucket (building vs noise).
+ *
+ * The Other section is collapsible and starts collapsed so first-time
+ * users see only real building categories without the panel exploding
+ * with 100+ Revit annotation rows.
+ */
+function CategoryFlatList({
+  types,
+  activeSet,
+  onToggle,
+  t,
+}: {
+  types: Array<[string, number]>;
+  activeSet: Set<string>;
+  onToggle: (name: string) => void;
+  t: ReturnType<typeof useTranslation>['t'];
+}) {
+  const [otherExpanded, setOtherExpanded] = useState(false);
+
+  // Universal split via bucketOf — works for any project's category set
+  const building: Array<[string, number]> = [];
+  const other: Array<[string, number]> = [];
+  for (const entry of types) {
+    if (BUCKETS[bucketOf(entry[0])].noise) other.push(entry);
+    else building.push(entry);
+  }
+
+  if (types.length === 0) {
+    return (
+      <div className="text-[10px] text-content-quaternary italic px-1">
+        {t('bim.filter_no_types', { defaultValue: 'No element types detected' })}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-1">
+      {/* Building elements — real categories */}
+      {building.length > 0 && (
+        <div className="space-y-0.5">
+          {building.map(([name, count]) => {
+            const active = activeSet.has(name);
+            return (
+              <FilterChip
+                key={name}
+                label={prettifyCategoryName(name)}
+                count={count}
+                active={active}
+                onClick={() => onToggle(name)}
+              />
+            );
+          })}
+        </div>
+      )}
+
+      {/* Annotations & analytical — collapsible, de-emphasised */}
+      {other.length > 0 && (
+        <div className="rounded border border-border-light/50 bg-surface-secondary/30">
+          <button
+            type="button"
+            onClick={() => setOtherExpanded((v) => !v)}
+            className="w-full flex items-center justify-between px-2 py-1 text-left"
+          >
+            <div className="flex items-center gap-1.5">
+              {otherExpanded ? (
+                <ChevronDown size={11} className="text-content-tertiary" />
+              ) : (
+                <ChevronRight size={11} className="text-content-tertiary" />
+              )}
+              <span className="text-[10px] font-medium text-content-tertiary uppercase tracking-wider">
+                {t('bim.category_annotations_analytical', {
+                  defaultValue: 'Annotations & analytical',
+                })}
+              </span>
+            </div>
+            <span className="text-[10px] text-content-quaternary tabular-nums">
+              {other.reduce((s, [, c]) => s + c, 0).toLocaleString()}
+            </span>
+          </button>
+          {otherExpanded && (
+            <div className="px-1 pb-1 space-y-0.5">
+              {other.map(([name, count]) => {
+                const active = activeSet.has(name);
+                return (
+                  <FilterChip
+                    key={name}
+                    label={prettifyCategoryName(name)}
+                    count={count}
+                    active={active}
+                    onClick={() => onToggle(name)}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function FilterSection({
   title,
