@@ -400,6 +400,7 @@ export default function App() {
         <Route path="/architecture" element={<P title="Architecture Map"><ArchitectureMapPage /></P>} />
 
         {/* Convenience route aliases — redirect to canonical paths */}
+        <Route path="/dashboard" element={<Navigate to="/" replace />} />
         <Route path="/change-orders" element={<Navigate to="/changeorders" replace />} />
         <Route path="/punch-list" element={<Navigate to="/punchlist" replace />} />
         <Route path="/variations" element={<Navigate to="/changeorders" replace />} />
