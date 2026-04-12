@@ -8,6 +8,7 @@ Endpoints:
     GET    /template/                          -- Download Excel template
     POST   /export/{set_id}/excel/             -- Export set as Excel
     POST   /export/{set_id}/ids/              -- Export set as IDS XML
+    POST   /validate/{set_id}/                -- Validate BIM model against requirement set
 """
 
 import logging
@@ -23,6 +24,7 @@ from app.modules.bim_requirements.schemas import (
     BIMRequirementSetResponse,
     ImportResultResponse,
     ParseError,
+    RequirementValidationResponse,
 )
 from app.modules.bim_requirements.service import BIMRequirementService
 
@@ -244,3 +246,24 @@ async def export_ids(
             "Content-Disposition": f'attachment; filename="{safe_name}.ids"',
         },
     )
+
+
+# ── Validate against BIM model ────────────────────────────────────────────
+
+
+@router.post("/validate/{set_id}/", response_model=RequirementValidationResponse)
+async def validate_against_model(
+    set_id: uuid.UUID,
+    model_id: uuid.UUID = Query(...),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: BIMRequirementService = Depends(_get_service),
+) -> RequirementValidationResponse:
+    """Validate a BIM model's elements against a requirement set.
+
+    For each requirement:
+    - Finds elements that match the requirement's ``element_filter``
+    - Checks if those elements have the required property/value per ``constraint_def``
+    - Returns a compliance report with pass/fail/not_applicable counts
+    """
+    report = await service.validate_against_model(set_id, model_id)
+    return RequirementValidationResponse(**report)
