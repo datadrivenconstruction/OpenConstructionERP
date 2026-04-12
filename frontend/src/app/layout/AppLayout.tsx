@@ -6,6 +6,7 @@ import { Header } from './Header';
 import { FeedbackDialog, OnboardingTour } from '@/shared/ui';
 import { FloatingQueuePanel } from './FloatingQueuePanel';
 import { GlobalProgress } from '@/shared/ui/GlobalProgress';
+import { GlobalUploadIndicator } from '@/shared/ui/GlobalUploadIndicator';
 import { OfflineBanner } from '@/shared/ui/OfflineBanner';
 import { DemoBanner } from '@/shared/ui/DemoBanner';
 
@@ -108,6 +109,9 @@ export function AppLayout({ title, children }: AppLayoutProps) {
 
       {/* Floating queue panel — shows background task progress */}
       <FloatingQueuePanel />
+
+      {/* Global BIM upload indicator — survives route changes */}
+      <GlobalUploadIndicator />
 
       {/* Floating Recent button — bottom-right corner */}
       <FloatingRecentButton />

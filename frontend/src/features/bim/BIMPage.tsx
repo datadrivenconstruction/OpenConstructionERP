@@ -62,25 +62,23 @@ import { Filter } from 'lucide-react';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { useBIMLinkSelectionStore } from '@/stores/useBIMLinkSelectionStore';
+import { useBIMUploadStore } from '@/stores/useBIMUploadStore';
 import {
   fetchBIMModels,
   fetchBIMModel,
   fetchBIMElements,
   fetchBIMConverters,
-  uploadBIMData,
-  uploadCADFile,
   getGeometryUrl,
   deleteBIMModel,
   deleteLink,
   listElementGroups,
   deleteElementGroup,
   type BIMElementGroup,
-  type BIMCadUploadResponse,
 } from './api';
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
-const CAD_EXTENSIONS = new Set(['.rvt', '.ifc']);
+const CAD_EXTENSIONS = new Set(['.rvt', '.ifc', '.dwg', '.dgn', '.fbx', '.obj', '.3ds']);
 const DATA_EXTENSIONS = new Set(['.csv', '.xlsx', '.xls']);
 
 function getFileExtension(filename: string): string {
@@ -275,69 +273,38 @@ function UploadPanel({
     [fileInputRef, dataInputRef, geoInputRef].forEach((r) => { if (r.current) r.current.value = ''; });
   }, []);
 
+  const startGlobalUpload = useBIMUploadStore((s) => s.startUpload);
+
   const handleUpload = useCallback(async () => {
     if (!projectId) return;
     setUploading(true);
     setUploadError(null);
     setUploadProgress(0);
 
-    // The backend /upload-cad endpoint is synchronous — it runs the whole
-    // pipeline inline and only returns when processing is finished. Since
-    // there are no intermediate status events we simulate the 5 stages on
-    // a timer so the user sees steady progress. If the fetch resolves
-    // faster than the timer, we jump to the final stage immediately.
     const activeFile = advancedMode ? dataFile : file;
     const sizeLabel = activeFile ? formatFileSize(activeFile.size) : undefined;
     const fileName = activeFile?.name;
-    onProcessingUpdate?.({ stage: 'uploading', fileName, fileSize: sizeLabel });
-    setUploadStage('Uploading…');
-    setUploadProgress(10);
-
-    // Drive the stepper forward while the fetch is in flight
-    const stageSchedule: BIMProcessingStage[] = [
-      'uploading',
-      'converting',
-      'parsing',
-      'indexing',
-      'linking',
-    ];
-    let stageIdx = 0;
-    const stageTimer = setInterval(() => {
-      if (stageIdx < stageSchedule.length - 1) {
-        stageIdx += 1;
-        onProcessingUpdate?.({
-          stage: stageSchedule[stageIdx]!,
-          fileName,
-          fileSize: sizeLabel,
-        });
-        setUploadStage(stageSchedule[stageIdx]!);
-        setUploadProgress((p) => Math.min(p + 15, 90));
-      }
-    }, 1500);
 
     try {
       if (advancedMode && dataFile) {
-        const res = await uploadBIMData(
+        // Advanced (data) upload — delegate to global store
+        const name = modelName || 'Imported';
+        startGlobalUpload({
+          file: dataFile,
           projectId,
-          modelName || 'Imported',
+          modelName: name,
           discipline,
-          dataFile,
+          uploadType: 'data',
           geometryFile,
-        );
-        clearInterval(stageTimer);
-        setUploadProgress(100);
-        onProcessingUpdate?.({
-          stage: 'ready',
-          fileName,
-          fileSize: sizeLabel,
-          elementCount: res.element_count,
         });
+        onProcessingUpdate?.({ stage: 'uploading', fileName, fileSize: sizeLabel });
         addToast({
-          type: 'success',
-          title: t('bim.upload_success'),
-          message: `${res.element_count} elements`,
+          type: 'info',
+          title: t('bim.upload_started_title', { defaultValue: 'Upload started' }),
+          message: t('bim.upload_background_msg', {
+            defaultValue: 'You can navigate to other pages — the upload will continue in the background.',
+          }),
         });
-        onUploadComplete(res.model_id);
         resetForm();
       } else if (file) {
         const name = modelName || file.name.replace(/\.[^.]+$/, '');
@@ -362,7 +329,6 @@ function UploadPanel({
                 (c) => c.id === needsConverterMatch,
               );
               if (conv && !conv.installed) {
-                clearInterval(stageTimer);
                 setUploadProgress(0);
                 setUploadStage('');
                 onProcessingUpdate?.(null);
@@ -386,154 +352,44 @@ function UploadPanel({
             }
           }
 
-          const res = await uploadCADFile(projectId, name, discipline, file);
-          clearInterval(stageTimer);
-          setUploadProgress(100);
-          const st = (res as { status?: string }).status || 'processing';
-          const cnt = (res as { element_count?: number }).element_count || 0;
-
-          if (st === 'ready') {
-            onProcessingUpdate?.({
-              stage: 'ready',
-              fileName,
-              fileSize: sizeLabel,
-              elementCount: cnt,
-            });
-            addToast({
-              type: 'success',
-              title: t('bim.toast_model_processed_title'),
-              message: `${cnt} elements`,
-            });
-            if (res.model_id) onUploadComplete(res.model_id);
-            await new Promise((r) => setTimeout(r, 600));
-            resetForm();
-          } else if (st === 'converter_required') {
-            // Backend preflight rejected — no model row was created and
-            // no upload bytes were wasted.  Show the install prompt
-            // directly so the user can one-click install and retry.
-            onProcessingUpdate?.(null);
-            setInstallPromptState({
-              open: true,
-              converterId: (res.converter_id || needsConverterMatch || '') as string,
-              fileName: file.name,
-              fileSize: file.size,
-              pendingFile: file,
-              pendingProjectId: projectId,
-              pendingName: name,
-              pendingDiscipline: discipline,
-            });
-            addToast({
-              type: 'warning',
-              title: t('bim.toast_converter_required_title'),
-              message:
-                res.message ||
-                t('bim.toast_converter_required_msg', {
-                  defaultValue: '{{format}} converter not installed',
-                  format: (res.format || '').toUpperCase(),
-                }),
-            });
-            return;
-          } else if (st === 'needs_converter') {
-            // Post-upload rejection — the file was saved but the
-            // processor couldn't run.  If the response includes a
-            // converter id (v1.4.7+), offer the install prompt so the
-            // user can fix it in one click; otherwise fall back to
-            // the old error-card behaviour.
-            const cid = (res as BIMCadUploadResponse).converter_id || undefined;
-            if (cid) {
-              setInstallPromptState({
-                open: true,
-                converterId: cid,
-                fileName: file.name,
-                fileSize: file.size,
-                pendingFile: file,
-                pendingProjectId: projectId,
-                pendingName: name,
-                pendingDiscipline: discipline,
-              });
-            }
-            onProcessingUpdate?.({
-              stage: 'needs_converter',
-              fileName,
-              fileSize: sizeLabel,
-              errorMessage:
-                res.error_message ||
-                t('bim.needs_converter_fallback_msg', {
-                  defaultValue:
-                    '{{format}} requires a converter. Install it or convert to IFC first.',
-                  format: (res.format || '').toUpperCase(),
-                }),
-            });
-            addToast({
-              type: 'warning',
-              title: t('bim.toast_converter_required_title'),
-              message:
-                res.error_message ||
-                t('bim.toast_converter_required_msg', {
-                  defaultValue: '{{format}} converter not installed',
-                  format: (res.format || '').toUpperCase(),
-                }),
-            });
-            if (res.model_id) onUploadComplete(res.model_id);
-            await new Promise((r) => setTimeout(r, 600));
-            resetForm();
-          } else if (st === 'error') {
-            onProcessingUpdate?.({
-              stage: 'error',
-              fileName,
-              fileSize: sizeLabel,
-              errorMessage:
-                res.error_message ||
-                t('bim.error_generic_processing', {
-                  defaultValue: 'Could not extract elements from this CAD file.',
-                }),
-            });
-            addToast({
-              type: 'error',
-              title: t('bim.toast_processing_failed_title'),
-              message:
-                res.error_message || t('bim.toast_processing_failed_msg'),
-            });
-            if (res.model_id) onUploadComplete(res.model_id);
-            await new Promise((r) => setTimeout(r, 600));
-            resetForm();
-          } else {
-            onProcessingUpdate?.({
-              stage: 'ready',
-              fileName,
-              fileSize: sizeLabel,
-              elementCount: cnt,
-            });
-            addToast({
-              type: 'success',
-              title: t('bim.toast_file_uploaded_title'),
-              message: t('bim.toast_processing_queued_msg'),
-            });
-            if (res.model_id) onUploadComplete(res.model_id);
-            await new Promise((r) => setTimeout(r, 600));
-            resetForm();
-          }
-        } else if (isDataFile(file.name)) {
-          const res = await uploadBIMData(projectId, name, discipline, file);
-          clearInterval(stageTimer);
-          setUploadProgress(100);
-          onProcessingUpdate?.({
-            stage: 'ready',
-            fileName,
-            fileSize: sizeLabel,
-            elementCount: res.element_count,
+          // Delegate to global store — upload survives navigation
+          startGlobalUpload({
+            file,
+            projectId,
+            modelName: name,
+            discipline,
+            uploadType: 'cad',
           });
+          onProcessingUpdate?.({ stage: 'uploading', fileName, fileSize: sizeLabel });
           addToast({
-            type: 'success',
-            title: t('bim.toast_imported_title'),
-            message: `${res.element_count} elements`,
+            type: 'info',
+            title: t('bim.upload_started_title', { defaultValue: 'Upload started' }),
+            message: t('bim.upload_background_msg', {
+              defaultValue: 'You can navigate to other pages — the upload will continue in the background.',
+            }),
           });
-          onUploadComplete(res.model_id);
+          resetForm();
+        } else if (isDataFile(file.name)) {
+          // Data file upload — delegate to global store
+          startGlobalUpload({
+            file,
+            projectId,
+            modelName: name,
+            discipline,
+            uploadType: 'data',
+          });
+          onProcessingUpdate?.({ stage: 'uploading', fileName, fileSize: sizeLabel });
+          addToast({
+            type: 'info',
+            title: t('bim.upload_started_title', { defaultValue: 'Upload started' }),
+            message: t('bim.upload_background_msg', {
+              defaultValue: 'You can navigate to other pages — the upload will continue in the background.',
+            }),
+          });
           resetForm();
         }
       }
     } catch (err) {
-      clearInterval(stageTimer);
       const msg = err instanceof Error ? err.message : String(err);
       setUploadError(msg);
       setUploadProgress(0);
@@ -545,7 +401,6 @@ function UploadPanel({
       });
       addToast({ type: 'error', title: t('bim.upload_failed'), message: msg });
     } finally {
-      clearInterval(stageTimer);
       setUploading(false);
       setUploadStage('');
     }
@@ -562,16 +417,16 @@ function UploadPanel({
     addToast,
     resetForm,
     queryClient,
+    startGlobalUpload,
     t,
   ]);
 
   /** Replay a deferred upload after the user installs a converter from
    *  the prompt.  Uses the saved `pendingFile` + metadata so the user
-   *  never has to pick the file twice.  Runs outside the handleUpload
-   *  callback because the stage timer / error plumbing is simpler here
-   *  and the most critical thing is that the retry actually fires.  */
+   *  never has to pick the file twice.  Now delegates to the global
+   *  store so the retry also survives navigation. */
   const retryUploadAfterInstall = useCallback(
-    async (pending: InstallPromptState) => {
+    (pending: InstallPromptState) => {
       const pendingFile = pending.pendingFile;
       const sizeLabel = formatFileSize(pendingFile.size);
       onProcessingUpdate?.({
@@ -579,61 +434,22 @@ function UploadPanel({
         fileName: pendingFile.name,
         fileSize: sizeLabel,
       });
-      try {
-        const res = await uploadCADFile(
-          pending.pendingProjectId,
-          pending.pendingName,
-          pending.pendingDiscipline,
-          pendingFile,
-        );
-        const st = (res as { status?: string }).status || 'processing';
-        const cnt = (res as { element_count?: number }).element_count || 0;
-        if (st === 'ready' || st === 'processing') {
-          onProcessingUpdate?.({
-            stage: 'ready',
-            fileName: pendingFile.name,
-            fileSize: sizeLabel,
-            elementCount: cnt,
-          });
-          addToast({
-            type: 'success',
-            title: t('bim.toast_model_processed_title'),
-            message: t('bim.toast_retry_success_msg', {
-              defaultValue: 'Upload retried — {{count}} elements',
-              count: cnt,
-            }),
-          });
-          if (res.model_id) onUploadComplete(res.model_id);
-        } else {
-          onProcessingUpdate?.({
-            stage: 'error',
-            fileName: pendingFile.name,
-            fileSize: sizeLabel,
-            errorMessage:
-              res.error_message ||
-              t('bim.error_generic_processing', {
-                defaultValue: 'Could not extract elements from this CAD file.',
-              }),
-          });
-          addToast({
-            type: 'error',
-            title: t('bim.toast_processing_failed_title'),
-            message:
-              res.error_message || t('bim.toast_processing_failed_msg'),
-          });
-        }
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        onProcessingUpdate?.({
-          stage: 'error',
-          fileName: pendingFile.name,
-          fileSize: sizeLabel,
-          errorMessage: msg,
-        });
-        addToast({ type: 'error', title: t('bim.upload_failed'), message: msg });
-      }
+      startGlobalUpload({
+        file: pendingFile,
+        projectId: pending.pendingProjectId,
+        modelName: pending.pendingName,
+        discipline: pending.pendingDiscipline,
+        uploadType: 'cad',
+      });
+      addToast({
+        type: 'info',
+        title: t('bim.upload_started_title', { defaultValue: 'Upload started' }),
+        message: t('bim.upload_background_msg', {
+          defaultValue: 'You can navigate to other pages — the upload will continue in the background.',
+        }),
+      });
     },
-    [addToast, onProcessingUpdate, onUploadComplete, t],
+    [addToast, onProcessingUpdate, startGlobalUpload, t],
   );
 
   const canUpload = advancedMode ? !!dataFile && !uploading : !!file && !uploading;
@@ -688,7 +504,7 @@ function UploadPanel({
                 <p className="text-[10px] text-content-quaternary">{t('bim.upload_size_hint')}</p>
               </>
             )}
-            <input ref={fileInputRef} type="file" accept=".rvt,.ifc,.csv,.xlsx,.xls" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); }} />
+            <input ref={fileInputRef} type="file" accept=".rvt,.ifc,.dwg,.dgn,.fbx,.obj,.3ds,.csv,.xlsx,.xls" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); }} />
           </label>
         ) : (
           <div className="grid grid-cols-2 gap-3">
@@ -805,7 +621,7 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete }: {
 
 /* ── Landing Page ────────────────────────────────────────────────────── */
 
-function LandingPage({ projectId, onUploadComplete, breadcrumbItems }: {
+function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrumbItems }: {
   projectId: string; onUploadComplete: (modelId: string) => void; breadcrumbItems: { label: string; to?: string }[];
 }) {
   const { t } = useTranslation();
@@ -816,32 +632,32 @@ function LandingPage({ projectId, onUploadComplete, breadcrumbItems }: {
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const addToast = useToastStore((s) => s.addToast);
+  const startGlobalUpload = useBIMUploadStore((s) => s.startUpload);
 
   const handleUpload = useCallback(async () => {
     if (!file || !projectId) return;
     setUploading(true); setUploadError(null);
     try {
       const name = modelName || file.name.replace(/\.[^.]+$/, '');
-      if (isCADFile(file.name)) {
-        setUploadProgress(20);
-        const iv = setInterval(() => setUploadProgress((p) => Math.min(p + 5, 85)), 500);
-        const res = await uploadCADFile(projectId, name, 'architecture', file);
-        clearInterval(iv); setUploadProgress(100);
-        const st = res.status || 'processing';
-        const cnt = res.element_count ?? 0;
-        if (st === 'ready') addToast({ type: 'success', title: t('bim.toast_model_ready_title'), message: `${cnt} elements` });
-        else addToast({ type: 'success', title: t('bim.toast_uploaded_title'), message: res.format.toUpperCase() });
-        if (res.model_id) onUploadComplete(res.model_id);
-      } else if (isDataFile(file.name)) {
-        setUploadProgress(40);
-        const res = await uploadBIMData(projectId, name, 'architecture', file);
-        setUploadProgress(100);
-        addToast({ type: 'success', title: t('bim.toast_imported_title'), message: `${res.element_count} elements` });
-        onUploadComplete(res.model_id);
-      }
+      const uploadType = isCADFile(file.name) ? 'cad' as const : 'data' as const;
+      startGlobalUpload({
+        file,
+        projectId,
+        modelName: name,
+        discipline: 'architecture',
+        uploadType,
+      });
+      setUploadProgress(100);
+      addToast({
+        type: 'info',
+        title: t('bim.upload_started_title', { defaultValue: 'Upload started' }),
+        message: t('bim.upload_background_msg', {
+          defaultValue: 'You can navigate to other pages — the upload will continue in the background.',
+        }),
+      });
     } catch (err) { setUploadError(err instanceof Error ? err.message : String(err)); }
     finally { setUploading(false); }
-  }, [file, projectId, modelName, onUploadComplete, addToast]);
+  }, [file, projectId, modelName, startGlobalUpload, addToast, t]);
 
   const features = [
     { icon: Eye, color: 'bg-blue-50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-800', ic: 'text-blue-500', title: t('bim.landing_feat_3d_title'), desc: t('bim.landing_feat_3d_desc') },
@@ -890,7 +706,7 @@ function LandingPage({ projectId, onUploadComplete, breadcrumbItems }: {
                   <p className="text-xs text-content-quaternary">{t('bim.landing_size_hint')}</p>
                 </>
               )}
-              <input ref={fileInputRef} type="file" accept=".rvt,.ifc,.csv,.xlsx,.xls" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) { setFile(f); if (!modelName) setModelName(f.name.replace(/\.[^.]+$/, '')); } }} />
+              <input ref={fileInputRef} type="file" accept=".rvt,.ifc,.dwg,.dgn,.fbx,.obj,.3ds,.csv,.xlsx,.xls" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) { setFile(f); if (!modelName) setModelName(f.name.replace(/\.[^.]+$/, '')); } }} />
             </label>
             {file && (
               <div className="mt-4 space-y-3">
@@ -1318,6 +1134,58 @@ export function BIMPage() {
     setUploadOpen(false); setUploadConvertedName(null);
     queryClient.invalidateQueries({ queryKey: ['bim-models', projectId] });
   }, [queryClient, projectId]);
+
+  // Watch global BIM upload store — when a job for this project finishes
+  // successfully, auto-select the new model and refresh the model list.
+  // Also drive the processing overlay so BIMProcessingProgress still works
+  // when BIMPage is mounted.
+  const globalUploadJobs = useBIMUploadStore((s) => s.jobs);
+  const completedJobRef = useRef(new Set<string>());
+  useEffect(() => {
+    for (const [jobId, job] of globalUploadJobs) {
+      if (job.projectId !== projectId) continue;
+      // Drive inline processing overlay from store state
+      if (job.status === 'uploading' || job.status === 'converting') {
+        setProcessing({
+          stage: job.status as BIMProcessingStage,
+          fileName: job.fileName,
+          fileSize: formatFileSize(job.fileSize),
+        });
+      } else if (job.status === 'ready' && !completedJobRef.current.has(jobId)) {
+        completedJobRef.current.add(jobId);
+        setProcessing({
+          stage: 'ready',
+          fileName: job.fileName,
+          fileSize: formatFileSize(job.fileSize),
+          elementCount: job.elementCount,
+        });
+        if (job.modelId) handleUploadComplete(job.modelId);
+        addToast({
+          type: 'success',
+          title: t('bim.toast_model_processed_title', { defaultValue: 'Model ready' }),
+          message: `${job.elementCount} elements`,
+        });
+      } else if (
+        (job.status === 'error' || job.status === 'converter_required') &&
+        !completedJobRef.current.has(jobId)
+      ) {
+        completedJobRef.current.add(jobId);
+        setProcessing({
+          stage: job.status === 'converter_required' ? 'needs_converter' : 'error',
+          fileName: job.fileName,
+          fileSize: formatFileSize(job.fileSize),
+          errorMessage: job.errorMessage || undefined,
+        });
+        if (job.status === 'error') {
+          addToast({
+            type: 'error',
+            title: t('bim.toast_processing_failed_title', { defaultValue: 'Processing failed' }),
+            message: job.errorMessage || undefined,
+          });
+        }
+      }
+    }
+  }, [globalUploadJobs, projectId, handleUploadComplete, addToast, t]);
 
   const handleDeleteModel = useCallback(async (modelId: string, name: string) => {
     if (!window.confirm(t('bim.confirm_delete_model', { name }))) return;

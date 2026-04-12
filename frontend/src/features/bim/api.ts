@@ -674,3 +674,117 @@ export async function uploadCADFile(
 
   return response.json();
 }
+
+/* ── BIM Requirements Import/Export ─────────────────────────────────── */
+
+export interface BIMRequirementSetResponse {
+  id: string;
+  project_id: string;
+  name: string;
+  description: string;
+  source_format: string;
+  source_filename: string;
+  created_by: string;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BIMRequirementResponse {
+  id: string;
+  requirement_set_id: string;
+  element_filter: Record<string, unknown>;
+  property_group: string | null;
+  property_name: string;
+  constraint_def: Record<string, unknown>;
+  context: Record<string, unknown> | null;
+  source_format: string;
+  source_ref: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BIMRequirementSetDetail extends BIMRequirementSetResponse {
+  requirements: BIMRequirementResponse[];
+}
+
+export interface BIMRequirementImportResult {
+  requirement_set_id: string;
+  name: string;
+  source_format: string;
+  total_requirements: number;
+  errors: Array<{ row?: number; field?: string; msg?: string }>;
+  warnings: Array<{ row?: number; field?: string; msg?: string }>;
+  metadata: Record<string, unknown>;
+}
+
+/** Upload and import a BIM requirements file. */
+export async function importBIMRequirements(
+  projectId: string,
+  file: File,
+  name?: string,
+): Promise<BIMRequirementImportResult> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  let url = `/v1/bim_requirements/import/upload/?project_id=${encodeURIComponent(projectId)}`;
+  if (name) {
+    url += `&name=${encodeURIComponent(name)}`;
+  }
+
+  const token = useAuthStore.getState().accessToken;
+  const reqHeaders: Record<string, string> = {};
+  if (token) reqHeaders['Authorization'] = `Bearer ${token}`;
+
+  const resp = await fetch(`/api${url}`, { method: 'POST', headers: reqHeaders, body: formData });
+  if (!resp.ok) {
+    let detail = `Import failed (HTTP ${resp.status})`;
+    try {
+      const body = await resp.json();
+      detail = body.detail || detail;
+    } catch {
+      // ignore json parse error
+    }
+    throw new Error(detail);
+  }
+  return resp.json();
+}
+
+/** List BIM requirement sets for a project. */
+export async function fetchBIMRequirementSets(
+  projectId: string,
+): Promise<BIMRequirementSetResponse[]> {
+  return apiGet<BIMRequirementSetResponse[]>(
+    `/v1/bim_requirements/sets/?project_id=${encodeURIComponent(projectId)}`,
+  );
+}
+
+/** Get a BIM requirement set with all requirements. */
+export async function fetchBIMRequirementSetDetail(
+  setId: string,
+): Promise<BIMRequirementSetDetail> {
+  return apiGet<BIMRequirementSetDetail>(
+    `/v1/bim_requirements/sets/${encodeURIComponent(setId)}/`,
+  );
+}
+
+/** Delete a BIM requirement set. */
+export async function deleteBIMRequirementSet(setId: string): Promise<void> {
+  await apiDelete(`/v1/bim_requirements/sets/${encodeURIComponent(setId)}/`);
+}
+
+/** Download the BIM requirements Excel template URL. */
+export function bimRequirementsTemplateUrl(): string {
+  return '/api/v1/bim_requirements/template/';
+}
+
+/** Export a BIM requirement set as Excel (returns action URL for POST). */
+export function bimRequirementsExportExcelUrl(setId: string, language = 'en'): string {
+  return `/api/v1/bim_requirements/export/${encodeURIComponent(setId)}/excel/?language=${language}`;
+}
+
+/** Export a BIM requirement set as IDS XML (returns action URL for POST). */
+export function bimRequirementsExportIdsUrl(setId: string): string {
+  return `/api/v1/bim_requirements/export/${encodeURIComponent(setId)}/ids/`;
+}
