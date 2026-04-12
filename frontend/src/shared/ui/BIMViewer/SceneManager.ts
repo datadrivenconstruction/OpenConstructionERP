@@ -86,6 +86,7 @@ export class SceneManager {
     // loaded model after zoomToFit() so the grid always sits at the
     // same scale as the geometry (a 100 m grid swamps a 2 m model).
     this.gridHelper = new THREE.GridHelper(20, 20, 0xcccccc, 0xe0e0e0);
+    this.gridHelper.visible = false; // hidden by default — user can toggle via toolbar
     this.scene.add(this.gridHelper);
 
     // Resize observer — also request a render so the new viewport is drawn.
