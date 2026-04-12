@@ -528,9 +528,12 @@ export default function BIMFilterPanel({
         if (s.storeys.size > 0 && el.storey) {
           if (!s.storeys.has(el.storey)) return false;
         }
-        // Type filter
+        // Type filter — matches either the category (e.g. "Walls") OR the
+        // individual type name (e.g. "Generic - 200mm") so users can filter
+        // at both hierarchy levels.
         if (s.types.size > 0) {
-          if (!s.types.has(tpe)) return false;
+          const typeName = getTypeNameKey(el);
+          if (!s.types.has(tpe) && !s.types.has(typeName)) return false;
         }
         // Search
         if (search) {
@@ -1278,19 +1281,30 @@ export default function BIMFilterPanel({
                       </div>
                       {isOpen && (
                         <ul className="px-2 pb-1.5 pt-0.5 space-y-0.5">
-                          {types.map(([typeName, count]) => (
-                            <li
-                              key={typeName}
-                              className="flex items-center justify-between gap-1 px-1.5 py-0.5 rounded text-[10px] text-content-secondary hover:bg-surface-primary"
-                            >
-                              <span className="truncate" title={typeName}>
-                                {typeName}
-                              </span>
-                              <span className="text-content-quaternary tabular-nums shrink-0">
-                                {count.toLocaleString()}
-                              </span>
-                            </li>
-                          ))}
+                          {types.map(([typeName, count]) => {
+                            const typeActive = state.types.has(typeName);
+                            return (
+                              <li key={typeName}>
+                                <button
+                                  type="button"
+                                  onClick={() => toggleSet('types', typeName)}
+                                  className={`w-full flex items-center justify-between gap-1 px-1.5 py-0.5 rounded text-[10px] text-left transition-colors ${
+                                    typeActive
+                                      ? 'bg-oe-blue/10 text-oe-blue font-medium'
+                                      : 'text-content-secondary hover:bg-surface-primary'
+                                  }`}
+                                  title={typeName}
+                                >
+                                  <span className="truncate">
+                                    {typeName}
+                                  </span>
+                                  <span className={`tabular-nums shrink-0 ${typeActive ? 'text-oe-blue' : 'text-content-quaternary'}`}>
+                                    {count.toLocaleString()}
+                                  </span>
+                                </button>
+                              </li>
+                            );
+                          })}
                         </ul>
                       )}
                     </div>
