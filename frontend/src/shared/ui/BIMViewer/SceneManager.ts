@@ -64,12 +64,19 @@ export class SceneManager {
     this.camera.position.set(30, 20, 30);
     this.camera.lookAt(0, 0, 0);
 
-    // Controls — equally generous distance limits.
+    // Controls — smooth, professional orbit behaviour.
     this.controls = new OrbitControls(this.camera, canvas);
     this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.1;
-    this.controls.minDistance = 0.001;
-    this.controls.maxDistance = 1_000_000;
+    this.controls.dampingFactor = 0.08;       // smoother deceleration (was 0.1)
+    this.controls.rotateSpeed = 0.8;          // slightly slower rotation for precision
+    this.controls.panSpeed = 1.0;
+    this.controls.zoomSpeed = 1.2;
+    this.controls.minDistance = 0.01;
+    this.controls.maxDistance = 100_000;
+    // Prevent camera from flipping upside down — construction models
+    // should always have "up" pointing up.
+    this.controls.minPolarAngle = 0.05;       // ~3° from top
+    this.controls.maxPolarAngle = Math.PI - 0.05; // ~3° from bottom
     this.controls.target.set(0, 0, 0);
 
     // On-demand rendering: only render when the camera moves or the
