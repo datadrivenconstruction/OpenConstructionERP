@@ -396,6 +396,20 @@ def _excel_elements_to_bim_result(
             if len(properties) >= 30:
                 break  # Cap properties per element
 
+        # Promote Revit hierarchy fields into properties under clean keys
+        # so the frontend can build Category -> Family -> Type Name trees.
+        raw_category = str(category) if category else ""
+        if raw_category and raw_category.lower() not in ("none", "null", "n/a", "-"):
+            properties["category"] = raw_category
+        raw_family = lc_row.get("family name") or lc_row.get("familyname") or ""
+        raw_family = str(raw_family).strip()
+        if raw_family and raw_family.lower() not in ("none", "null", "n/a", "-"):
+            properties["family"] = raw_family
+        raw_type_name = lc_row.get("type name") or lc_row.get("typename") or ""
+        raw_type_name = str(raw_type_name).strip()
+        if raw_type_name and raw_type_name.lower() not in ("none", "null", "n/a", "-"):
+            properties["type_name"] = raw_type_name
+
         elements.append({
             "stable_id": stable_id,
             "element_type": etype,
