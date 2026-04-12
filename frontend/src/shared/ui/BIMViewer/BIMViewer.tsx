@@ -321,6 +321,19 @@ export function BIMViewer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Dark mode detection — watches the <html> element's `class` attribute
+  // for "dark" and tells the SceneManager to swap background + grid colors.
+  useEffect(() => {
+    const scene = sceneRef.current;
+    if (!scene) return;
+    const html = document.documentElement;
+    const sync = () => scene.setDarkMode(html.classList.contains('dark'));
+    sync(); // initial
+    const observer = new MutationObserver(sync);
+    observer.observe(html, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
+
   // Re-wire callbacks when handlers change (avoid stale closures)
   const onElementSelectRef = useRef(onElementSelect);
   onElementSelectRef.current = onElementSelect;
@@ -482,7 +495,9 @@ export function BIMViewer({
     }
   }, [colorByMode, elements]);
 
-  // Sync selection from parent
+  // Sync selection from parent — highlight the mesh AND auto-zoom the
+  // camera so the element is centered in the viewport.  This drives the
+  // "click row in filter panel -> fly to that element" interaction.
   useEffect(() => {
     if (!selectionMgrRef.current || !selectedElementIds) return;
     selectionMgrRef.current.setSelection(selectedElementIds);
@@ -491,6 +506,15 @@ export function BIMViewer({
     if (selectedElementIds.length > 0 && elementMgrRef.current) {
       const data = elementMgrRef.current.getElementData(selectedElementIds[0]!);
       setSelectedElement(data ?? null);
+
+      // Auto-zoom to the selected element(s) so the user gets immediate
+      // spatial feedback when clicking a row in the filter panel or table.
+      const meshes = selectedElementIds
+        .map((id) => elementMgrRef.current!.getMesh(id))
+        .filter((m): m is NonNullable<typeof m> => m != null);
+      if (meshes.length > 0 && sceneRef.current) {
+        sceneRef.current.zoomToSelection(meshes);
+      }
     }
   }, [selectedElementIds]);
 
@@ -569,11 +593,102 @@ export function BIMViewer({
     sceneRef.current?.setCameraPreset(view);
   }, []);
 
+  // ── Keyboard shortcuts ──────────────────────────────────────────────
+  //   F     — zoom to fit all
+  //   W     — toggle wireframe
+  //   G     — toggle grid
+  //   1     — front view
+  //   2     — side view
+  //   3     — top view
+  //   0     — isometric view (reset)
+  //   Escape — deselect element / close properties
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore shortcuts when user is typing in an input/textarea
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      // Also ignore when modifier keys are held (Ctrl/Cmd combos are browser shortcuts)
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+      switch (e.key.toLowerCase()) {
+        case 'f':
+          e.preventDefault();
+          sceneRef.current?.zoomToFit();
+          break;
+        case 'w':
+          e.preventDefault();
+          elementMgrRef.current?.toggleWireframe();
+          setWireframe((prev) => !prev);
+          break;
+        case 'g':
+          e.preventDefault();
+          sceneRef.current?.toggleGrid();
+          setGridVisible((v) => !v);
+          break;
+        case '1':
+          e.preventDefault();
+          sceneRef.current?.setCameraPreset('front');
+          break;
+        case '2':
+          e.preventDefault();
+          sceneRef.current?.setCameraPreset('side');
+          break;
+        case '3':
+          e.preventDefault();
+          sceneRef.current?.setCameraPreset('top');
+          break;
+        case '0':
+          e.preventDefault();
+          sceneRef.current?.setCameraPreset('iso');
+          break;
+        case 'escape':
+          // Deselect element and close properties panel
+          setSelectedElement(null);
+          setParquetProps(null);
+          setParquetExpanded(false);
+          selectionMgrRef.current?.clearSelection();
+          onElementSelect?.(null);
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onElementSelect]);
+
   // Memoize the element properties/quantities for the panel
   const elementProperties = useMemo(() => {
     if (!selectedElement?.properties) return {};
     return selectedElement.properties;
   }, [selectedElement]);
+
+  /** Model summary breakdown — computed once per element set change.
+   *  Shows category and storey breakdowns in the properties panel when
+   *  no element is individually selected. */
+  const modelSummary = useMemo(() => {
+    const els = elements ?? [];
+    if (els.length === 0) return null;
+    const byCat = new Map<string, number>();
+    const byStorey = new Map<string, number>();
+    let totalVolume = 0;
+    let totalArea = 0;
+    let totalLength = 0;
+    for (const el of els) {
+      const cat = el.element_type || 'Unknown';
+      byCat.set(cat, (byCat.get(cat) ?? 0) + 1);
+      const st = el.storey || 'Unassigned';
+      byStorey.set(st, (byStorey.get(st) ?? 0) + 1);
+      if (el.quantities) {
+        totalVolume += el.quantities['volume'] ?? el.quantities['Volume'] ?? 0;
+        totalArea += el.quantities['area'] ?? el.quantities['Area'] ?? 0;
+        totalLength += el.quantities['length'] ?? el.quantities['Length'] ?? 0;
+      }
+    }
+    // Sort by count descending
+    const categories = [...byCat.entries()].sort((a, b) => b[1] - a[1]);
+    const storeys = [...byStorey.entries()].sort((a, b) => b[1] - a[1]);
+    return { categories, storeys, totalVolume, totalArea, totalLength };
+  }, [elements]);
 
   const elementQuantities = useMemo(() => {
     if (!selectedElement?.quantities) return {};
@@ -826,6 +941,112 @@ export function BIMViewer({
               {healthStats.hasDocs.toLocaleString()}
             </button>
           )}
+        </div>
+      )}
+
+      {/* Model summary panel — shown when elements are loaded but no
+          individual element is selected.  Gives the user a quick overview
+          of the model breakdown by category and storey. */}
+      {!selectedElement && modelSummary && elementCount > 0 && (
+        <div className="absolute top-12 end-3 w-64 bg-surface-primary/95 backdrop-blur border border-border-light rounded-lg shadow-lg z-20 max-h-[calc(100%-6rem)] overflow-y-auto">
+          <div className="p-3 border-b border-border-light">
+            <h3 className="text-sm font-semibold text-content-primary">
+              {t('bim.model_summary', { defaultValue: 'Model summary' })}
+            </h3>
+            <p className="text-[11px] text-content-tertiary mt-0.5">
+              {t('bim.model_total_elements', {
+                defaultValue: '{{count}} elements',
+                count: elementCount,
+              })}
+            </p>
+          </div>
+          <div className="p-3 space-y-3">
+            {/* Category breakdown */}
+            <div>
+              <h4 className="text-xs font-semibold text-content-primary mb-1.5">
+                {t('bim.by_category', { defaultValue: 'By category' })}
+              </h4>
+              <div className="space-y-0.5 max-h-36 overflow-y-auto">
+                {modelSummary.categories.slice(0, 15).map(([cat, count]) => (
+                  <div key={cat} className="flex items-center justify-between text-[11px]">
+                    <span className="text-content-secondary truncate mr-2">{cat}</span>
+                    <span className="text-content-tertiary tabular-nums shrink-0">{count}</span>
+                  </div>
+                ))}
+                {modelSummary.categories.length > 15 && (
+                  <div className="text-[10px] text-content-quaternary italic">
+                    + {modelSummary.categories.length - 15} more
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* Storey breakdown */}
+            {modelSummary.storeys.length > 1 && (
+              <div>
+                <h4 className="text-xs font-semibold text-content-primary mb-1.5">
+                  {t('bim.by_storey', { defaultValue: 'By storey' })}
+                </h4>
+                <div className="space-y-0.5 max-h-28 overflow-y-auto">
+                  {modelSummary.storeys.map(([st, count]) => (
+                    <div key={st} className="flex items-center justify-between text-[11px]">
+                      <span className="text-content-secondary truncate mr-2">{st}</span>
+                      <span className="text-content-tertiary tabular-nums shrink-0">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {/* Aggregate quantities */}
+            {(modelSummary.totalVolume > 0 || modelSummary.totalArea > 0 || modelSummary.totalLength > 0) && (
+              <div>
+                <h4 className="text-xs font-semibold text-content-primary mb-1.5">
+                  {t('bim.total_quantities', { defaultValue: 'Total quantities' })}
+                </h4>
+                <div className="space-y-0.5">
+                  {modelSummary.totalVolume > 0 && (
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-content-secondary">Volume</span>
+                      <span className="text-content-tertiary tabular-nums">
+                        {modelSummary.totalVolume.toLocaleString(undefined, { maximumFractionDigits: 1 })} m3
+                      </span>
+                    </div>
+                  )}
+                  {modelSummary.totalArea > 0 && (
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-content-secondary">Area</span>
+                      <span className="text-content-tertiary tabular-nums">
+                        {modelSummary.totalArea.toLocaleString(undefined, { maximumFractionDigits: 1 })} m2
+                      </span>
+                    </div>
+                  )}
+                  {modelSummary.totalLength > 0 && (
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-content-secondary">Length</span>
+                      <span className="text-content-tertiary tabular-nums">
+                        {modelSummary.totalLength.toLocaleString(undefined, { maximumFractionDigits: 1 })} m
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            {/* Keyboard shortcuts hint */}
+            <div className="pt-2 border-t border-border-light">
+              <h4 className="text-[10px] font-semibold text-content-quaternary uppercase tracking-wider mb-1">
+                {t('bim.shortcuts', { defaultValue: 'Shortcuts' })}
+              </h4>
+              <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] text-content-tertiary">
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">F</kbd> Fit all</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">W</kbd> Wireframe</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">G</kbd> Grid</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">Esc</kbd> Deselect</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">1</kbd> Front</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">2</kbd> Side</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">3</kbd> Top</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">0</kbd> Iso</span>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
