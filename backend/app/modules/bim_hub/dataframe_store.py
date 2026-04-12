@@ -58,9 +58,22 @@ def write_dataframe(
     dest_dir.mkdir(parents=True, exist_ok=True)
     parquet_path = dest_dir / "elements.parquet"
 
-    # pyarrow.Table.from_pylist handles heterogeneous dicts natively --
-    # missing keys become null columns with inferred types.
-    table = pa.Table.from_pylist(rows)
+    # pyarrow.Table.from_pylist infers the schema from the FIRST dict
+    # only — keys that appear in later dicts but not the first are
+    # silently dropped.  DDC Excel rows are sparse (a Material element
+    # has 6 keys, a Wall has 21, a Door has 35), so we must collect
+    # ALL keys first and normalise every row to include them all.
+    all_keys: list[str] = []
+    seen: set[str] = set()
+    for row in rows:
+        for k in row:
+            if k not in seen:
+                seen.add(k)
+                all_keys.append(k)
+
+    # Normalise: ensure every row has every key (None for missing)
+    normalised = [{k: row.get(k) for k in all_keys} for row in rows]
+    table = pa.Table.from_pylist(normalised)
 
     pq.write_table(
         table,
