@@ -46,13 +46,13 @@ function elapsed(startedAt: number): string {
   return `${min}m ${rem}s`;
 }
 
-function timeSince(ts: number): string {
+function timeSince(ts: number, t: (key: string, opts?: Record<string, unknown>) => string): string {
   const sec = Math.round((Date.now() - ts) / 1000);
-  if (sec < 60) return 'just now';
+  if (sec < 60) return t('common.time_just_now', { defaultValue: 'just now' });
   const min = Math.floor(sec / 60);
-  if (min < 60) return `${min}m ago`;
+  if (min < 60) return t('common.time_minutes_ago', { defaultValue: '{{count}}m ago', count: min });
   const hr = Math.floor(min / 60);
-  return `${hr}h ago`;
+  return t('common.time_hours_ago', { defaultValue: '{{count}}h ago', count: hr });
 }
 
 /* ── Component ─────────────────────────────────────────────────────────── */
@@ -200,6 +200,7 @@ export function GlobalUploadIndicator() {
         <button
           onClick={() => setExpanded(false)}
           className="p-1 rounded hover:bg-surface-secondary text-content-tertiary"
+          aria-label={t('common.collapse', { defaultValue: 'Collapse' })}
         >
           <ChevronDown size={14} />
         </button>
@@ -293,7 +294,7 @@ function JobRow({
             </span>
             {job.completedAt && (
               <span className="text-[10px] text-content-quaternary">
-                {timeSince(job.completedAt)}
+                {timeSince(job.completedAt, t)}
               </span>
             )}
           </div>
