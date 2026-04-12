@@ -309,9 +309,18 @@ def _excel_elements_to_bim_result(
         if not category or cat_lower in SKIP_CATEGORIES:
             continue
 
-        # Friendly element type derived from OST_ category name
+        # Friendly element type derived from OST_ category name.
+        # DDC writes raw Revit built-in category names like
+        # "OST_CurtainWallMullions" — we strip the prefix, split
+        # CamelCase into words, and title-case the result so the
+        # filter panel shows "Curtain Wall Mullions" instead of
+        # "Curtainwallmullions".
         if cat_lower.startswith("ost_"):
-            etype = cat_lower[4:].replace("_", " ").title()
+            raw_name = str(category)[4:]  # preserve original casing
+            # Split CamelCase: "CurtainWallMullions" → "Curtain Wall Mullions"
+            spaced = re.sub(r"([a-z])([A-Z])", r"\1 \2", raw_name)
+            spaced = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1 \2", spaced)
+            etype = spaced.replace("_", " ").strip()
         else:
             etype = str(category) if category else "Unknown"
 
@@ -406,9 +415,9 @@ def _excel_elements_to_bim_result(
 
         # Promote Revit hierarchy fields into properties under clean keys
         # so the frontend can build Category -> Family -> Type Name trees.
-        raw_category = str(category) if category else ""
-        if raw_category and raw_category.lower() not in ("none", "null", "n/a", "-"):
-            properties["category"] = raw_category
+        # Use the friendly etype (with spaces) rather than the raw OST_ name.
+        if etype and etype.lower() not in ("none", "null", "n/a", "-", "unknown"):
+            properties["category"] = etype
         raw_family = lc_row.get("family name") or lc_row.get("familyname") or ""
         raw_family = str(raw_family).strip()
         if raw_family and raw_family.lower() not in ("none", "null", "n/a", "-"):
