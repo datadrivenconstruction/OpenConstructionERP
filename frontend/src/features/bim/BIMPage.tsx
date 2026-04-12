@@ -243,6 +243,7 @@ function UploadPanel({
   const [file, setFile] = useState<File | null>(null);
   const [modelName, setModelName] = useState(initialModelName || '');
   const [discipline, setDiscipline] = useState('architecture');
+  const [conversionDepth, setConversionDepth] = useState<'standard' | 'complete'>('standard');
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStage, setUploadStage] = useState('');
@@ -366,6 +367,7 @@ function UploadPanel({
             modelName: name,
             discipline,
             uploadType: 'cad',
+            conversionDepth,
           });
           addToast({
             type: 'info',
@@ -540,6 +542,13 @@ function UploadPanel({
           <label className="block text-[10px] font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">{t('bim.upload_discipline_label')}</label>
           <select className="w-full text-sm py-2 px-3 rounded-lg border border-border-light bg-surface-secondary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue" value={discipline} onChange={(e) => setDiscipline(e.target.value)}>
             {disciplines.map((d) => <option key={d.v} value={d.v}>{d.l}</option>)}
+          </select>
+        </div>
+        <div>
+          <label className="block text-[10px] font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">{t('bim.upload_depth_label', { defaultValue: 'Conversion depth' })}</label>
+          <select className="w-full text-sm py-2 px-3 rounded-lg border border-border-light bg-surface-secondary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue" value={conversionDepth} onChange={(e) => setConversionDepth(e.target.value as 'standard' | 'complete')}>
+            <option value="standard">{t('bim.depth_standard', { defaultValue: 'Standard — key parameters (~15 columns, faster)' })}</option>
+            <option value="complete">{t('bim.depth_complete', { defaultValue: 'Complete — all Revit parameters (~1000+ columns, slower)' })}</option>
           </select>
         </div>
 
