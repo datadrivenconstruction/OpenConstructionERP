@@ -142,6 +142,8 @@ export interface BIMModelData {
   created_at?: string;
   /** Element count (0 for processing models) */
   element_count?: number;
+  /** Storey/level count extracted during processing */
+  storey_count?: number;
 }
 
 /* ── Discipline Colors ─────────────────────────────────────────────────── */
@@ -756,12 +758,23 @@ export class ElementManager {
     return Array.from(this.elementDataMap.values());
   }
 
-  /** Toggle wireframe mode. */
+  /** Toggle wireframe mode for ALL meshes — both box placeholders
+   *  (baseMaterials) and DAE/COLLADA-loaded geometry. */
   toggleWireframe(): void {
     this.wireframeEnabled = !this.wireframeEnabled;
     for (const mat of this.baseMaterials.values()) {
       mat.wireframe = this.wireframeEnabled;
     }
+    // Also toggle DAE-loaded meshes whose materials are NOT in baseMaterials
+    for (const mesh of this.allDaeMeshes) {
+      const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+      for (const mat of mats) {
+        if (mat && 'wireframe' in mat) {
+          (mat as THREE.MeshStandardMaterial).wireframe = this.wireframeEnabled;
+        }
+      }
+    }
+    this.sceneManager.requestRender();
   }
 
   /** Get wireframe state. */

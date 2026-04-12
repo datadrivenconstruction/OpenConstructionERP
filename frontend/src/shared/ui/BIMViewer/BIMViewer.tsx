@@ -33,6 +33,9 @@ import {
   ShieldCheck,
   ShieldAlert,
   ShieldX,
+  Database,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
 import { SceneManager } from './SceneManager';
 import { ElementManager } from './ElementManager';
@@ -230,6 +233,10 @@ export function BIMViewer({
   const [gridVisible, setGridVisible] = useState(false);
   const [selectedElement, setSelectedElement] = useState<BIMElementData | null>(null);
   const [elementCount, setElementCount] = useState(0);
+  /** Parquet/DuckDB "all properties" expansion state. */
+  const [parquetProps, setParquetProps] = useState<Record<string, unknown> | null>(null);
+  const [parquetLoading, setParquetLoading] = useState(false);
+  const [parquetExpanded, setParquetExpanded] = useState(false);
   /** DAE/COLLADA download progress, in [0, 1].  ``null`` when no
    *  geometry load is in flight; a fraction while bytes are streaming
    *  in; ``1`` momentarily before the overlay hides itself.  Drives
@@ -291,6 +298,9 @@ export function BIMViewer({
         } else {
           setSelectedElement(null);
         }
+        // Reset parquet expansion when element changes
+        setParquetProps(null);
+        setParquetExpanded(false);
         onElementSelect?.(id);
       },
       onElementHover: (id) => {
@@ -511,9 +521,44 @@ export function BIMViewer({
 
   const handleCloseProperties = useCallback(() => {
     setSelectedElement(null);
+    setParquetProps(null);
+    setParquetExpanded(false);
     selectionMgrRef.current?.clearSelection();
     onElementSelect?.(null);
   }, [onElementSelect]);
+
+  /** Fetch all Parquet columns for the selected element via the DuckDB
+   *  dataframe query endpoint. This surfaces 1000+ columns from "complete"
+   *  mode uploads that the JSONB `properties` column only has a subset of. */
+  const handleFetchAllProperties = useCallback(async () => {
+    if (!selectedElement || !modelId) return;
+    setParquetLoading(true);
+    try {
+      const resp = await fetch(`/api/v1/bim_hub/models/${modelId}/dataframe/query/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filters: [{ column: 'id', op: '=', value: selectedElement.id }],
+          limit: 1,
+        }),
+      });
+      if (resp.ok) {
+        const rows: Record<string, unknown>[] = await resp.json();
+        if (rows.length > 0) {
+          setParquetProps(rows[0]!);
+        } else {
+          setParquetProps({});
+        }
+      } else {
+        setParquetProps(null);
+      }
+    } catch {
+      setParquetProps(null);
+    } finally {
+      setParquetLoading(false);
+      setParquetExpanded(true);
+    }
+  }, [selectedElement, modelId]);
 
   const handleToggleGrid = useCallback(() => {
     sceneRef.current?.toggleGrid();
@@ -844,6 +889,40 @@ export function BIMViewer({
                 <QuantitiesTable quantities={elementQuantities} />
               </div>
             )}
+
+            {/* All Properties from Parquet/DuckDB — shows every column for
+                this element as stored in the Parquet dataframe, which can
+                have 1000+ columns for "complete" mode uploads. */}
+            <div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!parquetExpanded && parquetProps === null) {
+                    handleFetchAllProperties();
+                  } else {
+                    setParquetExpanded((v) => !v);
+                  }
+                }}
+                className="flex items-center gap-1.5 text-xs font-semibold text-content-primary hover:text-oe-blue transition-colors w-full"
+              >
+                {parquetExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                <Database size={11} />
+                {t('bim.all_properties', { defaultValue: 'All properties (Parquet)' })}
+                {parquetLoading && <Loader2 size={11} className="animate-spin text-oe-blue ms-auto" />}
+              </button>
+              {parquetExpanded && parquetProps && (
+                <div className="mt-1 max-h-60 overflow-y-auto">
+                  <PropertiesTable properties={parquetProps} />
+                </div>
+              )}
+              {parquetExpanded && parquetProps && Object.keys(parquetProps).length === 0 && (
+                <p className="text-[10px] text-content-tertiary italic mt-1">
+                  {t('bim.no_parquet_data', {
+                    defaultValue: 'No Parquet data available for this element',
+                  })}
+                </p>
+              )}
+            </div>
 
             {/* Validation results — appears when the user has run
                 POST /validation/check-bim-model on this model.  Each

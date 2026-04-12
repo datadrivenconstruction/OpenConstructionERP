@@ -961,6 +961,9 @@ class BIMHubService:
             data.boq_position_id, data.bim_element_id
         )
 
+        # Auto-populate BOQ position quantity from linked element quantities.
+        await self._sync_boq_quantity_from_links(data.boq_position_id)
+
         logger.info(
             "BOQ-BIM link created: pos=%s elem=%s type=%s",
             data.boq_position_id,
@@ -983,6 +986,9 @@ class BIMHubService:
 
         # Remove the mirrored id from Position.cad_element_ids.
         await self._remove_cad_element_id(position_id, element_id)
+
+        # Re-sync BOQ position quantity after link removal.
+        await self._sync_boq_quantity_from_links(position_id)
 
         logger.info("BOQ-BIM link deleted: %s", link_id)
 
@@ -1009,6 +1015,96 @@ class BIMHubService:
             pos.cad_element_ids = current
             # Re-assign to force SQLAlchemy to notice the mutation on JSON.
             await self.session.flush()
+
+    async def _sync_boq_quantity_from_links(
+        self,
+        position_id: uuid.UUID,
+    ) -> None:
+        """Recompute ``Position.quantity`` from all linked BIM element quantities.
+
+        Strategy: sum the quantity field from linked elements that best matches
+        the position's unit.  Mapping:
+
+        - m3  / m³  → volume_m3
+        - m2  / m²  → area_m2
+        - m   / lfm → length_m
+        - kg         → weight_kg (if present)
+
+        When no matching quantity key is found we fall back to the first
+        non-zero numeric quantity value.  The position is only updated when
+        the computed value is > 0 so manual overrides are not clobbered by
+        elements with missing data.
+        """
+        pos = await self.session.get(Position, position_id)
+        if pos is None:
+            return
+
+        links = await self.link_repo.list_by_boq_position(position_id)
+        if not links:
+            return
+
+        # Determine which quantity key to sum based on BOQ position unit.
+        unit = (pos.unit or "").strip().lower()
+        _UNIT_TO_QKEY: dict[str, list[str]] = {
+            "m3": ["volume_m3", "Volume", "volume"],
+            "m³": ["volume_m3", "Volume", "volume"],
+            "m2": ["area_m2", "Area", "area"],
+            "m²": ["area_m2", "Area", "area"],
+            "m": ["length_m", "Length", "length"],
+            "lfm": ["length_m", "Length", "length"],
+            "kg": ["weight_kg", "Weight", "weight"],
+            "t": ["weight_kg", "Weight", "weight"],
+        }
+        preferred_keys = _UNIT_TO_QKEY.get(unit, [])
+
+        total = Decimal(0)
+        for lnk in links:
+            elem = await self.element_repo.get(lnk.bim_element_id)
+            if elem is None:
+                continue
+            qtys = elem.quantities or {}
+
+            value: Decimal | None = None
+            # Try preferred keys first
+            for key in preferred_keys:
+                raw = qtys.get(key)
+                if raw is not None:
+                    try:
+                        value = Decimal(str(raw))
+                        break
+                    except (InvalidOperation, TypeError, ValueError):
+                        continue
+
+            # Fallback: first non-zero numeric value
+            if value is None:
+                for v in qtys.values():
+                    try:
+                        candidate = Decimal(str(v))
+                        if candidate > 0:
+                            value = candidate
+                            break
+                    except (InvalidOperation, TypeError, ValueError):
+                        continue
+
+            if value is not None and value > 0:
+                total += value
+
+        if total > 0:
+            # Round to 4 decimal places to avoid floating-point noise
+            pos.quantity = str(total.quantize(Decimal("0.0001")))
+            # Also recompute total = quantity * unit_rate
+            try:
+                rate = Decimal(pos.unit_rate or "0")
+                pos.total = str((total * rate).quantize(Decimal("0.01")))
+            except (InvalidOperation, TypeError, ValueError):
+                pass
+            await self.session.flush()
+            logger.info(
+                "BOQ position %s quantity auto-updated to %s from %d linked BIM elements",
+                position_id,
+                pos.quantity,
+                len(links),
+            )
 
     async def _remove_cad_element_id(
         self,
