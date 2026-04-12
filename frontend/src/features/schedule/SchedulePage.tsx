@@ -26,9 +26,8 @@ import {
   GitBranch,
   TrendingUp,
   Layers,
-  Cuboid,
 } from 'lucide-react';
-import { Button, Card, Badge, Input, InfoHint, SkeletonTable, Breadcrumb, GanttChart as SVGGanttChart } from '@/shared/ui';
+import { Button, Card, Badge, Input, InfoHint, SkeletonTable, Breadcrumb, GanttChart as SVGGanttChart, ViewInBIMButton } from '@/shared/ui';
 import type { GanttActivity as SVGGanttActivity, GanttViewMode } from '@/shared/ui';
 import { apiGet, apiDelete } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
@@ -389,7 +388,6 @@ function GanttChart({
   zoomLevel?: ZoomLevel;
 }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const ganttBodyRef = useRef<HTMLDivElement>(null);
   const ganttScrollRef = useRef<HTMLDivElement>(null);
   // Debounced progress updates
@@ -714,39 +712,11 @@ function GanttChart({
                     <Badge variant={sc.variant} size="sm">
                       {displayProgress}%
                     </Badge>
-                    {/* BIM link badge — clickable, navigates to viewer
-                        with the first pinned element preselected.  Read
-                        from the new `bim_element_ids` field exposed by
-                        the schedule API in v1.4.2. */}
-                    {(() => {
-                      const ids = Array.isArray(activity.bim_element_ids)
-                        ? activity.bim_element_ids.filter(
-                            (x): x is string => typeof x === 'string' && x.length > 0,
-                          )
-                        : [];
-                      if (ids.length === 0) return null;
-                      const firstId = ids[0]!;
-                      return (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(
-                              `/bim?element=${encodeURIComponent(firstId)}`,
-                            );
-                          }}
-                          className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-700 border border-amber-200 dark:border-amber-900/60 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors"
-                          title={t('schedule.bim_linked_count', {
-                            defaultValue:
-                              '{{count}} BIM element(s) pinned — click to open viewer',
-                            count: ids.length,
-                          })}
-                        >
-                          <Cuboid size={9} />
-                          {ids.length}
-                        </button>
-                      );
-                    })()}
+                    <ViewInBIMButton
+                      elementIds={activity.bim_element_ids ?? []}
+                      iconSize={9}
+                      className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-700 border border-amber-200 dark:border-amber-900/60 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors"
+                    />
                   </div>
                 </div>
                 {/* Progress slider */}
