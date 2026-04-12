@@ -235,25 +235,20 @@ class IDSParser(BaseRequirementParser):
             )
             return
 
-        # Process <property> facets
-        for prop_el in _findall(reqs_container, "ids:property"):
+        # Process <property> facets (namespaced first, fallback to non-namespaced)
+        prop_els = _findall(reqs_container, "ids:property")
+        if not prop_els:
+            prop_els = reqs_container.findall("property")
+        for prop_el in prop_els:
             req = self._parse_property_facet(prop_el, element_filter, context)
             if req:
                 result.requirements.append(req)
 
-        # Also try without namespace
-        for prop_el in reqs_container.findall("property"):
-            req = self._parse_property_facet(prop_el, element_filter, context)
-            if req:
-                result.requirements.append(req)
-
-        # Process <attribute> facets
-        for attr_el in _findall(reqs_container, "ids:attribute"):
-            req = self._parse_attribute_facet(attr_el, element_filter, context)
-            if req:
-                result.requirements.append(req)
-
-        for attr_el in reqs_container.findall("attribute"):
+        # Process <attribute> facets (namespaced first, fallback to non-namespaced)
+        attr_els = _findall(reqs_container, "ids:attribute")
+        if not attr_els:
+            attr_els = reqs_container.findall("attribute")
+        for attr_el in attr_els:
             req = self._parse_attribute_facet(attr_el, element_filter, context)
             if req:
                 result.requirements.append(req)

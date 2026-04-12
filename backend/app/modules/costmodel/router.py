@@ -324,11 +324,14 @@ async def list_snapshots(
     dependencies=[Depends(RequirePermission("costmodel.write"))],
 )
 async def delete_snapshot(
-    project_id: uuid.UUID,  # noqa: ARG001 — part of URL scoping, enforced by service
+    project_id: uuid.UUID,
     snapshot_id: uuid.UUID,
     service: CostModelService = Depends(_get_service),
 ) -> None:
     """Delete an EVM cost snapshot."""
+    snapshot = await service.get_snapshot(snapshot_id)
+    if str(snapshot.project_id) != str(project_id):
+        raise HTTPException(status_code=404, detail="Snapshot not found")
     await service.delete_snapshot(snapshot_id)
 
 
