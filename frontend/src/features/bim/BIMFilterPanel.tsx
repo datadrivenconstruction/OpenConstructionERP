@@ -641,7 +641,9 @@ export default function BIMFilterPanel({
           ' ' +
           (el.element_type || '') +
           ' ' +
-          (el.category || '')
+          (el.category || '') +
+          ' ' +
+          (el.storey || '')
         ).toLowerCase();
         if (!hay.includes(search)) return false;
       }
@@ -737,22 +739,22 @@ export default function BIMFilterPanel({
           <div className="mt-2 px-2.5 py-1.5 rounded-md bg-oe-blue/5 border border-oe-blue/15 text-[11px] font-medium text-oe-blue">
             {(() => {
               const parts: string[] = [];
-              parts.push(`Showing ${visibleElements.length}`);
+              parts.push(t('bim.filter_summary_showing', { defaultValue: 'Showing {{count}}', count: visibleElements.length }));
               if (state.types.size === 1) {
                 const typeName = prettifyCategoryName([...state.types][0]!);
                 parts.push(typeName);
               } else if (state.types.size > 1) {
-                parts.push(`types (${state.types.size})`);
+                parts.push(t('bim.filter_summary_types', { defaultValue: 'types ({{count}})', count: state.types.size }));
               } else {
-                parts.push('elements');
+                parts.push(t('bim.filter_summary_elements', { defaultValue: 'elements' }));
               }
               if (state.storeys.size === 1) {
-                parts.push(`on ${[...state.storeys][0]}`);
+                parts.push(t('bim.filter_summary_on_level', { defaultValue: 'on {{level}}', level: [...state.storeys][0] }));
               } else if (state.storeys.size > 1) {
-                parts.push(`across ${state.storeys.size} levels`);
+                parts.push(t('bim.filter_summary_across_levels', { defaultValue: 'across {{count}} levels', count: state.storeys.size }));
               }
               if (state.search) {
-                parts.push(`matching "${state.search}"`);
+                parts.push(t('bim.filter_summary_matching', { defaultValue: 'matching "{{query}}"', query: state.search }));
               }
               return parts.join(' ');
             })()}
