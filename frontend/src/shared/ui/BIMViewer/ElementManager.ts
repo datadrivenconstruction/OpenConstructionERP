@@ -989,6 +989,22 @@ export class ElementManager {
     return visibleCount;
   }
 
+  /** Hide specific elements by ID. Sets mesh.visible = false for each.
+   *  Other elements remain unaffected. */
+  hideElements(ids: Set<string>): void {
+    for (const id of ids) {
+      const mesh = this.meshMap.get(id);
+      if (!mesh) continue;
+      const handle = (mesh.userData as { batchHandle?: { batched: THREE.BatchedMesh; instanceId: number } }).batchHandle;
+      if (handle) {
+        handle.batched.setVisibleAt(handle.instanceId, false);
+      } else {
+        mesh.visible = false;
+      }
+    }
+    this.sceneManager.requestRender();
+  }
+
   /** Reset all element visibility to visible. */
   showAll(): void {
     for (const mesh of this.meshMap.values()) {
