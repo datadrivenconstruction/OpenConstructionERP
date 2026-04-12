@@ -184,12 +184,13 @@ async def convert_cad_to_excel(
     logger.info("Converting %s using %s", input_path.name, converter.name)
 
     # DDC converters CLI: <input> [<output.xlsx>] [<mode>] [-no-collada]
-    # Use 'complete' mode for full quantity data (Volume, Area, Length, etc.)
+    # Use 'standard' mode by default — balanced data extraction without
+    # the heavy per-view/per-schedule parameter dump of 'complete' mode.
     output_xlsx = output_dir / (input_path.stem + ".xlsx")
     args = [str(converter), str(input_path), str(output_xlsx)]
     # RVT and IFC converters support export modes; DWG/DGN do not
     if extension in ("rvt", "ifc"):
-        args.append("complete")
+        args.append("standard")
     args.append("-no-collada")
 
     try:
