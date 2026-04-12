@@ -300,13 +300,24 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
    */
   const rowLockMapRef = useRef<Map<string, CollabLock>>(new Map());
   const rowLockPendingRef = useRef<Set<string>>(new Set());
+  // Tracks positions whose edit stopped while the acquire was still
+  // in-flight.  The .then() callback checks this set and releases
+  // immediately instead of storing the lock in rowLockMapRef.
+  const rowLockCancelledRef = useRef<Set<string>>(new Set());
 
   const releaseRowLock = useCallback((positionId: string) => {
     const held = rowLockMapRef.current.get(positionId);
-    if (held === undefined) return;
-    rowLockMapRef.current.delete(positionId);
-    // Fire-and-forget — unmount / row-leave must not await a network call.
-    releaseCollabLock(held.id).catch(() => undefined);
+    if (held !== undefined) {
+      rowLockMapRef.current.delete(positionId);
+      // Fire-and-forget — unmount / row-leave must not await a network call.
+      releaseCollabLock(held.id).catch(() => undefined);
+      return;
+    }
+    // If the acquire is still pending, mark for release-on-resolve so
+    // the lock does not leak until TTL expiry.
+    if (rowLockPendingRef.current.has(positionId)) {
+      rowLockCancelledRef.current.add(positionId);
+    }
   }, []);
 
   // Release every held row lock on unmount.
@@ -640,6 +651,13 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
         .then((result) => {
           rowLockPendingRef.current.delete(positionId);
           if (result.ok) {
+            // If editing stopped while the acquire was in-flight,
+            // release the lock immediately instead of storing it.
+            if (rowLockCancelledRef.current.has(positionId)) {
+              rowLockCancelledRef.current.delete(positionId);
+              releaseCollabLock(result.lock.id).catch(() => undefined);
+              return;
+            }
             rowLockMapRef.current.set(positionId, result.lock);
             return;
           }
@@ -669,6 +687,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
           // edit.  The worst case is the existing "last writer
           // wins" behaviour we had before layer 1.
           rowLockPendingRef.current.delete(positionId);
+          rowLockCancelledRef.current.delete(positionId);
         });
     },
     [addToast, t],
