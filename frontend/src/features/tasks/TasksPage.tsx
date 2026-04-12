@@ -22,9 +22,8 @@ import {
   Scale,
   UserCircle,
   AlertTriangle,
-  Box,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, SkeletonGrid } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, SkeletonGrid, ViewInBIMButton } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useCreateShortcut } from '@/shared/hooks/useCreateShortcut';
@@ -426,31 +425,12 @@ const TaskCard = React.memo(function TaskCard({
             </span>
           )}
           {/* BIM pin indicator — surfaces tasks that are spatially linked
-              to 3D model geometry.  Click jumps to the first pinned element
-              in the BIM viewer. */}
-          {task.bim_element_ids && task.bim_element_ids.length > 0 && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                const firstId = task.bim_element_ids?.[0];
-                if (firstId) {
-                  window.location.href = `/bim?element=${encodeURIComponent(firstId)}`;
-                }
-              }}
-              className="inline-flex items-center gap-1 mt-0.5 text-2xs text-emerald-700 dark:text-emerald-400 hover:underline"
-              title={t('tasks.bim_pinned_title', {
-                defaultValue: 'Pinned to {{count}} BIM element(s) — click to view in 3D',
-                count: task.bim_element_ids.length,
-              })}
-            >
-              <Box size={9} className="shrink-0" />
-              {t('tasks.bim_pinned', {
-                defaultValue: 'Pinned to {{count}} BIM element(s)',
-                count: task.bim_element_ids.length,
-              })}
-            </button>
-          )}
+              to 3D model geometry.  Click isolates pinned elements in viewer. */}
+          <ViewInBIMButton
+            elementIds={task.bim_element_ids ?? []}
+            iconSize={9}
+            className="inline-flex items-center gap-1 mt-0.5 text-2xs text-emerald-700 dark:text-emerald-400 hover:underline"
+          />
         </div>
       </div>
 
