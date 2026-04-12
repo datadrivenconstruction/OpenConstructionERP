@@ -44,7 +44,7 @@ _LINE_RE = re.compile(r"^#(\d+)\s*=\s*(\w+)\s*\((.*)\)\s*;", re.DOTALL)
 _STRING_RE = re.compile(r"'([^']*)'")
 
 
-def _try_cad2data(ifc_path: Path, output_dir: Path) -> dict[str, Any] | None:
+def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "standard") -> dict[str, Any] | None:
     """Try to convert CAD files using DDC converters.
 
     Pipeline (tried in order):
@@ -79,7 +79,8 @@ def _try_cad2data(ifc_path: Path, output_dir: Path) -> dict[str, Any] | None:
                 """Invoke RvtExporter / IfcExporter with the given output target."""
                 args_list = [str(converter), str(input_abs), str(out_path)]
                 if ext in ("rvt", "ifc"):
-                    args_list.append("standard")
+                    # User-selected depth: 'standard' (~15 cols) or 'complete' (~1000+ cols)
+                    args_list.append(conversion_depth if conversion_depth in ("standard", "complete") else "standard")
                 args_list.extend(extra_args)
                 logger.debug("DDC call: %s", args_list)
                 proc = subprocess.run(
@@ -522,6 +523,7 @@ def _convert_dae_to_glb(dae_path: Path, output_dir: Path) -> Path | None:
 def process_ifc_file(
     ifc_path: Path,
     output_dir: Path,
+    conversion_depth: str = "standard",
 ) -> dict[str, Any]:
     """Process an IFC/RVT file.
 
@@ -529,10 +531,15 @@ def process_ifc_file(
     1. Try DDC cad2data (full conversion with geometry)
     2. Fallback: text-based IFC parser (elements only, box geometry)
 
+    Args:
+        conversion_depth: 'standard' (~15 key columns, faster) or
+            'complete' (~1000+ Revit parameters, slower). Passed
+            to the DDC converter as the export mode argument.
+
     Returns dict with elements, storeys, disciplines, geometry info.
     """
     # Step 1: Try cad2data
-    cad_result = _try_cad2data(ifc_path, output_dir)
+    cad_result = _try_cad2data(ifc_path, output_dir, conversion_depth=conversion_depth)
     if cad_result and cad_result["element_count"] > 0:
         logger.info("cad2data conversion successful: %d elements", cad_result["element_count"])
         return cad_result
