@@ -70,8 +70,12 @@ data/exports/
 data/cwicr/cache/
 frontend/debug-bim/
 
-# Claude Code / MCP
-.claude/
+# Claude Code / MCP — keep instruction files (.claude/*.md) but
+# ignore session cache, temp data, and MCP artifacts
+.claude/tmp/
+.claude/cache/
+.claude/projects/
+*.claude-session
 .mcp.json
 .playwright-mcp/
 
