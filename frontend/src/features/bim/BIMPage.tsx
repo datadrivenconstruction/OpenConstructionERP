@@ -48,6 +48,7 @@ import { Badge, EmptyState, Breadcrumb } from '@/shared/ui';
 import { BIMViewer } from '@/shared/ui/BIMViewer';
 import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
 import BIMFilterPanel from './BIMFilterPanel';
+import BIMGroupsPanel from './BIMGroupsPanel';
 import { BIMProcessingProgress, type BIMProcessingStage } from './BIMProcessingProgress';
 import { BIMConverterStatusBanner } from './BIMConverterStatusBanner';
 import { InstallConverterPrompt } from './InstallConverterPrompt';
@@ -908,6 +909,35 @@ export function BIMPage() {
     }
   }, [deepLinkElementId, elements, searchParams, setSearchParams, setBIMSelection]);
 
+  // Deep-link: ?isolate=id1,id2,... — isolate the listed BIM elements in
+  // the 3D viewer.  Used by the BOQ editor's "View in BIM" button when a
+  // position is linked to one or more BIM elements.  Stripped after first
+  // application so a page refresh resets to the full model view.
+  const isolateParam = searchParams.get('isolate');
+  useEffect(() => {
+    if (!isolateParam || elements.length === 0) return;
+    const ids = isolateParam.split(',').filter((id) => id.length > 0);
+    if (ids.length === 0) return;
+    // Verify at least one ID actually exists in the current model
+    const elementIdSet = new Set(elements.map((e) => e.id));
+    const validIds = ids.filter((id) => elementIdSet.has(id));
+    if (validIds.length === 0) return;
+    setIsolatedIds(validIds);
+    // If a single element is isolated, also select it to show its detail
+    if (validIds.length === 1) {
+      setSelectedElementId(validIds[0]!);
+      setBIMSelection(validIds);
+    }
+    const next = new URLSearchParams(searchParams);
+    next.delete('isolate');
+    setSearchParams(next, { replace: true });
+  }, [isolateParam, elements, searchParams, setSearchParams, setBIMSelection]);
+
+  // Deep-link: ?group=<group_id> — apply a saved element group as the
+  // isolation filter.  The group is resolved from the savedGroups query
+  // and its member_element_ids are set as the isolatedIds.
+  const groupParam = searchParams.get('group');
+
   // Saved element groups for the current model — populated by the
   // /api/v1/bim_hub/element-groups/ endpoint and rendered at the top
   // of BIMFilterPanel for one-click apply.  Refetch is triggered by
@@ -918,6 +948,20 @@ export function BIMPage() {
     enabled: !!projectId && !!activeModelId,
   });
   const savedGroups: BIMElementGroup[] = groupsQuery.data ?? [];
+
+  // Resolve ?group=<id> deep-link once savedGroups are loaded.
+  useEffect(() => {
+    if (!groupParam || savedGroups.length === 0) return;
+    const group = savedGroups.find((g) => g.id === groupParam);
+    if (!group) return;
+    const memberIds = group.member_element_ids ?? group.element_ids ?? [];
+    if (memberIds.length > 0) {
+      setIsolatedIds(memberIds);
+    }
+    const next = new URLSearchParams(searchParams);
+    next.delete('group');
+    setSearchParams(next, { replace: true });
+  }, [groupParam, savedGroups, searchParams, setSearchParams]);
 
   const geometryUrl = useMemo(() => {
     if (!activeModelId || activeModel?.status !== 'ready') return null;
@@ -1129,6 +1173,43 @@ export function BIMPage() {
     },
     [],
   );
+
+  // Isolate a saved group's member elements in the 3D viewport.
+  const handleIsolateGroup = useCallback(
+    (group: BIMElementGroup) => {
+      setIsolatedIds(group.member_element_ids.length > 0 ? group.member_element_ids : null);
+    },
+    [],
+  );
+
+  // Highlight a group's members on hover — set isolatedIds to a temporary
+  // preview without committing.  We use the BIM viewer's highlightedIds
+  // prop instead to avoid flickering the isolation state.
+  const handleHighlightGroup = useCallback(
+    (group: BIMElementGroup | null) => {
+      if (group) {
+        setBIMSelection(group.member_element_ids);
+      } else {
+        setBIMSelection([]);
+      }
+    },
+    [setBIMSelection],
+  );
+
+  // Navigate to the BOQ editor, optionally focusing a specific position.
+  const handleNavigateToBOQ = useCallback(
+    (positionId: string) => {
+      navigate(`/boq?position=${encodeURIComponent(positionId)}`);
+    },
+    [navigate],
+  );
+
+  // Invalidate groups query after a rename or color change.
+  const handleGroupUpdated = useCallback(() => {
+    queryClient.invalidateQueries({
+      queryKey: ['bim-element-groups', projectId, activeModelId],
+    });
+  }, [queryClient, projectId, activeModelId]);
 
   // Remove a BIM↔BOQ link — fires from the properties panel's unlink button.
   const handleUnlinkBOQ = useCallback(
@@ -1393,7 +1474,7 @@ export function BIMPage() {
       <div className="flex-1 min-h-0 relative bg-surface-secondary flex">
         {/* Filter sidebar — only when model has loaded elements */}
         {activeModelId && !isModelNonReady && elements.length > 0 && filterPanelOpen && (
-          <div className="shrink-0 h-full">
+          <div className="shrink-0 h-full overflow-y-auto flex flex-col">
             <BIMFilterPanel
               elements={elements}
               modelId={activeModelId ?? undefined}
@@ -1409,6 +1490,20 @@ export function BIMPage() {
               onDeleteGroup={handleDeleteGroup}
               onSmartFilter={handleSmartFilter}
             />
+            {/* Saved Groups panel — shows all groups with quantities + BOQ links */}
+            {savedGroups.length > 0 && (
+              <BIMGroupsPanel
+                savedGroups={savedGroups}
+                elements={elements}
+                projectId={projectId}
+                onIsolateGroup={handleIsolateGroup}
+                onHighlightGroup={handleHighlightGroup}
+                onLinkToBOQ={handleLinkGroupToBOQ}
+                onNavigateToBOQ={handleNavigateToBOQ}
+                onDeleteGroup={handleDeleteGroup}
+                onGroupUpdated={handleGroupUpdated}
+              />
+            )}
           </div>
         )}
 
