@@ -71,9 +71,24 @@ def write_dataframe(
                 seen.add(k)
                 all_keys.append(k)
 
-    # Normalise: ensure every row has every key (None for missing)
-    normalised = [{k: row.get(k) for k in all_keys} for row in rows]
-    table = pa.Table.from_pylist(normalised)
+    # Normalise: ensure every row has every key (None for missing).
+    # Also sanitise values: DDC Excel sometimes puts non-breaking spaces
+    # (\xa0) in numeric cells which crashes pyarrow type inference.
+    def _clean(v: Any) -> Any:
+        if isinstance(v, str):
+            v = v.replace("\xa0", " ").strip()
+            if not v or v.lower() in ("none", "null"):
+                return None
+        return v
+
+    normalised = [{k: _clean(row.get(k)) for k in all_keys} for row in rows]
+
+    # Force all columns to string to avoid type-inference crashes on
+    # mixed int/str/float columns (e.g. "Volume" is float for walls
+    # but the literal string "None" for materials).
+    schema = pa.schema([(k, pa.string()) for k in all_keys])
+    str_rows = [{k: str(v) if v is not None else None for k, v in row.items()} for row in normalised]
+    table = pa.Table.from_pylist(str_rows, schema=schema)
 
     pq.write_table(
         table,
