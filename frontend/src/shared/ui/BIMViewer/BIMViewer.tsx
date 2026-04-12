@@ -234,6 +234,7 @@ export function BIMViewer({
 
   const [wireframe, setWireframe] = useState(false);
   const [gridVisible, setGridVisible] = useState(false);
+  const [boxesVisible, setBoxesVisible] = useState(true);
   const [selectedElement, setSelectedElement] = useState<BIMElementData | null>(null);
   const [elementCount, setElementCount] = useState(0);
   /** Hover tooltip state — tracks the hovered element and mouse position
@@ -696,6 +697,18 @@ export function BIMViewer({
     setGridVisible((v) => !v);
   }, []);
 
+  const handleToggleBoxes = useCallback(() => {
+    if (!elementMgrRef.current) return;
+    const mgr = elementMgrRef.current;
+    setBoxesVisible((prev) => {
+      const next = !prev;
+      // Toggle visibility of all placeholder box meshes in elementGroup
+      mgr.elementGroup.visible = next;
+      sceneRef.current?.requestRender();
+      return next;
+    });
+  }, []);
+
   const handleCameraPreset = useCallback((view: 'top' | 'front' | 'side' | 'iso') => {
     sceneRef.current?.setCameraPreset(view);
   }, []);
@@ -851,6 +864,10 @@ export function BIMViewer({
           e.preventDefault();
           sceneRef.current?.toggleGrid();
           setGridVisible((v) => !v);
+          break;
+        case 'b':
+          e.preventDefault();
+          handleToggleBoxes();
           break;
         case '1':
           e.preventDefault();
@@ -1090,6 +1107,17 @@ export function BIMViewer({
           }
           onClick={handleToggleGrid}
           active={gridVisible}
+          variant="group"
+        />
+        <ToolbarButton
+          icon={Box}
+          label={
+            boxesVisible
+              ? t('bim.hide_boxes', { defaultValue: 'Hide placeholder boxes (B)' })
+              : t('bim.show_boxes', { defaultValue: 'Show placeholder boxes (B)' })
+          }
+          onClick={handleToggleBoxes}
+          active={boxesVisible}
           variant="group"
         />
       </div>
