@@ -118,7 +118,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'nav.ai_estimate', to: '/ai-estimate', icon: Sparkles },
       { labelKey: 'nav.ai_advisor', to: '/advisor', icon: MessageSquare },
       { labelKey: 'nav.project_intelligence', to: '/project-intelligence', icon: BrainCircuit, badge: 'BETA' },
-      { labelKey: 'nav.erp_chat', to: '/chat', icon: MessageSquare, highlight: true, badge: 'BETA' },
+      { labelKey: 'nav.erp_chat', to: '/chat', icon: MessageSquare, badge: 'BETA' },
     ],
   },
   // ── PLANNING & CONTROL (advanced) ──────────────────────────────────
