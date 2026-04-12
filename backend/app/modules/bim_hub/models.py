@@ -67,7 +67,7 @@ class BIMModel(Base):
     )
 
     # Relationships
-    elements: Mapped[list["BIMElement"]] = relationship(
+    elements: Mapped[list[BIMElement]] = relationship(
         back_populates="model",
         cascade="all, delete-orphan",
         lazy="selectin",
@@ -122,7 +122,7 @@ class BIMElement(Base):
 
     # Relationships
     model: Mapped[BIMModel] = relationship(back_populates="elements")
-    boq_links: Mapped[list["BOQElementLink"]] = relationship(
+    boq_links: Mapped[list[BOQElementLink]] = relationship(
         back_populates="bim_element",
         cascade="all, delete-orphan",
         lazy="selectin",
