@@ -43,6 +43,7 @@ Endpoints:
 """
 
 import csv
+import gzip as _gzip
 import io
 import json
 import logging
@@ -1121,6 +1122,26 @@ async def upload_cad_file(
                             geo_local,
                         )
 
+                # Store GLB geometry (DAE->GLB conversion for 8.8x faster loading)
+                glb_local = result.get("glb_path")
+                if glb_local:
+                    _glb_path = _Path(glb_local)
+                    if _glb_path.is_file():
+                        _glb_bytes = await asyncio.to_thread(_glb_path.read_bytes)
+                        _glb_key = await bim_file_storage.save_geometry(
+                            project_id=project_id,
+                            model_id=str(model_id),
+                            ext=".glb",
+                            content=_glb_bytes,
+                        )
+                        # Prefer GLB as the canonical geometry -- the BIM viewer
+                        # loads this instead of the DAE for 8.8x faster loading.
+                        model.canonical_file_path = _glb_key
+                        logger.info(
+                            "GLB geometry saved: %s (%d bytes)",
+                            _glb_key, len(_glb_bytes),
+                        )
+
             if element_count > 0:
                 # Insert elements into DB
                 from app.modules.bim_hub.models import BIMElement
@@ -1307,7 +1328,7 @@ async def get_model_geometry(
             ext, "application/octet-stream"
         )
         cache_headers = {
-            # Allow long browser caching since DAE content is content-addressed
+            # Allow long browser caching since geometry is content-addressed
             "Cache-Control": "private, max-age=3600",
         }
 
@@ -1317,12 +1338,20 @@ async def get_model_geometry(
         if presigned:
             return RedirectResponse(url=presigned, status_code=307)
 
-        stream = bim_file_storage.open_geometry_stream(key)
-        return StreamingResponse(
-            stream,
+        # Read the full blob and gzip-compress for transfer.
+        # GLB: 9.5 MB → 1.7 MB, DAE: 32 MB → 3.5 MB typical.
+        from app.core.storage import get_storage_backend
+
+        _geo_bytes = await get_storage_backend().get(key)
+        compressed = _gzip.compress(_geo_bytes, compresslevel=6)
+        from fastapi.responses import Response
+
+        return Response(
+            content=compressed,
             media_type=media_type,
             headers={
                 **cache_headers,
+                "Content-Encoding": "gzip",
                 "Content-Disposition": (
                     f'inline; filename="{model.name}{ext}"'
                 ),

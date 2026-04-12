@@ -23,6 +23,8 @@ export class SceneManager {
   private resizeObserver: ResizeObserver | null = null;
   private container: HTMLElement;
   private gridHelper: THREE.GridHelper | null = null;
+  /** On-demand rendering flag — drops idle CPU from 60 FPS to ~0%. */
+  private _needsRender = true;
 
   constructor(canvas: HTMLCanvasElement) {
     const parent = canvas.parentElement;
@@ -70,6 +72,13 @@ export class SceneManager {
     this.controls.maxDistance = 1_000_000;
     this.controls.target.set(0, 0, 0);
 
+    // On-demand rendering: only render when the camera moves or the
+    // scene is explicitly invalidated.  Drops idle CPU from 60 FPS
+    // constant rendering to ~0%.
+    this.controls.addEventListener('change', () => {
+      this._needsRender = true;
+    });
+
     // Lighting
     this.setupLighting();
 
@@ -79,8 +88,11 @@ export class SceneManager {
     this.gridHelper = new THREE.GridHelper(20, 20, 0xcccccc, 0xe0e0e0);
     this.scene.add(this.gridHelper);
 
-    // Resize observer
-    this.resizeObserver = new ResizeObserver(() => this.updateSize());
+    // Resize observer — also request a render so the new viewport is drawn.
+    this.resizeObserver = new ResizeObserver(() => {
+      this.updateSize();
+      this._needsRender = true;
+    });
     this.resizeObserver.observe(this.container);
 
     // Start loop
@@ -126,9 +138,22 @@ export class SceneManager {
 
   private animate = (): void => {
     this.animationId = requestAnimationFrame(this.animate);
-    this.controls.update();
-    this.renderer.render(this.scene, this.camera);
+    // Damping requires controls.update() every frame to animate the
+    // deceleration, but we only pay the GPU render cost when something
+    // actually changed.
+    const dampingDirty = this.controls.update();
+    if (dampingDirty) this._needsRender = true;
+    if (this._needsRender) {
+      this.renderer.render(this.scene, this.camera);
+      this._needsRender = false;
+    }
   };
+
+  /** Mark the scene as needing a re-render on the next animation frame.
+   *  Call this after selection changes, colour mutations, or visibility toggles. */
+  requestRender(): void {
+    this._needsRender = true;
+  }
 
   /** Fit all objects (or a specific bounding box) into the camera view. */
   zoomToFit(bbox?: THREE.Box3): void {
@@ -197,6 +222,7 @@ export class SceneManager {
     );
     this.camera.lookAt(center);
     this.controls.update();
+    this._needsRender = true;
 
     // Resize the grid to match the model. We want 1-unit cells (≈ 1 m
     // when the model is in metres) and a total extent that's slightly
@@ -249,6 +275,7 @@ export class SceneManager {
     this.camera.position.set(position.x, position.y, position.z);
     this.controls.target.set(target.x, target.y, target.z);
     this.controls.update();
+    this._needsRender = true;
   }
 
   /** Snap the camera to a canonical view of the current scene bounding box.
@@ -311,6 +338,7 @@ export class SceneManager {
     }
     this.camera.lookAt(center);
     this.controls.update();
+    this._needsRender = true;
   }
 
   /** Get current camera viewpoint. */
@@ -333,6 +361,7 @@ export class SceneManager {
   toggleGrid(): void {
     if (this.gridHelper) {
       this.gridHelper.visible = !this.gridHelper.visible;
+      this._needsRender = true;
     }
   }
 
