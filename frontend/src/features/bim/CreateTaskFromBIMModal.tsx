@@ -29,29 +29,12 @@ interface CreateTaskFromBIMModalProps {
   onCreated?: () => void;
 }
 
-const TASK_TYPES: { value: TaskType; label: string }[] = [
-  { value: 'task', label: 'Task' },
-  { value: 'topic', label: 'Topic' },
-  { value: 'information', label: 'Info' },
-  { value: 'decision', label: 'Decision' },
-];
-
-const PRIORITIES: { value: TaskPriority; label: string; color: string }[] = [
-  { value: 'low', label: 'Low', color: 'text-content-tertiary' },
-  { value: 'normal', label: 'Normal', color: 'text-content-secondary' },
-  { value: 'high', label: 'High', color: 'text-amber-600' },
-  { value: 'urgent', label: 'Urgent', color: 'text-rose-600' },
-];
-
-/** Build a default task title from the element set. */
-function buildDefaultTitle(elements: BIMElementData[]): string {
-  if (elements.length === 1) {
-    const el = elements[0]!;
-    const name = el.name && el.name !== 'None' ? el.name : el.element_type || 'Element';
-    return `Issue on ${name}`;
-  }
-  return `Issue on ${elements.length} elements`;
-}
+const PRIORITY_COLORS: Record<TaskPriority, string> = {
+  low: 'text-content-tertiary',
+  normal: 'text-content-secondary',
+  high: 'text-amber-600',
+  urgent: 'text-rose-600',
+};
 
 export default function CreateTaskFromBIMModal({
   projectId,
@@ -62,6 +45,30 @@ export default function CreateTaskFromBIMModal({
   const { t } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
+
+  const TASK_TYPES: { value: TaskType; label: string }[] = [
+    { value: 'task', label: t('tasks.type_task', { defaultValue: 'Task' }) },
+    { value: 'topic', label: t('tasks.type_topic', { defaultValue: 'Topic' }) },
+    { value: 'information', label: t('tasks.type_information', { defaultValue: 'Info' }) },
+    { value: 'decision', label: t('tasks.type_decision', { defaultValue: 'Decision' }) },
+  ];
+
+  const PRIORITIES: { value: TaskPriority; label: string; color: string }[] = [
+    { value: 'low', label: t('tasks.priority_low', { defaultValue: 'Low' }), color: PRIORITY_COLORS.low },
+    { value: 'normal', label: t('tasks.priority_normal', { defaultValue: 'Normal' }), color: PRIORITY_COLORS.normal },
+    { value: 'high', label: t('tasks.priority_high', { defaultValue: 'High' }), color: PRIORITY_COLORS.high },
+    { value: 'urgent', label: t('tasks.priority_urgent', { defaultValue: 'Urgent' }), color: PRIORITY_COLORS.urgent },
+  ];
+
+  /** Build a default task title from the element set. */
+  function buildDefaultTitle(els: BIMElementData[]): string {
+    if (els.length === 1) {
+      const el = els[0]!;
+      const name = el.name && el.name !== 'None' ? el.name : el.element_type || t('bim.element_fallback', { defaultValue: 'Element' });
+      return t('bim.issue_on_element', { defaultValue: 'Issue on {{name}}', name });
+    }
+    return t('bim.issue_on_elements', { defaultValue: 'Issue on {{count}} elements', count: els.length });
+  }
 
   const [title, setTitle] = useState(() => buildDefaultTitle(elements));
   const [description, setDescription] = useState('');
@@ -109,6 +116,8 @@ export default function CreateTaskFromBIMModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      role="dialog"
+      aria-modal="true"
       onClick={onClose}
     >
       <div
@@ -134,6 +143,7 @@ export default function CreateTaskFromBIMModal({
           <button
             onClick={onClose}
             className="p-1 rounded text-content-tertiary hover:text-content-primary hover:bg-surface-secondary"
+            aria-label={t('common.close', { defaultValue: 'Close' })}
           >
             <X size={16} />
           </button>
