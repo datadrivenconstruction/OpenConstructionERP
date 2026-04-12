@@ -40,6 +40,7 @@ import {
   Tag,
   Layers,
   Boxes,
+  Cuboid,
 } from 'lucide-react';
 
 import {
@@ -1304,6 +1305,24 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                     onClick={() => { navigate(`/costs?highlight=${costItemId}`); closeContextMenu(); }}
                   />
                 )}
+                {(() => {
+                  const cadIds = d.cad_element_ids as string[] | undefined;
+                  const bimIds = Array.isArray(cadIds) ? cadIds.filter((x) => typeof x === 'string' && x.length > 0) : [];
+                  if (bimIds.length === 0) return null;
+                  return (
+                    <CtxItem icon={<Cuboid size={14}/>}
+                      label={t('boq.view_in_bim', { defaultValue: 'View in BIM 3D ({{count}})', count: bimIds.length })}
+                      onClick={() => {
+                        if (bimIds.length === 1) {
+                          navigate(`/bim?element=${encodeURIComponent(bimIds[0]!)}&isolate=${encodeURIComponent(bimIds[0]!)}`);
+                        } else {
+                          navigate(`/bim?isolate=${bimIds.map((id) => encodeURIComponent(id)).join(',')}`);
+                        }
+                        closeContextMenu();
+                      }}
+                    />
+                  );
+                })()}
                 {/* ── AI features ─────────────────────────────────── */}
                 <CtxSeparator />
                 <CtxGroupLabel label="AI" />

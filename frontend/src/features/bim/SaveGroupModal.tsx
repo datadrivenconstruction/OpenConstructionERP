@@ -17,6 +17,7 @@ import {
   type BIMGroupFilterCriteria,
   type BIMElementGroup,
 } from './api';
+import { GROUP_COLORS } from './BIMGroupsPanel';
 import { useToastStore } from '@/stores/useToastStore';
 
 interface SaveGroupModalProps {
@@ -147,16 +148,26 @@ export default function SaveGroupModal({
             />
           </div>
 
-          <div className="flex items-center gap-2">
-            <label className="block text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
+          <div>
+            <label className="block text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-1.5">
               {t('bim.group_color', { defaultValue: 'Color' })}
             </label>
-            <input
-              type="color"
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-              className="h-7 w-10 border border-border-light rounded cursor-pointer"
-            />
+            <div className="flex items-center gap-1.5">
+              {GROUP_COLORS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setColor(c)}
+                  className={`h-6 w-6 rounded-full border-2 transition-transform hover:scale-110 ${
+                    color === c
+                      ? 'border-content-primary scale-105'
+                      : 'border-transparent'
+                  }`}
+                  style={{ background: c }}
+                  title={c}
+                />
+              ))}
+            </div>
           </div>
 
           {/* Dynamic vs static toggle */}
