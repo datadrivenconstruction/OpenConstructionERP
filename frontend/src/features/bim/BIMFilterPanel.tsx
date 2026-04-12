@@ -1647,7 +1647,7 @@ function FilterChip({
       }`}
       title={subtitle}
     >
-      <div className="flex items-center gap-1.5 min-w-0 flex-1">
+      <div className="flex items-center gap-1.5 min-w-0 flex-1 text-left">
         {colorDot != null ? (
           <span
             className="inline-block w-2 h-2 rounded-full shrink-0 ring-1 ring-black/10"
@@ -1658,8 +1658,8 @@ function FilterChip({
         ) : (
           <EyeOff size={10} className="shrink-0 opacity-40" />
         )}
-        <div className="min-w-0 flex-1">
-          <span className="truncate block">{label}</span>
+        <div className="min-w-0 flex-1 text-left">
+          <span className="truncate block text-left">{label}</span>
           {subtitle && (
             <span className="block text-[9px] text-content-quaternary truncate">
               {subtitle}
