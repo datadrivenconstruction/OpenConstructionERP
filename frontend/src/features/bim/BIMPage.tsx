@@ -257,7 +257,7 @@ function UploadPanel({
   const [file, setFile] = useState<File | null>(null);
   const [modelName, setModelName] = useState(initialModelName || '');
   const [discipline, setDiscipline] = useState('architecture');
-  const [conversionDepth, setConversionDepth] = useState<'standard' | 'complete'>('standard');
+  const [conversionDepth, setConversionDepth] = useState<'standard' | 'complete'>('complete');
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStage, setUploadStage] = useState('');
@@ -561,8 +561,8 @@ function UploadPanel({
         <div>
           <label className="block text-[10px] font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">{t('bim.upload_depth_label', { defaultValue: 'Conversion depth' })}</label>
           <select className="w-full text-sm py-2 px-3 rounded-lg border border-border-light bg-surface-secondary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue" value={conversionDepth} onChange={(e) => setConversionDepth(e.target.value as 'standard' | 'complete')}>
-            <option value="standard">{t('bim.depth_standard', { defaultValue: 'Standard — key parameters (~15 columns, faster)' })}</option>
-            <option value="complete">{t('bim.depth_complete', { defaultValue: 'Complete — all Revit parameters (~1000+ columns, slower)' })}</option>
+            <option value="complete">{t('bim.depth_complete', { defaultValue: 'Complete — all properties (Volume, Area, Level, Materials, 1000+ columns)' })}</option>
+            <option value="standard">{t('bim.depth_standard', { defaultValue: 'Standard — basic identifiers only (~15 columns, faster)' })}</option>
           </select>
         </div>
 
