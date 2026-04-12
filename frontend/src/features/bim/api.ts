@@ -639,7 +639,7 @@ export async function uploadCADFile(
   discipline: string,
   file: File,
   signal?: AbortSignal,
-  conversionDepth?: 'standard' | 'complete',
+  conversionDepth?: 'standard' | 'medium' | 'complete',
 ): Promise<BIMCadUploadResponse> {
   const formData = new FormData();
   formData.append('file', file);

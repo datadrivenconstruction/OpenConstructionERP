@@ -60,8 +60,8 @@ export interface StartUploadParams {
   uploadType: 'cad' | 'data';
   /** Optional geometry file for advanced (data) uploads. */
   geometryFile?: File | null;
-  /** DDC conversion depth: 'standard' (~15 key columns) or 'complete' (~1000+ columns). Default 'standard'. */
-  conversionDepth?: 'standard' | 'complete';
+  /** DDC conversion depth: 'standard' (fast, key props), 'medium' (~900 cols), 'complete' (~1000+ cols). */
+  conversionDepth?: 'standard' | 'medium' | 'complete';
 }
 
 interface BIMUploadState {
