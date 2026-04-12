@@ -249,12 +249,17 @@ export class SceneManager {
     if (extent > 100) cell = Math.ceil(extent / 100);
     const divisions = Math.max(2, Math.round(extent / cell));
     // Replace the existing grid (GridHelper has no resize API).
+    // Respect dark mode by checking the scene background luminance.
+    const bg = this.scene.background;
+    const isDark = bg instanceof THREE.Color && bg.getHSL({ h: 0, s: 0, l: 0 }).l < 0.3;
+    const centerColor = isDark ? 0x333344 : 0xcccccc;
+    const lineColor = isDark ? 0x2a2a3a : 0xe0e0e0;
     this.scene.remove(this.gridHelper);
     this.gridHelper.geometry.dispose();
     const mat = this.gridHelper.material;
     if (Array.isArray(mat)) mat.forEach((m) => m.dispose());
     else mat?.dispose();
-    this.gridHelper = new THREE.GridHelper(extent, divisions, 0xcccccc, 0xe0e0e0);
+    this.gridHelper = new THREE.GridHelper(extent, divisions, centerColor, lineColor);
     // Sit the grid just below the model floor so it doesn't z-fight
     // with the lowest geometry.
     this.gridHelper.position.set(center.x, box.min.y - 0.001, center.z);
@@ -364,6 +369,56 @@ export class SceneManager {
       this.gridHelper.visible = !this.gridHelper.visible;
       this._needsRender = true;
     }
+  }
+
+  /** Update the scene background and grid colors for light/dark mode.
+   *
+   *  Light mode: #f0f2f5 background, #cccccc / #e0e0e0 grid
+   *  Dark mode:  #1a1a2e background, #333344 / #2a2a3a grid
+   */
+  setDarkMode(isDark: boolean): void {
+    if (isDark) {
+      this.scene.background = new THREE.Color(0x1a1a2e);
+    } else {
+      this.scene.background = new THREE.Color(0xf0f2f5);
+    }
+    // Rebuild the grid with matching colors — no resize API on GridHelper,
+    // so we swap it in-place keeping the same position/visibility.
+    if (this.gridHelper) {
+      const wasVisible = this.gridHelper.visible;
+      const pos = this.gridHelper.position.clone();
+      // GridHelper stores its size/divisions on the geometry userData or
+      // as internal state. We read the bounding box to infer size, then
+      // fall back to 20/20 if it's empty or not computed.
+      let size = 20;
+      let divisions = 20;
+      this.gridHelper.geometry.computeBoundingBox();
+      const bb = this.gridHelper.geometry.boundingBox;
+      if (bb && !bb.isEmpty()) {
+        const gSize = bb.getSize(new THREE.Vector3());
+        size = Math.round(Math.max(gSize.x, gSize.z));
+        // Infer divisions from vertex count: a GridHelper with N divisions
+        // has (N+1)*2*2 = 4*(N+1) vertices on each axis → total position
+        // count = 4*(N+1)*2.  We approximate by taking position count / 8.
+        const posAttr = this.gridHelper.geometry.getAttribute('position');
+        if (posAttr) {
+          const approxDiv = Math.round(posAttr.count / 8) - 1;
+          if (approxDiv > 1) divisions = approxDiv;
+        }
+      }
+      this.scene.remove(this.gridHelper);
+      this.gridHelper.geometry.dispose();
+      const mat = this.gridHelper.material;
+      if (Array.isArray(mat)) mat.forEach((m) => m.dispose());
+      else mat?.dispose();
+      const centerColor = isDark ? 0x333344 : 0xcccccc;
+      const lineColor = isDark ? 0x2a2a3a : 0xe0e0e0;
+      this.gridHelper = new THREE.GridHelper(size, divisions, centerColor, lineColor);
+      this.gridHelper.position.copy(pos);
+      this.gridHelper.visible = wasVisible;
+      this.scene.add(this.gridHelper);
+    }
+    this._needsRender = true;
   }
 
   /** Dispose all Three.js resources. */
