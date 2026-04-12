@@ -324,7 +324,11 @@ class AIService:
         try:
             provider, api_key = resolve_provider_and_key(settings)
         except ValueError as exc:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+            logger.warning("AI provider config error for user %s: %s", user_id, exc)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No AI provider configured. Please add an API key in Settings.",
+            ) from exc
 
         # Create the job record
         job = AIEstimateJob(
@@ -417,7 +421,7 @@ class AIService:
             )
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=error_msg,
+                detail="AI estimation failed due to invalid input. Please check your request.",
             ) from exc
         except Exception as exc:
             duration_ms = int((time.monotonic() - start_time) * 1000)
@@ -433,7 +437,7 @@ class AIService:
             )
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
-                detail=error_msg,
+                detail="AI service temporarily unavailable. Please try again.",
             ) from exc
 
         # Re-fetch the completed job
@@ -498,7 +502,11 @@ class AIService:
         try:
             provider, api_key = resolve_provider_and_key(settings)
         except ValueError as exc:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+            logger.warning("AI provider config error for user %s: %s", user_id, exc)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No AI provider configured. Please add an API key in Settings.",
+            ) from exc
 
         # Create job record
         job = AIEstimateJob(
@@ -585,7 +593,7 @@ class AIService:
             )
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=error_msg,
+                detail="AI photo analysis failed due to invalid input. Please check your request.",
             ) from exc
         except Exception as exc:
             duration_ms = int((time.monotonic() - start_time) * 1000)
@@ -601,7 +609,7 @@ class AIService:
             )
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
-                detail=error_msg,
+                detail="AI service temporarily unavailable. Please try again.",
             ) from exc
 
         self.session.expunge(job)
@@ -670,7 +678,11 @@ class AIService:
         try:
             provider, api_key = resolve_provider_and_key(settings)
         except ValueError as exc:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+            logger.warning("AI provider config error for user %s: %s", user_id, exc)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No AI provider configured. Please add an API key in Settings.",
+            ) from exc
 
         # Create job record
         job = AIEstimateJob(
@@ -780,7 +792,7 @@ class AIService:
             await self.job_repo.update_fields(
                 job_id,
                 status="failed",
-                error_message=f"Failed to extract content from {filename}: {exc}",
+                error_message=f"Failed to extract content from file: {exc}",
                 model_used=provider,
                 duration_ms=0,
             )
@@ -872,7 +884,7 @@ class AIService:
             )
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=error_msg,
+                detail="AI file analysis failed due to invalid input. Please check your request.",
             ) from exc
         except Exception as exc:
             duration_ms = int((time.monotonic() - start_time) * 1000)
@@ -888,7 +900,7 @@ class AIService:
             )
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
-                detail=error_msg,
+                detail="AI service temporarily unavailable. Please try again.",
             ) from exc
 
         self.session.expunge(job)
