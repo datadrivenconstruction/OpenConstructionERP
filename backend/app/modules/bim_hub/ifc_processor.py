@@ -79,7 +79,7 @@ def _try_cad2data(ifc_path: Path, output_dir: Path) -> dict[str, Any] | None:
                 """Invoke RvtExporter / IfcExporter with the given output target."""
                 args_list = [str(converter), str(input_abs), str(out_path)]
                 if ext in ("rvt", "ifc"):
-                    args_list.append("complete")
+                    args_list.append("standard")
                 args_list.extend(extra_args)
                 logger.debug("DDC call: %s", args_list)
                 proc = subprocess.run(
@@ -393,8 +393,6 @@ def _excel_elements_to_bim_result(
                 continue
             # Cap value length to keep payloads reasonable
             properties[k] = sval[:500]
-            if len(properties) >= 30:
-                break  # Cap properties per element
 
         # Promote Revit hierarchy fields into properties under clean keys
         # so the frontend can build Category -> Family -> Type Name trees.
