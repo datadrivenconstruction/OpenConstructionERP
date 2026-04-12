@@ -227,7 +227,7 @@ export function BIMViewer({
   const selectionMgrRef = useRef<SelectionManager | null>(null);
 
   const [wireframe, setWireframe] = useState(false);
-  const [gridVisible, setGridVisible] = useState(true);
+  const [gridVisible, setGridVisible] = useState(false);
   const [selectedElement, setSelectedElement] = useState<BIMElementData | null>(null);
   const [elementCount, setElementCount] = useState(0);
   /** DAE/COLLADA download progress, in [0, 1].  ``null`` when no
@@ -670,7 +670,7 @@ export function BIMViewer({
           variant="group"
         />
         <ToolbarButton
-          icon={gridVisible ? Eye : EyeOff}
+          icon={Grid3X3}
           label={
             gridVisible
               ? t('bim.hide_grid', { defaultValue: 'Hide grid' })
