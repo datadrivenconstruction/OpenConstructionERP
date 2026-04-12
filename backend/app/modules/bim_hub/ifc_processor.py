@@ -165,8 +165,8 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
         logger.warning("DDC Community Converter error: %s", e, exc_info=True)
 
     # --- Method 2: cad2data binary on PATH ---
-    import shutil
     import csv
+    import shutil
 
     cad2data_bin = shutil.which("cad2data")
     if not cad2data_bin:
@@ -197,7 +197,7 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
         disciplines_set: set[str] = set()
 
         if csv_path.exists():
-            with open(csv_path, "r", encoding="utf-8") as f:
+            with open(csv_path, encoding="utf-8") as f:
                 reader = csv.DictReader(f)
                 for row in reader:
                     csv_raw_rows.append(dict(row))
@@ -284,6 +284,12 @@ def _excel_elements_to_bim_result(
     elements: list[dict[str, Any]] = []
     storeys_set: set[str] = set()
     disciplines_set: set[str] = set()
+
+    # Patch DDC COLLADA node names: DDC writes name="node" for every element
+    # but the frontend ColladaLoader uses `name` (not `id`) for Object3D.name.
+    # Without this patch, mesh_ref matching in the 3D viewer is 0%.
+    if real_dae_path and real_dae_path.exists():
+        _patch_collada_node_names(real_dae_path)
 
     # Pre-parse the DAE (if provided) to extract per-node bounding boxes
     # keyed by the numeric Revit ElementId written into <node id="...">.
@@ -987,6 +993,49 @@ def _extract_dae_bboxes_by_node_id(dae_path: Path) -> dict[int, dict[str, float]
         }
 
     return result
+
+
+def _patch_collada_node_names(dae_path: Path) -> int:
+    """Rewrite COLLADA ``<node name="...">`` to match ``<node id="...">``.
+
+    DDC RvtExporter writes ``<node id="ELEMENT_ID" name="node">`` for every
+    element. Three.js ColladaLoader uses the ``name`` attribute (not ``id``)
+    to set ``Object3D.name``, so every mesh ends up with ``name="node"`` and
+    the frontend element-to-mesh matching fails (0% match rate).
+
+    This function rewrites each ``<node>`` so ``name`` equals ``id``, which
+    lets the existing ``stableIdToElement.get(nodeName)`` lookup succeed.
+
+    Returns the number of nodes patched.
+    """
+    try:
+        tree = ET.parse(str(dae_path))
+    except ET.ParseError as exc:
+        logger.warning("Cannot patch COLLADA node names: XML parse error: %s", exc)
+        return 0
+
+    root = tree.getroot()
+    ns = {"c": _COLLADA_NS}
+    patched = 0
+
+    for node in root.iter(f"{{{_COLLADA_NS}}}node"):
+        nid = node.get("id") or ""
+        nname = node.get("name") or ""
+        # Only patch element nodes (numeric id from DDC) that have a generic
+        # name like "node" — leave lights/cameras/named nodes alone.
+        if nid and nid != nname and (nname in ("node", "") or nid.isdigit()):
+            node.set("name", nid)
+            patched += 1
+
+    if patched > 0:
+        ET.indent(tree, space="  ")
+        tree.write(str(dae_path), xml_declaration=True, encoding="utf-8")
+        logger.info(
+            "Patched %d COLLADA node name attributes to match id in %s",
+            patched,
+            dae_path.name,
+        )
+    return patched
 
 
 def _empty_result() -> dict[str, Any]:

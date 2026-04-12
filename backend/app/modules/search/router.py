@@ -8,9 +8,11 @@ Routes:
 
 from __future__ import annotations
 
+import uuid
+
 from fastapi import APIRouter, Query
 
-from app.dependencies import CurrentUserId
+from app.dependencies import CurrentUserId, SessionDep, verify_project_access
 from app.modules.search.schemas import (
     SearchStatusResponse,
     UnifiedSearchResponse,
@@ -26,6 +28,7 @@ router = APIRouter()
 @router.get("/", response_model=UnifiedSearchResponse)
 async def unified_search_endpoint(
     _user_id: CurrentUserId,
+    session: SessionDep,
     q: str = Query(..., min_length=1, max_length=500, description="Free-text query"),
     types: list[str] | None = Query(
         default=None,
@@ -52,6 +55,8 @@ async def unified_search_endpoint(
     Project-scoped queries pass ``project_id`` to drop hits from other
     projects at the vector layer (no Postgres roundtrip needed).
     """
+    if project_id:
+        await verify_project_access(uuid.UUID(project_id), _user_id, session)
     return await unified_search_service(
         query=q,
         types=types,

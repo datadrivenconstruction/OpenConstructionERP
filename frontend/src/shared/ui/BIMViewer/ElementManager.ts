@@ -380,7 +380,10 @@ export class ElementManager {
     // or set it incorrectly, so we always apply this correction.
     scene.rotation.x = -Math.PI / 2;
 
-    // Build two lookups: by stable_id (mesh_ref) and by element name.
+    // Build lookups: by stable_id / mesh_ref / element name.
+    // mesh_ref is the Revit ElementId string (e.g. "105545") that matches
+    // the COLLADA <node id="105545"> — after the backend patches node names,
+    // ColladaLoader exposes it as Object3D.name on the parent Group.
     const stableIdToElement = new Map<string, BIMElementData>();
     const nameToElement = new Map<string, BIMElementData>();
     for (const el of this.elementDataMap.values()) {
@@ -410,15 +413,43 @@ export class ElementManager {
     // ships with real per-element materials. We only touch the material
     // when an explicit colour-by mode is on, and we cache the original
     // on `userData.originalMaterial` so `resetColors()` can restore it.
+    //
+    // Matching strategy (tried in order for each mesh):
+    //   1. child.name          via stableIdToElement (mesh_ref / db id)
+    //   2. parent.name         via stableIdToElement (DDC patched node name = ElementId)
+    //   3. grandparent.name    via stableIdToElement (GLB loader may nest differently)
+    //   4. child.name          via nameToElement (element display name)
+    //   5. parent.name         via nameToElement
+    //   6. Extract numeric ID from parent.name pattern "Type-N-suffix" (Light-1-235371-point)
+    //      — this catches DDC light/node IDs embedded in composite names.
     scene.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         const nodeName = child.name || '';
         const parentName = child.parent?.name || '';
-        const element =
+        const grandparentName = child.parent?.parent?.name || '';
+        let element =
           stableIdToElement.get(nodeName) ||
           stableIdToElement.get(parentName) ||
+          stableIdToElement.get(grandparentName) ||
           nameToElement.get(nodeName) ||
           nameToElement.get(parentName);
+
+        // Fallback: try to extract a numeric ID from the parent name.
+        // DDC COLLADA sometimes names nodes as "Type-N-ElementId-suffix"
+        // (e.g. "Light-1-235371-point"). If the parent name contains a
+        // numeric segment that matches a mesh_ref, use it.
+        if (!element && parentName) {
+          const segments = parentName.split('-');
+          for (const seg of segments) {
+            if (/^\d+$/.test(seg)) {
+              const candidate = stableIdToElement.get(seg);
+              if (candidate) {
+                element = candidate;
+                break;
+              }
+            }
+          }
+        }
 
         child.castShadow = false;
         child.receiveShadow = false;
@@ -451,6 +482,13 @@ export class ElementManager {
       // eslint-disable-next-line no-console
       console.info(`[BIM] stripped ${strippedLights} lights/cameras from loaded scene`);
     }
+
+    // eslint-disable-next-line no-console
+    console.info(
+      `[BIM] mesh matching: ${matchedCount}/${this.allDaeMeshes.length} meshes matched ` +
+      `to ${this.elementDataMap.size} elements ` +
+      `(${this.elementDataMap.size > 0 ? Math.round((matchedCount / this.elementDataMap.size) * 100) : 0}% element coverage)`,
+    );
 
     // POSITIONAL FALLBACK: when the converter drops node ids and we
     // get 0% explicit matches, pair meshes with element data by index.
