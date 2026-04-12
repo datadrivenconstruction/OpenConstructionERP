@@ -83,9 +83,6 @@ def export_excel(
         start_color=_PROHIBITED_BG, end_color=_PROHIBITED_BG, fill_type="solid"
     )
 
-    # Use language-appropriate headers
-    header_idx = 1 if language == "en" else 2
-
     # Write headers
     for col_idx, (_, en_name, de_name, width) in enumerate(_COLUMNS, start=1):
         cell = ws.cell(row=1, column=col_idx)  # type: ignore[union-attr]

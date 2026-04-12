@@ -173,6 +173,7 @@ export async function uploadBIMData(
   discipline: string,
   dataFile: File,
   geometryFile?: File | null,
+  signal?: AbortSignal,
 ): Promise<BIMUploadResponse> {
   const formData = new FormData();
   formData.append('data_file', dataFile);
@@ -201,8 +202,11 @@ export async function uploadBIMData(
       method: 'POST',
       headers,
       body: formData,
+      signal,
     });
   } catch (networkErr) {
+    // Re-throw AbortError as-is so callers can distinguish cancellation
+    if (networkErr instanceof DOMException && networkErr.name === 'AbortError') throw networkErr;
     throw new Error(
       'Cannot connect to server. Please check that the backend is running and try again.',
     );
@@ -629,6 +633,7 @@ export async function uploadCADFile(
   name: string,
   discipline: string,
   file: File,
+  signal?: AbortSignal,
 ): Promise<BIMCadUploadResponse> {
   const formData = new FormData();
   formData.append('file', file);
@@ -654,8 +659,11 @@ export async function uploadCADFile(
       method: 'POST',
       headers,
       body: formData,
+      signal,
     });
   } catch (networkErr) {
+    // Re-throw AbortError as-is so callers can distinguish cancellation
+    if (networkErr instanceof DOMException && networkErr.name === 'AbortError') throw networkErr;
     throw new Error(
       'Cannot connect to server. Please check that the backend is running and try again.',
     );

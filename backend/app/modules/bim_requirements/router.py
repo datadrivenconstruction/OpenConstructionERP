@@ -30,6 +30,16 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
+def _sanitize_filename(name: str) -> str:
+    """Sanitize a user-provided name for use in Content-Disposition headers.
+
+    Removes characters that could enable header injection or path traversal.
+    """
+    # Strip control characters (CR, LF, tab, etc.), quotes, slashes, backslashes
+    clean = "".join(c for c in name if c.isprintable() and c not in '"/\\')
+    return clean.strip()[:50] or "export"
+
+
 def _get_service(session: SessionDep) -> BIMRequirementService:
     return BIMRequirementService(session)
 
@@ -202,7 +212,7 @@ async def export_excel(
     """Export a BIM requirement set as a formatted Excel file."""
     content = await service.export_excel(set_id, language=language)
     req_set = await service.get_set(set_id)
-    safe_name = req_set.name.replace('"', "").replace("/", "_")[:50]
+    safe_name = _sanitize_filename(req_set.name)
 
     return Response(
         content=content,
@@ -225,7 +235,7 @@ async def export_ids(
     """Export a BIM requirement set as IDS XML."""
     content = await service.export_ids(set_id)
     req_set = await service.get_set(set_id)
-    safe_name = req_set.name.replace('"', "").replace("/", "_")[:50]
+    safe_name = _sanitize_filename(req_set.name)
 
     return Response(
         content=content,
