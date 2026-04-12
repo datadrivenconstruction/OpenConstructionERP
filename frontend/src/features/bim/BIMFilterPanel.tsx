@@ -142,12 +142,17 @@ function detectModelFormat(
   const first = elements[0];
   if (first) {
     if (first.element_type?.toLowerCase().startsWith('ifc')) return 'ifc';
-    const props = first.properties as Record<string, unknown> | undefined;
-    if (props) {
-      const hasRevitKey = Object.keys(props).some((k) =>
-        k.toLowerCase().includes('revit'),
-      );
-      if (hasRevitKey) return 'rvt';
+    const props = (first.properties || {}) as Record<string, unknown>;
+    // If properties.category exists with a non-IFC value, it is likely Revit
+    if (
+      typeof props.category === 'string' &&
+      props.category &&
+      !props.category.toLowerCase().startsWith('ifc')
+    ) {
+      return 'rvt';
+    }
+    if (Object.keys(props).some((k) => k.toLowerCase().includes('revit'))) {
+      return 'rvt';
     }
   }
   return 'other';
@@ -157,9 +162,9 @@ function detectModelFormat(
  * Get the top-level category label for an element depending on model format.
  *
  *   • Revit  →  the Category (Walls, Doors, Curtain Wall Mullions, …).
- *               Stored on `el.category` if the converter populated it,
- *               otherwise we fall back to `el.element_type` which the
- *               Excel/parquet conversion uses as the category column.
+ *               Stored in `properties.category` (promoted from the split
+ *               alias groups during upload) or on the legacy `el.category`
+ *               field.  Falls back to `el.element_type`.
  *   • IFC    →  the IfcEntity (IfcWall, IfcSlab, IfcDoor, …) which is
  *               always on `el.element_type`.
  *
@@ -168,13 +173,17 @@ function detectModelFormat(
  * filter panel grouping selector.
  */
 function getTypeKey(el: BIMElementData, format: BIMModelFormat): string {
+  const props = (el.properties || {}) as Record<string, unknown>;
+  const category =
+    typeof props.category === 'string' && props.category ? props.category : null;
+
   if (format === 'rvt') {
-    return el.category || el.element_type || 'Unknown';
+    return category || el.category || el.element_type || 'Unknown';
   }
   if (format === 'ifc') {
-    return el.element_type || el.category || 'Unknown';
+    return el.element_type || category || el.category || 'Unknown';
   }
-  return el.category || el.element_type || 'Unknown';
+  return category || el.category || el.element_type || 'Unknown';
 }
 
 /**
@@ -183,21 +192,26 @@ function getTypeKey(el: BIMElementData, format: BIMModelFormat): string {
  * wall mullion.  This is the Revit "Family/Type Name" axis.
  *
  * Source preference order:
- *   1. `el.name` (always populated by the parquet ingestion path)
- *   2. `el.properties.family` (Revit Family parameter)
- *   3. `el.properties["family and type"]` (combined Revit param)
- *   4. `el.properties.type` (Revit Type parameter)
+ *   1. `properties.type_name` (promoted alias from upload pipeline)
+ *   2. `properties.family` (promoted alias from upload pipeline)
+ *   3. `el.name` (always populated by the parquet ingestion path)
+ *   4. `properties["Family"]` / `properties["family and type"]` / `properties["Type"]`
  *   5. fallback to "Unspecified"
  */
 function getTypeNameKey(el: BIMElementData): string {
-  if (el.name && el.name !== 'None' && el.name !== '') return el.name;
   const props = (el.properties || {}) as Record<string, unknown>;
+  // Prefer explicit type_name from the promoted alias, then fall back
+  // to family, then el.name, then generic property lookup.
+  const typeName =
+    typeof props.type_name === 'string' && props.type_name ? props.type_name : null;
+  const family = typeof props.family === 'string' && props.family ? props.family : null;
+
+  if (typeName) return typeName;
+  if (family) return family;
+  if (el.name && el.name !== 'None' && el.name !== '') return el.name;
+
   const cand =
-    props['family'] ??
-    props['family and type'] ??
-    props['type'] ??
-    props['Family'] ??
-    props['Type'];
+    props['Family'] ?? props['family and type'] ?? props['Type'] ?? props['type'];
   if (typeof cand === 'string' && cand !== '' && cand !== 'None') return cand;
   return 'Unspecified';
 }
@@ -496,9 +510,11 @@ export default function BIMFilterPanel({
         const tpe = getTypeKey(el, format);
         // Buildings-only toggle hides annotation/analytical noise
         if (s.buildingsOnly && isNoiseCategory(tpe)) return false;
-        // Storey filter (empty set = show all)
-        if (s.storeys.size > 0) {
-          if (!s.storeys.has(el.storey || '—')) return false;
+        // Storey filter (empty set = show all).  Elements without a storey
+        // are always visible — hiding them when the user picks a specific
+        // level silently drops "unassigned" elements which is confusing.
+        if (s.storeys.size > 0 && el.storey) {
+          if (!s.storeys.has(el.storey)) return false;
         }
         // Type filter
         if (s.types.size > 0) {
@@ -506,12 +522,17 @@ export default function BIMFilterPanel({
         }
         // Search
         if (search) {
+          const elProps = (el.properties || {}) as Record<string, unknown>;
+          const propCat =
+            typeof elProps.category === 'string' ? elProps.category : '';
           const hay = (
             (el.name || '') +
             ' ' +
             (el.element_type || '') +
             ' ' +
             (el.category || '') +
+            ' ' +
+            propCat +
             ' ' +
             (el.storey || '')
           ).toLowerCase();
