@@ -115,6 +115,7 @@ function StatPill({ label, value, icon: Icon }: { label: string; value: string |
 function ModelCard({ model, isActive, onClick, onDelete }: {
   model: BIMModelData; isActive: boolean; onClick: () => void; onDelete?: () => void;
 }) {
+  const { t } = useTranslation();
   const fmt = (model.model_format || model.format || '').toUpperCase();
   const isError = model.status === 'error' || model.status === 'needs_converter';
   const isProcessing = model.status === 'processing';
@@ -128,13 +129,13 @@ function ModelCard({ model, isActive, onClick, onDelete }: {
         : 'bg-gray-400';
 
   const statusLabel = model.status === 'ready'
-    ? 'Ready'
+    ? t('bim.status_ready', { defaultValue: 'Ready' })
     : model.status === 'needs_converter'
-      ? 'Needs Converter'
+      ? t('bim.status_needs_converter', { defaultValue: 'Needs Converter' })
       : model.status === 'processing'
-        ? 'Processing'
+        ? t('bim.status_processing', { defaultValue: 'Processing' })
         : model.status === 'error'
-          ? 'Error'
+          ? t('bim.status_error', { defaultValue: 'Error' })
           : model.status;
 
   return (
@@ -183,7 +184,7 @@ function ModelCard({ model, isActive, onClick, onDelete }: {
           </div>
         </div>
         <div className="flex items-center justify-between text-[10px]">
-          <span className="text-content-quaternary tabular-nums">{model.element_count ?? 0} elements</span>
+          <span className="text-content-quaternary tabular-nums">{t('bim.element_count', { defaultValue: '{{count}} elements', count: model.element_count ?? 0 })}</span>
           {model.created_at && (
             <span className="text-content-quaternary">
               {new Date(model.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
@@ -329,6 +330,7 @@ function UploadPanel({
                 (c) => c.id === needsConverterMatch,
               );
               if (conv && !conv.installed) {
+                setUploading(false);
                 setUploadProgress(0);
                 setUploadStage('');
                 onProcessingUpdate?.(null);
@@ -474,7 +476,7 @@ function UploadPanel({
             <p className="text-[10px] text-content-quaternary">{t('bim.upload_panel_subtitle')}</p>
           </div>
         </div>
-        <button onClick={onClose} className="p-1.5 rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors">
+        <button onClick={onClose} className="p-1.5 rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors" aria-label={t('common.close', { defaultValue: 'Close' })}>
           <X size={16} />
         </button>
       </div>
@@ -1163,7 +1165,7 @@ export function BIMPage() {
         addToast({
           type: 'success',
           title: t('bim.toast_model_processed_title', { defaultValue: 'Model ready' }),
-          message: `${job.elementCount} elements`,
+          message: t('bim.upload_complete_count', { defaultValue: '{{count}} elements', count: job.elementCount }),
         });
       } else if (
         (job.status === 'error' || job.status === 'converter_required') &&
@@ -1232,15 +1234,15 @@ export function BIMPage() {
               <Cuboid size={18} className="text-oe-blue" />
             </div>
             <div>
-              <h1 className="text-sm font-bold text-content-primary">BIM Viewer</h1>
+              <h1 className="text-sm font-bold text-content-primary">{t('bim.viewer_title', { defaultValue: 'BIM Viewer' })}</h1>
               {activeModel && <p className="text-[10px] text-content-tertiary truncate max-w-[160px]">{activeModel.name}</p>}
             </div>
           </div>
           {elements.length > 0 && (
             <div className="flex items-center gap-2 ms-2">
-              <StatPill icon={Box} label="Elements" value={elements.length} />
-              {storeys.size > 0 && <StatPill icon={Layers} label="Storeys" value={storeys.size} />}
-              {discips.size > 0 && <StatPill icon={Sparkles} label="Disciplines" value={discips.size} />}
+              <StatPill icon={Box} label={t('bim.stat_elements', { defaultValue: 'Elements' })} value={elements.length} />
+              {storeys.size > 0 && <StatPill icon={Layers} label={t('bim.stat_storeys', { defaultValue: 'Storeys' })} value={storeys.size} />}
+              {discips.size > 0 && <StatPill icon={Sparkles} label={t('bim.stat_disciplines', { defaultValue: 'Disciplines' })} value={discips.size} />}
             </div>
           )}
         </div>
@@ -1323,18 +1325,18 @@ export function BIMPage() {
                 </button>
               )}
               <button onClick={() => navigate('/boq')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-content-secondary bg-surface-secondary border border-border-light hover:bg-surface-tertiary transition-colors">
-                <Link2 size={13} /> Link to BOQ
+                <Link2 size={13} /> {t('bim.link_to_boq', { defaultValue: 'Link to BOQ' })}
               </button>
               <button onClick={() => navigate('/bim/rules')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-content-secondary bg-surface-secondary border border-border-light hover:bg-surface-tertiary transition-colors">
                 <SlidersHorizontal size={13} /> {t('bim.rules_button', { defaultValue: 'Rules' })}
               </button>
               <button onClick={() => navigate('/schedule')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-content-secondary bg-surface-secondary border border-border-light hover:bg-surface-tertiary transition-colors">
-                <CalendarDays size={13} /> 4D Schedule
+                <CalendarDays size={13} /> {t('bim.schedule_4d', { defaultValue: '4D Schedule' })}
               </button>
             </>
           )}
           <button onClick={() => setUploadOpen((p) => !p)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-oe-blue text-white hover:bg-oe-blue-dark transition-colors shadow-sm">
-            <Plus size={13} /> Add Model
+            <Plus size={13} /> {t('bim.add_model', { defaultValue: 'Add Model' })}
           </button>
         </div>
       </div>
@@ -1383,7 +1385,7 @@ export function BIMPage() {
             highlightedIds={highlightedBIMElementIds.length > 0 ? highlightedBIMElementIds : null}
             elements={elements}
             isLoading={elementsQuery.isLoading}
-            error={elementsQuery.error ? 'Failed to load model elements. Check the server connection.' : null}
+            error={elementsQuery.error ? t('bim.error_load_elements', { defaultValue: 'Failed to load model elements. Check the server connection.' }) : null}
             geometryUrl={geometryUrl}
             filterPredicate={filterPredicate}
             colorByMode={colorByMode}
@@ -1406,7 +1408,7 @@ export function BIMPage() {
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
               <Cuboid size={40} className="text-content-quaternary mx-auto mb-3" />
-              <p className="text-sm text-content-tertiary">Select a model to view</p>
+              <p className="text-sm text-content-tertiary">{t('bim.select_model_prompt', { defaultValue: 'Select a model to view' })}</p>
             </div>
           </div>
         )}
@@ -1465,7 +1467,7 @@ export function BIMPage() {
       {/* ── Model Filmstrip ── */}
       <div className="shrink-0 border-t border-border-light bg-surface-primary">
         <div className="flex items-center gap-3 px-5 py-3 overflow-x-auto">
-          <span className="text-[10px] font-bold text-content-quaternary uppercase tracking-wider shrink-0">Models</span>
+          <span className="text-[10px] font-bold text-content-quaternary uppercase tracking-wider shrink-0">{t('bim.models_label', { defaultValue: 'Models' })}</span>
           {modelsQuery.isLoading ? (
             <Loader2 size={14} className="animate-spin text-content-quaternary" />
           ) : models.length ? (
@@ -1475,7 +1477,7 @@ export function BIMPage() {
                 onDelete={() => handleDeleteModel(m.id, m.name)} />
             ))
           ) : (
-            <span className="text-[11px] text-content-quaternary">No models uploaded yet</span>
+            <span className="text-[11px] text-content-quaternary">{t('bim.no_models_yet', { defaultValue: 'No models uploaded yet' })}</span>
           )}
         </div>
       </div>

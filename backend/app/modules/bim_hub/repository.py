@@ -170,10 +170,19 @@ class BIMElementRepository:
         return element
 
     async def bulk_create(self, elements: list[BIMElement]) -> list[BIMElement]:
-        """Insert multiple elements at once."""
-        self.session.add_all(elements)
-        await self.session.flush()
-        return elements
+        """Insert multiple elements in batches.
+
+        Batching avoids SQLite's 999 bind-variable limit and keeps memory
+        pressure manageable for large models (17 k+ elements).
+        """
+        BATCH_SIZE = 500
+        created: list[BIMElement] = []
+        for i in range(0, len(elements), BATCH_SIZE):
+            batch = elements[i : i + BATCH_SIZE]
+            self.session.add_all(batch)
+            await self.session.flush()
+            created.extend(batch)
+        return created
 
     async def delete_all_for_model(self, model_id: uuid.UUID) -> int:
         """Delete all elements for a model. Returns count deleted."""
