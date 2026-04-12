@@ -15,7 +15,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, Query
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.ncr.schemas import (
     NCRCreate,
     NCRResponse,
@@ -59,6 +59,7 @@ def _to_response(item: object) -> NCRResponse:
 
 @router.get("/", response_model=list[NCRResponse])
 async def list_ncrs(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     offset: int = Query(default=0, ge=0),
@@ -68,6 +69,7 @@ async def list_ncrs(
     severity: str | None = Query(default=None),
     service: NCRService = Depends(_get_service),
 ) -> list[NCRResponse]:
+    await verify_project_access(project_id, user_id, session)
     ncrs, _ = await service.list_ncrs(
         project_id,
         offset=offset,
@@ -83,9 +85,11 @@ async def list_ncrs(
 async def create_ncr(
     data: NCRCreate,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("ncr.create")),
     service: NCRService = Depends(_get_service),
 ) -> NCRResponse:
+    await verify_project_access(data.project_id, user_id, session)
     ncr = await service.create_ncr(data, user_id=user_id)
     return _to_response(ncr)
 

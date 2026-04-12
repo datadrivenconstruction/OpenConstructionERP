@@ -26,7 +26,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import Response, StreamingResponse
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.fieldreports.schemas import (
     FieldReportCreate,
     FieldReportResponse,
@@ -92,11 +92,13 @@ def _report_to_response(report: object) -> FieldReportResponse:
 
 @router.get("/reports/summary/", response_model=FieldReportSummary)
 async def get_summary(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: FieldReportService = Depends(_get_service),
 ) -> FieldReportSummary:
     """Aggregated field report stats for a project."""
+    await verify_project_access(project_id, user_id, session)
     data = await service.get_summary(project_id)
     return FieldReportSummary(**data)
 
@@ -106,12 +108,14 @@ async def get_summary(
 
 @router.get("/reports/calendar/", response_model=list[FieldReportResponse])
 async def get_calendar(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     month: str = Query(..., pattern=r"^\d{4}-\d{2}$"),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: FieldReportService = Depends(_get_service),
 ) -> list[FieldReportResponse]:
     """Get reports for a month (calendar view). Month format: YYYY-MM."""
+    await verify_project_access(project_id, user_id, session)
     parts = month.split("-")
     year, mon = int(parts[0]), int(parts[1])
     reports = await service.get_calendar(project_id, year, mon)
@@ -423,6 +427,7 @@ def _parse_report_rows_from_excel(content_bytes: bytes) -> list[dict[str, Any]]:
 
 @router.post("/reports/import/file/")
 async def import_field_reports_file(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     _user_id: CurrentUserId = None,  # type: ignore[assignment]
     file: UploadFile = File(..., description="Excel (.xlsx) or CSV (.csv) file"),
@@ -433,6 +438,7 @@ async def import_field_reports_file(
     Parses columns with flexible EN/DE aliases.  Returns a summary with
     counts of imported, skipped, and error details.
     """
+    await verify_project_access(project_id, _user_id, session)
     filename = (file.filename or "").lower()
     if not filename.endswith((".xlsx", ".csv", ".xls")):
         raise HTTPException(
@@ -567,11 +573,13 @@ async def import_field_reports_file(
 
 @router.get("/reports/export/")
 async def export_field_reports(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     _user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: FieldReportService = Depends(_get_service),
 ) -> StreamingResponse:
     """Export all field reports for a project as an Excel file."""
+    await verify_project_access(project_id, _user_id, session)
     from openpyxl import Workbook
     from openpyxl.styles import Font
 
@@ -638,10 +646,12 @@ async def export_field_reports(
 async def create_report(
     data: FieldReportCreate,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("fieldreports.create")),
     service: FieldReportService = Depends(_get_service),
 ) -> FieldReportResponse:
     """Create a new field report."""
+    await verify_project_access(data.project_id, user_id, session)
     report = await service.create_report(data, user_id=user_id)
     return _report_to_response(report)
 
@@ -651,6 +661,7 @@ async def create_report(
 
 @router.get("/reports/", response_model=list[FieldReportResponse])
 async def list_reports(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     offset: int = Query(default=0, ge=0),
@@ -662,6 +673,7 @@ async def list_reports(
     service: FieldReportService = Depends(_get_service),
 ) -> list[FieldReportResponse]:
     """List field reports for a project with optional filters."""
+    await verify_project_access(project_id, user_id, session)
     reports, _ = await service.list_reports(
         project_id,
         offset=offset,
