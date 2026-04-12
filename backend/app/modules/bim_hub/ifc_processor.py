@@ -272,13 +272,58 @@ def _excel_elements_to_bim_result(
     .dae), we use the real Revit COLLADA geometry instead of the placeholder
     box-grid generated from element bounding boxes.
     """
-    # Skip these categories — they're not building elements (settings, materials, etc.)
-    SKIP_CATEGORIES = {
-        None, "", "ost_materials", "ost_sunstudy", "ost_views", "ost_viewports",
+    # Skip these categories — they're not building elements.
+    # Expanded set covers views, sheets, materials, annotations, tags,
+    # dimensions, analytical model, model groups, revisions, schedules,
+    # legends, and other non-physical Revit categories.
+    SKIP_CATEGORIES: set[str | None] = {
+        None, "",
+        # Views, sheets, materials, settings
+        "ost_materials", "ost_sunstudy", "ost_views", "ost_viewports",
         "ost_grids", "ost_levels", "ost_sheets", "ost_titleblocks",
         "ost_phases", "ost_previewlegendcomponents", "ost_designoptions",
         "ost_paramelemelectricalloadclassification", "ost_hvac_load_space_types",
         "ost_hvac_load_building_types", "ost_filldrawcolor", "ost_filllinepattern",
+        # Annotations, tags, dimensions
+        "ost_dimensions", "ost_textnotes", "ost_genericannotation",
+        "ost_doortags", "ost_windowtags", "ost_roomtags", "ost_walltags",
+        "ost_areatags", "ost_keynotetags", "ost_materialtags",
+        "ost_areaschemelines", "ost_sketchlines", "ost_weakdims",
+        "ost_detailcomponents", "ost_colorfilllegends", "ost_colorfillschema",
+        "ost_spotdimensions", "ost_spotcoordinates", "ost_spotslopes",
+        "ost_spotelevsymbols", "ost_callouts", "ost_callouthead", "ost_calloutheads",
+        "ost_elevationmarks", "ost_sectionmarks", "ost_sectionbox",
+        "ost_scopeboxes", "ost_referencepoints", "ost_referenceplane",
+        "ost_referenceline", "ost_gridheads", "ost_levelheads",
+        "ost_matchline", "ost_viewportlabel",
+        # Detail & drafting
+        "ost_detailitems", "ost_lines", "ost_clines",
+        "ost_rasterimages", "ost_schedulegraphics",
+        "ost_tilepatterns", "ost_divisionrules",
+        # Revision clouds & tags
+        "ost_revisionclouds", "ost_revisioncloudtags",
+        "ost_revisions", "ost_revisionnumberingsequences",
+        # Analytical / structural analysis
+        "ost_analyticalnodes", "ost_analyticalmember", "ost_analyticalsurface",
+        "ost_analyticalfloor", "ost_analyticalwall",
+        "ost_analyticalpipeconnections", "ost_linksanalytical",
+        "ost_loadcases", "ost_constraints",
+        # Model groups, design options, arrays
+        "ost_iosmodelgroups", "ost_iosdetailgroups", "ost_editcuts",
+        "ost_iossketchgrid", "ost_iosgeolocations", "ost_iosgeosite",
+        "ost_iosarrays",
+        # Schedules, legends
+        "ost_schedules", "ost_legendcomponents",
+        # Profile / reference / misc
+        "ost_profilefamilies", "ost_profileplane",
+        "ost_referenceviewersymbol", "ost_multireferenceannotations",
+        "ost_sectionheads",
+        # Project / system info (not physical)
+        "ost_projectinformation", "ost_projectbasepoint",
+        "ost_sharedbasepoint", "ost_coordinatesystem",
+        "ost_eaconstructions", "ost_covertype",
+        # Room/area separation (lines, not geometry)
+        "ost_roomseparationlines", "ost_areaschemes",
     }
 
     elements: list[dict[str, Any]] = []
@@ -363,18 +408,25 @@ def _excel_elements_to_bim_result(
             storeys_set.add(storey)
         disciplines_set.add(discipline)
 
-        # Numeric quantity fields — handle Revit native (mm/m²/m³) units
+        # Numeric quantity fields — handle Revit native (mm/m²/m³) units.
+        # DDC Excel columns have exact names; we map them all.
         quantities: dict[str, float] = {}
         for src_key, dest_key in (
             ("length", "Length"), ("area", "Area"), ("volume", "Volume"),
             ("width", "Width"), ("height", "Height"), ("thickness", "Thickness"),
             ("perimeter", "Perimeter"), ("count", "Count"),
+            ("gross area", "Gross Area"), ("gross volume", "Gross Volume"),
+            ("floor area", "Floor Area"), ("floor volume", "Floor Volume"),
+            ("surface area", "Surface Area"),
+            ("cut length", "Cut Length"), ("unconnected height", "Unconnected Height"),
         ):
             val = lc_row.get(src_key)
             if val is None:
                 continue
             try:
-                quantities[dest_key] = float(val)
+                fval = float(val)
+                if fval != 0.0:
+                    quantities[dest_key] = fval
             except (ValueError, TypeError):
                 pass
 
@@ -433,6 +485,32 @@ def _excel_elements_to_bim_result(
         raw_type_name = str(raw_type_name).strip()
         if raw_type_name and raw_type_name.lower() not in ("none", "null", "n/a", "-"):
             properties["type_name"] = raw_type_name
+
+        # ENSURE critical DDC columns are stored in properties under clean keys,
+        # even if the generic property loop above missed them (capped, filtered, etc.).
+        _KEY_DDC_COLUMNS = {
+            "level": "level", "base constraint": "base_constraint",
+            "base level": "base_level", "top level": "top_level",
+            "top constraint": "top_constraint",
+            "fire rating": "fire_rating", "material": "material",
+            "phase": "phase", "phase created": "phase_created",
+            "assembly code": "assembly_code",
+            "assembly description": "assembly_description",
+            "type mark": "type_mark", "mark": "mark",
+            "structural": "structural", "function": "function",
+            "family and type": "family_and_type",
+            "cost": "cost", "keynote": "keynote",
+            "comments": "comments", "description": "description",
+            "type comments": "type_comments",
+        }
+        for ddc_key, prop_key in _KEY_DDC_COLUMNS.items():
+            if prop_key in properties:
+                continue  # already populated by generic loop or hierarchy promotion
+            val = lc_row.get(ddc_key)
+            if val is not None:
+                sval = str(val).strip()
+                if sval and sval.lower() not in ("none", "0", ""):
+                    properties[prop_key] = sval[:500]
 
         elements.append({
             "stable_id": stable_id,
