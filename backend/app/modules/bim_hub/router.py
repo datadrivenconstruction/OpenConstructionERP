@@ -191,14 +191,39 @@ _BIM_COLUMN_ALIASES: dict[str, list[str]] = {
     "element_type": [
         "element_type",
         "elementtype",
-        "type",
-        "category",
         "ifc_type",
         "ifctype",
         "object_type",
         "objecttype",
-        "family",
+    ],
+    # _-prefixed alias groups are NOT top-level BIMElement columns.
+    # _rows_to_elements promotes them into the properties JSONB under
+    # clean keys (category, family, type_name) so the frontend can
+    # build Revit Browser-style hierarchy without data collisions.
+    "_category": [
+        "category",
+        "elementcategory",
+        "revit_category",
+        "revitcategory",
+        "ifc_class",
+        "ifcclass",
         "class",
+    ],
+    "_family": [
+        "family",
+        "family_name",
+        "familyname",
+        "revit_family",
+        "revitfamily",
+        "family_and_type",
+        "familyandtype",
+    ],
+    "_type_name": [
+        "type_name",
+        "typename",
+        "type",
+        "revit_type",
+        "revittype",
     ],
     "name": [
         "name",
@@ -208,8 +233,6 @@ _BIM_COLUMN_ALIASES: dict[str, list[str]] = {
         "bezeichnung",
         "label",
         "title",
-        "family_name",
-        "familyname",
     ],
     "storey": [
         "storey",
@@ -618,6 +641,21 @@ def _rows_to_elements(
                 if any(r > 10_000 for r in ranges):
                     bbox = {k: v / 1000.0 for k, v in bbox.items()}
 
+        # Promote _-prefixed canonical keys into properties under clean names.
+        # These come from the split alias groups (_category, _family, _type_name)
+        # that used to collide on element_type.
+        _PROMOTE_TO_PROPS = {
+            "_category": "category",
+            "_family": "family",
+            "_type_name": "type_name",
+        }
+        for raw_key, clean_key in _PROMOTE_TO_PROPS.items():
+            val = row.get(raw_key)
+            if val is not None:
+                cleaned = str(val).strip()
+                if cleaned and cleaned.lower() not in ("none", "null", "n/a", "-"):
+                    props[clean_key] = cleaned
+
         # Collect any extra columns not in known canonical keys as properties
         bbox_col_keys = {
             "bounding_box", "bbox_min_x", "bbox_min_y", "bbox_min_z",
@@ -626,14 +664,22 @@ def _rows_to_elements(
         known_keys = {
             "element_id", "element_type", "name", "storey",
             "discipline", "properties", "mesh_ref",
-        } | quantity_keys | bbox_col_keys
+        } | quantity_keys | bbox_col_keys | set(_PROMOTE_TO_PROPS.keys())
         for k, v in row.items():
             if k not in known_keys and v is not None and str(v).strip():
                 props[k] = v
 
+        # If element_type is empty after the alias split (because the Excel
+        # only had "Category" and "Type" columns, both now redirected away
+        # from element_type), fall back to category (the broadest
+        # classification) so we don't store rows with no type at all.
+        raw_element_type = str(row.get("element_type", "")).strip() or None
+        if not raw_element_type and props.get("category"):
+            raw_element_type = props["category"]
+
         element: dict[str, Any] = {
             "stable_id": eid,
-            "element_type": str(row.get("element_type", "")).strip() or None,
+            "element_type": raw_element_type,
             "name": str(row.get("name", "")).strip() or None,
             # Resolve storey from the top-level column first; if absent
             # (or a "None"/"-" sentinel), fall back to scanning the
