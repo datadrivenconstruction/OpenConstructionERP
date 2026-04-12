@@ -628,8 +628,9 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete }: {
 
 /* ── Landing Page ────────────────────────────────────────────────────── */
 
-function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrumbItems }: {
+function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrumbItems, onProcessingUpdate }: {
   projectId: string; onUploadComplete: (modelId: string) => void; breadcrumbItems: { label: string; to?: string }[];
+  onProcessingUpdate?: (update: ProcessingUpdate | null) => void;
 }) {
   const { t } = useTranslation();
   const [file, setFile] = useState<File | null>(null);
@@ -647,6 +648,9 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
     try {
       const name = modelName || file.name.replace(/\.[^.]+$/, '');
       const uploadType = isCADFile(file.name) ? 'cad' as const : 'data' as const;
+      // Show centered progress overlay immediately
+      const sizeLabel = (file.size / 1024 / 1024).toFixed(1) + ' MB';
+      onProcessingUpdate?.({ stage: 'uploading', fileName: file.name, fileSize: sizeLabel });
       startGlobalUpload({
         file,
         projectId,
@@ -1222,7 +1226,7 @@ export function BIMPage() {
   }
 
   if (showFullPageUpload && !modelsQuery.isLoading) {
-    return <LandingPage projectId={projectId} onUploadComplete={handleUploadComplete} breadcrumbItems={breadcrumbItems} />;
+    return <LandingPage projectId={projectId} onUploadComplete={handleUploadComplete} breadcrumbItems={breadcrumbItems} onProcessingUpdate={setProcessing} />;
   }
 
   const storeys = new Set(elements.map((e) => e.storey).filter(Boolean));
