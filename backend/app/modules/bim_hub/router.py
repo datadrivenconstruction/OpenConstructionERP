@@ -1253,6 +1253,7 @@ async def upload_cad_file(
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
+@router.head("/models/{model_id}/geometry/", response_model=None, include_in_schema=False)
 @router.get("/models/{model_id}/geometry/", response_model=None)
 async def get_model_geometry(
     model_id: uuid.UUID,
