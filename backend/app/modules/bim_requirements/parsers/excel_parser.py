@@ -164,11 +164,17 @@ def _parse_constraint_value(raw: str) -> dict[str, Any]:
     if not text:
         return result
 
-    # Check for enum (semicolons or commas with multiple distinct values)
+    # Check for enum (semicolons first — unambiguous; then commas as fallback)
     if ";" in text:
         enums = [v.strip() for v in text.split(";") if v.strip()]
         if len(enums) > 1:
             result["enum"] = enums
+            return result
+    elif "," in text:
+        parts = [v.strip() for v in text.split(",") if v.strip()]
+        # Don't treat as enum if all parts look numeric (could be "1,234" number)
+        if len(parts) > 1 and not all(re.match(r"^[\d.]+$", p) for p in parts):
+            result["enum"] = parts
             return result
 
     # Check for range pattern: "0.1 - 1.0" or "0.1-1.0"
