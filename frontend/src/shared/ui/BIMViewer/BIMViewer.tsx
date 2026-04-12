@@ -395,10 +395,15 @@ export function BIMViewer({
           setTimeout(fit, 250);
         })
         .catch(() => {
-          // Silently fall back to placeholder boxes (already rendered
-          // by loadElements). Hide the progress overlay so the user
-          // is not stuck looking at a frozen bar.
+          // Geometry load failed — re-load elements WITH placeholder
+          // boxes so the viewport is not left completely empty. The
+          // initial loadElements call used skipPlaceholders=true
+          // because we expected geometry to arrive; now we undo that.
           setGeometryProgress(null);
+          if (elementMgrRef.current && elements?.length) {
+            elementMgrRef.current.loadElements(elements, { skipPlaceholders: false });
+            sceneRef.current?.zoomToFit();
+          }
         });
     }
   }, [geometryUrl, elements]);
@@ -948,33 +953,47 @@ export function BIMViewer({
           individual element is selected.  Gives the user a quick overview
           of the model breakdown by category and storey. */}
       {!selectedElement && modelSummary && elementCount > 0 && (
-        <div className="absolute top-12 end-3 w-64 bg-surface-primary/95 backdrop-blur border border-border-light rounded-lg shadow-lg z-20 max-h-[calc(100%-6rem)] overflow-y-auto">
-          <div className="p-3 border-b border-border-light">
-            <h3 className="text-sm font-semibold text-content-primary">
-              {t('bim.model_summary', { defaultValue: 'Model summary' })}
-            </h3>
-            <p className="text-[11px] text-content-tertiary mt-0.5">
-              {t('bim.model_total_elements', {
-                defaultValue: '{{count}} elements',
-                count: elementCount,
-              })}
-            </p>
+        <div className="absolute top-12 end-3 w-72 bg-surface-primary/95 backdrop-blur border border-border-light rounded-lg shadow-lg z-20 max-h-[calc(100%-6rem)] overflow-y-auto">
+          <div className="px-4 py-3 border-b border-border-light">
+            <div className="flex items-center gap-2">
+              <LayoutGrid size={16} className="text-oe-blue shrink-0" />
+              <h3 className="text-sm font-bold text-content-primary">
+                {t('bim.model_summary', { defaultValue: 'Model summary' })}
+              </h3>
+            </div>
+            <div className="mt-1.5 flex items-center gap-2">
+              <span className="inline-flex items-center rounded-md bg-oe-blue/10 px-2 py-0.5 text-xs font-semibold text-oe-blue tabular-nums">
+                {elementCount.toLocaleString()}
+              </span>
+              <span className="text-xs text-content-tertiary">
+                {t('bim.model_total_elements_label', { defaultValue: 'elements' })}
+              </span>
+            </div>
           </div>
-          <div className="p-3 space-y-3">
+          <div className="px-4 py-3 space-y-4">
             {/* Category breakdown */}
             <div>
-              <h4 className="text-xs font-semibold text-content-primary mb-1.5">
+              <h4 className="text-xs font-bold text-content-primary mb-2">
                 {t('bim.by_category', { defaultValue: 'By category' })}
               </h4>
-              <div className="space-y-0.5 max-h-36 overflow-y-auto">
-                {modelSummary.categories.slice(0, 15).map(([cat, count]) => (
-                  <div key={cat} className="flex items-center justify-between text-[11px]">
-                    <span className="text-content-secondary truncate mr-2">{cat}</span>
-                    <span className="text-content-tertiary tabular-nums shrink-0">{count}</span>
-                  </div>
-                ))}
+              <div className="space-y-1.5 max-h-44 overflow-y-auto">
+                {modelSummary.categories.slice(0, 15).map(([cat, count]) => {
+                  const maxCount = modelSummary.categories[0]?.[1] ?? 1;
+                  const pct = Math.max(4, (count / maxCount) * 100);
+                  return (
+                    <div key={cat}>
+                      <div className="flex items-center justify-between text-xs mb-0.5">
+                        <span className="text-content-secondary truncate mr-2 font-medium">{cat}</span>
+                        <span className="inline-flex items-center rounded bg-surface-tertiary px-1.5 py-px text-[11px] font-semibold text-content-primary tabular-nums shrink-0">{count}</span>
+                      </div>
+                      <div className="h-1 w-full rounded-full bg-surface-tertiary overflow-hidden">
+                        <div className="h-full rounded-full bg-oe-blue/40" style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
                 {modelSummary.categories.length > 15 && (
-                  <div className="text-[10px] text-content-quaternary italic">
+                  <div className="text-[11px] text-content-quaternary italic pt-0.5">
                     + {modelSummary.categories.length - 15} more
                   </div>
                 )}
@@ -983,14 +1002,14 @@ export function BIMViewer({
             {/* Storey breakdown */}
             {modelSummary.storeys.length > 1 && (
               <div>
-                <h4 className="text-xs font-semibold text-content-primary mb-1.5">
+                <h4 className="text-xs font-bold text-content-primary mb-2">
                   {t('bim.by_storey', { defaultValue: 'By storey' })}
                 </h4>
-                <div className="space-y-0.5 max-h-28 overflow-y-auto">
+                <div className="space-y-1 max-h-32 overflow-y-auto">
                   {modelSummary.storeys.map(([st, count]) => (
-                    <div key={st} className="flex items-center justify-between text-[11px]">
+                    <div key={st} className="flex items-center justify-between text-xs">
                       <span className="text-content-secondary truncate mr-2">{st}</span>
-                      <span className="text-content-tertiary tabular-nums shrink-0">{count}</span>
+                      <span className="inline-flex items-center rounded bg-surface-tertiary px-1.5 py-px text-[11px] font-semibold text-content-primary tabular-nums shrink-0">{count}</span>
                     </div>
                   ))}
                 </div>
@@ -999,30 +1018,30 @@ export function BIMViewer({
             {/* Aggregate quantities */}
             {(modelSummary.totalVolume > 0 || modelSummary.totalArea > 0 || modelSummary.totalLength > 0) && (
               <div>
-                <h4 className="text-xs font-semibold text-content-primary mb-1.5">
+                <h4 className="text-xs font-bold text-content-primary mb-2">
                   {t('bim.total_quantities', { defaultValue: 'Total quantities' })}
                 </h4>
-                <div className="space-y-0.5">
+                <div className="grid grid-cols-1 gap-1.5">
                   {modelSummary.totalVolume > 0 && (
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-content-secondary">Volume</span>
-                      <span className="text-content-tertiary tabular-nums">
-                        {modelSummary.totalVolume.toLocaleString(undefined, { maximumFractionDigits: 1 })} m3
+                    <div className="flex items-center justify-between rounded-md bg-surface-secondary px-2.5 py-1.5">
+                      <span className="text-xs font-medium text-content-secondary">Volume</span>
+                      <span className="text-xs font-semibold text-content-primary tabular-nums">
+                        {modelSummary.totalVolume.toLocaleString(undefined, { maximumFractionDigits: 1 })} m&sup3;
                       </span>
                     </div>
                   )}
                   {modelSummary.totalArea > 0 && (
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-content-secondary">Area</span>
-                      <span className="text-content-tertiary tabular-nums">
-                        {modelSummary.totalArea.toLocaleString(undefined, { maximumFractionDigits: 1 })} m2
+                    <div className="flex items-center justify-between rounded-md bg-surface-secondary px-2.5 py-1.5">
+                      <span className="text-xs font-medium text-content-secondary">Area</span>
+                      <span className="text-xs font-semibold text-content-primary tabular-nums">
+                        {modelSummary.totalArea.toLocaleString(undefined, { maximumFractionDigits: 1 })} m&sup2;
                       </span>
                     </div>
                   )}
                   {modelSummary.totalLength > 0 && (
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-content-secondary">Length</span>
-                      <span className="text-content-tertiary tabular-nums">
+                    <div className="flex items-center justify-between rounded-md bg-surface-secondary px-2.5 py-1.5">
+                      <span className="text-xs font-medium text-content-secondary">Length</span>
+                      <span className="text-xs font-semibold text-content-primary tabular-nums">
                         {modelSummary.totalLength.toLocaleString(undefined, { maximumFractionDigits: 1 })} m
                       </span>
                     </div>

@@ -37,6 +37,7 @@ import {
   Boxes,
   BookOpen,
   Sparkles,
+  ChevronRight,
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -1490,10 +1491,11 @@ export function BIMQuantityRulesPage() {
       {/* Preview modal */}
       {/* BIM Requirements Import */}
       <div className="border-t border-border-light bg-surface-primary px-6 py-4">
-        <details className="group">
+        <details className="group" open>
           <summary className="cursor-pointer text-sm font-semibold text-content-primary flex items-center gap-2">
             <BookOpen size={16} className="text-oe-blue" />
             {t('bim_rules.requirements_import', { defaultValue: 'BIM Requirements Import/Export' })}
+            <ChevronRight size={14} className="text-content-tertiary transition-transform group-open:rotate-90" />
           </summary>
           <div className="mt-4">
             <BIMRequirementsImport />
