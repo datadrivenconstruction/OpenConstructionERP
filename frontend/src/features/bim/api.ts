@@ -634,15 +634,14 @@ export async function uploadCADFile(
   discipline: string,
   file: File,
   signal?: AbortSignal,
+  conversionDepth?: 'standard' | 'complete',
 ): Promise<BIMCadUploadResponse> {
   const formData = new FormData();
   formData.append('file', file);
 
-  const params = new URLSearchParams({
-    project_id: projectId,
-    name,
-    discipline,
-  });
+  const qp: Record<string, string> = { project_id: projectId, name, discipline };
+  if (conversionDepth) qp.conversion_depth = conversionDepth;
+  const params = new URLSearchParams(qp);
 
   const token = useAuthStore.getState().accessToken;
   const headers: HeadersInit = {

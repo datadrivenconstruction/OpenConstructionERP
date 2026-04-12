@@ -914,6 +914,7 @@ async def upload_cad_file(
     project_id: str = Query(..., description="Project UUID"),
     name: str = Query(default="", max_length=255),
     discipline: str = Query(default="architecture", max_length=50),
+    conversion_depth: str = Query(default="standard", description="DDC conversion depth: 'standard' (~15 key columns) or 'complete' (~1000+ columns)"),
     file: UploadFile = File(..., description="CAD file (RVT, IFC, DWG, DGN, FBX, OBJ, 3DS)"),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("bim.create")),
@@ -1095,7 +1096,7 @@ async def upload_cad_file(
 
                 # Run sync processor in thread to avoid blocking the event loop
                 result = await asyncio.to_thread(
-                    process_ifc_file, _tmp_cad_path, _tmp_dir
+                    process_ifc_file, _tmp_cad_path, _tmp_dir, conversion_depth
                 )
                 element_count = result["element_count"]
 
