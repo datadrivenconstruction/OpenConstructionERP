@@ -39,6 +39,7 @@ import {
 } from 'lucide-react';
 import type { BIMElementGroup } from './api';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
+import { getCategoryColor } from '@/shared/ui/BIMViewer/ElementManager';
 import {
   bucketOf,
   isNoiseCategory,
@@ -727,6 +728,33 @@ export default function BIMFilterPanel({
             </button>
           )}
         </div>
+
+        {/* Natural language summary — "Showing 72 Walls on Entry Level" */}
+        {hasActiveFilters && visibleElements.length > 0 && (
+          <div className="mt-2 px-2.5 py-1.5 rounded-md bg-oe-blue/5 border border-oe-blue/15 text-[11px] font-medium text-oe-blue">
+            {(() => {
+              const parts: string[] = [];
+              parts.push(`Showing ${visibleElements.length}`);
+              if (state.types.size === 1) {
+                const typeName = prettifyCategoryName([...state.types][0]!);
+                parts.push(typeName);
+              } else if (state.types.size > 1) {
+                parts.push(`types (${state.types.size})`);
+              } else {
+                parts.push('elements');
+              }
+              if (state.storeys.size === 1) {
+                parts.push(`on ${[...state.storeys][0]}`);
+              } else if (state.storeys.size > 1) {
+                parts.push(`across ${state.storeys.size} levels`);
+              }
+              if (state.search) {
+                parts.push(`matching "${state.search}"`);
+              }
+              return parts.join(' ');
+            })()}
+          </div>
+        )}
 
         {/* Visible count + clear */}
         <div className="flex items-center justify-between mt-2 text-[11px] text-content-tertiary">
@@ -1513,6 +1541,7 @@ function CategoryFlatList({
                 active={active}
                 onClick={() => onToggle(name)}
                 subtitle={qtyParts.length > 0 ? qtyParts.join(' | ') : undefined}
+                colorDot={getCategoryColor(name)}
               />
             );
           })}
@@ -1598,12 +1627,15 @@ function FilterChip({
   active,
   onClick,
   subtitle,
+  colorDot,
 }: {
   label: string;
   count: number;
   active: boolean;
   onClick: () => void;
   subtitle?: string;
+  /** Hex color number (e.g. 0x4488cc) for a small category dot. */
+  colorDot?: number;
 }) {
   return (
     <button
@@ -1616,7 +1648,12 @@ function FilterChip({
       title={subtitle}
     >
       <div className="flex items-center gap-1.5 min-w-0 flex-1">
-        {active ? (
+        {colorDot != null ? (
+          <span
+            className="inline-block w-2 h-2 rounded-full shrink-0 ring-1 ring-black/10"
+            style={{ backgroundColor: `#${colorDot.toString(16).padStart(6, '0')}` }}
+          />
+        ) : active ? (
           <Eye size={10} className="shrink-0" />
         ) : (
           <EyeOff size={10} className="shrink-0 opacity-40" />
