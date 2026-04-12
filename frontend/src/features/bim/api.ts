@@ -146,11 +146,16 @@ export async function fetchBIMModel(modelId: string): Promise<BIMModelData> {
  */
 export async function fetchBIMElements(
   modelId: string,
-  limit = 50000,
-  offset = 0,
+  opts?: { limit?: number; offset?: number; groupId?: string | null },
 ): Promise<BIMElementsResponse> {
+  const limit = opts?.limit ?? 50000;
+  const offset = opts?.offset ?? 0;
+  const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+  if (opts?.groupId) {
+    params.set('group_id', opts.groupId);
+  }
   return apiGet<BIMElementsResponse>(
-    `/v1/bim_hub/models/${encodeURIComponent(modelId)}/elements/?limit=${limit}&offset=${offset}`,
+    `/v1/bim_hub/models/${encodeURIComponent(modelId)}/elements/?${params.toString()}`,
   );
 }
 

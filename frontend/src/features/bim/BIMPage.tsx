@@ -877,6 +877,8 @@ export function BIMPage() {
     setVisibleElementCount(null);
     setIsolatedIds(null);
     setColorByMode('default');
+    setFullModelRequested(false);
+    setActiveGroupId(null);
   }, [activeModelId]);
 
   // Auto-dismiss the processing progress card 4 seconds after the model is
@@ -887,12 +889,32 @@ export function BIMPage() {
     return () => clearTimeout(timer);
   }, [processing?.stage]);
 
+  // When ?group= is present, load only that group's elements from the
+  // backend (lazy loading).  This makes cross-module navigation instant
+  // for large models (7k+ elements).
+  const groupParam = searchParams.get('group');
+  const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
+  const [fullModelRequested, setFullModelRequested] = useState(false);
+
+  // Sync the URL group param into local state on mount / URL change.
+  useEffect(() => {
+    if (groupParam && !fullModelRequested) {
+      setActiveGroupId(groupParam);
+    }
+  }, [groupParam, fullModelRequested]);
+
+  const effectiveGroupId = fullModelRequested ? null : activeGroupId;
+
   const elementsQuery = useQuery({
-    queryKey: ['bim-elements', activeModelId],
-    queryFn: () => fetchBIMElements(activeModelId!),
+    queryKey: ['bim-elements', activeModelId, effectiveGroupId ?? 'all'],
+    queryFn: () =>
+      fetchBIMElements(activeModelId!, {
+        groupId: effectiveGroupId,
+      }),
     enabled: !!activeModelId && activeModel?.status === 'ready',
   });
   const elements: BIMElementData[] = elementsQuery.data?.items ?? [];
+  const elementsTotal: number = elementsQuery.data?.total ?? 0;
 
   // Apply the deep-link element selection as soon as the elements list
   // resolves.  Strips the query param afterwards so a refresh doesn't
@@ -933,11 +955,6 @@ export function BIMPage() {
     setSearchParams(next, { replace: true });
   }, [isolateParam, elements, searchParams, setSearchParams, setBIMSelection]);
 
-  // Deep-link: ?group=<group_id> — apply a saved element group as the
-  // isolation filter.  The group is resolved from the savedGroups query
-  // and its member_element_ids are set as the isolatedIds.
-  const groupParam = searchParams.get('group');
-
   // Saved element groups for the current model — populated by the
   // /api/v1/bim_hub/element-groups/ endpoint and rendered at the top
   // of BIMFilterPanel for one-click apply.  Refetch is triggered by
@@ -949,19 +966,11 @@ export function BIMPage() {
   });
   const savedGroups: BIMElementGroup[] = groupsQuery.data ?? [];
 
-  // Resolve ?group=<id> deep-link once savedGroups are loaded.
-  useEffect(() => {
-    if (!groupParam || savedGroups.length === 0) return;
-    const group = savedGroups.find((g) => g.id === groupParam);
-    if (!group) return;
-    const memberIds = group.member_element_ids ?? group.element_ids ?? [];
-    if (memberIds.length > 0) {
-      setIsolatedIds(memberIds);
-    }
-    const next = new URLSearchParams(searchParams);
-    next.delete('group');
-    setSearchParams(next, { replace: true });
-  }, [groupParam, savedGroups, searchParams, setSearchParams]);
+  // Resolve the active group name for the lazy-load info bar.
+  const activeGroupMeta = useMemo(() => {
+    if (!activeGroupId) return null;
+    return savedGroups.find((g) => g.id === activeGroupId) ?? null;
+  }, [activeGroupId, savedGroups]);
 
   const geometryUrl = useMemo(() => {
     if (!activeModelId || activeModel?.status !== 'ready') return null;
@@ -1515,6 +1524,7 @@ export function BIMPage() {
             onDelete={() => handleDeleteModel(activeModel!.id, activeModel!.name)}
           />
         ) : activeModelId ? (
+          <>
           <BIMViewer
             modelId={activeModelId}
             projectId={projectId}
@@ -1542,6 +1552,38 @@ export function BIMPage() {
             onSmartFilter={handleSmartFilter}
             className="h-full"
           />
+
+          {/* Lazy-load info bar — shown when viewing a group subset */}
+          {activeGroupId && !fullModelRequested && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-border-primary shadow-lg text-sm">
+              <Layers size={16} className="text-brand-primary shrink-0" />
+              <span className="text-content-secondary">
+                {t('bim.group_subset_info', {
+                  defaultValue: 'Showing {{count}} elements from group "{{name}}"',
+                  count: elementsTotal,
+                  name: activeGroupMeta?.name ?? groupParam ?? '...',
+                })}
+              </span>
+              <button
+                onClick={() => {
+                  setFullModelRequested(true);
+                  setActiveGroupId(null);
+                  // Strip group param from URL
+                  const next = new URLSearchParams(searchParams);
+                  next.delete('group');
+                  setSearchParams(next, { replace: true });
+                }}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-brand-primary/10 hover:bg-brand-primary/20 text-brand-primary font-medium transition-colors"
+              >
+                <Globe2 size={14} />
+                {t('bim.load_full_model', {
+                  defaultValue: 'Load full model ({{total}} elements)',
+                  total: activeModel?.element_count?.toLocaleString() ?? '...',
+                })}
+              </button>
+            </div>
+          )}
+          </>
         ) : (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
