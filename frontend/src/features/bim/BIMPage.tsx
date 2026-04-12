@@ -290,6 +290,7 @@ function UploadPanel({
       if (advancedMode && dataFile) {
         // Advanced (data) upload — delegate to global store
         const name = modelName || 'Imported';
+        onProcessingUpdate?.({ stage: 'uploading', fileName, fileSize: sizeLabel });
         startGlobalUpload({
           file: dataFile,
           projectId,
@@ -298,7 +299,6 @@ function UploadPanel({
           uploadType: 'data',
           geometryFile,
         });
-        onProcessingUpdate?.({ stage: 'uploading', fileName, fileSize: sizeLabel });
         addToast({
           type: 'info',
           title: t('bim.upload_started_title', { defaultValue: 'Upload started' }),
@@ -307,6 +307,7 @@ function UploadPanel({
           }),
         });
         resetForm();
+        onClose?.();
       } else if (file) {
         const name = modelName || file.name.replace(/\.[^.]+$/, '');
         if (isCADFile(file.name)) {
@@ -354,7 +355,11 @@ function UploadPanel({
             }
           }
 
-          // Delegate to global store — upload survives navigation
+          // Delegate to global store — upload survives navigation.
+          // Set the centered progress overlay FIRST so the user sees
+          // immediate feedback, then close the upload panel so the
+          // overlay is not hidden behind it.
+          onProcessingUpdate?.({ stage: 'uploading', fileName, fileSize: sizeLabel });
           startGlobalUpload({
             file,
             projectId,
@@ -362,7 +367,6 @@ function UploadPanel({
             discipline,
             uploadType: 'cad',
           });
-          onProcessingUpdate?.({ stage: 'uploading', fileName, fileSize: sizeLabel });
           addToast({
             type: 'info',
             title: t('bim.upload_started_title', { defaultValue: 'Upload started' }),
@@ -371,6 +375,7 @@ function UploadPanel({
             }),
           });
           resetForm();
+          onClose?.();
         } else if (isDataFile(file.name)) {
           // Data file upload — delegate to global store
           startGlobalUpload({
