@@ -167,6 +167,57 @@ function getDisciplineColor(discipline: string): number {
   return DISCIPLINE_COLORS[key] ?? DEFAULT_COLOR;
 }
 
+/* ── Category Colors (for placeholder boxes) ─────────────────────────── */
+
+/** Map element_type (Revit Category / IFC Entity) to a distinct color so
+ *  placeholder boxes are immediately distinguishable by building trade.
+ *  Exported for reuse in the filter panel (colored dots on chips). */
+export const CATEGORY_COLORS: Record<string, number> = {
+  'Walls': 0x4488cc,
+  'Doors': 0x44aa44,
+  'Windows': 0x66ccdd,
+  'Structural Columns': 0x888888,
+  'Structural Framing': 0x999999,
+  'Floors': 0xccaa66,
+  'Roofs': 0xcc6644,
+  'Ceilings': 0xddccaa,
+  'Stairs': 0xaa6644,
+  'Furniture': 0x886644,
+  'Curtain Wall Mullions': 0x6688aa,
+  'Curtain Wall Panels': 0x88aacc,
+  'Planting': 0x55bb55,
+  'Rooms': 0xeeeecc,
+  'Columns': 0x888888,
+  'Mechanical Equipment': 0x66bb6a,
+  'Electrical Equipment': 0xfdd835,
+  'Plumbing Fixtures': 0xab47bc,
+  'Railings': 0x9e8e7e,
+  'Generic Models': 0xbbbbbb,
+  'Pipes': 0xab47bc,
+  'Ducts': 0x66bb6a,
+  'Cable Trays': 0xfdd835,
+  // IFC entities
+  'IfcWall': 0x4488cc,
+  'IfcWallStandardCase': 0x4488cc,
+  'IfcDoor': 0x44aa44,
+  'IfcWindow': 0x66ccdd,
+  'IfcColumn': 0x888888,
+  'IfcBeam': 0x999999,
+  'IfcSlab': 0xccaa66,
+  'IfcRoof': 0xcc6644,
+  'IfcCovering': 0xddccaa,
+  'IfcStair': 0xaa6644,
+  'IfcFurnishingElement': 0x886644,
+  'IfcCurtainWall': 0x88aacc,
+  'IfcSpace': 0xeeeecc,
+  'IfcRailing': 0x9e8e7e,
+  'IfcBuildingElementProxy': 0xbbbbbb,
+};
+
+export function getCategoryColor(elementType: string): number {
+  return CATEGORY_COLORS[elementType] ?? 0xdd8833; // default warm orange
+}
+
 /* ── Element Manager ───────────────────────────────────────────────────── */
 
 export class ElementManager {
@@ -207,6 +258,10 @@ export class ElementManager {
     this.sceneManager = sceneManager;
     this.elementGroup = new THREE.Group();
     this.elementGroup.name = 'bim_elements';
+    // DDC bounding boxes use Z-up (Revit/CAD convention).
+    // Rotate the group -90° around X to bring buildings upright,
+    // matching the same rotation applied to DAE/GLB geometry.
+    this.elementGroup.rotation.x = -Math.PI / 2;
     this.sceneManager.scene.add(this.elementGroup);
   }
 
@@ -698,7 +753,10 @@ export class ElementManager {
     const depth = Math.abs(bb.max_z - bb.min_z) || 0.1;
 
     const geometry = new THREE.BoxGeometry(width, height, depth);
-    const material = this.getMaterial(element.discipline);
+    // Color by element category (type) for immediate visual distinction,
+    // falling back to discipline color if no category mapping exists.
+    const catColor = getCategoryColor(element.element_type);
+    const material = this.getOrCreateCategoryMaterial(element.element_type, catColor);
 
     const mesh = new THREE.Mesh(geometry, material);
     mesh.position.set(
@@ -708,6 +766,16 @@ export class ElementManager {
     );
     mesh.castShadow = true;
     mesh.receiveShadow = true;
+
+    // Add thin wireframe outline for depth / edge visibility
+    const edgeGeo = new THREE.EdgesGeometry(geometry);
+    const edgeMat = new THREE.LineBasicMaterial({
+      color: 0x222222,
+      transparent: true,
+      opacity: 0.25,
+    });
+    const wireframe = new THREE.LineSegments(edgeGeo, edgeMat);
+    mesh.add(wireframe);
 
     // Store element data for raycasting / picking
     mesh.userData = {
@@ -726,6 +794,29 @@ export class ElementManager {
         color: getDisciplineColor(discipline),
         roughness: 0.7,
         metalness: 0.1,
+        transparent: true,
+        opacity: 0.85,
+        wireframe: this.wireframeEnabled,
+      });
+      this.baseMaterials.set(key, mat);
+    }
+    return mat;
+  }
+
+  /** Get or create a material keyed by category name + color.
+   *  Placeholder boxes use this so each Revit/IFC category gets a
+   *  unique color without duplicating material allocations. */
+  private getOrCreateCategoryMaterial(
+    category: string,
+    color: number,
+  ): THREE.MeshStandardMaterial {
+    const key = `cat_${category}`;
+    let mat = this.baseMaterials.get(key);
+    if (!mat) {
+      mat = new THREE.MeshStandardMaterial({
+        color,
+        roughness: 0.6,
+        metalness: 0.08,
         transparent: true,
         opacity: 0.85,
         wireframe: this.wireframeEnabled,
