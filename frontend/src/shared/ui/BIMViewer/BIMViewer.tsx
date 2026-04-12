@@ -583,6 +583,11 @@ export function BIMViewer({
                           defaultValue: 'Streaming geometry from server…',
                         })}
                   </span>
+                  <span className="text-[10px] text-content-quaternary text-center mt-1">
+                    {t('bim.loading_navigate_hint', {
+                      defaultValue: 'You can navigate to other pages — loading will continue in the background',
+                    })}
+                  </span>
                 </>
               )}
             </div>
