@@ -914,7 +914,7 @@ async def upload_cad_file(
     project_id: str = Query(..., description="Project UUID"),
     name: str = Query(default="", max_length=255),
     discipline: str = Query(default="architecture", max_length=50),
-    conversion_depth: str = Query(default="standard", description="DDC conversion depth: 'standard' (~15 key columns) or 'complete' (~1000+ columns)"),
+    conversion_depth: str = Query(default="complete", description="DDC conversion depth: 'complete' (all Revit parameters, ~1000+ columns) or 'standard' (~15 basic columns, faster)"),
     file: UploadFile = File(..., description="CAD file (RVT, IFC, DWG, DGN, FBX, OBJ, 3DS)"),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("bim.create")),
