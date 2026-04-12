@@ -28,7 +28,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, 
 from fastapi.responses import StreamingResponse
 
 from app.core.bulk_ops import BulkAssignRequest, BulkDeleteRequest, BulkStatusRequest
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.tasks.schemas import (
     TaskBimLinkRequest,
     TaskCompleteRequest,
@@ -103,6 +103,7 @@ def _to_response(item: object) -> TaskResponse:
 
 @router.get("/", response_model=list[TaskResponse])
 async def list_tasks(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     offset: int = Query(default=0, ge=0),
@@ -132,6 +133,7 @@ async def list_tasks(
     is supplied, the result is filtered to tasks whose ``bim_element_ids``
     list includes that element id. All other filters still apply on top.
     """
+    await verify_project_access(project_id, user_id, session)
     if bim_element_id:
         # JSON-contains filter — delegated to the service for dialect handling.
         tasks_with_bim = await service.get_tasks_for_bim_element(
@@ -203,16 +205,19 @@ async def my_tasks(
 async def create_task(
     data: TaskCreate,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("tasks.create")),
     service: TaskService = Depends(_get_service),
 ) -> TaskResponse:
     """Create a new task."""
+    await verify_project_access(data.project_id, user_id, session)
     task = await service.create_task(data, user_id=user_id)
     return _to_response(task)
 
 
 @router.get("/stats/", response_model=TaskStatsResponse)
 async def task_stats(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: TaskService = Depends(_get_service),
@@ -222,6 +227,7 @@ async def task_stats(
     Includes total, breakdown by status/type/priority, overdue count,
     and average checklist progress.
     """
+    await verify_project_access(project_id, user_id, session)
     return await service.get_stats(project_id, current_user_id=user_id)
 
 
@@ -230,11 +236,13 @@ async def task_stats(
 
 @router.get("/export/")
 async def export_tasks(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: TaskService = Depends(_get_service),
 ) -> StreamingResponse:
     """Export tasks for a project as Excel file."""
+    await verify_project_access(project_id, user_id, session)
     from openpyxl import Workbook
     from openpyxl.styles import Font
 
@@ -450,6 +458,7 @@ def _parse_task_rows_from_excel(content: bytes) -> list[dict[str, Any]]:
 @router.post("/import/file/")
 async def import_tasks_file(
     user_id: CurrentUserId,
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     file: UploadFile = File(..., description="Excel (.xlsx) or CSV (.csv) file"),
     _perm: None = Depends(RequirePermission("tasks.create")),
@@ -468,6 +477,7 @@ async def import_tasks_file(
     Returns:
         Summary with counts of imported, skipped, and error details per row.
     """
+    await verify_project_access(project_id, user_id, session)
     filename = (file.filename or "").lower()
     if not filename.endswith((".xlsx", ".csv", ".xls")):
         raise HTTPException(
