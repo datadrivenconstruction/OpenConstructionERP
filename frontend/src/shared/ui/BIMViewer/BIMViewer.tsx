@@ -32,9 +32,6 @@ import {
   ShieldCheck,
   ShieldAlert,
   ShieldX,
-  Database,
-  ChevronDown,
-  ChevronRight,
   LayoutGrid,
   Boxes,
   PanelTop,
@@ -235,6 +232,15 @@ export function BIMViewer({
   const [gridVisible, setGridVisible] = useState(false);
   const [selectedElement, setSelectedElement] = useState<BIMElementData | null>(null);
   const [elementCount, setElementCount] = useState(0);
+  /** Hover tooltip state — tracks the hovered element and mouse position
+   *  so a floating label appears next to the cursor in the 3D viewport. */
+  const [hoveredElement, setHoveredElement] = useState<BIMElementData | null>(null);
+  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  /** Keyboard shortcut overlay toggle (press ? to show). */
+  const [showShortcuts, setShowShortcuts] = useState(false);
+  /** Properties panel active tab. */
+  const [propsTab, setPropsTab] = useState<'key' | 'all' | 'links' | 'validation'>('key');
   /** Parquet/DuckDB "all properties" expansion state. */
   const [parquetProps, setParquetProps] = useState<Record<string, unknown> | null>(null);
   const [parquetLoading, setParquetLoading] = useState(false);
@@ -300,18 +306,39 @@ export function BIMViewer({
         } else {
           setSelectedElement(null);
         }
-        // Reset parquet expansion when element changes
+        // Reset parquet expansion and tab when element changes
         setParquetProps(null);
         setParquetExpanded(false);
+        setPropsTab('key');
         onElementSelect?.(id);
       },
       onElementHover: (id) => {
+        if (id) {
+          const data = elementMgr.getElementData(id);
+          setHoveredElement(data ?? null);
+        } else {
+          setHoveredElement(null);
+          setTooltipPos(null);
+        }
         onElementHover?.(id);
       },
     });
     selectionMgrRef.current = selectionMgr;
 
+    // Track mouse position for hover tooltip
+    const handleMouseMoveForTooltip = (e: MouseEvent) => {
+      const container = containerRef.current;
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      setTooltipPos({
+        x: e.clientX - rect.left + 14,
+        y: e.clientY - rect.top + 14,
+      });
+    };
+    canvas.addEventListener('mousemove', handleMouseMoveForTooltip);
+
     return () => {
+      canvas.removeEventListener('mousemove', handleMouseMoveForTooltip);
       selectionMgr.dispose();
       elementMgr.dispose();
       scene.dispose();
@@ -650,18 +677,26 @@ export function BIMViewer({
           break;
         case 'escape':
           // Deselect element and close properties panel
-          setSelectedElement(null);
-          setParquetProps(null);
-          setParquetExpanded(false);
-          selectionMgrRef.current?.clearSelection();
-          onElementSelect?.(null);
+          if (showShortcuts) {
+            setShowShortcuts(false);
+          } else {
+            setSelectedElement(null);
+            setParquetProps(null);
+            setParquetExpanded(false);
+            selectionMgrRef.current?.clearSelection();
+            onElementSelect?.(null);
+          }
+          break;
+        case '?':
+          e.preventDefault();
+          setShowShortcuts((v) => !v);
           break;
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onElementSelect]);
+  }, [onElementSelect, showShortcuts]);
 
   // Memoize the element properties/quantities for the panel
   const elementProperties = useMemo(() => {
@@ -703,7 +738,7 @@ export function BIMViewer({
   }, [selectedElement]);
 
   return (
-    <div className={clsx('relative w-full h-full min-h-[400px] bg-surface-secondary rounded-lg overflow-hidden', className)}>
+    <div ref={containerRef} className={clsx('relative w-full h-full min-h-[400px] bg-surface-secondary rounded-lg overflow-hidden', className)}>
       <canvas ref={canvasRef} className="w-full h-full block" />
 
       {/* Loading overlay — covers the canvas while either the
@@ -949,6 +984,65 @@ export function BIMViewer({
         </div>
       )}
 
+      {/* Hover tooltip — follows the cursor when hovering over an element */}
+      {hoveredElement && tooltipPos && !selectedElement && (
+        <div
+          className="absolute z-30 pointer-events-none px-2.5 py-1.5 rounded-md bg-gray-900/90 text-white text-[11px] leading-tight shadow-lg backdrop-blur-sm max-w-[220px]"
+          style={{ left: tooltipPos.x, top: tooltipPos.y }}
+        >
+          <div className="font-semibold truncate">
+            {hoveredElement.name || hoveredElement.element_type}
+          </div>
+          <div className="text-gray-300 text-[10px]">
+            {hoveredElement.element_type}
+            {hoveredElement.storey && (
+              <span className="ml-1.5 text-gray-400">{hoveredElement.storey}</span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Keyboard shortcut overlay — toggled by pressing ? */}
+      {showShortcuts && (
+        <div className="absolute inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-surface-primary rounded-xl shadow-2xl border border-border-light p-6 w-80">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold text-content-primary">
+                {t('bim.keyboard_shortcuts', { defaultValue: 'Keyboard Shortcuts' })}
+              </h3>
+              <button
+                onClick={() => setShowShortcuts(false)}
+                className="text-content-tertiary hover:text-content-primary text-xs"
+              >
+                Esc
+              </button>
+            </div>
+            <div className="space-y-2 text-xs">
+              {[
+                ['F', 'Fit all elements'],
+                ['W', 'Toggle wireframe'],
+                ['G', 'Toggle grid'],
+                ['1', 'Front view'],
+                ['2', 'Side view'],
+                ['3', 'Top view'],
+                ['0', 'Isometric view'],
+                ['Esc', 'Deselect / close panel'],
+                ['Click', 'Select element'],
+                ['Ctrl+Click', 'Multi-select'],
+                ['?', 'Toggle this overlay'],
+              ].map(([key, desc]) => (
+                <div key={key} className="flex items-center justify-between">
+                  <span className="text-content-secondary">{desc}</span>
+                  <kbd className="px-1.5 py-0.5 bg-surface-secondary border border-border-light rounded text-[10px] font-mono text-content-primary min-w-[28px] text-center">
+                    {key}
+                  </kbd>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Model summary panel — shown when elements are loaded but no
           individual element is selected.  Gives the user a quick overview
           of the model breakdown by category and storey. */}
@@ -1069,10 +1163,10 @@ export function BIMViewer({
         </div>
       )}
 
-      {/* Properties panel (when element selected) */}
+      {/* Properties panel (when element selected) — tabbed layout */}
       {selectedElement && (
-        <div className="absolute top-12 end-3 w-72 bg-surface-primary/95 backdrop-blur border border-border-light rounded-lg shadow-lg z-20 max-h-[calc(100%-6rem)] overflow-y-auto">
-          <div className="flex items-center justify-between p-3 border-b border-border-light">
+        <div className="absolute top-12 end-3 w-72 bg-surface-primary/95 backdrop-blur border border-border-light rounded-lg shadow-lg z-20 max-h-[calc(100%-6rem)] flex flex-col">
+          <div className="flex items-center justify-between p-3 border-b border-border-light shrink-0">
             <h3 className="text-sm font-semibold text-content-primary truncate">
               {selectedElement.name || selectedElement.element_type || selectedElement.id}
             </h3>
@@ -1085,157 +1179,205 @@ export function BIMViewer({
             </button>
           </div>
 
-          <div className="p-3 space-y-3">
-            {/* Element info */}
-            <div className="space-y-1">
-              <InfoRow
-                label={t('bim.prop_type', { defaultValue: 'Type' })}
-                value={selectedElement.element_type}
-              />
-              <InfoRow
-                label={t('bim.prop_discipline', { defaultValue: 'Discipline' })}
-                value={selectedElement.discipline}
-              />
-              {selectedElement.storey && (
-                <InfoRow
-                  label={t('bim.prop_storey', { defaultValue: 'Storey' })}
-                  value={selectedElement.storey}
-                />
-              )}
-              {selectedElement.category && (
-                <InfoRow
-                  label={t('bim.prop_category', { defaultValue: 'Category' })}
-                  value={selectedElement.category}
-                />
-              )}
-            </div>
-
-            {/* Classification */}
-            {selectedElement.classification && Object.keys(selectedElement.classification).length > 0 && (
-              <div>
-                <h4 className="text-xs font-semibold text-content-primary mb-1">
-                  {t('bim.classification', { defaultValue: 'Classification' })}
-                </h4>
-                <PropertiesTable properties={selectedElement.classification} />
-              </div>
-            )}
-
-            {/* Quantities */}
-            {Object.keys(elementQuantities).length > 0 && (
-              <div>
-                <h4 className="text-xs font-semibold text-content-primary mb-1">
-                  {t('bim.quantities', { defaultValue: 'Quantities' })}
-                </h4>
-                <QuantitiesTable quantities={elementQuantities} />
-              </div>
-            )}
-
-            {/* All Properties from Parquet/DuckDB — shows every column for
-                this element as stored in the Parquet dataframe, which can
-                have 1000+ columns for "complete" mode uploads. */}
-            <div>
+          {/* Tab bar */}
+          <div className="flex border-b border-border-light shrink-0">
+            {([
+              ['key', 'Key'] as const,
+              ['all', 'All'] as const,
+              ['links', 'Links'] as const,
+              ['validation', 'Check'] as const,
+            ]).map(([id, label]) => (
               <button
+                key={id}
                 type="button"
                 onClick={() => {
-                  if (!parquetExpanded && parquetProps === null) {
+                  setPropsTab(id);
+                  if (id === 'all' && parquetProps === null && !parquetExpanded) {
                     handleFetchAllProperties();
-                  } else {
-                    setParquetExpanded((v) => !v);
                   }
                 }}
-                className="flex items-center gap-1.5 text-xs font-semibold text-content-primary hover:text-oe-blue transition-colors w-full"
-              >
-                {parquetExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-                <Database size={11} />
-                {t('bim.all_properties', { defaultValue: 'All properties (Parquet)' })}
-                {parquetLoading && <Loader2 size={11} className="animate-spin text-oe-blue ms-auto" />}
-              </button>
-              {parquetExpanded && parquetProps && (
-                <div className="mt-1 max-h-60 overflow-y-auto">
-                  <PropertiesTable properties={parquetProps} />
-                </div>
-              )}
-              {parquetExpanded && parquetProps && Object.keys(parquetProps).length === 0 && (
-                <p className="text-[10px] text-content-tertiary italic mt-1">
-                  {t('bim.no_parquet_data', {
-                    defaultValue: 'No Parquet data available for this element',
-                  })}
-                </p>
-              )}
-            </div>
-
-            {/* Validation results — appears when the user has run
-                POST /validation/check-bim-model on this model.  Each
-                element gets a per-element rollup (pass/warning/error)
-                plus the list of failed rules with messages. */}
-            {selectedElement.validation_results && selectedElement.validation_results.length > 0 && (
-              <div
-                className={`rounded-md border p-2 ${
-                  selectedElement.validation_status === 'error'
-                    ? 'border-rose-300/60 bg-rose-50/50 dark:bg-rose-950/20'
-                    : selectedElement.validation_status === 'warning'
-                      ? 'border-amber-300/60 bg-amber-50/50 dark:bg-amber-950/20'
-                      : 'border-emerald-300/60 bg-emerald-50/50 dark:bg-emerald-950/20'
+                className={`flex-1 py-1.5 text-[10px] font-semibold transition-colors border-b-2 ${
+                  propsTab === id
+                    ? 'border-oe-blue text-oe-blue'
+                    : 'border-transparent text-content-tertiary hover:text-content-secondary'
                 }`}
               >
-                <h4
-                  className={`text-xs font-semibold flex items-center gap-1 mb-1.5 ${
-                    selectedElement.validation_status === 'error'
-                      ? 'text-rose-700 dark:text-rose-300'
-                      : selectedElement.validation_status === 'warning'
-                        ? 'text-amber-700 dark:text-amber-300'
-                        : 'text-emerald-700 dark:text-emerald-300'
-                  }`}
-                >
-                  {selectedElement.validation_status === 'error' ? (
-                    <ShieldX size={11} />
-                  ) : selectedElement.validation_status === 'warning' ? (
-                    <ShieldAlert size={11} />
-                  ) : (
-                    <ShieldCheck size={11} />
-                  )}
-                  {t('bim.validation_results', { defaultValue: 'Validation results' })}
-                  <span className="text-[10px] text-content-tertiary font-normal">
-                    ({selectedElement.validation_results.length})
+                {label}
+                {id === 'links' && (selectedElement.boq_links?.length ?? 0) > 0 && (
+                  <span className="ml-0.5 text-[9px] text-oe-blue">
+                    {selectedElement.boq_links!.length}
                   </span>
-                </h4>
-                <ul className="space-y-0.5">
-                  {selectedElement.validation_results.slice(0, 6).map((vr, i) => (
-                    <li
-                      key={`${vr.rule_id}-${i}`}
-                      className="flex items-start gap-1.5 text-[10px] text-content-secondary"
-                    >
-                      <span
-                        className={`mt-0.5 inline-block h-1.5 w-1.5 rounded-full shrink-0 ${
-                          vr.severity === 'error'
-                            ? 'bg-rose-500'
-                            : vr.severity === 'warning'
-                              ? 'bg-amber-500'
-                              : 'bg-sky-500'
-                        }`}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div
-                          className="text-content-primary truncate"
-                          title={vr.rule_id}
-                        >
-                          {vr.rule_id}
-                        </div>
-                        <div className="text-content-tertiary text-[9px] line-clamp-2">
-                          {vr.message}
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-                  {selectedElement.validation_results.length > 6 && (
-                    <li className="text-[9px] text-content-tertiary italic">
-                      + {selectedElement.validation_results.length - 6} more rules
-                    </li>
+                )}
+                {id === 'validation' && selectedElement.validation_status === 'error' && (
+                  <span className="ml-0.5 text-[9px] text-rose-500">!</span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          <div className="overflow-y-auto p-3 space-y-3">
+            {/* ── Tab: Key Properties ─────────────────────────────────── */}
+            {propsTab === 'key' && (
+              <>
+                {/* Element info */}
+                <div className="space-y-1">
+                  <InfoRow
+                    label={t('bim.prop_type', { defaultValue: 'Type' })}
+                    value={selectedElement.element_type}
+                  />
+                  <InfoRow
+                    label={t('bim.prop_discipline', { defaultValue: 'Discipline' })}
+                    value={selectedElement.discipline}
+                  />
+                  {selectedElement.storey && (
+                    <InfoRow
+                      label={t('bim.prop_storey', { defaultValue: 'Storey' })}
+                      value={selectedElement.storey}
+                    />
                   )}
-                </ul>
-              </div>
+                  {selectedElement.category && (
+                    <InfoRow
+                      label={t('bim.prop_category', { defaultValue: 'Category' })}
+                      value={selectedElement.category}
+                    />
+                  )}
+                </div>
+
+                {/* Classification */}
+                {selectedElement.classification && Object.keys(selectedElement.classification).length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-semibold text-content-primary mb-1">
+                      {t('bim.classification', { defaultValue: 'Classification' })}
+                    </h4>
+                    <PropertiesTable properties={selectedElement.classification} />
+                  </div>
+                )}
+
+                {/* Quantities */}
+                {Object.keys(elementQuantities).length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-semibold text-content-primary mb-1">
+                      {t('bim.quantities', { defaultValue: 'Quantities' })}
+                    </h4>
+                    <QuantitiesTable quantities={elementQuantities} />
+                  </div>
+                )}
+
+                {/* Inline properties — limited set of key ones */}
+                {Object.keys(elementProperties).length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-semibold text-content-primary mb-1">
+                      {t('bim.properties', { defaultValue: 'Properties' })}
+                    </h4>
+                    <PropertiesTable properties={elementProperties} />
+                  </div>
+                )}
+              </>
             )}
 
+            {/* ── Tab: All Properties ──────────────────────────────── */}
+            {propsTab === 'all' && (
+              <>
+                {parquetLoading && (
+                  <div className="flex items-center gap-2 text-xs text-content-tertiary">
+                    <Loader2 size={12} className="animate-spin text-oe-blue" />
+                    {t('bim.loading_properties', { defaultValue: 'Loading properties...' })}
+                  </div>
+                )}
+                {parquetProps && Object.keys(parquetProps).length > 0 && (
+                  <PropertiesTable properties={parquetProps} />
+                )}
+                {parquetProps && Object.keys(parquetProps).length === 0 && (
+                  <p className="text-[10px] text-content-tertiary italic">
+                    {t('bim.no_parquet_data', {
+                      defaultValue: 'No Parquet data available for this element',
+                    })}
+                  </p>
+                )}
+                {/* Also show inline properties as fallback */}
+                {!parquetProps && !parquetLoading && Object.keys(elementProperties).length > 0 && (
+                  <PropertiesTable properties={elementProperties} />
+                )}
+              </>
+            )}
+
+            {/* ── Tab: Validation ────────────────────────────────── */}
+            {propsTab === 'validation' && (
+              <>
+                {selectedElement.validation_results && selectedElement.validation_results.length > 0 ? (
+                  <div
+                    className={`rounded-md border p-2 ${
+                      selectedElement.validation_status === 'error'
+                        ? 'border-rose-300/60 bg-rose-50/50 dark:bg-rose-950/20'
+                        : selectedElement.validation_status === 'warning'
+                          ? 'border-amber-300/60 bg-amber-50/50 dark:bg-amber-950/20'
+                          : 'border-emerald-300/60 bg-emerald-50/50 dark:bg-emerald-950/20'
+                    }`}
+                  >
+                    <h4
+                      className={`text-xs font-semibold flex items-center gap-1 mb-1.5 ${
+                        selectedElement.validation_status === 'error'
+                          ? 'text-rose-700 dark:text-rose-300'
+                          : selectedElement.validation_status === 'warning'
+                            ? 'text-amber-700 dark:text-amber-300'
+                            : 'text-emerald-700 dark:text-emerald-300'
+                      }`}
+                    >
+                      {selectedElement.validation_status === 'error' ? (
+                        <ShieldX size={11} />
+                      ) : selectedElement.validation_status === 'warning' ? (
+                        <ShieldAlert size={11} />
+                      ) : (
+                        <ShieldCheck size={11} />
+                      )}
+                      {t('bim.validation_results', { defaultValue: 'Validation results' })}
+                      <span className="text-[10px] text-content-tertiary font-normal">
+                        ({selectedElement.validation_results.length})
+                      </span>
+                    </h4>
+                    <ul className="space-y-0.5">
+                      {selectedElement.validation_results.map((vr, i) => (
+                        <li
+                          key={`${vr.rule_id}-${i}`}
+                          className="flex items-start gap-1.5 text-[10px] text-content-secondary"
+                        >
+                          <span
+                            className={`mt-0.5 inline-block h-1.5 w-1.5 rounded-full shrink-0 ${
+                              vr.severity === 'error'
+                                ? 'bg-rose-500'
+                                : vr.severity === 'warning'
+                                  ? 'bg-amber-500'
+                                  : 'bg-sky-500'
+                            }`}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="text-content-primary truncate" title={vr.rule_id}>
+                              {vr.rule_id}
+                            </div>
+                            <div className="text-content-tertiary text-[9px] line-clamp-2">
+                              {vr.message}
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <ShieldCheck size={24} className="mx-auto text-content-quaternary mb-2" />
+                    <p className="text-[11px] text-content-tertiary">
+                      {t('bim.no_validation', {
+                        defaultValue: 'No validation results yet. Run a validation check on this model.',
+                      })}
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* ── Tab: Links ──────────────────────────────────────── */}
+            {propsTab === 'links' && (
+              <>
             {/* BOQ Links — the headline integration feature.
                 Shows every BOQ position this element is linked to, with an
                 "Unlink" action on each, plus an "Add to BOQ" button that
@@ -1595,10 +1737,8 @@ export function BIMViewer({
               </div>
             )}
 
-            {/* Semantic similarity — finds BIM elements like the selected one
-                across the rest of the model (and optionally other models).
-                Defaults to in-model search because that's the most useful
-                view for typical takeoff workflows. */}
+            {/* Semantic similarity — in links tab since it helps find
+                related elements for linking workflows. */}
             <div>
               <SimilarItemsPanel
                 module="bim_elements"
@@ -1606,15 +1746,7 @@ export function BIMViewer({
                 limit={5}
               />
             </div>
-
-            {/* Properties */}
-            {Object.keys(elementProperties).length > 0 && (
-              <div>
-                <h4 className="text-xs font-semibold text-content-primary mb-1">
-                  {t('bim.properties', { defaultValue: 'Properties' })}
-                </h4>
-                <PropertiesTable properties={elementProperties} />
-              </div>
+              </>
             )}
           </div>
         </div>
