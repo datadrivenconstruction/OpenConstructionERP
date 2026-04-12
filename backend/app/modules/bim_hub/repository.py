@@ -5,7 +5,7 @@ and model diffs live here. No business logic — pure data access.
 """
 
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -84,7 +84,7 @@ class BIMModelRepository:
 
         Returns the number of models deleted.
         """
-        cutoff = datetime.now(timezone.utc) - timedelta(hours=max_age_hours)
+        cutoff = datetime.now(UTC) - timedelta(hours=max_age_hours)
         # Find stale models
         find_stmt = select(BIMModel.id).where(
             BIMModel.project_id == project_id,

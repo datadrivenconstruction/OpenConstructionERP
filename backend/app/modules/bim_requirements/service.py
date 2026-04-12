@@ -267,3 +267,242 @@ class BIMRequirementService:
             )
             for row in rows
         ]
+
+    # ── Validation (compliance check against BIM model) ──────────────────
+
+    async def validate_against_model(
+        self,
+        set_id: uuid.UUID,
+        model_id: uuid.UUID,
+    ) -> dict:
+        """Check if BIM elements in a model satisfy the requirements in a set.
+
+        For each requirement:
+        1. Use ``element_filter`` to find matching elements (by ifc_class,
+           element_type, or classification).
+        2. Check if matching elements have the required ``property_name``
+           (optionally in the specified ``property_group``).
+        3. Evaluate the ``constraint_def`` against the actual property value.
+
+        Returns a compliance report dict suitable for ``RequirementValidationResponse``.
+        """
+        from app.modules.bim_hub.models import BIMModel
+        from app.modules.bim_hub.repository import BIMElementRepository
+
+        # Load requirement set
+        req_set = await self.get_set(set_id)
+        reqs = req_set.requirements
+
+        # Load BIM model and its elements
+        model = await self.session.get(BIMModel, model_id)
+        if model is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="BIM model not found",
+            )
+        elem_repo = BIMElementRepository(self.session)
+        elements, _total = await elem_repo.list_for_model(model_id, offset=0, limit=50_000)
+
+        results: list[dict] = []
+        passed = failed = not_applicable = 0
+
+        for req in reqs:
+            if not req.is_active:
+                continue
+
+            ef = req.element_filter or {}
+            matched = self._filter_elements(elements, ef)
+            prop_name = req.property_name
+            prop_group = req.property_group
+            constraint = req.constraint_def or {}
+
+            if not matched:
+                results.append({
+                    "requirement_id": str(req.id),
+                    "property_group": prop_group,
+                    "property_name": prop_name,
+                    "element_filter": ef,
+                    "constraint_def": constraint,
+                    "status": "not_applicable",
+                    "matched_elements": 0,
+                    "compliant_elements": 0,
+                    "non_compliant_elements": 0,
+                    "details": "No elements match the element_filter",
+                })
+                not_applicable += 1
+                continue
+
+            compliant = 0
+            non_compliant = 0
+            for elem in matched:
+                val = self._get_property_value(elem, prop_name, prop_group)
+                if self._check_constraint(val, constraint):
+                    compliant += 1
+                else:
+                    non_compliant += 1
+
+            req_status = "pass" if non_compliant == 0 else "fail"
+            if req_status == "pass":
+                passed += 1
+            else:
+                failed += 1
+
+            results.append({
+                "requirement_id": str(req.id),
+                "property_group": prop_group,
+                "property_name": prop_name,
+                "element_filter": ef,
+                "constraint_def": constraint,
+                "status": req_status,
+                "matched_elements": len(matched),
+                "compliant_elements": compliant,
+                "non_compliant_elements": non_compliant,
+                "details": (
+                    f"{compliant}/{len(matched)} elements compliant"
+                    if req_status == "pass"
+                    else f"{non_compliant}/{len(matched)} elements non-compliant"
+                ),
+            })
+
+        total = passed + failed + not_applicable
+        return {
+            "requirement_set_id": str(req_set.id),
+            "requirement_set_name": req_set.name,
+            "model_id": str(model_id),
+            "total_requirements": total,
+            "passed": passed,
+            "failed": failed,
+            "not_applicable": not_applicable,
+            "compliance_ratio": round(passed / max(passed + failed, 1), 3),
+            "results": results,
+        }
+
+    @staticmethod
+    def _filter_elements(
+        elements: list,
+        element_filter: dict,
+    ) -> list:
+        """Filter BIM elements by the requirement's element_filter spec.
+
+        Supports:
+        - ``ifc_class``: glob match against element_type (e.g. "Wall*", "IfcWall")
+        - ``classification``: dict of code → pattern (e.g. {"din276": "300*"})
+        - ``properties``: dict of key → pattern (e.g. {"material": "concrete*"})
+        """
+        from fnmatch import fnmatch as _fnmatch
+
+        if not element_filter:
+            return list(elements)
+
+        result = []
+        ifc_class = element_filter.get("ifc_class") or element_filter.get("entity")
+        classification = element_filter.get("classification", {})
+        prop_filters = element_filter.get("properties", {})
+
+        for elem in elements:
+            # ifc_class / entity filter
+            if ifc_class:
+                etype = (elem.element_type or "").lower()
+                if not _fnmatch(etype, ifc_class.lower()):
+                    continue
+
+            # classification filter
+            skip = False
+            if classification:
+                elem_class = elem.classification or {}
+                for code_sys, pattern in classification.items():
+                    actual = str(elem_class.get(code_sys, "")).lower()
+                    if not _fnmatch(actual, str(pattern).lower()):
+                        skip = True
+                        break
+            if skip:
+                continue
+
+            # property filter
+            if prop_filters:
+                props = elem.properties or {}
+                for pk, pv in prop_filters.items():
+                    actual = str(props.get(pk, "")).lower()
+                    if not _fnmatch(actual, str(pv).lower()):
+                        skip = True
+                        break
+            if skip:
+                continue
+
+            result.append(elem)
+        return result
+
+    @staticmethod
+    def _get_property_value(
+        elem: object,
+        prop_name: str,
+        prop_group: str | None,
+    ) -> object:
+        """Extract a property value from a BIM element."""
+        props = getattr(elem, "properties", None) or {}
+        quantities = getattr(elem, "quantities", None) or {}
+
+        # Check quantities first (Area, Volume, Length, etc.)
+        val = quantities.get(prop_name)
+        if val is not None:
+            return val
+
+        # Check properties (flat or nested by group)
+        if prop_group:
+            group_data = props.get(prop_group)
+            if isinstance(group_data, dict):
+                return group_data.get(prop_name)
+        return props.get(prop_name)
+
+    @staticmethod
+    def _check_constraint(actual: object, constraint_def: dict) -> bool:
+        """Evaluate a constraint against an actual value.
+
+        Constraint types supported:
+        - ``{"type": "exists"}`` -- property must be present (not None)
+        - ``{"type": "enumeration", "values": [...]}`` -- value must be in list
+        - ``{"type": "pattern", "pattern": "..."}`` -- fnmatch pattern match
+        - ``{"type": "range", "min": N, "max": N}`` -- numeric range
+        - ``{"type": "value", "value": X}`` -- exact match
+        - Empty constraint or unknown type: pass if value exists.
+        """
+        from fnmatch import fnmatch as _fnmatch
+
+        ctype = constraint_def.get("type", "exists")
+
+        if ctype == "exists":
+            return actual is not None and str(actual).strip() != ""
+
+        if ctype == "enumeration":
+            values = constraint_def.get("values", [])
+            if not values:
+                return actual is not None
+            return str(actual).lower() in [str(v).lower() for v in values]
+
+        if ctype == "pattern":
+            pattern = constraint_def.get("pattern", "*")
+            if actual is None:
+                return False
+            return _fnmatch(str(actual).lower(), pattern.lower())
+
+        if ctype == "range":
+            if actual is None:
+                return False
+            try:
+                num = float(actual)  # type: ignore[arg-type]
+            except (TypeError, ValueError):
+                return False
+            lo = constraint_def.get("min")
+            hi = constraint_def.get("max")
+            if lo is not None and num < float(lo):
+                return False
+            return not (hi is not None and num > float(hi))
+
+        if ctype == "value":
+            expected = constraint_def.get("value")
+            if expected is None:
+                return actual is None
+            return str(actual).lower() == str(expected).lower()
+
+        # Unknown constraint type — pass if value exists
+        return actual is not None

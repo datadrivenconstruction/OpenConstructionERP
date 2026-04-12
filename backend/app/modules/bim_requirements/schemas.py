@@ -117,3 +117,35 @@ class ImportResultResponse(BaseModel):
     errors: list[ParseError] = Field(default_factory=list)
     warnings: list[ParseError] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+# ── Validation (compliance check) ────────────────────────────────────────
+
+
+class RequirementCheckResult(BaseModel):
+    """Result of checking one requirement against a BIM model."""
+
+    requirement_id: UUID
+    property_group: str | None = None
+    property_name: str
+    element_filter: dict[str, Any] = Field(default_factory=dict)
+    constraint_def: dict[str, Any] = Field(default_factory=dict)
+    status: str  # "pass", "fail", "not_applicable"
+    matched_elements: int = 0
+    compliant_elements: int = 0
+    non_compliant_elements: int = 0
+    details: str = ""
+
+
+class RequirementValidationResponse(BaseModel):
+    """Compliance report for a requirement set against a BIM model."""
+
+    requirement_set_id: UUID
+    requirement_set_name: str
+    model_id: UUID
+    total_requirements: int = 0
+    passed: int = 0
+    failed: int = 0
+    not_applicable: int = 0
+    compliance_ratio: float = 0.0
+    results: list[RequirementCheckResult] = Field(default_factory=list)
