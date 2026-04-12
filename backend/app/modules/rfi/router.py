@@ -20,7 +20,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
 
 from app.core.bulk_ops import BulkDeleteRequest, BulkStatusRequest
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.rfi.schemas import (
     RFICreate,
     RFIRespondRequest,
@@ -121,6 +121,7 @@ def _to_response(item: object) -> RFIResponse:
 )
 async def list_rfis(
     user_id: CurrentUserId,
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
@@ -132,6 +133,7 @@ async def list_rfis(
     ),
     service: RFIService = Depends(_get_service),
 ) -> list[RFIResponse]:
+    await verify_project_access(project_id, user_id, session)
     rfis, _ = await service.list_rfis(
         project_id,
         offset=offset,
@@ -146,9 +148,11 @@ async def list_rfis(
 async def create_rfi(
     data: RFICreate,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("rfi.create")),
     service: RFIService = Depends(_get_service),
 ) -> RFIResponse:
+    await verify_project_access(data.project_id, user_id, session)
     rfi = await service.create_rfi(data, user_id=user_id)
     return _to_response(rfi)
 
@@ -160,6 +164,7 @@ async def create_rfi(
 )
 async def rfi_stats(
     user_id: CurrentUserId,
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     service: RFIService = Depends(_get_service),
 ) -> RFIStatsResponse:
@@ -167,6 +172,7 @@ async def rfi_stats(
 
     Computes total, open, overdue, avg response time, and breakdown by status.
     """
+    await verify_project_access(project_id, user_id, session)
     return await service.get_stats(project_id)
 
 
@@ -180,6 +186,7 @@ async def export_rfi_log(
     project_id: uuid.UUID = Query(...),
 ) -> StreamingResponse:
     """Export RFI log for a project as Excel."""
+    await verify_project_access(project_id, _user, session)
     from openpyxl import Workbook
     from openpyxl.styles import Font
     from sqlalchemy import select

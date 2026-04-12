@@ -28,7 +28,7 @@ from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query
 from fastapi.responses import FileResponse
 
 from app.core.bulk_ops import BulkDeleteRequest
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.documents.schemas import (
     DocumentBIMLinkCreate,
     DocumentBIMLinkListResponse,
@@ -94,11 +94,13 @@ def _doc_to_response(doc: object) -> DocumentResponse:
 
 @router.get("/summary/", response_model=DocumentSummary)
 async def get_summary(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: DocumentService = Depends(_get_service),
 ) -> DocumentSummary:
     """Aggregated document stats for a project."""
+    await verify_project_access(project_id, user_id, session)
     data = await service.get_summary(project_id)
     return DocumentSummary(**data)
 
@@ -108,6 +110,7 @@ async def get_summary(
 
 @router.post("/upload/", response_model=DocumentResponse, status_code=201)
 async def upload_document(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     category: str = Query(default="other"),
     file: UploadFile = File(...),
@@ -117,6 +120,7 @@ async def upload_document(
     service: DocumentService = Depends(_get_service),
 ) -> DocumentResponse:
     """Upload a document to a project."""
+    await verify_project_access(project_id, user_id, session)
     # Early rejection based on Content-Length header (before reading body)
     if content_length is not None and content_length > MAX_FILE_SIZE:
         raise HTTPException(
@@ -141,6 +145,7 @@ async def upload_document(
 
 @router.get("/", response_model=list[DocumentResponse])
 async def list_documents(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     offset: int = Query(default=0, ge=0),
@@ -150,6 +155,7 @@ async def list_documents(
     service: DocumentService = Depends(_get_service),
 ) -> list[DocumentResponse]:
     """List documents for a project."""
+    await verify_project_access(project_id, user_id, session)
     docs, _ = await service.list_documents(
         project_id,
         offset=offset,
@@ -197,6 +203,7 @@ def _photo_to_response(photo: object) -> PhotoResponse:
 
 @router.post("/photos/upload/", response_model=PhotoResponse, status_code=201)
 async def upload_photo(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     category: str = Form(default="site"),
     caption: str | None = Form(default=None),
@@ -210,6 +217,7 @@ async def upload_photo(
     service: PhotoService = Depends(_get_photo_service),
 ) -> PhotoResponse:
     """Upload a photo with metadata to a project."""
+    await verify_project_access(project_id, user_id, session)
     # Parse tags from comma-separated string
     parsed_tags: list[str] = []
     if tags:
@@ -242,6 +250,7 @@ async def upload_photo(
 
 @router.get("/photos/", response_model=list[PhotoResponse])
 async def list_photos(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     category: str | None = Query(default=None),
     tag: str | None = Query(default=None),
@@ -254,6 +263,7 @@ async def list_photos(
     service: PhotoService = Depends(_get_photo_service),
 ) -> list[PhotoResponse]:
     """List photos for a project with optional filters."""
+    await verify_project_access(project_id, user_id, session)
     parsed_date_from: datetime | None = None
     parsed_date_to: datetime | None = None
     if date_from:
@@ -285,11 +295,13 @@ async def list_photos(
 
 @router.get("/photos/gallery/", response_model=list[PhotoResponse])
 async def get_gallery(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: PhotoService = Depends(_get_photo_service),
 ) -> list[PhotoResponse]:
     """Get all photos for gallery view."""
+    await verify_project_access(project_id, user_id, session)
     photos = await service.get_gallery(project_id)
     return [_photo_to_response(p) for p in photos]
 
@@ -299,11 +311,13 @@ async def get_gallery(
 
 @router.get("/photos/timeline/", response_model=list[PhotoTimelineGroup])
 async def get_timeline(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: PhotoService = Depends(_get_photo_service),
 ) -> list[PhotoTimelineGroup]:
     """Get photos grouped by date for timeline view."""
+    await verify_project_access(project_id, user_id, session)
     groups = await service.get_timeline(project_id)
     return [
         PhotoTimelineGroup(
@@ -451,6 +465,7 @@ def _sheet_to_response(sheet: object) -> SheetResponse:
 
 @router.get("/sheets/", response_model=list[SheetResponse])
 async def list_sheets(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     discipline: str | None = Query(default=None),
     revision: str | None = Query(default=None),
@@ -462,6 +477,7 @@ async def list_sheets(
     service: SheetService = Depends(_get_sheet_service),
 ) -> list[SheetResponse]:
     """List sheets for a project with optional filters."""
+    await verify_project_access(project_id, user_id, session)
     sheets, _ = await service.list_sheets(
         project_id,
         offset=offset,
@@ -479,11 +495,13 @@ async def list_sheets(
 
 @router.get("/sheets/disciplines/", response_model=list[str])
 async def list_disciplines(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: SheetService = Depends(_get_sheet_service),
 ) -> list[str]:
     """List distinct discipline values for a project."""
+    await verify_project_access(project_id, user_id, session)
     return await service.get_disciplines(project_id)
 
 
@@ -492,6 +510,7 @@ async def list_disciplines(
 
 @router.post("/sheets/split-pdf/", response_model=list[SheetResponse], status_code=201)
 async def split_pdf(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     file: UploadFile = File(...),
     content_length: int | None = Header(default=None),
@@ -505,6 +524,7 @@ async def split_pdf(
     and revision. Auto-detects discipline from sheet number prefix.
     Generates thumbnails for each page.
     """
+    await verify_project_access(project_id, user_id, session)
     if content_length is not None and content_length > MAX_FILE_SIZE:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,

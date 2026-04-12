@@ -20,7 +20,7 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from fastapi.responses import StreamingResponse
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.meetings.schemas import (
     ActionItemEntry,
     AgendaItemEntry,
@@ -72,6 +72,7 @@ def _meeting_to_response(meeting: object) -> MeetingResponse:
 
 @router.get("/", response_model=list[MeetingResponse])
 async def list_meetings(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     offset: int = Query(default=0, ge=0),
@@ -86,6 +87,7 @@ async def list_meetings(
     service: MeetingService = Depends(_get_service),
 ) -> list[MeetingResponse]:
     """List meetings for a project with optional filters and search."""
+    await verify_project_access(project_id, user_id, session)
     meetings, _ = await service.list_meetings(
         project_id,
         offset=offset,
@@ -102,6 +104,8 @@ async def list_meetings(
 
 @router.get("/stats/", response_model=MeetingStatsResponse)
 async def meeting_stats(
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
     project_id: uuid.UUID = Query(...),
     service: MeetingService = Depends(_get_service),
 ) -> MeetingStatsResponse:
@@ -110,6 +114,7 @@ async def meeting_stats(
     Returns total, breakdown by status and type, count of open action items
     across all meetings, and the next upcoming meeting date.
     """
+    await verify_project_access(project_id, user_id, session)
     return await service.get_stats(project_id)
 
 
@@ -118,6 +123,8 @@ async def meeting_stats(
 
 @router.get("/open-actions/", response_model=list[OpenActionItemResponse])
 async def open_action_items(
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
     project_id: uuid.UUID = Query(...),
     service: MeetingService = Depends(_get_service),
 ) -> list[OpenActionItemResponse]:
@@ -125,6 +132,7 @@ async def open_action_items(
 
     Returns each action item with its parent meeting context (number, title, date).
     """
+    await verify_project_access(project_id, user_id, session)
     return await service.get_open_actions(project_id)
 
 
@@ -135,10 +143,12 @@ async def open_action_items(
 async def create_meeting(
     data: MeetingCreate,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("meetings.create")),
     service: MeetingService = Depends(_get_service),
 ) -> MeetingResponse:
     """Create a new meeting with auto-generated meeting number."""
+    await verify_project_access(data.project_id, user_id, session)
     meeting = await service.create_meeting(data, user_id=user_id)
     return _meeting_to_response(meeting)
 
