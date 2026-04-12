@@ -1481,6 +1481,10 @@ async def list_elements(
     element_type: str | None = Query(default=None),
     storey: str | None = Query(default=None),
     discipline: str | None = Query(default=None),
+    group_id: uuid.UUID | None = Query(
+        default=None,
+        description="Filter to elements belonging to this saved element group",
+    ),
     offset: int = Query(default=0, ge=0),
     # Cap raised to 50000 because the BIM viewer needs all elements at once to
     # match COLLADA mesh nodes by stable_id. Real Revit models routinely have
@@ -1522,6 +1526,7 @@ async def list_elements(
         element_type=element_type,
         storey=storey,
         discipline=discipline,
+        group_id=group_id,
         offset=offset,
         limit=limit,
     )

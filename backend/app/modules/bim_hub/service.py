@@ -464,6 +464,7 @@ class BIMHubService:
         element_type: str | None = None,
         storey: str | None = None,
         discipline: str | None = None,
+        group_id: uuid.UUID | None = None,
         offset: int = 0,
         limit: int = 200,
     ) -> tuple[
@@ -531,6 +532,23 @@ class BIMHubService:
             base = base.where(BIMElement.storey == storey)
         if discipline is not None:
             base = base.where(BIMElement.discipline == discipline)
+
+        # Lazy-load by group: restrict to member element ids when a group
+        # filter is supplied.  This makes cross-module deep-links like
+        # ``/bim?group={id}`` load only the relevant subset instead of the
+        # entire model (7k+ elements).
+        if group_id is not None:
+            group = await self.get_element_group(group_id)
+            member_ids_raw = group.element_ids or []
+            member_uuids = [
+                uuid.UUID(eid) if isinstance(eid, str) else eid
+                for eid in member_ids_raw
+            ]
+            if member_uuids:
+                base = base.where(BIMElement.id.in_(member_uuids))
+            else:
+                # Group has no members — return empty result set.
+                base = base.where(False)  # type: ignore[arg-type]
 
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
