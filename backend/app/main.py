@@ -1059,6 +1059,7 @@ def create_app() -> FastAPI:
             from app.modules.ai import models as _ai_models  # noqa: F401
             from app.modules.assemblies import models as _asm_models  # noqa: F401
             from app.modules.bim_hub import models as _bim_hub_models  # noqa: F401
+            from app.modules.bim_requirements import models as _bim_requirements_models  # noqa: F401
             from app.modules.boq import models as _boq_models  # noqa: F401
             from app.modules.catalog import models as _catalog_models  # noqa: F401
             from app.modules.cde import models as _cde_models  # noqa: F401

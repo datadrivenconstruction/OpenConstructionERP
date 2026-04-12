@@ -9,7 +9,7 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 [Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Discussions](https://t.me/datadrivenconstruction) · [Report Bug](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 
 ![License](https://img.shields.io/badge/license-AGPL--3.0-blue)
-![Version](https://img.shields.io/badge/version-1.4.6-green)
+![Version](https://img.shields.io/badge/version-1.4.8-green)
 ![Languages](https://img.shields.io/badge/languages-21-orange)
 ![Cost Items](https://img.shields.io/badge/cost_items-55%2C000%2B-red)
 ![Standards](https://img.shields.io/badge/standards-20-blueviolet)
@@ -75,7 +75,6 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 - [Tech Stack](#tech-stack)
 - [Architecture](#architecture)
 - [Security](#security)
-- [Contributing](#contributing)
 
 </td>
 </tr>
@@ -122,6 +121,9 @@ Construction cost estimation software is expensive, closed-source, and locked to
 <tr><td><b>Resource catalog</b></td><td align="center">&#10004; 7K+ with prices</td><td align="center">&#10006; extra cost</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
 <tr><td><b>Validation engine</b></td><td align="center">&#10004; 42 rules</td><td align="center">&#9888; limited</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
 <tr><td><b>REST API</b></td><td align="center">&#10004; full access</td><td align="center">&#9888; limited</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
+<tr><td><b>Real-time collaboration</b></td><td align="center">&#10004; soft locks + presence</td><td align="center">&#10004;</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
+<tr><td><b>Open data export</b></td><td align="center">&#10004; GAEB, Excel, CSV, JSON, PDF</td><td align="center">&#9888; limited</td><td align="center">&#9888; limited</td><td align="center">&#9888; limited</td><td align="center">PDF only</td></tr>
+<tr><td><b>BIM requirements (IDS/COBie)</b></td><td align="center">&#10004; import + export</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
 </table>
 
 <sub>Product names are trademarks of their respective owners. This comparison is based on publicly available information as of Q1 2026. Pricing is approximate (per-seat, list price) and may vary by region. OpenConstructionERP is not affiliated with any of the listed vendors.</sub>
@@ -425,10 +427,6 @@ OpenConstructionERP includes security hardening for production deployments:
 
 Report vulnerabilities via [GitHub Issues](https://github.com/datadrivenconstruction/OpenConstructionERP/issues) (private reports supported).
 
-## Contributing
-
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines, code style, and PR process.
-
 ## License
 
 **AGPL-3.0** — see [LICENSE](LICENSE).
@@ -441,12 +439,10 @@ For commercial licensing without AGPL obligations, contact [info@datadrivenconst
 
 <div align="center">
 
-**Created by [Artem Boiko](https://www.linkedin.com/in/boikoartem/)** · [Data Driven Construction](https://datadrivenconstruction.io)
+**[Data Driven Construction](https://datadrivenconstruction.io)** — open-source tools for the global construction industry.
 
-Building open-source tools for the global construction industry.
+[Website](https://datadrivenconstruction.io) · [YouTube](https://www.youtube.com/@datadrivenconstruction) · [GitHub](https://github.com/datadrivenconstruction) · [Telegram](https://t.me/datadrivenconstruction)
 
-[Website](https://datadrivenconstruction.io) · [LinkedIn](https://www.linkedin.com/in/boikoartem/) · [YouTube](https://www.youtube.com/@datadrivenconstruction) · [GitHub](https://github.com/datadrivenconstruction)
-
-<sub>OpenConstructionERP v1.4.6 · AGPL-3.0 · Python 3.12+ · Node 20+</sub>
+<sub>OpenConstructionERP v1.4.8 · AGPL-3.0 · Python 3.12+ · Node 20+</sub>
 
 </div>

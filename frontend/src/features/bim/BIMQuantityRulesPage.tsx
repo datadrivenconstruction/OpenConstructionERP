@@ -41,6 +41,7 @@ import {
 import clsx from 'clsx';
 
 import { Badge, ConfirmDialog, EmptyState } from '@/shared/ui';
+import BIMRequirementsImport from './BIMRequirementsImport';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
 import {
@@ -1487,6 +1488,19 @@ export function BIMQuantityRulesPage() {
       />
 
       {/* Preview modal */}
+      {/* BIM Requirements Import */}
+      <div className="border-t border-border-light bg-surface-primary px-6 py-4">
+        <details className="group">
+          <summary className="cursor-pointer text-sm font-semibold text-content-primary flex items-center gap-2">
+            <BookOpen size={16} className="text-oe-blue" />
+            {t('bim_rules.requirements_import', { defaultValue: 'BIM Requirements Import/Export' })}
+          </summary>
+          <div className="mt-4">
+            <BIMRequirementsImport />
+          </div>
+        </details>
+      </div>
+
       <PreviewModal
         open={previewOpen}
         onClose={() => setPreviewOpen(false)}
