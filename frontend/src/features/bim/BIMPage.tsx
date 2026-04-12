@@ -184,7 +184,21 @@ function ModelCard({ model, isActive, onClick, onDelete }: {
           </div>
         </div>
         <div className="flex items-center justify-between text-[10px]">
-          <span className="text-content-quaternary tabular-nums">{t('bim.element_count', { defaultValue: '{{count}} elements', count: model.element_count ?? 0 })}</span>
+          <div className="flex items-center gap-2 text-content-quaternary tabular-nums">
+            {isProcessing && (model.element_count ?? 0) === 0 ? (
+              <span className="inline-block w-16 h-3 rounded bg-surface-tertiary animate-pulse" />
+            ) : (
+              <>
+                <span>{t('bim.element_count', { defaultValue: '{{count}} elements', count: model.element_count ?? 0 })}</span>
+                {(model.storey_count ?? 0) > 0 && (
+                  <>
+                    <span className="text-content-quaternary">·</span>
+                    <span>{t('bim.storey_count', { defaultValue: '{{count}} storeys', count: model.storey_count })}</span>
+                  </>
+                )}
+              </>
+            )}
+          </div>
           {model.created_at && (
             <span className="text-content-quaternary">
               {new Date(model.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
