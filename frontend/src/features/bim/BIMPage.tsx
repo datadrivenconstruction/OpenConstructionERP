@@ -1424,8 +1424,69 @@ export function BIMPage() {
           />
         )}
 
-        {/* Processing progress card (bottom-right of viewport) */}
-        {processing && (
+        {/* Centered upload progress overlay — visible and prominent so the user
+            knows work is happening and they can navigate away safely. */}
+        {processing && (processing.stage === 'uploading' || processing.stage === 'converting' || processing.stage === 'parsing' || processing.stage === 'indexing') && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm">
+            <div className="bg-surface-primary border border-border-light rounded-2xl shadow-xl p-8 max-w-md w-full mx-4 text-center">
+              <Loader2 size={40} className="text-oe-blue animate-spin mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-content-primary mb-1">
+                {processing.stage === 'uploading'
+                  ? t('bim.progress_uploading', { defaultValue: 'Uploading file...' })
+                  : processing.stage === 'converting'
+                    ? t('bim.progress_converting', { defaultValue: 'Converting CAD model...' })
+                    : processing.stage === 'parsing'
+                      ? t('bim.progress_parsing', { defaultValue: 'Extracting elements...' })
+                      : t('bim.progress_indexing', { defaultValue: 'Indexing properties...' })}
+              </h3>
+              {processing.fileName && (
+                <p className="text-sm text-content-secondary mb-3">
+                  {processing.fileName}
+                  {processing.fileSize ? ` (${processing.fileSize})` : ''}
+                </p>
+              )}
+              <div className="h-2 w-full rounded-full bg-surface-tertiary overflow-hidden mb-4">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-500 ease-out"
+                  style={{
+                    width: processing.stage === 'uploading' ? '25%'
+                      : processing.stage === 'converting' ? '50%'
+                        : processing.stage === 'parsing' ? '75%'
+                          : '90%',
+                  }}
+                />
+              </div>
+              {processing.fileSize && (
+                <p className="text-xs text-content-secondary mb-2 font-medium">
+                  {t('bim.progress_eta', {
+                    defaultValue: 'Estimated time: {{time}}',
+                    time: (() => {
+                      // Estimate based on measured DDC conversion rate: ~0.73 MB/s
+                      const sizeStr = processing.fileSize || '';
+                      const sizeMatch = sizeStr.match(/([\d.]+)\s*(MB|KB|GB)/i);
+                      if (!sizeMatch) return '~30s';
+                      let mb = parseFloat(sizeMatch[1] ?? '0');
+                      const unit = (sizeMatch[2] || 'MB').toUpperCase();
+                      if (unit === 'KB') mb /= 1024;
+                      if (unit === 'GB') mb *= 1024;
+                      const totalSec = Math.round(mb / 0.73);
+                      if (totalSec < 60) return `~${totalSec}s`;
+                      return `~${Math.ceil(totalSec / 60)} min`;
+                    })(),
+                  })}
+                </p>
+              )}
+              <p className="text-xs text-content-tertiary">
+                {t('bim.progress_navigate_away', {
+                  defaultValue: 'You can navigate to other pages — processing will continue in the background. You will be notified when it is complete.',
+                })}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Completion / error progress card (bottom-right of viewport) */}
+        {processing && (processing.stage === 'ready' || processing.stage === 'error' || processing.stage === 'needs_converter') && (
           <div className="absolute bottom-6 end-6 z-40 pointer-events-none">
             <BIMProcessingProgress
               stage={processing.stage}
