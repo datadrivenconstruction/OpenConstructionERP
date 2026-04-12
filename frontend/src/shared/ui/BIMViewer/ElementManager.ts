@@ -373,6 +373,13 @@ export class ElementManager {
     this.daeGroup = new THREE.Group();
     this.daeGroup.name = 'bim_dae_geometry';
 
+    // DDC COLLADA/GLB exports use Z-up coordinate system (Revit/CAD
+    // convention) while Three.js expects Y-up. Rotate the entire
+    // imported scene -90° around X to bring the building upright.
+    // ColladaLoader has an `up_axis` tag but DDC files often omit it
+    // or set it incorrectly, so we always apply this correction.
+    scene.rotation.x = -Math.PI / 2;
+
     // Build two lookups: by stable_id (mesh_ref) and by element name.
     const stableIdToElement = new Map<string, BIMElementData>();
     const nameToElement = new Map<string, BIMElementData>();
