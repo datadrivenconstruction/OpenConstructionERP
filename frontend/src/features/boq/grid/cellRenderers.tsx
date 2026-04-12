@@ -12,6 +12,7 @@ import {
   BookmarkPlus,
   MoreHorizontal,
   Boxes,
+  Cuboid,
 } from 'lucide-react';
 import { RESOURCE_TYPE_BADGE, fmtWithCurrency } from '../boqHelpers';
 import { countComments } from '../CommentDrawer';
@@ -277,20 +278,23 @@ export function OrdinalCellRenderer(params: ICellRendererParams) {
           onMouseDown={(e) => e.preventDefault()}
           onClick={(e) => {
             e.stopPropagation();
-            // Deep-link to the BIM viewer with the first linked element
-            // preselected.  BIMPage parses ?element=<id> on mount and
-            // calls setSelectedElementId so the user lands directly on
-            // the model element this BOQ row was created from.
-            if (firstBimElementId) {
-              navigate(`/bim?element=${encodeURIComponent(firstBimElementId)}`);
+            // Navigate to the BIM viewer and isolate the linked elements.
+            // When a single element is linked we also set ?element= so the
+            // detail panel opens.  For multiple elements we use ?isolate=
+            // so the 3D view hides everything except the linked set.
+            if (bimLinkCount === 1 && firstBimElementId) {
+              navigate(`/bim?element=${encodeURIComponent(firstBimElementId)}&isolate=${encodeURIComponent(firstBimElementId)}`);
+            } else if (bimLinkIds.length > 1) {
+              navigate(`/bim?isolate=${bimLinkIds.map((id) => encodeURIComponent(id)).join(',')}`);
             } else {
               navigate('/bim');
             }
           }}
-          className="shrink-0 inline-flex items-center justify-center min-w-[16px] h-[14px] px-1 rounded-full bg-oe-blue/10 text-oe-blue text-[10px] font-semibold leading-none hover:bg-oe-blue/20 hover:scale-110 transition-all cursor-pointer"
-          title={`Open ${bimLinkCount} linked BIM element${bimLinkCount === 1 ? '' : 's'} in viewer`}
-          aria-label={`Open BIM viewer for this position`}
+          className="shrink-0 inline-flex items-center gap-0.5 min-w-[16px] h-[14px] px-1 rounded-full bg-oe-blue/10 text-oe-blue text-[10px] font-semibold leading-none hover:bg-oe-blue/20 hover:scale-110 transition-all cursor-pointer"
+          title={`Open ${bimLinkCount} linked BIM element${bimLinkCount === 1 ? '' : 's'} in 3D viewer`}
+          aria-label={`View linked BIM elements in 3D`}
         >
+          <Cuboid size={9} className="shrink-0" />
           {bimLinkCount}
         </button>
       )}
