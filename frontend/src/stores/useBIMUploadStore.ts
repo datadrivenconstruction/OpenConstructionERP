@@ -137,12 +137,15 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
     startStageTimer(jobId);
 
     try {
+      const ac = abortControllers.get(jobId);
+
       if (params.uploadType === 'cad') {
         const res: BIMCadUploadResponse = await uploadCADFile(
           params.projectId,
           params.modelName,
           params.discipline,
           params.file,
+          ac?.signal,
         );
 
         clearStageTimer(jobId);
@@ -187,6 +190,7 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
           params.discipline,
           params.file,
           params.geometryFile,
+          ac?.signal,
         );
 
         clearStageTimer(jobId);
