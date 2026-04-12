@@ -16,7 +16,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, Query
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.submittals.schemas import (
     SubmittalCreate,
     SubmittalResponse,
@@ -60,6 +60,7 @@ def _to_response(item: object) -> SubmittalResponse:
 
 @router.get("/", response_model=list[SubmittalResponse])
 async def list_submittals(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     offset: int = Query(default=0, ge=0),
@@ -68,6 +69,7 @@ async def list_submittals(
     type_filter: str | None = Query(default=None, alias="type"),
     service: SubmittalService = Depends(_get_service),
 ) -> list[SubmittalResponse]:
+    await verify_project_access(project_id, user_id, session)
     submittals, _ = await service.list_submittals(
         project_id,
         offset=offset,
@@ -82,9 +84,11 @@ async def list_submittals(
 async def create_submittal(
     data: SubmittalCreate,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("submittals.create")),
     service: SubmittalService = Depends(_get_service),
 ) -> SubmittalResponse:
+    await verify_project_access(data.project_id, user_id, session)
     submittal = await service.create_submittal(data, user_id=user_id)
     return _to_response(submittal)
 

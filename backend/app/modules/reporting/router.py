@@ -16,7 +16,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, Query
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.reporting.schemas import (
     GeneratedReportResponse,
     GenerateReportRequest,
@@ -40,11 +40,13 @@ def _get_service(session: SessionDep) -> ReportingService:
 
 @router.get("/kpi/", response_model=KPISnapshotResponse | None)
 async def get_latest_kpi(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: ReportingService = Depends(_get_service),
 ) -> KPISnapshotResponse | None:
     """Get the latest KPI snapshot for a project."""
+    await verify_project_access(project_id, user_id, session)
     snapshot = await service.get_latest_kpi(project_id)
     if snapshot is None:
         return None
@@ -53,6 +55,7 @@ async def get_latest_kpi(
 
 @router.get("/kpi/history/", response_model=list[KPISnapshotResponse])
 async def list_kpi_history(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     offset: int = Query(default=0, ge=0),
@@ -60,6 +63,7 @@ async def list_kpi_history(
     service: ReportingService = Depends(_get_service),
 ) -> list[KPISnapshotResponse]:
     """List KPI snapshots for a project over time."""
+    await verify_project_access(project_id, user_id, session)
     snapshots, _ = await service.list_kpi_history(
         project_id,
         offset=offset,
@@ -72,10 +76,12 @@ async def list_kpi_history(
 async def create_kpi_snapshot(
     data: KPISnapshotCreate,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("reporting.create")),
     service: ReportingService = Depends(_get_service),
 ) -> KPISnapshotResponse:
     """Create a new KPI snapshot for a project."""
+    await verify_project_access(data.project_id, user_id, session)
     snapshot = await service.create_kpi_snapshot(data, user_id=user_id)
     return KPISnapshotResponse.model_validate(snapshot)
 
@@ -129,16 +135,19 @@ async def create_template(
 async def generate_report(
     data: GenerateReportRequest,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("reporting.create")),
     service: ReportingService = Depends(_get_service),
 ) -> GeneratedReportResponse:
     """Generate a new report for a project."""
+    await verify_project_access(data.project_id, user_id, session)
     report = await service.generate_report(data, user_id=user_id)
     return GeneratedReportResponse.model_validate(report)
 
 
 @router.get("/reports/", response_model=list[GeneratedReportResponse])
 async def list_reports(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     offset: int = Query(default=0, ge=0),
@@ -146,6 +155,7 @@ async def list_reports(
     service: ReportingService = Depends(_get_service),
 ) -> list[GeneratedReportResponse]:
     """List generated reports for a project."""
+    await verify_project_access(project_id, user_id, session)
     reports, _ = await service.list_reports(
         project_id,
         offset=offset,
