@@ -191,6 +191,7 @@ def _try_cad2data(ifc_path: Path, output_dir: Path) -> dict[str, Any] | None:
                 break
 
         elements: list[dict[str, Any]] = []
+        csv_raw_rows: list[dict[str, Any]] = []
         storeys_set: set[str] = set()
         disciplines_set: set[str] = set()
 
@@ -198,6 +199,7 @@ def _try_cad2data(ifc_path: Path, output_dir: Path) -> dict[str, Any] | None:
             with open(csv_path, "r", encoding="utf-8") as f:
                 reader = csv.DictReader(f)
                 for row in reader:
+                    csv_raw_rows.append(dict(row))
                     storey = row.get("storey", row.get("level", ""))
                     discipline = row.get("discipline", _classify_discipline(row.get("type", "")))
                     if storey:
@@ -233,6 +235,7 @@ def _try_cad2data(ifc_path: Path, output_dir: Path) -> dict[str, Any] | None:
             "has_geometry": has_geometry,
             "geometry_path": str(dae_path) if has_geometry else None,
             "bounding_box": None,
+            "raw_elements": csv_raw_rows,
         }
     except Exception as e:
         logger.warning("cad2data error: %s", e)
@@ -447,6 +450,10 @@ def _excel_elements_to_bim_result(
         "has_geometry": geometry_path is not None,
         "geometry_path": str(geometry_path) if geometry_path else None,
         "bounding_box": bounding_box,
+        # Full DDC dataframe (all 1000+ columns) for Parquet cold storage.
+        # The hot table only keeps ~12 indexed fields; analytical queries
+        # run against the Parquet via DuckDB.
+        "raw_elements": raw_elements,
     }
 
 
