@@ -116,6 +116,12 @@ cv = [
     "pymupdf>=1.25.0",
     "Pillow>=12.1.1",
 ]
+# Analytical queries on BIM element Parquet files via DuckDB.
+# When not installed the dataframe endpoints fall back to pure-pyarrow
+# row-level filtering (slower but functional).
+analytics = [
+    "duckdb>=1.2.0",
+]
 # S3-compatible object storage backend (MinIO / AWS S3 / Backblaze B2 /
 # DigitalOcean Spaces).  Enables ``storage_backend=s3`` in settings so
 # BIM/CAD blobs live in a bucket instead of the local filesystem.
@@ -124,7 +130,7 @@ s3 = [
 ]
 # Everything
 all = [
-    "openconstructionerp[server,vector,semantic,cv,s3]",
+    "openconstructionerp[server,vector,semantic,cv,s3,analytics]",
 ]
 # Development tools
 dev = [
