@@ -22,7 +22,7 @@ import uuid
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.safety.schemas import (
     IncidentCreate,
     IncidentResponse,
@@ -96,6 +96,7 @@ def _observation_to_response(item: object) -> ObservationResponse:
 
 @router.get("/stats/", response_model=SafetyStatsResponse)
 async def safety_stats(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: SafetyService = Depends(_get_service),
@@ -103,17 +104,20 @@ async def safety_stats(
     """Return dashboard KPIs: incident counts, days without incident,
     observations by risk tier, open corrective actions, etc.
     """
+    await verify_project_access(project_id, user_id, session)
     return await service.get_stats(project_id)
 
 
 @router.get("/trends/", response_model=SafetyTrendsResponse)
 async def safety_trends(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     period: str = Query(default="monthly", pattern=r"^(monthly|weekly)$"),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: SafetyService = Depends(_get_service),
 ) -> SafetyTrendsResponse:
     """Return time-series incident and observation data grouped by period."""
+    await verify_project_access(project_id, user_id, session)
     return await service.get_trends(project_id, period=period)
 
 
@@ -122,6 +126,7 @@ async def safety_trends(
 
 @router.get("/incidents/", response_model=list[IncidentResponse])
 async def list_incidents(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     offset: int = Query(default=0, ge=0),
@@ -130,6 +135,7 @@ async def list_incidents(
     status_filter: str | None = Query(default=None, alias="status"),
     service: SafetyService = Depends(_get_service),
 ) -> list[IncidentResponse]:
+    await verify_project_access(project_id, user_id, session)
     items, _ = await service.list_incidents(
         project_id,
         offset=offset,
@@ -144,9 +150,11 @@ async def list_incidents(
 async def create_incident(
     data: IncidentCreate,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("safety.create")),
     service: SafetyService = Depends(_get_service),
 ) -> IncidentResponse:
+    await verify_project_access(data.project_id, user_id, session)
     incident = await service.create_incident(data, user_id=user_id)
     return _incident_to_response(incident)
 
@@ -158,6 +166,7 @@ async def export_incidents(
     _user: CurrentUserId = None,  # type: ignore[assignment]
 ) -> StreamingResponse:
     """Export safety incidents for a project as Excel."""
+    await verify_project_access(project_id, _user, session)
     from openpyxl import Workbook
     from openpyxl.styles import Font
     from sqlalchemy import select
@@ -258,6 +267,7 @@ async def delete_incident(
 
 @router.get("/observations/", response_model=list[ObservationResponse])
 async def list_observations(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     offset: int = Query(default=0, ge=0),
@@ -266,6 +276,7 @@ async def list_observations(
     status_filter: str | None = Query(default=None, alias="status"),
     service: SafetyService = Depends(_get_service),
 ) -> list[ObservationResponse]:
+    await verify_project_access(project_id, user_id, session)
     items, _ = await service.list_observations(
         project_id,
         offset=offset,
@@ -280,9 +291,11 @@ async def list_observations(
 async def create_observation(
     data: ObservationCreate,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("safety.create")),
     service: SafetyService = Depends(_get_service),
 ) -> ObservationResponse:
+    await verify_project_access(data.project_id, user_id, session)
     observation = await service.create_observation(data, user_id=user_id)
     return _observation_to_response(observation)
 
@@ -294,6 +307,7 @@ async def export_observations(
     _user: CurrentUserId = None,  # type: ignore[assignment]
 ) -> StreamingResponse:
     """Export safety observations for a project as Excel."""
+    await verify_project_access(project_id, _user, session)
     from openpyxl import Workbook
     from openpyxl.styles import Font
     from sqlalchemy import select
