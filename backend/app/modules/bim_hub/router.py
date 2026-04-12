@@ -35,6 +35,11 @@ Endpoints:
         POST   /element-groups/                   — Create a group
         PATCH  /element-groups/{group_id}         — Update a group
         DELETE /element-groups/{group_id}         — Delete a group
+
+    Dataframe (Parquet + DuckDB analytical queries):
+        GET    /models/{model_id}/dataframe/schema/              — Column names + types
+        POST   /models/{model_id}/dataframe/query/               — Query via DuckDB SQL
+        GET    /models/{model_id}/dataframe/columns/{col}/values — Value counts for a column
 """
 
 import csv
@@ -1152,6 +1157,26 @@ async def upload_cad_file(
                     "CAD processed: %d elements, %d storeys → model %s is ready",
                     element_count, len(result["storeys"]), model_id,
                 )
+
+                # Write full DDC dataframe as Parquet for analytical queries.
+                # The hot table keeps ~12 indexed fields; the Parquet preserves
+                # ALL 1000+ DDC columns in columnar, ZSTD-compressed form.
+                # Failure is non-fatal -- the 3D viewer and BOQ linking work
+                # without it; only the dataframe query endpoints degrade.
+                raw_elements = result.get("raw_elements", [])
+                if raw_elements:
+                    try:
+                        from app.modules.bim_hub.dataframe_store import write_dataframe
+
+                        await asyncio.to_thread(
+                            write_dataframe,
+                            project_id=project_id,
+                            model_id=str(model_id),
+                            rows=raw_elements,
+                        )
+                    except Exception as exc:
+                        logger.warning("Parquet write failed (non-fatal): %s", exc)
+
             else:
                 # No elements extracted — set informative status
                 if ext == ".rvt":
@@ -2199,3 +2224,109 @@ async def bim_coverage_summary(
         "percent_with_tasks": _pct(elements_with_tasks),
         "percent_with_activities": _pct(elements_with_activities),
     }
+
+
+# =============================================================================
+# Dataframe endpoints (Parquet + DuckDB analytical queries)
+# =============================================================================
+
+
+@router.get("/models/{model_id}/dataframe/schema/")
+async def get_dataframe_schema(
+    model_id: uuid.UUID,
+    service: BIMHubService = Depends(_get_service),
+    _user: CurrentUserId = ...,
+) -> list[dict]:
+    """Return column names and types from the Parquet file.
+
+    Used by the frontend to build dynamic filter dropdowns for the full
+    DDC property set (1000+ columns).
+    """
+    model = await service.get_model(model_id)
+    if not model:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Model not found")
+
+    import asyncio
+
+    from app.modules.bim_hub.dataframe_store import read_schema
+
+    return await asyncio.to_thread(
+        read_schema,
+        str(model.project_id),
+        str(model_id),
+    )
+
+
+@router.post("/models/{model_id}/dataframe/query/")
+async def query_dataframe(
+    model_id: uuid.UUID,
+    body: dict,
+    service: BIMHubService = Depends(_get_service),
+    _user: CurrentUserId = ...,
+) -> list[dict]:
+    """Query the Parquet dataframe via DuckDB.
+
+    Request body::
+
+        {
+            "columns": ["category", "Fire Rating"],   // optional, null = all
+            "filters": [
+                {"column": "Fire Rating", "op": "=", "value": "F90"},
+                {"column": "volume", "op": ">", "value": 0}
+            ],
+            "limit": 500
+        }
+    """
+    model = await service.get_model(model_id)
+    if not model:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Model not found")
+
+    import asyncio
+
+    from app.modules.bim_hub.dataframe_store import query_parquet
+
+    try:
+        rows = await asyncio.to_thread(
+            query_parquet,
+            str(model.project_id),
+            str(model_id),
+            columns=body.get("columns"),
+            filters=body.get("filters"),
+            limit=min(body.get("limit", 10_000), 50_000),
+        )
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc))
+    return rows
+
+
+@router.get("/models/{model_id}/dataframe/columns/{column}/values/")
+async def get_column_values(
+    model_id: uuid.UUID,
+    column: str,
+    limit: int = Query(default=100, le=1000),
+    service: BIMHubService = Depends(_get_service),
+    _user: CurrentUserId = ...,
+) -> list[dict]:
+    """Return value counts for a column (for filter autocomplete).
+
+    Returns ``[{"value": "F90", "count": 42}, ...]`` sorted by count desc.
+    """
+    model = await service.get_model(model_id)
+    if not model:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Model not found")
+
+    import asyncio
+
+    from app.modules.bim_hub.dataframe_store import column_value_counts
+
+    try:
+        counts = await asyncio.to_thread(
+            column_value_counts,
+            str(model.project_id),
+            str(model_id),
+            column=column,
+            limit=limit,
+        )
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc))
+    return counts
