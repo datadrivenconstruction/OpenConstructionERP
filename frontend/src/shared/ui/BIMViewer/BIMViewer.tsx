@@ -22,7 +22,6 @@ import {
   Link2,
   Link2Off,
   Plus,
-  Camera,
   Square,
   CornerUpLeft,
   FileText,
@@ -36,6 +35,9 @@ import {
   Database,
   ChevronDown,
   ChevronRight,
+  LayoutGrid,
+  Boxes,
+  PanelTop,
 } from 'lucide-react';
 import { SceneManager } from './SceneManager';
 import { ElementManager } from './ElementManager';
@@ -781,39 +783,37 @@ export function BIMViewer({
           Grouping follows the professional 6-group taxonomy from the research
           brief: Camera | Selection | Visibility | (contextual tools follow). */}
       <div className="absolute top-3 start-3 flex items-center gap-1 z-20 rounded-lg bg-surface-primary/90 backdrop-blur border border-border-light shadow-sm p-1">
-        {/* Camera group — presets + fit */}
+        {/* Camera views — each has a unique icon */}
         <ToolbarButton
           icon={Home}
-          label={t('bim.zoom_fit', { defaultValue: 'Fit all' })}
+          label={t('bim.zoom_fit', { defaultValue: 'Fit all (F)' })}
           onClick={handleZoomToFit}
           variant="group"
         />
         <ToolbarButton
-          icon={Box}
-          label={t('bim.view_iso', { defaultValue: 'Isometric view' })}
+          icon={Boxes}
+          label={t('bim.view_iso', { defaultValue: 'Isometric (0)' })}
           onClick={() => handleCameraPreset('iso')}
           variant="group"
         />
         <ToolbarButton
-          icon={Square}
-          label={t('bim.view_top', { defaultValue: 'Top view' })}
+          icon={PanelTop}
+          label={t('bim.view_top', { defaultValue: 'Top view (3)' })}
           onClick={() => handleCameraPreset('top')}
           variant="group"
         />
         <ToolbarButton
-          icon={CornerUpLeft}
-          label={t('bim.view_front', { defaultValue: 'Front view' })}
+          icon={Square}
+          label={t('bim.view_front', { defaultValue: 'Front view (1)' })}
           onClick={() => handleCameraPreset('front')}
           variant="group"
         />
         <ToolbarButton
-          icon={Camera}
-          label={t('bim.view_side', { defaultValue: 'Side view' })}
+          icon={CornerUpLeft}
+          label={t('bim.view_side', { defaultValue: 'Side view (2)' })}
           onClick={() => handleCameraPreset('side')}
           variant="group"
         />
-        <div className="w-px h-5 bg-border-light mx-0.5" />
-        {/* Selection group */}
         <ToolbarButton
           icon={Maximize2}
           label={t('bim.zoom_selection', { defaultValue: 'Zoom to selection' })}
@@ -821,10 +821,10 @@ export function BIMViewer({
           variant="group"
         />
         <div className="w-px h-5 bg-border-light mx-0.5" />
-        {/* Visibility group */}
+        {/* Visibility toggles — distinct icons for each */}
         <ToolbarButton
-          icon={Grid3X3}
-          label={t('bim.wireframe', { defaultValue: 'Wireframe' })}
+          icon={LayoutGrid}
+          label={t('bim.wireframe', { defaultValue: 'Wireframe (W)' })}
           onClick={handleToggleWireframe}
           active={wireframe}
           variant="group"
@@ -833,8 +833,8 @@ export function BIMViewer({
           icon={Grid3X3}
           label={
             gridVisible
-              ? t('bim.hide_grid', { defaultValue: 'Hide grid' })
-              : t('bim.show_grid', { defaultValue: 'Show grid' })
+              ? t('bim.hide_grid', { defaultValue: 'Hide grid (G)' })
+              : t('bim.show_grid', { defaultValue: 'Show grid (G)' })
           }
           onClick={handleToggleGrid}
           active={gridVisible}
