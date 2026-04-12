@@ -326,6 +326,13 @@ def _excel_elements_to_bim_result(
         "ost_projectinformation", "ost_projectbasepoint",
         "ost_sharedbasepoint", "ost_coordinatesystem",
         "ost_eaconstructions", "ost_covertype",
+        # Topography / site context (huge meshes that obscure the building)
+        "ost_topography", "ost_toposurface", "ost_topo",
+        "ost_site", "ost_sitepad", "ost_siteregion",
+        "ost_buildingpad", "ost_pad",
+        "ost_entourage", "ost_planting",
+        # HVAC schedules / load (analytical, not physical)
+        "ost_hvacloadschedules", "ost_hvac_load_schedules",
         # Room/area separation (lines, not geometry)
         "ost_roomseparationlines", "ost_areaschemes",
     }

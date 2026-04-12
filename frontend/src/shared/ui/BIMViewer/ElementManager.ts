@@ -222,7 +222,7 @@ export function getCategoryColor(elementType: string): number {
 
 export class ElementManager {
   private sceneManager: SceneManager;
-  private elementGroup: THREE.Group;
+  elementGroup: THREE.Group;
   private daeGroup: THREE.Group | null = null;
   /** Meshes that have been linked to an element by stable_id / bbox. */
   private meshMap = new Map<string, THREE.Mesh>();
@@ -321,14 +321,24 @@ export class ElementManager {
     // full blob twice if we guess wrong.
     try {
       const resp = await fetch(geometryUrl, { method: 'HEAD' });
-      const ct = resp.headers.get('content-type') || '';
-      if (ct.includes('gltf-binary') || ct.includes('gltf+json')) {
-        return this.loadGLBGeometry(geometryUrl, onProgress);
+      if (resp.ok) {
+        const ct = resp.headers.get('content-type') || '';
+        if (ct.includes('gltf-binary') || ct.includes('gltf+json')) {
+          return this.loadGLBGeometry(geometryUrl, onProgress);
+        }
+        // Content-Type indicates DAE/COLLADA — use ColladaLoader
+        return this.loadDAEGeometry(geometryUrl, onProgress);
       }
+      // HEAD returned non-200 (e.g. 405 Method Not Allowed) — can't
+      // trust the content-type header.  Default to GLTFLoader (GLB is
+      // the preferred format since v1.4.2) with automatic DAE fallback.
     } catch {
-      // HEAD failed (CORS, network) -- fall through to DAE loader
+      // HEAD failed (CORS, network) -- fall through to GLB-first path
     }
-    return this.loadDAEGeometry(geometryUrl, onProgress);
+    // When HEAD is unavailable, try GLTFLoader first (GLB is preferred
+    // and 8.8x faster). GLTFLoader's error callback already falls back
+    // to ColladaLoader for legacy DAE files.
+    return this.loadGLBGeometry(geometryUrl, onProgress);
   }
 
   /**
