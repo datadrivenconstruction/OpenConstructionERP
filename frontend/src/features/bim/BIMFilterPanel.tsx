@@ -733,12 +733,10 @@ export default function BIMFilterPanel({
           )}
         </div>
 
-        {/* Quick-takeoff button + Save as group button — both act on the
-            currently filtered subset.  Quick takeoff opens AddToBOQ; Save
-            as group opens SaveGroupModal so the user can name the
-            selection and reuse it later. */}
+        {/* Quick-takeoff button + Save as group button + Export CSV — all act
+            on the currently filtered subset. */}
         {visibleElements.length > 0 && visibleElements.length < elements.length && (
-          <div className="mt-2 flex gap-1">
+          <div className="mt-2 flex gap-1 flex-wrap">
             {onQuickTakeoff && (
               <button
                 type="button"
@@ -773,6 +771,48 @@ export default function BIMFilterPanel({
                 {t('bim.save_as_group', { defaultValue: 'Save as group' })}
               </button>
             )}
+            {/* Export filtered elements as CSV */}
+            <button
+              type="button"
+              onClick={() => {
+                // Build CSV from visible elements
+                const headers = ['id', 'name', 'element_type', 'discipline', 'storey', 'category'];
+                // Collect quantity keys from all visible elements
+                const qtyKeys = new Set<string>();
+                for (const el of visibleElements) {
+                  if (el.quantities) for (const k of Object.keys(el.quantities)) qtyKeys.add(k);
+                }
+                const qtyArr = [...qtyKeys].sort();
+                const allHeaders = [...headers, ...qtyArr];
+                const escCsv = (v: unknown) => {
+                  const s = v == null ? '' : String(v);
+                  return s.includes(',') || s.includes('"') || s.includes('\n')
+                    ? `"${s.replace(/"/g, '""')}"`
+                    : s;
+                };
+                const rows = visibleElements.map((el) => {
+                  const base = [el.id, el.name, el.element_type, el.discipline, el.storey ?? '', el.category ?? ''];
+                  const qtyVals = qtyArr.map((k) => (el.quantities?.[k] ?? ''));
+                  return [...base, ...qtyVals].map(escCsv).join(',');
+                });
+                const csv = [allHeaders.map(escCsv).join(','), ...rows].join('\n');
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `bim_elements_${visibleElements.length}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+              className="inline-flex items-center justify-center gap-1.5 px-2 py-1.5 text-[11px] font-medium rounded-md border border-border-light text-content-secondary hover:bg-surface-secondary transition-colors"
+              title={t('bim.export_csv_title', {
+                defaultValue: 'Export {{count}} filtered elements as CSV',
+                count: visibleElements.length,
+              })}
+            >
+              <FileText size={11} />
+              CSV
+            </button>
           </div>
         )}
 
