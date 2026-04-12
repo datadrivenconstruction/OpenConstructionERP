@@ -161,29 +161,17 @@ function detectModelFormat(
 /**
  * Get the top-level category label for an element depending on model format.
  *
- *   • Revit  →  the Category (Walls, Doors, Curtain Wall Mullions, …).
- *               Stored in `properties.category` (promoted from the split
- *               alias groups during upload) or on the legacy `el.category`
- *               field.  Falls back to `el.element_type`.
+ *   • Revit  →  `element_type` is the clean CamelCase-split category name
+ *               set by the backend (e.g. "Curtain Wall Mullions", "Walls").
+ *               We use it directly — `properties.category` was a duplicate
+ *               that sometimes held raw OST_ strings, causing filter confusion.
  *   • IFC    →  the IfcEntity (IfcWall, IfcSlab, IfcDoor, …) which is
  *               always on `el.element_type`.
  *
- * Both formats end up using `element_type` as the primary axis when
- * `category` isn't populated — that's the "Category" view in the
- * filter panel grouping selector.
+ * `element_type` is the single source of truth for the category axis.
  */
-function getTypeKey(el: BIMElementData, format: BIMModelFormat): string {
-  const props = (el.properties || {}) as Record<string, unknown>;
-  const category =
-    typeof props.category === 'string' && props.category ? props.category : null;
-
-  if (format === 'rvt') {
-    return category || el.category || el.element_type || 'Unknown';
-  }
-  if (format === 'ifc') {
-    return el.element_type || category || el.category || 'Unknown';
-  }
-  return category || el.category || el.element_type || 'Unknown';
+function getTypeKey(el: BIMElementData, _format: BIMModelFormat): string {
+  return el.element_type || el.category || 'Unknown';
 }
 
 /**
@@ -401,9 +389,18 @@ export default function BIMFilterPanel({
   // EXCLUDED from the storey list, so the user sees a clean list of
   // real building levels instead of an overwhelming "—" entry that
   // dominates the panel.
+  /** Aggregate quantities per category type key — Volume, Area, Length. */
+  interface TypeQtyAgg {
+    volume: number;
+    area: number;
+    length: number;
+  }
+
   const counts = useMemo(() => {
     const byStorey = new Map<string, number>();
     const byType = new Map<string, number>();
+    /** Per-type aggregate quantities for tooltip display */
+    const typeQty = new Map<string, TypeQtyAgg>();
     /** bucket → ordered list of [typeName, count] */
     const byBucket = new Map<BIMCategoryBucket, Map<string, number>>();
     const bucketTotals = new Map<BIMCategoryBucket, number>();
@@ -426,6 +423,19 @@ export default function BIMFilterPanel({
       // happens in the render layer (CategoryFlatList) so the user always
       // sees what's available, with annotations collapsed by default.
       byType.set(tpe, (byType.get(tpe) ?? 0) + 1);
+
+      // Accumulate quantities per type for the summary display
+      const q = el.quantities as Record<string, number> | undefined;
+      if (q) {
+        let agg = typeQty.get(tpe);
+        if (!agg) {
+          agg = { volume: 0, area: 0, length: 0 };
+          typeQty.set(tpe, agg);
+        }
+        agg.volume += q.Volume ?? q.volume_m3 ?? q['Gross Volume'] ?? 0;
+        agg.area += q.Area ?? q.area_m2 ?? q['Gross Area'] ?? q['Surface Area'] ?? 0;
+        agg.length += q.Length ?? q.length_m ?? 0;
+      }
 
       // Hierarchical Category → Type Name (Revit Browser style)
       const typeName = getTypeNameKey(el);
@@ -497,6 +507,7 @@ export default function BIMFilterPanel({
     return {
       storeys: storeysOrdered,
       types: Array.from(byType.entries()).sort((a, b) => b[1] - a[1]),
+      typeQty,
       buckets: orderedBuckets,
       categoriesWithTypes,
     };
@@ -1167,6 +1178,7 @@ export default function BIMFilterPanel({
           {groupingMode === 'category' && (
             <CategoryFlatList
               types={counts.types}
+              typeQty={counts.typeQty}
               activeSet={state.types}
               onToggle={(n) => toggleSet('types', n)}
               t={t}
@@ -1439,13 +1451,23 @@ export default function BIMFilterPanel({
  * users see only real building categories without the panel exploding
  * with 100+ Revit annotation rows.
  */
+/** Format a quantity value for compact display (e.g. 1234.5 -> "1,235") */
+function fmtQty(val: number): string {
+  if (val === 0) return '';
+  if (val >= 1000) return Math.round(val).toLocaleString();
+  if (val >= 10) return val.toFixed(1);
+  return val.toFixed(2);
+}
+
 function CategoryFlatList({
   types,
+  typeQty,
   activeSet,
   onToggle,
   t,
 }: {
   types: Array<[string, number]>;
+  typeQty: Map<string, { volume: number; area: number; length: number }>;
   activeSet: Set<string>;
   onToggle: (name: string) => void;
   t: ReturnType<typeof useTranslation>['t'];
@@ -1470,11 +1492,19 @@ function CategoryFlatList({
 
   return (
     <div className="space-y-1">
-      {/* Building elements — real categories */}
+      {/* Building elements — real categories with quantity summaries */}
       {building.length > 0 && (
         <div className="space-y-0.5">
           {building.map(([name, count]) => {
             const active = activeSet.has(name);
+            const agg = typeQty.get(name);
+            // Build a compact quantity summary string
+            const qtyParts: string[] = [];
+            if (agg) {
+              if (agg.volume > 0) qtyParts.push(`${fmtQty(agg.volume)} m\u00B3`);
+              if (agg.area > 0) qtyParts.push(`${fmtQty(agg.area)} m\u00B2`);
+              if (agg.length > 0) qtyParts.push(`${fmtQty(agg.length)} m`);
+            }
             return (
               <FilterChip
                 key={name}
@@ -1482,6 +1512,7 @@ function CategoryFlatList({
                 count={count}
                 active={active}
                 onClick={() => onToggle(name)}
+                subtitle={qtyParts.length > 0 ? qtyParts.join(' | ') : undefined}
               />
             );
           })}
@@ -1566,11 +1597,13 @@ function FilterChip({
   count,
   active,
   onClick,
+  subtitle,
 }: {
   label: string;
   count: number;
   active: boolean;
   onClick: () => void;
+  subtitle?: string;
 }) {
   return (
     <button
@@ -1580,6 +1613,7 @@ function FilterChip({
           ? 'bg-oe-blue/10 text-oe-blue font-medium'
           : 'text-content-secondary hover:bg-surface-secondary'
       }`}
+      title={subtitle}
     >
       <div className="flex items-center gap-1.5 min-w-0 flex-1">
         {active ? (
@@ -1587,7 +1621,14 @@ function FilterChip({
         ) : (
           <EyeOff size={10} className="shrink-0 opacity-40" />
         )}
-        <span className="truncate">{label}</span>
+        <div className="min-w-0 flex-1">
+          <span className="truncate block">{label}</span>
+          {subtitle && (
+            <span className="block text-[9px] text-content-quaternary truncate">
+              {subtitle}
+            </span>
+          )}
+        </div>
       </div>
       <span className="text-[10px] text-content-quaternary tabular-nums shrink-0">
         {count.toLocaleString()}
