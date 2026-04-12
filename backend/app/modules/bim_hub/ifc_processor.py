@@ -358,7 +358,9 @@ def _excel_elements_to_bim_result(
 
         # Skip non-element rows: those with no category at all (likely orphan
         # parameter rows from the DDC converter), and known non-element categories.
-        if not category or cat_lower in SKIP_CATEGORIES:
+        # DDC writes the literal string "None" for elements without a Revit
+        # category — treat it the same as Python None.
+        if not category or cat_lower in SKIP_CATEGORIES or cat_lower in ("none", "null", "", "n/a"):
             continue
 
         # Friendly element type derived from OST_ category name.
