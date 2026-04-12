@@ -342,7 +342,7 @@ export function BIMViewer({
       // hide overlay; 0 → start animating in.
       setGeometryProgress(0);
       mgr
-        .loadDAEGeometry(geometryUrl, (fraction) => {
+        .loadGeometry(geometryUrl, (fraction) => {
           // ColladaLoader fires this on every XHR progress event,
           // typically every few KB.  We clamp to [0, 1] defensively
           // and let the React render schedule batch updates.

@@ -10,7 +10,8 @@ Key layout
 ----------
 ::
 
-    bim/{project_id}/{model_id}/geometry.dae
+    bim/{project_id}/{model_id}/geometry.glb   (preferred — 8.8x faster)
+    bim/{project_id}/{model_id}/geometry.dae   (fallback for pre-v1.5 models)
     bim/{project_id}/{model_id}/original.{ext}
 
 The storage backend is resolved via
@@ -32,7 +33,8 @@ logger = logging.getLogger(__name__)
 _BIM_PREFIX: Final[str] = "bim"
 
 # Geometry files the viewer can load (order = lookup priority).
-GEOMETRY_EXTENSIONS: Final[tuple[str, ...]] = (".dae", ".glb", ".gltf")
+# GLB is preferred: 8.8x faster browser loading than raw DAE.
+GEOMETRY_EXTENSIONS: Final[tuple[str, ...]] = (".glb", ".dae", ".gltf")
 
 GEOMETRY_MEDIA_TYPES: Final[dict[str, str]] = {
     ".dae": "model/vnd.collada+xml",

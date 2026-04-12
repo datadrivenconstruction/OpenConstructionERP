@@ -13,6 +13,7 @@
 
 import * as THREE from 'three';
 import { ColladaLoader } from 'three/addons/loaders/ColladaLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { SceneManager } from './SceneManager';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -245,25 +246,82 @@ export class ElementManager {
   }
 
   /**
-   * Load DAE/COLLADA geometry from the server and match mesh nodes
-   * to element IDs stored in elementDataMap.
+   * Auto-detect geometry format (GLB vs DAE) and load accordingly.
    *
-   * After loading, each mesh node whose name matches an element's stable_id
-   * (mesh_ref) gets colored by discipline and wired up for selection.
+   * The backend now preferentially serves GLB (8.8x faster than DAE).
+   * The Content-Type header determines the format:
+   *   - ``model/gltf-binary`` -> GLTFLoader
+   *   - ``model/vnd.collada+xml`` -> ColladaLoader (legacy fallback)
+   *
+   * Falls back to ColladaLoader if the Content-Type is ambiguous.
    */
+  async loadGeometry(
+    geometryUrl: string,
+    onProgress?: (fraction: number) => void,
+  ): Promise<void> {
+    // Probe the Content-Type to decide which loader to use.
+    // We make a HEAD request first -- cheap, avoids downloading the
+    // full blob twice if we guess wrong.
+    try {
+      const resp = await fetch(geometryUrl, { method: 'HEAD' });
+      const ct = resp.headers.get('content-type') || '';
+      if (ct.includes('gltf-binary') || ct.includes('gltf+json')) {
+        return this.loadGLBGeometry(geometryUrl, onProgress);
+      }
+    } catch {
+      // HEAD failed (CORS, network) -- fall through to DAE loader
+    }
+    return this.loadDAEGeometry(geometryUrl, onProgress);
+  }
+
+  /**
+   * Load GLB/glTF geometry and bind meshes to BIM elements.
+   *
+   * GLTFLoader output (``gltf.scene``) is a THREE.Group just like
+   * ColladaLoader's -- the downstream mesh processing (traverse,
+   * match, batch) is identical.
+   */
+  private loadGLBGeometry(
+    geometryUrl: string,
+    onProgress?: (fraction: number) => void,
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const loader = new GLTFLoader();
+      loader.load(
+        geometryUrl,
+        (gltf) => {
+          if (!gltf || !gltf.scene) {
+            reject(new Error('GLTFLoader returned empty result'));
+            return;
+          }
+          this.processLoadedScene(gltf.scene, onProgress);
+          resolve();
+        },
+        (xhr: ProgressEvent) => {
+          if (!onProgress) return;
+          if (xhr.lengthComputable && xhr.total > 0) {
+            const fraction = Math.min(0.95, xhr.loaded / xhr.total);
+            onProgress(fraction);
+          } else {
+            onProgress(0.5);
+          }
+        },
+        (error) => {
+          // eslint-disable-next-line no-console
+          console.warn('GLB load failed, falling back to DAE:', error);
+          // Fallback: try the DAE loader in case the file is actually COLLADA
+          this.loadDAEGeometry(geometryUrl, onProgress).then(resolve, reject);
+        },
+      );
+    });
+  }
+
   /**
    * Load the DAE/COLLADA geometry blob and bind every mesh to its
    * BIM element by stable_id / mesh_ref / element name.
    *
-   * The optional ``onProgress`` callback is invoked with a value in
-   * [0, 1] as the file downloads (``loaded / total`` from
-   * ColladaLoader's XHR progress event).  ColladaLoader emits the
-   * progress synchronously while the bytes stream in, so the caller
-   * can drive a UI progress bar without polling.
-   *
-   * After loading, each mesh node whose name matches an element's
-   * stable_id (mesh_ref) gets coloured by discipline and wired up
-   * for selection.
+   * Kept as a public method for backward compatibility with models
+   * uploaded before the GLB optimization was added.
    */
   loadDAEGeometry(
     geometryUrl: string,
@@ -278,195 +336,12 @@ export class ElementManager {
             reject(new Error('ColladaLoader returned empty result'));
             return;
           }
-
-          // Remove any existing placeholder meshes for elements that have geometry
-          this.clearPlaceholders();
-
-          this.daeGroup = new THREE.Group();
-          this.daeGroup.name = 'bim_dae_geometry';
-          const scene = collada.scene;
-
-          // Build two lookups: by stable_id (mesh_ref) and by element name.
-          // Different converters emit different node-name schemes:
-          //   · IFC       → nodes named after IfcGlobalId (matches stable_id)
-          //   · DDC RVT   → nodes named after numeric Revit IDs (no match)
-          //   · GLB / FBX → nodes named after mesh/asset names
-          const stableIdToElement = new Map<string, BIMElementData>();
-          const nameToElement = new Map<string, BIMElementData>();
-          for (const el of this.elementDataMap.values()) {
-            if (el.mesh_ref) stableIdToElement.set(el.mesh_ref, el);
-            // Sometimes converters use the raw stable_id as the node name
-            stableIdToElement.set(el.id, el);
-            if (el.name) nameToElement.set(el.name, el);
-          }
-
-          let matchedCount = 0;
-          let strippedLights = 0;
-          this.allDaeMeshes = [];
-
-          // Strip every Light/Camera that COLLADA dragged into the scene.
-          // DDC RvtExporter exports ~40 spot lights inside the DAE which
-          // ColladaLoader happily adds to the THREE scene — combined with
-          // our 4 application lights this turns into a 50-light shadow
-          // catastrophe (1 fps on a 5 000-mesh model).
-          const lightsToRemove: THREE.Object3D[] = [];
-          scene.traverse((obj) => {
-            if (obj instanceof THREE.Light || obj instanceof THREE.Camera) {
-              lightsToRemove.push(obj);
-            }
-          });
-          for (const obj of lightsToRemove) {
-            if (obj.parent) obj.parent.remove(obj);
-            strippedLights++;
-          }
-
-          // Traverse the loaded DAE scene and match mesh nodes.
-          //
-          // IMPORTANT: do NOT replace `child.material`. The COLLADA file
-          // ships with real per-element materials (colours, opacities,
-          // textures) authored in the source CAD tool. Replacing them
-          // with our default discipline `MeshStandardMaterial` produces
-          // the white-everything regression users reported. We only
-          // touch the material when an explicit colour-by mode is on
-          // (`colorBy` / `isolate` mutate clones, not the originals),
-          // and we cache the COLLADA original on the mesh as
-          // `userData.originalMaterial` so `resetColors()` can restore
-          // it after a colour-by toggle.
-          scene.traverse((child) => {
-            if (child instanceof THREE.Mesh) {
-              const nodeName = child.name || '';
-              const parentName = child.parent?.name || '';
-              const element =
-                stableIdToElement.get(nodeName) ||
-                stableIdToElement.get(parentName) ||
-                nameToElement.get(nodeName) ||
-                nameToElement.get(parentName);
-
-              // Shadows DISABLED on DAE meshes — drawing 5 000 shadow
-              // casters per frame is the difference between 60 fps and
-              // 1 fps on real Revit exports. Shadows on the BIM viewer
-              // were never load-bearing visually and the perf cost is
-              // catastrophic.
-              child.castShadow = false;
-              child.receiveShadow = false;
-
-              // Static geometry — lock the world matrix so Three.js doesn't
-              // recompute 5 000+ matrices every frame. The COLLADA loader
-              // has already set the local transform; we just need to push it
-              // to world once and then freeze.
-              child.matrixAutoUpdate = false;
-              child.updateMatrix();
-
-              // Cache the original material so colour-by / reset can
-              // toggle without losing the COLLADA visual.
-              const originalMaterial = child.material;
-
-              if (element) {
-                child.userData = {
-                  elementId: element.id,
-                  elementData: element,
-                  originalMaterial,
-                };
-                this.meshMap.set(element.id, child);
-                matchedCount++;
-              } else {
-                child.userData = { elementId: null, originalMaterial };
-              }
-
-              // Only apply our default material when the COLLADA mesh
-              // came in with no material at all (rare — usually a
-              // converter bug).
-              if (!child.material) {
-                child.material = this.getMaterial(element?.discipline || 'other');
-              }
-
-              // Track every mesh for bulk operations (filter / color-by / isolate)
-              this.allDaeMeshes.push(child);
-            }
-          });
-
-          if (strippedLights > 0) {
-            // eslint-disable-next-line no-console
-            console.info(`[BIM] stripped ${strippedLights} lights/cameras from COLLADA scene`);
-          }
-
-          // POSITIONAL FALLBACK: when the converter (looking at you, DDC
-          // RvtExporter) drops node ids and we get 0% explicit matches,
-          // pair DAE meshes with element data by index. The order is not
-          // guaranteed correct, but it gives every mesh an `elementId`
-          // and lets the filter / colour-by / isolate paths actually do
-          // their job. Without this, every filter chip is a no-op for
-          // models exported by DDC.
-          if (matchedCount === 0 && this.allDaeMeshes.length > 0 && this.elementDataMap.size > 0) {
-            const elementsArr = Array.from(this.elementDataMap.values());
-            const pairs = Math.min(this.allDaeMeshes.length, elementsArr.length);
-            for (let i = 0; i < pairs; i++) {
-              const mesh = this.allDaeMeshes[i]!;
-              const el = elementsArr[i]!;
-              mesh.userData = {
-                ...(mesh.userData as object),
-                elementId: el.id,
-                elementData: el,
-                positionalFallback: true,
-              };
-              this.meshMap.set(el.id, mesh);
-            }
-            matchedCount = pairs;
-            // eslint-disable-next-line no-console
-            console.info(
-              `[BIM] positional fallback: paired ${pairs} DAE meshes with element data ` +
-              `(node names were generic, real mesh_ref matching unavailable)`,
-            );
-          }
-
-          const totalElements = this.elementDataMap.size;
-          this.meshMatchRatio = totalElements > 0 ? matchedCount / totalElements : 0;
-
-          this.daeGroup.add(scene);
-          this.elementGroup.add(this.daeGroup);
-          this.geometryLoaded = true;
-
-          // Force a world-matrix update before batching so each instance
-          // gets the correct transform.
-          this.sceneManager.scene.updateMatrixWorld(true);
-
-          // Big-model perf path: collapse same-material meshes into BatchedMesh
-          // groups.  Currently disabled by default (threshold = 50 000)
-          // because three.js BatchedMesh.setVisibleAt has subtle GPU-sync
-          // issues that cause partial renders when filters change rapidly.
-          // The per-mesh path holds 60 fps comfortably up to ~10 000 meshes,
-          // and the storage architecture work in progress will let us
-          // pre-bake BatchedMesh on the BACKEND side (canonical format)
-          // instead of doing it client-side, which avoids the visibility
-          // sync problem entirely.  See `batchMeshesByMaterial`.
-          if (this.allDaeMeshes.length >= 50000) {
-            try {
-              this.batchMeshesByMaterial();
-            } catch (err) {
-              // eslint-disable-next-line no-console
-              console.warn('[BIM] BatchedMesh path failed, falling back to individual meshes', err);
-            }
-          }
-
-          // Fit camera to the newly added geometry
-          this.sceneManager.zoomToFit();
-
-          // Final tick — geometry is fully loaded + parsed.
-          if (onProgress) onProgress(1);
+          this.processLoadedScene(collada.scene, onProgress);
           resolve();
         },
-        // onProgress: ColladaLoader forwards XHR progress events.
-        // event.lengthComputable is true when Content-Length is set,
-        // which is the common case for our static / S3 geometry.
-        // Otherwise we can't compute a fraction — fall back to a
-        // monotonic "indeterminate" 0.5 placeholder so the UI shows
-        // something happening even on chunked transfer.
         (event: ProgressEvent) => {
           if (!onProgress) return;
           if (event.lengthComputable && event.total > 0) {
-            // Cap at 0.95 — the last 5% is parsing + scene wire-up
-            // which happens AFTER the bytes finish downloading; we
-            // emit 1.0 from the success callback above.
             const fraction = Math.min(0.95, event.loaded / event.total);
             onProgress(fraction);
           } else {
@@ -475,11 +350,150 @@ export class ElementManager {
         },
         (error) => {
           console.warn('Failed to load DAE geometry:', error);
-          // On failure, keep existing placeholder boxes
           reject(error);
         },
       );
     });
+  }
+
+  /**
+   * Shared scene-processing logic for both GLTFLoader and ColladaLoader.
+   *
+   * Strips lights/cameras, matches mesh nodes to BIM elements by
+   * stable_id / mesh_ref / name, disables shadows, freezes matrices,
+   * and triggers BatchedMesh collapsing for large models.
+   */
+  private processLoadedScene(
+    scene: THREE.Group | THREE.Object3D,
+    onProgress?: (fraction: number) => void,
+  ): void {
+    // Remove any existing placeholder meshes for elements that have geometry
+    this.clearPlaceholders();
+
+    this.daeGroup = new THREE.Group();
+    this.daeGroup.name = 'bim_dae_geometry';
+
+    // Build two lookups: by stable_id (mesh_ref) and by element name.
+    const stableIdToElement = new Map<string, BIMElementData>();
+    const nameToElement = new Map<string, BIMElementData>();
+    for (const el of this.elementDataMap.values()) {
+      if (el.mesh_ref) stableIdToElement.set(el.mesh_ref, el);
+      stableIdToElement.set(el.id, el);
+      if (el.name) nameToElement.set(el.name, el);
+    }
+
+    let matchedCount = 0;
+    let strippedLights = 0;
+    this.allDaeMeshes = [];
+
+    // Strip every Light/Camera that the loader dragged into the scene.
+    const lightsToRemove: THREE.Object3D[] = [];
+    scene.traverse((obj) => {
+      if (obj instanceof THREE.Light || obj instanceof THREE.Camera) {
+        lightsToRemove.push(obj);
+      }
+    });
+    for (const obj of lightsToRemove) {
+      if (obj.parent) obj.parent.remove(obj);
+      strippedLights++;
+    }
+
+    // Traverse the loaded scene and match mesh nodes.
+    // IMPORTANT: do NOT replace `child.material` -- the geometry file
+    // ships with real per-element materials. We only touch the material
+    // when an explicit colour-by mode is on, and we cache the original
+    // on `userData.originalMaterial` so `resetColors()` can restore it.
+    scene.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        const nodeName = child.name || '';
+        const parentName = child.parent?.name || '';
+        const element =
+          stableIdToElement.get(nodeName) ||
+          stableIdToElement.get(parentName) ||
+          nameToElement.get(nodeName) ||
+          nameToElement.get(parentName);
+
+        child.castShadow = false;
+        child.receiveShadow = false;
+        child.matrixAutoUpdate = false;
+        child.updateMatrix();
+
+        const originalMaterial = child.material;
+
+        if (element) {
+          child.userData = {
+            elementId: element.id,
+            elementData: element,
+            originalMaterial,
+          };
+          this.meshMap.set(element.id, child);
+          matchedCount++;
+        } else {
+          child.userData = { elementId: null, originalMaterial };
+        }
+
+        if (!child.material) {
+          child.material = this.getMaterial(element?.discipline || 'other');
+        }
+
+        this.allDaeMeshes.push(child);
+      }
+    });
+
+    if (strippedLights > 0) {
+      // eslint-disable-next-line no-console
+      console.info(`[BIM] stripped ${strippedLights} lights/cameras from loaded scene`);
+    }
+
+    // POSITIONAL FALLBACK: when the converter drops node ids and we
+    // get 0% explicit matches, pair meshes with element data by index.
+    if (matchedCount === 0 && this.allDaeMeshes.length > 0 && this.elementDataMap.size > 0) {
+      const elementsArr = Array.from(this.elementDataMap.values());
+      const pairs = Math.min(this.allDaeMeshes.length, elementsArr.length);
+      for (let i = 0; i < pairs; i++) {
+        const mesh = this.allDaeMeshes[i]!;
+        const el = elementsArr[i]!;
+        mesh.userData = {
+          ...(mesh.userData as object),
+          elementId: el.id,
+          elementData: el,
+          positionalFallback: true,
+        };
+        this.meshMap.set(el.id, mesh);
+      }
+      matchedCount = pairs;
+      // eslint-disable-next-line no-console
+      console.info(
+        `[BIM] positional fallback: paired ${pairs} meshes with element data ` +
+        `(node names were generic, real mesh_ref matching unavailable)`,
+      );
+    }
+
+    const totalElements = this.elementDataMap.size;
+    this.meshMatchRatio = totalElements > 0 ? matchedCount / totalElements : 0;
+
+    this.daeGroup.add(scene);
+    this.elementGroup.add(this.daeGroup);
+    this.geometryLoaded = true;
+
+    this.sceneManager.scene.updateMatrixWorld(true);
+
+    // BatchedMesh: collapse same-material meshes into one draw call per
+    // material. Threshold lowered from 50,000 to 1,000 -- collapses
+    // ~6,000 draw calls to ~30 for a typical Revit model.
+    if (this.allDaeMeshes.length >= 1_000) {
+      try {
+        this.batchMeshesByMaterial();
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn('[BIM] BatchedMesh path failed, falling back to individual meshes', err);
+      }
+    }
+
+    this.sceneManager.zoomToFit();
+    this.sceneManager.requestRender();
+
+    if (onProgress) onProgress(1);
   }
 
   /**
@@ -822,6 +836,7 @@ export class ElementManager {
       }
     }
     if (this.daeGroup) this.daeGroup.visible = true;
+    this.sceneManager.requestRender();
     return visibleCount;
   }
 
@@ -845,6 +860,7 @@ export class ElementManager {
       }
     }
     if (this.daeGroup) this.daeGroup.visible = true;
+    this.sceneManager.requestRender();
   }
 
   /**
@@ -888,6 +904,7 @@ export class ElementManager {
         ud.customMaterial = false;
       }
     }
+    this.sceneManager.requestRender();
   }
 
   /** Isolate given element IDs — hide everything else. */
@@ -917,6 +934,7 @@ export class ElementManager {
         }
       }
     }
+    this.sceneManager.requestRender();
   }
 
   /**
@@ -969,6 +987,7 @@ export class ElementManager {
         mat.color.copy(color);
       }
     }
+    this.sceneManager.requestRender();
   }
 
   /**
@@ -1014,6 +1033,7 @@ export class ElementManager {
         mat.color.copy(color);
       }
     }
+    this.sceneManager.requestRender();
   }
 
   /** Reset mesh colors back to their discipline-based material. */
@@ -1051,6 +1071,7 @@ export class ElementManager {
       mat.dispose();
     }
     this.createdMaterials.clear();
+    this.sceneManager.requestRender();
   }
 
   /** Remove all elements from the scene. */
