@@ -193,7 +193,7 @@ function ModelCard({ model, isActive, onClick, onDelete }: {
                 {(model.storey_count ?? 0) > 0 && (
                   <>
                     <span className="text-content-quaternary">·</span>
-                    <span>{t('bim.storey_count', { defaultValue: '{{count}} storeys', count: model.storey_count })}</span>
+                    <span>{t('bim.storey_count', { defaultValue: '{{count}} levels', count: model.storey_count })}</span>
                   </>
                 )}
               </>
@@ -1284,7 +1284,7 @@ export function BIMPage() {
           {elements.length > 0 && (
             <div className="flex items-center gap-2 ms-2">
               <StatPill icon={Box} label={t('bim.stat_elements', { defaultValue: 'Elements' })} value={elements.length} />
-              {storeys.size > 0 && <StatPill icon={Layers} label={t('bim.stat_storeys', { defaultValue: 'Storeys' })} value={storeys.size} />}
+              {storeys.size > 0 && <StatPill icon={Layers} label={t('bim.stat_storeys', { defaultValue: 'Levels' })} value={storeys.size} />}
               {discips.size > 0 && <StatPill icon={Sparkles} label={t('bim.stat_disciplines', { defaultValue: 'Disciplines' })} value={discips.size} />}
             </div>
           )}
