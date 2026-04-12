@@ -69,7 +69,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
   return (
     <header
       className={clsx(
-        'sticky top-0 z-20',
+        'sticky top-0 z-[100]',
         'flex h-header items-center justify-between gap-3 px-4 sm:px-6 lg:px-8',
         'border-b border-border-light bg-surface-primary/80 backdrop-blur-xl',
       )}
