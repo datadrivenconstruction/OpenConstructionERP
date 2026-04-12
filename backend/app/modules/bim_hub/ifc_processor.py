@@ -79,8 +79,12 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
                 """Invoke RvtExporter / IfcExporter with the given output target."""
                 args_list = [str(converter), str(input_abs), str(out_path)]
                 if ext in ("rvt", "ifc"):
-                    # User-selected depth: 'standard' (~15 cols) or 'complete' (~1000+ cols)
-                    args_list.append(conversion_depth if conversion_depth in ("standard", "complete") else "standard")
+                    # User-selected depth: 'standard' (fast), 'medium' (balanced), 'complete' (full)
+                    # DDC RvtExporter accepts: standard, complete. 'medium' maps to 'standard'
+                    # because DDC has no separate medium mode — the difference is handled
+                    # by our property extraction (medium = standard DDC + full property promotion).
+                    ddc_mode = "complete" if conversion_depth == "complete" else "standard"
+                    args_list.append(ddc_mode)
                 args_list.extend(extra_args)
                 logger.debug("DDC call: %s", args_list)
                 proc = subprocess.run(

@@ -258,7 +258,7 @@ function UploadPanel({
   const [file, setFile] = useState<File | null>(null);
   const [modelName, setModelName] = useState(initialModelName || '');
   const [discipline, setDiscipline] = useState('architecture');
-  const [conversionDepth, setConversionDepth] = useState<'standard' | 'complete'>('complete');
+  const [conversionDepth, setConversionDepth] = useState<'standard' | 'medium' | 'complete'>('standard');
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStage, setUploadStage] = useState('');
@@ -561,9 +561,10 @@ function UploadPanel({
         </div>
         <div>
           <label className="block text-[10px] font-semibold text-content-tertiary mb-1.5 uppercase tracking-wider">{t('bim.upload_depth_label', { defaultValue: 'Conversion depth' })}</label>
-          <select className="w-full text-sm py-2 px-3 rounded-lg border border-border-light bg-surface-secondary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue" value={conversionDepth} onChange={(e) => setConversionDepth(e.target.value as 'standard' | 'complete')}>
-            <option value="complete">{t('bim.depth_complete', { defaultValue: 'Complete — all properties (Volume, Area, Level, Materials, 1000+ columns)' })}</option>
-            <option value="standard">{t('bim.depth_standard', { defaultValue: 'Standard — basic identifiers only (~15 columns, faster)' })}</option>
+          <select className="w-full text-sm py-2 px-3 rounded-lg border border-border-light bg-surface-secondary text-content-primary focus:outline-none focus:ring-1 focus:ring-oe-blue" value={conversionDepth} onChange={(e) => setConversionDepth(e.target.value as 'standard' | 'medium' | 'complete')}>
+            <option value="standard">{t('bim.depth_standard', { defaultValue: 'Fast — key properties (Category, Level, Volume, Area, ~20s)' })}</option>
+            <option value="medium">{t('bim.depth_medium', { defaultValue: 'Standard — all type parameters (~900 columns, ~25s)' })}</option>
+            <option value="complete">{t('bim.depth_complete', { defaultValue: 'Full — every Revit parameter including views (~1000+ columns, ~30s)' })}</option>
           </select>
         </div>
 
