@@ -35,11 +35,15 @@ import {
   LayoutGrid,
   Boxes,
   PanelTop,
+  X,
+  EyeOff as EyeOffIcon,
 } from 'lucide-react';
 import { SceneManager } from './SceneManager';
 import { ElementManager } from './ElementManager';
 import type { BIMElementData } from './ElementManager';
 import { SelectionManager } from './SelectionManager';
+import { BIMContextMenu } from './BIMContextMenu';
+import type { BIMContextMenuState } from './BIMContextMenu';
 import SimilarItemsPanel from '@/shared/ui/SimilarItemsPanel';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -253,6 +257,18 @@ export function BIMViewer({
    *  previous spinner gave the user no signal anything was happening. */
   const [geometryProgress, setGeometryProgress] = useState<number | null>(null);
 
+  /** Context menu state -- null when closed. */
+  const [contextMenu, setContextMenu] = useState<BIMContextMenuState | null>(null);
+  /** Set of element IDs that the user has manually hidden via the context
+   *  menu.  Tracked as React state so the "N hidden" badge updates. */
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
+  /** Number of currently selected elements -- drives the selection toolbar. */
+  const [selectionCount, setSelectionCount] = useState(0);
+  /** Summary of selected elements for the toolbar label. */
+  const [selectionSummary, setSelectionSummary] = useState('');
+  /** Whether the viewer is in isolation mode (double-click). */
+  const [isIsolated, setIsIsolated] = useState(false);
+
   /** Health-stat rollup over the loaded elements.  Drives the banner at
    *  the top of the viewport: total / linked-to-BOQ / errors / warnings /
    *  has-tasks / has-documents.  Pure derived state so it updates the
@@ -321,6 +337,63 @@ export function BIMViewer({
           setTooltipPos(null);
         }
         onElementHover?.(id);
+      },
+      onSelectionChange: (ids) => {
+        setSelectionCount(ids.length);
+        // Build summary like "2 Walls, 1 Door"
+        if (ids.length > 1) {
+          const counts = new Map<string, number>();
+          for (const id of ids) {
+            const data = elementMgr.getElementData(id);
+            const cat = data?.element_type || 'Unknown';
+            counts.set(cat, (counts.get(cat) ?? 0) + 1);
+          }
+          const parts = [...counts.entries()]
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3)
+            .map(([cat, n]) => `${n} ${cat}`);
+          setSelectionSummary(parts.join(', '));
+        } else {
+          setSelectionSummary('');
+        }
+        // Close context menu on selection change
+        setContextMenu(null);
+      },
+      onContextMenu: (event, _elementId) => {
+        const selected = selectionMgr.getSelectedElements();
+        const directElement = _elementId
+          ? elementMgr.getElementData(_elementId) ?? null
+          : null;
+        if (selected.length > 0 || directElement) {
+          setContextMenu({
+            x: event.clientX,
+            y: event.clientY,
+            element: directElement,
+            selectedElements: selected.length > 0 ? selected : (directElement ? [directElement] : []),
+          });
+        }
+      },
+      onDoubleClick: (elementId) => {
+        if (elementId) {
+          // Double-click element -> isolate it (plus current selection)
+          const ids = selectionMgr.getSelectedIds();
+          const toIsolate = ids.includes(elementId) ? ids : [elementId];
+          elementMgr.isolate(toIsolate);
+          setIsIsolated(true);
+          // Zoom to the isolated elements
+          const meshes = toIsolate
+            .map((id) => elementMgr.getMesh(id))
+            .filter((m): m is NonNullable<typeof m> => m != null);
+          if (meshes.length > 0) {
+            scene.zoomToSelection(meshes);
+          }
+        } else {
+          // Double-click empty space -> exit isolation, show all
+          elementMgr.showAll();
+          setIsIsolated(false);
+          setHiddenIds(new Set());
+          scene.zoomToFit();
+        }
       },
     });
     selectionMgrRef.current = selectionMgr;
@@ -627,6 +700,126 @@ export function BIMViewer({
     sceneRef.current?.setCameraPreset(view);
   }, []);
 
+  // ── Context menu actions ────────────────────────────────────────────
+  const handleCloseContextMenu = useCallback(() => {
+    setContextMenu(null);
+  }, []);
+
+  const handleCtxZoomToElement = useCallback(() => {
+    if (!contextMenu?.element) return;
+    const mesh = elementMgrRef.current?.getMesh(contextMenu.element.id);
+    if (mesh && sceneRef.current) {
+      sceneRef.current.zoomToSelection([mesh]);
+    }
+  }, [contextMenu]);
+
+  const handleCtxCopyProperties = useCallback(() => {
+    if (!contextMenu?.element) return;
+    const el = contextMenu.element;
+    const text = JSON.stringify(
+      { id: el.id, name: el.name, type: el.element_type, storey: el.storey, quantities: el.quantities, properties: el.properties },
+      null,
+      2,
+    );
+    navigator.clipboard.writeText(text).catch(() => {/* ignore */});
+  }, [contextMenu]);
+
+  const handleCtxAddToBOQ = useCallback(() => {
+    if (!contextMenu) return;
+    const el = contextMenu.element ?? contextMenu.selectedElements[0];
+    if (el && onAddToBOQ) onAddToBOQ(el);
+  }, [contextMenu, onAddToBOQ]);
+
+  const handleCtxLinkDocument = useCallback(() => {
+    if (!contextMenu) return;
+    const el = contextMenu.element ?? contextMenu.selectedElements[0];
+    if (el && onLinkDocument) onLinkDocument(el);
+  }, [contextMenu, onLinkDocument]);
+
+  const handleCtxLinkActivity = useCallback(() => {
+    if (!contextMenu) return;
+    const el = contextMenu.element ?? contextMenu.selectedElements[0];
+    if (el && onLinkActivity) onLinkActivity(el);
+  }, [contextMenu, onLinkActivity]);
+
+  const handleCtxCreateTask = useCallback(() => {
+    if (!contextMenu) return;
+    const el = contextMenu.element ?? contextMenu.selectedElements[0];
+    if (el && onCreateTask) onCreateTask(el);
+  }, [contextMenu, onCreateTask]);
+
+  const handleCtxIsolate = useCallback(() => {
+    if (!contextMenu || !elementMgrRef.current) return;
+    const ids = contextMenu.selectedElements.map((el) => el.id);
+    if (ids.length === 0) return;
+    elementMgrRef.current.isolate(ids);
+    setIsIsolated(true);
+    const meshes = ids
+      .map((id) => elementMgrRef.current!.getMesh(id))
+      .filter((m): m is NonNullable<typeof m> => m != null);
+    if (meshes.length > 0 && sceneRef.current) {
+      sceneRef.current.zoomToSelection(meshes);
+    }
+  }, [contextMenu]);
+
+  const handleCtxHide = useCallback(() => {
+    if (!contextMenu || !elementMgrRef.current) return;
+    const ids = contextMenu.selectedElements.map((el) => el.id);
+    if (ids.length === 0) return;
+    const newHidden = new Set(hiddenIds);
+    for (const id of ids) newHidden.add(id);
+    setHiddenIds(newHidden);
+    elementMgrRef.current.hideElements(newHidden);
+    // Deselect hidden elements
+    selectionMgrRef.current?.clearSelection();
+    setSelectedElement(null);
+    setSelectionCount(0);
+    onElementSelect?.(null);
+  }, [contextMenu, hiddenIds, onElementSelect]);
+
+  const handleShowAll = useCallback(() => {
+    if (!elementMgrRef.current) return;
+    elementMgrRef.current.showAll();
+    setHiddenIds(new Set());
+    setIsIsolated(false);
+    sceneRef.current?.zoomToFit();
+  }, []);
+
+  const handleClearSelection = useCallback(() => {
+    selectionMgrRef.current?.clearSelection();
+    setSelectedElement(null);
+    setSelectionCount(0);
+    onElementSelect?.(null);
+  }, [onElementSelect]);
+
+  const handleSelectionIsolate = useCallback(() => {
+    if (!selectionMgrRef.current || !elementMgrRef.current) return;
+    const ids = selectionMgrRef.current.getSelectedIds();
+    if (ids.length === 0) return;
+    elementMgrRef.current.isolate(ids);
+    setIsIsolated(true);
+    const meshes = ids
+      .map((id) => elementMgrRef.current!.getMesh(id))
+      .filter((m): m is NonNullable<typeof m> => m != null);
+    if (meshes.length > 0 && sceneRef.current) {
+      sceneRef.current.zoomToSelection(meshes);
+    }
+  }, []);
+
+  const handleSelectionHide = useCallback(() => {
+    if (!selectionMgrRef.current || !elementMgrRef.current) return;
+    const ids = selectionMgrRef.current.getSelectedIds();
+    if (ids.length === 0) return;
+    const newHidden = new Set(hiddenIds);
+    for (const id of ids) newHidden.add(id);
+    setHiddenIds(newHidden);
+    elementMgrRef.current.hideElements(newHidden);
+    selectionMgrRef.current.clearSelection();
+    setSelectedElement(null);
+    setSelectionCount(0);
+    onElementSelect?.(null);
+  }, [hiddenIds, onElementSelect]);
+
   // ── Keyboard shortcuts ──────────────────────────────────────────────
   //   F     — zoom to fit all
   //   W     — toggle wireframe
@@ -675,15 +868,34 @@ export function BIMViewer({
           e.preventDefault();
           sceneRef.current?.setCameraPreset('iso');
           break;
+        case 'h':
+          // Hide selected elements
+          e.preventDefault();
+          handleSelectionHide();
+          break;
+        case 'i':
+          // Isolate selected elements
+          e.preventDefault();
+          if (isIsolated) {
+            handleShowAll();
+          } else {
+            handleSelectionIsolate();
+          }
+          break;
         case 'escape':
-          // Deselect element and close properties panel
-          if (showShortcuts) {
+          // Close context menu first, then shortcuts, then deselect
+          if (contextMenu) {
+            setContextMenu(null);
+          } else if (showShortcuts) {
             setShowShortcuts(false);
+          } else if (isIsolated) {
+            handleShowAll();
           } else {
             setSelectedElement(null);
             setParquetProps(null);
             setParquetExpanded(false);
             selectionMgrRef.current?.clearSelection();
+            setSelectionCount(0);
             onElementSelect?.(null);
           }
           break;
@@ -696,7 +908,7 @@ export function BIMViewer({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onElementSelect, showShortcuts]);
+  }, [onElementSelect, showShortcuts, contextMenu, isIsolated, handleSelectionHide, handleSelectionIsolate, handleShowAll]);
 
   // Memoize the element properties/quantities for the panel
   const elementProperties = useMemo(() => {
@@ -882,6 +1094,95 @@ export function BIMViewer({
         />
       </div>
 
+      {/* Selection toolbar — appears above the viewport when 1+ elements
+          are selected.  Gives quick access to BOQ/Hide/Isolate/Clear without
+          right-clicking. */}
+      {selectionCount > 0 && (
+        <div className="absolute bottom-3 start-1/2 -translate-x-1/2 z-30 flex items-center gap-2 rounded-lg bg-surface-primary/95 backdrop-blur border border-oe-blue/40 shadow-lg px-3 py-1.5">
+          <span className="text-xs font-semibold text-content-primary whitespace-nowrap">
+            {selectionCount === 1
+              ? t('bim.sel_one', {
+                  defaultValue: '1 selected',
+                })
+              : t('bim.sel_n', {
+                  defaultValue: '{{count}} selected',
+                  count: selectionCount,
+                })}
+          </span>
+          {selectionSummary && (
+            <span className="text-[10px] text-content-tertiary truncate max-w-[200px]">
+              ({selectionSummary})
+            </span>
+          )}
+          <div className="w-px h-4 bg-border-light" />
+          {onAddToBOQ && (
+            <button
+              type="button"
+              onClick={() => {
+                const el = selectionMgrRef.current?.getSelectedElements()?.[0];
+                if (el) onAddToBOQ(el);
+              }}
+              className="px-2 py-0.5 rounded text-[11px] font-medium text-white bg-oe-blue hover:bg-oe-blue-dark transition-colors"
+            >
+              {t('bim.sel_boq', { defaultValue: 'BOQ' })}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={handleSelectionHide}
+            className="px-2 py-0.5 rounded text-[11px] font-medium text-content-secondary bg-surface-secondary hover:bg-surface-tertiary transition-colors"
+            title={t('bim.sel_hide', { defaultValue: 'Hide selected (H)' })}
+          >
+            {t('bim.hide', { defaultValue: 'Hide' })}
+          </button>
+          <button
+            type="button"
+            onClick={handleSelectionIsolate}
+            className="px-2 py-0.5 rounded text-[11px] font-medium text-content-secondary bg-surface-secondary hover:bg-surface-tertiary transition-colors"
+            title={t('bim.sel_isolate', { defaultValue: 'Isolate selected (I)' })}
+          >
+            {t('bim.isolate', { defaultValue: 'Isolate' })}
+          </button>
+          <button
+            type="button"
+            onClick={handleClearSelection}
+            className="flex items-center justify-center h-5 w-5 rounded text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors"
+            title={t('bim.sel_clear', { defaultValue: 'Clear selection (Esc)' })}
+          >
+            <X size={12} />
+          </button>
+        </div>
+      )}
+
+      {/* Hidden elements badge + Show all button — bottom-right corner */}
+      {(hiddenIds.size > 0 || isIsolated) && (
+        <div className="absolute bottom-3 end-3 z-20 flex items-center gap-1.5">
+          {hiddenIds.size > 0 && (
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium bg-surface-primary/90 backdrop-blur border border-border-light shadow-sm text-content-secondary">
+              <EyeOffIcon size={11} />
+              {t('bim.hidden_count', {
+                defaultValue: '{{count}} hidden',
+                count: hiddenIds.size,
+              })}
+            </span>
+          )}
+          {isIsolated && (
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium bg-oe-blue/10 border border-oe-blue/30 shadow-sm text-oe-blue">
+              <Eye size={11} />
+              {t('bim.isolated', { defaultValue: 'Isolated' })}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={handleShowAll}
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium bg-surface-primary/90 backdrop-blur border border-border-light shadow-sm text-content-secondary hover:bg-surface-secondary transition-colors"
+          >
+            <Eye size={11} />
+            {t('bim.show_all', { defaultValue: 'Show all' })}
+          </button>
+        </div>
+      )}
+
       {/* Health stats banner — top-right, multi-pill clickable counts.
           The pills are smart filters: clicking "Errors" narrows the
           3D viewport to elements with validation_status='error', etc.
@@ -1022,13 +1323,19 @@ export function BIMViewer({
                 ['F', 'Fit all elements'],
                 ['W', 'Toggle wireframe'],
                 ['G', 'Toggle grid'],
+                ['H', 'Hide selected'],
+                ['I', 'Isolate / exit isolation'],
                 ['1', 'Front view'],
                 ['2', 'Side view'],
                 ['3', 'Top view'],
                 ['0', 'Isometric view'],
                 ['Esc', 'Deselect / close panel'],
                 ['Click', 'Select element'],
-                ['Ctrl+Click', 'Multi-select'],
+                ['Ctrl+Click', 'Multi-select (toggle)'],
+                ['Shift+Click', 'Add to selection'],
+                ['DblClick', 'Isolate element'],
+                ['DblClick empty', 'Exit isolation'],
+                ['Right-click', 'Context menu'],
                 ['?', 'Toggle this overlay'],
               ].map(([key, desc]) => (
                 <div key={key} className="flex items-center justify-between">
@@ -1152,6 +1459,8 @@ export function BIMViewer({
                 <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">F</kbd> Fit all</span>
                 <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">W</kbd> Wireframe</span>
                 <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">G</kbd> Grid</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">H</kbd> Hide</span>
+                <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">I</kbd> Isolate</span>
                 <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">Esc</kbd> Deselect</span>
                 <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">1</kbd> Front</span>
                 <span><kbd className="px-1 py-0.5 bg-surface-secondary rounded text-[9px] font-mono">2</kbd> Side</span>
@@ -1759,6 +2068,25 @@ export function BIMViewer({
           wired to cost or schedule data.  Coloring by discipline / storey /
           type now lives in the top toolbar of BIMPage via the colorByMode
           dropdown, which is the single source of truth. */}
+
+      {/* Right-click context menu — rendered as a fixed-position portal-like
+          overlay.  Closes on click outside, Escape, or scroll. */}
+      {contextMenu && (
+        <BIMContextMenu
+          menu={contextMenu}
+          onClose={handleCloseContextMenu}
+          actions={{
+            onZoomToElement: handleCtxZoomToElement,
+            onCopyProperties: handleCtxCopyProperties,
+            onAddToBOQ: onAddToBOQ ? handleCtxAddToBOQ : undefined,
+            onLinkDocument: onLinkDocument ? handleCtxLinkDocument : undefined,
+            onLinkActivity: onLinkActivity ? handleCtxLinkActivity : undefined,
+            onCreateTask: onCreateTask ? handleCtxCreateTask : undefined,
+            onIsolate: handleCtxIsolate,
+            onHide: handleCtxHide,
+          }}
+        />
+      )}
     </div>
   );
 }
