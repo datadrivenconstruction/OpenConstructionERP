@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   ClipboardCheck,
@@ -24,9 +24,8 @@ import {
   FileJson,
   FileText,
   AlertCircle,
-  Cuboid,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Breadcrumb, ViewInBIMButton } from '@/shared/ui';
 import { apiGet, triggerDownload } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -1388,7 +1387,6 @@ function CreateSetModal({
 
 function ExpandedRow({ req }: { req: Requirement }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   // Pull pinned BIM elements out of metadata.bim_element_ids — the same
   // array linkRequirementToBIMElements writes via PATCH /bim-links.
   const bimIds = useMemo<string[]>(() => {
@@ -1431,24 +1429,10 @@ function ExpandedRow({ req }: { req: Requirement }) {
               {t('requirements.linked_bim', { defaultValue: 'Pinned BIM elements' })}
             </p>
             {bimIds.length > 0 ? (
-              <button
-                type="button"
-                onClick={() =>
-                  navigate(`/bim?element=${encodeURIComponent(bimIds[0]!)}`)
-                }
+              <ViewInBIMButton
+                elementIds={bimIds}
                 className="inline-flex items-center gap-1 text-violet-700 dark:text-violet-300 hover:underline"
-                title={t('requirements.linked_bim_count_title', {
-                  defaultValue:
-                    'Pinned to {{count}} BIM element(s) — click to open the viewer',
-                  count: bimIds.length,
-                })}
-              >
-                <Cuboid size={12} />
-                {t('requirements.linked_bim_count', {
-                  defaultValue: '{{count}} pinned',
-                  count: bimIds.length,
-                })}
-              </button>
+              />
             ) : (
               <span className="text-content-tertiary italic">
                 {t('common.none', { defaultValue: 'None' })}
