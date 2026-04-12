@@ -60,6 +60,8 @@ export interface StartUploadParams {
   uploadType: 'cad' | 'data';
   /** Optional geometry file for advanced (data) uploads. */
   geometryFile?: File | null;
+  /** DDC conversion depth: 'standard' (~15 key columns) or 'complete' (~1000+ columns). Default 'standard'. */
+  conversionDepth?: 'standard' | 'complete';
 }
 
 interface BIMUploadState {
@@ -146,6 +148,7 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
           params.discipline,
           params.file,
           ac?.signal,
+          params.conversionDepth,
         );
 
         clearStageTimer(jobId);
