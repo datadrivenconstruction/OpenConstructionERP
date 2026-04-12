@@ -32,7 +32,7 @@ from fastapi.responses import StreamingResponse
 
 logger = logging.getLogger(__name__)
 
-from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermission, SessionDep, verify_project_access
 from app.modules.schedule.schemas import (
     ActivityBimLinkRequest,
     ActivityCreate,
@@ -939,8 +939,10 @@ async def create_baseline(
 async def list_baselines(
     project_id: uuid.UUID = Query(..., description="Filter baselines by project"),
     session: SessionDep = None,
+    _user_id: CurrentUserId = None,  # type: ignore[assignment]
 ) -> list[BaselineResponse]:
     """List all baselines for a project."""
+    await verify_project_access(project_id, _user_id, session)
     from sqlalchemy import select
 
     from app.modules.schedule.models import ScheduleBaseline
@@ -1076,8 +1078,10 @@ async def list_progress_updates(
     project_id: uuid.UUID = Query(..., description="Filter by project"),
     activity_id: uuid.UUID | None = Query(default=None, description="Filter by activity"),
     session: SessionDep = None,
+    _user_id: CurrentUserId = None,  # type: ignore[assignment]
 ) -> list[ProgressUpdateResponse]:
     """List progress updates for a project, optionally filtered by activity."""
+    await verify_project_access(project_id, _user_id, session)
     from sqlalchemy import select
 
     from app.modules.schedule.models import ProgressUpdate as ProgressUpdateModel
@@ -1792,11 +1796,13 @@ async def export_schedule_csv(
 async def schedule_stats(
     project_id: uuid.UUID = Query(..., description="Project to compute stats for"),
     session: SessionDep = None,  # type: ignore[assignment]
+    _user_id: CurrentUserId = None,  # type: ignore[assignment]
 ) -> ScheduleStatsResponse:
     """Return aggregate schedule statistics across all schedules in a project.
 
     Computes total activities, critical count, delayed, on_track, progress_pct, etc.
     """
+    await verify_project_access(project_id, _user_id, session)
     from sqlalchemy import select
 
     from app.modules.schedule.models import Activity, Schedule
@@ -1876,12 +1882,14 @@ async def schedule_stats(
 async def critical_path_activities(
     project_id: uuid.UUID = Query(..., description="Project to retrieve critical path for"),
     session: SessionDep = None,  # type: ignore[assignment]
+    _user_id: CurrentUserId = None,  # type: ignore[assignment]
 ) -> list[ActivityResponse]:
     """Return only critical-path activities across all schedules in a project.
 
     Filters activities where is_critical=True, ordered by early_start.
     Requires CPM calculation to have been run first.
     """
+    await verify_project_access(project_id, _user_id, session)
     from sqlalchemy import select
 
     from app.modules.schedule.models import Activity, Schedule
