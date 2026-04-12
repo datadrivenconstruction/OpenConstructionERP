@@ -705,66 +705,77 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
   return (
     <div className="flex flex-col -mx-2 sm:-mx-3 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
       <div className="px-6 pt-4 pb-3 border-b border-border-light"><Breadcrumb items={breadcrumbItems} /></div>
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto px-6 py-12">
-          {/* Hero */}
-          <div className="text-center mb-12">
-            <div className="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-oe-blue/10 to-blue-100 dark:to-blue-950/30 border border-oe-blue/20 flex items-center justify-center mb-5 shadow-lg shadow-oe-blue/5">
-              <Cuboid size={36} className="text-oe-blue" />
+      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-blue-50/50 dark:from-gray-900 dark:via-gray-900 dark:to-blue-950/20">
+        <div className="max-w-2xl w-full px-6 py-8">
+          {/* Hero — compact, centered, strong visual */}
+          <div className="text-center mb-8">
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-oe-blue to-blue-600 flex items-center justify-center mb-4 shadow-lg shadow-oe-blue/20">
+              <Cuboid size={28} className="text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-content-primary tracking-tight">{t('bim.landing_hero_title')}</h1>
-            <p className="text-base text-content-secondary mt-3 max-w-lg mx-auto leading-relaxed">
+            <h1 className="text-2xl font-bold text-content-primary tracking-tight">{t('bim.landing_hero_title')}</h1>
+            <p className="text-sm text-content-secondary mt-2 max-w-md mx-auto">
               {t('bim.landing_hero_subtitle')}
             </p>
           </div>
 
-          {/* Upload */}
-          <div className="max-w-lg mx-auto mb-12">
-            <label
-              onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) { setFile(f); if (!modelName) setModelName(f.name.replace(/\.[^.]+$/, '')); } }}
-              onDragOver={(e) => e.preventDefault()}
-              className={`flex flex-col items-center gap-4 border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all ${
-                file ? 'border-oe-blue/40 bg-oe-blue/5' : 'border-border-medium hover:border-oe-blue/50 hover:bg-surface-secondary'
-              }`}
-            >
-              {file ? (
-                <>
-                  <div className="w-14 h-14 rounded-xl bg-oe-blue/10 border border-oe-blue/20 flex items-center justify-center"><CheckCircle2 size={24} className="text-oe-blue" /></div>
-                  <p className="text-base font-semibold text-content-primary">{file.name}</p>
-                  <p className="text-xs text-content-quaternary">{formatFileSize(file.size)}</p>
-                </>
-              ) : (
-                <>
-                  <div className="w-14 h-14 rounded-xl bg-surface-secondary border border-border-light flex items-center justify-center"><FileUp size={24} className="text-content-quaternary" /></div>
-                  <p className="text-base font-semibold text-content-primary">{t('bim.landing_drop_here')}</p>
-                  <p className="text-xs text-content-quaternary">{t('bim.landing_size_hint')}</p>
-                </>
+          {/* Upload — prominent card with shadow */}
+          <div className="max-w-md mx-auto mb-8">
+            <div className="rounded-2xl bg-surface-primary border border-border-light shadow-lg shadow-black/5 dark:shadow-black/20 p-6">
+              <label
+                onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) { setFile(f); if (!modelName) setModelName(f.name.replace(/\.[^.]+$/, '')); } }}
+                onDragOver={(e) => e.preventDefault()}
+                className={`flex flex-col items-center gap-3 border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
+                  file ? 'border-oe-blue bg-oe-blue/5' : 'border-border-medium hover:border-oe-blue hover:bg-blue-50/50 dark:hover:bg-blue-950/20'
+                }`}
+              >
+                {file ? (
+                  <>
+                    <div className="w-12 h-12 rounded-xl bg-oe-blue/10 flex items-center justify-center"><CheckCircle2 size={22} className="text-oe-blue" /></div>
+                    <p className="text-sm font-semibold text-content-primary">{file.name}</p>
+                    <p className="text-[11px] text-content-quaternary">{formatFileSize(file.size)}</p>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 border border-blue-200/50 dark:border-blue-800/30 flex items-center justify-center">
+                      <FileUp size={22} className="text-oe-blue" />
+                    </div>
+                    <p className="text-sm font-semibold text-content-primary">{t('bim.landing_drop_here')}</p>
+                    <p className="text-[11px] text-content-quaternary">{t('bim.landing_size_hint')}</p>
+                  </>
+                )}
+                <input ref={fileInputRef} type="file" accept=".rvt,.ifc,.dwg,.dgn,.fbx,.obj,.3ds,.csv,.xlsx,.xls" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) { setFile(f); if (!modelName) setModelName(f.name.replace(/\.[^.]+$/, '')); } }} />
+              </label>
+              {file && (
+                <div className="mt-4 space-y-3">
+                  <input type="text" className="w-full text-sm py-2.5 px-4 rounded-xl border border-border-light bg-surface-secondary text-content-primary placeholder-content-quaternary focus:outline-none focus:ring-2 focus:ring-oe-blue/30" placeholder={t('bim.model_name')} value={modelName} onChange={(e) => setModelName(e.target.value)} />
+                  {uploading && <div className="h-1.5 rounded-full bg-surface-tertiary overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-300" style={{ width: `${uploadProgress}%` }} /></div>}
+                  {uploadError && <p className="text-xs text-red-500">{uploadError}</p>}
+                  <button onClick={handleUpload} disabled={uploading} className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-50 bg-oe-blue text-white hover:bg-oe-blue-dark active:scale-[0.98] shadow-md hover:shadow-lg">
+                    {uploading ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
+                    {uploading ? t('bim.landing_processing') : t('bim.landing_upload_process')}
+                  </button>
+                </div>
               )}
-              <input ref={fileInputRef} type="file" accept=".rvt,.ifc,.dwg,.dgn,.fbx,.obj,.3ds,.csv,.xlsx,.xls" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) { setFile(f); if (!modelName) setModelName(f.name.replace(/\.[^.]+$/, '')); } }} />
-            </label>
-            {file && (
-              <div className="mt-4 space-y-3">
-                <input type="text" className="w-full text-sm py-2.5 px-4 rounded-xl border border-border-light bg-surface-secondary text-content-primary placeholder-content-quaternary focus:outline-none focus:ring-1 focus:ring-oe-blue" placeholder={t('bim.model_name')} value={modelName} onChange={(e) => setModelName(e.target.value)} />
-                {uploading && <div className="h-1.5 rounded-full bg-surface-tertiary overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-300" style={{ width: `${uploadProgress}%` }} /></div>}
-                {uploadError && <p className="text-xs text-red-500">{uploadError}</p>}
-                <button onClick={handleUpload} disabled={uploading} className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-50 bg-oe-blue text-white hover:bg-oe-blue-dark active:scale-[0.98] shadow-sm hover:shadow-md">
-                  {uploading ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
-                  {uploading ? t('bim.landing_processing') : t('bim.landing_upload_process')}
-                </button>
-              </div>
-            )}
+            </div>
           </div>
 
-          {/* Features */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Features — compact 2-row grid, visible without scrolling */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-w-lg mx-auto">
             {features.map((f, i) => (
-              <div key={i} className="rounded-xl border border-border-light bg-surface-primary p-5 hover:shadow-md transition-shadow">
-                <div className={`w-10 h-10 rounded-lg ${f.color} border flex items-center justify-center mb-3`}><f.icon size={18} className={f.ic} /></div>
-                <h3 className="text-sm font-semibold text-content-primary mb-1">{f.title}</h3>
-                <p className="text-xs text-content-tertiary leading-relaxed">{f.desc}</p>
+              <div key={i} className="flex items-start gap-2.5 rounded-lg p-3 bg-surface-primary/60 dark:bg-surface-primary/40 border border-border-light/50 hover:border-border-light transition-colors">
+                <div className={`w-8 h-8 rounded-lg ${f.color} border flex items-center justify-center shrink-0`}><f.icon size={14} className={f.ic} /></div>
+                <div className="min-w-0">
+                  <h3 className="text-[11px] font-semibold text-content-primary leading-tight">{f.title}</h3>
+                  <p className="text-[10px] text-content-quaternary leading-snug mt-0.5 line-clamp-2">{f.desc}</p>
+                </div>
               </div>
             ))}
           </div>
+
+          {/* Supported formats — subtle bottom hint */}
+          <p className="text-center text-[10px] text-content-quaternary mt-6">
+            {t('bim.landing_formats', { defaultValue: 'Supports Revit (.rvt), IFC, DWG, DGN, FBX, OBJ, CSV, Excel' })}
+          </p>
         </div>
       </div>
     </div>
