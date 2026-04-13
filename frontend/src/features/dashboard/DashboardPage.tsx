@@ -1551,6 +1551,7 @@ export function DashboardPage() {
     queryKey: ['projects'],
     queryFn: () => apiGet<ProjectSummary[]>('/v1/projects/').catch(() => []),
     retry: false,
+    staleTime: 5 * 60_000,
   });
 
   // Fetch lightweight per-project summary metrics for dashboard cards (single endpoint)

@@ -1182,6 +1182,7 @@ function AddToBOQModal({
     queryKey: ['projects'],
     queryFn: () => apiGet<Project[]>('/v1/projects/'),
     retry: false,
+    staleTime: 5 * 60_000,
   });
 
   // Fetch BOQs for selected project
