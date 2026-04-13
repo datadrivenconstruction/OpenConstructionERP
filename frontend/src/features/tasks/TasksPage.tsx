@@ -1121,8 +1121,8 @@ export function TasksPage() {
                         {t('tasks.show_errors', { defaultValue: 'Show error details' })}
                       </summary>
                       <ul className="mt-1 space-y-0.5 max-h-32 overflow-y-auto">
-                        {importResult.errors.slice(0, 20).map((err, i) => (
-                          <li key={i}>Row {err.row}: {err.error}</li>
+                        {importResult.errors.slice(0, 20).map((err) => (
+                          <li key={`row-${err.row}`}>Row {err.row}: {err.error}</li>
                         ))}
                       </ul>
                     </details>

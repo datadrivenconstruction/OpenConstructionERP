@@ -468,7 +468,7 @@ export function BackupRestore() {
                             <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg px-3 py-2.5">
                               {validation.warnings.map((w, i) => (
                                 <div
-                                  key={i}
+                                  key={`warn-${w.slice(0, 30)}-${i}`}
                                   className="flex items-start gap-2 text-xs text-content-secondary"
                                 >
                                   <AlertTriangle

@@ -244,7 +244,7 @@ export function AIAdvisorPanel({ projectId, role }: AIAdvisorPanelProps) {
             )}
             {chatMessages.map((msg, i) => (
               <div
-                key={i}
+                key={`${msg.role}-${i}`}
                 className={clsx(
                   'rounded-lg px-3 py-2 text-xs',
                   msg.role === 'user'

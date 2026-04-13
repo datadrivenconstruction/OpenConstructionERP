@@ -49,8 +49,12 @@ const GRADE_COLORS: Record<string, string> = {
   F: '#da3633',
 };
 
+interface SummaryState {
+  project_name?: string;
+}
+
 interface Summary {
-  state: any;
+  state: SummaryState;
   score: {
     overall: number;
     overall_grade: string;
@@ -544,8 +548,8 @@ export function ProjectIntelligencePage() {
                   </p>
                 </div>
                 <div className="space-y-1.5">
-                  {score.achievements.map((ach, i) => (
-                    <AchievementCard key={i} achievement={ach} />
+                  {score.achievements.map((ach) => (
+                    <AchievementCard key={`${ach.domain}-${ach.title}`} achievement={ach} />
                   ))}
                 </div>
               </div>
@@ -558,7 +562,7 @@ export function ProjectIntelligencePage() {
             <AIAdvisorPanel
               projectId={activeProjectId}
               role={role}
-              projectName={state.project_name}
+              projectName={state.project_name ?? ''}
               score={score}
             />
 

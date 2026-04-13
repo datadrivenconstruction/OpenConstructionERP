@@ -838,8 +838,8 @@ function ImportSummaryModal({
                     {t('meetings.label_topics', { defaultValue: 'Key Topics' })}
                   </label>
                   <div className="flex flex-wrap gap-1.5">
-                    {previewData.key_topics.map((topic, idx) => (
-                      <Badge key={idx} variant="blue" size="sm">
+                    {previewData.key_topics.map((topic) => (
+                      <Badge key={topic} variant="blue" size="sm">
                         {topic.length > 60 ? topic.slice(0, 60) + '...' : topic}
                       </Badge>
                     ))}
@@ -859,7 +859,7 @@ function ImportSummaryModal({
                   <div className="rounded-lg border border-border-light divide-y divide-border-light">
                     {editAttendees.map((att, idx) => (
                       <label
-                        key={idx}
+                        key={`${att.name}-${att.company || ''}-${idx}`}
                         className="flex items-center gap-3 px-3 py-2 hover:bg-surface-secondary/50 cursor-pointer transition-colors"
                       >
                         <input
@@ -895,7 +895,7 @@ function ImportSummaryModal({
                   <div className="rounded-lg border border-blue-200 dark:border-blue-800 divide-y divide-blue-100 dark:divide-blue-900">
                     {editActionItems.map((ai, idx) => (
                       <div
-                        key={idx}
+                        key={`action-${ai.description?.slice(0, 30) || idx}-${idx}`}
                         className={clsx(
                           'flex items-start gap-3 px-3 py-2.5 transition-colors',
                           !ai.included && 'opacity-50',
@@ -943,7 +943,7 @@ function ImportSummaryModal({
                   </label>
                   <div className="rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-3 space-y-1.5">
                     {previewData.decisions.map((d, idx) => (
-                      <div key={idx} className="flex items-start gap-2 text-sm">
+                      <div key={`decision-${d.decision.slice(0, 30)}-${idx}`} className="flex items-start gap-2 text-sm">
                         <CheckCircle2 size={14} className="text-semantic-success mt-0.5 shrink-0" />
                         <div className="flex-1 min-w-0">
                           <span className="text-content-primary">{d.decision}</span>

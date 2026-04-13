@@ -1279,7 +1279,7 @@ function MonteCarloPanel({ projectId, currency }: { projectId: string; currency:
                     const isP80 = result.p80 >= bin.from && result.p80 < bin.to;
                     const isP95 = result.p95 >= bin.from && result.p95 < bin.to;
                     return (
-                      <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
+                      <div key={`${bin.from}-${bin.to}`} className="flex-1 flex flex-col items-center gap-0.5">
                         <span className="text-2xs text-content-quaternary tabular-nums">{bin.count}</span>
                         <div
                           className={`w-full rounded-t transition-all ${

@@ -403,7 +403,7 @@ function RuleEditorModal({
               ) : (
                 <div className="space-y-2">
                   {form.property_filter.map((row, index) => (
-                    <div key={index} className="flex items-center gap-2">
+                    <div key={`prop-${row.key}-${index}`} className="flex items-center gap-2">
                       <input
                         type="text"
                         value={row.key}

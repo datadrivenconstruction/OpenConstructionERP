@@ -368,7 +368,7 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
                   </tr>
                 ))
               ) : displayRows.map((row, idx) => (
-                <tr key={idx} className={`border-b border-border-light hover:bg-surface-secondary/30 ${idx % 2 === 0 ? '' : 'bg-surface-secondary/10'}`}>
+                <tr key={`row-${page * pageSize + idx}-${Object.values(row).slice(0, 2).join('-')}`} className={`border-b border-border-light hover:bg-surface-secondary/30 ${idx % 2 === 0 ? '' : 'bg-surface-secondary/10'}`}>
                   <td className="px-2 py-1.5 text-center text-content-quaternary tabular-nums text-2xs">
                     {page * pageSize + idx + 1}
                   </td>
@@ -683,8 +683,8 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
                             </td>
                           ))}
                         </tr>
-                        {isOpen && children.map((g, i) => (
-                          <tr key={i} className="border-b border-border-light">
+                        {isOpen && children.map((g) => (
+                          <tr key={Object.values(g.key).join('-')} className="border-b border-border-light">
                             <td className="px-3 py-1.5 pl-8 text-content-quaternary">{g.key[groupBy[0]!]}</td>
                             {groupBy.slice(1).map((col) => <td key={col} className="px-3 py-1.5 text-content-secondary">{g.key[col] || '—'}</td>)}
                             <td className="px-3 py-1.5 text-right tabular-nums text-content-secondary">{g.count.toLocaleString()}</td>
@@ -695,8 +695,8 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
                     );
                   })
                 ) : (
-                  sortedGroups.map((g, i) => (
-                    <tr key={i} className="border-b border-border-light hover:bg-surface-secondary/30">
+                  sortedGroups.map((g) => (
+                    <tr key={Object.values(g.key).join('-')} className="border-b border-border-light hover:bg-surface-secondary/30">
                       {groupBy.map((col) => <td key={col} className="px-3 py-2 text-content-primary">{g.key[col] || '—'}</td>)}
                       <td className="px-3 py-2 text-right tabular-nums text-content-secondary">{g.count.toLocaleString()}</td>
                       {aggCols.map((col) => <td key={col} className="px-3 py-2 text-right tabular-nums font-medium">{formatNumber(g.results[col])}</td>)}
@@ -847,7 +847,7 @@ function ChartsTab({ sessionId, describe }: { sessionId: string; describe: Descr
                 const pct = maxVal > 0 ? (val / maxVal) * 100 : 0;
                 const color = BAR_COLORS[i % BAR_COLORS.length]!;
                 return (
-                  <div key={i} className="flex items-center gap-3">
+                  <div key={Object.values(g.key).join('-')} className="flex items-center gap-3">
                     <span className="w-32 text-xs text-content-secondary truncate shrink-0 text-right">
                       {Object.values(g.key)[0] || '—'}
                     </span>
@@ -879,7 +879,7 @@ function ChartsTab({ sessionId, describe }: { sessionId: string; describe: Descr
                       const pct = totalVal > 0 ? (val / totalVal) * 100 : 0;
                       const dashArray = `${pct} ${100 - pct}`;
                       const el = (
-                        <circle key={i} cx="50" cy="50" r="40" fill="none"
+                        <circle key={Object.values(g.key).join('-')} cx="50" cy="50" r="40" fill="none"
                           stroke={BAR_COLORS[i % BAR_COLORS.length]}
                           strokeWidth="20" strokeDasharray={dashArray}
                           strokeDashoffset={-offset}
@@ -896,7 +896,7 @@ function ChartsTab({ sessionId, describe }: { sessionId: string; describe: Descr
                   const val = g.results[chartValue] ?? 0;
                   const pct = totalVal > 0 ? ((val / totalVal) * 100).toFixed(1) : '0';
                   return (
-                    <div key={i} className="flex items-center gap-2 text-xs">
+                    <div key={Object.values(g.key).join('-')} className="flex items-center gap-2 text-xs">
                       <div className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: BAR_COLORS[i % BAR_COLORS.length] }} />
                       <span className="flex-1 text-content-secondary truncate">{Object.values(g.key)[0] || '—'}</span>
                       <span className="text-content-primary font-medium tabular-nums">{formatNumber(val)}</span>
@@ -1022,8 +1022,8 @@ function DescribeTab({ sessionId, describe }: { sessionId: string; describe: Des
             <span className="ml-2 text-content-tertiary font-normal">({vcData.total.toLocaleString()} total)</span>
           </h3>
           <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
-            {vcData.values.map((v, i) => (
-              <div key={i} className="flex items-center gap-3">
+            {vcData.values.map((v) => (
+              <div key={`${v.value}`} className="flex items-center gap-3">
                 <span className="w-36 text-xs text-content-secondary truncate shrink-0">{v.value || '(empty)'}</span>
                 <div className="flex-1 h-5 bg-surface-secondary rounded overflow-hidden relative">
                   <div
@@ -1222,7 +1222,7 @@ function CreateBOQFromPivotModal({ open, onClose, groups, groupByColumns, aggCol
                 const desc = groupByColumns.map((col) => g.key[col] || '').filter(Boolean).join(' — ');
                 const qty = g.results[`sum_${quantityCol}`] ?? g.results[`avg_${quantityCol}`] ?? g.count;
                 return (
-                  <div key={i} className="flex items-center justify-between text-xs">
+                  <div key={Object.values(g.key).join('-') || `group-${i}`} className="flex items-center justify-between text-xs">
                     <span className="text-content-primary truncate flex-1 mr-2">{desc || `Group ${i + 1}`}</span>
                     <span className="text-content-tertiary tabular-nums shrink-0">{Math.round(qty * 100) / 100} {unitGuess}</span>
                   </div>

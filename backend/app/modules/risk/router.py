@@ -127,6 +127,10 @@ async def list_risks(
     status_filter: str | None = Query(default=None, alias="status"),
     category: str | None = Query(default=None),
     severity: str | None = Query(default=None),
+    sort_by: str | None = Query(
+        default=None, description="Sort field: risk_score, probability, created_at"
+    ),
+    sort_order: str = Query(default="desc", pattern="^(asc|desc)$"),
     service: RiskService = Depends(_get_service),
 ) -> list[RiskResponse]:
     """List risk items for a project."""
@@ -137,6 +141,8 @@ async def list_risks(
         status_filter=status_filter,
         category_filter=category,
         severity_filter=severity,
+        sort_by=sort_by,
+        sort_order=sort_order,
     )
     return [_risk_to_response(i) for i in items]
 

@@ -180,7 +180,7 @@ function ChatBubble({
         <div className="mt-2 flex flex-wrap gap-1.5 max-w-[85%] sm:max-w-[75%]">
           {msg.options.map((opt, i) => (
             <button
-              key={i}
+              key={opt}
               onClick={() => onOptionClick(opt)}
               className="inline-flex items-center gap-1.5 rounded-full border border-oe-blue/30
                 bg-oe-blue/[0.06] px-3.5 py-[7px] text-[13px] font-medium text-oe-blue
@@ -435,9 +435,9 @@ export function AdvisorPage() {
 
               {/* Suggestion chips */}
               <div className="flex flex-wrap justify-center gap-2 max-w-lg">
-                {suggestions.map((s, i) => (
+                {suggestions.map((s) => (
                   <button
-                    key={i}
+                    key={s}
                     onClick={() => sendMessage(s)}
                     className="rounded-full border border-border-light bg-surface-elevated px-4 py-2 text-[13px] text-content-secondary
                       transition-all duration-150
@@ -454,7 +454,7 @@ export function AdvisorPage() {
           {/* Message list */}
           {messages.map((msg, i) => (
             <ChatBubble
-              key={i}
+              key={`${msg.role}-${i}`}
               msg={msg}
               onOptionClick={sendMessage}
               isLast={i === messages.length - 1}

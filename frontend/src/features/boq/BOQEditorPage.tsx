@@ -2634,6 +2634,7 @@ export function BOQEditorPage() {
               <button
                 onClick={() => setGaebPreviewOpen(false)}
                 className="p-1 rounded-lg text-content-tertiary hover:bg-surface-secondary transition-colors"
+                aria-label={t('common.close', { defaultValue: 'Close' })}
               >
                 <X size={16} />
               </button>
@@ -2780,6 +2781,7 @@ export function BOQEditorPage() {
             <button
               onClick={() => setShowVectorSetup(false)}
               className="absolute top-3 right-3 p-1.5 rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors"
+              aria-label={t('common.close', { defaultValue: 'Close' })}
             >
               <X size={16} />
             </button>

@@ -279,7 +279,7 @@ function ImportResultBanner({
             {t('bim.requirements.warnings', { defaultValue: 'warning(s)' })}
           </div>
           {result.warnings.slice(0, 3).map((w, i) => (
-            <div key={i} className="ml-5 mt-0.5">
+            <div key={`warn-${(w.msg ?? '').slice(0, 30)}-${i}`} className="ml-5 mt-0.5">
               {w.msg}
             </div>
           ))}
@@ -293,7 +293,7 @@ function ImportResultBanner({
             {result.errors.length} {t('bim.requirements.errors', { defaultValue: 'error(s)' })}
           </div>
           {result.errors.slice(0, 3).map((e, i) => (
-            <div key={i} className="ml-5 mt-0.5">
+            <div key={`err-${(e.msg ?? '').slice(0, 30)}-${i}`} className="ml-5 mt-0.5">
               {e.msg}
             </div>
           ))}

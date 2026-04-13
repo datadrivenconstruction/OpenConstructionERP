@@ -414,7 +414,7 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
     setHasUnsavedKey(false);
     setShowKey(false);
     // Auto-save provider selection as preferred_model
-    aiApi.updateSettings({ preferred_model: provider } as any).then(() => {
+    aiApi.updateSettings({ preferred_model: provider }).then(() => {
       queryClient.invalidateQueries({ queryKey: ['ai-settings'] });
     }).catch(() => { /* ignore — will save on next explicit Save */ });
   }, [queryClient]);
