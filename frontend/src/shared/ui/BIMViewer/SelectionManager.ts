@@ -104,23 +104,52 @@ export class SelectionManager {
 
   private raycast(mouseCoords: THREE.Vector2): THREE.Intersection | null {
     this.raycaster.setFromCamera(mouseCoords, this.sceneManager.camera);
-    const meshes = this.elementManager.getAllMeshes().filter((m) => m.visible);
-    const intersects = this.raycaster.intersectObjects(meshes, true);
-    // Walk hits until we find one with an elementId.
-    // Every mesh should have one now (real or temporary), but guard anyway.
+
+    // Raycast against the ENTIRE scene recursively. This catches:
+    // - Individual meshes (placeholder boxes)
+    // - DAE-loaded meshes still in scene graph
+    // - BatchedMesh objects (which replace individual meshes for perf)
+    // We cannot raycast against allDaeMeshes because batchMeshesByMaterial
+    // removes them from the scene graph (no valid world matrix).
+    const intersects = this.raycaster.intersectObjects(
+      this.sceneManager.scene.children,
+      true,
+    );
+
     for (const hit of intersects) {
-      // Walk up the object hierarchy to find the elementId
+      // Skip non-mesh hits (grid, lights, helpers)
+      if (!(hit.object instanceof THREE.Mesh)) continue;
+
+      // Walk up hierarchy to find elementId
       let obj: THREE.Object3D | null = hit.object;
       while (obj) {
         const eid = (obj.userData as { elementId?: string | null }).elementId;
         if (eid) {
-          // Stamp the hit object so callers can read it consistently
           if (obj !== hit.object) {
             (hit.object.userData as Record<string, unknown>).elementId = eid;
           }
           return hit;
         }
         obj = obj.parent;
+      }
+
+      // For BatchedMesh hits: try to resolve via instanceId
+      if ((hit as { instanceId?: number }).instanceId != null) {
+        // BatchedMesh — the individual mesh that was batched still lives
+        // in meshMap/allDaeMeshes with a batchHandle. Find it by scanning
+        // allDaeMeshes for one whose batchHandle.batchedMesh === hit.object.
+        const batchedObj = hit.object;
+        const instId = (hit as { instanceId?: number }).instanceId;
+        for (const mesh of this.elementManager.getAllMeshes()) {
+          const handle = (mesh.userData as { batchHandle?: { batchedMesh: unknown; instanceId: number } }).batchHandle;
+          if (handle && handle.batchedMesh === batchedObj && handle.instanceId === instId) {
+            const eid = (mesh.userData as { elementId?: string }).elementId;
+            if (eid) {
+              (hit.object.userData as Record<string, unknown>).elementId = eid;
+              return hit;
+            }
+          }
+        }
       }
     }
     return null;
