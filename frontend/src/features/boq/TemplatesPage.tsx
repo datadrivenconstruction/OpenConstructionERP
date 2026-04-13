@@ -253,6 +253,7 @@ export function TemplatesPage() {
       if (error instanceof ApiError && error.status === 404) return false;
       return failCount < 3;
     },
+    staleTime: 5 * 60_000,
   });
 
   /* ── Create from template mutation ───────────────────────────────── */

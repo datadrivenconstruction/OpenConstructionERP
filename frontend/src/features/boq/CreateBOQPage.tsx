@@ -32,6 +32,7 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
   const { data: projects } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    staleTime: 5 * 60_000,
   });
 
   // Sync default project when modal opens or defaultProjectId changes
