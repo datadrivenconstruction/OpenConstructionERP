@@ -351,6 +351,22 @@ const RULES: Rule[] = [
   { match: 'matchline', bucket: 'annotation' },
   { match: 'titleblock', bucket: 'annotation' },
   { match: 'ifcannotation', bucket: 'annotation' },
+  // Revit sketch / path / extension / boundary lines — drafting artefacts
+  // that look like real geometry but are annotation-only. Must come BEFORE
+  // the broad "stair"/"railing"/"wall" envelope rules so they don't leak.
+  { match: 'sketchline', bucket: 'annotation' },
+  { match: 'sketchriser', bucket: 'annotation' },
+  { match: 'sketchboundary', bucket: 'annotation' },
+  { match: 'sketchrun', bucket: 'annotation' },
+  { match: 'pathextension', bucket: 'annotation' },
+  { match: 'extensionline', bucket: 'annotation' },
+  { match: 'cutmark', bucket: 'annotation' },
+  { match: 'stairspath', bucket: 'annotation' },
+  { match: 'stairscutmark', bucket: 'annotation' },
+  { match: 'railingpath', bucket: 'annotation' },
+  { match: 'railrailpath', bucket: 'annotation' },
+  // Mass / massing — conceptual design, not physical construction
+  { match: 'mass', bucket: 'analytical' },
 
   // ── Structure ─────────────────────────────────────────────────────
   { match: 'structuralcolumn', bucket: 'structure' },
@@ -374,19 +390,36 @@ const RULES: Rule[] = [
   { match: 'ifcreinforcingmesh', bucket: 'structure' },
 
   // ── Envelope (walls, slabs, roofs, curtain) ───────────────────────
+  // Specific curtain wall sub-types first
+  { match: 'curtainwallmullion', bucket: 'envelope' },
+  { match: 'curtainwallpanel', bucket: 'envelope' },
   { match: 'curtainwall', bucket: 'envelope' },
   { match: 'curtaingrid', bucket: 'envelope' },
   { match: 'curtainpanel', bucket: 'envelope' },
   { match: 'curtainsystem', bucket: 'envelope' },
   { match: 'mullion', bucket: 'envelope' },
+  // Stair physical elements (NOT sketch/path/cut lines — filtered above)
+  { match: 'stairsrailing', bucket: 'envelope' },
+  { match: 'stairsrun', bucket: 'envelope' },
+  { match: 'stairslanding', bucket: 'envelope' },
+  { match: 'stairsflight', bucket: 'envelope' },
+  { match: 'stairsstringer', bucket: 'envelope' },
+  { match: 'multistorystairs', bucket: 'envelope' },
+  { match: 'stairs', bucket: 'envelope' },
+  { match: 'stair', bucket: 'envelope' },
+  // Railing physical elements (NOT path extension lines — filtered above)
+  { match: 'railinghandrail', bucket: 'envelope' },
+  { match: 'railingtoprail', bucket: 'envelope' },
+  { match: 'railingbaluster', bucket: 'envelope' },
+  { match: 'railing', bucket: 'envelope' },
+  // Core envelope
+  { match: 'stackedwall', bucket: 'envelope' },
   { match: 'wall', bucket: 'envelope' },
   { match: 'floor', bucket: 'envelope' },
   { match: 'slab', bucket: 'envelope' },
   { match: 'roof', bucket: 'envelope' },
   { match: 'ceiling', bucket: 'envelope' },
-  { match: 'stair', bucket: 'envelope' },
   { match: 'ramp', bucket: 'envelope' },
-  { match: 'railing', bucket: 'envelope' },
   { match: 'ifcwall', bucket: 'envelope' },
   { match: 'ifcslab', bucket: 'envelope' },
   { match: 'ifcroof', bucket: 'envelope' },
