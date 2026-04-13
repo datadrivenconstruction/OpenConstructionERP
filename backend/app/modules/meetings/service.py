@@ -145,6 +145,8 @@ class MeetingService:
         meeting_type: str | None = None,
         status_filter: str | None = None,
         search: str | None = None,
+        sort_by: str | None = None,
+        sort_order: str = "desc",
     ) -> tuple[list[Meeting], int]:
         """List meetings for a project with optional search."""
         return await self.repo.list_for_project(
@@ -154,6 +156,8 @@ class MeetingService:
             meeting_type=meeting_type,
             status=status_filter,
             search=search,
+            sort_by=sort_by,
+            sort_order=sort_order,
         )
 
     # ── Update ────────────────────────────────────────────────────────────

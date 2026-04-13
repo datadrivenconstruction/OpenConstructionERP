@@ -583,8 +583,8 @@ const RFIRow = React.memo(function RFIRow({
           {rfi.linked_drawings && rfi.linked_drawings.length > 0 && (
             <div className="flex items-center gap-2 flex-wrap">
               <FileText size={13} className="text-content-tertiary" />
-              {rfi.linked_drawings.map((d, i) => (
-                <Badge key={i} variant="neutral" size="sm">
+              {rfi.linked_drawings.map((d) => (
+                <Badge key={d} variant="neutral" size="sm">
                   {d}
                 </Badge>
               ))}

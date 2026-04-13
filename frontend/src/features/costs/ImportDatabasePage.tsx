@@ -1460,8 +1460,8 @@ export function ImportDatabasePage() {
                   {t('costs.import_error_details', { defaultValue: 'Error details' })}
                 </p>
                 <div className="space-y-1.5">
-                  {result.errors.slice(0, 5).map((err, i) => (
-                    <p key={i} className="text-xs text-content-secondary">
+                  {result.errors.slice(0, 5).map((err) => (
+                    <p key={`row-${err.row}`} className="text-xs text-content-secondary">
                       <span className="font-mono text-semantic-error">
                         {t('costs.import_row', { defaultValue: 'Row' })} {err.row}
                       </span>

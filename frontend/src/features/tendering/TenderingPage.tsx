@@ -592,9 +592,9 @@ function BidComparisonTable({
             <th className="whitespace-nowrap px-3 py-2.5 text-right font-semibold text-content-primary">
               {t('tendering.budget', 'Budget')}
             </th>
-            {comparison.bid_companies.map((company, i) => (
+            {comparison.bid_companies.map((company) => (
               <th
-                key={i}
+                key={company}
                 className="whitespace-nowrap px-3 py-2.5 text-right font-semibold text-content-primary"
               >
                 <span className="flex items-center justify-end gap-1.5">
@@ -608,7 +608,7 @@ function BidComparisonTable({
         <tbody>
           {comparison.rows.map((row, idx) => (
             <tr
-              key={idx}
+              key={`${row.description}-${row.unit}-${idx}`}
               className="border-b border-border-light/50 transition-colors hover:bg-surface-secondary/30"
             >
               <td className="px-3 py-2.5">
@@ -620,7 +620,7 @@ function BidComparisonTable({
               </td>
               {row.bids.map((bid, bi) => (
                 <td
-                  key={bi}
+                  key={`bid-${comparison.bid_companies[bi]}`}
                   className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums"
                 >
                   <span className="text-content-primary">{formatNumber(bid.unit_rate)}</span>
@@ -644,7 +644,7 @@ function BidComparisonTable({
             </td>
             {comparison.bid_totals.map((bt, i) => (
               <td
-                key={i}
+                key={`total-${comparison.bid_companies[i]}`}
                 className="whitespace-nowrap px-3 py-3 text-right tabular-nums"
               >
                 <span className="font-bold text-content-primary">
