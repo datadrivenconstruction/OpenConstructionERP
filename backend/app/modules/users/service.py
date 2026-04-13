@@ -320,9 +320,11 @@ class UserService:
 
         logger.info("Password reset token generated for user %s", user.email)
 
-        # TODO: Send token via email service. For now, token is logged at DEBUG
-        # level only and never exposed in the HTTP response.
-        logger.debug("Reset token for %s (dev-only log): %s", user.email, token)
+        # TODO: Send token via email service.  The token is never exposed in
+        # the HTTP response.  In development the token is logged at DEBUG so
+        # developers can complete the reset flow without an email service.
+        if self.settings.debug:
+            logger.debug("Reset token for %s (dev-only log): %s", user.email, token)
 
         return ForgotPasswordResponse(message=message)
 

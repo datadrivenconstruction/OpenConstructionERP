@@ -276,12 +276,15 @@ export class SelectionManager {
   }
 
   private restoreMaterial(elementId: string): void {
-    const mesh = this.elementManager.getMesh(elementId);
     const original = this.originalMaterials.get(elementId);
-    if (mesh && original) {
+    if (!original) return;
+    const mesh = this.elementManager.getMesh(elementId);
+    if (mesh) {
       mesh.material = original;
-      this.originalMaterials.delete(elementId);
     }
+    // Always remove from map — even if the mesh was removed, keeping the
+    // entry would leak the material reference indefinitely.
+    this.originalMaterials.delete(elementId);
   }
 
   /** Notify parent about selection changes. */
