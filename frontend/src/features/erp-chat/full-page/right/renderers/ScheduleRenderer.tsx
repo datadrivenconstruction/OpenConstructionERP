@@ -82,7 +82,7 @@ export default function ScheduleRenderer({ data }: { data: unknown }) {
 
           return (
             <div
-              key={i}
+              key={a.name || `activity-${i}`}
               style={{
                 display: 'flex',
                 alignItems: 'center',

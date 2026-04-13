@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
+import { normalizeListResponse } from '@/shared/lib/apiHelpers';
 import {
   ShieldAlert,
   Eye,
@@ -306,8 +307,7 @@ function QualityDashboardSummary({ projectId }: { projectId: string }) {
     queryKey: ['inspections-summary', projectId],
     queryFn: () =>
       apiGet<{ status: string }[]>(`/v1/inspections/?project_id=${projectId}`),
-    select: (d): { status: string }[] =>
-      Array.isArray(d) ? d : (d as any)?.items ?? [],
+    select: (d): { status: string }[] => normalizeListResponse(d),
     enabled: !!projectId,
   });
 
@@ -315,8 +315,7 @@ function QualityDashboardSummary({ projectId }: { projectId: string }) {
     queryKey: ['ncrs-summary', projectId],
     queryFn: () =>
       apiGet<{ status: string }[]>(`/v1/ncr/?project_id=${projectId}`),
-    select: (d): { status: string }[] =>
-      Array.isArray(d) ? d : (d as any)?.items ?? [],
+    select: (d): { status: string }[] => normalizeListResponse(d),
     enabled: !!projectId,
   });
 
@@ -612,7 +611,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
       apiGet<Incident[]>(
         `/v1/safety/incidents?project_id=${projectId}`,
       ),
-    select: (d): Incident[] => (Array.isArray(d) ? d : (d as any)?.items ?? []),
+    select: (d): Incident[] => normalizeListResponse(d),
   });
 
   const filtered = useMemo(() => {
@@ -1108,7 +1107,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
       apiGet<Observation[]>(
         `/v1/safety/observations?project_id=${projectId}`,
       ),
-    select: (d): Observation[] => (Array.isArray(d) ? d : (d as any)?.items ?? []),
+    select: (d): Observation[] => normalizeListResponse(d),
   });
 
   const filtered = useMemo(() => {

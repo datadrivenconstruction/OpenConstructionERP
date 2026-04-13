@@ -1658,6 +1658,14 @@ function CreateAssemblyFromCostsModal({
 }
 
 
+const INITIAL_COST_ITEM_FORM = {
+  code: '',
+  description: '',
+  unit: 'm2',
+  rate: '',
+  currency: 'EUR',
+};
+
 function CreateCostItemModal({
   onClose,
   onCreated,
@@ -1668,13 +1676,7 @@ function CreateCostItemModal({
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [form, setForm] = useState({
-    code: '',
-    description: '',
-    unit: 'm2',
-    rate: '',
-    currency: 'EUR',
-  });
+  const [form, setForm] = useState(INITIAL_COST_ITEM_FORM);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -1992,7 +1994,7 @@ function CostItemRow({
                   {[cls.category, cls.collection, cls.department, cls.section, cls.subsection]
                     .filter(Boolean)
                     .map((part, i, arr) => (
-                      <span key={i} className="flex items-center gap-1">
+                      <span key={`${String(part)}-${i}`} className="flex items-center gap-1">
                         <span className="text-2xs text-content-quaternary">{String(part)}</span>
                         {i < arr.length - 1 && <span className="text-2xs text-content-quaternary/50">&rsaquo;</span>}
                       </span>
@@ -2125,7 +2127,7 @@ function CostItemRow({
                       const typeColor = TYPE_COLOR_MAP[comp.type] || 'text-gray-600 bg-gray-50';
                       const typeLabel = t(`costs.component_${comp.type}`, { defaultValue: comp.type.charAt(0).toUpperCase() + comp.type.slice(1) });
                       return (
-                        <tr key={i} className="hover:bg-surface-secondary/30">
+                        <tr key={`${comp.name}-${comp.type}-${i}`} className="hover:bg-surface-secondary/30">
                           <td className="px-3 py-2 text-content-primary truncate" title={comp.name}>{comp.name}</td>
                           <td className="px-3 py-2">
                             <span className={`inline-block text-2xs font-medium px-1.5 py-0.5 rounded ${typeColor}`}>

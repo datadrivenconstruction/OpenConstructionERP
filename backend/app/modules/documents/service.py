@@ -219,6 +219,8 @@ class DocumentService:
         limit: int = 50,
         category: str | None = None,
         search: str | None = None,
+        sort_by: str | None = None,
+        sort_order: str = "desc",
     ) -> tuple[list[Document], int]:
         """List documents for a project."""
         return await self.repo.list_for_project(
@@ -227,6 +229,8 @@ class DocumentService:
             limit=limit,
             category=category,
             search=search,
+            sort_by=sort_by,
+            sort_order=sort_order,
         )
 
     # ── Update ─────────────────────────────────────────────────────────────

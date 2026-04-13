@@ -33,6 +33,8 @@ interface BOQ {
   description: string;
   status: string;
   created_at: string;
+  position_count?: number;
+  grand_total?: number;
 }
 
 interface BOQWithProject extends BOQ {
@@ -403,8 +405,8 @@ export function BOQListPage() {
             ...b,
             projectName: p.name,
             currency: p.currency,
-            positionCount: (b as any).position_count ?? 0,
-            grandTotal: (b as any).grand_total ?? 0,
+            positionCount: b.position_count ?? 0,
+            grandTotal: b.grand_total ?? 0,
             classificationStandard: p.classification_standard,
           } as BOQWithProject));
         } catch (err) {

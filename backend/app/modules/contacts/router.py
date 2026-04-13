@@ -125,6 +125,8 @@ async def list_contacts(
     is_active: bool = Query(default=True),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
+    sort_by: str | None = Query(default=None, description="Sort field: name, email, created_at"),
+    sort_order: str = Query(default="desc", pattern="^(asc|desc)$"),
     _perm: None = Depends(RequirePermission("contacts.read")),
     service: ContactService = Depends(_get_service),
 ) -> ContactListResponse:
@@ -134,6 +136,10 @@ async def list_contacts(
     ``created_by`` proxy (until a real ``tenant_id`` migration lands).
     Admins bypass the scope and see every contact in the database.
     """
+    # Map friendly sort field names to model column names
+    _sort_aliases = {"name": "company_name", "email": "primary_email"}
+    resolved_sort = _sort_aliases.get(sort_by, sort_by) if sort_by else None
+
     owner_filter: str | None = None if await _is_admin(session, user_id) else user_id
     items, total = await service.list_contacts(
         contact_type=contact_type,
@@ -142,6 +148,8 @@ async def list_contacts(
         owner_id=owner_filter,
         offset=offset,
         limit=limit,
+        sort_by=resolved_sort,
+        sort_order=sort_order,
     )
     return ContactListResponse(
         items=[ContactResponse.model_validate(c) for c in items],

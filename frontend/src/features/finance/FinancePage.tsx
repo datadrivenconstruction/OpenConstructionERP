@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { normalizeListResponse } from '@/shared/lib/apiHelpers';
 import {
   Wallet,
   FileText,
@@ -312,6 +313,8 @@ export function FinancePage() {
 
 /* ── Budgets Tab ──────────────────────────────────────────────────────── */
 
+const INITIAL_BUDGET_FORM = { wbs_code: '', category: '', original_budget: '', notes: '' };
+
 function BudgetsTab({ projectId }: { projectId: string }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -324,7 +327,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
   const [importResult, setImportResult] = useState<BudgetImportResult | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
-  const [budgetForm, setBudgetForm] = useState({ wbs_code: '', category: '', original_budget: '', notes: '' });
+  const [budgetForm, setBudgetForm] = useState(INITIAL_BUDGET_FORM);
   const [budgetErrors, setBudgetErrors] = useState<Record<string, string>>({});
   const budgetFirstRef = useRef<HTMLInputElement>(null);
 
@@ -371,7 +374,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['finance-budgets', projectId] });
       setShowCreate(false);
-      setBudgetForm({ wbs_code: '', category: '', original_budget: '', notes: '' });
+      setBudgetForm(INITIAL_BUDGET_FORM);
       addToast({ type: 'success', title: t('finance.budget_created', { defaultValue: 'Budget line created successfully' }) });
     },
     onError: (e: Error) =>
@@ -552,7 +555,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
       apiGet<BudgetLine[]>(
         `/v1/finance/budgets?project_id=${projectId}`,
       ),
-    select: (d): BudgetLine[] => (Array.isArray(d) ? d : (d as any)?.items ?? []),
+    select: (d): BudgetLine[] => normalizeListResponse(d),
   });
 
   const filtered = useMemo(() => {
@@ -876,8 +879,8 @@ function BudgetsTab({ projectId }: { projectId: string }) {
                       {t('finance.show_errors', { defaultValue: 'Show error details' })}
                     </summary>
                     <ul className="mt-1 space-y-0.5 max-h-32 overflow-y-auto">
-                      {importResult.errors.slice(0, 20).map((err, i) => (
-                        <li key={i}>Row {err.row}: {err.error}</li>
+                      {importResult.errors.slice(0, 20).map((err) => (
+                        <li key={`row-${err.row}`}>Row {err.row}: {err.error}</li>
                       ))}
                     </ul>
                   </details>
@@ -1030,7 +1033,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
       apiGet<Invoice[]>(
         `/v1/finance/?project_id=${projectId}&direction=${subTab}`,
       ),
-    select: (d): Invoice[] => (Array.isArray(d) ? d : (d as any)?.items ?? []),
+    select: (d): Invoice[] => normalizeListResponse(d),
   });
 
   const filtered = useMemo(() => {
@@ -1690,7 +1693,7 @@ function PaymentsTab({ projectId }: { projectId: string }) {
     queryKey: ['finance-payments', projectId],
     queryFn: () =>
       apiGet<Payment[]>(`/v1/finance/payments/?project_id=${projectId}`),
-    select: (d): Payment[] => (Array.isArray(d) ? d : (d as any)?.items ?? []),
+    select: (d): Payment[] => normalizeListResponse(d),
   });
 
   const paymentTotals = useMemo(() => {

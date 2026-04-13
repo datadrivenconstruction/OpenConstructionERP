@@ -152,6 +152,8 @@ async def list_documents(
     limit: int = Query(default=50, ge=1, le=100),
     category: str | None = Query(default=None),
     search: str | None = Query(default=None),
+    sort_by: str | None = Query(default=None, description="Sort field: name, created_at, category"),
+    sort_order: str = Query(default="desc", pattern="^(asc|desc)$"),
     service: DocumentService = Depends(_get_service),
 ) -> list[DocumentResponse]:
     """List documents for a project."""
@@ -162,6 +164,8 @@ async def list_documents(
         limit=limit,
         category=category,
         search=search,
+        sort_by=sort_by,
+        sort_order=sort_order,
     )
     return [_doc_to_response(d) for d in docs]
 
