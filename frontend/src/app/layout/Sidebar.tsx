@@ -104,6 +104,7 @@ const navGroups: NavGroup[] = [
     defaultOpen: true,
     items: [
       { labelKey: 'nav.pdf_measurements', to: '/takeoff?tab=measurements', icon: Ruler },
+      { labelKey: 'nav.dwg_takeoff', to: '/dwg-takeoff', icon: PenTool },
       { labelKey: 'nav.cad_bim_explorer', to: '/data-explorer', icon: TableProperties },
       { labelKey: 'nav.bim_viewer', to: '/bim', icon: Box, badge: 'BETA' },
       { labelKey: 'nav.bim_rules', to: '/bim/rules', icon: SlidersHorizontal, badge: 'BETA' },
