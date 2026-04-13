@@ -669,6 +669,7 @@ export function PunchListPage() {
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    staleTime: 5 * 60_000,
   });
 
   const projectId = activeProjectId || projects[0]?.id || '';

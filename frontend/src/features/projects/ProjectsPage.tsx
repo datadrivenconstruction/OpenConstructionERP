@@ -106,6 +106,7 @@ export function ProjectsPage() {
   const { data: projects, isLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: projectsApi.list,
+    staleTime: 5 * 60_000,
   });
 
   /* Fetch BOQ stats for all projects (count + total value) — single request + parallel detail fetches */

@@ -1828,6 +1828,7 @@ export function CostModelPage() {
   const { data: projects, isLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    staleTime: 5 * 60_000,
   });
 
   // Auto-select if there's only one project

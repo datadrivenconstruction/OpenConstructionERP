@@ -385,6 +385,7 @@ export function BOQListPage() {
   const { data: projects, isLoading: projLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    staleTime: 5 * 60_000,
   });
 
   const { data: allBoqs, isLoading: boqLoading } = useQuery({
