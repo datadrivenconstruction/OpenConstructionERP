@@ -254,11 +254,26 @@ async def export_backup(user_id: CurrentUserId) -> StreamingResponse:
     data: dict[str, list[dict]] = {}
     record_counts: dict[str, int] = {}
 
+    # Sensitive fields to strip from exports (never leak password hashes)
+    _STRIP_FIELDS = {"hashed_password", "password_hash", "key_hash"}
+
     async with async_session_factory() as session:
         for backup_key, _table_name, model_cls in tables:
             try:
-                rows = (await session.execute(select(model_cls))).scalars().all()
-                serialised = [serialize_row(r) for r in rows]
+                # Filter by created_by/owner to enforce tenant isolation.
+                # Users table exports only the requesting user's own record.
+                stmt = select(model_cls)
+                if hasattr(model_cls, "created_by"):
+                    stmt = stmt.where(model_cls.created_by == user_id)
+                elif hasattr(model_cls, "owner_id"):
+                    stmt = stmt.where(model_cls.owner_id == user_id)
+                elif backup_key == "users":
+                    stmt = stmt.where(model_cls.id == user_id)
+                rows = (await session.execute(stmt)).scalars().all()
+                serialised = [
+                    {k: v for k, v in serialize_row(r).items() if k not in _STRIP_FIELDS}
+                    for r in rows
+                ]
                 data[backup_key] = serialised
                 record_counts[backup_key] = len(serialised)
             except Exception:
