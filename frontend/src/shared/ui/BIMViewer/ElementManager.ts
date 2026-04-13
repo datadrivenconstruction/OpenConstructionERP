@@ -283,10 +283,9 @@ export class ElementManager {
     this.sceneManager = sceneManager;
     this.elementGroup = new THREE.Group();
     this.elementGroup.name = 'bim_elements';
-    // DDC bounding boxes use Z-up (Revit/CAD convention).
-    // Rotate the group -90° around X to bring buildings upright,
-    // matching the same rotation applied to DAE/GLB geometry.
-    this.elementGroup.rotation.x = -Math.PI / 2;
+    // No rotation needed: placeholder boxes use the same coordinate
+    // system as the loaded COLLADA/GLB, and ColladaLoader handles the
+    // Z_UP → Y_UP conversion via the <up_axis> tag automatically.
     this.sceneManager.scene.add(this.elementGroup);
   }
 
