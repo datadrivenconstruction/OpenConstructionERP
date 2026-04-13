@@ -352,9 +352,9 @@ export function RenumberDialog({
               </div>
             ) : (
               <div className="divide-y divide-border">
-                {preview.map((row, i) => (
+                {preview.map((row) => (
                   <div
-                    key={i}
+                    key={`${row.before}-${row.after}`}
                     className="grid grid-cols-[80px_20px_80px_1fr] items-center gap-2 px-3 py-1.5 text-[11px]"
                   >
                     <span className="font-mono tabular-nums text-content-tertiary line-through">

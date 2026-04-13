@@ -191,6 +191,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
             'hover:bg-surface-secondary hover:text-content-secondary',
           )}
           title={t('feedback.report_issue', { defaultValue: 'Report Issue' })}
+          aria-label={t('feedback.report_issue', { defaultValue: 'Report Issue' })}
         >
           <Bug size={14} />
           <span className="hidden lg:inline">{t('feedback.report_issue', { defaultValue: 'Report Issue' })}</span>

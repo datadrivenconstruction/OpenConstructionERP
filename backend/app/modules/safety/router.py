@@ -135,6 +135,7 @@ async def list_incidents(
     status_filter: str | None = Query(default=None, alias="status"),
     service: SafetyService = Depends(_get_service),
 ) -> list[IncidentResponse]:
+    """List safety incidents for a project."""
     await verify_project_access(project_id, user_id, session)
     items, _ = await service.list_incidents(
         project_id,
@@ -154,6 +155,7 @@ async def create_incident(
     _perm: None = Depends(RequirePermission("safety.create")),
     service: SafetyService = Depends(_get_service),
 ) -> IncidentResponse:
+    """Create a new safety incident."""
     await verify_project_access(data.project_id, user_id, session)
     incident = await service.create_incident(data, user_id=user_id)
     return _incident_to_response(incident)
@@ -236,6 +238,7 @@ async def get_incident(
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: SafetyService = Depends(_get_service),
 ) -> IncidentResponse:
+    """Get a single safety incident."""
     incident = await service.get_incident(incident_id)
     return _incident_to_response(incident)
 
@@ -248,6 +251,7 @@ async def update_incident(
     _perm: None = Depends(RequirePermission("safety.update")),
     service: SafetyService = Depends(_get_service),
 ) -> IncidentResponse:
+    """Update a safety incident."""
     incident = await service.update_incident(incident_id, data)
     return _incident_to_response(incident)
 
@@ -259,6 +263,7 @@ async def delete_incident(
     _perm: None = Depends(RequirePermission("safety.delete")),
     service: SafetyService = Depends(_get_service),
 ) -> None:
+    """Delete a safety incident."""
     await service.delete_incident(incident_id)
 
 
@@ -276,6 +281,7 @@ async def list_observations(
     status_filter: str | None = Query(default=None, alias="status"),
     service: SafetyService = Depends(_get_service),
 ) -> list[ObservationResponse]:
+    """List safety observations for a project."""
     await verify_project_access(project_id, user_id, session)
     items, _ = await service.list_observations(
         project_id,
@@ -295,6 +301,7 @@ async def create_observation(
     _perm: None = Depends(RequirePermission("safety.create")),
     service: SafetyService = Depends(_get_service),
 ) -> ObservationResponse:
+    """Create a new safety observation."""
     await verify_project_access(data.project_id, user_id, session)
     observation = await service.create_observation(data, user_id=user_id)
     return _observation_to_response(observation)
@@ -381,6 +388,7 @@ async def get_observation(
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: SafetyService = Depends(_get_service),
 ) -> ObservationResponse:
+    """Get a single safety observation."""
     observation = await service.get_observation(observation_id)
     return _observation_to_response(observation)
 
@@ -393,6 +401,7 @@ async def update_observation(
     _perm: None = Depends(RequirePermission("safety.update")),
     service: SafetyService = Depends(_get_service),
 ) -> ObservationResponse:
+    """Update a safety observation."""
     observation = await service.update_observation(observation_id, data)
     return _observation_to_response(observation)
 
@@ -404,4 +413,5 @@ async def delete_observation(
     _perm: None = Depends(RequirePermission("safety.delete")),
     service: SafetyService = Depends(_get_service),
 ) -> None:
+    """Delete a safety observation."""
     await service.delete_observation(observation_id)

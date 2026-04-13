@@ -183,6 +183,8 @@ class RiskService:
         status_filter: str | None = None,
         category_filter: str | None = None,
         severity_filter: str | None = None,
+        sort_by: str | None = None,
+        sort_order: str = "desc",
     ) -> tuple[list[RiskItem], int]:
         """List risk items for a project."""
         return await self.repo.list_for_project(
@@ -192,6 +194,8 @@ class RiskService:
             status=status_filter,
             category=category_filter,
             severity=severity_filter,
+            sort_by=sort_by,
+            sort_order=sort_order,
         )
 
     # ── Update ────────────────────────────────────────────────────────────

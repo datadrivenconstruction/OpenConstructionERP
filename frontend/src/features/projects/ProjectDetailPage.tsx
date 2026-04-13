@@ -796,7 +796,7 @@ function ImportDialog({
                   <p className="text-xs font-medium text-semantic-error mb-2">Error details:</p>
                   <div className="max-h-32 overflow-y-auto space-y-1">
                     {result.errors.map((err, i) => (
-                      <p key={i} className="text-xs text-semantic-error/80">
+                      <p key={`${err.row || err.item || ''}-${i}`} className="text-xs text-semantic-error/80">
                         {err.row ? `Row ${err.row}: ` : err.item ? `${err.item}: ` : ''}
                         {err.error}
                       </p>
@@ -899,6 +899,8 @@ class TabErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState>
 // Main Page
 // ---------------------------------------------------------------------------
 
+const INITIAL_PROJECT_EDIT_FORM = { name: '', description: '', region: '', currency: '' };
+
 export function ProjectDetailPage() {
   const { t } = useTranslation();
   const { projectId } = useParams<{ projectId: string }>();
@@ -913,7 +915,7 @@ export function ProjectDetailPage() {
 
   const [activeTab, setActiveTab] = useState<ProjectTab>('dashboard');
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ name: '', description: '', region: '', currency: '' });
+  const [editForm, setEditForm] = useState(INITIAL_PROJECT_EDIT_FORM);
 
   const setActiveProject = useProjectContextStore((s) => s.setActiveProject);
 
@@ -1674,7 +1676,7 @@ export function ProjectDetailPage() {
                           field_report: 'bg-semantic-success-bg text-[#15803d]',
                         };
                         return (
-                          <div key={idx} className="flex items-center gap-3 px-5 py-3">
+                          <div key={`${item.type}-${item.title.slice(0, 30)}-${idx}`} className="flex items-center gap-3 px-5 py-3">
                             <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-2xs font-bold ${typeColors[item.type] || 'bg-surface-secondary text-content-tertiary'}`}>
                               {(typeLabels[item.type] || item.type).charAt(0).toUpperCase()}
                             </div>
@@ -2045,8 +2047,8 @@ export function ProjectDetailPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border-light">
-                        {budgetDashboard.items!.map((item, idx) => (
-                          <tr key={idx} className="hover:bg-surface-secondary transition-colors">
+                        {budgetDashboard.items!.map((item) => (
+                          <tr key={item.name} className="hover:bg-surface-secondary transition-colors">
                             <td className="px-4 py-2.5 text-content-primary">{item.name}</td>
                             <td className="px-4 py-2.5 text-right tabular-nums text-content-secondary">
                               {formatCurrency(item.planned ?? 0, currency)}
