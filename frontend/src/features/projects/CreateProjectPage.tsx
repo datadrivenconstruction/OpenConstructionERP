@@ -267,6 +267,7 @@ export function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
     queryKey: ['projects'],
     queryFn: projectsApi.list,
     enabled: open,
+    staleTime: 5 * 60_000,
   });
 
   const trimmedName = form.name.trim();

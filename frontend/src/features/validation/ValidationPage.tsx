@@ -426,6 +426,7 @@ export function ValidationPage() {
   const { data: projects, isLoading: projectsLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    staleTime: 5 * 60_000,
   });
 
   // Fetch BOQs for selected project
