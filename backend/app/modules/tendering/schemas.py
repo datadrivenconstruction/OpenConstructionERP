@@ -21,7 +21,7 @@ class PackageCreate(BaseModel):
     boq_id: UUID | None = None
     name: str = Field(..., min_length=1, max_length=255)
     description: str = ""
-    deadline: str | None = Field(default=None, max_length=20)
+    deadline: str | None = Field(default=None, max_length=100)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
