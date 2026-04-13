@@ -199,7 +199,7 @@ export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPaste
                   </thead>
                   <tbody className="divide-y divide-border-light">
                     {rows.slice(0, 50).map((r, i) => (
-                      <tr key={i} className="hover:bg-surface-secondary/50">
+                      <tr key={`${r.ordinal}-${i}`} className="hover:bg-surface-secondary/50">
                         <td className="px-3 py-1.5 font-mono text-content-tertiary">{r.ordinal}</td>
                         <td className="px-3 py-1.5 max-w-[300px] truncate">{r.description}</td>
                         <td className="px-3 py-1.5 text-center font-mono uppercase">{r.unit}</td>

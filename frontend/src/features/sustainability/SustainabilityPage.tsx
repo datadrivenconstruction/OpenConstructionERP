@@ -101,8 +101,8 @@ function DonutChart({ data }: { data: { label: string; value: number; pct: numbe
 
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="shrink-0">
-      {segments.map((seg, i) => (
-        <path key={i} d={arc(seg.startAngle, seg.endAngle)} fill={seg.color} />
+      {segments.map((seg) => (
+        <path key={seg.label} d={arc(seg.startAngle, seg.endAngle)} fill={seg.color} />
       ))}
       <circle cx={cx} cy={cy} r={innerR - 1} fill="var(--color-surface-primary, white)" />
       <text x={cx} y={cy - 4} textAnchor="middle" fontSize={11} className="fill-content-tertiary" fontFamily="system-ui">CO2e</text>

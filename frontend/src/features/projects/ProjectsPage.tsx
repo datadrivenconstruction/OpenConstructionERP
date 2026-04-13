@@ -12,6 +12,7 @@ import { projectsApi, type Project } from './api';
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { useLocalStorage } from '@/shared/hooks/useLocalStorage';
 import { type BOQWithPositions } from '../boq/api';
 import { CreateProjectModal } from './CreateProjectPage';
 
@@ -72,36 +73,18 @@ export function ProjectsPage() {
   }, [location.state]);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('oe_projects_filters') ?? '{}');
-      return saved.status ?? 'all';
-    } catch { return 'all'; }
+  const [filters, setFilters] = useLocalStorage('oe_projects_filters', {
+    status: 'all' as StatusFilter,
+    region: 'all',
+    sort: 'newest' as SortOption,
   });
-  const [regionFilter, setRegionFilter] = useState<string>(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('oe_projects_filters') ?? '{}');
-      return saved.region ?? 'all';
-    } catch { return 'all'; }
-  });
-  const [sortOption, setSortOption] = useState<SortOption>(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('oe_projects_filters') ?? '{}');
-      return saved.sort ?? 'newest';
-    } catch { return 'newest'; }
-  });
+  const statusFilter = filters.status;
+  const regionFilter = filters.region;
+  const sortOption = filters.sort;
+  const setStatusFilter = (v: StatusFilter) => setFilters((p) => ({ ...p, status: v }));
+  const setRegionFilter = (v: string) => setFilters((p) => ({ ...p, region: v }));
+  const setSortOption = (v: SortOption) => setFilters((p) => ({ ...p, sort: v }));
   const [page, setPage] = useState(1);
-
-  // Persist filters to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem('oe_projects_filters', JSON.stringify({
-        sort: sortOption,
-        status: statusFilter,
-        region: regionFilter,
-      }));
-    } catch {}
-  }, [sortOption, statusFilter, regionFilter]);
 
   const { data: projects, isLoading } = useQuery({
     queryKey: ['projects'],

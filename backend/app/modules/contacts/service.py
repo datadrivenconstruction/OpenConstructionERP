@@ -158,6 +158,8 @@ class ContactService:
         owner_id: str | None = None,
         limit: int = 50,
         offset: int = 0,
+        sort_by: str | None = None,
+        sort_order: str = "desc",
     ) -> tuple[list[Contact], int]:
         """List contacts with filters.
 
@@ -174,6 +176,8 @@ class ContactService:
             owner_id=owner_id,
             limit=limit,
             offset=offset,
+            sort_by=sort_by,
+            sort_order=sort_order,
         )
 
     # ── Update ────────────────────────────────────────────────────────────

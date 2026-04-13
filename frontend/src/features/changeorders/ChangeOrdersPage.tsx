@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { normalizeListResponse } from '@/shared/lib/apiHelpers';
 import {
   FileEdit,
   Plus,
@@ -907,7 +908,7 @@ export function ChangeOrdersPage() {
   const { data: orders = [], isLoading, isError } = useQuery({
     queryKey: ['changeorders', projectId],
     queryFn: () => apiGet<ChangeOrder[]>(`/v1/changeorders/?project_id=${projectId}`),
-    select: (d): ChangeOrder[] => (Array.isArray(d) ? d : (d as any)?.items ?? []),
+    select: (d): ChangeOrder[] => normalizeListResponse(d),
     enabled: !!projectId,
   });
 

@@ -34,8 +34,8 @@ export default function CompareRenderer({ data }: { data: unknown }) {
         <thead>
           <tr style={{ background: 'var(--chat-surface-2)' }}>
             <th style={{ ...cellBase, fontWeight: 600, textAlign: 'left', minWidth: 120 }}>Metric</th>
-            {columns.map((col, i) => (
-              <th key={i} style={{ ...cellBase, fontWeight: 600, textAlign: 'right', minWidth: 100 }}>
+            {columns.map((col) => (
+              <th key={col} style={{ ...cellBase, fontWeight: 600, textAlign: 'right', minWidth: 100 }}>
                 {col}
               </th>
             ))}

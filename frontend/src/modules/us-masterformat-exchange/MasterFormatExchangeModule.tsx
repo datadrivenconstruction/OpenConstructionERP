@@ -120,7 +120,7 @@ function ImportPreview({
 
               return (
                 <tr
-                  key={idx}
+                  key={pos.ordinal || `pos-${idx}`}
                   className={`hover:bg-surface-secondary/30 ${idx % 2 === 0 ? 'bg-surface-primary/50' : ''}`}
                 >
                   <td className="px-3 py-1.5 font-mono text-content-tertiary">{pos.ordinal}</td>
@@ -649,7 +649,7 @@ export default function MasterFormatExchangeModule() {
               {importResult.errors.length > 0 && (
                 <ul className="mt-2 space-y-1 text-xs text-content-secondary">
                   {importResult.errors.map((err, idx) => (
-                    <li key={idx}>&bull; {err}</li>
+                    <li key={`err-${idx}`}>&bull; {err}</li>
                   ))}
                 </ul>
               )}
@@ -818,7 +818,7 @@ export default function MasterFormatExchangeModule() {
                         .filter((p) => !p.isSection)
                         .slice(0, 30)
                         .map((pos, idx) => (
-                          <tr key={idx} className="hover:bg-surface-secondary/30">
+                          <tr key={pos.ordinal || `export-${idx}`} className="hover:bg-surface-secondary/30">
                             <td className="px-3 py-1.5 font-mono text-content-tertiary">
                               {pos.ordinal}
                             </td>

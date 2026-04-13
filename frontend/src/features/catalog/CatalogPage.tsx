@@ -715,7 +715,7 @@ function ResourceDetailPanel({
         <div className="px-6 pt-3 pb-0">
           <div className="flex flex-wrap items-center gap-1">
             {hierarchy.map((part, i) => (
-              <span key={i} className="flex items-center gap-1">
+              <span key={`${part}-${i}`} className="flex items-center gap-1">
                 <span className="text-2xs text-content-quaternary">{part}</span>
                 {i < hierarchy.length - 1 && <span className="text-2xs text-content-quaternary/40">&rsaquo;</span>}
               </span>

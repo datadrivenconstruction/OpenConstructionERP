@@ -621,8 +621,8 @@ function ImportContactsModal({
                     {t('contacts.show_errors', { defaultValue: 'Show error details' })}
                   </summary>
                   <ul className="mt-1 space-y-0.5 max-h-32 overflow-y-auto">
-                    {result.errors.slice(0, 20).map((err, i) => (
-                      <li key={i}>
+                    {result.errors.slice(0, 20).map((err) => (
+                      <li key={`row-${err.row}`}>
                         {t('contacts.row_error', {
                           defaultValue: 'Row {{row}}: {{error}}',
                           row: err.row,

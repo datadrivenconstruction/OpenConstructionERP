@@ -84,10 +84,16 @@ async def list_meetings(
         max_length=200,
         description="Free-text search across title, agenda, minutes, and meeting number.",
     ),
+    sort_by: str | None = Query(
+        default=None, description="Sort field: date, meeting_date, status, created_at"
+    ),
+    sort_order: str = Query(default="desc", pattern="^(asc|desc)$"),
     service: MeetingService = Depends(_get_service),
 ) -> list[MeetingResponse]:
     """List meetings for a project with optional filters and search."""
     await verify_project_access(project_id, user_id, session)
+    # Map friendly alias "date" to the actual model column
+    resolved_sort = "meeting_date" if sort_by == "date" else sort_by
     meetings, _ = await service.list_meetings(
         project_id,
         offset=offset,
@@ -95,6 +101,8 @@ async def list_meetings(
         meeting_type=type_filter,
         status_filter=status_filter,
         search=search,
+        sort_by=resolved_sort,
+        sort_order=sort_order,
     )
     return [_meeting_to_response(m) for m in meetings]
 

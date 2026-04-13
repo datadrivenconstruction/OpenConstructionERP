@@ -133,6 +133,7 @@ async def list_rfis(
     ),
     service: RFIService = Depends(_get_service),
 ) -> list[RFIResponse]:
+    """List RFIs for a project."""
     await verify_project_access(project_id, user_id, session)
     rfis, _ = await service.list_rfis(
         project_id,
@@ -152,6 +153,7 @@ async def create_rfi(
     _perm: None = Depends(RequirePermission("rfi.create")),
     service: RFIService = Depends(_get_service),
 ) -> RFIResponse:
+    """Create a new RFI."""
     await verify_project_access(data.project_id, user_id, session)
     rfi = await service.create_rfi(data, user_id=user_id)
     return _to_response(rfi)
@@ -365,6 +367,7 @@ async def get_rfi(
     user_id: CurrentUserId,
     service: RFIService = Depends(_get_service),
 ) -> RFIResponse:
+    """Get a single RFI."""
     rfi = await service.get_rfi(rfi_id)
     return _to_response(rfi)
 
@@ -377,6 +380,7 @@ async def update_rfi(
     _perm: None = Depends(RequirePermission("rfi.update")),
     service: RFIService = Depends(_get_service),
 ) -> RFIResponse:
+    """Update an RFI."""
     rfi = await service.update_rfi(rfi_id, data)
     return _to_response(rfi)
 
@@ -388,6 +392,7 @@ async def delete_rfi(
     _perm: None = Depends(RequirePermission("rfi.delete")),
     service: RFIService = Depends(_get_service),
 ) -> None:
+    """Delete an RFI."""
     await service.delete_rfi(rfi_id)
 
 

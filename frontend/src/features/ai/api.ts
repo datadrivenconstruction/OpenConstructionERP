@@ -56,6 +56,7 @@ export interface AISettings {
 
 export interface AISettingsUpdate {
   provider?: AIProvider;
+  preferred_model?: string;
   anthropic_api_key?: string | null;
   openai_api_key?: string | null;
   gemini_api_key?: string | null;
