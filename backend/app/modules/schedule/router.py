@@ -32,8 +32,9 @@ from fastapi.responses import StreamingResponse
 
 logger = logging.getLogger(__name__)
 
-from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermission, SessionDep, verify_project_access
 from app.modules.schedule.schemas import (
+    ActivityBimLinkRequest,
     ActivityCreate,
     ActivityResponse,
     ActivityUpdate,
@@ -498,6 +499,59 @@ async def update_activity_progress(
     return _activity_to_response(activity)
 
 
+@router.patch(
+    "/activities/{activity_id}/bim-links",
+    response_model=ActivityResponse,
+    summary="Replace BIM element links on an activity",
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
+async def update_activity_bim_links(
+    activity_id: uuid.UUID,
+    body: ActivityBimLinkRequest,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ScheduleService = Depends(_get_service),
+) -> ActivityResponse:
+    """Replace the full ``bim_element_ids`` array on an activity (4D linking).
+
+    The caller supplies the complete desired list; partial add/remove should
+    be handled client-side by reading the current value first.
+    """
+    activity = await service.get_activity(activity_id)
+    await _verify_schedule_owner(
+        service, session, activity.schedule_id, _user_id, payload
+    )
+    updated = await service.update_bim_links(activity_id, body.bim_element_ids)
+    return _activity_to_response(updated)
+
+
+@router.get(
+    "/activities/by-bim-element/",
+    response_model=list[ActivityResponse],
+    summary="List activities linked to a BIM element",
+    dependencies=[Depends(RequirePermission("schedule.read"))],
+)
+async def list_activities_by_bim_element(
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    element_id: str = Query(..., description="BIM element UUID to look up"),
+    project_id: uuid.UUID = Query(
+        ..., description="Project scope for the search"
+    ),
+    service: ScheduleService = Depends(_get_service),
+) -> list[ActivityResponse]:
+    """Reverse query: return every activity in ``project_id`` whose
+    ``bim_element_ids`` array contains ``element_id``.
+    """
+    await _verify_schedule_project_owner(session, project_id, _user_id, payload)
+    activities = await service.get_activities_for_bim_element(
+        element_id, project_id
+    )
+    return [_activity_to_response(act) for act in activities]
+
+
 # ── Work Order CRUD ──────────────────────────────────────────────────────────
 
 
@@ -885,8 +939,10 @@ async def create_baseline(
 async def list_baselines(
     project_id: uuid.UUID = Query(..., description="Filter baselines by project"),
     session: SessionDep = None,
+    _user_id: CurrentUserId = None,  # type: ignore[assignment]
 ) -> list[BaselineResponse]:
     """List all baselines for a project."""
+    await verify_project_access(project_id, _user_id, session)
     from sqlalchemy import select
 
     from app.modules.schedule.models import ScheduleBaseline
@@ -1022,8 +1078,10 @@ async def list_progress_updates(
     project_id: uuid.UUID = Query(..., description="Filter by project"),
     activity_id: uuid.UUID | None = Query(default=None, description="Filter by activity"),
     session: SessionDep = None,
+    _user_id: CurrentUserId = None,  # type: ignore[assignment]
 ) -> list[ProgressUpdateResponse]:
     """List progress updates for a project, optionally filtered by activity."""
+    await verify_project_access(project_id, _user_id, session)
     from sqlalchemy import select
 
     from app.modules.schedule.models import ProgressUpdate as ProgressUpdateModel
@@ -1738,11 +1796,13 @@ async def export_schedule_csv(
 async def schedule_stats(
     project_id: uuid.UUID = Query(..., description="Project to compute stats for"),
     session: SessionDep = None,  # type: ignore[assignment]
+    _user_id: CurrentUserId = None,  # type: ignore[assignment]
 ) -> ScheduleStatsResponse:
     """Return aggregate schedule statistics across all schedules in a project.
 
     Computes total activities, critical count, delayed, on_track, progress_pct, etc.
     """
+    await verify_project_access(project_id, _user_id, session)
     from sqlalchemy import select
 
     from app.modules.schedule.models import Activity, Schedule
@@ -1822,12 +1882,14 @@ async def schedule_stats(
 async def critical_path_activities(
     project_id: uuid.UUID = Query(..., description="Project to retrieve critical path for"),
     session: SessionDep = None,  # type: ignore[assignment]
+    _user_id: CurrentUserId = None,  # type: ignore[assignment]
 ) -> list[ActivityResponse]:
     """Return only critical-path activities across all schedules in a project.
 
     Filters activities where is_critical=True, ordered by early_start.
     Requires CPM calculation to have been run first.
     """
+    await verify_project_access(project_id, _user_id, session)
     from sqlalchemy import select
 
     from app.modules.schedule.models import Activity, Schedule

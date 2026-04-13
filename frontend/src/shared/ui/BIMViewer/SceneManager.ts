@@ -23,6 +23,8 @@ export class SceneManager {
   private resizeObserver: ResizeObserver | null = null;
   private container: HTMLElement;
   private gridHelper: THREE.GridHelper | null = null;
+  /** On-demand rendering flag — drops idle CPU from 60 FPS to ~0%. */
+  private _needsRender = true;
 
   constructor(canvas: HTMLCanvasElement) {
     const parent = canvas.parentElement;
@@ -35,9 +37,14 @@ export class SceneManager {
       antialias: true,
       alpha: false,
     });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    // Pixel ratio capped at 1 — high-DPI rendering on a 5 000-mesh BIM
+    // scene quadruples the per-frame fragment cost for marginal visual
+    // gain on the engineering-readability use case. Users who want a
+    // sharper picture can take a screenshot via the browser at any
+    // zoom; the live viewport stays fluid.
+    this.renderer.setPixelRatio(1);
+    // Shadow map disabled — see DirectionalLight comment below.
+    this.renderer.shadowMap.enabled = false;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.0;
     this.updateSize();
@@ -46,32 +53,54 @@ export class SceneManager {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0xf0f2f5);
 
-    // Gradient sky via hemisphere light contribution + fog
-    this.scene.fog = new THREE.Fog(0xf0f2f5, 200, 500);
+    // No fog. RVT/COLLADA models can ship in millimetres / centimetres /
+    // feet — a fixed-distance fog either swallows the geometry whole or
+    // does nothing useful, depending on the model size. Easier to skip it
+    // than to keep recomputing the range every time the model changes.
 
-    // Camera
+    // Camera — wide near/far so any unit fits without manual zoom.
     const aspect = this.container.clientWidth / Math.max(this.container.clientHeight, 1);
-    this.camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
+    this.camera = new THREE.PerspectiveCamera(45, aspect, 0.01, 1_000_000);
     this.camera.position.set(30, 20, 30);
     this.camera.lookAt(0, 0, 0);
 
-    // Controls
+    // Controls — smooth, professional orbit behaviour.
     this.controls = new OrbitControls(this.camera, canvas);
     this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.1;
-    this.controls.minDistance = 1;
-    this.controls.maxDistance = 500;
+    this.controls.dampingFactor = 0.08;       // smoother deceleration (was 0.1)
+    this.controls.rotateSpeed = 0.8;          // slightly slower rotation for precision
+    this.controls.panSpeed = 1.0;
+    this.controls.zoomSpeed = 1.2;
+    this.controls.minDistance = 0.01;
+    this.controls.maxDistance = 100_000;
+    // Prevent camera from flipping upside down — construction models
+    // should always have "up" pointing up.
+    this.controls.minPolarAngle = 0.05;       // ~3° from top
+    this.controls.maxPolarAngle = Math.PI - 0.05; // ~3° from bottom
     this.controls.target.set(0, 0, 0);
+
+    // On-demand rendering: only render when the camera moves or the
+    // scene is explicitly invalidated.  Drops idle CPU from 60 FPS
+    // constant rendering to ~0%.
+    this.controls.addEventListener('change', () => {
+      this._needsRender = true;
+    });
 
     // Lighting
     this.setupLighting();
 
-    // Grid
-    this.gridHelper = new THREE.GridHelper(100, 100, 0xcccccc, 0xe0e0e0);
+    // Grid — initial 20 m × 20 m with 1 m cells. Resized to fit the
+    // loaded model after zoomToFit() so the grid always sits at the
+    // same scale as the geometry (a 100 m grid swamps a 2 m model).
+    this.gridHelper = new THREE.GridHelper(20, 20, 0xcccccc, 0xe0e0e0);
+    this.gridHelper.visible = false; // hidden by default — user can toggle via toolbar
     this.scene.add(this.gridHelper);
 
-    // Resize observer
-    this.resizeObserver = new ResizeObserver(() => this.updateSize());
+    // Resize observer — also request a render so the new viewport is drawn.
+    this.resizeObserver = new ResizeObserver(() => {
+      this.updateSize();
+      this._needsRender = true;
+    });
     this.resizeObserver.observe(this.container);
 
     // Start loop
@@ -88,19 +117,14 @@ export class SceneManager {
     hemi.position.set(0, 50, 0);
     this.scene.add(hemi);
 
-    // Main directional light with soft shadows
+    // Main directional light. Shadow casting is DISABLED — rendering
+    // shadows for thousands of BIM meshes per frame drops the viewer
+    // from 60 fps to 1 fps on real Revit exports. The directional
+    // contribution alone is enough for solid 3D readability without
+    // the per-frame shadow map cost.
     const directional = new THREE.DirectionalLight(0xffffff, 0.8);
     directional.position.set(30, 50, 30);
-    directional.castShadow = true;
-    directional.shadow.mapSize.width = 2048;
-    directional.shadow.mapSize.height = 2048;
-    directional.shadow.camera.near = 0.5;
-    directional.shadow.camera.far = 200;
-    directional.shadow.camera.left = -50;
-    directional.shadow.camera.right = 50;
-    directional.shadow.camera.top = 50;
-    directional.shadow.camera.bottom = -50;
-    directional.shadow.bias = -0.0001;
+    directional.castShadow = false;
     this.scene.add(directional);
 
     // Fill light from opposite direction
@@ -122,29 +146,133 @@ export class SceneManager {
 
   private animate = (): void => {
     this.animationId = requestAnimationFrame(this.animate);
-    this.controls.update();
-    this.renderer.render(this.scene, this.camera);
+    // Damping requires controls.update() every frame to animate the
+    // deceleration, but we only pay the GPU render cost when something
+    // actually changed.
+    const dampingDirty = this.controls.update();
+    if (dampingDirty) this._needsRender = true;
+    if (this._needsRender) {
+      this.renderer.render(this.scene, this.camera);
+      this._needsRender = false;
+    }
   };
+
+  /** Mark the scene as needing a re-render on the next animation frame.
+   *  Call this after selection changes, colour mutations, or visibility toggles. */
+  requestRender(): void {
+    this._needsRender = true;
+  }
 
   /** Fit all objects (or a specific bounding box) into the camera view. */
   zoomToFit(bbox?: THREE.Box3): void {
-    const box = bbox ?? new THREE.Box3().setFromObject(this.scene);
+    // Build a content-only bounding box. We can't use a plain
+    // setFromObject(scene) here because the scene also contains the
+    // 100×100 GridHelper and the lights, and those dominate the bbox
+    // for any real-world model (~30 m), making the camera distance
+    // far too large and the model invisibly small in frame.
+    //
+    // CRITICAL: force the entire scene graph to recompute world
+    // matrices BEFORE we read any mesh.matrixWorld. Otherwise the
+    // first zoomToFit after a DAE load runs against stale identity
+    // matrices and returns a tiny bbox, leaving the camera parked
+    // 1000× too far away.
+    this.scene.updateMatrixWorld(true);
+
+    let box: THREE.Box3;
+    if (bbox) {
+      box = bbox;
+    } else {
+      box = new THREE.Box3();
+      const tmp = new THREE.Box3();
+      this.scene.traverse((obj) => {
+        // Skip helpers, grids, lights, cameras — anything that is not
+        // real BIM content. Walk INSIDE Groups so we still pick up
+        // every mesh nested under the COLLADA scene root.
+        if (
+          obj instanceof THREE.GridHelper ||
+          obj instanceof THREE.AxesHelper ||
+          obj instanceof THREE.Light ||
+          obj instanceof THREE.Camera
+        ) {
+          return;
+        }
+        if (obj instanceof THREE.Mesh && obj.geometry) {
+          // Make sure the geometry has a bbox computed; otherwise
+          // setFromObject silently returns an empty box.
+          if (!obj.geometry.boundingBox) obj.geometry.computeBoundingBox();
+          tmp.setFromObject(obj);
+          if (!tmp.isEmpty() && Number.isFinite(tmp.min.x)) {
+            box.union(tmp);
+          }
+        }
+      });
+    }
     if (box.isEmpty()) return;
 
     const center = box.getCenter(new THREE.Vector3());
     const size = box.getSize(new THREE.Vector3());
     const maxDim = Math.max(size.x, size.y, size.z);
-    const fov = this.camera.fov * (Math.PI / 180);
-    const dist = maxDim / (2 * Math.tan(fov / 2)) * 1.5;
+    if (!Number.isFinite(maxDim) || maxDim <= 0) return;
 
+    const fov = this.camera.fov * (Math.PI / 180);
+    // Multiplier 1.05 (was 1.4) — pull the camera in tighter so the
+    // model fills the viewport instead of sitting in the middle with
+    // ~40% empty margin around it. The orbit controls let users zoom
+    // out anyway if they want a wider view.
+    const dist = (maxDim / (2 * Math.tan(fov / 2))) * 1.05;
+
+    // Place camera at a natural architectural viewing angle.
+    // Slightly elevated (0.35 * dist up) and offset diagonally so the
+    // model reads like a perspective architectural rendering.
     this.controls.target.copy(center);
     this.camera.position.set(
-      center.x + dist * 0.6,
-      center.y + dist * 0.4,
-      center.z + dist * 0.6,
+      center.x + dist * 0.7,
+      center.y + dist * 0.35,
+      center.z + dist * 0.5,
     );
     this.camera.lookAt(center);
     this.controls.update();
+    this._needsRender = true;
+
+    // Resize the grid to match the model. We want 1-unit cells (≈ 1 m
+    // when the model is in metres) and a total extent that's slightly
+    // larger than the model footprint so the grid frames the geometry
+    // without dwarfing it.
+    this.resizeGridToBox(box);
+  }
+
+  /** Replace the grid helper with one sized to the given bounding box. */
+  private resizeGridToBox(box: THREE.Box3): void {
+    if (!this.gridHelper) return;
+    const size = box.getSize(new THREE.Vector3());
+    const center = box.getCenter(new THREE.Vector3());
+    // Use the larger horizontal axis to size the grid; clamp to a sane
+    // range so we never end up with a 1 cm grid (zero-divisions error)
+    // or a 10 km grid (millions of lines).
+    const horizontal = Math.max(size.x, size.z);
+    let extent = Math.max(2, Math.ceil(horizontal * 1.6));
+    extent = Math.min(extent, 500);
+    // Choose a cell size that keeps the line count reasonable: 1 m for
+    // anything ≤ 100 m, then scale up to keep ~100 divisions max.
+    let cell = 1;
+    if (extent > 100) cell = Math.ceil(extent / 100);
+    const divisions = Math.max(2, Math.round(extent / cell));
+    // Replace the existing grid (GridHelper has no resize API).
+    // Respect dark mode by checking the scene background luminance.
+    const bg = this.scene.background;
+    const isDark = bg instanceof THREE.Color && bg.getHSL({ h: 0, s: 0, l: 0 }).l < 0.3;
+    const centerColor = isDark ? 0x333344 : 0xcccccc;
+    const lineColor = isDark ? 0x2a2a3a : 0xe0e0e0;
+    this.scene.remove(this.gridHelper);
+    this.gridHelper.geometry.dispose();
+    const mat = this.gridHelper.material;
+    if (Array.isArray(mat)) mat.forEach((m) => m.dispose());
+    else mat?.dispose();
+    this.gridHelper = new THREE.GridHelper(extent, divisions, centerColor, lineColor);
+    // Sit the grid just below the model floor so it doesn't z-fight
+    // with the lowest geometry.
+    this.gridHelper.position.set(center.x, box.min.y - 0.001, center.z);
+    this.scene.add(this.gridHelper);
   }
 
   /** Zoom to specific element bounding boxes. */
@@ -162,6 +290,70 @@ export class SceneManager {
     this.camera.position.set(position.x, position.y, position.z);
     this.controls.target.set(target.x, target.y, target.z);
     this.controls.update();
+    this._needsRender = true;
+  }
+
+  /** Snap the camera to a canonical view of the current scene bounding box.
+   *
+   * `view` is one of:
+   *   - `'top'`   — looking straight down (plan view)
+   *   - `'front'` — looking at the +Z face
+   *   - `'side'`  — looking at the +X face
+   *   - `'iso'`   — the default 3/4 orthographic-ish perspective angle
+   */
+  setCameraPreset(view: 'top' | 'front' | 'side' | 'iso'): void {
+    // Recompute the scene bounding box (same walker that zoomToFit uses,
+    // minus the helpers) so the preset always matches what's currently loaded.
+    this.scene.updateMatrixWorld(true);
+    const box = new THREE.Box3();
+    const tmp = new THREE.Box3();
+    this.scene.traverse((obj) => {
+      if (
+        obj instanceof THREE.GridHelper ||
+        obj instanceof THREE.AxesHelper ||
+        obj instanceof THREE.Light ||
+        obj instanceof THREE.Camera
+      ) {
+        return;
+      }
+      if (obj instanceof THREE.Mesh && obj.geometry) {
+        if (!obj.geometry.boundingBox) obj.geometry.computeBoundingBox();
+        tmp.setFromObject(obj);
+        if (!tmp.isEmpty() && Number.isFinite(tmp.min.x)) box.union(tmp);
+      }
+    });
+    if (box.isEmpty()) return;
+
+    const center = box.getCenter(new THREE.Vector3());
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    if (!Number.isFinite(maxDim) || maxDim <= 0) return;
+    const fov = this.camera.fov * (Math.PI / 180);
+    const dist = (maxDim / (2 * Math.tan(fov / 2))) * 1.1;
+
+    this.controls.target.copy(center);
+    switch (view) {
+      case 'top':
+        this.camera.position.set(center.x, center.y + dist, center.z + 0.001);
+        break;
+      case 'front':
+        this.camera.position.set(center.x, center.y, center.z + dist);
+        break;
+      case 'side':
+        this.camera.position.set(center.x + dist, center.y, center.z);
+        break;
+      case 'iso':
+      default:
+        this.camera.position.set(
+          center.x + dist * 0.7,
+          center.y + dist * 0.35,
+          center.z + dist * 0.5,
+        );
+        break;
+    }
+    this.camera.lookAt(center);
+    this.controls.update();
+    this._needsRender = true;
   }
 
   /** Get current camera viewpoint. */
@@ -184,7 +376,58 @@ export class SceneManager {
   toggleGrid(): void {
     if (this.gridHelper) {
       this.gridHelper.visible = !this.gridHelper.visible;
+      this._needsRender = true;
     }
+  }
+
+  /** Update the scene background and grid colors for light/dark mode.
+   *
+   *  Light mode: #f0f2f5 background, #cccccc / #e0e0e0 grid
+   *  Dark mode:  #1a1a2e background, #333344 / #2a2a3a grid
+   */
+  setDarkMode(isDark: boolean): void {
+    if (isDark) {
+      this.scene.background = new THREE.Color(0x1a1a2e);
+    } else {
+      this.scene.background = new THREE.Color(0xf0f2f5);
+    }
+    // Rebuild the grid with matching colors — no resize API on GridHelper,
+    // so we swap it in-place keeping the same position/visibility.
+    if (this.gridHelper) {
+      const wasVisible = this.gridHelper.visible;
+      const pos = this.gridHelper.position.clone();
+      // GridHelper stores its size/divisions on the geometry userData or
+      // as internal state. We read the bounding box to infer size, then
+      // fall back to 20/20 if it's empty or not computed.
+      let size = 20;
+      let divisions = 20;
+      this.gridHelper.geometry.computeBoundingBox();
+      const bb = this.gridHelper.geometry.boundingBox;
+      if (bb && !bb.isEmpty()) {
+        const gSize = bb.getSize(new THREE.Vector3());
+        size = Math.round(Math.max(gSize.x, gSize.z));
+        // Infer divisions from vertex count: a GridHelper with N divisions
+        // has (N+1)*2*2 = 4*(N+1) vertices on each axis → total position
+        // count = 4*(N+1)*2.  We approximate by taking position count / 8.
+        const posAttr = this.gridHelper.geometry.getAttribute('position');
+        if (posAttr) {
+          const approxDiv = Math.round(posAttr.count / 8) - 1;
+          if (approxDiv > 1) divisions = approxDiv;
+        }
+      }
+      this.scene.remove(this.gridHelper);
+      this.gridHelper.geometry.dispose();
+      const mat = this.gridHelper.material;
+      if (Array.isArray(mat)) mat.forEach((m) => m.dispose());
+      else mat?.dispose();
+      const centerColor = isDark ? 0x333344 : 0xcccccc;
+      const lineColor = isDark ? 0x2a2a3a : 0xe0e0e0;
+      this.gridHelper = new THREE.GridHelper(size, divisions, centerColor, lineColor);
+      this.gridHelper.position.copy(pos);
+      this.gridHelper.visible = wasVisible;
+      this.scene.add(this.gridHelper);
+    }
+    this._needsRender = true;
   }
 
   /** Dispose all Three.js resources. */

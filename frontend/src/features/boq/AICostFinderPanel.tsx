@@ -382,7 +382,7 @@ function ResultCard({
       {expanded && hasComponents && (
         <div className="mt-1 ml-4 space-y-0.5">
           {item.components.map((c, i) => (
-            <div key={i} className="text-xs text-text-muted flex justify-between">
+            <div key={`${c.description}-${c.unit}-${i}`} className="text-xs text-text-muted flex justify-between">
               <span className="truncate mr-2">{c.description}</span>
               <span className="shrink-0">
                 {c.unit} {fmtWithCurrency(c.rate, locale, currencyCode)}

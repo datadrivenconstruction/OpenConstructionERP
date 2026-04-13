@@ -30,6 +30,15 @@ import { useToastStore } from '@/stores/useToastStore';
 
 // ── Types ────────────────────────────────────────────────────────────────
 
+interface TakeoffDocument {
+  id?: string;
+  name?: string;
+  filename?: string;
+  created_at?: string;
+  type?: string;
+  file_type?: string;
+}
+
 interface MethodCard {
   titleKey: string;
   descriptionKey: string;
@@ -662,14 +671,14 @@ export function QuantitiesPage() {
   // Converter data from API
   const { data: convertersData } = useQuery<ConvertersResponse>({
     queryKey: ['takeoff', 'converters'],
-    queryFn: () => apiGet<ConvertersResponse>('/v1/takeoff/converters'),
+    queryFn: () => apiGet<ConvertersResponse>('/v1/takeoff/converters/'),
     staleTime: 30_000,
   });
 
   // Recent documents from API
   const { data: documents } = useQuery({
     queryKey: ['takeoff', 'documents'],
-    queryFn: () => apiGet<any[]>('/v1/takeoff/documents/'),
+    queryFn: () => apiGet<TakeoffDocument[]>('/v1/takeoff/documents/'),
   });
 
   const converters = convertersData?.converters ?? [];
@@ -1050,7 +1059,7 @@ export function QuantitiesPage() {
 
         {documents && documents.length > 0 ? (
           <div className="space-y-2">
-            {documents.slice(0, 10).map((doc: any, idx: number) => (
+            {documents.slice(0, 10).map((doc, idx) => (
               <div
                 key={doc.id ?? idx}
                 className="flex items-center justify-between rounded-lg border border-border-light px-4 py-3 hover:bg-surface-secondary transition-colors"

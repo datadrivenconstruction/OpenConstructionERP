@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   ClipboardList,
@@ -23,9 +23,10 @@ import {
   UserCircle,
   AlertTriangle,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, SkeletonGrid } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, SkeletonGrid, ViewInBIMButton } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { useConfirm } from '@/shared/hooks/useConfirm';
+import { useCreateShortcut } from '@/shared/hooks/useCreateShortcut';
 import { apiGet } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -128,6 +129,8 @@ function AddTaskModal({
     setForm((prev) => ({ ...prev, [key]: value }));
     if (errors[key]) setErrors((prev) => { const next = { ...prev }; delete next[key]; return next; });
   };
+
+  const canSubmit = form.title.trim().length > 0;
 
   const validate = (): boolean => {
     const e: Record<string, string> = {};
@@ -339,7 +342,7 @@ function AddTaskModal({
           <Button variant="ghost" onClick={onClose} disabled={isPending}>
             {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={isPending}>
+          <Button variant="primary" onClick={handleSubmit} disabled={isPending || !canSubmit}>
             {isPending ? (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
             ) : (
@@ -377,6 +380,7 @@ const TaskCard = React.memo(function TaskCard({
 
   return (
     <Card
+      data-task-id={task.id}
       className={clsx(
         'p-3 mb-2 hover:shadow-md transition-shadow',
         isOverdue && 'bg-red-50/40 dark:bg-red-950/15',
@@ -420,6 +424,13 @@ const TaskCard = React.memo(function TaskCard({
                     : t('tasks.source_linked', { defaultValue: 'Linked' })}
             </span>
           )}
+          {/* BIM pin indicator — surfaces tasks that are spatially linked
+              to 3D model geometry.  Click isolates pinned elements in viewer. */}
+          <ViewInBIMButton
+            elementIds={task.bim_element_ids ?? []}
+            iconSize={9}
+            className="inline-flex items-center gap-1 mt-0.5 text-2xs text-emerald-700 dark:text-emerald-400 hover:underline"
+          />
         </div>
       </div>
 
@@ -523,6 +534,40 @@ export function TasksPage() {
   const [typeFilter, setTypeFilter] = useState<TaskType | ''>('');
   const [myTasksOnly, setMyTasksOnly] = useState(false);
 
+  // Deep-link auto-scroll: Cmd+Shift+K global semantic search lands here
+  // with `?id=<task_id>` — scroll the matching task card into view and
+  // briefly highlight it.  Cleared from the URL after one shot so a
+  // refresh doesn't keep re-scrolling.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const deepLinkTaskId = searchParams.get('id');
+  useEffect(() => {
+    if (!deepLinkTaskId) return;
+    // Defer until the next tick so the task list has had a chance to
+    // render after the data fetch finishes.
+    const timer = setTimeout(() => {
+      const node = document.querySelector(
+        `[data-task-id="${CSS.escape(deepLinkTaskId)}"]`,
+      );
+      if (node) {
+        node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        node.classList.add('ring-2', 'ring-oe-blue', 'ring-offset-2');
+        setTimeout(() => {
+          node.classList.remove('ring-2', 'ring-oe-blue', 'ring-offset-2');
+        }, 2500);
+      }
+      const next = new URLSearchParams(searchParams);
+      next.delete('id');
+      setSearchParams(next, { replace: true });
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [deepLinkTaskId, searchParams, setSearchParams]);
+
+  // "n" shortcut → open new task form
+  useCreateShortcut(
+    useCallback(() => setShowAddModal(true), []),
+    !showAddModal && !showImportModal,
+  );
+
   // Escape key handler for import modal
   useEffect(() => {
     if (!showImportModal) return;
@@ -537,6 +582,7 @@ export function TasksPage() {
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    staleTime: 5 * 60_000,
   });
 
   const projectId = routeProjectId || activeProjectId || projects[0]?.id || '';
@@ -598,13 +644,13 @@ export function TasksPage() {
       setShowAddModal(false);
       addToast({
         type: 'success',
-        title: t('tasks.created', { defaultValue: 'Task created' }),
+        title: t('tasks.created', { defaultValue: 'Task created successfully' }),
       });
     },
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('tasks.create_failed', { defaultValue: 'Failed to create task' }),
         message: e.message,
       }),
   });
@@ -614,13 +660,13 @@ export function TasksPage() {
     onSuccess: () =>
       addToast({
         type: 'success',
-        title: t('tasks.export_success', { defaultValue: 'Export complete' }),
-        message: t('tasks.export_success_msg', { defaultValue: 'Excel file downloaded.' }),
+        title: t('tasks.export_success', { defaultValue: 'Tasks exported successfully' }),
+        message: t('tasks.export_success_msg', { defaultValue: 'Excel file has been downloaded.' }),
       }),
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('tasks.export_failed', { defaultValue: 'Export failed' }),
+        title: t('tasks.export_failed', { defaultValue: 'Failed to export tasks' }),
         message: e.message,
       }),
   });
@@ -631,13 +677,13 @@ export function TasksPage() {
       invalidateAll();
       addToast({
         type: 'success',
-        title: t('tasks.completed', { defaultValue: 'Task completed' }),
+        title: t('tasks.completed', { defaultValue: 'Task marked as completed' }),
       });
     },
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('tasks.complete_failed', { defaultValue: 'Failed to complete task' }),
         message: e.message,
       }),
   });
@@ -645,7 +691,7 @@ export function TasksPage() {
   const handleCreateSubmit = useCallback(
     (formData: TaskFormData) => {
       if (!projectId) {
-        addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: t('common.select_project_first', { defaultValue: 'Please select a project first' }) });
+        addToast({ type: 'error', title: t('tasks.no_project_error', { defaultValue: 'No project selected' }), message: t('common.select_project_first', { defaultValue: 'Please select a project first' }) });
         return;
       }
       createMut.mutate({
@@ -726,8 +772,8 @@ export function TasksPage() {
     } catch (e: unknown) {
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
-        message: e instanceof Error ? e.message : 'Failed to download template',
+        title: t('tasks.template_download_failed', { defaultValue: 'Failed to download template' }),
+        message: e instanceof Error ? e.message : t('tasks.template_error_generic', { defaultValue: 'An unexpected error occurred while downloading the import template.' }),
       });
     }
   };
@@ -748,9 +794,14 @@ export function TasksPage() {
 
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-content-primary">
-          {t('tasks.title', { defaultValue: 'Tasks' })}
-        </h1>
+        <div>
+          <h1 className="text-2xl font-bold text-content-primary">
+            {t('tasks.title', { defaultValue: 'Tasks' })}
+          </h1>
+          <p className="mt-1 text-sm text-content-secondary">
+            {t('tasks.subtitle', { defaultValue: 'Track assignments, deadlines, and progress across your team' })}
+          </p>
+        </div>
 
         <div className="flex items-center gap-2 shrink-0">
           {/* Project selector (if not in route) */}
@@ -908,10 +959,10 @@ export function TasksPage() {
             description={
               searchQuery || typeFilter || myTasksOnly
                 ? t('tasks.no_results_hint', {
-                    defaultValue: 'Try adjusting your search or filters',
+                    defaultValue: 'Try adjusting your search or filters to find what you are looking for.',
                   })
                 : t('tasks.no_tasks_hint', {
-                    defaultValue: 'Create your first task to get started',
+                    defaultValue: 'Create your first task to track assignments, deadlines, and progress across your team.',
                   })
             }
             action={
@@ -953,7 +1004,7 @@ export function TasksPage() {
                   <div className="flex-1 min-h-[80px]">
                     {colItems.length === 0 ? (
                       <div className="flex items-center justify-center py-8 text-xs text-content-quaternary">
-                        {t('tasks.column_empty', { defaultValue: 'No items' })}
+                        {t('tasks.column_empty', { defaultValue: 'No tasks in this column' })}
                       </div>
                     ) : (
                       colItems.map((task) => (
@@ -976,7 +1027,7 @@ export function TasksPage() {
         <EmptyState
           icon={<ClipboardList size={28} strokeWidth={1.5} />}
           title={t('tasks.no_project', { defaultValue: 'No project selected' })}
-          description={t('tasks.select_project', { defaultValue: 'Open a project first to view and manage tasks.' })}
+          description={t('tasks.select_project', { defaultValue: 'Select a project from the header to view and manage tasks, assignments, and deadlines.' })}
         />
       )}
 
@@ -1070,8 +1121,8 @@ export function TasksPage() {
                         {t('tasks.show_errors', { defaultValue: 'Show error details' })}
                       </summary>
                       <ul className="mt-1 space-y-0.5 max-h-32 overflow-y-auto">
-                        {importResult.errors.slice(0, 20).map((err, i) => (
-                          <li key={i}>Row {err.row}: {err.error}</li>
+                        {importResult.errors.slice(0, 20).map((err) => (
+                          <li key={`row-${err.row}`}>Row {err.row}: {err.error}</li>
                         ))}
                       </ul>
                     </details>

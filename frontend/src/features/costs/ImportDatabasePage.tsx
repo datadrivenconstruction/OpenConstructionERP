@@ -210,7 +210,7 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
   // Sync loaded state with actual backend data
   const { data: regionStats } = useQuery({
     queryKey: ['costs', 'regions', 'stats'],
-    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats'),
+    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats/'),
     retry: false,
   });
 
@@ -597,7 +597,7 @@ function LoadedDatabasesSection() {
   // Fetch real per-region stats from backend
   const { data: regionStats } = useQuery({
     queryKey: ['costs', 'regions', 'stats'],
-    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats'),
+    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats/'),
     retry: false,
     refetchOnWindowFocus: true,
   });
@@ -646,7 +646,7 @@ function LoadedDatabasesSection() {
 
   // Clear all mutation
   const clearMutation = useMutation({
-    mutationFn: () => apiDelete<{ deleted: number }>('/v1/costs/actions/clear-database?source=cwicr'),
+    mutationFn: () => apiDelete<{ deleted: number }>('/v1/costs/actions/clear-database/?source=cwicr'),
     onSuccess: () => {
       clearLoadedDatabases();
       queryClient.invalidateQueries({ queryKey: ['costs'] });
@@ -858,7 +858,7 @@ function VectorDatabaseSection() {
   // Check vector DB status (LanceDB embedded or Qdrant)
   const { data: vectorStatus, refetch: refetchStatus } = useQuery({
     queryKey: ['costs', 'vector', 'status'],
-    queryFn: () => apiGet<VectorStatus>('/v1/costs/vector/status'),
+    queryFn: () => apiGet<VectorStatus>('/v1/costs/vector/status/'),
     retry: false,
     refetchInterval: (loadingRegion || isIndexingAll) ? 5000 : false,
   });
@@ -868,7 +868,7 @@ function VectorDatabaseSection() {
   // Per-region vector counts — only fetch when vector DB is connected
   const { data: vectorRegionStats, refetch: refetchVectorRegions } = useQuery({
     queryKey: ['costs', 'vector', 'regions'],
-    queryFn: () => apiGet<VectorRegionStat[]>('/v1/costs/vector/regions').catch(() => [] as VectorRegionStat[]),
+    queryFn: () => apiGet<VectorRegionStat[]>('/v1/costs/vector/regions/').catch(() => [] as VectorRegionStat[]),
     retry: false,
     enabled: isConnected,
   });
@@ -876,7 +876,7 @@ function VectorDatabaseSection() {
   // Region stats for cost item counts
   const { data: regionStats } = useQuery({
     queryKey: ['costs', 'regions', 'stats'],
-    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats'),
+    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats/'),
     retry: false,
   });
 
@@ -1460,8 +1460,8 @@ export function ImportDatabasePage() {
                   {t('costs.import_error_details', { defaultValue: 'Error details' })}
                 </p>
                 <div className="space-y-1.5">
-                  {result.errors.slice(0, 5).map((err, i) => (
-                    <p key={i} className="text-xs text-content-secondary">
+                  {result.errors.slice(0, 5).map((err) => (
+                    <p key={`row-${err.row}`} className="text-xs text-content-secondary">
                       <span className="font-mono text-semantic-error">
                         {t('costs.import_row', { defaultValue: 'Row' })} {err.row}
                       </span>

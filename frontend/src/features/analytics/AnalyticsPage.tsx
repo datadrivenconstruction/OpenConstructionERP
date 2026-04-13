@@ -78,7 +78,7 @@ export function AnalyticsPage() {
 
   const { data, isLoading } = useQuery<AnalyticsOverview>({
     queryKey: ['analytics', 'overview'],
-    queryFn: () => apiGet<AnalyticsOverview>('/v1/projects/analytics/overview'),
+    queryFn: () => apiGet<AnalyticsOverview>('/v1/projects/analytics/overview/'),
   });
 
   const regions = useMemo(() => {

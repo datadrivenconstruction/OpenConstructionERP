@@ -75,11 +75,11 @@ export const takeoffApi = {
 
   /** Create a single measurement. */
   create: (data: MeasurementCreate) =>
-    apiPost<MeasurementResponse>('/v1/takeoff/measurements', data),
+    apiPost<MeasurementResponse>('/v1/takeoff/measurements/', data),
 
   /** Bulk create measurements (up to 500). */
   bulkCreate: (measurements: MeasurementCreate[]) =>
-    apiPost<MeasurementResponse[]>('/v1/takeoff/measurements/bulk', { measurements }),
+    apiPost<MeasurementResponse[]>('/v1/takeoff/measurements/bulk/', { measurements }),
 
   /** Update a measurement. */
   update: (id: string, data: Partial<MeasurementCreate>) =>
@@ -91,7 +91,7 @@ export const takeoffApi = {
 
   /** Link a measurement to a BOQ position. */
   linkToBoq: (id: string, boqPositionId: string) =>
-    apiPost<MeasurementResponse>(`/v1/takeoff/measurements/${id}/link-to-boq`, {
+    apiPost<MeasurementResponse>(`/v1/takeoff/measurements/${id}/link-to-boq/`, {
       boq_position_id: boqPositionId,
     }),
 

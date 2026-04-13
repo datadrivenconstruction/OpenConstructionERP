@@ -1,12 +1,14 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import clsx from 'clsx';
-import { Sidebar } from './Sidebar';
+import { Sidebar, FloatingRecentButton, FloatingChatButton } from './Sidebar';
 import { Header } from './Header';
 import { FeedbackDialog, OnboardingTour } from '@/shared/ui';
 import { FloatingQueuePanel } from './FloatingQueuePanel';
 import { GlobalProgress } from '@/shared/ui/GlobalProgress';
+import { GlobalUploadIndicator } from '@/shared/ui/GlobalUploadIndicator';
 import { OfflineBanner } from '@/shared/ui/OfflineBanner';
+import { DemoBanner } from '@/shared/ui/DemoBanner';
 
 import { useSwipeGesture, useEdgeSwipe } from '@/shared/hooks/useSwipeGesture';
 import { useIsRTL } from '@/shared/hooks/useIsRTL';
@@ -58,6 +60,7 @@ export function AppLayout({ title, children }: AppLayoutProps) {
 
   return (
     <div className="min-h-screen bg-surface-secondary">
+      <DemoBanner />
       <OfflineBanner />
       <GlobalProgress />
 
@@ -86,16 +89,19 @@ export function AppLayout({ title, children }: AppLayoutProps) {
         <Sidebar onClose={closeSidebar} />
       </div>
 
-      {/* Main area — offset from the sidebar side (left in LTR, right in RTL) */}
+      {/* Main area — offset from the sidebar side (left in LTR, right in RTL).
+          Inner padding kept tight (px-2 → px-3) so content fills the available
+          width. Pages that want full-bleed (BIM viewer, AI chat) negate it via
+          `-mx-2 sm:-mx-3` on their root div. Header padding stays as Header
+          owns it. max-w-content is also gone — pages that need a constrained
+          reading width re-apply it themselves. */}
       <div className="lg:pl-sidebar">
         <Header
           title={title}
           onMenuClick={openSidebar}
         />
-        <main className="px-3 py-4 sm:px-4 lg:px-6">
-          <div className="mx-auto max-w-content">
-            {children}
-          </div>
+        <main className="px-2 py-4 sm:px-3">
+          {children}
         </main>
       </div>
 
@@ -103,6 +109,13 @@ export function AppLayout({ title, children }: AppLayoutProps) {
 
       {/* Floating queue panel — shows background task progress */}
       <FloatingQueuePanel />
+
+      {/* Global BIM upload indicator — survives route changes */}
+      <GlobalUploadIndicator />
+
+      {/* Floating Recent button — bottom-right corner */}
+      <FloatingRecentButton />
+      <FloatingChatButton />
 
       {/* Onboarding tour — auto-starts on first visit */}
       <OnboardingTour />

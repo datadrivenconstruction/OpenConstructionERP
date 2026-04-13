@@ -200,7 +200,7 @@ async def delete_catalog_region(
     region: str,
     session: SessionDep,
     _user_id: CurrentUserId,
-    _perm: None = Depends(RequirePermission("catalog.create")),
+    _perm: None = Depends(RequirePermission("catalog.delete")),
 ) -> dict[str, Any]:
     """Remove all resources for a specific region."""
     from app.modules.catalog.repository import CatalogResourceRepository

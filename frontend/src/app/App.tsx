@@ -18,6 +18,8 @@ import { IntegrationsPage } from '@/features/integrations';
 import { AboutPage } from '@/features/about/AboutPage';
 import { QuickEstimatePage } from '@/features/ai';
 import { Logo, ShortcutsDialog, CommandPalette, ToastContainer, ErrorBoundary, NotFoundPage } from '@/shared/ui';
+import GlobalSearchModal from '@/features/search/GlobalSearchModal';
+import { useGlobalSearchStore } from '@/stores/useGlobalSearchStore';
 import { FloatingQueuePanel } from './layout/FloatingQueuePanel';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useThemeStore } from '@/stores/useThemeStore';
@@ -54,6 +56,9 @@ const CatalogPage = lazy(() =>
 );
 const AdvisorPage = lazy(() =>
   import('@/features/ai/AdvisorPage').then((m) => ({ default: m.AdvisorPage }))
+);
+const ERPChatPage = lazy(() =>
+  import('@/features/erp-chat/full-page/ChatFullPage')
 );
 const ChangeOrdersPage = lazy(() =>
   import('@/features/changeorders/ChangeOrdersPage').then((m) => ({ default: m.ChangeOrdersPage }))
@@ -127,11 +132,17 @@ const ReportingPage = lazy(() =>
 const BIMPage = lazy(() =>
   import('@/features/bim/BIMPage').then((m) => ({ default: m.BIMPage }))
 );
+const BIMQuantityRulesPage = lazy(() =>
+  import('@/features/bim/BIMQuantityRulesPage').then((m) => ({ default: m.BIMQuantityRulesPage }))
+);
 const UserManagementPage = lazy(() =>
   import('@/features/users/UserManagementPage').then((m) => ({ default: m.UserManagementPage }))
 );
 const ArchitectureMapPage = lazy(() =>
   import('@/features/architecture/ArchitectureMapPage').then((m) => ({ default: m.ArchitectureMapPage }))
+);
+const ProjectIntelligencePage = lazy(() =>
+  import('@/features/project-intelligence/ProjectIntelligencePage').then((m) => ({ default: m.ProjectIntelligencePage }))
 );
 
 function LoadingScreen() {
@@ -189,11 +200,27 @@ function GlobalShortcuts() {
   // and cannot be intercepted reliably — use the `n p` two-key sequence instead.
   // Ctrl+Shift+V is reserved for Excel paste in BOQ Editor — don't bind it globally.
 
+  const openGlobalSearch = useGlobalSearchStore((s) => s.openModal);
+  const toggleGlobalSearch = useGlobalSearchStore((s) => s.toggleModal);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const mod = e.ctrlKey || e.metaKey;
       const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      const isTextField =
+        tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+
+      // Cmd/Ctrl+Shift+K → semantic search modal (cross-module vector search).
+      // Bound BEFORE the plain Cmd+K branch so the shift modifier short-
+      // circuits the navigation palette.  Works even from text fields so
+      // estimators can trigger semantic search while editing a BOQ row.
+      if (mod && e.shiftKey && (e.key === 'K' || e.key === 'k')) {
+        e.preventDefault();
+        toggleGlobalSearch();
+        return;
+      }
+
+      if (isTextField) return;
 
       if (mod && e.key === 'k') {
         e.preventDefault();
@@ -206,12 +233,13 @@ function GlobalShortcuts() {
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, []);
+  }, [toggleGlobalSearch, openGlobalSearch]);
 
   return (
     <>
       <ShortcutsDialog open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <GlobalSearchModal />
     </>
   );
 }
@@ -279,9 +307,11 @@ export default function App() {
 
         <Route path="/ai-estimate" element={<P title="AI Quick Estimate"><QuickEstimatePage /></P>} />
         <Route path="/advisor" element={<P title="AI Cost Advisor"><AdvisorPage /></P>} />
+        <Route path="/chat" element={<P title="AI Chat"><ERPChatPage /></P>} />
         <Route path="/cad-takeoff" element={<Navigate to="/data-explorer" replace />} />
         <Route path="/data-explorer" element={<P title="Data Explorer"><CadDataExplorerPage /></P>} />
         <Route path="/bim" element={<P title="BIM Viewer"><BIMPage /></P>} />
+        <Route path="/bim/rules" element={<P title="BIM Rules"><BIMQuantityRulesPage /></P>} />
         <Route path="/projects/:projectId/bim" element={<P title="BIM Viewer"><BIMPage /></P>} />
 
         <Route path="/projects" element={<P title="Projects"><ProjectsPage /></P>} />
@@ -366,9 +396,11 @@ export default function App() {
         <Route path="/settings" element={<P title="Settings"><SettingsPage /></P>} />
         <Route path="/integrations" element={<P title="Integrations"><IntegrationsPage /></P>} />
         <Route path="/about" element={<P title="About"><AboutPage /></P>} />
+        <Route path="/project-intelligence" element={<P title="Project Intelligence"><ProjectIntelligencePage /></P>} />
         <Route path="/architecture" element={<P title="Architecture Map"><ArchitectureMapPage /></P>} />
 
         {/* Convenience route aliases — redirect to canonical paths */}
+        <Route path="/dashboard" element={<Navigate to="/" replace />} />
         <Route path="/change-orders" element={<Navigate to="/changeorders" replace />} />
         <Route path="/punch-list" element={<Navigate to="/punchlist" replace />} />
         <Route path="/variations" element={<Navigate to="/changeorders" replace />} />

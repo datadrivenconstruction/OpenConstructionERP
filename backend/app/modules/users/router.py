@@ -76,13 +76,23 @@ def _get_service(session: SessionDep, settings: SettingsDep) -> UserService:
 
 
 @router.post("/auth/register/", response_model=UserResponse, status_code=201)
+@router.post("/auth/register", response_model=UserResponse, status_code=201, include_in_schema=False)
 async def register(data: UserCreate, service: UserService = Depends(_get_service)) -> UserResponse:
     """Register a new user account."""
     user = await service.register(data)
     return UserResponse.model_validate(user)
 
 
+# NOTE on the dual-route registration: every auth endpoint below is mounted
+# at BOTH the trailing-slash and the bare path. Issue #42 retest showed that
+# some Docker quickstart proxy setups (and bare curl users) hit
+# `POST /api/v1/users/auth/login` (no slash) and got a 404 because FastAPI's
+# default 307 redirect doesn't preserve POST bodies. Registering both forms
+# is more robust than relying on slash redirects to behave correctly through
+# every reverse proxy in the wild.
+
 @router.post("/auth/login/", response_model=TokenResponse)
+@router.post("/auth/login", response_model=TokenResponse, include_in_schema=False)
 async def login(
     data: LoginRequest,
     request: Request,
@@ -104,6 +114,7 @@ async def login(
 
 
 @router.post("/auth/refresh/", response_model=TokenResponse)
+@router.post("/auth/refresh", response_model=TokenResponse, include_in_schema=False)
 async def refresh(
     data: RefreshRequest,
     service: UserService = Depends(_get_service),
@@ -120,7 +131,7 @@ async def forgot_password(
     """Request a password reset token.
 
     Always returns a success message to prevent email enumeration.
-    In dev mode, the reset token is included in the response for testing.
+    The token is never included in the HTTP response.
     """
     return await service.forgot_password(data)
 
@@ -355,9 +366,34 @@ async def list_users(
     limit: int = Query(default=50, ge=1, le=100),
     is_active: bool | None = None,
 ) -> list[UserResponse]:
-    """List all users (admin/manager only)."""
+    """List all users (admin/manager only).
+
+    Demo-mode privacy: when ``OE_DEMO_MODE=true`` is set in the environment
+    (only on the public hosted demo), personal data is stripped from the
+    response — first/last names are blanked and the email's local part is
+    replaced with a hash. Only the email domain remains visible. This way
+    the public demo can show registration counts without leaking PII from
+    real users who signed up to try the product.
+    """
+    import os as _os
     users, _ = await service.list_users(offset=offset, limit=limit, is_active=is_active)
-    return [UserResponse.model_validate(u) for u in users]
+    responses = [UserResponse.model_validate(u) for u in users]
+
+    if _os.environ.get("OE_DEMO_MODE", "").lower() in ("1", "true", "yes"):
+        import hashlib as _hl
+
+        def _scrub(r: UserResponse) -> UserResponse:
+            data = r.model_dump()
+            email = (data.get("email") or "").strip()
+            if "@" in email:
+                local, domain = email.split("@", 1)
+                short = _hl.sha1(local.encode("utf-8")).hexdigest()[:6]
+                data["email"] = f"user-{short}@{domain}"
+            data["full_name"] = ""
+            return UserResponse.model_validate(data)
+
+        responses = [_scrub(r) for r in responses]
+    return responses
 
 
 @router.get(

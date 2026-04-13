@@ -34,7 +34,8 @@ import {
   AlertCircle, Package, FileText as NotesIcon,
   ShieldCheck, Leaf, Check, Building2, FileCheck, Boxes,
 } from 'lucide-react';
-import { Button, Badge } from '@/shared/ui';
+import { Button, Badge, ConfirmDialog } from '@/shared/ui';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useToastStore } from '@/stores/useToastStore';
 import { boqApi, type CustomColumnDef, type Position } from './api';
 import { getErrorMessage } from '@/shared/lib/api';
@@ -227,6 +228,7 @@ export function CustomColumnsDialog({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
+  const { confirm, ...confirmProps } = useConfirm();
 
   // ── State for the manual "Add column" form ───────────────────────────
   const [newName, setNewName] = useState('');
@@ -506,18 +508,16 @@ export function CustomColumnsDialog({
                         </div>
                       </div>
                       <button
-                        onClick={() => {
-                          if (
-                            window.confirm(
-                              t('boq.column_delete_confirm', {
-                                defaultValue:
-                                  'Remove the "{{name}}" column? Existing values in positions are preserved but no longer shown.',
-                                name: col.display_name,
-                              }),
-                            )
-                          ) {
-                            deleteMut.mutate(col.name);
-                          }
+                        onClick={async () => {
+                          const ok = await confirm({
+                            title: t('boq.column_delete_confirm_title', { defaultValue: 'Remove column?' }),
+                            message: t('boq.column_delete_confirm', {
+                              defaultValue:
+                                'Remove the "{{name}}" column? Existing values in positions are preserved but no longer shown.',
+                              name: col.display_name,
+                            }),
+                          });
+                          if (ok) deleteMut.mutate(col.name);
                         }}
                         disabled={deleteMut.isPending}
                         aria-label={t('common.delete', { defaultValue: 'Delete' })}
@@ -713,6 +713,7 @@ export function CustomColumnsDialog({
           </p>
         </div>
       </div>
+      <ConfirmDialog {...confirmProps} />
     </div>
   );
 }

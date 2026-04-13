@@ -37,8 +37,10 @@ import {
   MessageSquare,
   HardHat,
   Percent,
+  Rocket,
 } from 'lucide-react';
 import { Card, CardHeader, CardContent, Button, Badge, Skeleton, InfoHint, ActivityFeed as CrossModuleActivityFeed } from '@/shared/ui';
+import BIMCoverageCard from './BIMCoverageCard';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 
 /* ── Types ────────────────────────────────────────────────────────────── */
@@ -169,6 +171,7 @@ function ImportDemoModal({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
   const [installingId, setInstallingId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -194,6 +197,9 @@ function ImportDemoModal({
       void queryClient.invalidateQueries({ queryKey: ['projects'] });
       onClose();
       navigate(`/projects/${result.project_id}`);
+    },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('demo.install_failed', { defaultValue: 'Failed to install demo' }), message: err.message });
     },
     onSettled: () => {
       setInstallingId(null);
@@ -239,6 +245,7 @@ function ImportDemoModal({
           <button
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary transition-colors"
+            aria-label={t('common.close', { defaultValue: 'Close' })}
           >
             <X size={16} />
           </button>
@@ -774,7 +781,7 @@ function PortfolioOverview({ projects: _projects }: { projects: ProjectSummary[]
 
   const { data: analytics } = useQuery({
     queryKey: ['portfolio-analytics', _projects.length],
-    queryFn: () => apiGet<AnalyticsOverview>('/v1/projects/analytics/overview'),
+    queryFn: () => apiGet<AnalyticsOverview>('/v1/projects/analytics/overview/'),
     retry: false,
     staleTime: 60_000,
   });
@@ -1252,6 +1259,272 @@ function ProjectMetricCards({
   );
 }
 
+/* ── Workflow Guide (step-by-step for new users) ─────────────────────── */
+
+interface WorkflowStep {
+  step: number;
+  icon: React.ReactNode;
+  titleKey: string;
+  titleDefault: string;
+  descKey: string;
+  descDefault: string;
+  route: string;
+  done: boolean;
+}
+
+function WorkflowGuide({
+  projects,
+  boqs,
+  schedules,
+}: {
+  projects?: ProjectSummary[];
+  boqs?: BOQWithTotal[];
+  schedules?: ScheduleSummary[];
+}) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  const hasProjects = Boolean(projects && projects.length > 0);
+  const hasBoqs = Boolean(boqs && boqs.length > 0);
+  const hasValidatedBoqs = Boolean(
+    boqs && boqs.some((b) => b.positions && b.positions.some((p) => p.total > 0)),
+  );
+  const hasSchedules = Boolean(schedules && schedules.length > 0);
+  // Reports are considered "done" if the user has at least one BOQ with priced positions
+  const hasReports = hasValidatedBoqs;
+
+  const steps: WorkflowStep[] = [
+    {
+      step: 1,
+      icon: <FolderPlus size={20} strokeWidth={1.75} />,
+      titleKey: 'dashboard.wf_create_project',
+      titleDefault: 'Create Your First Project',
+      descKey: 'dashboard.wf_create_project_desc',
+      descDefault: 'Set up a project with region, currency, and classification standard.',
+      route: '/projects/new',
+      done: hasProjects,
+    },
+    {
+      step: 2,
+      icon: <FileSpreadsheet size={20} strokeWidth={1.75} />,
+      titleKey: 'dashboard.wf_add_boq',
+      titleDefault: 'Add a Bill of Quantities',
+      descKey: 'dashboard.wf_add_boq_desc',
+      descDefault: 'Build your cost breakdown with sections, positions, and unit rates.',
+      route: '/boq',
+      done: hasBoqs,
+    },
+    {
+      step: 3,
+      icon: <ShieldCheck size={20} strokeWidth={1.75} />,
+      titleKey: 'dashboard.wf_run_validation',
+      titleDefault: 'Run Validation',
+      descKey: 'dashboard.wf_run_validation_desc',
+      descDefault: 'Check for missing quantities, zero prices, duplicates, and compliance.',
+      route: '/validation',
+      done: hasValidatedBoqs,
+    },
+    {
+      step: 4,
+      icon: <Calendar size={20} strokeWidth={1.75} />,
+      titleKey: 'dashboard.wf_generate_schedule',
+      titleDefault: 'Generate Schedule from BOQ',
+      descKey: 'dashboard.wf_generate_schedule_desc',
+      descDefault: 'Create a project timeline with activities, dependencies, and milestones.',
+      route: '/schedule',
+      done: hasSchedules,
+    },
+    {
+      step: 5,
+      icon: <BarChart3 size={20} strokeWidth={1.75} />,
+      titleKey: 'dashboard.wf_export_reports',
+      titleDefault: 'Export Reports',
+      descKey: 'dashboard.wf_export_reports_desc',
+      descDefault: 'Generate PDF summaries, GAEB XML, Excel exports, and cost breakdowns.',
+      route: '/reports',
+      done: hasReports,
+    },
+  ];
+
+  const completedCount = steps.filter((s) => s.done).length;
+  const allDone = completedCount === steps.length;
+
+  // Hide if all steps done — the user already knows the workflow
+  if (allDone) return null;
+
+  return (
+    <div
+      className="animate-card-in"
+      style={{ animationDelay: '90ms' }}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">
+            <Rocket size={14} className="text-emerald-600" strokeWidth={2} />
+          </div>
+          <h3 className="text-sm font-semibold text-content-primary">
+            {t('dashboard.workflow_guide', { defaultValue: 'Your Workflow' })}
+          </h3>
+          <Badge variant="blue" size="sm">
+            {completedCount}/{steps.length}
+          </Badge>
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div className="mb-4">
+        <div className="h-1 w-full rounded-full bg-surface-secondary overflow-hidden">
+          <div
+            className="h-full rounded-full transition-all duration-slow ease-oe"
+            style={{
+              width: `${(completedCount / steps.length) * 100}%`,
+              background: 'linear-gradient(90deg, #16a34a, #0891b2)',
+            }}
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-5">
+        {steps.map((s, i) => {
+          const isNext = !s.done && steps.slice(0, i).every((prev) => prev.done);
+          return (
+            <button
+              key={s.step}
+              onClick={() => navigate(s.route)}
+              className={`group relative flex flex-col items-start gap-2 rounded-xl border p-4 text-left transition-all duration-normal ease-oe animate-stagger-in ${
+                s.done
+                  ? 'border-emerald-200 bg-emerald-50/50 dark:border-emerald-800/30 dark:bg-emerald-900/10 opacity-80'
+                  : isNext
+                    ? 'border-oe-blue/40 bg-oe-blue-subtle/20 hover:border-oe-blue/60 hover:shadow-sm'
+                    : 'border-border-light bg-surface-primary hover:border-border-light/80 hover:bg-surface-secondary/50'
+              }`}
+              style={{ animationDelay: `${100 + i * 50}ms` }}
+            >
+              {/* Step number + done indicator */}
+              <div className="flex items-center gap-2 w-full">
+                <div
+                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-2xs font-bold ${
+                    s.done
+                      ? 'bg-emerald-500 text-white'
+                      : isNext
+                        ? 'bg-oe-blue text-white'
+                        : 'bg-surface-secondary text-content-tertiary'
+                  }`}
+                >
+                  {s.done ? (
+                    <CheckCircle2 size={12} strokeWidth={2.5} />
+                  ) : (
+                    s.step
+                  )}
+                </div>
+                <div className={`${s.done ? 'text-emerald-600' : isNext ? 'text-oe-blue' : 'text-content-quaternary'}`}>
+                  {s.icon}
+                </div>
+              </div>
+
+              <div className="min-w-0">
+                <h4 className={`text-xs font-semibold leading-snug ${s.done ? 'text-emerald-700 dark:text-emerald-400' : 'text-content-primary'}`}>
+                  {t(s.titleKey, { defaultValue: s.titleDefault })}
+                </h4>
+                <p className="mt-0.5 text-2xs leading-relaxed text-content-tertiary line-clamp-2">
+                  {t(s.descKey, { defaultValue: s.descDefault })}
+                </p>
+              </div>
+
+              {/* Arrow connector on non-last items (visible on sm+) */}
+              {i < steps.length - 1 && (
+                <div className="hidden sm:block absolute -right-2 top-1/2 -translate-y-1/2 z-10 text-content-quaternary">
+                  <ArrowRight size={12} strokeWidth={1.5} />
+                </div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ── System Status Summary (compact badges) ──────────────────────────── */
+
+function SystemStatusSummary({
+  projects,
+  boqs,
+}: {
+  projects?: ProjectSummary[];
+  boqs?: BOQWithTotal[];
+}) {
+  const { t } = useTranslation();
+
+  const { data: modules } = useQuery({
+    queryKey: ['modules'],
+    queryFn: () => fetch('/api/system/modules').then((r) => r.json()),
+    retry: false,
+    staleTime: 60_000,
+  });
+
+  const { data: usersList } = useQuery({
+    queryKey: ['dashboard-users-count'],
+    queryFn: () => apiGet<{ id: string }[]>('/v1/users/').catch(() => []),
+    retry: false,
+    staleTime: 60_000,
+  });
+
+  const moduleCount = modules?.modules?.length ?? 0;
+  const projectCount = projects?.length ?? 0;
+  const boqCount = boqs?.length ?? 0;
+  const userCount = usersList?.length ?? 0;
+
+  const badges = [
+    {
+      icon: <Layers size={12} strokeWidth={2} />,
+      value: projectCount,
+      label: t('dashboard.ss_projects', { defaultValue: 'Projects' }),
+      color: 'text-oe-blue',
+      bg: 'bg-oe-blue-subtle',
+    },
+    {
+      icon: <FileSpreadsheet size={12} strokeWidth={2} />,
+      value: boqCount,
+      label: t('dashboard.ss_boqs', { defaultValue: 'BOQs' }),
+      color: 'text-[#7c3aed]',
+      bg: 'bg-[#7c3aed]/10',
+    },
+    {
+      icon: <Cpu size={12} strokeWidth={2} />,
+      value: moduleCount,
+      label: t('dashboard.ss_modules', { defaultValue: 'Modules' }),
+      color: 'text-[#0891b2]',
+      bg: 'bg-[#0891b2]/10',
+    },
+    {
+      icon: <Users size={12} strokeWidth={2} />,
+      value: userCount,
+      label: t('dashboard.ss_users', { defaultValue: 'Users' }),
+      color: 'text-[#16a34a]',
+      bg: 'bg-[#16a34a]/10',
+    },
+  ];
+
+  return (
+    <div
+      className="flex flex-wrap items-center gap-2 animate-card-in"
+      style={{ animationDelay: '40ms' }}
+    >
+      {badges.map((b) => (
+        <div
+          key={b.label}
+          className={`inline-flex items-center gap-1.5 rounded-lg ${b.bg} px-2.5 py-1.5 transition-colors`}
+        >
+          <span className={b.color}>{b.icon}</span>
+          <span className={`text-xs font-bold tabular-nums ${b.color}`}>{b.value}</span>
+          <span className="text-2xs text-content-tertiary">{b.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /* ── Main Page ─────────────────────────────────────────────────────────── */
 
 export function DashboardPage() {
@@ -1279,6 +1552,7 @@ export function DashboardPage() {
     queryKey: ['projects'],
     queryFn: () => apiGet<ProjectSummary[]>('/v1/projects/').catch(() => []),
     retry: false,
+    staleTime: 5 * 60_000,
   });
 
   // Fetch lightweight per-project summary metrics for dashboard cards (single endpoint)
@@ -1291,14 +1565,14 @@ export function DashboardPage() {
 
   const { data: regionStats } = useQuery({
     queryKey: ['costs', 'regions', 'stats'],
-    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats').catch(() => []),
+    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats/').catch(() => []),
     retry: false,
   });
 
   // Fetch system status for vector DB count (used in onboarding steps)
   const { data: systemStatus } = useQuery({
     queryKey: ['system-status'],
-    queryFn: () => fetch('/api/system/status/').then((r) => r.json()) as Promise<SystemStatusData>,
+    queryFn: () => fetch('/api/system/status').then((r) => r.json()) as Promise<SystemStatusData>,
     retry: false,
     staleTime: 30_000,
   });
@@ -1525,6 +1799,9 @@ export function DashboardPage() {
         </div>
       )}
 
+      {/* System Status Summary — compact badges */}
+      <SystemStatusSummary projects={projects} boqs={allBoqs} />
+
       {/* KPI hint */}
       <InfoHint text={t('dashboard.kpi_hint', { defaultValue: 'Summary across all projects. Values update as you add estimates and schedule activities.' })} />
 
@@ -1578,6 +1855,17 @@ export function DashboardPage() {
       {/* KPI Ribbon */}
       <KpiRibbon boqs={allBoqs} schedules={allSchedules} projects={projects} />
 
+      {/* BIM coverage card — only renders when the active project has at
+          least one BIM model.  Shows what fraction of elements is linked
+          to BOQ, costed, validated, has tasks / docs.  One of the
+          deepest cross-module integration signals — answers the question
+          "how complete is the model integration on this project?" */}
+      <BIMCoverageCard />
+
+
+      {/* Workflow Guide — step-by-step for new users */}
+      <WorkflowGuide projects={projects} boqs={allBoqs} schedules={allSchedules} />
+
       {/* Context-aware Next Steps */}
       <NextSteps
         projects={projects}
@@ -1612,7 +1900,7 @@ export function DashboardPage() {
                 });
                 navigate(`/boq/${boq.id}`);
               } catch {
-                addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }) });
+                addToast({ type: 'error', title: t('dashboard.quick_start_failed', { defaultValue: 'Failed to create quick start estimate' }) });
               }
             }}
           >
@@ -1641,6 +1929,22 @@ export function DashboardPage() {
             onClick={() => navigate('/validation')}
           >
             {t('nav.validation', { defaultValue: 'Validate' })}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<Database size={14} />}
+            onClick={() => navigate('/setup/databases')}
+          >
+            {t('dashboard.qa_import_cost_db', { defaultValue: 'Import Cost DB' })}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<Sparkles size={14} />}
+            onClick={() => navigate('/ai-estimate')}
+          >
+            {t('dashboard.qa_ai_estimate', { defaultValue: 'AI Estimate' })}
           </Button>
           <Button
             variant="secondary"
@@ -1729,12 +2033,16 @@ function ProjectsList({ projects }: { projects?: ProjectSummary[] }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
 
   const installDemoMutation = useMutation({
     mutationFn: () => apiPost<DemoInstallResult>('/demo/install/residential-berlin'),
     onSuccess: (result) => {
       void queryClient.invalidateQueries({ queryKey: ['projects'] });
       navigate(`/projects/${result.project_id}`);
+    },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('demo.install_failed', { defaultValue: 'Failed to install demo' }), message: err.message });
     },
   });
 
@@ -2126,20 +2434,20 @@ function SystemStatus() {
 
   const { data: status } = useQuery({
     queryKey: ['system-status'],
-    queryFn: () => fetch('/api/system/status/').then((r) => r.json()) as Promise<SystemStatusData>,
+    queryFn: () => fetch('/api/system/status').then((r) => r.json()) as Promise<SystemStatusData>,
     retry: false,
     refetchInterval: 15000,
   });
 
   const { data: modules } = useQuery({
     queryKey: ['modules'],
-    queryFn: () => fetch('/api/system/modules/').then((r) => r.json()),
+    queryFn: () => fetch('/api/system/modules').then((r) => r.json()),
     retry: false,
   });
 
   const { data: rules } = useQuery({
     queryKey: ['validation-rules'],
-    queryFn: () => fetch('/api/system/validation-rules/').then((r) => r.json()),
+    queryFn: () => fetch('/api/system/validation-rules').then((r) => r.json()),
     retry: false,
   });
 

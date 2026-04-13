@@ -8,10 +8,15 @@ Professional BOQ, 4D scheduling, 5D cost model, AI-powered estimation, CAD/BIM t
 
 ```bash
 pip install openconstructionerp
-openconstructionerp serve --open
+openestimate init-db
+openestimate serve
 ```
 
-Opens at http://localhost:8080 with SQLite — zero configuration needed.
+Opens at **http://localhost:8080** with SQLite — zero configuration needed.
+
+Demo login: `demo@openestimator.io` / `DemoPass1234!`
+
+If anything goes wrong, run `openestimate doctor` for diagnostics.
 
 ## Features
 
@@ -28,11 +33,14 @@ Opens at http://localhost:8080 with SQLite — zero configuration needed.
 ## CLI Commands
 
 ```bash
-openconstructionerp serve [--host HOST] [--port PORT] [--open]
-openconstructionerp init [--data-dir DIR]
-openconstructionerp seed [--demo]
-openconstructionerp version
+openestimate serve   [--host HOST] [--port PORT] [--data-dir DIR] [--open] [--quiet]
+openestimate init-db [--data-dir DIR]    # Create local SQLite DB + data dirs
+openestimate doctor  [--port PORT]       # Run installation health checks
+openestimate seed    [--demo]            # Load demo project data
+openestimate version                     # Show version info
 ```
+
+The `openconstructionerp` command is also available as a longer alias for both binaries.
 
 ## Links
 

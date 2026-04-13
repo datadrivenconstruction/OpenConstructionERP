@@ -27,6 +27,7 @@ import {
   User,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, CountryFlag } from '@/shared/ui';
+import { useCreateShortcut } from '@/shared/hooks/useCreateShortcut';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   fetchContacts,
@@ -157,6 +158,8 @@ function AddContactModal({
     setForm((prev) => ({ ...prev, [key]: value }));
     if (errors[key]) setErrors((prev) => { const next = { ...prev }; delete next[key]; return next; });
   };
+
+  const canSubmit = form.company_name.trim().length > 0 || form.first_name.trim().length > 0 || form.last_name.trim().length > 0;
 
   const validate = (): boolean => {
     const e: Record<string, string> = {};
@@ -463,7 +466,7 @@ function AddContactModal({
           <Button variant="ghost" onClick={onClose} disabled={isPending}>
             {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={isPending}>
+          <Button variant="primary" onClick={handleSubmit} disabled={isPending || !canSubmit}>
             {isPending ? (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
             ) : (
@@ -618,8 +621,8 @@ function ImportContactsModal({
                     {t('contacts.show_errors', { defaultValue: 'Show error details' })}
                   </summary>
                   <ul className="mt-1 space-y-0.5 max-h-32 overflow-y-auto">
-                    {result.errors.slice(0, 20).map((err, i) => (
-                      <li key={i}>
+                    {result.errors.slice(0, 20).map((err) => (
+                      <li key={`row-${err.row}`}>
                         {t('contacts.row_error', {
                           defaultValue: 'Row {{row}}: {{error}}',
                           row: err.row,
@@ -745,6 +748,12 @@ export function ContactsPage() {
   const [typeFilter, setTypeFilter] = useState<ContactType | ''>('');
   const [countryFilter, setCountryFilter] = useState('');
 
+  // "n" shortcut → open new contact form
+  useCreateShortcut(
+    useCallback(() => setShowAddModal(true), []),
+    !showAddModal && !showImportModal,
+  );
+
   // Data
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ['contacts', typeFilter],
@@ -792,13 +801,13 @@ export function ContactsPage() {
       setShowAddModal(false);
       addToast({
         type: 'success',
-        title: t('contacts.created', { defaultValue: 'Contact created' }),
+        title: t('contacts.created', { defaultValue: 'Contact created successfully' }),
       });
     },
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('contacts.create_failed', { defaultValue: 'Failed to create contact' }),
         message: e.message,
       }),
   });
@@ -809,13 +818,13 @@ export function ContactsPage() {
     onSuccess: () =>
       addToast({
         type: 'success',
-        title: t('contacts.export_success', { defaultValue: 'Export complete' }),
-        message: t('contacts.export_success_msg', { defaultValue: 'Excel file downloaded.' }),
+        title: t('contacts.export_success', { defaultValue: 'Contacts exported successfully' }),
+        message: t('contacts.export_success_msg', { defaultValue: 'Excel file has been downloaded.' }),
       }),
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('contacts.export_failed', { defaultValue: 'Export failed' }),
+        title: t('contacts.export_failed', { defaultValue: 'Failed to export contacts' }),
         message: e.message,
       }),
   });
@@ -855,9 +864,14 @@ export function ContactsPage() {
 
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-content-primary">
-          {t('contacts.page_title', { defaultValue: 'Contacts Directory' })}
-        </h1>
+        <div>
+          <h1 className="text-2xl font-bold text-content-primary">
+            {t('contacts.page_title', { defaultValue: 'Contacts Directory' })}
+          </h1>
+          <p className="mt-1 text-sm text-content-secondary">
+            {t('contacts.subtitle', { defaultValue: 'Manage clients, subcontractors, suppliers, and consultants' })}
+          </p>
+        </div>
         <div className="flex items-center gap-2">
           <Button
             variant="secondary"

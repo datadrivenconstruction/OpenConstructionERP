@@ -84,3 +84,6 @@ export type { ViewMode as GanttViewMode } from './Gantt';
 
 export { BIMViewer, DisciplineToggle } from './BIMViewer';
 export type { BIMViewerProps, BIMViewMode } from './BIMViewer';
+
+export { ViewInBIMButton } from './ViewInBIMButton';
+export type { ViewInBIMButtonProps } from './ViewInBIMButton';

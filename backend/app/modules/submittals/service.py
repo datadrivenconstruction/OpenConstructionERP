@@ -13,6 +13,16 @@ from app.modules.submittals.schemas import SubmittalCreate, SubmittalUpdate
 
 logger = logging.getLogger(__name__)
 
+
+async def _safe_publish(name: str, data: dict, source_module: str = "oe_submittals") -> None:
+    """Publish an event, swallowing errors so business logic continues."""
+    try:
+        from app.core.events import event_bus
+
+        await event_bus.publish(name, data, source_module=source_module)
+    except Exception as exc:
+        logger.debug("Event publish failed for %s: %s", name, exc)
+
 # ── Allowed submittal status transitions ──────────────────────────────────────
 
 _SUBMITTAL_STATUS_TRANSITIONS: dict[str, set[str]] = {
@@ -155,9 +165,10 @@ class SubmittalService:
     async def submit_submittal(self, submittal_id: uuid.UUID) -> Submittal:
         """Move submittal from draft (or revise_and_resubmit) to submitted.
 
-        When resubmitting after a ``revise_and_resubmit`` decision the
-        ``current_revision`` is automatically incremented.
-        Ball-in-court moves to the reviewer.
+        Revision numbering:
+        - First submission (``draft`` → ``submitted``): sets ``current_revision`` to 1.
+        - Resubmission after ``revise_and_resubmit``: increments by 1.
+        Ball-in-court moves to the reviewer. Publishes ``submittal.submitted`` event.
         """
         submittal = await self.get_submittal(submittal_id)
         allowed = ("draft", "revise_and_resubmit")
@@ -178,9 +189,13 @@ class SubmittalService:
             "date_returned": None,
         }
 
-        # Increment revision on resubmit
+        # Revision management:
+        # First submit → revision 1; resubmit → previous + 1.
+        current_rev = submittal.current_revision or 0
         if submittal.status == "revise_and_resubmit":
-            fields["current_revision"] = submittal.current_revision + 1
+            fields["current_revision"] = current_rev + 1
+        elif current_rev == 0:
+            fields["current_revision"] = 1
 
         # Ball-in-court moves to reviewer
         if submittal.reviewer_id:
@@ -188,6 +203,20 @@ class SubmittalService:
 
         await self.repo.update_fields(submittal_id, **fields)
         await self.session.refresh(submittal)
+
+        await _safe_publish(
+            "submittal.submitted",
+            {
+                "project_id": str(submittal.project_id),
+                "submittal_id": str(submittal_id),
+                "submittal_number": getattr(submittal, "submittal_number", None),
+                "title": submittal.title,
+                "current_revision": fields.get("current_revision", current_rev),
+                "reviewer_id": str(submittal.reviewer_id) if submittal.reviewer_id else None,
+                "submitted_by": str(submittal.created_by) if submittal.created_by else None,
+            },
+        )
+
         logger.info("Submittal submitted: %s (rev %s)", submittal_id, submittal.current_revision)
         return submittal
 
@@ -202,6 +231,7 @@ class SubmittalService:
         Ball-in-court updates depend on the decision:
         - ``approved`` / ``approved_as_noted``: stays with reviewer (done)
         - ``revise_and_resubmit`` / ``rejected``: back to submitter
+        Publishes ``submittal.reviewed`` event with the decision.
         """
         submittal = await self.get_submittal(submittal_id)
         if submittal.status not in ("submitted", "under_review"):
@@ -226,6 +256,20 @@ class SubmittalService:
         }
         await self.repo.update_fields(submittal_id, **fields)
         await self.session.refresh(submittal)
+
+        await _safe_publish(
+            "submittal.reviewed",
+            {
+                "project_id": str(submittal.project_id),
+                "submittal_id": str(submittal_id),
+                "title": submittal.title,
+                "decision": new_status,
+                "reviewer_id": reviewer_id,
+                "ball_in_court": str(ball) if ball else None,
+                "submitted_by": str(submittal.created_by) if submittal.created_by else None,
+            },
+        )
+
         logger.info("Submittal reviewed: %s -> %s by %s", submittal_id, new_status, reviewer_id)
         return submittal
 
@@ -238,6 +282,7 @@ class SubmittalService:
 
         Only submittals that are currently ``submitted`` or ``under_review``
         can receive final approval.  Ball-in-court is cleared on approval.
+        Publishes ``submittal.approved`` event.
         """
         submittal = await self.get_submittal(submittal_id)
         allowed = ("submitted", "under_review")
@@ -260,5 +305,17 @@ class SubmittalService:
         }
         await self.repo.update_fields(submittal_id, **fields)
         await self.session.refresh(submittal)
+
+        await _safe_publish(
+            "submittal.approved",
+            {
+                "project_id": str(submittal.project_id),
+                "submittal_id": str(submittal_id),
+                "title": submittal.title,
+                "approver_id": approver_id,
+                "submitted_by": str(submittal.created_by) if submittal.created_by else None,
+            },
+        )
+
         logger.info("Submittal approved: %s by %s", submittal_id, approver_id)
         return submittal

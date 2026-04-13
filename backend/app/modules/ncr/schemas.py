@@ -14,7 +14,7 @@ class NCRCreate(BaseModel):
 
     project_id: UUID
     title: str = Field(..., min_length=1, max_length=500)
-    description: str = Field(..., min_length=1)
+    description: str = Field(..., min_length=1, max_length=10000)
     ncr_type: str = Field(
         ...,
         pattern=r"^(material|workmanship|design|documentation|safety)$",
@@ -23,10 +23,10 @@ class NCRCreate(BaseModel):
         ...,
         pattern=r"^(critical|major|minor|observation)$",
     )
-    root_cause: str | None = None
+    root_cause: str | None = Field(default=None, max_length=5000)
     root_cause_category: str | None = Field(default=None, max_length=100)
-    corrective_action: str | None = None
-    preventive_action: str | None = None
+    corrective_action: str | None = Field(default=None, max_length=5000)
+    preventive_action: str | None = Field(default=None, max_length=5000)
     status: str = Field(
         default="identified",
         pattern=r"^(identified|under_review|corrective_action|verification|closed|void)$",
@@ -34,8 +34,8 @@ class NCRCreate(BaseModel):
     cost_impact: str | None = Field(default=None, max_length=50)
     schedule_impact_days: int | None = Field(default=None, ge=0)
     location_description: str | None = Field(default=None, max_length=500)
-    linked_inspection_id: str | None = None
-    change_order_id: str | None = None
+    linked_inspection_id: str | None = Field(default=None, max_length=36)
+    change_order_id: str | None = Field(default=None, max_length=36)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -45,7 +45,7 @@ class NCRUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     title: str | None = Field(default=None, min_length=1, max_length=500)
-    description: str | None = Field(default=None, min_length=1)
+    description: str | None = Field(default=None, min_length=1, max_length=10000)
     ncr_type: str | None = Field(
         default=None,
         pattern=r"^(material|workmanship|design|documentation|safety)$",
@@ -54,10 +54,10 @@ class NCRUpdate(BaseModel):
         default=None,
         pattern=r"^(critical|major|minor|observation)$",
     )
-    root_cause: str | None = None
+    root_cause: str | None = Field(default=None, max_length=5000)
     root_cause_category: str | None = Field(default=None, max_length=100)
-    corrective_action: str | None = None
-    preventive_action: str | None = None
+    corrective_action: str | None = Field(default=None, max_length=5000)
+    preventive_action: str | None = Field(default=None, max_length=5000)
     status: str | None = Field(
         default=None,
         pattern=r"^(identified|under_review|corrective_action|verification|closed|void)$",
@@ -65,8 +65,8 @@ class NCRUpdate(BaseModel):
     cost_impact: str | None = Field(default=None, max_length=50)
     schedule_impact_days: int | None = Field(default=None, ge=0)
     location_description: str | None = Field(default=None, max_length=500)
-    linked_inspection_id: str | None = None
-    change_order_id: str | None = None
+    linked_inspection_id: str | None = Field(default=None, max_length=36)
+    change_order_id: str | None = Field(default=None, max_length=36)
     metadata: dict[str, Any] | None = None
 
 

@@ -260,10 +260,14 @@ export function AssembliesPage() {
         <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-end">
           {/* Search input */}
           <div className="relative flex-1">
+            <label htmlFor="assemblies-search" className="sr-only">
+              {t('common.search', { defaultValue: 'Search' })}
+            </label>
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-content-tertiary">
               <Search size={16} />
             </div>
             <input
+              id="assemblies-search"
               type="text"
               value={query}
               onChange={(e) => handleSearch(e.target.value)}
@@ -343,7 +347,7 @@ export function AssembliesPage() {
                 onClick={() => navigate(`/assemblies/${assembly.id}`)}
                 onDuplicate={async () => {
                   try {
-                    const cloned = await apiPost<Assembly>(`/v1/assemblies/${assembly.id}/clone`, {});
+                    const cloned = await apiPost<Assembly>(`/v1/assemblies/${assembly.id}/clone/`, {});
                     queryClient.invalidateQueries({ queryKey: ['assemblies'] });
                     addToast({ type: 'success', title: t('toasts.assembly_duplicated', { defaultValue: 'Assembly duplicated' }), message: cloned.name });
                   } catch {
@@ -694,7 +698,7 @@ function AIGenerateModal({
                             ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
                             : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400';
                         return (
-                          <tr key={idx} className="hover:bg-surface-secondary/50">
+                          <tr key={`${comp.name}-${comp.type}-${idx}`} className="hover:bg-surface-secondary/50">
                             <td className="px-3 py-2 text-content-primary truncate max-w-[250px]">{comp.name}</td>
                             <td className="px-3 py-2 text-center">
                               <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium ${typeBadge}`}>

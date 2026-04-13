@@ -63,7 +63,7 @@ export interface AggregateResponse {
 /* ── API Functions ─────────────────────────────────────────────────────── */
 
 export async function describeSession(sessionId: string): Promise<DescribeResponse> {
-  return apiPost<DescribeResponse>('/v1/takeoff/cad-data/describe', { session_id: sessionId });
+  return apiPost<DescribeResponse>('/v1/takeoff/cad-data/describe/', { session_id: sessionId });
 }
 
 export async function valueCounts(
@@ -71,7 +71,7 @@ export async function valueCounts(
   column: string,
   limit = 50,
 ): Promise<ValueCountsResponse> {
-  return apiPost<ValueCountsResponse>('/v1/takeoff/cad-data/value-counts', {
+  return apiPost<ValueCountsResponse>('/v1/takeoff/cad-data/value-counts/', {
     session_id: sessionId,
     column,
     limit,

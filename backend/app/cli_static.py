@@ -13,7 +13,8 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from starlette.responses import FileResponse
+from starlette.requests import Request
+from starlette.responses import FileResponse, Response
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +50,15 @@ def mount_frontend(app: FastAPI) -> None:
     Serves:
     - /assets/* — hashed JS/CSS bundles (long cache)
     - /favicon.svg, /logo.svg — static resources
-    - /* (catch-all) — index.html for SPA routing
+    - /* (catch-all via 404 handler) — index.html for SPA routing
+
+    Strategy: instead of a ``/{path:path}`` catch-all route (which competes
+    with FastAPI's built-in ``/api/docs``, ``/api/redoc``, and
+    ``/api/openapi.json``), we override the **404 exception handler**.
+    This guarantees that all real API routes — including Swagger UI — are
+    resolved first by FastAPI's normal router.  Only genuinely unmatched
+    paths fall through to the 404 handler, which serves ``index.html``
+    for non-API paths (SPA client-side routing).
     """
     try:
         frontend_dir = get_frontend_dir()
@@ -68,7 +77,7 @@ def mount_frontend(app: FastAPI) -> None:
             name="frontend-assets",
         )
 
-    # Serve individual static files
+    # Serve individual static files at the root (favicon, logo, etc.)
     index_path = frontend_dir / "index.html"
 
     for static_name in ("favicon.svg", "logo.svg"):
@@ -83,16 +92,37 @@ def mount_frontend(app: FastAPI) -> None:
 
             app.get(f"/{static_name}", include_in_schema=False)(_make_static_handler(static_path))
 
-    # SPA catch-all: any route not matched by /api/* or /assets/* → index.html
-    @app.get("/{path:path}", include_in_schema=False)
-    async def spa_fallback(path: str) -> FileResponse:
-        """Serve index.html for all frontend routes (SPA routing).
+    # Serve other root-level static files (e.g. manifest.json, robots.txt)
+    # that may exist in the frontend dist directory.
+    _root_static_extensions = {".ico", ".png", ".svg", ".webmanifest", ".json", ".txt", ".xml"}
 
-        IMPORTANT: Skip /api/ paths — they must be handled by FastAPI routers.
-        Without this check, the catch-all would return index.html for API GET requests.
+    # ── SPA fallback via custom 404 handler ─────────────────────────────
+    # Keep a reference to whatever 404 handler was already registered
+    # (e.g. FastAPI's default) so we can delegate API 404s to it.
+    from fastapi.exception_handlers import http_exception_handler
+    from starlette.exceptions import HTTPException as StarletteHTTPException
+
+    @app.exception_handler(404)
+    async def _spa_or_404(request: Request, exc: StarletteHTTPException) -> Response:
+        """Serve index.html for frontend routes; real 404 for API paths.
+
+        This replaces the previous ``/{path:path}`` catch-all route which
+        could shadow FastAPI's built-in ``/api/docs`` and ``/api/redoc``.
         """
-        if path.startswith("api/") or path.startswith("api"):
-            from fastapi import HTTPException
+        path = request.url.path
 
-            raise HTTPException(status_code=404, detail="Not Found")
+        # API paths: return the normal JSON 404 response.
+        if path.startswith("/api"):
+            return await http_exception_handler(request, exc)
+
+        # Check if the requested file physically exists in the frontend
+        # dist (e.g. /robots.txt, /manifest.json).  Serve it directly
+        # if it does, to avoid breaking non-HTML static assets.
+        relative = path.lstrip("/")
+        if relative:
+            candidate = frontend_dir / relative
+            if candidate.is_file() and candidate.suffix in _root_static_extensions:
+                return FileResponse(str(candidate))
+
+        # Everything else: SPA client-side routing → index.html
         return FileResponse(str(index_path))

@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, SkeletonTable } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
+import { useCreateShortcut } from '@/shared/hooks/useCreateShortcut';
 import { apiGet, apiPost, triggerDownload } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -109,6 +110,8 @@ function CreateRFIModal({
     setForm((prev) => ({ ...prev, [key]: value }));
     if (errors[key]) setErrors((prev) => { const next = { ...prev }; delete next[key]; return next; });
   };
+
+  const canSubmit = form.subject.trim().length > 0 && form.question.trim().length > 0;
 
   const validate = (): boolean => {
     const e: Record<string, string> = {};
@@ -354,7 +357,7 @@ function CreateRFIModal({
           <Button variant="ghost" onClick={onClose} disabled={isPending}>
             {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={isPending}>
+          <Button variant="primary" onClick={handleSubmit} disabled={isPending || !canSubmit}>
             {isPending ? (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
             ) : (
@@ -580,8 +583,8 @@ const RFIRow = React.memo(function RFIRow({
           {rfi.linked_drawings && rfi.linked_drawings.length > 0 && (
             <div className="flex items-center gap-2 flex-wrap">
               <FileText size={13} className="text-content-tertiary" />
-              {rfi.linked_drawings.map((d, i) => (
-                <Badge key={i} variant="neutral" size="sm">
+              {rfi.linked_drawings.map((d) => (
+                <Badge key={d} variant="neutral" size="sm">
                   {d}
                 </Badge>
               ))}
@@ -677,10 +680,17 @@ export function RFIPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<RFIStatus | ''>('');
 
+  // "n" shortcut → open new RFI form
+  useCreateShortcut(
+    useCallback(() => setShowCreateModal(true), []),
+    !showCreateModal,
+  );
+
   // Data
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    staleTime: 5 * 60_000,
   });
 
   const projectId = routeProjectId || activeProjectId || projects[0]?.id || '';
@@ -736,13 +746,13 @@ export function RFIPage() {
       setShowCreateModal(false);
       addToast({
         type: 'success',
-        title: t('rfi.created', { defaultValue: 'RFI created' }),
+        title: t('rfi.created', { defaultValue: 'RFI created successfully' }),
       });
     },
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('rfi.create_failed', { defaultValue: 'Failed to create RFI' }),
         message: e.message,
       }),
   });
@@ -755,13 +765,13 @@ export function RFIPage() {
       setRespondingRfi(null);
       addToast({
         type: 'success',
-        title: t('rfi.responded', { defaultValue: 'Response submitted' }),
+        title: t('rfi.responded', { defaultValue: 'Response submitted successfully' }),
       });
     },
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('rfi.respond_failed', { defaultValue: 'Failed to submit response' }),
         message: e.message,
       }),
   });
@@ -772,13 +782,13 @@ export function RFIPage() {
       invalidateAll();
       addToast({
         type: 'success',
-        title: t('rfi.closed', { defaultValue: 'RFI closed' }),
+        title: t('rfi.closed', { defaultValue: 'RFI closed successfully' }),
       });
     },
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('rfi.close_failed', { defaultValue: 'Failed to close RFI' }),
         message: e.message,
       }),
   });
@@ -792,12 +802,12 @@ export function RFIPage() {
     onSuccess: () =>
       addToast({
         type: 'success',
-        title: t('rfi.export_success', { defaultValue: 'Export complete' }),
+        title: t('rfi.export_success', { defaultValue: 'RFI log exported successfully' }),
       }),
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('rfi.export_failed', { defaultValue: 'Failed to export RFI log' }),
         message: e.message,
       }),
   });
@@ -805,7 +815,7 @@ export function RFIPage() {
   const handleCreateSubmit = useCallback(
     (formData: RFIFormData) => {
       if (!projectId) {
-        addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: t('common.select_project_first', { defaultValue: 'Please select a project first' }) });
+        addToast({ type: 'error', title: t('rfi.no_project_error', { defaultValue: 'No project selected' }), message: t('common.select_project_first', { defaultValue: 'Please select a project first' }) });
         return;
       }
       createMut.mutate({
@@ -876,7 +886,7 @@ export function RFIPage() {
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('rfi.variation_failed', { defaultValue: 'Failed to create variation from RFI' }),
         message: e.message,
       }),
   });
@@ -904,9 +914,14 @@ export function RFIPage() {
 
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-content-primary">
-          {t('rfi.page_title', { defaultValue: 'Requests for Information' })}
-        </h1>
+        <div>
+          <h1 className="text-2xl font-bold text-content-primary">
+            {t('rfi.page_title', { defaultValue: 'Requests for Information' })}
+          </h1>
+          <p className="mt-1 text-sm text-content-secondary">
+            {t('rfi.subtitle', { defaultValue: 'Submit, track, and resolve design and construction queries' })}
+          </p>
+        </div>
 
         <div className="flex items-center gap-2 shrink-0">
           {!routeProjectId && projects.length > 0 && (
@@ -1075,10 +1090,10 @@ export function RFIPage() {
             description={
               searchQuery || statusFilter
                 ? t('rfi.no_results_hint', {
-                    defaultValue: 'Try adjusting your search or filters',
+                    defaultValue: 'Try adjusting your search or filters to find what you are looking for.',
                   })
                 : t('rfi.no_rfis_hint', {
-                    defaultValue: 'Create your first Request for Information',
+                    defaultValue: 'Create your first RFI to track design queries, clarifications, and responses between project stakeholders.',
                   })
             }
             action={
@@ -1189,7 +1204,7 @@ export function RFIPage() {
         <EmptyState
           icon={<HelpCircle size={28} strokeWidth={1.5} />}
           title={t('rfi.no_project', { defaultValue: 'No project selected' })}
-          description={t('rfi.select_project', { defaultValue: 'Open a project first to view and manage RFIs.' })}
+          description={t('rfi.select_project_hint', { defaultValue: 'Select a project from the header to submit, track, and resolve requests for information.' })}
         />
       )}
 

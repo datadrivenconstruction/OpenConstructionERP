@@ -101,8 +101,8 @@ function DonutChart({ data }: { data: { label: string; value: number; pct: numbe
 
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="shrink-0">
-      {segments.map((seg, i) => (
-        <path key={i} d={arc(seg.startAngle, seg.endAngle)} fill={seg.color} />
+      {segments.map((seg) => (
+        <path key={seg.label} d={arc(seg.startAngle, seg.endAngle)} fill={seg.color} />
       ))}
       <circle cx={cx} cy={cy} r={innerR - 1} fill="var(--color-surface-primary, white)" />
       <text x={cx} y={cy - 4} textAnchor="middle" fontSize={11} className="fill-content-tertiary" fontFamily="system-ui">CO2e</text>
@@ -157,6 +157,7 @@ export function SustainabilityPage() {
   const { data: projects, isLoading: projectsLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<Project[]>('/v1/projects/').catch(() => []),
+    staleTime: 5 * 60_000,
   });
   const { data: boqs, isLoading: boqsLoading } = useQuery({
     queryKey: ['boqs', selectedProjectId],
@@ -186,6 +187,9 @@ export function SustainabilityPage() {
       refetch();
       alert(`CO2 enriched: ${res.enriched} positions (${res.skipped} skipped)`);
     },
+    onError: (err: Error) => {
+      alert(`CO2 enrichment failed: ${err.message}`);
+    },
   });
 
   // Assign CO2 mutation
@@ -194,6 +198,9 @@ export function SustainabilityPage() {
       assignPositionCO2(posId, epdId),
     onSuccess: () => {
       refetch();
+    },
+    onError: (err: Error) => {
+      console.error('Failed to assign CO2 data:', err.message);
     },
   });
 

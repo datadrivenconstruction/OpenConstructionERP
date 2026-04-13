@@ -165,7 +165,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
     if (globalSearchTimer.current) clearTimeout(globalSearchTimer.current);
     globalSearchTimer.current = setTimeout(() => {
       setGlobalSearchLoading(true);
-      apiGet<GlobalSearchResult[]>(`/v1/search/?q=${encodeURIComponent(trimmed)}&limit=10`)
+      apiGet<GlobalSearchResult[]>(`/v1/search?q=${encodeURIComponent(trimmed)}&limit=10`)
         .then((data) => {
           setGlobalResults(data);
         })

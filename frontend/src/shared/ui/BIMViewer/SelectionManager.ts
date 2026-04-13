@@ -3,7 +3,10 @@
  *
  * Uses raycasting against BIM element meshes. Supports:
  * - Single click selection
- * - Ctrl+click multi-select
+ * - Ctrl+click multi-select (toggle)
+ * - Shift+click add to selection
+ * - Double-click to isolate
+ * - Right-click context menu
  * - Hover highlighting (temporary)
  * - Programmatic selection from parent
  */
@@ -15,6 +18,13 @@ import type { ElementManager, BIMElementData } from './ElementManager';
 export interface SelectionCallbacks {
   onElementSelect?: (elementId: string | null) => void;
   onElementHover?: (elementId: string | null) => void;
+  /** Fired when the selection set changes (add/remove/clear). The parent
+   *  uses this to drive the floating selection toolbar and context menu. */
+  onSelectionChange?: (selectedIds: string[]) => void;
+  /** Fired on right-click over an element (or multi-selection). */
+  onContextMenu?: (event: MouseEvent, elementId: string | null) => void;
+  /** Fired on double-click on an element (isolate) or empty space (show all). */
+  onDoubleClick?: (elementId: string | null) => void;
 }
 
 const HIGHLIGHT_COLOR = 0x2979ff; // selection blue
@@ -39,6 +49,8 @@ export class SelectionManager {
   private canvas: HTMLCanvasElement;
   private boundOnClick: (e: MouseEvent) => void;
   private boundOnMouseMove: (e: MouseEvent) => void;
+  private boundOnContextMenu: (e: MouseEvent) => void;
+  private boundOnDblClick: (e: MouseEvent) => void;
 
   constructor(
     sceneManager: SceneManager,
@@ -74,8 +86,12 @@ export class SelectionManager {
     // Bind event listeners
     this.boundOnClick = this.onClick.bind(this);
     this.boundOnMouseMove = this.onMouseMove.bind(this);
+    this.boundOnContextMenu = this.onContextMenu.bind(this);
+    this.boundOnDblClick = this.onDblClick.bind(this);
     this.canvas.addEventListener('click', this.boundOnClick);
     this.canvas.addEventListener('mousemove', this.boundOnMouseMove);
+    this.canvas.addEventListener('contextmenu', this.boundOnContextMenu);
+    this.canvas.addEventListener('dblclick', this.boundOnDblClick);
   }
 
   private getMouseCoords(e: MouseEvent): THREE.Vector2 {
@@ -93,15 +109,24 @@ export class SelectionManager {
     return intersects[0] ?? null;
   }
 
+  /** Raycast from a mouse event and return the element ID under the cursor. */
+  raycastElementId(e: MouseEvent): string | null {
+    const coords = this.getMouseCoords(e);
+    const hit = this.raycast(coords);
+    if (!hit) return null;
+    return (hit.object.userData as { elementId?: string }).elementId ?? null;
+  }
+
   private onClick(e: MouseEvent): void {
     const coords = this.getMouseCoords(e);
     const hit = this.raycast(coords);
 
     if (!hit) {
-      // Click on empty space — deselect all (unless Ctrl is held)
+      // Click on empty space -- deselect all (unless Ctrl is held)
       if (!e.ctrlKey && !e.metaKey) {
         this.clearSelection();
         this.callbacks.onElementSelect?.(null);
+        this.notifySelectionChange();
       }
       return;
     }
@@ -116,14 +141,51 @@ export class SelectionManager {
       } else {
         this.selectElement(elementId);
       }
+    } else if (e.shiftKey) {
+      // Shift+click: add to selection (no toggle -- always add)
+      if (!this.selectedIds.has(elementId)) {
+        this.selectElement(elementId);
+      }
     } else {
-      // Single select — clear others first
+      // Single select -- clear others first
       this.clearSelection();
       this.selectElement(elementId);
     }
 
     // Report the most recently clicked element
     this.callbacks.onElementSelect?.(elementId);
+    this.notifySelectionChange();
+  }
+
+  private onContextMenu(e: MouseEvent): void {
+    e.preventDefault();
+    const coords = this.getMouseCoords(e);
+    const hit = this.raycast(coords);
+    const elementId = hit
+      ? (hit.object.userData as { elementId?: string }).elementId ?? null
+      : null;
+
+    // If right-clicking on an element not in the selection, select it
+    if (elementId && !this.selectedIds.has(elementId)) {
+      if (!e.ctrlKey && !e.metaKey) {
+        this.clearSelection();
+      }
+      this.selectElement(elementId);
+      this.callbacks.onElementSelect?.(elementId);
+      this.notifySelectionChange();
+    }
+
+    this.callbacks.onContextMenu?.(e, elementId);
+  }
+
+  private onDblClick(e: MouseEvent): void {
+    const coords = this.getMouseCoords(e);
+    const hit = this.raycast(coords);
+    const elementId = hit
+      ? (hit.object.userData as { elementId?: string }).elementId ?? null
+      : null;
+
+    this.callbacks.onDoubleClick?.(elementId);
   }
 
   private onMouseMove(e: MouseEvent): void {
@@ -192,6 +254,11 @@ export class SelectionManager {
     return Array.from(this.selectedIds);
   }
 
+  /** Get count of selected elements. */
+  getSelectedCount(): number {
+    return this.selectedIds.size;
+  }
+
   /** Get selected element data. */
   getSelectedElements(): BIMElementData[] {
     const result: BIMElementData[] = [];
@@ -209,18 +276,28 @@ export class SelectionManager {
   }
 
   private restoreMaterial(elementId: string): void {
-    const mesh = this.elementManager.getMesh(elementId);
     const original = this.originalMaterials.get(elementId);
-    if (mesh && original) {
+    if (!original) return;
+    const mesh = this.elementManager.getMesh(elementId);
+    if (mesh) {
       mesh.material = original;
-      this.originalMaterials.delete(elementId);
     }
+    // Always remove from map — even if the mesh was removed, keeping the
+    // entry would leak the material reference indefinitely.
+    this.originalMaterials.delete(elementId);
+  }
+
+  /** Notify parent about selection changes. */
+  private notifySelectionChange(): void {
+    this.callbacks.onSelectionChange?.(this.getSelectedIds());
   }
 
   /** Dispose event listeners and materials. */
   dispose(): void {
     this.canvas.removeEventListener('click', this.boundOnClick);
     this.canvas.removeEventListener('mousemove', this.boundOnMouseMove);
+    this.canvas.removeEventListener('contextmenu', this.boundOnContextMenu);
+    this.canvas.removeEventListener('dblclick', this.boundOnDblClick);
     this.highlightMaterial.dispose();
     this.hoverMaterial.dispose();
     this.originalMaterials.clear();

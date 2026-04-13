@@ -28,6 +28,9 @@ export interface Activity {
   dependencies: Array<{ activity_id: string; type: string; lag_days: number }>;
   resources: Array<{ name: string; type: string; allocation_pct: number }>;
   boq_position_ids: string[];
+  /** BIM elements pinned to this activity for 4D scheduling.  Backend
+   *  populates this from the `Activity.bim_element_ids` JSON column. */
+  bim_element_ids?: string[] | null;
   color: string;
   sort_order: number;
 }
@@ -115,9 +118,9 @@ export const scheduleApi = {
 
   // Activities
   getGantt: (scheduleId: string) =>
-    apiGet<GanttData>(`/v1/schedule/schedules/${scheduleId}/gantt`),
+    apiGet<GanttData>(`/v1/schedule/schedules/${scheduleId}/gantt/`),
   createActivity: (scheduleId: string, data: Partial<Activity>) =>
-    apiPost<Activity>(`/v1/schedule/schedules/${scheduleId}/activities`, data),
+    apiPost<Activity>(`/v1/schedule/schedules/${scheduleId}/activities/`, data),
   updateActivity: (activityId: string, data: Partial<Activity>) =>
     apiPatch<Activity>(`/v1/schedule/activities/${activityId}`, data),
   deleteActivity: (activityId: string) =>

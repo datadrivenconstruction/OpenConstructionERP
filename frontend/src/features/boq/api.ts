@@ -29,6 +29,8 @@ export interface Position {
   confidence: number | null;
   sort_order: number;
   validation_status: string;
+  /** BIM element IDs linked to this position (cross-highlight source). */
+  cad_element_ids?: string[];
   /** Backend returns `metadata_` (aliased) — normalize to `metadata` in fetch layer */
   metadata: Record<string, unknown>;
   metadata_?: Record<string, unknown>;
@@ -557,37 +559,37 @@ export const boqApi = {
   deleteBoq: (boqId: string) => apiDelete(`/v1/boq/boqs/${boqId}`),
 
   /* Duplicate */
-  duplicateBoq: (boqId: string) => apiPost<BOQ>(`/v1/boq/boqs/${boqId}/duplicate`, {}),
+  duplicateBoq: (boqId: string) => apiPost<BOQ>(`/v1/boq/boqs/${boqId}/duplicate/`, {}),
   duplicatePosition: (posId: string) =>
-    apiPost<Position>(`/v1/boq/positions/${posId}/duplicate`, {}),
+    apiPost<Position>(`/v1/boq/positions/${posId}/duplicate/`, {}),
 
   /* Section */
   addSection: (boqId: string, data: { ordinal: string; description: string }) =>
-    apiPost<Position>(`/v1/boq/boqs/${boqId}/sections`, { boq_id: boqId, ...data }),
+    apiPost<Position>(`/v1/boq/boqs/${boqId}/sections/`, { boq_id: boqId, ...data }),
 
   /* Position CRUD */
   addPosition: (data: CreatePositionData) =>
-    apiPost<Position>(`/v1/boq/boqs/${data.boq_id}/positions`, data),
+    apiPost<Position>(`/v1/boq/boqs/${data.boq_id}/positions/`, data),
   updatePosition: (posId: string, data: UpdatePositionData) =>
     apiPatch<Position>(`/v1/boq/positions/${posId}`, data),
   deletePosition: (posId: string) => apiDelete(`/v1/boq/positions/${posId}`),
 
   /* Position reorder (drag-and-drop) */
   reorderPositions: (boqId: string, positionIds: string[]) =>
-    apiPost<{ ok: boolean }>(`/v1/boq/boqs/${boqId}/positions/reorder`, {
+    apiPost<{ ok: boolean }>(`/v1/boq/boqs/${boqId}/positions/reorder/`, {
       position_ids: positionIds,
     }),
 
   /* Markups */
-  getMarkups: (boqId: string) => apiGet<MarkupsResponse>(`/v1/boq/boqs/${boqId}/markups`),
+  getMarkups: (boqId: string) => apiGet<MarkupsResponse>(`/v1/boq/boqs/${boqId}/markups/`),
   addMarkup: (boqId: string, data: CreateMarkupData) =>
-    apiPost<Markup>(`/v1/boq/boqs/${boqId}/markups`, data),
+    apiPost<Markup>(`/v1/boq/boqs/${boqId}/markups/`, data),
   updateMarkup: (boqId: string, markupId: string, data: UpdateMarkupData) =>
     apiPatch<Markup>(`/v1/boq/boqs/${boqId}/markups/${markupId}`, data),
   deleteMarkup: (boqId: string, markupId: string) =>
     apiDelete(`/v1/boq/boqs/${boqId}/markups/${markupId}`),
   applyDefaults: (boqId: string, region: string) =>
-    apiPost<Markup[]>(`/v1/boq/boqs/${boqId}/markups/apply-defaults?region=${encodeURIComponent(region)}`, {}),
+    apiPost<Markup[]>(`/v1/boq/boqs/${boqId}/markups/apply-defaults/?region=${encodeURIComponent(region)}`, {}),
 
   /* Activity */
   getActivity: async (boqId: string): Promise<ActivityResponse> => {
@@ -632,37 +634,37 @@ export const boqApi = {
 
   /* AI Chat */
   aiChat: (boqId: string, data: AIChatRequest) =>
-    apiPost<AIChatResponse>(`/v1/boq/boqs/${boqId}/ai-chat`, data),
+    apiPost<AIChatResponse>(`/v1/boq/boqs/${boqId}/ai-chat/`, data),
 
   /* Recalculate rates from resource breakdowns */
   recalculateRates: (boqId: string) =>
     apiPost<{ updated: number; skipped: number; total: number }>(
-      `/v1/boq/boqs/${boqId}/recalculate-rates`,
+      `/v1/boq/boqs/${boqId}/recalculate-rates/`,
       {},
     ),
 
   /* Resource Summary */
   getResourceSummary: (boqId: string) =>
-    apiGet<ResourceSummaryResponse>(`/v1/boq/boqs/${boqId}/resource-summary`),
+    apiGet<ResourceSummaryResponse>(`/v1/boq/boqs/${boqId}/resource-summary/`),
 
   /* Cost Breakdown */
   getCostBreakdown: (boqId: string) =>
-    apiGet<CostBreakdownResponse>(`/v1/boq/boqs/${boqId}/cost-breakdown`),
+    apiGet<CostBreakdownResponse>(`/v1/boq/boqs/${boqId}/cost-breakdown/`),
 
   /* AACE Estimate Classification */
   getClassification: (boqId: string) =>
-    apiGet<EstimateClassificationResponse>(`/v1/boq/boqs/${boqId}/classification`),
+    apiGet<EstimateClassificationResponse>(`/v1/boq/boqs/${boqId}/classification/`),
 
   /* Sensitivity Analysis */
   getSensitivity: (boqId: string, variationPct = 10) =>
     apiGet<SensitivityResponse>(
-      `/v1/boq/boqs/${boqId}/sensitivity?variation_pct=${variationPct}`,
+      `/v1/boq/boqs/${boqId}/sensitivity/?variation_pct=${variationPct}`,
     ),
 
   /* Monte Carlo Cost Risk */
   getCostRisk: (boqId: string, iterations = 1000) =>
     apiGet<CostRiskResponse>(
-      `/v1/boq/boqs/${boqId}/cost-risk?iterations=${iterations}`,
+      `/v1/boq/boqs/${boqId}/cost-risk/?iterations=${iterations}`,
     ),
 
   /* Statistics — aggregated BOQ metrics */
@@ -682,34 +684,34 @@ export const boqApi = {
       classification_coverage_pct: number;
       created_at: string;
       updated_at: string;
-    }>(`/v1/boq/boqs/${boqId}/statistics`),
+    }>(`/v1/boq/boqs/${boqId}/statistics/`),
 
   /* Snapshot / Version History */
   getSnapshots: (boqId: string) =>
-    apiGet<BOQSnapshot[]>(`/v1/boq/boqs/${boqId}/snapshots`),
+    apiGet<BOQSnapshot[]>(`/v1/boq/boqs/${boqId}/snapshots/`),
   createSnapshot: (boqId: string, label?: string) =>
-    apiPost<BOQSnapshot>(`/v1/boq/boqs/${boqId}/snapshots`, { name: label ?? '' }),
+    apiPost<BOQSnapshot>(`/v1/boq/boqs/${boqId}/snapshots/`, { name: label ?? '' }),
   restoreSnapshot: (boqId: string, snapshotId: string) =>
     apiPost<{ ok: boolean }>(`/v1/boq/boqs/${boqId}/restore/${snapshotId}`, {}),
 
   /* Enrich positions with resources from cost database */
   enrichResources: (boqId: string) =>
     apiPost<{ enriched_count: number; total_positions: number }>(
-      `/v1/boq/boqs/${boqId}/enrich-resources`,
+      `/v1/boq/boqs/${boqId}/enrich-resources/`,
       {},
     ),
 
   /* AI: Classify position */
   classify: (data: { description: string; unit?: string; project_standard?: string }) =>
-    apiPost<ClassifyResponse>('/v1/boq/boqs/classify', data),
+    apiPost<ClassifyResponse>('/v1/boq/boqs/classify/', data),
 
   /* AI: Suggest rate */
   suggestRate: (data: { description: string; unit?: string; classification?: Record<string, string>; region?: string }) =>
-    apiPost<SuggestRateResponse>('/v1/boq/boqs/suggest-rate', data),
+    apiPost<SuggestRateResponse>('/v1/boq/boqs/suggest-rate/', data),
 
   /* AI: Check anomalies */
   checkAnomalies: (boqId: string) =>
-    apiPost<AnomalyCheckResponse>(`/v1/boq/boqs/${boqId}/check-anomalies`, {}),
+    apiPost<AnomalyCheckResponse>(`/v1/boq/boqs/${boqId}/check-anomalies/`, {}),
 
   /* AI: Search cost items (vector similarity) */
   searchCostItems: (data: {
@@ -718,7 +720,7 @@ export const boqApi = {
     region?: string;
     limit?: number;
     min_score?: number;
-  }) => apiPost<CostItemSearchResponse>('/v1/boq/boqs/search-cost-items', data),
+  }) => apiPost<CostItemSearchResponse>('/v1/boq/boqs/search-cost-items/', data),
 
   /* AI: Enhance description via LLM */
   enhanceDescription: (data: {
@@ -726,7 +728,7 @@ export const boqApi = {
     unit?: string;
     classification?: Record<string, string>;
     locale?: string;
-  }) => apiPost<EnhanceDescriptionResponse>('/v1/boq/boqs/enhance-description', data),
+  }) => apiPost<EnhanceDescriptionResponse>('/v1/boq/boqs/enhance-description/', data),
 
   /* AI: Suggest prerequisites via LLM */
   suggestPrerequisites: (data: {
@@ -735,7 +737,7 @@ export const boqApi = {
     classification?: Record<string, string>;
     existing_descriptions?: string[];
     locale?: string;
-  }) => apiPost<SuggestPrerequisitesResponse>('/v1/boq/boqs/suggest-prerequisites', data),
+  }) => apiPost<SuggestPrerequisitesResponse>('/v1/boq/boqs/suggest-prerequisites/', data),
 
   /* AI: Check scope completeness via LLM */
   checkScope: (boqId: string, data: {
@@ -743,7 +745,7 @@ export const boqApi = {
     region?: string;
     currency?: string;
     locale?: string;
-  }) => apiPost<CheckScopeResponse>(`/v1/boq/boqs/${boqId}/check-scope`, data),
+  }) => apiPost<CheckScopeResponse>(`/v1/boq/boqs/${boqId}/check-scope/`, data),
 
   /* AI: Escalate rate via LLM */
   escalateRate: (data: {
@@ -755,13 +757,13 @@ export const boqApi = {
     target_year?: number;
     region?: string;
     locale?: string;
-  }) => apiPost<EscalateRateResponse>('/v1/boq/boqs/escalate-rate', data),
+  }) => apiPost<EscalateRateResponse>('/v1/boq/boqs/escalate-rate/', data),
 
   /* Custom Columns — manage user-defined fields per BOQ */
   listCustomColumns: (boqId: string) =>
-    apiGet<CustomColumnDef[]>(`/v1/boq/boqs/${boqId}/columns`),
+    apiGet<CustomColumnDef[]>(`/v1/boq/boqs/${boqId}/columns/`),
   addCustomColumn: (boqId: string, data: CustomColumnDef) =>
-    apiPost<CustomColumnDef, CustomColumnDef>(`/v1/boq/boqs/${boqId}/columns`, data),
+    apiPost<CustomColumnDef, CustomColumnDef>(`/v1/boq/boqs/${boqId}/columns/`, data),
   deleteCustomColumn: (boqId: string, columnName: string) =>
     apiDelete<void>(`/v1/boq/boqs/${boqId}/columns/${columnName}`),
 

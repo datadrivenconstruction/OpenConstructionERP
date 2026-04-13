@@ -25,6 +25,32 @@ from app.modules.meetings.schemas import (
 )
 
 logger = logging.getLogger(__name__)
+_logger_audit = logging.getLogger(__name__ + ".audit")
+
+
+async def _safe_audit(
+    session: AsyncSession,
+    *,
+    action: str,
+    entity_type: str,
+    entity_id: str | None = None,
+    user_id: str | None = None,
+    details: dict | None = None,
+) -> None:
+    """Best-effort audit log — never blocks the caller on failure."""
+    try:
+        from app.core.audit import audit_log
+
+        await audit_log(
+            session,
+            action=action,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            user_id=user_id,
+            details=details,
+        )
+    except Exception:
+        _logger_audit.debug("Audit log write skipped for %s %s", action, entity_type)
 
 # ── Allowed meeting status transitions ────────────────────────────────────────
 
@@ -75,6 +101,21 @@ class MeetingService:
             metadata_=data.metadata,
         )
         meeting = await self.repo.create(meeting)
+
+        await _safe_audit(
+            self.session,
+            action="create",
+            entity_type="meeting",
+            entity_id=str(meeting.id),
+            user_id=user_id,
+            details={
+                "title": data.title,
+                "meeting_number": meeting_number,
+                "meeting_type": data.meeting_type,
+                "project_id": str(data.project_id),
+            },
+        )
+
         logger.info(
             "Meeting created: %s (%s) for project %s",
             meeting_number,
@@ -103,14 +144,20 @@ class MeetingService:
         limit: int = 50,
         meeting_type: str | None = None,
         status_filter: str | None = None,
+        search: str | None = None,
+        sort_by: str | None = None,
+        sort_order: str = "desc",
     ) -> tuple[list[Meeting], int]:
-        """List meetings for a project."""
+        """List meetings for a project with optional search."""
         return await self.repo.list_for_project(
             project_id,
             offset=offset,
             limit=limit,
             meeting_type=meeting_type,
             status=status_filter,
+            search=search,
+            sort_by=sort_by,
+            sort_order=sort_order,
         )
 
     # ── Update ────────────────────────────────────────────────────────────
@@ -167,8 +214,36 @@ class MeetingService:
     # ── Delete ────────────────────────────────────────────────────────────
 
     async def delete_meeting(self, meeting_id: uuid.UUID) -> None:
-        """Delete a meeting."""
+        """Delete a meeting.
+
+        Also scrubs ``meeting_id`` references from any tasks that were
+        auto-created via ``complete_meeting`` — preventing dangling FK
+        pointers without destroying the user's task history.
+        """
         await self.get_meeting(meeting_id)  # Raises 404 if not found
+
+        # Clear the meeting_id FK on tasks that reference this meeting
+        try:
+            from sqlalchemy import update as _update
+
+            from app.modules.tasks.models import Task
+
+            result = await self.session.execute(
+                _update(Task)
+                .where(Task.meeting_id == str(meeting_id))
+                .values(meeting_id=None)
+            )
+            if result.rowcount:
+                logger.info(
+                    "Cleared meeting_id on %d tasks before deleting meeting %s",
+                    result.rowcount, meeting_id,
+                )
+        except Exception as exc:  # best-effort cleanup
+            logger.warning(
+                "Failed to scrub task.meeting_id refs for meeting %s: %s",
+                meeting_id, exc,
+            )
+
         await self.repo.delete(meeting_id)
         logger.info("Meeting deleted: %s", meeting_id)
 
@@ -209,18 +284,30 @@ class MeetingService:
         await self.session.refresh(meeting)
         logger.info("Meeting completed: %s", meeting_id)
 
-        # Create tasks from open action items
+        # Create tasks from open action items.  Per-item isolation: a
+        # single failed action item does not abort the others, AND the
+        # event payload only carries the action items that ACTUALLY
+        # produced a Task row.  The previous version wrapped the
+        # whole loop in a try/except and then published a "tasks
+        # created" event regardless — even if zero tasks were
+        # created, downstream subscribers were told the work was
+        # done.  Now the event payload + the meeting completion
+        # response surface the real success/failure breakdown so the
+        # UI can show "3 of 5 tasks created" instead of lying.
         action_items = meeting.action_items or []
         open_actions = [
             ai
             for ai in action_items
             if isinstance(ai, dict) and ai.get("status", "open") == "open"
         ]
-        if open_actions:
-            try:
-                from app.modules.tasks.models import Task
+        created_action_items: list[dict] = []
+        failed_action_items: list[dict] = []
 
-                for ai in open_actions:
+        if open_actions:
+            from app.modules.tasks.models import Task
+
+            for ai in open_actions:
+                try:
                     task = Task(
                         project_id=meeting.project_id,
                         task_type="task",
@@ -239,29 +326,52 @@ class MeetingService:
                         metadata_={"source": "meeting_action_item"},
                     )
                     self.session.add(task)
-                await self.session.flush()
-                logger.info(
-                    "Created %d tasks from meeting %s action items",
-                    len(open_actions),
-                    meeting.meeting_number,
-                )
-            except Exception:
-                # Task creation is best-effort — don't fail the completion
-                logger.exception(
-                    "Failed to create tasks from meeting %s action items",
-                    meeting.meeting_number,
+                    await self.session.flush()
+                    created_action_items.append({**ai, "task_id": str(task.id)})
+                except Exception as exc:  # noqa: BLE001 — per-item isolation
+                    logger.warning(
+                        "Failed to create task from meeting %s action item: %s",
+                        meeting.meeting_number,
+                        exc,
+                    )
+                    failed_action_items.append({**ai, "error": str(exc)})
+
+            logger.info(
+                "Meeting %s: %d/%d tasks created from action items "
+                "(%d failed)",
+                meeting.meeting_number,
+                len(created_action_items),
+                len(open_actions),
+                len(failed_action_items),
+            )
+
+            # Only publish the event if at least one task actually
+            # made it into the DB.  An empty creation set means
+            # downstream subscribers (notifications, vector index)
+            # have nothing to consume — publishing would be a lie.
+            if created_action_items:
+                await event_bus.publish(
+                    "meeting.action_items_created",
+                    {
+                        "meeting_id": str(meeting.id),
+                        "project_id": str(meeting.project_id),
+                        "meeting_number": meeting.meeting_number,
+                        "action_items": created_action_items,
+                        "failed_action_items": failed_action_items,
+                        "created_count": len(created_action_items),
+                        "failed_count": len(failed_action_items),
+                    },
+                    source_module="meetings",
                 )
 
-            await event_bus.publish(
-                "meeting.action_items_created",
-                {
-                    "meeting_id": str(meeting.id),
-                    "project_id": str(meeting.project_id),
-                    "meeting_number": meeting.meeting_number,
-                    "action_items": open_actions,
-                },
-                source_module="meetings",
-            )
+        # Stash the per-item breakdown on the returned meeting so the
+        # router can surface it in the response payload.  Setting it
+        # via setattr keeps the ORM model unchanged — this is a
+        # transient annotation, not a column.
+        meeting._action_item_summary = {  # type: ignore[attr-defined]
+            "created": created_action_items,
+            "failed": failed_action_items,
+        }
 
         return meeting
 

@@ -6,7 +6,7 @@ No business logic — pure data access.
 
 import uuid
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.meetings.models import Meeting
@@ -30,18 +30,42 @@ class MeetingRepository:
         limit: int = 50,
         meeting_type: str | None = None,
         status: str | None = None,
+        search: str | None = None,
+        sort_by: str | None = None,
+        sort_order: str = "desc",
     ) -> tuple[list[Meeting], int]:
-        """List meetings for a project with pagination and filters."""
+        """List meetings for a project with pagination, filters, and search."""
         base = select(Meeting).where(Meeting.project_id == project_id)
         if meeting_type is not None:
             base = base.where(Meeting.meeting_type == meeting_type)
         if status is not None:
             base = base.where(Meeting.status == status)
 
+        # Free-text search across title, agenda, minutes, and meeting number
+        if search and search.strip():
+            pattern = f"%{search.strip()}%"
+            base = base.where(
+                or_(
+                    Meeting.title.ilike(pattern),
+                    Meeting.agenda.ilike(pattern),
+                    Meeting.minutes.ilike(pattern),
+                    Meeting.meeting_number.ilike(pattern),
+                )
+            )
+
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        stmt = base.order_by(Meeting.meeting_date.desc()).offset(offset).limit(limit)
+        # Sorting
+        order_clause = None
+        if sort_by:
+            col = getattr(Meeting, sort_by, None)
+            if col is not None:
+                order_clause = col.desc() if sort_order == "desc" else col.asc()
+        if order_clause is None:
+            order_clause = Meeting.meeting_date.desc()
+
+        stmt = base.order_by(order_clause).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         items = list(result.scalars().all())
 

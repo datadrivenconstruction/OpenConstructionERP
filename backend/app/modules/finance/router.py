@@ -32,9 +32,11 @@ from typing import Any
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies import CurrentUserId, SessionDep
-from app.modules.finance.models import Invoice, ProjectBudget
+from app.core.rate_limiter import approval_limiter
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.modules.finance.models import EVMSnapshot, Invoice, Payment, ProjectBudget
 from app.modules.finance.schemas import (
     BudgetCreate,
     BudgetListResponse,
@@ -61,6 +63,134 @@ def _get_service(session: SessionDep) -> FinanceService:
     return FinanceService(session)
 
 
+# ── IDOR protection helpers ─────────────────────────────────────────────────
+
+
+async def _require_project_access(
+    session: AsyncSession,
+    project_id: uuid.UUID | None,
+    user_id: str | None,
+) -> None:
+    """Verify the current user owns (or is admin on) the referenced project.
+
+    Central choke-point for project-scoped finance endpoints — must be called
+    before reading or writing invoices/budgets/payments/EVM snapshots that
+    belong to a specific project. Mirrors the pattern used by
+    ``erp_chat.tools._require_project_access``.
+
+    Raises HTTP 403 if the user has no access to the project. A ``None``
+    ``project_id`` is treated as a no-op (dashboard/list fall-throughs that
+    legitimately aggregate across the user's own projects should handle
+    scoping in their own service layer).
+    """
+    if project_id is None:
+        return
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+        )
+
+    try:
+        from app.modules.projects.repository import ProjectRepository
+        from app.modules.users.repository import UserRepository
+
+        proj_repo = ProjectRepository(session)
+        project = await proj_repo.get_by_id(project_id)
+        if project is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Project {project_id} not found",
+            )
+
+        # Admin bypass
+        try:
+            user_repo = UserRepository(session)
+            user = await user_repo.get_by_id(user_id)
+            if user is not None and getattr(user, "role", "") == "admin":
+                return
+        except Exception:  # noqa: BLE001 — best-effort admin check
+            pass
+
+        if str(getattr(project, "owner_id", "")) != str(user_id):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: you do not own this project",
+            )
+    except HTTPException:
+        raise
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Finance project access check failed for %s: %s", project_id, exc)
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Authorization check failed",
+        )
+
+
+async def _require_invoice_access(
+    session: AsyncSession,
+    invoice_id: uuid.UUID,
+    user_id: str | None,
+) -> Invoice:
+    """Load an invoice and verify the caller has access to its parent project."""
+    invoice = await session.get(Invoice, invoice_id)
+    if invoice is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Invoice {invoice_id} not found",
+        )
+    await _require_project_access(session, invoice.project_id, user_id)
+    return invoice
+
+
+async def _require_budget_access(
+    session: AsyncSession,
+    budget_id: uuid.UUID,
+    user_id: str | None,
+) -> ProjectBudget:
+    """Load a budget and verify the caller has access to its parent project."""
+    budget = await session.get(ProjectBudget, budget_id)
+    if budget is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Budget {budget_id} not found",
+        )
+    await _require_project_access(session, budget.project_id, user_id)
+    return budget
+
+
+async def _require_payment_access(
+    session: AsyncSession,
+    payment_id: uuid.UUID,
+    user_id: str | None,
+) -> Payment:
+    """Load a payment and verify caller has access via its parent invoice."""
+    payment = await session.get(Payment, payment_id)
+    if payment is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Payment {payment_id} not found",
+        )
+    await _require_invoice_access(session, payment.invoice_id, user_id)
+    return payment
+
+
+async def _require_evm_access(
+    session: AsyncSession,
+    snapshot_id: uuid.UUID,
+    user_id: str | None,
+) -> EVMSnapshot:
+    """Load an EVM snapshot and verify caller has access to its project."""
+    snapshot = await session.get(EVMSnapshot, snapshot_id)
+    if snapshot is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"EVM snapshot {snapshot_id} not found",
+        )
+    await _require_project_access(session, snapshot.project_id, user_id)
+    return snapshot
+
+
 # ── Invoices (list / create) ───────────────────────────────────────────────
 
 
@@ -72,15 +202,18 @@ def _get_service(session: SessionDep) -> FinanceService:
     "direction (payable/receivable), and status.",
 )
 async def list_invoices(
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     project_id: uuid.UUID | None = Query(default=None),
     direction: str | None = Query(default=None),
     status: str | None = Query(default=None),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
+    _perm: None = Depends(RequirePermission("finance.read")),
     service: FinanceService = Depends(_get_service),
 ) -> InvoiceListResponse:
     """List invoices with optional filters."""
+    await _require_project_access(session, project_id, user_id)
     items, total = await service.list_invoices(
         project_id=project_id,
         direction=direction,
@@ -107,9 +240,12 @@ async def list_invoices(
 async def create_invoice(
     data: InvoiceCreate,
     user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("finance.create")),
     service: FinanceService = Depends(_get_service),
 ) -> InvoiceResponse:
     """Create a new invoice."""
+    await _require_project_access(session, data.project_id, user_id)
     invoice = await service.create_invoice(data, user_id=user_id)
     return InvoiceResponse.model_validate(invoice)
 
@@ -129,10 +265,13 @@ async def export_invoices(
     _user_id: CurrentUserId,
     project_id: uuid.UUID = Query(...),
     direction: str | None = Query(default=None),
+    _perm: None = Depends(RequirePermission("finance.read")),
 ) -> StreamingResponse:
     """Export invoices for a project as Excel file."""
     from openpyxl import Workbook
     from openpyxl.styles import Font
+
+    await _require_project_access(session, project_id, _user_id)
 
     stmt = select(Invoice).where(Invoice.project_id == project_id)
     if direction:
@@ -202,13 +341,17 @@ async def export_invoices(
     description="Retrieve a paginated list of payments, optionally filtered by invoice.",
 )
 async def list_payments(
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     invoice_id: uuid.UUID | None = Query(default=None),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
+    _perm: None = Depends(RequirePermission("finance.read")),
     service: FinanceService = Depends(_get_service),
 ) -> PaymentListResponse:
     """List payments with optional invoice filter."""
+    if invoice_id is not None:
+        await _require_invoice_access(session, invoice_id, user_id)
     items, total = await service.list_payments(
         invoice_id=invoice_id, limit=limit, offset=offset
     )
@@ -228,9 +371,12 @@ async def list_payments(
 async def create_payment(
     data: PaymentCreate,
     user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("finance.create")),
     service: FinanceService = Depends(_get_service),
 ) -> PaymentResponse:
     """Record a payment against an invoice."""
+    await _require_invoice_access(session, data.invoice_id, user_id)
     payment = await service.create_payment(data)
     return PaymentResponse.model_validate(payment)
 
@@ -245,12 +391,15 @@ async def create_payment(
     description="Retrieve project budget lines with optional filters by project and cost category.",
 )
 async def list_budgets(
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     project_id: uuid.UUID | None = Query(default=None),
     category: str | None = Query(default=None),
+    _perm: None = Depends(RequirePermission("finance.read")),
     service: FinanceService = Depends(_get_service),
 ) -> BudgetListResponse:
     """List project budgets."""
+    await _require_project_access(session, project_id, user_id)
     items, total = await service.list_budgets(project_id=project_id, category=category)
     return BudgetListResponse(
         items=[BudgetResponse.model_validate(b) for b in items],
@@ -268,9 +417,12 @@ async def list_budgets(
 async def create_budget(
     data: BudgetCreate,
     user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("finance.create")),
     service: FinanceService = Depends(_get_service),
 ) -> BudgetResponse:
     """Create a project budget line."""
+    await _require_project_access(session, data.project_id, user_id)
     budget = await service.create_budget(data)
     return BudgetResponse.model_validate(budget)
 
@@ -437,8 +589,10 @@ def _parse_budget_rows_from_excel(content_bytes: bytes) -> list[dict[str, Any]]:
 )
 async def import_budgets_file(
     _user_id: CurrentUserId,
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     file: UploadFile = File(..., description="Excel (.xlsx) or CSV (.csv) file"),
+    _perm: None = Depends(RequirePermission("finance.create")),
     service: FinanceService = Depends(_get_service),
 ) -> dict[str, Any]:
     """Import project budgets from an Excel or CSV file upload.
@@ -452,6 +606,8 @@ async def import_budgets_file(
     Returns:
         Summary with counts of imported, skipped, and error details per row.
     """
+    await _require_project_access(session, project_id, _user_id)
+
     # Validate file type
     filename = (file.filename or "").lower()
     if not filename.endswith((".xlsx", ".csv", ".xls")):
@@ -587,10 +743,13 @@ async def export_budgets(
     session: SessionDep,
     _user_id: CurrentUserId,
     project_id: uuid.UUID = Query(...),
+    _perm: None = Depends(RequirePermission("finance.read")),
 ) -> StreamingResponse:
     """Export budgets for a project as Excel file."""
     from openpyxl import Workbook
     from openpyxl.styles import Font
+
+    await _require_project_access(session, project_id, _user_id)
 
     result = await session.execute(
         select(ProjectBudget).where(ProjectBudget.project_id == project_id).limit(50000)
@@ -668,9 +827,12 @@ async def update_budget(
     budget_id: uuid.UUID,
     data: BudgetUpdate,
     user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("finance.update")),
     service: FinanceService = Depends(_get_service),
 ) -> BudgetResponse:
     """Update a budget line."""
+    await _require_budget_access(session, budget_id, user_id)
     budget = await service.update_budget(budget_id, data)
     return BudgetResponse.model_validate(budget)
 
@@ -686,11 +848,14 @@ async def update_budget(
     "Each snapshot captures PV, EV, AC, SPI, CPI, and EAC at a point in time.",
 )
 async def list_evm_snapshots(
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     project_id: uuid.UUID | None = Query(default=None),
+    _perm: None = Depends(RequirePermission("finance.read")),
     service: FinanceService = Depends(_get_service),
 ) -> EVMListResponse:
     """List EVM snapshots for a project."""
+    await _require_project_access(session, project_id, user_id)
     items, total = await service.list_evm_snapshots(project_id=project_id)
     return EVMListResponse(
         items=[EVMSnapshotResponse.model_validate(s) for s in items],
@@ -709,9 +874,12 @@ async def list_evm_snapshots(
 async def create_evm_snapshot(
     data: EVMSnapshotCreate,
     user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("finance.create")),
     service: FinanceService = Depends(_get_service),
 ) -> EVMSnapshotResponse:
     """Create an EVM snapshot."""
+    await _require_project_access(session, data.project_id, user_id)
     snapshot = await service.create_evm_snapshot(data)
     return EVMSnapshotResponse.model_validate(snapshot)
 
@@ -728,8 +896,10 @@ async def create_evm_snapshot(
     "Optionally scope to a single project via project_id query parameter.",
 )
 async def finance_dashboard(
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     project_id: uuid.UUID | None = Query(default=None),
+    _perm: None = Depends(RequirePermission("finance.read")),
     service: FinanceService = Depends(_get_service),
 ) -> dict:
     """Aggregated finance KPIs: payable, receivable, overdue, budget, cash flow.
@@ -737,6 +907,7 @@ async def finance_dashboard(
     Optionally scope to a single project via ``project_id`` query parameter.
     Returns budget warning level ("normal", "caution" at 80%+, "critical" at 95%+).
     """
+    await _require_project_access(session, project_id, user_id)
     return await service.get_dashboard(project_id=project_id)
 
 
@@ -751,10 +922,13 @@ async def finance_dashboard(
 )
 async def get_invoice(
     invoice_id: uuid.UUID,
+    session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("finance.read")),
     service: FinanceService = Depends(_get_service),
 ) -> InvoiceResponse:
     """Get a single invoice by ID."""
+    await _require_invoice_access(session, invoice_id, user_id)
     invoice = await service.get_invoice(invoice_id)
     return InvoiceResponse.model_validate(invoice)
 
@@ -769,9 +943,12 @@ async def update_invoice(
     invoice_id: uuid.UUID,
     data: InvoiceUpdate,
     user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("finance.update")),
     service: FinanceService = Depends(_get_service),
 ) -> InvoiceResponse:
     """Update an invoice."""
+    await _require_invoice_access(session, invoice_id, user_id)
     invoice = await service.update_invoice(invoice_id, data)
     return InvoiceResponse.model_validate(invoice)
 
@@ -786,9 +963,15 @@ async def update_invoice(
 async def approve_invoice(
     invoice_id: uuid.UUID,
     user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("finance.update")),
     service: FinanceService = Depends(_get_service),
 ) -> InvoiceResponse:
     """Approve an invoice."""
+    allowed, _ = approval_limiter.is_allowed(str(user_id))
+    if not allowed:
+        raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Rate limit exceeded. Try again later.")
+    await _require_invoice_access(session, invoice_id, user_id)
     invoice = await service.approve_invoice(invoice_id)
     return InvoiceResponse.model_validate(invoice)
 
@@ -802,8 +985,14 @@ async def approve_invoice(
 async def pay_invoice(
     invoice_id: uuid.UUID,
     user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("finance.update")),
     service: FinanceService = Depends(_get_service),
 ) -> InvoiceResponse:
     """Mark invoice as paid."""
+    allowed, _ = approval_limiter.is_allowed(str(user_id))
+    if not allowed:
+        raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Rate limit exceeded. Try again later.")
+    await _require_invoice_access(session, invoice_id, user_id)
     invoice = await service.pay_invoice(invoice_id)
     return InvoiceResponse.model_validate(invoice)

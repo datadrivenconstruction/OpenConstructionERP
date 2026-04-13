@@ -8,7 +8,8 @@
     "ai_estimate": "AI-kalkyl",
     "settings": "Inställningar",
     "5d_cost_model": "5D Kostnadsmodell",
-    "templates": "Mallar"
+    "templates": "Mallar",
+    "architecture": "Arkitekturkarta"
   },
   "common": {
     "save": "Spara",

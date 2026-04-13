@@ -19,7 +19,8 @@ import {
   FileText,
   X,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Skeleton, InfoHint, SkeletonTable, Breadcrumb } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Skeleton, InfoHint, SkeletonTable, Breadcrumb, ConfirmDialog } from '@/shared/ui';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { apiGet, apiPost, apiPatch } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -396,7 +397,7 @@ function AddBidDialog({
 
   const createMutation = useMutation({
     mutationFn: () =>
-      apiPost<BidData>(`/v1/tendering/packages/${packageId}/bids`, {
+      apiPost<BidData>(`/v1/tendering/packages/${packageId}/bids/`, {
         company_name: companyName,
         contact_email: contactEmail,
         total_amount: totalAmount || '0',
@@ -591,9 +592,9 @@ function BidComparisonTable({
             <th className="whitespace-nowrap px-3 py-2.5 text-right font-semibold text-content-primary">
               {t('tendering.budget', 'Budget')}
             </th>
-            {comparison.bid_companies.map((company, i) => (
+            {comparison.bid_companies.map((company) => (
               <th
-                key={i}
+                key={company}
                 className="whitespace-nowrap px-3 py-2.5 text-right font-semibold text-content-primary"
               >
                 <span className="flex items-center justify-end gap-1.5">
@@ -607,7 +608,7 @@ function BidComparisonTable({
         <tbody>
           {comparison.rows.map((row, idx) => (
             <tr
-              key={idx}
+              key={`${row.description}-${row.unit}-${idx}`}
               className="border-b border-border-light/50 transition-colors hover:bg-surface-secondary/30"
             >
               <td className="px-3 py-2.5">
@@ -619,7 +620,7 @@ function BidComparisonTable({
               </td>
               {row.bids.map((bid, bi) => (
                 <td
-                  key={bi}
+                  key={`bid-${comparison.bid_companies[bi]}`}
                   className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums"
                 >
                   <span className="text-content-primary">{formatNumber(bid.unit_rate)}</span>
@@ -643,7 +644,7 @@ function BidComparisonTable({
             </td>
             {comparison.bid_totals.map((bt, i) => (
               <td
-                key={i}
+                key={`total-${comparison.bid_companies[i]}`}
                 className="whitespace-nowrap px-3 py-3 text-right tabular-nums"
               >
                 <span className="font-bold text-content-primary">
@@ -673,6 +674,7 @@ function PackageDetail({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
+  const { confirm, ...confirmProps } = useConfirm();
   const [showAddBid, setShowAddBid] = useState(false);
 
   // Fetch package with bids
@@ -684,7 +686,7 @@ function PackageDetail({
   // Fetch comparison
   const { data: comparison, isLoading: comparisonLoading } = useQuery({
     queryKey: ['tendering-comparison', packageId],
-    queryFn: () => apiGet<BidComparison>(`/v1/tendering/packages/${packageId}/comparison`),
+    queryFn: () => apiGet<BidComparison>(`/v1/tendering/packages/${packageId}/comparison/`),
   });
 
   // Award mutation
@@ -888,10 +890,13 @@ function PackageDetail({
                     size="sm"
                     icon={<Award size={14} />}
                     loading={awardMutation.isPending}
-                    onClick={() => {
-                      if (window.confirm(t('tendering.award_confirm', { defaultValue: 'Award this contract to {{company}}? This action cannot be undone.', company: bid.company_name }))) {
-                        awardMutation.mutate(bid.id);
-                      }
+                    onClick={async () => {
+                      const ok = await confirm({
+                        title: t('tendering.award_confirm_title', { defaultValue: 'Award contract?' }),
+                        message: t('tendering.award_confirm', { defaultValue: 'Award this contract to {{company}}? This action cannot be undone.', company: bid.company_name }),
+                        variant: 'warning',
+                      });
+                      if (ok) awardMutation.mutate(bid.id);
                     }}
                     title={t('tendering.award_bid', 'Award this bid')}
                   >
@@ -960,6 +965,7 @@ function PackageDetail({
           onCreated={handleBidCreated}
         />
       )}
+      <ConfirmDialog {...confirmProps} />
     </div>
   );
 }
@@ -979,6 +985,7 @@ export function TenderingPage() {
   const { data: projects, isLoading: projectsLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    staleTime: 5 * 60_000,
   });
 
   // Fetch BOQs for selected project (needed for create dialog)

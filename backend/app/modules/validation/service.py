@@ -134,6 +134,26 @@ class ValidationModuleService:
         )
         await self.repo.create(db_report)
 
+        # Publish a standardized event so the vector indexer (and any
+        # future cross-module subscriber) can react.  Best-effort —
+        # publish failures must never break a successful validation run.
+        try:
+            from app.core.events import event_bus
+
+            await event_bus.publish(
+                "validation.report.created",
+                {
+                    "report_id": str(db_report.id),
+                    "project_id": str(project_id),
+                    "target_type": "boq",
+                    "target_id": str(boq_id),
+                    "status": engine_report.status.value,
+                },
+                source_module="oe_validation",
+            )
+        except Exception:
+            logger.debug("Failed to publish validation.report.created event", exc_info=True)
+
         # 5. Build response
         return {
             "report_id": str(db_report.id),
@@ -201,7 +221,22 @@ class ValidationModuleService:
 
     async def delete_report(self, report_id: uuid.UUID) -> bool:
         """Delete a validation report. Returns True if deleted."""
-        return await self.repo.delete(report_id)
+        deleted = await self.repo.delete(report_id)
+        if deleted:
+            try:
+                from app.core.events import event_bus
+
+                await event_bus.publish(
+                    "validation.report.deleted",
+                    {"report_id": str(report_id)},
+                    source_module="oe_validation",
+                )
+            except Exception:
+                logger.debug(
+                    "Failed to publish validation.report.deleted event",
+                    exc_info=True,
+                )
+        return deleted
 
     # ── Internal helpers ──────────────────────────────────────────────────
 

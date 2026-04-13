@@ -29,7 +29,8 @@ import {
   HardHat,
   Thermometer,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog } from '@/shared/ui';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import {
@@ -56,6 +57,12 @@ import type {
   UpdateFieldReportPayload,
   ImportResult,
 } from './api';
+
+declare global {
+  interface Window {
+    __fieldreportPrefillDate?: string;
+  }
+}
 
 /* ── Constants ─────────────────────────────────────────────────────────── */
 
@@ -139,6 +146,7 @@ export function FieldReportsPage() {
   const activeProjectName = useProjectContextStore((s) => s.activeProjectName);
 
   const projectId = activeProjectId ?? '';
+  const { confirm, ...confirmProps } = useConfirm();
 
   // View mode: calendar vs list
   const [view, setView] = useState<'calendar' | 'list'>('calendar');
@@ -161,13 +169,13 @@ export function FieldReportsPage() {
 
   const calMonthStr = `${calYear}-${String(calMonth).padStart(2, '0')}`;
 
-  const { data: calendarReports = [] } = useQuery({
+  const { data: calendarReports = [], isLoading: isCalendarLoading } = useQuery({
     queryKey: ['fieldreports', 'calendar', projectId, calMonthStr],
     queryFn: () => fetchFieldReportCalendar(projectId, calMonthStr),
     enabled: !!projectId && view === 'calendar',
   });
 
-  const { data: listReports = [] } = useQuery({
+  const { data: listReports = [], isLoading: isListLoading } = useQuery({
     queryKey: ['fieldreports', 'list', projectId, statusFilter, typeFilter],
     queryFn: () =>
       fetchFieldReports(projectId, {
@@ -176,6 +184,8 @@ export function FieldReportsPage() {
       }),
     enabled: !!projectId && view === 'list',
   });
+
+  const isLoading = view === 'calendar' ? isCalendarLoading : isListLoading;
 
   const { data: summary } = useQuery({
     queryKey: ['fieldreports', 'summary', projectId],
@@ -218,6 +228,9 @@ export function FieldReportsPage() {
       queryClient.invalidateQueries({ queryKey: ['fieldreports'] });
       addToast({ type: 'success', title: '', message: t('fieldreports.deleted', { defaultValue: 'Field report deleted' }) });
     },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: err.message });
+    },
   });
 
   const submitMut = useMutation({
@@ -226,6 +239,9 @@ export function FieldReportsPage() {
       queryClient.invalidateQueries({ queryKey: ['fieldreports'] });
       addToast({ type: 'success', title: '', message: t('fieldreports.submitted', { defaultValue: 'Report submitted for approval' }) });
     },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: err.message });
+    },
   });
 
   const approveMut = useMutation({
@@ -233,6 +249,9 @@ export function FieldReportsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['fieldreports'] });
       addToast({ type: 'success', title: '', message: t('fieldreports.approved', { defaultValue: 'Report approved' }) });
+    },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: err.message });
     },
   });
 
@@ -316,12 +335,16 @@ export function FieldReportsPage() {
   }, []);
 
   const handleDelete = useCallback(
-    (id: string) => {
-      if (window.confirm(t('fieldreports.confirm_delete', { defaultValue: 'Delete this field report?' }))) {
+    async (id: string) => {
+      const ok = await confirm({
+        title: t('fieldreports.confirm_delete_title', { defaultValue: 'Delete field report?' }),
+        message: t('fieldreports.confirm_delete', { defaultValue: 'Delete this field report?' }),
+      });
+      if (ok) {
         deleteMut.mutate(id);
       }
     },
-    [deleteMut, t],
+    [deleteMut, t, confirm],
   );
 
   // ── No project selected ─────────────────────────────────────────────
@@ -503,7 +526,7 @@ export function FieldReportsPage() {
             <div className="grid grid-cols-7 gap-px rounded-lg border border-border-light bg-border-light overflow-hidden">
               {calendarDays.map((cell, idx) => (
                 <div
-                  key={idx}
+                  key={cell.day !== null ? `day-${cell.day}` : `empty-${idx}`}
                   className={clsx(
                     'min-h-[80px] bg-surface-primary p-2 transition-colors',
                     cell.day !== null && 'hover:bg-surface-secondary cursor-pointer',
@@ -517,7 +540,7 @@ export function FieldReportsPage() {
                       setEditingReport(null);
                       setShowModal(true);
                       // The modal will pick up the date from the cell
-                      (window as any).__fieldreport_prefill_date = cell.dateStr;
+                      window.__fieldreportPrefillDate = cell.dateStr;
                     }
                   }}
                 >
@@ -597,7 +620,13 @@ export function FieldReportsPage() {
           </div>
 
           {/* Table */}
-          {listReports.length === 0 ? (
+          {isLoading ? (
+            <div className="space-y-3 p-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="h-12 animate-pulse rounded-lg bg-surface-secondary" />
+              ))}
+            </div>
+          ) : listReports.length === 0 ? (
             <div className="p-8">
               <EmptyState
                 icon={<ClipboardList size={28} strokeWidth={1.5} />}
@@ -751,7 +780,7 @@ export function FieldReportsPage() {
           onClose={() => {
             setShowModal(false);
             setEditingReport(null);
-            delete (window as any).__fieldreport_prefill_date;
+            delete window.__fieldreportPrefillDate;
           }}
           onCreate={(data) => createMut.mutate(data)}
           onUpdate={(id, data) => updateMut.mutate({ id, data })}
@@ -779,6 +808,7 @@ export function FieldReportsPage() {
           }}
         />
       )}
+      <ConfirmDialog {...confirmProps} />
     </div>
   );
 }
@@ -915,8 +945,8 @@ function ImportFieldReportsModal({
                     {t('fieldreports.show_errors', { defaultValue: 'Show error details' })}
                   </summary>
                   <ul className="mt-1 space-y-0.5 max-h-32 overflow-y-auto">
-                    {result.errors.slice(0, 20).map((err, i) => (
-                      <li key={i}>
+                    {result.errors.slice(0, 20).map((err) => (
+                      <li key={`row-${err.row}`}>
                         {t('fieldreports.row_error', {
                           defaultValue: 'Row {{row}}: {{error}}',
                           row: err.row,
@@ -1020,7 +1050,7 @@ function ReportModal({
 
   // Prefill date from calendar click
   const prefillDate =
-    (window as any).__fieldreport_prefill_date || todayStr();
+    window.__fieldreportPrefillDate || todayStr();
 
   const [reportDate, setReportDate] = useState(report?.report_date ?? prefillDate);
   const [reportType, setReportType] = useState<ReportType>(report?.report_type ?? 'daily');
@@ -1242,7 +1272,7 @@ function ReportModal({
             </legend>
             <div className="mt-2 space-y-2">
               {workforce.map((entry, idx) => (
-                <div key={idx} className="flex items-center gap-2">
+                <div key={`workforce-${entry.trade}-${idx}`} className="flex items-center gap-2">
                   <div className="flex-1">
                     <input
                       type="text"
