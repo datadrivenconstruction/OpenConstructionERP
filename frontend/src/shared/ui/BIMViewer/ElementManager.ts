@@ -465,10 +465,16 @@ export class ElementManager {
     this.daeGroup = new THREE.Group();
     this.daeGroup.name = 'bim_dae_geometry';
 
-    // No manual rotation needed for either format:
-    // - DAE: ColladaLoader reads <up_axis>Z_UP</up_axis> and converts automatically
-    // - GLB: trimesh bakes the Z_UP→Y_UP conversion during DAE→GLB export
-    // Adding -90° X rotation here would DOUBLE the conversion and flip the model.
+    // Auto-detect if the loaded scene uses Z_UP (CAD/BIM convention) by
+    // measuring the bounding box: if the Z extent is much taller than Y,
+    // the scene is Z_UP and needs a -90° X rotation to bring it upright
+    // in Three.js's Y_UP coordinate system.
+    const box = new THREE.Box3().setFromObject(scene);
+    const size = box.getSize(new THREE.Vector3());
+    const isZUp = size.z > size.y * 1.5 && size.z > 1;
+    if (isZUp) {
+      scene.rotation.x = -Math.PI / 2;
+    }
 
     // Build lookups: by stable_id / mesh_ref / element name.
     // mesh_ref is the Revit ElementId string (e.g. "105545") that matches
