@@ -185,14 +185,27 @@ def parse_dxf(file_path: str) -> dict[str, Any]:
 
     # Extract entities
     entities: list[dict[str, Any]] = []
+    skipped_count = 0
+    total_count = 0
     for entity in msp:
+        total_count += 1
         try:
             serialized = _serialize_entity(entity)
             entities.append(serialized)
             layer_name = serialized.get("layer", "0")
             layer_counts[layer_name] = layer_counts.get(layer_name, 0) + 1
         except Exception:
+            skipped_count += 1
             logger.debug("Skipping unprocessable entity: %s", entity.dxftype())
+
+    if total_count > 0 and skipped_count / total_count > 0.10:
+        logger.warning(
+            "DXF parse: %d of %d entities skipped (%.1f%%) in %s",
+            skipped_count,
+            total_count,
+            100.0 * skipped_count / total_count,
+            file_path,
+        )
 
     # Update layer entity counts
     for layer_info in layers:
@@ -232,6 +245,7 @@ def parse_dxf(file_path: str) -> dict[str, Any]:
         "extents": extents,
         "units": units,
         "entity_count": len(entities),
+        "skipped_count": skipped_count,
     }
 
 
@@ -261,7 +275,7 @@ def generate_svg_thumbnail(file_path: str) -> str:
         return svg_content
     except Exception as exc:
         # Fallback: generate a minimal placeholder SVG
-        logger.warning("SVG generation failed, returning placeholder: %s", exc)
+        logger.exception("SVG generation failed, returning placeholder: %s", exc)
         return (
             '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">'
             '<rect width="800" height="600" fill="#1a1a2e" />'

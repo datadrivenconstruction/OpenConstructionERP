@@ -8,7 +8,7 @@ Tables:
 
 import uuid
 
-from sqlalchemy import Float, ForeignKey, Integer, JSON, String, Text
+from sqlalchemy import Float, ForeignKey, Index, Integer, JSON, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -43,6 +43,10 @@ class DwgDrawing(Base):
         server_default="{}",
     )
     created_by: Mapped[str] = mapped_column(String(255), nullable=False, default="")
+
+    __table_args__ = (
+        Index("ix_dwg_drawing_project_status", "project_id", "status"),
+    )
 
     def __repr__(self) -> str:
         return f"<DwgDrawing {self.name} ({self.file_format}) [{self.status}]>"
@@ -124,6 +128,12 @@ class DwgAnnotation(Base):
         nullable=False,
         default=dict,
         server_default="{}",
+    )
+
+    __table_args__ = (
+        Index("ix_dwg_annotation_drawing_type", "drawing_id", "annotation_type"),
+        Index("ix_dwg_annotation_linked_task", "linked_task_id"),
+        Index("ix_dwg_annotation_linked_punch", "linked_punch_item_id"),
     )
 
     def __repr__(self) -> str:

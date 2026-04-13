@@ -23,10 +23,12 @@ Endpoints:
 
 import logging
 import uuid
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, status
 from fastapi.responses import Response
 
+from app.core.rate_limiter import approval_limiter
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.dwg_takeoff.schemas import (
     BoqLinkRequest,
@@ -61,7 +63,6 @@ def _drawing_to_response(
         name=item.name,  # type: ignore[attr-defined]
         filename=item.filename,  # type: ignore[attr-defined]
         file_format=item.file_format,  # type: ignore[attr-defined]
-        file_path=item.file_path,  # type: ignore[attr-defined]
         size_bytes=item.size_bytes,  # type: ignore[attr-defined]
         status=item.status,  # type: ignore[attr-defined]
         discipline=item.discipline,  # type: ignore[attr-defined]
@@ -121,11 +122,14 @@ def _annotation_to_response(item: object) -> DwgAnnotationResponse:
 # ── Drawing Upload ──────────────────────────────────────────────────────────
 
 
+_MAX_UPLOAD_BYTES = 50 * 1024 * 1024  # 50 MB
+
+
 @router.post("/drawings/upload", response_model=DwgDrawingResponse, status_code=201)
 async def upload_drawing(
     file: UploadFile,
     project_id: uuid.UUID = Query(...),
-    name: str | None = Query(default=None),
+    name: str | None = Query(default=None, max_length=500),
     discipline: str | None = Query(default=None),
     sheet_number: str | None = Query(default=None),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -133,6 +137,30 @@ async def upload_drawing(
     service: DwgTakeoffService = Depends(_get_service),
 ) -> DwgDrawingResponse:
     """Upload a DWG/DXF file and trigger processing."""
+    # Rate-limit uploads
+    allowed, _ = approval_limiter.is_allowed(str(user_id))
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Rate limit exceeded. Try again later.",
+        )
+
+    # Validate file extension
+    filename = file.filename or ""
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+    if ext not in ("dwg", "dxf"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid file type. Only .dwg and .dxf files are accepted.",
+        )
+
+    # Validate file size (Content-Length header, if available)
+    if file.size is not None and file.size > _MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"File too large. Maximum allowed size is {_MAX_UPLOAD_BYTES // (1024 * 1024)} MB.",
+        )
+
     try:
         drawing = await service.upload_drawing(
             project_id,
@@ -160,7 +188,7 @@ async def upload_drawing(
 @router.get("/drawings/", response_model=list[DwgDrawingResponse])
 async def list_drawings(
     project_id: uuid.UUID = Query(...),
-    status_filter: str | None = Query(default=None, alias="status"),
+    status_filter: Literal["uploaded", "processing", "ready", "error"] | None = Query(default=None, alias="status"),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=200),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
