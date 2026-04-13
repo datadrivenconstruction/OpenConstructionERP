@@ -1273,7 +1273,7 @@ function MonteCarloPanel({ projectId, currency }: { projectId: string; currency:
                   {t('costmodel.mc_distribution', { defaultValue: 'Cost Distribution' })}
                 </h4>
                 <div className="flex items-end gap-1 h-32">
-                  {result.histogram.map((bin, i) => {
+                  {result.histogram.map((bin) => {
                     const pct = maxCount > 0 ? (bin.count / maxCount) * 100 : 0;
                     const isP50 = result.p50 >= bin.from && result.p50 < bin.to;
                     const isP80 = result.p80 >= bin.from && result.p80 < bin.to;
