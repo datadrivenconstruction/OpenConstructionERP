@@ -1032,28 +1032,48 @@ export class ElementManager {
   applyFilter(predicate: (el: BIMElementData) => boolean): number {
     let visibleCount = 0;
 
-    // Apply predicate to ALL meshes — both matched and unmatched.
-    // Unmatched meshes (no element data) are hidden when a filter is
-    // active so they don't clutter the view when the user picks a
-    // specific storey or category.
-    for (const [elementId, mesh] of this.meshMap) {
+    // Build a set of element IDs that pass the filter
+    const visibleIds = new Set<string>();
+    for (const [elementId] of this.meshMap) {
       const el = this.elementDataMap.get(elementId);
-      // If no element data (temporary/unmatched), use the element data
-      // stored directly on the mesh.userData by the fallback assigner.
-      const elFromUserData = (mesh.userData as { elementData?: BIMElementData }).elementData;
-      const effectiveEl = el || elFromUserData;
-      const shouldShow = effectiveEl ? predicate(effectiveEl) : false;
+      const elFromUserData = this.meshMap.get(elementId);
+      const effectiveEl = el || (elFromUserData?.userData as { elementData?: BIMElementData })?.elementData;
+      if (effectiveEl && predicate(effectiveEl)) {
+        visibleIds.add(elementId);
+        visibleCount++;
+      }
+    }
 
+    // Apply visibility to meshMap entries (placeholder boxes + matched DAE)
+    for (const [elementId, mesh] of this.meshMap) {
+      const shouldShow = visibleIds.has(elementId);
       const handle = (mesh.userData as { batchHandle?: { batched: THREE.BatchedMesh; instanceId: number } }).batchHandle;
       if (handle) {
         handle.batched.setVisibleAt(handle.instanceId, shouldShow);
       } else {
         mesh.visible = shouldShow;
       }
-      if (shouldShow) visibleCount++;
     }
 
-    if (this.daeGroup) this.daeGroup.visible = true;
+    // ALSO walk the entire DAE scene graph and hide/show meshes there.
+    // This catches meshes that are in the scene graph but may not be
+    // the same object reference as meshMap (Three.js ColladaLoader
+    // can nest meshes inside intermediate Group nodes).
+    if (this.daeGroup) {
+      this.daeGroup.traverse((obj) => {
+        if (obj instanceof THREE.Mesh) {
+          const ud = obj.userData as { elementId?: string | null };
+          if (ud.elementId) {
+            obj.visible = visibleIds.has(ud.elementId);
+          } else {
+            // Unmatched mesh — hide when filter is active
+            obj.visible = false;
+          }
+        }
+      });
+      this.daeGroup.visible = true;
+    }
+
     this.sceneManager.requestRender();
     return visibleCount;
   }
@@ -1084,16 +1104,13 @@ export class ElementManager {
         mesh.visible = true;
       }
     }
-    // DAE background meshes (unmatched) should also be restored
-    for (const mesh of this.allDaeMeshes) {
-      const handle = (mesh.userData as { batchHandle?: { batched: THREE.BatchedMesh; instanceId: number } }).batchHandle;
-      if (handle) {
-        handle.batched.setVisibleAt(handle.instanceId, true);
-      } else {
-        mesh.visible = true;
-      }
+    // Walk the full DAE scene graph and make everything visible again
+    if (this.daeGroup) {
+      this.daeGroup.traverse((obj) => {
+        obj.visible = true;
+      });
+      this.daeGroup.visible = true;
     }
-    if (this.daeGroup) this.daeGroup.visible = true;
     this.sceneManager.requestRender();
   }
 
