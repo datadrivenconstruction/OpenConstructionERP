@@ -77,8 +77,20 @@ def _get_service(session: SessionDep, settings: SettingsDep) -> UserService:
 
 @router.post("/auth/register/", response_model=UserResponse, status_code=201)
 @router.post("/auth/register", response_model=UserResponse, status_code=201, include_in_schema=False)
-async def register(data: UserCreate, service: UserService = Depends(_get_service)) -> UserResponse:
-    """Register a new user account."""
+async def register(
+    data: UserCreate,
+    request: Request,
+    service: UserService = Depends(_get_service),
+) -> UserResponse:
+    """Register a new user account. Rate-limited per IP."""
+    client_ip = request.client.host if request.client else "unknown"
+    allowed, _remaining = login_limiter.is_allowed(f"reg_{client_ip}")
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many registration attempts. Please wait a minute and try again.",
+            headers={"Retry-After": "60"},
+        )
     user = await service.register(data)
     return UserResponse.model_validate(user)
 
@@ -126,13 +138,22 @@ async def refresh(
 @router.post("/auth/forgot-password/", response_model=ForgotPasswordResponse)
 async def forgot_password(
     data: ForgotPasswordRequest,
+    request: Request,
     service: UserService = Depends(_get_service),
 ) -> ForgotPasswordResponse:
-    """Request a password reset token.
+    """Request a password reset token. Rate-limited per IP.
 
     Always returns a success message to prevent email enumeration.
     The token is never included in the HTTP response.
     """
+    client_ip = request.client.host if request.client else "unknown"
+    allowed, _remaining = login_limiter.is_allowed(f"pwd_{client_ip}")
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many requests. Please wait a minute and try again.",
+            headers={"Retry-After": "60"},
+        )
     return await service.forgot_password(data)
 
 
