@@ -133,31 +133,36 @@ function ModelFilmstrip({ models, isLoading, activeModelId, onSelectModel, onDel
   }, []);
 
   return (
-    <div className="shrink-0 border-t border-border-light bg-surface-primary relative">
-      {/* Toggle handle — always visible */}
+    <div className="shrink-0 bg-surface-primary/90 backdrop-blur-sm relative">
+      {/* Drag handle — centered, always visible */}
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
-        className="flex items-center gap-1.5 px-4 py-1.5 w-full text-left hover:bg-surface-secondary/50 transition-colors"
+        className="flex items-center justify-center w-full py-0.5 cursor-row-resize group hover:bg-surface-secondary/40 transition-colors border-t border-border-light/60"
       >
-        <span className="text-[10px] font-bold text-content-quaternary uppercase tracking-wider">
-          {t('bim.models_label', { defaultValue: 'Models' })}
-        </span>
-        <span className="text-[9px] text-content-quaternary">({models.length})</span>
-        <svg
-          className={`ml-auto w-3 h-3 text-content-quaternary transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
-          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-        </svg>
+        {/* Grab indicator — 3 horizontal lines */}
+        <div className="flex flex-col items-center gap-[2px]">
+          <div className="w-8 h-[2px] rounded-full bg-content-quaternary/40 group-hover:bg-content-tertiary transition-colors" />
+          <div className="w-6 h-[2px] rounded-full bg-content-quaternary/30 group-hover:bg-content-tertiary transition-colors" />
+        </div>
       </button>
+
+      {/* Header row with label */}
+      {expanded && (
+        <div className="flex items-center gap-1.5 px-4 pt-1 pb-0.5">
+          <span className="text-[10px] font-bold text-content-quaternary uppercase tracking-wider">
+            {t('bim.models_label', { defaultValue: 'Models' })}
+          </span>
+          <span className="text-[9px] text-content-quaternary">({models.length})</span>
+        </div>
+      )}
 
       {/* Collapsible content */}
       <div
         className="overflow-hidden transition-all duration-300 ease-in-out"
-        style={{ maxHeight: expanded ? '120px' : '0px', opacity: expanded ? 1 : 0 }}
+        style={{ maxHeight: expanded ? '100px' : '0px', opacity: expanded ? 1 : 0 }}
       >
-        <div className="flex items-center gap-3 px-5 pb-3 overflow-x-auto">
+        <div className="flex items-center gap-3 px-4 pb-1.5 overflow-x-auto">
           {isLoading ? (
             <Loader2 size={14} className="animate-spin text-content-quaternary" />
           ) : models.length ? (
