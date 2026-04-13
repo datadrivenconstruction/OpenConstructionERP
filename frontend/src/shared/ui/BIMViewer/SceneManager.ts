@@ -88,6 +88,36 @@ export class SceneManager {
       RIGHT: THREE.MOUSE.PAN,
     };
 
+    // Disable OrbitControls when Ctrl or Shift is held so that
+    // Ctrl+Click and Shift+Click are free for multi-select in the
+    // SelectionManager.  Re-enable on keyup.
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Control' || e.key === 'Shift') {
+        this.controls.enabled = false;
+      }
+    };
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'Control' || e.key === 'Shift') {
+        this.controls.enabled = true;
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    // Also handle the case where modifier was held during pointerdown
+    // on the canvas — OrbitControls checks enabled on pointer events.
+    canvas.addEventListener('pointerdown', (e: PointerEvent) => {
+      if (e.ctrlKey || e.metaKey || e.shiftKey) {
+        this.controls.enabled = false;
+        // Re-enable after a short delay so the next non-modified
+        // interaction works normally.
+        const restore = () => {
+          this.controls.enabled = true;
+          window.removeEventListener('pointerup', restore);
+        };
+        window.addEventListener('pointerup', restore);
+      }
+    }, { capture: true }); // capture phase — runs BEFORE OrbitControls
+
     // On-demand rendering: only render when the camera moves or the
     // scene is explicitly invalidated.  Drops idle CPU from 60 FPS
     // constant rendering to ~0%.
