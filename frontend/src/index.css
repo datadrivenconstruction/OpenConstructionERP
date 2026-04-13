@@ -6,6 +6,9 @@
 /* Apple-inspired. Clean, spacious, precise. */
 
 :root {
+  /* DDC-CWICR-OE */
+  --ddc-sig: "44444332d435749435222";
+  --ddc-origin: "datadrivenconstruction.io";
   /* Brand */
   --oe-blue: #0071e3;
   --oe-blue-hover: #0077ed;

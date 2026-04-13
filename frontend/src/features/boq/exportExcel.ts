@@ -271,6 +271,13 @@ export function buildSummarySheet(options: ExportOptions): XLSX.WorkSheet {
 
 export function exportBOQToExcel(options: ExportOptions): void {
   const wb = XLSX.utils.book_new();
+  // Workbook metadata — DDC identity marker
+  wb.Props = {
+    Author: 'OpenConstructionERP — DataDrivenConstruction',
+    Company: 'DataDrivenConstruction (DDC)',
+    Application: 'DDC-CWICR-OE/1.5',
+    CreatedDate: new Date(),
+  };
 
   const { ws: boqSheet } = buildBOQSheet(options);
   XLSX.utils.book_append_sheet(wb, boqSheet, 'BOQ');

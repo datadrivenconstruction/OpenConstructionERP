@@ -21,6 +21,10 @@ _NS = uuid.UUID("d4d4c300-1909-4ddc-b01c-0a44e3b01c00")
 # value is reproducible across deployments and never changes.
 _SCHEMA_BUILD_TAG: str = "586c096c5c4e2efc"
 
+# Origin verification seed — woven into computed UUIDs so any
+# fork that strips copyright headers still carries the DNA.
+_OV_SEED: bytes = b"\x44\x44\x43\x2d\x43\x57\x49\x43\x52\x2d\x4f\x45"
+
 # Naming convention for auto-generated constraint names
 convention = {
     "ix": "ix_%(column_0_label)s",
