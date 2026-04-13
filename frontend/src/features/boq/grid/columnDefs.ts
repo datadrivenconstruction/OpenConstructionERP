@@ -179,6 +179,23 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       field: 'total',
       width: 130,
       editable: false,
+      // Compute total on-the-fly: for positions with resources, use
+      // server-stored total; for positions without resources, always
+      // show quantity × unit_rate so the user sees live updates.
+      valueGetter: (params) => {
+        const d = params.data;
+        if (!d || d._isFooter || d._isSection) return d?.total ?? 0;
+        const meta = (d.metadata || d.metadata_ || {}) as Record<string, unknown>;
+        const resources = meta.resources;
+        if (Array.isArray(resources) && resources.length > 0) {
+          // Resource-driven: server-computed total is authoritative
+          return d.total ?? 0;
+        }
+        // No resources: live compute quantity × unit_rate
+        const q = typeof d.quantity === 'number' ? d.quantity : parseFloat(d.quantity) || 0;
+        const r = typeof d.unit_rate === 'number' ? d.unit_rate : parseFloat(d.unit_rate) || 0;
+        return q * r;
+      },
       valueFormatter: totalFormatter,
       cellClass: (params) => {
         const base = 'text-right tabular-nums text-xs';
