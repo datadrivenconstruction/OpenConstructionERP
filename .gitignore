@@ -124,3 +124,4 @@ desktop/src-tauri/binaries/
 
 # Backup files
 *.backup.*
+backend/data/dwg_uploads/
