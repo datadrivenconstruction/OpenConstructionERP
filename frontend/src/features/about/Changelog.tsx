@@ -14,6 +14,21 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.5.0',
+    date: '2026-04-13',
+    changes: [
+      'Deep quality audit: fixed 4 security vulnerabilities (permissions, JWT exposure, rate limiting), 2 critical concurrency bugs (lock race condition, sweeper atomicity), 3 BIM memory leaks, 4 logic bugs',
+      'IFC4x3 civil infrastructure support (issue #52): 30+ new entity types (IfcAlignment, IfcBridge, IfcRoad, IfcRailway, IfcPavement, IfcEarthworks, etc.), "civil" discipline classification, real IFC coordinate extraction, element limit raised from 500 to 2000',
+      'BIM Viewer UX: removed auto-zoom on element click, Delete key hides elements, collapsible Models filmstrip (auto-hides after 5s), improved camera angle, fixed model orientation (Z_UP double-rotation bug)',
+      'Properties panel redesign: clean key-value layout with hover states, values no longer truncated by letter',
+      'Replaced all 17 window.confirm() dialogs with styled useConfirm + ConfirmDialog',
+      'i18n: wrapped 25+ hardcoded strings in Safety, ChangeOrders, Risk, Validation pages',
+      'Performance: staleTime on 37 useQuery calls across 33 pages, extracted useState object constants',
+      'Code quality: stable React keys in 37 files, normalizeListResponse utility (replaces 9 duplicate patterns), useLocalStorage hook, aria-labels on icon buttons, sr-only form labels, OpenAPI docstrings on 20 endpoints, sort_by/sort_order on 4 list APIs',
+      'Tests: 10 new backend unit test files (185 tests), 8 new E2E Playwright specs (55 tests), 59 IFC civil tests',
+    ],
+  },
+  {
     version: '1.4.8',
     date: '2026-04-11',
     changes: [

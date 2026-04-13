@@ -386,7 +386,7 @@ export class ElementManager {
             reject(new Error('GLTFLoader returned empty result'));
             return;
           }
-          this.processLoadedScene(gltf.scene, onProgress);
+          this.processLoadedScene(gltf.scene, onProgress, true);
           resolve();
         },
         (xhr: ProgressEvent) => {
@@ -458,6 +458,7 @@ export class ElementManager {
   private processLoadedScene(
     scene: THREE.Group | THREE.Object3D,
     onProgress?: (fraction: number) => void,
+    isGLB = false,
   ): void {
     // Remove any existing placeholder meshes for elements that have geometry
     this.clearPlaceholders();
@@ -465,12 +466,19 @@ export class ElementManager {
     this.daeGroup = new THREE.Group();
     this.daeGroup.name = 'bim_dae_geometry';
 
-    // DDC COLLADA/GLB exports use Z-up coordinate system (Revit/CAD
-    // convention) while Three.js expects Y-up. Rotate the entire
-    // imported scene -90° around X to bring the building upright.
-    // ColladaLoader has an `up_axis` tag but DDC files often omit it
-    // or set it incorrectly, so we always apply this correction.
-    scene.rotation.x = -Math.PI / 2;
+    // ColladaLoader automatically handles the <up_axis> tag in COLLADA
+    // files and converts Z_UP → Y_UP internally.  We only need to apply
+    // a manual -90° X rotation for GLB files (which lose the up_axis
+    // metadata during DAE→GLB conversion by trimesh).
+    // For COLLADA (.dae) loaded via ColladaLoader: no rotation needed.
+    // For GLB loaded via GLTFLoader: rotation is already baked in by trimesh.
+    // Detect: if the scene was loaded from a DAE and already has the
+    // ColladaLoader's up_axis correction applied, skip additional rotation.
+    if (isGLB) {
+      // GLB from trimesh may need the rotation
+      scene.rotation.x = -Math.PI / 2;
+    }
+    // For ColladaLoader (DAE): the loader already applied up_axis correction
 
     // Build lookups: by stable_id / mesh_ref / element name.
     // mesh_ref is the Revit ElementId string (e.g. "105545") that matches
