@@ -91,12 +91,7 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       minWidth: 260,
       flex: 1,
       editable: (params) => !params.data?._isFooter,
-      cellEditorSelector: (params) => {
-        if (params.data?._isSection) {
-          return { component: 'agTextCellEditor' };
-        }
-        return { component: 'autocompleteCellEditor' };
-      },
+      cellEditor: 'agTextCellEditor',
       cellClass: (params) => {
         if (params.data?._isSection) return 'font-bold uppercase tracking-wide text-xs';
         return 'text-xs';
