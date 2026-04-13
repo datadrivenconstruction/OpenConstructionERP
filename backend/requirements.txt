@@ -225,7 +225,7 @@ transformers==4.57.6
 typer==0.24.0
 typing-inspection==0.4.2
 typing_extensions==4.15.0
-tzdata==2025.3
+tzdata==2026.1
 uritemplate==4.2.0
 urllib3==2.6.3
 uvicorn==0.41.0
