@@ -9,16 +9,54 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 [Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Discussions](https://t.me/datadrivenconstruction) · [Report Bug](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 
 ![License](https://img.shields.io/badge/license-AGPL--3.0-blue)
-![Version](https://img.shields.io/badge/version-1.0.0-green)
+![Version](https://img.shields.io/badge/version-1.5.0-green)
 ![Languages](https://img.shields.io/badge/languages-21-orange)
 ![Cost Items](https://img.shields.io/badge/cost_items-55%2C000%2B-red)
 ![Standards](https://img.shields.io/badge/standards-20-blueviolet)
 
-<img src="docs/screenshots/hero-overview.jpg" alt="OpenConstructionERP — Dashboard Overview" width="800" />
+<img src="docs/gifs/01_HERO_Full_Workflow.gif" alt="OpenConstructionERP — Full Workflow Demo" width="800" />
 
 *100% open source · 55,000+ cost items · AI estimation · 21 languages · Self-hosted*
 
 </div>
+
+---
+
+## See It In Action
+
+<table>
+<tr>
+<td align="center" width="50%">
+<strong>AI Photo → Estimate</strong><br/>
+<em>Upload a construction photo, get a BOQ in seconds</em><br/><br/>
+<img src="docs/gifs/02_AI_Photo_to_Estimate.gif" alt="AI Photo to Estimate" width="400" />
+</td>
+<td align="center" width="50%">
+<strong>BIM → BOQ Takeoff</strong><br/>
+<em>Import IFC/RVT, auto-extract quantities to BOQ</em><br/><br/>
+<img src="docs/gifs/03_BIM_to_BOQ.gif" alt="BIM to BOQ" width="400" />
+</td>
+</tr>
+<tr>
+<td align="center">
+<strong>PDF Takeoff</strong><br/>
+<em>Measure directly on PDF drawings</em><br/><br/>
+<img src="docs/gifs/04_PDF_Takeoff.gif" alt="PDF Takeoff" width="400" />
+</td>
+<td align="center">
+<strong>55K+ Cost Items — Instant Search</strong><br/>
+<em>Find any cost item across 11 regional databases</em><br/><br/>
+<img src="docs/gifs/05_Instant_Search.gif" alt="Instant Search" width="400" />
+</td>
+</tr>
+<tr>
+<td align="center" colspan="2">
+<strong>Build a BOQ in 60 Seconds</strong><br/>
+<em>Keyboard-first editor with inline cost lookup</em><br/><br/>
+<img src="docs/gifs/06_Build_BOQ_Fast.gif" alt="Build BOQ Fast" width="600" />
+</td>
+</tr>
+</table>
 
 ---
 
@@ -75,7 +113,6 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 - [Tech Stack](#tech-stack)
 - [Architecture](#architecture)
 - [Security](#security)
-- [Contributing](#contributing)
 
 </td>
 </tr>
@@ -104,41 +141,30 @@ Construction cost estimation software is expensive, closed-source, and locked to
 <tr>
 <th align="left">Capability</th>
 <th align="center">OpenConstructionERP</th>
-<th align="center">Typical Proprietary Estimating</th>
-<th align="center">Typical Takeoff Tool</th>
+<th align="center">RIB iTWO</th>
+<th align="center">Exactal CostX</th>
+<th align="center">Sage Estimating</th>
+<th align="center">Bluebeam</th>
 </tr>
-<tr><td><b>License</b></td><td align="center">AGPL-3.0 (free)</td><td align="center">Proprietary</td><td align="center">Proprietary</td></tr>
-<tr><td><b>Self-hosted / offline</b></td><td align="center">&#10004;</td><td align="center">&#10006; cloud only</td><td align="center">&#10006;</td></tr>
-<tr><td><b>Price</b></td><td align="center"><b>Free forever</b></td><td align="center">&#8364;200-500/mo per seat</td><td align="center">&#8364;30-100/mo per seat</td></tr>
-<tr><td><b>AI estimation</b></td><td align="center">&#10004; 16 LLM providers</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
-<tr><td><b>UI languages</b></td><td align="center"><b>21</b></td><td align="center">2-5</td><td align="center">3-8</td></tr>
-<tr><td><b>Regional standards</b></td><td align="center"><b>20</b></td><td align="center">1-4</td><td align="center">&mdash;</td></tr>
-<tr><td><b>BOQ editor</b></td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10006;</td></tr>
-<tr><td><b>CAD/BIM takeoff</b></td><td align="center">&#10004; RVT IFC DWG DGN</td><td align="center">&#10004;</td><td align="center">&#10004; PDF only</td></tr>
-<tr><td><b>4D/5D planning</b></td><td align="center">&#10004;</td><td align="center">&#9888; limited</td><td align="center">&#10006;</td></tr>
-<tr><td><b>Cost database included</b></td><td align="center">&#10004; 55K+ items with rates</td><td align="center">&#10006; extra cost</td><td align="center">&#10006;</td></tr>
-<tr><td><b>Resource catalog</b></td><td align="center">&#10004; 7K+ with prices</td><td align="center">&#10006; extra cost</td><td align="center">&#10006;</td></tr>
-<tr><td><b>Validation engine</b></td><td align="center">&#10004; 42 rules</td><td align="center">&#9888; limited</td><td align="center">&#10006;</td></tr>
-<tr><td><b>REST API</b></td><td align="center">&#10004; full access</td><td align="center">&#9888; limited</td><td align="center">&#10006;</td></tr>
+<tr><td><b>License</b></td><td align="center">AGPL-3.0 (free)</td><td align="center">Proprietary</td><td align="center">Proprietary</td><td align="center">Proprietary</td><td align="center">Proprietary</td></tr>
+<tr><td><b>Self-hosted / offline</b></td><td align="center">&#10004;</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#9888; partial</td><td align="center">&#10006;</td></tr>
+<tr><td><b>Price</b></td><td align="center"><b>Free forever</b></td><td align="center">~&#8364;500/mo</td><td align="center">~&#8364;300/mo</td><td align="center">~&#8364;200/mo</td><td align="center">~&#8364;30/mo</td></tr>
+<tr><td><b>AI estimation</b></td><td align="center">&#10004; 7 LLM providers</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
+<tr><td><b>UI languages</b></td><td align="center"><b>21</b></td><td align="center">5</td><td align="center">3</td><td align="center">2</td><td align="center">8</td></tr>
+<tr><td><b>Regional standards</b></td><td align="center"><b>20</b></td><td align="center">4</td><td align="center">3</td><td align="center">2</td><td align="center">&mdash;</td></tr>
+<tr><td><b>BOQ editor</b></td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10006;</td></tr>
+<tr><td><b>CAD/BIM takeoff</b></td><td align="center">&#10004; RVT IFC DWG DGN</td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10006;</td><td align="center">&#10004; PDF only</td></tr>
+<tr><td><b>4D/5D planning</b></td><td align="center">&#10004;</td><td align="center">&#10004;</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
+<tr><td><b>Cost database included</b></td><td align="center">&#10004; 55K+ items with rates</td><td align="center">&#10006; extra cost</td><td align="center">&#10006; extra cost</td><td align="center">&#10006; extra cost</td><td align="center">&#10006;</td></tr>
+<tr><td><b>Resource catalog</b></td><td align="center">&#10004; 7K+ with prices</td><td align="center">&#10006; extra cost</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
+<tr><td><b>Validation engine</b></td><td align="center">&#10004; 42 rules</td><td align="center">&#9888; limited</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
+<tr><td><b>REST API</b></td><td align="center">&#10004; full access</td><td align="center">&#9888; limited</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
+<tr><td><b>Real-time collaboration</b></td><td align="center">&#10004; soft locks + presence</td><td align="center">&#10004;</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
+<tr><td><b>Open data export</b></td><td align="center">&#10004; GAEB, Excel, CSV, JSON, PDF</td><td align="center">&#9888; limited</td><td align="center">&#9888; limited</td><td align="center">&#9888; limited</td><td align="center">PDF only</td></tr>
+<tr><td><b>BIM requirements (IDS/COBie)</b></td><td align="center">&#10004; import + export</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td><td align="center">&#10006;</td></tr>
 </table>
 
-### What's New in v0.9.0
-
-**30 new modules** — contacts, finance, procurement, tasks, meetings, safety, inspections, RFI, submittals, NCR, correspondence, CDE (ISO 19650), transmittals, BIM Hub, reporting, and more.
-
-**SVG Gantt chart** — day/week/month zoom, dependency arrows, critical path highlighting, drag-to-reschedule.
-
-**BIM Viewer** — Three.js viewer with discipline coloring, element selection, properties panel. Upload CSV/Excel element data + DAE geometry, or raw CAD files (RVT, IFC, DWG, DGN).
-
-**16 AI providers** — Anthropic, OpenAI, Google Gemini, Mistral, Groq, DeepSeek, OpenRouter, Together, Fireworks, Perplexity, Cohere, AI21, xAI, Zhipu, Yandex GPT, Baidu.
-
-**8 regional packs** — US (AIA/CSI), DACH (DIN 276/GAEB/VOB), UK (NRM2/JCT/NEC4), Russia, Middle East (FIDIC), Asia-Pacific, India, Latin America.
-
-**Import/export everywhere** — contacts CSV import with template, budget Excel import, safety/inspection/RFI Excel exports, meeting minutes PDF export, AI meeting transcript import (Teams/Meet/Zoom).
-
-**ISO 19650 CDE** — document containers with WIP->Shared->Published->Archived workflow, OpenCDE BCF 3.0 API compliance.
-
-**568 translation keys x 20 languages** — professional construction terminology in German, French, Spanish, Russian, Chinese, Arabic, Japanese, and 13 more.
+<sub>Product names are trademarks of their respective owners. This comparison is based on publicly available information as of Q1 2026. Pricing is approximate (per-seat, list price) and may vary by region. OpenConstructionERP is not affiliated with any of the listed vendors.</sub>
 
 ---
 
@@ -439,10 +465,6 @@ OpenConstructionERP includes security hardening for production deployments:
 
 Report vulnerabilities via [GitHub Issues](https://github.com/datadrivenconstruction/OpenConstructionERP/issues) (private reports supported).
 
-## Contributing
-
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines, code style, and PR process.
-
 ## License
 
 **AGPL-3.0** — see [LICENSE](LICENSE).
@@ -455,10 +477,10 @@ For commercial licensing without AGPL obligations, contact [info@datadrivenconst
 
 <div align="center">
 
-**Created by [Artem Boiko](https://www.linkedin.com/in/boikoartem/)** · [Data Driven Construction](https://datadrivenconstruction.io)
+**[Data Driven Construction](https://datadrivenconstruction.io)** — open-source tools for the global construction industry.
 
-Building open-source tools for the global construction industry.
+[Website](https://datadrivenconstruction.io) · [YouTube](https://www.youtube.com/@datadrivenconstruction) · [GitHub](https://github.com/datadrivenconstruction) · [Telegram](https://t.me/datadrivenconstruction)
 
-[Website](https://datadrivenconstruction.io) · [LinkedIn](https://www.linkedin.com/in/boikoartem/) · [YouTube](https://www.youtube.com/@datadrivenconstruction) · [GitHub](https://github.com/datadrivenconstruction)
+<sub>OpenConstructionERP v1.4.8 · AGPL-3.0 · Python 3.12+ · Node 20+</sub>
 
 </div>

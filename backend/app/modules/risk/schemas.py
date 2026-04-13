@@ -21,7 +21,7 @@ class RiskCreate(BaseModel):
 
     project_id: UUID
     title: str = Field(..., min_length=1, max_length=255)
-    description: str = ""
+    description: str = Field(default="", max_length=5000)
     category: str = Field(
         default="technical",
         pattern=r"^(technical|financial|schedule|regulatory|environmental|safety)$",
@@ -33,8 +33,8 @@ class RiskCreate(BaseModel):
         default="medium",
         pattern=r"^(low|medium|high|critical)$",
     )
-    mitigation_strategy: str = ""
-    contingency_plan: str = ""
+    mitigation_strategy: str = Field(default="", max_length=5000)
+    contingency_plan: str = Field(default="", max_length=5000)
     owner_name: str = Field(default="", max_length=255)
     response_cost: float = Field(default=0.0, ge=0.0)
     currency: str = Field(default="EUR", max_length=10)
@@ -47,7 +47,7 @@ class RiskUpdate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     title: str | None = Field(default=None, min_length=1, max_length=255)
-    description: str | None = None
+    description: str | None = Field(default=None, max_length=5000)
     category: str | None = Field(
         default=None,
         pattern=r"^(technical|financial|schedule|regulatory|environmental|safety)$",
@@ -63,8 +63,8 @@ class RiskUpdate(BaseModel):
         default=None,
         pattern=r"^(identified|assessed|mitigating|closed|occurred)$",
     )
-    mitigation_strategy: str | None = None
-    contingency_plan: str | None = None
+    mitigation_strategy: str | None = Field(default=None, max_length=5000)
+    contingency_plan: str | None = Field(default=None, max_length=5000)
     owner_name: str | None = Field(default=None, max_length=255)
     response_cost: float | None = Field(default=None, ge=0.0)
     currency: str | None = Field(default=None, max_length=10)

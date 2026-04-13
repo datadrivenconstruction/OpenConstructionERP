@@ -6910,7 +6910,11 @@ async def install_demo_project(session: AsyncSession, demo_id: str) -> dict:
                 start_date=act_start,
                 end_date=act_end,
                 duration_days=dur,
-                progress_pct=prog,
+                # progress_pct is String(10) in the schema (legacy SQLite-era
+                # compromise). asyncpg/PostgreSQL strictly enforces the column
+                # type, so an int here raises "expected str, got int" on the
+                # PG quickstart path. Cast everywhere we set it.
+                progress_pct=str(prog),
                 status="in_progress" if prog > 0 else "planned",
                 color="#ef4444" if i % 3 == 0 else "#0071e3",
                 dependencies=[str(prev_id)] if prev_id else [],
@@ -6945,7 +6949,7 @@ async def install_demo_project(session: AsyncSession, demo_id: str) -> dict:
                 start_date=current_start.strftime("%Y-%m-%d"),
                 end_date=end_date.strftime("%Y-%m-%d"),
                 duration_days=dur,
-                progress_pct=prog,
+                progress_pct=str(prog),  # see note above — String(10), asyncpg-strict
                 status="in_progress" if prog > 0 else "planned",
                 color="#ef4444" if i % 3 == 0 else "#0071e3",
                 dependencies=[str(prev_id)] if prev_id else [],

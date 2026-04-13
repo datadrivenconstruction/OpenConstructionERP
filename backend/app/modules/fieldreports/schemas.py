@@ -45,15 +45,15 @@ class FieldReportCreate(BaseModel):
     humidity: int | None = Field(default=None, ge=0, le=100)
     workforce: list[WorkforceEntry] = Field(default_factory=list)
     equipment_on_site: list[str] = Field(default_factory=list)
-    work_performed: str = ""
-    delays: str | None = None
+    work_performed: str = Field(default="", max_length=10000)
+    delays: str | None = Field(default=None, max_length=5000)
     delay_hours: float = Field(default=0.0, ge=0.0)
-    visitors: str | None = None
-    deliveries: str | None = None
-    safety_incidents: str | None = None
+    visitors: str | None = Field(default=None, max_length=2000)
+    deliveries: str | None = Field(default=None, max_length=5000)
+    safety_incidents: str | None = Field(default=None, max_length=5000)
     materials_used: list[str] = Field(default_factory=list)
     photos: list[str] = Field(default_factory=list)
-    notes: str | None = None
+    notes: str | None = Field(default=None, max_length=5000)
     signature_by: str | None = Field(default=None, max_length=255)
     signature_data: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -85,15 +85,15 @@ class FieldReportUpdate(BaseModel):
     humidity: int | None = Field(default=None, ge=0, le=100)
     workforce: list[WorkforceEntry] | None = None
     equipment_on_site: list[str] | None = None
-    work_performed: str | None = None
-    delays: str | None = None
+    work_performed: str | None = Field(default=None, max_length=10000)
+    delays: str | None = Field(default=None, max_length=5000)
     delay_hours: float | None = Field(default=None, ge=0.0)
-    visitors: str | None = None
-    deliveries: str | None = None
-    safety_incidents: str | None = None
+    visitors: str | None = Field(default=None, max_length=2000)
+    deliveries: str | None = Field(default=None, max_length=5000)
+    safety_incidents: str | None = Field(default=None, max_length=5000)
     materials_used: list[str] | None = None
     photos: list[str] | None = None
-    notes: str | None = None
+    notes: str | None = Field(default=None, max_length=5000)
     signature_by: str | None = Field(default=None, max_length=255)
     signature_data: str | None = None
     metadata: dict[str, Any] | None = None

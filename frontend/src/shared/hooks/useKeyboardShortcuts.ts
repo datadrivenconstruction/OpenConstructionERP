@@ -44,6 +44,15 @@ export interface UseKeyboardShortcutsOptions {
  *   n p - New Project
  *   n b - New BOQ (via projects page)
  *   n t - New Task
+ *
+ * Navigation additions:
+ *   g m - Meetings
+ *   g i - RFI
+ *   g o - Contacts
+ *
+ * Module-local shortcuts (handled per-page, not here):
+ *   n   - Open "create new" form on list pages (tasks, meetings, RFI, contacts)
+ *   s   - Save / recalculate on BOQ editor
  */
 export function useKeyboardShortcuts({
   onOpenSearch,
@@ -76,6 +85,9 @@ export function useKeyboardShortcuts({
         '5': '/5d',
         r: '/reports',
         t: '/tendering',
+        m: '/meetings',
+        i: '/rfi',
+        o: '/contacts',
       },
       n: {
         p: '/projects/new',

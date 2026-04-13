@@ -50,6 +50,7 @@ class Project(Base):
         GUID(),
         ForeignKey("oe_projects_project.id", ondelete="SET NULL"),
         nullable=True,
+        index=True,
     )
     address: Mapped[dict | None] = mapped_column(  # type: ignore[assignment]
         JSON, nullable=True

@@ -5,6 +5,7 @@ and model diffs live here. No business logic — pure data access.
 """
 
 import uuid
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -73,6 +74,32 @@ class BIMModelRepository:
         """Delete a BIM model and all its elements (via CASCADE)."""
         stmt = delete(BIMModel).where(BIMModel.id == model_id)
         await self.session.execute(stmt)
+
+    async def cleanup_stale_processing(
+        self,
+        project_id: uuid.UUID,
+        max_age_hours: int = 1,
+    ) -> int:
+        """Delete models stuck in 'processing' with 0 elements for longer than max_age_hours.
+
+        Returns the number of models deleted.
+        """
+        cutoff = datetime.now(UTC) - timedelta(hours=max_age_hours)
+        # Find stale models
+        find_stmt = select(BIMModel.id).where(
+            BIMModel.project_id == project_id,
+            BIMModel.status == "processing",
+            BIMModel.element_count == 0,
+            BIMModel.created_at < cutoff,
+        )
+        result = await self.session.execute(find_stmt)
+        stale_ids = [row[0] for row in result.all()]
+        if not stale_ids:
+            return 0
+        # Delete them
+        del_stmt = delete(BIMModel).where(BIMModel.id.in_(stale_ids))
+        await self.session.execute(del_stmt)
+        return len(stale_ids)
 
 
 class BIMElementRepository:
@@ -143,10 +170,19 @@ class BIMElementRepository:
         return element
 
     async def bulk_create(self, elements: list[BIMElement]) -> list[BIMElement]:
-        """Insert multiple elements at once."""
-        self.session.add_all(elements)
-        await self.session.flush()
-        return elements
+        """Insert multiple elements in batches.
+
+        Batching avoids SQLite's 999 bind-variable limit and keeps memory
+        pressure manageable for large models (17 k+ elements).
+        """
+        BATCH_SIZE = 500
+        created: list[BIMElement] = []
+        for i in range(0, len(elements), BATCH_SIZE):
+            batch = elements[i : i + BATCH_SIZE]
+            self.session.add_all(batch)
+            await self.session.flush()
+            created.extend(batch)
+        return created
 
     async def delete_all_for_model(self, model_id: uuid.UUID) -> int:
         """Delete all elements for a model. Returns count deleted."""

@@ -20,6 +20,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
+from app.core.rate_limiter import approval_limiter
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.changeorders.schemas import (
     ChangeOrderCreate,
@@ -43,9 +44,17 @@ def _get_service(session: SessionDep) -> ChangeOrderService:
 
 def _order_to_response(order: object) -> ChangeOrderResponse:
     """Build a ChangeOrderResponse from a ChangeOrder ORM object."""
+    # `items` may not be eager-loaded in async context — only attempt to access
+    # if the relationship was populated upstream (via selectinload or similar).
+    # Returning an empty list when unloaded is intentional: this response type
+    # only uses `item_count`, not the items themselves.
     try:
         items = list(order.items)  # type: ignore[attr-defined]
-    except Exception:
+    except Exception as exc:
+        import logging
+        logging.getLogger(__name__).debug(
+            "ChangeOrder items not loaded for response: %s", exc
+        )
         items = []
     return ChangeOrderResponse(
         id=order.id,  # type: ignore[attr-defined]
@@ -300,6 +309,9 @@ async def approve_order(
     service: ChangeOrderService = Depends(_get_service),
 ) -> ChangeOrderResponse:
     """Approve a submitted change order."""
+    allowed, _ = approval_limiter.is_allowed(str(user_id))
+    if not allowed:
+        raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Rate limit exceeded. Try again later.")
     order = await service.approve_order(order_id, user_id)
     return _order_to_response(order)
 

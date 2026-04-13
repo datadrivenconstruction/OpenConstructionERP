@@ -46,10 +46,18 @@ class ContactRepository:
         country_code: str | None = None,
         search: str | None = None,
         is_active: bool = True,
+        owner_id: str | None = None,
         limit: int = 50,
         offset: int = 0,
+        sort_by: str | None = None,
+        sort_order: str = "desc",
     ) -> tuple[list[Contact], int]:
         """List contacts with filters and pagination.
+
+        ``owner_id`` scopes the result to contacts the caller created
+        (``created_by`` proxy used until a real ``tenant_id`` column
+        lands).  Pass ``None`` to skip the owner filter — only admins
+        should ever do that.
 
         Returns (contacts, total_count).
         """
@@ -59,6 +67,8 @@ class ContactRepository:
             base = base.where(Contact.contact_type == contact_type)
         if country_code is not None:
             base = base.where(Contact.country_code == country_code)
+        if owner_id is not None:
+            base = base.where(Contact.created_by == str(owner_id))
         if search is not None:
             term = f"%{search}%"
             base = base.where(
@@ -73,7 +83,16 @@ class ContactRepository:
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        stmt = base.order_by(Contact.created_at.desc()).offset(offset).limit(limit)
+        # Sorting
+        order_clause = None
+        if sort_by:
+            col = getattr(Contact, sort_by, None)
+            if col is not None:
+                order_clause = col.desc() if sort_order == "desc" else col.asc()
+        if order_clause is None:
+            order_clause = Contact.created_at.desc()
+
+        stmt = base.order_by(order_clause).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         contacts = list(result.scalars().all())
 
@@ -101,14 +120,26 @@ class ContactRepository:
             )
         return (await self.session.execute(base)).scalar_one()
 
-    async def stats(self) -> dict:
+    async def stats(self, *, owner_id: str | None = None) -> dict:
         """Compute aggregate contact statistics.
+
+        ``owner_id`` scopes the aggregates to a single user's contacts
+        via the ``created_by`` proxy.  Pass ``None`` for the global
+        view — admins only.
 
         Returns dict with keys: total, by_type, by_country_top10,
         with_expiring_prequalification.
         """
+        # Reused base predicate for all 4 sub-queries below.
+        owner_filter = (
+            (Contact.created_by == str(owner_id)) if owner_id is not None else None
+        )
+
+        def _scope(stmt):  # type: ignore[no-untyped-def]
+            return stmt.where(owner_filter) if owner_filter is not None else stmt
+
         # Total active contacts
-        total_stmt = (
+        total_stmt = _scope(
             select(func.count())
             .select_from(Contact)
             .where(Contact.is_active.is_(True))
@@ -116,7 +147,7 @@ class ContactRepository:
         total = (await self.session.execute(total_stmt)).scalar_one()
 
         # Count by type
-        type_stmt = (
+        type_stmt = _scope(
             select(Contact.contact_type, func.count())
             .where(Contact.is_active.is_(True))
             .group_by(Contact.contact_type)
@@ -125,7 +156,7 @@ class ContactRepository:
         by_type = {row[0]: row[1] for row in type_rows}
 
         # Top 10 countries
-        country_stmt = (
+        country_stmt = _scope(
             select(Contact.country_code, func.count())
             .where(Contact.is_active.is_(True))
             .where(Contact.country_code.isnot(None))
@@ -137,7 +168,7 @@ class ContactRepository:
         by_country_top10 = {row[0]: row[1] for row in country_rows}
 
         # Contacts with expiring prequalification (approved + qualified_until set)
-        expiring_stmt = (
+        expiring_stmt = _scope(
             select(func.count())
             .select_from(Contact)
             .where(Contact.is_active.is_(True))
@@ -157,18 +188,22 @@ class ContactRepository:
         self,
         company_name: str,
         *,
+        owner_id: str | None = None,
         limit: int = 50,
         offset: int = 0,
     ) -> tuple[list[Contact], int]:
         """List all contacts at the same company.
 
-        Uses case-insensitive matching on company_name.
+        Uses case-insensitive matching on company_name.  ``owner_id``
+        scopes the result via the ``created_by`` proxy.
         """
         base = (
             select(Contact)
             .where(Contact.is_active.is_(True))
             .where(func.lower(Contact.company_name) == company_name.lower())
         )
+        if owner_id is not None:
+            base = base.where(Contact.created_by == str(owner_id))
 
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()

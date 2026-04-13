@@ -10,6 +10,8 @@ from decimal import Decimal, InvalidOperation
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.events import event_bus
+
 from app.modules.finance.models import (
     EVMSnapshot,
     Invoice,
@@ -276,7 +278,11 @@ class FinanceService:
         return updated
 
     async def pay_invoice(self, invoice_id: uuid.UUID) -> Invoice:
-        """Transition invoice to paid status."""
+        """Transition invoice to paid status.
+
+        After marking as paid, recalculates budget actuals for the project
+        (sum of all paid invoices) and emits ``invoice.paid`` event.
+        """
         invoice = await self.get_invoice(invoice_id)
         if invoice.status != "approved":
             raise HTTPException(
@@ -294,6 +300,58 @@ class FinanceService:
                 detail="Invoice not found",
             )
         logger.info("Invoice paid: %s", invoice.invoice_number)
+
+        # Recalculate budget actuals in the same session (avoids SQLite lock
+        # contention that occurs with event_bus handlers in separate sessions)
+        try:
+            from sqlalchemy import select
+
+            paid_result = await self.session.execute(
+                select(Invoice).where(
+                    Invoice.project_id == invoice.project_id,
+                    Invoice.status == "paid",
+                )
+            )
+            paid_invoices = paid_result.scalars().all()
+            total_actual = Decimal("0")
+            for inv in paid_invoices:
+                try:
+                    total_actual += Decimal(str(inv.amount_total))
+                except (InvalidOperation, ValueError):
+                    continue
+
+            budget_result = await self.session.execute(
+                select(ProjectBudget).where(
+                    ProjectBudget.project_id == invoice.project_id
+                )
+            )
+            budgets = budget_result.scalars().all()
+            for budget in budgets:
+                budget.actual = str(total_actual)
+
+            logger.info(
+                "Updated budget actuals for project %s: total_actual=%s",
+                invoice.project_id,
+                total_actual,
+            )
+        except Exception:
+            logger.exception(
+                "Failed to update budget actuals after paying invoice %s",
+                invoice.invoice_number,
+            )
+
+        # Emit event for additional cross-module handlers
+        await event_bus.publish(
+            "invoice.paid",
+            {
+                "project_id": str(invoice.project_id),
+                "invoice_id": str(invoice.id),
+                "amount_total": str(invoice.amount_total),
+                "currency_code": invoice.currency_code or "EUR",
+            },
+            source_module="finance",
+        )
+
         return updated
 
     # ── Payments ─────────────────────────────────────────────────────────────
@@ -395,11 +453,19 @@ class FinanceService:
         """Create an EVM snapshot for a project.
 
         Computes derived metrics server-side:
-        - SV = EV - PV  (schedule variance)
-        - CV = EV - AC  (cost variance)
-        - SPI = EV / PV (schedule performance index, 0 if PV == 0)
-        - CPI = EV / AC (cost performance index, 0 if AC == 0)
+        Performance indices:
+        - SV  = EV - PV                  (schedule variance)
+        - CV  = EV - AC                  (cost variance)
+        - SPI = EV / PV                  (schedule performance index, 0 if PV == 0)
+        - CPI = EV / AC                  (cost performance index, 0 if AC == 0)
+
+        Forecast metrics (EVM standard):
+        - EAC  = AC + (BAC - EV) / CPI   (estimate at completion, CPI-based forecast)
+        - VAC  = BAC - EAC               (variance at completion)
+        - ETC  = EAC - AC                (estimate to complete)
+        - TCPI = (BAC - EV) / (BAC - AC) (to-complete performance index)
         """
+        bac = _parse_decimal(data.bac, "bac")
         ev = _parse_decimal(data.ev, "ev")
         pv = _parse_decimal(data.pv, "pv")
         ac = _parse_decimal(data.ac, "ac")
@@ -414,6 +480,24 @@ class FinanceService:
         spi = spi.quantize(Decimal("0.0001")).normalize()
         cpi = cpi.quantize(Decimal("0.0001")).normalize()
 
+        # ── Forecast metrics ────────────────────────────────────────────
+        # EAC: CPI-based forecast. Falls back to AC + remaining BAC when CPI==0.
+        if cpi != 0:
+            eac = ac + (bac - ev) / cpi
+        else:
+            eac = ac + (bac - ev)
+        eac = eac.quantize(Decimal("0.01"))
+
+        vac = (bac - eac).quantize(Decimal("0.01"))
+        etc = (eac - ac).quantize(Decimal("0.01"))
+
+        # TCPI: performance needed on remaining work to stay within BAC.
+        remaining_budget = bac - ac
+        if remaining_budget != 0:
+            tcpi = ((bac - ev) / remaining_budget).quantize(Decimal("0.0001")).normalize()
+        else:
+            tcpi = Decimal("0")
+
         snapshot = EVMSnapshot(
             project_id=data.project_id,
             snapshot_date=data.snapshot_date,
@@ -425,10 +509,17 @@ class FinanceService:
             cv=str(cv),
             spi=str(spi),
             cpi=str(cpi),
+            eac=str(eac),
+            vac=str(vac),
+            etc=str(etc),
+            tcpi=str(tcpi),
             metadata_=data.metadata,
         )
         snapshot = await self.evm.create(snapshot)
-        logger.info("EVM snapshot created: project=%s date=%s", data.project_id, data.snapshot_date)
+        logger.info(
+            "EVM snapshot created: project=%s date=%s EAC=%s VAC=%s SPI=%s CPI=%s",
+            data.project_id, data.snapshot_date, eac, vac, spi, cpi,
+        )
         return snapshot
 
     async def list_evm_snapshots(

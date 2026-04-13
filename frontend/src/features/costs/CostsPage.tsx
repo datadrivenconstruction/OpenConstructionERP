@@ -31,7 +31,8 @@ import {
   TrendingUp,
   Trash2,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, InfoHint, SkeletonTable, CountryFlag, Breadcrumb } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, InfoHint, SkeletonTable, CountryFlag, Breadcrumb, ConfirmDialog } from '@/shared/ui';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { apiGet, apiPost, apiDelete, triggerDownload } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
@@ -427,14 +428,14 @@ export function CostsPage() {
   // Fetch loaded regions list
   const { data: loadedRegions } = useQuery({
     queryKey: ['costs', 'regions'],
-    queryFn: () => apiGet<string[]>('/v1/costs/regions'),
+    queryFn: () => apiGet<string[]>('/v1/costs/regions/'),
     retry: false,
   });
 
   // Fetch per-region stats (for item counts in tabs)
   const { data: regionStats } = useQuery({
     queryKey: ['costs', 'regions', 'stats'],
-    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats'),
+    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats/'),
     retry: false,
   });
 
@@ -1089,8 +1090,11 @@ export function CostsPage() {
               icon={<Copy size={14} />}
               onClick={() => {
                 const text = selectedItems.map((i) => `${i.code}\t${i.description}\t${i.unit}\t${i.rate}`).join('\n');
-                navigator.clipboard.writeText(text).catch(() => {});
-                addToast({ type: 'success', title: t('common.copied', { defaultValue: 'Copied' }), message: t('costs.items_copied', { defaultValue: '{{count}} items copied to clipboard', count: selectedIds.size }) });
+                navigator.clipboard.writeText(text).then(() => {
+                  addToast({ type: 'success', title: t('common.copied', { defaultValue: 'Copied' }), message: t('costs.items_copied', { defaultValue: '{{count}} items copied to clipboard', count: selectedIds.size }) });
+                }).catch((err) => {
+                  addToast({ type: 'error', title: t('common.copy_failed', { defaultValue: 'Copy failed' }), message: err?.message || 'Clipboard access denied' });
+                });
               }}
             >
               {t('common.copy', { defaultValue: 'Copy' })}
@@ -1178,6 +1182,7 @@ function AddToBOQModal({
     queryKey: ['projects'],
     queryFn: () => apiGet<Project[]>('/v1/projects/'),
     retry: false,
+    staleTime: 5 * 60_000,
   });
 
   // Fetch BOQs for selected project
@@ -1195,11 +1200,12 @@ function AddToBOQModal({
     }
   }, [boqs, boqId]);
 
-  // Fetch sections for selected BOQ
+  // Fetch sections for selected BOQ (extract positions from BOQ detail)
   const { data: sections } = useQuery({
     queryKey: ['boq-sections', boqId],
     queryFn: async () => {
-      const positions = await apiGet<BOQSection[]>(`/v1/boq/boqs/${boqId}/positions`);
+      const boqData = await apiGet<{ positions?: BOQSection[] }>(`/v1/boq/boqs/${boqId}`);
+      const positions = boqData.positions ?? [];
       // Sections are positions with empty unit
       return positions.filter((p) => !p.unit || p.unit.trim() === '');
     },
@@ -1215,23 +1221,31 @@ function AddToBOQModal({
 
     try {
       let nextOrdinal = 1;
-      // Get existing positions and find max ordinal for correct numbering
+      // Fetch BOQ detail to find the max existing ordinal for correct numbering
       try {
-        const existing = await apiGet<Array<{ordinal: string}>>(`/v1/boq/boqs/${boqId}/positions`);
+        const boqData = await apiGet<{ positions?: Array<{ ordinal: string }> }>(
+          `/v1/boq/boqs/${boqId}`,
+        );
+        const existing = boqData.positions ?? [];
         if (existing.length > 0) {
-          const maxOrd = Math.max(...existing.map(p => {
+          let maxNum = 0;
+          for (const p of existing) {
             const parts = p.ordinal.split('.');
-            const last = parts[parts.length - 1] ?? '0';
-            return parseInt(last, 10) || 0;
-          }));
-          nextOrdinal = maxOrd + 1;
+            for (const part of parts) {
+              const n = parseInt(part, 10);
+              if (!isNaN(n) && n > maxNum) maxNum = n;
+            }
+          }
+          nextOrdinal = maxNum + 1;
         }
       } catch {
         // Fallback: start at 1
       }
 
       for (const item of items) {
-        const ordinal = String(nextOrdinal).padStart(3, '0');
+        const section = String(Math.floor((nextOrdinal - 1) / 999) + 1).padStart(2, '0');
+        const pos = String(((nextOrdinal - 1) % 999) + 1).padStart(3, '0');
+        const ordinal = `${section}.${pos}`;
 
         // Build rich metadata with cost breakdown + components
         const meta: Record<string, unknown> = {
@@ -1644,6 +1658,14 @@ function CreateAssemblyFromCostsModal({
 }
 
 
+const INITIAL_COST_ITEM_FORM = {
+  code: '',
+  description: '',
+  unit: 'm2',
+  rate: '',
+  currency: 'EUR',
+};
+
 function CreateCostItemModal({
   onClose,
   onCreated,
@@ -1654,13 +1676,7 @@ function CreateCostItemModal({
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [form, setForm] = useState({
-    code: '',
-    description: '',
-    unit: 'm2',
-    rate: '',
-    currency: 'EUR',
-  });
+  const [form, setForm] = useState(INITIAL_COST_ITEM_FORM);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -1835,6 +1851,7 @@ function CostItemRow({
   fmt: (n: number) => string;
   t: ReturnType<typeof import('react-i18next').useTranslation>['t'];
 }) {
+  const { confirm, ...confirmProps } = useConfirm();
   const meta = item.metadata_ ?? {};
   const laborCost = meta.labor_cost ?? 0;
   const equipmentCost = meta.equipment_cost ?? 0;
@@ -1948,11 +1965,13 @@ function CostItemRow({
             </button>
             {item.source === 'custom' && (
               <button
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.stopPropagation();
-                  if (window.confirm(t('costs.confirm_delete', { defaultValue: 'Delete this custom cost item?' }))) {
-                    onDelete?.(item.id);
-                  }
+                  const ok = await confirm({
+                    title: t('costs.confirm_delete_title', { defaultValue: 'Delete cost item?' }),
+                    message: t('costs.confirm_delete', { defaultValue: 'Delete this custom cost item?' }),
+                  });
+                  if (ok) onDelete?.(item.id);
                 }}
                 title={t('common.delete', { defaultValue: 'Delete' })}
                 className="flex h-7 w-7 items-center justify-center rounded text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-colors"
@@ -1975,7 +1994,7 @@ function CostItemRow({
                   {[cls.category, cls.collection, cls.department, cls.section, cls.subsection]
                     .filter(Boolean)
                     .map((part, i, arr) => (
-                      <span key={i} className="flex items-center gap-1">
+                      <span key={`${String(part)}-${i}`} className="flex items-center gap-1">
                         <span className="text-2xs text-content-quaternary">{String(part)}</span>
                         {i < arr.length - 1 && <span className="text-2xs text-content-quaternary/50">&rsaquo;</span>}
                       </span>
@@ -2108,7 +2127,7 @@ function CostItemRow({
                       const typeColor = TYPE_COLOR_MAP[comp.type] || 'text-gray-600 bg-gray-50';
                       const typeLabel = t(`costs.component_${comp.type}`, { defaultValue: comp.type.charAt(0).toUpperCase() + comp.type.slice(1) });
                       return (
-                        <tr key={i} className="hover:bg-surface-secondary/30">
+                        <tr key={`${comp.name}-${comp.type}-${i}`} className="hover:bg-surface-secondary/30">
                           <td className="px-3 py-2 text-content-primary truncate" title={comp.name}>{comp.name}</td>
                           <td className="px-3 py-2">
                             <span className={`inline-block text-2xs font-medium px-1.5 py-0.5 rounded ${typeColor}`}>
@@ -2170,6 +2189,7 @@ function CostItemRow({
           </td>
         </tr>
       )}
+      <ConfirmDialog {...confirmProps} />
     </>
   );
 }

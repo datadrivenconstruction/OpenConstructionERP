@@ -56,6 +56,7 @@ export interface AISettings {
 
 export interface AISettingsUpdate {
   provider?: AIProvider;
+  preferred_model?: string;
   anthropic_api_key?: string | null;
   openai_api_key?: string | null;
   gemini_api_key?: string | null;
@@ -152,16 +153,16 @@ function getAuthHeaders(): Record<string, string> {
 }
 
 export const aiApi = {
-  getSettings: () => apiGet<AISettings>('/v1/ai/settings'),
+  getSettings: () => apiGet<AISettings>('/v1/ai/settings/'),
 
   updateSettings: (data: AISettingsUpdate) =>
-    apiPatch<AISettings, AISettingsUpdate>('/v1/ai/settings', data),
+    apiPatch<AISettings, AISettingsUpdate>('/v1/ai/settings/', data),
 
   testConnection: (provider: AIProvider) =>
-    apiPost<AITestResult, { provider: AIProvider }>('/v1/ai/settings/test', { provider }),
+    apiPost<AITestResult, { provider: AIProvider }>('/v1/ai/settings/test/', { provider }),
 
   quickEstimate: (data: QuickEstimateRequest) =>
-    apiPost<EstimateJobResponse, QuickEstimateRequest>('/v1/ai/quick-estimate', data),
+    apiPost<EstimateJobResponse, QuickEstimateRequest>('/v1/ai/quick-estimate/', data),
 
   /** Upload a photo and get an AI estimate via Vision model. */
   photoEstimate: async (params: {
@@ -220,7 +221,7 @@ export const aiApi = {
     ),
 
   enrichEstimate: (jobId: string, region: string, currency: string) =>
-    apiPost<EnrichResult>(`/v1/ai/estimate/${jobId}/enrich`, { region, currency }),
+    apiPost<EnrichResult>(`/v1/ai/estimate/${jobId}/enrich/`, { region, currency }),
 
   /** Extract grouped quantity tables from a CAD/BIM file (no AI needed). */
   cadExtract: async (file: File): Promise<CadExtractResponse> => {

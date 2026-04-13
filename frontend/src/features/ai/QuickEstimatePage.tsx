@@ -292,6 +292,7 @@ function SaveToBOQDialog({ open, onClose, onSave, saving }: SaveDialogProps) {
     queryKey: ['projects-list-simple'],
     queryFn: () => apiGet<ProjectSummary[]>('/v1/projects/?page_size=100'),
     enabled: open,
+    staleTime: 5 * 60_000,
   });
 
   if (!open) return null;
@@ -606,7 +607,7 @@ function QuantityTablesResult({ data }: { data: CadExtractResponse }) {
                   <tbody>
                     {group.items.map((item, idx) => (
                       <tr
-                        key={idx}
+                        key={`${item.type}-${item.material || ''}-${idx}`}
                         className="border-b border-border-light/30 hover:bg-surface-secondary/20 transition-colors"
                       >
                         <td className="px-4 py-2 text-content-primary">{item.type}</td>
@@ -1186,6 +1187,7 @@ export function QuickEstimatePage() {
     queryKey: ['ai-settings'],
     queryFn: aiApi.getSettings,
     retry: false,
+    staleTime: 5 * 60_000,
   });
 
   const isConfigured = !!(
@@ -1235,7 +1237,7 @@ export function QuickEstimatePage() {
     setInstallResult(null);
     setInstallError(null);
     try {
-      const data = await apiPost<{ message: string }>(`/v1/takeoff/converters/${c.id}/install`);
+      const data = await apiPost<{ message: string }>(`/v1/takeoff/converters/${c.id}/install/`);
       setInstallResult(data);
       addToast({ type: 'success', title: `${c.name} installed`, message: data.message });
       queryClient.invalidateQueries({ queryKey: ['takeoff', 'converters'] });
@@ -1956,6 +1958,7 @@ export function QuickEstimatePage() {
     queryKey: ['projects-list-simple-cad'],
     queryFn: () => apiGet<ProjectSummary[]>('/v1/projects/?page_size=100'),
     enabled: !!cadGroupResult,
+    staleTime: 5 * 60_000,
   });
 
   // ── Render ────────────────────────────────────────────────────────────
@@ -2786,7 +2789,7 @@ export function QuickEstimatePage() {
                         ? [...(selectedGroupBy || []), ...(selectedSumCols || [])].filter(c => c !== 'count' && previewKeys.has(c))
                         : Object.keys(row).slice(0, 8);
                       return (
-                        <tr key={idx} className="border-b border-border-light/30 hover:bg-surface-secondary/20">
+                        <tr key={`preview-${idx}-${Object.values(row).slice(0, 2).join('-')}`} className="border-b border-border-light/30 hover:bg-surface-secondary/20">
                           {visibleCols.map((key) => {
                             const val = row[key];
                             return (
@@ -3209,7 +3212,7 @@ export function QuickEstimatePage() {
                   </thead>
                   <tbody>
                     {elementDetailData.elements.map((el, idx) => (
-                      <tr key={idx} className="border-b border-border-light/20 hover:bg-surface-secondary/20 transition-colors">
+                      <tr key={`el-${idx}-${Object.values(el).slice(0, 2).join('-')}`} className="border-b border-border-light/20 hover:bg-surface-secondary/20 transition-colors">
                         <td className="px-3 py-1.5 text-content-quaternary font-mono">{idx + 1}</td>
                         {elementDetailData.columns.map((col) => {
                           const val = el[col];

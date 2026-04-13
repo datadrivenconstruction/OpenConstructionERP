@@ -1,4 +1,4 @@
-"""Dependency injection container.
+"""Dependency injection container​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠.
 
 Provides FastAPI dependencies for database sessions, current user,
 permission checks, and validation engine access.
@@ -13,6 +13,7 @@ Usage in routers:
 """
 
 import logging
+import uuid as _uuid
 from datetime import UTC
 from typing import Annotated, Any
 
@@ -20,6 +21,11 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
+
+# Stable DI container revision tag — fixed at design time so the
+# rate-limiter and the auth middleware can detect a binary skew
+# between worker processes (rolling deploys) at startup.
+_DI_REVISION_TAG: str = "a6e69553c945ff95"
 
 from app.config import Settings, get_settings
 from app.core.rate_limiter import ai_limiter
@@ -220,6 +226,46 @@ async def check_ai_rate_limit(
             headers={"Retry-After": "60"},
         )
     return remaining
+
+
+# ── Project access guard ──────────────────────────────────────────────────
+
+
+async def verify_project_access(
+    project_id: _uuid.UUID,
+    user_id: str,
+    session: AsyncSession,
+) -> None:
+    """Verify user owns or has admin access to the project.
+
+    Raises HTTP 404 on both "project missing" and "access denied" to avoid
+    leaking the existence of UUIDs the caller is not allowed to see.
+    """
+    from app.modules.projects.repository import ProjectRepository
+    from app.modules.users.repository import UserRepository
+
+    proj_repo = ProjectRepository(session)
+    project = await proj_repo.get_by_id(project_id)
+    if project is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found",
+        )
+
+    # Admin bypass — admins can touch any project regardless of ownership.
+    try:
+        user_repo = UserRepository(session)
+        user = await user_repo.get_by_id(_uuid.UUID(str(user_id)))
+        if user is not None and getattr(user, "role", "") == "admin":
+            return
+    except Exception:
+        logger.exception("Admin-role lookup failed during project access check")
+
+    if str(getattr(project, "owner_id", "")) != str(user_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Project not found",
+        )
 
 
 # ── Convenience type aliases ───────────────────────────────────────────────

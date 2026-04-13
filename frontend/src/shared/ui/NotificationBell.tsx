@@ -89,7 +89,7 @@ export function NotificationBell() {
   // Poll unread count every 30 seconds
   const { data: unreadData } = useQuery({
     queryKey: ['notifications-unread-count'],
-    queryFn: () => apiGet<UnreadCountResponse>('/v1/notifications/unread-count'),
+    queryFn: () => apiGet<UnreadCountResponse>('/v1/notifications/unread-count/'),
     refetchInterval: 30_000,
     staleTime: 15_000,
     retry: false,
@@ -100,7 +100,7 @@ export function NotificationBell() {
   // Fetch last 10 notifications when dropdown opens
   const { data: notifications } = useQuery({
     queryKey: ['notifications-list'],
-    queryFn: () => apiGet<Notification[]>('/v1/notifications/?limit=10'),
+    queryFn: () => apiGet<Notification[]>('/v1/notifications?limit=10'),
     enabled: open,
     staleTime: 10_000,
     retry: false,
@@ -108,19 +108,25 @@ export function NotificationBell() {
 
   // Mark single notification as read
   const markReadMutation = useMutation({
-    mutationFn: (id: string) => apiPost<void>(`/v1/notifications/${id}/read`),
+    mutationFn: (id: string) => apiPost<void>(`/v1/notifications/${id}/read/`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] });
       queryClient.invalidateQueries({ queryKey: ['notifications-list'] });
+    },
+    onError: (err: Error) => {
+      console.warn('Failed to mark notification as read:', err.message);
     },
   });
 
   // Mark all as read
   const markAllReadMutation = useMutation({
-    mutationFn: () => apiPost<void>('/v1/notifications/read-all'),
+    mutationFn: () => apiPost<void>('/v1/notifications/read-all/'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications-unread-count'] });
       queryClient.invalidateQueries({ queryKey: ['notifications-list'] });
+    },
+    onError: (err: Error) => {
+      console.warn('Failed to mark all notifications as read:', err.message);
     },
   });
 

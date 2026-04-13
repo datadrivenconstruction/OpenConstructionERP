@@ -13,7 +13,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, Query
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.correspondence.schemas import (
     CorrespondenceCreate,
     CorrespondenceResponse,
@@ -54,6 +54,7 @@ def _to_response(item: object) -> CorrespondenceResponse:
 
 @router.get("/", response_model=list[CorrespondenceResponse])
 async def list_correspondences(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     offset: int = Query(default=0, ge=0),
@@ -62,6 +63,7 @@ async def list_correspondences(
     type_filter: str | None = Query(default=None, alias="type"),
     service: CorrespondenceService = Depends(_get_service),
 ) -> list[CorrespondenceResponse]:
+    await verify_project_access(project_id, user_id, session)
     items, _ = await service.list_correspondences(
         project_id,
         offset=offset,
@@ -76,9 +78,11 @@ async def list_correspondences(
 async def create_correspondence(
     data: CorrespondenceCreate,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("correspondence.create")),
     service: CorrespondenceService = Depends(_get_service),
 ) -> CorrespondenceResponse:
+    await verify_project_access(data.project_id, user_id, session)
     correspondence = await service.create_correspondence(data, user_id=user_id)
     return _to_response(correspondence)
 

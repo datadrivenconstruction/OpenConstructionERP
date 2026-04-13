@@ -16,11 +16,12 @@ import {
   useReactFlow,
   ReactFlowProvider,
   Panel,
+  Position,
   type Node,
   type Edge,
   type NodeMouseHandler,
   type NodeTypes,
-  type EdgeTypes as RFEdgeTypes,
+  MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -139,17 +140,17 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 const METHOD_COLORS: Record<string, string> = {
-  GET: '#22c55e',
+  GET: '#16a34a',
   POST: '#3b82f6',
   PUT: '#f59e0b',
   PATCH: '#f59e0b',
   DELETE: '#ef4444',
 };
 
-const CANVAS_BG = '#0f1117';
-const NODE_BG = '#1e2433';
-const NODE_TEXT = '#e2e8f0';
-const NODE_TEXT_DIM = '#94a3b8';
+const CANVAS_BG = '#f8fafc';
+const NODE_BG = '#ffffff';
+const NODE_TEXT = '#1e293b';
+const NODE_TEXT_DIM = '#64748b';
 
 function getCategoryColor(category: string): string {
   return CATEGORY_COLORS[category] ?? '#6b7280';
@@ -173,11 +174,12 @@ function ModuleNodeComponent({ data }: { data: ModuleNodeData }) {
   const color = getCategoryColor(data.category);
   return (
     <div
-      className="rounded-xl px-4 py-3 min-w-[180px] max-w-[240px] shadow-lg"
+      className="rounded-xl px-4 py-3 min-w-[180px] max-w-[240px]"
       style={{
         background: NODE_BG,
         border: `2px solid ${color}`,
         color: NODE_TEXT,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
       }}
     >
       <div className="flex items-center gap-2 mb-2">
@@ -314,72 +316,13 @@ const nodeTypes: NodeTypes = {
 };
 
 // ---------------------------------------------------------------------------
-// Custom Edge Components
+// Edge styling constants (use only built-in React Flow edge types)
 // ---------------------------------------------------------------------------
 
-function FKEdge(props: {
-  id: string;
-  sourceX: number;
-  sourceY: number;
-  targetX: number;
-  targetY: number;
-  style?: React.CSSProperties;
-}) {
-  const { sourceX, sourceY, targetX, targetY } = props;
-  const path = `M${sourceX},${sourceY} C${sourceX + 50},${sourceY} ${targetX - 50},${targetY} ${targetX},${targetY}`;
-  return (
-    <g>
-      <path d={path} fill="none" stroke="#f59e0b" strokeWidth={1.5} />
-    </g>
-  );
-}
-
-function ImportEdge(props: {
-  id: string;
-  sourceX: number;
-  sourceY: number;
-  targetX: number;
-  targetY: number;
-  style?: React.CSSProperties;
-}) {
-  const { sourceX, sourceY, targetX, targetY } = props;
-  const path = `M${sourceX},${sourceY} C${sourceX + 50},${sourceY} ${targetX - 50},${targetY} ${targetX},${targetY}`;
-  return (
-    <g>
-      <path d={path} fill="none" stroke="#6b7280" strokeWidth={1} strokeDasharray="6 3" />
-    </g>
-  );
-}
-
-function APIEdge(props: {
-  id: string;
-  sourceX: number;
-  sourceY: number;
-  targetX: number;
-  targetY: number;
-  style?: React.CSSProperties;
-}) {
-  const { sourceX, sourceY, targetX, targetY } = props;
-  const path = `M${sourceX},${sourceY} C${sourceX + 60},${sourceY} ${targetX - 60},${targetY} ${targetX},${targetY}`;
-  return (
-    <g>
-      <path
-        d={path}
-        fill="none"
-        stroke="#3b82f6"
-        strokeWidth={1.5}
-        strokeDasharray="8 4"
-        className="animate-pulse"
-      />
-    </g>
-  );
-}
-
-const edgeTypes: RFEdgeTypes = {
-  fk: FKEdge as RFEdgeTypes['fk'],
-  import: ImportEdge as RFEdgeTypes['import'],
-  api: APIEdge as RFEdgeTypes['api'],
-};
+const EDGE_STYLE_DEPENDENCY = { stroke: '#64748b', strokeWidth: 2 };
+const EDGE_STYLE_FK = { stroke: '#f59e0b', strokeWidth: 2 };
+const EDGE_STYLE_API = { stroke: '#3b82f6', strokeWidth: 2, strokeDasharray: '8 4' };
+const EDGE_STYLE_OWNS = { stroke: '#94a3b8', strokeWidth: 1.5 };
 
 // ---------------------------------------------------------------------------
 // Layout helpers
@@ -404,6 +347,8 @@ function buildModuleView(manifest: ArchitectureManifest): { nodes: Node[]; edges
       id: `mod-${mod.module_id}`,
       type: 'module',
       position: { x: col * (nodeW + gapX), y: row * (nodeH + gapY) },
+      sourcePosition: Position.Right,
+      targetPosition: Position.Left,
       data: {
         label: mod.module_label || mod.module_id,
         category: mod.module_category,
@@ -418,6 +363,7 @@ function buildModuleView(manifest: ArchitectureManifest): { nodes: Node[]; edges
 
   // Dependency edges
   const depGraph = manifest.dependency_graph;
+  let edgeIdx = 0;
   for (const [sourceId, targets] of Object.entries(depGraph)) {
     for (const targetId of targets) {
       if (nodes.some((n) => n.id === `mod-${sourceId}`) && nodes.some((n) => n.id === `mod-${targetId}`)) {
@@ -425,10 +371,12 @@ function buildModuleView(manifest: ArchitectureManifest): { nodes: Node[]; edges
           id: `dep-${sourceId}-${targetId}`,
           source: `mod-${sourceId}`,
           target: `mod-${targetId}`,
-          type: 'import',
-          animated: false,
-          style: { stroke: '#6b7280', strokeDasharray: '6 3' },
+          type: 'default',
+          animated: edgeIdx < 5, // animate a few key edges to show data flow
+          style: { ...EDGE_STYLE_DEPENDENCY },
+          markerEnd: { type: MarkerType.ArrowClosed, color: '#64748b', width: 15, height: 15 },
         });
+        edgeIdx++;
       }
     }
   }
@@ -461,6 +409,8 @@ function buildModelView(manifest: ArchitectureManifest): { nodes: Node[]; edges:
         id: nodeId,
         type: 'model',
         position: { x: col * (nodeW + gapX), y: row * (nodeH + gapY) },
+        sourcePosition: Position.Right,
+        targetPosition: Position.Left,
         data: {
           label: model.class_name,
           tablename: model.tablename,
@@ -484,9 +434,10 @@ function buildModelView(manifest: ArchitectureManifest): { nodes: Node[]; edges:
             id: `fk-${sourceId}-${rel.name}-${targetId}`,
             source: sourceId,
             target: targetId,
-            type: 'fk',
+            type: 'default',
             animated: false,
-            style: { stroke: '#f59e0b' },
+            style: { ...EDGE_STYLE_FK },
+            markerEnd: { type: MarkerType.ArrowClosed, color: '#f59e0b', width: 12, height: 12 },
             label: rel.name,
           });
         }
@@ -514,6 +465,8 @@ function buildAPIView(manifest: ArchitectureManifest): { nodes: Node[]; edges: E
       id: featureNodeId,
       type: 'module',
       position: { x: 0, y: featureY },
+      sourcePosition: Position.Right,
+      targetPosition: Position.Left,
       data: {
         label: `FE: ${featureName}`,
         category: 'integration',
@@ -537,6 +490,8 @@ function buildAPIView(manifest: ArchitectureManifest): { nodes: Node[]; edges: E
       id: modNodeId,
       type: 'module',
       position: { x: 600, y: routeY },
+      sourcePosition: Position.Right,
+      targetPosition: Position.Left,
       data: {
         label: mod.module_label || mod.module_id,
         category: mod.module_category,
@@ -558,6 +513,8 @@ function buildAPIView(manifest: ArchitectureManifest): { nodes: Node[]; edges: E
         id: routeNodeId,
         type: 'route',
         position: { x: 1000, y: routeY + ri * 55 },
+        sourcePosition: Position.Right,
+        targetPosition: Position.Left,
         data: {
           method: route.method,
           path: `/api/v1/${mod.module_id}${route.path}`,
@@ -570,8 +527,10 @@ function buildAPIView(manifest: ArchitectureManifest): { nodes: Node[]; edges: E
         id: `api-edge-${modNodeId}-${routeNodeId}`,
         source: modNodeId,
         target: routeNodeId,
+        type: 'default',
         animated: true,
-        style: { stroke: '#3b82f6', strokeDasharray: '8 4' },
+        style: { ...EDGE_STYLE_API },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6', width: 12, height: 12 },
       });
     }
 
@@ -588,9 +547,10 @@ function buildAPIView(manifest: ArchitectureManifest): { nodes: Node[]; edges: E
         id: `fe-be-${featureName}-${backendModule}`,
         source: featureNodeId,
         target: backendNodeId,
-        type: 'api',
+        type: 'default',
         animated: true,
-        style: { stroke: '#3b82f6', strokeDasharray: '8 4' },
+        style: { ...EDGE_STYLE_API },
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6', width: 12, height: 12 },
       });
     }
   }
@@ -611,6 +571,8 @@ function buildFullView(manifest: ArchitectureManifest): { nodes: Node[]; edges: 
       id: modNodeId,
       type: 'module',
       position: { x: 0, y: moduleY },
+      sourcePosition: Position.Right,
+      targetPosition: Position.Left,
       data: {
         label: mod.module_label || mod.module_id,
         category: mod.module_category,
@@ -633,6 +595,8 @@ function buildFullView(manifest: ArchitectureManifest): { nodes: Node[]; edges: 
         id: modelNodeId,
         type: 'model',
         position: { x: 400, y: moduleY + mi * 220 },
+        sourcePosition: Position.Right,
+        targetPosition: Position.Left,
         data: {
           label: model.class_name,
           tablename: model.tablename,
@@ -645,7 +609,8 @@ function buildFullView(manifest: ArchitectureManifest): { nodes: Node[]; edges: 
         id: `owns-${modNodeId}-${modelNodeId}`,
         source: modNodeId,
         target: modelNodeId,
-        style: { stroke: getCategoryColor(mod.module_category), strokeWidth: 1 },
+        type: 'default',
+        style: { ...EDGE_STYLE_OWNS, stroke: getCategoryColor(mod.module_category) },
       });
     }
 
@@ -659,6 +624,8 @@ function buildFullView(manifest: ArchitectureManifest): { nodes: Node[]; edges: 
         id: routeNodeId,
         type: 'route',
         position: { x: 800, y: moduleY + ri * 55 },
+        sourcePosition: Position.Right,
+        targetPosition: Position.Left,
         data: {
           method: route.method,
           path: `/api/v1/${mod.module_id}${route.path}`,
@@ -671,8 +638,9 @@ function buildFullView(manifest: ArchitectureManifest): { nodes: Node[]; edges: 
         id: `api-${modNodeId}-${routeNodeId}`,
         source: modNodeId,
         target: routeNodeId,
+        type: 'default',
         animated: true,
-        style: { stroke: '#3b82f680', strokeDasharray: '6 3' },
+        style: { ...EDGE_STYLE_API },
       });
     }
 
@@ -688,8 +656,9 @@ function buildFullView(manifest: ArchitectureManifest): { nodes: Node[]; edges: 
           id: `dep-${sourceId}-${targetId}`,
           source: `mod-${sourceId}`,
           target: `mod-${targetId}`,
-          type: 'import',
-          style: { stroke: '#6b728060', strokeDasharray: '6 3' },
+          type: 'default',
+          style: { ...EDGE_STYLE_DEPENDENCY, strokeDasharray: '6 3' },
+          markerEnd: { type: MarkerType.ArrowClosed, color: '#64748b', width: 12, height: 12 },
         });
       }
     }
@@ -706,8 +675,9 @@ function buildFullView(manifest: ArchitectureManifest): { nodes: Node[]; edges: 
             id: `fk-${sourceId}-${rel.name}-${targetId}`,
             source: sourceId,
             target: targetId,
-            type: 'fk',
-            style: { stroke: '#f59e0b60' },
+            type: 'default',
+            style: { ...EDGE_STYLE_FK },
+            markerEnd: { type: MarkerType.ArrowClosed, color: '#f59e0b', width: 10, height: 10 },
           });
         }
       }
@@ -778,7 +748,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
                   <span
                     key={dep}
                     className="text-[10px] px-2 py-0.5 rounded-full"
-                    style={{ background: '#334155', color: NODE_TEXT_DIM }}
+                    style={{ background: '#e2e8f0', color: NODE_TEXT_DIM }}
                   >
                     {dep}
                   </span>
@@ -797,7 +767,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
                   <div
                     key={model.class_name}
                     className="text-[11px] px-2 py-1 rounded"
-                    style={{ background: '#0f1117', color: NODE_TEXT_DIM }}
+                    style={{ background: '#f8fafc', color: NODE_TEXT_DIM }}
                   >
                     <span className="font-mono font-medium" style={{ color: '#eab308' }}>
                       {model.class_name}
@@ -819,7 +789,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
                   <div
                     key={`${route.method}-${route.path}-${idx}`}
                     className="flex items-center gap-2 text-[11px] px-2 py-1 rounded"
-                    style={{ background: '#0f1117' }}
+                    style={{ background: '#f8fafc' }}
                   >
                     <span
                       className="px-1 py-0.5 rounded text-[9px] font-bold shrink-0"
@@ -880,7 +850,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
                   <div
                     key={col.name}
                     className="flex items-center gap-2 text-[11px] px-2 py-1 rounded"
-                    style={{ background: '#0f1117' }}
+                    style={{ background: '#f8fafc' }}
                   >
                     <span
                       className="w-2 h-2 rounded-full shrink-0"
@@ -917,7 +887,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
                 <div
                   key={rel.name}
                   className="flex items-center gap-2 text-[11px] px-2 py-1 rounded"
-                  style={{ background: '#0f1117' }}
+                  style={{ background: '#f8fafc' }}
                 >
                   <ChevronRight size={10} style={{ color: '#f59e0b' }} />
                   <span className="font-mono" style={{ color: '#f59e0b' }}>
@@ -968,7 +938,7 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
               <h4 className="text-xs font-semibold mb-1" style={{ color: NODE_TEXT }}>
                 {t('architecture.response_model', { defaultValue: 'Response Model' })}
               </h4>
-              <span className="text-xs font-mono" style={{ color: '#22c55e' }}>
+              <span className="text-xs font-mono" style={{ color: '#16a34a' }}>
                 {route.response_model}
               </span>
             </div>
@@ -1001,11 +971,11 @@ function DetailPanel({ manifest, selectedNodeId, onClose }: DetailPanelProps) {
       className="absolute top-0 right-0 h-full overflow-y-auto z-20 shadow-2xl"
       style={{
         width: 380,
-        background: '#1a1f2e',
+        background: '#ffffff',
         borderLeft: '1px solid #334155',
       }}
     >
-      <div className="sticky top-0 flex items-center justify-between px-4 py-3 z-10" style={{ background: '#1a1f2e', borderBottom: '1px solid #334155' }}>
+      <div className="sticky top-0 flex items-center justify-between px-4 py-3 z-10" style={{ background: '#ffffff', borderBottom: '1px solid #334155' }}>
         <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: NODE_TEXT_DIM }}>
           {t('architecture.details', { defaultValue: 'Details' })}
         </span>
@@ -1031,7 +1001,7 @@ function Legend() {
   return (
     <div
       className="rounded-lg px-3 py-2 text-[10px] space-y-2"
-      style={{ background: '#1a1f2eee', border: '1px solid #334155', color: NODE_TEXT_DIM }}
+      style={{ background: '#ffffffee', border: '1px solid #334155', color: NODE_TEXT_DIM }}
     >
       <div className="font-semibold text-[11px]" style={{ color: NODE_TEXT }}>
         {t('architecture.legend', { defaultValue: 'Legend' })}
@@ -1092,7 +1062,7 @@ function ArchitectureEmptyState() {
       <div className="flex flex-col items-center gap-4 max-w-md text-center px-6">
         <div
           className="w-16 h-16 rounded-2xl flex items-center justify-center"
-          style={{ background: '#1e2433', border: '1px solid #334155' }}
+          style={{ background: '#f1f5f9', border: '1px solid #334155' }}
         >
           <Network size={32} style={{ color: '#6b7280' }} />
         </div>
@@ -1107,7 +1077,7 @@ function ArchitectureEmptyState() {
         </p>
         <div
           className="text-xs font-mono px-4 py-2 rounded-lg"
-          style={{ background: '#0f1117', border: '1px solid #334155', color: '#22c55e' }}
+          style={{ background: '#f8fafc', border: '1px solid #334155', color: '#16a34a' }}
         >
           python generate_architecture_manifest.py
         </div>
@@ -1131,16 +1101,25 @@ function FlowCanvas({ manifest, viewLevel, searchQuery }: FlowCanvasProps) {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
   const built = useMemo(() => {
+    let result: { nodes: Node[]; edges: Edge[] };
     switch (viewLevel) {
       case 'modules':
-        return buildModuleView(manifest);
+        result = buildModuleView(manifest);
+        break;
       case 'models':
-        return buildModelView(manifest);
+        result = buildModelView(manifest);
+        break;
       case 'api':
-        return buildAPIView(manifest);
+        result = buildAPIView(manifest);
+        break;
       case 'full':
-        return buildFullView(manifest);
+        result = buildFullView(manifest);
+        break;
     }
+    if (import.meta.env.DEV) {
+      console.log('[ArchitectureMap]', viewLevel, '- Nodes:', result.nodes.length, 'Edges:', result.edges.length);
+    }
+    return result;
   }, [manifest, viewLevel]);
 
   // Apply search highlighting
@@ -1195,19 +1174,22 @@ function FlowCanvas({ manifest, viewLevel, searchQuery }: FlowCanvasProps) {
         onNodeClick={onNodeClick}
         onPaneClick={onPaneClick}
         nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
         fitView
         fitViewOptions={{ padding: 0.15 }}
         minZoom={0.05}
         maxZoom={2}
-        defaultEdgeOptions={{ animated: false }}
+        defaultEdgeOptions={{
+          type: 'default',
+          style: { stroke: '#94a3b8', strokeWidth: 2 },
+          markerEnd: { type: MarkerType.ArrowClosed, color: '#94a3b8' },
+        }}
         proOptions={{ hideAttribution: true }}
         style={{ background: CANVAS_BG }}
       >
-        <Background color="#1e293b" gap={24} size={1} />
+        <Background color="#cbd5e1" gap={24} size={1} />
         <Controls
           showInteractive={false}
-          style={{ background: '#1e2433', borderColor: '#334155', borderRadius: 8 }}
+          style={{ background: '#f1f5f9', borderColor: '#e2e8f0', borderRadius: 8 }}
         />
         <MiniMap
           nodeColor={(node) => {
@@ -1216,8 +1198,8 @@ function FlowCanvas({ manifest, viewLevel, searchQuery }: FlowCanvasProps) {
           }}
           maskColor="#0f111780"
           style={{
-            background: '#1a1f2e',
-            borderColor: '#334155',
+            background: '#ffffff',
+            borderColor: '#e2e8f0',
             borderRadius: 8,
           }}
         />
@@ -1315,11 +1297,11 @@ export function ArchitectureMapPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full" style={{ background: CANVAS_BG }}>
+      <div className="flex items-center justify-center" style={{ background: CANVAS_BG, height: 'calc(100vh - 56px)' }}>
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#3b82f6', borderTopColor: 'transparent' }} />
           <span className="text-sm" style={{ color: NODE_TEXT_DIM }}>
-            {t('architecture.loading', { defaultValue: 'Loading architecture...' })}
+            {t('architecture.loading', { defaultValue: 'Loading architecture data (54 modules)...' })}
           </span>
         </div>
       </div>
@@ -1331,11 +1313,11 @@ export function ArchitectureMapPage() {
   }
 
   return (
-    <div className="flex flex-col h-full" style={{ background: CANVAS_BG }}>
+    <div className="flex flex-col" style={{ background: CANVAS_BG, height: 'calc(100vh - 56px)' }}>
       {/* Top bar */}
       <div
         className="flex items-center gap-3 px-4 py-2 shrink-0 z-10"
-        style={{ background: '#1a1f2e', borderBottom: '1px solid #334155' }}
+        style={{ background: '#ffffff', borderBottom: '1px solid #e2e8f0' }}
       >
         {/* View level buttons */}
         <div className="flex items-center gap-1">
@@ -1369,7 +1351,7 @@ export function ArchitectureMapPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-8 pr-8 py-1.5 rounded-md text-xs outline-none"
             style={{
-              background: '#0f1117',
+              background: '#f8fafc',
               border: '1px solid #334155',
               color: NODE_TEXT,
               width: 220,
@@ -1392,13 +1374,13 @@ export function ArchitectureMapPage() {
         {/* Stats badge */}
         <div
           className="hidden md:flex items-center gap-2 text-[10px] px-3 py-1 rounded-md"
-          style={{ background: '#0f1117', border: '1px solid #334155', color: NODE_TEXT_DIM }}
+          style={{ background: '#f8fafc', border: '1px solid #334155', color: NODE_TEXT_DIM }}
         >
           <Info size={12} />
           <span>{manifest.statistics.backend_modules} modules</span>
-          <span style={{ color: '#334155' }}>|</span>
+          <span style={{ color: '#e2e8f0' }}>|</span>
           <span>{manifest.statistics.total_models} models</span>
-          <span style={{ color: '#334155' }}>|</span>
+          <span style={{ color: '#e2e8f0' }}>|</span>
           <span>{manifest.statistics.total_routes} routes</span>
         </div>
       </div>

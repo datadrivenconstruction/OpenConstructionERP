@@ -260,6 +260,7 @@ const ALL_MODULES: ModuleDef[] = [
   // AI
   { key: 'ai-estimate', labelKey: 'nav.ai_estimate', descriptionKey: 'onboarding.mod_ai_estimate_desc', group: 'ai' },
   { key: 'advisor', labelKey: 'nav.ai_advisor', descriptionKey: 'onboarding.mod_advisor_desc', group: 'ai' },
+  { key: 'project-intelligence', labelKey: 'nav.project_intelligence', descriptionKey: 'onboarding.mod_pci_desc', group: 'ai' },
   // Planning
   { key: 'schedule', labelKey: 'schedule.title', descriptionKey: 'onboarding.mod_schedule_desc', group: 'planning' },
   { key: 'tasks', labelKey: 'tasks.title', descriptionKey: 'onboarding.mod_tasks_desc', group: 'planning' },
@@ -894,6 +895,51 @@ function StepModuleConfig({
         {t('onboarding.modules_active', { defaultValue: 'modules active' })}
       </div>
 
+      {/* AI Tools toggle */}
+      <div className="mt-4 w-full max-w-2xl">
+        <div className="flex items-center justify-between rounded-xl border border-border-light bg-surface-elevated px-4 py-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50 dark:bg-violet-950/30 shrink-0">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-violet-600"><path d="M12 2a4 4 0 0 1 4 4v1a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V6a4 4 0 0 1 4-4Z"/><path d="M16 11v1a4 4 0 1 1-8 0v-1"/><path d="M12 19v3"/><path d="M8 22h8"/></svg>
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-content-primary">
+                {t('onboarding.ai_tools', { defaultValue: 'AI-Powered Tools' })}
+              </p>
+              <p className="text-xs text-content-tertiary truncate">
+                {t('onboarding.ai_tools_desc', {
+                  defaultValue: 'AI estimation, cost advisor, project intelligence. Requires API key (Anthropic, OpenAI, or Gemini).',
+                })}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const aiKeys = ALL_MODULES.filter((m) => m.group === 'ai').map((m) => m.key);
+              const anyEnabled = aiKeys.some((k) => enabledModules.has(k));
+              for (const k of aiKeys) {
+                if (anyEnabled && enabledModules.has(k)) onToggleModule(k);
+                if (!anyEnabled && !enabledModules.has(k)) onToggleModule(k);
+              }
+            }}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+              ALL_MODULES.filter((m) => m.group === 'ai').some((m) => enabledModules.has(m.key))
+                ? 'bg-oe-blue'
+                : 'bg-gray-300 dark:bg-gray-600'
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ease-in-out ${
+                ALL_MODULES.filter((m) => m.group === 'ai').some((m) => enabledModules.has(m.key))
+                  ? 'translate-x-5'
+                  : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
+      </div>
+
       {/* Module list grouped by category */}
       <div className="mt-4 w-full max-w-2xl max-h-[50vh] overflow-y-auto pr-1 space-y-5 scrollbar-thin">
         {MODULE_GROUPS.map((group) => {
@@ -1112,7 +1158,7 @@ function StepDataSetup({
   const handleInstallDemo = useCallback(async () => {
     setInstallingDemo(true);
     try {
-      await apiPost(`/demo/install/${suggestedDemoId}/`);
+      await apiPost(`/demo/install/${suggestedDemoId}`);
       setDemoInstalled(true);
       addToast({
         type: 'success',
@@ -1172,6 +1218,9 @@ function StepDataSetup({
           title: t('onboarding.ai_saved', { defaultValue: 'AI settings saved' }),
         });
       }
+    },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('onboarding.ai_save_failed', { defaultValue: 'Failed to save AI settings' }), message: err.message });
     },
   });
 

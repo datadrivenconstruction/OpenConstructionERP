@@ -52,6 +52,8 @@ import { manifest as itComputoExchange } from './it-computo-exchange/manifest';
 import { manifest as nlStabuExchange } from './nl-stabu-exchange/manifest';
 import { manifest as plKnrExchange } from './pl-knr-exchange/manifest';
 import { manifest as krBoqExchange } from './kr-boq-exchange/manifest';
+import { manifest as ddcIfcConverter } from './ddc-ifc-converter/manifest';
+import { manifest as ddcRvtConverter } from './ddc-rvt-converter/manifest';
 
 /* ── Registry ──────────────────────────────────────────────────────── */
 
@@ -88,6 +90,8 @@ export const MODULE_REGISTRY: ModuleManifest[] = [
   nlStabuExchange,
   plKnrExchange,
   krBoqExchange,
+  ddcIfcConverter,
+  ddcRvtConverter,
 ];
 
 /* ── Helper functions ──────────────────────────────────────────────── */

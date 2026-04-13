@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { Plus, Trash2, Send, X, Database, Search, Loader2, Check } from 'lucide-react';
-import { Button, Badge, Card, Input, Breadcrumb } from '@/shared/ui';
+import { Button, Badge, Card, Input, Breadcrumb, ConfirmDialog } from '@/shared/ui';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { apiGet } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
@@ -469,6 +470,7 @@ function ComponentRow({
   fmt: (n: number) => string;
 }) {
   const { t } = useTranslation();
+  const { confirm, ...confirmProps } = useConfirm();
   const [editing, setEditing] = useState<string | null>(null);
 
   const handleBlur = (field: string, value: string) => {
@@ -486,6 +488,7 @@ function ComponentRow({
     'w-full bg-transparent border-none outline-none focus:ring-0 p-0 text-sm';
 
   return (
+    <>
     <tr className="group hover:bg-surface-secondary/50 transition-colors">
       {/* Description */}
       <td className={cellClass}>
@@ -562,10 +565,12 @@ function ComponentRow({
       {/* Delete */}
       <td className="px-2 py-2.5">
         <button
-          onClick={() => {
-            if (window.confirm(t('assemblies.confirm_delete_component', { defaultValue: 'Remove this component from the assembly?' }))) {
-              onDelete();
-            }
+          onClick={async () => {
+            const ok = await confirm({
+              title: t('assemblies.confirm_delete_component_title', { defaultValue: 'Remove component?' }),
+              message: t('assemblies.confirm_delete_component', { defaultValue: 'Remove this component from the assembly?' }),
+            });
+            if (ok) onDelete();
           }}
           className="opacity-0 group-hover:opacity-100 flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-all"
         >
@@ -573,6 +578,8 @@ function ComponentRow({
         </button>
       </td>
     </tr>
+    <ConfirmDialog {...confirmProps} />
+    </>
   );
 }
 
@@ -649,6 +656,7 @@ function ApplyToBOQModal({
     queryKey: ['projects'],
     queryFn: () => apiGet<Array<{ id: string; name: string }>>('/v1/projects/'),
     retry: false,
+    staleTime: 5 * 60_000,
   });
 
   const { data: boqs } = useQuery({

@@ -35,3 +35,17 @@ repos:
       - id: conventional-pre-commit
         stages: [commit-msg]
         args: [feat, fix, refactor, docs, test, chore, perf, ci, build, style]
+
+  # Local hooks
+  - repo: local
+    hooks:
+      # Catch backend/pyproject.toml ↔ frontend/package.json version drift.
+      # History note: v1.3.32 → v1.4.2 silently shipped with backend stuck
+      # on 1.3.31 because nothing was guarding the two literals.  Added in
+      # v1.4.4 so the same gap can never sneak past a commit again.
+      - id: version-sync-check
+        name: Check backend/frontend version literals are in sync
+        entry: python scripts/check_version_sync.py
+        language: system
+        pass_filenames: false
+        files: ^(backend/pyproject\.toml|frontend/package\.json|CHANGELOG\.md|frontend/src/features/about/Changelog\.tsx)$

@@ -49,7 +49,7 @@ import random
 import tempfile
 import uuid
 from collections.abc import Iterator
-from datetime import UTC
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 
@@ -209,7 +209,7 @@ async def _log_activity(
                 boq = await service.get_boq(boq_id)
                 project_id = boq.project_id
             except Exception:
-                pass
+                _log.debug("Activity log: failed to resolve project_id from boq_id", exc_info=True)
         await service.log_activity(
             user_id=user_id,
             action=action,
@@ -455,9 +455,16 @@ async def classify_position(
             unit=data.unit,
             project_standard=data.project_standard,
         )
-    except Exception:
+    except HTTPException:
+        raise
+    except Exception as exc:
         _log.exception("classify_position failed")
-        raw_suggestions = []
+        # Return a structured error so the frontend can show a clear message
+        # instead of an empty suggestion list that looks like "no matches".
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Classification service unavailable: {exc}",
+        )
 
     suggestions = [
         ClassificationSuggestion(
@@ -1289,12 +1296,15 @@ async def add_position(
     boq_id: uuid.UUID,
     data: PositionCreate,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: BOQService = Depends(_get_service),
 ) -> PositionResponse:
     """Add a new position to a BOQ.
 
     The boq_id in the URL takes precedence over the body field.
     """
+    await _verify_boq_owner(session, boq_id, user_id, payload)
     # Override body boq_id with URL path parameter
     data.boq_id = boq_id
     position = await service.add_position(data)
@@ -1320,6 +1330,9 @@ async def add_position(
 async def bulk_add_positions(
     boq_id: uuid.UUID,
     payload: dict[str, Any],
+    user_id: CurrentUserId,
+    auth_payload: CurrentUserPayload,
+    session: SessionDep,
     service: BOQService = Depends(_get_service),
 ) -> list[PositionResponse]:
     """Bulk insert multiple positions into a BOQ.
@@ -1328,6 +1341,7 @@ async def bulk_add_positions(
     as sent by the Takeoff page.  Each item is converted into a full
     :class:`PositionCreate` and inserted sequentially.
     """
+    await _verify_boq_owner(session, boq_id, user_id, auth_payload)
     items: list[dict[str, Any]] = payload.get("items", [])
     if not items:
         raise HTTPException(
@@ -1399,9 +1413,16 @@ async def update_position(
     position_id: uuid.UUID,
     data: PositionUpdate,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: BOQService = Depends(_get_service),
 ) -> PositionResponse:
     """Update a BOQ position. Recalculates total if quantity or unit_rate changed."""
+    # IDOR guard: load position → derive boq_id → verify ownership chain
+    existing = await service.position_repo.get_by_id(position_id)
+    if existing is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Position not found")
+    await _verify_boq_owner(session, existing.boq_id, user_id, payload)
     position = await service.update_position(position_id, data)
     return _position_to_response(position)
 
@@ -1415,18 +1436,29 @@ async def update_position(
 async def delete_position(
     position_id: uuid.UUID,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    cascade: bool = Query(
+        default=False,
+        description="If true, delete all descendant positions when deleting a section.",
+    ),
     service: BOQService = Depends(_get_service),
 ) -> None:
-    """Delete a single position."""
+    """Delete a single position. For sections, pass ?cascade=true to delete children."""
+    # IDOR guard: load position → derive boq_id → verify ownership chain
+    existing = await service.position_repo.get_by_id(position_id)
+    if existing is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Position not found")
+    await _verify_boq_owner(session, existing.boq_id, user_id, payload)
     await _log_activity(
         service,
         user_id=user_id,
         action="position_deleted",
         target_type="position",
-        description=f"Deleted position {position_id}",
+        description=f"Deleted position {position_id} (cascade={cascade})",
         target_id=position_id,
     )
-    await service.delete_position(position_id)
+    await service.delete_position(position_id, cascade=cascade)
 
 
 @router.post(
@@ -1436,6 +1468,8 @@ async def delete_position(
 )
 async def reorder_positions(
     boq_id: uuid.UUID,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     data: dict = Body(...),
     user_id: CurrentUserId = None,
     service: BOQService = Depends(_get_service),
@@ -1445,6 +1479,8 @@ async def reorder_positions(
     Expects ``{"position_ids": ["uuid1", "uuid2", ...]}``.
     The list order determines the new ``sort_order`` for each position.
     """
+    # IDOR guard: verify BOQ ownership before any mutation
+    await _verify_boq_owner(session, boq_id, user_id, payload)
     raw_ids = data.get("position_ids", [])
     position_ids = [uuid.UUID(pid) if isinstance(pid, str) else pid for pid in raw_ids]
     await service.reorder_positions(boq_id, position_ids)
@@ -1472,6 +1508,9 @@ async def reorder_positions(
 async def create_section(
     boq_id: uuid.UUID,
     data: SectionCreate,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: BOQService = Depends(_get_service),
 ) -> PositionResponse:
     """Create a section header row in a BOQ.
@@ -1479,6 +1518,7 @@ async def create_section(
     Sections are positions with unit="section", quantity=0, unit_rate=0.
     They serve as grouping headers for estimating line items.
     """
+    await _verify_boq_owner(session, boq_id, user_id, payload)
     section = await service.create_section(boq_id, data)
     return _position_to_response(section)
 
@@ -1493,9 +1533,13 @@ async def create_section(
 )
 async def list_markups(
     boq_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: BOQService = Depends(_get_service),
 ) -> dict:
     """List all markups for a BOQ."""
+    await _verify_boq_owner(session, boq_id, user_id, payload)
     markups = await service.list_markups(boq_id)
     return {"markups": [_markup_to_response(m) for m in markups]}
 
@@ -1510,9 +1554,13 @@ async def list_markups(
 async def add_markup(
     boq_id: uuid.UUID,
     data: MarkupCreate,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: BOQService = Depends(_get_service),
 ) -> MarkupResponse:
     """Add a markup/overhead line to a BOQ."""
+    await _verify_boq_owner(session, boq_id, user_id, payload)
     markup = await service.add_markup(boq_id, data)
     return _markup_to_response(markup)
 
@@ -1527,9 +1575,13 @@ async def update_markup(
     boq_id: uuid.UUID,
     markup_id: uuid.UUID,
     data: MarkupUpdate,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: BOQService = Depends(_get_service),
 ) -> MarkupResponse:
     """Update a markup/overhead line on a BOQ."""
+    await _verify_boq_owner(session, boq_id, user_id, payload)
     markup = await service.update_markup(markup_id, data)
     return _markup_to_response(markup)
 
@@ -1543,9 +1595,13 @@ async def update_markup(
 async def delete_markup(
     boq_id: uuid.UUID,
     markup_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: BOQService = Depends(_get_service),
 ) -> None:
     """Delete a markup/overhead line from a BOQ."""
+    await _verify_boq_owner(session, boq_id, user_id, payload)
     await service.delete_markup(markup_id)
 
 
@@ -2932,7 +2988,7 @@ async def import_boq_excel(
                 "original_columns": import_meta.get("original_columns", []),
                 "column_mapping": import_meta.get("column_mapping", {}),
                 "total_imported": imported,
-                "import_date": __import__("datetime").datetime.utcnow().isoformat(),
+                "import_date": datetime.now(UTC).isoformat(),
             }
             boq.metadata_ = meta
             await service.session.flush()
@@ -3029,7 +3085,7 @@ def _extract_from_excel_for_smart(content: bytes) -> dict[str, Any]:
             if has_description:
                 return {"text": "", "structured": True, "rows": rows}
     except Exception:
-        pass
+        logger.debug("Smart import: structured Excel parsing failed, using raw text", exc_info=True)
 
     # Fall back to extracting raw text from all cells
     from openpyxl import load_workbook
@@ -3066,7 +3122,7 @@ def _extract_from_csv_for_smart(content: bytes) -> dict[str, Any]:
             if has_description:
                 return {"text": "", "structured": True, "rows": rows}
     except Exception:
-        pass
+        logger.debug("Smart import: structured CSV parsing failed, using raw text", exc_info=True)
 
     # Fall back to raw text
     for encoding in ("utf-8-sig", "utf-8", "latin-1"):
@@ -3693,7 +3749,7 @@ async def enrich_resources(
                     if isinstance(raw, list):
                         components = raw
             except Exception:
-                pass
+                logger.debug("Assembly expand: component lookup by code failed", exc_info=True)
 
         # Fallback: lookup by description
         if not components:
@@ -4585,4 +4641,127 @@ async def renumber_positions(
     return {
         "renumbered": n_updated,
         "scheme": opts.scheme,
+    }
+
+
+# ── Vector / semantic memory endpoints ───────────────────────────────────
+#
+# These three routes plug the BOQ module into the cross-module semantic
+# memory layer (see ``app/core/vector_index.py``).  They are intentionally
+# uniform across every module that participates — only the adapter and
+# the row loader differ.
+
+
+@router.get(
+    "/vector/status/",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def boq_vector_status() -> dict[str, Any]:
+    """Return health + row count for the ``oe_boq_positions`` collection.
+
+    Used by the admin panel and the global search status widget so the
+    user can tell at a glance whether semantic search over BOQ positions
+    is ready, partially indexed or empty.
+    """
+    from app.core.vector_index import COLLECTION_BOQ, collection_status
+
+    return collection_status(COLLECTION_BOQ)
+
+
+@router.post(
+    "/vector/reindex/",
+    dependencies=[Depends(RequirePermission("boq.write"))],
+)
+async def boq_vector_reindex(
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    project_id: uuid.UUID | None = Query(default=None),
+    boq_id: uuid.UUID | None = Query(default=None),
+    purge_first: bool = Query(default=False),
+) -> dict[str, Any]:
+    """Backfill the BOQ vector collection.
+
+    Optional filters narrow the scope so users can reindex one project or
+    even one BOQ at a time without re-embedding the entire tenant.  Set
+    ``purge_first=true`` to wipe the matching subset before re-encoding —
+    useful when the embedding model has changed.
+    """
+    from sqlalchemy import select
+    from sqlalchemy.orm import selectinload
+
+    from app.core.vector_index import reindex_collection
+    from app.modules.boq.models import BOQ as BOQModel  # noqa: N811  -- domain class, not constant
+    from app.modules.boq.models import Position
+    from app.modules.boq.vector_adapter import boq_position_adapter
+
+    stmt = select(Position).options(selectinload(Position.boq))
+    if boq_id is not None:
+        stmt = stmt.where(Position.boq_id == boq_id)
+    elif project_id is not None:
+        stmt = stmt.join(BOQModel, Position.boq_id == BOQModel.id).where(
+            BOQModel.project_id == project_id
+        )
+
+    rows = list((await session.execute(stmt)).scalars().all())
+    return await reindex_collection(
+        boq_position_adapter,
+        rows,
+        purge_first=purge_first,
+    )
+
+
+@router.get(
+    "/positions/{position_id}/similar/",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def boq_position_similar(
+    position_id: uuid.UUID,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    limit: int = Query(default=5, ge=1, le=20),
+    cross_project: bool = Query(default=True),
+) -> dict[str, Any]:
+    """Return BOQ positions semantically similar to the given one.
+
+    By default the search is **cross-project** — that's the highest-value
+    use case: estimators want to find how a similar position was priced
+    in past projects so they can reuse the unit rate.  Pass
+    ``cross_project=false`` to limit the search to the same project.
+
+    Returns a list of :class:`VectorHit` dicts plus the original row id
+    so the frontend can highlight the source.
+    """
+    from sqlalchemy import select
+    from sqlalchemy.orm import selectinload
+
+    from app.core.vector_index import find_similar
+    from app.modules.boq.models import Position
+    from app.modules.boq.vector_adapter import boq_position_adapter
+
+    stmt = (
+        select(Position)
+        .options(selectinload(Position.boq))
+        .where(Position.id == position_id)
+    )
+    row = (await session.execute(stmt)).scalar_one_or_none()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Position not found")
+
+    project_id = (
+        str(row.boq.project_id)
+        if row.boq is not None and row.boq.project_id is not None
+        else None
+    )
+    hits = await find_similar(
+        boq_position_adapter,
+        row,
+        project_id=project_id,
+        cross_project=cross_project,
+        limit=limit,
+    )
+    return {
+        "source_id": str(position_id),
+        "limit": limit,
+        "cross_project": cross_project,
+        "hits": [h.to_dict() for h in hits],
     }

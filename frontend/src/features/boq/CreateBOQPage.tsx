@@ -32,6 +32,7 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
   const { data: projects } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    staleTime: 5 * 60_000,
   });
 
   // Sync default project when modal opens or defaultProjectId changes
@@ -48,12 +49,12 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
     onSuccess: (boq) => {
       queryClient.invalidateQueries({ queryKey: ['boqs', selectedProjectId] });
       queryClient.invalidateQueries({ queryKey: ['all-boqs'] });
-      addToast({ type: 'success', title: t('toasts.boq_created', { defaultValue: 'BOQ created' }) });
+      addToast({ type: 'success', title: t('toasts.boq_created', { defaultValue: 'Bill of Quantities created successfully' }) });
       onClose();
       navigate(`/boq/${boq.id}`);
     },
     onError: (error: Error) => {
-      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+      addToast({ type: 'error', title: t('toasts.boq_create_failed', { defaultValue: 'Failed to create Bill of Quantities' }), message: error.message });
     },
   });
 

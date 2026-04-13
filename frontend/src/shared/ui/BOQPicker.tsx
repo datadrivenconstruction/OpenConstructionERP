@@ -42,6 +42,7 @@ export function BOQPicker({
     queryKey: ['projects'],
     queryFn: projectsApi.list,
     enabled: showProjectSelector,
+    staleTime: 5 * 60_000,
   });
 
   const { data: boqs, isLoading: boqsLoading } = useQuery({

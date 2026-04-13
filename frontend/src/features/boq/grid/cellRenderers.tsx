@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { ICellRendererParams } from 'ag-grid-community';
 import {
   ChevronDown,
@@ -11,6 +12,7 @@ import {
   BookmarkPlus,
   MoreHorizontal,
   Boxes,
+  Cuboid,
 } from 'lucide-react';
 import { RESOURCE_TYPE_BADGE, fmtWithCurrency } from '../boqHelpers';
 import { countComments } from '../CommentDrawer';
@@ -235,6 +237,17 @@ export function OrdinalCellRenderer(params: ICellRendererParams) {
   const ctx = context as ResourceGridContext | undefined;
   const hasResources = Array.isArray(data.metadata?.resources) && data.metadata.resources.length > 0;
   const isExpanded = ctx?.expandedPositions?.has(data.id) ?? false;
+  const navigate = useNavigate();
+
+  // BIM link count — shown as a small blue pill when the position is
+  // linked to one or more BIM elements.  Click navigates to the BIM
+  // viewer with the first linked element preselected (deep link).
+  const bimLinks: unknown = data.cad_element_ids;
+  const bimLinkIds: string[] = Array.isArray(bimLinks)
+    ? bimLinks.filter((x): x is string => typeof x === 'string' && x.length > 0)
+    : [];
+  const bimLinkCount = bimLinkIds.length;
+  const firstBimElementId = bimLinkIds[0] ?? null;
 
   return (
     <div className="flex items-center gap-1 overflow-hidden">
@@ -259,6 +272,32 @@ export function OrdinalCellRenderer(params: ICellRendererParams) {
         className={`inline-block h-2 w-2 shrink-0 rounded-full ${dotColor}`}
         title={status}
       />
+      {bimLinkCount > 0 && (
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={(e) => {
+            e.stopPropagation();
+            // Navigate to the BIM viewer and isolate the linked elements.
+            // When a single element is linked we also set ?element= so the
+            // detail panel opens.  For multiple elements we use ?isolate=
+            // so the 3D view hides everything except the linked set.
+            if (bimLinkCount === 1 && firstBimElementId) {
+              navigate(`/bim?element=${encodeURIComponent(firstBimElementId)}&isolate=${encodeURIComponent(firstBimElementId)}`);
+            } else if (bimLinkIds.length > 1) {
+              navigate(`/bim?isolate=${bimLinkIds.map((id) => encodeURIComponent(id)).join(',')}`);
+            } else {
+              navigate('/bim');
+            }
+          }}
+          className="shrink-0 inline-flex items-center gap-0.5 min-w-[16px] h-[14px] px-1 rounded-full bg-oe-blue/10 text-oe-blue text-[10px] font-semibold leading-none hover:bg-oe-blue/20 hover:scale-110 transition-all cursor-pointer"
+          title={`Open ${bimLinkCount} linked BIM element${bimLinkCount === 1 ? '' : 's'} in 3D viewer`}
+          aria-label={`View linked BIM elements in 3D`}
+        >
+          <Cuboid size={9} className="shrink-0" />
+          {bimLinkCount}
+        </button>
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-"""Application configuration.
+"""Application configuration​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠.
 
 Loads from environment variables with .env file fallback.
 All settings are typed and validated via Pydantic.
@@ -55,7 +55,11 @@ class Settings(BaseSettings):
     # ── Redis ────────────────────────────────────────────────────────────
     redis_url: str | None = "redis://localhost:6379/0"
 
-    # ── Storage (S3/MinIO) ───────────────────────────────────────────────
+    # ── Storage (Local filesystem or S3/MinIO) ───────────────────────────
+    # Set ``storage_backend=s3`` to push BIM/CAD blobs to an S3-compatible
+    # bucket instead of the local filesystem.  The S3 credentials below
+    # are only consulted when ``storage_backend="s3"``.
+    storage_backend: Literal["local", "s3"] = "local"
     s3_endpoint: str = "http://localhost:9000"
     s3_access_key: str = ""
     s3_secret_key: str = ""
@@ -72,6 +76,29 @@ class Settings(BaseSettings):
     vector_backend: str = "lancedb"  # "lancedb" (embedded, default) or "qdrant" (server)
     qdrant_url: str | None = "http://localhost:6333"
     vector_data_dir: str = ""  # LanceDB storage path, default: ~/.openestimator/data/vectors
+    # Embedding model used by the multi-collection semantic memory layer.
+    # Default is multilingual so the CWICR cost database (9 languages) and
+    # cross-module collections (BOQ, documents, tasks, risks, BIM elements,
+    # etc.) all rank correctly across English, German, Russian, Lithuanian,
+    # French, Spanish, Italian, Polish and Portuguese.  All-MiniLM-L6-v2 is
+    # kept as a fallback because the existing CWICR LanceDB index was built
+    # with it (same 384-dim, so the snapshot is dim-compatible until you
+    # explicitly reindex via `make vector-reindex-costs`).
+    embedding_model_name: str = "intfloat/multilingual-e5-small"
+    embedding_model_dim: int = 384
+    embedding_model_fallback: str = "sentence-transformers/all-MiniLM-L6-v2"
+    # On startup, scan every multi-collection vector store and backfill
+    # any rows that are not yet indexed.  Cheap on a fresh DB, useful when
+    # upgrading from a pre-v1.4.0 install where existing BOQ / Document /
+    # Task / Risk / BIM rows are not yet embedded.  Set ``false`` to
+    # disable in low-resource deployments where you'd rather call
+    # ``/vector/reindex/`` manually per module.
+    vector_auto_backfill: bool = True
+    # Per-collection cap for the auto backfill — protects against the
+    # case where someone enables backfill on a 5M-row tenant on first
+    # boot and the embedding loop saturates CPU for 30 minutes.  Set to
+    # 0 to disable the cap entirely.
+    vector_backfill_max_rows: int = 5000
     openai_api_key: str | None = None
     anthropic_api_key: str | None = None
     gemini_api_key: str | None = None

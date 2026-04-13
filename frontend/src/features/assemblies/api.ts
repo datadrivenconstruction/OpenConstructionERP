@@ -104,7 +104,7 @@ export const assembliesApi = {
     apiPatch<Assembly>(`/v1/assemblies/${id}`, data),
   delete: (id: string) => apiDelete(`/v1/assemblies/${id}`),
   addComponent: (assemblyId: string, data: CreateComponentData) =>
-    apiPost<AssemblyComponent>(`/v1/assemblies/${assemblyId}/components`, data),
+    apiPost<AssemblyComponent>(`/v1/assemblies/${assemblyId}/components/`, data),
   updateComponent: (assemblyId: string, componentId: string, data: Partial<CreateComponentData>) =>
     apiPatch<AssemblyComponent>(`/v1/assemblies/${assemblyId}/components/${componentId}`, data),
   deleteComponent: (assemblyId: string, componentId: string) =>

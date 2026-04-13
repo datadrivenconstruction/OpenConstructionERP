@@ -19,11 +19,11 @@ import time
 import uuid
 from datetime import UTC
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermission, SessionDep
 from app.modules.assemblies.schemas import (
     ApplyToBOQRequest,
     AssemblyCreate,
@@ -45,6 +45,71 @@ router = APIRouter()
 
 def _get_service(session: SessionDep) -> AssemblyService:
     return AssemblyService(session)
+
+
+async def _verify_assembly_owner(
+    session: SessionDep,
+    assembly_id: uuid.UUID,
+    user_id: str,
+    payload: dict | None = None,
+) -> None:
+    """Load an assembly and verify ownership.
+
+    Admins bypass the check via the role claim on the JWT payload.
+
+    Returns 404 (not 403) on ownership mismatch so attackers cannot
+    enumerate valid assembly UUIDs by probing for 403 responses.
+    """
+    if payload and payload.get("role") == "admin":
+        return
+
+    from app.modules.assemblies.repository import AssemblyRepository
+
+    repo = AssemblyRepository(session)
+    assembly = await repo.get_by_id(assembly_id)
+    if assembly is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Assembly not found",
+        )
+    # Legacy/global templates with no owner are readable only by admins (handled
+    # above). Treat as not-found for regular users to avoid leaking their ids.
+    if assembly.owner_id is None or str(assembly.owner_id) != str(user_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Assembly not found",
+        )
+
+
+async def _verify_target_boq_owner(
+    session: SessionDep,
+    boq_id: uuid.UUID,
+    user_id: str,
+    payload: dict | None = None,
+) -> None:
+    """Verify the user owns the project that contains the given BOQ.
+
+    Used by `apply_to_boq` to prevent cross-tenant injection of assembly
+    positions into someone else's BOQ. Mirrors ``boq.router._verify_boq_owner``
+    but lives here to avoid a circular import at module load time.
+    """
+    if payload and payload.get("role") == "admin":
+        return
+
+    from app.modules.boq.repository import BOQRepository
+    from app.modules.projects.repository import ProjectRepository
+
+    boq_repo = BOQRepository(session)
+    boq = await boq_repo.get_by_id(boq_id)
+    if boq is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ not found")
+    project_repo = ProjectRepository(session)
+    project = await project_repo.get_by_id(boq.project_id)
+    if project is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    if str(project.owner_id) != str(user_id):
+        # 404 here too — don't let callers probe for valid BOQ ids.
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ not found")
 
 
 def _assembly_to_response(assembly: object) -> AssemblyResponse:
@@ -360,9 +425,13 @@ async def get_stats(
 )
 async def get_assembly(
     assembly_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: AssemblyService = Depends(_get_service),
 ) -> AssemblyWithComponents:
     """Get an assembly with all its components and computed total."""
+    await _verify_assembly_owner(session, assembly_id, user_id, payload)
     return await service.get_assembly_with_components(assembly_id)
 
 
@@ -374,9 +443,13 @@ async def get_assembly(
 async def update_assembly(
     assembly_id: uuid.UUID,
     data: AssemblyUpdate,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: AssemblyService = Depends(_get_service),
 ) -> AssemblyResponse:
     """Update assembly metadata fields."""
+    await _verify_assembly_owner(session, assembly_id, user_id, payload)
     assembly = await service.update_assembly(assembly_id, data)
     return _assembly_to_response(assembly)
 
@@ -388,9 +461,13 @@ async def update_assembly(
 )
 async def delete_assembly(
     assembly_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: AssemblyService = Depends(_get_service),
 ) -> None:
     """Delete an assembly and all its components."""
+    await _verify_assembly_owner(session, assembly_id, user_id, payload)
     await service.delete_assembly(assembly_id)
 
 
@@ -406,9 +483,13 @@ async def delete_assembly(
 async def add_component(
     assembly_id: uuid.UUID,
     data: ComponentCreate,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: AssemblyService = Depends(_get_service),
 ) -> ComponentResponse:
     """Add a new component to an assembly."""
+    await _verify_assembly_owner(session, assembly_id, user_id, payload)
     component = await service.add_component(assembly_id, data)
     # Build response directly to avoid MissingGreenlet on expired ORM attrs
     try:
@@ -446,9 +527,13 @@ async def update_component(
     assembly_id: uuid.UUID,
     component_id: uuid.UUID,
     data: ComponentUpdate,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: AssemblyService = Depends(_get_service),
 ) -> ComponentResponse:
     """Update an assembly component. Recalculates totals."""
+    await _verify_assembly_owner(session, assembly_id, user_id, payload)
     component = await service.update_component(assembly_id, component_id, data)
     return _component_to_response(component)
 
@@ -461,9 +546,13 @@ async def update_component(
 async def delete_component(
     assembly_id: uuid.UUID,
     component_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: AssemblyService = Depends(_get_service),
 ) -> None:
     """Delete a component from an assembly."""
+    await _verify_assembly_owner(session, assembly_id, user_id, payload)
     await service.delete_component(assembly_id, component_id)
 
 
@@ -478,13 +567,21 @@ async def delete_component(
 async def apply_to_boq(
     assembly_id: uuid.UUID,
     data: ApplyToBOQRequest,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: AssemblyService = Depends(_get_service),
 ) -> dict:
     """Apply an assembly to a BOQ as a new position.
 
     Creates a BOQ position with unit_rate = assembly total_rate (optionally
     adjusted by a regional factor) and source = "assembly".
+
+    Verifies ownership of both the source assembly AND the target BOQ to
+    prevent cross-tenant data injection.
     """
+    await _verify_assembly_owner(session, assembly_id, user_id, payload)
+    await _verify_target_boq_owner(session, data.boq_id, user_id, payload)
     position = await service.apply_to_boq(assembly_id, data)
     return {
         "position_id": str(position.id),  # type: ignore[attr-defined]
@@ -504,8 +601,11 @@ async def clone_assembly(
     assembly_id: uuid.UUID,
     data: CloneAssemblyRequest,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: AssemblyService = Depends(_get_service),
 ) -> AssemblyResponse:
     """Clone an assembly, optionally into a different project."""
+    await _verify_assembly_owner(session, assembly_id, user_id, payload)
     cloned = await service.clone_assembly(assembly_id, data, owner_id=user_id)
     return _assembly_to_response(cloned)

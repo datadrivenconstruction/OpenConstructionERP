@@ -1,0 +1,81 @@
+/**
+ * ERP AI Chat — Theme tokens.
+ *
+ * The chat feature historically used its own "keynote" palette (dark
+ * GitHub-like colors + amber accent). To make /chat feel like a native
+ * part of the app, these tokens are now aliased onto the global OpenEstimate
+ * design system tokens (`--oe-*` in `src/index.css`).
+ *
+ * Because the site-wide theme toggler sets `.dark` on `html`, the `--oe-*`
+ * tokens already resolve to the correct palette — we just re-export them
+ * under the `--chat-*` names so existing chat components don't need to be
+ * rewritten.
+ *
+ * Amber (`--chat-accent`) is intentionally kept as the single "AI brand"
+ * accent for streaming cursors, live dots, and highlighted tokens. It is
+ * NOT used as primary background anywhere.
+ */
+
+[data-chat-theme='light'],
+[data-chat-theme='dark'] {
+  /* Backgrounds — map directly onto app surfaces.
+     - chat-bg:        main canvas              → primary page background
+     - chat-surface-1: topbar, banner, input bar → secondary tint
+     - chat-surface-2: suggestion chips, input  → tertiary tint
+     - chat-surface-3: user message bubble      → subtle blue tint so the
+                                                   bubble stands out from
+                                                   the white canvas */
+  --chat-bg: var(--oe-bg);
+  --chat-surface-1: var(--oe-bg-secondary);
+  --chat-surface-2: var(--oe-bg-tertiary);
+  --chat-surface-3: var(--oe-blue-subtle);
+
+  /* Borders */
+  --chat-border: var(--oe-border);
+  --chat-border-subtle: var(--oe-border-light);
+
+  /* Text */
+  --chat-text-primary: var(--oe-text-primary);
+  --chat-text-secondary: var(--oe-text-secondary);
+  --chat-text-tertiary: var(--oe-text-tertiary);
+
+  /* Accent — kept amber for "AI brand" moments only
+     (streaming cursor, live dot, highlighted run states). */
+  --chat-accent: #f0883e;
+
+  /* Tool states — use semantic tokens so they flip with theme */
+  --chat-tool-running: var(--oe-info);
+  --chat-tool-done: var(--oe-success);
+  --chat-tool-error: var(--oe-error);
+
+  /* Typography — inherit app fonts so chat matches the rest of the UI */
+  --chat-font-body: var(--oe-font-sans);
+  --chat-font-mono: var(--oe-font-mono);
+
+  /* Sizing */
+  --chat-radius: var(--oe-radius-sm);
+  --chat-radius-sm: var(--oe-radius-xs);
+  --chat-topbar-h: 52px;
+}
+
+/* Animations — unchanged, used by MessageBubble + StreamingCursor */
+@keyframes cursorBlink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes msgIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

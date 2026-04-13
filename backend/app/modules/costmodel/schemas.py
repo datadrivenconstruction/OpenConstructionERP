@@ -284,6 +284,11 @@ class EVMResponse(BaseModel):
         "unknown",
         description="Overall project health: on_track, at_risk, critical, unknown",
     )
+    spi_capped: bool = Field(
+        False,
+        description="True when SPI was clamped to the safe [0, 5] range (e.g. project "
+        "has not started yet, making PV approximate). Treat the value as indicative only.",
+    )
 
 
 class WhatIfAdjustments(BaseModel):

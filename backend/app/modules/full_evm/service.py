@@ -117,9 +117,17 @@ class EVMService:
         vac = (bac - eac).quantize(QUANTIZE, rounding=ROUND_HALF_UP)
 
         # TCPI = (BAC - EV) / (BAC - AC)
+        # Denominator-zero edge case: BAC == AC means the project has already
+        # consumed its entire budget. If any work remains (remaining > 0) the
+        # true TCPI is mathematically infinite — returning 0 (the previous
+        # behaviour) would falsely imply "no effort needed". We store the
+        # sentinel "inf" so downstream consumers can render it as
+        # "Not Achievable" / unbounded rather than treating it as a healthy 0.
         denominator = bac - ac
         if denominator != ZERO:
             tcpi = (remaining / denominator).quantize(QUANTIZE, rounding=ROUND_HALF_UP)
+        elif remaining > ZERO:
+            tcpi = None  # rendered as "inf" sentinel in the forecast row below
         else:
             tcpi = ZERO
 
@@ -134,7 +142,7 @@ class EVMService:
             etc_=str(etc),
             eac=str(eac),
             vac=str(vac),
-            tcpi=str(tcpi),
+            tcpi="inf" if tcpi is None else str(tcpi),
             forecast_method=forecast_method,
             confidence_range_low=str(conf_low),
             confidence_range_high=str(conf_high),

@@ -14,7 +14,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, Query
 
-from app.dependencies import CurrentUserId, SessionDep
+from app.dependencies import CurrentUserId, SessionDep, verify_project_access
 from app.modules.transmittals.schemas import (
     AcknowledgeRequest,
     RecipientResponse,
@@ -38,6 +38,7 @@ def _get_service(session: SessionDep) -> TransmittalService:
 
 @router.get("/", response_model=TransmittalListResponse)
 async def list_transmittals(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     status: str | None = Query(default=None),
     offset: int = Query(default=0, ge=0),
@@ -46,6 +47,7 @@ async def list_transmittals(
     service: TransmittalService = Depends(_get_service),
 ) -> TransmittalListResponse:
     """List transmittals for a project."""
+    await verify_project_access(project_id, user_id, session)
     items, total = await service.list_transmittals(
         project_id,
         transmittal_status=status,
@@ -67,9 +69,11 @@ async def list_transmittals(
 async def create_transmittal(
     data: TransmittalCreate,
     user_id: CurrentUserId,
+    session: SessionDep,
     service: TransmittalService = Depends(_get_service),
 ) -> TransmittalResponse:
     """Create a new transmittal with auto-generated number."""
+    await verify_project_access(data.project_id, user_id, session)
     transmittal = await service.create_transmittal(data, user_id=user_id)
     return TransmittalResponse.model_validate(transmittal)
 

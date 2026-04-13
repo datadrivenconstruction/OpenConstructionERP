@@ -18,7 +18,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, Query
 
-from app.dependencies import CurrentUserId, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.procurement.schemas import (
     GRCreate,
     GRListResponse,
@@ -41,9 +41,13 @@ def _get_service(session: SessionDep) -> ProcurementService:
 # ── Purchase Orders (list / create) ─────────────────────────────────────────
 
 
-@router.get("/", response_model=POListResponse)
+@router.get(
+    "/",
+    response_model=POListResponse,
+    dependencies=[Depends(RequirePermission("procurement.read"))],
+)
 async def list_purchase_orders(
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    user_id: CurrentUserId,
     project_id: uuid.UUID | None = Query(default=None),
     status: str | None = Query(default=None),
     vendor_contact_id: str | None = Query(default=None),
@@ -67,7 +71,12 @@ async def list_purchase_orders(
     )
 
 
-@router.post("/", response_model=POResponse, status_code=201)
+@router.post(
+    "/",
+    response_model=POResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("procurement.create"))],
+)
 async def create_purchase_order(
     data: POCreate,
     user_id: CurrentUserId,
@@ -81,8 +90,13 @@ async def create_purchase_order(
 # ── Stats ────────────────────────────────────────────────────────────────────
 
 
-@router.get("/stats/", response_model=ProcurementStatsResponse)
+@router.get(
+    "/stats/",
+    response_model=ProcurementStatsResponse,
+    dependencies=[Depends(RequirePermission("procurement.read"))],
+)
 async def procurement_stats(
+    user_id: CurrentUserId,
     project_id: uuid.UUID = Query(...),
     service: ProcurementService = Depends(_get_service),
 ) -> ProcurementStatsResponse:
@@ -97,9 +111,13 @@ async def procurement_stats(
 # ── Goods Receipts (MUST be before /{po_id}) ────────────────────────────────
 
 
-@router.get("/goods-receipts/", response_model=GRListResponse)
+@router.get(
+    "/goods-receipts/",
+    response_model=GRListResponse,
+    dependencies=[Depends(RequirePermission("procurement.read"))],
+)
 async def list_goods_receipts(
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    user_id: CurrentUserId,
     po_id: uuid.UUID | None = Query(default=None),
     status: str | None = Query(default=None),
     offset: int = Query(default=0, ge=0),
@@ -116,7 +134,12 @@ async def list_goods_receipts(
     )
 
 
-@router.post("/goods-receipts/", response_model=GRResponse, status_code=201)
+@router.post(
+    "/goods-receipts/",
+    response_model=GRResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("procurement.create"))],
+)
 async def create_goods_receipt(
     data: GRCreate,
     user_id: CurrentUserId,
@@ -127,7 +150,11 @@ async def create_goods_receipt(
     return GRResponse.model_validate(gr)
 
 
-@router.post("/goods-receipts/{gr_id}/confirm/", response_model=GRResponse)
+@router.post(
+    "/goods-receipts/{gr_id}/confirm/",
+    response_model=GRResponse,
+    dependencies=[Depends(RequirePermission("procurement.confirm_receipt"))],
+)
 async def confirm_goods_receipt(
     gr_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -141,10 +168,14 @@ async def confirm_goods_receipt(
 # ── PO by ID (parametric routes LAST) ───────────────────────────────────────
 
 
-@router.get("/{po_id}", response_model=POResponse)
+@router.get(
+    "/{po_id}",
+    response_model=POResponse,
+    dependencies=[Depends(RequirePermission("procurement.read"))],
+)
 async def get_purchase_order(
     po_id: uuid.UUID,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    user_id: CurrentUserId,
     service: ProcurementService = Depends(_get_service),
 ) -> POResponse:
     """Get a single purchase order by ID."""
@@ -152,7 +183,11 @@ async def get_purchase_order(
     return POResponse.model_validate(po)
 
 
-@router.patch("/{po_id}", response_model=POResponse)
+@router.patch(
+    "/{po_id}",
+    response_model=POResponse,
+    dependencies=[Depends(RequirePermission("procurement.update"))],
+)
 async def update_purchase_order(
     po_id: uuid.UUID,
     data: POUpdate,
@@ -164,7 +199,11 @@ async def update_purchase_order(
     return POResponse.model_validate(po)
 
 
-@router.post("/{po_id}/create-invoice/", status_code=201)
+@router.post(
+    "/{po_id}/create-invoice/",
+    status_code=201,
+    dependencies=[Depends(RequirePermission("procurement.create"))],
+)
 async def create_invoice_from_po(
     po_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -260,7 +299,11 @@ async def create_invoice_from_po(
         )
 
 
-@router.post("/{po_id}/issue/", response_model=POResponse)
+@router.post(
+    "/{po_id}/issue/",
+    response_model=POResponse,
+    dependencies=[Depends(RequirePermission("procurement.issue"))],
+)
 async def issue_purchase_order(
     po_id: uuid.UUID,
     user_id: CurrentUserId,

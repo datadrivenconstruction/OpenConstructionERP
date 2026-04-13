@@ -165,11 +165,16 @@ async def update_project(
 
 
 @router.delete(
-    "/{project_id}",
+    "/{project_id}/",
     status_code=204,
     summary="Archive project",
     description="Soft-delete (archive) a project. The project and its data are retained "
     "but hidden from default queries. Use POST /{project_id}/restore to un-archive.",
+)
+@router.delete(
+    "/{project_id}",
+    status_code=204,
+    include_in_schema=False,
 )
 async def delete_project(
     project_id: uuid.UUID,
@@ -177,7 +182,12 @@ async def delete_project(
     payload: CurrentUserPayload,
     service: ProjectService = Depends(_get_service),
 ) -> None:
-    """Archive a project (soft delete). Verifies ownership."""
+    """Archive a project (soft delete) and cascade-archive child records.
+
+    Verifies ownership. Marks the project and all its child tasks, RFIs,
+    and other linked entities as archived/inactive so they no longer appear
+    in default queries.
+    """
     import logging as _log
 
     try:
@@ -474,7 +484,7 @@ async def project_dashboard(
                 punch_items[row_status] = cnt
         quality_section["open_defects"] = punch_items["open"] + punch_items["in_progress"]
     except Exception:
-        pass
+        logger.debug("Dashboard: punch items query failed", exc_info=True)
 
     try:
         from app.modules.inspections.models import QualityInspection
@@ -489,7 +499,7 @@ async def project_dashboard(
         ).scalar_one()
         quality_section["pending_inspections"] = pending_insp
     except Exception:
-        pass
+        logger.debug("Dashboard: inspections query failed", exc_info=True)
 
     try:
         from app.modules.ncr.models import NCR
@@ -504,7 +514,7 @@ async def project_dashboard(
         ).scalar_one()
         quality_section["ncrs_open"] = ncr_open
     except Exception:
-        pass
+        logger.debug("Dashboard: NCR query failed", exc_info=True)
 
     try:
         from app.modules.risk.models import RiskItem as _RiskItem
@@ -519,7 +529,7 @@ async def project_dashboard(
         ).scalar_one()
         quality_section["high_risk_observations"] = _risk_high
     except Exception:
-        pass
+        logger.debug("Dashboard: risk items query failed", exc_info=True)
 
     # Validation score from BOQ positions
     if boq_ids:
@@ -546,7 +556,7 @@ async def project_dashboard(
             if val_total > 0:
                 quality_section["validation_score"] = str(round(val_passed / val_total, 2))
         except Exception:
-            pass
+            logger.debug("Dashboard: validation score query failed", exc_info=True)
 
     # ── Documents ──────────────────────────────────────────────────────────
     documents_section: dict = {
@@ -577,7 +587,7 @@ async def project_dashboard(
                 documents_section["published"] = cnt
         documents_section["total"] = doc_total
     except Exception:
-        pass
+        logger.debug("Dashboard: documents query failed", exc_info=True)
 
     try:
         from app.modules.transmittals.models import Transmittal
@@ -592,7 +602,7 @@ async def project_dashboard(
         ).scalar_one()
         documents_section["pending_transmittals"] = pending_trans
     except Exception:
-        pass
+        logger.debug("Dashboard: transmittals query failed", exc_info=True)
 
     # ── Communication (RFIs, Submittals, Tasks) ────────────────────────────
     communication_section: dict = {
@@ -630,7 +640,7 @@ async def project_dashboard(
         ).scalar_one()
         communication_section["overdue_rfis"] = overdue_rfis
     except Exception:
-        pass
+        logger.debug("Dashboard: RFI query failed", exc_info=True)
 
     try:
         from app.modules.submittals.models import Submittal
@@ -645,7 +655,7 @@ async def project_dashboard(
         ).scalar_one()
         communication_section["open_submittals"] = open_submittals
     except Exception:
-        pass
+        logger.debug("Dashboard: submittals query failed", exc_info=True)
 
     try:
         from app.modules.tasks.models import Task
@@ -660,7 +670,7 @@ async def project_dashboard(
         ).scalar_one()
         communication_section["open_tasks"] = open_tasks
     except Exception:
-        pass
+        logger.debug("Dashboard: tasks query failed", exc_info=True)
 
     try:
         from app.modules.meetings.models import Meeting
@@ -688,7 +698,7 @@ async def project_dashboard(
                 unresolved += sum(1 for item in items if isinstance(item, dict) and item.get("status") != "completed")
         communication_section["unresolved_action_items"] = unresolved
     except Exception:
-        pass
+        logger.debug("Dashboard: meetings query failed", exc_info=True)
 
     # ── Procurement ──────────────────────────────────────────────────────────
     procurement_section: dict = {
@@ -729,7 +739,7 @@ async def project_dashboard(
         ).scalar_one()
         procurement_section["total_committed"] = str(round(total_committed_result or 0, 2))
     except Exception:
-        pass
+        logger.debug("Dashboard: procurement query failed", exc_info=True)
 
     # ── Recent Activity (last 10 across modules) ───────────────────────────
     recent_activity: list[dict] = []
@@ -749,7 +759,7 @@ async def project_dashboard(
                 ).where(_RFI.project_id == project_id)
             )
         except Exception:
-            pass
+            logger.debug("Dashboard activity: RFI query build failed", exc_info=True)
         try:
             activity_queries.append(
                 select(
@@ -757,7 +767,7 @@ async def project_dashboard(
                 ).where(_Task.project_id == project_id)
             )
         except Exception:
-            pass
+            logger.debug("Dashboard activity: Task query build failed", exc_info=True)
         try:
             activity_queries.append(
                 select(
@@ -767,7 +777,7 @@ async def project_dashboard(
                 ).where(ChangeOrder.project_id == project_id)
             )
         except Exception:
-            pass
+            logger.debug("Dashboard activity: ChangeOrder query build failed", exc_info=True)
         try:
             activity_queries.append(
                 select(
@@ -775,7 +785,7 @@ async def project_dashboard(
                 ).where(_Doc.project_id == project_id)
             )
         except Exception:
-            pass
+            logger.debug("Dashboard activity: Document query build failed", exc_info=True)
         try:
             activity_queries.append(
                 select(
@@ -783,7 +793,7 @@ async def project_dashboard(
                 ).where(_Punch.project_id == project_id)
             )
         except Exception:
-            pass
+            logger.debug("Dashboard activity: PunchItem query build failed", exc_info=True)
         try:
             activity_queries.append(
                 select(
@@ -793,7 +803,7 @@ async def project_dashboard(
                 ).where(FieldReport.project_id == project_id)
             )
         except Exception:
-            pass
+            logger.debug("Dashboard activity: FieldReport query build failed", exc_info=True)
 
         if activity_queries:
             combined = union_all(*activity_queries).subquery()
@@ -839,7 +849,7 @@ async def project_dashboard(
             ).scalar_one()
             requirements_coverage = round(linked_count / requirements_total * 100) if requirements_total > 0 else 0
     except Exception:
-        pass
+        logger.debug("Dashboard: requirements query failed", exc_info=True)
 
     markups_count = 0
     try:
@@ -849,7 +859,7 @@ async def project_dashboard(
             await session.execute(select(func.count(Markup.id)).where(Markup.project_id == project_id))
         ).scalar_one()
     except Exception:
-        pass
+        logger.debug("Dashboard: markups query failed", exc_info=True)
 
     field_reports_total = 0
     field_reports_this_week = 0
@@ -866,7 +876,7 @@ async def project_dashboard(
             )
         ).scalar_one()
     except Exception:
-        pass
+        logger.debug("Dashboard: field reports query failed", exc_info=True)
 
     photos_count = 0
     try:
@@ -876,7 +886,7 @@ async def project_dashboard(
             await session.execute(select(func.count(ProjectPhoto.id)).where(ProjectPhoto.project_id == project_id))
         ).scalar_one()
     except Exception:
-        pass
+        logger.debug("Dashboard: photos query failed", exc_info=True)
 
     measurements_count = 0
     try:
@@ -888,7 +898,7 @@ async def project_dashboard(
             )
         ).scalar_one()
     except Exception:
-        pass
+        logger.debug("Dashboard: takeoff measurements query failed", exc_info=True)
 
     risk_total = 0
     risk_high_count = 0
@@ -906,7 +916,7 @@ async def project_dashboard(
             )
         ).scalar_one()
     except Exception:
-        pass
+        logger.debug("Dashboard: risk items query failed", exc_info=True)
 
     co_total = 0
     co_approved = 0
@@ -920,7 +930,7 @@ async def project_dashboard(
             )
         ).scalar_one()
     except Exception:
-        pass
+        logger.debug("Dashboard: change orders query failed", exc_info=True)
 
     return {
         # New unified dashboard structure
@@ -1197,8 +1207,12 @@ async def dashboard_cards(
 async def analytics_overview(
     session: SessionDep,
     _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
 ) -> dict:
-    """Cross-project analytics — aggregated KPIs across all projects."""
+    """Cross-project analytics — aggregated KPIs across all projects.
+
+    Scoped to the current user's owned projects; admins see every project.
+    """
     from sqlalchemy import Float, func, select
     from sqlalchemy.sql.expression import cast
 
@@ -1206,30 +1220,57 @@ async def analytics_overview(
     from app.modules.costmodel.models import BudgetLine
     from app.modules.projects.models import Project
 
-    # Count projects
-    proj_count = (await session.execute(select(func.count(Project.id)))).scalar_one()
+    is_admin = bool(payload and payload.get("role") == "admin")
 
-    # Total budget across all projects
-    budget_stmt = select(
-        BudgetLine.project_id,
-        func.sum(cast(BudgetLine.planned_amount, Float)).label("planned"),
-        func.sum(cast(BudgetLine.actual_amount, Float)).label("actual"),
-    ).group_by(BudgetLine.project_id)
-    budget_result = await session.execute(budget_stmt)
-    budget_rows = budget_result.all()
+    # Per-project summary — owner-scoped for non-admins
+    proj_stmt = select(Project).order_by(Project.name)
+    if not is_admin:
+        proj_stmt = proj_stmt.where(Project.owner_id == _user_id)
+    proj_result = await session.execute(proj_stmt)
+    all_projects = list(proj_result.scalars().all())
 
-    total_planned = sum(r.planned or 0 for r in budget_rows)
-    total_actual = sum(r.actual or 0 for r in budget_rows)
+    project_ids = [p.id for p in all_projects]
+    proj_count = len(all_projects)
+
+    # Single grouped query for budget rows across the user's projects
+    if project_ids:
+        budget_stmt = (
+            select(
+                BudgetLine.project_id,
+                func.sum(cast(BudgetLine.planned_amount, Float)).label("planned"),
+                func.sum(cast(BudgetLine.actual_amount, Float)).label("actual"),
+            )
+            .where(BudgetLine.project_id.in_(project_ids))
+            .group_by(BudgetLine.project_id)
+        )
+        budget_rows = (await session.execute(budget_stmt)).all()
+    else:
+        budget_rows = []
+
+    budget_map: dict[str, tuple[float, float]] = {
+        str(r.project_id): (float(r.planned or 0), float(r.actual or 0)) for r in budget_rows
+    }
+
+    total_planned = sum(p for p, _ in budget_map.values())
+    total_actual = sum(a for _, a in budget_map.values())
 
     # Projects with budget
-    projects_with_budget = len(budget_rows)
+    projects_with_budget = len(budget_map)
+
+    # Single grouped query for BOQ counts (fixes N+1)
+    if project_ids:
+        boq_stmt = (
+            select(BOQ.project_id, func.count(BOQ.id))
+            .where(BOQ.project_id.in_(project_ids))
+            .group_by(BOQ.project_id)
+        )
+        boq_count_rows = (await session.execute(boq_stmt)).all()
+        boq_counts_map: dict[str, int] = {str(row[0]): int(row[1]) for row in boq_count_rows}
+    else:
+        boq_counts_map = {}
 
     # Per-project summary
     projects_data = []
-    proj_stmt = select(Project).order_by(Project.name)
-    proj_result = await session.execute(proj_stmt)
-    all_projects = proj_result.scalars().all()
-
     for p in all_projects:
         pid = str(p.id)
         pname = p.name
@@ -1237,15 +1278,12 @@ async def analytics_overview(
         pcurrency = p.currency
 
         # Find budget for this project
-        budget_row = next((r for r in budget_rows if str(r.project_id) == pid), None)
-        planned = float(budget_row.planned or 0) if budget_row else 0
-        actual = float(budget_row.actual or 0) if budget_row else 0
+        planned, actual = budget_map.get(pid, (0.0, 0.0))
         variance = planned - actual if planned > 0 else 0
         variance_pct = round((variance / planned * 100), 1) if planned > 0 else 0
 
-        # BOQ count
-        boq_count_stmt = select(func.count(BOQ.id)).where(BOQ.project_id == p.id)
-        boq_count = (await session.execute(boq_count_stmt)).scalar_one()
+        # BOQ count from pre-fetched map (single grouped query above)
+        boq_count = boq_counts_map.get(pid, 0)
 
         projects_data.append(
             {

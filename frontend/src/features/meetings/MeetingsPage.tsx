@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, SkeletonTable } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
+import { useCreateShortcut } from '@/shared/hooks/useCreateShortcut';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { apiGet, triggerDownload } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
@@ -418,7 +419,7 @@ function CreateMeetingModal({
           <Button variant="ghost" onClick={onClose} disabled={isPending}>
             {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={isPending}>
+          <Button variant="primary" onClick={handleSubmit} disabled={isPending || !canSubmit}>
             {isPending ? (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent mr-2 shrink-0" />
             ) : (
@@ -537,7 +538,7 @@ function ImportSummaryModal({
       const msg = err instanceof Error ? err.message : 'Preview extraction failed';
       setPreviewError(msg);
       setStep('upload');
-      addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: msg });
+      addToast({ type: 'error', title: t('meetings.preview_failed', { defaultValue: 'Failed to preview meeting transcript' }), message: msg });
     }
   }, [selectedFile, projectId, t, addToast]);
 
@@ -837,8 +838,8 @@ function ImportSummaryModal({
                     {t('meetings.label_topics', { defaultValue: 'Key Topics' })}
                   </label>
                   <div className="flex flex-wrap gap-1.5">
-                    {previewData.key_topics.map((topic, idx) => (
-                      <Badge key={idx} variant="blue" size="sm">
+                    {previewData.key_topics.map((topic) => (
+                      <Badge key={topic} variant="blue" size="sm">
                         {topic.length > 60 ? topic.slice(0, 60) + '...' : topic}
                       </Badge>
                     ))}
@@ -858,7 +859,7 @@ function ImportSummaryModal({
                   <div className="rounded-lg border border-border-light divide-y divide-border-light">
                     {editAttendees.map((att, idx) => (
                       <label
-                        key={idx}
+                        key={`${att.name}-${att.company || ''}-${idx}`}
                         className="flex items-center gap-3 px-3 py-2 hover:bg-surface-secondary/50 cursor-pointer transition-colors"
                       >
                         <input
@@ -894,7 +895,7 @@ function ImportSummaryModal({
                   <div className="rounded-lg border border-blue-200 dark:border-blue-800 divide-y divide-blue-100 dark:divide-blue-900">
                     {editActionItems.map((ai, idx) => (
                       <div
-                        key={idx}
+                        key={`action-${ai.description?.slice(0, 30) || idx}-${idx}`}
                         className={clsx(
                           'flex items-start gap-3 px-3 py-2.5 transition-colors',
                           !ai.included && 'opacity-50',
@@ -942,7 +943,7 @@ function ImportSummaryModal({
                   </label>
                   <div className="rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-3 space-y-1.5">
                     {previewData.decisions.map((d, idx) => (
-                      <div key={idx} className="flex items-start gap-2 text-sm">
+                      <div key={`decision-${d.decision.slice(0, 30)}-${idx}`} className="flex items-start gap-2 text-sm">
                         <CheckCircle2 size={14} className="text-semantic-success mt-0.5 shrink-0" />
                         <div className="flex-1 min-w-0">
                           <span className="text-content-primary">{d.decision}</span>
@@ -1286,10 +1287,17 @@ export function MeetingsPage() {
   const [typeFilter, setTypeFilter] = useState<MeetingType | ''>('');
   const [statusFilter, setStatusFilter] = useState<MeetingStatus | ''>('');
 
+  // "n" shortcut → open new meeting form
+  useCreateShortcut(
+    useCallback(() => setShowCreateModal(true), []),
+    !showCreateModal && !showImportModal,
+  );
+
   // Data
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    staleTime: 5 * 60_000,
   });
 
   const projectId = routeProjectId || activeProjectId || projects[0]?.id || '';
@@ -1341,13 +1349,13 @@ export function MeetingsPage() {
       setShowCreateModal(false);
       addToast({
         type: 'success',
-        title: t('meetings.created', { defaultValue: 'Meeting created' }),
+        title: t('meetings.created', { defaultValue: 'Meeting created successfully' }),
       });
     },
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('meetings.create_failed', { defaultValue: 'Failed to create meeting' }),
         message: e.message,
       }),
   });
@@ -1361,7 +1369,7 @@ export function MeetingsPage() {
       addToast(
         {
           type: 'success',
-          title: t('meetings.completed', { defaultValue: 'Meeting completed' }),
+          title: t('meetings.completed', { defaultValue: 'Meeting marked as completed' }),
           message: actionCount > 0
             ? t('meetings.tasks_created_count', {
                 defaultValue: 'Meeting completed. {{count}} tasks created from action items.',
@@ -1383,7 +1391,7 @@ export function MeetingsPage() {
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('meetings.complete_failed', { defaultValue: 'Failed to complete meeting' }),
         message: e.message,
       }),
   });
@@ -1393,12 +1401,12 @@ export function MeetingsPage() {
     onSuccess: () =>
       addToast({
         type: 'success',
-        title: t('meetings.export_success', { defaultValue: 'PDF exported' }),
+        title: t('meetings.export_success', { defaultValue: 'Meeting minutes exported as PDF' }),
       }),
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('meetings.export_failed', { defaultValue: 'Failed to export meeting PDF' }),
         message: e.message,
       }),
   });
@@ -1411,13 +1419,13 @@ export function MeetingsPage() {
       setShowImportModal(false);
       addToast({
         type: 'success',
-        title: t('meetings.import_success', { defaultValue: 'Meeting imported from transcript' }),
+        title: t('meetings.import_success', { defaultValue: 'Meeting imported successfully from transcript' }),
       });
     },
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('meetings.import_failed', { defaultValue: 'Failed to import meeting transcript' }),
         message: e.message,
       }),
   });
@@ -1432,7 +1440,7 @@ export function MeetingsPage() {
   const handleCreateSubmit = useCallback(
     (formData: MeetingFormData) => {
       if (!projectId) {
-        addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: t('common.select_project_first', { defaultValue: 'Please select a project first' }) });
+        addToast({ type: 'error', title: t('meetings.no_project_error', { defaultValue: 'No project selected' }), message: t('common.select_project_first', { defaultValue: 'Please select a project first' }) });
         return;
       }
       const attendeesList = formData.attendees
@@ -1490,9 +1498,14 @@ export function MeetingsPage() {
 
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-content-primary">
-          {t('meetings.page_title', { defaultValue: 'Meetings' })}
-        </h1>
+        <div>
+          <h1 className="text-2xl font-bold text-content-primary">
+            {t('meetings.page_title', { defaultValue: 'Meetings' })}
+          </h1>
+          <p className="mt-1 text-sm text-content-secondary">
+            {t('meetings.subtitle', { defaultValue: 'Schedule, track, and document project meetings with action items' })}
+          </p>
+        </div>
 
         <div className="flex items-center gap-2 shrink-0">
           {!routeProjectId && projects.length > 0 && (
@@ -1660,10 +1673,10 @@ export function MeetingsPage() {
             description={
               searchQuery || typeFilter || statusFilter
                 ? t('meetings.no_results_hint', {
-                    defaultValue: 'Try adjusting your search or filters',
+                    defaultValue: 'Try adjusting your search or filters to find what you are looking for.',
                   })
                 : t('meetings.no_meetings_hint', {
-                    defaultValue: 'Schedule your first meeting',
+                    defaultValue: 'Schedule your first meeting to track attendance, decisions, and action items across your project.',
                   })
             }
             action={
@@ -1728,7 +1741,7 @@ export function MeetingsPage() {
         <EmptyState
           icon={<CalendarDays size={28} strokeWidth={1.5} />}
           title={t('meetings.no_project', { defaultValue: 'No project selected' })}
-          description={t('meetings.select_project', { defaultValue: 'Open a project first to view and manage meetings.' })}
+          description={t('meetings.select_project', { defaultValue: 'Select a project from the header to schedule meetings, track attendance, and manage action items.' })}
         />
       )}
 

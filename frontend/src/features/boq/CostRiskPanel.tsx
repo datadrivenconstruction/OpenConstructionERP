@@ -143,7 +143,7 @@ function Histogram({
       <div className="relative">
         {/* Bar chart */}
         <div className="flex items-stretch gap-px h-32">
-          {bins.map((bin, idx) => {
+          {bins.map((bin) => {
             const heightPct = maxCount > 0 ? (bin.count / maxCount) * 100 : 0;
             const binMid = (bin.bin_start + bin.bin_end) / 2;
             const isLeftOfP50 = binMid < p50;
@@ -158,7 +158,7 @@ function Histogram({
 
             return (
               <div
-                key={idx}
+                key={`${bin.bin_start}-${bin.bin_end}`}
                 className="flex-1 flex flex-col justify-end"
                 title={`${fmtCurrency(bin.bin_start, fmt)} - ${fmtCurrency(bin.bin_end, fmt)}: ${bin.count}`}
               >

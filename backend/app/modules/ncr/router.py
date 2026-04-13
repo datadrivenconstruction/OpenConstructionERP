@@ -13,9 +13,9 @@ Endpoints:
 import logging
 import uuid
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.ncr.schemas import (
     NCRCreate,
     NCRResponse,
@@ -59,6 +59,7 @@ def _to_response(item: object) -> NCRResponse:
 
 @router.get("/", response_model=list[NCRResponse])
 async def list_ncrs(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     offset: int = Query(default=0, ge=0),
@@ -68,6 +69,8 @@ async def list_ncrs(
     severity: str | None = Query(default=None),
     service: NCRService = Depends(_get_service),
 ) -> list[NCRResponse]:
+    """List non-conformance reports for a project."""
+    await verify_project_access(project_id, user_id, session)
     ncrs, _ = await service.list_ncrs(
         project_id,
         offset=offset,
@@ -83,9 +86,12 @@ async def list_ncrs(
 async def create_ncr(
     data: NCRCreate,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("ncr.create")),
     service: NCRService = Depends(_get_service),
 ) -> NCRResponse:
+    """Create a new non-conformance report."""
+    await verify_project_access(data.project_id, user_id, session)
     ncr = await service.create_ncr(data, user_id=user_id)
     return _to_response(ncr)
 
@@ -96,6 +102,7 @@ async def get_ncr(
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: NCRService = Depends(_get_service),
 ) -> NCRResponse:
+    """Get a single non-conformance report."""
     ncr = await service.get_ncr(ncr_id)
     return _to_response(ncr)
 
@@ -108,6 +115,7 @@ async def update_ncr(
     _perm: None = Depends(RequirePermission("ncr.update")),
     service: NCRService = Depends(_get_service),
 ) -> NCRResponse:
+    """Update a non-conformance report."""
     ncr = await service.update_ncr(ncr_id, data)
     return _to_response(ncr)
 
@@ -119,6 +127,7 @@ async def delete_ncr(
     _perm: None = Depends(RequirePermission("ncr.delete")),
     service: NCRService = Depends(_get_service),
 ) -> None:
+    """Delete a non-conformance report."""
     await service.delete_ncr(ncr_id)
 
 
@@ -138,10 +147,8 @@ async def create_variation_from_ncr(
     ncr = await service.get_ncr(ncr_id)
 
     if not ncr.cost_impact:
-        from fastapi import HTTPException
-
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="NCR has no cost impact — cannot create a variation.",
         )
 
@@ -198,18 +205,14 @@ async def create_variation_from_ncr(
             "title": order.title,
         }
     except ImportError:
-        from fastapi import HTTPException
-
         raise HTTPException(
-            status_code=501,
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
             detail="Change orders module is not available.",
         )
     except Exception as exc:
         logger.exception("Failed to create variation from NCR %s: %s", ncr_id, exc)
-        from fastapi import HTTPException
-
         raise HTTPException(
-            status_code=500,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create change order from NCR.",
         )
 
