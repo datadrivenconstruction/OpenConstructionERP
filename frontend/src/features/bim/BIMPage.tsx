@@ -114,6 +114,69 @@ function StatPill({ label, value, icon: Icon }: { label: string; value: string |
 
 /* ── Model Card ──────────────────────────────────────────────────────── */
 
+/** Collapsible model filmstrip — shows for 5s on mount, then slides away.
+ *  Click the tab handle to re-expand. */
+function ModelFilmstrip({ models, isLoading, activeModelId, onSelectModel, onDeleteModel }: {
+  models: BIMModelData[];
+  isLoading: boolean;
+  activeModelId: string | null;
+  onSelectModel: (id: string) => void;
+  onDeleteModel: (id: string, name: string) => void;
+}) {
+  const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(true);
+
+  // Auto-collapse after 5 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => setExpanded(false), 5000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div className="shrink-0 border-t border-border-light bg-surface-primary relative">
+      {/* Toggle handle — always visible */}
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="flex items-center gap-1.5 px-4 py-1.5 w-full text-left hover:bg-surface-secondary/50 transition-colors"
+      >
+        <span className="text-[10px] font-bold text-content-quaternary uppercase tracking-wider">
+          {t('bim.models_label', { defaultValue: 'Models' })}
+        </span>
+        <span className="text-[9px] text-content-quaternary">({models.length})</span>
+        <svg
+          className={`ml-auto w-3 h-3 text-content-quaternary transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+        </svg>
+      </button>
+
+      {/* Collapsible content */}
+      <div
+        className="overflow-hidden transition-all duration-300 ease-in-out"
+        style={{ maxHeight: expanded ? '120px' : '0px', opacity: expanded ? 1 : 0 }}
+      >
+        <div className="flex items-center gap-3 px-5 pb-3 overflow-x-auto">
+          {isLoading ? (
+            <Loader2 size={14} className="animate-spin text-content-quaternary" />
+          ) : models.length ? (
+            models.map((m) => (
+              <ModelCard key={m.id} model={m} isActive={m.id === activeModelId}
+                onClick={() => onSelectModel(m.id)}
+                onDelete={() => onDeleteModel(m.id, m.name)} />
+            ))
+          ) : (
+            <span className="text-[11px] text-content-quaternary">
+              {t('bim.no_models_yet', { defaultValue: 'No models uploaded yet' })}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ModelCard({ model, isActive, onClick, onDelete }: {
   model: BIMModelData; isActive: boolean; onClick: () => void; onDelete?: () => void;
 }) {
@@ -1736,23 +1799,14 @@ export function BIMPage() {
         </div>
       </div>
 
-      {/* ── Model Filmstrip ── */}
-      <div className="shrink-0 border-t border-border-light bg-surface-primary">
-        <div className="flex items-center gap-3 px-5 py-3 overflow-x-auto">
-          <span className="text-[10px] font-bold text-content-quaternary uppercase tracking-wider shrink-0">{t('bim.models_label', { defaultValue: 'Models' })}</span>
-          {modelsQuery.isLoading ? (
-            <Loader2 size={14} className="animate-spin text-content-quaternary" />
-          ) : models.length ? (
-            models.map((m) => (
-              <ModelCard key={m.id} model={m} isActive={m.id === activeModelId}
-                onClick={() => { setActiveModelId(m.id); setSelectedElementId(null); }}
-                onDelete={() => handleDeleteModel(m.id, m.name)} />
-            ))
-          ) : (
-            <span className="text-[11px] text-content-quaternary">{t('bim.no_models_yet', { defaultValue: 'No models uploaded yet' })}</span>
-          )}
-        </div>
-      </div>
+      {/* ── Model Filmstrip (collapsible, auto-hides after 5s) ── */}
+      <ModelFilmstrip
+        models={models}
+        isLoading={modelsQuery.isLoading}
+        activeModelId={activeModelId}
+        onSelectModel={(id) => { setActiveModelId(id); setSelectedElementId(null); }}
+        onDeleteModel={handleDeleteModel}
+      />
 
       {/* BIM ↔ BOQ linking modal — opened from the properties panel
           ("Add to BOQ" button) or the filter panel's quick-takeoff

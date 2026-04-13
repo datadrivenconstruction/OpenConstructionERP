@@ -221,12 +221,14 @@ export class SceneManager {
     // out anyway if they want a wider view.
     const dist = (maxDim / (2 * Math.tan(fov / 2))) * 1.05;
 
-    // Place camera at a 3/4 angle, looking at the model centre.
+    // Place camera at a natural architectural viewing angle.
+    // Slightly elevated (0.35 * dist up) and offset diagonally so the
+    // model reads like a perspective architectural rendering.
     this.controls.target.copy(center);
     this.camera.position.set(
-      center.x + dist * 0.6,
-      center.y + dist * 0.5,
-      center.z + dist * 0.6,
+      center.x + dist * 0.7,
+      center.y + dist * 0.35,
+      center.z + dist * 0.5,
     );
     this.camera.lookAt(center);
     this.controls.update();
@@ -343,9 +345,9 @@ export class SceneManager {
       case 'iso':
       default:
         this.camera.position.set(
-          center.x + dist * 0.6,
-          center.y + dist * 0.5,
-          center.z + dist * 0.6,
+          center.x + dist * 0.7,
+          center.y + dist * 0.35,
+          center.z + dist * 0.5,
         );
         break;
     }
