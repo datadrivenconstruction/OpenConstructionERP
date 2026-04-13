@@ -1,6 +1,6 @@
 /**
  * API helpers for DWG Takeoff module.
- * Endpoints prefixed with /v1/dwg-takeoff/.
+ * Endpoints prefixed with /v1/dwg_takeoff/.
  */
 
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
@@ -100,7 +100,7 @@ export interface UpdateAnnotationPayload {
 
 export async function fetchDrawings(projectId: string): Promise<DwgDrawing[]> {
   if (!projectId) return [];
-  return apiGet<DwgDrawing[]>(`/v1/dwg-takeoff/drawings/?project_id=${projectId}`);
+  return apiGet<DwgDrawing[]>(`/v1/dwg_takeoff/drawings/?project_id=${projectId}`);
 }
 
 export async function uploadDrawing(
@@ -116,7 +116,7 @@ export async function uploadDrawing(
   form.append('name', name);
   form.append('discipline', discipline);
 
-  const res = await fetch('/api/v1/dwg-takeoff/drawings/upload', {
+  const res = await fetch('/api/v1/dwg_takeoff/drawings/upload', {
     method: 'POST',
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -132,49 +132,49 @@ export async function uploadDrawing(
 }
 
 export async function deleteDrawing(id: string): Promise<void> {
-  return apiDelete(`/v1/dwg-takeoff/drawings/${id}`);
+  return apiDelete(`/v1/dwg_takeoff/drawings/${id}`);
 }
 
 /* ── Entities & Layers ─────────────────────────────────────────────────── */
 
 export async function fetchEntities(drawingId: string): Promise<DxfEntity[]> {
-  return apiGet<DxfEntity[]>(`/v1/dwg-takeoff/drawings/${drawingId}/entities`);
+  return apiGet<DxfEntity[]>(`/v1/dwg_takeoff/drawings/${drawingId}/entities`);
 }
 
 export async function fetchThumbnail(drawingId: string): Promise<string> {
-  return apiGet<string>(`/v1/dwg-takeoff/drawings/${drawingId}/thumbnail`);
+  return apiGet<string>(`/v1/dwg_takeoff/drawings/${drawingId}/thumbnail`);
 }
 
 export async function updateLayers(drawingId: string, layers: DxfLayer[]): Promise<void> {
-  return apiPatch(`/v1/dwg-takeoff/drawings/${drawingId}/layers`, { layers });
+  return apiPatch(`/v1/dwg_takeoff/drawings/${drawingId}/layers`, { layers });
 }
 
 /* ── Annotations CRUD ──────────────────────────────────────────────────── */
 
 export async function fetchAnnotations(drawingId: string): Promise<DwgAnnotation[]> {
-  return apiGet<DwgAnnotation[]>(`/v1/dwg-takeoff/drawings/${drawingId}/annotations`);
+  return apiGet<DwgAnnotation[]>(`/v1/dwg_takeoff/drawings/${drawingId}/annotations`);
 }
 
 export async function createAnnotation(data: CreateAnnotationPayload): Promise<DwgAnnotation> {
-  return apiPost<DwgAnnotation>('/v1/dwg-takeoff/annotations/', data);
+  return apiPost<DwgAnnotation>('/v1/dwg_takeoff/annotations/', data);
 }
 
 export async function updateAnnotation(
   id: string,
   data: UpdateAnnotationPayload,
 ): Promise<DwgAnnotation> {
-  return apiPatch<DwgAnnotation>(`/v1/dwg-takeoff/annotations/${id}`, data);
+  return apiPatch<DwgAnnotation>(`/v1/dwg_takeoff/annotations/${id}`, data);
 }
 
 export async function deleteAnnotation(id: string): Promise<void> {
-  return apiDelete(`/v1/dwg-takeoff/annotations/${id}`);
+  return apiDelete(`/v1/dwg_takeoff/annotations/${id}`);
 }
 
 export async function linkAnnotationToBoq(
   annotId: string,
   boqPositionId: string,
 ): Promise<DwgAnnotation> {
-  return apiPost<DwgAnnotation>(`/v1/dwg-takeoff/annotations/${annotId}/link-boq`, {
+  return apiPost<DwgAnnotation>(`/v1/dwg_takeoff/annotations/${annotId}/link-boq`, {
     position_id: boqPositionId,
   });
 }
@@ -182,5 +182,5 @@ export async function linkAnnotationToBoq(
 /* ── Pins ──────────────────────────────────────────────────────────────── */
 
 export async function fetchPins(drawingId: string): Promise<DwgPin[]> {
-  return apiGet<DwgPin[]>(`/v1/dwg-takeoff/drawings/${drawingId}/pins`);
+  return apiGet<DwgPin[]>(`/v1/dwg_takeoff/drawings/${drawingId}/pins`);
 }
