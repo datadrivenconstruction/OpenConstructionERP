@@ -311,8 +311,8 @@ function DomainContent({
 
       {/* Metrics grid */}
       <div className="grid grid-cols-2 gap-x-8 gap-y-1.5 mb-4">
-        {rows.map((row, i) => (
-          <div key={i} className="flex items-center justify-between py-1">
+        {rows.map((row) => (
+          <div key={row.label} className="flex items-center justify-between py-1">
             <span className="text-xs text-content-tertiary">{row.label}</span>
             <span className="text-xs font-medium text-content-secondary tabular-nums flex items-center gap-1">
               {String(row.value)}

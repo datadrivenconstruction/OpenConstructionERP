@@ -1131,7 +1131,7 @@ function ImportModal({
                     </thead>
                     <tbody>
                       {csvParsed.slice(0, 10).map((row, idx) => (
-                        <tr key={idx} className="border-b border-border last:border-0">
+                        <tr key={`${row.entity}-${row.attribute}-${idx}`} className="border-b border-border last:border-0">
                           <td className="px-2 py-1 text-content-primary">{row.entity}</td>
                           <td className="px-2 py-1 text-content-secondary font-mono">{row.attribute}</td>
                           <td className="px-2 py-1 text-content-secondary">{row.constraint_type}</td>
@@ -1247,7 +1247,7 @@ function ImportModal({
                     </thead>
                     <tbody>
                       {jsonParsed.slice(0, 10).map((row, idx) => (
-                        <tr key={idx} className="border-b border-border last:border-0">
+                        <tr key={`${row.entity}-${row.attribute}-${idx}`} className="border-b border-border last:border-0">
                           <td className="px-2 py-1 text-content-primary">{row.entity}</td>
                           <td className="px-2 py-1 text-content-secondary font-mono">{row.attribute}</td>
                           <td className="px-2 py-1 text-content-secondary">{row.constraint_type}</td>

@@ -31,6 +31,8 @@ class RiskRepository:
         status: str | None = None,
         category: str | None = None,
         severity: str | None = None,
+        sort_by: str | None = None,
+        sort_order: str = "desc",
     ) -> tuple[list[RiskItem], int]:
         """List risk items for a project with pagination and filters."""
         base = select(RiskItem).where(RiskItem.project_id == project_id)
@@ -44,7 +46,16 @@ class RiskRepository:
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        stmt = base.order_by(RiskItem.created_at.desc()).offset(offset).limit(limit)
+        # Sorting
+        order_clause = None
+        if sort_by:
+            col = getattr(RiskItem, sort_by, None)
+            if col is not None:
+                order_clause = col.desc() if sort_order == "desc" else col.asc()
+        if order_clause is None:
+            order_clause = RiskItem.created_at.desc()
+
+        stmt = base.order_by(order_clause).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         items = list(result.scalars().all())
 

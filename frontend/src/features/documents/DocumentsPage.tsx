@@ -285,6 +285,8 @@ function SortDropdown({
 
 /* ── Main Component ──────────────────────────────────────────────────── */
 
+const INITIAL_EDIT_DOC_FORM = { category: '', description: '', tagInput: '', tags: [] as string[] };
+
 export function DocumentsPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -303,7 +305,7 @@ export function DocumentsPage() {
   const [renameDoc, setRenameDoc] = useState<{ id: string; name: string } | null>(null);
   const [renameValue, setRenameValue] = useState('');
   const [editDoc, setEditDoc] = useState<DocItem | null>(null);
-  const [editForm, setEditForm] = useState({ category: '', description: '', tagInput: '', tags: [] as string[] });
+  const [editForm, setEditForm] = useState(INITIAL_EDIT_DOC_FORM);
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Upload state (progress shown in FloatingQueuePanel)

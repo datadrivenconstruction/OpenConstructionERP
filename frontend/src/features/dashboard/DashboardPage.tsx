@@ -245,6 +245,7 @@ function ImportDemoModal({
           <button
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary transition-colors"
+            aria-label={t('common.close', { defaultValue: 'Close' })}
           >
             <X size={16} />
           </button>

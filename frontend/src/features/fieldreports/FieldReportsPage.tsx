@@ -58,6 +58,12 @@ import type {
   ImportResult,
 } from './api';
 
+declare global {
+  interface Window {
+    __fieldreportPrefillDate?: string;
+  }
+}
+
 /* ── Constants ─────────────────────────────────────────────────────────── */
 
 const REPORT_TYPES: ReportType[] = ['daily', 'inspection', 'safety', 'concrete_pour'];
@@ -520,7 +526,7 @@ export function FieldReportsPage() {
             <div className="grid grid-cols-7 gap-px rounded-lg border border-border-light bg-border-light overflow-hidden">
               {calendarDays.map((cell, idx) => (
                 <div
-                  key={idx}
+                  key={cell.day !== null ? `day-${cell.day}` : `empty-${idx}`}
                   className={clsx(
                     'min-h-[80px] bg-surface-primary p-2 transition-colors',
                     cell.day !== null && 'hover:bg-surface-secondary cursor-pointer',
@@ -534,7 +540,7 @@ export function FieldReportsPage() {
                       setEditingReport(null);
                       setShowModal(true);
                       // The modal will pick up the date from the cell
-                      (window as any).__fieldreport_prefill_date = cell.dateStr;
+                      window.__fieldreportPrefillDate = cell.dateStr;
                     }
                   }}
                 >
@@ -774,7 +780,7 @@ export function FieldReportsPage() {
           onClose={() => {
             setShowModal(false);
             setEditingReport(null);
-            delete (window as any).__fieldreport_prefill_date;
+            delete window.__fieldreportPrefillDate;
           }}
           onCreate={(data) => createMut.mutate(data)}
           onUpdate={(id, data) => updateMut.mutate({ id, data })}
@@ -939,8 +945,8 @@ function ImportFieldReportsModal({
                     {t('fieldreports.show_errors', { defaultValue: 'Show error details' })}
                   </summary>
                   <ul className="mt-1 space-y-0.5 max-h-32 overflow-y-auto">
-                    {result.errors.slice(0, 20).map((err, i) => (
-                      <li key={i}>
+                    {result.errors.slice(0, 20).map((err) => (
+                      <li key={`row-${err.row}`}>
                         {t('fieldreports.row_error', {
                           defaultValue: 'Row {{row}}: {{error}}',
                           row: err.row,
@@ -1044,7 +1050,7 @@ function ReportModal({
 
   // Prefill date from calendar click
   const prefillDate =
-    (window as any).__fieldreport_prefill_date || todayStr();
+    window.__fieldreportPrefillDate || todayStr();
 
   const [reportDate, setReportDate] = useState(report?.report_date ?? prefillDate);
   const [reportType, setReportType] = useState<ReportType>(report?.report_type ?? 'daily');
@@ -1266,7 +1272,7 @@ function ReportModal({
             </legend>
             <div className="mt-2 space-y-2">
               {workforce.map((entry, idx) => (
-                <div key={idx} className="flex items-center gap-2">
+                <div key={`workforce-${entry.trade}-${idx}`} className="flex items-center gap-2">
                   <div className="flex-1">
                     <input
                       type="text"

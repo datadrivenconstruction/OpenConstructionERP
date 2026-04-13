@@ -49,6 +49,8 @@ class ContactRepository:
         owner_id: str | None = None,
         limit: int = 50,
         offset: int = 0,
+        sort_by: str | None = None,
+        sort_order: str = "desc",
     ) -> tuple[list[Contact], int]:
         """List contacts with filters and pagination.
 
@@ -81,7 +83,16 @@ class ContactRepository:
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        stmt = base.order_by(Contact.created_at.desc()).offset(offset).limit(limit)
+        # Sorting
+        order_clause = None
+        if sort_by:
+            col = getattr(Contact, sort_by, None)
+            if col is not None:
+                order_clause = col.desc() if sort_order == "desc" else col.asc()
+        if order_clause is None:
+            order_clause = Contact.created_at.desc()
+
+        stmt = base.order_by(order_clause).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         contacts = list(result.scalars().all())
 

@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
+import { normalizeListResponse } from '@/shared/lib/apiHelpers';
 import {
   ShieldAlert, Plus, ChevronRight, ArrowLeft, DollarSign,
   AlertTriangle, Shield, Trash2, X, Search, Filter,
@@ -219,10 +220,12 @@ const textareaCls = 'w-full rounded-lg border border-border bg-surface-primary p
 
 /* ── Create Dialog ─────────────────────────────────────────────────────── */
 
+const INITIAL_RISK_FORM = { title: '', description: '', category: 'technical', probability: 0.5, impactSeverity: 'medium', impactCost: 0, scheduleDays: 0, ownerName: '' };
+
 function CreateDialog({ projectId, currency, onClose, onCreated }: { projectId: string; currency: string; onClose: () => void; onCreated: () => void }) {
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
-  const [f, setF] = useState({ title: '', description: '', category: 'technical', probability: 0.5, impactSeverity: 'medium', impactCost: 0, scheduleDays: 0, ownerName: '' });
+  const [f, setF] = useState(INITIAL_RISK_FORM);
   const set = (k: string, v: unknown) => setF((p) => ({ ...p, [k]: v }));
 
   const mut = useMutation({
@@ -428,7 +431,7 @@ export function RiskRegisterPage() {
   const projectId = activeProjectId || projects[0]?.id || '';
   const project = useMemo(() => projects.find((p) => p.id === projectId), [projects, projectId]);
 
-  const { data: risks = [], isLoading } = useQuery({ queryKey: ['risks', projectId], queryFn: () => apiGet<RiskItem[]>(`/v1/risk/?project_id=${projectId}`), select: (d): RiskItem[] => (Array.isArray(d) ? d : (d as any)?.items ?? []), enabled: !!projectId });
+  const { data: risks = [], isLoading } = useQuery({ queryKey: ['risks', projectId], queryFn: () => apiGet<RiskItem[]>(`/v1/risk/?project_id=${projectId}`), select: (d): RiskItem[] => normalizeListResponse(d), enabled: !!projectId });
   const { data: summary } = useQuery({ queryKey: ['risk-summary', projectId], queryFn: () => apiGet<RiskSummary>(`/v1/risk/summary/?project_id=${projectId}`), enabled: !!projectId });
   const { data: matrixData } = useQuery({ queryKey: ['risk-matrix', projectId], queryFn: () => apiGet<{ cells: MatrixCell[] }>(`/v1/risk/matrix/?project_id=${projectId}`), enabled: !!projectId });
 
