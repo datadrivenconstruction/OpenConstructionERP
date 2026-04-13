@@ -465,19 +465,10 @@ export class ElementManager {
     this.daeGroup = new THREE.Group();
     this.daeGroup.name = 'bim_dae_geometry';
 
-    // ColladaLoader automatically handles the <up_axis> tag in COLLADA
-    // files and converts Z_UP → Y_UP internally.  We only need to apply
-    // a manual -90° X rotation for GLB files (which lose the up_axis
-    // metadata during DAE→GLB conversion by trimesh).
-    // For COLLADA (.dae) loaded via ColladaLoader: no rotation needed.
-    // For GLB loaded via GLTFLoader: rotation is already baked in by trimesh.
-    // Detect: if the scene was loaded from a DAE and already has the
-    // ColladaLoader's up_axis correction applied, skip additional rotation.
-    if (isGLB) {
-      // GLB from trimesh may need the rotation
-      scene.rotation.x = -Math.PI / 2;
-    }
-    // For ColladaLoader (DAE): the loader already applied up_axis correction
+    // No manual rotation needed for either format:
+    // - DAE: ColladaLoader reads <up_axis>Z_UP</up_axis> and converts automatically
+    // - GLB: trimesh bakes the Z_UP→Y_UP conversion during DAE→GLB export
+    // Adding -90° X rotation here would DOUBLE the conversion and flip the model.
 
     // Build lookups: by stable_id / mesh_ref / element name.
     // mesh_ref is the Revit ElementId string (e.g. "105545") that matches
