@@ -9,7 +9,8 @@ RUN groupadd -r oe && useradd -r -g oe -d /app -s /sbin/nologin oe
 WORKDIR /app
 
 COPY backend/pyproject.toml backend/
-RUN pip install --no-cache-dir ./backend
+RUN pip install --no-cache-dir ./backend && \
+    pip install --no-cache-dir "ezdxf>=0.18.0" || true
 
 COPY backend/ backend/
 
