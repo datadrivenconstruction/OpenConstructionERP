@@ -97,6 +97,11 @@ export function BOQEditorPage() {
     queryKey: ['boq', boqId],
     queryFn: () => boqApi.get(boqId!),
     enabled: !!boqId,
+    // Keep data fresh for 5 minutes — prevents refetch while user is
+    // editing cells in AG Grid (refetch destroys the cell editor and
+    // makes typed text disappear mid-keystroke).
+    staleTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
     select: (data) => ({
       ...data,
       positions: normalizePositions(data.positions),
@@ -132,6 +137,8 @@ export function BOQEditorPage() {
     queryKey: ['boq-markups', boqId],
     queryFn: () => boqApi.getMarkups(boqId!),
     enabled: !!boqId,
+    staleTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
     retry: (failCount, error) => {
       if (error instanceof ApiError && error.status === 404) return false;
       return failCount < 3;
