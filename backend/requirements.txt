@@ -89,7 +89,7 @@ imageio-ffmpeg==0.6.0
 img2pdf==0.6.3
 inflate64==1.0.4
 iniconfig==2.3.0
-invoke==2.2.1
+invoke==3.0.3
 isodate==0.7.2
 Jinja2==3.1.6
 jiter==0.12.0
