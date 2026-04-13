@@ -9,16 +9,54 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 [Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Discussions](https://t.me/datadrivenconstruction) · [Report Bug](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 
 ![License](https://img.shields.io/badge/license-AGPL--3.0-blue)
-![Version](https://img.shields.io/badge/version-1.4.8-green)
+![Version](https://img.shields.io/badge/version-1.5.0-green)
 ![Languages](https://img.shields.io/badge/languages-21-orange)
 ![Cost Items](https://img.shields.io/badge/cost_items-55%2C000%2B-red)
 ![Standards](https://img.shields.io/badge/standards-20-blueviolet)
 
-<img src="docs/screenshots/hero-overview.jpg" alt="OpenConstructionERP — Dashboard Overview" width="800" />
+<img src="docs/gifs/01_HERO_Full_Workflow.gif" alt="OpenConstructionERP — Full Workflow Demo" width="800" />
 
 *100% open source · 55,000+ cost items · AI estimation · 21 languages · Self-hosted*
 
 </div>
+
+---
+
+## See It In Action
+
+<table>
+<tr>
+<td align="center" width="50%">
+<strong>AI Photo → Estimate</strong><br/>
+<em>Upload a construction photo, get a BOQ in seconds</em><br/><br/>
+<img src="docs/gifs/02_AI_Photo_to_Estimate.gif" alt="AI Photo to Estimate" width="400" />
+</td>
+<td align="center" width="50%">
+<strong>BIM → BOQ Takeoff</strong><br/>
+<em>Import IFC/RVT, auto-extract quantities to BOQ</em><br/><br/>
+<img src="docs/gifs/03_BIM_to_BOQ.gif" alt="BIM to BOQ" width="400" />
+</td>
+</tr>
+<tr>
+<td align="center">
+<strong>PDF Takeoff</strong><br/>
+<em>Measure directly on PDF drawings</em><br/><br/>
+<img src="docs/gifs/04_PDF_Takeoff.gif" alt="PDF Takeoff" width="400" />
+</td>
+<td align="center">
+<strong>55K+ Cost Items — Instant Search</strong><br/>
+<em>Find any cost item across 11 regional databases</em><br/><br/>
+<img src="docs/gifs/05_Instant_Search.gif" alt="Instant Search" width="400" />
+</td>
+</tr>
+<tr>
+<td align="center" colspan="2">
+<strong>Build a BOQ in 60 Seconds</strong><br/>
+<em>Keyboard-first editor with inline cost lookup</em><br/><br/>
+<img src="docs/gifs/06_Build_BOQ_Fast.gif" alt="Build BOQ Fast" width="600" />
+</td>
+</tr>
+</table>
 
 ---
 
