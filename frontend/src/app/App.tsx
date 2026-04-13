@@ -129,6 +129,9 @@ const NCRPage = lazy(() =>
 const ReportingPage = lazy(() =>
   import('@/features/reporting/ReportingPage').then((m) => ({ default: m.ReportingPage }))
 );
+const DwgTakeoffPage = lazy(() =>
+  import('@/features/dwg-takeoff/DwgTakeoffPage').then((m) => ({ default: m.DwgTakeoffPage }))
+);
 const BIMPage = lazy(() =>
   import('@/features/bim/BIMPage').then((m) => ({ default: m.BIMPage }))
 );
@@ -336,6 +339,7 @@ export default function App() {
 
         <Route path="/quantities" element={<P title="Quantity Takeoff"><QuantitiesPage /></P>} />
         <Route path="/takeoff" element={<P title="PDF Takeoff"><TakeoffPage /></P>} />
+        <Route path="/dwg-takeoff" element={<P title="DWG Takeoff"><DwgTakeoffPage /></P>} />
 
         <Route path="/schedule" element={<P title="4D Schedule"><SchedulePage /></P>} />
 
