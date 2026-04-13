@@ -25,7 +25,8 @@ import {
   FileText,
   AlertCircle,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Breadcrumb, ViewInBIMButton } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Breadcrumb, ViewInBIMButton, ConfirmDialog } from '@/shared/ui';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { apiGet, triggerDownload } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -1460,6 +1461,7 @@ export function RequirementsPage() {
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+  const { confirm, ...confirmProps } = useConfirm();
 
   // State
   const [showCreateSet, setShowCreateSet] = useState(false);
@@ -1486,6 +1488,7 @@ export function RequirementsPage() {
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    staleTime: 5 * 60_000,
   });
 
   const projectId = activeProjectId || projects[0]?.id || '';
@@ -2041,10 +2044,12 @@ export function RequirementsPage() {
               </span>
               {currentSet && (
                 <button
-                  onClick={() => {
-                    if (window.confirm(t('requirements.confirm_delete_set', { defaultValue: 'Delete this requirement set and all its requirements?' }))) {
-                      delSetMut.mutate(currentSetId);
-                    }
+                  onClick={async () => {
+                    const ok = await confirm({
+                      title: t('requirements.confirm_delete_set_title', { defaultValue: 'Delete requirement set?' }),
+                      message: t('requirements.confirm_delete_set', { defaultValue: 'Delete this requirement set and all its requirements?' }),
+                    });
+                    if (ok) delSetMut.mutate(currentSetId);
                   }}
                   className="text-content-quaternary hover:text-semantic-error transition-colors"
                   title={t('requirements.delete_set', { defaultValue: 'Delete Set' })}
@@ -2105,6 +2110,7 @@ export function RequirementsPage() {
           isRowsPending={bulkImportMut.isPending}
         />
       )}
+      <ConfirmDialog {...confirmProps} />
     </div>
   );
 }

@@ -98,23 +98,22 @@ class CollabLockRepository:
                 # Someone else still holds it.  Conflict.
                 return None, existing
 
-            # Expired → steal it in place so we do not hit the unique
-            # constraint on INSERT.
-            existing.user_id = user_id
-            existing.org_id = org_id
-            existing.locked_at = now
-            existing.heartbeat_at = now
-            existing.expires_at = expires_at
+            # Expired lock held by another user.  Delete it first, then
+            # fall through to the INSERT path.  This avoids a TOCTOU race
+            # where two sessions could both read the expired row and try
+            # to update it — only one INSERT will succeed thanks to the
+            # unique constraint.
+            await self.session.delete(existing)
             try:
                 await self.session.flush()
             except IntegrityError:
                 await self.session.rollback()
                 return None, None
-            return existing, None
 
-        # 2. No row exists — try a straight insert.  If two requests
-        # race here, one of them hits the unique constraint; we reload
-        # the winner and return it as the conflict.
+        # 2. No row exists (or we just deleted the expired one) — try a
+        # straight insert.  If two requests race here, one of them hits
+        # the unique constraint; we reload the winner and return it as
+        # the conflict.
         row = CollabLock(
             org_id=org_id,
             entity_type=entity_type,

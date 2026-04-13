@@ -44,7 +44,8 @@ import {
   Cuboid,
   SlidersHorizontal,
 } from 'lucide-react';
-import { Badge, EmptyState, Breadcrumb } from '@/shared/ui';
+import { Badge, EmptyState, Breadcrumb, ConfirmDialog } from '@/shared/ui';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { BIMViewer } from '@/shared/ui/BIMViewer';
 import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
 import BIMFilterPanel from './BIMFilterPanel';
@@ -69,7 +70,7 @@ import {
   fetchBIMModel,
   fetchBIMElements,
   fetchBIMConverters,
-  getGeometryUrl,
+  fetchGeometryBlobUrl,
   deleteBIMModel,
   deleteLink,
   listElementGroups,
@@ -794,6 +795,7 @@ export function BIMPage() {
   const contextProjectId = useProjectContextStore((s) => s.activeProjectId);
   const contextProjectName = useProjectContextStore((s) => s.activeProjectName);
   const projectId = urlProjectId || contextProjectId || '';
+  const { confirm, ...confirmProps } = useConfirm();
 
   const [activeModelId, setActiveModelId] = useState<string | null>(null);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
@@ -847,7 +849,7 @@ export function BIMPage() {
   const setBIMSelection = useBIMLinkSelectionStore((s) => s.setBIMSelection);
   const clearBIMLinkSelection = useBIMLinkSelectionStore((s) => s.clear);
 
-  const modelsQuery = useQuery({ queryKey: ['bim-models', projectId], queryFn: () => fetchBIMModels(projectId), enabled: !!projectId });
+  const modelsQuery = useQuery({ queryKey: ['bim-models', projectId], queryFn: () => fetchBIMModels(projectId), enabled: !!projectId, staleTime: 5 * 60_000 });
   const models = modelsQuery.data?.items ?? [];
   const hasModels = models.length > 0;
   const showFullPageUpload = showUploadOverride !== null ? showUploadOverride : !hasModels;
@@ -973,10 +975,35 @@ export function BIMPage() {
     return savedGroups.find((g) => g.id === activeGroupId) ?? null;
   }, [activeGroupId, savedGroups]);
 
-  const geometryUrl = useMemo(() => {
-    if (!activeModelId || activeModel?.status !== 'ready') return null;
-    if ((activeModel?.element_count ?? 0) > 0 || elements.some((el) => !!el.mesh_ref)) return getGeometryUrl(activeModelId);
-    return null;
+  const [geometryUrl, setGeometryUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let revoked = false;
+    let objectUrl: string | null = null;
+    const shouldFetch =
+      activeModelId &&
+      activeModel?.status === 'ready' &&
+      ((activeModel?.element_count ?? 0) > 0 || elements.some((el) => !!el.mesh_ref));
+
+    if (!shouldFetch) {
+      setGeometryUrl(null);
+      return;
+    }
+
+    fetchGeometryBlobUrl(activeModelId).then((url) => {
+      if (revoked) {
+        URL.revokeObjectURL(url);
+        return;
+      }
+      objectUrl = url;
+      setGeometryUrl(url);
+    }).catch(() => {
+      if (!revoked) setGeometryUrl(null);
+    });
+
+    return () => {
+      revoked = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
   }, [activeModelId, activeModel, elements]);
 
   const handleElementSelect = useCallback(
@@ -1122,15 +1149,14 @@ export function BIMPage() {
   // Delete a saved group via the backend, refresh the list.
   const handleDeleteGroup = useCallback(
     async (group: BIMElementGroup) => {
-      if (
-        !window.confirm(
-          t('bim.group_delete_confirm', {
-            defaultValue: 'Delete the saved group "{{name}}"?',
-            name: group.name,
-          }),
-        )
-      )
-        return;
+      const ok = await confirm({
+        title: t('bim.group_delete_confirm_title', { defaultValue: 'Delete group?' }),
+        message: t('bim.group_delete_confirm', {
+          defaultValue: 'Delete the saved group "{{name}}"?',
+          name: group.name,
+        }),
+      });
+      if (!ok) return;
       try {
         await deleteElementGroup(group.id);
         addToast({
@@ -1324,7 +1350,11 @@ export function BIMPage() {
   }, [globalUploadJobs, projectId, handleUploadComplete, addToast, t]);
 
   const handleDeleteModel = useCallback(async (modelId: string, name: string) => {
-    if (!window.confirm(t('bim.confirm_delete_model', { name }))) return;
+    const ok = await confirm({
+      title: t('bim.confirm_delete_model_title', { defaultValue: 'Delete model?' }),
+      message: t('bim.confirm_delete_model', { name }),
+    });
+    if (!ok) return;
     try {
       await deleteBIMModel(modelId);
       addToast({ type: 'success', title: t('bim.toast_model_deleted_title'), message: name });
@@ -1787,6 +1817,7 @@ export function BIMPage() {
           onClose={() => setLinkRequirementFor(null)}
         />
       )}
+      <ConfirmDialog {...confirmProps} />
     </div>
   );
 }

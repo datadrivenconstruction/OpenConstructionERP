@@ -67,3 +67,7 @@ def _create_limiters() -> tuple[RateLimiter, RateLimiter, RateLimiter]:
 
 # Global instances — configured from environment variables
 ai_limiter, api_limiter, login_limiter = _create_limiters()
+
+# Rate limiter for approval / financial mutation endpoints.
+# Tighter window to limit potential abuse of state-changing actions.
+approval_limiter = RateLimiter(max_requests=20, window_seconds=60)
