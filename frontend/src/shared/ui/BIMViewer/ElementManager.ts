@@ -1031,13 +1031,19 @@ export class ElementManager {
    */
   applyFilter(predicate: (el: BIMElementData) => boolean): number {
     let visibleCount = 0;
+
+    // Apply predicate to ALL meshes — both matched and unmatched.
+    // Unmatched meshes (no element data) are hidden when a filter is
+    // active so they don't clutter the view when the user picks a
+    // specific storey or category.
     for (const [elementId, mesh] of this.meshMap) {
       const el = this.elementDataMap.get(elementId);
-      const shouldShow = el ? predicate(el) : true;
-      // Batched meshes: drive visibility through the handle ONLY. The
-      // original mesh's `visible` flag is kept at false because the
-      // BatchedMesh is the actual draw surface — touching mesh.visible
-      // would either be a no-op or cause double-rendering.
+      // If no element data (temporary/unmatched), use the element data
+      // stored directly on the mesh.userData by the fallback assigner.
+      const elFromUserData = (mesh.userData as { elementData?: BIMElementData }).elementData;
+      const effectiveEl = el || elFromUserData;
+      const shouldShow = effectiveEl ? predicate(effectiveEl) : false;
+
       const handle = (mesh.userData as { batchHandle?: { batched: THREE.BatchedMesh; instanceId: number } }).batchHandle;
       if (handle) {
         handle.batched.setVisibleAt(handle.instanceId, shouldShow);
@@ -1046,19 +1052,7 @@ export class ElementManager {
       }
       if (shouldShow) visibleCount++;
     }
-    // Un-matched DAE meshes act as background context. Ensure they are
-    // visible so the scene isn't blanked out by an active filter on a model
-    // without mesh mapping.
-    for (const mesh of this.allDaeMeshes) {
-      const ud = mesh.userData as { elementId?: string | null; batchHandle?: { batched: THREE.BatchedMesh; instanceId: number } };
-      if (!ud.elementId) {
-        if (ud.batchHandle) {
-          ud.batchHandle.batched.setVisibleAt(ud.batchHandle.instanceId, true);
-        } else {
-          mesh.visible = true;
-        }
-      }
-    }
+
     if (this.daeGroup) this.daeGroup.visible = true;
     this.sceneManager.requestRender();
     return visibleCount;
