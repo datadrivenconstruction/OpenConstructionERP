@@ -157,6 +157,7 @@ export function SustainabilityPage() {
   const { data: projects, isLoading: projectsLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<Project[]>('/v1/projects/').catch(() => []),
+    staleTime: 5 * 60_000,
   });
   const { data: boqs, isLoading: boqsLoading } = useQuery({
     queryKey: ['boqs', selectedProjectId],
