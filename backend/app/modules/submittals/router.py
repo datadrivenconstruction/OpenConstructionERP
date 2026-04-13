@@ -14,8 +14,9 @@ Endpoints:
 import logging
 import uuid
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
+from app.core.rate_limiter import approval_limiter
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.submittals.schemas import (
     SubmittalCreate,
@@ -58,7 +59,11 @@ def _to_response(item: object) -> SubmittalResponse:
     )
 
 
-@router.get("/", response_model=list[SubmittalResponse])
+@router.get(
+    "/",
+    response_model=list[SubmittalResponse],
+    dependencies=[Depends(RequirePermission("submittals.read"))],
+)
 async def list_submittals(
     session: SessionDep,
     project_id: uuid.UUID = Query(...),
@@ -93,7 +98,11 @@ async def create_submittal(
     return _to_response(submittal)
 
 
-@router.get("/{submittal_id}", response_model=SubmittalResponse)
+@router.get(
+    "/{submittal_id}",
+    response_model=SubmittalResponse,
+    dependencies=[Depends(RequirePermission("submittals.read"))],
+)
 async def get_submittal(
     submittal_id: uuid.UUID,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -158,5 +167,8 @@ async def approve_submittal(
     service: SubmittalService = Depends(_get_service),
 ) -> SubmittalResponse:
     """Final approval of a submittal."""
+    allowed, _ = approval_limiter.is_allowed(str(user_id))
+    if not allowed:
+        raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Rate limit exceeded. Try again later.")
     submittal = await service.approve_submittal(submittal_id, approver_id=user_id)
     return _to_response(submittal)

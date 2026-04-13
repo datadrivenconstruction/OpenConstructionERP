@@ -420,18 +420,14 @@ async def create_variation_from_rfi(
     rfi = await service.get_rfi(rfi_id)
 
     if not rfi.cost_impact:
-        from fastapi import HTTPException
-
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="RFI has no cost impact — cannot create a variation.",
         )
 
     if rfi.status not in ("answered", "closed"):
-        from fastapi import HTTPException
-
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="RFI must be answered or closed before creating a variation.",
         )
 
@@ -486,18 +482,14 @@ async def create_variation_from_rfi(
             "title": order.title,
         }
     except ImportError:
-        from fastapi import HTTPException
-
         raise HTTPException(
-            status_code=501,
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
             detail="Change orders module is not available.",
         )
     except Exception as exc:
         logger.exception("Failed to create variation from RFI %s: %s", rfi_id, exc)
-        from fastapi import HTTPException
-
         raise HTTPException(
-            status_code=500,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create change order from RFI.",
         )
 

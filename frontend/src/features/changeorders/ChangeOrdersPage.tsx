@@ -16,7 +16,8 @@ import {
   X,
   Download,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Breadcrumb, InfoHint } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Breadcrumb, InfoHint, ConfirmDialog } from '@/shared/ui';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
@@ -94,13 +95,15 @@ const STATUS_COLORS: Record<string, 'neutral' | 'blue' | 'success' | 'warning' |
   rejected: 'error',
 };
 
-const REASON_LABELS: Record<string, string> = {
-  client_request: 'Client Request',
-  design_change: 'Design Change',
-  unforeseen: 'Unforeseen Conditions',
-  regulatory: 'Regulatory',
-  error: 'Error/Omission',
-};
+function getReasonLabels(t: (key: string, opts?: Record<string, unknown>) => string): Record<string, string> {
+  return {
+    client_request: t('changeorders.reason_client_request', { defaultValue: 'Client Request' }),
+    design_change: t('changeorders.reason_design_change', { defaultValue: 'Design Change' }),
+    unforeseen: t('changeorders.reason_unforeseen', { defaultValue: 'Unforeseen Conditions' }),
+    regulatory: t('changeorders.reason_regulatory', { defaultValue: 'Regulatory' }),
+    error: t('changeorders.reason_error', { defaultValue: 'Error/Omission' }),
+  };
+}
 
 function translateStatus(status: string, t: (key: string, opts?: Record<string, unknown>) => string): string {
   const map: Record<string, string> = {
@@ -233,9 +236,9 @@ function CreateDialog({
                 onChange={(e) => setReason(e.target.value)}
                 className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
               >
-                {Object.entries(REASON_LABELS).map(([k, v]) => (
+                {Object.entries(getReasonLabels(t)).map(([k, v]) => (
                   <option key={k} value={k}>
-                    {t(`changeorders.reason_${k}`, { defaultValue: v })}
+                    {v}
                   </option>
                 ))}
               </select>
@@ -530,6 +533,7 @@ function DetailView({
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const userRole = useAuthStore((s) => s.userRole);
+  const { confirm, ...confirmProps } = useConfirm();
   const [showAddItem, setShowAddItem] = useState(false);
 
   // Only admins and managers can approve/reject change orders. Backend
@@ -641,10 +645,13 @@ function DetailView({
 
           <div className="flex gap-2 items-center">
             {order.status === 'draft' && (
-              <Button variant="primary" size="sm" onClick={() => {
-                if (window.confirm(t('changeorders.submit_confirm', { defaultValue: 'Submit this change order for review? This cannot be undone.' }))) {
-                  submitMut.mutate();
-                }
+              <Button variant="primary" size="sm" onClick={async () => {
+                const ok = await confirm({
+                  title: t('changeorders.submit_confirm_title', { defaultValue: 'Submit change order?' }),
+                  message: t('changeorders.submit_confirm', { defaultValue: 'Submit this change order for review? This cannot be undone.' }),
+                  variant: 'warning',
+                });
+                if (ok) submitMut.mutate();
               }} disabled={submitMut.isPending}>
                 <Send size={14} className="mr-1.5" />
                 {t('changeorders.submit', { defaultValue: 'Submit' })}
@@ -653,18 +660,23 @@ function DetailView({
             {order.status === 'submitted' && (
               canApprove ? (
                 <>
-                  <Button variant="primary" size="sm" onClick={() => {
-                    if (window.confirm(t('changeorders.approve_confirm', { defaultValue: 'Approve this change order? Cost impact will be applied to the project budget.' }))) {
-                      approveMut.mutate();
-                    }
+                  <Button variant="primary" size="sm" onClick={async () => {
+                    const ok = await confirm({
+                      title: t('changeorders.approve_confirm_title', { defaultValue: 'Approve change order?' }),
+                      message: t('changeorders.approve_confirm', { defaultValue: 'Approve this change order? Cost impact will be applied to the project budget.' }),
+                      variant: 'warning',
+                    });
+                    if (ok) approveMut.mutate();
                   }} disabled={approveMut.isPending}>
                     <CheckCircle2 size={14} className="mr-1.5" />
                     {t('changeorders.approve', { defaultValue: 'Approve' })}
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => {
-                    if (window.confirm(t('changeorders.reject_confirm', { defaultValue: 'Reject this change order?' }))) {
-                      rejectMut.mutate();
-                    }
+                  <Button variant="ghost" size="sm" onClick={async () => {
+                    const ok = await confirm({
+                      title: t('changeorders.reject_confirm_title', { defaultValue: 'Reject change order?' }),
+                      message: t('changeorders.reject_confirm', { defaultValue: 'Reject this change order?' }),
+                    });
+                    if (ok) rejectMut.mutate();
                   }} disabled={rejectMut.isPending}>
                     <XCircle size={14} className="mr-1.5" />
                     {t('changeorders.reject', { defaultValue: 'Reject' })}
@@ -700,7 +712,7 @@ function DetailView({
           </p>
           <p className="mt-1 text-sm font-medium text-content-primary">
             {t(`changeorders.reason_${order.reason_category}`, {
-              defaultValue: REASON_LABELS[order.reason_category] || order.reason_category,
+              defaultValue: getReasonLabels(t)[order.reason_category] || order.reason_category,
             })}
           </p>
         </Card>
@@ -831,10 +843,12 @@ function DetailView({
                     {canEdit && (
                       <td className="px-4 py-3 text-center">
                         <button
-                          onClick={() => {
-                            if (window.confirm(t('changeorders.delete_item_confirm', { defaultValue: 'Delete this item?' }))) {
-                              deleteItemMut.mutate(item.id);
-                            }
+                          onClick={async () => {
+                            const ok = await confirm({
+                              title: t('changeorders.delete_item_confirm_title', { defaultValue: 'Delete item?' }),
+                              message: t('changeorders.delete_item_confirm', { defaultValue: 'Delete this item?' }),
+                            });
+                            if (ok) deleteItemMut.mutate(item.id);
                           }}
                           className="text-content-tertiary hover:text-semantic-error transition-colors"
                           title={t('common.delete', { defaultValue: 'Delete' })}
@@ -862,6 +876,7 @@ function DetailView({
           }}
         />
       )}
+      <ConfirmDialog {...confirmProps} />
     </div>
   );
 }
@@ -929,7 +944,7 @@ export function ChangeOrdersPage() {
       o.code,
       `"${o.title.replace(/"/g, '""')}"`,
       o.status,
-      REASON_LABELS[o.reason_category] || o.reason_category,
+      getReasonLabels(t)[o.reason_category] || o.reason_category,
       o.cost_impact.toFixed(2),
       String(o.schedule_impact_days),
       String(o.item_count),
@@ -943,7 +958,7 @@ export function ChangeOrdersPage() {
     a.download = `change_orders_${project?.name || 'export'}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [filteredOrders, project]);
+  }, [filteredOrders, project, t]);
 
   // Detail view
   if (selectedOrderId) {
@@ -1180,7 +1195,7 @@ export function ChangeOrdersPage() {
                       </td>
                       <td className="px-4 py-3 text-content-secondary text-xs">
                         {t(`changeorders.reason_${order.reason_category}`, {
-                          defaultValue: REASON_LABELS[order.reason_category] || order.reason_category,
+                          defaultValue: getReasonLabels(t)[order.reason_category] || order.reason_category,
                         })}
                       </td>
                       <td className={`px-4 py-3 text-right font-medium tabular-nums ${order.cost_impact >= 0 ? 'text-semantic-error' : 'text-semantic-success'}`}>

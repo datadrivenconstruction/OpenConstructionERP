@@ -483,17 +483,20 @@ export function BIMViewer({
           onGeometryLoadedRef.current?.(mgr.getMeshMatchRatio());
           // Re-fit the camera AFTER the DAE scene has been parented and
           // the next render cycle had a chance to commit world matrices.
-          // We schedule three fits at increasing delays as belt & braces:
-          //   * 0  ms — synchronous, catches the common case
-          //   * 50 ms — lets ColladaLoader's microtasks settle
-          //   * 250ms — ultimate safety net for slow first-frame layouts
+          // We chain two requestAnimationFrame calls so the fit runs
+          // after the browser has actually committed the new geometry to
+          // the scene graph and performed a layout/paint pass.  This
+          // replaces the previous triple-setTimeout approach which was
+          // fragile and could still miss frames on slow machines.
           // Each call inside SceneManager.zoomToFit forces
           // updateMatrixWorld(true), so a stale matrix tree cannot
           // sabotage the bbox computation.
           const fit = () => sceneRef.current?.zoomToFit();
           fit();
-          setTimeout(fit, 50);
-          setTimeout(fit, 250);
+          requestAnimationFrame(() => {
+            fit();
+            requestAnimationFrame(fit);
+          });
         })
         .catch(() => {
           // Geometry load failed — re-load elements WITH placeholder
@@ -520,6 +523,10 @@ export function BIMViewer({
   // visibility isn't perfectly accurate.
   useEffect(() => {
     if (!elementMgrRef.current || !sceneRef.current) return;
+    // Clear manually hidden elements so the new filter starts from a
+    // clean slate.  Without this, IDs hidden via the context-menu
+    // "Hide element" action leak across filter changes.
+    setHiddenIds(new Set());
     if (isolatedIds && isolatedIds.length > 0) {
       elementMgrRef.current.isolate(isolatedIds);
       const visibleMeshes = elementMgrRef.current

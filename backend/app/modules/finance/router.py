@@ -34,6 +34,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.rate_limiter import approval_limiter
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.finance.models import EVMSnapshot, Invoice, Payment, ProjectBudget
 from app.modules.finance.schemas import (
@@ -967,6 +968,9 @@ async def approve_invoice(
     service: FinanceService = Depends(_get_service),
 ) -> InvoiceResponse:
     """Approve an invoice."""
+    allowed, _ = approval_limiter.is_allowed(str(user_id))
+    if not allowed:
+        raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Rate limit exceeded. Try again later.")
     await _require_invoice_access(session, invoice_id, user_id)
     invoice = await service.approve_invoice(invoice_id)
     return InvoiceResponse.model_validate(invoice)
@@ -986,6 +990,9 @@ async def pay_invoice(
     service: FinanceService = Depends(_get_service),
 ) -> InvoiceResponse:
     """Mark invoice as paid."""
+    allowed, _ = approval_limiter.is_allowed(str(user_id))
+    if not allowed:
+        raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Rate limit exceeded. Try again later.")
     await _require_invoice_access(session, invoice_id, user_id)
     invoice = await service.pay_invoice(invoice_id)
     return InvoiceResponse.model_validate(invoice)
