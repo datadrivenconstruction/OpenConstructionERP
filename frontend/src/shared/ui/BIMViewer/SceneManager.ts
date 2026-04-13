@@ -78,6 +78,15 @@ export class SceneManager {
     this.controls.minPolarAngle = 0.05;       // ~3° from top
     this.controls.maxPolarAngle = Math.PI - 0.05; // ~3° from bottom
     this.controls.target.set(0, 0, 0);
+    // Remap mouse buttons so Ctrl+Left doesn't trigger pan (which would
+    // steal clicks from SelectionManager's Ctrl+Click multi-select).
+    // Left=ROTATE, Middle=DOLLY, Right=PAN.  Ctrl/Shift+Left is now free
+    // for the selection system.
+    this.controls.mouseButtons = {
+      LEFT: THREE.MOUSE.ROTATE,
+      MIDDLE: THREE.MOUSE.DOLLY,
+      RIGHT: THREE.MOUSE.PAN,
+    };
 
     // On-demand rendering: only render when the camera moves or the
     // scene is explicitly invalidated.  Drops idle CPU from 60 FPS
