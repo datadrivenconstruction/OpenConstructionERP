@@ -105,8 +105,23 @@ export class SelectionManager {
   private raycast(mouseCoords: THREE.Vector2): THREE.Intersection | null {
     this.raycaster.setFromCamera(mouseCoords, this.sceneManager.camera);
     const meshes = this.elementManager.getAllMeshes().filter((m) => m.visible);
-    const intersects = this.raycaster.intersectObjects(meshes, false);
-    return intersects[0] ?? null;
+    // Recursive: true so children of DAE groups are hit-tested too
+    const intersects = this.raycaster.intersectObjects(meshes, true);
+    // Return the first hit that has an elementId (skip unmatched geometry)
+    for (const hit of intersects) {
+      const eid = (hit.object.userData as { elementId?: string }).elementId;
+      if (eid) return hit;
+      // Check parent — DAE loaders sometimes nest meshes inside groups
+      if (hit.object.parent) {
+        const parentEid = (hit.object.parent.userData as { elementId?: string }).elementId;
+        if (parentEid) {
+          // Attach parent's elementId to the hit object for consistent handling
+          (hit.object.userData as Record<string, unknown>).elementId = parentEid;
+          return hit;
+        }
+      }
+    }
+    return null;
   }
 
   /** Raycast from a mouse event and return the element ID under the cursor. */
