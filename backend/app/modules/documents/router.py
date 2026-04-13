@@ -849,7 +849,7 @@ async def documents_similar(
     stmt = select(Document).where(Document.id == document_id)
     row = (await session.execute(stmt)).scalar_one_or_none()
     if row is None:
-        raise HTTPException(status_code=404, detail="Document not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
     project_id = str(row.project_id) if row.project_id is not None else None
     hits = await find_similar(
