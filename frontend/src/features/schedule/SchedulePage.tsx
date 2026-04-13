@@ -27,7 +27,8 @@ import {
   TrendingUp,
   Layers,
 } from 'lucide-react';
-import { Button, Card, Badge, Input, InfoHint, SkeletonTable, Breadcrumb, GanttChart as SVGGanttChart, ViewInBIMButton } from '@/shared/ui';
+import { Button, Card, Badge, Input, InfoHint, SkeletonTable, Breadcrumb, GanttChart as SVGGanttChart, ViewInBIMButton, ConfirmDialog } from '@/shared/ui';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import type { GanttActivity as SVGGanttActivity, GanttViewMode } from '@/shared/ui';
 import { apiGet, apiDelete } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
@@ -965,6 +966,7 @@ function ScheduleDetail({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
+  const { confirm, ...confirmProps } = useConfirm();
   const [zoomLevel, setZoomLevel] = useState<ZoomLevel>('week');
   const [viewMode, setViewMode] = useState<'table' | 'gantt'>('gantt');
   const [showAddActivity, setShowAddActivity] = useState(false);
@@ -1295,10 +1297,12 @@ function ScheduleDetail({
                 variant="ghost"
                 size="sm"
                 icon={<RotateCcw size={14} />}
-                onClick={() => {
-                  if (window.confirm(t('schedule.confirm_reset', { defaultValue: 'Delete all activities and regenerate? This cannot be undone.' }))) {
-                    resetSchedule.mutate();
-                  }
+                onClick={async () => {
+                  const ok = await confirm({
+                    title: t('schedule.confirm_reset_title', { defaultValue: 'Reset schedule?' }),
+                    message: t('schedule.confirm_reset', { defaultValue: 'Delete all activities and regenerate? This cannot be undone.' }),
+                  });
+                  if (ok) resetSchedule.mutate();
                 }}
                 loading={resetSchedule.isPending}
               >
@@ -1648,6 +1652,7 @@ function ScheduleDetail({
           </div>
         </div>
       </Modal>
+      <ConfirmDialog {...confirmProps} />
     </div>
   );
 }
@@ -1924,6 +1929,7 @@ export function SchedulePage() {
   const { data: projects, isLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    staleTime: 5 * 60_000,
   });
 
   const selectedProject = useMemo(

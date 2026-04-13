@@ -159,12 +159,28 @@ export async function fetchBIMElements(
   );
 }
 
-/** Get the geometry file URL for a BIM model.
+/** Fetch the geometry file as a blob and return an object URL.
  *
- * Includes the JWT access token as a query param because Three.js
- * ColladaLoader cannot set custom headers — without this the geometry
- * fetch would 401.
+ * Uses the Authorization header instead of a query-param token to avoid
+ * leaking the JWT in logs, CDN caches, or error messages.  The caller
+ * MUST call `URL.revokeObjectURL()` on the returned URL when done.
  */
+export async function fetchGeometryBlobUrl(modelId: string): Promise<string> {
+  const token = useAuthStore.getState().accessToken;
+  const url = `/api/v1/bim_hub/models/${encodeURIComponent(modelId)}/geometry/`;
+  const headers: HeadersInit = { Accept: '*/*' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  const resp = await fetch(url, { headers });
+  if (!resp.ok) {
+    throw new Error(`Geometry fetch failed (HTTP ${resp.status})`);
+  }
+  const blob = await resp.blob();
+  return URL.createObjectURL(blob);
+}
+
+/** @deprecated Use fetchGeometryBlobUrl() instead — this exposes the JWT in the URL. */
 export function getGeometryUrl(modelId: string): string {
   const token = useAuthStore.getState().accessToken;
   const base = `/api/v1/bim_hub/models/${encodeURIComponent(modelId)}/geometry/`;

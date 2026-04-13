@@ -131,7 +131,7 @@ async def forgot_password(
     """Request a password reset token.
 
     Always returns a success message to prevent email enumeration.
-    In dev mode, the reset token is included in the response for testing.
+    The token is never included in the HTTP response.
     """
     return await service.forgot_password(data)
 

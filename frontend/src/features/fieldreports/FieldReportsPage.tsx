@@ -29,7 +29,8 @@ import {
   HardHat,
   Thermometer,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog } from '@/shared/ui';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import {
@@ -139,6 +140,7 @@ export function FieldReportsPage() {
   const activeProjectName = useProjectContextStore((s) => s.activeProjectName);
 
   const projectId = activeProjectId ?? '';
+  const { confirm, ...confirmProps } = useConfirm();
 
   // View mode: calendar vs list
   const [view, setView] = useState<'calendar' | 'list'>('calendar');
@@ -161,13 +163,13 @@ export function FieldReportsPage() {
 
   const calMonthStr = `${calYear}-${String(calMonth).padStart(2, '0')}`;
 
-  const { data: calendarReports = [] } = useQuery({
+  const { data: calendarReports = [], isLoading: isCalendarLoading } = useQuery({
     queryKey: ['fieldreports', 'calendar', projectId, calMonthStr],
     queryFn: () => fetchFieldReportCalendar(projectId, calMonthStr),
     enabled: !!projectId && view === 'calendar',
   });
 
-  const { data: listReports = [] } = useQuery({
+  const { data: listReports = [], isLoading: isListLoading } = useQuery({
     queryKey: ['fieldreports', 'list', projectId, statusFilter, typeFilter],
     queryFn: () =>
       fetchFieldReports(projectId, {
@@ -176,6 +178,8 @@ export function FieldReportsPage() {
       }),
     enabled: !!projectId && view === 'list',
   });
+
+  const isLoading = view === 'calendar' ? isCalendarLoading : isListLoading;
 
   const { data: summary } = useQuery({
     queryKey: ['fieldreports', 'summary', projectId],
@@ -325,12 +329,16 @@ export function FieldReportsPage() {
   }, []);
 
   const handleDelete = useCallback(
-    (id: string) => {
-      if (window.confirm(t('fieldreports.confirm_delete', { defaultValue: 'Delete this field report?' }))) {
+    async (id: string) => {
+      const ok = await confirm({
+        title: t('fieldreports.confirm_delete_title', { defaultValue: 'Delete field report?' }),
+        message: t('fieldreports.confirm_delete', { defaultValue: 'Delete this field report?' }),
+      });
+      if (ok) {
         deleteMut.mutate(id);
       }
     },
-    [deleteMut, t],
+    [deleteMut, t, confirm],
   );
 
   // ── No project selected ─────────────────────────────────────────────
@@ -606,7 +614,13 @@ export function FieldReportsPage() {
           </div>
 
           {/* Table */}
-          {listReports.length === 0 ? (
+          {isLoading ? (
+            <div className="space-y-3 p-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="h-12 animate-pulse rounded-lg bg-surface-secondary" />
+              ))}
+            </div>
+          ) : listReports.length === 0 ? (
             <div className="p-8">
               <EmptyState
                 icon={<ClipboardList size={28} strokeWidth={1.5} />}
@@ -788,6 +802,7 @@ export function FieldReportsPage() {
           }}
         />
       )}
+      <ConfirmDialog {...confirmProps} />
     </div>
   );
 }

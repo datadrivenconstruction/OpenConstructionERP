@@ -132,80 +132,86 @@ const OBS_STATUS_COLORS: Record<
 
 /* ── Card Config for Create Modals ────────────────────────────────────── */
 
-const INCIDENT_TYPE_CARDS: Record<
+function getIncidentTypeCards(t: (key: string, opts?: Record<string, unknown>) => string): Record<
   string,
   { icon: React.ElementType; color: string; description: string }
-> = {
-  injury: {
-    icon: Heart,
-    color:
-      'text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800',
-    description: 'Worker injury',
-  },
-  near_miss: {
-    icon: AlertTriangle,
-    color:
-      'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800',
-    description: 'Close call',
-  },
-  property_damage: {
-    icon: Home,
-    color:
-      'text-orange-600 bg-orange-50 border-orange-200 dark:text-orange-400 dark:bg-orange-950/30 dark:border-orange-800',
-    description: 'Equipment/structure damage',
-  },
-  environmental: {
-    icon: Leaf,
-    color:
-      'text-green-600 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950/30 dark:border-green-800',
-    description: 'Spill or emission',
-  },
-  fire: {
-    icon: Flame,
-    color:
-      'text-rose-600 bg-rose-50 border-rose-200 dark:text-rose-400 dark:bg-rose-950/30 dark:border-rose-800',
-    description: 'Fire or explosion',
-  },
-};
+> {
+  return {
+    injury: {
+      icon: Heart,
+      color:
+        'text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800',
+      description: t('safety.incident_type_injury', { defaultValue: 'Worker injury' }),
+    },
+    near_miss: {
+      icon: AlertTriangle,
+      color:
+        'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800',
+      description: t('safety.incident_type_near_miss', { defaultValue: 'Close call' }),
+    },
+    property_damage: {
+      icon: Home,
+      color:
+        'text-orange-600 bg-orange-50 border-orange-200 dark:text-orange-400 dark:bg-orange-950/30 dark:border-orange-800',
+      description: t('safety.incident_type_property_damage', { defaultValue: 'Equipment/structure damage' }),
+    },
+    environmental: {
+      icon: Leaf,
+      color:
+        'text-green-600 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950/30 dark:border-green-800',
+      description: t('safety.incident_type_environmental', { defaultValue: 'Spill or emission' }),
+    },
+    fire: {
+      icon: Flame,
+      color:
+        'text-rose-600 bg-rose-50 border-rose-200 dark:text-rose-400 dark:bg-rose-950/30 dark:border-rose-800',
+      description: t('safety.incident_type_fire', { defaultValue: 'Fire or explosion' }),
+    },
+  };
+}
 
 const INCIDENT_TYPES_LIST = ['injury', 'near_miss', 'property_damage', 'environmental', 'fire'];
 
-const TREATMENT_OPTIONS = [
-  { value: '', label: 'None' },
-  { value: 'first_aid', label: 'First Aid' },
-  { value: 'medical', label: 'Medical' },
-  { value: 'hospital', label: 'Hospital' },
-] as const;
+function getTreatmentOptions(t: (key: string, opts?: Record<string, unknown>) => string) {
+  return [
+    { value: '', label: t('safety.treatment_none', { defaultValue: 'None' }) },
+    { value: 'first_aid', label: t('safety.treatment_first_aid', { defaultValue: 'First Aid' }) },
+    { value: 'medical', label: t('safety.treatment_medical', { defaultValue: 'Medical' }) },
+    { value: 'hospital', label: t('safety.treatment_hospital', { defaultValue: 'Hospital' }) },
+  ] as const;
+}
 
-const OBS_TYPE_CARDS: Record<
+function getObsTypeCards(t: (key: string, opts?: Record<string, unknown>) => string): Record<
   string,
   { icon: React.ElementType; color: string; description: string }
-> = {
-  positive: {
-    icon: ThumbsUp,
-    color:
-      'text-green-600 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950/30 dark:border-green-800',
-    description: 'Good safety practice observed',
-  },
-  unsafe_act: {
-    icon: UserX,
-    color:
-      'text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800',
-    description: 'Person doing something unsafe',
-  },
-  unsafe_condition: {
-    icon: AlertOctagon,
-    color:
-      'text-orange-600 bg-orange-50 border-orange-200 dark:text-orange-400 dark:bg-orange-950/30 dark:border-orange-800',
-    description: 'Hazardous condition found',
-  },
-  near_miss: {
-    icon: AlertTriangle,
-    color:
-      'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800',
-    description: 'Almost happened',
-  },
-};
+> {
+  return {
+    positive: {
+      icon: ThumbsUp,
+      color:
+        'text-green-600 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950/30 dark:border-green-800',
+      description: t('safety.obs_type_positive', { defaultValue: 'Good safety practice observed' }),
+    },
+    unsafe_act: {
+      icon: UserX,
+      color:
+        'text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950/30 dark:border-red-800',
+      description: t('safety.obs_type_unsafe_act', { defaultValue: 'Person doing something unsafe' }),
+    },
+    unsafe_condition: {
+      icon: AlertOctagon,
+      color:
+        'text-orange-600 bg-orange-50 border-orange-200 dark:text-orange-400 dark:bg-orange-950/30 dark:border-orange-800',
+      description: t('safety.obs_type_unsafe_condition', { defaultValue: 'Hazardous condition found' }),
+    },
+    near_miss: {
+      icon: AlertTriangle,
+      color:
+        'text-amber-600 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-950/30 dark:border-amber-800',
+      description: t('safety.obs_type_near_miss', { defaultValue: 'Almost happened' }),
+    },
+  };
+}
 
 const OBS_TYPES_LIST = ['positive', 'unsafe_act', 'unsafe_condition', 'near_miss'];
 
@@ -837,7 +843,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
               </label>
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                 {INCIDENT_TYPES_LIST.map((tp) => {
-                  const cfg = INCIDENT_TYPE_CARDS[tp]!;
+                  const cfg = getIncidentTypeCards(t)[tp]!;
                   const TypeIcon = cfg.icon;
                   const selected = incidentForm.incident_type === tp;
                   return (
@@ -864,7 +870,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
               </div>
               <p className="mt-1.5 text-xs text-content-quaternary">
                 {t(`safety.type_${incidentForm.incident_type}_desc`, {
-                  defaultValue: INCIDENT_TYPE_CARDS[incidentForm.incident_type]?.description || '',
+                  defaultValue: getIncidentTypeCards(t)[incidentForm.incident_type]?.description || '',
                 })}
               </p>
             </div>
@@ -942,7 +948,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
                 {t('safety.treatment', { defaultValue: 'Treatment Type' })}
               </label>
               <div className="grid grid-cols-4 gap-2">
-                {TREATMENT_OPTIONS.map((opt) => {
+                {getTreatmentOptions(t).map((opt) => {
                   const selected = incidentForm.treatment_type === opt.value;
                   return (
                     <button
@@ -1337,7 +1343,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {OBS_TYPES_LIST.map((tp) => {
-                  const cfg = OBS_TYPE_CARDS[tp]!;
+                  const cfg = getObsTypeCards(t)[tp]!;
                   const TypeIcon = cfg.icon;
                   const selected = obsForm.observation_type === tp;
                   return (
@@ -1364,7 +1370,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
               </div>
               <p className="mt-1.5 text-xs text-content-quaternary">
                 {t(`safety.obs_type_${obsForm.observation_type}_desc`, {
-                  defaultValue: OBS_TYPE_CARDS[obsForm.observation_type]?.description || '',
+                  defaultValue: getObsTypeCards(t)[obsForm.observation_type]?.description || '',
                 })}
               </p>
             </div>
