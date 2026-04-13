@@ -112,11 +112,14 @@ export async function uploadDrawing(
   const token = useAuthStore.getState().accessToken;
   const form = new FormData();
   form.append('file', file);
-  form.append('project_id', projectId);
-  form.append('name', name);
-  form.append('discipline', discipline);
 
-  const res = await fetch('/api/v1/dwg_takeoff/drawings/upload', {
+  const params = new URLSearchParams({
+    project_id: projectId,
+    ...(name ? { name } : {}),
+    ...(discipline ? { discipline } : {}),
+  });
+
+  const res = await fetch(`/api/v1/dwg_takeoff/drawings/upload?${params.toString()}`, {
     method: 'POST',
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
