@@ -42,7 +42,15 @@ const CATEGORIES = ['technical', 'financial', 'schedule', 'regulatory', 'environ
 const SEVERITIES = ['low', 'medium', 'high', 'critical'];
 const STATUSES = ['identified', 'assessed', 'mitigating', 'closed', 'occurred'];
 const PROB_LEVELS = ['0.9', '0.7', '0.5', '0.3', '0.1'];
-const PROB_LABELS: Record<string, string> = { '0.9': 'Very High', '0.7': 'High', '0.5': 'Medium', '0.3': 'Low', '0.1': 'Very Low' };
+function getProbLabels(t: (key: string, opts?: Record<string, unknown>) => string): Record<string, string> {
+  return {
+    '0.9': t('risk.probability_very_high', { defaultValue: 'Very High' }),
+    '0.7': t('risk.probability_high', { defaultValue: 'High' }),
+    '0.5': t('risk.probability_medium', { defaultValue: 'Medium' }),
+    '0.3': t('risk.probability_low', { defaultValue: 'Low' }),
+    '0.1': t('risk.probability_very_low', { defaultValue: 'Very Low' }),
+  };
+}
 const IMPACT_LEVELS = ['low', 'medium', 'high', 'critical'];
 
 const selectCls = 'h-8 rounded-lg border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-colors pr-7 appearance-none cursor-pointer';
@@ -93,7 +101,7 @@ function RiskMatrix({ cells }: { cells: MatrixCell[] }) {
           <tbody>
             {PROB_LEVELS.map((p) => (
               <tr key={p}>
-                <td className="p-1 text-content-secondary font-medium">{t(`risk.prob_${String(p).replace('.', '')}`, { defaultValue: PROB_LABELS[p] })}</td>
+                <td className="p-1 text-content-secondary font-medium">{getProbLabels(t)[p]}</td>
                 {IMPACT_LEVELS.map((i) => {
                   const c = map[`${p}|${i}`]?.count || 0;
                   return <td key={i} className="p-1"><div className={`flex items-center justify-center h-10 rounded-md text-sm font-bold ${c > 0 ? matrixColor(p, i) : 'bg-surface-secondary text-content-quaternary'}`}>{c > 0 ? c : ''}</div></td>;
@@ -104,7 +112,7 @@ function RiskMatrix({ cells }: { cells: MatrixCell[] }) {
         </table>
       </div>
       <div className="mt-2 flex items-center gap-4 text-2xs text-content-tertiary">
-        {[['bg-green-400/70', 'Low'], ['bg-yellow-400/80', 'Medium'], ['bg-orange-400/80', 'High'], ['bg-red-500/80', 'Critical']].map(([bg, l]) => (
+        {[['bg-green-400/70', t('risk.legend_low', { defaultValue: 'Low' })], ['bg-yellow-400/80', t('risk.legend_medium', { defaultValue: 'Medium' })], ['bg-orange-400/80', t('risk.legend_high', { defaultValue: 'High' })], ['bg-red-500/80', t('risk.legend_critical', { defaultValue: 'Critical' })]].map(([bg, l]) => (
           <span key={l} className="flex items-center gap-1"><span className={`inline-block w-3 h-3 rounded ${bg}`} />{l}</span>
         ))}
       </div>

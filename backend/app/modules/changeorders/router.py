@@ -20,6 +20,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
+from app.core.rate_limiter import approval_limiter
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.changeorders.schemas import (
     ChangeOrderCreate,
@@ -308,6 +309,9 @@ async def approve_order(
     service: ChangeOrderService = Depends(_get_service),
 ) -> ChangeOrderResponse:
     """Approve a submitted change order."""
+    allowed, _ = approval_limiter.is_allowed(str(user_id))
+    if not allowed:
+        raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Rate limit exceeded. Try again later.")
     order = await service.approve_order(order_id, user_id)
     return _order_to_response(order)
 

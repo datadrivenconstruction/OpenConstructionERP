@@ -100,16 +100,28 @@ export function useEntityLock(
           setLock(refreshed);
         } catch {
           // Lost the lock under our feet (network drop, server
-          // restart, sweeper removed us).  Transition to 'released'
-          // so the consumer re-acquires on the next focus event.
+          // restart, sweeper removed us).  Transition to 'error'
+          // so the consumer knows the lock is gone and can show a
+          // warning.  We intentionally do NOT use 'released' here
+          // because that implies a deliberate release by the user.
           clearHeartbeat();
           lockRef.current = null;
           setLock(null);
-          setState('released');
+          setState('error');
+          addToast({
+            type: 'warning',
+            title: i18n.t('collab_locks.heartbeat_lost_title', {
+              defaultValue: 'Lock lost',
+            }),
+            message: i18n.t('collab_locks.heartbeat_lost_toast', {
+              defaultValue:
+                'Your editing lock was lost due to a connection issue. Save your work and re-acquire the lock.',
+            }),
+          });
         }
       }, heartbeatIntervalMs);
     },
-    [clearHeartbeat, heartbeatIntervalMs],
+    [addToast, clearHeartbeat, heartbeatIntervalMs],
   );
 
   const acquire = useCallback(async () => {

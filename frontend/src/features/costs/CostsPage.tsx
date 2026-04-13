@@ -31,7 +31,8 @@ import {
   TrendingUp,
   Trash2,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, InfoHint, SkeletonTable, CountryFlag, Breadcrumb } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, InfoHint, SkeletonTable, CountryFlag, Breadcrumb, ConfirmDialog } from '@/shared/ui';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { apiGet, apiPost, apiDelete, triggerDownload } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
@@ -1847,6 +1848,7 @@ function CostItemRow({
   fmt: (n: number) => string;
   t: ReturnType<typeof import('react-i18next').useTranslation>['t'];
 }) {
+  const { confirm, ...confirmProps } = useConfirm();
   const meta = item.metadata_ ?? {};
   const laborCost = meta.labor_cost ?? 0;
   const equipmentCost = meta.equipment_cost ?? 0;
@@ -1960,11 +1962,13 @@ function CostItemRow({
             </button>
             {item.source === 'custom' && (
               <button
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.stopPropagation();
-                  if (window.confirm(t('costs.confirm_delete', { defaultValue: 'Delete this custom cost item?' }))) {
-                    onDelete?.(item.id);
-                  }
+                  const ok = await confirm({
+                    title: t('costs.confirm_delete_title', { defaultValue: 'Delete cost item?' }),
+                    message: t('costs.confirm_delete', { defaultValue: 'Delete this custom cost item?' }),
+                  });
+                  if (ok) onDelete?.(item.id);
                 }}
                 title={t('common.delete', { defaultValue: 'Delete' })}
                 className="flex h-7 w-7 items-center justify-center rounded text-content-tertiary hover:text-semantic-error hover:bg-semantic-error-bg transition-colors"
@@ -2182,6 +2186,7 @@ function CostItemRow({
           </td>
         </tr>
       )}
+      <ConfirmDialog {...confirmProps} />
     </>
   );
 }

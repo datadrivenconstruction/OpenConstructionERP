@@ -194,7 +194,7 @@ async def batch_update_risk_status(
     allowed_statuses = {"identified", "assessed", "mitigating", "closed", "occurred"}
     if body.status not in allowed_statuses:
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid status. Allowed: {sorted(allowed_statuses)}",
         )
 
@@ -301,7 +301,7 @@ async def risk_similar(
     stmt = select(RiskItem).where(RiskItem.id == risk_id)
     row = (await session.execute(stmt)).scalar_one_or_none()
     if row is None:
-        raise HTTPException(status_code=404, detail="Risk not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Risk not found")
 
     project_id = str(row.project_id) if row.project_id is not None else None
     hits = await find_similar(

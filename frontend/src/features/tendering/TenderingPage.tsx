@@ -19,7 +19,8 @@ import {
   FileText,
   X,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Skeleton, InfoHint, SkeletonTable, Breadcrumb } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Skeleton, InfoHint, SkeletonTable, Breadcrumb, ConfirmDialog } from '@/shared/ui';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { apiGet, apiPost, apiPatch } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -673,6 +674,7 @@ function PackageDetail({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
+  const { confirm, ...confirmProps } = useConfirm();
   const [showAddBid, setShowAddBid] = useState(false);
 
   // Fetch package with bids
@@ -888,10 +890,13 @@ function PackageDetail({
                     size="sm"
                     icon={<Award size={14} />}
                     loading={awardMutation.isPending}
-                    onClick={() => {
-                      if (window.confirm(t('tendering.award_confirm', { defaultValue: 'Award this contract to {{company}}? This action cannot be undone.', company: bid.company_name }))) {
-                        awardMutation.mutate(bid.id);
-                      }
+                    onClick={async () => {
+                      const ok = await confirm({
+                        title: t('tendering.award_confirm_title', { defaultValue: 'Award contract?' }),
+                        message: t('tendering.award_confirm', { defaultValue: 'Award this contract to {{company}}? This action cannot be undone.', company: bid.company_name }),
+                        variant: 'warning',
+                      });
+                      if (ok) awardMutation.mutate(bid.id);
                     }}
                     title={t('tendering.award_bid', 'Award this bid')}
                   >
@@ -960,6 +965,7 @@ function PackageDetail({
           onCreated={handleBidCreated}
         />
       )}
+      <ConfirmDialog {...confirmProps} />
     </div>
   );
 }

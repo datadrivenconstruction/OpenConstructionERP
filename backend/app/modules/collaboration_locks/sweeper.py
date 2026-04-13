@@ -29,20 +29,30 @@ async def _sweep_once() -> int:
     event for every row so subscribers (presence hub, audit log) can react.
     """
     now = datetime.now(UTC)
-    from sqlalchemy import and_, select
+    from sqlalchemy import delete as sa_delete
 
     from app.core.events import event_bus
     from app.modules.collaboration_locks.models import CollabLock
 
     try:
         async with async_session_factory() as session:
-            # Read first so we can publish events after delete.
-            stmt = select(CollabLock).where(
-                and_(CollabLock.expires_at <= now)
+            # Atomically delete expired rows and return them in a single
+            # statement.  This eliminates the race window where another
+            # session could claim (heartbeat/re-acquire) a lock between
+            # the SELECT and the DELETE.
+            stmt = (
+                sa_delete(CollabLock)
+                .where(CollabLock.expires_at <= now)
+                .returning(
+                    CollabLock.id,
+                    CollabLock.entity_type,
+                    CollabLock.entity_id,
+                    CollabLock.user_id,
+                )
             )
             result = await session.execute(stmt)
-            stale_rows = list(result.scalars().all())
-            if not stale_rows:
+            deleted_rows = result.all()
+            if not deleted_rows:
                 return 0
 
             snapshots = [
@@ -52,11 +62,9 @@ async def _sweep_once() -> int:
                     "entity_id": str(row.entity_id),
                     "user_id": str(row.user_id),
                 }
-                for row in stale_rows
+                for row in deleted_rows
             ]
-
-            repo = CollabLockRepository(session)
-            removed = await repo.delete_expired(now)
+            removed = len(deleted_rows)
             await session.commit()
     except Exception:
         logger.exception("collab lock sweeper failed")
