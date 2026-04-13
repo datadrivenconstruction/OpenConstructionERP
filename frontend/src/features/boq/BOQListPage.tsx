@@ -33,6 +33,8 @@ interface BOQ {
   description: string;
   status: string;
   created_at: string;
+  position_count?: number;
+  grand_total?: number;
 }
 
 interface BOQWithProject extends BOQ {
@@ -385,6 +387,7 @@ export function BOQListPage() {
   const { data: projects, isLoading: projLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    staleTime: 5 * 60_000,
   });
 
   const { data: allBoqs, isLoading: boqLoading } = useQuery({
@@ -402,8 +405,8 @@ export function BOQListPage() {
             ...b,
             projectName: p.name,
             currency: p.currency,
-            positionCount: (b as any).position_count ?? 0,
-            grandTotal: (b as any).grand_total ?? 0,
+            positionCount: b.position_count ?? 0,
+            grandTotal: b.grand_total ?? 0,
             classificationStandard: p.classification_standard,
           } as BOQWithProject));
         } catch (err) {
@@ -552,7 +555,11 @@ export function BOQListPage() {
           <h1 className="text-2xl font-bold text-content-primary">{t('boq.title')}</h1>
           <p className="mt-1 text-sm text-content-secondary">
             {allBoqs
-              ? `${allBoqs.length} ${t('boq.estimates', { defaultValue: 'estimates' })} · ${projects?.length ?? 0} ${t('boq.projects_label', { defaultValue: 'projects' })}`
+              ? t('boq.list_subtitle_count', {
+                  defaultValue: '{{boqCount}} estimates across {{projectCount}} projects',
+                  boqCount: allBoqs.length,
+                  projectCount: projects?.length ?? 0,
+                })
               : t('common.loading')}
           </p>
         </div>

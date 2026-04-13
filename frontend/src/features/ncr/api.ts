@@ -69,5 +69,5 @@ export async function createNCR(data: CreateNCRPayload): Promise<NCR> {
 }
 
 export async function closeNCR(id: string): Promise<NCR> {
-  return apiPost<NCR>(`/v1/ncr/${id}/close`);
+  return apiPost<NCR>(`/v1/ncr/${id}/close/`);
 }

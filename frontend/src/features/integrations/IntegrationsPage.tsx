@@ -29,7 +29,8 @@ import {
   ExternalLink,
   type LucideIcon,
 } from 'lucide-react';
-import { Badge, Button, Input, Breadcrumb } from '@/shared/ui';
+import { Badge, Button, Input, Breadcrumb, ConfirmDialog } from '@/shared/ui';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 
@@ -834,6 +835,7 @@ export function IntegrationsPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
+  const { confirm, ...confirmProps } = useConfirm();
   const [connectingType, setConnectingType] = useState<ConnectorDef | null>(null);
 
   const { data, isLoading } = useQuery({
@@ -857,6 +859,9 @@ export function IntegrationsPage() {
         type: 'success',
         title: t('integrations.disconnected', 'Disconnected'),
       });
+    },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('integrations.disconnect_failed', { defaultValue: 'Failed to disconnect' }), message: err.message });
     },
   });
 
@@ -1026,17 +1031,12 @@ export function IntegrationsPage() {
                             )}
                           </button>
                           <button
-                            onClick={() => {
-                              if (
-                                window.confirm(
-                                  t(
-                                    'integrations.confirm_disconnect',
-                                    'Disconnect this integration?'
-                                  )
-                                )
-                              ) {
-                                deleteMut.mutate(cfg.id);
-                              }
+                            onClick={async () => {
+                              const ok = await confirm({
+                                title: t('integrations.confirm_disconnect_title', { defaultValue: 'Disconnect integration?' }),
+                                message: t('integrations.confirm_disconnect', 'Disconnect this integration?'),
+                              });
+                              if (ok) deleteMut.mutate(cfg.id);
                             }}
                             className="rounded p-1 text-content-secondary hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
                             title={t('integrations.disconnect', 'Disconnect')}
@@ -1115,6 +1115,7 @@ export function IntegrationsPage() {
           onSaved={handleConnected}
         />
       )}
+      <ConfirmDialog {...confirmProps} />
     </div>
   );
 }

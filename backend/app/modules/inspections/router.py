@@ -18,7 +18,7 @@ from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.inspections.schemas import (
     InspectionCreate,
     InspectionResponse,
@@ -65,6 +65,7 @@ def _to_response(item: object) -> InspectionResponse:
 
 @router.get("/", response_model=list[InspectionResponse])
 async def list_inspections(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     offset: int = Query(default=0, ge=0),
@@ -74,6 +75,7 @@ async def list_inspections(
     service: InspectionService = Depends(_get_service),
 ) -> list[InspectionResponse]:
     """List inspections for a project with optional filters."""
+    await verify_project_access(project_id, user_id, session)
     inspections, _ = await service.list_inspections(
         project_id,
         offset=offset,
@@ -88,10 +90,12 @@ async def list_inspections(
 async def create_inspection(
     data: InspectionCreate,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("inspections.create")),
     service: InspectionService = Depends(_get_service),
 ) -> InspectionResponse:
     """Create a new quality inspection."""
+    await verify_project_access(data.project_id, user_id, session)
     inspection = await service.create_inspection(data, user_id=user_id)
     return _to_response(inspection)
 
@@ -103,6 +107,7 @@ async def export_inspections(
     _user: CurrentUserId = None,  # type: ignore[assignment]
 ) -> StreamingResponse:
     """Export inspections for a project as Excel."""
+    await verify_project_access(project_id, _user, session)
     from openpyxl import Workbook
     from openpyxl.styles import Font
     from sqlalchemy import select

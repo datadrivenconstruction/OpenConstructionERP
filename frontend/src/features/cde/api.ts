@@ -95,18 +95,18 @@ export async function fetchCDEContainers(
 export async function createCDEContainer(
   data: CreateCDEContainerPayload,
 ): Promise<CDEContainer> {
-  return apiPost<CDEContainer>('/v1/cde/containers', data);
+  return apiPost<CDEContainer>('/v1/cde/containers/', data);
 }
 
 export async function transitionContainer(
   id: string,
   data: TransitionPayload,
 ): Promise<CDEContainer> {
-  return apiPost<CDEContainer>(`/v1/cde/containers/${id}/transition`, data);
+  return apiPost<CDEContainer>(`/v1/cde/containers/${id}/transition/`, data);
 }
 
 export async function fetchContainerRevisions(id: string): Promise<CDERevision[]> {
-  return apiGet<CDERevision[]>(`/v1/cde/containers/${id}/revisions`);
+  return apiGet<CDERevision[]>(`/v1/cde/containers/${id}/revisions/`);
 }
 
 export interface CreateRevisionPayload {
@@ -121,5 +121,5 @@ export async function createContainerRevision(
   containerId: string,
   data: CreateRevisionPayload,
 ): Promise<CDERevision> {
-  return apiPost<CDERevision>(`/v1/cde/containers/${containerId}/revisions`, data);
+  return apiPost<CDERevision>(`/v1/cde/containers/${containerId}/revisions/`, data);
 }

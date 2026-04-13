@@ -139,6 +139,12 @@ class PositionRepository:
         """Get position by ID."""
         return await self.session.get(Position, position_id)
 
+    async def list_children(self, parent_id: uuid.UUID) -> list[Position]:
+        """List direct children of a position (one level only)."""
+        stmt = select(Position).where(Position.parent_id == parent_id).order_by(Position.sort_order)
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
     async def list_for_boq(
         self,
         boq_id: uuid.UUID,

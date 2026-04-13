@@ -105,7 +105,7 @@ function Histogram({
       </h4>
       <div className="relative">
         <div className="flex items-end gap-px h-36">
-          {histogram.map((bin, idx) => {
+          {histogram.map((bin) => {
             const heightPct = maxCount > 0 ? (bin.count / maxCount) * 100 : 0;
             const binMid = (bin.binStart + bin.binEnd) / 2;
             const isLeftOfP50 = binMid < percentiles.p50;
@@ -117,7 +117,7 @@ function Histogram({
 
             return (
               <div
-                key={idx}
+                key={`${bin.binStart}-${bin.binEnd}`}
                 className="flex-1 flex flex-col justify-end"
                 title={`${fmtCurrency(bin.binStart)} – ${fmtCurrency(bin.binEnd)}: ${bin.count} (${(bin.frequency * 100).toFixed(1)}%)`}
               >

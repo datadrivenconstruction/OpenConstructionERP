@@ -21,18 +21,24 @@ import csv
 import io
 import logging
 import uuid
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import JSONResponse, StreamingResponse
+from pydantic import BaseModel
+from sqlalchemy import select
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.requirements.schemas import (
     GateResultResponse,
+    RequirementBulkDeleteRequest,
+    RequirementBulkDeleteResult,
     RequirementCreate,
     RequirementResponse,
     RequirementSetCreate,
     RequirementSetDetail,
     RequirementSetResponse,
+    RequirementSetUpdate,
     RequirementStats,
     RequirementUpdate,
     TextImportRequest,
@@ -265,6 +271,38 @@ async def export_requirements(
     )
 
 
+# ── Update set (PATCH) ──────────────────────────────────────────────────────
+
+
+@router.patch("/{set_id}", response_model=RequirementSetResponse)
+async def update_set(
+    set_id: uuid.UUID,
+    data: RequirementSetUpdate,
+    _user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("requirements.update")),
+    service: RequirementsService = Depends(_get_service),
+) -> RequirementSetResponse:
+    """Patch fields on a requirement set after creation.
+
+    Lets users rename a set, edit its description, change the source
+    type, or update the workflow status without having to delete and
+    recreate (which would lose history and any BIM/BOQ links the set's
+    requirements own).  Project re-assignment is intentionally NOT
+    supported here — sets are project-scoped at creation.
+    """
+    try:
+        item = await service.update_set(set_id, data.model_dump(exclude_unset=True))
+        return _set_to_response(item)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Unable to update requirement set")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to update requirement set",
+        )
+
+
 # ── Delete set ──────────────────────────────────────────────────────────────
 
 
@@ -277,6 +315,46 @@ async def delete_set(
 ) -> None:
     """Delete a requirement set and all its data."""
     await service.delete_set(set_id)
+
+
+# ── Bulk delete requirements ────────────────────────────────────────────────
+
+
+@router.post(
+    "/{set_id}/requirements/bulk-delete/",
+    response_model=RequirementBulkDeleteResult,
+)
+async def bulk_delete_requirements(
+    set_id: uuid.UUID,
+    data: RequirementBulkDeleteRequest,
+    _user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("requirements.delete")),
+    service: RequirementsService = Depends(_get_service),
+) -> RequirementBulkDeleteResult:
+    """Delete every requirement whose id is in the list (single transaction).
+
+    Ids that do not exist OR belong to a different set are silently
+    skipped — the response carries the actual delete count and skipped
+    count so the UI can show "deleted N of M" if there is a mismatch.
+    Each successful delete fires the standard
+    ``requirements.requirement.deleted`` event so vector indexes stay
+    in sync.
+    """
+    try:
+        deleted, skipped = await service.bulk_delete_requirements(
+            set_id, data.requirement_ids
+        )
+        return RequirementBulkDeleteResult(
+            deleted_count=deleted, skipped_count=skipped
+        )
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Unable to bulk-delete requirements for set %s", set_id)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to bulk-delete requirements",
+        )
 
 
 # ── Add requirement ─────────────────────────────────────────────────────────
@@ -466,3 +544,182 @@ async def import_from_text(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Unable to import requirements from text — parsing incomplete",
         )
+
+
+# ── BIM linking endpoints ────────────────────────────────────────────────
+
+
+class BIMLinkBody(BaseModel):
+    """Request body for the requirement → BIM elements link endpoint."""
+
+    bim_element_ids: list[str]
+    replace: bool = False
+
+
+@router.patch(
+    "/{set_id}/requirements/{req_id}/bim-links/",
+    response_model=RequirementResponse,
+)
+async def link_requirement_to_bim(
+    set_id: uuid.UUID,
+    req_id: uuid.UUID,
+    body: BIMLinkBody,
+    _user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("requirements.update")),
+    service: RequirementsService = Depends(_get_service),
+) -> RequirementResponse:
+    """Pin a requirement to one or more BIM elements.
+
+    By default the new ids are merged with whatever was there
+    previously (additive linking — no accidental data loss).  Pass
+    ``replace=true`` to overwrite the array entirely.
+
+    The link is stored under ``metadata_["bim_element_ids"]`` so we
+    don't need a schema migration.  After mutation we publish the
+    standardized ``requirements.requirement.linked_bim`` event so the
+    vector indexer refreshes the embedding to reflect the new links.
+    """
+    item = await service.link_to_bim_elements(
+        req_id, body.bim_element_ids, replace=body.replace
+    )
+    if item.requirement_set_id != set_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Requirement does not belong to the specified set",
+        )
+    return _req_to_response(item)
+
+
+@router.get(
+    "/by-bim-element/",
+    response_model=list[RequirementResponse],
+)
+async def list_requirements_by_bim_element(
+    _user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("requirements.read")),
+    service: RequirementsService = Depends(_get_service),
+    bim_element_id: str = Query(..., description="UUID of the BIM element"),
+    project_id: uuid.UUID | None = Query(default=None),
+) -> list[RequirementResponse]:
+    """Reverse query: every requirement that pins ``bim_element_id``.
+
+    Used by the BIM viewer's element details panel and the AI advisor's
+    structured project state to surface requirements relevant to the
+    currently selected element.  Pass ``project_id`` to scope the
+    candidate set; otherwise all requirements the caller has access to
+    are scanned (slower but works for tenant-wide queries).
+    """
+    rows = await service.list_by_bim_element(bim_element_id, project_id=project_id)
+    return [_req_to_response(r) for r in rows]
+
+
+# ── Vector / semantic memory endpoints ───────────────────────────────────
+#
+# ``/vector/status/`` + ``/vector/reindex/`` are wired via the shared
+# factory (see ``include_router`` at the bottom of this file).  The
+# similar-requirements endpoint below stays module-specific because it
+# needs to validate set/req parent linkage.
+
+
+@router.get(
+    "/{set_id}/requirements/{req_id}/similar/",
+    dependencies=[Depends(RequirePermission("requirements.read"))],
+)
+async def requirement_similar(
+    set_id: uuid.UUID,
+    req_id: uuid.UUID,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    limit: int = Query(default=5, ge=1, le=20),
+    cross_project: bool = Query(default=True),
+) -> dict[str, Any]:
+    """Return requirements semantically similar to the given one.
+
+    Defaults to **cross-project** — that's the highest-value use case
+    for the requirements module: estimators want to find how a similar
+    constraint was handled on past projects so they can reuse the
+    spec text and the linked BOQ rate.
+    """
+    from sqlalchemy.orm import selectinload
+
+    from app.core.vector_index import find_similar
+    from app.modules.requirements.models import Requirement
+    from app.modules.requirements.vector_adapter import requirement_vector_adapter
+
+    stmt = (
+        select(Requirement)
+        .options(selectinload(Requirement.requirement_set))
+        .where(Requirement.id == req_id)
+    )
+    row = (await session.execute(stmt)).scalar_one_or_none()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Requirement not found")
+    if row.requirement_set_id != set_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Requirement does not belong to the specified set",
+        )
+
+    project_id = (
+        str(row.requirement_set.project_id)
+        if row.requirement_set is not None and row.requirement_set.project_id
+        else None
+    )
+    hits = await find_similar(
+        requirement_vector_adapter,
+        row,
+        project_id=project_id,
+        cross_project=cross_project,
+        limit=limit,
+    )
+    return {
+        "source_id": str(req_id),
+        "limit": limit,
+        "cross_project": cross_project,
+        "hits": [h.to_dict() for h in hits],
+    }
+
+
+# ── Mount vector status + reindex via the shared factory ────────────────
+#
+# Requirements rows are scoped by ``RequirementSet.project_id`` rather
+# than a direct column, so we pass a custom loader that performs the
+# join for us.
+from sqlalchemy.orm import selectinload as _selectinload  # noqa: E402
+
+from app.core.vector_index import COLLECTION_REQUIREMENTS  # noqa: E402
+from app.core.vector_routes import create_vector_routes  # noqa: E402
+from app.modules.requirements.models import (  # noqa: E402
+    Requirement as _Requirement,
+)
+from app.modules.requirements.models import (  # noqa: E402
+    RequirementSet as _RequirementSet,
+)
+from app.modules.requirements.vector_adapter import (  # noqa: E402
+    requirement_vector_adapter as _requirement_vector_adapter,
+)
+
+
+async def _requirements_loader(
+    session: Any, project_id: uuid.UUID | None
+) -> list[Any]:
+    stmt = select(_Requirement).options(
+        _selectinload(_Requirement.requirement_set)
+    )
+    if project_id is not None:
+        stmt = stmt.join(
+            _RequirementSet,
+            _Requirement.requirement_set_id == _RequirementSet.id,
+        ).where(_RequirementSet.project_id == project_id)
+    return list((await session.execute(stmt)).scalars().all())
+
+
+router.include_router(
+    create_vector_routes(
+        collection=COLLECTION_REQUIREMENTS,
+        adapter=_requirement_vector_adapter,
+        loader=_requirements_loader,
+        read_permission="requirements.read",
+        write_permission="requirements.update",
+    )
+)

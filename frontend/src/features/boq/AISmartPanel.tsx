@@ -80,7 +80,7 @@ export function AISmartPanel({
 
   useEffect(() => {
     if (!isOpen) return;
-    apiGet<Record<string, unknown>>('/v1/ai/settings')
+    apiGet<Record<string, unknown>>('/v1/ai/settings/')
       .then((s) => {
         const hasKey =
           !!s.anthropic_api_key_set || !!s.openai_api_key_set || !!s.gemini_api_key_set ||
@@ -352,15 +352,15 @@ export function AISmartPanel({
                   </p>
                   <ul className="text-xs space-y-0.5">
                     {enhanceResult.specifications.map((s, i) => (
-                      <li key={i} className="text-text-secondary">• {s}</li>
+                      <li key={`spec-${s.slice(0, 30)}-${i}`} className="text-text-secondary">• {s}</li>
                     ))}
                   </ul>
                 </div>
               )}
               {enhanceResult.standards.length > 0 && (
                 <div className="flex flex-wrap gap-1">
-                  {enhanceResult.standards.map((s, i) => (
-                    <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+                  {enhanceResult.standards.map((s) => (
+                    <span key={s} className="text-[10px] px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
                       {s}
                     </span>
                   ))}
@@ -388,7 +388,7 @@ export function AISmartPanel({
           {prereqResult && prereqResult.suggestions.length > 0 && (
             <div className="space-y-2">
               {prereqResult.suggestions.map((item, i) => (
-                <div key={i} className="p-2 rounded border border-border-light bg-surface">
+                <div key={`${item.relationship}-${item.description.slice(0, 30)}-${i}`} className="p-2 rounded border border-border-light bg-surface">
                   <div className="flex items-start gap-2">
                     <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded ${
                       item.relationship === 'prerequisite'
@@ -522,7 +522,7 @@ export function AISmartPanel({
               {scopeResult.warnings.length > 0 && (
                 <div className="space-y-1">
                   {scopeResult.warnings.map((w, i) => (
-                    <div key={i} className="flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+                    <div key={`warn-${w.slice(0, 30)}-${i}`} className="flex items-start gap-1.5 text-xs text-amber-600 dark:text-amber-400">
                       <AlertTriangle size={12} className="shrink-0 mt-0.5" />
                       {w}
                     </div>
@@ -537,7 +537,7 @@ export function AISmartPanel({
                     {t('boq.ai_missing_items', { defaultValue: 'Missing Items' })} ({scopeResult.missing_items.length})
                   </p>
                   {scopeResult.missing_items.map((item, i) => (
-                    <div key={i} className="p-2 rounded border border-border-light bg-surface">
+                    <div key={`${item.category}-${item.description.slice(0, 30)}-${i}`} className="p-2 rounded border border-border-light bg-surface">
                       <div className="flex items-start gap-2">
                         <span className={`shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded ${
                           item.priority === 'high'

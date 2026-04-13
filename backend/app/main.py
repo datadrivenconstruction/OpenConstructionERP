@@ -2,12 +2,33 @@
 # CWICR Cost Database Engine · CAD2DATA Pipeline
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 # AGPL-3.0 License · DDC-CWICR-OE-2026
-"""OpenEstimate — FastAPI application factory.
+"""OpenEstimate​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ — FastAPI application factory.
 
 Usage:
     uvicorn app.main:create_app --factory --reload --port 8000
     openestimate serve  (CLI mode — also serves frontend)
 """
+
+# ── Runtime compatibility shims ─────────────────────────────────────────────
+# MUST run BEFORE any import that can pull in numpy / torch / lancedb.
+# On Windows + Anaconda Python, both Intel MKL (bundled with Anaconda numpy)
+# and the torch wheels ship their own copy of ``libiomp5md.dll``. When the
+# second copy is loaded, the OpenMP runtime aborts with:
+#
+#   OMP: Error #15: Initializing libiomp5md.dll, but found libiomp5md.dll
+#                   already initialized.
+#
+# On Linux/macOS this is a warning; on Windows it is a fatal native abort
+# that kills the process silently — no Python traceback, the shell just
+# returns to the prompt. ``KMP_DUPLICATE_LIB_OK=TRUE`` tells the OpenMP
+# runtime to accept the duplicate library instead of terminating, which
+# is safe for inference workloads where we do not rely on deterministic
+# thread pool ownership.
+import os as _os
+
+_os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
+_os.environ.setdefault("OMP_NUM_THREADS", "1")
+_os.environ.setdefault("MKL_NUM_THREADS", "1")
 
 import hashlib as _hashlib
 import logging
@@ -24,11 +45,12 @@ _BUILD_HASH = _hashlib.sha256(f"DDC-CWICR-OE-{_INSTANCE_ID}".encode()).hexdigest
 from datetime import UTC
 
 import structlog
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import Settings, get_settings
 from app.core.module_loader import module_loader
+from app.dependencies import get_current_user_id
 
 logger = logging.getLogger(__name__)
 
@@ -55,11 +77,22 @@ def configure_logging(settings: Settings) -> None:
 
 
 def _init_vector_db() -> None:
-    """Initialize vector database on startup (non-blocking).
+    """Initialize vector database on startup (non-blocking, never fatal).
 
-    Default: LanceDB (embedded, no Docker needed).
-    If VECTOR_BACKEND=qdrant, checks if Qdrant is reachable.
-    Embedding model is loaded lazily on first use, NOT at startup.
+    Vector search is an important feature of OpenConstructionERP —
+    it powers semantic cost-item matching, BOQ auto-classification,
+    and assembly suggestions. We support two backends:
+
+    * **Qdrant** (recommended for production) — dedicated server, scales
+      to millions of vectors, supports snapshots. Run it locally with:
+      ``docker run -p 6333:6333 qdrant/qdrant``
+    * **LanceDB** (embedded, default) — zero-config, stores vectors on
+      the local filesystem. Good enough for single-node deployments.
+
+    Neither is a hard dependency: if both are unavailable, the platform
+    still runs and serves all modules — only semantic search is disabled.
+    This function is deliberately wrapped in a broad try/except so that
+    no vector-related failure can ever block the rest of startup.
     """
     try:
         from app.core.vector import vector_status
@@ -70,13 +103,249 @@ def _init_vector_db() -> None:
             vectors = status.get("cost_collection", {})
             count = vectors.get("vectors_count", 0) if vectors else 0
             logger.info("Vector DB ready: %s (%d vectors indexed)", engine, count)
+            return
+
+        # Not connected — log a clear, actionable hint so users know how
+        # to enable semantic search if they need it.
+        error = status.get("error", "unknown")
+        if engine == "qdrant":
+            logger.warning(
+                "Qdrant not reachable (%s). Semantic search is disabled. "
+                "Start a local Qdrant with: docker run -p 6333:6333 qdrant/qdrant",
+                error,
+            )
         else:
-            if engine == "lancedb":
-                logger.info("LanceDB init failed: %s", status.get("error", "unknown"))
-            else:
-                logger.info("Qdrant not available — semantic search disabled")
-    except Exception as exc:
-        logger.info("Vector DB init skipped: %s", exc)
+            logger.warning(
+                "LanceDB init failed (%s). Semantic search is disabled. "
+                "Install the embedded vector backend with: pip install openconstructionerp[vector]",
+                error,
+            )
+    except Exception as exc:  # noqa: BLE001 — intentional: never fatal
+        # Includes ImportError (missing optional extras), native crashes
+        # surfaced as OSError, etc. Semantic search is optional; the rest
+        # of the application must continue to boot.
+        logger.warning("Vector DB init skipped: %s", exc)
+
+
+async def _auto_backfill_vector_collections() -> None:
+    """Backfill the multi-collection vector store from existing rows.
+
+    The event-driven indexing layer (added in v1.4.0) only fires for
+    rows that are created or updated AFTER the upgrade.  On a fresh
+    install with no data this is a no-op; on an existing v1.3.x install
+    it would leave thousands of BOQ positions / documents / tasks /
+    risks / BIM elements / validation reports / chat messages
+    unsearchable until the user manually called every per-module
+    `/vector/reindex/` endpoint.
+
+    This helper closes that gap automatically.  For each registered
+    collection it:
+
+    1. Reads the live row count from Postgres / SQLite
+    2. Reads the indexed row count from the vector store
+    3. If the vector store is short, runs ``reindex_collection`` for the
+       missing rows (capped by ``vector_backfill_max_rows`` per pass)
+
+    Designed to be **non-blocking** — it runs in a detached background
+    task so startup completes immediately even if the model loader has
+    to download a fresh embedding checkpoint.
+
+    All failures are logged and swallowed.  Disable entirely with
+    ``vector_auto_backfill=False`` in settings.
+    """
+    try:
+        from sqlalchemy import select
+
+        from app.config import get_settings
+        from app.core.vector import vector_count_collection
+        from app.core.vector_index import (
+            COLLECTION_BIM_ELEMENTS,
+            COLLECTION_BOQ,
+            COLLECTION_CHAT,
+            COLLECTION_DOCUMENTS,
+            COLLECTION_REQUIREMENTS,
+            COLLECTION_RISKS,
+            COLLECTION_TASKS,
+            COLLECTION_VALIDATION,
+            reindex_collection,
+        )
+        from app.database import async_session_factory
+
+        settings = get_settings()
+        if not settings.vector_auto_backfill:
+            logger.info("Vector auto-backfill disabled by settings; skipping")
+            return
+
+        cap = max(0, int(settings.vector_backfill_max_rows or 0))
+
+        from sqlalchemy import func
+        from sqlalchemy.orm import selectinload
+
+        async def _maybe_backfill(
+            label: str,
+            collection: str,
+            model,
+            adapter,
+            *,
+            options: list | None = None,
+        ) -> None:
+            """Backfill ``collection`` from ``model`` rows in a memory-safe way.
+
+            Steps:
+                1. Read the indexed-row count from the vector store (cheap).
+                2. Issue a ``SELECT COUNT(*)`` against the model — also cheap.
+                3. Skip if the index already has at least as many rows.
+                4. Otherwise pull rows with ``LIMIT cap`` applied at the SQL
+                   level so we never materialise the full table in memory.
+
+            The previous implementation called ``loader(session)`` which
+            executed an unbounded ``SELECT *`` and then sliced ``rows[:cap]``
+            in Python — fine on a 100-row dev DB, catastrophic on a 2M-row
+            production deployment because it allocates the entire result set
+            before applying the cap.  Now the cap is enforced before the
+            scan reaches the network.
+            """
+            try:
+                indexed = vector_count_collection(collection) or 0
+            except Exception:
+                indexed = 0
+
+            try:
+                async with async_session_factory() as session:
+                    # Step 1: cheap COUNT(*) — never materialises rows.
+                    live_total = (
+                        await session.execute(select(func.count()).select_from(model))
+                    ).scalar_one() or 0
+
+                    if not live_total:
+                        return
+                    if indexed >= live_total:
+                        logger.debug(
+                            "Backfill %s: %d/%d already indexed; skipping",
+                            label,
+                            indexed,
+                            live_total,
+                        )
+                        return
+
+                    # Step 2: decide how many rows to actually pull.
+                    if cap > 0 and live_total > cap:
+                        limit_to = cap
+                        logger.info(
+                            "Backfill %s: %d live rows exceeds cap (%d); "
+                            "indexing first %d",
+                            label,
+                            live_total,
+                            cap,
+                            cap,
+                        )
+                    else:
+                        limit_to = live_total
+
+                    # Step 3: pull only what we need, with relationship
+                    # eager-loads if the adapter needs them.
+                    stmt = select(model)
+                    if options:
+                        stmt = stmt.options(*options)
+                    stmt = stmt.limit(limit_to)
+                    rows = list((await session.execute(stmt)).scalars().all())
+            except Exception as exc:
+                logger.debug("Backfill %s loader failed: %s", label, exc)
+                return
+
+            if not rows:
+                return
+
+            try:
+                result = await reindex_collection(adapter, rows)
+                logger.info(
+                    "Backfill %s: indexed=%d, skipped=%d (live=%d, was=%d)",
+                    label,
+                    result.get("indexed", 0),
+                    result.get("skipped", 0),
+                    live_total,
+                    indexed,
+                )
+            except Exception as exc:
+                logger.debug("Backfill %s reindex failed: %s", label, exc)
+
+        # ── Declarative collection registry ──────────────────────────────
+        # Each tuple is (label, collection_constant, model_loader, adapter_loader,
+        # options_factory).  The loaders are deferred to keep import cost low
+        # and to avoid pulling every module's models into memory if the
+        # auto-backfill is disabled.
+        from app.modules.bim_hub.models import BIMElement
+        from app.modules.bim_hub.vector_adapter import bim_element_vector_adapter
+        from app.modules.boq.models import Position
+        from app.modules.boq.vector_adapter import boq_position_adapter
+        from app.modules.documents.models import Document
+        from app.modules.documents.vector_adapter import document_vector_adapter
+        from app.modules.erp_chat.models import ChatMessage
+        from app.modules.erp_chat.vector_adapter import chat_message_adapter
+        from app.modules.requirements.models import Requirement
+        from app.modules.requirements.vector_adapter import (
+            requirement_vector_adapter,
+        )
+        from app.modules.risk.models import RiskItem
+        from app.modules.risk.vector_adapter import risk_vector_adapter
+        from app.modules.tasks.models import Task
+        from app.modules.tasks.vector_adapter import task_vector_adapter
+        from app.modules.validation.models import ValidationReport
+        from app.modules.validation.vector_adapter import validation_report_adapter
+
+        backfill_targets = [
+            (
+                "BOQ positions",
+                COLLECTION_BOQ,
+                Position,
+                boq_position_adapter,
+                [selectinload(Position.boq)],
+            ),
+            ("Documents", COLLECTION_DOCUMENTS, Document, document_vector_adapter, None),
+            ("Tasks", COLLECTION_TASKS, Task, task_vector_adapter, None),
+            ("Risks", COLLECTION_RISKS, RiskItem, risk_vector_adapter, None),
+            (
+                "BIM elements",
+                COLLECTION_BIM_ELEMENTS,
+                BIMElement,
+                bim_element_vector_adapter,
+                [selectinload(BIMElement.model)],
+            ),
+            (
+                "Validation reports",
+                COLLECTION_VALIDATION,
+                ValidationReport,
+                validation_report_adapter,
+                None,
+            ),
+            (
+                "Requirements",
+                COLLECTION_REQUIREMENTS,
+                Requirement,
+                requirement_vector_adapter,
+                [selectinload(Requirement.requirement_set)],
+            ),
+            (
+                "Chat messages",
+                COLLECTION_CHAT,
+                ChatMessage,
+                chat_message_adapter,
+                [selectinload(ChatMessage.session)],
+            ),
+        ]
+
+        for label, collection_id, model, adapter, options in backfill_targets:
+            await _maybe_backfill(
+                label,
+                collection_id,
+                model,
+                adapter,
+                options=options,
+            )
+
+        logger.info("Vector auto-backfill pass complete")
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Vector auto-backfill skipped: %s", exc)
 
 
 async def _seed_demo_account() -> None:
@@ -206,7 +475,8 @@ def create_app() -> FastAPI:
         docs_url="/api/docs" if not settings.is_production else None,
         redoc_url="/api/redoc" if not settings.is_production else None,
         openapi_url="/api/openapi.json",
-        redirect_slashes=True,
+        swagger_ui_oauth2_redirect_url=("/api/docs/oauth2-redirect" if not settings.is_production else None),
+        redirect_slashes=False,
     )
 
     # ── Middleware ───────────────────────────────────────────────────────
@@ -224,7 +494,7 @@ def create_app() -> FastAPI:
         CORSMiddleware,
         allow_origins=cors_origins,
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+        allow_methods=["GET", "HEAD", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
         allow_headers=["Content-Type", "Authorization", "Accept", "Accept-Language"],
     )
 
@@ -385,12 +655,19 @@ def create_app() -> FastAPI:
     @app.get("/api/system/status", tags=["System"])
     async def system_status() -> dict[str, Any]:
         """Full system status: database, vector DB, AI providers."""
+        # Public hosted demo flag — set OE_DEMO_MODE=true on the VPS
+        # systemd unit so the frontend can show the "demo only" warning
+        # banner and the /users page can strip personal data from the
+        # demo registration list. Defaults to false on every fresh
+        # local install.
+        demo_mode = os.environ.get("OE_DEMO_MODE", "").lower() in ("1", "true", "yes")
         result: dict[str, Any] = {
             "api": {"status": "healthy", "version": settings.app_version},
             "database": {"status": "unknown"},
             "vector_db": {"status": "offline", "engine": "qdrant"},
             "ai": {"providers": []},
             "cache": {"status": "unknown"},
+            "demo_mode": demo_mode,
         }
 
         # Cache check
@@ -563,7 +840,10 @@ def create_app() -> FastAPI:
         return DEMO_CATALOG
 
     @app.post("/api/demo/install/{demo_id}", tags=["System"])
-    async def install_demo(demo_id: str) -> dict[str, Any]:
+    async def install_demo(
+        demo_id: str,
+        _user_id: str = Depends(get_current_user_id),
+    ) -> dict[str, Any]:
         """Install a demo project with full BOQ, Schedule, Budget, and Tendering data."""
         from app.core.demo_projects import DEMO_TEMPLATES, install_demo_project
         from app.database import async_session_factory
@@ -601,7 +881,10 @@ def create_app() -> FastAPI:
         return installed
 
     @app.delete("/api/demo/uninstall/{demo_id}", tags=["System"])
-    async def uninstall_demo(demo_id: str) -> dict[str, Any]:
+    async def uninstall_demo(
+        demo_id: str,
+        _user_id: str = Depends(get_current_user_id),
+    ) -> dict[str, Any]:
         """Remove a demo project and all its data."""
         from sqlalchemy import select
 
@@ -626,7 +909,9 @@ def create_app() -> FastAPI:
         return {"deleted_projects": len(targets), "demo_id": demo_id}
 
     @app.delete("/api/demo/clear-all", tags=["System"])
-    async def clear_all_demos() -> dict[str, Any]:
+    async def clear_all_demos(
+        _user_id: str = Depends(get_current_user_id),
+    ) -> dict[str, Any]:
         """Remove ALL demo projects and their data."""
         from sqlalchemy import select
 
@@ -709,9 +994,24 @@ def create_app() -> FastAPI:
         return {"status": "received"}
 
     # ── Lifecycle ───────────────────────────────────────────────────────
+    def _section(title: str) -> None:
+        """Log a visual section header during startup.
+
+        Makes it possible to scan a 60-line startup log and see at a glance
+        where the server got stuck. Keeps output machine-readable because
+        logger.info is still used.
+        """
+        logger.info("=== %s ===", title)
+
     @app.on_event("startup")
     async def startup() -> None:
-        logger.info("Starting %s v%s (%s)", settings.app_name, settings.app_version, settings.app_env)
+        _section("OpenConstructionERP")
+        logger.info(
+            "Starting %s v%s (env=%s)",
+            settings.app_name,
+            settings.app_version,
+            settings.app_env,
+        )
 
         # Validate secrets and configuration for production
         _insecure_secrets = {"change-me-in-production", "openestimate-local-dev-key", ""}
@@ -731,6 +1031,7 @@ def create_app() -> FastAPI:
                 logger.warning("DATABASE_URL points to localhost in production")
 
         # Load translations (20 languages)
+        _section("i18n")
         from app.core.i18n import load_translations
 
         load_translations()
@@ -740,8 +1041,17 @@ def create_app() -> FastAPI:
 
         register_core_permissions()
 
-        # Auto-create tables for SQLite dev mode (PostgreSQL uses Alembic)
-        if "sqlite" in settings.database_url:
+        # Auto-create tables for SQLite AND PostgreSQL on first start.
+        # Why for both: the v0.9.0 baseline Alembic migration is a no-op
+        # (it documents that tables are created via SQLAlchemy create_all),
+        # and the docker-compose.quickstart.yml entrypoint does not run
+        # `alembic upgrade head` before uvicorn. Result on a fresh PG
+        # volume: schema never created, login fails with
+        # `relation "oe_users_user" does not exist` (issue #42).
+        # SQLAlchemy create_all is idempotent on PG and harmless on existing
+        # databases — it only creates tables that do not yet exist.
+        _section("Database")
+        if "sqlite" in settings.database_url or "postgresql" in settings.database_url:
             # SQLite auto-migration: add missing columns before create_all
             from app.core import audit as _audit_core  # noqa: F401
             from app.core.sqlite_migrator import sqlite_auto_migrate
@@ -749,11 +1059,13 @@ def create_app() -> FastAPI:
             from app.modules.ai import models as _ai_models  # noqa: F401
             from app.modules.assemblies import models as _asm_models  # noqa: F401
             from app.modules.bim_hub import models as _bim_hub_models  # noqa: F401
+            from app.modules.bim_requirements import models as _bim_requirements_models  # noqa: F401
             from app.modules.boq import models as _boq_models  # noqa: F401
             from app.modules.catalog import models as _catalog_models  # noqa: F401
             from app.modules.cde import models as _cde_models  # noqa: F401
             from app.modules.changeorders import models as _changeorders_models  # noqa: F401
             from app.modules.collaboration import models as _collaboration_models  # noqa: F401
+            from app.modules.collaboration_locks import models as _collaboration_locks_models  # noqa: F401
             from app.modules.contacts import models as _contacts_models  # noqa: F401
             from app.modules.correspondence import models as _correspondence_models  # noqa: F401
             from app.modules.costmodel import models as _cm_models  # noqa: F401
@@ -762,6 +1074,7 @@ def create_app() -> FastAPI:
 
             # Enterprise / feature-pack modules
             from app.modules.enterprise_workflows import models as _enterprise_workflows_models  # noqa: F401
+            from app.modules.erp_chat import models as _erp_chat_models  # noqa: F401
             from app.modules.fieldreports import models as _fieldreports_models  # noqa: F401
             from app.modules.finance import models as _finance_models  # noqa: F401
             from app.modules.full_evm import models as _full_evm_models  # noqa: F401
@@ -791,15 +1104,24 @@ def create_app() -> FastAPI:
             from app.modules.users import models as _users_models  # noqa: F401
             from app.modules.validation import models as _validation_models  # noqa: F401
 
-            migrated = await sqlite_auto_migrate(engine, Base)
-            if migrated:
-                logger.info("SQLite auto-migration: %d columns added", migrated)
+            # SQLite-only: add missing columns to existing tables before
+            # create_all runs. PostgreSQL deployments must use Alembic for
+            # column-level migrations — sqlite_auto_migrate uses SQLite-
+            # specific PRAGMA / ALTER syntax.
+            if "sqlite" in settings.database_url:
+                migrated = await sqlite_auto_migrate(engine, Base)
+                if migrated:
+                    logger.info("SQLite auto-migration: %d columns added", migrated)
 
             async with engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
-            logger.info("SQLite tables created/verified")
+            db_kind = "SQLite" if "sqlite" in settings.database_url else "PostgreSQL"
+            logger.info("%s tables created/verified", db_kind)
+        else:
+            logger.info("Using external database (Alembic manages schema)")
 
         # Load all modules (triggers module on_startup hooks)
+        _section("Modules")
         await module_loader.load_all(app)
 
         # Mount OpenCDE API at the spec-compliant prefix /api/v1/opencde
@@ -845,15 +1167,29 @@ def create_app() -> FastAPI:
         register_event_handlers()
 
         # Register built-in validation rules
+        _section("Validation")
         from app.core.validation.rules import register_builtin_rules
 
         register_builtin_rules()
 
         # Seed demo account + 3 demo projects (idempotent)
+        _section("Demo data")
         await _seed_demo_account()
 
         # Initialize vector database (LanceDB embedded, no Docker)
+        _section("Vector DB")
         _init_vector_db()
+
+        # Auto-backfill the multi-collection vector store from existing
+        # rows.  Detached as a background task so a slow embedding model
+        # download or a large dataset doesn't delay startup — semantic
+        # search remains available the moment the model finishes loading.
+        try:
+            import asyncio as _asyncio_bf
+
+            _asyncio_bf.create_task(_auto_backfill_vector_collections())
+        except Exception:
+            logger.debug("Could not schedule vector backfill", exc_info=True)
 
         # ── KPI auto-recalculation scheduler (24-hour interval) ──────────
         import asyncio
@@ -880,21 +1216,66 @@ def create_app() -> FastAPI:
 
         asyncio.create_task(_kpi_scheduler())
 
-        logger.info("Application started successfully")
+        _section("Ready")
+        # Friendly multi-line ready banner. The CLI (`openestimate serve`)
+        # exposes OE_CLI_HOST / OE_CLI_PORT / OE_CLI_DATA_DIR so we can show
+        # an accurate URL after the socket is actually bound. If those env
+        # vars are absent (e.g. `uvicorn app.main:create_app --factory`), we
+        # fall back to a generic message.
+        _cli_host = os.environ.get("OE_CLI_HOST")
+        _cli_port = os.environ.get("OE_CLI_PORT")
+        _cli_data_dir = os.environ.get("OE_CLI_DATA_DIR")
+        if _cli_host and _cli_port:
+            _url = f"http://{_cli_host}:{_cli_port}"
+            logger.info("OpenConstructionERP is ready at %s", _url)
+            logger.info("Demo login: demo@openestimator.io / DemoPass1234!")
+            if _cli_data_dir:
+                logger.info("Data directory: %s", _cli_data_dir)
+            logger.info("Press Ctrl+C to stop. Docs: https://openconstructionerp.com/docs")
+        else:
+            logger.info("Application started successfully")
 
-        # ── Frontend Static Files (CLI / single-image mode) ──────────────
-        # MUST be mounted AFTER all module routers to avoid /{path:path}
-        # catch-all intercepting /api/* GET requests.
-        if os.environ.get("SERVE_FRONTEND", "").lower() in ("1", "true", "yes"):
-            from app.cli_static import mount_frontend
-
-            mount_frontend(app)
+        # NOTE: frontend static mounting moved to create_app() (below, before
+        # the startup event runs). Registering the SPA 404 exception handler
+        # here (inside the startup lifespan) is TOO LATE — Starlette has
+        # already built the ExceptionMiddleware by the time lifespan.startup
+        # fires, and the middleware captures a COPY of app.exception_handlers
+        # at build time.  Subsequent modifications to app.exception_handlers
+        # (like the one mount_frontend used to do) never reach the middleware.
+        # Symptom: https://.../demo/ returned a JSON 404 instead of index.html.
 
     @app.on_event("shutdown")
     async def shutdown() -> None:
         logger.info("Shutting down %s", settings.app_name)
         from app.database import engine
 
+        # Stop the collaboration-lock sweeper before closing the DB
+        # engine so its last iteration cannot hit a disposed pool.
+        try:
+            from app.modules.collaboration_locks.sweeper import stop_sweeper
+
+            stop_sweeper()
+        except Exception:
+            logger.debug("collab lock sweeper stop failed", exc_info=True)
+
         await engine.dispose()
+
+    # ── Frontend Static Files (CLI / single-image mode) ─────────────────────
+    # Registered HERE, before the app is returned from create_app(), so the
+    # SPA 404 exception handler is already in app.exception_handlers when
+    # Starlette builds the ExceptionMiddleware on the first lifespan message.
+    # (If this runs inside on_event("startup"), the handler is never wired up
+    # and the SPA 404 fallback silently does nothing — see comment above.)
+    #
+    # Exception handlers are independent of routes, so it is safe to register
+    # this before module routers are mounted: the handler only fires for
+    # requests that do NOT match any route.
+    if os.environ.get("SERVE_FRONTEND", "").lower() in ("1", "true", "yes"):
+        try:
+            from app.cli_static import mount_frontend
+
+            mount_frontend(app)
+        except Exception as exc:  # noqa: BLE001 — frontend is optional
+            logger.warning("Frontend mount skipped: %s", exc)
 
     return app

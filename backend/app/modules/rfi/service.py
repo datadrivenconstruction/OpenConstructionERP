@@ -1,4 +1,7 @@
-"""RFI service — business logic for RFI management."""
+"""RFI service — business logic for RFI management.
+
+- Event publishing on create/update/delete
+"""
 
 import logging
 import uuid
@@ -8,11 +11,20 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.events import event_bus
 from app.modules.rfi.models import RFI
 from app.modules.rfi.repository import RFIRepository
 from app.modules.rfi.schemas import RFICreate, RFIStatsResponse, RFIUpdate
 
 logger = logging.getLogger(__name__)
+_logger_ev = logging.getLogger(__name__ + ".events")
+
+
+async def _safe_publish(name: str, data: dict, source_module: str = "") -> None:
+    try:
+        await event_bus.publish(name, data, source_module=source_module)
+    except Exception:
+        _logger_ev.debug("Event publish skipped: %s", name)
 
 _RFI_RESPONSE_DUE_DAYS = 14
 
@@ -91,6 +103,22 @@ class RFIService:
         )
         rfi = await self.repo.create(rfi)
         logger.info("RFI created: %s for project %s", rfi_number, data.project_id)
+
+        # Publish rfi.assigned event so notification handlers fire
+        if data.assigned_to:
+            await _safe_publish(
+                "rfi.assigned",
+                {
+                    "project_id": str(data.project_id),
+                    "rfi_id": str(rfi.id),
+                    "rfi_number": rfi_number,
+                    "subject": data.subject,
+                    "assigned_to": str(data.assigned_to),
+                    "assigned_by": user_id or "",
+                },
+                source_module="oe_rfi",
+            )
+
         return rfi
 
     async def get_rfi(self, rfi_id: uuid.UUID) -> RFI:
@@ -109,12 +137,14 @@ class RFIService:
         offset: int = 0,
         limit: int = 50,
         status_filter: str | None = None,
+        search: str | None = None,
     ) -> tuple[list[RFI], int]:
         return await self.repo.list_for_project(
             project_id,
             offset=offset,
             limit=limit,
             status=status_filter,
+            search=search,
         )
 
     async def update_rfi(
@@ -163,9 +193,31 @@ class RFIService:
         if not fields:
             return rfi
 
+        # Detect reassignment so we can fire rfi.assigned
+        old_assigned = str(rfi.assigned_to) if rfi.assigned_to else None
+        new_assigned = fields.get("assigned_to")
+
         await self.repo.update_fields(rfi_id, **fields)
         await self.session.refresh(rfi)
         logger.info("RFI updated: %s (fields=%s)", rfi_id, list(fields.keys()))
+
+        # Fire rfi.assigned when assigned_to changes to a new user
+        if (
+            new_assigned is not None
+            and str(new_assigned) != old_assigned
+        ):
+            await _safe_publish(
+                "rfi.assigned",
+                {
+                    "project_id": str(rfi.project_id),
+                    "rfi_id": str(rfi_id),
+                    "rfi_number": rfi.rfi_number,
+                    "subject": rfi.subject,
+                    "assigned_to": str(new_assigned),
+                },
+                source_module="oe_rfi",
+            )
+
         return rfi
 
     async def delete_rfi(self, rfi_id: uuid.UUID) -> None:
@@ -182,7 +234,8 @@ class RFIService:
         """Record an official response to an RFI.
 
         Ball-in-court automatically flips to ``raised_by`` so the originator
-        can review the answer.
+        can review the answer. Publishes ``rfi.responded`` event so
+        subscribers (notifications, project intelligence) can react.
         """
         rfi = await self.get_rfi(rfi_id)
         if rfi.status in ("closed", "void"):
@@ -200,14 +253,29 @@ class RFIService:
             ball_in_court=str(rfi.raised_by),
         )
         await self.session.refresh(rfi)
+
+        await _safe_publish(
+            "rfi.responded",
+            {
+                "project_id": str(rfi.project_id),
+                "rfi_id": str(rfi_id),
+                "rfi_number": rfi.rfi_number,
+                "subject": rfi.subject,
+                "responded_by": responded_by,
+                "raised_by": str(rfi.raised_by) if rfi.raised_by else None,
+                "ball_in_court": str(rfi.raised_by) if rfi.raised_by else None,
+            },
+            source_module="oe_rfi",
+        )
+
         logger.info("RFI responded: %s by %s", rfi_id, responded_by)
         return rfi
 
-    async def close_rfi(self, rfi_id: uuid.UUID) -> RFI:
+    async def close_rfi(self, rfi_id: uuid.UUID, *, closed_by: str | None = None) -> RFI:
         """Close an RFI.
 
         Requires an official response before closing to prevent
-        unanswered RFIs from being silently closed.
+        unanswered RFIs from being silently closed. Publishes ``rfi.closed`` event.
         """
         rfi = await self.get_rfi(rfi_id)
         if rfi.status == "closed":
@@ -223,7 +291,20 @@ class RFIService:
 
         await self.repo.update_fields(rfi_id, status="closed", ball_in_court=None)
         await self.session.refresh(rfi)
-        logger.info("RFI closed: %s", rfi_id)
+
+        await _safe_publish(
+            "rfi.closed",
+            {
+                "project_id": str(rfi.project_id),
+                "rfi_id": str(rfi_id),
+                "rfi_number": rfi.rfi_number,
+                "subject": rfi.subject,
+                "closed_by": closed_by,
+            },
+            source_module="oe_rfi",
+        )
+
+        logger.info("RFI closed: %s by %s", rfi_id, closed_by)
         return rfi
 
     async def get_stats(self, project_id: uuid.UUID) -> RFIStatsResponse:

@@ -15,7 +15,7 @@ class ChecklistEntry(BaseModel):
     question: str = Field(..., min_length=1, max_length=500)
     response_type: str = Field(default="yes_no", max_length=50)
     response: str | None = Field(default=None, max_length=200)
-    notes: str | None = None
+    notes: str | None = Field(default=None, max_length=2000)
     critical: bool = False
 
 
@@ -33,10 +33,10 @@ class InspectionCreate(BaseModel):
         ),
     )
     title: str = Field(..., min_length=1, max_length=500)
-    description: str | None = None
+    description: str | None = Field(default=None, max_length=5000)
     location: str | None = Field(default=None, max_length=500)
-    wbs_id: str | None = None
-    inspector_id: str | None = None
+    wbs_id: str | None = Field(default=None, max_length=36)
+    inspector_id: str | None = Field(default=None, max_length=36)
     inspection_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     status: str = Field(
         default="scheduled",
@@ -60,10 +60,10 @@ class InspectionUpdate(BaseModel):
         ),
     )
     title: str | None = Field(default=None, min_length=1, max_length=500)
-    description: str | None = None
+    description: str | None = Field(default=None, max_length=5000)
     location: str | None = Field(default=None, max_length=500)
-    wbs_id: str | None = None
-    inspector_id: str | None = None
+    wbs_id: str | None = Field(default=None, max_length=36)
+    inspector_id: str | None = Field(default=None, max_length=36)
     inspection_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     status: str | None = Field(
         default=None,

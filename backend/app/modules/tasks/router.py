@@ -11,7 +11,10 @@ Endpoints:
     PATCH  /{task_id}            - Update task
     DELETE /{task_id}            - Delete task
     POST   /{task_id}/complete   - Mark task as completed
+    PATCH  /{task_id}/bim-links  - Replace linked BIM element ids
 """
+
+from __future__ import annotations
 
 import csv
 import io
@@ -24,8 +27,10 @@ from typing import Any
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import StreamingResponse
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.core.bulk_ops import BulkAssignRequest, BulkDeleteRequest, BulkStatusRequest
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.tasks.schemas import (
+    TaskBimLinkRequest,
     TaskCompleteRequest,
     TaskCreate,
     TaskResponse,
@@ -86,6 +91,9 @@ def _to_response(item: object) -> TaskResponse:
         result=item.result,  # type: ignore[attr-defined]
         is_private=item.is_private,  # type: ignore[attr-defined]
         created_by=item.created_by,  # type: ignore[attr-defined]
+        bim_element_ids=[
+            str(x) for x in (getattr(item, "bim_element_ids", None) or [])
+        ],
         metadata=getattr(item, "metadata_", {}),
         created_at=item.created_at,  # type: ignore[attr-defined]
         updated_at=item.updated_at,  # type: ignore[attr-defined]
@@ -95,6 +103,7 @@ def _to_response(item: object) -> TaskResponse:
 
 @router.get("/", response_model=list[TaskResponse])
 async def list_tasks(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     offset: int = Query(default=0, ge=0),
@@ -104,12 +113,61 @@ async def list_tasks(
     priority: str | None = Query(default=None),
     responsible_id: str | None = Query(default=None),
     meeting_id: str | None = Query(default=None),
+    bim_element_id: str | None = Query(
+        default=None,
+        description=(
+            "Filter tasks to those whose bim_element_ids JSON array contains "
+            "this element id (used by the BIM viewer to show linked defects)."
+        ),
+    ),
+    search: str | None = Query(
+        default=None,
+        max_length=200,
+        description="Free-text search across title, description, and result fields.",
+    ),
     service: TaskService = Depends(_get_service),
 ) -> list[TaskResponse]:
     """List tasks for a project with optional filters.
 
-    Private tasks are only visible to their creator.
+    Private tasks are only visible to their creator. When ``bim_element_id``
+    is supplied, the result is filtered to tasks whose ``bim_element_ids``
+    list includes that element id. All other filters still apply on top.
     """
+    await verify_project_access(project_id, user_id, session)
+    if bim_element_id:
+        # JSON-contains filter — delegated to the service for dialect handling.
+        tasks_with_bim = await service.get_tasks_for_bim_element(
+            bim_element_id,
+            project_id=project_id,
+            current_user_id=user_id,
+        )
+        # Apply the remaining lightweight filters in memory. The element
+        # filter is typically very selective (O(handful)) so this is fine.
+        if type_filter is not None:
+            tasks_with_bim = [t for t in tasks_with_bim if t.task_type == type_filter]
+        if status_filter is not None:
+            tasks_with_bim = [t for t in tasks_with_bim if t.status == status_filter]
+        if priority is not None:
+            tasks_with_bim = [t for t in tasks_with_bim if t.priority == priority]
+        if responsible_id is not None:
+            tasks_with_bim = [
+                t
+                for t in tasks_with_bim
+                if str(t.responsible_id or "") == responsible_id
+            ]
+        if meeting_id is not None:
+            tasks_with_bim = [t for t in tasks_with_bim if t.meeting_id == meeting_id]
+        if search and search.strip():
+            needle = search.strip().lower()
+            tasks_with_bim = [
+                t
+                for t in tasks_with_bim
+                if needle in (t.title or "").lower()
+                or needle in (t.description or "").lower()
+                or needle in (t.result or "").lower()
+            ]
+        return [_to_response(t) for t in tasks_with_bim[offset : offset + limit]]
+
     tasks, _ = await service.list_tasks(
         project_id,
         current_user_id=user_id,
@@ -120,6 +178,7 @@ async def list_tasks(
         priority=priority,
         responsible_id=responsible_id,
         meeting_id=meeting_id,
+        search=search,
     )
     return [_to_response(t) for t in tasks]
 
@@ -146,16 +205,19 @@ async def my_tasks(
 async def create_task(
     data: TaskCreate,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("tasks.create")),
     service: TaskService = Depends(_get_service),
 ) -> TaskResponse:
     """Create a new task."""
+    await verify_project_access(data.project_id, user_id, session)
     task = await service.create_task(data, user_id=user_id)
     return _to_response(task)
 
 
 @router.get("/stats/", response_model=TaskStatsResponse)
 async def task_stats(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: TaskService = Depends(_get_service),
@@ -165,6 +227,7 @@ async def task_stats(
     Includes total, breakdown by status/type/priority, overdue count,
     and average checklist progress.
     """
+    await verify_project_access(project_id, user_id, session)
     return await service.get_stats(project_id, current_user_id=user_id)
 
 
@@ -173,11 +236,13 @@ async def task_stats(
 
 @router.get("/export/")
 async def export_tasks(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: TaskService = Depends(_get_service),
 ) -> StreamingResponse:
     """Export tasks for a project as Excel file."""
+    await verify_project_access(project_id, user_id, session)
     from openpyxl import Workbook
     from openpyxl.styles import Font
 
@@ -393,6 +458,7 @@ def _parse_task_rows_from_excel(content: bytes) -> list[dict[str, Any]]:
 @router.post("/import/file/")
 async def import_tasks_file(
     user_id: CurrentUserId,
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     file: UploadFile = File(..., description="Excel (.xlsx) or CSV (.csv) file"),
     _perm: None = Depends(RequirePermission("tasks.create")),
@@ -411,6 +477,7 @@ async def import_tasks_file(
     Returns:
         Summary with counts of imported, skipped, and error details per row.
     """
+    await verify_project_access(project_id, user_id, session)
     filename = (file.filename or "").lower()
     if not filename.endswith((".xlsx", ".csv", ".xls")):
         raise HTTPException(
@@ -514,6 +581,112 @@ async def import_tasks_file(
     }
 
 
+# ── Bulk operations (must come BEFORE parametric /{task_id}) ───────────
+
+
+async def _filter_owned_task_ids(
+    session: SessionDep,
+    user_id: str,
+    task_ids: list[uuid.UUID],
+) -> list[uuid.UUID]:
+    """Return the subset of task_ids that belong to projects owned by user_id."""
+    from sqlalchemy import select as _select
+
+    from app.modules.projects.repository import ProjectRepository
+    from app.modules.tasks.models import Task
+
+    proj_repo = ProjectRepository(session)
+    owned_projects, _ = await proj_repo.list_for_user(
+        owner_id=user_id, offset=0, limit=10000, exclude_archived=False
+    )
+    owned_project_ids = {str(p.id) for p in owned_projects}
+
+    rows = (await session.execute(
+        _select(Task.id, Task.project_id).where(Task.id.in_(task_ids))
+    )).all()
+    return [r[0] for r in rows if str(r[1]) in owned_project_ids]
+
+
+@router.post(
+    "/batch/delete/",
+    status_code=200,
+    dependencies=[Depends(RequirePermission("tasks.delete"))],
+)
+async def batch_delete_tasks(
+    body: BulkDeleteRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> dict:
+    """Delete multiple tasks in one request. Only project-owned tasks are deleted."""
+    from app.core.bulk_ops import bulk_delete
+    from app.modules.tasks.models import Task
+
+    allowed = await _filter_owned_task_ids(session, user_id, body.ids)
+    deleted = await bulk_delete(session, Task, allowed)
+    logger.info(
+        "Bulk delete tasks: requested=%d deleted=%d user=%s",
+        len(body.ids), deleted, user_id,
+    )
+    return {"requested": len(body.ids), "deleted": deleted}
+
+
+@router.patch(
+    "/batch/status/",
+    status_code=200,
+    dependencies=[Depends(RequirePermission("tasks.update"))],
+)
+async def batch_update_task_status(
+    body: BulkStatusRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> dict:
+    """Bulk-update status on multiple tasks."""
+    from app.core.bulk_ops import bulk_update_status
+    from app.modules.tasks.models import Task
+
+    allowed_statuses = {"draft", "open", "in_progress", "completed"}
+    if body.status not in allowed_statuses:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid status. Allowed: {sorted(allowed_statuses)}",
+        )
+
+    allowed_ids = await _filter_owned_task_ids(session, user_id, body.ids)
+    updated = await bulk_update_status(
+        session, Task, allowed_ids, body.status, allowed_statuses=allowed_statuses
+    )
+    logger.info(
+        "Bulk update task status: requested=%d updated=%d new_status=%s user=%s",
+        len(body.ids), updated, body.status, user_id,
+    )
+    return {"requested": len(body.ids), "updated": updated, "status": body.status}
+
+
+@router.post(
+    "/batch/assign/",
+    status_code=200,
+    dependencies=[Depends(RequirePermission("tasks.update"))],
+)
+async def batch_assign_tasks(
+    body: BulkAssignRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> dict:
+    """Bulk-assign multiple tasks to a single user."""
+    from app.core.bulk_ops import bulk_update_fields
+    from app.modules.tasks.models import Task
+
+    allowed_ids = await _filter_owned_task_ids(session, user_id, body.ids)
+    updated = await bulk_update_fields(
+        session, Task, allowed_ids, {"responsible_id": body.assignee_id}
+    )
+    logger.info(
+        "Bulk assign tasks: requested=%d updated=%d assignee=%s user=%s",
+        len(body.ids), updated, body.assignee_id, user_id,
+    )
+    return {"requested": len(body.ids), "updated": updated, "assignee_id": body.assignee_id}
+
+
 @router.get("/{task_id}", response_model=TaskResponse)
 async def get_task(
     task_id: uuid.UUID,
@@ -561,3 +734,101 @@ async def complete_task(
     result = body.result if body else None
     task = await service.complete_task(task_id, result=result, current_user_id=user_id)
     return _to_response(task)
+
+
+@router.patch("/{task_id}/bim-links", response_model=TaskResponse)
+async def update_task_bim_links(
+    task_id: uuid.UUID,
+    body: TaskBimLinkRequest,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("tasks.update")),
+    service: TaskService = Depends(_get_service),
+) -> TaskResponse:
+    """Replace the full set of BIM element ids linked to this task.
+
+    Idempotent set semantics — the incoming ``bim_element_ids`` list
+    fully overwrites the previously stored list. Sending an empty list
+    clears all links.
+    """
+    task = await service.update_bim_links(
+        task_id,
+        body.bim_element_ids,
+        current_user_id=user_id,
+    )
+    return _to_response(task)
+
+
+# ── Vector / semantic memory endpoints ───────────────────────────────────
+#
+# ``/vector/status/`` + ``/vector/reindex/`` are wired via the shared
+# factory in ``app.core.vector_routes`` (see the ``include_router`` call
+# at the bottom of this file).  The ``/{id}/similar/`` endpoint below
+# stays module-specific.
+
+
+@router.get(
+    "/{task_id}/similar/",
+    dependencies=[Depends(RequirePermission("tasks.read"))],
+)
+async def tasks_similar(
+    task_id: uuid.UUID,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    limit: int = Query(default=5, ge=1, le=20),
+    cross_project: bool = Query(default=True),
+) -> dict[str, Any]:
+    """Return tasks semantically similar to the given one.
+
+    By default the search is **cross-project** — that's the highest-value
+    use case: users want to find how a similar task / defect / inspection
+    was handled in past projects so they can reuse the resolution.  Pass
+    ``cross_project=false`` to limit the search to the same project.
+
+    Returns a list of :class:`VectorHit` dicts plus the original row id
+    so the frontend can highlight the source.
+    """
+    from sqlalchemy import select
+
+    from app.core.vector_index import find_similar
+    from app.modules.tasks.models import Task
+    from app.modules.tasks.vector_adapter import task_vector_adapter
+
+    stmt = select(Task).where(Task.id == task_id)
+    row = (await session.execute(stmt)).scalar_one_or_none()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    project_id = str(row.project_id) if row.project_id is not None else None
+    hits = await find_similar(
+        task_vector_adapter,
+        row,
+        project_id=project_id,
+        cross_project=cross_project,
+        limit=limit,
+    )
+    return {
+        "source_id": str(task_id),
+        "limit": limit,
+        "cross_project": cross_project,
+        "hits": [h.to_dict() for h in hits],
+    }
+
+
+# ── Mount vector status + reindex via the shared factory ────────────────
+from app.core.vector_index import COLLECTION_TASKS  # noqa: E402
+from app.core.vector_routes import create_vector_routes  # noqa: E402
+from app.modules.tasks.models import Task as _TaskModel  # noqa: E402
+from app.modules.tasks.vector_adapter import (  # noqa: E402
+    task_vector_adapter as _task_vector_adapter,
+)
+
+router.include_router(
+    create_vector_routes(
+        collection=COLLECTION_TASKS,
+        adapter=_task_vector_adapter,
+        model=_TaskModel,
+        read_permission="tasks.read",
+        write_permission="tasks.update",
+        project_id_attr="project_id",
+    )
+)

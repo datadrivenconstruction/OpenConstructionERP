@@ -16,10 +16,11 @@ import logging
 import uuid
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.core.bulk_ops import BulkDeleteRequest, BulkStatusRequest
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.rfi.schemas import (
     RFICreate,
     RFIRespondRequest,
@@ -113,20 +114,33 @@ def _to_response(item: object) -> RFIResponse:
     )
 
 
-@router.get("/", response_model=list[RFIResponse])
+@router.get(
+    "/",
+    response_model=list[RFIResponse],
+    dependencies=[Depends(RequirePermission("rfi.read"))],
+)
 async def list_rfis(
+    user_id: CurrentUserId,
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
     status_filter: str | None = Query(default=None, alias="status"),
+    search: str | None = Query(
+        default=None,
+        max_length=200,
+        description="Free-text search across subject, question, response, and RFI number.",
+    ),
     service: RFIService = Depends(_get_service),
 ) -> list[RFIResponse]:
+    """List RFIs for a project."""
+    await verify_project_access(project_id, user_id, session)
     rfis, _ = await service.list_rfis(
         project_id,
         offset=offset,
         limit=limit,
         status_filter=status_filter,
+        search=search,
     )
     return [_to_response(r) for r in rfis]
 
@@ -135,33 +149,46 @@ async def list_rfis(
 async def create_rfi(
     data: RFICreate,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("rfi.create")),
     service: RFIService = Depends(_get_service),
 ) -> RFIResponse:
+    """Create a new RFI."""
+    await verify_project_access(data.project_id, user_id, session)
     rfi = await service.create_rfi(data, user_id=user_id)
     return _to_response(rfi)
 
 
-@router.get("/stats/", response_model=RFIStatsResponse)
+@router.get(
+    "/stats/",
+    response_model=RFIStatsResponse,
+    dependencies=[Depends(RequirePermission("rfi.read"))],
+)
 async def rfi_stats(
+    user_id: CurrentUserId,
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: RFIService = Depends(_get_service),
 ) -> RFIStatsResponse:
     """Return summary statistics for RFIs in a project.
 
     Computes total, open, overdue, avg response time, and breakdown by status.
     """
+    await verify_project_access(project_id, user_id, session)
     return await service.get_stats(project_id)
 
 
-@router.get("/export/")
+@router.get(
+    "/export/",
+    dependencies=[Depends(RequirePermission("rfi.read"))],
+)
 async def export_rfi_log(
+    _user: CurrentUserId,
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
-    session: SessionDep = None,  # type: ignore[assignment]
-    _user: CurrentUserId = None,  # type: ignore[assignment]
 ) -> StreamingResponse:
     """Export RFI log for a project as Excel."""
+    await verify_project_access(project_id, _user, session)
     from openpyxl import Workbook
     from openpyxl.styles import Font
     from sqlalchemy import select
@@ -246,12 +273,101 @@ async def export_rfi_log(
     )
 
 
-@router.get("/{rfi_id}", response_model=RFIResponse)
+# ── Bulk operations (must be BEFORE parametric /{rfi_id}) ──────────────
+
+
+@router.post(
+    "/batch/delete/",
+    status_code=200,
+    dependencies=[Depends(RequirePermission("rfi.delete"))],
+)
+async def batch_delete_rfis(
+    body: BulkDeleteRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> dict:
+    """Delete multiple RFIs in one request."""
+    from sqlalchemy import select as _select
+
+    from app.core.bulk_ops import bulk_delete
+    from app.modules.projects.repository import ProjectRepository
+    from app.modules.rfi.models import RFI
+
+    proj_repo = ProjectRepository(session)
+    owned_projects, _ = await proj_repo.list_for_user(
+        owner_id=user_id, offset=0, limit=10000, exclude_archived=False
+    )
+    owned_project_ids = {str(p.id) for p in owned_projects}
+
+    rows = (await session.execute(
+        _select(RFI.id, RFI.project_id).where(RFI.id.in_(body.ids))
+    )).all()
+    allowed = [r[0] for r in rows if str(r[1]) in owned_project_ids]
+
+    deleted = await bulk_delete(session, RFI, allowed)
+    logger.info(
+        "Bulk delete RFIs: requested=%d deleted=%d user=%s",
+        len(body.ids), deleted, user_id,
+    )
+    return {"requested": len(body.ids), "deleted": deleted}
+
+
+@router.patch(
+    "/batch/status/",
+    status_code=200,
+    dependencies=[Depends(RequirePermission("rfi.update"))],
+)
+async def batch_update_rfi_status(
+    body: BulkStatusRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> dict:
+    """Bulk-update status on multiple RFIs."""
+    from sqlalchemy import select as _select
+
+    from app.core.bulk_ops import bulk_update_status
+    from app.modules.projects.repository import ProjectRepository
+    from app.modules.rfi.models import RFI
+
+    allowed_statuses = {"draft", "open", "answered", "closed", "void"}
+    if body.status not in allowed_statuses:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid status. Allowed: {sorted(allowed_statuses)}",
+        )
+
+    proj_repo = ProjectRepository(session)
+    owned_projects, _ = await proj_repo.list_for_user(
+        owner_id=user_id, offset=0, limit=10000, exclude_archived=False
+    )
+    owned_project_ids = {str(p.id) for p in owned_projects}
+
+    rows = (await session.execute(
+        _select(RFI.id, RFI.project_id).where(RFI.id.in_(body.ids))
+    )).all()
+    allowed_ids = [r[0] for r in rows if str(r[1]) in owned_project_ids]
+
+    updated = await bulk_update_status(
+        session, RFI, allowed_ids, body.status, allowed_statuses=allowed_statuses
+    )
+    logger.info(
+        "Bulk update RFI status: requested=%d updated=%d user=%s",
+        len(body.ids), updated, user_id,
+    )
+    return {"requested": len(body.ids), "updated": updated, "status": body.status}
+
+
+@router.get(
+    "/{rfi_id}",
+    response_model=RFIResponse,
+    dependencies=[Depends(RequirePermission("rfi.read"))],
+)
 async def get_rfi(
     rfi_id: uuid.UUID,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    user_id: CurrentUserId,
     service: RFIService = Depends(_get_service),
 ) -> RFIResponse:
+    """Get a single RFI."""
     rfi = await service.get_rfi(rfi_id)
     return _to_response(rfi)
 
@@ -264,6 +380,7 @@ async def update_rfi(
     _perm: None = Depends(RequirePermission("rfi.update")),
     service: RFIService = Depends(_get_service),
 ) -> RFIResponse:
+    """Update an RFI."""
     rfi = await service.update_rfi(rfi_id, data)
     return _to_response(rfi)
 
@@ -275,6 +392,7 @@ async def delete_rfi(
     _perm: None = Depends(RequirePermission("rfi.delete")),
     service: RFIService = Depends(_get_service),
 ) -> None:
+    """Delete an RFI."""
     await service.delete_rfi(rfi_id)
 
 
@@ -307,18 +425,14 @@ async def create_variation_from_rfi(
     rfi = await service.get_rfi(rfi_id)
 
     if not rfi.cost_impact:
-        from fastapi import HTTPException
-
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="RFI has no cost impact — cannot create a variation.",
         )
 
     if rfi.status not in ("answered", "closed"):
-        from fastapi import HTTPException
-
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="RFI must be answered or closed before creating a variation.",
         )
 
@@ -373,29 +487,28 @@ async def create_variation_from_rfi(
             "title": order.title,
         }
     except ImportError:
-        from fastapi import HTTPException
-
         raise HTTPException(
-            status_code=501,
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
             detail="Change orders module is not available.",
         )
     except Exception as exc:
         logger.exception("Failed to create variation from RFI %s: %s", rfi_id, exc)
-        from fastapi import HTTPException
-
         raise HTTPException(
-            status_code=500,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create change order from RFI.",
         )
 
 
-@router.post("/{rfi_id}/close/", response_model=RFIResponse)
+@router.post(
+    "/{rfi_id}/close/",
+    response_model=RFIResponse,
+    dependencies=[Depends(RequirePermission("rfi.update"))],
+)
 async def close_rfi(
     rfi_id: uuid.UUID,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
-    _perm: None = Depends(RequirePermission("rfi.update")),
+    user_id: CurrentUserId,
     service: RFIService = Depends(_get_service),
 ) -> RFIResponse:
     """Close an RFI."""
-    rfi = await service.close_rfi(rfi_id)
+    rfi = await service.close_rfi(rfi_id, closed_by=user_id)
     return _to_response(rfi)

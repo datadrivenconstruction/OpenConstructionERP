@@ -24,7 +24,7 @@ class IncidentCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     project_id: UUID
-    title: str = Field(default="", max_length=500)
+    title: str = Field(default="", min_length=0, max_length=500)
     incident_date: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
     location: str | None = Field(default=None, max_length=500)
     incident_type: str = Field(
@@ -35,14 +35,14 @@ class IncidentCreate(BaseModel):
         default="minor",
         pattern=r"^(minor|moderate|major|severe|critical)$",
     )
-    description: str = Field(..., min_length=1)
+    description: str = Field(..., min_length=1, max_length=10000)
     injured_person_details: dict[str, Any] | None = None
     treatment_type: str | None = Field(
         default=None,
         pattern=r"^(first_aid|medical|hospital|fatality)$",
     )
     days_lost: int = Field(default=0, ge=0)
-    root_cause: str | None = None
+    root_cause: str | None = Field(default=None, max_length=5000)
     corrective_actions: list[CorrectiveActionEntry] = Field(default_factory=list)
     reported_to_regulator: bool = False
     status: str = Field(
@@ -68,14 +68,14 @@ class IncidentUpdate(BaseModel):
         default=None,
         pattern=r"^(minor|moderate|major|severe|critical)$",
     )
-    description: str | None = Field(default=None, min_length=1)
+    description: str | None = Field(default=None, min_length=1, max_length=10000)
     injured_person_details: dict[str, Any] | None = None
     treatment_type: str | None = Field(
         default=None,
         pattern=r"^(first_aid|medical|hospital|fatality)$",
     )
     days_lost: int | None = Field(default=None, ge=0)
-    root_cause: str | None = None
+    root_cause: str | None = Field(default=None, max_length=5000)
     corrective_actions: list[CorrectiveActionEntry] | None = None
     reported_to_regulator: bool | None = None
     status: str | None = Field(
@@ -125,12 +125,12 @@ class ObservationCreate(BaseModel):
         ...,
         pattern=r"^(positive|unsafe_act|unsafe_condition|near_miss)$",
     )
-    description: str = Field(..., min_length=1)
+    description: str = Field(..., min_length=1, max_length=10000)
     location: str | None = Field(default=None, max_length=500)
     severity: int = Field(default=1, ge=1, le=5)
     likelihood: int = Field(default=1, ge=1, le=5)
-    immediate_action: str | None = None
-    corrective_action: str | None = None
+    immediate_action: str | None = Field(default=None, max_length=5000)
+    corrective_action: str | None = Field(default=None, max_length=5000)
     status: str = Field(default="open", pattern=r"^(open|in_progress|closed)$")
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -144,12 +144,12 @@ class ObservationUpdate(BaseModel):
         default=None,
         pattern=r"^(positive|unsafe_act|unsafe_condition|near_miss)$",
     )
-    description: str | None = Field(default=None, min_length=1)
+    description: str | None = Field(default=None, min_length=1, max_length=10000)
     location: str | None = Field(default=None, max_length=500)
     severity: int | None = Field(default=None, ge=1, le=5)
     likelihood: int | None = Field(default=None, ge=1, le=5)
-    immediate_action: str | None = None
-    corrective_action: str | None = None
+    immediate_action: str | None = Field(default=None, max_length=5000)
+    corrective_action: str | None = Field(default=None, max_length=5000)
     status: str | None = Field(default=None, pattern=r"^(open|in_progress|closed)$")
     metadata: dict[str, Any] | None = None
 

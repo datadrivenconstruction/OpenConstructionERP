@@ -133,7 +133,7 @@ export async function addRequirement(
   setId: string,
   data: AddRequirementPayload,
 ): Promise<Requirement> {
-  return apiPost<Requirement>(`/v1/requirements/${setId}/requirements`, data);
+  return apiPost<Requirement>(`/v1/requirements/${setId}/requirements/`, data);
 }
 
 export async function updateRequirement(
@@ -149,7 +149,7 @@ export async function deleteRequirement(setId: string, reqId: string): Promise<v
 }
 
 export async function runGate(setId: string, gateNumber: number): Promise<GateResult> {
-  return apiPost<GateResult>(`/v1/requirements/${setId}/gates/${gateNumber}/run`);
+  return apiPost<GateResult>(`/v1/requirements/${setId}/gates/${gateNumber}/run/`);
 }
 
 export async function fetchGates(setId: string): Promise<GateResult[]> {
@@ -169,8 +169,41 @@ export async function linkToPosition(
   );
 }
 
+/** Pin a requirement to one or more BIM elements (additive by default).
+ *
+ *  The link is stored under `Requirement.metadata_["bim_element_ids"]`
+ *  on the backend so no schema migration is needed.  Pass `replace=true`
+ *  to overwrite the array entirely instead of merging.  After the call
+ *  the BIM viewer's element list query should be invalidated so the
+ *  newly linked element shows the requirement in its details panel.
+ */
+export async function linkRequirementToBIMElements(
+  setId: string,
+  reqId: string,
+  bimElementIds: string[],
+  options: { replace?: boolean } = {},
+): Promise<Requirement> {
+  return apiPatch<Requirement>(
+    `/v1/requirements/${setId}/requirements/${reqId}/bim-links/`,
+    { bim_element_ids: bimElementIds, replace: options.replace ?? false },
+  );
+}
+
+/** Reverse query: every requirement that pins ``bim_element_id``.
+ *  Used by the BIM viewer when the user wants to see the original
+ *  spec text behind a model element. */
+export async function fetchRequirementsByBIMElement(
+  bimElementId: string,
+  projectId?: string,
+): Promise<Requirement[]> {
+  const params = new URLSearchParams();
+  params.set('bim_element_id', bimElementId);
+  if (projectId) params.set('project_id', projectId);
+  return apiGet<Requirement[]>(`/v1/requirements/by-bim-element/?${params.toString()}`);
+}
+
 export async function importFromText(setId: string, text: string): Promise<RequirementSetDetail> {
-  return apiPost<RequirementSetDetail>(`/v1/requirements/${setId}/import/text`, { text });
+  return apiPost<RequirementSetDetail>(`/v1/requirements/${setId}/import/text/`, { text });
 }
 
 /* ── Export Functions ─────────────────────────────────────────────────────── */

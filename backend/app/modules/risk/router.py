@@ -12,9 +12,11 @@ Endpoints:
 
 import logging
 import uuid
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
+from app.core.bulk_ops import BulkDeleteRequest, BulkStatusRequest
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.risk.schemas import (
     RiskCreate,
@@ -125,6 +127,10 @@ async def list_risks(
     status_filter: str | None = Query(default=None, alias="status"),
     category: str | None = Query(default=None),
     severity: str | None = Query(default=None),
+    sort_by: str | None = Query(
+        default=None, description="Sort field: risk_score, probability, created_at"
+    ),
+    sort_order: str = Query(default="desc", pattern="^(asc|desc)$"),
     service: RiskService = Depends(_get_service),
 ) -> list[RiskResponse]:
     """List risk items for a project."""
@@ -135,8 +141,84 @@ async def list_risks(
         status_filter=status_filter,
         category_filter=category,
         severity_filter=severity,
+        sort_by=sort_by,
+        sort_order=sort_order,
     )
     return [_risk_to_response(i) for i in items]
+
+
+# ── Bulk operations (must come BEFORE parametric /{risk_id}) ─────────
+
+
+@router.post(
+    "/batch/delete/",
+    status_code=200,
+)
+async def batch_delete_risks(
+    body: BulkDeleteRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> dict:
+    """Delete multiple risks in one request."""
+    from sqlalchemy import select as _select
+
+    from app.core.bulk_ops import bulk_delete
+    from app.modules.projects.repository import ProjectRepository
+    from app.modules.risk.models import RiskItem
+
+    proj_repo = ProjectRepository(session)
+    owned_projects, _ = await proj_repo.list_for_user(
+        owner_id=user_id, offset=0, limit=10000, exclude_archived=False
+    )
+    owned_project_ids = {str(p.id) for p in owned_projects}
+
+    rows = (await session.execute(
+        _select(RiskItem.id, RiskItem.project_id).where(RiskItem.id.in_(body.ids))
+    )).all()
+    allowed = [r[0] for r in rows if str(r[1]) in owned_project_ids]
+
+    deleted = await bulk_delete(session, RiskItem, allowed)
+    return {"requested": len(body.ids), "deleted": deleted}
+
+
+@router.patch(
+    "/batch/status/",
+    status_code=200,
+)
+async def batch_update_risk_status(
+    body: BulkStatusRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> dict:
+    """Bulk-update status on multiple risks."""
+    from sqlalchemy import select as _select
+
+    from app.core.bulk_ops import bulk_update_status
+    from app.modules.projects.repository import ProjectRepository
+    from app.modules.risk.models import RiskItem
+
+    allowed_statuses = {"identified", "assessed", "mitigating", "closed", "occurred"}
+    if body.status not in allowed_statuses:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid status. Allowed: {sorted(allowed_statuses)}",
+        )
+
+    proj_repo = ProjectRepository(session)
+    owned_projects, _ = await proj_repo.list_for_user(
+        owner_id=user_id, offset=0, limit=10000, exclude_archived=False
+    )
+    owned_project_ids = {str(p.id) for p in owned_projects}
+
+    rows = (await session.execute(
+        _select(RiskItem.id, RiskItem.project_id).where(RiskItem.id.in_(body.ids))
+    )).all()
+    allowed_ids = [r[0] for r in rows if str(r[1]) in owned_project_ids]
+
+    updated = await bulk_update_status(
+        session, RiskItem, allowed_ids, body.status, allowed_statuses=allowed_statuses
+    )
+    return {"requested": len(body.ids), "updated": updated, "status": body.status}
 
 
 # ── Get ──────────────────────────────────────────────────────────────────────
@@ -181,3 +263,83 @@ async def delete_risk(
 ) -> None:
     """Delete a risk item."""
     await service.delete_risk(risk_id)
+
+
+# ── Vector / semantic memory endpoints ───────────────────────────────────
+#
+# ``/vector/status/`` + ``/vector/reindex/`` wired via the shared factory
+# (see the ``include_router`` call at the bottom of this file).  Risks
+# are the single highest-value collection for cross-project semantic
+# search — lessons learned reuse is why this infrastructure exists in
+# the first place — so the ``similar`` endpoint below defaults to
+# ``cross_project=true``.
+
+
+@router.get(
+    "/{risk_id}/similar/",
+    dependencies=[Depends(RequirePermission("risk.read"))],
+)
+async def risk_similar(
+    risk_id: uuid.UUID,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    limit: int = Query(default=5, ge=1, le=20),
+    cross_project: bool = Query(default=True),
+) -> dict[str, Any]:
+    """Return risks semantically similar to the given one.
+
+    Defaults to **cross-project** search — this is the whole point of
+    the risk vector collection.  Estimators starting a new project want
+    to instantly surface "risks like this one that we already faced on
+    past jobs" so they can reuse the mitigation strategy, contingency
+    plan and budget reserve.  Pass ``cross_project=false`` to restrict
+    the search to the same project (rarely the right choice for risks).
+
+    Returns a list of :class:`VectorHit` dicts plus the source row id so
+    the frontend can highlight the origin.
+    """
+    from sqlalchemy import select
+
+    from app.core.vector_index import find_similar
+    from app.modules.risk.models import RiskItem
+    from app.modules.risk.vector_adapter import risk_vector_adapter
+
+    stmt = select(RiskItem).where(RiskItem.id == risk_id)
+    row = (await session.execute(stmt)).scalar_one_or_none()
+    if row is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Risk not found")
+
+    project_id = str(row.project_id) if row.project_id is not None else None
+    hits = await find_similar(
+        risk_vector_adapter,
+        row,
+        project_id=project_id,
+        cross_project=cross_project,
+        limit=limit,
+    )
+    return {
+        "source_id": str(risk_id),
+        "limit": limit,
+        "cross_project": cross_project,
+        "hits": [h.to_dict() for h in hits],
+    }
+
+
+# ── Mount vector status + reindex via the shared factory ────────────────
+from app.core.vector_index import COLLECTION_RISKS  # noqa: E402
+from app.core.vector_routes import create_vector_routes  # noqa: E402
+from app.modules.risk.models import RiskItem as _RiskItemModel  # noqa: E402
+from app.modules.risk.vector_adapter import (  # noqa: E402
+    risk_vector_adapter as _risk_vector_adapter,
+)
+
+router.include_router(
+    create_vector_routes(
+        collection=COLLECTION_RISKS,
+        adapter=_risk_vector_adapter,
+        model=_RiskItemModel,
+        read_permission="risk.read",
+        write_permission="risk.update",
+        project_id_attr="project_id",
+    )
+)

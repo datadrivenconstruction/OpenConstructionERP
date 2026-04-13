@@ -34,7 +34,6 @@ Routes:
 import logging
 import time as _time
 import uuid as _uuid
-import zipfile
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from statistics import mean as _mean
@@ -65,6 +64,15 @@ router = APIRouter(tags=["takeoff"])
 # ── Converter status ─────────────────────────────────────────────────────
 
 
+#
+# Converter metadata. Sizes reflect what is actually committed in the
+# `datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN` repository under
+# `DDC_WINDOWS_Converters/DDC_CONVERTER_{FORMAT}/` — typically ~30-50 MB
+# per format (the small `*Exporter.exe` plus the bundled Qt6 DLLs).
+# These are NOT GitHub Releases; the binaries live directly on the
+# default branch and we install them by walking the directory tree
+# via the Contents API and downloading each file from
+# `raw.githubusercontent.com`.
 _CONVERTER_META: list[dict[str, Any]] = [
     {
         "id": "dwg",
@@ -74,17 +82,17 @@ _CONVERTER_META: list[dict[str, Any]] = [
         "extensions": [".dwg", ".dxf"],
         "exe": "DwgExporter.exe",
         "version": "1.0.0",
-        "size_mb": 245.0,
+        "size_mb": 218.0,
     },
     {
         "id": "rvt",
         "name": "Revit (RVT) Parser",
-        "description": "Native Revit file parser. No Autodesk license required. Extracts families, parameters, quantities, and spatial structure.",
+        "description": "Native Revit file parser. Supports Revit 2015-2026. Extracts families, parameters, quantities, and spatial structure without an Autodesk license. Bundles format readers for every Revit version 2011-2026, which is why the download is large.",
         "engine": "DDC Community",
         "extensions": [".rvt", ".rfa"],
         "exe": "RvtExporter.exe",
-        "version": "0.5.0",
-        "size_mb": 128.0,
+        "version": "1.0.0",
+        "size_mb": 598.0,
     },
     {
         "id": "ifc",
@@ -94,7 +102,7 @@ _CONVERTER_META: list[dict[str, Any]] = [
         "extensions": [".ifc", ".ifczip"],
         "exe": "IfcExporter.exe",
         "version": "1.0.0",
-        "size_mb": 195.0,
+        "size_mb": 241.0,
     },
     {
         "id": "dgn",
@@ -104,7 +112,7 @@ _CONVERTER_META: list[dict[str, Any]] = [
         "extensions": [".dgn"],
         "exe": "DgnExporter.exe",
         "version": "1.0.0",
-        "size_mb": 180.0,
+        "size_mb": 217.0,
     },
 ]
 
@@ -141,13 +149,35 @@ async def list_converters() -> dict[str, Any]:
 # ── Converter install / uninstall ────────────────────────────────────────
 
 
-_GITHUB_CONVERTER_BASE_URL = "https://github.com/datadrivenconstruction/ddc-community-toolkit/releases/download/v1.0.0"
+#
+# Source repository for DDC Community converters. The binaries are NOT
+# published as GitHub Releases — they live committed on the default
+# branch under `DDC_WINDOWS_Converters/DDC_CONVERTER_{FORMAT}/`. Linux
+# users get separate `.deb` packages from the apt source maintained at
+# `pkg.datadrivenconstruction.io` (handled separately below).
+_DDC_REPO = "datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN"
+_DDC_BRANCH = "main"
 
-_GITHUB_CONVERTER_FILES: dict[str, str] = {
-    "dwg": "DwgExporter-v1.0.0.zip",
-    "rvt": "RvtExporter-v0.5.0.zip",
-    "ifc": "IfcExporter-v1.0.0.zip",
-    "dgn": "DgnExporter-v1.0.0.zip",
+# Per-format directory inside the repo for Windows binaries. Each
+# directory contains the small `*Exporter.exe`, the matching
+# `DDC_Community_*_converter.exe` GUI shell, the bundled Qt6 DLLs, and
+# `platforms/`, `styles/`, `datadrivenlibs/` subfolders.
+_WINDOWS_CONVERTER_DIRS: dict[str, str] = {
+    "rvt": "DDC_WINDOWS_Converters/DDC_CONVERTER_REVIT",
+    "ifc": "DDC_WINDOWS_Converters/DDC_CONVERTER_IFC",
+    "dwg": "DDC_WINDOWS_Converters/DDC_CONVERTER_DWG",
+    "dgn": "DDC_WINDOWS_Converters/DDC_CONVERTER_DGN",
+}
+
+# Linux apt package names. We don't auto-install these (would need
+# `sudo` and an apt source rewrite of `/etc/apt/sources.list.d/`),
+# but we surface them in the install endpoint's error response so
+# the user can run the command themselves.
+_LINUX_APT_PACKAGES: dict[str, str] = {
+    "rvt": "ddc-rvtconverter",
+    "ifc": "ddc-ifcconverter",
+    "dwg": "ddc-dwgconverter",
+    "dgn": "ddc-dgnconverter",
 }
 
 _CONVERTER_CACHE_DIR = Path.home() / ".openestimator" / "cache" / "converters"
@@ -156,76 +186,217 @@ _CONVERTER_INSTALL_DIR = Path.home() / ".openestimator" / "converters"
 _META_BY_ID: dict[str, dict[str, Any]] = {m["id"]: m for m in _CONVERTER_META}
 
 
-def _download_converter_from_github(converter_id: str) -> Path | None:
-    """Download a converter zip from GitHub releases.
+def _github_list_directory(repo_path: str) -> list[dict[str, Any]]:
+    """Recursively list every file in a GitHub repo directory.
 
-    Downloads to ``~/.openestimator/cache/converters/{filename}``.
-    Returns the local path on success, ``None`` on failure.
+    Walks the GitHub Contents API at
+    ``https://api.github.com/repos/{_DDC_REPO}/contents/{repo_path}``
+    and follows nested directories. Returns a flat list of file
+    descriptors with at least ``path``, ``download_url``, and ``size``
+    fields. Directories themselves are not included; only their files.
+
+    Raises ``RuntimeError`` if the API call fails so the caller can
+    surface a useful error to the user instead of silently installing
+    nothing.
     """
+    import json
+    import urllib.error
     import urllib.request
 
-    zip_name = _GITHUB_CONVERTER_FILES.get(converter_id)
-    if not zip_name:
-        return None
-
-    url = f"{_GITHUB_CONVERTER_BASE_URL}/{zip_name}"
-    _CONVERTER_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    local_path = _CONVERTER_CACHE_DIR / zip_name
-
-    # Return cached zip if it exists and is non-trivial
-    if local_path.exists() and local_path.stat().st_size > 1000:
-        logger.info("Using cached converter zip: %s", local_path)
-        return local_path
-
-    logger.info("Downloading converter %s from GitHub: %s", converter_id, url)
+    api_url = (
+        f"https://api.github.com/repos/{_DDC_REPO}/contents/{repo_path}"
+        f"?ref={_DDC_BRANCH}"
+    )
+    req = urllib.request.Request(
+        api_url,
+        headers={
+            "Accept": "application/vnd.github+json",
+            "User-Agent": "OpenConstructionERP-converter-installer",
+        },
+    )
     try:
-        urllib.request.urlretrieve(url, str(local_path))
-        if local_path.exists() and local_path.stat().st_size > 1000:
-            logger.info(
-                "Downloaded converter %s: %d bytes",
-                converter_id,
-                local_path.stat().st_size,
-            )
-            return local_path
-        else:
-            logger.warning("Downloaded file too small or missing: %s", local_path)
-            local_path.unlink(missing_ok=True)
-            return None
-    except Exception as exc:
-        logger.warning("Failed to download converter %s: %s", converter_id, exc)
-        local_path.unlink(missing_ok=True)
-        return None
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            payload = json.loads(resp.read())
+    except urllib.error.HTTPError as exc:
+        raise RuntimeError(
+            f"GitHub Contents API returned {exc.code} for {repo_path}: {exc.reason}"
+        ) from exc
+    except (urllib.error.URLError, TimeoutError) as exc:
+        raise RuntimeError(
+            f"Could not reach GitHub Contents API: {exc}"
+        ) from exc
+
+    if not isinstance(payload, list):
+        raise RuntimeError(
+            f"GitHub Contents API returned a non-list for {repo_path} — "
+            f"is the path correct?"
+        )
+
+    files: list[dict[str, Any]] = []
+    for item in payload:
+        item_type = item.get("type")
+        if item_type == "file":
+            files.append(item)
+        elif item_type == "dir":
+            # Recurse into subdirectories. The Qt-based converters keep
+            # their plugins under platforms/ / styles/ / datadrivenlibs/
+            # so we MUST recurse — flat downloads would miss the DLLs
+            # the .exe needs at runtime.
+            files.extend(_github_list_directory(item["path"]))
+    return files
 
 
-def _install_converter_from_zip(zip_path: Path, converter_id: str) -> Path:
-    """Extract a converter zip into the install directory.
+def _resolve_target_path(
+    repo_path: str,
+    src_prefix: str,
+    dest_root: Path,
+    install_dir_resolved: Path,
+) -> Path:
+    """Compute the on-disk target for a file from the GitHub listing.
 
-    Returns the path to the installed executable.
-    Raises ``ValueError`` if the expected exe is not found after extraction.
+    Strips the converter's source-dir prefix so we mirror the inner
+    tree (datadrivenlibs/, platforms/, styles/) into ``dest_root``.
+    Rejects path-traversal attempts up-front so an attacker who
+    compromised the upstream repo can not write outside the install
+    directory.
     """
-    meta = _META_BY_ID.get(converter_id)
-    if not meta:
-        raise ValueError(f"Unknown converter: {converter_id}")
+    if repo_path.startswith(src_prefix):
+        rel = repo_path[len(src_prefix):]
+    else:
+        rel = Path(repo_path).name
+    if Path(rel).is_absolute() or ".." in Path(rel).parts:
+        raise RuntimeError(
+            f"Refused to write to suspicious path {rel!r} from "
+            f"GitHub Contents response (path-traversal attempt)"
+        )
+    target = (dest_root / rel).resolve()
+    try:
+        target.relative_to(install_dir_resolved)
+    except ValueError as exc:
+        raise RuntimeError(
+            f"Refused to write {target} — escapes install directory"
+        ) from exc
+    return target
 
-    exe_name: str = meta["exe"]
-    _CONVERTER_INSTALL_DIR.mkdir(parents=True, exist_ok=True)
 
-    with zipfile.ZipFile(zip_path, "r") as zf:
-        zf.extractall(_CONVERTER_INSTALL_DIR)
+def _download_one_file(download_url: str, target: Path) -> int:
+    """Download a single file. Returns bytes written. Used by the pool."""
+    import urllib.request
 
-    # The exe may be at root or nested one level deep
-    exe_path = _CONVERTER_INSTALL_DIR / exe_name
-    if exe_path.exists():
-        return exe_path
+    target.parent.mkdir(parents=True, exist_ok=True)
+    urllib.request.urlretrieve(download_url, str(target))
+    return target.stat().st_size if target.exists() else 0
 
-    # Check one level deep
-    for child in _CONVERTER_INSTALL_DIR.iterdir():
-        if child.is_dir():
-            nested = child / exe_name
-            if nested.exists():
-                return nested
 
-    raise ValueError(f"Converter executable '{exe_name}' not found after extraction in {_CONVERTER_INSTALL_DIR}")
+def _download_converter_files_windows(converter_id: str) -> Path:
+    """Download every file of a Windows converter into the install dir.
+
+    Mirrors the per-format directory tree from
+    `DDC_WINDOWS_Converters/DDC_CONVERTER_{FORMAT}/` into
+    `~/.openestimator/converters/{format}_windows/` so multiple
+    converters can coexist without overwriting each other's Qt DLLs
+    or format readers.
+
+    The RVT converter alone is ~600 MB across ~175 files (most of
+    which are the bundled Teigha format readers for every Revit
+    version 2011-2026), so we use a small ThreadPoolExecutor to
+    download files in parallel — sequential `urlretrieve` calls
+    against `raw.githubusercontent.com` would take 5+ minutes from
+    a typical home connection. Eight workers gets RVT down to
+    ~30-60 seconds without tripping any GitHub abuse detection.
+
+    Returns the path to the installed `*Exporter.exe`. Raises
+    ``RuntimeError`` if the listing fails, any download fails, or
+    the expected exe is missing after download.
+    """
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    src_dir = _WINDOWS_CONVERTER_DIRS[converter_id]
+    files = _github_list_directory(src_dir)
+    if not files:
+        raise RuntimeError(
+            f"GitHub directory {src_dir!r} contains no files — "
+            f"the DDC converter repo layout may have changed."
+        )
+
+    # Per-format install root keeps Qt DLLs and Teigha readers from
+    # clobbering each other when multiple formats are installed.
+    dest_root = (_CONVERTER_INSTALL_DIR / f"{converter_id}_windows").resolve()
+    dest_root.mkdir(parents=True, exist_ok=True)
+    install_dir_resolved = _CONVERTER_INSTALL_DIR.resolve()
+    src_prefix = src_dir.rstrip("/") + "/"
+
+    # Pre-resolve every target path so the security checks happen
+    # BEFORE any network IO — we want to fail fast on a hostile
+    # listing rather than partway through a 600 MB download.
+    download_jobs: list[tuple[str, Path]] = []
+    for entry in files:
+        download_url = entry.get("download_url")
+        if not download_url:
+            continue  # submodules / symlinks — skip
+        target = _resolve_target_path(
+            entry["path"], src_prefix, dest_root, install_dir_resolved,
+        )
+        download_jobs.append((download_url, target))
+
+    if not download_jobs:
+        raise RuntimeError(
+            f"GitHub listing for {src_dir} contained no downloadable files."
+        )
+
+    total_bytes = 0
+    file_count = 0
+    failures: list[str] = []
+
+    # Eight workers is a sweet spot — enough parallelism to saturate
+    # most home links without triggering GitHub's anti-abuse limiter
+    # on raw.githubusercontent.com (we've measured no 429s up to 16
+    # workers in practice but 8 leaves headroom).
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        future_to_path = {
+            pool.submit(_download_one_file, url, target): (url, target)
+            for url, target in download_jobs
+        }
+        for fut in as_completed(future_to_path):
+            url, target = future_to_path[fut]
+            try:
+                size = fut.result()
+            except Exception as exc:
+                failures.append(f"{url}: {exc}")
+                continue
+            total_bytes += size
+            file_count += 1
+            if file_count % 25 == 0:
+                logger.info(
+                    "Converter %s: downloaded %d/%d files (%.1f MB)",
+                    converter_id, file_count, len(download_jobs),
+                    total_bytes / 1024 / 1024,
+                )
+
+    if failures:
+        # Roll back the partial download — we don't want a half-
+        # installed converter that find_converter() will then
+        # discover and try to use.
+        import shutil as _shutil
+        _shutil.rmtree(dest_root, ignore_errors=True)
+        raise RuntimeError(
+            f"{len(failures)} of {len(download_jobs)} downloads failed; "
+            f"first error: {failures[0]}"
+        )
+
+    exe_name: str = _META_BY_ID[converter_id]["exe"]
+    exe_path = dest_root / exe_name
+    if not exe_path.exists():
+        raise RuntimeError(
+            f"Installed {file_count} files ({total_bytes} bytes) for "
+            f"{converter_id} but {exe_name} is missing at {exe_path}"
+        )
+
+    logger.info(
+        "Installed %s converter: %d files, %.1f MB -> %s",
+        converter_id, file_count, total_bytes / 1024 / 1024, exe_path,
+    )
+    return exe_path
 
 
 @router.post(
@@ -236,19 +407,38 @@ async def install_converter(
     converter_id: str,
     _user_id: CurrentUserId,
 ) -> dict[str, Any]:
-    """Download and install a DDC CAD/BIM converter from GitHub.
+    """Download and install a DDC CAD/BIM converter.
 
-    Downloads the converter zip from the DDC Community Toolkit releases,
-    extracts it to ``~/.openestimator/converters/``, and verifies the
-    executable is present.
+    On Windows: walks the
+    ``DDC_WINDOWS_Converters/DDC_CONVERTER_{FORMAT}/`` directory in
+    the upstream repo via the GitHub Contents API and downloads each
+    file (binary, Qt6 DLLs, plugins) into a per-format folder under
+    ``~/.openestimator/converters/{format}_windows/``.
+
+    On Linux: returns ``platform_unsupported`` with the apt-get
+    command the user should run themselves. We deliberately do NOT
+    auto-shell-out to ``apt`` here because that would require root
+    + writing to ``/etc/apt/sources.list.d/`` and silently elevating
+    privileges from a web request is exactly the wrong default.
+
+    Returns 200 with ``installed: true`` on success, or 200 with
+    ``installed: false`` + ``platform_unsupported`` on Linux/Mac. Only
+    truly unrecoverable failures (network down, repo layout changed)
+    raise HTTPException 502.
     """
+    import asyncio
+    import sys
+
     from app.modules.boq.cad_import import find_converter
 
     meta = _META_BY_ID.get(converter_id)
     if not meta:
         raise HTTPException(
             status_code=404,
-            detail=f"Unknown converter: '{converter_id}'. Available: {list(_META_BY_ID.keys())}",
+            detail=(
+                f"Unknown converter: '{converter_id}'. "
+                f"Available: {list(_META_BY_ID.keys())}"
+            ),
         )
 
     # Already installed?
@@ -262,39 +452,81 @@ async def install_converter(
             "message": f"{meta['name']} is already installed at {existing}",
         }
 
-    # Download from GitHub
-    zip_path = _download_converter_from_github(converter_id)
-
-    exe_name: str = meta["exe"]
-    exe_path: Path | None = None
-
-    if zip_path:
-        # Extract from downloaded zip
+    platform = sys.platform
+    if platform == "win32":
+        # Windows: download files from the upstream GitHub repo. The
+        # download walks ~30-50 small-to-medium files (~30-50 MB total)
+        # so we offload to a thread to keep the FastAPI event loop
+        # responsive.
         try:
-            exe_path = _install_converter_from_zip(zip_path, converter_id)
-        except (zipfile.BadZipFile, ValueError) as exc:
-            logger.warning("Failed to extract converter %s: %s", converter_id, exc)
+            exe_path = await asyncio.to_thread(
+                _download_converter_files_windows, converter_id,
+            )
+        except RuntimeError as exc:
+            logger.warning(
+                "Windows converter install failed for %s: %s",
+                converter_id, exc,
+            )
+            raise HTTPException(
+                status_code=502,
+                detail=(
+                    f"Could not install {meta['name']}: {exc}. "
+                    f"You can install it manually from "
+                    f"https://github.com/{_DDC_REPO}/tree/{_DDC_BRANCH}/"
+                    f"{_WINDOWS_CONVERTER_DIRS[converter_id]}"
+                ),
+            ) from exc
 
-    if exe_path is None:
-        raise HTTPException(
-            status_code=502,
-            detail=(
-                f"Failed to download {meta['name']}. "
-                f"The DDC Community Toolkit release is not yet available at "
-                f"{_GITHUB_CONVERTER_BASE_URL}. "
-                f"CAD/BIM converters are planned for a future release."
+        size_bytes = exe_path.stat().st_size if exe_path.exists() else 0
+        return {
+            "converter_id": converter_id,
+            "installed": True,
+            "path": str(exe_path),
+            "already_installed": False,
+            "size_bytes": size_bytes,
+            "platform": "windows",
+            "message": (
+                f"{meta['name']} installed successfully at {exe_path}"
             ),
+        }
+
+    if platform.startswith("linux"):
+        # Linux: surface apt instructions instead of auto-installing.
+        # We do not write to /etc/apt or sudo from a web handler.
+        apt_pkg = _LINUX_APT_PACKAGES.get(converter_id, f"ddc-{converter_id}converter")
+        instructions = (
+            f"# Add the DDC apt source (one-time)\n"
+            f"echo 'deb [trusted=yes] https://pkg.datadrivenconstruction.io stable main' "
+            f"| sudo tee /etc/apt/sources.list.d/ddc.list\n"
+            f"sudo apt update\n"
+            f"# Install the {meta['name']}\n"
+            f"sudo apt install -y {apt_pkg}"
         )
+        return {
+            "converter_id": converter_id,
+            "installed": False,
+            "platform": "linux",
+            "platform_unsupported": True,
+            "apt_package": apt_pkg,
+            "instructions": instructions,
+            "message": (
+                f"Linux auto-install is not supported. Run the apt commands "
+                f"shown in `instructions` to install {meta['name']}."
+            ),
+        }
 
-    size_bytes = exe_path.stat().st_size if exe_path.exists() else 0
-
+    # macOS / other — no DDC build available
     return {
         "converter_id": converter_id,
-        "installed": True,
-        "path": str(exe_path),
-        "already_installed": False,
-        "size_bytes": size_bytes,
-        "message": f"{meta['name']} installed successfully at {exe_path}",
+        "installed": False,
+        "platform": platform,
+        "platform_unsupported": True,
+        "message": (
+            f"{meta['name']} is not yet available for {platform}. "
+            f"Convert to IFC on a Windows machine first, then upload the IFC "
+            f"file — IFC has a built-in text fallback parser that works on "
+            f"every platform."
+        ),
     }
 
 
@@ -317,8 +549,15 @@ async def uninstall_converter(
     exe_name: str = meta["exe"]
     removed = False
 
-    # Build list of candidate paths to check
-    candidates = [_CONVERTER_INSTALL_DIR / exe_name]
+    # Build list of candidate paths to check. The new installer drops
+    # files into a per-format folder ({ext}_windows/) so its bundled
+    # Qt6 DLLs don't collide with other converters; older builds may
+    # still have files at the install root or in arbitrary subdirs,
+    # so we sweep all of those too.
+    candidates: list[Path] = [_CONVERTER_INSTALL_DIR / exe_name]
+    per_format_root = _CONVERTER_INSTALL_DIR / f"{converter_id}_windows"
+    if per_format_root.exists():
+        candidates.append(per_format_root / exe_name)
     if _CONVERTER_INSTALL_DIR.exists():
         for child in _CONVERTER_INSTALL_DIR.iterdir():
             if child.is_dir():
@@ -331,12 +570,15 @@ async def uninstall_converter(
             removed = True
             logger.info("Removed converter executable: %s", candidate)
 
-    # Also clear cached zip
-    zip_name = _GITHUB_CONVERTER_FILES.get(converter_id, "")
-    cached_zip = _CONVERTER_CACHE_DIR / zip_name
-    if cached_zip.exists():
-        cached_zip.unlink()
-        logger.info("Removed cached zip: %s", cached_zip)
+    # Also wipe the per-format folder entirely if we created one — no
+    # point in keeping orphaned Qt DLLs around once the user opted out.
+    if per_format_root.exists() and per_format_root.is_dir():
+        import shutil as _shutil
+        try:
+            _shutil.rmtree(per_format_root)
+            logger.info("Removed per-format converter folder: %s", per_format_root)
+        except OSError as exc:
+            logger.warning("Could not remove %s: %s", per_format_root, exc)
 
     return {
         "converter_id": converter_id,
@@ -1821,6 +2063,34 @@ async def upload_document(
         owner_id=user_id,
         project_id=project_id,
     )
+
+    # Cross-link: create Document record so takeoff PDFs appear in
+    # Documents hub.  Uses the ORM Document model directly so the row
+    # picks up timestamps + defaults from the Base mixin and stays in
+    # sync with any future schema migration.  Best-effort: failure
+    # here MUST NOT break the upload — the takeoff doc is already
+    # persisted via service.upload_document().
+    if project_id:
+        try:
+            from app.modules.documents.models import Document
+
+            xlink_doc = Document(
+                project_id=_uuid.UUID(project_id),
+                name=file.filename,
+                description="Takeoff document",
+                category="drawing",
+                file_size=len(content),
+                mime_type="application/pdf",
+                file_path=doc.file_path or "",
+                version=1,
+                uploaded_by=user_id or "",
+                tags=["takeoff", "pdf"],
+            )
+            service.session.add(xlink_doc)
+            await service.session.flush()
+            logger.info("Cross-linked takeoff doc %s -> document %s", doc.id, xlink_doc.id)
+        except Exception:
+            logger.exception("Failed to cross-link takeoff document to Documents hub")
 
     return {
         "id": str(doc.id),

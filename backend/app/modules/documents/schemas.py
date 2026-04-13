@@ -3,6 +3,8 @@
 Defines create, update, and response schemas for documents.
 """
 
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Any
 from uuid import UUID
@@ -187,3 +189,81 @@ class SheetVersionHistory(BaseModel):
 
     current: SheetResponse
     history: list[SheetResponse] = Field(default_factory=list)
+
+
+# ── DocumentBIMLink schemas ─────────────────────────────────────────────
+
+
+class DocumentBIMLinkCreate(BaseModel):
+    """Create a link between a Document and a BIM element."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    document_id: UUID
+    bim_element_id: UUID
+    link_type: str = Field(default="manual", max_length=50)
+    confidence: str | None = Field(default=None, max_length=10)
+    region_bbox: dict[str, Any] | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class DocumentBIMLinkResponse(BaseModel):
+    """Full DocumentBIMLink row returned from the API."""
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    document_id: UUID
+    bim_element_id: UUID
+    link_type: str
+    confidence: str | None = None
+    region_bbox: dict[str, Any] | None = None
+    created_by: UUID | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    created_at: datetime
+    updated_at: datetime
+
+
+class DocumentBIMLinkBrief(BaseModel):
+    """Compact DocumentBIMLink for embedding inside BIMElementResponse.
+
+    Contains just enough data for the viewer to render a link badge and
+    navigate to the linked document without a second round trip.
+    """
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    document_id: UUID
+    document_name: str | None = None
+    document_category: str | None = None
+    link_type: str
+    confidence: str | None = None
+
+
+class DocumentBIMLinkListResponse(BaseModel):
+    """List of DocumentBIMLink rows."""
+
+    items: list[DocumentBIMLinkResponse] = Field(default_factory=list)
+    total: int = 0
+
+
+# ── BIMElementBrief ─────────────────────────────────────────────────────
+#
+# A compact BIM element shape that lives in the documents schemas module so
+# DocumentResponse (and any future document-centric aggregate responses) can
+# embed linked BIM elements without importing from bim_hub.schemas, which
+# would introduce a circular dependency.
+
+
+class BIMElementBrief(BaseModel):
+    """Lightweight BIM element summary for embedding inside document responses."""
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    model_id: UUID
+    element_type: str | None = None
+    name: str | None = None
+    storey: str | None = None
+    discipline: str | None = None

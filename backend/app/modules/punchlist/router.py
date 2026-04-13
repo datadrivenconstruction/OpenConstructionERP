@@ -19,7 +19,7 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import Response
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.punchlist.schemas import (
     PinToSheetRequest,
     PunchItemCreate,
@@ -75,11 +75,13 @@ def _item_to_response(item: object) -> PunchItemResponse:
 
 @router.get("/summary/", response_model=PunchListSummary)
 async def get_summary(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: PunchListService = Depends(_get_service),
 ) -> PunchListSummary:
     """Aggregated punch list stats for a project."""
+    await verify_project_access(project_id, user_id, session)
     data = await service.get_summary(project_id)
     return PunchListSummary(**data)
 
@@ -91,10 +93,12 @@ async def get_summary(
 async def create_item(
     data: PunchItemCreate,
     user_id: CurrentUserId,
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("punchlist.create")),
     service: PunchListService = Depends(_get_service),
 ) -> PunchItemResponse:
     """Create a new punch list item."""
+    await verify_project_access(data.project_id, user_id, session)
     try:
         item = await service.create_item(data, user_id=user_id)
         return _item_to_response(item)
@@ -113,6 +117,7 @@ async def create_item(
 
 @router.get("/items/", response_model=list[PunchItemResponse])
 async def list_items(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     offset: int = Query(default=0, ge=0),
@@ -124,6 +129,7 @@ async def list_items(
     service: PunchListService = Depends(_get_service),
 ) -> list[PunchItemResponse]:
     """List punch items for a project with optional filters."""
+    await verify_project_access(project_id, user_id, session)
     items, _ = await service.list_items(
         project_id,
         offset=offset,
@@ -286,6 +292,35 @@ async def upload_photo(
     # Store relative path in the database
     photo_path = f"punchlist/photos/{filename}"
     item = await service.add_photo(item_id, photo_path)
+
+    # Cross-link: create Document record so punch photos appear in
+    # Documents hub.  Uses the ORM model directly (NOT raw SQL) so
+    # timestamps + defaults are filled by SQLAlchemy / Base mixin and
+    # the row stays in sync with the rest of the documents module if
+    # its schema evolves.  Best-effort: a failure here MUST NOT break
+    # the upload — the photo itself is already persisted.
+    try:
+        from app.modules.documents.models import Document
+
+        punch_project_id = item.project_id  # type: ignore[attr-defined]
+        doc = Document(
+            project_id=punch_project_id,
+            name=filename,
+            description=f"Punch list photo for item {item_id}",
+            category="photo",
+            file_size=len(content),
+            mime_type=file.content_type or "image/jpeg",
+            file_path=str(filepath),
+            version=1,
+            uploaded_by=user_id or "",
+            tags=["punchlist", "photo"],
+        )
+        service.session.add(doc)
+        await service.session.flush()
+        logger.info("Cross-linked punch photo -> document %s", doc.id)
+    except Exception:
+        logger.exception("Failed to cross-link punch photo to Documents hub")
+
     return _item_to_response(item)
 
 
@@ -306,11 +341,13 @@ async def remove_photo(
 
 @router.get("/export/pdf/")
 async def export_pdf(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: PunchListService = Depends(_get_service),
 ) -> Response:
     """Export punch list as a PDF report."""
+    await verify_project_access(project_id, user_id, session)
     pdf_bytes = await service.export_pdf(project_id)
     return Response(
         content=pdf_bytes,
@@ -321,11 +358,13 @@ async def export_pdf(
 
 @router.get("/export/excel/")
 async def export_excel(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: PunchListService = Depends(_get_service),
 ) -> Response:
     """Export punch list as an Excel spreadsheet."""
+    await verify_project_access(project_id, user_id, session)
     excel_bytes = await service.export_excel(project_id)
     # Determine media type: openpyxl produces xlsx, fallback produces CSV
     is_xlsx = excel_bytes[:4] == b"PK\x03\x04"

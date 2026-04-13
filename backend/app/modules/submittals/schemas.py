@@ -29,11 +29,11 @@ class SubmittalCreate(BaseModel):
             r"approved_as_noted|revise_and_resubmit|rejected|closed)$"
         ),
     )
-    ball_in_court: str | None = None
+    ball_in_court: str | None = Field(default=None, max_length=100)
     current_revision: int = Field(default=1, ge=1)
-    submitted_by_org: str | None = None
-    reviewer_id: str | None = None
-    approver_id: str | None = None
+    submitted_by_org: str | None = Field(default=None, max_length=255)
+    reviewer_id: str | None = Field(default=None, max_length=36)
+    approver_id: str | None = Field(default=None, max_length=36)
     date_submitted: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     date_required: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     date_returned: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
@@ -62,11 +62,11 @@ class SubmittalUpdate(BaseModel):
             r"approved_as_noted|revise_and_resubmit|rejected|closed)$"
         ),
     )
-    ball_in_court: str | None = None
+    ball_in_court: str | None = Field(default=None, max_length=100)
     current_revision: int | None = Field(default=None, ge=1)
-    submitted_by_org: str | None = None
-    reviewer_id: str | None = None
-    approver_id: str | None = None
+    submitted_by_org: str | None = Field(default=None, max_length=255)
+    reviewer_id: str | None = Field(default=None, max_length=36)
+    approver_id: str | None = Field(default=None, max_length=36)
     date_submitted: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     date_required: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     date_returned: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
@@ -83,7 +83,7 @@ class SubmittalReviewRequest(BaseModel):
             r"^(approved|approved_as_noted|revise_and_resubmit|rejected)$"
         ),
     )
-    notes: str | None = None
+    notes: str | None = Field(default=None, max_length=5000)
 
 
 class SubmittalResponse(BaseModel):

@@ -63,7 +63,7 @@ def _extract_pdf_pages(content: bytes) -> list[dict]:
                 pages.append({"page": i, "text": text.strip(), "tables": []})
             doc.close()
         except Exception:
-            pass
+            logger.warning("PDF extraction failed with both pdfplumber and pymupdf")
 
     return pages
 

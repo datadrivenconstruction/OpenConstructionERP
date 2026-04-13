@@ -1,11 +1,14 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
+import { normalizeListResponse } from '@/shared/lib/apiHelpers';
 import {
   ShieldAlert, Plus, ChevronRight, ArrowLeft, DollarSign,
   AlertTriangle, Shield, Trash2, X, Search, Filter,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog } from '@/shared/ui';
+import SimilarItemsPanel from '@/shared/ui/SimilarItemsPanel';
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
@@ -40,7 +43,15 @@ const CATEGORIES = ['technical', 'financial', 'schedule', 'regulatory', 'environ
 const SEVERITIES = ['low', 'medium', 'high', 'critical'];
 const STATUSES = ['identified', 'assessed', 'mitigating', 'closed', 'occurred'];
 const PROB_LEVELS = ['0.9', '0.7', '0.5', '0.3', '0.1'];
-const PROB_LABELS: Record<string, string> = { '0.9': 'Very High', '0.7': 'High', '0.5': 'Medium', '0.3': 'Low', '0.1': 'Very Low' };
+function getProbLabels(t: (key: string, opts?: Record<string, unknown>) => string): Record<string, string> {
+  return {
+    '0.9': t('risk.probability_very_high', { defaultValue: 'Very High' }),
+    '0.7': t('risk.probability_high', { defaultValue: 'High' }),
+    '0.5': t('risk.probability_medium', { defaultValue: 'Medium' }),
+    '0.3': t('risk.probability_low', { defaultValue: 'Low' }),
+    '0.1': t('risk.probability_very_low', { defaultValue: 'Very Low' }),
+  };
+}
 const IMPACT_LEVELS = ['low', 'medium', 'high', 'critical'];
 
 const selectCls = 'h-8 rounded-lg border border-border bg-surface-primary px-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-colors pr-7 appearance-none cursor-pointer';
@@ -52,7 +63,15 @@ function fmtCur(n: number, c = 'EUR') {
 }
 
 function matrixColor(prob: string, impact: string) {
-  const score = parseFloat(prob) * ({ low: 1, medium: 2, high: 3, critical: 4 }[impact] || 1);
+  // Guard against missing/invalid probability — treat as 0 so the cell stays neutral
+  const probNum = parseFloat(prob);
+  const probValid = Number.isFinite(probNum) ? probNum : 0;
+  // Guard against unknown impact values — default to 0 (not 1) so the cell is marked neutral
+  // instead of silently treated as low-risk.
+  const impactMap: Record<string, number> = { low: 1, medium: 2, high: 3, critical: 4 };
+  const impactNum = impactMap[impact] ?? 0;
+  const score = probValid * impactNum;
+  if (score === 0) return 'bg-surface-secondary text-content-quaternary';
   if (score >= 2.0) return 'bg-red-500/80 text-white';
   if (score >= 1.2) return 'bg-orange-400/80 text-white';
   if (score >= 0.6) return 'bg-yellow-400/80 text-gray-900';
@@ -83,7 +102,7 @@ function RiskMatrix({ cells }: { cells: MatrixCell[] }) {
           <tbody>
             {PROB_LEVELS.map((p) => (
               <tr key={p}>
-                <td className="p-1 text-content-secondary font-medium">{t(`risk.prob_${String(p).replace('.', '')}`, { defaultValue: PROB_LABELS[p] })}</td>
+                <td className="p-1 text-content-secondary font-medium">{getProbLabels(t)[p]}</td>
                 {IMPACT_LEVELS.map((i) => {
                   const c = map[`${p}|${i}`]?.count || 0;
                   return <td key={i} className="p-1"><div className={`flex items-center justify-center h-10 rounded-md text-sm font-bold ${c > 0 ? matrixColor(p, i) : 'bg-surface-secondary text-content-quaternary'}`}>{c > 0 ? c : ''}</div></td>;
@@ -94,7 +113,7 @@ function RiskMatrix({ cells }: { cells: MatrixCell[] }) {
         </table>
       </div>
       <div className="mt-2 flex items-center gap-4 text-2xs text-content-tertiary">
-        {[['bg-green-400/70', 'Low'], ['bg-yellow-400/80', 'Medium'], ['bg-orange-400/80', 'High'], ['bg-red-500/80', 'Critical']].map(([bg, l]) => (
+        {[['bg-green-400/70', t('risk.legend_low', { defaultValue: 'Low' })], ['bg-yellow-400/80', t('risk.legend_medium', { defaultValue: 'Medium' })], ['bg-orange-400/80', t('risk.legend_high', { defaultValue: 'High' })], ['bg-red-500/80', t('risk.legend_critical', { defaultValue: 'Critical' })]].map(([bg, l]) => (
           <span key={l} className="flex items-center gap-1"><span className={`inline-block w-3 h-3 rounded ${bg}`} />{l}</span>
         ))}
       </div>
@@ -201,10 +220,12 @@ const textareaCls = 'w-full rounded-lg border border-border bg-surface-primary p
 
 /* ── Create Dialog ─────────────────────────────────────────────────────── */
 
+const INITIAL_RISK_FORM = { title: '', description: '', category: 'technical', probability: 0.5, impactSeverity: 'medium', impactCost: 0, scheduleDays: 0, ownerName: '' };
+
 function CreateDialog({ projectId, currency, onClose, onCreated }: { projectId: string; currency: string; onClose: () => void; onCreated: () => void }) {
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
-  const [f, setF] = useState({ title: '', description: '', category: 'technical', probability: 0.5, impactSeverity: 'medium', impactCost: 0, scheduleDays: 0, ownerName: '' });
+  const [f, setF] = useState(INITIAL_RISK_FORM);
   const set = (k: string, v: unknown) => setF((p) => ({ ...p, [k]: v }));
 
   const mut = useMutation({
@@ -366,6 +387,13 @@ function DetailView({ riskId, onBack }: { riskId: string; onBack: () => void }) 
           </Card>
         </div>
       )}
+
+      {/* Cross-project lessons learned via semantic search.  Defaults to
+          cross_project=true so the panel surfaces similar risks (and their
+          mitigations) from EVERY project the user has access to. */}
+      <div className="mt-6">
+        <SimilarItemsPanel module="risks" id={risk.id} crossProject limit={6} />
+      </div>
     </div>
   );
 }
@@ -385,11 +413,25 @@ export function RiskRegisterPage() {
   const [filterStatus, setFilterStatus] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
-  const { data: projects = [] } = useQuery({ queryKey: ['projects'], queryFn: () => apiGet<Project[]>('/v1/projects/') });
+  // Deep-link auto-select: Cmd+Shift+K global search lands here with
+  // ?id=<risk_id> — open the matching risk detail view immediately and
+  // strip the query param so a refresh doesn't reopen it forever.
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const deepLinkId = searchParams.get('id');
+    if (deepLinkId && deepLinkId !== selectedRiskId) {
+      setSelectedRiskId(deepLinkId);
+      const next = new URLSearchParams(searchParams);
+      next.delete('id');
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, selectedRiskId, setSearchParams]);
+
+  const { data: projects = [] } = useQuery({ queryKey: ['projects'], queryFn: () => apiGet<Project[]>('/v1/projects/'), staleTime: 5 * 60_000 });
   const projectId = activeProjectId || projects[0]?.id || '';
   const project = useMemo(() => projects.find((p) => p.id === projectId), [projects, projectId]);
 
-  const { data: risks = [], isLoading } = useQuery({ queryKey: ['risks', projectId], queryFn: () => apiGet<RiskItem[]>(`/v1/risk/?project_id=${projectId}`), select: (d): RiskItem[] => (Array.isArray(d) ? d : (d as any)?.items ?? []), enabled: !!projectId });
+  const { data: risks = [], isLoading } = useQuery({ queryKey: ['risks', projectId], queryFn: () => apiGet<RiskItem[]>(`/v1/risk/?project_id=${projectId}`), select: (d): RiskItem[] => normalizeListResponse(d), enabled: !!projectId });
   const { data: summary } = useQuery({ queryKey: ['risk-summary', projectId], queryFn: () => apiGet<RiskSummary>(`/v1/risk/summary/?project_id=${projectId}`), enabled: !!projectId });
   const { data: matrixData } = useQuery({ queryKey: ['risk-matrix', projectId], queryFn: () => apiGet<{ cells: MatrixCell[] }>(`/v1/risk/matrix/?project_id=${projectId}`), enabled: !!projectId });
 
@@ -449,6 +491,17 @@ export function RiskRegisterPage() {
           </Button>
         </div>
       </div>
+
+      {/* No-project warning */}
+      {!projectId && (
+        <div className="mb-4 mt-4 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 px-4 py-3">
+          <AlertTriangle size={18} className="text-amber-600 shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-300">{t('common.no_project_selected', { defaultValue: 'No project selected' })}</p>
+            <p className="text-xs text-amber-600 dark:text-amber-400">{t('common.select_project_hint', { defaultValue: 'Select a project from the header to view and manage items.' })}</p>
+          </div>
+        </div>
+      )}
 
       {summary && (
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -516,7 +569,13 @@ export function RiskRegisterPage() {
       )}
 
       <div className="mt-4">
-        {isLoading ? (
+        {!projectId ? (
+          <Card><EmptyState
+            icon={<ShieldAlert size={28} strokeWidth={1.5} />}
+            title={t('risk.no_project', { defaultValue: 'No project selected' })}
+            description={t('risk.no_project_desc', { defaultValue: 'Open a project first to view and manage risks.' })}
+          /></Card>
+        ) : isLoading ? (
           <div className="flex items-center justify-center py-20"><div className="h-6 w-6 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" /></div>
         ) : filteredRisks.length === 0 ? (
           <Card><EmptyState

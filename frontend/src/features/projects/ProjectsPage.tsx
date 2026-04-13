@@ -12,6 +12,7 @@ import { projectsApi, type Project } from './api';
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { useLocalStorage } from '@/shared/hooks/useLocalStorage';
 import { type BOQWithPositions } from '../boq/api';
 import { CreateProjectModal } from './CreateProjectPage';
 
@@ -27,6 +28,7 @@ interface ProjectBOQStats {
   projectId: string;
   boqCount: number;
   totalValue: number;
+  hasError?: boolean;
 }
 
 type SortOption = 'name_asc' | 'newest' | 'oldest' | 'value';
@@ -71,58 +73,46 @@ export function ProjectsPage() {
   }, [location.state]);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('oe_projects_filters') ?? '{}');
-      return saved.status ?? 'all';
-    } catch { return 'all'; }
+  const [filters, setFilters] = useLocalStorage('oe_projects_filters', {
+    status: 'all' as StatusFilter,
+    region: 'all',
+    sort: 'newest' as SortOption,
   });
-  const [regionFilter, setRegionFilter] = useState<string>(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('oe_projects_filters') ?? '{}');
-      return saved.region ?? 'all';
-    } catch { return 'all'; }
-  });
-  const [sortOption, setSortOption] = useState<SortOption>(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('oe_projects_filters') ?? '{}');
-      return saved.sort ?? 'newest';
-    } catch { return 'newest'; }
-  });
+  const statusFilter = filters.status;
+  const regionFilter = filters.region;
+  const sortOption = filters.sort;
+  const setStatusFilter = (v: StatusFilter) => setFilters((p) => ({ ...p, status: v }));
+  const setRegionFilter = (v: string) => setFilters((p) => ({ ...p, region: v }));
+  const setSortOption = (v: SortOption) => setFilters((p) => ({ ...p, sort: v }));
   const [page, setPage] = useState(1);
-
-  // Persist filters to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem('oe_projects_filters', JSON.stringify({
-        sort: sortOption,
-        status: statusFilter,
-        region: regionFilter,
-      }));
-    } catch {}
-  }, [sortOption, statusFilter, regionFilter]);
 
   const { data: projects, isLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: projectsApi.list,
+    staleTime: 5 * 60_000,
   });
 
   /* Fetch BOQ stats for all projects (count + total value) — single request + parallel detail fetches */
-  const { data: boqStats } = useQuery({
+  const { data: boqStats, error: boqStatsError } = useQuery({
     queryKey: ['projects-boq-stats', projects],
     queryFn: async () => {
       if (!projects || projects.length === 0) return [];
 
       // Fetch BOQs per project (endpoint requires project_id)
+      // Track per-project errors so we can surface degraded loads to the UI.
       const perProject = await Promise.all(
         projects.map(async (p) => {
           try {
             const boqs = await apiGet<BOQBasic[]>(`/v1/boq/boqs/?project_id=${p.id}`);
-            return { projectId: p.id, boqs };
-          } catch {
-            return { projectId: p.id, boqs: [] as BOQBasic[] };
+            return { projectId: p.id, boqs, failed: false };
+          } catch (err) {
+            console.warn(`Failed to fetch BOQs for project ${p.id}:`, err);
+            return { projectId: p.id, boqs: [] as BOQBasic[], failed: true };
           }
         }),
+      );
+      const failedProjectIds = new Set(
+        perProject.filter((pp) => pp.failed).map((pp) => pp.projectId),
       );
       const allBoqs = perProject.flatMap((pp) => pp.boqs);
 
@@ -138,9 +128,10 @@ export function ProjectsPage() {
       const detailPromises = allBoqs.map(async (b) => {
         try {
           const full = await apiGet<BOQWithPositions>(`/v1/boq/boqs/${b.id}`);
-          return { boqId: b.id, projectId: b.project_id, grandTotal: full.grand_total };
-        } catch {
-          return { boqId: b.id, projectId: b.project_id, grandTotal: 0 };
+          return { boqId: b.id, projectId: b.project_id, grandTotal: full.grand_total, failed: false };
+        } catch (err) {
+          console.warn(`Failed to fetch BOQ ${b.id} detail:`, err);
+          return { boqId: b.id, projectId: b.project_id, grandTotal: 0, failed: true };
         }
       });
       const details = await Promise.all(detailPromises);
@@ -149,16 +140,25 @@ export function ProjectsPage() {
       const totalsByProject = new Map<string, number>();
       for (const d of details) {
         totalsByProject.set(d.projectId, (totalsByProject.get(d.projectId) ?? 0) + d.grandTotal);
+        if (d.failed) failedProjectIds.add(d.projectId);
       }
 
       return projects.map((p) => ({
         projectId: p.id,
         boqCount: boqsByProject.get(p.id)?.length ?? 0,
         totalValue: totalsByProject.get(p.id) ?? 0,
+        hasError: failedProjectIds.has(p.id),
       }));
     },
     enabled: !!projects && projects.length > 0,
   });
+
+  // Show a persistent warning if BOQ stats failed to load at the top level
+  useEffect(() => {
+    if (boqStatsError) {
+      console.error('BOQ stats query failed:', boqStatsError);
+    }
+  }, [boqStatsError]);
 
   const boqStatsMap = useMemo(() => {
     if (!boqStats) return new Map<string, ProjectBOQStats>();
@@ -262,7 +262,7 @@ export function ProjectsPage() {
           <p className="mt-1 text-sm text-content-secondary">
             {projects
               ? t('projects.subtitle_count', {
-                  defaultValue: '{{count}} projects',
+                  defaultValue: 'Manage your construction estimation projects ({{count}} total)',
                   count: projects.length,
                 })
               : t('common.loading', { defaultValue: 'Loading...' })}
@@ -435,7 +435,7 @@ export function ProjectsPage() {
           icon={<FolderOpen size={28} strokeWidth={1.5} />}
           title={t('projects.no_projects', { defaultValue: 'No projects yet' })}
           description={t('projects.no_projects_description', {
-            defaultValue: 'Create your first construction cost estimation project',
+            defaultValue: 'Projects organize your estimates, documents, and team. Create your first project to get started with cost estimation.',
           })}
           action={{
             label: t('projects.new_project', { defaultValue: 'Create Project' }),
@@ -588,7 +588,7 @@ function ProjectCard({
     onSuccess: () => {
       setConfirmDelete(false);
       queryClient.invalidateQueries({ queryKey: ['projects'] });
-      addToast({ type: 'success', title: t('projects.deleted', 'Project archived') });
+      addToast({ type: 'success', title: t('projects.deleted', 'Project deleted successfully') });
       onDeleted?.();
     },
     onError: (e: Error) => {
@@ -613,13 +613,13 @@ function ProjectCard({
     },
     onSuccess: (newProject) => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
-      addToast({ type: 'success', title: t('projects.duplicated', 'Project duplicated') });
+      addToast({ type: 'success', title: t('projects.duplicated', 'Project duplicated successfully') });
       navigate(`/projects/${newProject.id}`);
     },
     onError: (e: Error) => {
       addToast({
         type: 'error',
-        title: t('projects.duplicate_failed', 'Failed to duplicate'),
+        title: t('projects.duplicate_failed', 'Failed to duplicate project'),
         message: e.message,
       });
     },
@@ -629,10 +629,10 @@ function ProjectCard({
     mutationFn: () => apiPatch(`/v1/projects/${project.id}`, { status: 'archived' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
-      addToast({ type: 'success', title: t('toasts.project_archived', { defaultValue: 'Project archived' }) });
+      addToast({ type: 'success', title: t('toasts.project_archived', { defaultValue: 'Project archived successfully' }) });
     },
     onError: (error: Error) => {
-      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+      addToast({ type: 'error', title: t('toasts.archive_failed', { defaultValue: 'Failed to archive project' }), message: error.message });
     },
   });
 

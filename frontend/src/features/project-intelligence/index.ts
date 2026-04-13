@@ -1,0 +1,1 @@
+export { ProjectIntelligencePage } from './ProjectIntelligencePage';

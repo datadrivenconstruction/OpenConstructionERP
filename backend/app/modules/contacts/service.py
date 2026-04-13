@@ -19,8 +19,34 @@ from app.modules.contacts.repository import ContactRepository
 from app.modules.contacts.schemas import ContactCreate, ContactUpdate
 
 logger = logging.getLogger(__name__)
+_logger_audit = logging.getLogger(__name__ + ".audit")
 
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+async def _safe_audit(
+    session: AsyncSession,
+    *,
+    action: str,
+    entity_type: str,
+    entity_id: str | None = None,
+    user_id: str | None = None,
+    details: dict | None = None,
+) -> None:
+    """Best-effort audit log — never blocks the caller on failure."""
+    try:
+        from app.core.audit import audit_log
+
+        await audit_log(
+            session,
+            action=action,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            user_id=user_id,
+            details=details,
+        )
+    except Exception:
+        _logger_audit.debug("Audit log write skipped for %s %s", action, entity_type)
 
 
 def _validate_email_format(email: str | None) -> None:
@@ -93,6 +119,16 @@ class ContactService:
         )
         contact = await self.repo.create(contact)
         label = data.company_name or f"{data.first_name or ''} {data.last_name or ''}".strip()
+
+        await _safe_audit(
+            self.session,
+            action="create",
+            entity_type="contact",
+            entity_id=str(contact.id),
+            user_id=user_id,
+            details={"company_name": label, "contact_type": data.contact_type},
+        )
+
         logger.info("Contact created: %s (%s)", label, data.contact_type)
         return contact
 
@@ -119,17 +155,29 @@ class ContactService:
         country_code: str | None = None,
         search: str | None = None,
         is_active: bool = True,
+        owner_id: str | None = None,
         limit: int = 50,
         offset: int = 0,
+        sort_by: str | None = None,
+        sort_order: str = "desc",
     ) -> tuple[list[Contact], int]:
-        """List contacts with filters."""
+        """List contacts with filters.
+
+        ``owner_id`` scopes the result via the ``created_by`` proxy
+        (until a real ``tenant_id`` schema lands).  Pass ``None`` to
+        opt out of the scope filter — only admin callers should do
+        that.
+        """
         return await self.repo.list(
             contact_type=contact_type,
             country_code=country_code,
             search=search,
             is_active=is_active,
+            owner_id=owner_id,
             limit=limit,
             offset=offset,
+            sort_by=sort_by,
+            sort_order=sort_order,
         )
 
     # ── Update ────────────────────────────────────────────────────────────
@@ -179,6 +227,14 @@ class ContactService:
                 detail="Contact not found",
             )
 
+        await _safe_audit(
+            self.session,
+            action="update",
+            entity_type="contact",
+            entity_id=str(contact_id),
+            details={"updated_fields": list(fields.keys())},
+        )
+
         logger.info("Contact updated: %s (fields=%s)", contact_id, list(fields.keys()))
         return updated
 
@@ -188,6 +244,14 @@ class ContactService:
         """Soft-delete a contact (set is_active=False)."""
         await self.get_contact(contact_id)  # Raises 404 if not found
         await self.repo.update(contact_id, is_active=False)
+        await _safe_audit(
+            self.session,
+            action="delete",
+            entity_type="contact",
+            entity_id=str(contact_id),
+            details={},
+        )
+
         logger.info("Contact deactivated: %s", contact_id)
 
     # ── Count ─────────────────────────────────────────────────────────────
@@ -198,9 +262,13 @@ class ContactService:
 
     # ── Stats ────────────────────────────────────────────────────────────
 
-    async def get_stats(self) -> dict:
-        """Return aggregate contact statistics."""
-        return await self.repo.stats()
+    async def get_stats(self, *, owner_id: str | None = None) -> dict:
+        """Return aggregate contact statistics.
+
+        ``owner_id`` scopes the aggregates to the caller's contacts;
+        ``None`` is the global view (admin-only).
+        """
+        return await self.repo.stats(owner_id=owner_id)
 
     # ── By Company ───────────────────────────────────────────────────────
 
@@ -208,12 +276,17 @@ class ContactService:
         self,
         company_name: str,
         *,
+        owner_id: str | None = None,
         limit: int = 50,
         offset: int = 0,
     ) -> tuple[list[Contact], int]:
-        """List contacts grouped by company name."""
+        """List contacts grouped by company name.
+
+        ``owner_id`` scopes the result via the ``created_by`` proxy.
+        """
         return await self.repo.list_by_company(
             company_name,
+            owner_id=owner_id,
             limit=limit,
             offset=offset,
         )

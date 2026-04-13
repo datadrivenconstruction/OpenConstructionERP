@@ -15,11 +15,11 @@ import zipfile
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from app.dependencies import CurrentUserId
+from app.dependencies import CurrentUserId, RequirePermission
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -238,7 +238,7 @@ def parse_backup_zip(raw: bytes) -> tuple[dict[str, Any], dict[str, list[dict]]]
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 
-@router.post("/export/", tags=["Backup"])
+@router.post("/export/", tags=["Backup"], dependencies=[Depends(RequirePermission("backup.admin"))])
 async def export_backup(user_id: CurrentUserId) -> StreamingResponse:
     """Export all user data as a downloadable ZIP backup.
 
@@ -294,7 +294,7 @@ async def export_backup(user_id: CurrentUserId) -> StreamingResponse:
     )
 
 
-@router.post("/restore/", response_model=RestoreResponse, tags=["Backup"])
+@router.post("/restore/", response_model=RestoreResponse, tags=["Backup"], dependencies=[Depends(RequirePermission("backup.admin"))])
 async def restore_backup(
     user_id: CurrentUserId,
     file: UploadFile = File(...),
@@ -371,7 +371,7 @@ async def restore_backup(
                                     count_skipped += 1
                                     continue
                             except Exception:
-                                pass  # If check fails, attempt insert anyway
+                                logger.debug("Duplicate check failed for %s, attempting insert", backup_key)
 
                     try:
                         obj = deserialize_row(model_cls, record)
@@ -397,9 +397,10 @@ async def restore_backup(
             await session.commit()
         except Exception as exc:
             await session.rollback()
+            logger.exception("Backup restore failed: %s", exc)
             raise HTTPException(
                 status_code=500,
-                detail=f"Restore failed: {str(exc)[:300]}",
+                detail="Restore failed due to an internal error. Please check the backup file and try again.",
             )
 
     total_imported = sum(imported.values())
@@ -431,7 +432,7 @@ async def restore_backup(
     )
 
 
-@router.post("/validate/", response_model=ValidateResponse, tags=["Backup"])
+@router.post("/validate/", response_model=ValidateResponse, tags=["Backup"], dependencies=[Depends(RequirePermission("backup.admin"))])
 async def validate_backup(
     user_id: CurrentUserId,
     file: UploadFile = File(...),

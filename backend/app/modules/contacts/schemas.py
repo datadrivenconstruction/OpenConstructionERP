@@ -87,7 +87,7 @@ class ContactCreate(BaseModel):
     currency_code: str | None = Field(default=None, max_length=10)
 
     name_translations: dict[str, Any] | None = None
-    notes: str | None = None
+    notes: str | None = Field(default=None, max_length=5000)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -139,7 +139,7 @@ class ContactUpdate(BaseModel):
     currency_code: str | None = Field(default=None, max_length=10)
 
     name_translations: dict[str, Any] | None = None
-    notes: str | None = None
+    notes: str | None = Field(default=None, max_length=5000)
     metadata: dict[str, Any] | None = None
 
 

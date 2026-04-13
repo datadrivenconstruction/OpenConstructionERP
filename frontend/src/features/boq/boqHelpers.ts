@@ -268,7 +268,8 @@ export function computeQualityScore(
   const hasMarkups = markups.length > 0;
 
   // Weighted: description 30%, quantity 30%, rate 30%, markups 10%
-  const score = withDescription * 0.3 + withQuantity * 0.3 + withRate * 0.3 + (hasMarkups ? 10 : 0);
+  const markupScore = hasMarkups ? 100 : 0;
+  const score = withDescription * 0.3 + withQuantity * 0.3 + withRate * 0.3 + markupScore * 0.1;
 
   return { withDescription, withQuantity, withRate, hasMarkups, score: Math.round(score) };
 }

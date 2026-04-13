@@ -37,9 +37,9 @@ class ScheduleCreate(BaseModel):
     project_id: UUID
     name: str = Field(..., min_length=1, max_length=255, examples=["Master Schedule Phase 1"])
     schedule_type: str = Field(default="master", max_length=50, examples=["master"])
-    description: str = ""
-    start_date: str | None = Field(default=None, max_length=20, examples=["2026-05-01"])
-    end_date: str | None = Field(default=None, max_length=20, examples=["2027-03-31"])
+    description: str = Field(default="", max_length=5000)
+    start_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20, examples=["2026-05-01"])
+    end_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20, examples=["2027-03-31"])
     data_date: str | None = Field(default=None, max_length=20)
     created_by: UUID | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -57,9 +57,9 @@ class ScheduleUpdate(BaseModel):
 
     name: str | None = Field(default=None, min_length=1, max_length=255)
     schedule_type: str | None = Field(default=None, max_length=50)
-    description: str | None = None
-    start_date: str | None = Field(default=None, max_length=20)
-    end_date: str | None = Field(default=None, max_length=20)
+    description: str | None = Field(default=None, max_length=5000)
+    start_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20)
+    end_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20)
     status: str | None = Field(
         default=None, pattern=r"^(draft|active|completed|frozen|archived)$"
     )
@@ -119,10 +119,10 @@ class ActivityCreate(BaseModel):
     schedule_id: UUID = Field(default=None)  # type: ignore[assignment]
     parent_id: UUID | None = None
     name: str = Field(..., min_length=1, max_length=255)
-    description: str = ""
+    description: str = Field(default="", max_length=5000)
     wbs_code: str = Field(default="", max_length=50)
-    start_date: str = Field(..., max_length=20)
-    end_date: str = Field(..., max_length=20)
+    start_date: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20)
+    end_date: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20)
     duration_days: int = Field(default=0, ge=0)
     progress_pct: float = Field(default=0.0, ge=0.0, le=100.0)
     status: str = Field(
@@ -154,10 +154,10 @@ class ActivityUpdate(BaseModel):
 
     parent_id: UUID | None = None
     name: str | None = Field(default=None, min_length=1, max_length=255)
-    description: str | None = None
+    description: str | None = Field(default=None, max_length=5000)
     wbs_code: str | None = Field(default=None, max_length=50)
-    start_date: str | None = Field(default=None, max_length=20)
-    end_date: str | None = Field(default=None, max_length=20)
+    start_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20)
+    end_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20)
     duration_days: int | None = Field(default=None, ge=0)
     progress_pct: float | None = Field(default=None, ge=0.0, le=100.0)
     status: str | None = Field(
@@ -230,6 +230,37 @@ class LinkPositionRequest(BaseModel):
     boq_position_id: UUID
 
 
+class ActivityBimLinkRequest(BaseModel):
+    """Request body for replacing the BIM element link set on an activity.
+
+    The full ``bim_element_ids`` list is replaced atomically — callers that
+    want to add/remove a single element should read the current list, mutate
+    it, then PATCH the whole array back.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    bim_element_ids: list[str] = Field(default_factory=list)
+
+
+class ActivityBrief(BaseModel):
+    """Lightweight activity summary embedded in a BIM element response.
+
+    Mirrors the ``ActivityBrief`` schema declared in ``bim_hub.schemas`` —
+    the two are kept in sync so the viewer can render schedule badges on
+    linked elements without a second round trip.
+    """
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    name: str
+    start_date: str | None = None
+    end_date: str | None = None
+    status: str
+    percent_complete: float = 0.0
+
+
 class ProgressUpdateRequest(BaseModel):
     """Request body for updating activity progress."""
 
@@ -248,7 +279,7 @@ class WorkOrderCreate(BaseModel):
     assembly_id: UUID | None = None
     boq_position_id: UUID | None = None
     code: str = Field(..., min_length=1, max_length=50)
-    description: str = ""
+    description: str = Field(default="", max_length=5000)
     assigned_to: str = Field(default="", max_length=255)
     planned_start: str | None = Field(default=None, max_length=20)
     planned_end: str | None = Field(default=None, max_length=20)
@@ -271,7 +302,7 @@ class WorkOrderUpdate(BaseModel):
     assembly_id: UUID | None = None
     boq_position_id: UUID | None = None
     code: str | None = Field(default=None, min_length=1, max_length=50)
-    description: str | None = None
+    description: str | None = Field(default=None, max_length=5000)
     assigned_to: str | None = Field(default=None, max_length=255)
     planned_start: str | None = Field(default=None, max_length=20)
     planned_end: str | None = Field(default=None, max_length=20)
@@ -555,7 +586,7 @@ class ProgressUpdateCreate(BaseModel):
     actual_start: str | None = Field(default=None, max_length=20)
     actual_finish: str | None = Field(default=None, max_length=20)
     remaining_duration: str | None = Field(default=None, max_length=10)
-    notes: str | None = None
+    notes: str | None = Field(default=None, max_length=5000)
     status: str = Field(
         default="draft",
         pattern=r"^(draft|submitted|approved)$",
@@ -574,7 +605,7 @@ class ProgressUpdateEdit(BaseModel):
     actual_start: str | None = Field(default=None, max_length=20)
     actual_finish: str | None = Field(default=None, max_length=20)
     remaining_duration: str | None = Field(default=None, max_length=10)
-    notes: str | None = None
+    notes: str | None = Field(default=None, max_length=5000)
     status: str | None = Field(
         default=None,
         pattern=r"^(draft|submitted|approved)$",

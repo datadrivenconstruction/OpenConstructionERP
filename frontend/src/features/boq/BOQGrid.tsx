@@ -7,6 +7,7 @@ import type {
   GridApi,
   CellValueChangedEvent,
   CellEditingStartedEvent,
+  CellEditingStoppedEvent,
   RowDragEndEvent,
   GridReadyEvent,
   GetRowIdParams,
@@ -39,6 +40,7 @@ import {
   Tag,
   Layers,
   Boxes,
+  Cuboid,
 } from 'lucide-react';
 
 import {
@@ -47,6 +49,11 @@ import {
   type CostAutocompleteItem,
   groupPositionsIntoSections,
 } from './api';
+import {
+  acquireLock as acquireCollabLock,
+  releaseLock as releaseCollabLock,
+  type CollabLock,
+} from '@/features/collab_locks';
 import { getColumnDefs, getCustomColumnDefs } from './grid/columnDefs';
 import {
   FormulaCellEditor,
@@ -284,6 +291,46 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   const gridApiRef = useRef<GridApi | null>(null);
   const gridWrapperRef = useRef<HTMLDivElement>(null);
   const addToast = useToastStore((s) => s.addToast);
+
+  /* ── Collaboration locks (layer 1) ───────────────────────────────
+   * Per-row soft lock state: positionId -> held lock object.  We
+   * acquire on onCellEditingStarted and release on
+   * onCellEditingStopped.  A 409 triggers a toast and cancels the
+   * in-flight edit.  All lock failures degrade silently so a broken
+   * collab service never blocks editing.
+   */
+  const rowLockMapRef = useRef<Map<string, CollabLock>>(new Map());
+  const rowLockPendingRef = useRef<Set<string>>(new Set());
+  // Tracks positions whose edit stopped while the acquire was still
+  // in-flight.  The .then() callback checks this set and releases
+  // immediately instead of storing the lock in rowLockMapRef.
+  const rowLockCancelledRef = useRef<Set<string>>(new Set());
+
+  const releaseRowLock = useCallback((positionId: string) => {
+    const held = rowLockMapRef.current.get(positionId);
+    if (held !== undefined) {
+      rowLockMapRef.current.delete(positionId);
+      // Fire-and-forget — unmount / row-leave must not await a network call.
+      releaseCollabLock(held.id).catch(() => undefined);
+      return;
+    }
+    // If the acquire is still pending, mark for release-on-resolve so
+    // the lock does not leak until TTL expiry.
+    if (rowLockPendingRef.current.has(positionId)) {
+      rowLockCancelledRef.current.add(positionId);
+    }
+  }, []);
+
+  // Release every held row lock on unmount.
+  useEffect(() => {
+    const mapRef = rowLockMapRef.current;
+    return () => {
+      for (const lock of mapRef.values()) {
+        releaseCollabLock(lock.id).catch(() => undefined);
+      }
+      mapRef.clear();
+    };
+  }, []);
 
   /* ── Context menu state ──────────────────────────────────────────── */
   interface ContextMenuState {
@@ -578,9 +625,85 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
         event.data.metadata.resources.length > 0
       ) {
         event.api.stopEditing(true); // true = cancel (don't save)
+        return;
       }
+
+      // ── Layer-1 collaboration lock ──────────────────────────────
+      // Acquire a soft lock on the row (not the cell) the first
+      // time the user enters edit mode on it.  Subsequent cell
+      // edits on the same row piggy-back on the existing lock.
+      const positionId = event.data?.id;
+      if (
+        typeof positionId !== 'string' ||
+        positionId.length === 0 ||
+        event.data?._isSection ||
+        event.data?._isFooter
+      ) {
+        return;
+      }
+      if (
+        rowLockMapRef.current.has(positionId) ||
+        rowLockPendingRef.current.has(positionId)
+      ) {
+        return;
+      }
+      rowLockPendingRef.current.add(positionId);
+      acquireCollabLock('boq_position', positionId, 60)
+        .then((result) => {
+          rowLockPendingRef.current.delete(positionId);
+          if (result.ok) {
+            // If editing stopped while the acquire was in-flight,
+            // release the lock immediately instead of storing it.
+            if (rowLockCancelledRef.current.has(positionId)) {
+              rowLockCancelledRef.current.delete(positionId);
+              releaseCollabLock(result.lock.id).catch(() => undefined);
+              return;
+            }
+            rowLockMapRef.current.set(positionId, result.lock);
+            return;
+          }
+          // Conflict: cancel the in-flight edit so we cannot
+          // overwrite the holder's work.  The hook has already
+          // shown a toast.
+          try {
+            event.api.stopEditing(true);
+          } catch {
+            // ignore — the user may have already blurred
+          }
+          addToast({
+            type: 'warning',
+            title: t('collab_locks.lock_conflict_title', {
+              defaultValue: 'Someone is editing this',
+            }),
+            message: t('collab_locks.lock_conflict_toast', {
+              defaultValue:
+                'Locked by {{name}}. Try again in {{seconds}} seconds.',
+              name: result.conflict.current_holder_name,
+              seconds: result.conflict.remaining_seconds,
+            }),
+          });
+        })
+        .catch(() => {
+          // Network / 5xx — degrade silently so the user can still
+          // edit.  The worst case is the existing "last writer
+          // wins" behaviour we had before layer 1.
+          rowLockPendingRef.current.delete(positionId);
+          rowLockCancelledRef.current.delete(positionId);
+        });
     },
-    [],
+    [addToast, t],
+  );
+
+  const onCellEditingStopped = useCallback(
+    (event: CellEditingStoppedEvent) => {
+      const positionId = event.data?.id;
+      if (typeof positionId !== 'string' || positionId.length === 0) return;
+      // Release on stop — the user has either committed or cancelled
+      // the edit.  If they immediately start editing another cell on
+      // the same row, onCellEditingStarted will re-acquire.
+      releaseRowLock(positionId);
+    },
+    [releaseRowLock],
   );
 
   /* ── Cell value changed → dispatch update ─────────────────────── */
@@ -1080,6 +1203,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
           fullWidthCellRenderer="resourceFullWidthRenderer"
           pinnedBottomRowData={pinnedBottomRowData}
           onCellEditingStarted={onCellEditingStarted}
+          onCellEditingStopped={onCellEditingStopped}
           onCellValueChanged={onCellValueChanged}
           onColumnResized={handleColumnResized}
           onRowDragEnd={handleRowDragEnd}
@@ -1181,6 +1305,24 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                     onClick={() => { navigate(`/costs?highlight=${costItemId}`); closeContextMenu(); }}
                   />
                 )}
+                {(() => {
+                  const cadIds = d.cad_element_ids as string[] | undefined;
+                  const bimIds = Array.isArray(cadIds) ? cadIds.filter((x) => typeof x === 'string' && x.length > 0) : [];
+                  if (bimIds.length === 0) return null;
+                  return (
+                    <CtxItem icon={<Cuboid size={14}/>}
+                      label={t('boq.view_in_bim', { defaultValue: 'View in BIM 3D ({{count}})', count: bimIds.length })}
+                      onClick={() => {
+                        if (bimIds.length === 1) {
+                          navigate(`/bim?element=${encodeURIComponent(bimIds[0]!)}&isolate=${encodeURIComponent(bimIds[0]!)}`);
+                        } else {
+                          navigate(`/bim?isolate=${bimIds.map((id) => encodeURIComponent(id)).join(',')}`);
+                        }
+                        closeContextMenu();
+                      }}
+                    />
+                  );
+                })()}
                 {/* ── AI features ─────────────────────────────────── */}
                 <CtxSeparator />
                 <CtxGroupLabel label="AI" />

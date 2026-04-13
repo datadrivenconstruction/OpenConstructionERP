@@ -10,6 +10,8 @@ Tables:
     oe_bim_model_diff   — diff results between two model versions
 """
 
+from __future__ import annotations
+
 import uuid
 
 from sqlalchemy import (
@@ -52,6 +54,7 @@ class BIMModel(Base):
         GUID(),
         ForeignKey("oe_bim_model.id", ondelete="SET NULL"),
         nullable=True,
+        index=True,
     )
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
@@ -64,7 +67,7 @@ class BIMModel(Base):
     )
 
     # Relationships
-    elements: Mapped[list["BIMElement"]] = relationship(
+    elements: Mapped[list[BIMElement]] = relationship(
         back_populates="model",
         cascade="all, delete-orphan",
         lazy="selectin",
@@ -119,7 +122,7 @@ class BIMElement(Base):
 
     # Relationships
     model: Mapped[BIMModel] = relationship(back_populates="elements")
-    boq_links: Mapped[list["BOQElementLink"]] = relationship(
+    boq_links: Mapped[list[BOQElementLink]] = relationship(
         back_populates="bim_element",
         cascade="all, delete-orphan",
         lazy="selectin",
@@ -208,11 +211,13 @@ class BIMModelDiff(Base):
         GUID(),
         ForeignKey("oe_bim_model.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
     new_model_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
         ForeignKey("oe_bim_model.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
     diff_summary: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON,
@@ -229,3 +234,80 @@ class BIMModelDiff(Base):
 
     def __repr__(self) -> str:
         return f"<BIMModelDiff old={self.old_model_id} new={self.new_model_id}>"
+
+
+class BIMElementGroup(Base):
+    """Saved/named selection of BIM elements.
+
+    A group is either:
+    - **dynamic** (``is_dynamic=True``): members are recomputed from
+      ``filter_criteria`` against ``oe_bim_element`` on every read, and the
+      resolved ids are cached into ``element_ids`` for fast reads.
+    - **static** (``is_dynamic=False``): the explicit ``element_ids`` snapshot
+      is the source of truth and never auto-recomputes.
+
+    Scope:
+    - ``project_id`` is required — a group always belongs to a project.
+    - ``model_id`` is optional — when set, the group is scoped to a single
+      model; when NULL, it spans every model in the project.
+
+    Uniqueness:
+    - ``(project_id, name)`` must be unique per project so the UI can safely
+      address groups by human-readable name.
+    """
+
+    __tablename__ = "oe_bim_element_group"
+    __table_args__ = (
+        UniqueConstraint("project_id", "name", name="uq_bim_element_group_project_name"),
+        Index("ix_bim_element_group_project", "project_id"),
+    )
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        nullable=False,
+        index=True,
+    )
+    model_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_bim_model.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_dynamic: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default="1",
+    )
+    filter_criteria: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
+    element_ids: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
+    )
+    element_count: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
+    color: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
+
+    def __repr__(self) -> str:
+        return f"<BIMElementGroup {self.name} project={self.project_id}>"

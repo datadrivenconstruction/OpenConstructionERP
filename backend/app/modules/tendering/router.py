@@ -15,7 +15,7 @@ Endpoints:
 import io
 import logging
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
@@ -80,6 +80,34 @@ async def _verify_package_owner(
     if str(project.owner_id) != user_id:
         raise HTTPException(status_code=403, detail="You do not have access to this tender package")
     return package
+
+
+async def _verify_bid_access(
+    service: TenderingService,
+    session: SessionDep,
+    bid_id: uuid.UUID,
+    user_id: str,
+    payload: dict | None = None,
+) -> object:
+    """Load a bid → derive package → derive project → verify ownership.
+
+    Closes the IDOR hole on ``PATCH /bids/{bid_id}`` where the update
+    endpoint previously accepted any bid_id from any tenant.
+    """
+    try:
+        bid = await service.get_bid(bid_id)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.warning("Failed to load bid %s: %s", bid_id, exc)
+        raise HTTPException(status_code=404, detail="Bid not found")
+
+    if bid is None:
+        raise HTTPException(status_code=404, detail="Bid not found")
+
+    # Delegate ownership check via the parent package
+    await _verify_package_owner(service, session, bid.package_id, user_id, payload)
+    return bid
 
 
 def _package_to_response(package: object) -> PackageResponse:
@@ -173,13 +201,20 @@ async def list_packages(
     payload: CurrentUserPayload,
     session: SessionDep,
     service: TenderingService = Depends(_get_service),
-    project_id: uuid.UUID | None = Query(default=None),
+    project_id: uuid.UUID = Query(
+        ...,
+        description="Required: project ID to scope the listing (prevents cross-tenant enumeration)",
+    ),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
 ) -> list[PackageResponse]:
-    """List tender packages with optional project filter."""
-    if project_id is not None:
-        await _verify_tender_project_owner(session, project_id, user_id, payload)
+    """List tender packages for a project.
+
+    ``project_id`` is REQUIRED to prevent cross-tenant enumeration — the
+    previous optional parameter let any authenticated user dump packages
+    for every tenant when omitted.
+    """
+    await _verify_tender_project_owner(session, project_id, user_id, payload)
     packages, _ = await service.list_packages(project_id=project_id, offset=offset, limit=limit)
     return [_package_to_response(p) for p in packages]
 
@@ -258,9 +293,17 @@ async def update_bid(
     bid_id: uuid.UUID,
     data: BidUpdate,
     user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
     service: TenderingService = Depends(_get_service),
 ) -> BidResponse:
-    """Update a bid."""
+    """Update a bid.
+
+    Verifies the caller owns the parent package's project before
+    accepting the mutation — otherwise a cross-tenant tamper attack
+    could silently rewrite competing bids.
+    """
+    await _verify_bid_access(service, session, bid_id, user_id, payload)
     try:
         bid = await service.update_bid(bid_id, data)
         return _bid_to_response(bid)
@@ -332,7 +375,7 @@ async def export_tender_pdf(
     lines.append(f"Tender Package: {package.name}")
     lines.append(f"Status: {package.status}")
     lines.append(f"Deadline: {package.deadline or 'N/A'}")
-    lines.append(f"Generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}")
+    lines.append(f"Generated: {datetime.now(UTC).strftime('%Y-%m-%d %H:%M UTC')}")
     lines.append("")
     lines.append(f"Budget Total: {comparison.budget_total:,.2f}")
     lines.append(f"Number of Bids: {comparison.bid_count}")

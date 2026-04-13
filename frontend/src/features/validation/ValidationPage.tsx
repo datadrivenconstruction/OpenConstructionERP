@@ -69,16 +69,18 @@ type FilterMode = 'all' | 'errors' | 'warnings' | 'info' | 'passed';
 
 /* ── Rule descriptions for tooltips ───────────────────────────────────── */
 
-const RULE_DESCRIPTIONS: Record<string, string> = {
-  'boq_quality.position_has_quantity': 'Checks that every BOQ position has a quantity greater than zero.',
-  'boq_quality.position_has_unit_rate': 'Checks that every position has a unit rate assigned.',
-  'boq_quality.position_has_description': 'Checks that every position has a meaningful description.',
-  'boq_quality.no_duplicate_ordinals': 'Ensures all ordinal numbers within the BOQ are unique.',
-  'boq_quality.unit_rate_in_range': 'Flags unit rates that deviate more than 5x from median.',
-  'din276.cost_group_required': 'Ensures every position has a DIN 276 Kostengruppe assigned.',
-  'din276.valid_cost_group': 'Validates that DIN 276 codes are proper 3-digit codes.',
-  'gaeb.ordinal_format': 'Checks ordinal numbers follow GAEB LV format XX.XX.XXXX.',
-};
+function getRuleDescriptions(t: (key: string, opts?: Record<string, unknown>) => string): Record<string, string> {
+  return {
+    'boq_quality.position_has_quantity': t('validation.rule_position_has_quantity', { defaultValue: 'Checks that every BOQ position has a quantity greater than zero.' }),
+    'boq_quality.position_has_unit_rate': t('validation.rule_position_has_unit_rate', { defaultValue: 'Checks that every position has a unit rate assigned.' }),
+    'boq_quality.position_has_description': t('validation.rule_position_has_description', { defaultValue: 'Checks that every position has a meaningful description.' }),
+    'boq_quality.no_duplicate_ordinals': t('validation.rule_no_duplicate_ordinals', { defaultValue: 'Ensures all ordinal numbers within the BOQ are unique.' }),
+    'boq_quality.unit_rate_in_range': t('validation.rule_unit_rate_in_range', { defaultValue: 'Flags unit rates that deviate more than 5x from median.' }),
+    'din276.cost_group_required': t('validation.rule_cost_group_required', { defaultValue: 'Ensures every position has a DIN 276 Kostengruppe assigned.' }),
+    'din276.valid_cost_group': t('validation.rule_valid_cost_group', { defaultValue: 'Validates that DIN 276 codes are proper 3-digit codes.' }),
+    'gaeb.ordinal_format': t('validation.rule_ordinal_format', { defaultValue: 'Checks ordinal numbers follow GAEB LV format XX.XX.XXXX.' }),
+  };
+}
 
 /* ── Helpers ───────────────────────────────────────────────────────────── */
 
@@ -254,7 +256,7 @@ function ResultRow({
       ? t('validation.status_error', 'Error')
       : t('validation.status_warning', 'Warning');
 
-  const tooltip = RULE_DESCRIPTIONS[result.rule_id] || '';
+  const tooltip = getRuleDescriptions(t)[result.rule_id] || '';
 
   return (
     <div
@@ -424,6 +426,7 @@ export function ValidationPage() {
   const { data: projects, isLoading: projectsLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    staleTime: 5 * 60_000,
   });
 
   // Fetch BOQs for selected project
@@ -439,12 +442,15 @@ export function ValidationPage() {
   // Run validation mutation
   const runValidation = useMutation({
     mutationFn: () =>
-      apiPost<ValidationReportData>(`/v1/boq/boqs/${selectedBoqId}/validate`),
+      apiPost<ValidationReportData>(`/v1/boq/boqs/${selectedBoqId}/validate/`),
     onSuccess: (data) => {
       setReport(data);
       setFilter('all');
       setExpandedResults(new Set());
       queryClient.invalidateQueries({ queryKey: ['validation', selectedBoqId] });
+    },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('validation.run_failed', { defaultValue: 'Validation failed' }), message: err.message });
     },
   });
 

@@ -66,9 +66,9 @@ export async function createRFI(data: CreateRFIPayload): Promise<RFI> {
 }
 
 export async function respondToRFI(id: string, data: RespondRFIPayload): Promise<RFI> {
-  return apiPost<RFI>(`/v1/rfi/${id}/respond`, data);
+  return apiPost<RFI>(`/v1/rfi/${id}/respond/`, data);
 }
 
 export async function closeRFI(id: string): Promise<RFI> {
-  return apiPost<RFI>(`/v1/rfi/${id}/close`);
+  return apiPost<RFI>(`/v1/rfi/${id}/close/`);
 }

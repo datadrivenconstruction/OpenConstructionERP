@@ -14,6 +14,7 @@ import {
   ArrowUpDown, ChevronDown, ChevronRight, ChevronLeft, Layers, X, Save,
   Download as DownloadIcon, Columns3, Search as SearchIcon,
   Upload, FileUp, Loader2, CheckCircle2, Settings, AlertCircle, FolderOpen,
+  TrendingUp, Hash, Clock,
 } from 'lucide-react';
 import { Button, Card, Badge, Breadcrumb, EmptyState } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
@@ -37,11 +38,11 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
 type TabId = 'table' | 'pivot' | 'charts' | 'describe';
 
-const TABS: { id: TabId; icon: React.ElementType; label: string }[] = [
-  { id: 'table', icon: Table2, label: 'Data Table' },
-  { id: 'pivot', icon: Layers, label: 'Pivot' },
-  { id: 'charts', icon: BarChart3, label: 'Charts' },
-  { id: 'describe', icon: FileSpreadsheet, label: 'Describe' },
+const TABS: { id: TabId; icon: React.ElementType; label: string; description: string }[] = [
+  { id: 'table', icon: Table2, label: 'Data Table', description: 'Filter, sort and search element data' },
+  { id: 'pivot', icon: Layers, label: 'Pivot', description: 'Group and aggregate data by any column' },
+  { id: 'charts', icon: BarChart3, label: 'Charts', description: 'Visualize distributions and patterns' },
+  { id: 'describe', icon: FileSpreadsheet, label: 'Describe', description: 'Statistical summary of all numeric columns' },
 ];
 
 const AGG_FUNCTIONS = ['sum', 'avg', 'min', 'max', 'count'];
@@ -367,7 +368,7 @@ function DataTableTab({ sessionId, describe }: { sessionId: string; describe: De
                   </tr>
                 ))
               ) : displayRows.map((row, idx) => (
-                <tr key={idx} className={`border-b border-border-light hover:bg-surface-secondary/30 ${idx % 2 === 0 ? '' : 'bg-surface-secondary/10'}`}>
+                <tr key={`row-${page * pageSize + idx}-${Object.values(row).slice(0, 2).join('-')}`} className={`border-b border-border-light hover:bg-surface-secondary/30 ${idx % 2 === 0 ? '' : 'bg-surface-secondary/10'}`}>
                   <td className="px-2 py-1.5 text-center text-content-quaternary tabular-nums text-2xs">
                     {page * pageSize + idx + 1}
                   </td>
@@ -682,8 +683,8 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
                             </td>
                           ))}
                         </tr>
-                        {isOpen && children.map((g, i) => (
-                          <tr key={i} className="border-b border-border-light">
+                        {isOpen && children.map((g) => (
+                          <tr key={Object.values(g.key).join('-')} className="border-b border-border-light">
                             <td className="px-3 py-1.5 pl-8 text-content-quaternary">{g.key[groupBy[0]!]}</td>
                             {groupBy.slice(1).map((col) => <td key={col} className="px-3 py-1.5 text-content-secondary">{g.key[col] || '—'}</td>)}
                             <td className="px-3 py-1.5 text-right tabular-nums text-content-secondary">{g.count.toLocaleString()}</td>
@@ -694,8 +695,8 @@ function PivotTab({ sessionId, describe }: { sessionId: string; describe: Descri
                     );
                   })
                 ) : (
-                  sortedGroups.map((g, i) => (
-                    <tr key={i} className="border-b border-border-light hover:bg-surface-secondary/30">
+                  sortedGroups.map((g) => (
+                    <tr key={Object.values(g.key).join('-')} className="border-b border-border-light hover:bg-surface-secondary/30">
                       {groupBy.map((col) => <td key={col} className="px-3 py-2 text-content-primary">{g.key[col] || '—'}</td>)}
                       <td className="px-3 py-2 text-right tabular-nums text-content-secondary">{g.count.toLocaleString()}</td>
                       {aggCols.map((col) => <td key={col} className="px-3 py-2 text-right tabular-nums font-medium">{formatNumber(g.results[col])}</td>)}
@@ -846,7 +847,7 @@ function ChartsTab({ sessionId, describe }: { sessionId: string; describe: Descr
                 const pct = maxVal > 0 ? (val / maxVal) * 100 : 0;
                 const color = BAR_COLORS[i % BAR_COLORS.length]!;
                 return (
-                  <div key={i} className="flex items-center gap-3">
+                  <div key={Object.values(g.key).join('-')} className="flex items-center gap-3">
                     <span className="w-32 text-xs text-content-secondary truncate shrink-0 text-right">
                       {Object.values(g.key)[0] || '—'}
                     </span>
@@ -878,7 +879,7 @@ function ChartsTab({ sessionId, describe }: { sessionId: string; describe: Descr
                       const pct = totalVal > 0 ? (val / totalVal) * 100 : 0;
                       const dashArray = `${pct} ${100 - pct}`;
                       const el = (
-                        <circle key={i} cx="50" cy="50" r="40" fill="none"
+                        <circle key={Object.values(g.key).join('-')} cx="50" cy="50" r="40" fill="none"
                           stroke={BAR_COLORS[i % BAR_COLORS.length]}
                           strokeWidth="20" strokeDasharray={dashArray}
                           strokeDashoffset={-offset}
@@ -895,7 +896,7 @@ function ChartsTab({ sessionId, describe }: { sessionId: string; describe: Descr
                   const val = g.results[chartValue] ?? 0;
                   const pct = totalVal > 0 ? ((val / totalVal) * 100).toFixed(1) : '0';
                   return (
-                    <div key={i} className="flex items-center gap-2 text-xs">
+                    <div key={Object.values(g.key).join('-')} className="flex items-center gap-2 text-xs">
                       <div className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: BAR_COLORS[i % BAR_COLORS.length] }} />
                       <span className="flex-1 text-content-secondary truncate">{Object.values(g.key)[0] || '—'}</span>
                       <span className="text-content-primary font-medium tabular-nums">{formatNumber(val)}</span>
@@ -1021,8 +1022,8 @@ function DescribeTab({ sessionId, describe }: { sessionId: string; describe: Des
             <span className="ml-2 text-content-tertiary font-normal">({vcData.total.toLocaleString()} total)</span>
           </h3>
           <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
-            {vcData.values.map((v, i) => (
-              <div key={i} className="flex items-center gap-3">
+            {vcData.values.map((v) => (
+              <div key={`${v.value}`} className="flex items-center gap-3">
                 <span className="w-36 text-xs text-content-secondary truncate shrink-0">{v.value || '(empty)'}</span>
                 <div className="flex-1 h-5 bg-surface-secondary rounded overflow-hidden relative">
                   <div
@@ -1067,6 +1068,7 @@ function CreateBOQFromPivotModal({ open, onClose, groups, groupByColumns, aggCol
     queryKey: ['projects'],
     queryFn: () => apiGet<{ id: string; name: string }[]>('/v1/projects/'),
     enabled: open,
+    staleTime: 5 * 60_000,
   });
 
   const { data: boqs } = useQuery({
@@ -1220,7 +1222,7 @@ function CreateBOQFromPivotModal({ open, onClose, groups, groupByColumns, aggCol
                 const desc = groupByColumns.map((col) => g.key[col] || '').filter(Boolean).join(' — ');
                 const qty = g.results[`sum_${quantityCol}`] ?? g.results[`avg_${quantityCol}`] ?? g.count;
                 return (
-                  <div key={i} className="flex items-center justify-between text-xs">
+                  <div key={Object.values(g.key).join('-') || `group-${i}`} className="flex items-center justify-between text-xs">
                     <span className="text-content-primary truncate flex-1 mr-2">{desc || `Group ${i + 1}`}</span>
                     <span className="text-content-tertiary tabular-nums shrink-0">{Math.round(qty * 100) / 100} {unitGuess}</span>
                   </div>
@@ -1249,7 +1251,7 @@ function ConverterStatus() {
   const { t } = useTranslation();
   const { data } = useQuery({
     queryKey: ['cad-converters-status'],
-    queryFn: () => apiGet<{ converters: { id: string; name: string; extensions: string[]; installed: boolean }[] }>('/v1/takeoff/converters'),
+    queryFn: () => apiGet<{ converters: { id: string; name: string; extensions: string[]; installed: boolean }[] }>('/v1/takeoff/converters/'),
     staleTime: 60000,
   });
 
@@ -1485,22 +1487,27 @@ function UploadConvertZone({
             <p className="text-sm font-medium text-green-600">{t('explorer.done', { defaultValue: 'Conversion complete! Loading...' })}</p>
           </div>
         ) : (
-          <div className="px-6 py-5 flex items-center gap-5">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-oe-blue-subtle shrink-0">
-              <FileUp size={22} className="text-oe-blue" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-content-primary">
-                {t('explorer.drop_cad', { defaultValue: 'Drop a CAD/BIM file to explore' })}
+          <div className="px-8 py-10">
+            <div className="flex flex-col items-center text-center gap-4">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-oe-blue/10 to-blue-50 dark:from-oe-blue/20 dark:to-blue-900/10 border border-oe-blue/10">
+                <FileUp size={30} className="text-oe-blue" />
+              </div>
+              <div>
+                <p className="text-base font-bold text-content-primary mb-1">
+                  {t('explorer.drop_cad', { defaultValue: 'Drop your IFC, RVT, DWG, or DGN file here' })}
+                </p>
+                <p className="text-sm text-content-tertiary">
+                  {t('explorer.or_click', { defaultValue: 'or click to browse your files' })}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 mt-1">
+                {CAD_FORMATS.map((fmt) => (
+                  <span key={fmt} className={`px-2 py-1 rounded-lg text-2xs font-bold ${FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600'}`}>.{fmt.toLowerCase()}</span>
+                ))}
+              </div>
+              <p className="text-2xs text-content-quaternary">
+                {t('explorer.max_file_size', { defaultValue: 'Max 100 MB' })} — {t('explorer.upload_auto', { defaultValue: 'Automatic conversion and element extraction' })}
               </p>
-              <p className="text-xs text-content-tertiary mt-0.5">
-                {t('explorer.or_click', { defaultValue: 'or click to browse — data table, pivot, charts & statistics' })}
-              </p>
-            </div>
-            <div className="hidden sm:flex items-center gap-1.5 shrink-0">
-              {CAD_FORMATS.map((fmt) => (
-                <span key={fmt} className={`px-1.5 py-0.5 rounded text-2xs font-bold ${FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600'}`}>.{fmt.toLowerCase()}</span>
-              ))}
             </div>
           </div>
         )}
@@ -1529,6 +1536,7 @@ function SaveDialog({
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<{ id: string; name: string }[]>('/v1/projects/'),
+    staleTime: 5 * 60_000,
   });
 
   const [name, setName] = useState(filename.replace(/\.[^.]+$/, '') + ' — Analysis');
@@ -1609,6 +1617,7 @@ function SaveToProjectDialog({
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<{ id: string; name: string }[]>('/v1/projects/'),
+    staleTime: 5 * 60_000,
   });
 
   const [modelName, setModelName] = useState(filename.replace(/\.[^.]+$/, ''));
@@ -1720,39 +1729,96 @@ export function CadDataExplorerPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cad-all-sessions'] });
     },
+    onError: (err: Error) => {
+      console.error('Failed to delete CAD session:', err.message);
+    },
   });
 
   if (!sessionId) {
     const recentSessions = allSessions.slice(0, 12);
-    const FORMAT_COLORS: Record<string, string> = {
+    const LANDING_FORMAT_COLORS: Record<string, string> = {
       RVT: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
       IFC: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
       DWG: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
       DGN: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
     };
 
+    const FEATURE_CARDS: { icon: React.ElementType; title: string; desc: string; color: string; iconBg: string }[] = [
+      { icon: Table2, title: t('explorer.feat_table', { defaultValue: 'Data Table' }), desc: t('explorer.feat_table_desc', { defaultValue: 'Browse all elements with sorting, filtering, and column selection. Export to CSV or Excel.' }), color: 'text-blue-600 dark:text-blue-400', iconBg: 'bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20' },
+      { icon: Layers, title: t('explorer.feat_pivot', { defaultValue: 'Pivot Analysis' }), desc: t('explorer.feat_pivot_desc', { defaultValue: 'Group elements by storey, discipline, or type. Aggregate volumes, areas, and counts.' }), color: 'text-purple-600 dark:text-purple-400', iconBg: 'bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/30 dark:to-purple-800/20' },
+      { icon: BarChart3, title: t('explorer.feat_charts', { defaultValue: 'Charts' }), desc: t('explorer.feat_charts_desc', { defaultValue: 'Visualize quantity distributions with bar charts and pie charts.' }), color: 'text-emerald-600 dark:text-emerald-400', iconBg: 'bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-900/30 dark:to-emerald-800/20' },
+      { icon: TrendingUp, title: t('explorer.feat_stats', { defaultValue: 'Statistics' }), desc: t('explorer.feat_stats_desc', { defaultValue: 'Descriptive statistics for every numeric column -- min, max, mean, std dev.' }), color: 'text-orange-600 dark:text-orange-400', iconBg: 'bg-gradient-to-br from-orange-100 to-orange-50 dark:from-orange-900/30 dark:to-orange-800/20' },
+    ];
+
     return (
-      <div className="max-w-content mx-auto px-4 py-4 space-y-5 animate-fade-in">
+      <div className="max-w-content mx-auto px-4 py-4 space-y-8 animate-fade-in">
         <Breadcrumb items={[
           { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
           { label: t('explorer.title', { defaultValue: 'CAD-BIM Explorer' }) },
         ]} />
 
-        {/* Upload zone */}
-        <UploadConvertZone onSessionReady={handleSessionReady} />
+        {/* Hero section */}
+        <div className="relative text-center pt-10 pb-6 overflow-hidden">
+          {/* Gradient background decoration */}
+          <div className="absolute inset-0 -z-10 overflow-hidden rounded-3xl">
+            <div className="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-oe-blue/5 blur-3xl" />
+            <div className="absolute -bottom-16 -right-16 w-64 h-64 rounded-full bg-purple-500/5 blur-3xl" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-48 rounded-full bg-emerald-500/5 blur-3xl" />
+          </div>
 
-        {/* Recent sessions — compact table */}
+          <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-oe-blue to-blue-600 shadow-lg shadow-oe-blue/20 mb-6">
+            <Database size={36} className="text-white" />
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-content-primary mb-3 tracking-tight">
+            {t('explorer.hero_title', { defaultValue: 'CAD/BIM Data Explorer' })}
+          </h1>
+          <p className="text-base text-content-secondary max-w-2xl mx-auto leading-relaxed">
+            {t('explorer.hero_subtitle', { defaultValue: 'Analyze building element data in a powerful spreadsheet interface. Filter, pivot, chart, and export quantities from your IFC and Revit models.' })}
+          </p>
+        </div>
+
+        {/* Feature cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {FEATURE_CARDS.map(({ icon: Icon, title, desc, color, iconBg }) => (
+            <Card key={title} className="p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group border-border-light">
+              <div className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ${iconBg} mb-4 group-hover:scale-105 transition-transform`}>
+                <Icon size={22} className={color} />
+              </div>
+              <h3 className="text-sm font-bold text-content-primary mb-1.5">{title}</h3>
+              <p className="text-xs text-content-tertiary leading-relaxed">{desc}</p>
+            </Card>
+          ))}
+        </div>
+
+        {/* Upload zone */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="h-px flex-1 bg-border-light" />
+            <h2 className="text-xs font-bold text-content-secondary uppercase tracking-widest px-3">
+              {t('explorer.upload_heading', { defaultValue: 'Upload CAD/BIM File' })}
+            </h2>
+            <div className="h-px flex-1 bg-border-light" />
+          </div>
+          <UploadConvertZone onSessionReady={handleSessionReady} />
+          <div className="flex items-center justify-center gap-2 text-2xs text-content-quaternary">
+            <span>{t('explorer.upload_hint_formats', { defaultValue: 'Supported formats:' })}</span>
+            <span className="font-semibold text-content-tertiary">IFC, RVT, DWG, DGN, DXF, RFA</span>
+            <span className="mx-1">|</span>
+            <span>{t('explorer.upload_hint_size', { defaultValue: 'Max file size: 100 MB' })}</span>
+          </div>
+        </div>
+
+        {/* Recent sessions — card grid */}
         {recentSessions.length > 0 && (
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xs font-semibold text-content-tertiary uppercase tracking-wider">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-bold text-content-primary flex items-center gap-2">
+                <Clock size={15} className="text-content-tertiary" />
                 {t('explorer.recent_models', { defaultValue: 'Recent Models' })}
+                <Badge variant="neutral" size="sm">{allSessions.length}</Badge>
               </h2>
-              <span className="text-2xs text-content-quaternary tabular-nums">
-                {allSessions.length} {t('explorer.total_analyses', { defaultValue: 'total' })}
-              </span>
             </div>
-            <div className="rounded-xl border border-border-light bg-surface-elevated overflow-hidden divide-y divide-border-light">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {recentSessions.map((s) => {
                 const fmt = (s.file_format || '').toUpperCase();
                 const timeAgo = s.created_at ? (() => {
@@ -1764,27 +1830,16 @@ export function CadDataExplorerPage() {
                   return `${Math.floor(hrs / 24)}d ago`;
                 })() : '';
 
+                // Estimate column count from element_count (heuristic for display)
+                const colCount = describe ? describe.total_columns : null;
+
                 return (
                   <button
                     key={s.session_id}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-surface-hover transition-colors group"
+                    className="relative w-full text-left rounded-xl border border-border-light bg-surface-elevated p-4 hover:shadow-lg hover:border-oe-blue/30 hover:-translate-y-0.5 transition-all duration-200 group cursor-pointer"
                     onClick={() => setSearchParams({ session: s.session_id })}
                   >
-                    <span className={`px-1.5 py-0.5 rounded text-2xs font-bold shrink-0 ${FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>
-                      {fmt || '?'}
-                    </span>
-                    <span className="text-sm font-medium text-content-primary truncate flex-1">
-                      {s.display_name}
-                    </span>
-                    <span className="text-2xs text-content-tertiary tabular-nums shrink-0">
-                      {s.element_count.toLocaleString()} el.
-                    </span>
-                    {s.is_permanent && (
-                      <Save size={12} className="text-green-500 shrink-0" />
-                    )}
-                    <span className="text-2xs text-content-quaternary tabular-nums shrink-0 w-12 text-right">
-                      {timeAgo}
-                    </span>
+                    {/* Delete button */}
                     <span
                       role="button"
                       tabIndex={0}
@@ -1795,12 +1850,57 @@ export function CadDataExplorerPage() {
                         }
                       }}
                       onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.click(); }}
-                      className="shrink-0 h-6 w-6 flex items-center justify-center rounded-md text-content-quaternary hover:text-semantic-error hover:bg-semantic-error-bg opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                      className="absolute top-2.5 right-2.5 h-6 w-6 flex items-center justify-center rounded-md text-content-quaternary hover:text-semantic-error hover:bg-semantic-error-bg opacity-0 group-hover:opacity-100 transition-all cursor-pointer z-10"
                       title={t('common.delete', { defaultValue: 'Delete' })}
                     >
                       <X size={14} />
                     </span>
-                    <ChevronRight size={14} className="text-content-quaternary shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                    {/* Header: name + format badge */}
+                    <div className="flex items-start gap-2.5 mb-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-surface-secondary shrink-0">
+                        <Database size={16} className="text-content-tertiary" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="text-sm font-semibold text-content-primary truncate">{s.display_name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`px-1.5 py-0.5 rounded text-2xs font-bold shrink-0 ${LANDING_FORMAT_COLORS[fmt] || 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'}`}>
+                            {fmt || '?'}
+                          </span>
+                          {s.is_permanent && (
+                            <span className="inline-flex items-center gap-0.5 text-2xs text-green-600 dark:text-green-400 font-medium">
+                              <Save size={10} />
+                              {t('explorer.saved_label', { defaultValue: 'Saved' })}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Stats row */}
+                    <div className="flex items-center gap-3 text-2xs text-content-tertiary">
+                      <span className="inline-flex items-center gap-1 tabular-nums">
+                        <Hash size={10} className="text-content-quaternary" />
+                        {s.element_count.toLocaleString()} {t('explorer.elements_short', { defaultValue: 'elements' })}
+                      </span>
+                      {colCount != null && (
+                        <span className="inline-flex items-center gap-1 tabular-nums">
+                          <Columns3 size={10} className="text-content-quaternary" />
+                          {colCount} {t('explorer.cols_short', { defaultValue: 'cols' })}
+                        </span>
+                      )}
+                      <span className="ml-auto inline-flex items-center gap-1 tabular-nums text-content-quaternary">
+                        <Clock size={10} />
+                        {timeAgo}
+                      </span>
+                    </div>
+
+                    {/* Hover arrow indicator */}
+                    <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ChevronRight size={16} className="text-oe-blue" />
+                    </div>
                   </button>
                 );
               })}
@@ -1829,11 +1929,26 @@ export function CadDataExplorerPage() {
             <Database size={20} className="text-oe-blue" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-lg font-bold text-content-primary">{t('explorer.title', { defaultValue: 'CAD-BIM Explorer' })}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-bold text-content-primary truncate">
+                {describe ? describe.filename : t('explorer.title', { defaultValue: 'CAD-BIM Explorer' })}
+              </h1>
+              {describe?.format && (
+                <Badge variant="blue" size="sm">{describe.format.toUpperCase()}</Badge>
+              )}
+            </div>
             {describe && (
-              <p className="text-xs text-content-tertiary truncate">
-                {describe.filename} · {describe.total_elements.toLocaleString()} {t('explorer.elements', { defaultValue: 'elements' })}{describe.format ? ` · ${describe.format.toUpperCase()}` : ''} · {describe.total_columns} {t('explorer.columns', { defaultValue: 'columns' })}
-              </p>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="inline-flex items-center gap-1 text-2xs text-content-tertiary">
+                  <Hash size={10} />
+                  {describe.total_elements.toLocaleString()} {t('explorer.rows', { defaultValue: 'rows' })}
+                </span>
+                <span className="text-content-quaternary text-2xs">|</span>
+                <span className="inline-flex items-center gap-1 text-2xs text-content-tertiary">
+                  <Columns3 size={10} />
+                  {describe.total_columns} {t('explorer.columns', { defaultValue: 'columns' })}
+                </span>
+              </div>
             )}
           </div>
         </div>
@@ -1880,7 +1995,7 @@ export function CadDataExplorerPage() {
 
           {/* Tab selector */}
           <div className="flex items-center gap-1 border-b border-border-light">
-            {TABS.map(({ id, icon: Icon, label }) => (
+            {TABS.map(({ id, icon: Icon, label, description }) => (
               <button
                 key={id}
                 onClick={() => setActiveTab(id)}
@@ -1889,9 +2004,17 @@ export function CadDataExplorerPage() {
                     ? 'border-oe-blue text-oe-blue'
                     : 'border-transparent text-content-tertiary hover:text-content-primary'
                 }`}
+                title={t(`explorer.tab_${id}_desc`, { defaultValue: description })}
               >
                 <Icon size={14} />
                 {t(`explorer.tab_${id}`, { defaultValue: label })}
+                {id === 'table' && describe && (
+                  <span className={`ml-1 px-1.5 py-0.5 rounded-full text-2xs tabular-nums ${
+                    activeTab === id ? 'bg-oe-blue/10' : 'bg-surface-secondary'
+                  }`}>
+                    {describe.total_elements.toLocaleString()}
+                  </span>
+                )}
               </button>
             ))}
           </div>

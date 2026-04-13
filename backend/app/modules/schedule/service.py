@@ -14,10 +14,12 @@ Stateless service layer. Handles:
 import logging
 import math
 import uuid
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta
 
 from fastapi import HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import noload
 
 from app.core.events import event_bus
 
@@ -674,6 +676,94 @@ class ScheduleService:
 
         logger.info("Activity %s progress updated to %.1f%%", activity_id, progress_pct)
         return await self.get_activity(activity_id)
+
+    # ── BIM ↔ Activity linking ─────────────────────────────────────────────
+
+    async def update_bim_links(
+        self,
+        activity_id: uuid.UUID,
+        bim_element_ids: list[str],
+    ) -> Activity:
+        """Replace the BIM element link set on an activity.
+
+        Args:
+            activity_id: Target activity identifier.
+            bim_element_ids: Full list of BIM element UUIDs (as strings) to
+                store on the activity. The existing list is replaced, not
+                merged.
+
+        Returns:
+            The updated activity (re-fetched from the database).
+
+        Raises:
+            HTTPException 404 if the activity does not exist.
+        """
+        activity = await self.get_activity(activity_id)
+        schedule_id_str = str(activity.schedule_id)
+
+        # Normalise to a list of plain strings so we never write a dict to
+        # the JSON column (legacy values may have been dict-shaped).
+        normalised = [str(eid) for eid in bim_element_ids]
+
+        await self.activity_repo.update_fields(
+            activity_id,
+            bim_element_ids=normalised,
+        )
+
+        await _safe_publish(
+            "schedule.activity.bim_links_updated",
+            {
+                "activity_id": str(activity_id),
+                "schedule_id": schedule_id_str,
+                "bim_element_ids": normalised,
+                "count": len(normalised),
+            },
+            source_module="oe_schedule",
+        )
+
+        logger.info(
+            "Activity %s BIM links replaced (%d element(s))",
+            activity_id,
+            len(normalised),
+        )
+        return await self.get_activity(activity_id)
+
+    async def get_activities_for_bim_element(
+        self,
+        bim_element_id: str,
+        project_id: uuid.UUID,
+    ) -> list[Activity]:
+        """Return all activities in ``project_id`` that reference ``bim_element_id``.
+
+        The ``bim_element_ids`` JSON column is stored as a plain list so we
+        filter on the Python side (works across SQLite and PostgreSQL without
+        a dialect-specific JSON contains operator). Scoping by project keeps
+        the scan bounded.
+        """
+        target = str(bim_element_id)
+
+        stmt = (
+            select(Activity)
+            .join(Schedule, Activity.schedule_id == Schedule.id)
+            .where(Schedule.project_id == project_id)
+            .where(Activity.bim_element_ids.isnot(None))
+            .options(
+                noload(Activity.children),
+                noload(Activity.work_orders),
+            )
+            .order_by(Activity.sort_order, Activity.wbs_code)
+        )
+        result = await self.session.execute(stmt)
+        candidates = list(result.scalars().all())
+
+        matched: list[Activity] = []
+        for act in candidates:
+            raw = act.bim_element_ids
+            # Legacy dict-shaped values are treated as empty.
+            if isinstance(raw, list):
+                if target in (str(eid) for eid in raw):
+                    matched.append(act)
+        return matched
 
     # ── Work Order operations ──────────────────────────────────────────────
 
@@ -1529,21 +1619,79 @@ class ScheduleService:
                     deps[act_id].append((pred_id, dep_type, lag))
                     seen_pairs.add((pred_id, act_id))
 
+        # --- Topological sort (Kahn's algorithm) ---
+        # The forward/backward passes must visit each activity AFTER all of its
+        # predecessors. Iterating in raw DB order is unsafe: if a successor is
+        # listed before its predecessor, the forward pass would read ef.get(pred)
+        # as the fallback (0 + pred_dur) and produce wrong CPM dates. We also
+        # detect cycles here so we never silently return nonsense.
+        from collections import defaultdict, deque
+
+        adj: dict[str, list[str]] = defaultdict(list)
+        in_degree: dict[str, int] = {d["id"]: 0 for d in act_data}
+        for succ_id, preds in deps.items():
+            for pred_id, _dep_type, _lag in preds:
+                adj[pred_id].append(succ_id)
+                in_degree[succ_id] += 1
+
+        queue: deque[str] = deque(
+            [d["id"] for d in act_data if in_degree[d["id"]] == 0]
+        )
+        sorted_ids: list[str] = []
+        while queue:
+            nid = queue.popleft()
+            sorted_ids.append(nid)
+            for succ in adj[nid]:
+                in_degree[succ] -= 1
+                if in_degree[succ] == 0:
+                    queue.append(succ)
+
+        if len(sorted_ids) < len(act_data):
+            unsorted_ids = [d["id"] for d in act_data if d["id"] not in set(sorted_ids)]
+            unsorted_names = [idx[aid]["name"] or aid for aid in unsorted_ids[:5]]
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    "Schedule has a dependency cycle. Affected activities: "
+                    + ", ".join(unsorted_names)
+                ),
+            )
+
+        sorted_act_data: list[dict] = [idx[aid] for aid in sorted_ids]
+
         # --- Forward pass: compute ES, EF ---
+        # Supports all 4 dependency types per PMBOK:
+        #   FS (Finish-to-Start): successor starts after predecessor finishes (+lag)
+        #   SS (Start-to-Start):  successor starts after predecessor starts (+lag)
+        #   FF (Finish-to-Finish): successor finishes after predecessor finishes (+lag)
+        #   SF (Start-to-Finish): successor finishes after predecessor starts (+lag)
         es: dict[str, int] = {}
         ef: dict[str, int] = {}
-        for ad in act_data:
+        for ad in sorted_act_data:
             act_id = ad["id"]
             dur = ad["duration_days"]
             act_es = 0
             for pred_id, dep_type, lag in deps[act_id]:
+                dep_type = (dep_type or "FS").upper()
                 pred_dur = idx[pred_id]["duration_days"]
+                pred_ef = ef.get(pred_id, pred_dur)
+                pred_es = es.get(pred_id, 0)
                 if dep_type == "FS":
-                    candidate = ef.get(pred_id, pred_dur) + lag
+                    candidate = pred_ef + lag
                 elif dep_type == "SS":
-                    candidate = es.get(pred_id, 0) + lag
+                    candidate = pred_es + lag
+                elif dep_type == "FF":
+                    # Successor finish ≥ predecessor finish + lag → ES = EF_succ - dur
+                    candidate = pred_ef + lag - dur
+                elif dep_type == "SF":
+                    # Successor finish ≥ predecessor start + lag → ES = SF - dur
+                    candidate = pred_es + lag - dur
                 else:
-                    candidate = ef.get(pred_id, pred_dur)
+                    logger.warning(
+                        "Unknown dependency type '%s' on activity %s; treating as FS",
+                        dep_type, act_id,
+                    )
+                    candidate = pred_ef + lag
                 act_es = max(act_es, candidate)
             es[act_id] = act_es
             ef[act_id] = act_es + dur
@@ -1561,17 +1709,31 @@ class ScheduleService:
         lf: dict[str, int] = {d["id"]: project_duration for d in act_data}
         ls: dict[str, int] = {}
 
-        for ad in reversed(act_data):
+        for ad in reversed(sorted_act_data):
             act_id = ad["id"]
             dur = ad["duration_days"]
             for succ_id, dep_type, lag in successors.get(act_id, []):
+                dep_type = (dep_type or "FS").upper()
+                succ_ls = ls.get(succ_id, project_duration)
+                succ_lf = lf.get(succ_id, project_duration)
                 if dep_type == "FS":
-                    lf[act_id] = min(lf[act_id], ls.get(succ_id, project_duration) - lag)
+                    # pred LF ≤ succ LS - lag
+                    lf[act_id] = min(lf[act_id], succ_ls - lag)
                 elif dep_type == "SS":
-                    lf[act_id] = min(
-                        lf[act_id],
-                        ls.get(succ_id, project_duration) - lag + dur,
+                    # pred LS ≤ succ LS - lag → LF = LS_succ - lag + dur
+                    lf[act_id] = min(lf[act_id], succ_ls - lag + dur)
+                elif dep_type == "FF":
+                    # pred LF ≤ succ LF - lag
+                    lf[act_id] = min(lf[act_id], succ_lf - lag)
+                elif dep_type == "SF":
+                    # pred LS ≤ succ LF - lag → LF = LF_succ - lag + dur
+                    lf[act_id] = min(lf[act_id], succ_lf - lag + dur)
+                else:
+                    logger.warning(
+                        "Unknown dependency type '%s' on backward pass %s → %s; treating as FS",
+                        dep_type, act_id, succ_id,
                     )
+                    lf[act_id] = min(lf[act_id], succ_ls - lag)
             ls[act_id] = lf[act_id] - dur
 
         # --- Compute float and identify critical path ---
@@ -1598,7 +1760,8 @@ class ScheduleService:
             if is_critical:
                 critical_results.append(result)
 
-            # Update activity color + CPM metadata
+            # Update activity color + CPM metadata — persist so the frontend
+            # can display ES/EF/LS/LF/float on next load without re-running CPM.
             cpm_meta = {
                 "es": es[act_id],
                 "ef": ef[act_id],
@@ -1606,11 +1769,21 @@ class ScheduleService:
                 "lf": lf[act_id],
                 "total_float": total_float,
                 "is_critical": is_critical,
+                "calculated_at": datetime.now(UTC).isoformat(),
             }
             new_color = "#ef4444" if is_critical else "#0071e3"
+            # Merge cpm into existing metadata_ so we don't clobber user-set keys
+            activity = idx.get(act_id)
+            existing_meta = {}
+            if activity:
+                raw_meta = activity.get("metadata_") or activity.get("metadata") or {}
+                if isinstance(raw_meta, dict):
+                    existing_meta = dict(raw_meta)
+            existing_meta["cpm"] = cpm_meta
             await self.activity_repo.update_fields(
                 uuid.UUID(act_id),
                 color=new_color,
+                metadata_=existing_meta,
             )
 
         await _safe_publish(

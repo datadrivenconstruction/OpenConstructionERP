@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { normalizeListResponse } from '@/shared/lib/apiHelpers';
 import {
   Wallet,
   FileText,
@@ -312,6 +313,8 @@ export function FinancePage() {
 
 /* ── Budgets Tab ──────────────────────────────────────────────────────── */
 
+const INITIAL_BUDGET_FORM = { wbs_code: '', category: '', original_budget: '', notes: '' };
+
 function BudgetsTab({ projectId }: { projectId: string }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -324,7 +327,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
   const [importResult, setImportResult] = useState<BudgetImportResult | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
-  const [budgetForm, setBudgetForm] = useState({ wbs_code: '', category: '', original_budget: '', notes: '' });
+  const [budgetForm, setBudgetForm] = useState(INITIAL_BUDGET_FORM);
   const [budgetErrors, setBudgetErrors] = useState<Record<string, string>>({});
   const budgetFirstRef = useRef<HTMLInputElement>(null);
 
@@ -334,6 +337,8 @@ function BudgetsTab({ projectId }: { projectId: string }) {
       setTimeout(() => budgetFirstRef.current?.focus(), 100);
     }
   }, [showCreate]);
+
+  const canSubmitBudget = budgetForm.category.trim().length > 0 && budgetForm.original_budget.trim().length > 0 && parseFloat(budgetForm.original_budget) > 0;
 
   const validateBudget = (): boolean => {
     const e: Record<string, string> = {};
@@ -369,11 +374,11 @@ function BudgetsTab({ projectId }: { projectId: string }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['finance-budgets', projectId] });
       setShowCreate(false);
-      setBudgetForm({ wbs_code: '', category: '', original_budget: '', notes: '' });
-      addToast({ type: 'success', title: t('finance.budget_created', { defaultValue: 'Budget line created' }) });
+      setBudgetForm(INITIAL_BUDGET_FORM);
+      addToast({ type: 'success', title: t('finance.budget_created', { defaultValue: 'Budget line created successfully' }) });
     },
     onError: (e: Error) =>
-      addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: e.message }),
+      addToast({ type: 'error', title: t('finance.budget_create_failed', { defaultValue: 'Failed to create budget line' }), message: e.message }),
   });
 
   const exportBudgetsMut = useMutation({
@@ -385,12 +390,12 @@ function BudgetsTab({ projectId }: { projectId: string }) {
     onSuccess: () =>
       addToast({
         type: 'success',
-        title: t('finance.export_success', { defaultValue: 'Export complete' }),
+        title: t('finance.export_success', { defaultValue: 'Budget data exported successfully' }),
       }),
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('finance.export_failed', { defaultValue: 'Export failed' }),
+        title: t('finance.export_failed', { defaultValue: 'Failed to export budget data' }),
         message: e.message,
       }),
   });
@@ -511,7 +516,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
               onChange={(e) => setBudgetForm((p) => ({ ...p, notes: e.target.value }))}
               rows={2}
               className={clsx(inputCls, 'h-auto py-2.5 resize-none')}
-              placeholder={t('finance.budget_notes_placeholder', { defaultValue: 'Optional notes...' })}
+              placeholder={t('finance.budget_notes_placeholder', { defaultValue: 'e.g., Includes contingency for weather delays' })}
             />
           </div>
         </div>
@@ -530,7 +535,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
                 notes: budgetForm.notes || null,
               });
             }}
-            disabled={createBudgetMut.isPending}
+            disabled={createBudgetMut.isPending || !canSubmitBudget}
           >
             {createBudgetMut.isPending ? (
               <Loader2 size={16} className="animate-spin mr-1.5" />
@@ -550,7 +555,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
       apiGet<BudgetLine[]>(
         `/v1/finance/budgets?project_id=${projectId}`,
       ),
-    select: (d): BudgetLine[] => (Array.isArray(d) ? d : (d as any)?.items ?? []),
+    select: (d): BudgetLine[] => normalizeListResponse(d),
   });
 
   const filtered = useMemo(() => {
@@ -874,8 +879,8 @@ function BudgetsTab({ projectId }: { projectId: string }) {
                       {t('finance.show_errors', { defaultValue: 'Show error details' })}
                     </summary>
                     <ul className="mt-1 space-y-0.5 max-h-32 overflow-y-auto">
-                      {importResult.errors.slice(0, 20).map((err, i) => (
-                        <li key={i}>Row {err.row}: {err.error}</li>
+                      {importResult.errors.slice(0, 20).map((err) => (
+                        <li key={`row-${err.row}`}>Row {err.row}: {err.error}</li>
                       ))}
                     </ul>
                   </details>
@@ -950,6 +955,8 @@ function InvoicesTab({ projectId }: { projectId: string }) {
     }
   }, [showCreate]);
 
+  const canSubmitInvoice = !!invoiceForm.invoice_date && (parseFloat(invoiceForm.subtotal || '0') > 0 || parseFloat(invoiceForm.amount || '0') > 0);
+
   const validateInvoice = (): boolean => {
     const e: Record<string, string> = {};
     if (!invoiceForm.invoice_date) e.invoice_date = t('validation.required', { defaultValue: 'This field is required' });
@@ -995,10 +1002,10 @@ function InvoicesTab({ projectId }: { projectId: string }) {
       queryClient.invalidateQueries({ queryKey: ['finance-invoices', projectId] });
       setShowCreate(false);
       setInvoiceForm({ direction: 'payable', counterparty: '', contact_id: '', invoice_date: todayStr, due_date: '', subtotal: '', tax: '', amount: '', currency: 'EUR', description: '' });
-      addToast({ type: 'success', title: t('finance.invoice_created', { defaultValue: 'Invoice created' }) });
+      addToast({ type: 'success', title: t('finance.invoice_created', { defaultValue: 'Invoice created successfully' }) });
     },
     onError: (e: Error) =>
-      addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: e.message }),
+      addToast({ type: 'error', title: t('finance.invoice_create_failed', { defaultValue: 'Failed to create invoice' }), message: e.message }),
   });
 
   const exportInvoicesMut = useMutation({
@@ -1010,12 +1017,12 @@ function InvoicesTab({ projectId }: { projectId: string }) {
     onSuccess: () =>
       addToast({
         type: 'success',
-        title: t('finance.export_success', { defaultValue: 'Export complete' }),
+        title: t('finance.invoices_export_success', { defaultValue: 'Invoices exported successfully' }),
       }),
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('finance.export_failed', { defaultValue: 'Export failed' }),
+        title: t('finance.invoices_export_failed', { defaultValue: 'Failed to export invoices' }),
         message: e.message,
       }),
   });
@@ -1026,7 +1033,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
       apiGet<Invoice[]>(
         `/v1/finance/?project_id=${projectId}&direction=${subTab}`,
       ),
-    select: (d): Invoice[] => (Array.isArray(d) ? d : (d as any)?.items ?? []),
+    select: (d): Invoice[] => normalizeListResponse(d),
   });
 
   const filtered = useMemo(() => {
@@ -1064,12 +1071,12 @@ function InvoicesTab({ projectId }: { projectId: string }) {
       addToast({
         type: 'success',
         title: t('finance.invoice_approved', {
-          defaultValue: 'Invoice approved',
+          defaultValue: 'Invoice approved successfully',
         }),
       });
     },
     onError: (e: Error) =>
-      addToast({ type: 'error', title: t('common.error', 'Error'), message: e.message }),
+      addToast({ type: 'error', title: t('finance.approve_failed', { defaultValue: 'Failed to approve invoice' }), message: e.message }),
   });
 
   const markPaidMutation = useMutation({
@@ -1081,18 +1088,18 @@ function InvoicesTab({ projectId }: { projectId: string }) {
       });
       addToast({
         type: 'success',
-        title: t('finance.invoice_paid', { defaultValue: 'Invoice marked as paid' }),
+        title: t('finance.invoice_paid', { defaultValue: 'Invoice marked as paid successfully' }),
       });
     },
     onError: (e: Error) =>
-      addToast({ type: 'error', title: t('common.error', 'Error'), message: e.message }),
+      addToast({ type: 'error', title: t('finance.pay_failed', { defaultValue: 'Failed to mark invoice as paid' }), message: e.message }),
   });
 
   return (
     <div className="space-y-4">
       {/* Sub-tabs: Payable / Receivable + Export */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" title={t('finance.payable_receivable_tooltip', { defaultValue: 'Payable = invoices you owe to vendors. Receivable = invoices clients owe to you.' })}>
           <button
             onClick={() => setSubTab('payable')}
             className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
@@ -1604,7 +1611,12 @@ function InvoicesTab({ projectId }: { projectId: string }) {
                       {t('finance.total', { defaultValue: 'Total' })}
                     </span>
                     <span className="text-base font-bold tabular-nums text-content-primary">
-                      {invoiceForm.currency} {(parseFloat(invoiceForm.subtotal || '0') + parseFloat(invoiceForm.tax || '0')).toFixed(2)}
+                      {invoiceForm.currency} {(() => {
+                        const sub = parseFloat(invoiceForm.subtotal || '0');
+                        const tax = parseFloat(invoiceForm.tax || '0');
+                        const total = (Number.isFinite(sub) ? sub : 0) + (Number.isFinite(tax) ? tax : 0);
+                        return total.toFixed(2);
+                      })()}
                     </span>
                   </div>
                 </div>
@@ -1638,7 +1650,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
                   onChange={(e) => setInvoiceForm((f) => ({ ...f, description: e.target.value }))}
                   rows={3}
                   className={clsx(inputCls, 'h-auto py-2.5 resize-none')}
-                  placeholder={t('finance.invoice_desc_placeholder', { defaultValue: 'Optional description or notes...' })}
+                  placeholder={t('finance.invoice_desc_placeholder', { defaultValue: 'e.g., Progress payment for concrete works - Phase 2' })}
                 />
               </div>
             </div>
@@ -1652,7 +1664,7 @@ function InvoicesTab({ projectId }: { projectId: string }) {
                   if (!validateInvoice()) return;
                   createInvoiceMut.mutate(invoiceForm);
                 }}
-                disabled={createInvoiceMut.isPending}
+                disabled={createInvoiceMut.isPending || !canSubmitInvoice}
               >
                 {createInvoiceMut.isPending ? (
                   <Loader2 size={16} className="animate-spin mr-1.5" />
@@ -1681,7 +1693,7 @@ function PaymentsTab({ projectId }: { projectId: string }) {
     queryKey: ['finance-payments', projectId],
     queryFn: () =>
       apiGet<Payment[]>(`/v1/finance/payments/?project_id=${projectId}`),
-    select: (d): Payment[] => (Array.isArray(d) ? d : (d as any)?.items ?? []),
+    select: (d): Payment[] => normalizeListResponse(d),
   });
 
   const paymentTotals = useMemo(() => {
@@ -1816,13 +1828,13 @@ function EVMTab({ projectId }: { projectId: string }) {
       queryClient.invalidateQueries({ queryKey: ['finance-evm', projectId] });
       addToast({
         type: 'success',
-        title: t('finance.snapshot_created', { defaultValue: 'EVM snapshot created' }),
+        title: t('finance.snapshot_created', { defaultValue: 'EVM snapshot created successfully' }),
       });
     },
     onError: (e: Error) =>
       addToast({
         type: 'error',
-        title: t('finance.snapshot_failed', { defaultValue: 'Snapshot failed' }),
+        title: t('finance.snapshot_failed', { defaultValue: 'Failed to create EVM snapshot' }),
         message: e.message,
       }),
   });
