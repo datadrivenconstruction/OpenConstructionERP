@@ -552,6 +552,15 @@ export function generateBOQPdf(options: PdfReportOptions): void {
     format: 'a4',
   });
 
+  // PDF metadata — embedded identity markers
+  doc.setProperties({
+    title: options.projectName || 'BOQ Report',
+    subject: 'Bill of Quantities',
+    author: 'OpenConstructionERP — DataDrivenConstruction',
+    creator: 'DDC-CWICR-OE/1.5',
+    keywords: 'BOQ, OpenConstructionERP, DDC, CWICR',
+  });
+
   // ── 1. Cover page ──────────────────────────────────────────────────────
   renderCoverPage(doc, options, locale);
 

@@ -30,4 +30,6 @@ class DDCFingerprintMiddleware(BaseHTTPMiddleware):
         response.headers["X-Powered-By"] = "OpenConstructionERP"
         response.headers["X-DDC-Engine"] = "CWICR/1.0"
         response.headers["X-DDC-Build"] = _INSTANCE_HASH
+        # Embedded signature in Server-Timing (invisible to UI, visible in DevTools)
+        response.headers["Server-Timing"] = f"ddc;desc=\"DDC-CWICR-OE\";dur={hash('ddc-2026') % 1000}"
         return response
