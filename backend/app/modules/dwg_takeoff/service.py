@@ -68,8 +68,8 @@ def _process_dxf_sync(file_path: str, entities_key: str, thumbnail_key: str) -> 
     thumb_dir = os.path.join(
         os.environ.get("DATA_DIR", os.path.join(os.getcwd(), "data")), "dwg_thumbnails"
     )
-    os.makedirs(thumb_dir, exist_ok=True)
     thumb_path = os.path.join(thumb_dir, thumbnail_key)
+    os.makedirs(os.path.dirname(thumb_path), exist_ok=True)
     with open(thumb_path, "w", encoding="utf-8") as f:
         f.write(svg_content)
 
