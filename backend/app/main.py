@@ -1071,6 +1071,7 @@ def create_app() -> FastAPI:
             from app.modules.costmodel import models as _cm_models  # noqa: F401
             from app.modules.costs import models as _costs_models  # noqa: F401
             from app.modules.documents import models as _documents_models  # noqa: F401
+            from app.modules.dwg_takeoff import models as _dwg_takeoff_models  # noqa: F401
 
             # Enterprise / feature-pack modules
             from app.modules.enterprise_workflows import models as _enterprise_workflows_models  # noqa: F401
