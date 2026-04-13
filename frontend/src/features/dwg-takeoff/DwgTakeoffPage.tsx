@@ -26,6 +26,7 @@ import {
   X,
 } from 'lucide-react';
 import { Button, Badge, EmptyState, Breadcrumb, ConfirmDialog } from '@/shared/ui';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import {
@@ -86,6 +87,7 @@ export function DwgTakeoffPage() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const { confirm: confirmAnnotDelete, ...annotDeleteConfirmProps } = useConfirm();
 
   // Queries
   const { data: drawings = [], isLoading: loadingDrawings } = useQuery({
@@ -343,7 +345,11 @@ export function DwgTakeoffPage() {
                 <div className="flex-1 truncate">
                   <div className="truncate font-medium">{d.name}</div>
                   <div className="text-muted-foreground">
-                    {d.discipline} &middot; {d.entity_count} {t('dwg_takeoff.entities', 'entities')}
+                    {d.discipline} &middot;{' '}
+                    {selectedDrawingId === d.id && entities.length > 0
+                      ? entities.length
+                      : d.entity_count || '—'}{' '}
+                    {t('dwg_takeoff.entities', 'entities')}
                   </div>
                 </div>
                 <button
@@ -478,9 +484,15 @@ export function DwgTakeoffPage() {
                           )}
                         </div>
                         <button
-                          onClick={(e) => {
+                          onClick={async (e) => {
                             e.stopPropagation();
-                            deleteAnnotationMutation.mutate(ann.id);
+                            const ok = await confirmAnnotDelete({
+                              title: t('dwg_takeoff.confirm_delete_annotation', 'Delete annotation?'),
+                              message: t('dwg_takeoff.confirm_delete_annotation_desc', 'This annotation will be permanently removed.'),
+                              confirmLabel: t('common.delete', 'Delete'),
+                              variant: 'danger',
+                            });
+                            if (ok) deleteAnnotationMutation.mutate(ann.id);
                           }}
                           className="text-muted-foreground hover:text-red-500"
                         >
@@ -499,23 +511,23 @@ export function DwgTakeoffPage() {
                   </h3>
                   {selectedEntity ? (
                     <div className="space-y-2 text-xs">
-                      <PropertyRow label="Type" value={selectedEntity.type} />
-                      <PropertyRow label="Layer" value={selectedEntity.layer} />
-                      <PropertyRow label="Color" value={String(selectedEntity.color)} />
+                      <PropertyRow label={t('dwg_takeoff.prop_type', 'Type')} value={selectedEntity.type} />
+                      <PropertyRow label={t('dwg_takeoff.prop_layer', 'Layer')} value={selectedEntity.layer} />
+                      <PropertyRow label={t('dwg_takeoff.prop_color', 'Color')} value={String(selectedEntity.color)} />
                       {selectedEntity.start && (
                         <PropertyRow
-                          label="Position"
+                          label={t('dwg_takeoff.prop_position', 'Position')}
                           value={`(${selectedEntity.start.x.toFixed(2)}, ${selectedEntity.start.y.toFixed(2)})`}
                         />
                       )}
                       {selectedEntity.radius != null && (
-                        <PropertyRow label="Radius" value={selectedEntity.radius.toFixed(3)} />
+                        <PropertyRow label={t('dwg_takeoff.prop_radius', 'Radius')} value={selectedEntity.radius.toFixed(3)} />
                       )}
                       {selectedEntity.text && (
-                        <PropertyRow label="Text" value={selectedEntity.text} />
+                        <PropertyRow label={t('dwg_takeoff.prop_text', 'Text')} value={selectedEntity.text} />
                       )}
                       {selectedEntity.block_name && (
-                        <PropertyRow label="Block" value={selectedEntity.block_name} />
+                        <PropertyRow label={t('dwg_takeoff.prop_block', 'Block')} value={selectedEntity.block_name} />
                       )}
                     </div>
                   ) : (
@@ -530,7 +542,7 @@ export function DwgTakeoffPage() {
         )}
       </div>
 
-      {/* Delete confirmation */}
+      {/* Delete drawing confirmation */}
       {confirmDeleteId && (
         <ConfirmDialog
           open
@@ -546,6 +558,9 @@ export function DwgTakeoffPage() {
           onCancel={() => setConfirmDeleteId(null)}
         />
       )}
+
+      {/* Delete annotation confirmation */}
+      <ConfirmDialog {...annotDeleteConfirmProps} />
     </div>
   );
 }

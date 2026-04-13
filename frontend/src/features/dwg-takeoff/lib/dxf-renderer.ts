@@ -107,6 +107,9 @@ export function renderPolyline(
     const p = worldToScreen(v.x, v.y, vp);
     ctx.lineTo(p.x, p.y);
   }
+  if (entity.closed) {
+    ctx.closePath();
+  }
   ctx.stroke();
 }
 
@@ -121,8 +124,8 @@ export function renderArc(
   const startAngle = ((entity.start_angle ?? 0) * Math.PI) / 180;
   const endAngle = ((entity.end_angle ?? 360) * Math.PI) / 180;
   ctx.beginPath();
-  // DXF arcs are counter-clockwise; canvas arcs default to clockwise, so invert
-  ctx.arc(center.x, center.y, r, -startAngle, -endAngle, true);
+  // DXF arcs are CCW; with Y-axis flipped in worldToScreen, negate angles and sweep CW
+  ctx.arc(center.x, center.y, r, -startAngle, -endAngle, false);
   ctx.stroke();
 }
 
@@ -146,7 +149,7 @@ export function renderText(
 ): void {
   if (!entity.start || !entity.text) return;
   const pos = worldToScreen(entity.start.x, entity.start.y, vp);
-  const fontSize = Math.max(8, (entity.height ?? 2.5) * vp.scale);
+  const fontSize = Math.max(8, Math.min(72, (entity.height ?? 2.5) * vp.scale));
   ctx.font = `${fontSize}px monospace`;
   ctx.textBaseline = 'bottom';
   ctx.fillText(entity.text, pos.x, pos.y);

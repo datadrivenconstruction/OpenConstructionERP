@@ -113,14 +113,11 @@ class DwgTakeoffService:
         content = await file.read()
         size_bytes = len(content)
 
-        # Save file to disk
+        # Create drawing record FIRST (before writing file to disk)
         upload_dir = _get_upload_dir()
         file_id = str(uuid.uuid4())
         file_path = os.path.join(upload_dir, f"{file_id}{ext}")
-        with open(file_path, "wb") as f:
-            f.write(content)
 
-        # Create drawing record
         drawing = DwgDrawing(
             project_id=project_id,
             name=name or os.path.splitext(filename)[0],
@@ -137,6 +134,14 @@ class DwgTakeoffService:
         drawing = await self.drawing_repo.create(drawing)
         drawing_id = drawing.id
 
+        # Save file to disk AFTER DB record exists; clean up on failure
+        try:
+            with open(file_path, "wb") as f:
+                f.write(content)
+        except Exception:
+            await self.drawing_repo.delete(drawing_id)
+            raise
+
         logger.info(
             "Drawing uploaded: %s (%s, %d bytes) project=%s",
             filename,
@@ -145,15 +150,11 @@ class DwgTakeoffService:
             project_id,
         )
 
-        # Trigger processing (only DXF can be parsed directly)
+        # Trigger processing
         if file_format == "dxf":
             await self._process_drawing(drawing_id, file_path)
-        else:
-            await self.drawing_repo.update_fields(
-                drawing_id,
-                status="ready",
-                error_message="DWG files require conversion to DXF before processing",
-            )
+        elif file_format == "dwg":
+            await self._handle_dwg(drawing_id, file_path)
 
         await self.session.refresh(drawing)
         return drawing
@@ -216,6 +217,63 @@ class DwgTakeoffService:
             )
             logger.exception("Failed to process drawing %s: %s", drawing_id, exc)
 
+    async def _handle_dwg(self, drawing_id: uuid.UUID, file_path: str) -> None:
+        """Attempt DWG→DXF conversion via DDC, or fail with a clear message."""
+        try:
+            from app.modules.boq.cad_import import find_converter
+
+            converter = find_converter("dwg")
+        except ImportError:
+            converter = None
+
+        if converter is None:
+            await self.drawing_repo.update_fields(
+                drawing_id,
+                status="error",
+                error_message=(
+                    "DWG conversion requires DDC DwgExporter. "
+                    "Please upload DXF format or install the converter."
+                ),
+            )
+            return
+
+        import subprocess
+
+        dxf_path = file_path.rsplit(".", 1)[0] + ".dxf"
+        try:
+            result = subprocess.run(
+                [str(converter), file_path, dxf_path],
+                capture_output=True,
+                timeout=120,
+                check=False,
+            )
+            if result.returncode != 0 or not os.path.exists(dxf_path):
+                stderr_msg = result.stderr.decode(errors="replace")[:300] if result.stderr else ""
+                await self.drawing_repo.update_fields(
+                    drawing_id,
+                    status="error",
+                    error_message=f"DWG→DXF conversion failed: {stderr_msg}".strip()[:500],
+                )
+                return
+        except subprocess.TimeoutExpired:
+            await self.drawing_repo.update_fields(
+                drawing_id,
+                status="error",
+                error_message="DWG→DXF conversion timed out (120s limit)",
+            )
+            return
+        except Exception as exc:
+            await self.drawing_repo.update_fields(
+                drawing_id,
+                status="error",
+                error_message=f"DWG→DXF conversion error: {exc}"[:500],
+            )
+            return
+
+        # Update file_path to point to the converted DXF
+        await self.drawing_repo.update_fields(drawing_id, file_path=dxf_path)
+        await self._process_drawing(drawing_id, dxf_path)
+
     # ── Drawing CRUD ────────────────────────────────────────────────────
 
     async def get_drawing(self, drawing_id: uuid.UUID) -> DwgDrawing:
@@ -245,15 +303,39 @@ class DwgTakeoffService:
         )
 
     async def delete_drawing(self, drawing_id: uuid.UUID) -> None:
-        """Delete a drawing and its file."""
+        """Delete a drawing and all associated files (upload, entities, thumbnails)."""
         drawing = await self.get_drawing(drawing_id)
 
-        # Remove file from disk
+        # Remove the uploaded drawing file
         if drawing.file_path and os.path.exists(drawing.file_path):
             try:
                 os.remove(drawing.file_path)
             except OSError:
                 logger.warning("Could not delete file: %s", drawing.file_path)
+
+        # Remove entities and thumbnail files for all versions
+        versions = await self.version_repo.list_for_drawing(drawing_id)
+        entities_dir = _get_entities_dir()
+        thumb_dir = os.path.join(
+            os.environ.get("DATA_DIR", os.path.join(os.getcwd(), "data")), "dwg_thumbnails"
+        )
+        for version in versions:
+            if version.entities_key:
+                ent_path = os.path.join(entities_dir, version.entities_key)
+                if os.path.exists(ent_path):
+                    try:
+                        os.remove(ent_path)
+                    except OSError:
+                        logger.warning("Could not delete entities file: %s", ent_path)
+
+        # Remove thumbnail file referenced by the drawing
+        if drawing.thumbnail_key:
+            thumb_path = os.path.join(thumb_dir, drawing.thumbnail_key)
+            if os.path.exists(thumb_path):
+                try:
+                    os.remove(thumb_path)
+                except OSError:
+                    logger.warning("Could not delete thumbnail file: %s", thumb_path)
 
         await self.drawing_repo.delete(drawing_id)
         logger.info("Drawing deleted: %s", drawing_id)
@@ -282,6 +364,14 @@ class DwgTakeoffService:
         try:
             with open(entities_path, encoding="utf-8") as f:
                 entities = json.load(f)
+        except FileNotFoundError:
+            logger.warning("Entities file missing for drawing %s: %s", drawing_id, entities_path)
+            return []
+        except json.JSONDecodeError as exc:
+            logger.error(
+                "Corrupt entities JSON for drawing %s: %s", drawing_id, exc,
+            )
+            return []
         except Exception:
             logger.exception("Failed to load entities for drawing %s", drawing_id)
             return []

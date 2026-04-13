@@ -36,7 +36,6 @@ class DwgDrawingResponse(BaseModel):
     name: str
     filename: str
     file_format: str = "dxf"
-    file_path: str
     size_bytes: int = 0
     status: str = "uploaded"
     discipline: str | None = None
