@@ -42,7 +42,8 @@ RUN mkdir -p /app/frontend/dist
 COPY --from=frontend-build /build/dist backend/app/_frontend_dist/
 
 # Install Python dependencies with server extras (asyncpg for PostgreSQL)
-RUN pip install --no-cache-dir "./backend[server]"
+RUN pip install --no-cache-dir "./backend[server]" && \
+    pip install --no-cache-dir "ezdxf>=0.18.0" || true
 
 # Copy data catalogs (for seed/enrichment)
 COPY data/ data/
