@@ -13,7 +13,7 @@ Endpoints:
 import logging
 import uuid
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.ncr.schemas import (
@@ -142,10 +142,8 @@ async def create_variation_from_ncr(
     ncr = await service.get_ncr(ncr_id)
 
     if not ncr.cost_impact:
-        from fastapi import HTTPException
-
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="NCR has no cost impact — cannot create a variation.",
         )
 
@@ -202,18 +200,14 @@ async def create_variation_from_ncr(
             "title": order.title,
         }
     except ImportError:
-        from fastapi import HTTPException
-
         raise HTTPException(
-            status_code=501,
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
             detail="Change orders module is not available.",
         )
     except Exception as exc:
         logger.exception("Failed to create variation from NCR %s: %s", ncr_id, exc)
-        from fastapi import HTTPException
-
         raise HTTPException(
-            status_code=500,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create change order from NCR.",
         )
 
