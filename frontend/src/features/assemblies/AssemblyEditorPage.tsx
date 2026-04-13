@@ -656,6 +656,7 @@ function ApplyToBOQModal({
     queryKey: ['projects'],
     queryFn: () => apiGet<Array<{ id: string; name: string }>>('/v1/projects/'),
     retry: false,
+    staleTime: 5 * 60_000,
   });
 
   const { data: boqs } = useQuery({
