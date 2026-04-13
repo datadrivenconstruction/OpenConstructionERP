@@ -116,8 +116,10 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       field: 'unit',
       width: 80,
       editable: (params) => !params.data?._isSection && !params.data?._isFooter,
-      cellEditor: 'agTextCellEditor',
-      cellEditorParams: { useFormatter: false },
+      cellEditor: 'agSelectCellEditor',
+      cellEditorParams: {
+        values: ['m', 'm2', 'm3', 'kg', 'pcs', 'lsum', 'hr', 't', 'l', 'set', 'pair', 'ea', 'lot'],
+      },
       cellClass: 'text-center text-2xs font-mono uppercase',
     },
     {
