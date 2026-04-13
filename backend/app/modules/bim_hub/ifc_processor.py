@@ -984,6 +984,69 @@ def _extract_placements(
     logger.info("Placement extraction: %d/%d elements have coordinates", placed_count, len(elements))
 
 
+def _assign_logical_grid_positions(elements: list[dict[str, Any]]) -> None:
+    """Assign logical XYZ positions so placeholder boxes form a building-like layout.
+
+    Layout rules:
+    - **Z axis** = storey height.  Each storey is stacked vertically at
+      ``storey_index * STOREY_HEIGHT``.  Elements without a storey go to Z=0.
+    - **Y axis** = discipline lane.  Each discipline (structural, architecture,
+      MEP, civil, other) occupies its own Y-offset lane within the storey.
+    - **X axis** = sequential placement within the discipline lane.
+
+    The result is a recognisable building silhouette: floors stacked
+    vertically, trades separated horizontally, elements in reading order.
+    """
+    STOREY_HEIGHT = 3.5   # metres between storey base planes
+    DISCIPLINE_SPACING = 6.0  # Y gap between discipline lanes
+    ELEM_SPACING = 2.5        # X gap between elements in a lane
+    MAX_PER_ROW = 25          # wrap to next sub-row after this many
+
+    # Discover unique storeys in the order they appear, then sort
+    storey_order: list[str] = []
+    seen_storeys: set[str] = set()
+    for elem in elements:
+        s = elem.get("storey") or ""
+        if s and s not in seen_storeys:
+            storey_order.append(s)
+            seen_storeys.add(s)
+    storey_order.sort()  # alphabetical ≈ floor order for most naming schemes
+
+    # Add a pseudo-storey for elements without one
+    storey_index: dict[str, int] = {}
+    for idx, name in enumerate(storey_order):
+        storey_index[name] = idx + 1  # Z starts at STOREY_HEIGHT for first real storey
+    storey_index[""] = 0  # unassigned → ground level
+
+    discipline_order = ["structural", "architecture", "mep", "civil", "other"]
+    discipline_lane: dict[str, int] = {d: i for i, d in enumerate(discipline_order)}
+
+    # Counters: (storey, discipline) → next element index within that lane
+    lane_counter: dict[tuple[str, str], int] = {}
+
+    for elem in elements:
+        storey = elem.get("storey") or ""
+        disc = elem.get("discipline", "other")
+        if disc not in discipline_lane:
+            disc = "other"
+
+        key = (storey, disc)
+        idx = lane_counter.get(key, 0)
+        lane_counter[key] = idx + 1
+
+        q = elem.get("quantities", {})
+        ln = max(float(q.get("Length", q.get("Laenge", 1.0))), 0.5)
+
+        col = idx % MAX_PER_ROW
+        sub_row = idx // MAX_PER_ROW
+
+        x = col * max(ln + 0.5, ELEM_SPACING)
+        y = discipline_lane[disc] * DISCIPLINE_SPACING + sub_row * 3.0
+        z = storey_index.get(storey, 0) * STOREY_HEIGHT
+
+        elem["_grid_pos"] = (x, y, z)
+
+
 def _generate_collada_boxes(
     elements: list[dict],
     output_dir: Path,
@@ -1012,6 +1075,14 @@ def _generate_collada_boxes(
     # Check how many elements have real placements
     has_real_coords = sum(1 for e in elements if e.get("_placement")) > len(elements) * 0.3
 
+    # ── Build logical layout when no real coordinates ──────────────────
+    # Group elements by storey, then by discipline within each storey.
+    # Each storey is placed at a different Z level (floor height).
+    # Within a storey, disciplines are arranged along Y axis.
+    # Elements within a discipline group run along X axis.
+    if not has_real_coords:
+        _assign_logical_grid_positions(elements[:max_elements])
+
     # Track global bounding box
     g_min_x = g_min_y = g_min_z = float("inf")
     g_max_x = g_max_y = g_max_z = float("-inf")
@@ -1022,17 +1093,13 @@ def _generate_collada_boxes(
         h = max(float(q.get("Height", q.get("Hoehe", 3.0))), 0.05)
         ln = max(float(q.get("Length", q.get("Laenge", 1.0))), 0.05)
 
-        # Use real placement if available, otherwise grid
+        # Use real placement if available, otherwise pre-computed logical grid
         placement = elem.get("_placement")
         if has_real_coords and placement:
             x, y, z = placement
         else:
-            # Grid fallback — expanded to 30 columns with 3m spacing
-            row = i // 30
-            col = i % 30
-            x = col * max(ln + 1.0, 3.0)
-            y = row * max(w + 1.0, 3.0)
-            z = 0.0
+            grid = elem.get("_grid_pos", (0.0, 0.0, 0.0))
+            x, y, z = grid
 
         # Update global bbox
         g_min_x = min(g_min_x, x)

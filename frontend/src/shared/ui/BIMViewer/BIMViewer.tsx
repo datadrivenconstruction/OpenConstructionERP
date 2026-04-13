@@ -157,18 +157,24 @@ function PropertiesTable({ properties }: { properties: Record<string, unknown> }
   if (entries.length === 0) return null;
 
   return (
-    <table className="w-full text-xs">
-      <tbody>
-        {entries.map(([key, value]) => (
-          <tr key={key} className="border-b border-border-light last:border-0">
-            <td className="py-1 pe-2 text-content-tertiary font-medium whitespace-nowrap">
-              {key}
-            </td>
-            <td className="py-1 text-content-secondary break-all">{String(value)}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div className="space-y-0.5">
+      {entries.map(([key, value]) => (
+        <div
+          key={key}
+          className="flex justify-between items-start gap-3 py-1.5 px-2 rounded hover:bg-surface-secondary/50 group"
+        >
+          <span className="text-[11px] text-content-tertiary shrink-0 max-w-[40%] truncate" title={key}>
+            {key}
+          </span>
+          <span
+            className="text-[11px] text-content-primary font-medium text-end break-words min-w-0"
+            title={String(value)}
+          >
+            {String(value)}
+          </span>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -177,20 +183,23 @@ function QuantitiesTable({ quantities }: { quantities: Record<string, number> })
   if (entries.length === 0) return null;
 
   return (
-    <table className="w-full text-xs">
-      <tbody>
-        {entries.map(([key, value]) => (
-          <tr key={key} className="border-b border-border-light last:border-0">
-            <td className="py-1 pe-2 text-content-tertiary font-medium whitespace-nowrap">
-              {key}
-            </td>
-            <td className="py-1 text-content-secondary tabular-nums text-end">
-              {typeof value === 'number' ? value.toLocaleString(undefined, { maximumFractionDigits: 3 }) : String(value)}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div className="space-y-0.5">
+      {entries.map(([key, value]) => (
+        <div
+          key={key}
+          className="flex justify-between items-center gap-3 py-1.5 px-2 rounded hover:bg-surface-secondary/50"
+        >
+          <span className="text-[11px] text-content-tertiary truncate max-w-[50%]" title={key}>
+            {key}
+          </span>
+          <span className="text-[11px] text-content-primary font-semibold tabular-nums">
+            {typeof value === 'number'
+              ? value.toLocaleString(undefined, { maximumFractionDigits: 3 })
+              : String(value)}
+          </span>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -622,14 +631,9 @@ export function BIMViewer({
       const data = elementMgrRef.current.getElementData(selectedElementIds[0]!);
       setSelectedElement(data ?? null);
 
-      // Auto-zoom to the selected element(s) so the user gets immediate
-      // spatial feedback when clicking a row in the filter panel or table.
-      const meshes = selectedElementIds
-        .map((id) => elementMgrRef.current!.getMesh(id))
-        .filter((m): m is NonNullable<typeof m> => m != null);
-      if (meshes.length > 0 && sceneRef.current) {
-        sceneRef.current.zoomToSelection(meshes);
-      }
+      // NOTE: Auto-zoom on click removed — users found it disorienting.
+      // Use the "Focus" toolbar button (F key) or context menu → "Zoom to"
+      // for intentional zoom-to-selection.
     }
   }, [selectedElementIds]);
 
@@ -893,7 +897,8 @@ export function BIMViewer({
           sceneRef.current?.setCameraPreset('iso');
           break;
         case 'h':
-          // Hide selected elements
+        case 'delete':
+          // Hide selected elements from view (not permanently deleted)
           e.preventDefault();
           handleSelectionHide();
           break;
@@ -2164,9 +2169,11 @@ function ToolbarButton({
 function InfoRow({ label, value }: { label: string; value?: string }) {
   if (!value) return null;
   return (
-    <div className="flex items-baseline gap-2 text-xs">
-      <span className="text-content-tertiary font-medium shrink-0">{label}:</span>
-      <span className="text-content-secondary truncate">{value}</span>
+    <div className="flex justify-between items-center gap-3 py-1 px-2 rounded hover:bg-surface-secondary/50">
+      <span className="text-[11px] text-content-tertiary shrink-0">{label}</span>
+      <span className="text-[11px] text-content-primary font-medium text-end truncate min-w-0" title={value}>
+        {value}
+      </span>
     </div>
   );
 }
