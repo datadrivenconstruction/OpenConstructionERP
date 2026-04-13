@@ -47,10 +47,17 @@ export class SelectionManager {
   private hoverMaterial: THREE.MeshStandardMaterial;
 
   private canvas: HTMLCanvasElement;
-  private boundOnClick: (e: MouseEvent) => void;
+  private boundOnPointerDown: (e: PointerEvent) => void;
+  private boundOnPointerUp: (e: PointerEvent) => void;
   private boundOnMouseMove: (e: MouseEvent) => void;
   private boundOnContextMenu: (e: MouseEvent) => void;
   private boundOnDblClick: (e: MouseEvent) => void;
+
+  /** Track pointer down position to distinguish clicks from drags. */
+  private pointerDownPos: { x: number; y: number } | null = null;
+  private pointerDownTime = 0;
+  private readonly CLICK_THRESHOLD = 5; // max px movement to count as click
+  private readonly CLICK_TIME_LIMIT = 500; // max ms between down and up
 
   constructor(
     sceneManager: SceneManager,
@@ -83,12 +90,18 @@ export class SelectionManager {
       emissiveIntensity: 0.1,
     });
 
-    // Bind event listeners
-    this.boundOnClick = this.onClick.bind(this);
+    // Bind event listeners.
+    // We use pointerdown+pointerup instead of 'click' because OrbitControls
+    // intercepts Ctrl+click / Shift+click for camera manipulation. By
+    // tracking the pointer ourselves, we can detect short stationary clicks
+    // (even with modifier keys) that OrbitControls would otherwise swallow.
+    this.boundOnPointerDown = this.onPointerDown.bind(this);
+    this.boundOnPointerUp = this.onPointerUp.bind(this);
     this.boundOnMouseMove = this.onMouseMove.bind(this);
     this.boundOnContextMenu = this.onContextMenu.bind(this);
     this.boundOnDblClick = this.onDblClick.bind(this);
-    this.canvas.addEventListener('click', this.boundOnClick);
+    this.canvas.addEventListener('pointerdown', this.boundOnPointerDown);
+    this.canvas.addEventListener('pointerup', this.boundOnPointerUp);
     this.canvas.addEventListener('mousemove', this.boundOnMouseMove);
     this.canvas.addEventListener('contextmenu', this.boundOnContextMenu);
     this.canvas.addEventListener('dblclick', this.boundOnDblClick);
@@ -163,7 +176,27 @@ export class SelectionManager {
     return (hit.object.userData as { elementId?: string }).elementId ?? null;
   }
 
-  private onClick(e: MouseEvent): void {
+  private onPointerDown(e: PointerEvent): void {
+    if (e.button !== 0) return; // only left button
+    this.pointerDownPos = { x: e.clientX, y: e.clientY };
+    this.pointerDownTime = Date.now();
+  }
+
+  private onPointerUp(e: PointerEvent): void {
+    if (e.button !== 0 || !this.pointerDownPos) return;
+
+    // Check if this was a click (short, stationary) or a drag
+    const dx = e.clientX - this.pointerDownPos.x;
+    const dy = e.clientY - this.pointerDownPos.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const elapsed = Date.now() - this.pointerDownTime;
+    this.pointerDownPos = null;
+
+    if (dist > this.CLICK_THRESHOLD || elapsed > this.CLICK_TIME_LIMIT) {
+      return; // was a drag, not a click
+    }
+
+    // This is a genuine click — handle selection
     const coords = this.getMouseCoords(e);
     const hit = this.raycast(coords);
 
@@ -340,7 +373,8 @@ export class SelectionManager {
 
   /** Dispose event listeners and materials. */
   dispose(): void {
-    this.canvas.removeEventListener('click', this.boundOnClick);
+    this.canvas.removeEventListener('pointerdown', this.boundOnPointerDown);
+    this.canvas.removeEventListener('pointerup', this.boundOnPointerUp);
     this.canvas.removeEventListener('mousemove', this.boundOnMouseMove);
     this.canvas.removeEventListener('contextmenu', this.boundOnContextMenu);
     this.canvas.removeEventListener('dblclick', this.boundOnDblClick);
