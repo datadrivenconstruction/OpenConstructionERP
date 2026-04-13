@@ -44,6 +44,35 @@ ROLE_HIERARCHY: dict[Role, int] = {
 }
 
 
+# Alias map — legacy / industry-specific role names that should behave like
+# one of the canonical four roles. Keeps the core Role enum small while
+# allowing construction-industry titles ("estimator", "surveyor", ...) to
+# work without manual migration. Values are ALWAYS canonical Role members.
+ROLE_ALIASES: dict[str, Role] = {
+    "estimator": Role.EDITOR,
+    "quantity_surveyor": Role.EDITOR,
+    "qs": Role.EDITOR,
+    "user": Role.EDITOR,
+    "superuser": Role.ADMIN,
+    "owner": Role.ADMIN,
+    "readonly": Role.VIEWER,
+    "guest": Role.VIEWER,
+}
+
+
+def _resolve_role(role: "Role | str") -> "Role | None":
+    """Resolve any role string (including aliases) to a canonical Role, or None."""
+    if isinstance(role, Role):
+        return role
+    if not role:
+        return None
+    key = role.strip().lower()
+    try:
+        return Role(key)
+    except ValueError:
+        return ROLE_ALIASES.get(key)
+
+
 class PermissionRegistry:
     """Central registry of all permissions in the system.
 
@@ -89,15 +118,14 @@ class PermissionRegistry:
 
         Admin always has all permissions.
         Other roles are checked against the hierarchy.
+        Accepts canonical roles and legacy aliases (e.g. "estimator").
         """
-        if isinstance(role, str):
-            try:
-                role = Role(role)
-            except ValueError:
-                return False
+        resolved = _resolve_role(role)
+        if resolved is None:
+            return False
 
         # Admin bypasses all checks
-        if role == Role.ADMIN:
+        if resolved == Role.ADMIN:
             return True
 
         min_role = self._permissions.get(permission)
@@ -106,23 +134,21 @@ class PermissionRegistry:
             logger.warning("Unknown permission checked: %s", permission)
             return False
 
-        return ROLE_HIERARCHY.get(role, -1) >= ROLE_HIERARCHY.get(min_role, 999)
+        return ROLE_HIERARCHY.get(resolved, -1) >= ROLE_HIERARCHY.get(min_role, 999)
 
     def get_role_permissions(self, role: Role | str) -> list[str]:
         """Get all permissions available to a role."""
-        if isinstance(role, str):
-            try:
-                role = Role(role)
-            except ValueError:
-                return []
+        resolved = _resolve_role(role)
+        if resolved is None:
+            return []
 
-        if role == Role.ADMIN:
+        if resolved == Role.ADMIN:
             return list(self._permissions.keys())
 
         return [
             perm
             for perm, min_role in self._permissions.items()
-            if ROLE_HIERARCHY.get(role, -1) >= ROLE_HIERARCHY.get(min_role, 999)
+            if ROLE_HIERARCHY.get(resolved, -1) >= ROLE_HIERARCHY.get(min_role, 999)
         ]
 
     def list_all(self) -> dict[str, str]:

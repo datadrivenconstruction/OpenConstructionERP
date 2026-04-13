@@ -63,8 +63,19 @@ backend/locales/
 i18n-audit/
 translation_keys.txt
 
-# Claude Code / MCP
-.claude/
+# Per-tenant runtime data — uploads, processed BIM blobs, generated
+# exports, debug artifacts. Never committed; lives only on the host.
+data/bim/
+data/exports/
+data/cwicr/cache/
+frontend/debug-bim/
+
+# Claude Code / MCP — keep instruction files (.claude/*.md) but
+# ignore session cache, temp data, and MCP artifacts
+.claude/tmp/
+.claude/cache/
+.claude/projects/
+*.claude-session
 .mcp.json
 .playwright-mcp/
 

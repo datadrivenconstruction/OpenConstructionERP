@@ -31,6 +31,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { Card, Badge, Button, Input, InfoHint, Breadcrumb, ConfirmDialog } from '@/shared/ui';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useModuleStore } from '@/stores/useModuleStore';
@@ -253,7 +254,7 @@ function CompanyProfilesTab() {
 
   const { data: presets, isLoading: presetsLoading } = useQuery({
     queryKey: ['onboarding-presets'],
-    queryFn: () => apiGet<CompanyPresetAPI[]>('/v1/users/onboarding-presets'),
+    queryFn: () => apiGet<CompanyPresetAPI[]>('/v1/users/onboarding-presets/'),
   });
 
   const handleProfileClick = useCallback(
@@ -578,10 +579,11 @@ function ModuleTogglesSection({
 /* ══════════════════════════════════════════════════════════════════════════ */
 
 function DataPackagesTab() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
+  const { confirm, ...confirmProps } = useConfirm();
   const [activeCategory, setActiveCategory] = useState<CategoryKey>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [marketplaceLimit, setMarketplaceLimit] = useState(12);
@@ -679,7 +681,7 @@ function DataPackagesTab() {
         }
         setInstallingId(mod.id);
         try {
-          const status = await apiGet<{ backend: string; connected: boolean; can_restore_snapshots: boolean; can_generate_locally: boolean }>('/v1/costs/vector/status');
+          const status = await apiGet<{ backend: string; connected: boolean; can_restore_snapshots: boolean; can_generate_locally: boolean }>('/v1/costs/vector/status/');
           let result;
           if (status.can_restore_snapshots) {
             result = await apiPost<{ restored?: boolean; indexed?: number; database?: string; duration_seconds?: number }>(`/v1/costs/vector/restore-snapshot/${dbId}`);
@@ -726,11 +728,12 @@ function DataPackagesTab() {
   }
 
   async function handleUninstallDemo(demoId: string): Promise<void> {
-    const confirmed = window.confirm(
-      t('marketplace.uninstall_demo_confirm', {
+    const confirmed = await confirm({
+      title: t('marketplace.uninstall_demo_confirm_title', { defaultValue: 'Uninstall demo?' }),
+      message: t('marketplace.uninstall_demo_confirm', {
         defaultValue: 'Are you sure you want to uninstall this demo project? All associated data will be deleted.',
       }),
-    );
+    });
     if (!confirmed) return;
     setInstallingId(`demo-${demoId}`);
     try {
@@ -755,11 +758,12 @@ function DataPackagesTab() {
   }
 
   async function handleClearAllDemos(): Promise<void> {
-    const confirmed = window.confirm(
-      t('marketplace.clear_all_demos_confirm', {
+    const confirmed = await confirm({
+      title: t('marketplace.clear_all_demos_confirm_title', { defaultValue: 'Clear all demos?' }),
+      message: t('marketplace.clear_all_demos_confirm', {
         defaultValue: 'Are you sure you want to remove ALL demo projects and their data? This cannot be undone.',
       }),
-    );
+    });
     if (!confirmed) return;
     try {
       const result = await apiDelete<{ deleted_projects: number }>('/demo/clear-all');
@@ -982,6 +986,7 @@ function DataPackagesTab() {
           </div>
         </Card>
       </div>
+      <ConfirmDialog {...confirmProps} />
     </div>
   );
 }
@@ -997,7 +1002,7 @@ function SystemModulesTab() {
 
   const { data: systemModules, refetch } = useQuery({
     queryKey: ['system-modules'],
-    queryFn: () => apiGet<SystemModule[]>('/v1/modules'),
+    queryFn: () => apiGet<SystemModule[]>('/v1/modules/'),
   });
 
   const enabledCount = systemModules?.filter((m) => m.enabled).length ?? 0;

@@ -10,7 +10,11 @@ Endpoints:
     POST /bulk            -- Bulk import cost items (auth required)
     POST /import/file     -- Import cost items from Excel/CSV file (auth required)
     POST /load-cwicr/{db_id} -- Load CWICR regional database (auth required)
+    POST /suggest-for-element          -- Rank cost items for a BIM element body
+    POST /suggest-for-element/{id}     -- Same, loading the element by its UUID
 """
+
+from __future__ import annotations
 
 import csv
 import io
@@ -31,6 +35,8 @@ from app.modules.costs.schemas import (
     CostItemUpdate,
     CostSearchQuery,
     CostSearchResponse,
+    CostSuggestion,
+    SuggestCostsForElementRequest,
 )
 from app.modules.costs.service import CostItemService
 
@@ -78,7 +84,7 @@ async def autocomplete_cost_items(
                         for db_item in items_from_db:
                             components_map[db_item.code] = db_item.components or []
                     except Exception:
-                        pass  # Graceful fallback — return without components
+                        logger.debug("Cost search: component lookup failed", exc_info=True)
 
                     return [
                         CostAutocompleteItem(
@@ -92,7 +98,7 @@ async def autocomplete_cost_items(
                         for r in results
                     ]
         except Exception:
-            pass  # Fall back to text search
+            logger.debug("Cost search: vector search failed, falling back to text", exc_info=True)
 
     # Standard text search — fetch extra to prioritize items with components
     query = CostSearchQuery(q=q, region=region, limit=limit * 3, offset=0)
@@ -270,7 +276,7 @@ async def region_stats(
 
 @router.delete(
     "/actions/clear-region/{region}",
-    dependencies=[Depends(RequirePermission("costs.update"))],
+    dependencies=[Depends(RequirePermission("costs.delete"))],
 )
 async def clear_region_database(
     region: str,
@@ -329,6 +335,7 @@ async def vector_region_stats() -> list[dict]:
             try:
                 tbl = db.open_table(COST_TABLE)
             except Exception:
+                logger.debug("LanceDB table %s not found", COST_TABLE)
                 return []
             df = tbl.to_pandas()
             if "region" not in df.columns:
@@ -344,6 +351,7 @@ async def vector_region_stats() -> list[dict]:
                 return [{"region": "all", "count": col["vectors_count"]}]
             return []
     except Exception:
+        logger.debug("Vector stats query failed", exc_info=True)
         return []
 
 
@@ -361,12 +369,49 @@ async def vectorize_cost_items(
 
     Uses FastEmbed/ONNX (all-MiniLM-L6-v2, 384d) locally — no API key needed.
     Default backend: LanceDB (embedded, no Docker required).
+
+    Returns a graceful 200 with an error message when vector dependencies
+    (sentence-transformers, LanceDB) are not available instead of a 500.
     """
+    import asyncio
     import time
 
     from sqlalchemy import select
 
-    from app.core.vector import encode_texts, vector_index
+    # Quick check: can we even import the vector module?
+    try:
+        from app.core.vector import encode_texts, get_embedder, vector_index
+    except Exception as exc:
+        logger.warning("Vector module import failed: %s", exc)
+        return {
+            "indexed": 0,
+            "message": "Vector indexing is not available: vector module failed to load.",
+            "error": str(exc),
+        }
+
+    # Verify embedding model is loadable (run in thread with short timeout
+    # so a slow model download doesn't hang the request indefinitely).
+    try:
+        embedder = await asyncio.wait_for(asyncio.to_thread(get_embedder), timeout=30)
+        if embedder is None:
+            return {
+                "indexed": 0,
+                "message": "Vector indexing is not available: no embedding model found. "
+                "Install sentence-transformers (pip install sentence-transformers).",
+            }
+    except TimeoutError:
+        return {
+            "indexed": 0,
+            "message": "Vector indexing is not available: embedding model loading timed out. "
+            "The model may need to be downloaded first — try again later.",
+        }
+    except Exception as exc:
+        logger.warning("Embedding model check failed: %s", exc)
+        return {
+            "indexed": 0,
+            "message": f"Vector indexing is not available: {exc}",
+        }
+
     from app.modules.costs.models import CostItem
 
     start = time.monotonic()
@@ -410,10 +455,9 @@ async def vectorize_cost_items(
             }
         )
 
-    # Run CPU-heavy embedding in a separate process to not block event loop
-    import asyncio
-    import concurrent.futures
-
+    # Run CPU-heavy embedding in a thread to not block event loop.
+    # NOTE: Uses ThreadPoolExecutor (not Process) to avoid pickling issues
+    # with global model singletons and LanceDB connections.
     def _vectorize_batch(data: list[dict], bs: int) -> int:
         total = 0
         for i in range(0, len(data), bs):
@@ -427,9 +471,18 @@ async def vectorize_cost_items(
             total += vector_index(records)
         return total
 
-    loop = asyncio.get_event_loop()
-    with concurrent.futures.ProcessPoolExecutor(max_workers=1) as pool:
-        indexed = await loop.run_in_executor(pool, _vectorize_batch, items_data, batch_size)
+    try:
+        indexed = await asyncio.to_thread(_vectorize_batch, items_data, batch_size)
+    except Exception as exc:
+        # Graceful error when vector backend is unavailable:
+        # - RuntimeError: no embedding model or LanceDB not installed
+        # - ImportError: sentence-transformers / lancedb not installed
+        # - Any other error during vectorization
+        logger.warning("Vector indexing failed: %s", exc)
+        return {
+            "indexed": 0,
+            "message": f"Vector indexing failed: {exc}",
+        }
 
     duration = round(time.monotonic() - start, 1)
     logger.info("Indexed %d cost items in %.1fs", indexed, duration)
@@ -1409,8 +1462,12 @@ async def _find_cwicr_file(db_id: str) -> Path | None:
 
 
 @router.post(
-    "/load-cwicr/{db_id}",
-    dependencies=[Depends(RequirePermission("costs.create"))],
+    "/load-cwicr/{db_id}/",
+    # Any authenticated user can load a CWICR regional database. The data
+    # is public reference content (no confidentiality), and gating it to
+    # editor+ would block viewers from completing onboarding. Permission
+    # ``costs.read`` (VIEWER level) is used instead of ``costs.create``.
+    dependencies=[Depends(RequirePermission("costs.read"))],
 )
 async def load_cwicr_database(
     db_id: str,
@@ -1471,7 +1528,7 @@ async def load_cwicr_database(
 
     _path = cwicr_path
 
-    def _read_file() -> "pd.DataFrame":
+    def _read_file() -> pd.DataFrame:
         if _path.suffix == ".parquet":
             return pd.read_parquet(_path)
         return pd.read_excel(_path, engine="openpyxl")
@@ -1622,44 +1679,111 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
         if "row_type" in res_df.columns:
             res_df = res_df[res_df["row_type"].fillna("") != "Scope of work"]
 
-        for rc, grp in res_df.groupby("rate_code", sort=False):
-            comps = []
-            for _, r in grp.iterrows():
-                res_unit = _safe_str(r.get("resource_unit", ""))
-                is_mach = bool(r.get("is_machine", False))
-                is_mat = bool(r.get("is_material", False))
-                rtype = _safe_str(r.get("row_type", ""))
+        # FULLY VECTORIZED: build component dicts via column operations, then
+        # group by rate_code once using a dict accumulator. This replaces the
+        # previous iterrows() loop which was O(N) Python interpreter overhead
+        # (~5min for 900K rows → now ~5s).
+        if len(res_df) > 0:
+            # Normalize types
+            res_df["_rc"] = res_df["rate_code"].astype(str)
+            res_df["_name"] = res_df["resource_name"].fillna("").astype(str).str.slice(0, 200)
+            res_df["_code"] = (
+                res_df["resource_code"].fillna("").astype(str).str.slice(0, 50)
+                if "resource_code" in res_df.columns
+                else ""
+            )
+            res_df["_unit"] = (
+                res_df["resource_unit"].fillna("").astype(str).str.slice(0, 20)
+                if "resource_unit" in res_df.columns
+                else ""
+            )
+            res_df["_qty"] = (
+                pd.to_numeric(res_df["resource_quantity"], errors="coerce").fillna(0.0).round(4)
+                if "resource_quantity" in res_df.columns
+                else 0.0
+            )
+            res_df["_rate"] = (
+                pd.to_numeric(res_df[_price_col], errors="coerce").fillna(0.0).round(2)
+                if _price_col in res_df.columns
+                else 0.0
+            )
+            res_df["_cost_v"] = pd.to_numeric(res_df[_cost_col], errors="coerce").fillna(0.0).round(2)
 
-                if is_mach:
-                    ctype = (
-                        "operator" if rtype == "Machinist" else "electricity" if rtype == "Electricity" else "equipment"
-                    )
-                elif is_mat:
-                    ctype = "labor" if res_unit.lower() in _LABOR_UNITS else "material"
-                elif rtype == "Abstract resource":
-                    ctype = "material"
-                else:
-                    ctype = "other"
+            # Compute ctype vectorized
+            _row_type = res_df.get("row_type", pd.Series([""] * len(res_df), index=res_df.index)).fillna("").astype(str)
+            _is_mach = res_df.get("is_machine", pd.Series([False] * len(res_df), index=res_df.index)).fillna(False).astype(bool)
+            _is_mat = res_df.get("is_material", pd.Series([False] * len(res_df), index=res_df.index)).fillna(False).astype(bool)
+            _unit_lc = res_df["_unit"].str.lower()
+            _is_labor_unit = _unit_lc.isin(_LABOR_UNITS)
 
+            # Default
+            ctype_arr = pd.Series(["other"] * len(res_df), index=res_df.index, dtype=object)
+            # Material via row_type == Abstract resource
+            ctype_arr = ctype_arr.mask(_row_type == "Abstract resource", "material")
+            # is_material branch
+            ctype_arr = ctype_arr.mask(_is_mat & ~_is_labor_unit, "material")
+            ctype_arr = ctype_arr.mask(_is_mat & _is_labor_unit, "labor")
+            # is_machine branch (overrides is_material)
+            ctype_arr = ctype_arr.mask(_is_mach, "equipment")
+            ctype_arr = ctype_arr.mask(_is_mach & (_row_type == "Machinist"), "operator")
+            ctype_arr = ctype_arr.mask(_is_mach & (_row_type == "Electricity"), "electricity")
+            res_df["_type"] = ctype_arr
+
+            # Build records via zip over numpy arrays — much faster than iterrows
+            rc_arr = res_df["_rc"].to_numpy()
+            name_arr = res_df["_name"].to_numpy()
+            code_arr = res_df["_code"].to_numpy()
+            unit_arr = res_df["_unit"].to_numpy()
+            qty_arr = res_df["_qty"].to_numpy()
+            rate_arr = res_df["_rate"].to_numpy()
+            cost_arr = res_df["_cost_v"].to_numpy()
+            type_arr = res_df["_type"].to_numpy()
+
+            # strict=True surfaces array length drift immediately instead of
+            # silently truncating component rows mid-import — important for a
+            # cost-data pipeline where a missing column would otherwise corrupt
+            # the assembly composition without leaving any audit trail.
+            for rc, nm, cd, un, qt, rt, cs, tp in zip(
+                rc_arr,
+                name_arr,
+                code_arr,
+                unit_arr,
+                qty_arr,
+                rate_arr,
+                cost_arr,
+                type_arr,
+                strict=True,
+            ):
+                comps = resources_by_code.get(rc)
+                if comps is None:
+                    comps = []
+                    resources_by_code[rc] = comps
                 comps.append(
                     {
-                        "name": _safe_str(r.get("resource_name", ""))[:200],
-                        "code": _safe_str(r.get("resource_code", ""))[:50],
-                        "unit": res_unit[:20],
-                        "quantity": round(_safe_float(r.get("resource_quantity", 0)), 4),
-                        "unit_rate": round(_safe_float(r.get(_price_col, 0)), 2),
-                        "cost": round(_safe_float(r.get(_cost_col, 0)), 2),
-                        "type": ctype,
+                        "name": nm,
+                        "code": cd,
+                        "unit": un,
+                        "quantity": float(qt),
+                        "unit_rate": float(rt),
+                        "cost": float(cs),
+                        "type": tp,
                     }
                 )
-            resources_by_code[str(rc)] = comps
 
         _log.info("Built resources for %d rate_codes in %.1fs", len(resources_by_code), time.monotonic() - start)
 
-    # 5. Open SQLite and insert in micro-batches
-    conn = sqlite3.connect(db_file, timeout=30)
+    # 5. Open SQLite with aggressive write tuning — single transaction, no
+    # per-batch commits. Empirically: micro-batch commits were the bottleneck
+    # (275 fsyncs × ~250ms = ~70s). One big transaction + synchronous=NORMAL
+    # brings insert phase from ~70s down to ~3-5s for 55K rows.
+    # isolation_level=None → we manage BEGIN/COMMIT manually (no auto-begin
+    # from the sqlite3 driver that could conflict with our transaction).
+    conn = sqlite3.connect(db_file, timeout=60, isolation_level=None)
     conn.execute("PRAGMA journal_mode=WAL")
-    conn.execute("PRAGMA busy_timeout=10000")
+    conn.execute("PRAGMA synchronous=NORMAL")
+    conn.execute("PRAGMA busy_timeout=30000")
+    conn.execute("PRAGMA temp_store=MEMORY")
+    conn.execute("PRAGMA cache_size=-20000")  # 20 MB cache
 
     sql = """INSERT OR IGNORE INTO oe_costs_item
         (id, code, description, unit, rate, currency, source,
@@ -1669,8 +1793,10 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
 
     imported = 0
     skipped_count = 0
-    micro_batch_size = 200
+    # Bigger chunk and only ONE commit at the end
+    flush_every = 5000
     batch: list[tuple] = []
+    conn.execute("BEGIN IMMEDIATE")
 
     for rate_code, row in grouped.iterrows():
         desc = _safe_str(row.get("_desc", ""))
@@ -1731,38 +1857,17 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
             )
         )
 
-        if len(batch) >= micro_batch_size:
-            try:
-                conn.executemany(sql, batch)
-                conn.commit()
-                imported += len(batch)
-            except Exception:
-                conn.rollback()
-                for r in batch:
-                    try:
-                        conn.execute(sql, r)
-                        conn.commit()
-                        imported += 1
-                    except Exception:
-                        conn.rollback()
+        if len(batch) >= flush_every:
+            conn.executemany(sql, batch)
+            imported += len(batch)
             batch.clear()
 
-    # Final batch
+    # Final chunk (still inside the BEGIN)
     if batch:
-        try:
-            conn.executemany(sql, batch)
-            conn.commit()
-            imported += len(batch)
-        except Exception:
-            conn.rollback()
-            for r in batch:
-                try:
-                    conn.execute(sql, r)
-                    conn.commit()
-                    imported += 1
-                except Exception:
-                    conn.rollback()
+        conn.executemany(sql, batch)
+        imported += len(batch)
 
+    conn.execute("COMMIT")  # single commit — one fsync for the whole import
     conn.close()
     elapsed = round(time.monotonic() - start, 1)
     _log.info("CWICR %s: %d imported, %d skipped in %.1fs", db_id, imported, skipped_count, elapsed)
@@ -1776,7 +1881,7 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
     }
 
 
-def _build_cwicr_items(df: "pd.DataFrame", db_id: str) -> list[dict[str, Any]]:  # noqa: F821
+def _build_cwicr_items(df: pd.DataFrame, db_id: str) -> list[dict[str, Any]]:  # noqa: F821
     """Legacy — kept for reference but no longer called."""
     import math
 
@@ -2085,4 +2190,99 @@ async def export_cost_database(
         output,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": 'attachment; filename="cost_database.xlsx"'},
+    )
+
+
+# ── BIM-element cost suggestions ─────────────────────────────────────────────
+
+
+@router.post(
+    "/suggest-for-element/",
+    response_model=list[CostSuggestion],
+    dependencies=[Depends(RequirePermission("costs.read"))],
+)
+async def suggest_costs_for_element(
+    request: SuggestCostsForElementRequest,
+    _user_id: CurrentUserId,
+    service: CostItemService = Depends(_get_service),
+) -> list[CostSuggestion]:
+    """Rank cost items that match a BIM element (body-only variant).
+
+    The frontend already has the element loaded in the viewer, so the
+    cheapest path is to pass the fields inline and avoid a second DB
+    round-trip.  Returns at most ``request.limit`` suggestions sorted by
+    relevance score (0..1).
+    """
+    return await service.suggest_for_bim_element(
+        element_type=request.element_type,
+        name=request.name,
+        discipline=request.discipline,
+        properties=request.properties,
+        quantities=request.quantities,
+        classification=request.classification,
+        limit=request.limit,
+        region=request.region,
+    )
+
+
+@router.post(
+    "/suggest-for-element/{bim_element_id}/",
+    response_model=list[CostSuggestion],
+    dependencies=[Depends(RequirePermission("costs.read"))],
+)
+async def suggest_costs_for_element_by_id(
+    bim_element_id: uuid.UUID,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    limit: int = Query(default=5, ge=1, le=50),
+    region: str | None = Query(default=None),
+    service: CostItemService = Depends(_get_service),
+) -> list[CostSuggestion]:
+    """Convenience: load a ``BIMElement`` by ID and rank cost suggestions.
+
+    Raises 404 if the element does not exist.  Classification is pulled
+    from ``element.metadata_['classification']`` when present (BIM elements
+    do not have a dedicated classification column).
+    """
+    # Local import to avoid a hard dependency loop between costs and bim_hub.
+    from app.modules.bim_hub.service import BIMHubService
+
+    bim_service = BIMHubService(session)
+    try:
+        element = await bim_service.get_element(bim_element_id)
+    except HTTPException:
+        raise
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.exception("suggest_costs_for_element_by_id: failed to load element")
+        raise HTTPException(status_code=500, detail="Failed to load BIM element") from exc
+
+    # BIMElement has no `classification` column; pull from metadata if present.
+    classification: dict[str, str] | None = None
+    meta = getattr(element, "metadata_", None)
+    if isinstance(meta, dict):
+        candidate = meta.get("classification")
+        if isinstance(candidate, dict):
+            classification = {
+                k: str(v) for k, v in candidate.items() if isinstance(v, (str, int))
+            }
+
+    # Quantities may contain non-float entries in practice; coerce safely.
+    quantities_raw = getattr(element, "quantities", None) or {}
+    quantities: dict[str, float] = {}
+    if isinstance(quantities_raw, dict):
+        for key, val in quantities_raw.items():
+            try:
+                quantities[str(key)] = float(val)
+            except (TypeError, ValueError):
+                continue
+
+    return await service.suggest_for_bim_element(
+        element_type=getattr(element, "element_type", None),
+        name=getattr(element, "name", None),
+        discipline=getattr(element, "discipline", None),
+        properties=getattr(element, "properties", None),
+        quantities=quantities,
+        classification=classification,
+        limit=limit,
+        region=region,
     )

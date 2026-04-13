@@ -8,7 +8,8 @@
     "ai_estimate": "AI-kalkule",
     "settings": "Indstillinger",
     "5d_cost_model": "5D Omkostningsmodel",
-    "templates": "Skabeloner"
+    "templates": "Skabeloner",
+    "architecture": "Arkitekturkort"
   },
   "common": {
     "save": "Gem",

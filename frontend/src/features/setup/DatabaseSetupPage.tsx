@@ -315,7 +315,7 @@ export function DatabaseSetupPage() {
   // ── Sync loaded databases with backend region stats ──
   const { data: regionStats } = useQuery({
     queryKey: ['costs', 'regions', 'stats'],
-    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats').catch(() => []),
+    queryFn: () => apiGet<RegionStat[]>('/v1/costs/regions/stats/').catch(() => []),
     retry: false,
     refetchOnWindowFocus: true,
   });

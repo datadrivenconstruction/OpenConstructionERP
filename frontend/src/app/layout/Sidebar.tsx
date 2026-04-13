@@ -40,9 +40,9 @@ import {
   FileCheck,
   Mail,
   Send,
-  Plug,
-  Network,
   History,
+  BrainCircuit,
+  SlidersHorizontal,
   type LucideIcon,
 } from 'lucide-react';
 import { useModuleStore } from '@/stores/useModuleStore';
@@ -84,7 +84,6 @@ const navGroups: NavGroup[] = [
     items: [
       { labelKey: 'nav.dashboard', to: '/', icon: LayoutDashboard },
       { labelKey: 'projects.title', to: '/projects', icon: FolderOpen, tourId: 'projects' },
-      { labelKey: 'nav.reports', to: '/reports', icon: FileBarChart, advancedOnly: true },
     ],
   },
   {
@@ -106,7 +105,8 @@ const navGroups: NavGroup[] = [
     items: [
       { labelKey: 'nav.pdf_measurements', to: '/takeoff?tab=measurements', icon: Ruler },
       { labelKey: 'nav.cad_bim_explorer', to: '/data-explorer', icon: TableProperties },
-      { labelKey: 'nav.bim_viewer', to: '/bim', icon: Box },
+      { labelKey: 'nav.bim_viewer', to: '/bim', icon: Box, badge: 'BETA' },
+      { labelKey: 'nav.bim_rules', to: '/bim/rules', icon: SlidersHorizontal, badge: 'BETA' },
     ],
   },
   {
@@ -117,6 +117,8 @@ const navGroups: NavGroup[] = [
     items: [
       { labelKey: 'nav.ai_estimate', to: '/ai-estimate', icon: Sparkles },
       { labelKey: 'nav.ai_advisor', to: '/advisor', icon: MessageSquare },
+      { labelKey: 'nav.project_intelligence', to: '/project-intelligence', icon: BrainCircuit, badge: 'BETA' },
+      { labelKey: 'nav.erp_chat', to: '/chat', icon: MessageSquare, badge: 'BETA' },
     ],
   },
   // ── PLANNING & CONTROL (advanced) ──────────────────────────────────
@@ -130,6 +132,8 @@ const navGroups: NavGroup[] = [
       { labelKey: 'schedule.title', to: '/schedule', icon: CalendarDays, moduleKey: 'schedule' },
       { labelKey: 'tasks.title', to: '/tasks', icon: ClipboardList },
       { labelKey: 'nav.5d_cost_model', to: '/5d', icon: TrendingUp, moduleKey: '5d', advancedOnly: true },
+      { labelKey: 'nav.requirements', to: '/requirements', icon: ClipboardCheck, advancedOnly: true },
+      { labelKey: 'nav.risk_register', to: '/risks', icon: ShieldAlert, advancedOnly: true },
     ],
   },
   {
@@ -170,6 +174,8 @@ const navGroups: NavGroup[] = [
       { labelKey: 'cde.title', to: '/cde', icon: Database },
       { labelKey: 'nav.photos', to: '/photos', icon: Camera },
       { labelKey: 'nav.markups', to: '/markups', icon: PenTool },
+      { labelKey: 'nav.field_reports', to: '/field-reports', icon: ClipboardList, advancedOnly: true },
+      { labelKey: 'nav.reports', to: '/reports', icon: FileBarChart, advancedOnly: true },
     ],
   },
   // ── QUALITY & SAFETY ───────────────────────────────────────────────
@@ -184,19 +190,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'ncr.title', to: '/ncr', icon: AlertOctagon },
       { labelKey: 'safety.title', to: '/safety', icon: HardHat },
       { labelKey: 'nav.punchlist', to: '/punchlist', icon: ListChecks },
-      { labelKey: 'nav.risk_register', to: '/risks', icon: ShieldAlert },
       // sustainability + cost-benchmark injected dynamically from module registry
-    ],
-  },
-  // ── FIELD ──────────────────────────────────────────────────────────
-  {
-    id: 'field',
-    labelKey: 'nav.group_field',
-    defaultOpen: false,
-    hideInSimple: true,
-    items: [
-      { labelKey: 'nav.field_reports', to: '/field-reports', icon: ClipboardList },
-      { labelKey: 'nav.requirements', to: '/requirements', icon: ClipboardCheck },
     ],
   },
   {
@@ -214,8 +208,6 @@ const navGroups: NavGroup[] = [
 const bottomNav: NavItem[] = [
   { labelKey: 'users.management', to: '/users', icon: Users },
   { labelKey: 'modules.title', to: '/modules', icon: Package },
-  { labelKey: 'integrations.title', to: '/integrations', icon: Plug },
-  { labelKey: 'nav.architecture', to: '/architecture', icon: Network },
   { labelKey: 'nav.settings', to: '/settings', icon: Settings },
   { labelKey: 'nav.about', to: '/about', icon: Info },
 ];
@@ -283,7 +275,9 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     >
       {/* Logo + mobile close button */}
       <div className="flex h-header items-center justify-between px-5 border-b border-border-light">
-        <LogoWithText size="xs" />
+        <a href="https://openconstructionerp.com/?utm_source=app" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
+          <LogoWithText size="xs" />
+        </a>
         {onClose && (
           <button
             onClick={onClose}
@@ -352,11 +346,6 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         })}
       </nav>
 
-      {/* Recent items */}
-      <div className="bg-black/[0.02] dark:bg-white/[0.02]">
-        <RecentSection onItemClick={onClose} />
-      </div>
-
       {/* Bottom navigation */}
       <div className="border-t border-border-light px-3 py-2 bg-black/[0.04] dark:bg-white/[0.03]">
         <ul className="space-y-0.5">
@@ -371,21 +360,9 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
           ))}
         </ul>
 
+
         {/* Update notification */}
         <UpdateNotification />
-
-        {/* DDC branding */}
-        <div className="mt-2 pt-2 border-t border-border-light px-1">
-          <a
-            href="https://OpenConstructionERP.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-content-quaternary hover:text-content-secondary hover:bg-surface-secondary/50 transition-all"
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            <span className="text-2xs">OpenConstructionERP.com</span>
-          </a>
-        </div>
 
         {/* Version + AGPL notice */}
         <div className="px-3 pb-2 text-center">
@@ -499,13 +476,17 @@ function SidebarItem({ item, label, onClick, badge: numericBadge }: { item: NavI
         {item.badge && (
           <span
             className={clsx(
-              'ms-auto text-2xs font-semibold px-1.5 py-0.5 rounded-full',
-              item.highlight
-                ? 'bg-gradient-to-r from-[#7c3aed] to-[#0ea5e9] text-white'
-                : 'text-content-tertiary',
+              // BETA badge: tiny, subtle, lowercase, neutral grey.
+              // Reads as "this module is still in development" without
+              // visually competing for the user's attention.
+              item.badge === 'BETA'
+                ? 'ms-auto text-[9px] font-medium uppercase tracking-wide px-1.5 py-px rounded text-content-quaternary bg-surface-tertiary/60 dark:bg-surface-tertiary/40'
+                : item.highlight
+                  ? 'ms-auto text-2xs font-semibold px-1.5 py-0.5 rounded-full bg-gradient-to-r from-[#7c3aed] to-[#0ea5e9] text-white'
+                  : 'ms-auto text-2xs font-semibold px-1.5 py-0.5 rounded-full text-content-tertiary',
             )}
           >
-            {item.badge}
+            {item.badge === 'BETA' ? 'beta' : item.badge}
           </span>
         )}
       </NavLink>
@@ -521,38 +502,92 @@ const RECENT_TYPE_ICONS: Record<string, LucideIcon> = {
   contact: Users,
 };
 
-function RecentSection({ onItemClick }: { onItemClick?: () => void }) {
+/** Floating Recent button — rendered by AppLayout in the bottom-right corner. */
+export function FloatingRecentButton() {
   const { t } = useTranslation();
   const recentItems = useRecentStore((s) => s.items);
+  const [open, setOpen] = useState(false);
 
   if (recentItems.length === 0) return null;
-
-  const displayed = recentItems.slice(0, 3);
+  const displayed = recentItems.slice(0, 5);
 
   return (
-    <div className="border-t border-border-light px-3 py-2">
-      <span className="mt-1 mb-1 flex items-center gap-1.5 px-2.5 text-2xs font-medium uppercase tracking-wider text-content-tertiary">
-        <History size={11} strokeWidth={2} />
-        {t('nav.recent', { defaultValue: 'Recent' })}
-      </span>
-      <ul className="space-y-0.5">
-        {displayed.map((item) => {
-          const Icon = RECENT_TYPE_ICONS[item.type] || FolderOpen;
-          return (
-            <li key={item.id}>
-              <NavLink
-                to={item.url}
-                onClick={onItemClick}
-                title={item.title}
-                className="flex items-center gap-2 rounded-md px-2.5 py-[5px] text-[13px] font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-all duration-fast ease-oe"
-              >
-                <Icon size={14} strokeWidth={1.75} className="shrink-0 text-content-tertiary" />
-                <span className="truncate">{item.title}</span>
-              </NavLink>
-            </li>
-          );
-        })}
-      </ul>
+    // Smaller, slightly higher than the Chat FAB so they stack visually
+    <div className="fixed bottom-24 end-4 z-40">
+      {/* Popover */}
+      {open && (
+        <div className="absolute bottom-12 end-0 w-72 rounded-xl border border-border-light bg-surface-primary shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150">
+          <div className="flex items-center justify-between px-4 py-2.5 border-b border-border-light">
+            <span className="text-xs font-semibold text-content-primary">{t('nav.recent', { defaultValue: 'Recent' })}</span>
+            <button onClick={() => setOpen(false)} className="p-0.5 rounded text-content-tertiary hover:text-content-primary">
+              <X size={14} />
+            </button>
+          </div>
+          <ul className="py-1.5 max-h-60 overflow-y-auto">
+            {displayed.map((item) => {
+              const Icon = RECENT_TYPE_ICONS[item.type] || FolderOpen;
+              return (
+                <li key={item.id}>
+                  <NavLink
+                    to={item.url}
+                    onClick={() => setOpen(false)}
+                    title={item.title}
+                    className="flex items-center gap-2.5 px-4 py-2 text-[13px] font-medium text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-all"
+                  >
+                    <Icon size={14} strokeWidth={1.75} className="shrink-0 text-content-tertiary" />
+                    <span className="truncate flex-1">{item.title}</span>
+                    <span className="text-[10px] text-content-quaternary shrink-0 tabular-nums">
+                      {new Date(item.visitedAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </NavLink>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+      {/* FAB button */}
+      <button
+        onClick={() => setOpen((p) => !p)}
+        className={clsx(
+          'w-10 h-10 rounded-full flex items-center justify-center shadow-lg border transition-all duration-200 hover:scale-105 active:scale-95',
+          open
+            ? 'bg-oe-blue text-white border-oe-blue shadow-oe-blue/20'
+            : 'bg-surface-primary text-content-secondary border-border-light hover:border-oe-blue/30 hover:text-oe-blue',
+        )}
+        title={t('nav.recent', { defaultValue: 'Recent' })}
+      >
+        <History size={18} strokeWidth={2} />
+      </button>
     </div>
+  );
+}
+
+/** Floating AI Chat button — large pill-shaped FAB in bottom-right that
+ *  navigates to /chat. Hidden when already on the chat page. */
+export function FloatingChatButton() {
+  const { t } = useTranslation();
+  const location = useLocation();
+
+  // Hide when already on the chat page so it doesn't overlap the chat itself
+  if (location.pathname.startsWith('/chat')) return null;
+
+  return (
+    <NavLink
+      to="/chat"
+      className="fixed bottom-6 end-6 z-40 group flex items-center gap-2.5 px-5 py-3.5 rounded-full bg-gradient-to-r from-oe-blue to-blue-600 text-white shadow-xl shadow-oe-blue/30 hover:shadow-2xl hover:shadow-oe-blue/40 hover:scale-105 active:scale-95 transition-all duration-200 border border-oe-blue/50"
+      title={t('nav.erp_chat', { defaultValue: 'AI Chat' })}
+    >
+      <MessageSquare size={20} strokeWidth={2.25} className="shrink-0" />
+      <span className="text-sm font-semibold whitespace-nowrap">
+        {t('nav.erp_chat', { defaultValue: 'AI Chat' })}
+      </span>
+      {/* Subtle pulse indicator */}
+      <span className="relative flex h-2 w-2">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+      </span>
+    </NavLink>
   );
 }

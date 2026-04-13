@@ -171,7 +171,7 @@ async def test_boq_full_workflow(client, auth_headers):
 
     # Add section
     resp = await client.post(
-        f"/api/v1/boq/boqs/{bid}/sections",
+        f"/api/v1/boq/boqs/{bid}/sections/",
         json={"ordinal": "01", "description": "Substructure"},
         headers=headers,
     )
@@ -181,7 +181,7 @@ async def test_boq_full_workflow(client, auth_headers):
 
     # Add position
     resp = await client.post(
-        f"/api/v1/boq/boqs/{bid}/positions",
+        f"/api/v1/boq/boqs/{bid}/positions/",
         json={
             "boq_id": bid,
             "ordinal": "01.001",
@@ -204,7 +204,7 @@ async def test_boq_full_workflow(client, auth_headers):
     assert len(full["positions"]) >= 2  # section + position
 
     # Duplicate
-    resp = await client.post(f"/api/v1/boq/boqs/{bid}/duplicate", json={}, headers=headers)
+    resp = await client.post(f"/api/v1/boq/boqs/{bid}/duplicate/", json={}, headers=headers)
     assert resp.status_code == 201
     dup = resp.json()
     assert dup["id"] != bid
@@ -231,15 +231,15 @@ async def test_cost_search_requires_auth(client):
 
 
 @pytest.mark.asyncio
-async def test_cost_regions(client):
-    resp = await client.get("/api/v1/costs/regions")
+async def test_cost_regions(client, auth_headers):
+    resp = await client.get("/api/v1/costs/regions/", headers=auth_headers)
     assert resp.status_code == 200
     assert isinstance(resp.json(), list)
 
 
 @pytest.mark.asyncio
-async def test_vector_status(client):
-    resp = await client.get("/api/v1/costs/vector/status")
+async def test_vector_status(client, auth_headers):
+    resp = await client.get("/api/v1/costs/vector/status/", headers=auth_headers)
     assert resp.status_code == 200
     data = resp.json()
     assert "connected" in data
@@ -253,7 +253,25 @@ async def test_vector_status(client):
 async def test_tendering_packages(client, auth_headers):
     headers = auth_headers
 
-    resp = await client.get("/api/v1/tendering/packages/", headers=headers)
+    # The tendering packages list endpoint requires a project_id
+    # query param to prevent cross-tenant enumeration (added in
+    # v1.4.x security pass).  Create a throwaway project first.
+    proj_resp = await client.post(
+        "/api/v1/projects/",
+        json={
+            "name": "TenderingSmoke",
+            "region": "DACH",
+            "classification_standard": "din276",
+            "currency": "EUR",
+        },
+        headers=headers,
+    )
+    assert proj_resp.status_code == 201
+    pid = proj_resp.json()["id"]
+
+    resp = await client.get(
+        f"/api/v1/tendering/packages/?project_id={pid}", headers=headers
+    )
     assert resp.status_code == 200
     assert isinstance(resp.json(), list)
 

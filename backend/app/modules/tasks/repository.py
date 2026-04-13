@@ -29,6 +29,7 @@ class TaskRepository:
         priority: str | None = None,
         responsible_id: str | None = None,
         meeting_id: str | None = None,
+        search: str | None = None,
     ) -> tuple[list[Task], int]:
         base = select(Task).where(Task.project_id == project_id)
 
@@ -53,6 +54,18 @@ class TaskRepository:
             base = base.where(Task.responsible_id == responsible_id)
         if meeting_id is not None:
             base = base.where(Task.meeting_id == meeting_id)
+
+        # Free-text search across title + description + result fields.
+        # Uses ILIKE for case-insensitive matching (works on both PG and SQLite).
+        if search and search.strip():
+            pattern = f"%{search.strip()}%"
+            base = base.where(
+                or_(
+                    Task.title.ilike(pattern),
+                    Task.description.ilike(pattern),
+                    Task.result.ilike(pattern),
+                )
+            )
 
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()

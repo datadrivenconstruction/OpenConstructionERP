@@ -81,5 +81,5 @@ export async function createTransmittal(data: CreateTransmittalPayload): Promise
 }
 
 export async function issueTransmittal(id: string): Promise<Transmittal> {
-  return apiPost<Transmittal>(`/v1/transmittals/${id}/issue`);
+  return apiPost<Transmittal>(`/v1/transmittals/${id}/issue/`);
 }

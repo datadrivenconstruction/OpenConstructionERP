@@ -180,6 +180,15 @@ class EVMSnapshot(Base):
     cv: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     spi: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     cpi: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
+    # Forecast metrics (EVM standard):
+    #   eac  = AC + (BAC - EV) / CPI  — estimate at completion
+    #   vac  = BAC - EAC              — variance at completion
+    #   etc  = EAC - AC               — estimate to complete
+    #   tcpi = (BAC - EV) / (BAC - AC) — to-complete performance index
+    eac: Mapped[str] = mapped_column(String(50), nullable=False, default="0", server_default="0")
+    vac: Mapped[str] = mapped_column(String(50), nullable=False, default="0", server_default="0")
+    etc: Mapped[str] = mapped_column(String(50), nullable=False, default="0", server_default="0")
+    tcpi: Mapped[str] = mapped_column(String(50), nullable=False, default="0", server_default="0")
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,

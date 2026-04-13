@@ -7,13 +7,14 @@ import {
   MoreHorizontal, Pencil, Tag, Ruler, Send,
 } from 'lucide-react';
 import { Card, Button, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
+import SimilarItemsPanel from '@/shared/ui/SimilarItemsPanel';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { apiGet, apiDelete, apiPatch } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useUploadQueueStore } from '@/stores/useUploadQueueStore';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { listSessions } from '../cad-explorer/api';
 
 /* ── Types ───────────────────────────────────────────────────────────── */
@@ -86,6 +87,7 @@ function PreviewModal({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const kind = isPreviewable(doc.mime_type);
 
   useEffect(() => {
@@ -95,6 +97,20 @@ function PreviewModal({
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [onClose]);
+
+  // Reverse-direction lookup: every BIM element this document is linked to.
+  // The endpoint may not exist on older deployments — we tolerate a 404 by
+  // showing nothing instead of throwing.  Lazy-loaded only when the modal
+  // is open so we don't hammer the API on every documents-list render.
+  const { data: linkedElements } = useQuery({
+    queryKey: ['document-bim-links', doc.id],
+    queryFn: () =>
+      apiGet<{ items: Array<{ id: string; bim_element_id: string; document_id: string }> }>(
+        `/v1/documents/bim-links/?document_id=${encodeURIComponent(doc.id)}`,
+      ).catch(() => ({ items: [] })),
+    enabled: !!doc.id,
+    staleTime: 30_000,
+  });
 
   return (
     <div
@@ -149,6 +165,53 @@ function PreviewModal({
             />
           ) : null}
         </div>
+
+        {/* Semantic similarity — finds documents with related content
+            across all projects (drawings about the same scope, RFIs on
+            the same trade, etc.).  Cross-project default is on so the
+            estimator gets cross-pollination from past work. */}
+        <div className="border-t border-border-light px-5 py-3 bg-surface-primary shrink-0">
+          <SimilarItemsPanel module="documents" id={doc.id} crossProject limit={5} />
+        </div>
+
+        {/* Linked BIM elements — appears at the bottom of the preview when
+            this document has any DocumentBIMLink rows.  Click → opens the
+            BIM viewer with the element preselected. */}
+        {linkedElements && linkedElements.items.length > 0 && (
+          <div className="border-t border-border-light px-5 py-3 bg-surface-primary shrink-0">
+            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary mb-2">
+              {t('documents.linked_bim_elements', {
+                defaultValue: 'Linked BIM elements',
+              })}
+              <span className="ms-2 text-content-quaternary normal-case font-normal">
+                ({linkedElements.items.length})
+              </span>
+            </h4>
+            <div className="flex flex-wrap gap-1">
+              {linkedElements.items.slice(0, 12).map((link) => (
+                <button
+                  key={link.id}
+                  type="button"
+                  onClick={() => {
+                    navigate(`/bim?element=${encodeURIComponent(link.bim_element_id)}`);
+                    onClose();
+                  }}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-border-light text-[11px] text-content-secondary hover:text-oe-blue hover:bg-oe-blue/5"
+                  title={link.bim_element_id}
+                >
+                  <span className="font-mono text-[10px]">
+                    {link.bim_element_id.slice(0, 8)}
+                  </span>
+                </button>
+              ))}
+              {linkedElements.items.length > 12 && (
+                <span className="text-[10px] text-content-tertiary">
+                  + {linkedElements.items.length - 12} more
+                </span>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -222,6 +285,8 @@ function SortDropdown({
 
 /* ── Main Component ──────────────────────────────────────────────────── */
 
+const INITIAL_EDIT_DOC_FORM = { category: '', description: '', tagInput: '', tags: [] as string[] };
+
 export function DocumentsPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -240,7 +305,7 @@ export function DocumentsPage() {
   const [renameDoc, setRenameDoc] = useState<{ id: string; name: string } | null>(null);
   const [renameValue, setRenameValue] = useState('');
   const [editDoc, setEditDoc] = useState<DocItem | null>(null);
-  const [editForm, setEditForm] = useState({ category: '', description: '', tagInput: '', tags: [] as string[] });
+  const [editForm, setEditForm] = useState(INITIAL_EDIT_DOC_FORM);
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Upload state (progress shown in FloatingQueuePanel)
@@ -248,6 +313,14 @@ export function DocumentsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const projectId = activeProjectId;
+
+  /* ── Deep-link auto-preview ─────────────────────────────────────────────
+   * Cmd+Shift+K global semantic search and other deep links land here
+   * with `?id=<document_id>` — open the matching document in the preview
+   * modal as soon as it loads.  Cleans up the param afterwards so a
+   * page refresh doesn't keep re-opening the modal. */
+  const [searchParams, setSearchParams] = useSearchParams();
+  const deepLinkDocId = searchParams.get('id');
 
   /* ── Data fetching ──────────────────────────────────────────────────── */
 
@@ -262,6 +335,20 @@ export function DocumentsPage() {
     },
     enabled: !!projectId,
   });
+
+  // Open the deep-linked document in the preview modal as soon as it
+  // appears in the list.  We clear the `?id=` query param immediately
+  // afterwards so a refresh doesn't keep re-opening the modal.
+  useEffect(() => {
+    if (!deepLinkDocId || !documents) return;
+    const target = documents.find((d) => d.id === deepLinkDocId);
+    if (target) {
+      setPreviewDoc(target);
+      const next = new URLSearchParams(searchParams);
+      next.delete('id');
+      setSearchParams(next, { replace: true });
+    }
+  }, [deepLinkDocId, documents, searchParams, setSearchParams]);
 
   /* ── CAD/BIM models (saved sessions) ─────────────────────────────────── */
 
@@ -302,11 +389,11 @@ export function DocumentsPage() {
     mutationFn: (id: string) => apiDelete(`/v1/documents/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
-      addToast({ type: 'success', title: t('documents.deleted', { defaultValue: 'Document deleted' }) });
+      addToast({ type: 'success', title: t('documents.deleted', { defaultValue: 'Document deleted successfully' }) });
       setConfirmDeleteId(null);
     },
     onError: (err: Error) => {
-      addToast({ type: 'error', title: t('documents.delete_failed', { defaultValue: 'Delete failed' }), message: err.message });
+      addToast({ type: 'error', title: t('documents.delete_failed', { defaultValue: 'Failed to delete document' }), message: err.message });
       setConfirmDeleteId(null);
     },
   });
@@ -320,7 +407,7 @@ export function DocumentsPage() {
     if (!projectId) {
       addToast({
         type: 'error',
-        title: t('common.error', { defaultValue: 'Error' }),
+        title: t('documents.no_project_error', { defaultValue: 'No project selected' }),
         message: t('documents.select_project_first', { defaultValue: 'Please select a project first before uploading.' }),
       });
       return;
@@ -473,11 +560,11 @@ export function DocumentsPage() {
       apiPatch<unknown, { name: string }>(`/v1/documents/${id}`, { name }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
-      addToast({ type: 'success', title: t('documents.renamed', { defaultValue: 'Document renamed' }) });
+      addToast({ type: 'success', title: t('documents.renamed', { defaultValue: 'Document renamed successfully' }) });
       setRenameDoc(null);
     },
     onError: (err: Error) => {
-      addToast({ type: 'error', title: t('documents.rename_failed', { defaultValue: 'Rename failed' }), message: err.message });
+      addToast({ type: 'error', title: t('documents.rename_failed', { defaultValue: 'Failed to rename document' }), message: err.message });
     },
   });
 
@@ -487,11 +574,11 @@ export function DocumentsPage() {
       apiPatch<unknown, Record<string, unknown>>(`/v1/documents/${id}`, fields),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
-      addToast({ type: 'success', title: t('documents.properties_saved', { defaultValue: 'Properties saved' }) });
+      addToast({ type: 'success', title: t('documents.properties_saved', { defaultValue: 'Document properties saved successfully' }) });
       setEditDoc(null);
     },
     onError: (err: Error) => {
-      addToast({ type: 'error', title: t('documents.save_failed', { defaultValue: 'Save failed' }), message: err.message });
+      addToast({ type: 'error', title: t('documents.save_failed', { defaultValue: 'Failed to save document properties' }), message: err.message });
     },
   });
 

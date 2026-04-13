@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { normalizeListResponse } from '@/shared/lib/apiHelpers';
 import {
   FileEdit,
   Plus,
@@ -16,7 +17,8 @@ import {
   X,
   Download,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Breadcrumb, InfoHint } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Breadcrumb, InfoHint, ConfirmDialog } from '@/shared/ui';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
@@ -94,13 +96,15 @@ const STATUS_COLORS: Record<string, 'neutral' | 'blue' | 'success' | 'warning' |
   rejected: 'error',
 };
 
-const REASON_LABELS: Record<string, string> = {
-  client_request: 'Client Request',
-  design_change: 'Design Change',
-  unforeseen: 'Unforeseen Conditions',
-  regulatory: 'Regulatory',
-  error: 'Error/Omission',
-};
+function getReasonLabels(t: (key: string, opts?: Record<string, unknown>) => string): Record<string, string> {
+  return {
+    client_request: t('changeorders.reason_client_request', { defaultValue: 'Client Request' }),
+    design_change: t('changeorders.reason_design_change', { defaultValue: 'Design Change' }),
+    unforeseen: t('changeorders.reason_unforeseen', { defaultValue: 'Unforeseen Conditions' }),
+    regulatory: t('changeorders.reason_regulatory', { defaultValue: 'Regulatory' }),
+    error: t('changeorders.reason_error', { defaultValue: 'Error/Omission' }),
+  };
+}
 
 function translateStatus(status: string, t: (key: string, opts?: Record<string, unknown>) => string): string {
   const map: Record<string, string> = {
@@ -233,9 +237,9 @@ function CreateDialog({
                 onChange={(e) => setReason(e.target.value)}
                 className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
               >
-                {Object.entries(REASON_LABELS).map(([k, v]) => (
+                {Object.entries(getReasonLabels(t)).map(([k, v]) => (
                   <option key={k} value={k}>
-                    {t(`changeorders.reason_${k}`, { defaultValue: v })}
+                    {v}
                   </option>
                 ))}
               </select>
@@ -299,7 +303,7 @@ function AddItemDialog({
 
   const mutation = useMutation({
     mutationFn: () =>
-      apiPost<ChangeOrderItem>(`/v1/changeorders/${orderId}/items`, {
+      apiPost<ChangeOrderItem>(`/v1/changeorders/${orderId}/items/`, {
         description: desc,
         change_type: changeType,
         original_quantity: origQty,
@@ -530,6 +534,7 @@ function DetailView({
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const userRole = useAuthStore((s) => s.userRole);
+  const { confirm, ...confirmProps } = useConfirm();
   const [showAddItem, setShowAddItem] = useState(false);
 
   // Only admins and managers can approve/reject change orders. Backend
@@ -543,7 +548,7 @@ function DetailView({
   });
 
   const submitMut = useMutation({
-    mutationFn: () => apiPost<ChangeOrder>(`/v1/changeorders/${orderId}/submit`),
+    mutationFn: () => apiPost<ChangeOrder>(`/v1/changeorders/${orderId}/submit/`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['changeorder', orderId] });
       queryClient.invalidateQueries({ queryKey: ['changeorders'] });
@@ -553,7 +558,7 @@ function DetailView({
   });
 
   const approveMut = useMutation({
-    mutationFn: () => apiPost<ChangeOrder>(`/v1/changeorders/${orderId}/approve`),
+    mutationFn: () => apiPost<ChangeOrder>(`/v1/changeorders/${orderId}/approve/`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['changeorder', orderId] });
       queryClient.invalidateQueries({ queryKey: ['changeorders'] });
@@ -563,7 +568,7 @@ function DetailView({
   });
 
   const rejectMut = useMutation({
-    mutationFn: () => apiPost<ChangeOrder>(`/v1/changeorders/${orderId}/reject`),
+    mutationFn: () => apiPost<ChangeOrder>(`/v1/changeorders/${orderId}/reject/`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['changeorder', orderId] });
       queryClient.invalidateQueries({ queryKey: ['changeorders'] });
@@ -641,10 +646,13 @@ function DetailView({
 
           <div className="flex gap-2 items-center">
             {order.status === 'draft' && (
-              <Button variant="primary" size="sm" onClick={() => {
-                if (window.confirm(t('changeorders.submit_confirm', { defaultValue: 'Submit this change order for review? This cannot be undone.' }))) {
-                  submitMut.mutate();
-                }
+              <Button variant="primary" size="sm" onClick={async () => {
+                const ok = await confirm({
+                  title: t('changeorders.submit_confirm_title', { defaultValue: 'Submit change order?' }),
+                  message: t('changeorders.submit_confirm', { defaultValue: 'Submit this change order for review? This cannot be undone.' }),
+                  variant: 'warning',
+                });
+                if (ok) submitMut.mutate();
               }} disabled={submitMut.isPending}>
                 <Send size={14} className="mr-1.5" />
                 {t('changeorders.submit', { defaultValue: 'Submit' })}
@@ -653,18 +661,23 @@ function DetailView({
             {order.status === 'submitted' && (
               canApprove ? (
                 <>
-                  <Button variant="primary" size="sm" onClick={() => {
-                    if (window.confirm(t('changeorders.approve_confirm', { defaultValue: 'Approve this change order? Cost impact will be applied to the project budget.' }))) {
-                      approveMut.mutate();
-                    }
+                  <Button variant="primary" size="sm" onClick={async () => {
+                    const ok = await confirm({
+                      title: t('changeorders.approve_confirm_title', { defaultValue: 'Approve change order?' }),
+                      message: t('changeorders.approve_confirm', { defaultValue: 'Approve this change order? Cost impact will be applied to the project budget.' }),
+                      variant: 'warning',
+                    });
+                    if (ok) approveMut.mutate();
                   }} disabled={approveMut.isPending}>
                     <CheckCircle2 size={14} className="mr-1.5" />
                     {t('changeorders.approve', { defaultValue: 'Approve' })}
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => {
-                    if (window.confirm(t('changeorders.reject_confirm', { defaultValue: 'Reject this change order?' }))) {
-                      rejectMut.mutate();
-                    }
+                  <Button variant="ghost" size="sm" onClick={async () => {
+                    const ok = await confirm({
+                      title: t('changeorders.reject_confirm_title', { defaultValue: 'Reject change order?' }),
+                      message: t('changeorders.reject_confirm', { defaultValue: 'Reject this change order?' }),
+                    });
+                    if (ok) rejectMut.mutate();
                   }} disabled={rejectMut.isPending}>
                     <XCircle size={14} className="mr-1.5" />
                     {t('changeorders.reject', { defaultValue: 'Reject' })}
@@ -700,7 +713,7 @@ function DetailView({
           </p>
           <p className="mt-1 text-sm font-medium text-content-primary">
             {t(`changeorders.reason_${order.reason_category}`, {
-              defaultValue: REASON_LABELS[order.reason_category] || order.reason_category,
+              defaultValue: getReasonLabels(t)[order.reason_category] || order.reason_category,
             })}
           </p>
         </Card>
@@ -831,10 +844,12 @@ function DetailView({
                     {canEdit && (
                       <td className="px-4 py-3 text-center">
                         <button
-                          onClick={() => {
-                            if (window.confirm(t('changeorders.delete_item_confirm', { defaultValue: 'Delete this item?' }))) {
-                              deleteItemMut.mutate(item.id);
-                            }
+                          onClick={async () => {
+                            const ok = await confirm({
+                              title: t('changeorders.delete_item_confirm_title', { defaultValue: 'Delete item?' }),
+                              message: t('changeorders.delete_item_confirm', { defaultValue: 'Delete this item?' }),
+                            });
+                            if (ok) deleteItemMut.mutate(item.id);
                           }}
                           className="text-content-tertiary hover:text-semantic-error transition-colors"
                           title={t('common.delete', { defaultValue: 'Delete' })}
@@ -862,6 +877,7 @@ function DetailView({
           }}
         />
       )}
+      <ConfirmDialog {...confirmProps} />
     </div>
   );
 }
@@ -882,6 +898,7 @@ export function ChangeOrdersPage() {
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    staleTime: 5 * 60_000,
   });
 
   const projectId = activeProjectId || projects[0]?.id || '';
@@ -891,7 +908,7 @@ export function ChangeOrdersPage() {
   const { data: orders = [], isLoading, isError } = useQuery({
     queryKey: ['changeorders', projectId],
     queryFn: () => apiGet<ChangeOrder[]>(`/v1/changeorders/?project_id=${projectId}`),
-    select: (d): ChangeOrder[] => (Array.isArray(d) ? d : (d as any)?.items ?? []),
+    select: (d): ChangeOrder[] => normalizeListResponse(d),
     enabled: !!projectId,
   });
 
@@ -929,7 +946,7 @@ export function ChangeOrdersPage() {
       o.code,
       `"${o.title.replace(/"/g, '""')}"`,
       o.status,
-      REASON_LABELS[o.reason_category] || o.reason_category,
+      getReasonLabels(t)[o.reason_category] || o.reason_category,
       o.cost_impact.toFixed(2),
       String(o.schedule_impact_days),
       String(o.item_count),
@@ -943,7 +960,7 @@ export function ChangeOrdersPage() {
     a.download = `change_orders_${project?.name || 'export'}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [filteredOrders, project]);
+  }, [filteredOrders, project, t]);
 
   // Detail view
   if (selectedOrderId) {
@@ -1005,6 +1022,17 @@ export function ChangeOrdersPage() {
       </div>
 
       <InfoHint className="mt-4 mb-2" text={t('changeorders.workflow_desc', { defaultValue: 'Change Order workflow: Draft (prepare scope change) \u2192 Submitted (send for review) \u2192 Approved or Rejected. Each order tracks cost impact and schedule impact in days. Add line items to detail what changed \u2014 original vs new quantities and rates. The cost delta is computed automatically.' })} />
+
+      {/* No-project warning */}
+      {!projectId && (
+        <div className="mb-4 mt-4 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 px-4 py-3">
+          <AlertTriangle size={18} className="text-amber-600 shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-300">{t('common.no_project_selected', { defaultValue: 'No project selected' })}</p>
+            <p className="text-xs text-amber-600 dark:text-amber-400">{t('common.select_project_hint', { defaultValue: 'Select a project from the header to view and manage items.' })}</p>
+          </div>
+        </div>
+      )}
 
       {/* Summary cards */}
       {summary && (
@@ -1091,7 +1119,13 @@ export function ChangeOrdersPage() {
 
       {/* Orders table */}
       <div>
-        {isLoading ? (
+        {!projectId ? (
+          <EmptyState
+            icon={<FileEdit size={28} strokeWidth={1.5} />}
+            title={t('changeorders.no_project', { defaultValue: 'No project selected' })}
+            description={t('changeorders.no_project_desc', { defaultValue: 'Open a project first to view and manage change orders.' })}
+          />
+        ) : isLoading ? (
           <div className="flex items-center justify-center py-20">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" />
           </div>
@@ -1163,7 +1197,7 @@ export function ChangeOrdersPage() {
                       </td>
                       <td className="px-4 py-3 text-content-secondary text-xs">
                         {t(`changeorders.reason_${order.reason_category}`, {
-                          defaultValue: REASON_LABELS[order.reason_category] || order.reason_category,
+                          defaultValue: getReasonLabels(t)[order.reason_category] || order.reason_category,
                         })}
                       </td>
                       <td className={`px-4 py-3 text-right font-medium tabular-nums ${order.cost_impact >= 0 ? 'text-semantic-error' : 'text-semantic-success'}`}>

@@ -34,6 +34,9 @@ export interface Task {
   created_by: string | null;
   meeting_id: string | null;
   metadata: Record<string, unknown>;
+  /** Spatial pin to BIM elements (v1.3.30+).  Empty array when the task
+   *  isn't linked to any 3D geometry. */
+  bim_element_ids?: string[];
   created_at: string;
   updated_at: string;
   completed_at: string | null;
@@ -54,6 +57,10 @@ export interface CreateTaskPayload {
   priority?: TaskPriority;
   responsible_id?: string;
   due_date?: string;
+  /** Spatially pin the new task to one or more BIM elements. The backend
+   *  added this column in v1.3.30; passing the field on create avoids the
+   *  follow-up PATCH /tasks/{id}/bim-links round-trip. */
+  bim_element_ids?: string[];
 }
 
 export interface UpdateTaskPayload {
@@ -88,7 +95,7 @@ export async function updateTask(id: string, data: UpdateTaskPayload): Promise<T
 }
 
 export async function completeTask(id: string): Promise<Task> {
-  return apiPost<Task>(`/v1/tasks/${id}/complete`);
+  return apiPost<Task>(`/v1/tasks/${id}/complete/`);
 }
 
 export async function exportTasks(projectId: string): Promise<void> {

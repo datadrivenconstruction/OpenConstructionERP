@@ -284,6 +284,8 @@ function PurchaseOrdersTab({ projectId }: { projectId: string }) {
   const [poTaxInput, setPoTaxInput] = useState('0');
   const poTotal = poSubtotal + parseFloat(poTaxInput || '0');
 
+  const canSubmitPO = poForm.items.some((li) => li.description.trim().length > 0);
+
   const validatePO = (): boolean => {
     const e: Record<string, string> = {};
     const hasAnyItem = poForm.items.some((li) => li.description.trim());
@@ -473,7 +475,7 @@ function PurchaseOrdersTab({ projectId }: { projectId: string }) {
             {/* ── Section: Items ── */}
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-3">
-                {t('procurement.section_items', { defaultValue: 'Items' })}
+                {t('procurement.section_items', { defaultValue: 'Items' })} <span className="text-semantic-error">*</span>
               </h3>
               <div className="space-y-2">
                 {/* Header row */}
@@ -486,7 +488,7 @@ function PurchaseOrdersTab({ projectId }: { projectId: string }) {
                   <span />
                 </div>
                 {poForm.items.map((li, idx) => (
-                  <div key={idx} className="grid grid-cols-1 sm:grid-cols-[1fr_70px_60px_80px_80px_32px] gap-2 items-start">
+                  <div key={`item-${li.description.slice(0, 20)}-${idx}`} className="grid grid-cols-1 sm:grid-cols-[1fr_70px_60px_80px_80px_32px] gap-2 items-start">
                     <input
                       value={li.description}
                       onChange={(e) => updateLineItem(idx, 'description', e.target.value)}
@@ -647,7 +649,7 @@ function PurchaseOrdersTab({ projectId }: { projectId: string }) {
                 if (!validatePO()) return;
                 createPOMut.mutate(poForm);
               }}
-              disabled={createPOMut.isPending}
+              disabled={createPOMut.isPending || !canSubmitPO}
             >
               {createPOMut.isPending ? (
                 <Loader2 size={16} className="animate-spin mr-1.5" />

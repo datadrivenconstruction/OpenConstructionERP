@@ -595,9 +595,11 @@ const ContainerRow = React.memo(function ContainerRow({
         </Badge>
 
         {/* CDE State badge */}
-        <Badge variant={stateCfg.variant} size="sm" className={stateCfg.cls}>
-          {t(`cde.state_${containerState}`, { defaultValue: stateCfg.label })}
-        </Badge>
+        <span title={t('cde.iso19650_states_tooltip', { defaultValue: 'ISO 19650 document states: WIP = Work in Progress (being authored), Shared = shared with team for review, Published = formally approved and issued, Archived = superseded or no longer current' })}>
+          <Badge variant={stateCfg.variant} size="sm" className={stateCfg.cls}>
+            {t(`cde.state_${containerState}`, { defaultValue: stateCfg.label })}
+          </Badge>
+        </span>
 
         {/* Suitability Code */}
         <span className="text-xs text-content-tertiary w-12 text-center shrink-0 hidden lg:block font-mono">
@@ -744,6 +746,7 @@ export function CDEPage() {
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    staleTime: 5 * 60_000,
   });
 
   const projectId = routeProjectId || activeProjectId || projects[0]?.id || '';
@@ -977,7 +980,7 @@ export function CDEPage() {
       </div>
 
       {/* State filter tabs */}
-      <div className="mb-6 flex items-center gap-1 overflow-x-auto pb-1">
+      <div className="mb-6 flex items-center gap-1 overflow-x-auto pb-1" title={t('cde.iso19650_states_tooltip', { defaultValue: 'ISO 19650 document states: WIP = Work in Progress (being authored), Shared = shared with team for review, Published = formally approved and issued, Archived = superseded or no longer current' })}>
         {[
           { key: '' as CDEState | '', label: 'All', count: stateCounts.all },
           ...STATE_ORDER.map((s) => ({

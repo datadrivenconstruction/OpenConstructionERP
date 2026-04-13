@@ -101,10 +101,11 @@ async def _handle_safety_observation_high_risk(event: Event) -> None:
         observation_number: str
         risk_score: int
         description: str
-        notify_user_ids: list[str] (UUIDs of PM + safety officer)
+        notify_user_ids: list[str] (UUIDs — if empty, falls back to project owner)
     """
     try:
         data = event.data
+        project_id = data.get("project_id")
         observation_id = data.get("observation_id")
         risk_score = data.get("risk_score", 0)
         notify_user_ids = data.get("notify_user_ids", [])
@@ -118,14 +119,32 @@ async def _handle_safety_observation_high_risk(event: Event) -> None:
             )
             return
 
-        if not notify_user_ids:
-            logger.debug("safety.observation.high_risk: no users to notify")
-            return
-
         from app.database import async_session_factory
         from app.modules.notifications.service import NotificationService
 
         async with async_session_factory() as session:
+            # If no explicit user list, fall back to project owner
+            if not notify_user_ids and project_id:
+                try:
+                    from sqlalchemy import select
+
+                    from app.modules.projects.models import Project
+
+                    result = await session.execute(
+                        select(Project.owner_id).where(Project.id == project_id)
+                    )
+                    owner_id = result.scalar_one_or_none()
+                    if owner_id:
+                        notify_user_ids = [str(owner_id)]
+                except Exception:
+                    logger.debug(
+                        "safety.observation.high_risk: could not resolve project owner"
+                    )
+
+            if not notify_user_ids:
+                logger.debug("safety.observation.high_risk: no users to notify")
+                return
+
             svc = NotificationService(session)
             await svc.notify_users(
                 user_ids=notify_user_ids,
@@ -139,7 +158,7 @@ async def _handle_safety_observation_high_risk(event: Event) -> None:
                     "risk_score": risk_score,
                     "description": description[:200],
                 },
-                action_url=f"/projects/{data.get('project_id')}/safety?observation={observation_id}",
+                action_url=f"/projects/{project_id}/safety?observation={observation_id}",
             )
             await session.commit()
 
@@ -151,6 +170,83 @@ async def _handle_safety_observation_high_risk(event: Event) -> None:
         )
     except Exception:
         logger.exception("Error handling safety.observation.high_risk")
+
+
+# ---------------------------------------------------------------------------
+# 2b. safety.incident.created -> notify project owner
+# ---------------------------------------------------------------------------
+
+async def _handle_safety_incident_created(event: Event) -> None:
+    """Notify project owner when a safety incident is created.
+
+    Expected event.data:
+        project_id: str (UUID)
+        incident_id: str (UUID)
+        incident_number: str
+        incident_type: str
+        severity: str
+        description: str
+    """
+    try:
+        data = event.data
+        project_id = data.get("project_id")
+        incident_id = data.get("incident_id")
+        severity = data.get("severity", "")
+        incident_number = data.get("incident_number", "")
+        description = data.get("description", "")
+
+        from app.database import async_session_factory
+        from app.modules.notifications.service import NotificationService
+
+        async with async_session_factory() as session:
+            # Resolve project owner
+            notify_user_ids: list[str] = []
+            if project_id:
+                try:
+                    from sqlalchemy import select
+
+                    from app.modules.projects.models import Project
+
+                    result = await session.execute(
+                        select(Project.owner_id).where(Project.id == project_id)
+                    )
+                    owner_id = result.scalar_one_or_none()
+                    if owner_id:
+                        notify_user_ids = [str(owner_id)]
+                except Exception:
+                    logger.debug(
+                        "safety.incident.created: could not resolve project owner"
+                    )
+
+            if not notify_user_ids:
+                logger.debug("safety.incident.created: no users to notify")
+                return
+
+            svc = NotificationService(session)
+            await svc.notify_users(
+                user_ids=notify_user_ids,
+                notification_type="warning",
+                title_key="notifications.safety.incident_created",
+                entity_type="safety_incident",
+                entity_id=str(incident_id),
+                body_key="notifications.safety.incident_created_body",
+                body_context={
+                    "incident_number": incident_number,
+                    "severity": severity,
+                    "description": description[:200],
+                },
+                action_url=f"/projects/{project_id}/safety?incident={incident_id}",
+            )
+            await session.commit()
+
+        logger.info(
+            "safety.incident.created: notified %d users for incident %s (severity=%s)",
+            len(notify_user_ids),
+            incident_number,
+            severity,
+        )
+    except Exception:
+        logger.exception("Error handling safety.incident.created")
 
 
 # ---------------------------------------------------------------------------
@@ -1466,18 +1562,36 @@ async def _notify_ncr_created(event: Event) -> None:
         title: str
         severity: str
         created_by: str (UUID)
-        notify_user_ids: list[str] (UUIDs to notify, e.g. QA manager)
+        notify_user_ids: list[str] (UUIDs — if empty, falls back to project owner)
     """
     try:
         data = event.data
+        project_id = data.get("project_id")
         notify_ids = data.get("notify_user_ids", [])
-        if not notify_ids:
-            return
 
         from app.database import async_session_factory
         from app.modules.notifications.service import NotificationService
 
         async with async_session_factory() as session:
+            # If no explicit user list, fall back to project owner
+            if not notify_ids and project_id:
+                try:
+                    from sqlalchemy import select
+
+                    from app.modules.projects.models import Project
+
+                    result = await session.execute(
+                        select(Project.owner_id).where(Project.id == project_id)
+                    )
+                    owner_id = result.scalar_one_or_none()
+                    if owner_id:
+                        notify_ids = [str(owner_id)]
+                except Exception:
+                    logger.debug("_notify_ncr_created: could not resolve project owner")
+
+            if not notify_ids:
+                return
+
             svc = NotificationService(session)
             await svc.notify_users(
                 user_ids=notify_ids,
@@ -1491,7 +1605,7 @@ async def _notify_ncr_created(event: Event) -> None:
                     "title": str(data.get("title", ""))[:200],
                     "severity": data.get("severity", ""),
                 },
-                action_url=f"/projects/{data.get('project_id')}/ncr",
+                action_url=f"/projects/{project_id}/ncr",
             )
             await session.commit()
 
@@ -1606,6 +1720,7 @@ def register_event_handlers() -> None:
     # Original cross-module dataflow handlers (1–15)
     event_bus.subscribe("meeting.action_item.created", _handle_meeting_action_item_created)
     event_bus.subscribe("safety.observation.high_risk", _handle_safety_observation_high_risk)
+    event_bus.subscribe("safety.incident.created", _handle_safety_incident_created)
     event_bus.subscribe("inspection.completed.failed", _handle_inspection_completed_failed)
     event_bus.subscribe("rfi.response.design_change", _handle_rfi_response_design_change)
     event_bus.subscribe("ncr.cost_impact", _handle_ncr_cost_impact)

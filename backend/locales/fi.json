@@ -8,7 +8,8 @@
     "ai_estimate": "Tekoälylaskelma",
     "settings": "Asetukset",
     "5d_cost_model": "5D Kustannusmalli",
-    "templates": "Mallipohjat"
+    "templates": "Mallipohjat",
+    "architecture": "Arkkitehtuurikartta"
   },
   "common": {
     "save": "Tallenna",

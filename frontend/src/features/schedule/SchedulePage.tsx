@@ -23,8 +23,12 @@ import {
   ClipboardList,
   Users,
   Box,
+  GitBranch,
+  TrendingUp,
+  Layers,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Input, InfoHint, SkeletonTable, Breadcrumb, GanttChart as SVGGanttChart } from '@/shared/ui';
+import { Button, Card, Badge, Input, InfoHint, SkeletonTable, Breadcrumb, GanttChart as SVGGanttChart, ViewInBIMButton, ConfirmDialog } from '@/shared/ui';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import type { GanttActivity as SVGGanttActivity, GanttViewMode } from '@/shared/ui';
 import { apiGet, apiDelete } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
@@ -605,13 +609,48 @@ function GanttChart({
 
   if (activities.length === 0) {
     return (
-      <EmptyState
-        icon={<Calendar size={28} strokeWidth={1.5} />}
-        title={t('schedule.no_activities', { defaultValue: 'No activities yet' })}
-        description={t('schedule.no_activities_hint', {
-          defaultValue: 'Add activities to build your project timeline. Set start dates, durations, and dependencies -- the Gantt chart and critical path will update automatically.',
-        })}
-      />
+      <Card padding="none" className="overflow-hidden">
+        <div className="flex flex-col items-center justify-center py-14 px-6 text-center">
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-secondary text-content-tertiary">
+            <BarChart3 size={28} strokeWidth={1.5} />
+          </div>
+          <h3 className="text-lg font-semibold text-content-primary">
+            {t('schedule.gantt_empty_title', { defaultValue: 'Gantt chart is empty' })}
+          </h3>
+          <p className="mt-1.5 max-w-md text-sm text-content-secondary">
+            {t('schedule.gantt_empty_hint', {
+              defaultValue: 'Add activities manually or generate them from a BOQ to see the timeline. Dependencies and critical path will render automatically.',
+            })}
+          </p>
+          {/* Decorative timeline preview */}
+          <div className="mt-6 w-full max-w-lg">
+            <div className="flex items-center gap-2 mb-2 px-2">
+              <span className="text-2xs font-medium text-content-quaternary">{t('schedule.gantt_preview_label', { defaultValue: 'Timeline preview' })}</span>
+              <div className="flex-1 h-px bg-border-light" />
+            </div>
+            <div className="space-y-2 opacity-40">
+              <div className="flex items-center gap-3">
+                <span className="w-24 text-right text-2xs text-content-tertiary truncate">Foundation</span>
+                <div className="flex-1 h-6 rounded-md bg-oe-blue/15 relative">
+                  <div className="h-full w-3/5 rounded-md bg-oe-blue/30" />
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="w-24 text-right text-2xs text-content-tertiary truncate">Structural</span>
+                <div className="flex-1 h-6 rounded-md bg-semantic-success/15 relative ml-[15%]">
+                  <div className="h-full w-2/5 rounded-md bg-semantic-success/30" />
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="w-24 text-right text-2xs text-content-tertiary truncate">MEP Install</span>
+                <div className="flex-1 h-6 rounded-md bg-semantic-warning/15 relative ml-[30%]">
+                  <div className="h-full w-1/4 rounded-md bg-semantic-warning/30" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
     );
   }
 
@@ -674,6 +713,11 @@ function GanttChart({
                     <Badge variant={sc.variant} size="sm">
                       {displayProgress}%
                     </Badge>
+                    <ViewInBIMButton
+                      elementIds={activity.bim_element_ids ?? []}
+                      iconSize={9}
+                      className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-700 border border-amber-200 dark:border-amber-900/60 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors"
+                    />
                   </div>
                 </div>
                 {/* Progress slider */}
@@ -922,6 +966,7 @@ function ScheduleDetail({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
+  const { confirm, ...confirmProps } = useConfirm();
   const [zoomLevel, setZoomLevel] = useState<ZoomLevel>('week');
   const [viewMode, setViewMode] = useState<'table' | 'gantt'>('gantt');
   const [showAddActivity, setShowAddActivity] = useState(false);
@@ -1160,16 +1205,14 @@ function ScheduleDetail({
             </Badge>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {!hasActivities && (
-            <Button
-              variant="secondary"
-              icon={<FileBarChart size={16} />}
-              onClick={() => setShowGenerateBOQ(true)}
-            >
-              {t('schedule.generate_from_boq', 'Generate from BOQ')}
-            </Button>
-          )}
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="secondary"
+            icon={<FileBarChart size={16} />}
+            onClick={() => setShowGenerateBOQ(true)}
+          >
+            {t('schedule.generate_from_boq', 'Generate from BOQ')}
+          </Button>
           {hasActivities && (
             <>
               {/* View mode toggle: Table vs SVG Gantt */}
@@ -1211,6 +1254,7 @@ function ScheduleDetail({
                 icon={<Zap size={16} />}
                 onClick={() => calculateCPM.mutate()}
                 loading={calculateCPM.isPending}
+                title={t('schedule.cpm_tooltip', { defaultValue: 'Critical Path Method calculates the longest path through the project and identifies activities that cannot be delayed' })}
               >
                 {t('schedule.calculate_cpm', 'Critical Path')}
               </Button>
@@ -1253,10 +1297,12 @@ function ScheduleDetail({
                 variant="ghost"
                 size="sm"
                 icon={<RotateCcw size={14} />}
-                onClick={() => {
-                  if (window.confirm(t('schedule.confirm_reset', { defaultValue: 'Delete all activities and regenerate? This cannot be undone.' }))) {
-                    resetSchedule.mutate();
-                  }
+                onClick={async () => {
+                  const ok = await confirm({
+                    title: t('schedule.confirm_reset_title', { defaultValue: 'Reset schedule?' }),
+                    message: t('schedule.confirm_reset', { defaultValue: 'Delete all activities and regenerate? This cannot be undone.' }),
+                  });
+                  if (ok) resetSchedule.mutate();
                 }}
                 loading={resetSchedule.isPending}
               >
@@ -1274,115 +1320,197 @@ function ScheduleDetail({
         </div>
       </div>
 
-      {/* Summary stats */}
-      {ganttData && <SummaryStats summary={ganttData.summary} />}
+      {/* Content area: either the populated schedule or the empty state */}
+      {hasActivities ? (
+        <>
+          {/* Summary stats */}
+          {ganttData && <SummaryStats summary={ganttData.summary} />}
 
-      {/* Overall project progress bar */}
-      {ganttData && ganttData.summary.total_activities > 0 && (
-        <div className="mt-4 rounded-xl border border-border-light bg-surface-primary p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-content-primary">
-              {t('schedule.overall_progress', { defaultValue: 'Overall Progress' })}
-            </span>
-            <span className="text-sm font-bold text-oe-blue tabular-nums">
-              {Math.round((ganttData.summary.completed / Math.max(ganttData.summary.total_activities, 1)) * 100)}%
-            </span>
+          {/* Overall project progress bar */}
+          {ganttData && ganttData.summary.total_activities > 0 && (
+            <div className="mt-4 rounded-xl border border-border-light bg-surface-primary p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-content-primary">
+                  {t('schedule.overall_progress', { defaultValue: 'Overall Progress' })}
+                </span>
+                <span className="text-sm font-bold text-oe-blue tabular-nums">
+                  {Math.round((ganttData.summary.completed / Math.max(ganttData.summary.total_activities, 1)) * 100)}%
+                </span>
+              </div>
+              <div className="h-3 w-full overflow-hidden rounded-full bg-surface-secondary">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-500"
+                  style={{ width: `${(ganttData.summary.completed / Math.max(ganttData.summary.total_activities, 1)) * 100}%` }}
+                />
+              </div>
+              <div className="mt-2 flex items-center gap-4 text-xs text-content-tertiary">
+                <span>{ganttData.summary.completed} {t('schedule.completed_label', { defaultValue: 'completed' })}</span>
+                <span>{ganttData.summary.in_progress} {t('schedule.in_progress_label', { defaultValue: 'in progress' })}</span>
+                <span>{ganttData.summary.delayed} {t('schedule.delayed_label', { defaultValue: 'delayed' })}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Activity filter */}
+          <div className="mt-4 flex items-center gap-2">
+            <span className="text-xs text-content-tertiary">{t('schedule.filter_label', { defaultValue: 'Show:' })}</span>
+            {[
+              { key: 'all', label: t('schedule.filter_all', { defaultValue: 'All' }), count: ganttData?.summary.total_activities ?? 0 },
+              { key: 'critical', label: t('schedule.filter_critical', { defaultValue: 'Critical Path' }), count: cpmResult?.critical_path.length ?? 0, show: !!cpmResult },
+              { key: 'delayed', label: t('schedule.filter_delayed', { defaultValue: 'Delayed' }), count: ganttData?.summary.delayed ?? 0 },
+              { key: 'in_progress', label: t('schedule.filter_in_progress', { defaultValue: 'In Progress' }), count: ganttData?.summary.in_progress ?? 0 },
+            ].filter((f) => f.show !== false && (f.key === 'all' || f.count > 0)).map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setActivityFilter(f.key)}
+                className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full transition-colors ${
+                  activityFilter === f.key
+                    ? 'bg-oe-blue text-white'
+                    : 'text-content-secondary hover:bg-surface-secondary border border-border-light'
+                }`}
+              >
+                {f.label}
+                <span className="tabular-nums">{f.count}</span>
+              </button>
+            ))}
           </div>
-          <div className="h-3 w-full overflow-hidden rounded-full bg-surface-secondary">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-500"
-              style={{ width: `${(ganttData.summary.completed / Math.max(ganttData.summary.total_activities, 1)) * 100}%` }}
-            />
+
+          {/* Risk analysis card */}
+          {riskResult && <RiskAnalysisCard data={riskResult} />}
+
+          {/* CPM summary (when calculated but risk not yet requested) */}
+          {cpmResult && !riskResult && (
+            <Card padding="sm" className="mt-4">
+              <div className="flex items-center gap-3">
+                <Zap size={16} className="text-semantic-error" />
+                <span className="text-sm font-medium text-content-primary">
+                  {t('schedule.cpm_result', 'Critical Path: {{duration}} days, {{count}} critical activities', {
+                    duration: cpmResult.project_duration_days,
+                    count: cpmResult.critical_path.length,
+                  })}
+                </span>
+              </div>
+            </Card>
+          )}
+
+          {/* BIM hint */}
+          {hasBIMModels && (
+            <div className="mt-4 flex items-center gap-2 rounded-lg border border-border-light bg-surface-secondary/30 px-4 py-2.5">
+              <Box size={14} className="shrink-0 text-content-tertiary" />
+              <span className="text-xs text-content-tertiary">
+                {t('schedule.bim_hint', {
+                  defaultValue:
+                    'BIM models available -- link activities to elements for 4D visualization',
+                })}
+              </span>
+            </div>
+          )}
+
+          {/* Gantt chart */}
+          <div className="mt-6">
+            {isLoading ? (
+              <SkeletonTable rows={4} columns={4} />
+            ) : ganttData ? (
+              viewMode === 'gantt' ? (
+                <SVGGanttChart
+                  activities={svgGanttActivities}
+                  viewMode={zoomLevel as GanttViewMode}
+                  showBaseline={false}
+                  showDependencies={true}
+                  showCriticalPath={!!cpmResult}
+                  todayLine={true}
+                />
+              ) : (
+                <GanttChart
+                  activities={filteredActivities}
+                  onUpdateProgress={handleUpdateProgress}
+                  criticalActivityIds={criticalActivityIds}
+                  zoomLevel={zoomLevel}
+                />
+              )
+            ) : null}
           </div>
-          <div className="mt-2 flex items-center gap-4 text-xs text-content-tertiary">
-            <span>{ganttData.summary.completed} {t('schedule.completed_label', { defaultValue: 'completed' })}</span>
-            <span>{ganttData.summary.in_progress} {t('schedule.in_progress_label', { defaultValue: 'in progress' })}</span>
-            <span>{ganttData.summary.delayed} {t('schedule.delayed_label', { defaultValue: 'delayed' })}</span>
-          </div>
-        </div>
-      )}
-
-      {/* Activity filter */}
-      {hasActivities && (
-        <div className="mt-4 flex items-center gap-2">
-          <span className="text-xs text-content-tertiary">{t('schedule.filter_label', { defaultValue: 'Show:' })}</span>
-          {[
-            { key: 'all', label: t('schedule.filter_all', { defaultValue: 'All' }), count: ganttData?.summary.total_activities ?? 0 },
-            { key: 'critical', label: t('schedule.filter_critical', { defaultValue: 'Critical Path' }), count: cpmResult?.critical_path.length ?? 0, show: !!cpmResult },
-            { key: 'delayed', label: t('schedule.filter_delayed', { defaultValue: 'Delayed' }), count: ganttData?.summary.delayed ?? 0 },
-            { key: 'in_progress', label: t('schedule.filter_in_progress', { defaultValue: 'In Progress' }), count: ganttData?.summary.in_progress ?? 0 },
-          ].filter((f) => f.show !== false && (f.key === 'all' || f.count > 0)).map((f) => (
-            <button
-              key={f.key}
-              onClick={() => setActivityFilter(f.key)}
-              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-full transition-colors ${
-                activityFilter === f.key
-                  ? 'bg-oe-blue text-white'
-                  : 'text-content-secondary hover:bg-surface-secondary border border-border-light'
-              }`}
-            >
-              {f.label}
-              <span className="tabular-nums">{f.count}</span>
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Risk analysis card */}
-      {riskResult && <RiskAnalysisCard data={riskResult} />}
-
-      {/* CPM summary (when calculated but risk not yet requested) */}
-      {cpmResult && !riskResult && (
-        <Card padding="sm" className="mt-4">
-          <div className="flex items-center gap-3">
-            <Zap size={16} className="text-semantic-error" />
-            <span className="text-sm font-medium text-content-primary">
-              {t('schedule.cpm_result', 'Critical Path: {{duration}} days, {{count}} critical activities', {
-                duration: cpmResult.project_duration_days,
-                count: cpmResult.critical_path.length,
-              })}
-            </span>
-          </div>
-        </Card>
-      )}
-
-      {/* BIM hint */}
-      {hasBIMModels && (
-        <div className="mt-4 flex items-center gap-2 rounded-lg border border-border-light bg-surface-secondary/30 px-4 py-2.5">
-          <Box size={14} className="shrink-0 text-content-tertiary" />
-          <span className="text-xs text-content-tertiary">
-            {t('schedule.bim_hint', {
-              defaultValue:
-                'BIM models available -- link activities to elements for 4D visualization',
-            })}
-          </span>
-        </div>
-      )}
-
-      {/* Gantt chart */}
-      <div className="mt-6">
-        {isLoading ? (
-          <SkeletonTable rows={4} columns={4} />
-        ) : ganttData ? (
-          viewMode === 'gantt' ? (
-            <SVGGanttChart
-              activities={svgGanttActivities}
-              viewMode={zoomLevel as GanttViewMode}
-              showBaseline={false}
-              showDependencies={true}
-              showCriticalPath={!!cpmResult}
-              todayLine={true}
-            />
+        </>
+      ) : (
+        /* Empty state: no activities yet */
+        <div className="mt-6">
+          {isLoading ? (
+            <SkeletonTable rows={4} columns={4} />
           ) : (
-            <GanttChart
-              activities={filteredActivities}
-              onUpdateProgress={handleUpdateProgress}
-              criticalActivityIds={criticalActivityIds}
-              zoomLevel={zoomLevel}
-            />
-          )
-        ) : null}
-      </div>
+            <Card padding="none" className="overflow-hidden">
+              <div className="flex flex-col items-center justify-center py-14 px-6 text-center">
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-oe-blue/10 to-oe-blue/20">
+                  <CalendarDays size={32} className="text-oe-blue" />
+                </div>
+                <h3 className="text-lg font-semibold text-content-primary">
+                  {t('schedule.detail_empty_title', { defaultValue: 'Build your project timeline' })}
+                </h3>
+                <p className="mt-1.5 max-w-md text-sm text-content-secondary">
+                  {t('schedule.detail_empty_desc', {
+                    defaultValue: 'Add activities manually or generate them from an existing BOQ. The Gantt chart, dependencies, and critical path analysis will appear here.',
+                  })}
+                </p>
+
+                {/* Quick-start options */}
+                <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-lg">
+                  <button
+                    onClick={() => setShowGenerateBOQ(true)}
+                    className="group flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-border-light bg-surface-secondary/30 p-6 transition-all hover:border-oe-blue/50 hover:bg-oe-blue-subtle/30"
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue transition-transform group-hover:scale-110">
+                      <FileBarChart size={24} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-content-primary">
+                        {t('schedule.quickstart_boq_title', { defaultValue: 'Generate from BOQ' })}
+                      </p>
+                      <p className="mt-0.5 text-xs text-content-tertiary">
+                        {t('schedule.quickstart_boq_desc', { defaultValue: 'Auto-create activities from your Bill of Quantities' })}
+                      </p>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setShowAddActivity(true)}
+                    className="group flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-border-light bg-surface-secondary/30 p-6 transition-all hover:border-oe-blue/50 hover:bg-oe-blue-subtle/30"
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-secondary text-content-secondary transition-transform group-hover:scale-110">
+                      <Plus size={24} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-content-primary">
+                        {t('schedule.quickstart_manual_title', { defaultValue: 'Add Manually' })}
+                      </p>
+                      <p className="mt-0.5 text-xs text-content-tertiary">
+                        {t('schedule.quickstart_manual_desc', { defaultValue: 'Create tasks, milestones, and summary activities' })}
+                      </p>
+                    </div>
+                  </button>
+                </div>
+
+                {/* Feature hints */}
+                <div className="mt-8 flex flex-wrap justify-center gap-4 text-xs text-content-tertiary">
+                  <span className="flex items-center gap-1.5">
+                    <Zap size={12} className="text-oe-blue" />
+                    {t('schedule.hint_cpm', { defaultValue: 'CPM critical path' })}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <GitBranch size={12} className="text-oe-blue" />
+                    {t('schedule.hint_deps', { defaultValue: 'FS/SS/FF/SF dependencies' })}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <ShieldAlert size={12} className="text-oe-blue" />
+                    {t('schedule.hint_risk', { defaultValue: 'PERT risk analysis' })}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <TrendingUp size={12} className="text-oe-blue" />
+                    {t('schedule.hint_progress', { defaultValue: 'Progress tracking' })}
+                  </span>
+                </div>
+              </div>
+            </Card>
+          )}
+        </div>
+      )}
 
       {/* Add Activity Modal */}
       <Modal
@@ -1524,6 +1652,7 @@ function ScheduleDetail({
           </div>
         </div>
       </Modal>
+      <ConfirmDialog {...confirmProps} />
     </div>
   );
 }
@@ -1617,17 +1746,90 @@ function ProjectSchedules({
       {isLoading ? (
         <SkeletonTable rows={3} columns={4} />
       ) : !schedules || schedules.length === 0 ? (
-        <EmptyState
-          icon={<Calendar size={28} strokeWidth={1.5} />}
-          title={t('schedule.no_schedules', { defaultValue: 'No schedules yet' })}
-          description={t('schedule.no_schedules_hint', {
-            defaultValue: 'The schedule shows when each activity happens. Create activities, set dependencies, and let the automatic CPM calculation find your critical path.',
-          })}
-          action={{
-            label: t('schedule.create_schedule', { defaultValue: 'Create Schedule' }),
-            onClick: () => setShowCreate(true),
-          }}
-        />
+        <div className="max-w-3xl mx-auto py-6">
+          {/* Hero */}
+          <div className="text-center mb-8">
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-oe-blue/10 to-oe-blue/20 flex items-center justify-center mb-4">
+              <CalendarDays size={32} className="text-oe-blue" />
+            </div>
+            <h2 className="text-xl font-bold text-content-primary">
+              {t('schedule.empty_hero_title', { defaultValue: '4D Schedule with Gantt Chart' })}
+            </h2>
+            <p className="text-sm text-content-secondary mt-2 max-w-lg mx-auto">
+              {t('schedule.empty_hero_desc', {
+                defaultValue: 'Plan your construction timeline with interactive Gantt charts, dependency management, and Critical Path Method analysis. Generate schedules automatically from your BOQ.',
+              })}
+            </p>
+          </div>
+
+          {/* Feature cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div className="border border-border-light rounded-lg bg-surface-primary p-5 text-center">
+              <div className="mx-auto w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center mb-3">
+                <FileBarChart size={20} className="text-blue-600 dark:text-blue-400" />
+              </div>
+              <h3 className="text-sm font-semibold text-content-primary mb-1">
+                {t('schedule.feature_boq_title', { defaultValue: 'Auto-generate from BOQ' })}
+              </h3>
+              <p className="text-xs text-content-tertiary">
+                {t('schedule.feature_boq_desc', {
+                  defaultValue: 'Create activities from your Bill of Quantities with cost-proportional durations.',
+                })}
+              </p>
+            </div>
+            <div className="border border-border-light rounded-lg bg-surface-primary p-5 text-center">
+              <div className="mx-auto w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center mb-3">
+                <GitBranch size={20} className="text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <h3 className="text-sm font-semibold text-content-primary mb-1">
+                {t('schedule.feature_deps_title', { defaultValue: 'Dependencies & Links' })}
+              </h3>
+              <p className="text-xs text-content-tertiary">
+                {t('schedule.feature_deps_desc', {
+                  defaultValue: 'FS, SS, FF, SF dependency types with lag days. Arrows drawn automatically on the Gantt chart.',
+                })}
+              </p>
+            </div>
+            <div className="border border-border-light rounded-lg bg-surface-primary p-5 text-center">
+              <div className="mx-auto w-10 h-10 rounded-lg bg-red-50 dark:bg-red-950/30 flex items-center justify-center mb-3">
+                <Zap size={20} className="text-red-600 dark:text-red-400" />
+              </div>
+              <h3 className="text-sm font-semibold text-content-primary mb-1">
+                {t('schedule.feature_cpm_title', { defaultValue: 'CPM Critical Path' })}
+              </h3>
+              <p className="text-xs text-content-tertiary">
+                {t('schedule.feature_cpm_desc', {
+                  defaultValue: 'Identify activities that directly affect the project end date. Calculate float and slack.',
+                })}
+              </p>
+            </div>
+            <div className="border border-border-light rounded-lg bg-surface-primary p-5 text-center">
+              <div className="mx-auto w-10 h-10 rounded-lg bg-violet-50 dark:bg-violet-950/30 flex items-center justify-center mb-3">
+                <ShieldAlert size={20} className="text-violet-600 dark:text-violet-400" />
+              </div>
+              <h3 className="text-sm font-semibold text-content-primary mb-1">
+                {t('schedule.feature_risk_title', { defaultValue: 'Monte Carlo Risk' })}
+              </h3>
+              <p className="text-xs text-content-tertiary">
+                {t('schedule.feature_risk_desc', {
+                  defaultValue: 'PERT-based risk analysis with P50/P80/P95 confidence intervals and buffer calculation.',
+                })}
+              </p>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="text-center">
+            <Button
+              variant="primary"
+              size="lg"
+              icon={<Plus size={18} />}
+              onClick={() => setShowCreate(true)}
+            >
+              {t('schedule.create_schedule', { defaultValue: 'Create Schedule' })}
+            </Button>
+          </div>
+        </div>
       ) : (
         <div className="space-y-3">
           {schedules.map((schedule) => (
@@ -1727,6 +1929,7 @@ export function SchedulePage() {
   const { data: projects, isLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<Project[]>('/v1/projects/'),
+    staleTime: 5 * 60_000,
   });
 
   const selectedProject = useMemo(
@@ -1809,13 +2012,55 @@ export function SchedulePage() {
       {isLoading ? (
         <SkeletonTable rows={3} columns={3} />
       ) : !projects || projects.length === 0 ? (
-        <EmptyState
-          icon={<Calendar size={28} strokeWidth={1.5} />}
-          title={t('schedule.no_schedule_items', { defaultValue: 'No schedule items' })}
-          description={t('schedule.no_projects_hint', {
-            defaultValue: 'Create a project first to start building your schedule',
-          })}
-        />
+        <div className="max-w-2xl mx-auto py-8">
+          <div className="text-center mb-8">
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-oe-blue/10 to-oe-blue/20 flex items-center justify-center mb-4">
+              <Calendar size={32} className="text-oe-blue" />
+            </div>
+            <h2 className="text-xl font-bold text-content-primary">
+              {t('schedule.no_projects_title', { defaultValue: 'No projects yet' })}
+            </h2>
+            <p className="text-sm text-content-secondary mt-2 max-w-md mx-auto">
+              {t('schedule.no_projects_desc', {
+                defaultValue: 'Create a project first to start building your 4D schedule with Gantt charts, dependencies, and critical path analysis.',
+              })}
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
+            <div className="flex items-start gap-3 rounded-lg border border-border-light bg-surface-primary p-4">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle">
+                <Layers size={16} className="text-oe-blue" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-content-primary">{t('schedule.step_1_title', { defaultValue: 'Create a Project' })}</p>
+                <p className="text-xs text-content-tertiary mt-0.5">{t('schedule.step_1_desc', { defaultValue: 'Set up your project in the Projects module' })}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 rounded-lg border border-border-light bg-surface-primary p-4">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle">
+                <CalendarDays size={16} className="text-oe-blue" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-content-primary">{t('schedule.step_2_title', { defaultValue: 'Create a Schedule' })}</p>
+                <p className="text-xs text-content-tertiary mt-0.5">{t('schedule.step_2_desc', { defaultValue: 'Add timelines and milestones' })}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 rounded-lg border border-border-light bg-surface-primary p-4">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-oe-blue-subtle">
+                <Zap size={16} className="text-oe-blue" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-content-primary">{t('schedule.step_3_title', { defaultValue: 'Analyze & Optimize' })}</p>
+                <p className="text-xs text-content-tertiary mt-0.5">{t('schedule.step_3_desc', { defaultValue: 'Run CPM and risk analysis' })}</p>
+              </div>
+            </div>
+          </div>
+          <div className="text-center">
+            <Button variant="primary" icon={<Plus size={16} />} onClick={() => navigate('/projects')}>
+              {t('schedule.go_to_projects', { defaultValue: 'Go to Projects' })}
+            </Button>
+          </div>
+        </div>
       ) : (
         <div className="space-y-3">
           {projects.map((project) => (

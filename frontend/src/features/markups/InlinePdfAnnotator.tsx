@@ -52,7 +52,19 @@ interface StampDef {
 interface DrawnAnnotation {
   id: string;
   tool: AnnotationTool;
+  /**
+   * Annotation vertices in PDF user units (the CRS returned by
+   * ``viewport.convertToPdfPoint``). These are zoom-, rotation- and
+   * device-pixel-ratio-independent, so a markup saved at zoom 1.0 renders
+   * correctly when reopened at any other zoom.
+   *
+   * Legacy markups (``coordSpace === 'canvas'``) still hold raw overlay
+   * canvas pixel coordinates; the render loop converts both variants into
+   * viewport pixels on the fly.
+   */
   points: { x: number; y: number }[];
+  /** ``'pdf'`` for new markups, ``'canvas'`` for legacy pixel-space ones. */
+  coordSpace: 'pdf' | 'canvas';
   text?: string;
   color: string;
   page: number;
@@ -144,11 +156,15 @@ export function InlinePdfAnnotator({
   const overlayRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const pageDimensionsRef = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
+  // Current rendered viewport. Required for converting between PDF user
+  // units (where annotations are stored) and canvas pixels (where we draw).
+  const viewportRef = useRef<pdfjsLib.PageViewport | null>(null);
 
   /* ── Load PDF from backend ────────────────────────────────────────── */
 
   useEffect(() => {
     let cancelled = false;
+    let loadedDoc: pdfjsLib.PDFDocumentProxy | null = null;
     const loadPdf = async () => {
       setIsLoading(true);
       setError(null);
@@ -164,7 +180,13 @@ export function InlinePdfAnnotator({
         const arrayBuffer = await res.arrayBuffer();
         if (cancelled) return;
         const doc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        if (cancelled) return;
+        if (cancelled) {
+          // Component unmounted while the doc was loading — free native
+          // resources immediately to prevent the classic PDF.js leak.
+          doc.destroy?.();
+          return;
+        }
+        loadedDoc = doc;
         setPdfDoc(doc);
         setTotalPages(doc.numPages);
         setCurrentPage(1);
@@ -177,7 +199,12 @@ export function InlinePdfAnnotator({
       }
     };
     loadPdf();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      // Release the worker-side document; without this PDF.js holds onto
+      // the entire file buffer + parsed objects for the lifetime of the tab.
+      loadedDoc?.destroy?.();
+    };
   }, [documentId]);
 
   /* ── Load existing markups from server ─────────────────────────────── */
@@ -189,15 +216,23 @@ export function InlinePdfAnnotator({
       try {
         const existing = await fetchMarkups(projectId, { document_id: documentId });
         if (cancelled || existing.length === 0) return;
-        const loaded: DrawnAnnotation[] = existing.map((m: Markup) => ({
-          id: m.id,
-          tool: (m.geometry?.tool as AnnotationTool) || (m.type as AnnotationTool) || 'rectangle',
-          points: (m.geometry?.points as { x: number; y: number }[]) || [{ x: 50, y: 50 }],
-          text: m.text || m.label || undefined,
-          color: m.color || '#3B82F6',
-          page: m.page || 1,
-          stampName: (m.geometry?.stamp_name as string) || (m.type === 'stamp' ? (m.label || undefined) : undefined),
-        }));
+        const loaded: DrawnAnnotation[] = existing.map((m: Markup) => {
+          const savedSpace = (m.geometry?.coord_space as 'pdf' | 'canvas' | undefined);
+          return {
+            id: m.id,
+            tool: (m.geometry?.tool as AnnotationTool) || (m.type as AnnotationTool) || 'rectangle',
+            points: (m.geometry?.points as { x: number; y: number }[]) || [{ x: 50, y: 50 }],
+            // Backwards compat: pre-v1.3.17 markups were stored in overlay
+            // canvas pixels and therefore mis-render at any non-saving zoom.
+            // Treat anything without an explicit ``coord_space`` flag as
+            // legacy ``canvas`` so they at least appear on-screen.
+            coordSpace: savedSpace === 'pdf' ? 'pdf' : 'canvas',
+            text: m.text || m.label || undefined,
+            color: m.color || '#3B82F6',
+            page: m.page || 1,
+            stampName: (m.geometry?.stamp_name as string) || (m.type === 'stamp' ? (m.label || undefined) : undefined),
+          };
+        });
         if (!cancelled) setAnnotations((prev) => [...prev, ...loaded]);
       } catch {
         // non-critical — just won't show existing markups
@@ -212,6 +247,7 @@ export function InlinePdfAnnotator({
   useEffect(() => {
     if (!pdfDoc || !canvasRef.current) return;
     let cancelled = false;
+    let activeTask: ReturnType<pdfjsLib.PDFPageProxy['render']> | null = null;
     const renderPage = async () => {
       const page = await pdfDoc.getPage(currentPage);
       if (cancelled) return;
@@ -221,6 +257,7 @@ export function InlinePdfAnnotator({
       canvas.width = viewport.width;
       canvas.height = viewport.height;
       pageDimensionsRef.current = { width: viewport.width, height: viewport.height };
+      viewportRef.current = viewport;
 
       // Also size the overlay canvas
       if (overlayRef.current) {
@@ -228,13 +265,30 @@ export function InlinePdfAnnotator({
         overlayRef.current.height = viewport.height;
       }
 
-      await page.render({ canvasContext: ctx, viewport }).promise;
+      activeTask = page.render({ canvasContext: ctx, viewport });
+      try {
+        await activeTask.promise;
+      } catch (err) {
+        // RenderingCancelledException is expected on zoom / page flip —
+        // swallow it, but surface anything else to the console.
+        if (err && (err as { name?: string }).name !== 'RenderingCancelledException') {
+          // eslint-disable-next-line no-console
+          console.warn('PDF page render failed', err);
+        }
+        return;
+      }
       if (!cancelled) {
         drawAnnotations();
       }
     };
     renderPage();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      // Cancel the in-flight render — otherwise rapidly flipping pages
+      // accumulates orphan RenderTasks each holding a full canvas worth of
+      // bitmap data.
+      activeTask?.cancel?.();
+    };
   }, [pdfDoc, currentPage, zoom]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Draw annotations on overlay ──────────────────────────────────── */
@@ -245,9 +299,39 @@ export function InlinePdfAnnotator({
     const ctx = canvas.getContext('2d')!;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    const viewport = viewportRef.current;
+
+    /**
+     * Project a stored point into current viewport pixel coordinates.
+     *
+     * - ``coordSpace === 'pdf'``: stored as PDF user units → map via
+     *   ``viewport.convertToViewportPoint``.
+     * - ``coordSpace === 'canvas'`` (legacy): stored as overlay pixels at
+     *   the saving user's zoom. We have no reliable way to recover the
+     *   original scale, so we render them at today's pixel values, which
+     *   at least keeps the demo workflow showing existing markups.
+     */
+    const toPixel = (
+      p: { x: number; y: number },
+      space: 'pdf' | 'canvas',
+    ): { x: number; y: number } => {
+      if (space === 'pdf' && viewport) {
+        const [px, py] = viewport.convertToViewportPoint(p.x, p.y);
+        return { x: px, y: py };
+      }
+      return p;
+    };
+
     const pageAnnotations = annotations.filter((a) => a.page === currentPage);
 
-    for (const ann of pageAnnotations) {
+    for (const rawAnn of pageAnnotations) {
+      // Materialise the annotation with points already mapped into
+      // overlay-canvas pixel space so the shape-drawing branches stay
+      // unchanged.
+      const ann = {
+        ...rawAnn,
+        points: rawAnn.points.map((p) => toPixel(p, rawAnn.coordSpace)),
+      };
       ctx.save();
       ctx.strokeStyle = ann.color;
       ctx.fillStyle = ann.color;
@@ -404,6 +488,22 @@ export function InlinePdfAnnotator({
     };
   }, []);
 
+  /**
+   * Convert an overlay canvas pixel point into PDF user units.
+   *
+   * All annotations are persisted in PDF user units so that a markup saved
+   * at zoom 1.0 renders at the correct physical location when reopened at
+   * any other zoom. If the viewport is not yet ready (edge case during
+   * first paint), we fall back to the canvas coordinates unchanged; the
+   * next render pass will use the correct viewport.
+   */
+  const toPdfPoint = useCallback((p: { x: number; y: number }): { x: number; y: number } => {
+    const viewport = viewportRef.current;
+    if (!viewport) return p;
+    const [x, y] = viewport.convertToPdfPoint(p.x, p.y);
+    return { x, y };
+  }, []);
+
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (activeTool === 'select') return;
     const coords = getCanvasCoords(e);
@@ -420,7 +520,8 @@ export function InlinePdfAnnotator({
       const newAnnotation: DrawnAnnotation = {
         id: crypto.randomUUID(),
         tool: 'stamp',
-        points: [coords],
+        points: [toPdfPoint(coords)],
+        coordSpace: 'pdf',
         stampName: selectedStamp,
         text: stampDef?.label || selectedStamp,
         color: stampDef?.color || activeColor,
@@ -456,14 +557,15 @@ export function InlinePdfAnnotator({
     const newAnnotation: DrawnAnnotation = {
       id: crypto.randomUUID(),
       tool: activeTool,
-      points: [drawStart, drawEnd],
+      points: [toPdfPoint(drawStart), toPdfPoint(drawEnd)],
+      coordSpace: 'pdf',
       color: activeColor,
       page: currentPage,
     };
     setAnnotations((prev) => [...prev, newAnnotation]);
     setDrawStart(null);
     setDrawEnd(null);
-  }, [isDrawing, drawStart, drawEnd, activeTool, activeColor, currentPage]);
+  }, [isDrawing, drawStart, drawEnd, activeTool, activeColor, currentPage, toPdfPoint]);
 
   const handleTextSubmit = useCallback(() => {
     if (!textPosition || !textInput.trim()) {
@@ -473,7 +575,8 @@ export function InlinePdfAnnotator({
     const newAnnotation: DrawnAnnotation = {
       id: crypto.randomUUID(),
       tool: 'text',
-      points: [textPosition],
+      points: [toPdfPoint(textPosition)],
+      coordSpace: 'pdf',
       text: textInput.trim(),
       color: activeColor,
       page: currentPage,
@@ -482,7 +585,7 @@ export function InlinePdfAnnotator({
     setShowTextInput(false);
     setTextInput('');
     setTextPosition(null);
-  }, [textPosition, textInput, activeColor, currentPage]);
+  }, [textPosition, textInput, activeColor, currentPage, toPdfPoint]);
 
   /* ── Save all annotations as markups ──────────────────────────────── */
 
@@ -510,6 +613,10 @@ export function InlinePdfAnnotator({
         geometry: {
           points: ann.points,
           tool: ann.tool,
+          // Mark coordinate space so readers can correctly interpret
+          // ``points``. Legacy markups (saved pre-v1.3.17) do not carry
+          // this field and default to canvas pixels on read.
+          coord_space: ann.coordSpace,
           ...(ann.stampName ? { stamp_name: ann.stampName } : {}),
         },
         ...(ann.text ? { text: ann.text } : {}),

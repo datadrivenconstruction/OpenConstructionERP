@@ -10,6 +10,7 @@ import { apiGet, apiPost, triggerDownload } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useRecentStore } from '@/stores/useRecentStore';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useBIMLinkSelectionStore } from '@/stores/useBIMLinkSelectionStore';
 import {
   boqApi,
   groupPositionsIntoSections,
@@ -232,17 +233,26 @@ export function BOQEditorPage() {
       }
       isUndoRedoInProgressRef.current = false;
     },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('boq.add_failed', { defaultValue: 'Failed to add position' }), message: err.message });
+    },
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdatePositionData }) =>
       boqApi.updatePosition(id, data),
     onSuccess: () => invalidateAll(),
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('boq.update_failed', { defaultValue: 'Failed to update position' }), message: err.message });
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => boqApi.deletePosition(id),
     onSuccess: () => invalidateAll(),
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('boq.delete_failed', { defaultValue: 'Failed to delete position' }), message: err.message });
+    },
   });
 
   const [renumberDialogOpen, setRenumberDialogOpen] = useState(false);
@@ -319,7 +329,7 @@ export function BOQEditorPage() {
   }, [unlockMutation]);
 
   const createBudgetMutation = useMutation({
-    mutationFn: () => apiPost<{ created: number }>(`/v1/boq/boqs/${boqId}/create-budget`, {}),
+    mutationFn: () => apiPost<{ created: number }>(`/v1/boq/boqs/${boqId}/create-budget/`, {}),
     onSuccess: (data) => {
       addToast({
         type: 'success',
@@ -344,7 +354,7 @@ export function BOQEditorPage() {
   }, [createBudgetMutation]);
 
   const createRevisionMutation = useMutation({
-    mutationFn: () => apiPost<{ id: string }>(`/v1/boq/boqs/${boqId}/create-revision`, {}),
+    mutationFn: () => apiPost<{ id: string }>(`/v1/boq/boqs/${boqId}/create-revision/`, {}),
     onSuccess: (result) => {
       invalidateAll();
       addToast({
@@ -485,8 +495,11 @@ export function BOQEditorPage() {
       const pending = pendingDeleteRef.current;
       if (pending) {
         clearTimeout(pending.timeoutId);
-        // Fire the API call so the delete isn't silently lost
-        boqApi.deletePosition(pending.positionSnapshot.id).catch(() => {});
+        // Fire the API call so the delete isn't silently lost.
+        // Log failures — component is unmounting so toasts may not render.
+        boqApi.deletePosition(pending.positionSnapshot.id).catch((err) => {
+          console.error('Failed to flush pending delete on unmount:', err);
+        });
         pendingDeleteRef.current = null;
       }
     };
@@ -648,9 +661,50 @@ export function BOQEditorPage() {
     boqGridRef.current?.clearSelection();
   }, []);
 
-  const handleSelectionChanged = useCallback((ids: string[]) => {
-    setSelectedPositionIds(ids);
-  }, []);
+  /* ── Cross-highlight bridge to BIM viewer ───────────────────────── */
+  const setBOQLinkSelection = useBIMLinkSelectionStore((s) => s.setBOQSelection);
+  const clearBIMLinkSelection = useBIMLinkSelectionStore((s) => s.clear);
+  const bimSelectedElementIds = useBIMLinkSelectionStore((s) => s.selectedBIMElementIds);
+  /** Position ID to scroll-to-and-flash when a BIM mesh click arrives. */
+  const [bimScrollTargetId, setBimScrollTargetId] = useState<string | undefined>(undefined);
+
+  const handleSelectionChanged = useCallback(
+    (ids: string[]) => {
+      setSelectedPositionIds(ids);
+      // Publish to the cross-highlight store so the BIM viewer lights up
+      // linked elements in orange. Only single-row selection drives it —
+      // multi-select clears any existing highlight.
+      if (ids.length === 1) {
+        const pos = boq?.positions.find((p) => p.id === ids[0]);
+        const cadIds = pos?.cad_element_ids ?? [];
+        setBOQLinkSelection(pos?.id ?? null, cadIds);
+      } else {
+        setBOQLinkSelection(null, []);
+      }
+    },
+    [boq?.positions, setBOQLinkSelection],
+  );
+
+  // Clear the cross-highlight store on unmount or when switching BOQs so
+  // the BIM viewer doesn't keep a stale highlight from a different BOQ.
+  useEffect(() => {
+    return () => clearBIMLinkSelection();
+  }, [boqId, clearBIMLinkSelection]);
+
+  // Viewer → editor: when the user clicks a mesh in the BIM viewer, scroll
+  // to the first BOQ position whose `cad_element_ids` contains that ID.
+  useEffect(() => {
+    if (bimSelectedElementIds.length === 0) {
+      setBimScrollTargetId(undefined);
+      return;
+    }
+    const positions = boq?.positions ?? [];
+    const bimIdSet = new Set(bimSelectedElementIds);
+    const match = positions.find((p) =>
+      (p.cad_element_ids ?? []).some((cid) => bimIdSet.has(cid)),
+    );
+    if (match) setBimScrollTargetId(match.id);
+  }, [bimSelectedElementIds, boq?.positions]);
 
   const handleUndo = useCallback(() => {
     const entry = undoStackRef.current.pop();
@@ -934,6 +988,9 @@ export function BOQEditorPage() {
     onSuccess: () => {
       invalidateAll();
       addToast({ type: 'success', title: t('boq.section_added', { defaultValue: 'Section added' }) });
+    },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('boq.section_add_failed', { defaultValue: 'Failed to add section' }), message: err.message });
     },
   });
 
@@ -1282,6 +1339,22 @@ export function BOQEditorPage() {
   const handleRecalculate = useCallback(() => {
     setShowRecalcConfirm(true);
   }, []);
+
+  // "s" shortcut → save / recalculate rates (when not typing in an input)
+  useEffect(() => {
+    const INTERACTIVE = new Set(['INPUT', 'TEXTAREA', 'SELECT']);
+    const handler = (e: KeyboardEvent) => {
+      const el = document.activeElement;
+      if (el && (INTERACTIVE.has(el.tagName) || (el as HTMLElement).isContentEditable)) return;
+      if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
+      if (e.key === 's') {
+        e.preventDefault();
+        handleRecalculate();
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [handleRecalculate]);
 
   /* ── Excel paste handler ──────────────────────────────────────────── */
 
@@ -2189,7 +2262,7 @@ export function BOQEditorPage() {
           )}
           <div className="flex items-center gap-2 flex-shrink-0">
             {!boq.is_locked && isManager && (
-              <Button variant="secondary" size="sm" onClick={handleLock} disabled={lockMutation.isPending}>
+              <Button variant="secondary" size="sm" onClick={handleLock} disabled={lockMutation.isPending} title={t('boq.lock_tooltip', { defaultValue: 'Lock prevents edits. Create a revision to make changes to a locked estimate.' })}>
                 <Lock size={14} className="mr-1" />
                 {t('boq.lock', { defaultValue: 'Lock Estimate' })}
               </Button>
@@ -2287,7 +2360,7 @@ export function BOQEditorPage() {
           onReorderPositions={handleReorderPositions}
           collapsedSections={collapsedSections}
           onToggleSection={toggleSection}
-          highlightPositionId={newPositionId ?? undefined}
+          highlightPositionId={newPositionId ?? bimScrollTargetId ?? undefined}
           currencySymbol={currencySymbol}
           currencyCode={currencyCode}
           locale={locale}
@@ -2561,6 +2634,7 @@ export function BOQEditorPage() {
               <button
                 onClick={() => setGaebPreviewOpen(false)}
                 className="p-1 rounded-lg text-content-tertiary hover:bg-surface-secondary transition-colors"
+                aria-label={t('common.close', { defaultValue: 'Close' })}
               >
                 <X size={16} />
               </button>
@@ -2707,6 +2781,7 @@ export function BOQEditorPage() {
             <button
               onClick={() => setShowVectorSetup(false)}
               className="absolute top-3 right-3 p-1.5 rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors"
+              aria-label={t('common.close', { defaultValue: 'Close' })}
             >
               <X size={16} />
             </button>

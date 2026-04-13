@@ -834,6 +834,7 @@ export function PhotoGalleryPage() {
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<{ id: string; name: string }[]>('/v1/projects/'),
+    staleTime: 5 * 60_000,
   });
 
   const projectId = activeProjectId || projects[0]?.id || '';

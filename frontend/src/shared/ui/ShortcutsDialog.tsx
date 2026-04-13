@@ -42,6 +42,9 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
       { keys: ['g', '5'], descriptionKey: 'shortcuts.nav_5d' },
       { keys: ['g', 'r'], descriptionKey: 'shortcuts.nav_reports' },
       { keys: ['g', 't'], descriptionKey: 'shortcuts.nav_tendering' },
+      { keys: ['g', 'm'], descriptionKey: 'shortcuts.nav_meetings' },
+      { keys: ['g', 'i'], descriptionKey: 'shortcuts.nav_rfi' },
+      { keys: ['g', 'o'], descriptionKey: 'shortcuts.nav_contacts' },
     ],
   },
   {
@@ -53,8 +56,15 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
     ],
   },
   {
+    titleKey: 'shortcuts.group.module_pages',
+    items: [
+      { keys: ['n'], descriptionKey: 'shortcuts.create_new_item' },
+    ],
+  },
+  {
     titleKey: 'shortcuts.group.boq_editor',
     items: [
+      { keys: ['s'], descriptionKey: 'shortcuts.save_recalculate' },
       { keys: ['Ctrl', 'Z'], descriptionKey: 'shortcuts.undo' },
       { keys: ['Ctrl', 'Y'], descriptionKey: 'shortcuts.redo' },
       { keys: ['Ctrl', 'Shift', 'V'], descriptionKey: 'shortcuts.paste_from_excel' },

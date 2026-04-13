@@ -5,6 +5,7 @@ import { getIntlLocale } from '@/shared/lib/formatters';
 import { TranslationManager } from './TranslationManager';
 import { BackupRestore } from './BackupRestore';
 import { RegionalSettings } from './RegionalSettings';
+import VectorStatusCard from './VectorStatusCard';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Eye,
@@ -413,7 +414,7 @@ function AIConfigurationCard({ animationDelay }: { animationDelay: string }) {
     setHasUnsavedKey(false);
     setShowKey(false);
     // Auto-save provider selection as preferred_model
-    aiApi.updateSettings({ preferred_model: provider } as any).then(() => {
+    aiApi.updateSettings({ preferred_model: provider }).then(() => {
       queryClient.invalidateQueries({ queryKey: ['ai-settings'] });
     }).catch(() => { /* ignore — will save on next explicit Save */ });
   }, [queryClient]);
@@ -726,13 +727,13 @@ export function SettingsPage() {
 
   const { data: profile, isPending: profileLoading } = useQuery({
     queryKey: ['me'],
-    queryFn: () => apiGet<UserProfile>('/v1/users/me'),
+    queryFn: () => apiGet<UserProfile>('/v1/users/me/'),
     retry: false,
   });
 
   const profileMutation = useMutation({
     mutationFn: (data: { full_name: string }) =>
-      apiPatch<UserProfile>('/v1/users/me', data),
+      apiPatch<UserProfile>('/v1/users/me/', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['me'] });
       setEditingProfile(false);
@@ -927,6 +928,9 @@ export function SettingsPage() {
         <BackupRestore />
       </div>
 
+      {/* Semantic Search status — per-collection vector store health */}
+      <VectorStatusCard />
+
       {/* Databases & Resources */}
       <Card className="animate-card-in" style={{ animationDelay: '400ms' }}>
         <CardHeader
@@ -1044,6 +1048,20 @@ export function SettingsPage() {
               {t('settings.change_password', { defaultValue: 'Change Password' })}
             </Button>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Integrations link */}
+      <Card className="animate-card-in" style={{ animationDelay: '500ms' }}>
+        <CardHeader title={t('integrations.title', { defaultValue: 'Integrations' })} subtitle={t('integrations.desc', { defaultValue: 'Connect Teams, Slack, Telegram, Discord, Webhooks' })} />
+        <CardContent>
+          <button
+            onClick={() => window.location.href = '/integrations'}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-oe-blue/20 bg-oe-blue/[0.04] text-oe-blue text-sm font-medium hover:bg-oe-blue/10 transition-colors"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v6m0 8v6M4.93 4.93l4.24 4.24m5.66 5.66l4.24 4.24M2 12h6m8 0h6M4.93 19.07l4.24-4.24m5.66-5.66l4.24-4.24"/></svg>
+            {t('integrations.configure', { defaultValue: 'Configure Integrations' })}
+          </button>
         </CardContent>
       </Card>
 

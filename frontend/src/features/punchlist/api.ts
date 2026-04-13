@@ -120,7 +120,7 @@ export async function fetchPunchItems(
 }
 
 export async function createPunchItem(data: CreatePunchPayload): Promise<PunchItem> {
-  return apiPost<PunchItem>('/v1/punchlist/items', data);
+  return apiPost<PunchItem>('/v1/punchlist/items/', data);
 }
 
 export async function updatePunchItem(id: string, data: UpdatePunchPayload): Promise<PunchItem> {
@@ -135,7 +135,7 @@ export async function transitionPunchStatus(
   id: string,
   newStatus: PunchStatus,
 ): Promise<PunchItem> {
-  return apiPost<PunchItem>(`/v1/punchlist/items/${id}/transition`, { new_status: newStatus });
+  return apiPost<PunchItem>(`/v1/punchlist/items/${id}/transition/`, { new_status: newStatus });
 }
 
 export async function uploadPunchPhoto(id: string, file: File): Promise<PunchItem> {

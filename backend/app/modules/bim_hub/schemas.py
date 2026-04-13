@@ -1,11 +1,13 @@
 """BIM Hub Pydantic schemas — request/response models.
 
 Defines create, update, and response schemas for BIM models, elements,
-BOQ links, quantity maps, and model diffs.
+BOQ links, quantity maps, element groups, and model diffs.
 """
 
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -118,6 +120,123 @@ class BIMElementBulkImport(BaseModel):
     elements: list[BIMElementCreate] = Field(..., min_length=1, max_length=50000)
 
 
+class BOQElementLinkBrief(BaseModel):
+    """Lightweight BOQ link summary embedded in a BIM element response.
+
+    Contains just enough data for the viewer to render a link badge and
+    navigate to the linked BOQ position without a second round trip.
+    """
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    boq_position_id: UUID
+    boq_position_ordinal: str | None = None
+    boq_position_description: str | None = None
+    link_type: str
+    confidence: str | None = None
+
+
+class DocumentLinkBrief(BaseModel):
+    """Lightweight Document link summary embedded in a BIM element response.
+
+    Mirrors ``BOQElementLinkBrief`` but lives in ``bim_hub.schemas`` to avoid
+    a circular import with ``documents.schemas.DocumentBIMLinkBrief``. The
+    two shapes must stay in sync — add fields in both files.
+    """
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    document_id: UUID
+    document_name: str | None = None
+    document_category: str | None = None
+    link_type: str
+    confidence: str | None = None
+
+
+class TaskBrief(BaseModel):
+    """Lightweight Task summary embedded in a BIM element response.
+
+    Mirrors ``app.modules.tasks.schemas.TaskBrief`` but is defined locally
+    here to avoid a circular import between ``bim_hub.schemas`` and
+    ``tasks.schemas``. The two shapes MUST stay in sync — add fields in
+    both files.
+    """
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    project_id: UUID
+    title: str
+    status: str
+    task_type: str
+    due_date: str | None = None
+
+
+class ActivityBrief(BaseModel):
+    """Lightweight schedule activity summary embedded in a BIM element response.
+
+    Mirrors ``app.modules.schedule.schemas.ActivityBrief`` but is defined
+    locally here to avoid a circular import between ``bim_hub.schemas`` and
+    ``schedule.schemas``. The two shapes MUST stay in sync — add fields in
+    both files.
+    """
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    name: str
+    start_date: str | None = None
+    end_date: str | None = None
+    status: str
+    percent_complete: float = 0.0
+
+
+class ElementValidationSummary(BaseModel):
+    """Lightweight per-element validation finding.
+
+    Mirrors the shape stored inside ``ValidationReport.results`` when the
+    report's ``target_type`` is ``'bim_model'``. Only failing checks
+    produce these entries — a fully-passing element receives an empty
+    ``validation_results`` list and ``validation_status='pass'``.
+    """
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    rule_id: str
+    severity: Literal["error", "warning", "info"]
+    message: str
+
+
+class RequirementBrief(BaseModel):
+    """Lightweight requirement summary embedded in a BIM element response.
+
+    Mirrors the relevant subset of
+    ``app.modules.requirements.schemas.RequirementResponse`` but is
+    defined locally to avoid a circular import between ``bim_hub`` and
+    ``requirements``.  The two shapes MUST stay in sync — add fields in
+    both files together.
+
+    Surfaces the EAC triplet (entity / attribute / constraint) so the
+    BIM viewer's "Linked requirements" section can render a meaningful
+    one-line summary without an extra Postgres roundtrip.
+    """
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    requirement_set_id: UUID
+    entity: str
+    attribute: str
+    constraint_type: str = "equals"
+    constraint_value: str
+    unit: str = ""
+    category: str = "general"
+    priority: str = "must"
+    status: str = "open"
+
+
 class BIMElementResponse(BaseModel):
     """BIM element returned from the API."""
 
@@ -137,6 +256,13 @@ class BIMElementResponse(BaseModel):
     mesh_ref: str | None = None
     lod_variants: dict[str, Any] | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    boq_links: list[BOQElementLinkBrief] = Field(default_factory=list)
+    linked_documents: list[DocumentLinkBrief] = Field(default_factory=list)
+    linked_tasks: list[TaskBrief] = Field(default_factory=list)
+    linked_activities: list[ActivityBrief] = Field(default_factory=list)
+    linked_requirements: list[RequirementBrief] = Field(default_factory=list)
+    validation_results: list[ElementValidationSummary] = Field(default_factory=list)
+    validation_status: Literal["pass", "warning", "error", "unchecked"] = "unchecked"
     created_at: datetime
     updated_at: datetime
 
@@ -267,15 +393,37 @@ class QuantityMapApplyRequest(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     model_id: UUID
-    dry_run: bool = Field(default=False, description="If True, return results without creating links")
+    dry_run: bool = Field(
+        default=True,
+        description=(
+            "If True (default), return the preview without creating any "
+            "BOQElementLink or BOQPosition rows. Set to False to actually "
+            "persist links and auto-created positions."
+        ),
+    )
 
 
 class QuantityMapApplyResult(BaseModel):
-    """Result of applying quantity mapping rules."""
+    """Result of applying quantity mapping rules.
+
+    ``links_created`` and ``positions_created`` are always reported — they
+    stay at 0 on a ``dry_run`` so the caller can safely display them as
+    "would-be" counters without extra branching.
+
+    ``skipped_count`` / ``skipped`` surface every (element, rule) pair
+    that the engine considered but could not extract a quantity from.
+    Each skip carries a ``reason`` so estimators can see at a glance
+    *why* their expected elements were excluded — the previous version
+    silently dropped these and made under-population invisible.
+    """
 
     matched_elements: int = 0
     rules_applied: int = 0
+    links_created: int = 0
+    positions_created: int = 0
+    skipped_count: int = 0
     results: list[dict[str, Any]] = Field(default_factory=list)
+    skipped: list[dict[str, Any]] = Field(default_factory=list)
 
 
 # ── BIMModelDiff schemas ─────────────────────────────────────────────────────
@@ -294,3 +442,78 @@ class BIMModelDiffResponse(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+
+
+# ── BIMElementGroup schemas ──────────────────────────────────────────────────
+
+
+class BIMElementGroupCreate(BaseModel):
+    """Create a new BIM element group (saved selection).
+
+    When ``is_dynamic`` is True (default), ``filter_criteria`` is evaluated
+    against ``oe_bim_element`` at create time and the resolved ids are cached
+    in ``element_ids`` automatically; callers do not need to send
+    ``element_ids``.
+
+    When ``is_dynamic`` is False, the caller is expected to send an explicit
+    ``element_ids`` list.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: str = Field(..., min_length=1, max_length=255)
+    description: str | None = None
+    model_id: UUID | None = None
+    is_dynamic: bool = True
+    filter_criteria: dict[str, Any] = Field(default_factory=dict)
+    element_ids: list[UUID] = Field(default_factory=list)
+    color: str | None = Field(default=None, max_length=20)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class BIMElementGroupUpdate(BaseModel):
+    """Partial update for a BIM element group.
+
+    Any field can be omitted. If ``filter_criteria`` or ``is_dynamic`` is
+    supplied, the service re-resolves the member list and re-caches
+    ``element_ids`` + ``element_count``.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    description: str | None = None
+    model_id: UUID | None = None
+    is_dynamic: bool | None = None
+    filter_criteria: dict[str, Any] | None = None
+    element_ids: list[UUID] | None = None
+    color: str | None = Field(default=None, max_length=20)
+    metadata: dict[str, Any] | None = None
+
+
+class BIMElementGroupResponse(BaseModel):
+    """BIM element group returned from the API.
+
+    ``member_element_ids`` is the resolved list of element UUIDs. For dynamic
+    groups this mirrors the freshly-recomputed cache; for static groups it
+    mirrors the persisted ``element_ids`` snapshot. Clients should use this
+    field for rendering instead of ``element_ids``.
+    """
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    project_id: UUID
+    model_id: UUID | None = None
+    name: str
+    description: str | None = None
+    is_dynamic: bool
+    filter_criteria: dict[str, Any] = Field(default_factory=dict)
+    element_ids: list[UUID] = Field(default_factory=list)
+    element_count: int = 0
+    color: str | None = None
+    created_by: UUID | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    created_at: datetime
+    updated_at: datetime
+    member_element_ids: list[UUID] = Field(default_factory=list)

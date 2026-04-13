@@ -8,7 +8,8 @@
     "ai_estimate": "YZ Tahmin",
     "settings": "Ayarlar",
     "5d_cost_model": "5D Maliyet Modeli",
-    "templates": "Şablonlar"
+    "templates": "Şablonlar",
+    "architecture": "Mimari Harita"
   },
   "common": {
     "save": "Kaydet",

@@ -18,6 +18,32 @@ from app.config import Settings
 from app.core.events import event_bus
 
 _logger_ev = __import__("logging").getLogger(__name__ + ".events")
+_logger_audit = __import__("logging").getLogger(__name__ + ".audit")
+
+
+async def _safe_audit(
+    session: AsyncSession,
+    *,
+    action: str,
+    entity_type: str,
+    entity_id: str | None = None,
+    user_id: str | None = None,
+    details: dict | None = None,
+) -> None:
+    """Best-effort audit log — never blocks the caller on failure."""
+    try:
+        from app.core.audit import audit_log
+
+        await audit_log(
+            session,
+            action=action,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            user_id=user_id,
+            details=details,
+        )
+    except Exception:
+        _logger_audit.debug("Audit log write skipped for %s %s", action, entity_type)
 
 
 async def _safe_publish(name: str, data: dict, source_module: str = "") -> None:
@@ -126,6 +152,15 @@ class ProjectService:
         except Exception:
             logger.debug("Auto-create default team skipped (teams module may not be loaded)")
 
+        await _safe_audit(
+            self.session,
+            action="create",
+            entity_type="project",
+            entity_id=str(project.id),
+            user_id=str(owner_id),
+            details={"name": project.name, "project_code": project_code},
+        )
+
         logger.info("Project created: %s (owner=%s, code=%s)", project.name, owner_id, project_code)
         return project
 
@@ -207,6 +242,14 @@ class ProjectService:
             source_module="oe_projects",
         )
 
+        await _safe_audit(
+            self.session,
+            action="update",
+            entity_type="project",
+            entity_id=str(project_id),
+            details={"updated_fields": list(fields.keys()), "name": project.name},
+        )
+
         logger.info("Project updated: %s (fields=%s)", project_id, list(fields.keys()))
         return project
 
@@ -215,13 +258,78 @@ class ProjectService:
     async def delete_project(self, project_id: uuid.UUID) -> None:
         """Soft-delete a project by setting status to 'archived'.
 
+        Also hard-deletes child records (tasks, RFIs, etc.) that reference
+        the project so they don't remain accessible after the project is
+        archived.  The DB FK constraints use ``ondelete=CASCADE`` for real
+        deletes, but since the project row itself is kept (soft-delete) those
+        cascades never trigger — we do it explicitly here.
+
         Raises 404 if not found. Idempotent — re-archiving an archived
         project is a no-op (returns 204) so the user gets a clean delete UX.
         """
+        from sqlalchemy import delete as sa_delete
+
         project = await self.get_project(project_id, include_archived=True)
         if project.status == "archived":
             return  # Already archived — silently succeed
         owner_id = str(project.owner_id)  # Save before expire_all()
+
+        # Cascade-delete child records that belong to this project.
+        # These models all have project_id FK with ondelete=CASCADE, but
+        # since we only soft-delete the project row the DB cascade never
+        # fires.  Delete them explicitly so they don't remain accessible.
+        child_models: list[type] = []
+        try:
+            from app.modules.tasks.models import Task
+            child_models.append(Task)
+        except ImportError:
+            pass
+        try:
+            from app.modules.rfi.models import RFI
+            child_models.append(RFI)
+        except ImportError:
+            pass
+        try:
+            from app.modules.meetings.models import Meeting
+            child_models.append(Meeting)
+        except ImportError:
+            pass
+        try:
+            from app.modules.punchlist.models import PunchItem
+            child_models.append(PunchItem)
+        except ImportError:
+            pass
+        try:
+            from app.modules.inspections.models import Inspection
+            child_models.append(Inspection)
+        except ImportError:
+            pass
+        try:
+            from app.modules.ncr.models import NCR
+            child_models.append(NCR)
+        except ImportError:
+            pass
+        try:
+            from app.modules.fieldreports.models import FieldReport
+            child_models.append(FieldReport)
+        except ImportError:
+            pass
+        try:
+            from app.modules.risk.models import Risk
+            child_models.append(Risk)
+        except ImportError:
+            pass
+
+        for model in child_models:
+            try:
+                stmt = sa_delete(model).where(model.project_id == project_id)  # type: ignore[attr-defined]
+                await self.session.execute(stmt)
+            except Exception as exc:
+                logger.debug(
+                    "Cascade delete for %s skipped: %s",
+                    model.__tablename__,  # type: ignore[attr-defined]
+                    exc,
+                )
 
         await self.repo.update_fields(project_id, status="archived")
 
@@ -232,6 +340,14 @@ class ProjectService:
                 "owner_id": owner_id,
             },
             source_module="oe_projects",
+        )
+
+        await _safe_audit(
+            self.session,
+            action="delete",
+            entity_type="project",
+            entity_id=str(project_id),
+            details={"name": project.name},
         )
 
         logger.info("Project archived: %s", project_id)

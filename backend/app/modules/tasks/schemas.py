@@ -1,5 +1,7 @@
 """Tasks Pydantic schemas — request/response models."""
 
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Any
 from uuid import UUID
@@ -26,13 +28,13 @@ class TaskCreate(BaseModel):
         pattern=r"^(task|topic|information|decision|personal)$",
     )
     title: str = Field(..., min_length=1, max_length=500)
-    description: str | None = None
+    description: str | None = Field(default=None, max_length=5000)
     checklist: list[ChecklistItemEntry] = Field(default_factory=list)
-    responsible_id: str | None = None
+    responsible_id: str | None = Field(default=None, max_length=36)
     persons_involved: list[str] = Field(default_factory=list)
     due_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
-    milestone_id: str | None = None
-    meeting_id: str | None = None
+    milestone_id: str | None = Field(default=None, max_length=36)
+    meeting_id: str | None = Field(default=None, max_length=36)
     status: str = Field(
         default="draft",
         pattern=r"^(draft|open|in_progress|completed)$",
@@ -41,8 +43,16 @@ class TaskCreate(BaseModel):
         default="normal",
         pattern=r"^(low|normal|high|urgent)$",
     )
-    result: str | None = None
+    result: str | None = Field(default=None, max_length=5000)
     is_private: bool = False
+    depends_on: UUID | None = Field(
+        default=None,
+        description="Task UUID this task depends on. Cannot be completed until predecessor is completed.",
+    )
+    bim_element_ids: list[str] = Field(
+        default_factory=list,
+        description="BIM element UUIDs spatially linked to this task (defects, inspections).",
+    )
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -56,13 +66,13 @@ class TaskUpdate(BaseModel):
         pattern=r"^(task|topic|information|decision|personal)$",
     )
     title: str | None = Field(default=None, min_length=1, max_length=500)
-    description: str | None = None
+    description: str | None = Field(default=None, max_length=5000)
     checklist: list[ChecklistItemEntry] | None = None
-    responsible_id: str | None = None
+    responsible_id: str | None = Field(default=None, max_length=36)
     persons_involved: list[str] | None = None
     due_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
-    milestone_id: str | None = None
-    meeting_id: str | None = None
+    milestone_id: str | None = Field(default=None, max_length=36)
+    meeting_id: str | None = Field(default=None, max_length=36)
     status: str | None = Field(
         default=None,
         pattern=r"^(draft|open|in_progress|completed)$",
@@ -71,8 +81,9 @@ class TaskUpdate(BaseModel):
         default=None,
         pattern=r"^(low|normal|high|urgent)$",
     )
-    result: str | None = None
+    result: str | None = Field(default=None, max_length=5000)
     is_private: bool | None = None
+    depends_on: UUID | None = None
     metadata: dict[str, Any] | None = None
 
 
@@ -107,6 +118,8 @@ class TaskResponse(BaseModel):
     result: str | None = None
     is_private: bool = False
     created_by: str | None = None
+    depends_on: UUID | None = None
+    bim_element_ids: list[str] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
@@ -116,6 +129,38 @@ class TaskResponse(BaseModel):
         default=False,
         description="True when status is not completed and due_date is past today",
     )
+    blocked_by_count: int = Field(
+        default=0,
+        description="Number of incomplete predecessor tasks (computed from depends_on chain).",
+    )
+
+
+class TaskBimLinkRequest(BaseModel):
+    """Replace the set of BIM elements linked to a task (idempotent set)."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    bim_element_ids: list[str] = Field(
+        default_factory=list,
+        description="Full replacement list of BIM element UUIDs for this task.",
+    )
+
+
+class TaskBrief(BaseModel):
+    """Lightweight task summary embedded in BIM element responses.
+
+    Contains just enough data for the viewer to render a task badge and
+    navigate to the linked task without a second round trip.
+    """
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    project_id: UUID
+    title: str
+    status: str
+    task_type: str
+    due_date: str | None = None
 
 
 class TaskStatsResponse(BaseModel):

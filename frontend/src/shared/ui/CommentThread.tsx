@@ -17,6 +17,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MessageSquare, Send, Reply, Pencil, Trash2, X, Check } from 'lucide-react';
 import clsx from 'clsx';
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
+import { useToastStore } from '@/stores/useToastStore';
 
 // -- Types -------------------------------------------------------------------
 
@@ -296,6 +297,7 @@ function CommentItem({
 export function CommentThread({ entityType, entityId, className }: CommentThreadProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
 
   const [newText, setNewText] = useState('');
   const [replyToId, setReplyToId] = useState<string | null>(null);
@@ -339,11 +341,14 @@ export function CommentThread({ entityType, entityId, className }: CommentThread
       entity_id: string;
       text: string;
       parent_comment_id?: string;
-    }) => apiPost<CommentData>('/v1/collaboration/comments', body),
+    }) => apiPost<CommentData>('/v1/collaboration/comments/', body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
       setNewText('');
       setReplyToId(null);
+    },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('comments.create_failed', { defaultValue: 'Failed to post comment' }), message: err.message });
     },
   });
 
@@ -353,12 +358,18 @@ export function CommentThread({ entityType, entityId, className }: CommentThread
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
     },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('comments.edit_failed', { defaultValue: 'Failed to edit comment' }), message: err.message });
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => apiDelete(`/v1/collaboration/comments/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
+    },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('comments.delete_failed', { defaultValue: 'Failed to delete comment' }), message: err.message });
     },
   });
 

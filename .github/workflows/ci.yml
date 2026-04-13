@@ -7,6 +7,26 @@ on:
   workflow_call:
 
 jobs:
+  version-sync:
+    name: Version Sync Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify backend/frontend version literals match
+        # Catches the drift that silently shipped v1.3.32 → v1.4.2 with
+        # backend/pyproject.toml stuck at 1.3.31 (so /api/health lied
+        # about the running version for 4 minor releases). The script
+        # also flags CHANGELOG.md and the in-app Changelog.tsx if their
+        # top entry doesn't match the source-of-truth backend version.
+        run: python scripts/check_version_sync.py
+
   backend:
     name: Backend CI
     runs-on: ubuntu-latest

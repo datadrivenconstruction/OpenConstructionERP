@@ -46,14 +46,14 @@ class InvoiceLineItemCreate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
-    description: str = Field(..., max_length=500)
+    description: str = Field(..., min_length=1, max_length=500)
     quantity: str = Field(default="1", max_length=50)
     unit: str | None = Field(default=None, max_length=20)
     unit_rate: str = Field(default="0", max_length=50)
     amount: str = Field(default="0", max_length=50)
     wbs_id: str | None = Field(default=None, max_length=36)
     cost_category: str | None = Field(default=None, max_length=100)
-    sort_order: int = 0
+    sort_order: int = Field(default=0, ge=0)
 
     @field_validator("quantity", "unit_rate", "amount")
     @classmethod
@@ -76,8 +76,8 @@ class InvoiceCreate(BaseModel):
     invoice_number: str | None = Field(
         default=None, max_length=50, examples=["INV-2026-0042"]
     )
-    invoice_date: str = Field(..., max_length=20, examples=["2026-04-01"])
-    due_date: str | None = Field(default=None, max_length=20, examples=["2026-05-01"])
+    invoice_date: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20, examples=["2026-04-01"])
+    due_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20, examples=["2026-05-01"])
     currency_code: str = Field(default="EUR", max_length=10, examples=["EUR"])
     amount_subtotal: str = Field(default="0", max_length=50, examples=["50000.00"])
     tax_amount: str = Field(default="0", max_length=50, examples=["9500.00"])
@@ -86,7 +86,7 @@ class InvoiceCreate(BaseModel):
     tax_config_id: str | None = Field(default=None, max_length=36)
     status: str = Field(default="draft", max_length=50)
     payment_terms_days: str | None = Field(default=None, max_length=10)
-    notes: str | None = None
+    notes: str | None = Field(default=None, max_length=5000)
     line_items: list[InvoiceLineItemCreate] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -116,7 +116,7 @@ class InvoiceUpdate(BaseModel):
     tax_config_id: str | None = Field(default=None, max_length=36)
     status: str | None = Field(default=None, max_length=50)
     payment_terms_days: str | None = Field(default=None, max_length=10)
-    notes: str | None = None
+    notes: str | None = Field(default=None, max_length=5000)
     line_items: list[InvoiceLineItemCreate] | None = None
     metadata: dict[str, Any] | None = None
 
@@ -196,7 +196,7 @@ class PaymentCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     invoice_id: UUID
-    payment_date: str = Field(..., max_length=20)
+    payment_date: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20)
     amount: str = Field(..., max_length=50)
     currency_code: str = Field(default="EUR", max_length=10)
     exchange_rate_snapshot: str = Field(default="1", max_length=50)
@@ -347,7 +347,7 @@ class EVMSnapshotCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     project_id: UUID
-    snapshot_date: str = Field(..., max_length=20)
+    snapshot_date: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20)
     bac: str = Field(default="0", max_length=50)
     pv: str = Field(default="0", max_length=50)
     ev: str = Field(default="0", max_length=50)
@@ -385,6 +385,11 @@ class EVMSnapshotResponse(BaseModel):
     cv: str = "0"
     spi: str = "0"
     cpi: str = "0"
+    # Forecast metrics (EVM standard)
+    eac: str = "0"
+    vac: str = "0"
+    etc: str = "0"
+    tcpi: str = "0"
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime

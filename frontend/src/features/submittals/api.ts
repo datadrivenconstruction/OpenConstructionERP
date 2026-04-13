@@ -82,13 +82,13 @@ export async function createSubmittal(data: CreateSubmittalPayload): Promise<Sub
 }
 
 export async function submitSubmittal(id: string): Promise<Submittal> {
-  return apiPost<Submittal>(`/v1/submittals/${id}/submit`);
+  return apiPost<Submittal>(`/v1/submittals/${id}/submit/`);
 }
 
 export async function reviewSubmittal(id: string, data: ReviewSubmittalPayload): Promise<Submittal> {
-  return apiPost<Submittal>(`/v1/submittals/${id}/review`, data);
+  return apiPost<Submittal>(`/v1/submittals/${id}/review/`, data);
 }
 
 export async function approveSubmittal(id: string, data: ApproveSubmittalPayload): Promise<Submittal> {
-  return apiPost<Submittal>(`/v1/submittals/${id}/approve`, data);
+  return apiPost<Submittal>(`/v1/submittals/${id}/approve/`, data);
 }

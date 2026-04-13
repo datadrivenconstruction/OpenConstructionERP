@@ -27,8 +27,12 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query, UploadFile, status
 from fastapi.responses import FileResponse
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.core.bulk_ops import BulkDeleteRequest
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.documents.schemas import (
+    DocumentBIMLinkCreate,
+    DocumentBIMLinkListResponse,
+    DocumentBIMLinkResponse,
     DocumentResponse,
     DocumentSummary,
     DocumentUpdate,
@@ -43,6 +47,7 @@ from app.modules.documents.service import (
     MAX_FILE_SIZE,
     PHOTO_BASE,
     UPLOAD_BASE,
+    DocumentBIMLinkService,
     DocumentService,
     PhotoService,
     SheetService,
@@ -89,11 +94,13 @@ def _doc_to_response(doc: object) -> DocumentResponse:
 
 @router.get("/summary/", response_model=DocumentSummary)
 async def get_summary(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: DocumentService = Depends(_get_service),
 ) -> DocumentSummary:
     """Aggregated document stats for a project."""
+    await verify_project_access(project_id, user_id, session)
     data = await service.get_summary(project_id)
     return DocumentSummary(**data)
 
@@ -103,6 +110,7 @@ async def get_summary(
 
 @router.post("/upload/", response_model=DocumentResponse, status_code=201)
 async def upload_document(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     category: str = Query(default="other"),
     file: UploadFile = File(...),
@@ -112,6 +120,7 @@ async def upload_document(
     service: DocumentService = Depends(_get_service),
 ) -> DocumentResponse:
     """Upload a document to a project."""
+    await verify_project_access(project_id, user_id, session)
     # Early rejection based on Content-Length header (before reading body)
     if content_length is not None and content_length > MAX_FILE_SIZE:
         raise HTTPException(
@@ -136,21 +145,27 @@ async def upload_document(
 
 @router.get("/", response_model=list[DocumentResponse])
 async def list_documents(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
     category: str | None = Query(default=None),
     search: str | None = Query(default=None),
+    sort_by: str | None = Query(default=None, description="Sort field: name, created_at, category"),
+    sort_order: str = Query(default="desc", pattern="^(asc|desc)$"),
     service: DocumentService = Depends(_get_service),
 ) -> list[DocumentResponse]:
     """List documents for a project."""
+    await verify_project_access(project_id, user_id, session)
     docs, _ = await service.list_documents(
         project_id,
         offset=offset,
         limit=limit,
         category=category,
         search=search,
+        sort_by=sort_by,
+        sort_order=sort_order,
     )
     return [_doc_to_response(d) for d in docs]
 
@@ -192,6 +207,7 @@ def _photo_to_response(photo: object) -> PhotoResponse:
 
 @router.post("/photos/upload/", response_model=PhotoResponse, status_code=201)
 async def upload_photo(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     category: str = Form(default="site"),
     caption: str | None = Form(default=None),
@@ -205,6 +221,7 @@ async def upload_photo(
     service: PhotoService = Depends(_get_photo_service),
 ) -> PhotoResponse:
     """Upload a photo with metadata to a project."""
+    await verify_project_access(project_id, user_id, session)
     # Parse tags from comma-separated string
     parsed_tags: list[str] = []
     if tags:
@@ -237,6 +254,7 @@ async def upload_photo(
 
 @router.get("/photos/", response_model=list[PhotoResponse])
 async def list_photos(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     category: str | None = Query(default=None),
     tag: str | None = Query(default=None),
@@ -249,6 +267,7 @@ async def list_photos(
     service: PhotoService = Depends(_get_photo_service),
 ) -> list[PhotoResponse]:
     """List photos for a project with optional filters."""
+    await verify_project_access(project_id, user_id, session)
     parsed_date_from: datetime | None = None
     parsed_date_to: datetime | None = None
     if date_from:
@@ -280,11 +299,13 @@ async def list_photos(
 
 @router.get("/photos/gallery/", response_model=list[PhotoResponse])
 async def get_gallery(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: PhotoService = Depends(_get_photo_service),
 ) -> list[PhotoResponse]:
     """Get all photos for gallery view."""
+    await verify_project_access(project_id, user_id, session)
     photos = await service.get_gallery(project_id)
     return [_photo_to_response(p) for p in photos]
 
@@ -294,11 +315,13 @@ async def get_gallery(
 
 @router.get("/photos/timeline/", response_model=list[PhotoTimelineGroup])
 async def get_timeline(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: PhotoService = Depends(_get_photo_service),
 ) -> list[PhotoTimelineGroup]:
     """Get photos grouped by date for timeline view."""
+    await verify_project_access(project_id, user_id, session)
     groups = await service.get_timeline(project_id)
     return [
         PhotoTimelineGroup(
@@ -334,16 +357,24 @@ async def serve_photo_file(
     """Serve the actual photo file."""
     photo = await service.get_photo(photo_id)
     file_path = Path(photo.file_path).resolve()
-
-    # Security: ensure resolved path is within allowed photo directory
     photo_base = Path(PHOTO_BASE).resolve()
-    if not str(file_path).startswith(str(photo_base)):
+
+    # Security: Path.resolve().relative_to() handles case-insensitive FS + symlinks
+    try:
+        file_path.relative_to(photo_base)
+    except ValueError:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied",
         )
 
-    if not file_path.exists() or file_path.is_symlink():
+    if file_path.is_symlink():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Symlinks not permitted",
+        )
+
+    if not file_path.exists() or not file_path.is_file():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Photo file not found on disk",
@@ -438,6 +469,7 @@ def _sheet_to_response(sheet: object) -> SheetResponse:
 
 @router.get("/sheets/", response_model=list[SheetResponse])
 async def list_sheets(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     discipline: str | None = Query(default=None),
     revision: str | None = Query(default=None),
@@ -449,6 +481,7 @@ async def list_sheets(
     service: SheetService = Depends(_get_sheet_service),
 ) -> list[SheetResponse]:
     """List sheets for a project with optional filters."""
+    await verify_project_access(project_id, user_id, session)
     sheets, _ = await service.list_sheets(
         project_id,
         offset=offset,
@@ -466,11 +499,13 @@ async def list_sheets(
 
 @router.get("/sheets/disciplines/", response_model=list[str])
 async def list_disciplines(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     service: SheetService = Depends(_get_sheet_service),
 ) -> list[str]:
     """List distinct discipline values for a project."""
+    await verify_project_access(project_id, user_id, session)
     return await service.get_disciplines(project_id)
 
 
@@ -479,6 +514,7 @@ async def list_disciplines(
 
 @router.post("/sheets/split-pdf/", response_model=list[SheetResponse], status_code=201)
 async def split_pdf(
+    session: SessionDep,
     project_id: uuid.UUID = Query(...),
     file: UploadFile = File(...),
     content_length: int | None = Header(default=None),
@@ -492,6 +528,7 @@ async def split_pdf(
     and revision. Auto-detects discipline from sheet number prefix.
     Generates thumbnails for each page.
     """
+    await verify_project_access(project_id, user_id, session)
     if content_length is not None and content_length > MAX_FILE_SIZE:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
@@ -558,6 +595,127 @@ async def get_sheet_versions(
 
 
 # ══════════════════════════════════════════════════════════════════════════
+# Document ↔ BIM element links
+# NOTE: These MUST come BEFORE /{document_id} parametric routes to avoid
+#       FastAPI matching "/bim-links" as a document_id (route shadowing).
+# ══════════════════════════════════════════════════════════════════════════
+
+
+def _get_bim_link_service(session: SessionDep) -> DocumentBIMLinkService:
+    return DocumentBIMLinkService(session)
+
+
+def _bim_link_to_response(link: object) -> DocumentBIMLinkResponse:
+    """Build a DocumentBIMLinkResponse from a DocumentBIMLink ORM object."""
+    return DocumentBIMLinkResponse.model_validate(link)
+
+
+@router.get("/bim-links/", response_model=DocumentBIMLinkListResponse)
+async def list_bim_links(
+    element_id: uuid.UUID | None = Query(default=None),
+    document_id: uuid.UUID | None = Query(default=None),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("documents.read")),
+    service: DocumentBIMLinkService = Depends(_get_bim_link_service),
+) -> DocumentBIMLinkListResponse:
+    """List Document ↔ BIM element links.
+
+    Exactly one of ``element_id`` or ``document_id`` must be supplied:
+    - ``element_id=X`` — every document linked to BIM element X
+    - ``document_id=Y`` — every BIM element linked from document Y
+    """
+    if (element_id is None) == (document_id is None):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Exactly one of 'element_id' or 'document_id' must be provided",
+        )
+
+    if element_id is not None:
+        links = await service.list_links_for_element(element_id)
+    else:
+        assert document_id is not None  # narrowing for type-checkers
+        links = await service.list_links_for_document(document_id)
+
+    items = [_bim_link_to_response(link) for link in links]
+    return DocumentBIMLinkListResponse(items=items, total=len(items))
+
+
+@router.post(
+    "/bim-links/",
+    response_model=DocumentBIMLinkResponse,
+    status_code=201,
+)
+async def create_bim_link(
+    payload: DocumentBIMLinkCreate,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("documents.create")),
+    service: DocumentBIMLinkService = Depends(_get_bim_link_service),
+) -> DocumentBIMLinkResponse:
+    """Create a new Document ↔ BIM element link."""
+    parsed_user_id: uuid.UUID | None = None
+    if user_id:
+        try:
+            parsed_user_id = uuid.UUID(str(user_id))
+        except (ValueError, TypeError):
+            parsed_user_id = None
+
+    link = await service.create_link(payload, user_id=parsed_user_id)
+    return _bim_link_to_response(link)
+
+
+@router.delete("/bim-links/{link_id}", status_code=204)
+async def delete_bim_link(
+    link_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("documents.delete")),
+    service: DocumentBIMLinkService = Depends(_get_bim_link_service),
+) -> None:
+    """Delete a Document ↔ BIM element link."""
+    await service.delete_link(link_id)
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# Bulk operations (must come BEFORE parametric /{document_id})
+# ══════════════════════════════════════════════════════════════════════════
+
+
+@router.post(
+    "/batch/delete/",
+    status_code=200,
+    dependencies=[Depends(RequirePermission("documents.delete"))],
+)
+async def batch_delete_documents(
+    body: BulkDeleteRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> dict:
+    """Delete multiple documents in one request."""
+    from sqlalchemy import select as _select
+
+    from app.core.bulk_ops import bulk_delete
+    from app.modules.documents.models import Document
+    from app.modules.projects.repository import ProjectRepository
+
+    proj_repo = ProjectRepository(session)
+    owned_projects, _ = await proj_repo.list_for_user(
+        owner_id=user_id, offset=0, limit=10000, exclude_archived=False
+    )
+    owned_project_ids = {str(p.id) for p in owned_projects}
+
+    rows = (await session.execute(
+        _select(Document.id, Document.project_id).where(Document.id.in_(body.ids))
+    )).all()
+    allowed = [r[0] for r in rows if str(r[1]) in owned_project_ids]
+
+    deleted = await bulk_delete(session, Document, allowed)
+    logger.info(
+        "Bulk delete documents: requested=%d deleted=%d user=%s",
+        len(body.ids), deleted, user_id,
+    )
+    return {"requested": len(body.ids), "deleted": deleted}
+
+
+# ══════════════════════════════════════════════════════════════════════════
 # Document CRUD by ID (parametric routes — MUST be after /photos/* and /sheets/* routes)
 # ══════════════════════════════════════════════════════════════════════════
 
@@ -579,25 +737,42 @@ async def get_document(
 # ── Download ─────────────────────────────────────────────────────────────────
 
 
-@router.get("/{document_id}/download/")
+@router.get(
+    "/{document_id}/download/",
+    dependencies=[Depends(RequirePermission("documents.read"))],
+)
 async def download_document(
     document_id: uuid.UUID,
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    user_id: CurrentUserId,
     service: DocumentService = Depends(_get_service),
 ) -> FileResponse:
-    """Download a document file."""
+    """Download a document file.
+
+    Security: uses ``Path.resolve().relative_to()`` for containment check so
+    case-insensitive filesystems and symlinks cannot escape ``UPLOAD_BASE``.
+    """
     doc = await service.get_document(document_id)
     file_path = Path(doc.file_path).resolve()
-
-    # Security: ensure resolved path is within the allowed upload directory
     upload_base = Path(UPLOAD_BASE).resolve()
-    if not str(file_path).startswith(str(upload_base)):
+
+    # Security: path must be STRICTLY inside upload_base after full resolution.
+    # ``str.startswith`` can be fooled on Windows case-insensitive FS and by
+    # symlinks; ``relative_to`` rejects both cases explicitly.
+    try:
+        file_path.relative_to(upload_base)
+    except ValueError:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied",
         )
 
-    if not file_path.exists() or file_path.is_symlink():
+    if file_path.is_symlink():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Symlinks not permitted",
+        )
+
+    if not file_path.exists() or not file_path.is_file():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="File not found on disk",
@@ -638,3 +813,79 @@ async def delete_document(
 ) -> None:
     """Delete a document and its file."""
     await service.delete_document(document_id)
+
+
+# ── Vector / semantic memory endpoints ───────────────────────────────────
+#
+# ``/vector/status/`` and ``/vector/reindex/`` are wired via the shared
+# factory in ``app.core.vector_routes`` (see bottom of file for the
+# ``include_router`` call).  The ``/{id}/similar/`` endpoint remains
+# module-specific and is defined below.
+
+
+@router.get(
+    "/{document_id}/similar/",
+    dependencies=[Depends(RequirePermission("documents.read"))],
+)
+async def documents_similar(
+    document_id: uuid.UUID,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    limit: int = Query(default=5, ge=1, le=20),
+    cross_project: bool = Query(default=True),
+) -> dict:
+    """Return documents semantically similar to the given one.
+
+    By default the search is **cross-project** — that's the highest-value
+    use case: engineers want to find how a similar drawing or spec was
+    handled on past projects so they can reuse context.  Pass
+    ``cross_project=false`` to limit the search to the same project.
+
+    Returns a list of :class:`VectorHit` dicts plus the original row id
+    so the frontend can highlight the source.
+    """
+    from sqlalchemy import select
+
+    from app.core.vector_index import find_similar
+    from app.modules.documents.models import Document
+    from app.modules.documents.vector_adapter import document_vector_adapter
+
+    stmt = select(Document).where(Document.id == document_id)
+    row = (await session.execute(stmt)).scalar_one_or_none()
+    if row is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+
+    project_id = str(row.project_id) if row.project_id is not None else None
+    hits = await find_similar(
+        document_vector_adapter,
+        row,
+        project_id=project_id,
+        cross_project=cross_project,
+        limit=limit,
+    )
+    return {
+        "source_id": str(document_id),
+        "limit": limit,
+        "cross_project": cross_project,
+        "hits": [h.to_dict() for h in hits],
+    }
+
+
+# ── Mount vector status + reindex via the shared factory ────────────────
+from app.core.vector_index import COLLECTION_DOCUMENTS  # noqa: E402
+from app.core.vector_routes import create_vector_routes  # noqa: E402
+from app.modules.documents.models import Document as _DocumentModel  # noqa: E402
+from app.modules.documents.vector_adapter import (  # noqa: E402
+    document_vector_adapter as _document_vector_adapter,
+)
+
+router.include_router(
+    create_vector_routes(
+        collection=COLLECTION_DOCUMENTS,
+        adapter=_document_vector_adapter,
+        model=_DocumentModel,
+        read_permission="documents.read",
+        write_permission="documents.update",
+        project_id_attr="project_id",
+    )
+)

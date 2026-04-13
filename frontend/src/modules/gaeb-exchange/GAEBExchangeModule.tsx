@@ -94,7 +94,7 @@ function ImportPreview({
           </thead>
           <tbody className="divide-y divide-border-light">
             {displayed.map((pos, idx) => (
-              <tr key={idx} className={`hover:bg-surface-secondary/30 ${idx % 2 === 0 ? 'bg-surface-primary/50' : ''}`}>
+              <tr key={pos.ordinal || `pos-${idx}`} className={`hover:bg-surface-secondary/30 ${idx % 2 === 0 ? 'bg-surface-primary/50' : ''}`}>
                 <td className="px-3 py-1.5 font-mono text-content-tertiary">{pos.ordinal}</td>
                 <td className="px-3 py-1.5 text-content-primary max-w-[300px] truncate" title={pos.description}>
                   {pos.description || '-'}
@@ -506,7 +506,7 @@ export default function GAEBExchangeModule() {
               {importResult.errors.length > 0 && (
                 <ul className="mt-2 space-y-1 text-xs text-content-secondary">
                   {importResult.errors.map((err, idx) => (
-                    <li key={idx}>• {err}</li>
+                    <li key={`err-${err.slice(0, 40)}-${idx}`}>• {err}</li>
                   ))}
                 </ul>
               )}

@@ -66,7 +66,7 @@ def _find_ddc_toolkit_bin() -> Path | None:
                     candidate = candidate.parent
                 break
     except Exception:
-        pass
+        logger.debug("DDC converter discovery via importlib failed", exc_info=True)
 
     # 3. Scan common sibling directories (projects next to this repo)
     this_project = Path(__file__).resolve().parents[4]  # backend/app/modules/boq -> repo root
@@ -114,6 +114,30 @@ def find_converter(extension: str) -> Path | None:
     if ddc_bin and ddc_bin not in search_paths:
         search_paths.insert(0, ddc_bin)
 
+    # Per-format Windows install dir written by the BIM converter
+    # auto-installer (takeoff/router.py:install_converter). The
+    # installer drops files at ~/.openestimator/converters/{ext}_windows/
+    # so multiple converters can coexist without their bundled Qt6
+    # DLLs colliding. Probe this location explicitly so an installed
+    # converter is picked up by the next find_converter() call without
+    # any service restart.
+    per_format_windows = (
+        Path.home() / ".openestimator" / "converters" / f"{extension}_windows"
+    )
+    if per_format_windows not in search_paths:
+        search_paths.insert(0, per_format_windows)
+
+    # Linux apt install puts the binaries on PATH under ddc-* names.
+    # We probe these locations BEFORE walking search_paths so a
+    # system-installed converter is found instantly.
+    linux_apt_candidates = [
+        Path("/usr/bin") / f"ddc-{extension}converter",
+        Path("/usr/local/bin") / f"ddc-{extension}converter",
+    ]
+    for cand in linux_apt_candidates:
+        if cand.exists() and cand.stat().st_size > 1024:
+            return cand
+
     for search_path in search_paths:
         exe_path = search_path / exe_name
         if exe_path.exists() and exe_path.stat().st_size > 1024:
@@ -160,12 +184,13 @@ async def convert_cad_to_excel(
     logger.info("Converting %s using %s", input_path.name, converter.name)
 
     # DDC converters CLI: <input> [<output.xlsx>] [<mode>] [-no-collada]
-    # Use 'complete' mode for full quantity data (Volume, Area, Length, etc.)
+    # Use 'standard' mode by default — balanced data extraction without
+    # the heavy per-view/per-schedule parameter dump of 'complete' mode.
     output_xlsx = output_dir / (input_path.stem + ".xlsx")
     args = [str(converter), str(input_path), str(output_xlsx)]
     # RVT and IFC converters support export modes; DWG/DGN do not
     if extension in ("rvt", "ifc"):
-        args.append("complete")
+        args.append("standard")
     args.append("-no-collada")
 
     try:
