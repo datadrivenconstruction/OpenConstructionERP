@@ -179,11 +179,41 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
                     rc2, stderr2.decode(errors="replace")[:200] if stderr2 else "",
                 )
 
-            return _excel_elements_to_bim_result(
+            # ── Pass 3: PDF sheets (drawings) ─────────────────────────
+            # DDC converters export PDF when the output file has .pdf extension.
+            # We generate one PDF containing all sheets from the Revit/IFC model
+            # and store it alongside the model for the Documents module.
+            pdf_path: Path | None = None
+            try:
+                real_pdf = (output_dir / "sheets.pdf").resolve()
+                rc3, _stdout3, stderr3 = _run_ddc(real_pdf)
+                if rc3 == 0 and real_pdf.exists() and real_pdf.stat().st_size > 1000:
+                    pdf_path = real_pdf
+                    logger.info(
+                        "DDC PDF sheets exported: %d bytes",
+                        real_pdf.stat().st_size,
+                    )
+                else:
+                    logger.debug(
+                        "DDC PDF pass skipped (rc=%s, size=%s)",
+                        rc3,
+                        real_pdf.stat().st_size if real_pdf.exists() else 0,
+                    )
+            except subprocess.TimeoutExpired:
+                logger.debug("DDC PDF pass timed out — skipping")
+            except Exception as exc:
+                logger.debug("DDC PDF pass error: %s", exc)
+
+            result = _excel_elements_to_bim_result(
                 raw_elements,
                 output_dir,
                 real_dae_path=real_dae_path,
             )
+            # Attach PDF path so the caller (BIM Hub router) can create
+            # a Document record linking the sheets to the project.
+            if pdf_path:
+                result["pdf_sheets_path"] = str(pdf_path)
+            return result
     except ImportError:
         logger.debug("cad_import module not available")
     except Exception as e:

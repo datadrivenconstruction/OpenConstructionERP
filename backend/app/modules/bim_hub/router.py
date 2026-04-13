@@ -1180,6 +1180,46 @@ async def upload_cad_file(
                     element_count, len(result["storeys"]), model_id,
                 )
 
+                # ── Save PDF sheets as a Document ─────────────────────────
+                # DDC converters export all Revit/IFC sheets as a single PDF
+                # when invoked with a .pdf output target.  If available, we
+                # store it via the Documents module so it appears in the
+                # project's document list alongside the BIM model.
+                _pdf_local = result.get("pdf_sheets_path")
+                if _pdf_local:
+                    _pdf_p = _Path(_pdf_local)
+                    if _pdf_p.is_file() and _pdf_p.stat().st_size > 1000:
+                        try:
+                            from app.modules.documents.models import Document as DocModel
+
+                            _pdf_bytes = await asyncio.to_thread(_pdf_p.read_bytes)
+                            _pdf_storage_key = f"bim/{project_id}/{model_id}/sheets.pdf"
+                            await bim_file_storage.save_geometry(
+                                project_id=project_id,
+                                model_id=str(model_id),
+                                ext=".pdf",
+                                content=_pdf_bytes,
+                            )
+
+                            _pdf_doc = DocModel(
+                                project_id=uuid.UUID(project_id),
+                                name=f"{name or 'BIM Model'} — Sheets (PDF)",
+                                category="drawing",
+                                file_path=_pdf_storage_key,
+                                file_size=len(_pdf_bytes),
+                                mime_type="application/pdf",
+                                tags=["bim", "sheets", "auto-generated", model_format],
+                                created_by=user_id,
+                            )
+                            service.session.add(_pdf_doc)
+                            await service.session.flush()
+                            logger.info(
+                                "PDF sheets saved as Document: %s (%d bytes)",
+                                _pdf_storage_key, len(_pdf_bytes),
+                            )
+                        except Exception as exc:
+                            logger.warning("PDF sheets → Document failed: %s", exc)
+
                 # Write full DDC dataframe as Parquet for analytical queries.
                 # The hot table keeps ~12 indexed fields; the Parquet preserves
                 # ALL 1000+ DDC columns in columnar, ZSTD-compressed form.
