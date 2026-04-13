@@ -67,6 +67,8 @@ dependencies = [
     # 3D geometry — DAE->GLB conversion for 8.8x faster BIM viewer loading.
     # Degrades gracefully: if missing, the viewer falls back to raw DAE.
     "trimesh>=4.0.0",
+    # DWG/DXF parsing for 2D takeoff viewer
+    "ezdxf>=0.18.0",
 ]
 
 [project.scripts]

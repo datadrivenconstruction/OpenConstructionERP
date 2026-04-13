@@ -1,0 +1,245 @@
+/**
+ * Renders DWG takeoff annotations on the 2D canvas.
+ *
+ * Called from the DxfViewer's render loop — receives the canvas context
+ * and draws text pins, arrows, rectangles, distances, and areas on top
+ * of the DXF entities.
+ */
+
+import type { DwgAnnotation } from '../api';
+import type { ViewportState } from '../lib/viewport';
+import { worldToScreen } from '../lib/viewport';
+import { formatMeasurement } from '../lib/measurement';
+
+/** Render all annotations onto the provided canvas context. */
+export function renderAnnotations(
+  ctx: CanvasRenderingContext2D,
+  annotations: DwgAnnotation[],
+  vp: ViewportState,
+  selectedId?: string | null,
+): void {
+  for (const ann of annotations) {
+    const isSelected = ann.id === selectedId;
+    const color = isSelected ? '#3b82f6' : ann.color;
+
+    switch (ann.type) {
+      case 'text_pin':
+        renderTextPin(ctx, ann, vp, color, isSelected);
+        break;
+      case 'arrow':
+        renderArrow(ctx, ann, vp, color, isSelected);
+        break;
+      case 'rectangle':
+        renderRectangle(ctx, ann, vp, color, isSelected);
+        break;
+      case 'distance':
+        renderDistance(ctx, ann, vp, color, isSelected);
+        break;
+      case 'area':
+        renderArea(ctx, ann, vp, color, isSelected);
+        break;
+    }
+  }
+}
+
+function renderTextPin(
+  ctx: CanvasRenderingContext2D,
+  ann: DwgAnnotation,
+  vp: ViewportState,
+  color: string,
+  isSelected: boolean,
+): void {
+  if (ann.points.length < 1) return;
+  const pt0 = ann.points[0]!;
+  const pos = worldToScreen(pt0.x, pt0.y, vp);
+
+  // Circle marker
+  ctx.beginPath();
+  ctx.arc(pos.x, pos.y, isSelected ? 8 : 6, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.85;
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Label
+  if (ann.text) {
+    ctx.font = '11px Inter, system-ui, sans-serif';
+    ctx.fillStyle = color;
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(ann.text, pos.x + 10, pos.y - 4);
+  }
+
+  if (isSelected) {
+    ctx.strokeStyle = '#3b82f6';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 11, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+function renderArrow(
+  ctx: CanvasRenderingContext2D,
+  ann: DwgAnnotation,
+  vp: ViewportState,
+  color: string,
+  isSelected: boolean,
+): void {
+  if (ann.points.length < 2) return;
+  const aPt0 = ann.points[0]!;
+  const aPt1 = ann.points[1]!;
+  const from = worldToScreen(aPt0.x, aPt0.y, vp);
+  const to = worldToScreen(aPt1.x, aPt1.y, vp);
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = isSelected ? 2.5 : 2;
+  ctx.beginPath();
+  ctx.moveTo(from.x, from.y);
+  ctx.lineTo(to.x, to.y);
+  ctx.stroke();
+
+  // Arrowhead
+  const angle = Math.atan2(to.y - from.y, to.x - from.x);
+  const headLen = 12;
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(to.x, to.y);
+  ctx.lineTo(to.x - headLen * Math.cos(angle - 0.4), to.y - headLen * Math.sin(angle - 0.4));
+  ctx.lineTo(to.x - headLen * Math.cos(angle + 0.4), to.y - headLen * Math.sin(angle + 0.4));
+  ctx.closePath();
+  ctx.fill();
+}
+
+function renderRectangle(
+  ctx: CanvasRenderingContext2D,
+  ann: DwgAnnotation,
+  vp: ViewportState,
+  color: string,
+  isSelected: boolean,
+): void {
+  if (ann.points.length < 2) return;
+  const rPt0 = ann.points[0]!;
+  const rPt1 = ann.points[1]!;
+  const p1 = worldToScreen(rPt0.x, rPt0.y, vp);
+  const p2 = worldToScreen(rPt1.x, rPt1.y, vp);
+
+  const x = Math.min(p1.x, p2.x);
+  const y = Math.min(p1.y, p2.y);
+  const w = Math.abs(p2.x - p1.x);
+  const h = Math.abs(p2.y - p1.y);
+
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.12;
+  ctx.fillRect(x, y, w, h);
+  ctx.globalAlpha = 1;
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = isSelected ? 2.5 : 1.5;
+  ctx.strokeRect(x, y, w, h);
+
+  // Drag handles when selected
+  if (isSelected) {
+    for (const p of [p1, p2]) {
+      ctx.fillStyle = '#3b82f6';
+      ctx.fillRect(p.x - 4, p.y - 4, 8, 8);
+    }
+  }
+}
+
+function renderDistance(
+  ctx: CanvasRenderingContext2D,
+  ann: DwgAnnotation,
+  vp: ViewportState,
+  color: string,
+  isSelected: boolean,
+): void {
+  if (ann.points.length < 2) return;
+  const dPt0 = ann.points[0]!;
+  const dPt1 = ann.points[1]!;
+  const p1 = worldToScreen(dPt0.x, dPt0.y, vp);
+  const p2 = worldToScreen(dPt1.x, dPt1.y, vp);
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = isSelected ? 2 : 1.5;
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  ctx.moveTo(p1.x, p1.y);
+  ctx.lineTo(p2.x, p2.y);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Dimension text
+  const label =
+    ann.measurement_value != null
+      ? formatMeasurement(ann.measurement_value, ann.measurement_unit ?? 'm')
+      : ann.text ?? '';
+  if (label) {
+    const mx = (p1.x + p2.x) / 2;
+    const my = (p1.y + p2.y) / 2;
+    ctx.font = 'bold 11px Inter, system-ui, sans-serif';
+    ctx.fillStyle = color;
+    ctx.textBaseline = 'bottom';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, mx, my - 4);
+    ctx.textAlign = 'start';
+  }
+
+  // End markers
+  for (const p of [p1, p2]) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function renderArea(
+  ctx: CanvasRenderingContext2D,
+  ann: DwgAnnotation,
+  vp: ViewportState,
+  color: string,
+  isSelected: boolean,
+): void {
+  if (ann.points.length < 3) return;
+  const screenPts = ann.points.map((p) => worldToScreen(p.x, p.y, vp));
+  const first = screenPts[0]!;
+
+  // Fill
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.15;
+  ctx.beginPath();
+  ctx.moveTo(first.x, first.y);
+  for (let i = 1; i < screenPts.length; i++) {
+    ctx.lineTo(screenPts[i]!.x, screenPts[i]!.y);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Outline
+  ctx.strokeStyle = color;
+  ctx.lineWidth = isSelected ? 2.5 : 1.5;
+  ctx.beginPath();
+  ctx.moveTo(first.x, first.y);
+  for (let i = 1; i < screenPts.length; i++) {
+    ctx.lineTo(screenPts[i]!.x, screenPts[i]!.y);
+  }
+  ctx.closePath();
+  ctx.stroke();
+
+  // Area text at centroid
+  const cx = screenPts.reduce((s, p) => s + p.x, 0) / screenPts.length;
+  const cy = screenPts.reduce((s, p) => s + p.y, 0) / screenPts.length;
+  const label =
+    ann.measurement_value != null
+      ? formatMeasurement(ann.measurement_value, ann.measurement_unit ?? 'm\u00B2')
+      : ann.text ?? '';
+  if (label) {
+    ctx.font = 'bold 11px Inter, system-ui, sans-serif';
+    ctx.fillStyle = color;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, cx, cy);
+    ctx.textAlign = 'start';
+  }
+}
