@@ -1590,7 +1590,7 @@ export function BIMPage() {
       <div className="flex-1 min-h-0 relative bg-surface-secondary flex">
         {/* Filter sidebar — only when model has loaded elements */}
         {activeModelId && !isModelNonReady && elements.length > 0 && filterPanelOpen && (
-          <div className="shrink-0 h-full overflow-y-auto flex flex-col">
+          <div className="absolute top-0 start-0 h-full z-20 overflow-y-auto flex flex-col">
             <BIMFilterPanel
               elements={elements}
               modelId={activeModelId ?? undefined}
