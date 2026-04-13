@@ -589,14 +589,26 @@ export class ElementManager {
       `(${this.elementDataMap.size > 0 ? Math.round((matchedCount / this.elementDataMap.size) * 100) : 0}% element coverage)`,
     );
 
-    // POSITIONAL FALLBACK: when the converter drops node ids and we
-    // get 0% explicit matches, pair meshes with element data by index.
-    if (matchedCount === 0 && this.allDaeMeshes.length > 0 && this.elementDataMap.size > 0) {
-      const elementsArr = Array.from(this.elementDataMap.values());
-      const pairs = Math.min(this.allDaeMeshes.length, elementsArr.length);
+    // FALLBACK: assign elementIds to unmatched meshes so every visible
+    // mesh is selectable.  When explicit matching covers < 50% of meshes,
+    // we pair remaining unmatched meshes with unmatched elements by index.
+    const unmatchedMeshes = this.allDaeMeshes.filter(
+      (m) => !(m.userData as { elementId?: string | null }).elementId,
+    );
+    const matchedElementIds = new Set(
+      this.allDaeMeshes
+        .map((m) => (m.userData as { elementId?: string | null }).elementId)
+        .filter(Boolean),
+    );
+    const unmatchedElements = Array.from(this.elementDataMap.values()).filter(
+      (el) => !matchedElementIds.has(el.id),
+    );
+
+    if (unmatchedMeshes.length > 0 && unmatchedElements.length > 0) {
+      const pairs = Math.min(unmatchedMeshes.length, unmatchedElements.length);
       for (let i = 0; i < pairs; i++) {
-        const mesh = this.allDaeMeshes[i]!;
-        const el = elementsArr[i]!;
+        const mesh = unmatchedMeshes[i]!;
+        const el = unmatchedElements[i]!;
         mesh.userData = {
           ...(mesh.userData as object),
           elementId: el.id,
@@ -605,12 +617,31 @@ export class ElementManager {
         };
         this.meshMap.set(el.id, mesh);
       }
-      matchedCount = pairs;
+      matchedCount += pairs;
       // eslint-disable-next-line no-console
       console.info(
         `[BIM] positional fallback: paired ${pairs} meshes with element data ` +
         `(node names were generic, real mesh_ref matching unavailable)`,
       );
+    }
+
+    // Assign temporary IDs to any remaining meshes that still have no
+    // elementId — this ensures every visible mesh is selectable.
+    let tempIdCounter = 0;
+    for (const mesh of this.allDaeMeshes) {
+      if (!(mesh.userData as { elementId?: string | null }).elementId) {
+        const tempId = `_unmatched_${tempIdCounter++}`;
+        mesh.userData = {
+          ...(mesh.userData as object),
+          elementId: tempId,
+        };
+        this.meshMap.set(tempId, mesh);
+      }
+    }
+    if (tempIdCounter > 0) {
+      matchedCount += tempIdCounter;
+      // eslint-disable-next-line no-console
+      console.info(`[BIM] assigned temporary IDs to ${tempIdCounter} unmatched meshes`);
     }
 
     const totalElements = this.elementDataMap.size;
