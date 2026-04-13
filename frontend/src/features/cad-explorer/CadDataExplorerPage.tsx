@@ -1068,6 +1068,7 @@ function CreateBOQFromPivotModal({ open, onClose, groups, groupByColumns, aggCol
     queryKey: ['projects'],
     queryFn: () => apiGet<{ id: string; name: string }[]>('/v1/projects/'),
     enabled: open,
+    staleTime: 5 * 60_000,
   });
 
   const { data: boqs } = useQuery({
@@ -1535,6 +1536,7 @@ function SaveDialog({
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<{ id: string; name: string }[]>('/v1/projects/'),
+    staleTime: 5 * 60_000,
   });
 
   const [name, setName] = useState(filename.replace(/\.[^.]+$/, '') + ' — Analysis');
@@ -1615,6 +1617,7 @@ function SaveToProjectDialog({
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
     queryFn: () => apiGet<{ id: string; name: string }[]>('/v1/projects/'),
+    staleTime: 5 * 60_000,
   });
 
   const [modelName, setModelName] = useState(filename.replace(/\.[^.]+$/, ''));

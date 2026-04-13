@@ -292,6 +292,7 @@ function SaveToBOQDialog({ open, onClose, onSave, saving }: SaveDialogProps) {
     queryKey: ['projects-list-simple'],
     queryFn: () => apiGet<ProjectSummary[]>('/v1/projects/?page_size=100'),
     enabled: open,
+    staleTime: 5 * 60_000,
   });
 
   if (!open) return null;
@@ -1186,6 +1187,7 @@ export function QuickEstimatePage() {
     queryKey: ['ai-settings'],
     queryFn: aiApi.getSettings,
     retry: false,
+    staleTime: 5 * 60_000,
   });
 
   const isConfigured = !!(
@@ -1956,6 +1958,7 @@ export function QuickEstimatePage() {
     queryKey: ['projects-list-simple-cad'],
     queryFn: () => apiGet<ProjectSummary[]>('/v1/projects/?page_size=100'),
     enabled: !!cadGroupResult,
+    staleTime: 5 * 60_000,
   });
 
   // ── Render ────────────────────────────────────────────────────────────
