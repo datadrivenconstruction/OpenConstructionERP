@@ -352,6 +352,11 @@ def _excel_elements_to_bim_result(
         "ost_site", "ost_sitepad", "ost_siteregion",
         "ost_buildingpad", "ost_pad",
         "ost_entourage", "ost_planting",
+        # IFC spatial/project types (from DDC IfcExporter — not physical elements)
+        "ifcproject", "ifcsite", "ifcbuilding", "ifcbuildingstorey",
+        "ifcownerhistory", "ifcapplication", "ifcpersonandorganization",
+        "ifcperson", "ifcorganization", "ifcunitassignment",
+        "ifcgeometricrepresentationcontext",
         # HVAC schedules / load (analytical, not physical)
         "ost_hvacloadschedules", "ost_hvac_load_schedules",
         # Room/area separation (lines, not geometry)
@@ -426,6 +431,8 @@ def _excel_elements_to_bim_result(
         storey = (
             lc_row.get("level")
             or lc_row.get("storey")
+            or lc_row.get("buildingstorey")
+            or lc_row.get("building storey")
             or lc_row.get("base constraint")
             or lc_row.get("base level")
             or lc_row.get("reference level")
@@ -453,6 +460,13 @@ def _excel_elements_to_bim_result(
             ("floor area", "Floor Area"), ("floor volume", "Floor Volume"),
             ("surface area", "Surface Area"),
             ("cut length", "Cut Length"), ("unconnected height", "Unconnected Height"),
+            # DDC IfcExporter uses [BaseQuantities] prefix
+            ("[basequantities] length", "Length"),
+            ("[basequantities] width", "Width"),
+            ("[basequantities] height", "Height"),
+            ("[basequantities] area", "Area"),
+            ("[basequantities] volume", "Volume"),
+            ("overallwidth", "Width"), ("overallheight", "Height"),
         ):
             val = lc_row.get(src_key)
             if val is None:
