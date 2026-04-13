@@ -44,6 +44,8 @@ export interface DxfEntity {
   height?: number;
   /** Block name for INSERT entities */
   block_name?: string;
+  /** Whether the polyline is closed */
+  closed?: boolean;
 }
 
 export interface DxfLayer {
@@ -172,7 +174,7 @@ export async function linkAnnotationToBoq(
   annotId: string,
   boqPositionId: string,
 ): Promise<DwgAnnotation> {
-  return apiPost<DwgAnnotation>(`/v1/dwg-takeoff/annotations/${annotId}/link-to-boq/`, {
+  return apiPost<DwgAnnotation>(`/v1/dwg-takeoff/annotations/${annotId}/link-boq`, {
     position_id: boqPositionId,
   });
 }

@@ -3,6 +3,7 @@
  */
 
 import { useRef, useEffect, useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { DxfEntity, DwgAnnotation } from '../api';
 import type { ViewportState, Extents } from '../lib/viewport';
 import { zoomToFit, applyZoom, applyPan, screenToWorld } from '../lib/viewport';
@@ -53,6 +54,12 @@ function computeExtents(entities: DxfEntity[]): Extents {
       expand(e.start.x - e.radius, e.start.y - e.radius);
       expand(e.start.x + e.radius, e.start.y + e.radius);
     }
+    // TEXT/MTEXT: use insertion point + estimated text width
+    if ((e.type === 'TEXT') && e.start && e.text) {
+      const h = e.height ?? 2.5;
+      const estimatedWidth = h * e.text.length * 0.6;
+      expand(e.start.x + estimatedWidth, e.start.y + h);
+    }
   }
 
   if (!isFinite(minX)) return { minX: 0, minY: 0, maxX: 100, maxY: 100 };
@@ -71,6 +78,7 @@ export function DxfViewer({
   onSelectAnnotation,
   onAnnotationCreated,
 }: Props) {
+  const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const vpRef = useRef<ViewportState>({ offsetX: 0, offsetY: 0, scale: 1 });
@@ -78,7 +86,20 @@ export function DxfViewer({
   const isPanningRef = useRef(false);
   const lastMouseRef = useRef({ x: 0, y: 0 });
   const drawPointsRef = useRef<{ x: number; y: number }[]>([]);
+  const activeToolRef = useRef(activeTool);
+  activeToolRef.current = activeTool;
+  const activeColorRef = useRef(activeColor);
+  activeColorRef.current = activeColor;
+  const selectedEntityIdRef = useRef(selectedEntityId);
+  selectedEntityIdRef.current = selectedEntityId;
+  const selectedAnnotationIdRef = useRef(selectedAnnotationId);
+  selectedAnnotationIdRef.current = selectedAnnotationId;
   const [, forceRender] = useState(0);
+
+  // Clear in-progress draw points when tool changes
+  useEffect(() => {
+    drawPointsRef.current = [];
+  }, [activeTool]);
 
   // Fit on first mount or when entities change
   useEffect(() => {
@@ -147,14 +168,16 @@ export function DxfViewer({
         }
       }
 
-      renderEntities(ctx, entities, vp, visibleLayers, selectedEntityId);
-      renderAnnotations(ctx, annotations, vp, selectedAnnotationId);
+      renderEntities(ctx, entities, vp, visibleLayers, selectedEntityIdRef.current);
+      renderAnnotations(ctx, annotations, vp, selectedAnnotationIdRef.current);
 
       // Draw in-progress annotation points
       const pts = drawPointsRef.current;
-      if (pts.length > 0 && activeTool !== 'select' && activeTool !== 'pan') {
-        ctx.strokeStyle = activeColor;
-        ctx.fillStyle = activeColor;
+      const curTool = activeToolRef.current;
+      const curColor = activeColorRef.current;
+      if (pts.length > 0 && curTool !== 'select' && curTool !== 'pan') {
+        ctx.strokeStyle = curColor;
+        ctx.fillStyle = curColor;
         ctx.lineWidth = 2;
         ctx.setLineDash([4, 3]);
         const screenPts = pts.map((p) => ({
@@ -181,7 +204,8 @@ export function DxfViewer({
 
     rafRef.current = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [entities, annotations, visibleLayers, selectedEntityId, selectedAnnotationId, activeTool, activeColor]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entities, annotations, visibleLayers]);
 
   // Wheel zoom
   const handleWheel = useCallback((e: React.WheelEvent) => {
@@ -256,7 +280,7 @@ export function DxfViewer({
 
       // Text pin: single click
       if (activeTool === 'text_pin' && pts.length === 1) {
-        const label = window.prompt('Label:');
+        const label = window.prompt(t('dwg_takeoff.enter_label', 'Enter label:'));
         if (label) {
           onAnnotationCreated({ type: 'text_pin', points: pts, text: label });
         }
