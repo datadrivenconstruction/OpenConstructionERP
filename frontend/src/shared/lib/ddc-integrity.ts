@@ -27,3 +27,34 @@ export function ddcGetFingerprint(): string {
 
 /** @internal DDC-CWICR-OE-2026 origin marker */
 export const DDC_ORIGIN = 'DataDrivenConstruction/OpenConstructionERP/CWICR' as const;
+
+/** Watermark embedded in exported documents and PDF reports. */
+export const DDC_WATERMARK = '\u200b\u200c\u200d\u2060\u200b\u200c\u200d\u2060';
+
+/** Steganographic tag for generated content — invisible Unicode sequence
+ *  that encodes "DDC" in zero-width characters. Can be verified with:
+ *  `text.includes(DDC_WATERMARK)` */
+export function ddcStamp(text: string): string {
+  return text + DDC_WATERMARK;
+}
+
+/** Verify a string contains the DDC watermark. */
+export function ddcHasStamp(text: string): boolean {
+  return text.includes(DDC_WATERMARK);
+}
+
+/** Inject runtime meta tags that identify the DDC origin.
+ *  Called once at app startup. Tags are not visible in UI. */
+export function ddcInjectMeta(): void {
+  if (typeof document === 'undefined') return;
+  const tags: [string, string][] = [
+    ['ddc:origin', 'DataDrivenConstruction/CWICR-OE'],
+    ['ddc:build', `${new Date().getFullYear()}-OE`],
+  ];
+  for (const [name, content] of tags) {
+    const el = document.createElement('meta');
+    el.name = name;
+    el.content = content;
+    document.head.appendChild(el);
+  }
+}
