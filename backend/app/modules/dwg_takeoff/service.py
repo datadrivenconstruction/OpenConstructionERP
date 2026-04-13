@@ -218,7 +218,7 @@ class DwgTakeoffService:
             logger.exception("Failed to process drawing %s: %s", drawing_id, exc)
 
     async def _handle_dwg(self, drawing_id: uuid.UUID, file_path: str) -> None:
-        """Attempt DWG→DXF conversion via DDC, or fail with a clear message."""
+        """Process DWG via DDC DwgExporter → Excel → parse entities."""
         try:
             from app.modules.boq.cad_import import find_converter
 
@@ -237,42 +237,96 @@ class DwgTakeoffService:
             )
             return
 
-        import subprocess
+        await self.drawing_repo.update_fields(drawing_id, status="processing")
 
-        dxf_path = file_path.rsplit(".", 1)[0] + ".dxf"
+        import subprocess
+        from pathlib import Path as _Path
+
+        # DDC DwgExporter → Excel (dispatched by output file extension)
+        xlsx_path = file_path.rsplit(".", 1)[0] + "_dwg.xlsx"
         try:
-            result = subprocess.run(
-                [str(converter), file_path, dxf_path],
-                capture_output=True,
-                timeout=120,
-                check=False,
+            proc = await asyncio.to_thread(
+                lambda: subprocess.run(
+                    [str(converter), str(_Path(file_path).resolve()), str(_Path(xlsx_path).resolve()), "-no-collada"],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    cwd=str(converter.parent),
+                    input=b"\n",
+                    timeout=120,
+                )
             )
-            if result.returncode != 0 or not os.path.exists(dxf_path):
-                stderr_msg = result.stderr.decode(errors="replace")[:300] if result.stderr else ""
+            if not os.path.exists(xlsx_path) or os.path.getsize(xlsx_path) < 100:
+                stderr_msg = proc.stderr.decode(errors="replace")[:300] if proc.stderr else ""
                 await self.drawing_repo.update_fields(
                     drawing_id,
                     status="error",
-                    error_message=f"DWG→DXF conversion failed: {stderr_msg}".strip()[:500],
+                    error_message=f"DDC DwgExporter produced no output: {stderr_msg}".strip()[:500],
                 )
                 return
         except subprocess.TimeoutExpired:
             await self.drawing_repo.update_fields(
-                drawing_id,
-                status="error",
-                error_message="DWG→DXF conversion timed out (120s limit)",
+                drawing_id, status="error",
+                error_message="DWG conversion timed out (120s limit)",
             )
             return
         except Exception as exc:
             await self.drawing_repo.update_fields(
-                drawing_id,
-                status="error",
-                error_message=f"DWG→DXF conversion error: {exc}"[:500],
+                drawing_id, status="error",
+                error_message=f"DWG conversion error: {exc}"[:500],
             )
             return
 
-        # Update file_path to point to the converted DXF
-        await self.drawing_repo.update_fields(drawing_id, file_path=dxf_path)
-        await self._process_drawing(drawing_id, dxf_path)
+        # Parse DDC Excel → entities (same format as ezdxf output)
+        try:
+            from app.modules.dwg_takeoff.ddc_dwg_parser import parse_ddc_dwg_excel
+
+            result = await asyncio.to_thread(parse_ddc_dwg_excel, xlsx_path)
+
+            if result["entity_count"] == 0:
+                await self.drawing_repo.update_fields(
+                    drawing_id, status="error",
+                    error_message="No drawable entities found in DWG file",
+                )
+                return
+
+            # Store entities JSON
+            entities_key = f"{drawing_id}/entities.json"
+            entities_path = os.path.join(os.path.dirname(file_path), f"{drawing_id}_entities.json")
+            import json
+            with open(entities_path, "w", encoding="utf-8") as f:
+                json.dump(result["entities"], f)
+
+            # Create drawing version
+            version_number = await self.version_repo.get_next_version_number(drawing_id)
+            version = DwgDrawingVersion(
+                drawing_id=drawing_id,
+                version_number=version_number,
+                layers=result["layers"],
+                entities_key=entities_path,
+                entity_count=result["entity_count"],
+                extents=result["extents"],
+                units=result.get("units", "unitless"),
+                status="ready",
+            )
+            self.session.add(version)
+            await self.drawing_repo.update_fields(
+                drawing_id,
+                status="ready",
+                error_message=None,
+            )
+            await self.session.flush()
+
+            logger.info(
+                "DWG processed via DDC: %s — %d entities, %d layers",
+                drawing_id, result["entity_count"], len(result["layers"]),
+            )
+
+        except Exception as exc:
+            await self.drawing_repo.update_fields(
+                drawing_id, status="error",
+                error_message=f"DWG parsing error: {exc}"[:500],
+            )
+            logger.exception("Failed to parse DWG %s: %s", drawing_id, exc)
 
     # ── Drawing CRUD ────────────────────────────────────────────────────
 
