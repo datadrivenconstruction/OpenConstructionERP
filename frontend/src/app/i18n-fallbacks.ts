@@ -1007,6 +1007,7 @@ export const fallbackResources = {
       'nav.sustainability': 'Sustainability',
       'nav.takeoff': 'PDF Takeoff',
       'nav.pdf_measurements': 'PDF Measurements',
+      'nav.dwg_takeoff': 'DWG Drawings',
       'nav.pdf_documents': 'PDF Documents & AI',
       'nav.benchmarks': 'Cost Benchmarks',
       'nav.collaboration': 'Collaboration',
