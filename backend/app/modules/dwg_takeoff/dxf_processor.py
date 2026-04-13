@@ -52,13 +52,20 @@ def _aci_to_hex(aci: int) -> str:
     return aci_map.get(aci, "#ffffff")
 
 
-def _serialize_entity(entity: Any) -> dict[str, Any]:
+def _serialize_entity(entity: Any, layer_colors: dict[str, str] | None = None) -> dict[str, Any]:
     """Convert an ezdxf entity to a JSON-serializable dict."""
     dxf = entity.dxf
+    aci = dxf.get("color", 256)  # 256 = ByLayer (default)
+    layer_name = dxf.get("layer", "0")
+    # ACI 0 (ByBlock) or 256 (ByLayer): use layer color
+    if aci in (0, 256) and layer_colors and layer_name in layer_colors:
+        color = layer_colors[layer_name]
+    else:
+        color = _aci_to_hex(aci)
     result: dict[str, Any] = {
         "entity_type": entity.dxftype(),
-        "layer": dxf.get("layer", "0"),
-        "color": _aci_to_hex(dxf.get("color", 7)),
+        "layer": layer_name,
+        "color": color,
         "geometry_data": {},
     }
 
@@ -180,6 +187,9 @@ def parse_dxf(file_path: str) -> dict[str, Any]:
             "entity_count": 0,
         })
 
+    # Build layer color map for ByLayer color resolution
+    layer_color_map: dict[str, str] = {l["name"]: l["color"] for l in layers}
+
     # Build layer name set for counting
     layer_counts: dict[str, int] = {}
 
@@ -190,7 +200,7 @@ def parse_dxf(file_path: str) -> dict[str, Any]:
     for entity in msp:
         total_count += 1
         try:
-            serialized = _serialize_entity(entity)
+            serialized = _serialize_entity(entity, layer_color_map)
             entities.append(serialized)
             layer_name = serialized.get("layer", "0")
             layer_counts[layer_name] = layer_counts.get(layer_name, 0) + 1
@@ -211,19 +221,35 @@ def parse_dxf(file_path: str) -> dict[str, Any]:
     for layer_info in layers:
         layer_info["entity_count"] = layer_counts.get(layer_info["name"], 0)
 
-    # Calculate extents
-    extents: dict[str, Any] = {"min_x": 0, "min_y": 0, "max_x": 0, "max_y": 0}
-    try:
-        ext = msp.get_extents()
-        if ext is not None and ext.has_data:
-            extents = {
-                "min_x": ext.extmin.x,
-                "min_y": ext.extmin.y,
-                "max_x": ext.extmax.x,
-                "max_y": ext.extmax.y,
-            }
-    except Exception:
-        logger.debug("Could not calculate extents for %s", file_path)
+    # Calculate extents from parsed entities (more reliable than msp.get_extents)
+    min_x = min_y = float("inf")
+    max_x = max_y = float("-inf")
+    for ent in entities:
+        gd = ent.get("geometry_data", {})
+        points: list[tuple[float, float]] = []
+        if "start" in gd and "end" in gd:
+            points.append((gd["start"]["x"], gd["start"]["y"]))
+            points.append((gd["end"]["x"], gd["end"]["y"]))
+        if "points" in gd:
+            for v in gd["points"]:
+                points.append((v["x"], v["y"]))
+        if "center" in gd:
+            r = gd.get("radius", 0)
+            cx, cy = gd["center"]["x"], gd["center"]["y"]
+            points.append((cx - r, cy - r))
+            points.append((cx + r, cy + r))
+        if "insertion_point" in gd:
+            points.append((gd["insertion_point"]["x"], gd["insertion_point"]["y"]))
+        for px, py in points:
+            min_x = min(min_x, px)
+            min_y = min(min_y, py)
+            max_x = max(max_x, px)
+            max_y = max(max_y, py)
+
+    if min_x == float("inf"):
+        min_x = min_y = 0.0
+        max_x = max_y = 1000.0
+    extents = {"min_x": float(min_x), "min_y": float(min_y), "max_x": float(max_x), "max_y": float(max_y)}
 
     # Extract units
     units_map = {
