@@ -26,18 +26,39 @@ _COLLADA_NS = "http://www.collada.org/2005/11/COLLADASchema"
 
 logger = logging.getLogger(__name__)
 
-# IFC entity types we care about
+# IFC entity types we care about — includes IFC2x3, IFC4, and IFC4x3 civil types
 _ELEMENT_TYPES = {
+    # ── Structural / architectural (IFC2x3+) ──
     "IFCWALL", "IFCWALLSTANDARDCASE", "IFCSLAB", "IFCCOLUMN", "IFCBEAM",
     "IFCDOOR", "IFCWINDOW", "IFCROOF", "IFCSTAIR", "IFCRAILING",
     "IFCCURTAINWALL", "IFCPLATE", "IFCMEMBER", "IFCFOOTING",
     "IFCPILE", "IFCBUILDINGELEMENTPROXY",
+    # ── MEP ──
     "IFCFLOWSEGMENT", "IFCFLOWTERMINAL", "IFCFLOWFITTING",
     "IFCDISTRIBUTIONELEMENT", "IFCFURNISHINGELEMENT",
     "IFCCOVERING", "IFCSPACE",
+    # ── Civil infrastructure (IFC4x3 + common proxies) ──
+    "IFCALIGNMENT", "IFCALIGNMENTHORIZONTAL", "IFCALIGNMENTVERTICAL",
+    "IFCALIGNMENTSEGMENT", "IFCALIGNMENTCANT",
+    "IFCBRIDGE", "IFCBRIDGEPART",
+    "IFCROAD", "IFCROADPART",
+    "IFCRAILWAY", "IFCRAILWAYPART",
+    "IFCFACILITY", "IFCFACILITYPART",
+    "IFCPAVEMENT", "IFCKERB", "IFCCOURSE",
+    "IFCEARTHWORKSFILL", "IFCEARTHWORKSCUT", "IFCEARTHWORKSELEMENT",
+    "IFCREINFORCEDSOIL", "IFCGEOTECHNICELEMENT", "IFCGEOTECHNICSTRATUM",
+    "IFCDEEPFOUNDATION", "IFCCAISSONFOOTING",
+    "IFCBEARING", "IFCTENDON", "IFCTENDONANCHOR", "IFCTENDONCONDUIT",
+    "IFCSURFACEFEATURE", "IFCVOIDINGELEMENT",
+    # ── Generic / catch-all ──
+    "IFCCIVILELEMENT", "IFCGEOGRAPHICELEMENT",
+    "IFCTRANSPORTELEMENT", "IFCVIRTUALELEMENT",
+    "IFCEXTERNALSPATIALELEMENT",
 }
 
-_STOREY_TYPE = "IFCBUILDINGSTOREY"
+# Spatial structure types used as "storey" equivalents (IFC4x3 uses
+# IfcFacilityPart for road stations, bridge spans, etc.)
+_STOREY_TYPES = {"IFCBUILDINGSTOREY", "IFCFACILITYPART", "IFCBRIDGEPART", "IFCROADPART", "IFCRAILWAYPART"}
 
 # Regex for IFC STEP line: #123= IFCWALL('guid', #owner, 'name', ...)
 _LINE_RE = re.compile(r"^#(\d+)\s*=\s*(\w+)\s*\((.*)\)\s*;", re.DOTALL)
@@ -680,10 +701,10 @@ def process_ifc_file(
 
     logger.info("Parsed %d IFC entities", len(entities))
 
-    # Extract storeys
+    # Extract storeys (IFC2x3 IfcBuildingStorey + IFC4x3 facility parts)
     storeys: dict[int, str] = {}
     for eid, ent in entities.items():
-        if ent["type"] == _STOREY_TYPE:
+        if ent["type"] in _STOREY_TYPES:
             name = ent["strings"][1] if len(ent["strings"]) > 1 else f"Storey-{eid}"
             storeys[eid] = name
 
@@ -741,6 +762,9 @@ def process_ifc_file(
                 "bounding_box": None,
                 "mesh_ref": None,
             })
+
+    # Try to extract real placement coordinates from IFC before generating geometry
+    _extract_placements(elements, entities)
 
     # Generate simplified COLLADA
     geometry_path = None
@@ -820,32 +844,158 @@ def _extract_quantities_for_element(
 def _classify_discipline(ifc_type: str) -> str:
     """Classify IFC type into a discipline."""
     t = ifc_type.lower()
-    if any(x in t for x in ["wall", "slab", "column", "beam", "footing", "pile", "stair", "railing", "roof"]):
-        return "structural"
+    # Check architecture first — curtainwall contains "wall" so must precede structural
     if any(x in t for x in ["door", "window", "curtainwall", "covering", "furnishing"]):
         return "architecture"
+    if any(x in t for x in ["wall", "slab", "column", "beam", "footing", "pile", "stair", "railing", "roof",
+                             "plate", "member", "tendon", "bearing"]):
+        return "structural"
     if any(x in t for x in ["flow", "distribution", "pipe", "duct", "cable"]):
         return "mep"
+    if any(x in t for x in ["alignment", "road", "railway", "bridge", "pavement", "kerb", "course",
+                             "earthworks", "civil", "facility", "geographic", "geotechnic",
+                             "caisson", "deepfoundation", "surfacefeature", "transport",
+                             "reinforcedsoil"]):
+        return "civil"
     if "space" in t:
         return "architecture"
     return "other"
 
 
+_TYPE_DISPLAY_MAP: dict[str, str] = {
+    "IFCWALLSTANDARDCASE": "Wall",
+    "IFCBUILDINGELEMENTPROXY": "Generic Element",
+    "IFCALIGNMENT": "Alignment",
+    "IFCALIGNMENTHORIZONTAL": "Horizontal Alignment",
+    "IFCALIGNMENTVERTICAL": "Vertical Alignment",
+    "IFCALIGNMENTSEGMENT": "Alignment Segment",
+    "IFCALIGNMENTCANT": "Alignment Cant",
+    "IFCBRIDGE": "Bridge",
+    "IFCBRIDGEPART": "Bridge Part",
+    "IFCROAD": "Road",
+    "IFCROADPART": "Road Part",
+    "IFCRAILWAY": "Railway",
+    "IFCRAILWAYPART": "Railway Part",
+    "IFCPAVEMENT": "Pavement",
+    "IFCKERB": "Kerb",
+    "IFCCOURSE": "Course",
+    "IFCEARTHWORKSFILL": "Earthworks Fill",
+    "IFCEARTHWORKSCUT": "Earthworks Cut",
+    "IFCEARTHWORKSELEMENT": "Earthworks Element",
+    "IFCREINFORCEDSOIL": "Reinforced Soil",
+    "IFCGEOTECHNICELEMENT": "Geotechnic Element",
+    "IFCGEOTECHNICSTRATUM": "Geotechnic Stratum",
+    "IFCDEEPFOUNDATION": "Deep Foundation",
+    "IFCCAISSONFOOTING": "Caisson Footing",
+    "IFCBEARING": "Bearing",
+    "IFCTENDON": "Tendon",
+    "IFCTENDONANCHOR": "Tendon Anchor",
+    "IFCTENDONCONDUIT": "Tendon Conduit",
+    "IFCSURFACEFEATURE": "Surface Feature",
+    "IFCCIVILELEMENT": "Civil Element",
+    "IFCGEOGRAPHICELEMENT": "Geographic Element",
+    "IFCFACILITY": "Facility",
+    "IFCFACILITYPART": "Facility Part",
+}
+
+
 def _simplify_type(ifc_type: str) -> str:
     """Simplify IFC type name for display."""
-    return (
-        ifc_type
-        .replace("IFCWALLSTANDARDCASE", "Wall")
-        .replace("IFC", "")
-        .title()
-    )
+    up = ifc_type.upper()
+    if up in _TYPE_DISPLAY_MAP:
+        return _TYPE_DISPLAY_MAP[up]
+    return ifc_type.replace("IFC", "").title()
+
+
+def _extract_placements(
+    elements: list[dict[str, Any]],
+    entities: dict[int, dict],
+) -> None:
+    """Try to extract real XYZ placement coordinates from IFC entities.
+
+    Parses ``IfcLocalPlacement → IfcAxis2Placement3D → IfcCartesianPoint``
+    and stores the result in ``elem["_placement"]`` as ``(x, y, z)``.
+    Elements without recoverable placement keep ``_placement = None``.
+    """
+    # Build map: element_ifc_id → placement ref
+    placement_map: dict[int, tuple[float, float, float]] = {}
+
+    for eid, ent in entities.items():
+        if ent["type"] == "IFCCARTESIANPOINT":
+            nums = re.findall(r"[-\d.]+(?:E[+-]?\d+)?", ent["args_raw"])
+            if len(nums) >= 3:
+                try:
+                    placement_map[eid] = (float(nums[0]), float(nums[1]), float(nums[2]))
+                except ValueError:
+                    pass
+            elif len(nums) == 2:
+                try:
+                    placement_map[eid] = (float(nums[0]), float(nums[1]), 0.0)
+                except ValueError:
+                    pass
+
+    # Build IfcAxis2Placement3D → location point
+    axis_to_point: dict[int, tuple[float, float, float]] = {}
+    for eid, ent in entities.items():
+        if ent["type"] in ("IFCAXIS2PLACEMENT3D", "IFCAXIS2PLACEMENT2D"):
+            refs = re.findall(r"#(\d+)", ent["args_raw"])
+            if refs:
+                pt_id = int(refs[0])
+                if pt_id in placement_map:
+                    axis_to_point[eid] = placement_map[pt_id]
+
+    # Build IfcLocalPlacement → resolved point (simplified: only direct placements)
+    local_placement_pt: dict[int, tuple[float, float, float]] = {}
+    for eid, ent in entities.items():
+        if ent["type"] == "IFCLOCALPLACEMENT":
+            refs = re.findall(r"#(\d+)", ent["args_raw"])
+            for ref_str in refs:
+                ref_id = int(ref_str)
+                if ref_id in axis_to_point:
+                    local_placement_pt[eid] = axis_to_point[ref_id]
+                    break
+
+    # Map elements to their placements via ObjectPlacement ref (typically #N in arg index 5)
+    for elem in elements:
+        ifc_id = elem.get("properties", {}).get("ifc_id")
+        if ifc_id is None:
+            elem["_placement"] = None
+            continue
+
+        ent = entities.get(ifc_id)
+        if not ent:
+            elem["_placement"] = None
+            continue
+
+        # The ObjectPlacement reference is typically the 6th arg in IFC entity definition.
+        # We look for any ref that points to a known IfcLocalPlacement.
+        refs = re.findall(r"#(\d+)", ent["args_raw"])
+        placed = False
+        for ref_str in refs:
+            ref_id = int(ref_str)
+            if ref_id in local_placement_pt:
+                elem["_placement"] = local_placement_pt[ref_id]
+                placed = True
+                break
+        if not placed:
+            elem["_placement"] = None
+
+    placed_count = sum(1 for e in elements if e.get("_placement") is not None)
+    logger.info("Placement extraction: %d/%d elements have coordinates", placed_count, len(elements))
 
 
 def _generate_collada_boxes(
     elements: list[dict],
     output_dir: Path,
+    *,
+    max_elements: int = 2000,
 ) -> tuple[Path | None, dict | None]:
-    """Generate simplified COLLADA with box placeholders per element."""
+    """Generate simplified COLLADA with box placeholders per element.
+
+    When real IFC placement coordinates are available (populated by
+    ``_extract_placements``), elements are positioned at their actual
+    locations.  Otherwise falls back to a grid layout.
+    """
     output_dir.mkdir(parents=True, exist_ok=True)
     dae_path = output_dir / "geometry.dae"
 
@@ -859,22 +1009,39 @@ def _generate_collada_boxes(
     lib_scenes = ET.SubElement(root, "library_visual_scenes")
     vscene = ET.SubElement(lib_scenes, "visual_scene", id="Scene", name="Scene")
 
-    # Layout elements in a grid if no coordinates
-    for i, elem in enumerate(elements[:500]):  # Cap at 500 for performance
+    # Check how many elements have real placements
+    has_real_coords = sum(1 for e in elements if e.get("_placement")) > len(elements) * 0.3
+
+    # Track global bounding box
+    g_min_x = g_min_y = g_min_z = float("inf")
+    g_max_x = g_max_y = g_max_z = float("-inf")
+
+    for i, elem in enumerate(elements[:max_elements]):
         q = elem.get("quantities", {})
-        w = q.get("Width", q.get("Breite", 0.3))
-        h = q.get("Height", q.get("Hoehe", 3.0))
-        ln = q.get("Length", q.get("Laenge", 1.0))
+        w = max(float(q.get("Width", q.get("Breite", 0.3))), 0.05)
+        h = max(float(q.get("Height", q.get("Hoehe", 3.0))), 0.05)
+        ln = max(float(q.get("Length", q.get("Laenge", 1.0))), 0.05)
 
-        # Grid placement
-        row = i // 20
-        col = i % 20
-        x = col * 4.0
-        y = row * 4.0
-        z = 0.0
+        # Use real placement if available, otherwise grid
+        placement = elem.get("_placement")
+        if has_real_coords and placement:
+            x, y, z = placement
+        else:
+            # Grid fallback — expanded to 30 columns with 3m spacing
+            row = i // 30
+            col = i % 30
+            x = col * max(ln + 1.0, 3.0)
+            y = row * max(w + 1.0, 3.0)
+            z = 0.0
 
-        # Record the placeholder node id + per-element bbox so callers can
-        # populate BIMElement.mesh_ref / bounding_box from this result.
+        # Update global bbox
+        g_min_x = min(g_min_x, x)
+        g_min_y = min(g_min_y, y)
+        g_min_z = min(g_min_z, z)
+        g_max_x = max(g_max_x, x + ln)
+        g_max_y = max(g_max_y, y + w)
+        g_max_z = max(g_max_z, z + h)
+
         node_id = f"n{i}"
         elem["mesh_ref"] = node_id
         elem["bounding_box"] = {
@@ -888,15 +1055,15 @@ def _generate_collada_boxes(
 
         gid = f"g{i}"
         geom = ET.SubElement(lib_geom, "geometry", id=gid, name=elem.get("name", f"e{i}"))
-        mesh = ET.SubElement(geom, "mesh")
+        mesh_el = ET.SubElement(geom, "mesh")
 
         verts = [
             (0, 0, 0), (ln, 0, 0), (ln, w, 0), (0, w, 0),
             (0, 0, h), (ln, 0, h), (ln, w, h), (0, w, h),
         ]
-        pos_str = " ".join(f"{v[0]:.2f} {v[1]:.2f} {v[2]:.2f}" for v in verts)
+        pos_str = " ".join(f"{v[0]:.4f} {v[1]:.4f} {v[2]:.4f}" for v in verts)
 
-        src = ET.SubElement(mesh, "source", id=f"{gid}-p")
+        src = ET.SubElement(mesh_el, "source", id=f"{gid}-p")
         fa = ET.SubElement(src, "float_array", id=f"{gid}-pa", count=str(len(verts) * 3))
         fa.text = pos_str
         tc = ET.SubElement(src, "technique_common")
@@ -905,17 +1072,17 @@ def _generate_collada_boxes(
         ET.SubElement(acc, "param", name="Y", type="float")
         ET.SubElement(acc, "param", name="Z", type="float")
 
-        vs = ET.SubElement(mesh, "vertices", id=f"{gid}-v")
+        vs = ET.SubElement(mesh_el, "vertices", id=f"{gid}-v")
         ET.SubElement(vs, "input", semantic="POSITION", source=f"#{gid}-p")
 
-        tri = ET.SubElement(mesh, "triangles", count="12")
+        tri = ET.SubElement(mesh_el, "triangles", count="12")
         ET.SubElement(tri, "input", semantic="VERTEX", source=f"#{gid}-v", offset="0")
         p = ET.SubElement(tri, "p")
         p.text = "0 1 2 0 2 3 4 6 5 4 7 6 0 4 5 0 5 1 2 6 7 2 7 3 0 3 7 0 7 4 1 5 6 1 6 2"
 
-        node = ET.SubElement(vscene, "node", id=f"n{i}", name=elem.get("name", f"e{i}"))
+        node = ET.SubElement(vscene, "node", id=node_id, name=elem.get("name", f"e{i}"))
         mat = ET.SubElement(node, "matrix", sid="transform")
-        mat.text = f"1 0 0 {x:.2f} 0 1 0 {y:.2f} 0 0 1 {z:.2f} 0 0 0 1"
+        mat.text = f"1 0 0 {x:.4f} 0 1 0 {y:.4f} 0 0 1 {z:.4f} 0 0 0 1"
         ET.SubElement(node, "instance_geometry", url=f"#{gid}")
 
     scene = ET.SubElement(root, "scene")
@@ -925,15 +1092,20 @@ def _generate_collada_boxes(
     ET.indent(tree, space="  ")
     tree.write(str(dae_path), xml_declaration=True, encoding="utf-8")
 
-    n = min(len(elements), 500)
-    cols = min(n, 20)
-    rows = (n + 19) // 20
+    n = min(len(elements), max_elements)
+    if g_min_x == float("inf"):
+        g_min_x = g_min_y = g_min_z = 0.0
+        g_max_x = g_max_y = g_max_z = 10.0
     bb = {
-        "min": {"x": 0, "y": 0, "z": 0},
-        "max": {"x": cols * 4.0, "y": rows * 4.0, "z": 3.0},
+        "min": {"x": g_min_x, "y": g_min_y, "z": g_min_z},
+        "max": {"x": g_max_x, "y": g_max_y, "z": g_max_z},
     }
 
-    logger.info("Generated COLLADA boxes: %d elements", n)
+    logger.info(
+        "Generated COLLADA boxes: %d elements (%s coordinates)",
+        n,
+        "real" if has_real_coords else "grid",
+    )
     return dae_path, bb
 
 
