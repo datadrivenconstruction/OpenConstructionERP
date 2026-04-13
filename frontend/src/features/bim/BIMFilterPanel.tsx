@@ -681,7 +681,7 @@ export default function BIMFilterPanel({
 
   return (
     <div
-      className="h-full flex flex-col bg-surface-primary border-e border-border-light"
+      className="h-full flex flex-col bg-surface-primary/80 backdrop-blur-xl border-e border-border-light/50"
       style={{ width: 320, minWidth: 320 }}
     >
       {/* Header */}
