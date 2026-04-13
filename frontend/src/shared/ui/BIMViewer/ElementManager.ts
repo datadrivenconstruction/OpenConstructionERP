@@ -654,9 +654,11 @@ export class ElementManager {
     this.sceneManager.scene.updateMatrixWorld(true);
 
     // BatchedMesh: collapse same-material meshes into one draw call per
-    // material. Threshold lowered from 50,000 to 1,000 -- collapses
-    // ~6,000 draw calls to ~30 for a typical Revit model.
-    if (this.allDaeMeshes.length >= 1_000) {
+    // material.  Threshold raised to 10,000 so that selection highlighting
+    // works for typical models (BatchedMesh doesn't support per-instance
+    // material changes needed for click-to-highlight).  Only very large
+    // models (10K+ meshes) trade selection UX for render performance.
+    if (this.allDaeMeshes.length >= 10_000) {
       try {
         this.batchMeshesByMaterial();
       } catch (err) {
