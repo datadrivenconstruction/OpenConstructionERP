@@ -133,36 +133,44 @@ function ModelFilmstrip({ models, isLoading, activeModelId, onSelectModel, onDel
   }, []);
 
   return (
-    <div className="shrink-0 bg-surface-primary/90 backdrop-blur-sm relative">
-      {/* Drag handle — centered, always visible */}
+    <div className="shrink-0 bg-surface-primary/90 backdrop-blur-sm border-t border-border-light/60">
+      {/* Header — always visible with drag handle, title, and count */}
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
-        className="flex items-center justify-center w-full py-0.5 cursor-row-resize group hover:bg-surface-secondary/40 transition-colors border-t border-border-light/60"
+        className="flex items-center w-full px-4 py-2 cursor-pointer group hover:bg-surface-secondary/30 transition-colors"
       >
-        {/* Grab indicator — 3 horizontal lines */}
-        <div className="flex flex-col items-center gap-[2px]">
-          <div className="w-8 h-[2px] rounded-full bg-content-quaternary/40 group-hover:bg-content-tertiary transition-colors" />
-          <div className="w-6 h-[2px] rounded-full bg-content-quaternary/30 group-hover:bg-content-tertiary transition-colors" />
+        {/* Drag handle icon */}
+        <div className="flex flex-col items-center gap-[3px] mr-3 opacity-50 group-hover:opacity-80 transition-opacity">
+          <div className="w-5 h-[2px] rounded-full bg-content-tertiary" />
+          <div className="w-5 h-[2px] rounded-full bg-content-tertiary" />
+          <div className="w-5 h-[2px] rounded-full bg-content-tertiary" />
         </div>
+
+        {/* Model icon */}
+        <Layers size={16} className="text-content-secondary mr-2 shrink-0" />
+
+        {/* Title */}
+        <span className="text-xs font-semibold text-content-primary">
+          {t('bim.models_label', { defaultValue: 'Models' })}
+        </span>
+        <span className="text-[11px] text-content-tertiary ml-1.5">({models.length})</span>
+
+        {/* Expand/collapse chevron */}
+        <svg
+          className={`ml-auto w-4 h-4 text-content-tertiary transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+        </svg>
       </button>
 
-      {/* Header row with label */}
-      {expanded && (
-        <div className="flex items-center gap-1.5 px-4 pt-1 pb-0.5">
-          <span className="text-[10px] font-bold text-content-quaternary uppercase tracking-wider">
-            {t('bim.models_label', { defaultValue: 'Models' })}
-          </span>
-          <span className="text-[9px] text-content-quaternary">({models.length})</span>
-        </div>
-      )}
-
-      {/* Collapsible content */}
+      {/* Collapsible model cards */}
       <div
         className="overflow-hidden transition-all duration-300 ease-in-out"
-        style={{ maxHeight: expanded ? '100px' : '0px', opacity: expanded ? 1 : 0 }}
+        style={{ maxHeight: expanded ? '120px' : '0px', opacity: expanded ? 1 : 0 }}
       >
-        <div className="flex items-center gap-3 px-4 pb-1.5 overflow-x-auto">
+        <div className="flex items-center gap-3 px-4 pb-2 overflow-x-auto">
           {isLoading ? (
             <Loader2 size={14} className="animate-spin text-content-quaternary" />
           ) : models.length ? (
@@ -1582,7 +1590,7 @@ export function BIMPage() {
       <div className="flex-1 min-h-0 relative bg-surface-secondary flex">
         {/* Filter sidebar — only when model has loaded elements */}
         {activeModelId && !isModelNonReady && elements.length > 0 && filterPanelOpen && (
-          <div className="shrink-0 h-full overflow-y-auto flex flex-col bg-surface-primary/85 backdrop-blur-md">
+          <div className="shrink-0 h-full overflow-y-auto flex flex-col">
             <BIMFilterPanel
               elements={elements}
               modelId={activeModelId ?? undefined}
