@@ -457,7 +457,7 @@ export class ElementManager {
   private processLoadedScene(
     scene: THREE.Group | THREE.Object3D,
     onProgress?: (fraction: number) => void,
-    isGLB = false,
+    _isGLB = false,
   ): void {
     // Remove any existing placeholder meshes for elements that have geometry
     this.clearPlaceholders();
