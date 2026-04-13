@@ -1750,9 +1750,14 @@ export function BIMPage() {
                   })}
                 </p>
               )}
-              <p className="text-xs text-content-tertiary">
+              <p className="text-xs text-content-tertiary mb-2">
                 {t('bim.progress_navigate_away', {
-                  defaultValue: 'You can navigate to other pages — processing will continue in the background. You will be notified when it is complete.',
+                  defaultValue: 'Processing continues in the background — you can navigate to other pages and will be notified when complete.',
+                })}
+              </p>
+              <p className="text-xs text-oe-blue font-medium">
+                {t('bim.progress_parallel_hint', {
+                  defaultValue: 'You can upload multiple models in parallel — each one processes independently.',
                 })}
               </p>
             </div>
