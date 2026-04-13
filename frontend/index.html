@@ -7,13 +7,18 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href="https://openconstructionerp.com" />
 
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JYQXK2652T"></script>
+    <!-- Google Analytics — only on production domain, skipped on localhost -->
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-JYQXK2652T');
+      if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-JYQXK2652T';
+        document.head.appendChild(s);
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-JYQXK2652T');
+      }
     </script>
 
     <!-- SEO: Primary Meta Tags -->
