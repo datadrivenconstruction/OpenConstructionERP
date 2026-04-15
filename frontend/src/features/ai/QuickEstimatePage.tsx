@@ -1964,7 +1964,7 @@ export function QuickEstimatePage() {
   // ── Render ────────────────────────────────────────────────────────────
 
   return (
-    <div className="max-w-content mx-auto space-y-6 animate-fade-in">
+    <div className="w-full space-y-6 animate-fade-in">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-xs text-content-tertiary">
         <a href="/" className="hover:text-content-primary transition-colors">{t('nav.dashboard', { defaultValue: 'Dashboard' })}</a>

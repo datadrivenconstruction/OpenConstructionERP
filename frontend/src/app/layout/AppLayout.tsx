@@ -90,17 +90,15 @@ export function AppLayout({ title, children }: AppLayoutProps) {
       </div>
 
       {/* Main area — offset from the sidebar side (left in LTR, right in RTL).
-          Inner padding kept tight (px-2 → px-3) so content fills the available
-          width. Pages that want full-bleed (BIM viewer, AI chat) negate it via
-          `-mx-2 sm:-mx-3` on their root div. Header padding stays as Header
-          owns it. max-w-content is also gone — pages that need a constrained
-          reading width re-apply it themselves. */}
+          Consistent padding (px-4 sm:px-7) across all modules.
+          Full-bleed pages (BIM viewer, DWG takeoff, AI chat) negate it
+          via `-mx-4 sm:-mx-7` on their root div. */}
       <div className="lg:pl-sidebar">
         <Header
           title={title}
           onMenuClick={openSidebar}
         />
-        <main className="px-2 py-4 sm:px-3">
+        <main className="px-4 pt-6 pb-4 sm:px-7">
           {children}
         </main>
       </div>

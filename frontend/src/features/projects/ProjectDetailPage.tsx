@@ -1062,7 +1062,7 @@ export function ProjectDetailPage() {
   // ── Loading state ──────────────────────────────────────────────────────
   if (projectLoading) {
     return (
-      <div className="max-w-content mx-auto space-y-6 animate-fade-in">
+      <div className="w-full space-y-6 animate-fade-in">
         <Skeleton height={20} width={120} />
         <Skeleton height={80} className="w-full" />
         <div className="grid grid-cols-4 gap-4">
@@ -1078,7 +1078,7 @@ export function ProjectDetailPage() {
   // ── Not found ──────────────────────────────────────────────────────────
   if (!project) {
     return (
-      <div className="max-w-content mx-auto">
+      <div className="w-full">
         <EmptyState
           title={t('projects.not_found', { defaultValue: 'Project not found' })}
           description={t('projects.not_found_desc', { defaultValue: 'The project you are looking for does not exist or has been deleted.' })}
@@ -1095,7 +1095,7 @@ export function ProjectDetailPage() {
   const currency = project.currency || 'EUR';
 
   return (
-    <div className="max-w-content mx-auto animate-fade-in">
+    <div className="w-full animate-fade-in">
       {/* Breadcrumb */}
       <Breadcrumb
         className="mb-4"

@@ -43,12 +43,14 @@ import {
   Plus,
   Cuboid,
   SlidersHorizontal,
+  ClipboardList,
 } from 'lucide-react';
 import { Badge, EmptyState, Breadcrumb, ConfirmDialog } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { BIMViewer } from '@/shared/ui/BIMViewer';
 import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
 import BIMFilterPanel from './BIMFilterPanel';
+import BIMLinkedBOQPanel from './BIMLinkedBOQPanel';
 import BIMGroupsPanel from './BIMGroupsPanel';
 import { BIMProcessingProgress, type BIMProcessingStage } from './BIMProcessingProgress';
 import { BIMConverterStatusBanner } from './BIMConverterStatusBanner';
@@ -857,7 +859,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
   ];
 
   return (
-    <div className="flex flex-col -mx-2 sm:-mx-3 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
+    <div className="flex flex-col -mx-4 sm:-mx-7 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
       <div className="px-6 pt-4 pb-3 border-b border-border-light"><Breadcrumb items={breadcrumbItems} /></div>
       <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-blue-50/50 dark:from-gray-900 dark:via-gray-900 dark:to-blue-950/20">
         <div className="max-w-2xl w-full px-6 py-8">
@@ -998,6 +1000,7 @@ export function BIMPage() {
   const [uploadConvertedName, setUploadConvertedName] = useState<string | null>(null);
   const [showUploadOverride, setShowUploadOverride] = useState<boolean | null>(null);
   const [filterPanelOpen, setFilterPanelOpen] = useState(true);
+  const [boqPanelOpen, setBoqPanelOpen] = useState(false);
   const [filterPredicate, setFilterPredicate] = useState<
     ((el: BIMElementData) => boolean) | null
   >(null);
@@ -1590,7 +1593,7 @@ export function BIMPage() {
 
   if (!projectId) {
     return (
-      <div className="flex items-center justify-center -mx-2 sm:-mx-3 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
+      <div className="flex items-center justify-center -mx-4 sm:-mx-7 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
         <EmptyState icon={<FolderOpen size={32} />} title={t('bim.no_project')} description={t('bim.no_project_desc')} />
       </div>
     );
@@ -1605,7 +1608,7 @@ export function BIMPage() {
   const isModelNonReady = activeModel && ['processing', 'needs_converter', 'error'].includes(activeModel.status);
 
   return (
-    <div className="flex flex-col -mx-2 sm:-mx-3 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
+    <div className="flex flex-col -mx-4 sm:-mx-7 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
       {/* ── Header ── */}
       <div className="relative z-20 px-3 py-2.5 flex items-center justify-between border-b border-border-light bg-surface-primary">
         <div className="flex items-center gap-4">
@@ -1645,6 +1648,19 @@ export function BIMPage() {
                     {visibleElementCount}
                   </span>
                 )}
+              </button>
+
+              <button
+                onClick={() => setBoqPanelOpen((p) => !p)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border ${
+                  boqPanelOpen
+                    ? 'bg-oe-blue/10 text-oe-blue border-oe-blue/30'
+                    : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
+                }`}
+                title={t('bim.linked_boq_toggle', { defaultValue: 'Toggle linked BOQ panel' })}
+              >
+                <ClipboardList size={13} />
+                {t('bim.linked_boq_button', { defaultValue: 'Linked BOQ' })}
               </button>
 
               {/* Color-by selector — three families:
@@ -1921,6 +1937,23 @@ export function BIMPage() {
           </div>
         )}
         </div>
+
+        {/* Linked BOQ sidebar — right side, mirrors filter panel on left */}
+        {activeModelId && !isModelNonReady && elements.length > 0 && boqPanelOpen && (
+          <div className="absolute top-0 end-0 h-full z-20 overflow-y-auto">
+            <BIMLinkedBOQPanel
+              elements={elements}
+              onHighlightElements={(ids) => {
+                if (ids.length > 0) {
+                  setIsolatedIds(ids);
+                } else {
+                  setIsolatedIds(null);
+                }
+              }}
+              onClose={() => setBoqPanelOpen(false)}
+            />
+          </div>
+        )}
       </div>
 
       {/* ── Model Filmstrip (collapsible, auto-hides after 5s) ── */}

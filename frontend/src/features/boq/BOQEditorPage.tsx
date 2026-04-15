@@ -2214,7 +2214,7 @@ export function BOQEditorPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-content mx-auto py-8 animate-fade-in">
+      <div className="w-full py-8 animate-fade-in">
         <div className="space-y-4">
           <div className="h-8 w-48 rounded-lg bg-surface-secondary animate-shimmer bg-gradient-to-r from-surface-secondary via-surface-tertiary to-surface-secondary bg-[length:200%_100%]" />
           <div className="h-4 w-80 rounded-md bg-surface-secondary animate-shimmer bg-gradient-to-r from-surface-secondary via-surface-tertiary to-surface-secondary bg-[length:200%_100%]" />
@@ -2234,7 +2234,7 @@ export function BOQEditorPage() {
 
   if (!boq) {
     return (
-      <div className="max-w-content mx-auto py-16 text-center">
+      <div className="w-full py-16 text-center">
         <p className="text-content-secondary">{t('boq.not_found', { defaultValue: 'BOQ not found' })}</p>
       </div>
     );
@@ -2246,7 +2246,7 @@ export function BOQEditorPage() {
     <div
       ref={editorContainerRef}
       tabIndex={-1}
-      className="max-w-content mx-auto animate-fade-in pb-12 outline-none"
+      className="w-full animate-fade-in pb-12 outline-none"
     >
       {/* ── Breadcrumb ────────────────────────────────────────────────── */}
       <Breadcrumb

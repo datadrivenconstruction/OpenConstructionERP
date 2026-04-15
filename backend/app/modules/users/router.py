@@ -91,7 +91,12 @@ async def register(
             detail="Too many registration attempts. Please wait a minute and try again.",
             headers={"Retry-After": "60"},
         )
-    user = await service.register(data)
+    user = await service.register(
+        data,
+        client_ip=client_ip,
+        user_agent=request.headers.get("user-agent", ""),
+        referrer=request.headers.get("referer", ""),
+    )
     return UserResponse.model_validate(user)
 
 

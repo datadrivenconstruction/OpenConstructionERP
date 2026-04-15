@@ -227,7 +227,7 @@ export function SustainabilityPage() {
     : 'Estimated (auto-detected)';
 
   return (
-    <div className="max-w-content mx-auto animate-fade-in">
+    <div className="w-full animate-fade-in">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">

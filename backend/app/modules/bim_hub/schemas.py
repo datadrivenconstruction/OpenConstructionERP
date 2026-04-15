@@ -133,6 +133,10 @@ class BOQElementLinkBrief(BaseModel):
     boq_position_id: UUID
     boq_position_ordinal: str | None = None
     boq_position_description: str | None = None
+    boq_position_quantity: float | None = None
+    boq_position_unit: str | None = None
+    boq_position_unit_rate: float | None = None
+    boq_position_total: float | None = None
     link_type: str
     confidence: str | None = None
 

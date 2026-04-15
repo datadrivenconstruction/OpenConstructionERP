@@ -170,14 +170,19 @@ function applyStyle(
 ): void {
   const isSelected = entity.id === selectedId;
   if (isSelected) {
-    ctx.strokeStyle = '#3b82f6';
-    ctx.fillStyle = '#3b82f6';
+    ctx.strokeStyle = '#60a5fa';
+    ctx.fillStyle = '#60a5fa';
     ctx.lineWidth = 2.5;
+    // Glow effect via shadow
+    ctx.shadowColor = 'rgba(96, 165, 250, 0.5)';
+    ctx.shadowBlur = 8;
   } else {
     const color = resolveColor(entity.color);
     ctx.strokeStyle = color;
     ctx.fillStyle = color;
     ctx.lineWidth = 1;
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
   }
 }
 
