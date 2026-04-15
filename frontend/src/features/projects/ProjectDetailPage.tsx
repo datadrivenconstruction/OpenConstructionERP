@@ -507,6 +507,7 @@ function DropZone({
   onFileSelect: (file: File) => void;
   disabled?: boolean;
 }) {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
 
@@ -552,10 +553,10 @@ function DropZone({
       </div>
       <div>
         <p className="text-sm font-medium text-content-primary">
-          Drop your file here, or click to browse
+          {t('import.drop_or_browse', { defaultValue: 'Drop your file here, or click to browse' })}
         </p>
         <p className="mt-1 text-xs text-content-tertiary">
-          Supports Excel, CSV, PDF, photos, and CAD/BIM files (Revit, IFC, DWG, DGN)
+          {t('import.supported_formats', { defaultValue: 'Supports Excel, CSV, PDF, photos, and CAD/BIM files (Revit, IFC, DWG, DGN)' })}
         </p>
       </div>
       <input
@@ -637,15 +638,15 @@ function ImportDialog({
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-semibold text-content-primary">
-                {t('common.import', { defaultValue: 'Import' })} Document
+                {t('import.import_document', { defaultValue: 'Import Document' })}
               </h2>
               <span className="inline-flex items-center gap-1 rounded-full bg-oe-blue-subtle px-2 py-0.5 text-2xs font-medium text-oe-blue">
                 <Sparkles size={10} />
-                AI-powered
+                {t('import.ai_powered', { defaultValue: 'AI-powered' })}
               </span>
             </div>
             <p className="mt-0.5 text-sm text-content-secondary">
-              Into: {boqName}
+              {t('import.into_boq', { defaultValue: 'Into: {{name}}', name: boqName })}
             </p>
           </div>
           <button
@@ -704,7 +705,7 @@ function ImportDialog({
                       if (msg.includes('DDC converter') || msg.includes('no DDC converter')) {
                         return (
                           <div className="space-y-1.5">
-                            <p>CAD converter not installed.</p>
+                            <p>{t('import.cad_converter_missing', { defaultValue: 'CAD converter not installed.' })}</p>
                             <p className="text-xs text-semantic-error/80">
                               Download DDC converters from{' '}
                               <a
@@ -735,10 +736,10 @@ function ImportDialog({
               <div className="flex items-center gap-3 rounded-lg bg-semantic-success-bg px-4 py-3">
                 <CheckCircle2 size={20} className="shrink-0 text-[#15803d]" />
                 <div>
-                  <p className="text-sm font-medium text-[#15803d]">Import complete</p>
+                  <p className="text-sm font-medium text-[#15803d]">{t('import.complete', { defaultValue: 'Import complete' })}</p>
                   <p className="text-xs text-[#15803d]/80">
-                    {result.imported} positions imported
-                    {(result.skipped ?? 0) > 0 && `, ${result.skipped} rows skipped`}
+                    {t('import.positions_imported', { defaultValue: '{{count}} positions imported', count: result.imported })}
+                    {(result.skipped ?? 0) > 0 && `, ${t('import.rows_skipped', { defaultValue: '{{count}} rows skipped', count: result.skipped })}`}
                   </p>
                 </div>
                 {(result.method === 'ai' || result.method === 'cad_ai') && (
@@ -751,7 +752,7 @@ function ImportDialog({
                 )}
                 {result.method === 'direct' && (
                   <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-surface-secondary px-2 py-0.5 text-2xs font-medium text-content-tertiary">
-                    Direct
+                    {t('import.method_direct', { defaultValue: 'Direct' })}
                   </span>
                 )}
               </div>
@@ -760,10 +761,10 @@ function ImportDialog({
               {result.method === 'cad_ai' && result.cad_elements != null && (
                 <div className="flex items-center gap-2 rounded-lg bg-oe-blue-subtle/50 px-4 py-2.5 text-xs text-oe-blue">
                   <span className="font-medium">
-                    {result.cad_elements} CAD elements
+                    {t('import.cad_elements_count', { defaultValue: '{{count}} CAD elements', count: result.cad_elements })}
                   </span>
                   <span className="text-oe-blue/60">
-                    extracted from .{result.cad_format} file via DDC converter
+                    {t('import.cad_extracted', { defaultValue: 'extracted from .{{format}} file via DDC converter', format: result.cad_format })}
                   </span>
                 </div>
               )}
@@ -773,7 +774,7 @@ function ImportDialog({
                 <div className="rounded-lg bg-surface-secondary px-3 py-2 text-center">
                   <p className="text-lg font-bold text-content-primary">{result.imported}</p>
                   <p className="text-2xs text-content-tertiary uppercase tracking-wide">
-                    Imported
+                    {t('import.stat_imported', { defaultValue: 'Imported' })}
                   </p>
                 </div>
                 <div className="rounded-lg bg-surface-secondary px-3 py-2 text-center">
@@ -781,23 +782,23 @@ function ImportDialog({
                     {result.total_items ?? result.total_rows ?? 0}
                   </p>
                   <p className="text-2xs text-content-tertiary uppercase tracking-wide">
-                    Total items
+                    {t('import.stat_total_items', { defaultValue: 'Total items' })}
                   </p>
                 </div>
                 <div className="rounded-lg bg-surface-secondary px-3 py-2 text-center">
                   <p className="text-lg font-bold text-content-primary">{result.errors.length}</p>
-                  <p className="text-2xs text-content-tertiary uppercase tracking-wide">Errors</p>
+                  <p className="text-2xs text-content-tertiary uppercase tracking-wide">{t('import.stat_errors', { defaultValue: 'Errors' })}</p>
                 </div>
               </div>
 
               {/* Error details */}
               {result.errors.length > 0 && (
                 <div className="rounded-lg border border-semantic-error/20 bg-semantic-error-bg/50 px-4 py-3">
-                  <p className="text-xs font-medium text-semantic-error mb-2">Error details:</p>
+                  <p className="text-xs font-medium text-semantic-error mb-2">{t('import.error_details', { defaultValue: 'Error details:' })}</p>
                   <div className="max-h-32 overflow-y-auto space-y-1">
                     {result.errors.map((err, i) => (
                       <p key={`${err.row || err.item || ''}-${i}`} className="text-xs text-semantic-error/80">
-                        {err.row ? `Row ${err.row}: ` : err.item ? `${err.item}: ` : ''}
+                        {err.row ? `${t('import.error_row', { defaultValue: 'Row {{row}}', row: err.row })}: ` : err.item ? `${err.item}: ` : ''}
                         {err.error}
                       </p>
                     ))}
@@ -827,7 +828,7 @@ function ImportDialog({
             </>
           ) : (
             <Button variant="primary" onClick={onClose}>
-              Done
+              {t('common.done', { defaultValue: 'Done' })}
             </Button>
           )}
         </div>
@@ -874,18 +875,18 @@ class TabErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState>
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <AlertTriangle className="text-semantic-warning mb-3" size={32} />
           <h3 className="text-base font-semibold text-content-primary">
-            {this.props.fallbackTitle || 'Something went wrong'}
+            {this.props.fallbackTitle || i18n.t('common.something_went_wrong', { defaultValue: 'Something went wrong' })}
           </h3>
           <p className="mt-1 text-sm text-content-secondary max-w-md">
             {this.props.fallbackDescription ||
-              'Unable to load this section. Please try again.'}
+              i18n.t('common.unable_to_load', { defaultValue: 'Unable to load this section. Please try again.' })}
           </p>
           <button
             onClick={this.handleRetry}
             className="mt-4 inline-flex items-center gap-2 rounded-lg bg-surface-secondary px-4 py-2 text-sm font-medium text-content-primary hover:bg-surface-tertiary transition-colors"
           >
             <RefreshCw size={14} />
-            Retry
+            {i18n.t('common.retry', { defaultValue: 'Retry' })}
           </button>
         </div>
       );

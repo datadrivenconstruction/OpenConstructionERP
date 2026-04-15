@@ -108,10 +108,10 @@ function formatFileSize(bytes: number): string {
 
 function StatPill({ label, value, icon: Icon }: { label: string; value: string | number; icon: React.ElementType }) {
   return (
-    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-secondary border border-border-light">
-      <Icon size={12} className="text-content-quaternary" />
-      <span className="text-[10px] font-medium text-content-tertiary">{label}</span>
-      <span className="text-[10px] font-bold text-content-primary tabular-nums">{value}</span>
+    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-secondary border border-border-light">
+      <Icon size={13} className="text-content-tertiary" />
+      <span className="text-[11px] font-medium text-content-tertiary">{label}</span>
+      <span className="text-[11px] font-bold text-content-primary tabular-nums">{value}</span>
     </div>
   );
 }
@@ -131,11 +131,13 @@ function ModelFilmstrip({ models, isLoading, activeModelId, onSelectModel, onDel
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(true);
 
-  // Auto-collapse after 5 seconds
+  // Auto-collapse after 10 seconds, but only when there are 3+ models
+  // (1-2 models are fast to scan, no need to hide the filmstrip)
   useEffect(() => {
-    const timer = setTimeout(() => setExpanded(false), 5000);
+    if (models.length < 3) return;
+    const timer = setTimeout(() => setExpanded(false), 10_000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [models.length]);
 
   return (
     <div className="shrink-0 bg-surface-primary border-t border-border-light">
@@ -143,6 +145,8 @@ function ModelFilmstrip({ models, isLoading, activeModelId, onSelectModel, onDel
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        aria-label={t('bim.toggle_models_filmstrip', { defaultValue: 'Toggle models filmstrip' })}
         className="flex items-center w-full px-4 py-2 cursor-pointer group hover:bg-surface-secondary/30 transition-colors"
       >
         {/* Drag handle icon */}
@@ -194,6 +198,7 @@ function ModelFilmstrip({ models, isLoading, activeModelId, onSelectModel, onDel
             onClick={onUpload}
             className="flex items-center justify-center shrink-0 w-16 h-16 rounded-xl border-2 border-dashed border-border-medium hover:border-oe-blue/50 hover:bg-oe-blue/5 transition-all group"
             title={t('bim.upload_model', { defaultValue: 'Upload model' })}
+            aria-label={t('bim.upload_model', { defaultValue: 'Upload model' })}
           >
             <Plus size={20} className="text-content-quaternary group-hover:text-oe-blue transition-colors" />
           </button>
@@ -242,15 +247,15 @@ function ModelCard({ model, isActive, onClick, onDelete }: {
       <div className={`h-[3px] ${isActive ? 'bg-oe-blue' : isError ? 'bg-red-400' : isProcessing ? 'bg-amber-400' : 'bg-emerald-400'}`} />
 
       {onDelete && (
-        <div
-          role="button"
-          tabIndex={0}
+        <button
+          type="button"
           onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          onKeyDown={(e) => { if (e.key === 'Enter') { e.stopPropagation(); onDelete?.(); } }}
-          className="absolute top-2.5 end-2 p-1 rounded-md text-content-quaternary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 opacity-0 group-hover:opacity-100 transition-all z-10"
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); onDelete?.(); } }}
+          aria-label={t('bim.delete_model', { defaultValue: 'Delete model' })}
+          className="absolute top-2.5 end-2 p-1 rounded-md text-content-quaternary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-all z-10"
         >
           <Trash2 size={11} />
-        </div>
+        </button>
       )}
 
       <div className="p-3 space-y-2">
@@ -652,6 +657,7 @@ function UploadPanel({
 
         {!advancedMode ? (
           <label
+            aria-label={t('bim.upload_dropzone_aria', { defaultValue: 'Drop a file here or click to browse' })}
             onDrop={(e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files?.[0]; if (f) handleFileSelect(f); }}
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={(e) => { e.preventDefault(); setDragOver(false); }}
@@ -671,6 +677,12 @@ function UploadPanel({
                 <div className="w-12 h-12 rounded-xl bg-surface-secondary border border-border-light flex items-center justify-center"><FileUp size={22} className="text-content-quaternary" /></div>
                 <p className="text-sm font-medium text-content-primary">{t('bim.upload_drop_here')}</p>
                 <p className="text-[10px] text-content-quaternary">{t('bim.upload_size_hint')}</p>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-oe-blue/10 text-oe-blue border border-oe-blue/20">.rvt</span>
+                  <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-oe-blue/10 text-oe-blue border border-oe-blue/20">.ifc</span>
+                  <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-surface-tertiary text-content-quaternary">.csv</span>
+                  <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-surface-tertiary text-content-quaternary">.xlsx</span>
+                </div>
               </>
             )}
             <input ref={fileInputRef} type="file" accept=".rvt,.ifc,.csv,.xlsx,.xls" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); }} />
@@ -777,17 +789,17 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete }: {
   const c = configs[model.status as keyof typeof configs] ?? configs.error;
 
   return (
-    <div className="flex flex-col items-center justify-center h-full bg-surface-secondary">
+    <div className="flex flex-col items-center justify-center h-full bg-surface-secondary" role="alert">
       <div className="text-center max-w-sm px-6">
         <div className={`mx-auto w-20 h-20 rounded-2xl ${c.bg} border flex items-center justify-center mb-5`}>{c.icon}</div>
         <h2 className="text-lg font-bold text-content-primary mb-2">{c.title}</h2>
         <p className="text-sm text-content-secondary mb-2">{c.desc}</p>
         <p className="text-[11px] text-content-quaternary mb-6">{model.name}{model.file_size ? ` · ${formatFileSize(model.file_size)}` : ''}</p>
-        <div className="flex items-center justify-center gap-3">
-          <button onClick={onUploadConverted} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-oe-blue text-white text-sm font-semibold hover:bg-oe-blue-dark transition-colors shadow-sm">
+        <div className="flex items-center justify-center gap-3 flex-wrap">
+          <button onClick={onUploadConverted} aria-label={t('bim.overlay_upload_converted_btn')} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-oe-blue text-white text-sm font-semibold hover:bg-oe-blue-dark transition-colors shadow-sm">
             <UploadCloud size={15} /> {t('bim.overlay_upload_converted_btn')}
           </button>
-          <button onClick={onDelete} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-primary border border-border-light text-content-secondary text-sm font-medium hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors">
+          <button onClick={onDelete} aria-label={t('bim.overlay_delete_btn')} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-primary border border-border-light text-content-secondary text-sm font-medium hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors">
             <Trash2 size={15} /> {t('bim.overlay_delete_btn')}
           </button>
         </div>
@@ -1108,12 +1120,13 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
           </div>
 
           {/* 3-column layout: Upload | Features | Animation */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr_0.8fr] gap-8 items-start mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.2fr_1fr_0.8fr] gap-8 items-start mb-10">
 
-            {/* LEFT — Upload card (prominent, bigger) */}
+            {/* LEFT -- Upload card (prominent, bigger) */}
             <div>
               <div className="rounded-2xl bg-surface-primary border border-border-light shadow-lg shadow-black/5 dark:shadow-black/20 p-6">
                 <label
+                  aria-label={t('bim.landing_dropzone_aria', { defaultValue: 'Drop a BIM model file here or click to browse. Supported formats: .rvt, .ifc, .csv, .xlsx' })}
                   onDrop={(e) => {
                     e.preventDefault();
                     const f = e.dataTransfer.files?.[0];
@@ -1157,6 +1170,12 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                       </div>
                       <p className="text-sm font-semibold text-content-primary">{t('bim.landing_drop_here')}</p>
                       <p className="text-[11px] text-content-quaternary">{t('bim.landing_size_hint')}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/30">.rvt</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/30">.ifc</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-secondary text-content-quaternary border border-border-light">.csv</span>
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-secondary text-content-quaternary border border-border-light">.xlsx</span>
+                      </div>
                     </>
                   )}
                   <input ref={fileInputRef} type="file" accept=".rvt,.ifc,.csv,.xlsx,.xls" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) { setFile(f); if (!modelName) setModelName(f.name.replace(/\.[^.]+$/, '')); } }} />
@@ -1173,7 +1192,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                   </div>
                 )}
                 {/* Supported formats hint below the drop zone */}
-                <p className="text-[10px] text-content-quaternary mt-3">
+                <p className="text-[11px] text-content-tertiary mt-3">
                   {t('bim.landing_formats', { defaultValue: 'Supports Revit (.rvt), IFC (.ifc), CSV, Excel. DWG files \u2192 DWG Takeoff module.' })}
                 </p>
               </div>
@@ -1232,8 +1251,8 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
               ))}
             </div>
 
-            {/* RIGHT — CSS animation preview */}
-            <div className="flex items-center justify-center">
+            {/* RIGHT -- CSS animation preview (hidden on small and medium screens) */}
+            <div className="hidden lg:flex items-center justify-center">
               <BIMEmptyAnimation />
             </div>
           </div>
@@ -1886,18 +1905,18 @@ export function BIMPage() {
             </div>
             <div>
               <h1 className="text-sm font-bold text-content-primary">{t('bim.viewer_title', { defaultValue: 'BIM Viewer' })}</h1>
-              {activeModel && <p className="text-[10px] text-content-tertiary truncate max-w-[160px]">{activeModel.name}</p>}
+              {activeModel && <p className="text-[10px] text-content-tertiary truncate max-w-[160px] lg:max-w-[280px]">{activeModel.name}</p>}
             </div>
           </div>
           {elements.length > 0 && (
-            <div className="flex items-center gap-2 ms-2">
+            <div className="hidden md:flex items-center gap-2 ms-2">
               <StatPill icon={Box} label={t('bim.stat_elements', { defaultValue: 'Elements' })} value={elements.length} />
               {storeys.size > 0 && <StatPill icon={Layers} label={t('bim.stat_storeys', { defaultValue: 'Levels' })} value={storeys.size} />}
               {discips.size > 0 && <StatPill icon={Sparkles} label={t('bim.stat_disciplines', { defaultValue: 'Disciplines' })} value={discips.size} />}
             </div>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
           {elements.length > 0 && (
             <>
               <button
@@ -1908,6 +1927,8 @@ export function BIMPage() {
                     : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
                 }`}
                 title={t('bim.filter_toggle', { defaultValue: 'Toggle filter panel' })}
+                aria-label={t('bim.filter_toggle', { defaultValue: 'Toggle filter panel' })}
+                aria-pressed={filterPanelOpen}
               >
                 <Filter size={13} />
                 {t('bim.filter_button', { defaultValue: 'Filter' })}
@@ -1926,6 +1947,8 @@ export function BIMPage() {
                     : 'text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary'
                 }`}
                 title={t('bim.linked_boq_toggle', { defaultValue: 'Toggle linked BOQ panel' })}
+                aria-label={t('bim.linked_boq_toggle', { defaultValue: 'Toggle linked BOQ panel' })}
+                aria-pressed={boqPanelOpen}
               >
                 <ClipboardList size={13} />
                 {t('bim.linked_boq_button', { defaultValue: 'Linked BOQ' })}
@@ -1950,6 +1973,7 @@ export function BIMPage() {
                   )
                 }
                 title={t('bim.color_by', { defaultValue: 'Color by' })}
+                aria-label={t('bim.color_by', { defaultValue: 'Color by' })}
                 className="text-[11px] py-1.5 px-2 rounded-lg border border-border-light bg-surface-secondary text-content-secondary hover:bg-surface-tertiary focus:outline-none focus:ring-1 focus:ring-oe-blue"
               >
                 <optgroup label={t('bim.color_group_field', { defaultValue: 'By field' })}>
@@ -1959,13 +1983,13 @@ export function BIMPage() {
                 </optgroup>
                 <optgroup label={t('bim.color_group_status', { defaultValue: 'By compliance' })}>
                   <option value="validation">
-                    {t('bim.color_validation', { defaultValue: '🛡️ Validation status' })}
+                    {t('bim.color_validation', { defaultValue: 'Validation status' })}
                   </option>
                   <option value="boq_coverage">
-                    {t('bim.color_boq_coverage', { defaultValue: '💰 BOQ link coverage' })}
+                    {t('bim.color_boq_coverage', { defaultValue: 'BOQ link coverage' })}
                   </option>
                   <option value="document_coverage">
-                    {t('bim.color_doc_coverage', { defaultValue: '📄 Document coverage' })}
+                    {t('bim.color_doc_coverage', { defaultValue: 'Document coverage' })}
                   </option>
                 </optgroup>
               </select>
@@ -2087,8 +2111,8 @@ export function BIMPage() {
 
           {/* Lazy-load info bar — shown when viewing a group subset */}
           {activeGroupId && !fullModelRequested && (
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-border-primary shadow-lg text-sm">
-              <Layers size={16} className="text-brand-primary shrink-0" />
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border border-border-light shadow-lg text-sm">
+              <Layers size={16} className="text-oe-blue shrink-0" />
               <span className="text-content-secondary">
                 {t('bim.group_subset_info', {
                   defaultValue: 'Showing {{count}} elements from group "{{name}}"',
@@ -2105,7 +2129,7 @@ export function BIMPage() {
                   next.delete('group');
                   setSearchParams(next, { replace: true });
                 }}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-brand-primary/10 hover:bg-brand-primary/20 text-brand-primary font-medium transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-oe-blue/10 hover:bg-oe-blue/20 text-oe-blue font-medium transition-colors"
               >
                 <Globe2 size={14} />
                 {t('bim.load_full_model', {
@@ -2206,9 +2230,10 @@ export function BIMPage() {
         )}
         </div>
 
-        {/* Linked BOQ sidebar — right side, mirrors filter panel on left */}
+        {/* Linked BOQ sidebar -- right side, mirrors filter panel on left.
+            z-index 15 keeps it below the upload panel (z-30) when both are open. */}
         {activeModelId && !isModelNonReady && elements.length > 0 && boqPanelOpen && (
-          <div className="absolute top-0 end-0 h-full z-20 overflow-y-auto">
+          <div className="absolute top-0 end-0 h-full z-[15] overflow-y-auto">
             <BIMLinkedBOQPanel
               elements={elements}
               onHighlightElements={(ids) => {

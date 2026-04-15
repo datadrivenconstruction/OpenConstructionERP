@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Eye, EyeOff, Search } from 'lucide-react';
 import clsx from 'clsx';
 import type { DxfLayer } from '../api';
-import { aciToHex } from '../lib/dxf-renderer';
+import { resolveColor } from '../lib/dxf-renderer';
 
 interface Props {
   layers: DxfLayer[];
@@ -80,7 +80,7 @@ export function LayerPanel({ layers, visibleLayers, onToggleLayer, onShowAll, on
               {visible ? <Eye size={13} /> : <EyeOff size={13} />}
               <span
                 className="h-2.5 w-2.5 rounded-full flex-shrink-0"
-                style={{ backgroundColor: aciToHex(layer.color) }}
+                style={{ backgroundColor: resolveColor(layer.color) }}
               />
               <span className="truncate flex-1 text-left">{layer.name}</span>
               <span className="text-muted-foreground tabular-nums">{layer.entity_count}</span>

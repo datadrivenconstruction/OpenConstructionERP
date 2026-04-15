@@ -702,6 +702,7 @@ export default function BIMFilterPanel({
             onClick={onClose}
             className="p-1 rounded-md text-content-tertiary hover:text-content-primary hover:bg-surface-secondary"
             title={t('common.close', { defaultValue: 'Close' })}
+            aria-label={t('common.close', { defaultValue: 'Close' })}
           >
             <X size={14} />
           </button>
@@ -722,12 +723,16 @@ export default function BIMFilterPanel({
             placeholder={t('bim.filter_search_placeholder', {
               defaultValue: 'Search name, type, level…',
             })}
+            aria-label={t('bim.filter_search_placeholder', {
+              defaultValue: 'Search name, type, level…',
+            })}
             className="w-full ps-8 pe-8 py-1.5 text-xs rounded-md bg-surface-secondary border border-border-light focus:outline-none focus:ring-1 focus:ring-oe-blue focus:border-oe-blue"
           />
           {state.search && (
             <button
               onClick={() => setState((p) => ({ ...p, search: '' }))}
               className="absolute end-2 top-1/2 -translate-y-1/2 text-content-quaternary hover:text-content-primary"
+              aria-label={t('bim.filter_clear_search', { defaultValue: 'Clear search' })}
             >
               <X size={12} />
             </button>
