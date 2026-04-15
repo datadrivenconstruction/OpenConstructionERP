@@ -90,3 +90,12 @@ export type { ViewInBIMButtonProps } from './ViewInBIMButton';
 
 export { MiniGeometryPreview } from './MiniGeometryPreview';
 export type { MiniGeometryPreviewProps } from './MiniGeometryPreview';
+
+export { ElementInfoPopover } from './ElementInfoPopover';
+export type {
+  ElementInfoPopoverProps,
+  ElementPayload,
+  BIMElementPayload,
+  DWGElementPayload,
+  PDFMeasurementPayload,
+} from './ElementInfoPopover';

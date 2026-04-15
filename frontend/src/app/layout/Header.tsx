@@ -499,31 +499,17 @@ function ProjectSwitcher() {
       <button
         onClick={() => setOpen(!open)}
         className={clsx(
-          'flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-all border',
+          'flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-all border max-w-[220px]',
           activeProjectId
-            ? 'bg-oe-blue-subtle text-oe-blue border-oe-blue/20 hover:bg-oe-blue/10 hover:border-oe-blue/30 max-w-[280px]'
+            ? 'bg-oe-blue-subtle text-oe-blue border-oe-blue/20 hover:bg-oe-blue/10 hover:border-oe-blue/30'
             : 'text-content-tertiary border-border-light hover:text-content-primary hover:bg-surface-secondary hover:border-border',
         )}
       >
-        <div className={clsx(
-          'flex items-center justify-center w-6 h-6 rounded-md shrink-0',
-          activeProjectId
-            ? 'bg-oe-blue/10'
-            : 'bg-surface-secondary',
-        )}>
-          <FolderOpen size={14} className="shrink-0" />
-        </div>
-        <div className="flex flex-col items-start min-w-0">
-          <span className="truncate leading-tight">
-            {activeProjectName || t('schedule.select_project', { defaultValue: 'Select Project' })}
-          </span>
-          {activeProjectId && (
-            <span className="text-2xs text-content-quaternary leading-tight truncate">
-              {t('projects.active_label', { defaultValue: 'Active project' })}
-            </span>
-          )}
-        </div>
-        <ChevronDown size={14} className={clsx(
+        <FolderOpen size={13} className="shrink-0" />
+        <span className="truncate">
+          {activeProjectName || t('schedule.select_project', { defaultValue: 'Select Project' })}
+        </span>
+        <ChevronDown size={12} className={clsx(
           'shrink-0 text-content-quaternary transition-transform duration-fast',
           open && 'rotate-180',
         )} />

@@ -9,7 +9,7 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 [Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Discussions](https://t.me/datadrivenconstruction) · [Report Bug](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 
 ![License](https://img.shields.io/badge/license-AGPL--3.0-blue)
-![Version](https://img.shields.io/badge/version-1.6.0-green)
+![Version](https://img.shields.io/badge/version-1.7.0-green)
 ![Languages](https://img.shields.io/badge/languages-21-orange)
 ![Cost Items](https://img.shields.io/badge/cost_items-55%2C000%2B-red)
 ![Standards](https://img.shields.io/badge/standards-20-blueviolet)
@@ -489,6 +489,6 @@ For commercial licensing without AGPL obligations, contact [info@datadrivenconst
 
 [Website](https://datadrivenconstruction.io) · [YouTube](https://www.youtube.com/@datadrivenconstruction) · [GitHub](https://github.com/datadrivenconstruction) · [Telegram](https://t.me/datadrivenconstruction)
 
-<sub>OpenConstructionERP v1.6.0 · AGPL-3.0 · Python 3.12+ · Node 20+</sub>
+<sub>OpenConstructionERP v1.7.0 · AGPL-3.0 · Python 3.12+ · Node 20+</sub>
 
 </div>

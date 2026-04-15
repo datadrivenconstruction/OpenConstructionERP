@@ -796,6 +796,229 @@ function NonReadyOverlay({ model, onUploadConverted, onDelete }: {
   );
 }
 
+/* ── BIM Empty State Animation ──────────────────────────────────────── */
+
+function BIMEmptyAnimation() {
+  return (
+    <div className="mx-auto mb-6 relative" style={{ width: 220, height: 160, opacity: 0.6 }}>
+      <style>{`
+        /* Building blocks assemble into a silhouette */
+        @keyframes bimBlockSlide1 {
+          0%, 5% { transform: perspective(800px) rotateX(15deg) rotateY(-25deg) translate(-60px, 40px); opacity: 0; }
+          15%, 65% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 1; }
+          80%, 100% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 0.3; }
+        }
+        @keyframes bimBlockSlide2 {
+          0%, 10% { transform: perspective(800px) rotateX(15deg) rotateY(20deg) translate(50px, -30px); opacity: 0; }
+          22%, 65% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 1; }
+          80%, 100% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 0.3; }
+        }
+        @keyframes bimBlockSlide3 {
+          0%, 16% { transform: perspective(800px) rotateX(-20deg) rotateY(15deg) translate(40px, 50px); opacity: 0; }
+          28%, 65% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 1; }
+          80%, 100% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 0.3; }
+        }
+        @keyframes bimBlockSlide4 {
+          0%, 20% { transform: perspective(800px) rotateX(10deg) rotateY(-30deg) translate(-50px, -40px); opacity: 0; }
+          33%, 65% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 1; }
+          80%, 100% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 0.3; }
+        }
+        @keyframes bimBlockSlide5 {
+          0%, 25% { transform: perspective(800px) rotateX(-15deg) rotateY(-20deg) translate(30px, 60px); opacity: 0; }
+          38%, 65% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 1; }
+          80%, 100% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 0.3; }
+        }
+        @keyframes bimBlockSlide6 {
+          0%, 28% { transform: perspective(800px) rotateX(20deg) rotateY(25deg) translate(-40px, -50px); opacity: 0; }
+          42%, 65% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 1; }
+          80%, 100% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 0.3; }
+        }
+        @keyframes bimBlockSlide7 {
+          0%, 32% { transform: perspective(800px) rotateX(-10deg) rotateY(30deg) translate(55px, 35px); opacity: 0; }
+          46%, 65% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 1; }
+          80%, 100% { transform: perspective(800px) rotateX(8deg) rotateY(-10deg) translate(0, 0); opacity: 0.3; }
+        }
+        /* Connection lines draw from building to table */
+        @keyframes bimLineDrawH {
+          0%, 50% { transform: scaleX(0); opacity: 0; }
+          55% { opacity: 0.7; }
+          65%, 78% { transform: scaleX(1); opacity: 0.7; }
+          88%, 100% { transform: scaleX(1); opacity: 0; }
+        }
+        @keyframes bimLineDrawV {
+          0%, 53% { transform: scaleY(0); opacity: 0; }
+          58% { opacity: 0.5; }
+          68%, 78% { transform: scaleY(1); opacity: 0.5; }
+          88%, 100% { transform: scaleY(1); opacity: 0; }
+        }
+        /* Table/grid rows slide in */
+        @keyframes bimTableRow {
+          0%, 58% { transform: translateX(12px); opacity: 0; }
+          68%, 78% { transform: translateX(0); opacity: 0.8; }
+          88%, 100% { transform: translateX(0); opacity: 0; }
+        }
+        /* Table header */
+        @keyframes bimTableHead {
+          0%, 55% { transform: translateY(-4px); opacity: 0; }
+          65%, 78% { transform: translateY(0); opacity: 0.9; }
+          88%, 100% { transform: translateY(0); opacity: 0; }
+        }
+        /* Gentle float for the building group */
+        @keyframes bimFloat {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-3px); }
+        }
+        /* Dot pulse on connection endpoints */
+        @keyframes bimDotPulse {
+          0%, 52%, 88%, 100% { transform: scale(0); opacity: 0; }
+          60%, 78% { transform: scale(1); opacity: 0.8; }
+        }
+      `}</style>
+
+      <div style={{ animation: 'bimFloat 6s ease-in-out infinite' }}>
+        {/* Building silhouette — 7 blocks assembling with 3D perspective */}
+        <div style={{ position: 'absolute', left: 16, top: 8, width: 100, height: 130 }}>
+          {/* Block 1 — tall left tower */}
+          <div style={{
+            position: 'absolute', left: 0, top: 0, width: 28, height: 85,
+            borderRadius: 4,
+            background: 'linear-gradient(135deg, var(--oe-blue), #6366f1)',
+            animation: 'bimBlockSlide1 9s ease-out infinite',
+            transformOrigin: 'center center',
+            boxShadow: '0 2px 8px rgba(99,102,241,0.15)',
+          }} />
+          {/* Block 2 — wide base */}
+          <div style={{
+            position: 'absolute', left: 0, bottom: 0, width: 95, height: 22,
+            borderRadius: 4,
+            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+            animation: 'bimBlockSlide2 9s ease-out infinite',
+            transformOrigin: 'center center',
+            boxShadow: '0 2px 8px rgba(139,92,246,0.12)',
+          }} />
+          {/* Block 3 — center column */}
+          <div style={{
+            position: 'absolute', left: 32, top: 20, width: 24, height: 65,
+            borderRadius: 3,
+            background: 'linear-gradient(135deg, #10b981, #059669)',
+            animation: 'bimBlockSlide3 9s ease-out infinite',
+            transformOrigin: 'center center',
+            boxShadow: '0 2px 8px rgba(16,185,129,0.12)',
+          }} />
+          {/* Block 4 — right short block */}
+          <div style={{
+            position: 'absolute', left: 60, top: 42, width: 32, height: 44,
+            borderRadius: 4,
+            background: 'linear-gradient(135deg, var(--oe-blue), #3b82f6)',
+            animation: 'bimBlockSlide4 9s ease-out infinite',
+            transformOrigin: 'center center',
+            boxShadow: '0 2px 8px rgba(59,130,246,0.12)',
+          }} />
+          {/* Block 5 — small accent block on top of tower */}
+          <div style={{
+            position: 'absolute', left: 6, top: -4, width: 16, height: 12,
+            borderRadius: 3,
+            background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+            animation: 'bimBlockSlide5 9s ease-out infinite',
+            transformOrigin: 'center center',
+          }} />
+          {/* Block 6 — mid-height bridge between columns */}
+          <div style={{
+            position: 'absolute', left: 26, top: 38, width: 36, height: 10,
+            borderRadius: 2,
+            background: 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
+            animation: 'bimBlockSlide6 9s ease-out infinite',
+            transformOrigin: 'center center',
+          }} />
+          {/* Block 7 — right tower extension */}
+          <div style={{
+            position: 'absolute', left: 68, top: 24, width: 20, height: 22,
+            borderRadius: 3,
+            background: 'linear-gradient(135deg, #10b981, #34d399)',
+            animation: 'bimBlockSlide7 9s ease-out infinite',
+            transformOrigin: 'center center',
+          }} />
+          {/* Window accents — small dots on blocks for detail */}
+          {[
+            { l: 5, t: 14, d: 250 }, { l: 14, t: 14, d: 300 },
+            { l: 5, t: 28, d: 350 }, { l: 14, t: 28, d: 400 },
+            { l: 5, t: 42, d: 450 }, { l: 14, t: 42, d: 500 },
+            { l: 36, t: 32, d: 380 }, { l: 46, t: 32, d: 430 },
+            { l: 66, t: 55, d: 500 }, { l: 78, t: 55, d: 550 },
+          ].map((w, i) => (
+            <div key={i} style={{
+              position: 'absolute', left: w.l, top: w.t, width: 4, height: 5,
+              borderRadius: 1, background: 'rgba(255,255,255,0.6)',
+              animation: `bimBlockSlide${(i % 7) + 1} 9s ease-out infinite`,
+            }} />
+          ))}
+        </div>
+
+        {/* Connection lines — horizontal line from building to table area */}
+        <div style={{
+          position: 'absolute', left: 120, top: 70, width: 30, height: 2,
+          background: 'linear-gradient(90deg, #6366f1, var(--oe-blue))',
+          borderRadius: 1,
+          transformOrigin: 'left center',
+          animation: 'bimLineDrawH 9s ease-out infinite',
+        }} />
+        {/* Diagonal connecting line */}
+        <div style={{
+          position: 'absolute', left: 148, top: 55, width: 2, height: 32,
+          background: 'linear-gradient(180deg, var(--oe-blue), #10b981)',
+          borderRadius: 1,
+          transformOrigin: 'top center',
+          animation: 'bimLineDrawV 9s ease-out infinite',
+        }} />
+        {/* Connection dot at junction */}
+        <div style={{
+          position: 'absolute', left: 145, top: 67, width: 8, height: 8,
+          borderRadius: '50%',
+          background: 'var(--oe-blue)',
+          animation: 'bimDotPulse 9s ease-out infinite',
+        }} />
+
+        {/* Table / BOQ grid representation */}
+        <div style={{ position: 'absolute', right: 8, top: 32, width: 56, height: 80 }}>
+          {/* Table header */}
+          <div style={{
+            width: '100%', height: 10, borderRadius: '4px 4px 0 0',
+            background: 'linear-gradient(135deg, var(--oe-blue), #6366f1)',
+            animation: 'bimTableHead 9s ease-out infinite',
+          }} />
+          {/* Table rows */}
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div key={i} style={{
+              display: 'flex', gap: 2, marginTop: 3,
+              animation: `bimTableRow 9s ease-out infinite`,
+              animationDelay: `${i * 0.12}s`,
+            }}>
+              <div style={{
+                flex: 1, height: 8, borderRadius: 2,
+                background: i % 2 === 0
+                  ? 'linear-gradient(90deg, rgba(99,102,241,0.25), rgba(99,102,241,0.1))'
+                  : 'linear-gradient(90deg, rgba(16,185,129,0.25), rgba(16,185,129,0.1))',
+              }} />
+              <div style={{
+                width: 14, height: 8, borderRadius: 2,
+                background: 'rgba(99,102,241,0.15)',
+              }} />
+            </div>
+          ))}
+          {/* Table border outline */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            border: '1px solid rgba(99,102,241,0.15)',
+            borderRadius: 4,
+            pointerEvents: 'none',
+            animation: 'bimTableHead 9s ease-out infinite',
+          }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Landing Page ────────────────────────────────────────────────────── */
 
 function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrumbItems, onProcessingUpdate }: {
@@ -878,9 +1101,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
         <div className="max-w-2xl w-full px-6 py-8">
           {/* Hero — compact, centered, strong visual */}
           <div className="text-center mb-8">
-            <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-oe-blue to-blue-600 flex items-center justify-center mb-4 shadow-lg shadow-oe-blue/20">
-              <Cuboid size={28} className="text-white" />
-            </div>
+            <BIMEmptyAnimation />
             <h1 className="text-2xl font-bold text-content-primary tracking-tight">{t('bim.landing_hero_title')}</h1>
             <p className="text-sm text-content-secondary mt-2 max-w-md mx-auto">
               {t('bim.landing_hero_subtitle')}
@@ -1368,7 +1589,7 @@ export function BIMPage() {
   }, []);
   const handleOpenRequirement = useCallback(
     (requirementId: string) => {
-      navigate(`/requirements?id=${encodeURIComponent(requirementId)}`);
+      navigate(`/bim/rules?id=${encodeURIComponent(requirementId)}`);
     },
     [navigate],
   );

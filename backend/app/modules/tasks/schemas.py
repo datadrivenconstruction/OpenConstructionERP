@@ -27,7 +27,10 @@ class TaskCreate(BaseModel):
         ...,
         min_length=1,
         max_length=50,
-        description="Built-in types: task, topic, information, decision, personal. Custom category strings are also accepted.",
+        description=(
+            "Built-in types: task, topic, information, decision, personal."
+            " Custom category strings are also accepted."
+        ),
     )
     title: str = Field(..., min_length=1, max_length=500)
     description: str | None = Field(default=None, max_length=5000)
@@ -67,7 +70,10 @@ class TaskUpdate(BaseModel):
         default=None,
         min_length=1,
         max_length=50,
-        description="Built-in types: task, topic, information, decision, personal. Custom category strings are also accepted.",
+        description=(
+            "Built-in types: task, topic, information, decision, personal."
+            " Custom category strings are also accepted."
+        ),
     )
     title: str | None = Field(default=None, min_length=1, max_length=500)
     description: str | None = Field(default=None, max_length=5000)
@@ -122,11 +128,23 @@ class TaskResponse(BaseModel):
     result: str | None = None
     is_private: bool = False
     created_by: str | None = None
+    assigned_to: str | None = Field(
+        default=None,
+        description="Alias for responsible_id — the UUID of the assigned user.",
+    )
+    assigned_to_name: str | None = Field(
+        default=None,
+        description="Display name of the assigned user (resolved from responsible_id).",
+    )
     depends_on: UUID | None = None
     bim_element_ids: list[str] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+    completed_at: str | None = Field(
+        default=None,
+        description="ISO timestamp when the task was completed (null if not yet completed).",
+    )
 
     # Computed fields
     is_overdue: bool = Field(

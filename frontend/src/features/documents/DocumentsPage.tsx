@@ -562,6 +562,14 @@ export function DocumentsPage() {
   /* ── Card click handler ─────────────────────────────────────────────── */
 
   const handleCardClick = useCallback((doc: DocItem) => {
+    // DWG/DXF files -> navigate to DWG Takeoff page
+    const lowerName = doc.name.toLowerCase();
+    if (lowerName.endsWith('.dwg') || lowerName.endsWith('.dxf')) {
+      // Navigate to DWG takeoff — the DWG module will match by name via deep-link
+      navigate(`/dwg-takeoff`);
+      return;
+    }
+
     const kind = isPreviewable(doc.mime_type);
     if (kind) {
       setPreviewDoc(doc);
@@ -569,7 +577,7 @@ export function DocumentsPage() {
       // Non-previewable — trigger download
       window.open(`/api/v1/documents/${doc.id}/download`, '_blank');
     }
-  }, []);
+  }, [navigate]);
 
   /* ── Close preview ──────────────────────────────────────────────────── */
 
