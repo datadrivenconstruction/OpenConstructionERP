@@ -692,21 +692,37 @@ export function DwgTakeoffPage() {
       {/* Upload form modal overlay */}
       {showUpload && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
           onClick={() => setShowUpload(false)}
         >
           <div
-            className="w-80 rounded-xl border border-white/15 bg-[#1e1e38]/95 shadow-2xl backdrop-blur-md p-4 space-y-3"
+            className="w-[420px] rounded-2xl border border-border-light bg-surface-primary shadow-2xl p-6 space-y-5"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Header */}
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-white/90">
-                {t('dwg_takeoff.upload_drawing', 'Upload drawing')}
-              </span>
-              <button onClick={() => setShowUpload(false)}>
-                <X size={16} className="text-white/40 hover:text-white/80 transition-colors" />
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 border border-blue-200/50 dark:border-blue-800/30 flex items-center justify-center">
+                  <FileUp size={20} className="text-oe-blue" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-content-primary">
+                    {t('dwg_takeoff.upload_drawing', 'Upload drawing')}
+                  </h3>
+                  <p className="text-[11px] text-content-tertiary">
+                    {t('dwg_takeoff.upload_hint', 'DWG or DXF files up to 100 MB')}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowUpload(false)}
+                className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-surface-secondary transition-colors"
+              >
+                <X size={16} className="text-content-tertiary hover:text-content-primary transition-colors" />
               </button>
             </div>
+
+            {/* Drop zone / file picker */}
             <input
               ref={fileInputRef}
               type="file"
@@ -720,47 +736,85 @@ export function DwgTakeoffPage() {
                 }
               }}
             />
-            <Button
-              size="sm"
-              variant="secondary"
-              className="w-full justify-center"
+            <button
+              type="button"
               onClick={() => fileInputRef.current?.click()}
+              className={`w-full flex flex-col items-center gap-2 border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
+                uploadFile
+                  ? 'border-oe-blue bg-oe-blue/5'
+                  : 'border-border-medium hover:border-oe-blue hover:bg-blue-50/50 dark:hover:bg-blue-950/20'
+              }`}
             >
-              <FileUp size={14} className="mr-1" />
-              {uploadFile ? uploadFile.name : t('dwg_takeoff.choose_file', 'Choose file')}
-            </Button>
-            <input
-              type="text"
-              value={uploadName}
-              onChange={(e) => setUploadName(e.target.value)}
-              placeholder={t('dwg_takeoff.drawing_name', 'Drawing name')}
-              className="w-full rounded-md border border-white/15 bg-white/5 px-2.5 py-1.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-oe-blue"
-            />
-            <select
-              value={uploadDiscipline}
-              onChange={(e) => setUploadDiscipline(e.target.value)}
-              className="w-full rounded-md border border-white/15 bg-white/5 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-oe-blue"
-            >
-              <option value="architectural">{t('dwg_takeoff.discipline_arch', 'Architectural')}</option>
-              <option value="structural">{t('dwg_takeoff.discipline_struct', 'Structural')}</option>
-              <option value="mep">{t('dwg_takeoff.discipline_mep', 'MEP')}</option>
-              <option value="civil">{t('dwg_takeoff.discipline_civil', 'Civil')}</option>
-              <option value="other">{t('dwg_takeoff.discipline_other', 'Other')}</option>
-            </select>
-            <Button
-              size="sm"
-              variant="primary"
-              className="w-full justify-center"
+              {uploadFile ? (
+                <>
+                  <div className="w-10 h-10 rounded-lg bg-oe-blue/10 flex items-center justify-center">
+                    <FileText size={18} className="text-oe-blue" />
+                  </div>
+                  <p className="text-sm font-semibold text-content-primary">{uploadFile.name}</p>
+                  <p className="text-[11px] text-content-quaternary">
+                    {(uploadFile.size / 1024 / 1024).toFixed(1)} MB
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="w-10 h-10 rounded-lg bg-surface-secondary flex items-center justify-center">
+                    <Upload size={18} className="text-content-tertiary" />
+                  </div>
+                  <p className="text-sm font-medium text-content-primary">
+                    {t('dwg_takeoff.click_to_select', 'Click to select a file')}
+                  </p>
+                  <p className="text-[11px] text-content-quaternary">.dwg, .dxf</p>
+                </>
+              )}
+            </button>
+
+            {/* Drawing name */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-content-secondary">
+                {t('dwg_takeoff.drawing_name', 'Drawing name')}
+              </label>
+              <input
+                type="text"
+                value={uploadName}
+                onChange={(e) => setUploadName(e.target.value)}
+                placeholder={t('dwg_takeoff.drawing_name_placeholder', 'e.g. Floor Plan Level 1')}
+                className="w-full rounded-xl border border-border-light bg-surface-secondary px-3.5 py-2.5 text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all"
+              />
+            </div>
+
+            {/* Discipline */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-content-secondary">
+                {t('dwg_takeoff.discipline_label', 'Discipline')}
+              </label>
+              <select
+                value={uploadDiscipline}
+                onChange={(e) => setUploadDiscipline(e.target.value)}
+                className="w-full rounded-xl border border-border-light bg-surface-secondary px-3.5 py-2.5 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all"
+              >
+                <option value="architectural">{t('dwg_takeoff.discipline_arch', 'Architectural')}</option>
+                <option value="structural">{t('dwg_takeoff.discipline_struct', 'Structural')}</option>
+                <option value="mep">{t('dwg_takeoff.discipline_mep', 'MEP')}</option>
+                <option value="civil">{t('dwg_takeoff.discipline_civil', 'Civil')}</option>
+                <option value="other">{t('dwg_takeoff.discipline_other', 'Other')}</option>
+              </select>
+            </div>
+
+            {/* Upload button */}
+            <button
               disabled={!uploadFile || uploadMutation.isPending}
               onClick={() => uploadMutation.mutate()}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-50 bg-oe-blue text-white hover:bg-oe-blue-dark active:scale-[0.98] shadow-md hover:shadow-lg"
             >
               {uploadMutation.isPending ? (
-                <Loader2 size={14} className="mr-1 animate-spin" />
+                <Loader2 size={16} className="animate-spin" />
               ) : (
-                <Upload size={14} className="mr-1" />
+                <Upload size={16} />
               )}
-              {t('dwg_takeoff.upload', 'Upload')}
-            </Button>
+              {uploadMutation.isPending
+                ? t('dwg_takeoff.uploading', 'Uploading...')
+                : t('dwg_takeoff.upload_and_process', 'Upload & Process')}
+            </button>
           </div>
         </div>
       )}

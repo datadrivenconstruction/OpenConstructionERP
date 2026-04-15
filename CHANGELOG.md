@@ -9,21 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### BIM, DWG Takeoff, and cross-module UI improvements
 
-- **BIM Viewer** — linked BOQ panel shows quantity, unit, and total per position;
-  two-column geometry popover with expandable properties and smart rounding
-- **DWG Takeoff** — polygon selection with area/perimeter measurements, text
-  annotation popup, entity name filter, mouse wheel zoom fix
+- **BIM Viewer** — linked BOQ panel with quantities
+- **DWG Takeoff** — polygon selection + measurements
 - **Data Explorer** — BIM-style full-viewport layout
-- **Dashboard** — DDC branding refresh, subtitle i18n (21 languages), unified padding
-- **Assemblies** — import/export JSON, tag support, drag-reorder, quick cost preview
-- **5D Cost Model** — inline-editable budget lines and snapshots
-- **Finance** — summary cards with key metrics, direct module links
-- **Tasks** — custom categories (Trello-style), 4-column Kanban board
+- **Dashboard** — DDC branding, subtitle i18n (21 langs)
+- **Assemblies** — JSON import/export, tags, drag-reorder
+- **5D Cost Model** — inline-editable budget lines
+- **Finance** — summary cards with key metrics
+- **Tasks** — custom categories, 4-column Kanban
 - **Schedule** — user-selectable project start date
-- **Chat** — AI onboarding guide, blue color scheme
-- **Project Intelligence** — tag badges, compact domain cards, project selector redesign
-- **Bugfixes** — Contacts country_code column, RFI field mismatch, 4 modal layouts
-- **UI** — unified padding across 37+ pages, offline banner restyle
+- **Chat** — AI config onboarding guide
+- **Project Intelligence** — tag badges, compact cards
+- **Bugfixes** — Contacts country_code, RFI field sync, 4 modals
+- **UI** — unified padding across 37+ pages
 
 ## [1.4.8] — 2026-04-11
 
