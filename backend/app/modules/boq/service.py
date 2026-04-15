@@ -1829,14 +1829,15 @@ class BOQService:
 
         created_positions = await self.position_repo.bulk_create(new_positions)
 
-        # Build old→new ID mapping using eagerly captured data
-        for cap, new_pos in zip(captured_positions, created_positions, strict=False):
-            old_to_new[cap["id"]] = new_pos.id
+        # Build old→new ID mapping — eagerly capture new IDs before they expire
+        new_ids: list[uuid.UUID] = [p.id for p in created_positions]
+        for cap, new_id in zip(captured_positions, new_ids, strict=False):
+            old_to_new[cap["id"]] = new_id
 
         # Second pass: remap parent_id references using captured data
-        for cap, new_pos in zip(captured_positions, created_positions, strict=False):
+        for cap, new_id in zip(captured_positions, new_ids, strict=False):
             if cap["parent_id"] is not None and cap["parent_id"] in old_to_new:
-                await self.position_repo.update_fields(new_pos.id, parent_id=old_to_new[cap["parent_id"]])
+                await self.position_repo.update_fields(new_id, parent_id=old_to_new[cap["parent_id"]])
 
         # Copy markups
         markups = await self.markup_repo.list_for_boq(boq_id)
