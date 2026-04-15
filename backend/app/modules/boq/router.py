@@ -1269,6 +1269,9 @@ async def create_revision(
     Duplicates the entire BOQ (positions + markups) and links the copy
     back to the original via parent_estimate_id for revision tracking.
     """
+    # Ensure Projects model is registered in SQLAlchemy metadata (FK resolution)
+    from app.modules.projects import models as _proj_models  # noqa: F401
+
     new_boq = await service.duplicate_boq(boq_id)
     new_boq_id = new_boq.id  # Capture before session expires attributes
     # Link the new BOQ to the original as its revision parent
