@@ -842,9 +842,15 @@ def create_app() -> FastAPI:
     @app.post("/api/demo/install/{demo_id}", tags=["System"])
     async def install_demo(
         demo_id: str,
+        force: bool = False,
         _user_id: str = Depends(get_current_user_id),
     ) -> dict[str, Any]:
-        """Install a demo project with full BOQ, Schedule, Budget, and Tendering data."""
+        """Install a demo project with full BOQ, Schedule, Budget, and Tendering data.
+
+        When the demo is already installed, returns the existing project info
+        with ``already_installed=True`` unless ``force=True`` query param is set,
+        in which case the old demo is deleted and recreated.
+        """
         from app.core.demo_projects import DEMO_TEMPLATES, install_demo_project
         from app.database import async_session_factory
 
@@ -858,7 +864,7 @@ def create_app() -> FastAPI:
             )
 
         async with async_session_factory() as session:
-            result = await install_demo_project(session, demo_id)
+            result = await install_demo_project(session, demo_id, force_reinstall=force)
             await session.commit()
 
         return result

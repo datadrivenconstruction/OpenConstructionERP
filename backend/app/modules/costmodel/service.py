@@ -16,17 +16,6 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
-
-_logger_ev = __import__("logging").getLogger(__name__ + ".events")
-
-
-async def _safe_publish(name: str, data: dict, source_module: str = "") -> None:
-    try:
-        await event_bus.publish(name, data, source_module=source_module)
-    except Exception:
-        _logger_ev.debug("Event publish skipped: %s", name)
-
-
 from app.modules.costmodel.models import BudgetLine, CashFlow, CostSnapshot
 from app.modules.costmodel.repository import (
     BudgetLineRepository,
@@ -50,6 +39,15 @@ from app.modules.costmodel.schemas import (
     WhatIfAdjustments,
     WhatIfResult,
 )
+
+_logger_ev = logging.getLogger(__name__ + ".events")
+
+
+async def _safe_publish(name: str, data: dict, source_module: str = "") -> None:
+    try:
+        await event_bus.publish(name, data, source_module=source_module)
+    except Exception:
+        _logger_ev.debug("Event publish skipped: %s", name)
 
 logger = logging.getLogger(__name__)
 

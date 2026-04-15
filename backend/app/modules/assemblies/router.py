@@ -27,7 +27,6 @@ from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermissio
 from app.modules.assemblies.schemas import (
     ApplyToBOQRequest,
     AssemblyCreate,
-    AssemblyExport,
     AssemblyImportRequest,
     AssemblyResponse,
     AssemblySearchResponse,

@@ -276,7 +276,10 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
                         "name": row.get("name", ""),
                         "storey": storey or None,
                         "discipline": discipline,
-                        "properties": {k: v for k, v in row.items() if k not in ("global_id", "id", "type", "name", "storey", "discipline")},
+                        "properties": {
+                        k: v for k, v in row.items()
+                        if k not in ("global_id", "id", "type", "name", "storey", "discipline")
+                    },
                         "quantities": quantities,
                         "geometry_hash": hashlib.md5(str(row).encode()).hexdigest()[:16],
                         "bounding_box": None,
@@ -707,7 +710,6 @@ def _convert_dae_to_glb(dae_path: Path, output_dir: Path) -> Path | None:
                         new_json += b" "
                     bin_offset = 20 + json_len
                     # Find binary chunk
-                    bin_header = glb_data[bin_offset : bin_offset + 8]
                     bin_chunk = glb_data[bin_offset:]
                     total = 12 + 8 + len(new_json) + len(bin_chunk)
                     glb_data = (
@@ -1456,7 +1458,6 @@ def _patch_collada_node_names(dae_path: Path) -> int:
         return 0
 
     root = tree.getroot()
-    ns = {"c": _COLLADA_NS}
     patched = 0
 
     for node in root.iter(f"{{{_COLLADA_NS}}}node"):
