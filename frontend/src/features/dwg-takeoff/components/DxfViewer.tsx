@@ -144,6 +144,7 @@ export function DxfViewer({
   selectedAnnotationIdRef.current = selectedAnnotationId;
   const [, forceRender] = useState(0);
   const [textPinPopup, setTextPinPopup] = useState<TextPinPopupState | null>(null);
+  const [isPanning, setIsPanning] = useState(false);
   /** Last computed drawing extents — kept to re-fit on resize. */
   const extentsRef = useRef<Extents | null>(null);
   /** Whether the viewport has been fitted at least once (prevents redundant fits). */
@@ -422,6 +423,7 @@ export function DxfViewer({
 
       if (activeTool === 'pan' || e.button === 1) {
         isPanningRef.current = true;
+        setIsPanning(true);
         lastMouseRef.current = { x: e.clientX, y: e.clientY };
         return;
       }
@@ -453,6 +455,20 @@ export function DxfViewer({
               d = 0;
             }
           }
+          // HATCH — test interior of boundary polygon
+          else if (ent.type === 'HATCH' && ent.vertices && ent.vertices.length >= 3) {
+            if (pointInPolygon(world, ent.vertices)) {
+              d = 0;
+            } else {
+              for (let i = 0; i < ent.vertices.length - 1; i++) {
+                const sd = pointToSegmentDistance(world, ent.vertices[i]!, ent.vertices[i + 1]!);
+                if (sd < d) d = sd;
+              }
+              // Closing segment
+              const sd = pointToSegmentDistance(world, ent.vertices[ent.vertices.length - 1]!, ent.vertices[0]!);
+              if (sd < d) d = sd;
+            }
+          }
           // LINE — test segment
           else if (ent.type === 'LINE' && ent.start && ent.end) {
             d = pointToSegmentDistance(world, ent.start, ent.end);
@@ -462,10 +478,31 @@ export function DxfViewer({
             const toCenter = calculateDistance(world, ent.start);
             d = Math.abs(toCenter - ent.radius);
           }
-          // ARC — test distance to arc
+          // ARC — test distance to arc circumference within angle range
           else if (ent.type === 'ARC' && ent.start && ent.radius) {
             const toCenter = calculateDistance(world, ent.start);
-            d = Math.abs(toCenter - ent.radius);
+            const distToCirc = Math.abs(toCenter - ent.radius);
+            // Check if click angle falls within the arc's sweep
+            if (ent.start_angle != null && ent.end_angle != null) {
+              let clickAngle = Math.atan2(world.y - ent.start.y, world.x - ent.start.x);
+              if (clickAngle < 0) clickAngle += Math.PI * 2;
+              let sa = ent.start_angle % (Math.PI * 2);
+              if (sa < 0) sa += Math.PI * 2;
+              let ea = ent.end_angle % (Math.PI * 2);
+              if (ea < 0) ea += Math.PI * 2;
+              const inArc = sa <= ea
+                ? clickAngle >= sa && clickAngle <= ea
+                : clickAngle >= sa || clickAngle <= ea;
+              d = inArc ? distToCirc : distToCirc + closestDist;
+            } else {
+              d = distToCirc;
+            }
+          }
+          // ELLIPSE — test distance to center (approximation)
+          else if (ent.type === 'ELLIPSE' && ent.start) {
+            d = calculateDistance(world, ent.start);
+            const maxR = Math.max(ent.major_radius ?? 0, ent.minor_radius ?? 0, ent.radius ?? 0);
+            if (maxR > 0) d = Math.abs(d - maxR);
           }
           // Fallback — test start point
           else if (ent.start) {
@@ -536,11 +573,13 @@ export function DxfViewer({
   // Mouse up
   const handleMouseUp = useCallback(() => {
     isPanningRef.current = false;
+    setIsPanning(false);
   }, []);
 
   // Mouse leave — clear rubber band cursor and stop panning
   const handleMouseLeave = useCallback(() => {
     isPanningRef.current = false;
+    setIsPanning(false);
     mousePosRef.current = null;
   }, []);
 
@@ -590,7 +629,7 @@ export function DxfViewer({
     <div
       ref={containerRef}
       className="relative h-full w-full overflow-hidden bg-[#1a1a2e]"
-      style={{ cursor: activeTool === 'pan' ? 'grab' : activeTool === 'select' ? 'default' : 'crosshair' }}
+      style={{ cursor: isPanning ? 'grabbing' : activeTool === 'pan' ? 'grab' : activeTool === 'select' ? 'default' : 'crosshair' }}
     >
       <canvas
         ref={canvasRef}
@@ -599,6 +638,7 @@ export function DxfViewer({
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseLeave}
         onDoubleClick={handleDoubleClick}
+        onContextMenu={(e) => e.preventDefault()}
         className="h-full w-full"
       />
       {/* Text pin floating popup */}
@@ -610,22 +650,41 @@ export function DxfViewer({
           onCancel={() => setTextPinPopup(null)}
         />
       )}
-      {/* Fit-all button (bottom-right overlay) */}
-      {extentsRef.current && (
-        <button
-          onClick={handleFitAll}
-          className="absolute bottom-3 right-3 h-8 px-2.5 rounded-lg
-                     bg-white/10 hover:bg-white/20 backdrop-blur-sm
-                     text-white/70 hover:text-white text-xs font-medium
-                     flex items-center gap-1.5 transition-colors
-                     border border-white/10"
-          title={t('dwg_takeoff.fit_all', { defaultValue: 'Fit to drawing bounds' })}
+      {/* Bottom-left overlay: world coordinate readout */}
+      {mousePosRef.current && entities.length > 0 && (
+        <div
+          className="absolute bottom-3 left-3 h-7 px-2.5 rounded-lg bg-white/10 backdrop-blur-sm
+                     text-white/40 text-[10px] font-mono flex items-center gap-2
+                     border border-white/10 select-none pointer-events-none"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
-          </svg>
-          {t('dwg_takeoff.fit', { defaultValue: 'Fit' })}
-        </button>
+          <span>X: {mousePosRef.current.x.toFixed(2)}</span>
+          <span>Y: {mousePosRef.current.y.toFixed(2)}</span>
+        </div>
+      )}
+      {/* Bottom-right overlay: zoom level + Fit button */}
+      {extentsRef.current && (
+        <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
+          <span
+            className="h-8 px-2.5 rounded-lg bg-white/10 backdrop-blur-sm text-white/50 text-[11px]
+                       font-mono flex items-center border border-white/10 select-none"
+          >
+            {Math.round(vpRef.current.scale * 100)}%
+          </span>
+          <button
+            onClick={handleFitAll}
+            className="h-8 px-2.5 rounded-lg
+                       bg-white/10 hover:bg-white/20 backdrop-blur-sm
+                       text-white/70 hover:text-white text-xs font-medium
+                       flex items-center gap-1.5 transition-colors
+                       border border-white/10"
+            title={t('dwg_takeoff.fit_all', { defaultValue: 'Fit to drawing bounds' })}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+            </svg>
+            {t('dwg_takeoff.fit', { defaultValue: 'Fit' })}
+          </button>
+        </div>
       )}
     </div>
   );

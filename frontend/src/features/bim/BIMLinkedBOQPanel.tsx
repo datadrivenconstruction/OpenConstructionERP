@@ -109,6 +109,7 @@ export default function BIMLinkedBOQPanel({
         </div>
         <button
           onClick={onClose}
+          aria-label={t('common.close', { defaultValue: 'Close' })}
           className="p-1 rounded-md text-content-tertiary hover:text-content-primary hover:bg-surface-secondary"
         >
           <X size={14} />
@@ -124,6 +125,7 @@ export default function BIMLinkedBOQPanel({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('bim.linked_boq_search', { defaultValue: 'Search positions...' })}
+            aria-label={t('bim.linked_boq_search', { defaultValue: 'Search positions...' })}
             className="w-full ps-8 pe-8 py-1.5 text-xs rounded-md bg-surface-secondary border border-border-light focus:outline-none focus:ring-1 focus:ring-oe-blue focus:border-oe-blue"
           />
           {search && (
@@ -165,6 +167,8 @@ export default function BIMLinkedBOQPanel({
                 key={pos.boq_position_id}
                 type="button"
                 onClick={() => handleRowClick(pos)}
+                aria-label={`${pos.ordinal ?? ''} ${pos.description ?? t('bim.linked_boq_no_desc', { defaultValue: '(no description)' })}`}
+                aria-pressed={isActive}
                 className={`w-full text-start px-4 py-2.5 border-b border-border-light transition-colors ${
                   isActive
                     ? 'bg-oe-blue/8 border-s-2 border-s-oe-blue'
@@ -210,7 +214,8 @@ export default function BIMLinkedBOQPanel({
                           href={`/boq/${boqId}?highlight=${pos.boq_position_id}`}
                           onClick={(e) => e.stopPropagation()}
                           className="text-[9px] text-oe-blue hover:text-oe-blue/80 flex items-center gap-0.5"
-                          title="Open in BOQ"
+                          title={t('bim.linked_boq_open_in_boq', { defaultValue: 'Open in BOQ' })}
+                          aria-label={t('bim.linked_boq_open_in_boq', { defaultValue: 'Open in BOQ' })}
                         >
                           <ExternalLink size={8} />
                           BOQ

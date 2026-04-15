@@ -703,7 +703,7 @@ function EstimatorDashboard({
   }, [project?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!project) {
-    return <EmptyState message={t('reporting.select_project_prompt', { defaultValue: 'Select a project to view Estimator dashboard' })} />;
+    return <EmptyState message={t('reporting.select_project_prompt_estimator', { defaultValue: 'Select a project to view Estimator dashboard' })} />;
   }
 
   return (
@@ -790,7 +790,7 @@ function SiteDashboard({
   const { t } = useTranslation();
 
   if (!project) {
-    return <EmptyState message={t('reporting.select_project_prompt', { defaultValue: 'Select a project to view Site Engineer dashboard' })} />;
+    return <EmptyState message={t('reporting.select_project_prompt_site', { defaultValue: 'Select a project to view Site Engineer dashboard' })} />;
   }
 
   return (
@@ -880,7 +880,7 @@ function FinanceDashboardView({
   const { t } = useTranslation();
 
   if (!project) {
-    return <EmptyState message={t('reporting.select_project_prompt', { defaultValue: 'Select a project to view Finance dashboard' })} />;
+    return <EmptyState message={t('reporting.select_project_prompt_finance', { defaultValue: 'Select a project to view Finance dashboard' })} />;
   }
 
   return (

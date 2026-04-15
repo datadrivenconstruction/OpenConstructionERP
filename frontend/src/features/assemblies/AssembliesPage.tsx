@@ -52,18 +52,6 @@ const UNIT_OPTIONS = ['m', 'm2', 'm3', 'kg', 't', 'pcs', 'lsum', 'h', 'set', 'lm
 
 /* Templates removed — assemblies are managed via New/AI Generate/Clone/Save from BOQ */
 
-/* Category icon map — reserved for future assembly card rendering
-const CATEGORY_ICON_MAP: Record<string, React.ReactNode> = {
-  concrete: <HardHat size={16} />,
-  masonry: <Hammer size={16} />,
-  steel: <Wrench size={16} />,
-  insulation: <Home size={16} />,
-  finishing: <PaintBucket size={16} />,
-  roofing: <Home size={16} />,
-  earthwork: <Mountain size={16} />,
-  mep: <Zap size={16} />,
-}; */
-
 /* -- Helpers -------------------------------------------------------------- */
 
 function csvEscape(val: string): string {

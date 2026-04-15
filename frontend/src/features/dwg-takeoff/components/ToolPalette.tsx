@@ -16,12 +16,12 @@ import {
 
 export type DwgTool = 'select' | 'pan' | 'distance' | 'area' | 'text_pin' | 'arrow' | 'rectangle';
 
-const TOOLS: { id: DwgTool; icon: React.ElementType; labelKey: string }[] = [
-  { id: 'select', icon: MousePointer2, labelKey: 'dwg_takeoff.tool_select' },
-  { id: 'pan', icon: Hand, labelKey: 'dwg_takeoff.tool_pan' },
-  { id: 'distance', icon: Ruler, labelKey: 'dwg_takeoff.tool_distance' },
-  { id: 'area', icon: PenTool, labelKey: 'dwg_takeoff.tool_area' },
-  { id: 'text_pin', icon: Type, labelKey: 'dwg_takeoff.tool_text_pin' },
+const TOOLS: { id: DwgTool; icon: React.ElementType; labelKey: string; shortcut?: string }[] = [
+  { id: 'select', icon: MousePointer2, labelKey: 'dwg_takeoff.tool_select', shortcut: 'V' },
+  { id: 'pan', icon: Hand, labelKey: 'dwg_takeoff.tool_pan', shortcut: 'H' },
+  { id: 'distance', icon: Ruler, labelKey: 'dwg_takeoff.tool_distance', shortcut: 'D' },
+  { id: 'area', icon: PenTool, labelKey: 'dwg_takeoff.tool_area', shortcut: 'A' },
+  { id: 'text_pin', icon: Type, labelKey: 'dwg_takeoff.tool_text_pin', shortcut: 'T' },
   { id: 'arrow', icon: ArrowRight, labelKey: 'dwg_takeoff.tool_arrow' },
   { id: 'rectangle', icon: Square, labelKey: 'dwg_takeoff.tool_rectangle' },
 ];
@@ -40,10 +40,10 @@ export function ToolPalette({ activeTool, onToolChange, activeColor, onColorChan
 
   return (
     <div className="flex items-center gap-1 rounded-lg border border-border bg-surface px-2 py-1 shadow-sm">
-      {TOOLS.map(({ id, icon: Icon, labelKey }) => (
+      {TOOLS.map(({ id, icon: Icon, labelKey, shortcut }) => (
         <button
           key={id}
-          title={t(labelKey, id)}
+          title={`${t(labelKey, id)}${shortcut ? ` (${shortcut})` : ''}`}
           onClick={() => onToolChange(id)}
           className={clsx(
             'flex h-8 w-8 items-center justify-center rounded-md transition-colors',

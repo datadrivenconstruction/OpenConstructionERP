@@ -12,6 +12,7 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
   calculateArea,
+  calculateDistance,
   calculatePerimeter,
   getSegmentLengths,
   formatMeasurement,
@@ -162,10 +163,11 @@ export function DwgTakeoffPage() {
   }, [entities]);
 
   // Auto-select first layout when entities load
-  useMemo(() => {
+  useEffect(() => {
     if (layouts.length > 0 && selectedLayout === null) {
       setSelectedLayout(layouts[0] ?? null);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layouts]);
 
   // Filter entities by selected layout
@@ -178,14 +180,14 @@ export function DwgTakeoffPage() {
   const layers = useMemo(() => extractLayers(filteredEntities), [filteredEntities]);
 
   // Initialize visible layers when entities/layout change
-  useMemo(() => {
+  useEffect(() => {
     if (layers.length > 0) {
       setVisibleLayers(new Set(layers.map((l) => l.name)));
     }
   }, [layers]);
 
   // Initialize visible entity names when entities/layout change
-  useMemo(() => {
+  useEffect(() => {
     if (filteredEntities.length > 0) {
       const names = new Set<string>();
       for (const e of filteredEntities) {
@@ -204,14 +206,14 @@ export function DwgTakeoffPage() {
     onSuccess: (drawing) => {
       queryClient.invalidateQueries({ queryKey: ['dwg-drawings', projectId] });
       addToast({ type: 'success', title: t('dwg_takeoff.upload_success', 'Drawing uploaded') });
-      setShowUpload(false);
-      setUploadFile(null);
-      setUploadName('');
+      // Capture file ref before clearing state
+      const savedFile = uploadFile;
+      closeUploadModal();
       setSelectedDrawingId(drawing.id);
 
       // Auto-save to Documents module as well (fire-and-forget)
-      if (uploadFile && projectId) {
-        const file = uploadFile;
+      if (savedFile && projectId) {
+        const file = savedFile;
         const token = useAuthStore.getState().accessToken;
         const formData = new FormData();
         formData.append('file', file);
@@ -367,6 +369,46 @@ export function DwgTakeoffPage() {
     [entities, selectedEntityId],
   );
 
+  const closeUploadModal = useCallback(() => {
+    setShowUpload(false);
+    setUploadFile(null);
+    setUploadName('');
+    setUploadDiscipline('architectural');
+  }, []);
+
+  // Global keyboard shortcuts for the page
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      // Ignore shortcuts when typing in inputs
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+      switch (e.key) {
+        case 'Escape':
+          if (selectedEntityId) { setSelectedEntityId(null); setEntityPopup(null); }
+          else if (selectedAnnotationId) setSelectedAnnotationId(null);
+          break;
+        case 'v': case 'V':
+          setActiveTool('select');
+          break;
+        case 'h': case 'H':
+          setActiveTool('pan');
+          break;
+        case 'd': case 'D':
+          setActiveTool('distance');
+          break;
+        case 'a': case 'A':
+          setActiveTool('area');
+          break;
+        case 't': case 'T':
+          setActiveTool('text_pin');
+          break;
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [selectedEntityId, selectedAnnotationId]);
+
   const breadcrumbs = [
     { label: t('nav.group_takeoff', 'Takeoff'), to: '/takeoff' },
     { label: t('dwg_takeoff.title', 'DWG Takeoff') },
@@ -455,9 +497,6 @@ export function DwgTakeoffPage() {
                   screenY={entityPopup.y}
                   projectId={projectId}
                   onClose={() => setEntityPopup(null)}
-                  onLinkBOQ={() => {
-                    setEntityPopup(null);
-                  }}
                 />
               )}
             </div>
@@ -485,11 +524,11 @@ export function DwgTakeoffPage() {
             <div className="flex border-b border-border">
               {(
                 [
-                  { id: 'layers', icon: Layers, labelKey: 'dwg_takeoff.layers' },
-                  { id: 'annotations', icon: MessageSquare, labelKey: 'dwg_takeoff.annotations' },
-                  { id: 'properties', icon: Info, labelKey: 'dwg_takeoff.properties' },
-                ] as const
-              ).map(({ id, icon: Icon, labelKey }) => (
+                  { id: 'layers' as const, icon: Layers, labelKey: 'dwg_takeoff.layers', count: layers.length },
+                  { id: 'annotations' as const, icon: MessageSquare, labelKey: 'dwg_takeoff.annotations', count: annotations.length },
+                  { id: 'properties' as const, icon: Info, labelKey: 'dwg_takeoff.properties', count: 0 },
+                ]
+              ).map(({ id, icon: Icon, labelKey, count }) => (
                 <button
                   key={id}
                   onClick={() => setRightTab(id)}
@@ -502,6 +541,9 @@ export function DwgTakeoffPage() {
                 >
                   <Icon size={13} />
                   {t(labelKey, id)}
+                  {count > 0 && (
+                    <span className="text-[9px] tabular-nums opacity-60">({count})</span>
+                  )}
                 </button>
               ))}
             </div>
@@ -693,7 +735,11 @@ export function DwgTakeoffPage() {
       {showUpload && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
-          onClick={() => setShowUpload(false)}
+          onClick={closeUploadModal}
+          onKeyDown={(e) => { if (e.key === 'Escape') closeUploadModal(); }}
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('dwg_takeoff.upload_drawing', 'Upload drawing')}
         >
           <div
             className="w-[420px] rounded-2xl border border-border-light bg-surface-primary shadow-2xl p-6 space-y-5"
@@ -715,7 +761,7 @@ export function DwgTakeoffPage() {
                 </div>
               </div>
               <button
-                onClick={() => setShowUpload(false)}
+                onClick={closeUploadModal}
                 className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-surface-secondary transition-colors"
               >
                 <X size={16} className="text-content-tertiary hover:text-content-primary transition-colors" />
@@ -731,6 +777,17 @@ export function DwgTakeoffPage() {
               onChange={(e) => {
                 const f = e.target.files?.[0];
                 if (f) {
+                  const MAX_SIZE_MB = 100;
+                  if (f.size > MAX_SIZE_MB * 1024 * 1024) {
+                    addToast({
+                      type: 'error',
+                      title: t('dwg_takeoff.file_too_large', 'File too large'),
+                      message: t('dwg_takeoff.file_size_limit', 'Maximum file size is {{max}} MB', {
+                        max: MAX_SIZE_MB,
+                      }),
+                    });
+                    return;
+                  }
                   setUploadFile(f);
                   if (!uploadName) setUploadName(f.name.replace(/\.[^.]+$/, ''));
                 }
@@ -739,6 +796,36 @@ export function DwgTakeoffPage() {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const f = e.dataTransfer.files?.[0];
+                if (f) {
+                  const ext = f.name.split('.').pop()?.toLowerCase();
+                  if (ext !== 'dwg' && ext !== 'dxf') {
+                    addToast({
+                      type: 'error',
+                      title: t('dwg_takeoff.invalid_format', 'Invalid file format'),
+                      message: t('dwg_takeoff.accepted_formats', 'Only .dwg and .dxf files are accepted'),
+                    });
+                    return;
+                  }
+                  const MAX_SIZE_MB = 100;
+                  if (f.size > MAX_SIZE_MB * 1024 * 1024) {
+                    addToast({
+                      type: 'error',
+                      title: t('dwg_takeoff.file_too_large', 'File too large'),
+                      message: t('dwg_takeoff.file_size_limit', 'Maximum file size is {{max}} MB', {
+                        max: MAX_SIZE_MB,
+                      }),
+                    });
+                    return;
+                  }
+                  setUploadFile(f);
+                  if (!uploadName) setUploadName(f.name.replace(/\.[^.]+$/, ''));
+                }
+              }}
               className={`w-full flex flex-col items-center gap-2 border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
                 uploadFile
                   ? 'border-oe-blue bg-oe-blue/5'
@@ -761,7 +848,7 @@ export function DwgTakeoffPage() {
                     <Upload size={18} className="text-content-tertiary" />
                   </div>
                   <p className="text-sm font-medium text-content-primary">
-                    {t('dwg_takeoff.click_to_select', 'Click to select a file')}
+                    {t('dwg_takeoff.click_or_drop', 'Click or drag a file here')}
                   </p>
                   <p className="text-[11px] text-content-quaternary">.dwg, .dxf</p>
                 </>
@@ -850,7 +937,6 @@ interface EntityInfoPopupProps {
   screenY: number;
   projectId: string;
   onClose: () => void;
-  onLinkBOQ: () => void;
 }
 
 function EntityInfoPopup({ entity, screenX, screenY, projectId, onClose }: EntityInfoPopupProps) {
@@ -977,6 +1063,20 @@ function EntityInfoPopup({ entity, screenX, screenY, projectId, onClose }: Entit
             <div className="flex justify-between">
               <span className="text-white/40">{t('dwg_takeoff.prop_block', 'Block')}</span>
               <span className="font-mono text-white/80">{entity.block_name}</span>
+            </div>
+          )}
+          {entity.text && (
+            <div className="flex justify-between gap-2">
+              <span className="text-white/40 shrink-0">{t('dwg_takeoff.prop_text', 'Text')}</span>
+              <span className="font-mono text-white/80 truncate text-right">{entity.text}</span>
+            </div>
+          )}
+          {entity.start && entity.end && entity.type === 'LINE' && (
+            <div className="flex justify-between">
+              <span className="text-white/40">{t('dwg_takeoff.length', 'Length')}</span>
+              <span className="font-mono text-white/80">
+                {formatMeasurement(calculateDistance(entity.start, entity.end), 'm')}
+              </span>
             </div>
           )}
         </div>
