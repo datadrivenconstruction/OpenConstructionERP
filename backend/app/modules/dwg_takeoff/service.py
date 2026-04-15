@@ -31,6 +31,80 @@ from app.modules.dwg_takeoff.schemas import (
 logger = logging.getLogger(__name__)
 
 
+def _normalize_entity(raw: dict[str, Any], index: int) -> dict[str, Any]:
+    """Flatten stored entity format to the shape the frontend DxfViewer expects.
+
+    Stored format: {entity_type, layer, color, geometry_data: {…}}
+    Frontend format: {id, type, layer, color, start?, end?, vertices?, …}
+    """
+    gd = raw.get("geometry_data", {})
+    entity_type = raw.get("entity_type", "")
+    # Map MTEXT → TEXT for the frontend renderer
+    front_type = "TEXT" if entity_type == "MTEXT" else entity_type
+
+    result: dict[str, Any] = {
+        "id": f"e_{index}",
+        "type": front_type,
+        "layer": raw.get("layer", "0"),
+        "color": raw.get("color", "#cccccc"),
+    }
+
+    # Pass through layout field (DXF layout name or DWG BlockId)
+    if "layout" in raw:
+        result["layout"] = raw["layout"]
+
+    if entity_type == "LINE":
+        result["start"] = gd.get("start")
+        result["end"] = gd.get("end")
+    elif entity_type in ("LWPOLYLINE", "POLYLINE"):
+        result["vertices"] = gd.get("points", [])
+        result["closed"] = gd.get("closed", False)
+    elif entity_type == "CIRCLE":
+        result["start"] = gd.get("center")
+        result["radius"] = gd.get("radius")
+    elif entity_type == "ARC":
+        result["start"] = gd.get("center")
+        result["radius"] = gd.get("radius")
+        result["start_angle"] = gd.get("start_angle", 0)
+        result["end_angle"] = gd.get("end_angle", 6.283185307179586)
+    elif entity_type == "ELLIPSE":
+        result["start"] = gd.get("center")
+        result["major_radius"] = gd.get("major_radius")
+        result["minor_radius"] = gd.get("minor_radius")
+        result["rotation"] = gd.get("rotation", 0)
+        result["start_angle"] = gd.get("start_angle", 0)
+        result["end_angle"] = gd.get("end_angle", 0)
+        # Also provide major_axis for ezdxf-style format
+        if "major_axis" in gd:
+            result["major_axis"] = gd["major_axis"]
+            result["ratio"] = gd.get("ratio", 1.0)
+    elif entity_type in ("TEXT", "MTEXT"):
+        result["start"] = gd.get("insert") or gd.get("insertion_point")
+        result["text"] = gd.get("text", "")
+        result["height"] = gd.get("height", 2.5)
+        result["rotation"] = gd.get("rotation", 0)
+    elif entity_type == "INSERT":
+        result["start"] = gd.get("insert") or gd.get("insertion_point")
+        result["block_name"] = gd.get("block_name") or gd.get("name", "")
+        result["rotation"] = gd.get("rotation", 0)
+        result["x_scale"] = gd.get("x_scale", 1.0)
+        result["y_scale"] = gd.get("y_scale", 1.0)
+    elif entity_type == "HATCH":
+        result["vertices"] = gd.get("points", [])
+        result["closed"] = gd.get("closed", True)
+        result["pattern_name"] = gd.get("pattern_name", "SOLID")
+        result["is_solid"] = gd.get("is_solid", False)
+    elif entity_type == "SPLINE":
+        result["type"] = "LWPOLYLINE"
+        result["vertices"] = gd.get("control_points", [])
+        result["closed"] = False
+    elif entity_type == "DIMENSION":
+        result["start"] = gd.get("start")
+        result["end"] = gd.get("end")
+
+    return result
+
+
 def _get_upload_dir() -> str:
     """Get the upload directory for DWG files."""
     base = os.environ.get("DATA_DIR", os.path.join(os.getcwd(), "data"))
@@ -177,7 +251,7 @@ class DwgTakeoffService:
             version = DwgDrawingVersion(
                 drawing_id=drawing_id,
                 version_number=version_number,
-                layers={layer["name"]: layer for layer in result["layers"]},
+                layers=result["layers"],
                 entities_key=entities_key,
                 entity_count=result["entity_count"],
                 extents=result["extents"],
@@ -435,7 +509,10 @@ class DwgTakeoffService:
             visible_set = set(visible_layers)
             entities = [e for e in entities if e.get("layer", "0") in visible_set]
 
-        return entities
+        # Normalize entity format for frontend consumption:
+        # Backend stores {entity_type, geometry_data: {…}} but frontend
+        # expects flat {type, id, start, end, vertices, …} structure.
+        return [_normalize_entity(e, i) for i, e in enumerate(entities)]
 
     async def get_thumbnail_svg(self, drawing_id: uuid.UUID) -> str | None:
         """Load SVG thumbnail content for a drawing."""
@@ -470,12 +547,19 @@ class DwgTakeoffService:
                 detail="No drawing version found",
             )
 
-        layers = dict(version.layers)
-        for layer_name, visible in layer_updates.items():
-            if layer_name in layers:
-                layers[layer_name]["visible"] = visible
+        # Normalize layers to list format (legacy data may be stored as dict)
+        raw = version.layers
+        if isinstance(raw, dict):
+            layers_list = list(raw.values()) if raw else []
+        else:
+            layers_list = list(raw) if raw else []
 
-        await self.version_repo.update_fields(version.id, layers=layers)
+        for layer_info in layers_list:
+            name = layer_info.get("name", "")
+            if name in layer_updates:
+                layer_info["visible"] = layer_updates[name]
+
+        await self.version_repo.update_fields(version.id, layers=layers_list)
         await self.session.refresh(version)
         return version
 

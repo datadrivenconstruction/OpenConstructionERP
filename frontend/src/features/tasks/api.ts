@@ -98,6 +98,11 @@ export async function completeTask(id: string): Promise<Task> {
   return apiPost<Task>(`/v1/tasks/${id}/complete/`);
 }
 
+export async function deleteTask(id: string): Promise<void> {
+  const { apiDelete } = await import('@/shared/lib/api');
+  return apiDelete(`/v1/tasks/${id}`);
+}
+
 export async function exportTasks(projectId: string): Promise<void> {
   const token = useAuthStore.getState().accessToken;
   const headers: Record<string, string> = { Accept: 'application/octet-stream' };

@@ -777,7 +777,7 @@ export const boqApi = {
     options?: { scheme?: 'gap10' | 'gap100' | 'sequential' | 'dotted'; pad?: boolean },
   ) =>
     apiPost<{ renumbered: number; scheme: string }>(
-      `/v1/boq/boqs/${boqId}/renumber`,
+      `/v1/boq/boqs/${boqId}/renumber/`,
       options ?? {},
     ),
 };

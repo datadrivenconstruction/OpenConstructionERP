@@ -298,6 +298,7 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
             "geometry_path": str(dae_path) if has_geometry else None,
             "glb_path": str(glb_path) if glb_path else None,
             "bounding_box": None,
+            "geometry_type": "real" if has_geometry else "placeholder",
             "raw_elements": csv_raw_rows,
         }
     except Exception as e:
@@ -621,9 +622,9 @@ def _excel_elements_to_bim_result(
         except Exception as e:
             logger.warning("COLLADA box generation failed: %s", e)
 
-    # ── Pass 3: DAE → GLB conversion for 8.8x faster browser loading ──
-    # trimesh converts COLLADA to binary glTF with optimized buffer layout.
-    # GLB + gzip ≈ 1.7 MB vs 32 MB raw DAE.
+    # Convert DAE → GLB for 2x smaller transfer + faster browser parsing.
+    # trimesh loses COLLADA node names, but we patch them back into the
+    # GLB JSON chunk using the original DAE node IDs (0.09s overhead).
     glb_path: Path | None = None
     if geometry_path and geometry_path.exists():
         glb_path = _convert_dae_to_glb(geometry_path, output_dir)
@@ -637,6 +638,7 @@ def _excel_elements_to_bim_result(
         "geometry_path": str(geometry_path) if geometry_path else None,
         "glb_path": str(glb_path) if glb_path else None,
         "bounding_box": bounding_box,
+        "geometry_type": "real" if (real_dae_path and real_dae_path.exists()) else "placeholder",
         # Full DDC dataframe (all 1000+ columns) for Parquet cold storage.
         # The hot table only keeps ~12 indexed fields; analytical queries
         # run against the Parquet via DuckDB.
@@ -653,6 +655,10 @@ def _convert_dae_to_glb(dae_path: Path, output_dir: Path) -> Path | None:
     Trimesh handles DAE -> GLB natively (via collada-exporter + numpy).
     Typical conversion: 32 MB DAE -> 9.5 MB GLB (3.4x smaller).
     With server-side gzip the transfer shrinks to ~1.7 MB (19x smaller).
+
+    **Important**: trimesh.load() on DAE files loses the original COLLADA
+    node IDs (replaces them with ``shapeN-lib``).  We post-process the GLB
+    JSON chunk to restore node names from the DAE ``<node id="...">`` tags.
     """
     glb_target = (output_dir / "geometry.glb").resolve()
     try:
@@ -660,6 +666,63 @@ def _convert_dae_to_glb(dae_path: Path, output_dir: Path) -> Path | None:
 
         scene = trimesh.load(str(dae_path))
         glb_data: bytes = scene.export(file_type="glb")  # type: ignore[union-attr]
+
+        # Post-process: restore node names from the original DAE.
+        # Parse COLLADA <node id="..."> to get the original IDs in order.
+        try:
+            import xml.etree.ElementTree as _ET
+            import struct as _struct
+            import json as _json
+
+            dae_tree = _ET.parse(str(dae_path))
+            ns = {"c": "http://www.collada.org/2005/11/COLLADASchema"}
+            dae_nodes = dae_tree.findall(".//c:visual_scene/c:node", ns)
+            dae_node_ids = [n.get("id", "") for n in dae_nodes]
+
+            if dae_node_ids:
+                # Parse GLB: header(12) + json_chunk_header(8) + json
+                json_len = _struct.unpack("<I", glb_data[12:16])[0]
+                gltf = _json.loads(glb_data[20 : 20 + json_len])
+                glb_nodes = gltf.get("nodes", [])
+
+                # Map: skip the root "world" node, patch geometry nodes
+                glb_meshes = gltf.get("meshes", [])
+                geom_idx = 0
+                for node in glb_nodes:
+                    if "mesh" in node and geom_idx < len(dae_node_ids):
+                        eid = dae_node_ids[geom_idx]
+                        node["name"] = eid
+                        # ALSO patch mesh.name — Three.js GLTFLoader
+                        # sets Mesh.name from meshes[].name (not node.name).
+                        mesh_idx = node["mesh"]
+                        if mesh_idx < len(glb_meshes):
+                            glb_meshes[mesh_idx]["name"] = eid
+                        geom_idx += 1
+
+                if geom_idx > 0:
+                    # Rebuild GLB with patched JSON
+                    new_json = _json.dumps(gltf, separators=(",", ":")).encode("utf-8")
+                    # Pad to 4-byte alignment
+                    while len(new_json) % 4:
+                        new_json += b" "
+                    bin_offset = 20 + json_len
+                    # Find binary chunk
+                    bin_header = glb_data[bin_offset : bin_offset + 8]
+                    bin_chunk = glb_data[bin_offset:]
+                    total = 12 + 8 + len(new_json) + len(bin_chunk)
+                    glb_data = (
+                        _struct.pack("<III", 0x46546C67, 2, total)
+                        + _struct.pack("<II", len(new_json), 0x4E4F534A)
+                        + new_json
+                        + bin_chunk
+                    )
+                    logger.info(
+                        "GLB post-process: restored %d node names from DAE",
+                        geom_idx,
+                    )
+        except Exception as patch_err:
+            logger.debug("GLB node-name patching skipped: %s", patch_err)
+
         glb_target.write_bytes(glb_data)
 
         if glb_target.stat().st_size > 1000:
@@ -835,6 +898,7 @@ def process_ifc_file(
         "has_geometry": has_geometry,
         "geometry_path": str(geometry_path) if geometry_path else None,
         "bounding_box": bounding_box,
+        "geometry_type": "placeholder",
     }
 
 
@@ -1153,7 +1217,10 @@ def _generate_collada_boxes(
         g_max_y = max(g_max_y, y + w)
         g_max_z = max(g_max_z, z + h)
 
-        node_id = f"n{i}"
+        # Use the element's original mesh_ref (Revit ElementId) as the
+        # COLLADA node id so the frontend viewer can match meshes to
+        # elements by name. Fall back to stable_id or index.
+        node_id = str(elem.get("mesh_ref") or elem.get("stable_id") or f"n{i}")
         elem["mesh_ref"] = node_id
         elem["bounding_box"] = {
             "min_x": float(x),
@@ -1421,4 +1488,7 @@ def _empty_result() -> dict[str, Any]:
         "has_geometry": False,
         "geometry_path": None,
         "bounding_box": None,
+        "status": "error",
+        "error_message": "No elements could be extracted. The converter may not support this file format.",
+        "geometry_type": "unknown",
     }

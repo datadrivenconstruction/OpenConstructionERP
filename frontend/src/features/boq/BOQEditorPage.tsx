@@ -25,6 +25,7 @@ import {
 } from './api';
 import { ApiError } from '@/shared/lib/api';
 import { projectsApi } from '@/features/projects/api';
+import { fetchBIMModels } from '@/features/bim/api';
 // AutocompleteInput used in sub-components, not directly here
 // import { AutocompleteInput } from './AutocompleteInput';
 import { AIChatPanel } from './AIChatPanel';
@@ -115,6 +116,23 @@ export function BOQEditorPage() {
     queryFn: () => projectsApi.get(boq!.project_id),
     enabled: !!boq?.project_id,
   });
+
+  /* ── Fetch BIM models for the project (used for mini 3D preview) ─── */
+
+  const { data: bimModelsData } = useQuery({
+    queryKey: ['bim-models', boq?.project_id],
+    queryFn: () => fetchBIMModels(boq!.project_id),
+    enabled: !!boq?.project_id,
+    staleTime: 10 * 60_000,
+  });
+
+  /** First ready BIM model ID — passed to BOQGrid for mini geometry previews. */
+  const bimModelId = useMemo(() => {
+    const models = bimModelsData?.items;
+    if (!models || models.length === 0) return null;
+    const ready = models.find((m) => m.status === 'ready' && (m.element_count ?? 0) > 0);
+    return ready?.id ?? null;
+  }, [bimModelsData]);
 
   const vatRate = useMemo(() => getVatRate(project?.region), [project?.region]);
   const currencySymbol = useMemo(() => getCurrencySymbol(project?.currency), [project?.currency]);
@@ -2387,6 +2405,10 @@ export function BOQEditorPage() {
           onApplyAnomalySuggestion={handleApplyAnomalySuggestion}
           onSaveAsAssembly={handleSaveAsAssembly}
           customColumns={boqCustomColumns}
+          bimModelId={bimModelId}
+          onHighlightBIMElements={(elementIds) => {
+            setBOQLinkSelection(null, elementIds);
+          }}
         /></div>
       ) : (
         <div className="rounded-xl border border-border-light bg-surface-elevated shadow-xs overflow-hidden p-8">

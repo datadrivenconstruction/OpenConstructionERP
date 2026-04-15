@@ -140,15 +140,13 @@ export async function fetchBIMModel(modelId: string): Promise<BIMModelData> {
 
 /** Fetch elements for a specific BIM model.
  *
- * Default limit is 50000 because the 3D viewer needs every element loaded
- * at once to match COLLADA mesh nodes by stable_id — pagination would mean
- * missing geometry references.
+ * Default limit is 2000 (API max).  The 3D viewer paginates if needed.
  */
 export async function fetchBIMElements(
   modelId: string,
   opts?: { limit?: number; offset?: number; groupId?: string | null },
 ): Promise<BIMElementsResponse> {
-  const limit = opts?.limit ?? 50000;
+  const limit = opts?.limit ?? 2000;
   const offset = opts?.offset ?? 0;
   const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
   if (opts?.groupId) {
@@ -156,6 +154,18 @@ export async function fetchBIMElements(
   }
   return apiGet<BIMElementsResponse>(
     `/v1/bim_hub/models/${encodeURIComponent(modelId)}/elements/?${params.toString()}`,
+  );
+}
+
+/** Fetch specific elements by their IDs (DB UUID or stable_id).
+ *  Used by the BIM Quantity Picker to load only linked elements. */
+export async function fetchBIMElementsByIds(
+  modelId: string,
+  elementIds: string[],
+): Promise<BIMElementsResponse> {
+  return apiPost<BIMElementsResponse, { element_ids: string[] }>(
+    `/v1/bim_hub/models/${encodeURIComponent(modelId)}/elements/by-ids/`,
+    { element_ids: elementIds },
   );
 }
 
@@ -167,8 +177,9 @@ export async function fetchBIMElements(
  */
 export async function fetchGeometryBlobUrl(modelId: string): Promise<string> {
   const token = useAuthStore.getState().accessToken;
-  const url = `/api/v1/bim_hub/models/${encodeURIComponent(modelId)}/geometry/`;
-  const headers: HeadersInit = { Accept: '*/*' };
+  // Cache-bust: geometry may have been re-generated with patched node names
+  const url = `/api/v1/bim_hub/models/${encodeURIComponent(modelId)}/geometry/?_t=${Date.now()}`;
+  const headers: HeadersInit = { Accept: '*/*', 'Cache-Control': 'no-cache' };
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }

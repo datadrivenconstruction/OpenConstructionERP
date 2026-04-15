@@ -111,7 +111,7 @@ def create_engine_from_settings():
         def _set_sqlite_pragma(dbapi_conn: object, _: object) -> None:
             cursor = dbapi_conn.cursor()  # type: ignore[union-attr]
             cursor.execute("PRAGMA journal_mode=WAL")
-            cursor.execute("PRAGMA busy_timeout=5003")
+            cursor.execute("PRAGMA busy_timeout=30000")
             cursor.close()
 
         kwargs["connect_args"] = {"check_same_thread": False}

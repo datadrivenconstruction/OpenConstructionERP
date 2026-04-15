@@ -22,8 +22,10 @@ import {
   Scale,
   UserCircle,
   AlertTriangle,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, SkeletonGrid, ViewInBIMButton } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, ViewInBIMButton } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useCreateShortcut } from '@/shared/hooks/useCreateShortcut';
@@ -36,6 +38,7 @@ import { triggerDownload } from '@/shared/lib/api';
 import {
   fetchTasks,
   createTask,
+  updateTask,
   completeTask,
   exportTasks,
   type Task,
@@ -115,14 +118,16 @@ function AddTaskModal({
   onSubmit,
   isPending,
   projectName,
+  initialData,
 }: {
   onClose: () => void;
   onSubmit: (data: TaskFormData) => void;
   isPending: boolean;
   projectName?: string;
+  initialData?: TaskFormData | null;
 }) {
   const { t } = useTranslation();
-  const [form, setForm] = useState<TaskFormData>(EMPTY_FORM);
+  const [form, setForm] = useState<TaskFormData>(initialData || EMPTY_FORM);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const set = <K extends keyof TaskFormData>(key: K, value: TaskFormData[K]) => {
@@ -361,9 +366,15 @@ function AddTaskModal({
 const TaskCard = React.memo(function TaskCard({
   task,
   onComplete,
+  onEdit,
+  onDelete,
+  onStatusChange,
 }: {
   task: Task;
   onComplete: (id: string) => void;
+  onEdit: (task: Task) => void;
+  onDelete: (id: string) => void;
+  onStatusChange: (id: string, status: TaskStatus) => void;
 }) {
   const { t } = useTranslation();
 
@@ -496,20 +507,42 @@ const TaskCard = React.memo(function TaskCard({
         </div>
       )}
 
-      {/* Complete action */}
-      {task.status !== 'completed' && (
-        <div className="flex items-center gap-1 mt-2.5 pt-2 border-t border-border-light">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onComplete(task.id)}
-            className="text-xs shrink-0 whitespace-nowrap"
-          >
-            <CheckCircle2 size={12} className="mr-1 shrink-0" />
-            <span>{t('tasks.mark_complete', { defaultValue: 'Complete' })}</span>
+      {/* Actions bar */}
+      <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-border-light">
+        <div className="flex items-center gap-1">
+          {/* Status quick-change */}
+          {task.status !== 'completed' ? (
+            <select
+              value={task.status}
+              onChange={(e) => onStatusChange(task.id, e.target.value as TaskStatus)}
+              className="text-[10px] py-0.5 px-1 rounded border border-border-light bg-surface-secondary text-content-secondary focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            >
+              <option value="draft">{t('tasks.status_draft', { defaultValue: 'Draft' })}</option>
+              <option value="open">{t('tasks.status_open', { defaultValue: 'Open' })}</option>
+              <option value="in_progress">{t('tasks.status_in_progress', { defaultValue: 'In Progress' })}</option>
+              <option value="completed">{t('tasks.status_completed', { defaultValue: 'Completed' })}</option>
+            </select>
+          ) : (
+            <span className="text-[10px] text-green-600 dark:text-green-400 font-medium flex items-center gap-1">
+              <CheckCircle2 size={10} />
+              {t('tasks.completed', { defaultValue: 'Completed' })}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-0.5">
+          {task.status !== 'completed' && (
+            <Button variant="ghost" size="sm" onClick={() => onComplete(task.id)} className="text-[10px] px-1.5 py-0.5 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950/20">
+              <CheckCircle2 size={11} />
+            </Button>
+          )}
+          <Button variant="ghost" size="sm" onClick={() => onEdit(task)} className="text-[10px] px-1.5 py-0.5 text-content-tertiary hover:text-oe-blue">
+            <Pencil size={11} />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => onDelete(task.id)} className="text-[10px] px-1.5 py-0.5 text-content-tertiary hover:text-red-500">
+            <Trash2 size={11} />
           </Button>
         </div>
-      )}
+      </div>
     </Card>
   );
 });
@@ -525,6 +558,7 @@ export function TasksPage() {
 
   // State
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [showImportModal, setShowImportModal] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importPending, setImportPending] = useState(false);
@@ -707,6 +741,35 @@ export function TasksPage() {
     [createMut, projectId, addToast, t],
   );
 
+  const editMut = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: TaskFormData }) =>
+      updateTask(id, {
+        title: data.title,
+        description: data.description || undefined,
+        task_type: data.task_type,
+        priority: data.priority,
+        assigned_to: data.assigned_to || null,
+        due_date: data.due_date || null,
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      setShowAddModal(false);
+      setEditingTask(null);
+      addToast({ type: 'success', title: t('tasks.updated', { defaultValue: 'Task updated' }) });
+    },
+    onError: () => {
+      addToast({ type: 'error', title: t('tasks.update_failed', { defaultValue: 'Update failed' }) });
+    },
+  });
+
+  const handleEditSubmit = useCallback(
+    (formData: TaskFormData) => {
+      if (!editingTask) return;
+      editMut.mutate({ id: editingTask.id, data: formData });
+    },
+    [editMut, editingTask],
+  );
+
   const { confirm, ...confirmProps } = useConfirm();
 
   const handleComplete = useCallback(
@@ -720,6 +783,56 @@ export function TasksPage() {
       if (ok) completeMut.mutate(id);
     },
     [completeMut, confirm, t],
+  );
+
+  const handleEditTask = useCallback((task: Task) => {
+    setEditingTask(task);
+    setShowAddModal(true);
+  }, []);
+
+  const deleteMut = useMutation({
+    mutationFn: async (id: string) => {
+      const { deleteTask } = await import('./api');
+      return deleteTask(id);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+      addToast({ type: 'success', title: t('tasks.deleted', { defaultValue: 'Task deleted' }) });
+    },
+    onError: () => {
+      addToast({ type: 'error', title: t('tasks.delete_failed', { defaultValue: 'Delete failed' }) });
+    },
+  });
+
+  const handleDeleteTask = useCallback(
+    async (id: string) => {
+      const ok = await confirm({
+        title: t('tasks.confirm_delete_title', { defaultValue: 'Delete task?' }),
+        message: t('tasks.confirm_delete_msg', { defaultValue: 'This task will be permanently deleted.' }),
+        confirmLabel: t('common.delete', { defaultValue: 'Delete' }),
+        variant: 'danger',
+      });
+      if (ok) deleteMut.mutate(id);
+    },
+    [deleteMut, confirm, t],
+  );
+
+  const statusMut = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: TaskStatus }) => updateTask(id, { status }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
+
+  const handleStatusChange = useCallback(
+    (id: string, status: TaskStatus) => {
+      if (status === 'completed') {
+        handleComplete(id);
+      } else {
+        statusMut.mutate({ id, status });
+      }
+    },
+    [statusMut, handleComplete],
   );
 
   const handleImportFile = async () => {
@@ -947,7 +1060,34 @@ export function TasksPage() {
       {/* Board / Columns */}
       <div>
         {isLoading ? (
-          <SkeletonGrid items={6} gridCols="md:grid-cols-3" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4" aria-hidden="true">
+            {Array.from({ length: 3 }).map((_, colIdx) => (
+              <div key={colIdx} className="flex flex-col">
+                <div className="rounded-lg px-3 py-2 mb-3 bg-surface-secondary animate-pulse h-9" />
+                {Array.from({ length: 3 }).map((_, cardIdx) => (
+                  <div
+                    key={cardIdx}
+                    className="rounded-xl border border-border-light bg-surface-elevated p-3 mb-2 space-y-3"
+                  >
+                    <div className="flex items-start gap-2">
+                      <div className="animate-pulse rounded bg-surface-secondary h-5 w-14 shrink-0" />
+                      <div className="flex-1 space-y-1.5">
+                        <div className="animate-pulse rounded bg-surface-secondary h-4 w-full" />
+                        <div className="animate-pulse rounded bg-surface-secondary h-4 w-2/3" />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="animate-pulse rounded-full bg-surface-secondary h-5 w-5" />
+                      <div className="flex items-center gap-2">
+                        <div className="animate-pulse rounded-full bg-surface-secondary h-5 w-14" />
+                        <div className="animate-pulse rounded bg-surface-secondary h-4 w-16" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={<ClipboardList size={28} strokeWidth={1.5} />}
@@ -1012,6 +1152,9 @@ export function TasksPage() {
                           key={task.id}
                           task={task}
                           onComplete={handleComplete}
+                          onEdit={handleEditTask}
+                          onDelete={handleDeleteTask}
+                          onStatusChange={handleStatusChange}
                         />
                       ))
                     )}
@@ -1031,13 +1174,21 @@ export function TasksPage() {
         />
       )}
 
-      {/* Add Modal */}
+      {/* Add / Edit Modal */}
       {showAddModal && (
         <AddTaskModal
-          onClose={() => setShowAddModal(false)}
-          onSubmit={handleCreateSubmit}
-          isPending={createMut.isPending}
+          onClose={() => { setShowAddModal(false); setEditingTask(null); }}
+          onSubmit={editingTask ? handleEditSubmit : handleCreateSubmit}
+          isPending={createMut.isPending || editMut.isPending}
           projectName={projectName}
+          initialData={editingTask ? {
+            title: editingTask.title,
+            description: editingTask.description || '',
+            task_type: editingTask.task_type,
+            priority: editingTask.priority,
+            assigned_to: editingTask.assigned_to_name || '',
+            due_date: editingTask.due_date || '',
+          } : null}
         />
       )}
 

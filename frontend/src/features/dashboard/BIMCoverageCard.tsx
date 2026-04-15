@@ -81,7 +81,7 @@ export default function BIMCoverageCard() {
     queryKey: ['bim-coverage-summary', projectId],
     queryFn: () =>
       apiGet<BIMCoverageSummary>(
-        `/api/v1/bim_hub/coverage-summary/?project_id=${encodeURIComponent(projectId!)}`,
+        `/v1/bim_hub/coverage-summary/?project_id=${encodeURIComponent(projectId!)}`,
       ),
     enabled: !!projectId,
     staleTime: 60 * 1000,

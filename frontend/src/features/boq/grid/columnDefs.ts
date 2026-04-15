@@ -71,26 +71,54 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       cellClass: 'flex items-center justify-center',
     },
     {
+      headerName: '',
+      colId: '_expand',
+      field: '_expand',
+      width: 28,
+      minWidth: 28,
+      maxWidth: 28,
+      editable: false,
+      sortable: false,
+      filter: false,
+      resizable: false,
+      suppressNavigable: true,
+      suppressHeaderMenuButton: true,
+      cellRenderer: 'expandCellRenderer',
+      cellClass: 'p-0',
+    },
+    {
       headerName: t('boq.ordinal', { defaultValue: 'Pos.' }),
       field: 'ordinal',
       width: 120,
       minWidth: 90,
       editable: (params) => {
         if (params.data?._isSection || params.data?._isFooter) return false;
-        // Positions with resources use the chevron in ordinal cell — disable editing
-        // so singleClickEdit doesn't swallow the click event
-        const res = params.data?.metadata?.resources;
-        if (Array.isArray(res) && res.length > 0) return false;
         return true;
       },
       cellClass: 'font-mono text-xs',
+    },
+    {
+      headerName: '',
+      colId: '_bim_link',
+      field: '_bim_link',
+      width: 36,
+      minWidth: 36,
+      maxWidth: 36,
+      editable: false,
+      sortable: false,
+      filter: false,
+      resizable: false,
+      suppressNavigable: true,
+      suppressHeaderMenuButton: true,
+      cellRenderer: 'bimLinkCellRenderer',
+      cellClass: 'p-0',
     },
     {
       headerName: t('boq.description', { defaultValue: 'Description' }),
       field: 'description',
       minWidth: 260,
       flex: 1,
-      editable: (params) => !params.data?._isFooter,
+      editable: true,
       cellEditor: 'agTextCellEditor',
       cellClass: (params) => {
         if (params.data?._isSection) return 'font-bold uppercase tracking-wide text-xs';
@@ -120,16 +148,33 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       cellEditorParams: {
         values: ['m', 'm2', 'm3', 'kg', 'pcs', 'lsum', 'hr', 't', 'l', 'set', 'pair', 'ea', 'lot'],
       },
+      cellRenderer: 'unitCellRenderer',
       cellClass: 'text-center text-2xs font-mono uppercase',
+    },
+    {
+      headerName: '',
+      colId: '_bim_qty',
+      field: '_bim_qty',
+      width: 28,
+      minWidth: 28,
+      maxWidth: 28,
+      editable: false,
+      sortable: false,
+      filter: false,
+      resizable: false,
+      suppressNavigable: true,
+      suppressHeaderMenuButton: true,
+      cellRenderer: 'bimQtyPickerCellRenderer',
+      cellClass: 'p-0',
     },
     {
       headerName: t('boq.quantity', { defaultValue: 'Qty' }),
       field: 'quantity',
-      width: 100,
-      editable: (params) => !params.data?._isSection && !params.data?._isFooter,
+      width: 110,
+      editable: (params) => !params.data?._isSection && !params.data?._isFooter && !params.data?._isResource,
       cellEditor: 'agNumberCellEditor',
       cellEditorParams: { min: 0, precision: 4 },
-      valueFormatter: currencyFormatter,
+      cellRenderer: 'quantityCellRenderer',
       valueParser: (params) => {
         const val = parseFloat(params.newValue);
         return isNaN(val) ? params.oldValue : val;

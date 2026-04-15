@@ -6,7 +6,7 @@ import {
   Search, X, Loader2, FolderOpen, ChevronDown, HardDrive, Eye,
   MoreHorizontal, Pencil, Tag, Ruler, Send,
 } from 'lucide-react';
-import { Card, Button, Badge, EmptyState, Breadcrumb } from '@/shared/ui';
+import { Card, Button, Badge, EmptyState, Breadcrumb, ViewInBIMButton } from '@/shared/ui';
 import SimilarItemsPanel from '@/shared/ui/SimilarItemsPanel';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { apiGet, apiDelete, apiPatch } from '@/shared/lib/api';
@@ -75,6 +75,41 @@ function useDebounce<T>(value: T, delayMs: number): T {
     return () => clearTimeout(timer);
   }, [value, delayMs]);
   return debounced;
+}
+
+/* ── Inline BIM link icon for document cards ────────────────────────── */
+
+/**
+ * Lazily fetches BIM links for a single document and renders a compact
+ * ViewInBIMButton when at least one link exists.  React Query caching
+ * prevents redundant requests when the list re-renders.
+ */
+function DocBIMIcon({ docId }: { docId: string }) {
+  const { data } = useQuery({
+    queryKey: ['document-bim-links', docId],
+    queryFn: () =>
+      apiGet<{ items: Array<{ id: string; bim_element_id: string; document_id: string }> }>(
+        `/v1/documents/bim-links/?document_id=${encodeURIComponent(docId)}`,
+      ).catch(() => ({ items: [] })),
+    enabled: !!docId,
+    staleTime: 60_000,
+  });
+
+  const elementIds = useMemo(
+    () => (data?.items ?? []).map((l) => l.bim_element_id),
+    [data],
+  );
+
+  if (!elementIds.length) return null;
+
+  return (
+    <ViewInBIMButton
+      elementIds={elementIds}
+      iconSize={10}
+      label=""
+      className="inline-flex items-center gap-0.5 text-2xs text-oe-blue hover:text-oe-blue-dark transition-colors"
+    />
+  );
 }
 
 /* ── Preview Modal ───────────────────────────────────────────────────── */
@@ -927,6 +962,7 @@ export function DocumentsPage() {
                           {t('documents.preview', { defaultValue: 'Preview' })}
                         </span>
                       )}
+                      <DocBIMIcon docId={doc.id} />
                     </div>
                     {doc.tags && doc.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-1.5">

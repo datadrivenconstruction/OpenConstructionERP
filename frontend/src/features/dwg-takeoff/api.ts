@@ -23,34 +23,60 @@ export interface DwgDrawing {
 
 export interface DxfEntity {
   id: string;
-  type: 'LINE' | 'LWPOLYLINE' | 'ARC' | 'CIRCLE' | 'TEXT' | 'POINT' | 'INSERT';
+  type:
+    | 'LINE'
+    | 'LWPOLYLINE'
+    | 'ARC'
+    | 'CIRCLE'
+    | 'ELLIPSE'
+    | 'TEXT'
+    | 'POINT'
+    | 'INSERT'
+    | 'HATCH';
   layer: string;
-  color: number;
+  /** Hex color string (e.g. "#ff0000") or ACI number */
+  color: string | number;
   /** Line start / circle center / text insertion point */
   start?: { x: number; y: number };
   /** Line end */
   end?: { x: number; y: number };
-  /** Polyline vertices */
+  /** Polyline / hatch boundary vertices */
   vertices?: { x: number; y: number }[];
   /** Arc / circle radius */
   radius?: number;
-  /** Arc start angle (degrees) */
+  /** Ellipse major radius */
+  major_radius?: number;
+  /** Ellipse minor radius */
+  minor_radius?: number;
+  /** Arc/ellipse start angle (radians) */
   start_angle?: number;
-  /** Arc end angle (degrees) */
+  /** Arc/ellipse end angle (radians) */
   end_angle?: number;
+  /** Entity rotation (radians) */
+  rotation?: number;
   /** Text content */
   text?: string;
   /** Text height */
   height?: number;
   /** Block name for INSERT entities */
   block_name?: string;
-  /** Whether the polyline is closed */
+  /** Whether the polyline/hatch is closed */
   closed?: boolean;
+  /** Hatch pattern name */
+  pattern_name?: string;
+  /** Whether hatch is solid fill */
+  is_solid?: boolean;
+  /** Ellipse major axis vector (ezdxf format) */
+  major_axis?: { x: number; y: number };
+  /** Ellipse axis ratio (ezdxf format) */
+  ratio?: number;
+  /** Layout name (DXF) or BlockId (DWG) the entity belongs to */
+  layout?: string;
 }
 
 export interface DxfLayer {
   name: string;
-  color: number;
+  color: string | number;
   visible: boolean;
   entity_count: number;
 }
@@ -119,7 +145,7 @@ export async function uploadDrawing(
     ...(discipline ? { discipline } : {}),
   });
 
-  const res = await fetch(`/api/v1/dwg_takeoff/drawings/upload?${params.toString()}`, {
+  const res = await fetch(`/api/v1/dwg_takeoff/drawings/upload/?${params.toString()}`, {
     method: 'POST',
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -141,11 +167,11 @@ export async function deleteDrawing(id: string): Promise<void> {
 /* ── Entities & Layers ─────────────────────────────────────────────────── */
 
 export async function fetchEntities(drawingId: string): Promise<DxfEntity[]> {
-  return apiGet<DxfEntity[]>(`/v1/dwg_takeoff/drawings/${drawingId}/entities`);
+  return apiGet<DxfEntity[]>(`/v1/dwg_takeoff/drawings/${drawingId}/entities/`);
 }
 
 export async function fetchThumbnail(drawingId: string): Promise<string> {
-  return apiGet<string>(`/v1/dwg_takeoff/drawings/${drawingId}/thumbnail`);
+  return apiGet<string>(`/v1/dwg_takeoff/drawings/${drawingId}/thumbnail/`);
 }
 
 export async function updateLayers(drawingId: string, layers: DxfLayer[]): Promise<void> {
@@ -177,7 +203,7 @@ export async function linkAnnotationToBoq(
   annotId: string,
   boqPositionId: string,
 ): Promise<DwgAnnotation> {
-  return apiPost<DwgAnnotation>(`/v1/dwg_takeoff/annotations/${annotId}/link-boq`, {
+  return apiPost<DwgAnnotation>(`/v1/dwg_takeoff/annotations/${annotId}/link-boq/`, {
     position_id: boqPositionId,
   });
 }

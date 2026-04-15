@@ -87,3 +87,6 @@ export type { BIMViewerProps, BIMViewMode } from './BIMViewer';
 
 export { ViewInBIMButton } from './ViewInBIMButton';
 export type { ViewInBIMButtonProps } from './ViewInBIMButton';
+
+export { MiniGeometryPreview } from './MiniGeometryPreview';
+export type { MiniGeometryPreviewProps } from './MiniGeometryPreview';

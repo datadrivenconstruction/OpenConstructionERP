@@ -989,6 +989,13 @@ async def upload_cad_file(
                 "error_message": None,
             }
 
+    # Check Content-Length header before reading the whole file into memory
+    if file.size and file.size > _CAD_MAX_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"File too large. Maximum size is {_CAD_MAX_SIZE // (1024 * 1024)} MB.",
+        )
+
     content = await file.read()
     if not content:
         raise HTTPException(
@@ -997,7 +1004,7 @@ async def upload_cad_file(
         )
     if len(content) > _CAD_MAX_SIZE:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail=f"File too large. Maximum size is {_CAD_MAX_SIZE // (1024 * 1024)} MB.",
         )
 
@@ -1123,7 +1130,7 @@ async def upload_cad_file(
                             geo_local,
                         )
 
-                # Store GLB geometry (DAE->GLB conversion for 8.8x faster loading)
+                # Store GLB (DAE→GLB with node names patched back in)
                 glb_local = result.get("glb_path")
                 if glb_local:
                     _glb_path = _Path(glb_local)
@@ -1135,8 +1142,6 @@ async def upload_cad_file(
                             ext=".glb",
                             content=_glb_bytes,
                         )
-                        # Prefer GLB as the canonical geometry -- the BIM viewer
-                        # loads this instead of the DAE for 8.8x faster loading.
                         model.canonical_file_path = _glb_key
                         logger.info(
                             "GLB geometry saved: %s (%d bytes)",
@@ -1172,6 +1177,10 @@ async def upload_cad_file(
                 model.element_count = element_count
                 model.storey_count = len(result["storeys"])
                 model.bounding_box = result.get("bounding_box")
+                model.metadata_ = {
+                    **(model.metadata_ or {}),
+                    "geometry_type": result.get("geometry_type", "unknown"),
+                }
                 await service.session.flush()
                 final_status = "ready"
 
@@ -1280,6 +1289,7 @@ async def upload_cad_file(
         "status": final_status,
         "element_count": element_count,
         "error_message": model.error_message,
+        "geometry_type": (model.metadata_ or {}).get("geometry_type", "unknown"),
         "converter_id": ext.lstrip(".") if final_status == "needs_converter" else None,
         "install_endpoint": (
             f"/api/v1/takeoff/converters/{ext.lstrip('.')}/install/"
@@ -1370,8 +1380,8 @@ async def get_model_geometry(
             ext, "application/octet-stream"
         )
         cache_headers = {
-            # Allow long browser caching since geometry is content-addressed
-            "Cache-Control": "private, max-age=3600",
+            # No caching — geometry may be re-generated with patched node names.
+            "Cache-Control": "no-store, no-cache, must-revalidate",
         }
 
         # Prefer a presigned URL so the browser fetches directly from the
@@ -1482,7 +1492,7 @@ async def delete_model(
     await service.delete_model(model_id)
 
 
-@router.post("/cleanup-stale")
+@router.post("/cleanup-stale/")
 async def cleanup_stale_processing(
     project_id: uuid.UUID = Query(...),
     max_age_hours: int = Query(default=1, ge=0),
@@ -1527,11 +1537,9 @@ async def list_elements(
         description="Filter to elements belonging to this saved element group",
     ),
     offset: int = Query(default=0, ge=0),
-    # Cap raised to 50000 because the BIM viewer needs all elements at once to
-    # match COLLADA mesh nodes by stable_id. Real Revit models routinely have
-    # 10–30k elements; pagination on the viewer side would mean missing
-    # geometry references.
-    limit: int = Query(default=50000, ge=1, le=50000),
+    # Capped at 2000 to prevent excessive memory usage. The frontend should
+    # paginate through larger element sets.
+    limit: int = Query(default=2000, ge=1, le=2000),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("bim.read")),
     service: BIMHubService = Depends(_get_service),
@@ -1649,6 +1657,50 @@ async def bulk_import_elements(
     """Bulk import elements for a model (replaces existing)."""
     await _verify_model_access(service, model_id, user_id)
     elements = await service.bulk_import_elements(model_id, data.elements)
+    return BIMElementListResponse(
+        items=[BIMElementResponse.model_validate(e) for e in elements],
+        total=len(elements),
+        offset=0,
+        limit=len(elements),
+    )
+
+
+@router.post(
+    "/models/{model_id}/elements/by-ids/",
+    response_model=BIMElementListResponse,
+)
+async def get_elements_by_ids(
+    model_id: uuid.UUID,
+    body: dict,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("bim.read")),
+    service: BIMHubService = Depends(_get_service),
+) -> BIMElementListResponse:
+    """Fetch specific elements by their IDs (DB UUID or stable_id)."""
+    await _verify_model_access(service, model_id, user_id or "")
+
+    element_ids: list[str] = body.get("element_ids", [])
+    if not element_ids or len(element_ids) > 100:
+        return BIMElementListResponse(items=[], total=0, offset=0, limit=0)
+
+    from app.modules.bim_hub.models import BIMElement
+    from sqlalchemy import or_
+
+    query = (
+        select(BIMElement)
+        .where(BIMElement.model_id == model_id)
+        .where(
+            or_(
+                BIMElement.id.in_(
+                    [uuid.UUID(eid) for eid in element_ids if len(eid) == 36]
+                ),
+                BIMElement.stable_id.in_(element_ids),
+            )
+        )
+    )
+    result = await service.session.execute(query)
+    elements = list(result.scalars().all())
+
     return BIMElementListResponse(
         items=[BIMElementResponse.model_validate(e) for e in elements],
         total=len(elements),
