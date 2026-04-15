@@ -12,6 +12,7 @@ Endpoints:
     POST   /projects/{project_id}/5d/generate-budget     — auto-generate from BOQ
     POST   /projects/{project_id}/5d/snapshots           — create EVM snapshot
     GET    /projects/{project_id}/5d/snapshots           — list snapshots
+    PATCH  /5d/snapshots/{snapshot_id}                   — update snapshot (notes, values)
     POST   /projects/{project_id}/5d/generate-cash-flow  — generate from schedule
     GET    /projects/{project_id}/5d/evm                 — full EVM calculation
     POST   /projects/{project_id}/5d/what-if             — create what-if scenario
@@ -34,6 +35,7 @@ from app.modules.costmodel.schemas import (
     SCurveData,
     SnapshotCreate,
     SnapshotResponse,
+    SnapshotUpdate,
     WhatIfAdjustments,
     WhatIfResult,
 )
@@ -316,6 +318,21 @@ async def list_snapshots(
         limit=limit,
     )
     return [_snapshot_to_response(snap) for snap in snapshots]
+
+
+@router.patch(
+    "/5d/snapshots/{snapshot_id}",
+    response_model=SnapshotResponse,
+    dependencies=[Depends(RequirePermission("costmodel.write"))],
+)
+async def update_snapshot(
+    snapshot_id: uuid.UUID,
+    data: SnapshotUpdate,
+    service: CostModelService = Depends(_get_service),
+) -> SnapshotResponse:
+    """Update an EVM cost snapshot (notes, values, etc.)."""
+    snapshot = await service.update_snapshot(snapshot_id, data)
+    return _snapshot_to_response(snapshot)
 
 
 @router.delete(

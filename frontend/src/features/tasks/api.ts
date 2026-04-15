@@ -9,7 +9,9 @@ import { useAuthStore } from '@/stores/useAuthStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
-export type TaskType = 'task' | 'topic' | 'information' | 'decision' | 'personal';
+/** Built-in task types. Custom category strings are also supported. */
+export type BuiltinTaskType = 'task' | 'topic' | 'information' | 'decision' | 'personal';
+export type TaskType = BuiltinTaskType | (string & {});
 export type TaskStatus = 'draft' | 'open' | 'in_progress' | 'completed';
 export type TaskPriority = 'low' | 'normal' | 'high' | 'urgent';
 

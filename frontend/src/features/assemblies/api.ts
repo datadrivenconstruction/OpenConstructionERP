@@ -29,8 +29,31 @@ export interface Assembly {
   project_id: string | null;
   is_active: boolean;
   component_count: number;
+  usage_count: number;
+  tags: string[];
   created_at: string;
   updated_at: string;
+}
+
+export interface AssemblyExport {
+  code: string;
+  name: string;
+  description: string;
+  unit: string;
+  category: string;
+  classification: Record<string, string>;
+  currency: string;
+  bid_factor: number;
+  regional_factors: Record<string, string>;
+  tags: string[];
+  components: Array<{
+    description: string;
+    factor: number;
+    quantity: number;
+    unit: string;
+    unit_cost: number;
+    sort_order: number;
+  }>;
 }
 
 export interface AssemblySearchResponse {
@@ -113,4 +136,12 @@ export const assembliesApi = {
     apiPost(`/v1/assemblies/${assemblyId}/apply-to-boq/`, { boq_id: boqId, quantity }),
   aiGenerate: (data: AIGenerateRequest) =>
     apiPost<AIGeneratedAssembly>('/v1/assemblies/ai-generate/', data),
+  reorderComponents: (assemblyId: string, componentIds: string[]) =>
+    apiPost(`/v1/assemblies/${assemblyId}/reorder-components/`, { component_ids: componentIds }),
+  exportAssembly: (assemblyId: string) =>
+    apiGet<AssemblyExport>(`/v1/assemblies/${assemblyId}/export/`),
+  importAssembly: (data: AssemblyExport) =>
+    apiPost<Assembly>('/v1/assemblies/import/', { assembly: data }),
+  updateTags: (assemblyId: string, tags: string[]) =>
+    apiPatch<Assembly>(`/v1/assemblies/${assemblyId}/tags/`, { tags }),
 };

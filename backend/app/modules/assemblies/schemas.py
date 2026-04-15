@@ -148,6 +148,8 @@ class AssemblyResponse(BaseModel):
     owner_id: UUID | None
     is_active: bool
     component_count: int = 0
+    usage_count: int = 0
+    tags: list[str] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict, alias="metadata_")
     created_at: datetime
     updated_at: datetime
@@ -192,3 +194,33 @@ class CloneAssemblyRequest(BaseModel):
 
     new_code: str | None = Field(default=None, min_length=1, max_length=100)
     project_id: UUID | None = None
+
+
+class ReorderComponentsRequest(BaseModel):
+    """Request body for reordering components within an assembly."""
+
+    component_ids: list[UUID] = Field(
+        ..., min_length=1, description="Ordered list of component IDs"
+    )
+
+
+class AssemblyExport(BaseModel):
+    """Full assembly export format for sharing/importing."""
+
+    code: str
+    name: str
+    description: str = ""
+    unit: str
+    category: str = ""
+    classification: dict[str, Any] = Field(default_factory=dict)
+    currency: str = "EUR"
+    bid_factor: float = 1.0
+    regional_factors: dict[str, Any] = Field(default_factory=dict)
+    tags: list[str] = Field(default_factory=list)
+    components: list[dict[str, Any]] = Field(default_factory=list)
+
+
+class AssemblyImportRequest(BaseModel):
+    """Request body for importing an assembly from JSON."""
+
+    assembly: AssemblyExport

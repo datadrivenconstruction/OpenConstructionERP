@@ -136,9 +136,9 @@ function CreateRFIModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('rfi.new_rfi', { defaultValue: 'New RFI' })}>
+      <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[85vh] flex flex-col" role="dialog" aria-label={t('rfi.new_rfi', { defaultValue: 'New RFI' })}>
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light sticky top-0 z-10 bg-surface-elevated rounded-t-xl">
           <div>
             <h2 className="text-lg font-semibold text-content-primary">
               {t('rfi.new_rfi', { defaultValue: 'New RFI' })}
@@ -162,7 +162,7 @@ function CreateRFIModal({
         </div>
 
         {/* Form */}
-        <div className="px-6 py-4 space-y-5">
+        <div className="px-6 py-4 space-y-5 overflow-y-auto flex-1">
           {/* ── Request Details ── */}
           <div className="flex items-center gap-2 pb-1">
             <MessageSquare size={14} className="text-content-tertiary" />
@@ -259,7 +259,7 @@ function CreateRFIModal({
                 className={inputCls}
               />
               <p className="mt-1 text-xs text-content-quaternary">
-                {t('rfi.due_date_hint', { defaultValue: 'Typical: 14 business days from submission' })}
+                {t('rfi.response_due_date_hint', { defaultValue: 'Typical: 14 business days from submission' })}
               </p>
             </div>
           </div>
@@ -347,13 +347,13 @@ function CreateRFIModal({
           <div className="rounded-lg border border-dashed border-border p-4 text-center">
             <Paperclip size={18} className="mx-auto text-content-quaternary mb-1" />
             <p className="text-xs text-content-tertiary">
-              {t('rfi.linked_drawings_hint', { defaultValue: 'Linked drawings and references can be added after creation' })}
+              {t('rfi.linked_drawing_ids_hint', { defaultValue: 'Linked drawings and references can be added after creation' })}
             </p>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light sticky bottom-0 z-10 bg-surface-elevated rounded-b-xl">
           <Button variant="ghost" onClick={onClose} disabled={isPending}>
             {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>
@@ -388,7 +388,7 @@ function RespondModal({
   const [response, setResponse] = useState('');
 
   const handleSubmit = () => {
-    if (response.trim()) onSubmit({ response: response.trim() });
+    if (response.trim()) onSubmit({ official_response: response.trim() });
   };
 
   useEffect(() => {
@@ -465,8 +465,8 @@ const RFIRow = React.memo(function RFIRow({
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
-  const days = daysOpen(rfi.created_at, rfi.closed_at);
-  const isOverdue = rfi.due_date && rfi.status === 'open' && new Date(rfi.due_date) < new Date();
+  const days = rfi.days_open ?? daysOpen(rfi.created_at, null);
+  const isOverdue = rfi.is_overdue ?? (rfi.response_due_date && rfi.status === 'open' && new Date(rfi.response_due_date) < new Date());
   const statusCfg = STATUS_CONFIG[rfi.status] ?? STATUS_CONFIG.draft;
 
   return (
@@ -506,7 +506,7 @@ const RFIRow = React.memo(function RFIRow({
 
         {/* Ball in Court */}
         <span className="text-xs text-content-tertiary w-28 truncate shrink-0 hidden md:block">
-          {rfi.ball_in_court_name || rfi.ball_in_court || '-'}
+          {rfi.ball_in_court || '-'}
         </span>
 
         {/* Days Open */}
@@ -526,8 +526,8 @@ const RFIRow = React.memo(function RFIRow({
             isOverdue ? 'text-semantic-error font-semibold' : 'text-content-tertiary',
           )}
         >
-          {rfi.due_date
-            ? new Date(rfi.due_date).toLocaleDateString(undefined, {
+          {rfi.response_due_date
+            ? new Date(rfi.response_due_date).toLocaleDateString(undefined, {
                 month: 'short',
                 day: 'numeric',
               })
@@ -561,12 +561,12 @@ const RFIRow = React.memo(function RFIRow({
           </div>
 
           {/* Response */}
-          {rfi.response && (
+          {rfi.official_response && (
             <div className="rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-3">
               <p className="text-xs text-green-700 dark:text-green-400 mb-1 font-medium uppercase tracking-wide">
                 {t('rfi.label_response', { defaultValue: 'Response' })}
               </p>
-              <p className="text-sm text-content-primary whitespace-pre-wrap">{rfi.response}</p>
+              <p className="text-sm text-content-primary whitespace-pre-wrap">{rfi.official_response}</p>
               {rfi.responded_at && (
                 <p className="text-xs text-content-tertiary mt-2">
                   {new Date(rfi.responded_at).toLocaleDateString(undefined, {
@@ -580,10 +580,10 @@ const RFIRow = React.memo(function RFIRow({
           )}
 
           {/* Linked drawings */}
-          {rfi.linked_drawings && rfi.linked_drawings.length > 0 && (
+          {rfi.linked_drawing_ids && rfi.linked_drawing_ids.length > 0 && (
             <div className="flex items-center gap-2 flex-wrap">
               <FileText size={13} className="text-content-tertiary" />
-              {rfi.linked_drawings.map((d) => (
+              {rfi.linked_drawing_ids.map((d) => (
                 <Badge key={d} variant="neutral" size="sm">
                   {d}
                 </Badge>
@@ -715,7 +715,7 @@ export function RFIPage() {
         r.subject.toLowerCase().includes(q) ||
         r.question.toLowerCase().includes(q) ||
         String(r.rfi_number).includes(q) ||
-        (r.ball_in_court_name && r.ball_in_court_name.toLowerCase().includes(q)),
+        (r.ball_in_court && r.ball_in_court.toLowerCase().includes(q)),
     );
   }, [rfis, searchQuery]);
 
@@ -724,11 +724,11 @@ export function RFIPage() {
     const total = rfis.length;
     const open = rfis.filter((r) => r.status === 'open').length;
     const overdue = rfis.filter(
-      (r) => r.status === 'open' && r.due_date && new Date(r.due_date) < new Date(),
+      (r) => r.is_overdue ?? (r.status === 'open' && r.response_due_date && new Date(r.response_due_date) < new Date()),
     ).length;
     const avgDays =
       rfis.length > 0
-        ? Math.round(rfis.reduce((sum, r) => sum + daysOpen(r.created_at, r.closed_at), 0) / rfis.length)
+        ? Math.round(rfis.reduce((sum, r) => sum + (r.days_open ?? daysOpen(r.created_at, null)), 0) / rfis.length)
         : 0;
     return { total, open, overdue, avgDays };
   }, [rfis]);
@@ -741,7 +741,13 @@ export function RFIPage() {
   // Mutations
   const createMut = useMutation({
     mutationFn: (data: CreateRFIPayload) => createRFI(data),
-    onSuccess: () => {
+    onSuccess: (newRfi) => {
+      // Optimistically add the new RFI to the cache so it appears immediately,
+      // then also invalidate to ensure eventual consistency with the server.
+      qc.setQueryData<RFI[]>(
+        ['rfis', projectId, statusFilter],
+        (old) => (old ? [newRfi, ...old] : [newRfi]),
+      );
       invalidateAll();
       setShowCreateModal(false);
       addToast({
@@ -1157,8 +1163,8 @@ export function RFIPage() {
             {/* Mobile card view */}
             <div className="md:hidden space-y-3">
               {filtered.map((rfi) => {
-                const days = daysOpen(rfi.created_at, rfi.closed_at);
-                const isOverdue = rfi.due_date && rfi.status === 'open' && new Date(rfi.due_date) < new Date();
+                const days = rfi.days_open ?? daysOpen(rfi.created_at, null);
+                const isOverdue = rfi.is_overdue ?? (rfi.response_due_date && rfi.status === 'open' && new Date(rfi.response_due_date) < new Date());
                 const statusCfg = STATUS_CONFIG[rfi.status] ?? STATUS_CONFIG.draft;
                 return (
                   <Card key={rfi.id} className="p-4">
@@ -1172,14 +1178,14 @@ export function RFIPage() {
                       </Badge>
                     </div>
                     <div className="text-xs text-content-tertiary space-y-1">
-                      {(rfi.ball_in_court_name || rfi.ball_in_court) && (
-                        <div>{t('rfi.col_bic', { defaultValue: 'Ball in Court' })}: {rfi.ball_in_court_name || rfi.ball_in_court}</div>
+                      {(rfi.ball_in_court) && (
+                        <div>{t('rfi.col_bic', { defaultValue: 'Ball in Court' })}: {rfi.ball_in_court}</div>
                       )}
                       <div className="flex items-center gap-3">
                         <span className={isOverdue ? 'text-semantic-error font-semibold' : ''}>{days}d {t('rfi.col_days', { defaultValue: 'open' })}</span>
-                        {rfi.due_date && (
+                        {rfi.response_due_date && (
                           <span className={isOverdue ? 'text-semantic-error font-semibold' : ''}>
-                            {t('rfi.col_due', { defaultValue: 'Due' })}: {new Date(rfi.due_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                            {t('rfi.col_due', { defaultValue: 'Due' })}: {new Date(rfi.response_due_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                           </span>
                         )}
                       </div>

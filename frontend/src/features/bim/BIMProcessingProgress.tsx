@@ -23,7 +23,7 @@
  *  6. Ready           — viewport opens
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import {
@@ -141,28 +141,58 @@ export function BIMProcessingProgress({
   const isDone = stage === 'ready';
   const currentIdx = isError ? -1 : stageIndex(stage);
 
-  // While the parent keeps us on an intermediate stage (uploading/converting
-  // etc.) we slowly advance a local "visual progress" number so the bar keeps
-  // creeping forward even when no new stage event arrives. If the parent
-  // sets stage='ready' we snap to 100 immediately.
-  const [visualPct, setVisualPct] = useState(5);
+  // Visual progress with realistic phase-aware pacing:
+  //   uploading   (idx 0): 0-30%  — fast, proportional to upload
+  //   converting  (idx 1): 30-60% — slower, steady increments
+  //   parsing     (idx 2): 60-75% — medium
+  //   indexing    (idx 3): 75-90% — medium
+  //   linking     (idx 4): 90-98% — quick
+  //   ready       (idx 5): 100%
+  const PHASE_TARGETS = [30, 60, 75, 90, 98, 100];
+  const PHASE_SPEEDS  = [0.08, 0.04, 0.06, 0.06, 0.10, 0]; // multiplier for exponential approach
+
+  const [visualPct, setVisualPct] = useState(2);
+  const [elapsedSec, setElapsedSec] = useState(0);
+  const startTime = useRef(Date.now());
+
+  // Track elapsed seconds for estimated-time display
+  useEffect(() => {
+    if (isDone || isError) return;
+    const iv = setInterval(() => {
+      setElapsedSec(Math.floor((Date.now() - startTime.current) / 1000));
+    }, 1000);
+    return () => clearInterval(iv);
+  }, [isDone, isError]);
+
   useEffect(() => {
     if (isError) return;
     if (isDone) {
       setVisualPct(100);
       return;
     }
-    // Target pct for this stage: each stage owns ~18% of the bar
-    const stageTarget = Math.min(95, (currentIdx + 1) * (100 / STAGES.length));
+    const target = PHASE_TARGETS[currentIdx] ?? 30;
+    const speed = PHASE_SPEEDS[currentIdx] ?? 0.05;
     const iv = setInterval(() => {
       setVisualPct((prev) => {
-        if (prev >= stageTarget) return prev;
-        // Approach the target exponentially so the bar slows down near the end
-        return Math.min(stageTarget, prev + Math.max(0.3, (stageTarget - prev) * 0.05));
+        if (prev >= target) return prev;
+        // Exponential approach — slows down near the phase boundary,
+        // giving a natural "working" feel instead of a stuck bar.
+        const remaining = target - prev;
+        const increment = Math.max(0.1, remaining * speed);
+        return Math.min(target, prev + increment);
       });
-    }, 120);
+    }, 100);
     return () => clearInterval(iv);
   }, [currentIdx, isDone, isError]);
+
+  // Formatted elapsed time string
+  const elapsedLabel = useMemo(() => {
+    if (isDone || isError) return '';
+    if (elapsedSec < 5) return '';
+    const m = Math.floor(elapsedSec / 60);
+    const s = elapsedSec % 60;
+    return m > 0 ? `${m}m ${s}s` : `${s}s`;
+  }, [elapsedSec, isDone, isError]);
 
   const headerCopy = useMemo(() => {
     if (stage === 'needs_converter') {
@@ -266,15 +296,20 @@ export function BIMProcessingProgress({
                     defaultValue: STAGES[currentIdx]?.defaultLabel ?? 'Processing',
                   })}
             </span>
-            <span className="tabular-nums">{Math.round(visualPct)}%</span>
+            <span className="flex items-center gap-2 tabular-nums">
+              {elapsedLabel && !isDone && (
+                <span className="text-content-quaternary">{elapsedLabel}</span>
+              )}
+              {Math.round(visualPct)}%
+            </span>
           </div>
           <div className="h-1.5 w-full rounded-full bg-surface-tertiary overflow-hidden">
             <div
               className={clsx(
-                'h-full rounded-full transition-all duration-200',
+                'h-full rounded-full',
                 isDone
-                  ? 'bg-emerald-400'
-                  : 'bg-gradient-to-r from-oe-blue to-blue-400',
+                  ? 'bg-emerald-400 transition-all duration-500 ease-out'
+                  : 'bg-gradient-to-r from-oe-blue to-blue-400 transition-[width] duration-700 ease-out',
               )}
               style={{ width: `${visualPct}%` }}
             />
