@@ -499,42 +499,59 @@ function ProjectSwitcher() {
       <button
         onClick={() => setOpen(!open)}
         className={clsx(
-          'flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-all',
+          'flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-all border',
           activeProjectId
-            ? 'bg-oe-blue-subtle text-oe-blue hover:bg-oe-blue/10 max-w-[200px]'
-            : 'text-content-tertiary hover:text-content-primary hover:bg-surface-secondary',
+            ? 'bg-oe-blue-subtle text-oe-blue border-oe-blue/20 hover:bg-oe-blue/10 hover:border-oe-blue/30 max-w-[280px]'
+            : 'text-content-tertiary border-border-light hover:text-content-primary hover:bg-surface-secondary hover:border-border',
         )}
       >
-        <FolderOpen size={13} className="shrink-0" />
-        <span className="truncate">
-          {activeProjectName || t('schedule.select_project', { defaultValue: 'Select Project' })}
-        </span>
-        <ChevronDown size={12} className="shrink-0 text-content-quaternary" />
+        <div className={clsx(
+          'flex items-center justify-center w-6 h-6 rounded-md shrink-0',
+          activeProjectId
+            ? 'bg-oe-blue/10'
+            : 'bg-surface-secondary',
+        )}>
+          <FolderOpen size={14} className="shrink-0" />
+        </div>
+        <div className="flex flex-col items-start min-w-0">
+          <span className="truncate leading-tight">
+            {activeProjectName || t('schedule.select_project', { defaultValue: 'Select Project' })}
+          </span>
+          {activeProjectId && (
+            <span className="text-2xs text-content-quaternary leading-tight truncate">
+              {t('projects.active_label', { defaultValue: 'Active project' })}
+            </span>
+          )}
+        </div>
+        <ChevronDown size={14} className={clsx(
+          'shrink-0 text-content-quaternary transition-transform duration-fast',
+          open && 'rotate-180',
+        )} />
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-1 z-50 w-56 rounded-xl border border-border bg-surface-elevated shadow-xl overflow-hidden animate-fade-in">
-          <div className="px-3 py-2 border-b border-border-light">
-            <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wider">
+        <div className="absolute top-full left-0 mt-1.5 z-50 w-72 rounded-xl border border-border bg-surface-elevated shadow-xl overflow-hidden animate-fade-in">
+          <div className="px-4 py-2.5 border-b border-border-light bg-surface-secondary/50">
+            <p className="text-xs font-semibold text-content-secondary">
               {t('schedule.switch_project', { defaultValue: 'Switch Project' })}
             </p>
           </div>
-          <div className="px-2 py-1.5 border-b border-border-light">
+          <div className="px-3 py-2 border-b border-border-light">
             <div className="relative">
-              <Search size={13} className="absolute left-2 top-1/2 -translate-y-1/2 text-content-quaternary pointer-events-none" />
+              <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-content-quaternary pointer-events-none" />
               <input
                 ref={searchRef}
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('common.search', { defaultValue: 'Search...' })}
-                className="w-full rounded-md border border-border-light bg-surface-secondary pl-7 pr-2 py-1 text-xs text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-1 focus:ring-oe-blue/40 focus:border-oe-blue/40"
+                className="w-full rounded-lg border border-border-light bg-surface-secondary pl-8 pr-3 py-1.5 text-sm text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
               />
             </div>
           </div>
-          <div className="max-h-60 overflow-y-auto py-1">
+          <div className="max-h-64 overflow-y-auto py-1">
             {visibleProjects.length === 0 && (
-              <p className="px-3 py-2 text-xs text-content-tertiary text-center">
+              <p className="px-4 py-4 text-sm text-content-tertiary text-center">
                 {searchQuery
                   ? t('common.no_results', { defaultValue: 'No projects found' })
                   : t('projects.none', { defaultValue: 'No projects yet' })}
@@ -545,29 +562,41 @@ function ProjectSwitcher() {
                 key={p.id}
                 onClick={() => { setActiveProject(p.id, p.name); setOpen(false); }}
                 className={clsx(
-                  'flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors',
+                  'flex w-full items-center gap-2.5 px-4 py-2 text-sm transition-colors',
                   p.id === activeProjectId
                     ? 'bg-oe-blue-subtle text-oe-blue font-medium'
                     : 'text-content-primary hover:bg-surface-secondary',
                 )}
               >
-                <FolderOpen size={14} className="shrink-0" />
+                <div className={clsx(
+                  'flex items-center justify-center w-7 h-7 rounded-md shrink-0',
+                  p.id === activeProjectId
+                    ? 'bg-oe-blue/10'
+                    : 'bg-surface-tertiary',
+                )}>
+                  <FolderOpen size={14} className="shrink-0" />
+                </div>
                 <span className="truncate">{p.name}</span>
+                {p.id === activeProjectId && (
+                  <span className="ml-auto text-2xs text-oe-blue font-normal shrink-0">
+                    {t('common.active', { defaultValue: 'Active' })}
+                  </span>
+                )}
               </button>
             ))}
             {remainingCount > 0 && (
-              <p className="px-3 py-1.5 text-2xs text-content-tertiary text-center">
+              <p className="px-4 py-2 text-xs text-content-tertiary text-center">
                 {t('common.n_more', { count: remainingCount, defaultValue: '{{count}} more...' })}
               </p>
             )}
           </div>
           {activeProjectId && (
-            <div className="border-t border-border-light px-3 py-2">
+            <div className="border-t border-border-light px-4 py-2.5">
               <button
                 onClick={() => { navigate(`/projects/${activeProjectId}`); setOpen(false); }}
-                className="text-xs text-oe-blue hover:underline"
+                className="text-xs font-medium text-oe-blue hover:underline"
               >
-                {t('projects.open_details', { defaultValue: 'Open Project Details →' })}
+                {t('projects.open_details', { defaultValue: 'Open Project Details' })} &rarr;
               </button>
             </div>
           )}

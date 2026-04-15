@@ -19,9 +19,13 @@ import {
   Lock,
   Target,
   ShieldCheck,
+  Pencil,
+  Check,
+  X,
+  Loader2,
 } from 'lucide-react';
 import { Card, CardHeader, CardContent, Button, Badge, EmptyState, Skeleton, Breadcrumb } from '@/shared/ui';
-import { apiGet, apiPost } from '@/shared/lib/api';
+import { apiGet, apiPost, apiPatch } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   costModelApi,
@@ -893,6 +897,466 @@ const EVMDashboard = memo(function EVMDashboard({
     </Card>
   );
 });
+
+/* ── Editable Budget Lines Table ──────────────────────────────────────── */
+
+interface EditingBudgetLine {
+  id: string;
+  category: string;
+  description: string;
+  planned_amount: number;
+  actual_amount: number;
+  forecast_amount: number;
+}
+
+function BudgetLinesEditor({
+  projectId,
+  currency,
+}: {
+  projectId: string;
+  currency: string;
+}) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<EditingBudgetLine | null>(null);
+
+  const { data: budgetLines, isLoading } = useQuery({
+    queryKey: ['costmodel', 'budget-lines', projectId],
+    queryFn: () => costModelApi.getBudgetLines(projectId),
+    retry: false,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (data: { id: string; updates: Partial<EditingBudgetLine> }) =>
+      costModelApi.updateBudgetLine(data.id, data.updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['costmodel'] });
+      setEditingId(null);
+      setEditForm(null);
+      addToast({
+        type: 'success',
+        title: t('costmodel.budget_line_updated', { defaultValue: 'Budget line updated' }),
+      });
+    },
+    onError: (err: Error) => {
+      addToast({
+        type: 'error',
+        title: t('costmodel.budget_line_update_failed', { defaultValue: 'Failed to update budget line' }),
+        message: err.message,
+      });
+    },
+  });
+
+  const startEditing = useCallback(
+    (line: {
+      id: string;
+      category: string;
+      description: string;
+      planned_amount: number;
+      actual_amount: number;
+      forecast_amount: number;
+    }) => {
+      setEditingId(line.id);
+      setEditForm({
+        id: line.id,
+        category: line.category,
+        description: line.description,
+        planned_amount: line.planned_amount,
+        actual_amount: line.actual_amount,
+        forecast_amount: line.forecast_amount,
+      });
+    },
+    [],
+  );
+
+  const cancelEditing = useCallback(() => {
+    setEditingId(null);
+    setEditForm(null);
+  }, []);
+
+  const saveEditing = useCallback(() => {
+    if (!editForm) return;
+    updateMutation.mutate({
+      id: editForm.id,
+      updates: {
+        category: editForm.category,
+        description: editForm.description,
+        planned_amount: editForm.planned_amount,
+        actual_amount: editForm.actual_amount,
+        forecast_amount: editForm.forecast_amount,
+      },
+    });
+  }, [editForm, updateMutation]);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        {[1, 2, 3].map((i) => (
+          <Skeleton key={i} height={44} className="w-full" rounded="md" />
+        ))}
+      </div>
+    );
+  }
+
+  if (!budgetLines || budgetLines.length === 0) {
+    return null;
+  }
+
+  const lineTotal = budgetLines.reduce(
+    (acc, l) => ({
+      planned: acc.planned + l.planned_amount,
+      actual: acc.actual + l.actual_amount,
+      forecast: acc.forecast + l.forecast_amount,
+    }),
+    { planned: 0, actual: 0, forecast: 0 },
+  );
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b-2 border-border">
+            <th className="py-3 pr-4 text-left text-xs font-semibold uppercase tracking-wider text-content-secondary">
+              {t('costmodel.bl_category', { defaultValue: 'Category' })}
+            </th>
+            <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider text-content-secondary">
+              {t('costmodel.bl_description', { defaultValue: 'Description' })}
+            </th>
+            <th className="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+              {t('costmodel.planned', 'Planned')}
+            </th>
+            <th className="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+              {t('costmodel.actual', 'Actual')}
+            </th>
+            <th className="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+              {t('costmodel.forecast', 'Forecast')}
+            </th>
+            <th className="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+              {t('costmodel.variance', 'Variance')}
+            </th>
+            <th className="py-3 pl-4 text-center text-xs font-semibold uppercase tracking-wider text-content-secondary w-20">
+              {t('common.actions', { defaultValue: 'Actions' })}
+            </th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-border-light">
+          {budgetLines.map((line) => {
+            const isEditing = editingId === line.id;
+            const variance = line.planned_amount - line.forecast_amount;
+
+            if (isEditing && editForm) {
+              return (
+                <tr key={line.id} className="bg-oe-blue-subtle/10">
+                  <td className="py-2 pr-4">
+                    <input
+                      value={editForm.category}
+                      onChange={(e) =>
+                        setEditForm((f) => f && { ...f, category: e.target.value })
+                      }
+                      className="h-8 w-full rounded border border-oe-blue/40 bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                    />
+                  </td>
+                  <td className="py-2 px-4">
+                    <input
+                      value={editForm.description}
+                      onChange={(e) =>
+                        setEditForm((f) => f && { ...f, description: e.target.value })
+                      }
+                      className="h-8 w-full rounded border border-oe-blue/40 bg-surface-primary px-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                    />
+                  </td>
+                  <td className="py-2 px-4">
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={editForm.planned_amount}
+                      onChange={(e) =>
+                        setEditForm((f) =>
+                          f && { ...f, planned_amount: parseFloat(e.target.value) || 0 },
+                        )
+                      }
+                      className="h-8 w-full rounded border border-oe-blue/40 bg-surface-primary px-2 text-sm text-right tabular-nums focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                    />
+                  </td>
+                  <td className="py-2 px-4">
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={editForm.actual_amount}
+                      onChange={(e) =>
+                        setEditForm((f) =>
+                          f && { ...f, actual_amount: parseFloat(e.target.value) || 0 },
+                        )
+                      }
+                      className="h-8 w-full rounded border border-oe-blue/40 bg-surface-primary px-2 text-sm text-right tabular-nums focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                    />
+                  </td>
+                  <td className="py-2 px-4">
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={editForm.forecast_amount}
+                      onChange={(e) =>
+                        setEditForm((f) =>
+                          f && { ...f, forecast_amount: parseFloat(e.target.value) || 0 },
+                        )
+                      }
+                      className="h-8 w-full rounded border border-oe-blue/40 bg-surface-primary px-2 text-sm text-right tabular-nums focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                    />
+                  </td>
+                  <td className="py-2 px-4 text-right tabular-nums text-content-tertiary">
+                    {formatCurrency(editForm.planned_amount - editForm.forecast_amount, currency)}
+                  </td>
+                  <td className="py-2 pl-4">
+                    <div className="flex items-center justify-center gap-1">
+                      <button
+                        onClick={saveEditing}
+                        disabled={updateMutation.isPending}
+                        className="flex h-7 w-7 items-center justify-center rounded-md text-semantic-success hover:bg-semantic-success-bg transition-colors"
+                        title={t('common.save', { defaultValue: 'Save' })}
+                      >
+                        {updateMutation.isPending ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <Check size={14} />
+                        )}
+                      </button>
+                      <button
+                        onClick={cancelEditing}
+                        disabled={updateMutation.isPending}
+                        className="flex h-7 w-7 items-center justify-center rounded-md text-semantic-error hover:bg-semantic-error-bg transition-colors"
+                        title={t('common.cancel', { defaultValue: 'Cancel' })}
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            }
+
+            return (
+              <tr
+                key={line.id}
+                className="transition-colors hover:bg-surface-secondary/50 group cursor-pointer"
+                onDoubleClick={() => startEditing(line)}
+              >
+                <td className="py-3.5 pr-4 font-medium text-content-primary">
+                  {line.category}
+                </td>
+                <td className="py-3.5 px-4 text-content-secondary text-xs">
+                  {line.description || '\u2014'}
+                </td>
+                <td className="py-3.5 px-4 text-right tabular-nums text-content-secondary">
+                  {formatCurrency(line.planned_amount, currency)}
+                </td>
+                <td className="py-3.5 px-4 text-right tabular-nums text-content-secondary">
+                  {formatCurrency(line.actual_amount, currency)}
+                </td>
+                <td className="py-3.5 px-4 text-right tabular-nums text-content-secondary">
+                  {formatCurrency(line.forecast_amount, currency)}
+                </td>
+                <td
+                  className={`py-3.5 px-4 text-right tabular-nums font-medium ${varianceColor(variance)}`}
+                >
+                  {variance > 0 ? '+' : ''}
+                  {formatCurrency(variance, currency)}
+                </td>
+                <td className="py-3.5 pl-4 text-center">
+                  <button
+                    onClick={() => startEditing(line)}
+                    className="invisible group-hover:visible flex h-7 w-7 mx-auto items-center justify-center rounded-md text-content-tertiary hover:text-oe-blue hover:bg-oe-blue-subtle/40 transition-colors"
+                    title={t('common.edit', { defaultValue: 'Edit' })}
+                  >
+                    <Pencil size={13} />
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+        <tfoot>
+          <tr className="border-t-2 border-border font-semibold">
+            <td className="py-3.5 pr-4 text-content-primary" colSpan={2}>
+              {t('costmodel.total', 'Total')}
+            </td>
+            <td className="py-3.5 px-4 text-right tabular-nums text-content-primary">
+              {formatCurrency(lineTotal.planned, currency)}
+            </td>
+            <td className="py-3.5 px-4 text-right tabular-nums text-content-primary">
+              {formatCurrency(lineTotal.actual, currency)}
+            </td>
+            <td className="py-3.5 px-4 text-right tabular-nums text-content-primary">
+              {formatCurrency(lineTotal.forecast, currency)}
+            </td>
+            <td
+              className={`py-3.5 px-4 text-right tabular-nums font-bold ${varianceColor(lineTotal.planned - lineTotal.forecast)}`}
+            >
+              {lineTotal.planned - lineTotal.forecast > 0 ? '+' : ''}
+              {formatCurrency(lineTotal.planned - lineTotal.forecast, currency)}
+            </td>
+            <td />
+          </tr>
+        </tfoot>
+      </table>
+      <p className="mt-2 text-2xs text-content-quaternary">
+        {t('costmodel.bl_edit_hint', { defaultValue: 'Double-click a row or use the edit button to modify values.' })}
+      </p>
+    </div>
+  );
+}
+
+/* ── Snapshots List (with editable notes) ────────────────────────────── */
+
+function SnapshotsList({ projectId, currency }: { projectId: string; currency: string }) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
+  const [editingNotes, setEditingNotes] = useState<string | null>(null);
+  const [notesValue, setNotesValue] = useState('');
+
+  const { data: snapshots, isLoading } = useQuery({
+    queryKey: ['costmodel', 'snapshots', projectId],
+    queryFn: () => costModelApi.getSnapshots(projectId),
+    retry: false,
+  });
+
+  const updateSnapshotMutation = useMutation({
+    mutationFn: (data: { id: string; notes: string }) =>
+      apiPatch(`/v1/costmodel/5d/snapshots/${data.id}`, { notes: data.notes }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['costmodel', 'snapshots', projectId] });
+      setEditingNotes(null);
+      addToast({
+        type: 'success',
+        title: t('costmodel.snapshot_updated', { defaultValue: 'Snapshot notes updated' }),
+      });
+    },
+    onError: (err: Error) => {
+      addToast({
+        type: 'error',
+        title: t('costmodel.snapshot_update_failed', { defaultValue: 'Failed to update snapshot' }),
+        message: err.message,
+      });
+    },
+  });
+
+  if (isLoading || !snapshots || snapshots.length === 0) return null;
+
+  return (
+    <Card>
+      <CardHeader title={t('costmodel.snapshots_title', { defaultValue: 'Cost Snapshots' })} />
+      <CardContent>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border-light">
+                <th className="py-2 pr-3 text-left text-xs font-semibold uppercase tracking-wider text-content-secondary">
+                  {t('costmodel.period', { defaultValue: 'Period' })}
+                </th>
+                <th className="py-2 px-3 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+                  {t('costmodel.planned', 'Planned')}
+                </th>
+                <th className="py-2 px-3 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+                  EV
+                </th>
+                <th className="py-2 px-3 text-right text-xs font-semibold uppercase tracking-wider text-content-secondary">
+                  AC
+                </th>
+                <th className="py-2 px-3 text-center text-xs font-semibold uppercase tracking-wider text-content-secondary">
+                  SPI
+                </th>
+                <th className="py-2 px-3 text-center text-xs font-semibold uppercase tracking-wider text-content-secondary">
+                  CPI
+                </th>
+                <th className="py-2 pl-3 text-left text-xs font-semibold uppercase tracking-wider text-content-secondary">
+                  {t('costmodel.notes', { defaultValue: 'Notes' })}
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border-light">
+              {snapshots.map((snap) => (
+                <tr key={snap.id} className="hover:bg-surface-secondary/50 transition-colors group">
+                  <td className="py-2.5 pr-3 font-mono text-xs text-content-primary">
+                    {snap.period}
+                  </td>
+                  <td className="py-2.5 px-3 text-right tabular-nums text-content-secondary">
+                    {formatCompact(snap.planned_cost, currency)}
+                  </td>
+                  <td className="py-2.5 px-3 text-right tabular-nums text-content-secondary">
+                    {formatCompact(snap.earned_value, currency)}
+                  </td>
+                  <td className="py-2.5 px-3 text-right tabular-nums text-content-secondary">
+                    {formatCompact(snap.actual_cost, currency)}
+                  </td>
+                  <td className={`py-2.5 px-3 text-center tabular-nums font-medium ${snap.spi >= 1 ? 'text-[#15803d]' : 'text-semantic-error'}`}>
+                    {snap.spi.toFixed(2)}
+                  </td>
+                  <td className={`py-2.5 px-3 text-center tabular-nums font-medium ${snap.cpi >= 1 ? 'text-[#15803d]' : 'text-semantic-error'}`}>
+                    {snap.cpi.toFixed(2)}
+                  </td>
+                  <td className="py-2.5 pl-3 min-w-[160px]">
+                    {editingNotes === snap.id ? (
+                      <div className="flex items-center gap-1">
+                        <input
+                          value={notesValue}
+                          onChange={(e) => setNotesValue(e.target.value)}
+                          className="h-7 flex-1 rounded border border-oe-blue/40 bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              updateSnapshotMutation.mutate({ id: snap.id, notes: notesValue });
+                            }
+                            if (e.key === 'Escape') setEditingNotes(null);
+                          }}
+                        />
+                        <button
+                          onClick={() => updateSnapshotMutation.mutate({ id: snap.id, notes: notesValue })}
+                          className="flex h-6 w-6 items-center justify-center rounded text-semantic-success hover:bg-semantic-success-bg"
+                          disabled={updateSnapshotMutation.isPending}
+                        >
+                          {updateSnapshotMutation.isPending ? (
+                            <Loader2 size={12} className="animate-spin" />
+                          ) : (
+                            <Check size={12} />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => setEditingNotes(null)}
+                          className="flex h-6 w-6 items-center justify-center rounded text-semantic-error hover:bg-semantic-error-bg"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div
+                        className="flex items-center gap-1 cursor-pointer group/notes"
+                        onClick={() => {
+                          setEditingNotes(snap.id);
+                          setNotesValue(snap.notes || '');
+                        }}
+                      >
+                        <span className="text-xs text-content-tertiary truncate max-w-[200px]">
+                          {snap.notes || t('costmodel.click_to_add_notes', { defaultValue: 'Click to add notes...' })}
+                        </span>
+                        <Pencil
+                          size={11}
+                          className="invisible group-hover/notes:visible shrink-0 text-content-quaternary"
+                        />
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 /* ── Slider Control (extracted to module scope to avoid remount on re-render) ── */
 
@@ -1772,6 +2236,23 @@ function FiveDDashboard({ project }: { project: Project }) {
           )}
         </CardContent>
       </Card>
+
+      {/* Editable Budget Lines */}
+      {hasBudget && (
+        <Card>
+          <CardHeader
+            title={t('costmodel.budget_lines_title', { defaultValue: 'Budget Lines (Editable)' })}
+          />
+          <CardContent>
+            <BudgetLinesEditor projectId={project.id} currency={currency} />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Cost Snapshots */}
+      {hasBudget && (
+        <SnapshotsList projectId={project.id} currency={currency} />
+      )}
     </div>
   );
 }

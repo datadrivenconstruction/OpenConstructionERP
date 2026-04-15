@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useSearchParams } from 'react-router-dom';
@@ -43,6 +43,7 @@ import {
   exportTasks,
   type Task,
   type TaskType,
+  type BuiltinTaskType,
   type TaskStatus,
   type TaskPriority,
   type CreateTaskPayload,
@@ -55,10 +56,10 @@ interface Project {
   name: string;
 }
 
-const TASK_TYPES: TaskType[] = ['task', 'topic', 'information', 'decision', 'personal'];
+const BUILTIN_TASK_TYPES: BuiltinTaskType[] = ['task', 'topic', 'information', 'decision', 'personal'];
 const STATUSES: TaskStatus[] = ['draft', 'open', 'in_progress', 'completed'];
 
-const TYPE_CARD_ICON: Record<TaskType, React.ElementType> = {
+const TYPE_CARD_ICON: Record<string, React.ElementType> = {
   task: ListTodo,
   topic: MessageCircle,
   information: Info,
@@ -66,13 +67,61 @@ const TYPE_CARD_ICON: Record<TaskType, React.ElementType> = {
   personal: UserCircle,
 };
 
-const TYPE_COLOR: Record<TaskType, string> = {
+const BUILTIN_TYPE_COLOR: Record<string, string> = {
   task: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
   topic: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
   information: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300',
   decision: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
   personal: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
 };
+
+/* ── Custom Category Palette ──────────────────────────────────────────── */
+
+const CUSTOM_CATEGORY_COLORS = [
+  { bg: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300', hex: '#f43f5e' },
+  { bg: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300', hex: '#f97316' },
+  { bg: 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300', hex: '#14b8a6' },
+  { bg: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300', hex: '#6366f1' },
+  { bg: 'bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300', hex: '#ec4899' },
+  { bg: 'bg-lime-100 text-lime-700 dark:bg-lime-900/40 dark:text-lime-300', hex: '#84cc16' },
+  { bg: 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300', hex: '#0ea5e9' },
+  { bg: 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/40 dark:text-fuchsia-300', hex: '#d946ef' },
+];
+
+interface CustomCategory {
+  name: string;     // lowercase slug used as task_type
+  label: string;    // display name
+  colorIdx: number; // index into CUSTOM_CATEGORY_COLORS
+}
+
+const CUSTOM_CATEGORIES_KEY = 'oe-task-custom-categories';
+
+function loadCustomCategories(): CustomCategory[] {
+  try {
+    const raw = localStorage.getItem(CUSTOM_CATEGORIES_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveCustomCategories(categories: CustomCategory[]): void {
+  try {
+    localStorage.setItem(CUSTOM_CATEGORIES_KEY, JSON.stringify(categories));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+/** Get the color class for any task type, including custom categories. */
+function getTypeColor(taskType: string, customCategories: CustomCategory[]): string {
+  if (BUILTIN_TYPE_COLOR[taskType]) return BUILTIN_TYPE_COLOR[taskType]!;
+  const custom = customCategories.find((c) => c.name === taskType);
+  if (custom) return CUSTOM_CATEGORY_COLORS[custom.colorIdx % CUSTOM_CATEGORY_COLORS.length]!.bg;
+  // Fallback for unknown types
+  return 'bg-gray-100 text-gray-700 dark:bg-gray-800/40 dark:text-gray-300';
+}
+
 
 const PRIORITY_BADGE: Record<TaskPriority, { variant: 'neutral' | 'blue' | 'warning' | 'error'; cls: string }> = {
   low: { variant: 'neutral', cls: '' },
@@ -119,12 +168,14 @@ function AddTaskModal({
   isPending,
   projectName,
   initialData,
+  customCategories,
 }: {
   onClose: () => void;
   onSubmit: (data: TaskFormData) => void;
   isPending: boolean;
   projectName?: string;
   initialData?: TaskFormData | null;
+  customCategories: CustomCategory[];
 }) {
   const { t } = useTranslation();
   const [form, setForm] = useState<TaskFormData>(initialData || EMPTY_FORM);
@@ -191,9 +242,9 @@ function AddTaskModal({
             <label className="block text-sm font-medium text-content-primary mb-2">
               {t('tasks.field_type', { defaultValue: 'Type' })}
             </label>
-            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-              {TASK_TYPES.map((tt) => {
-                const TypeIcon = TYPE_CARD_ICON[tt];
+            <div className="flex flex-wrap gap-2">
+              {BUILTIN_TASK_TYPES.map((tt) => {
+                const TypeIcon = TYPE_CARD_ICON[tt] ?? ListTodo;
                 const selected = form.task_type === tt;
                 return (
                   <button
@@ -201,9 +252,9 @@ function AddTaskModal({
                     type="button"
                     onClick={() => set('task_type', tt)}
                     className={clsx(
-                      'flex flex-col items-center gap-1.5 rounded-lg border-2 px-2 py-2.5 text-center transition-all',
+                      'flex flex-col items-center gap-1.5 rounded-lg border-2 px-2 py-2.5 text-center transition-all min-w-[72px]',
                       selected
-                        ? TYPE_COLOR[tt] + ' border-current ring-2 ring-oe-blue/30'
+                        ? (BUILTIN_TYPE_COLOR[tt] ?? '') + ' border-current ring-2 ring-oe-blue/30'
                         : 'border-border bg-surface-primary text-content-tertiary hover:border-border-light hover:bg-surface-secondary',
                     )}
                   >
@@ -212,6 +263,28 @@ function AddTaskModal({
                       {t(`tasks.type_${tt}`, {
                         defaultValue: tt.charAt(0).toUpperCase() + tt.slice(1),
                       })}
+                    </span>
+                  </button>
+                );
+              })}
+              {customCategories.map((cat) => {
+                const selected = form.task_type === cat.name;
+                const colorCls = CUSTOM_CATEGORY_COLORS[cat.colorIdx % CUSTOM_CATEGORY_COLORS.length]?.bg ?? '';
+                return (
+                  <button
+                    key={cat.name}
+                    type="button"
+                    onClick={() => set('task_type', cat.name as TaskType)}
+                    className={clsx(
+                      'flex flex-col items-center gap-1.5 rounded-lg border-2 px-2 py-2.5 text-center transition-all min-w-[72px]',
+                      selected
+                        ? colorCls + ' border-current ring-2 ring-oe-blue/30'
+                        : 'border-border bg-surface-primary text-content-tertiary hover:border-border-light hover:bg-surface-secondary',
+                    )}
+                  >
+                    <ListTodo size={18} />
+                    <span className="text-2xs font-medium leading-tight">
+                      {cat.label}
                     </span>
                   </button>
                 );
@@ -369,12 +442,14 @@ const TaskCard = React.memo(function TaskCard({
   onEdit,
   onDelete,
   onStatusChange,
+  customCategories,
 }: {
   task: Task;
   onComplete: (id: string) => void;
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
   onStatusChange: (id: string, status: TaskStatus) => void;
+  customCategories: CustomCategory[];
 }) {
   const { t } = useTranslation();
 
@@ -393,26 +468,27 @@ const TaskCard = React.memo(function TaskCard({
     <Card
       data-task-id={task.id}
       className={clsx(
-        'p-3 mb-2 hover:shadow-md transition-shadow',
+        'px-2.5 py-2 mb-1.5 hover:shadow-md transition-shadow group',
         isOverdue && 'bg-red-50/40 dark:bg-red-950/15',
       )}
     >
-      {/* Type badge + title */}
-      <div className="flex items-start gap-2">
-        <span
-          className={clsx(
-            'inline-flex items-center rounded px-1.5 py-0.5 text-2xs font-semibold shrink-0 mt-0.5',
-            TYPE_COLOR[task.task_type],
-          )}
-        >
-          {t(`tasks.type_${task.task_type}`, {
-            defaultValue: task.task_type.charAt(0).toUpperCase() + task.task_type.slice(1),
-          })}
-        </span>
+      {/* Top row: type icon + title + priority */}
+      <div className="flex items-start gap-1.5">
+        {(() => {
+          const TypeIcon = TYPE_CARD_ICON[task.task_type] ?? ListTodo;
+          return (
+            <div className={clsx(
+              'flex items-center justify-center w-5 h-5 rounded shrink-0 mt-px',
+              getTypeColor(task.task_type, customCategories),
+            )}>
+              <TypeIcon size={11} />
+            </div>
+          );
+        })()}
         <div className="flex-1 min-w-0">
           <h4
             className={clsx(
-              'text-sm font-semibold line-clamp-2',
+              'text-xs font-semibold line-clamp-2 leading-snug',
               task.status === 'completed'
                 ? 'text-content-tertiary line-through'
                 : isOverdue
@@ -422,127 +498,112 @@ const TaskCard = React.memo(function TaskCard({
           >
             {task.title}
           </h4>
-          {/* Source indicator */}
+        </div>
+        <Badge variant={pb.variant} size="sm" className="shrink-0 text-[9px] px-1 py-0">
+          {t(`tasks.priority_${task.priority}`, {
+            defaultValue: task.priority.charAt(0).toUpperCase() + task.priority.slice(1),
+          })}
+        </Badge>
+      </div>
+
+      {/* Source / BIM indicators — inline, compact */}
+      {(task.meeting_id || (task.metadata && typeof task.metadata.source === 'string') || (task.bim_element_ids && task.bim_element_ids.length > 0)) && (
+        <div className="flex items-center gap-2 mt-1 ml-6">
           {(task.meeting_id || (task.metadata && typeof task.metadata.source === 'string')) && (
-            <span className="inline-flex items-center gap-1 mt-0.5 text-2xs text-content-quaternary">
-              <Link2 size={9} className="shrink-0" />
+            <span className="inline-flex items-center gap-0.5 text-[9px] text-content-quaternary">
+              <Link2 size={8} className="shrink-0" />
               {task.meeting_id
-                ? t('tasks.from_meeting', { defaultValue: 'From meeting' })
+                ? t('tasks.from_meeting', { defaultValue: 'Meeting' })
                 : String(task.metadata?.source) === 'rfi'
-                  ? t('tasks.from_rfi', { defaultValue: 'From RFI' })
+                  ? t('tasks.from_rfi', { defaultValue: 'RFI' })
                   : String(task.metadata?.source) === 'inspection'
-                    ? t('tasks.from_inspection', { defaultValue: 'From inspection' })
+                    ? t('tasks.from_inspection', { defaultValue: 'Inspection' })
                     : t('tasks.source_linked', { defaultValue: 'Linked' })}
             </span>
           )}
-          {/* BIM pin indicator — surfaces tasks that are spatially linked
-              to 3D model geometry.  Click isolates pinned elements in viewer. */}
           <ViewInBIMButton
             elementIds={task.bim_element_ids ?? []}
-            iconSize={9}
-            className="inline-flex items-center gap-1 mt-0.5 text-2xs text-emerald-700 dark:text-emerald-400 hover:underline"
+            iconSize={8}
+            className="inline-flex items-center gap-0.5 text-[9px] text-emerald-700 dark:text-emerald-400 hover:underline"
           />
         </div>
-      </div>
+      )}
 
-      {/* Assignee + due date row */}
-      <div className="flex items-center justify-between mt-3 text-xs text-content-tertiary">
-        <div className="flex items-center gap-1.5">
+      {/* Bottom row: assignee + due date + actions */}
+      <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-border-light/60">
+        <div className="flex items-center gap-2 min-w-0">
+          {/* Assignee */}
           {task.assigned_to_name ? (
-            <>
-              <div className="h-5 w-5 rounded-full bg-oe-blue/10 text-oe-blue flex items-center justify-center text-2xs font-semibold shrink-0">
+            <div className="flex items-center gap-1 min-w-0">
+              <div className="h-4 w-4 rounded-full bg-oe-blue/10 text-oe-blue flex items-center justify-center text-[8px] font-bold shrink-0">
                 {task.assigned_to_name.charAt(0).toUpperCase()}
               </div>
-              <span className="truncate max-w-[100px]">{task.assigned_to_name}</span>
-            </>
+              <span className="text-[10px] text-content-tertiary truncate max-w-[70px]">{task.assigned_to_name}</span>
+            </div>
           ) : (
-            <span className="text-content-quaternary flex items-center gap-1">
-              <User size={11} />
-              {t('tasks.unassigned', { defaultValue: 'Unassigned' })}
+            <span className="text-[10px] text-content-quaternary flex items-center gap-0.5">
+              <User size={9} />
             </span>
           )}
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Badge variant={pb.variant} size="sm">
-            {t(`tasks.priority_${task.priority}`, {
-              defaultValue: task.priority.charAt(0).toUpperCase() + task.priority.slice(1),
-            })}
-          </Badge>
+          {/* Due date */}
           {task.due_date && (
             <div
               className={clsx(
-                'flex items-center gap-1',
-                isOverdue && 'text-semantic-error font-medium',
+                'flex items-center gap-0.5 text-[10px]',
+                isOverdue ? 'text-semantic-error font-medium' : 'text-content-quaternary',
               )}
             >
-              <Calendar size={11} />
-              <span>
-                <DateDisplay value={task.due_date} />
-              </span>
+              <Calendar size={9} />
+              <DateDisplay value={task.due_date} />
             </div>
           )}
         </div>
+
+        {/* Actions — visible on hover */}
+        <div className="flex items-center gap-0 opacity-0 group-hover:opacity-100 transition-opacity">
+          {task.status !== 'completed' ? (
+            <>
+              <Button variant="ghost" size="sm" onClick={() => onComplete(task.id)} className="!p-0.5 text-green-600 hover:text-green-700 h-auto" title={t('tasks.mark_complete', { defaultValue: 'Complete' })}>
+                <CheckCircle2 size={10} />
+              </Button>
+              <select
+                value={task.status}
+                onChange={(e) => onStatusChange(task.id, e.target.value as TaskStatus)}
+                onClick={(e) => e.stopPropagation()}
+                className="text-[9px] py-0 px-0.5 rounded border border-border-light bg-surface-secondary text-content-tertiary focus:outline-none focus:ring-1 focus:ring-oe-blue h-4"
+              >
+                <option value="draft">{t('tasks.status_draft', { defaultValue: 'Draft' })}</option>
+                <option value="open">{t('tasks.status_open', { defaultValue: 'Open' })}</option>
+                <option value="in_progress">{t('tasks.status_in_progress', { defaultValue: 'In Progress' })}</option>
+                <option value="completed">{t('tasks.status_completed', { defaultValue: 'Completed' })}</option>
+              </select>
+            </>
+          ) : (
+            <CheckCircle2 size={10} className="text-green-500" />
+          )}
+          <Button variant="ghost" size="sm" onClick={() => onEdit(task)} className="!p-0.5 text-content-quaternary hover:text-oe-blue h-auto">
+            <Pencil size={10} />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => onDelete(task.id)} className="!p-0.5 text-content-quaternary hover:text-red-500 h-auto">
+            <Trash2 size={10} />
+          </Button>
+        </div>
       </div>
 
-      {/* Checklist progress */}
+      {/* Checklist progress — ultra compact */}
       {checklistTotal > 0 && (
-        <div className="mt-2.5 pt-2 border-t border-border-light">
-          <div className="flex items-center justify-between text-xs text-content-tertiary mb-1">
-            <span>
-              {t('tasks.checklist_progress', {
-                defaultValue: '{{done}}/{{total}} items',
-                done: checklistDone,
-                total: checklistTotal,
-              })}
-            </span>
-            <span>{checklistPercent}%</span>
-          </div>
-          <div className="h-1.5 w-full rounded-full bg-surface-tertiary overflow-hidden">
+        <div className="mt-1.5 flex items-center gap-2">
+          <div className="flex-1 h-1 rounded-full bg-surface-tertiary overflow-hidden">
             <div
               className="h-full rounded-full bg-oe-blue transition-all"
               style={{ width: `${checklistPercent}%` }}
             />
           </div>
+          <span className="text-[9px] text-content-quaternary tabular-nums shrink-0">
+            {checklistDone}/{checklistTotal}
+          </span>
         </div>
       )}
-
-      {/* Actions bar */}
-      <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-border-light">
-        <div className="flex items-center gap-1">
-          {/* Status quick-change */}
-          {task.status !== 'completed' ? (
-            <select
-              value={task.status}
-              onChange={(e) => onStatusChange(task.id, e.target.value as TaskStatus)}
-              className="text-[10px] py-0.5 px-1 rounded border border-border-light bg-surface-secondary text-content-secondary focus:outline-none focus:ring-1 focus:ring-oe-blue"
-            >
-              <option value="draft">{t('tasks.status_draft', { defaultValue: 'Draft' })}</option>
-              <option value="open">{t('tasks.status_open', { defaultValue: 'Open' })}</option>
-              <option value="in_progress">{t('tasks.status_in_progress', { defaultValue: 'In Progress' })}</option>
-              <option value="completed">{t('tasks.status_completed', { defaultValue: 'Completed' })}</option>
-            </select>
-          ) : (
-            <span className="text-[10px] text-green-600 dark:text-green-400 font-medium flex items-center gap-1">
-              <CheckCircle2 size={10} />
-              {t('tasks.completed', { defaultValue: 'Completed' })}
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-0.5">
-          {task.status !== 'completed' && (
-            <Button variant="ghost" size="sm" onClick={() => onComplete(task.id)} className="text-[10px] px-1.5 py-0.5 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-950/20">
-              <CheckCircle2 size={11} />
-            </Button>
-          )}
-          <Button variant="ghost" size="sm" onClick={() => onEdit(task)} className="text-[10px] px-1.5 py-0.5 text-content-tertiary hover:text-oe-blue">
-            <Pencil size={11} />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => onDelete(task.id)} className="text-[10px] px-1.5 py-0.5 text-content-tertiary hover:text-red-500">
-            <Trash2 size={11} />
-          </Button>
-        </div>
-      </div>
     </Card>
   );
 });
@@ -567,6 +628,39 @@ export function TasksPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<TaskType | ''>('');
   const [myTasksOnly, setMyTasksOnly] = useState(false);
+
+  // Custom categories
+  const [customCategories, setCustomCategories] = useState<CustomCategory[]>(loadCustomCategories);
+  const [showAddCategory, setShowAddCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryColorIdx, setNewCategoryColorIdx] = useState(0);
+  const addCategoryInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAddCategory = useCallback(() => {
+    const label = newCategoryName.trim();
+    if (!label) return;
+    const slug = label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    if (!slug) return;
+    // Avoid duplicates
+    if (BUILTIN_TASK_TYPES.includes(slug as BuiltinTaskType) || customCategories.some((c) => c.name === slug)) {
+      addToast({ type: 'warning', title: t('tasks.category_exists', { defaultValue: 'This category already exists' }) });
+      return;
+    }
+    const updated = [...customCategories, { name: slug, label, colorIdx: newCategoryColorIdx }];
+    setCustomCategories(updated);
+    saveCustomCategories(updated);
+    setNewCategoryName('');
+    setNewCategoryColorIdx((prev) => (prev + 1) % CUSTOM_CATEGORY_COLORS.length);
+    setShowAddCategory(false);
+    addToast({ type: 'success', title: t('tasks.category_created', { defaultValue: 'Category "{{name}}" created', name: label }) });
+  }, [newCategoryName, newCategoryColorIdx, customCategories, addToast, t]);
+
+  const handleRemoveCategory = useCallback((slug: string) => {
+    const updated = customCategories.filter((c) => c.name !== slug);
+    setCustomCategories(updated);
+    saveCustomCategories(updated);
+    if (typeFilter === slug) setTypeFilter('');
+  }, [customCategories, typeFilter]);
 
   // Deep-link auto-scroll: Cmd+Shift+K global semantic search lands here
   // with `?id=<task_id>` — scroll the matching task card into view and
@@ -1007,14 +1101,14 @@ export function TasksPage() {
         >
           {t('tasks.filter_all', { defaultValue: 'All' })}
         </button>
-        {TASK_TYPES.map((tt) => (
+        {BUILTIN_TASK_TYPES.map((tt) => (
           <button
             key={tt}
             onClick={() => setTypeFilter(tt)}
             className={clsx(
               'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors whitespace-nowrap',
               typeFilter === tt
-                ? TYPE_COLOR[tt]
+                ? BUILTIN_TYPE_COLOR[tt]
                 : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary',
             )}
           >
@@ -1023,6 +1117,98 @@ export function TasksPage() {
             })}
           </button>
         ))}
+        {/* Custom category tabs */}
+        {customCategories.map((cat) => (
+          <div key={cat.name} className="relative group flex items-center">
+            <button
+              onClick={() => setTypeFilter(cat.name)}
+              className={clsx(
+                'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors whitespace-nowrap',
+                typeFilter === cat.name
+                  ? CUSTOM_CATEGORY_COLORS[cat.colorIdx % CUSTOM_CATEGORY_COLORS.length]?.bg ?? ''
+                  : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary',
+              )}
+            >
+              {cat.label}
+            </button>
+            <button
+              onClick={() => handleRemoveCategory(cat.name)}
+              className="hidden group-hover:flex items-center justify-center w-4 h-4 rounded-full bg-surface-tertiary text-content-tertiary hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-950/40 dark:hover:text-red-400 transition-colors -ml-1"
+              title={t('tasks.remove_category', { defaultValue: 'Remove category' })}
+            >
+              <X size={10} />
+            </button>
+          </div>
+        ))}
+
+        {/* Add category button + popover */}
+        <div className="relative">
+          <button
+            onClick={() => {
+              setShowAddCategory((prev) => !prev);
+              setTimeout(() => addCategoryInputRef.current?.focus(), 50);
+            }}
+            className="flex items-center justify-center w-8 h-8 rounded-lg text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary transition-colors"
+            title={t('tasks.add_category', { defaultValue: 'Add category' })}
+          >
+            <Plus size={16} />
+          </button>
+          {showAddCategory && (
+            <div className="absolute left-0 top-full mt-1 z-20 w-64 rounded-xl border border-border bg-surface-elevated shadow-lg p-3 animate-fade-in">
+              <p className="text-xs font-semibold text-content-primary mb-2">
+                {t('tasks.new_category', { defaultValue: 'New Category' })}
+              </p>
+              <input
+                ref={addCategoryInputRef}
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                placeholder={t('tasks.category_name_placeholder', { defaultValue: 'e.g. Safety, QA Review...' })}
+                className={inputCls + ' !h-8 !text-xs mb-2'}
+                maxLength={50}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleAddCategory();
+                  if (e.key === 'Escape') setShowAddCategory(false);
+                }}
+              />
+              {/* Color picker */}
+              <div className="flex items-center gap-1 mb-2">
+                <span className="text-2xs text-content-tertiary mr-1">
+                  {t('tasks.category_color', { defaultValue: 'Color:' })}
+                </span>
+                {CUSTOM_CATEGORY_COLORS.map((c, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setNewCategoryColorIdx(idx)}
+                    className={clsx(
+                      'w-5 h-5 rounded-full border-2 transition-all',
+                      newCategoryColorIdx === idx
+                        ? 'border-content-primary scale-110'
+                        : 'border-transparent hover:scale-105',
+                    )}
+                    style={{ backgroundColor: c.hex }}
+                  />
+                ))}
+              </div>
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  onClick={() => setShowAddCategory(false)}
+                  className="text-xs text-content-tertiary hover:text-content-secondary"
+                >
+                  {t('common.cancel', { defaultValue: 'Cancel' })}
+                </button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={handleAddCategory}
+                  disabled={!newCategoryName.trim()}
+                >
+                  {t('common.add', { defaultValue: 'Add' })}
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Toolbar */}
@@ -1060,28 +1246,25 @@ export function TasksPage() {
       {/* Board / Columns */}
       <div>
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4" aria-hidden="true">
-            {Array.from({ length: 3 }).map((_, colIdx) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3" aria-hidden="true">
+            {Array.from({ length: 4 }).map((_, colIdx) => (
               <div key={colIdx} className="flex flex-col">
-                <div className="rounded-lg px-3 py-2 mb-3 bg-surface-secondary animate-pulse h-9" />
-                {Array.from({ length: 3 }).map((_, cardIdx) => (
+                <div className="rounded-md px-2.5 py-1.5 mb-2 bg-surface-secondary animate-pulse h-7" />
+                {Array.from({ length: 2 }).map((_, cardIdx) => (
                   <div
                     key={cardIdx}
-                    className="rounded-xl border border-border-light bg-surface-elevated p-3 mb-2 space-y-3"
+                    className="rounded-xl border border-border-light bg-surface-elevated px-2.5 py-2 mb-1.5 space-y-2"
                   >
-                    <div className="flex items-start gap-2">
-                      <div className="animate-pulse rounded bg-surface-secondary h-5 w-14 shrink-0" />
-                      <div className="flex-1 space-y-1.5">
-                        <div className="animate-pulse rounded bg-surface-secondary h-4 w-full" />
-                        <div className="animate-pulse rounded bg-surface-secondary h-4 w-2/3" />
+                    <div className="flex items-start gap-1.5">
+                      <div className="animate-pulse rounded bg-surface-secondary h-5 w-5 shrink-0" />
+                      <div className="flex-1 space-y-1">
+                        <div className="animate-pulse rounded bg-surface-secondary h-3.5 w-full" />
+                        <div className="animate-pulse rounded bg-surface-secondary h-3.5 w-2/3" />
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <div className="animate-pulse rounded-full bg-surface-secondary h-5 w-5" />
-                      <div className="flex items-center gap-2">
-                        <div className="animate-pulse rounded-full bg-surface-secondary h-5 w-14" />
-                        <div className="animate-pulse rounded bg-surface-secondary h-4 w-16" />
-                      </div>
+                      <div className="animate-pulse rounded-full bg-surface-secondary h-4 w-4" />
+                      <div className="animate-pulse rounded bg-surface-secondary h-3 w-12" />
                     </div>
                   </div>
                 ))}
@@ -1115,7 +1298,7 @@ export function TasksPage() {
             }
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
             {STATUSES.map((status) => {
               const colItems = grouped.get(status) ?? [];
               return (
@@ -1123,11 +1306,11 @@ export function TasksPage() {
                   {/* Column header */}
                   <div
                     className={clsx(
-                      'rounded-lg px-3 py-2 mb-3 flex items-center justify-between',
+                      'rounded-md px-2.5 py-1.5 mb-2 flex items-center justify-between',
                       STATUS_HEADER_CLS[status],
                     )}
                   >
-                    <span className="text-sm font-semibold">
+                    <span className="text-xs font-semibold">
                       {t(`tasks.status_${status}`, {
                         defaultValue: status
                           .split('_')
@@ -1135,16 +1318,16 @@ export function TasksPage() {
                           .join(' '),
                       })}
                     </span>
-                    <span className="text-xs font-bold rounded-full px-2 py-0.5 bg-white/30">
+                    <span className="text-[10px] font-bold rounded-full px-1.5 py-0.5 bg-white/30 tabular-nums">
                       {colItems.length}
                     </span>
                   </div>
 
                   {/* Column items */}
-                  <div className="flex-1 min-h-[80px]">
+                  <div className="flex-1 min-h-[60px]">
                     {colItems.length === 0 ? (
-                      <div className="flex items-center justify-center py-8 text-xs text-content-quaternary">
-                        {t('tasks.column_empty', { defaultValue: 'No tasks in this column' })}
+                      <div className="flex items-center justify-center py-6 text-[10px] text-content-quaternary">
+                        {t('tasks.column_empty', { defaultValue: 'No tasks' })}
                       </div>
                     ) : (
                       colItems.map((task) => (
@@ -1155,6 +1338,7 @@ export function TasksPage() {
                           onEdit={handleEditTask}
                           onDelete={handleDeleteTask}
                           onStatusChange={handleStatusChange}
+                          customCategories={customCategories}
                         />
                       ))
                     )}
@@ -1189,6 +1373,7 @@ export function TasksPage() {
             assigned_to: editingTask.assigned_to_name || '',
             due_date: editingTask.due_date || '',
           } : null}
+          customCategories={customCategories}
         />
       )}
 

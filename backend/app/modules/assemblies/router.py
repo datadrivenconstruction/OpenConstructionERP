@@ -27,6 +27,8 @@ from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermissio
 from app.modules.assemblies.schemas import (
     ApplyToBOQRequest,
     AssemblyCreate,
+    AssemblyExport,
+    AssemblyImportRequest,
     AssemblyResponse,
     AssemblySearchResponse,
     AssemblyUpdate,
@@ -35,6 +37,7 @@ from app.modules.assemblies.schemas import (
     ComponentCreate,
     ComponentResponse,
     ComponentUpdate,
+    ReorderComponentsRequest,
 )
 from app.modules.assemblies.service import AssemblyService, _str_to_float
 
@@ -112,9 +115,13 @@ async def _verify_target_boq_owner(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ not found")
 
 
-def _assembly_to_response(assembly: object) -> AssemblyResponse:
+def _assembly_to_response(
+    assembly: object, usage_count: int = 0,
+) -> AssemblyResponse:
     """Convert an Assembly ORM model to an AssemblyResponse schema."""
     components = getattr(assembly, "components", None) or []
+    metadata = getattr(assembly, "metadata_", {}) or {}
+    tags: list[str] = metadata.get("tags", []) if isinstance(metadata, dict) else []
     return AssemblyResponse(
         id=assembly.id,  # type: ignore[attr-defined]
         code=assembly.code,  # type: ignore[attr-defined]
@@ -132,7 +139,9 @@ def _assembly_to_response(assembly: object) -> AssemblyResponse:
         owner_id=assembly.owner_id,  # type: ignore[attr-defined]
         is_active=assembly.is_active,  # type: ignore[attr-defined]
         component_count=len(components),
-        metadata_=assembly.metadata_,  # type: ignore[attr-defined]
+        usage_count=usage_count,
+        tags=tags,
+        metadata_=metadata,
         created_at=assembly.created_at,  # type: ignore[attr-defined]
         updated_at=assembly.updated_at,  # type: ignore[attr-defined]
     )
@@ -186,6 +195,7 @@ async def search_assemblies(
     q: str | None = Query(default=None, description="Text search on code, name, description"),
     category: str | None = Query(default=None, description="Filter by category"),
     unit: str | None = Query(default=None, description="Filter by unit"),
+    tag: str | None = Query(default=None, description="Filter by tag"),
     project_id: uuid.UUID | None = Query(default=None, description="Filter by project"),
     is_template: bool | None = Query(default=None, description="Filter by template flag"),
     offset: int = Query(default=0, ge=0),
@@ -197,13 +207,27 @@ async def search_assemblies(
         q=q,
         category=category,
         unit=unit,
+        tag=tag,
         project_id=project_id,
         is_template=is_template,
         offset=offset,
         limit=limit,
     )
+
+    # Compute usage counts for each assembly from BOQ metadata
+    usage_map: dict[str, int] = {}
+    try:
+        usage_map = await service.get_usage_counts(
+            [a.id for a in assemblies],
+        )
+    except Exception:
+        logger.debug("Could not compute assembly usage counts")
+
     return AssemblySearchResponse(
-        items=[_assembly_to_response(a) for a in assemblies],
+        items=[
+            _assembly_to_response(a, usage_count=usage_map.get(str(a.id), 0))
+            for a in assemblies
+        ],
         total=total,
         limit=limit,
         offset=offset,
@@ -609,3 +633,96 @@ async def clone_assembly(
     await _verify_assembly_owner(session, assembly_id, user_id, payload)
     cloned = await service.clone_assembly(assembly_id, data, owner_id=user_id)
     return _assembly_to_response(cloned)
+
+
+# ── Reorder ──────────────────────────────────────────────────────────────────
+
+
+@router.post(
+    "/{assembly_id}/reorder-components/",
+    status_code=200,
+    dependencies=[Depends(RequirePermission("assemblies.update"))],
+)
+async def reorder_components(
+    assembly_id: uuid.UUID,
+    data: ReorderComponentsRequest,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: AssemblyService = Depends(_get_service),
+) -> dict:
+    """Reorder components within an assembly.
+
+    Accepts an ordered list of component IDs and updates sort_order
+    accordingly.
+    """
+    await _verify_assembly_owner(session, assembly_id, user_id, payload)
+    await service.reorder_components(assembly_id, data.component_ids)
+    return {"status": "ok", "assembly_id": str(assembly_id)}
+
+
+# ── Export / Import ──────────────────────────────────────────────────────────
+
+
+@router.get(
+    "/{assembly_id}/export/",
+    dependencies=[Depends(RequirePermission("assemblies.read"))],
+)
+async def export_assembly(
+    assembly_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: AssemblyService = Depends(_get_service),
+) -> dict:
+    """Export an assembly with all components as a shareable JSON payload."""
+    await _verify_assembly_owner(session, assembly_id, user_id, payload)
+    return await service.export_assembly(assembly_id)
+
+
+@router.post(
+    "/import/",
+    response_model=AssemblyResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("assemblies.create"))],
+)
+async def import_assembly(
+    data: AssemblyImportRequest,
+    user_id: CurrentUserId,
+    service: AssemblyService = Depends(_get_service),
+) -> AssemblyResponse:
+    """Import an assembly from a JSON payload.
+
+    Creates a new assembly with all components from the exported format.
+    If the code already exists, a suffix is appended to make it unique.
+    """
+    assembly = await service.import_assembly(data.assembly, owner_id=user_id)
+    return _assembly_to_response(assembly)
+
+
+# ── Tags ─────────────────────────────────────────────────────────────────────
+
+
+class UpdateTagsRequest(BaseModel):
+    """Request body for updating assembly tags."""
+
+    tags: list[str] = Field(default_factory=list, max_length=20)
+
+
+@router.patch(
+    "/{assembly_id}/tags/",
+    response_model=AssemblyResponse,
+    dependencies=[Depends(RequirePermission("assemblies.update"))],
+)
+async def update_tags(
+    assembly_id: uuid.UUID,
+    data: UpdateTagsRequest,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: AssemblyService = Depends(_get_service),
+) -> AssemblyResponse:
+    """Update tags on an assembly. Tags are stored in metadata."""
+    await _verify_assembly_owner(session, assembly_id, user_id, payload)
+    assembly = await service.update_tags(assembly_id, data.tags)
+    return _assembly_to_response(assembly)
