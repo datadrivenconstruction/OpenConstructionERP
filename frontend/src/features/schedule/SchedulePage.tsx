@@ -1940,7 +1940,7 @@ export function SchedulePage() {
   // Project schedule detail view
   if (selectedProject) {
     return (
-      <div className="max-w-content mx-auto animate-fade-in">
+      <div className="w-full animate-fade-in">
         <Breadcrumb items={[
           { label: t('nav.dashboard', 'Dashboard'), to: '/' },
           { label: t('schedule.title', '4D Schedule'), to: '/schedule' },
@@ -1976,7 +1976,7 @@ export function SchedulePage() {
 
   // Project list view
   return (
-    <div className="max-w-content mx-auto animate-fade-in">
+    <div className="w-full animate-fade-in">
       <Breadcrumb items={[
         { label: t('nav.dashboard', 'Dashboard'), to: '/' },
         { label: t('schedule.title', '4D Schedule') },

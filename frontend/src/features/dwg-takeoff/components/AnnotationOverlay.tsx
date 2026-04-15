@@ -53,27 +53,63 @@ function renderTextPin(
   const pt0 = ann.points[0]!;
   const pos = worldToScreen(pt0.x, pt0.y, vp);
 
-  // Circle marker
+  // Read custom font size from metadata (default 11px for backwards compatibility)
+  const customFontSize =
+    ann.metadata && typeof ann.metadata.font_size === 'number'
+      ? ann.metadata.font_size
+      : 11;
+
+  // Use the annotation's own color (which the popup sets), falling back to the
+  // selection highlight / default color passed in.
+  const pinColor = isSelected ? color : ann.color || color;
+
+  // Circle marker — scale proportionally to font size
+  const markerRadius = Math.max(4, customFontSize * 0.45);
   ctx.beginPath();
-  ctx.arc(pos.x, pos.y, isSelected ? 8 : 6, 0, Math.PI * 2);
-  ctx.fillStyle = color;
+  ctx.arc(pos.x, pos.y, isSelected ? markerRadius + 2 : markerRadius, 0, Math.PI * 2);
+  ctx.fillStyle = pinColor;
   ctx.globalAlpha = 0.85;
   ctx.fill();
   ctx.globalAlpha = 1;
 
   // Label
   if (ann.text) {
-    ctx.font = '11px Inter, system-ui, sans-serif';
-    ctx.fillStyle = color;
+    ctx.font = `600 ${customFontSize}px Inter, system-ui, sans-serif`;
+    ctx.fillStyle = pinColor;
     ctx.textBaseline = 'bottom';
-    ctx.fillText(ann.text, pos.x + 10, pos.y - 4);
+
+    // Background pill for readability
+    const textMetrics = ctx.measureText(ann.text);
+    const pillPad = 4;
+    const pillW = textMetrics.width + pillPad * 2;
+    const pillH = customFontSize + pillPad;
+    const pillX = pos.x + markerRadius + 6;
+    const pillY = pos.y - customFontSize - pillPad / 2;
+
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
+    ctx.beginPath();
+    const r = 3;
+    ctx.moveTo(pillX + r, pillY);
+    ctx.lineTo(pillX + pillW - r, pillY);
+    ctx.arcTo(pillX + pillW, pillY, pillX + pillW, pillY + r, r);
+    ctx.lineTo(pillX + pillW, pillY + pillH - r);
+    ctx.arcTo(pillX + pillW, pillY + pillH, pillX + pillW - r, pillY + pillH, r);
+    ctx.lineTo(pillX + r, pillY + pillH);
+    ctx.arcTo(pillX, pillY + pillH, pillX, pillY + pillH - r, r);
+    ctx.lineTo(pillX, pillY + r);
+    ctx.arcTo(pillX, pillY, pillX + r, pillY, r);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = pinColor;
+    ctx.fillText(ann.text, pillX + pillPad, pillY + pillH - pillPad / 2);
   }
 
   if (isSelected) {
     ctx.strokeStyle = '#3b82f6';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(pos.x, pos.y, 11, 0, Math.PI * 2);
+    ctx.arc(pos.x, pos.y, markerRadius + 5, 0, Math.PI * 2);
     ctx.stroke();
   }
 }

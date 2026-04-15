@@ -224,6 +224,8 @@ export function DwgTakeoffPage() {
       type: DwgAnnotation['type'];
       points: { x: number; y: number }[];
       text?: string;
+      color?: string;
+      fontSize?: number;
       measurement_value?: number;
       measurement_unit?: string;
     }) => {
@@ -233,13 +235,22 @@ export function DwgTakeoffPage() {
         type: ann.type,
         points: ann.points,
         text: ann.text,
-        color: activeColor,
+        color: ann.color ?? activeColor,
         measurement_value: ann.measurement_value,
         measurement_unit: ann.measurement_unit,
+        metadata: ann.fontSize ? { font_size: ann.fontSize } : undefined,
       });
     },
     [selectedDrawingId, activeColor, createAnnotationMutation],
   );
+
+  const handleSelectEntity = useCallback((id: string | null) => {
+    setSelectedEntityId(id);
+    if (id) {
+      // Auto-switch to properties tab when an entity is selected
+      setRightTab('properties');
+    }
+  }, []);
 
   const handleSelectDrawing = useCallback((id: string) => {
     setSelectedDrawingId(id);
@@ -263,7 +274,7 @@ export function DwgTakeoffPage() {
   /* ── Render ──────────────────────────────────────────────────────── */
 
   return (
-    <div className="flex h-full flex-col -mx-2 sm:-mx-3 -my-4" style={{ height: 'calc(100vh - 3.5rem)' }}>
+    <div className="flex h-full flex-col -mx-4 sm:-mx-7 -my-4" style={{ height: 'calc(100vh - 3.5rem)' }}>
       <div className="flex items-center justify-between border-b border-border px-4 py-2">
         <Breadcrumb items={breadcrumbs} />
         <div className="flex items-center gap-2">
@@ -457,7 +468,7 @@ export function DwgTakeoffPage() {
               activeColor={activeColor}
               selectedEntityId={selectedEntityId}
               selectedAnnotationId={selectedAnnotationId}
-              onSelectEntity={setSelectedEntityId}
+              onSelectEntity={handleSelectEntity}
               onSelectAnnotation={setSelectedAnnotationId}
               onAnnotationCreated={handleAnnotationCreated}
             />
@@ -574,6 +585,7 @@ export function DwgTakeoffPage() {
                       <PropertyRow label={t('dwg_takeoff.prop_type', 'Type')} value={selectedEntity.type} />
                       <PropertyRow label={t('dwg_takeoff.prop_layer', 'Layer')} value={selectedEntity.layer} />
                       <PropertyRow label={t('dwg_takeoff.prop_color', 'Color')} value={String(selectedEntity.color)} />
+                      <PropertyRow label={t('dwg_takeoff.prop_id', 'ID')} value={selectedEntity.id} />
                       {selectedEntity.start && (
                         <PropertyRow
                           label={t('dwg_takeoff.prop_position', 'Position')}
@@ -602,21 +614,21 @@ export function DwgTakeoffPage() {
                             <div className="font-semibold text-xs text-foreground border-b border-border pb-1">
                               {t('dwg_takeoff.measurements', 'Measurements')}
                             </div>
-                            <div className="flex items-center justify-between rounded-md bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1.5 border border-emerald-200 dark:border-emerald-800/40">
-                              <span className="text-emerald-700 dark:text-emerald-400 font-medium">
+                            <div className="flex items-center justify-between rounded-md bg-emerald-950/30 px-2.5 py-1.5 border border-emerald-800/40">
+                              <span className="text-emerald-400 font-medium">
                                 {t('dwg_takeoff.perimeter', 'Perimeter')}
                               </span>
-                              <span className="font-mono font-bold text-emerald-800 dark:text-emerald-300">
+                              <span className="font-mono font-bold text-emerald-300">
                                 {formatMeasurement(perimeter, 'm')}
                               </span>
                             </div>
                             {closed && area > 0 && (
-                              <div className="flex items-center justify-between rounded-md bg-blue-50 dark:bg-blue-950/30 px-2.5 py-1.5 border border-blue-200 dark:border-blue-800/40">
-                                <span className="text-blue-700 dark:text-blue-400 font-medium">
+                              <div className="flex items-center justify-between rounded-md bg-blue-950/30 px-2.5 py-1.5 border border-blue-800/40">
+                                <span className="text-blue-400 font-medium">
                                   {t('dwg_takeoff.area', 'Area')}
                                 </span>
-                                <span className="font-mono font-bold text-blue-800 dark:text-blue-300">
-                                  {formatMeasurement(area, 'm²')}
+                                <span className="font-mono font-bold text-blue-300">
+                                  {formatMeasurement(area, 'm\u00B2')}
                                 </span>
                               </div>
                             )}
@@ -626,20 +638,22 @@ export function DwgTakeoffPage() {
                             />
                             <PropertyRow
                               label={t('dwg_takeoff.closed', 'Closed')}
-                              value={closed ? 'Yes' : 'No'}
+                              value={closed
+                                ? t('common.yes', 'Yes')
+                                : t('common.no', 'No')}
                             />
                             <div className="mt-2">
                               <div className="font-medium text-[10px] text-muted-foreground uppercase tracking-wider mb-1">
-                                {t('dwg_takeoff.segments', 'Segments')}
+                                {t('dwg_takeoff.segments', 'Segments')} ({segLengths.length})
                               </div>
-                              <div className="space-y-0.5 max-h-40 overflow-y-auto">
+                              <div className="space-y-0.5 max-h-48 overflow-y-auto">
                                 {segLengths.map((len, i) => (
                                   <div
                                     key={i}
-                                    className="flex items-center justify-between rounded px-2 py-1 bg-muted/30 hover:bg-muted/60 transition-colors"
+                                    className="flex items-center justify-between rounded px-2 py-1 bg-white/5 hover:bg-white/10 transition-colors"
                                   >
                                     <span className="text-muted-foreground font-mono text-[10px]">
-                                      {i + 1}
+                                      #{i + 1}
                                     </span>
                                     <span className="font-mono font-medium text-[11px]">
                                       {formatMeasurement(len, 'm')}

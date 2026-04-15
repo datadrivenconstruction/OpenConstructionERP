@@ -82,3 +82,20 @@ export function polygonCentroid(vertices: Pt[]): Pt {
   for (const v of vertices) { cx += v.x; cy += v.y; }
   return { x: cx / vertices.length, y: cy / vertices.length };
 }
+
+/** Ray-casting point-in-polygon test for closed polylines. */
+export function pointInPolygon(p: Pt, vertices: Pt[]): boolean {
+  let inside = false;
+  const n = vertices.length;
+  for (let i = 0, j = n - 1; i < n; j = i++) {
+    const vi = vertices[i]!;
+    const vj = vertices[j]!;
+    if (
+      (vi.y > p.y) !== (vj.y > p.y) &&
+      p.x < ((vj.x - vi.x) * (p.y - vi.y)) / (vj.y - vi.y) + vi.x
+    ) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}

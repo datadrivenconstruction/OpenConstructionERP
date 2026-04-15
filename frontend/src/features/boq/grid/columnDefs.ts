@@ -150,6 +150,7 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       },
       cellRenderer: 'unitCellRenderer',
       cellClass: 'text-center text-2xs font-mono uppercase',
+      cellStyle: { display: 'flex', justifyContent: 'center', alignItems: 'center' },
     },
     {
       headerName: '',

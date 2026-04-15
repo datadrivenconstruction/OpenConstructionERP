@@ -20,7 +20,7 @@ export function AboutPage() {
     <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
       {/* Update notification — always shown on About so users see it
           when they navigate here looking for "what's new". */}
-      <div className="-mx-2">
+      <div className="-mx-4 sm:-mx-7">
         <UpdateNotification forceShow hideDismiss />
       </div>
 

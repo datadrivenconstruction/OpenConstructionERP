@@ -1890,7 +1890,7 @@ export function CostModelPage() {
   // Project detail view with 5D dashboard
   if (selectedProject) {
     return (
-      <div className="max-w-content mx-auto animate-fade-in">
+      <div className="w-full animate-fade-in">
         <button
           onClick={handleBack}
           className="mb-4 flex items-center gap-1.5 text-sm text-content-secondary hover:text-content-primary transition-colors"
@@ -1918,7 +1918,7 @@ export function CostModelPage() {
 
   // Project selector view
   return (
-    <div className="max-w-content mx-auto animate-fade-in">
+    <div className="w-full animate-fade-in">
       <Breadcrumb items={[{ label: t('nav.dashboard', 'Dashboard'), to: '/' }, { label: t('nav.costmodel', { defaultValue: '5D Cost Model' }) }]} className="mb-4" />
 
       {/* Hero header */}
