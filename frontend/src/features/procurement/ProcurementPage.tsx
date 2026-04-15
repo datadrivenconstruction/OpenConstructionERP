@@ -402,8 +402,8 @@ function PurchaseOrdersTab({ projectId }: { projectId: string }) {
   function renderPOModal() {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-        <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('procurement.new_po', { defaultValue: 'New Purchase Order' })}>
-          <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
+        <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[85vh] flex flex-col" role="dialog" aria-label={t('procurement.new_po', { defaultValue: 'New Purchase Order' })}>
+          <div className="flex items-center justify-between px-6 py-4 border-b border-border-light sticky top-0 z-10 bg-surface-elevated rounded-t-xl">
             <h2 className="text-lg font-semibold text-content-primary">
               {t('procurement.new_po', { defaultValue: 'New Purchase Order' })}
             </h2>
@@ -415,7 +415,7 @@ function PurchaseOrdersTab({ projectId }: { projectId: string }) {
               <X size={18} />
             </button>
           </div>
-          <div className="px-6 py-5 space-y-5">
+          <div className="px-6 py-5 space-y-5 overflow-y-auto flex-1">
             {/* ── Section: Order Details ── */}
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-3">
@@ -639,7 +639,7 @@ function PurchaseOrdersTab({ projectId }: { projectId: string }) {
               </div>
             </div>
           </div>
-          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
+          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light sticky bottom-0 z-10 bg-surface-elevated rounded-b-xl">
             <Button variant="ghost" onClick={() => setShowCreate(false)} disabled={createPOMut.isPending}>
               {t('common.cancel', { defaultValue: 'Cancel' })}
             </Button>

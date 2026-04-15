@@ -92,9 +92,9 @@ export function DomainDetails({
       </div>
 
       {/* Detail content */}
-      <div className="p-4">
+      <div className="px-4 py-3">
         {!selectedDomain ? (
-          <p className="text-xs text-content-tertiary text-center py-6">
+          <p className="text-xs text-content-tertiary text-center py-3">
             {t('project_intelligence.select_domain', {
               defaultValue: 'Select a domain tab above to see detailed metrics.',
             })}
@@ -288,14 +288,16 @@ function DomainContent({
 
   const domainConfig = DOMAIN_TABS.find((d) => d.id === domain);
 
+  const domainActions = actions.filter((a) => _isActionForDomain(a, domain));
+
   return (
     <div>
-      {/* Score bar */}
-      <div className="flex items-center gap-3 mb-4">
-        <span className="text-sm font-medium text-content-primary">
+      {/* Score bar — compact */}
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-xs font-semibold text-content-primary">
           {domainConfig?.label || domain}
         </span>
-        <div className="flex-1 h-2 bg-border-light/40 rounded-full overflow-hidden">
+        <div className="flex-1 h-1.5 bg-border-light/40 rounded-full overflow-hidden">
           <div
             className="h-full rounded-full transition-all duration-500 ease-out"
             style={{
@@ -304,41 +306,42 @@ function DomainContent({
             }}
           />
         </div>
-        <span className="text-sm font-medium tabular-nums" style={{ color: domainConfig?.color }}>
+        <span className="text-xs font-semibold tabular-nums" style={{ color: domainConfig?.color }}>
           {Math.round(score)}%
         </span>
       </div>
 
-      {/* Metrics grid */}
-      <div className="grid grid-cols-2 gap-x-8 gap-y-1.5 mb-4">
+      {/* Metrics — compact card grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mb-3">
         {rows.map((row) => (
-          <div key={row.label} className="flex items-center justify-between py-1">
-            <span className="text-xs text-content-tertiary">{row.label}</span>
-            <span className="text-xs font-medium text-content-secondary tabular-nums flex items-center gap-1">
+          <div
+            key={row.label}
+            className="flex items-center justify-between gap-2 rounded-lg bg-surface-tertiary/50 px-2.5 py-1.5"
+          >
+            <span className="text-2xs text-content-tertiary truncate">{row.label}</span>
+            <span className="text-xs font-medium text-content-secondary tabular-nums flex items-center gap-1 shrink-0">
               {String(row.value)}
-              {row.status === 'ok' && <CheckCircle2 size={11} className="text-green-400" />}
-              {row.status === 'warn' && <AlertTriangle size={11} className="text-yellow-400" />}
-              {row.status === 'error' && <XIcon size={11} className="text-red-400" />}
+              {row.status === 'ok' && <CheckCircle2 size={10} className="text-green-400" />}
+              {row.status === 'warn' && <AlertTriangle size={10} className="text-yellow-400" />}
+              {row.status === 'error' && <XIcon size={10} className="text-red-400" />}
             </span>
           </div>
         ))}
       </div>
 
       {/* Domain actions */}
-      {actions.length > 0 && (
+      {domainActions.length > 0 && (
         <div className="flex flex-wrap gap-2 pt-2 border-t border-border-light">
-          {actions
-            .filter((a) => _isActionForDomain(a, domain))
-            .map((action) => (
-              <button
-                key={action.id}
-                onClick={() => onAction(action.id)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-content-secondary bg-surface-tertiary border border-border-light rounded-md hover:bg-surface-quaternary transition-colors"
-              >
-                <Zap size={11} />
-                {action.label}
-              </button>
-            ))}
+          {domainActions.map((action) => (
+            <button
+              key={action.id}
+              onClick={() => onAction(action.id)}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs text-content-secondary bg-surface-tertiary border border-border-light rounded-md hover:bg-surface-quaternary transition-colors"
+            >
+              <Zap size={11} />
+              {action.label}
+            </button>
+          ))}
         </div>
       )}
     </div>

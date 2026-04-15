@@ -13,22 +13,30 @@ export type RFIStatus = 'draft' | 'open' | 'answered' | 'closed' | 'void';
 export interface RFI {
   id: string;
   project_id: string;
-  rfi_number: number;
+  rfi_number: string;
   subject: string;
   question: string;
-  response: string | null;
+  official_response: string | null;
   status: RFIStatus;
+  raised_by: string;
+  assigned_to: string | null;
   ball_in_court: string | null;
-  ball_in_court_name: string | null;
-  due_date: string | null;
+  responded_by: string | null;
+  responded_at: string | null;
   cost_impact: boolean;
+  cost_impact_value: string | null;
   schedule_impact: boolean;
-  linked_drawings: string[];
+  schedule_impact_days: number | null;
+  date_required: string | null;
+  response_due_date: string | null;
+  linked_drawing_ids: string[];
+  change_order_id: string | null;
   created_by: string | null;
+  metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
-  responded_at: string | null;
-  closed_at: string | null;
+  is_overdue: boolean;
+  days_open: number;
 }
 
 export interface RFIFilters {
@@ -48,7 +56,7 @@ export interface CreateRFIPayload {
 }
 
 export interface RespondRFIPayload {
-  response: string;
+  official_response: string;
 }
 
 /* ── API Functions ─────────────────────────────────────────────────────── */

@@ -1,6 +1,7 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { aiApi, type AISettings } from '@/features/ai/api';
 import type { ChatMessage, ChatStreamChunk, DataPanelEntry, ToolCallInfo } from '../types';
 
 const DEFAULT_SUGGESTIONS = [
@@ -22,6 +23,7 @@ export interface UseChatFullPageReturn {
   suggestions: string[];
   dataPanelEntries: DataPanelEntry[];
   activePanelIndex: number;
+  aiConfigured: boolean | null; // null = still loading
   sendMessage: (text: string) => void;
   clearChat: () => void;
   setActivePanelIndex: (idx: number) => void;
@@ -34,15 +36,64 @@ export function useChatFullPage(): UseChatFullPageReturn {
   const [suggestions, setSuggestions] = useState<string[]>(DEFAULT_SUGGESTIONS);
   const [dataPanelEntries, setDataPanelEntries] = useState<DataPanelEntry[]>([]);
   const [activePanelIndex, setActivePanelIndex] = useState(-1);
+  const [aiConfigured, setAiConfigured] = useState<boolean | null>(null);
 
   const abortRef = useRef<AbortController | null>(null);
 
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
 
+  // Check if any AI provider is configured
+  useEffect(() => {
+    let cancelled = false;
+    aiApi
+      .getSettings()
+      .then((settings: AISettings) => {
+        if (cancelled) return;
+        const hasKey =
+          settings.anthropic_api_key_set ||
+          settings.openai_api_key_set ||
+          settings.gemini_api_key_set ||
+          settings.openrouter_api_key_set ||
+          settings.mistral_api_key_set ||
+          settings.groq_api_key_set ||
+          settings.deepseek_api_key_set ||
+          settings.cohere_api_key_set;
+        setAiConfigured(hasKey);
+      })
+      .catch(() => {
+        if (!cancelled) setAiConfigured(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const sendMessage = useCallback(
     (text: string) => {
       const trimmed = text.trim();
       if (!trimmed || isStreaming) return;
+
+      // If no AI provider is configured, show an onboarding message instead
+      // of hitting the API (which would return a 500 error).
+      if (aiConfigured === false) {
+        const userMsg: ChatMessage = {
+          id: uid(),
+          role: 'user',
+          content: trimmed,
+          ts: new Date(),
+        };
+        const onboardingMsg: ChatMessage = {
+          id: uid(),
+          role: 'assistant',
+          content:
+            '**AI assistant is not configured yet**\n\n' +
+            'Connect your AI provider (Anthropic, OpenAI, Google, or another supported provider) in **Settings** to enable the chat assistant.\n\n' +
+            'Go to [Settings](/settings) to add your API key.',
+          ts: new Date(),
+        };
+        setMessages((prev) => [...prev, userMsg, onboardingMsg]);
+        return;
+      }
 
       const userMsg: ChatMessage = {
         id: uid(),
@@ -251,7 +302,7 @@ export function useChatFullPage(): UseChatFullPageReturn {
         }
       })();
     },
-    [isStreaming, sessionId, activeProjectId],
+    [isStreaming, sessionId, activeProjectId, aiConfigured],
   );
 
   const clearChat = useCallback(() => {
@@ -273,6 +324,7 @@ export function useChatFullPage(): UseChatFullPageReturn {
     suggestions,
     dataPanelEntries,
     activePanelIndex,
+    aiConfigured,
     sendMessage,
     clearChat,
     setActivePanelIndex,

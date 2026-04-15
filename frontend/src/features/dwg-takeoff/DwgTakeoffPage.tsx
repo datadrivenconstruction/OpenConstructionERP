@@ -48,6 +48,7 @@ import type { DxfEntity, DxfLayer, DwgAnnotation, CreateAnnotationPayload } from
 import { DxfViewer } from './components/DxfViewer';
 import { ToolPalette, type DwgTool } from './components/ToolPalette';
 import { LayerPanel } from './components/LayerPanel';
+import { EntityNameFilter, entityDisplayName } from './components/EntityNameFilter';
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
@@ -84,6 +85,7 @@ export function DwgTakeoffPage() {
   const [activeTool, setActiveTool] = useState<DwgTool>('select');
   const [activeColor, setActiveColor] = useState('#ef4444');
   const [visibleLayers, setVisibleLayers] = useState<Set<string>>(new Set());
+  const [visibleNames, setVisibleNames] = useState<Set<string>>(new Set());
   const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
   const [selectedAnnotationId, setSelectedAnnotationId] = useState<string | null>(null);
   const [rightTab, setRightTab] = useState<'layers' | 'annotations' | 'properties'>('layers');
@@ -157,6 +159,17 @@ export function DwgTakeoffPage() {
     }
   }, [layers]);
 
+  // Initialize visible entity names when entities/layout change
+  useMemo(() => {
+    if (filteredEntities.length > 0) {
+      const names = new Set<string>();
+      for (const e of filteredEntities) {
+        names.add(entityDisplayName(e));
+      }
+      setVisibleNames(names);
+    }
+  }, [filteredEntities]);
+
   // Mutations
   const uploadMutation = useMutation({
     mutationFn: () => {
@@ -219,6 +232,41 @@ export function DwgTakeoffPage() {
     setVisibleLayers(new Set());
   }, []);
 
+  // Entity name filter handlers
+  const handleToggleName = useCallback((name: string) => {
+    setVisibleNames((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  }, []);
+
+  const handleShowAllNames = useCallback(() => {
+    const names = new Set<string>();
+    for (const e of filteredEntities) {
+      names.add(entityDisplayName(e));
+    }
+    setVisibleNames(names);
+  }, [filteredEntities]);
+
+  const handleHideAllNames = useCallback(() => {
+    setVisibleNames(new Set());
+  }, []);
+
+  // Entities filtered by both layer AND name visibility
+  const viewerEntities = useMemo(() => {
+    // If all names are visible (or no names extracted yet), skip the name check
+    const allNames = new Set<string>();
+    for (const e of filteredEntities) {
+      allNames.add(entityDisplayName(e));
+    }
+    const nameFilterActive = visibleNames.size < allNames.size;
+
+    if (!nameFilterActive) return filteredEntities;
+    return filteredEntities.filter((e) => visibleNames.has(entityDisplayName(e)));
+  }, [filteredEntities, visibleNames]);
+
   const handleAnnotationCreated = useCallback(
     (ann: {
       type: DwgAnnotation['type'];
@@ -255,6 +303,7 @@ export function DwgTakeoffPage() {
   const handleSelectDrawing = useCallback((id: string) => {
     setSelectedDrawingId(id);
     setVisibleLayers(new Set());
+    setVisibleNames(new Set());
     setSelectedEntityId(null);
     setSelectedAnnotationId(null);
     setSelectedLayout(null);
@@ -461,7 +510,7 @@ export function DwgTakeoffPage() {
               </div>
             )}
             <DxfViewer
-              entities={filteredEntities}
+              entities={viewerEntities}
               annotations={annotations}
               visibleLayers={visibleLayers}
               activeTool={activeTool}
@@ -506,13 +555,22 @@ export function DwgTakeoffPage() {
 
             <div className="flex-1 overflow-y-auto p-3">
               {rightTab === 'layers' && (
-                <LayerPanel
-                  layers={layers}
-                  visibleLayers={visibleLayers}
-                  onToggleLayer={handleToggleLayer}
-                  onShowAll={handleShowAllLayers}
-                  onHideAll={handleHideAllLayers}
-                />
+                <>
+                  <LayerPanel
+                    layers={layers}
+                    visibleLayers={visibleLayers}
+                    onToggleLayer={handleToggleLayer}
+                    onShowAll={handleShowAllLayers}
+                    onHideAll={handleHideAllLayers}
+                  />
+                  <EntityNameFilter
+                    entities={filteredEntities}
+                    visibleNames={visibleNames}
+                    onToggleName={handleToggleName}
+                    onShowAllNames={handleShowAllNames}
+                    onHideAllNames={handleHideAllNames}
+                  />
+                </>
               )}
 
               {rightTab === 'annotations' && (

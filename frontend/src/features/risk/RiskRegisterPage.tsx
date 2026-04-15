@@ -455,13 +455,13 @@ export function RiskRegisterPage() {
     return result;
   }, [risks, searchQuery, filterCategory, filterStatus]);
 
-  if (selectedRiskId) return <div className="mx-auto max-w-5xl px-6 py-6"><DetailView riskId={selectedRiskId} onBack={() => setSelectedRiskId(null)} /></div>;
+  if (selectedRiskId) return <div className="w-full"><DetailView riskId={selectedRiskId} onBack={() => setSelectedRiskId(null)} /></div>;
 
   const currency = project?.currency || summary?.currency || 'EUR';
   const hasRisks = (summary?.total_risks ?? 0) > 0;
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-6 animate-fade-in">
+    <div className="w-full animate-fade-in">
       <Breadcrumb items={[{ label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' }, { label: t('nav.risk_register', { defaultValue: 'Risk Register' }) }]} />
 
       <div className="mt-4 flex items-center justify-between gap-3 flex-wrap">

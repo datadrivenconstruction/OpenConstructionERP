@@ -214,9 +214,9 @@ function CreateMeetingModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('meetings.new_meeting', { defaultValue: 'New Meeting' })}>
+      <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[85vh] flex flex-col" role="dialog" aria-label={t('meetings.new_meeting', { defaultValue: 'New Meeting' })}>
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light sticky top-0 z-10 bg-surface-elevated rounded-t-xl">
           <div>
             <h2 className="text-lg font-semibold text-content-primary">
               {t('meetings.new_meeting', { defaultValue: 'New Meeting' })}
@@ -240,7 +240,7 @@ function CreateMeetingModal({
         </div>
 
         {/* Form */}
-        <div className="px-6 py-4 space-y-5">
+        <div className="px-6 py-4 space-y-5 overflow-y-auto flex-1">
           {/* ── Meeting Type ── */}
           <div>
             <label className="block text-sm font-medium text-content-primary mb-2">
@@ -415,7 +415,7 @@ function CreateMeetingModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light sticky bottom-0 z-10 bg-surface-elevated rounded-b-xl">
           <Button variant="ghost" onClick={onClose} disabled={isPending}>
             {t('common.cancel', { defaultValue: 'Cancel' })}
           </Button>

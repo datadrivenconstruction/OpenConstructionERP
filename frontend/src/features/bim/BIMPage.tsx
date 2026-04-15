@@ -82,8 +82,10 @@ import {
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
-const CAD_EXTENSIONS = new Set(['.rvt', '.ifc', '.dwg', '.dgn', '.fbx', '.obj', '.3ds']);
+const CAD_EXTENSIONS = new Set(['.rvt', '.ifc']);
 const DATA_EXTENSIONS = new Set(['.csv', '.xlsx', '.xls']);
+/** Extensions handled by the DWG Takeoff module — not accepted in BIM Hub. */
+const DWG_EXTENSIONS = new Set(['.dwg', '.dxf']);
 
 function getFileExtension(filename: string): string {
   const dot = filename.lastIndexOf('.');
@@ -342,6 +344,7 @@ function UploadPanel({
   onProcessingUpdate?: (update: ProcessingUpdate | null) => void;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [file, setFile] = useState<File | null>(null);
   const [modelName, setModelName] = useState(initialModelName || '');
@@ -367,11 +370,20 @@ function UploadPanel({
 
   const handleFileSelect = useCallback((f: File) => {
     const ext = getFileExtension(f.name);
-    if (!CAD_EXTENSIONS.has(ext) && !DATA_EXTENSIONS.has(ext)) { setUploadError(t('bim.upload_unsupported_format')); return; }
+    if (DWG_EXTENSIONS.has(ext)) {
+      addToast({
+        type: 'info',
+        title: t('bim.dwg_redirect_title', { defaultValue: 'DWG files are handled in the DWG Takeoff module' }),
+        message: t('bim.dwg_redirect_msg', { defaultValue: 'Redirecting to DWG Takeoff...' }),
+      });
+      navigate('/dwg-takeoff');
+      return;
+    }
+    if (!CAD_EXTENSIONS.has(ext) && !DATA_EXTENSIONS.has(ext)) { setUploadError(t('bim.upload_unsupported_format', { defaultValue: 'Unsupported file format. Please upload .rvt or .ifc files.' })); return; }
     setFile(f);
     setUploadError(ext === '.rvt' ? t('bim.upload_rvt_note') : null);
     if (!modelName) setModelName(f.name.replace(/\.[^.]+$/, ''));
-  }, [modelName, t]);
+  }, [modelName, t, addToast, navigate]);
 
   const resetForm = useCallback(() => {
     setFile(null); setDataFile(null); setGeometryFile(null); setModelName(''); setUploadError(null);
@@ -434,7 +446,7 @@ function UploadPanel({
           // banner and the prompt pick up the same data.
           const lowerName = file.name.toLowerCase();
           const needsConverterMatch = (
-            ['rvt', 'dwg', 'dgn'] as const
+            ['rvt'] as const
           ).find((c) => lowerName.endsWith('.' + c));
           if (needsConverterMatch) {
             try {
@@ -661,7 +673,7 @@ function UploadPanel({
                 <p className="text-[10px] text-content-quaternary">{t('bim.upload_size_hint')}</p>
               </>
             )}
-            <input ref={fileInputRef} type="file" accept=".rvt,.ifc,.dwg,.dgn,.fbx,.obj,.3ds,.csv,.xlsx,.xls" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); }} />
+            <input ref={fileInputRef} type="file" accept=".rvt,.ifc,.csv,.xlsx,.xls" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); }} />
           </label>
         ) : (
           <div className="grid grid-cols-2 gap-3">
@@ -791,6 +803,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
   onProcessingUpdate?: (update: ProcessingUpdate | null) => void;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [modelName, setModelName] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -878,7 +891,31 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
           <div className="max-w-md mx-auto mb-8">
             <div className="rounded-2xl bg-surface-primary border border-border-light shadow-lg shadow-black/5 dark:shadow-black/20 p-6">
               <label
-                onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) { setFile(f); if (!modelName) setModelName(f.name.replace(/\.[^.]+$/, '')); } }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const f = e.dataTransfer.files?.[0];
+                  if (f) {
+                    const ext = getFileExtension(f.name);
+                    if (DWG_EXTENSIONS.has(ext)) {
+                      addToast({
+                        type: 'info',
+                        title: t('bim.dwg_redirect_title', { defaultValue: 'DWG files are handled in the DWG Takeoff module' }),
+                        message: t('bim.dwg_redirect_msg', { defaultValue: 'Redirecting to DWG Takeoff...' }),
+                      });
+                      navigate('/dwg-takeoff');
+                      return;
+                    }
+                    if (!CAD_EXTENSIONS.has(ext) && !DATA_EXTENSIONS.has(ext)) {
+                      addToast({
+                        type: 'error',
+                        title: t('bim.upload_unsupported_format', { defaultValue: 'Unsupported file format. Please upload .rvt or .ifc files.' }),
+                      });
+                      return;
+                    }
+                    setFile(f);
+                    if (!modelName) setModelName(f.name.replace(/\.[^.]+$/, ''));
+                  }
+                }}
                 onDragOver={(e) => e.preventDefault()}
                 className={`flex flex-col items-center gap-3 border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
                   file ? 'border-oe-blue bg-oe-blue/5' : 'border-border-medium hover:border-oe-blue hover:bg-blue-50/50 dark:hover:bg-blue-950/20'
@@ -899,7 +936,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
                     <p className="text-[11px] text-content-quaternary">{t('bim.landing_size_hint')}</p>
                   </>
                 )}
-                <input ref={fileInputRef} type="file" accept=".rvt,.ifc,.dwg,.dgn,.fbx,.obj,.3ds,.csv,.xlsx,.xls" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) { setFile(f); if (!modelName) setModelName(f.name.replace(/\.[^.]+$/, '')); } }} />
+                <input ref={fileInputRef} type="file" accept=".rvt,.ifc,.csv,.xlsx,.xls" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) { setFile(f); if (!modelName) setModelName(f.name.replace(/\.[^.]+$/, '')); } }} />
               </label>
               {file && (
                 <div className="mt-4 space-y-3">
@@ -967,7 +1004,7 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
 
           {/* Supported formats — subtle bottom hint */}
           <p className="text-center text-[10px] text-content-quaternary mt-6">
-            {t('bim.landing_formats', { defaultValue: 'Supports Revit (.rvt), IFC, DWG, DGN, FBX, OBJ, CSV, Excel' })}
+            {t('bim.landing_formats', { defaultValue: 'Supports Revit (.rvt), IFC (.ifc), CSV, Excel. DWG files \u2192 DWG Takeoff module.' })}
           </p>
         </div>
       </div>
@@ -1895,18 +1932,18 @@ export function BIMPage() {
               </div>
               <div className="h-1.5 w-full rounded-full bg-surface-tertiary overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-500 ease-out"
+                  className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-[width] duration-700 ease-out"
                   style={{
                     width: processing.stage === 'uploading' ? '25%'
-                      : processing.stage === 'converting' ? '50%'
+                      : processing.stage === 'converting' ? '55%'
                         : processing.stage === 'parsing' ? '75%'
-                          : '90%',
+                          : '92%',
                   }}
                 />
               </div>
               <p className="text-[10px] text-content-quaternary mt-1.5">
                 {t('bim.progress_navigate_away_short', {
-                  defaultValue: 'Processing in background — you can continue working.',
+                  defaultValue: 'Processing in background -- you can continue working.',
                 })}
               </p>
             </div>

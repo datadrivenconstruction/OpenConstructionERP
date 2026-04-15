@@ -1,11 +1,11 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
-import { Plus, Trash2, Send, X, Database, Search, Loader2, Check } from 'lucide-react';
+import { Plus, Trash2, Send, X, Database, Search, Loader2, Check, GripVertical, Share2, Tag } from 'lucide-react';
 import { Button, Badge, Card, Input, Breadcrumb, ConfirmDialog } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
-import { apiGet } from '@/shared/lib/api';
+import { apiGet, triggerDownload } from '@/shared/lib/api';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import {
@@ -27,7 +27,13 @@ export function AssemblyEditorPage() {
 
   const [applyModalOpen, setApplyModalOpen] = useState(false);
   const [costDbModalOpen, setCostDbModalOpen] = useState(false);
+  const [showTagEditor, setShowTagEditor] = useState(false);
+  const [tagInput, setTagInput] = useState('');
   const addToast = useToastStore((s) => s.addToast);
+
+  // Drag state for component reordering
+  const dragIdx = useRef<number | null>(null);
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
 
   const { data: assembly, isLoading } = useQuery({
     queryKey: ['assembly', assemblyId],
@@ -70,6 +76,29 @@ export function AssemblyEditorPage() {
     },
   });
 
+  const reorderMutation = useMutation({
+    mutationFn: (componentIds: string[]) =>
+      assembliesApi.reorderComponents(assemblyId!, componentIds),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assembly', assemblyId] });
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.reorder_failed', { defaultValue: 'Reorder failed' }), message: error.message });
+    },
+  });
+
+  const tagsMutation = useMutation({
+    mutationFn: (tags: string[]) =>
+      assembliesApi.updateTags(assemblyId!, tags),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assembly', assemblyId] });
+      addToast({ type: 'success', title: t('toasts.tags_updated', { defaultValue: 'Tags updated' }) });
+    },
+    onError: (error: Error) => {
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+    },
+  });
+
   const handleAddComponent = useCallback(() => {
     addComponentMutation.mutate({
       description: 'New component',
@@ -79,6 +108,48 @@ export function AssemblyEditorPage() {
       unit_cost: 0,
     });
   }, [addComponentMutation, assembly?.unit]);
+
+  const handleExportJson = useCallback(async () => {
+    if (!assemblyId) return;
+    try {
+      const exported = await assembliesApi.exportAssembly(assemblyId);
+      const json = JSON.stringify(exported, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      triggerDownload(blob, `${assembly?.code || 'assembly'}.json`);
+      addToast({ type: 'success', title: t('assemblies.exported_json', { defaultValue: 'JSON exported' }) });
+    } catch {
+      addToast({ type: 'error', title: t('common.export_failed', { defaultValue: 'Export failed' }) });
+    }
+  }, [assemblyId, assembly?.code, addToast, t]);
+
+  const handleDragEnd = useCallback((fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) return;
+    const comps = assembly?.components ?? [];
+    if (fromIndex < 0 || fromIndex >= comps.length) return;
+    const reordered = [...comps];
+    const moved = reordered.splice(fromIndex, 1)[0];
+    if (!moved) return;
+    reordered.splice(toIndex, 0, moved);
+    reorderMutation.mutate(reordered.map((c) => c.id));
+  }, [assembly?.components, reorderMutation]);
+
+  const handleAddTag = useCallback(() => {
+    const tag = tagInput.trim().toLowerCase();
+    if (!tag || !assembly) return;
+    const currentTags: string[] = (assembly as { tags?: string[] }).tags ?? [];
+    if (currentTags.includes(tag)) {
+      setTagInput('');
+      return;
+    }
+    tagsMutation.mutate([...currentTags, tag]);
+    setTagInput('');
+  }, [tagInput, assembly, tagsMutation]);
+
+  const handleRemoveTag = useCallback((tag: string) => {
+    if (!assembly) return;
+    const currentTags: string[] = (assembly as { tags?: string[] }).tags ?? [];
+    tagsMutation.mutate(currentTags.filter((t) => t !== tag));
+  }, [assembly, tagsMutation]);
 
   const fmt = (n: number) =>
     new Intl.NumberFormat(getIntlLocale(), {
@@ -152,6 +223,23 @@ export function AssemblyEditorPage() {
           <Button
             variant="secondary"
             size="sm"
+            icon={<Share2 size={15} />}
+            onClick={handleExportJson}
+          >
+            {t('assemblies.export_json', { defaultValue: 'Export JSON' })}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<Tag size={15} />}
+            onClick={() => setShowTagEditor((v) => !v)}
+            className={showTagEditor ? 'ring-2 ring-violet-400/50 border-violet-400' : ''}
+          >
+            {t('assemblies.tags', { defaultValue: 'Tags' })}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
             icon={<Send size={15} />}
             onClick={() => setApplyModalOpen(true)}
           >
@@ -176,12 +264,61 @@ export function AssemblyEditorPage() {
         </div>
       </div>
 
+      {/* Tags Editor */}
+      {showTagEditor && (
+        <Card className="mb-4">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Tag size={14} className="text-violet-500 shrink-0" />
+            {((assembly as { tags?: string[] }).tags ?? []).map((tag) => (
+              <Badge
+                key={tag}
+                variant="neutral"
+                size="md"
+                className="bg-violet-50 text-violet-700 dark:bg-violet-900/20 dark:text-violet-400 border-violet-200/50 pr-1"
+              >
+                {tag}
+                <button
+                  onClick={() => handleRemoveTag(tag)}
+                  className="ml-1 flex h-4 w-4 items-center justify-center rounded-full hover:bg-violet-200 dark:hover:bg-violet-800/40 transition-colors"
+                >
+                  <X size={10} />
+                </button>
+              </Badge>
+            ))}
+            <div className="flex items-center gap-1.5">
+              <input
+                type="text"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleAddTag();
+                  if (e.key === 'Escape') setShowTagEditor(false);
+                }}
+                placeholder={t('assemblies.add_tag', { defaultValue: 'Add tag...' })}
+                className="h-7 w-28 rounded-md border border-border-light bg-surface-primary px-2 text-xs text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-1 focus:ring-violet-400"
+                autoFocus
+              />
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleAddTag}
+                disabled={!tagInput.trim()}
+                className="h-7 px-2 text-xs"
+              >
+                +
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Components Table */}
       <Card padding="none" className="overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border-light bg-surface-tertiary text-left">
+                <th className="w-8 px-1 py-3" />
                 <th className="px-4 py-3 font-medium text-content-secondary min-w-[280px]">
                   {t('boq.description')}
                 </th>
@@ -204,10 +341,21 @@ export function AssemblyEditorPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border-light">
-              {components.map((component) => (
+              {components.map((component, idx) => (
                 <ComponentRow
                   key={component.id}
                   component={component}
+                  isDragOver={dragOverIdx === idx}
+                  onDragStart={() => { dragIdx.current = idx; }}
+                  onDragOver={(e) => { e.preventDefault(); setDragOverIdx(idx); }}
+                  onDragEnd={() => {
+                    if (dragIdx.current !== null && dragOverIdx !== null) {
+                      handleDragEnd(dragIdx.current, dragOverIdx);
+                    }
+                    dragIdx.current = null;
+                    setDragOverIdx(null);
+                  }}
+                  onDragLeave={() => setDragOverIdx(null)}
                   onUpdate={(data) =>
                     updateComponentMutation.mutate({
                       componentId: component.id,
@@ -220,7 +368,7 @@ export function AssemblyEditorPage() {
               ))}
               {components.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-10 text-center text-content-tertiary">
+                  <td colSpan={8} className="px-4 py-10 text-center text-content-tertiary">
                     {t('assemblies.no_components_hint', { defaultValue: 'No components yet. Click "Add Component" to start building this assembly.' })}
                   </td>
                 </tr>
@@ -230,7 +378,7 @@ export function AssemblyEditorPage() {
               <tfoot>
                 {assembly.bid_factor !== 1.0 && (
                   <tr className="border-t border-border-light bg-surface-tertiary/50">
-                    <td colSpan={5} className="px-4 py-2.5 text-right text-sm text-content-secondary">
+                    <td colSpan={6} className="px-4 py-2.5 text-right text-sm text-content-secondary">
                       {t('assemblies.subtotal', { defaultValue: 'Subtotal' })}
                     </td>
                     <td className="px-4 py-2.5 text-right text-sm text-content-secondary tabular-nums">
@@ -241,7 +389,7 @@ export function AssemblyEditorPage() {
                 )}
                 {assembly.bid_factor !== 1.0 && (
                   <tr className="border-t border-border-light bg-surface-tertiary/50">
-                    <td colSpan={5} className="px-4 py-2.5 text-right text-sm text-content-secondary">
+                    <td colSpan={6} className="px-4 py-2.5 text-right text-sm text-content-secondary">
                       {t('assemblies.bid_factor', { defaultValue: 'Bid Factor' })} ({assembly.bid_factor})
                     </td>
                     <td className="px-4 py-2.5 text-right text-sm text-content-secondary tabular-nums">
@@ -251,7 +399,7 @@ export function AssemblyEditorPage() {
                   </tr>
                 )}
                 <tr className="border-t-2 border-border bg-surface-tertiary font-semibold">
-                  <td colSpan={5} className="px-4 py-3 text-right text-content-primary">
+                  <td colSpan={6} className="px-4 py-3 text-right text-content-primary">
                     {assembly.bid_factor !== 1.0
                       ? t('assemblies.total_rate_adjusted', {
                           defaultValue: 'Total Rate (\u00d7{{factor}} bid factor)',
@@ -460,11 +608,21 @@ function CostDbSearchForAssembly({
 
 function ComponentRow({
   component,
+  isDragOver,
+  onDragStart,
+  onDragOver,
+  onDragEnd,
+  onDragLeave,
   onUpdate,
   onDelete,
   fmt,
 }: {
   component: AssemblyComponent;
+  isDragOver: boolean;
+  onDragStart: () => void;
+  onDragOver: (e: React.DragEvent) => void;
+  onDragEnd: () => void;
+  onDragLeave: () => void;
   onUpdate: (data: Partial<CreateComponentData>) => void;
   onDelete: () => void;
   fmt: (n: number) => string;
@@ -489,7 +647,21 @@ function ComponentRow({
 
   return (
     <>
-    <tr className="group hover:bg-surface-secondary/50 transition-colors">
+    <tr
+      className={`group hover:bg-surface-secondary/50 transition-colors ${isDragOver ? 'border-t-2 border-oe-blue' : ''}`}
+      draggable
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDragEnd={onDragEnd}
+      onDragLeave={onDragLeave}
+    >
+      {/* Drag handle */}
+      <td className="px-1 py-2.5 cursor-grab active:cursor-grabbing">
+        <div className="flex items-center justify-center text-content-quaternary group-hover:text-content-tertiary transition-colors">
+          <GripVertical size={14} />
+        </div>
+      </td>
+
       {/* Description */}
       <td className={cellClass}>
         <EditableCell
