@@ -91,6 +91,7 @@ export interface DwgAnnotation {
   measurement_value: number | null;
   measurement_unit: string | null;
   linked_boq_position_id: string | null;
+  metadata?: Record<string, unknown>;
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -113,6 +114,7 @@ export interface CreateAnnotationPayload {
   color?: string;
   measurement_value?: number;
   measurement_unit?: string;
+  metadata?: Record<string, unknown>;
 }
 
 export interface UpdateAnnotationPayload {

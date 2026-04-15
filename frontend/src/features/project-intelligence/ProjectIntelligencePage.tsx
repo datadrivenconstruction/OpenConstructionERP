@@ -282,7 +282,7 @@ export function ProjectIntelligencePage() {
 
   if (loading) {
     return (
-      <div className="max-w-content mx-auto py-16">
+      <div className="w-full py-16">
         <div className="text-center space-y-3 animate-pulse">
           <BrainCircuit size={48} className="mx-auto text-oe-blue" />
           <p className="text-sm text-content-secondary">
@@ -296,7 +296,7 @@ export function ProjectIntelligencePage() {
   if (error) {
     const isAuth = error.includes('401') || error.includes('auth') || error.includes('Unauthorized');
     return (
-      <div className="max-w-content mx-auto py-12">
+      <div className="w-full py-12">
         <div className="text-center space-y-4">
           <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center mx-auto">
             <AlertTriangle size={28} className="text-amber-500" />

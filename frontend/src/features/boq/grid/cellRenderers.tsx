@@ -13,6 +13,9 @@ import {
   Boxes,
   Cuboid,
   Ruler,
+  ArrowRight,
+  Loader2,
+  Info,
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -29,6 +32,13 @@ const VALIDATION_DOT_STYLES: Record<string, string> = {
   warnings: 'bg-amber-500',
   errors: 'bg-red-500',
   pending: 'bg-gray-300 dark:bg-gray-600',
+};
+
+const VALIDATION_DOT_TOOLTIP: Record<string, string> = {
+  passed: 'Validation passed — position is complete',
+  warnings: 'Validation warnings — review recommended',
+  errors: 'Validation errors — action required',
+  pending: 'Validation pending — not yet checked',
 };
 
 /* ── Section Full-Width Group Row Renderer ────────────────────────── */
@@ -277,8 +287,8 @@ export function OrdinalCellRenderer(params: ICellRendererParams) {
     <div className="flex items-center gap-1 overflow-hidden">
       <span className="text-xs font-mono truncate min-w-0">{value}</span>
       <span
-        className={`inline-block h-2 w-2 shrink-0 rounded-full ${dotColor}`}
-        title={status}
+        className={`inline-block h-2 w-2 shrink-0 rounded-full ${dotColor} cursor-help`}
+        title={VALIDATION_DOT_TOOLTIP[status] ?? status}
       />
     </div>
   );
@@ -320,8 +330,8 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
   const popoverStyle = anchorRect
     ? {
         position: 'fixed' as const,
-        left: Math.min(anchorRect.right + 8, window.innerWidth - 400),
-        top: Math.max(8, Math.min(anchorRect.top - 40, window.innerHeight - 500)),
+        left: Math.min(anchorRect.right + 8, window.innerWidth - 660),
+        top: Math.max(8, Math.min(anchorRect.top - 40, window.innerHeight - 520)),
         zIndex: 9999,
       }
     : undefined;
@@ -357,6 +367,8 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
               elementIds={bimLinkIds}
               style={popoverStyle!}
               onClose={() => setShowPreview(false)}
+              positionData={data}
+              onUpdatePosition={ctx?.onUpdatePosition}
             />
           </>,
           document.body,
@@ -374,8 +386,10 @@ const BimLinkPopover = forwardRef<
     elementIds: string[];
     style: React.CSSProperties;
     onClose: () => void;
+    positionData?: Record<string, unknown>;
+    onUpdatePosition?: (id: string, data: Record<string, unknown>, oldData: Record<string, unknown>) => void;
   }
->(function BimLinkPopover({ modelId, elementIds, style, onClose }, ref) {
+>(function BimLinkPopover({ modelId, elementIds, style, onClose, positionData, onUpdatePosition }, ref) {
   const innerRef = useRef<HTMLDivElement>(null);
   const combinedRef = useCallback(
     (node: HTMLDivElement | null) => {
@@ -405,6 +419,7 @@ const BimLinkPopover = forwardRef<
   }, [onClose]);
 
   const [glbOk, setGlbOk] = useState(true);
+  const [showAllProps, setShowAllProps] = useState(false);
   const { data, isLoading } = useQuery({
     queryKey: ['bim-link-preview', modelId, ...elementIds],
     queryFn: () => fetchBIMElementsByIds(modelId, elementIds),
@@ -413,12 +428,57 @@ const BimLinkPopover = forwardRef<
   });
   const elements = data?.items ?? [];
 
+  const currentQuantity = typeof positionData?.quantity === 'number' ? positionData.quantity : 0;
+  const canApply = !!positionData?.id && !!onUpdatePosition;
+
+  const handleUseQuantity = useCallback(
+    (value: number, source: string) => {
+      if (!positionData?.id || !onUpdatePosition) return;
+      const id = positionData.id as string;
+      const oldMeta = (positionData.metadata ?? {}) as Record<string, unknown>;
+      onUpdatePosition(
+        id,
+        { quantity: value, metadata: { ...oldMeta, bim_qty_source: source } },
+        { ...positionData, quantity: currentQuantity },
+      );
+    },
+    [positionData, onUpdatePosition, currentQuantity],
+  );
+
+  // Compute sums across all elements for each quantity key
+  const quantitySums = useMemo(() => {
+    if (elements.length === 0) return [] as { key: string; label: string; sum: number; unit: string; count: number }[];
+    const map = new Map<string, { key: string; label: string; sum: number; unit: string; count: number }>();
+    for (const el of elements) {
+      if (!el.quantities) continue;
+      for (const [k, v] of Object.entries(el.quantities)) {
+        const num = typeof v === 'number' ? v : parseFloat(String(v));
+        if (isNaN(num) || num === 0) continue;
+        const existing = map.get(k);
+        const label = k.replace(/_m2$|_m3$|_m$|_kg$/, '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+        if (existing) {
+          existing.sum += num;
+          existing.count += 1;
+        } else {
+          let unit = '';
+          if (k.includes('area') || k.endsWith('_m2')) unit = 'm\u00B2';
+          else if (k.includes('volume') || k.endsWith('_m3')) unit = 'm\u00B3';
+          else if (k.includes('length') || k.endsWith('_m') || k.includes('height') || k.includes('width') || k.includes('perimeter')) unit = 'm';
+          else if (k.includes('weight') || k.endsWith('_kg')) unit = 'kg';
+          else if (k.includes('count')) unit = 'pcs';
+          map.set(k, { key: k, label, sum: num, unit, count: 1 });
+        }
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => b.sum - a.sum);
+  }, [elements]);
+
   return (
     <div
       ref={combinedRef}
       className="rounded-xl shadow-2xl border border-border-light dark:border-border-dark
-                 bg-white dark:bg-surface-elevated overflow-hidden w-[380px]"
-      style={style}
+                 bg-white dark:bg-surface-elevated overflow-hidden"
+      style={{ ...style, width: canApply ? 640 : 380 }}
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
     >
@@ -442,54 +502,177 @@ const BimLinkPopover = forwardRef<
         </button>
       </div>
 
-      {/* 3D Preview — large */}
-      {glbOk && (
-        <MiniGeometryPreview
-          modelId={modelId}
-          elementIds={elementIds}
-          width={380}
-          height={240}
-          className="bg-gray-50 dark:bg-gray-900 border-b border-border-light dark:border-border-dark"
-          onError={() => setGlbOk(false)}
-        />
-      )}
+      <div className={canApply ? 'flex' : ''}>
+        {/* Left column: 3D preview + element cards */}
+        <div className={canApply ? 'w-[380px] shrink-0 border-r border-border-light dark:border-border-dark' : 'w-full'}>
+          {/* 3D Preview */}
+          {glbOk && (
+            <MiniGeometryPreview
+              modelId={modelId}
+              elementIds={elementIds}
+              width={380}
+              height={220}
+              className="bg-gray-50 dark:bg-gray-900 border-b border-border-light dark:border-border-dark"
+              onError={() => setGlbOk(false)}
+            />
+          )}
 
-      {/* Element info cards */}
-      <div className="max-h-[200px] overflow-y-auto">
-        {isLoading && (
-          <div className="flex items-center justify-center py-6 text-content-tertiary text-xs">
-            Loading element data...
-          </div>
-        )}
-        {!isLoading && elements.map((el) => (
-          <div key={el.id} className="px-4 py-2.5 border-b border-border-light/50 dark:border-border-dark/50 last:border-b-0">
-            <div className="flex items-center gap-2">
-              <Cuboid size={12} className="text-oe-blue/60 shrink-0" />
-              <div className="min-w-0 flex-1">
-                <div className="text-xs font-medium text-content-primary truncate">
-                  {el.name || el.element_type}
-                </div>
-                <div className="text-[10px] text-content-tertiary font-mono">{el.element_type}</div>
-              </div>
-            </div>
-            {el.quantities && Object.keys(el.quantities).length > 0 && (
-              <div className="mt-1.5 ml-5 grid grid-cols-2 gap-x-3 gap-y-0.5">
-                {Object.entries(el.quantities).map(([k, v]) => (
-                  <div key={k} className="flex items-baseline justify-between gap-1">
-                    <span className="text-[10px] text-content-secondary truncate">{k}</span>
-                    <span className="text-[10px] font-mono text-content-primary tabular-nums shrink-0">
-                      {typeof v === 'number' ? v.toFixed(2) : String(v)}
-                    </span>
-                  </div>
-                ))}
+          {/* Element info cards */}
+          <div className="max-h-[180px] overflow-y-auto">
+            {isLoading && (
+              <div className="flex items-center justify-center py-6 text-content-tertiary text-xs">
+                Loading element data...
               </div>
             )}
+            {!isLoading && elements.map((el) => (
+              <div key={el.id} className="px-3 py-2 border-b border-border-light/50 dark:border-border-dark/50 last:border-b-0">
+                <div className="flex items-center gap-2">
+                  <Cuboid size={11} className="text-oe-blue/60 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[11px] font-medium text-content-primary truncate">
+                      {el.name || el.element_type}
+                    </div>
+                    <div className="text-[9px] text-content-tertiary font-mono">{el.element_type}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
+
+        {/* Right column: properties + quantity picker */}
+        {canApply && (
+          <div className="w-[260px] flex flex-col">
+            {/* Properties header + toggle */}
+            <button
+              onClick={() => setShowAllProps((v) => !v)}
+              className="flex items-center gap-1.5 px-3 py-1.5 w-full bg-blue-50/50 dark:bg-blue-950/20 border-b border-border-light/50 dark:border-border-dark/50 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
+            >
+              <Info size={11} className="text-blue-600 shrink-0" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400 flex-1 text-left">
+                Properties
+              </span>
+              <ChevronDown size={12} className={`text-blue-500 transition-transform ${showAllProps ? 'rotate-180' : ''}`} />
+            </button>
+            <div className={`overflow-y-auto border-b border-border-light dark:border-border-dark ${showAllProps ? 'max-h-[280px]' : 'max-h-[140px]'}`}>
+              {isLoading && (
+                <div className="flex items-center justify-center gap-2 py-4">
+                  <Loader2 size={12} className="animate-spin text-content-tertiary" />
+                </div>
+              )}
+              {!isLoading && elements.map((el) => {
+                // Collect numeric entries from quantities + properties
+                const numericEntries: { key: string; value: number; source: 'qty' | 'prop' }[] = [];
+                if (el.quantities) {
+                  for (const [k, v] of Object.entries(el.quantities)) {
+                    const num = typeof v === 'number' ? v : parseFloat(String(v));
+                    if (!isNaN(num)) numericEntries.push({ key: k, value: num, source: 'qty' });
+                  }
+                }
+                if (showAllProps && el.properties) {
+                  for (const [k, v] of Object.entries(el.properties)) {
+                    const num = typeof v === 'number' ? v : parseFloat(String(v));
+                    if (!isNaN(num) && !numericEntries.some((e) => e.key === k)) {
+                      numericEntries.push({ key: k, value: num, source: 'prop' });
+                    }
+                  }
+                }
+                if (numericEntries.length === 0) return null;
+                return (
+                  <div key={el.id} className="px-3 py-1.5 border-b border-border-light/30 dark:border-border-dark/30 last:border-b-0">
+                    {elements.length > 1 && (
+                      <div className="text-[9px] font-medium text-content-tertiary mb-0.5 truncate">{el.name || el.element_type}</div>
+                    )}
+                    {numericEntries.map(({ key, value, source }) => (
+                      <div key={key} className="flex items-baseline justify-between gap-2 py-0.5">
+                        <span className={`text-[10px] truncate ${source === 'prop' ? 'text-content-tertiary italic' : 'text-content-secondary'}`}>
+                          {key.replace(/_/g, ' ')}
+                        </span>
+                        <span className="text-[10px] font-mono text-content-primary tabular-nums shrink-0 font-medium">
+                          {value.toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+              {!isLoading && elements.every((el) => !el.quantities || Object.keys(el.quantities).length === 0) && !showAllProps && (
+                <div className="py-3 text-center text-[10px] text-content-tertiary">No quantities — click to show all properties</div>
+              )}
+            </div>
+
+            {/* Apply Quantity section — aggregated sums */}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50/50 dark:bg-emerald-950/20 border-b border-border-light/50 dark:border-border-dark/50">
+              <Ruler size={11} className="text-emerald-600 shrink-0" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                Apply to BOQ
+              </span>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {isLoading && (
+                <div className="flex items-center justify-center gap-2 py-4">
+                  <Loader2 size={12} className="animate-spin text-content-tertiary" />
+                </div>
+              )}
+              {!isLoading && quantitySums.length === 0 && (
+                <div className="py-3 text-center text-[10px] text-content-tertiary">
+                  No numeric quantities
+                </div>
+              )}
+              {!isLoading && quantitySums.map((s) => {
+                const isCurrent = Math.abs(s.sum - currentQuantity) < 0.001;
+                return (
+                  <div
+                    key={s.key}
+                    className={`flex items-center gap-1 px-3 py-1.5 group/qrow transition-colors ${
+                      isCurrent
+                        ? 'bg-emerald-50/60 dark:bg-emerald-950/20'
+                        : 'hover:bg-emerald-50/80 dark:hover:bg-emerald-950/30'
+                    }`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <span className="text-[11px] text-content-secondary truncate block">
+                        {s.label}
+                      </span>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-[12px] tabular-nums text-content-primary font-semibold">
+                          {Number.isInteger(s.sum) ? s.sum.toLocaleString('en') : s.sum.toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
+                        </span>
+                        {s.unit && (
+                          <span className="text-[9px] text-content-quaternary font-mono">{s.unit}</span>
+                        )}
+                        {elements.length > 1 && s.count > 1 && (
+                          <span className="text-[8px] text-content-quaternary">({s.count} el.)</span>
+                        )}
+                      </div>
+                    </div>
+                    {isCurrent ? (
+                      <span className="text-[9px] text-emerald-600 font-semibold shrink-0 bg-emerald-100 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded">
+                        current
+                      </span>
+                    ) : (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUseQuantity(s.sum, `BIM: ${s.label}`);
+                        }}
+                        className="shrink-0 h-6 flex items-center gap-0.5 px-2.5 rounded text-[10px] font-semibold
+                                   text-white bg-emerald-500 hover:bg-emerald-600
+                                   shadow-sm transition-all"
+                      >
+                        Use <ArrowRight size={9} />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Footer — navigate to BIM viewer */}
-      <div className="px-4 py-2.5 border-t border-border-light dark:border-border-dark bg-surface-secondary/20">
+      <div className="px-4 py-2 border-t border-border-light dark:border-border-dark bg-surface-secondary/20">
         <a
           href={`/bim?model=${encodeURIComponent(modelId)}&highlight=${encodeURIComponent(elementIds.join(','))}`}
           className="flex items-center justify-center gap-2 w-full h-8 rounded-lg
@@ -831,21 +1014,24 @@ export function QuantityCellRenderer(params: ICellRendererParams) {
   }
 
   const ctx = context as FullGridContext | undefined;
-  // Smart formatting: >=0.01 → 2 decimals; <0.01 → show all significant digits
+  // Smart formatting: >=1 → 2 decimals; <1 → up to 4; <0.01 → show all significant digits
   let formatted = '';
   if (value != null) {
     const num = typeof value === 'number' ? value : parseFloat(String(value));
     if (!isNaN(num)) {
       const absVal = Math.abs(num);
-      // For very small values, find how many decimals are needed to show first significant digit
       let maxFrac = 2;
       if (absVal > 0 && absVal < 0.01) {
-        // e.g. 0.000018 → need 6 decimals; 0.0018 → need 4
         maxFrac = Math.max(6, Math.ceil(-Math.log10(absVal)) + 2);
       } else if (absVal > 0 && absVal < 1) {
         maxFrac = 4;
       }
-      const f = ctx?.fmt ?? new Intl.NumberFormat('en', { minimumFractionDigits: 2, maximumFractionDigits: maxFrac });
+      // Always use a dedicated formatter with the computed maxFrac
+      // (ctx.fmt is fixed at 2 decimals and would hide small values)
+      const f = new Intl.NumberFormat(ctx?.locale ?? 'en', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: maxFrac,
+      });
       formatted = f.format(num);
     }
   }

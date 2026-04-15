@@ -1298,7 +1298,7 @@ export function CatalogPage() {
   }, [queryClient]);
 
   return (
-    <div className="max-w-content mx-auto animate-fade-in">
+    <div className="w-full animate-fade-in">
       {/* Header */}
       <div className="mb-5 flex items-start justify-between">
         <div>

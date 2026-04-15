@@ -767,7 +767,7 @@ export function SettingsPage() {
   const pwValid = pwForm.current.length >= 8 && pwForm.new_.length >= 8 && pwForm.new_ === pwForm.confirm;
 
   return (
-    <div className="max-w-content mx-auto space-y-6 animate-fade-in">
+    <div className="w-full space-y-6 animate-fade-in">
       <Breadcrumb items={[
         { label: t('nav.dashboard', 'Dashboard'), to: '/' },
         { label: t('nav.settings', 'Settings') },
@@ -775,7 +775,7 @@ export function SettingsPage() {
 
       {/* Update notification — surfaced in Settings so users see new
           versions even if they dismissed the sidebar widget for the session. */}
-      <div className="-mx-2">
+      <div className="-mx-4 sm:-mx-7">
         <UpdateNotification forceShow hideDismiss />
       </div>
 

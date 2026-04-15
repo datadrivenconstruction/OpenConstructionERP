@@ -568,27 +568,38 @@ class BIMHubService:
             for lnk in elem.boq_links or []:
                 pos_ids.add(lnk.boq_position_id)
 
-        pos_info: dict[uuid.UUID, tuple[str | None, str | None]] = {}
+        pos_info: dict[uuid.UUID, tuple[str | None, str | None, Any, str | None, Any, Any]] = {}
         if pos_ids:
             pos_stmt = select(
-                Position.id, Position.ordinal, Position.description
+                Position.id, Position.ordinal, Position.description,
+                Position.quantity, Position.unit, Position.unit_rate, Position.total,
             ).where(Position.id.in_(pos_ids))
             pos_result = await self.session.execute(pos_stmt)
-            for pid, ordinal, desc in pos_result.all():
-                pos_info[pid] = (ordinal, desc)
+            for pid, ordinal, desc, qty, unit, urate, total in pos_result.all():
+                pos_info[pid] = (ordinal, desc, qty, unit, urate, total)
 
         # ── Step 3: build BOQ brief dicts per element ───────────────────
         boq_links_by_element_id: dict[uuid.UUID, list[dict[str, Any]]] = {}
         for elem in elements:
             briefs: list[dict[str, Any]] = []
             for lnk in elem.boq_links or []:
-                ordinal, desc = pos_info.get(lnk.boq_position_id, (None, None))
+                info = pos_info.get(lnk.boq_position_id)
+                ordinal = info[0] if info else None
+                desc = info[1] if info else None
+                qty = float(info[2]) if info and info[2] is not None else None
+                unit = info[3] if info else None
+                urate = float(info[4]) if info and info[4] is not None else None
+                total = float(info[5]) if info and info[5] is not None else None
                 briefs.append(
                     {
                         "id": lnk.id,
                         "boq_position_id": lnk.boq_position_id,
                         "boq_position_ordinal": ordinal,
                         "boq_position_description": desc,
+                        "boq_position_quantity": qty,
+                        "boq_position_unit": unit,
+                        "boq_position_unit_rate": urate,
+                        "boq_position_total": total,
                         "link_type": lnk.link_type,
                         "confidence": lnk.confidence,
                     }

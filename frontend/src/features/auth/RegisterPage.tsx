@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import {
   Eye, EyeOff, Mail, Lock, User, Globe, ChevronDown,
   ShieldCheck, HardDrive, Zap, Globe2, Brain, Users,
+  Building2, Briefcase, Search,
 } from 'lucide-react';
 import { Button, Input, LogoWithText, CountryFlag } from '@/shared/ui';
 import { SUPPORTED_LANGUAGES, getLanguageByCode } from '@/app/i18n';
@@ -17,9 +18,13 @@ export function RegisterPage() {
   const currentLang = getLanguageByCode(i18n.language);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const [company, setCompany] = useState('');
+  const [jobTitle, setJobTitle] = useState('');
+  const [howFoundUs, setHowFoundUs] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [langOpen, setLangOpen] = useState(false);
@@ -55,7 +60,14 @@ export function RegisterPage() {
       const regRes = await fetch('/api/v1/users/auth/register/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, full_name: fullName }),
+        body: JSON.stringify({
+          email,
+          password,
+          full_name: fullName,
+          company,
+          job_title: jobTitle,
+          how_found_us: howFoundUs,
+        }),
       });
 
       if (!regRes.ok) {
@@ -235,6 +247,61 @@ export function RegisterPage() {
                 />
               </div>
 
+              <div className="animate-stagger-in" style={{ animationDelay: '320ms' }}>
+                <Input
+                  id="register-company"
+                  name="company"
+                  label={t('auth.company', 'Company')}
+                  type="text"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  placeholder={t('auth.company_placeholder', 'Your company or organisation')}
+                  autoComplete="organization"
+                  icon={<Building2 size={15} />}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 animate-stagger-in" style={{ animationDelay: '330ms' }}>
+                <Input
+                  id="register-job-title"
+                  name="job_title"
+                  label={t('auth.job_title', 'Role')}
+                  type="text"
+                  value={jobTitle}
+                  onChange={(e) => setJobTitle(e.target.value)}
+                  placeholder={t('auth.job_title_placeholder', 'e.g. Estimator')}
+                  autoComplete="organization-title"
+                  icon={<Briefcase size={15} />}
+                />
+                <div>
+                  <label htmlFor="register-how-found" className="text-sm font-medium text-content-primary block mb-1">
+                    {t('auth.how_found_us', 'How did you find us?')}
+                  </label>
+                  <div className="relative">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-content-tertiary">
+                      <Search size={15} />
+                    </div>
+                    <select
+                      id="register-how-found"
+                      name="how_found_us"
+                      value={howFoundUs}
+                      onChange={(e) => setHowFoundUs(e.target.value)}
+                      className="h-9 w-full rounded-lg border border-border bg-surface-primary pl-9 pr-3 text-sm text-content-primary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary appearance-none cursor-pointer"
+                    >
+                      <option value="">{t('auth.how_found_select', '— Select —')}</option>
+                      <option value="google">{t('auth.how_found_google', 'Google Search')}</option>
+                      <option value="github">{t('auth.how_found_github', 'GitHub')}</option>
+                      <option value="linkedin">{t('auth.how_found_linkedin', 'LinkedIn')}</option>
+                      <option value="reddit">{t('auth.how_found_reddit', 'Reddit')}</option>
+                      <option value="youtube">{t('auth.how_found_youtube', 'YouTube')}</option>
+                      <option value="recommendation">{t('auth.how_found_recommendation', 'Recommendation')}</option>
+                      <option value="conference">{t('auth.how_found_conference', 'Conference / Event')}</option>
+                      <option value="other">{t('auth.how_found_other', 'Other')}</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
               <div className="flex flex-col gap-1 animate-stagger-in" style={{ animationDelay: '340ms' }}>
                 <label htmlFor="register-password" className="text-sm font-medium text-content-primary">
                   {t('auth.password', 'Password')}
@@ -300,13 +367,46 @@ export function RegisterPage() {
                 </div>
               )}
 
+              <div className="animate-stagger-in" style={{ animationDelay: '410ms' }}>
+                <label className="flex items-start gap-2 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={privacyAccepted}
+                    onChange={(e) => setPrivacyAccepted(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 rounded border-border text-oe-blue focus:ring-oe-blue cursor-pointer shrink-0"
+                  />
+                  <span className="text-[11px] text-content-secondary leading-snug">
+                    {t('auth.privacy_consent', 'I agree to the')}{' '}
+                    <a
+                      href="/privacy-policy.html"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-oe-blue hover:underline font-medium"
+                    >
+                      {t('auth.privacy_policy', 'Privacy Policy')}
+                    </a>
+                    {' '}{t('auth.and', 'and')}{' '}
+                    <a
+                      href="/terms.html"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-oe-blue hover:underline font-medium"
+                    >
+                      {t('auth.terms_of_service', 'Terms of Service')}
+                    </a>
+                    {'. '}
+                    {t('auth.privacy_consent_detail', 'Your data is processed in accordance with GDPR. We collect your name, email, company info, and usage data to provide the service. You can delete your account at any time.')}
+                  </span>
+                </label>
+              </div>
+
               <div className="animate-stagger-in" style={{ animationDelay: '420ms' }}>
                 <Button
                   type="submit"
                   variant="primary"
                   size="lg"
                   loading={loading}
-                  disabled={!fullName || !email || !password || !confirmPassword || !passwordsMatch || !passwordLongEnough}
+                  disabled={!fullName || !email || !password || !confirmPassword || !passwordsMatch || !passwordLongEnough || !privacyAccepted}
                   className="w-full btn-shimmer"
                 >
                   {t('auth.create_account', 'Create account')}

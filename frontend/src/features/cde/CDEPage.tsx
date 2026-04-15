@@ -876,7 +876,7 @@ export function CDEPage() {
   );
 
   return (
-    <div className="max-w-content mx-auto animate-fade-in">
+    <div className="w-full animate-fade-in">
       {/* Breadcrumb */}
       <Breadcrumb
         items={[

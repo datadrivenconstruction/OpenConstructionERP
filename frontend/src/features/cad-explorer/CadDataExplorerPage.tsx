@@ -57,52 +57,7 @@ function formatNumber(n: number | null | undefined): string {
   return n.toLocaleString(undefined, { maximumFractionDigits: 4 });
 }
 
-/* ── Stats Cards ───────────────────────────────────────────────────────── */
-
-function StatsCards({ data }: { data: DescribeResponse }) {
-  const { t } = useTranslation();
-  const numericCols = data.columns.filter((c) => c.dtype === 'number' && c.non_null > 0);
-  const stringCols = data.columns.filter((c) => c.dtype === 'string' && c.non_null > 0);
-  const totalVolume = numericCols.find((c) => c.name.toLowerCase().includes('volume'))?.sum;
-  const totalArea = numericCols.find((c) => c.name.toLowerCase().includes('area'))?.sum;
-  const categories = data.columns.find((c) => c.name.toLowerCase() === 'category');
-  const formatBadge = data.format ? data.format.toUpperCase() : '';
-
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3">
-      <Card className="p-3">
-        <div className="flex items-center justify-between">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">{t('explorer.elements', { defaultValue: 'Elements' })}</p>
-          {formatBadge && <Badge variant="blue" size="sm">{formatBadge}</Badge>}
-        </div>
-        <p className="text-lg font-bold text-content-primary tabular-nums">{data.total_elements.toLocaleString()}</p>
-      </Card>
-      <Card className="p-3">
-        <p className="text-2xs text-content-tertiary uppercase tracking-wide">{t('explorer.columns', { defaultValue: 'Columns' })}</p>
-        <p className="text-lg font-bold text-content-primary tabular-nums">{stringCols.length + numericCols.length}</p>
-        <p className="text-2xs text-content-quaternary">{stringCols.length} text · {numericCols.length} numeric</p>
-      </Card>
-      {categories && (
-        <Card className="p-3">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">{t('explorer.categories', { defaultValue: 'Categories' })}</p>
-          <p className="text-lg font-bold text-content-primary tabular-nums">{categories.unique}</p>
-        </Card>
-      )}
-      {totalVolume != null && totalVolume > 0 && (
-        <Card className="p-3">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">{t('explorer.total_volume', { defaultValue: 'Total Volume' })}</p>
-          <p className="text-lg font-bold text-oe-blue tabular-nums">{formatNumber(totalVolume)} m³</p>
-        </Card>
-      )}
-      {totalArea != null && totalArea > 0 && (
-        <Card className="p-3">
-          <p className="text-2xs text-content-tertiary uppercase tracking-wide">{t('explorer.total_area', { defaultValue: 'Total Area' })}</p>
-          <p className="text-lg font-bold text-oe-blue tabular-nums">{formatNumber(totalArea)} m²</p>
-        </Card>
-      )}
-    </div>
-  );
-}
+/* ── (Stats now rendered as header pills in the session view) ──────────── */
 
 /* ── Data Table Tab ────────────────────────────────────────────────────── */
 
@@ -1699,7 +1654,6 @@ function SaveToProjectDialog({
 
 export function CadDataExplorerPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const sessionId = searchParams.get('session') || '';
@@ -1751,7 +1705,7 @@ export function CadDataExplorerPage() {
     ];
 
     return (
-      <div className="max-w-content mx-auto px-4 py-4 space-y-8 animate-fade-in">
+      <div className="w-full px-4 py-4 space-y-8 animate-fade-in">
         <Breadcrumb items={[
           { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
           { label: t('explorer.title', { defaultValue: 'CAD-BIM Explorer' }) },
@@ -1915,117 +1869,128 @@ export function CadDataExplorerPage() {
   }
 
   return (
-    <div className="max-w-content mx-auto px-4 py-4 space-y-4 animate-fade-in">
-      <Breadcrumb items={[
-        { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
-        { label: t('nav.documents', { defaultValue: 'Documents' }), to: '/documents' },
-        { label: t('explorer.title', { defaultValue: 'CAD-BIM Explorer' }) },
-      ]} />
-
-      {/* Header */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle shrink-0">
-            <Database size={20} className="text-oe-blue" />
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold text-content-primary truncate">
+    <div className="flex flex-col -mx-4 sm:-mx-7 -mt-6 -mb-6 border-s border-border-light" style={{ height: 'calc(100vh - 56px)' }}>
+      {/* ── Header ── */}
+      <div className="relative z-20 px-3 py-2.5 flex items-center justify-between border-b border-border-light bg-surface-primary">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-oe-blue/10 to-blue-50 dark:to-blue-950/20 border border-oe-blue/15 flex items-center justify-center">
+              <Database size={18} className="text-oe-blue" />
+            </div>
+            <div>
+              <h1 className="text-sm font-bold text-content-primary">
                 {describe ? describe.filename : t('explorer.title', { defaultValue: 'CAD-BIM Explorer' })}
               </h1>
               {describe?.format && (
-                <Badge variant="blue" size="sm">{describe.format.toUpperCase()}</Badge>
+                <p className="text-[10px] text-content-tertiary truncate max-w-[160px]">{describe.format.toUpperCase()} {t('explorer.data_session', { defaultValue: 'Data Session' })}</p>
               )}
             </div>
-            {describe && (
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="inline-flex items-center gap-1 text-2xs text-content-tertiary">
-                  <Hash size={10} />
-                  {describe.total_elements.toLocaleString()} {t('explorer.rows', { defaultValue: 'rows' })}
-                </span>
-                <span className="text-content-quaternary text-2xs">|</span>
-                <span className="inline-flex items-center gap-1 text-2xs text-content-tertiary">
-                  <Columns3 size={10} />
-                  {describe.total_columns} {t('explorer.columns', { defaultValue: 'columns' })}
-                </span>
-              </div>
-            )}
           </div>
+          {describe && (
+            <div className="flex items-center gap-2 ms-2">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-secondary border border-border-light">
+                <Hash size={12} className="text-content-quaternary" />
+                <span className="text-[10px] font-medium text-content-tertiary">{t('explorer.elements', { defaultValue: 'Elements' })}</span>
+                <span className="text-[10px] font-bold text-content-primary tabular-nums">{describe.total_elements.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-secondary border border-border-light">
+                <Columns3 size={12} className="text-content-quaternary" />
+                <span className="text-[10px] font-medium text-content-tertiary">{t('explorer.columns', { defaultValue: 'Columns' })}</span>
+                <span className="text-[10px] font-bold text-content-primary tabular-nums">{describe.total_columns}</span>
+              </div>
+              {describe.format && (
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-secondary border border-border-light">
+                  <Database size={12} className="text-content-quaternary" />
+                  <span className="text-[10px] font-medium text-content-tertiary">{t('explorer.format', { defaultValue: 'Format' })}</span>
+                  <span className="text-[10px] font-bold text-content-primary">{describe.format.toUpperCase()}</span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
-        <div className="flex items-center gap-1.5 shrink-0">
-          <Button variant="primary" size="sm" onClick={() => setShowSaveToProjectDialog(true)} className="shrink-0 whitespace-nowrap">
-            <FolderOpen size={13} className="mr-1" />
-            <span>{t('explorer.save_to_project_btn', { defaultValue: 'Save to Project' })}</span>
-          </Button>
-          <Button variant="secondary" size="sm" onClick={() => setShowSaveDialog(true)} className="shrink-0 whitespace-nowrap">
-            <Save size={13} className="mr-1" />
-            <span>{t('explorer.save_analysis', { defaultValue: 'Save' })}</span>
-          </Button>
-          <Button variant="secondary" size="sm" onClick={() => { setSearchParams({}); }} className="shrink-0 whitespace-nowrap">
-            <Upload size={13} className="mr-1" />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowSaveToProjectDialog(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border bg-oe-blue/10 text-oe-blue border-oe-blue/30 hover:bg-oe-blue/20"
+          >
+            <FolderOpen size={13} />
+            {t('explorer.save_to_project_btn', { defaultValue: 'Save to Project' })}
+          </button>
+          <button
+            onClick={() => setShowSaveDialog(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
+          >
+            <Save size={13} />
+            {t('explorer.save_analysis', { defaultValue: 'Save' })}
+          </button>
+          <button
+            onClick={() => { setSearchParams({}); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors border text-content-secondary bg-surface-secondary border-border-light hover:bg-surface-tertiary"
+          >
+            <Upload size={13} />
             <span className="hidden sm:inline">{t('explorer.new_file', { defaultValue: 'New File' })}</span>
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => navigate('/documents')} className="shrink-0 whitespace-nowrap">
-            <span className="hidden sm:inline">{t('explorer.documents', { defaultValue: 'Documents' })}</span>
-          </Button>
+          </button>
         </div>
       </div>
 
-      {isLoading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" />
-        </div>
-      ) : error ? (
-        /* Session expired or invalid — show upload zone to re-upload */
-        <div className="space-y-4">
-          <Card className="p-4 border-amber-200 bg-amber-50/50 dark:bg-amber-900/10 dark:border-amber-800">
-            <div className="flex items-center gap-3">
-              <AlertCircle size={18} className="text-amber-600 shrink-0" />
-              <div>
-                <p className="text-sm font-medium text-content-primary">{t('explorer.session_expired_title', { defaultValue: 'Session expired or not found' })}</p>
-                <p className="text-xs text-content-tertiary">{t('explorer.session_expired_desc', { defaultValue: 'CAD sessions are valid for 24 hours. Upload your file again to continue.' })}</p>
-              </div>
-            </div>
-          </Card>
-          <UploadConvertZone onSessionReady={handleSessionReady} />
-        </div>
-      ) : describe ? (
-        <>
-          <StatsCards data={describe} />
-
-          {/* Tab selector */}
-          <div className="flex items-center gap-1 border-b border-border-light">
-            {TABS.map(({ id, icon: Icon, label, description }) => (
-              <button
-                key={id}
-                onClick={() => setActiveTab(id)}
-                className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium border-b-2 transition-colors ${
-                  activeTab === id
-                    ? 'border-oe-blue text-oe-blue'
-                    : 'border-transparent text-content-tertiary hover:text-content-primary'
-                }`}
-                title={t(`explorer.tab_${id}_desc`, { defaultValue: description })}
-              >
-                <Icon size={14} />
-                {t(`explorer.tab_${id}`, { defaultValue: label })}
-                {id === 'table' && describe && (
-                  <span className={`ml-1 px-1.5 py-0.5 rounded-full text-2xs tabular-nums ${
-                    activeTab === id ? 'bg-oe-blue/10' : 'bg-surface-secondary'
-                  }`}>
-                    {describe.total_elements.toLocaleString()}
-                  </span>
-                )}
-              </button>
-            ))}
+      {/* ── Content area ── */}
+      <div className="flex-1 flex flex-col min-h-0">
+        {isLoading ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" />
           </div>
+        ) : error ? (
+          /* Session expired or invalid — show upload zone to re-upload */
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <Card className="p-4 border-amber-200 bg-amber-50/50 dark:bg-amber-900/10 dark:border-amber-800">
+              <div className="flex items-center gap-3">
+                <AlertCircle size={18} className="text-amber-600 shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-content-primary">{t('explorer.session_expired_title', { defaultValue: 'Session expired or not found' })}</p>
+                  <p className="text-xs text-content-tertiary">{t('explorer.session_expired_desc', { defaultValue: 'CAD sessions are valid for 24 hours. Upload your file again to continue.' })}</p>
+                </div>
+              </div>
+            </Card>
+            <UploadConvertZone onSessionReady={handleSessionReady} />
+          </div>
+        ) : describe ? (
+          <>
+            {/* Tab selector */}
+            <div className="flex items-center gap-1 px-3 border-b border-border-light bg-surface-primary">
+              {TABS.map(({ id, icon: Icon, label, description }) => (
+                <button
+                  key={id}
+                  onClick={() => setActiveTab(id)}
+                  className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium border-b-2 transition-colors ${
+                    activeTab === id
+                      ? 'border-oe-blue text-oe-blue'
+                      : 'border-transparent text-content-tertiary hover:text-content-primary'
+                  }`}
+                  title={t(`explorer.tab_${id}_desc`, { defaultValue: description })}
+                >
+                  <Icon size={14} />
+                  {t(`explorer.tab_${id}`, { defaultValue: label })}
+                  {id === 'table' && describe && (
+                    <span className={`ml-1 px-1.5 py-0.5 rounded-full text-2xs tabular-nums ${
+                      activeTab === id ? 'bg-oe-blue/10' : 'bg-surface-secondary'
+                    }`}>
+                      {describe.total_elements.toLocaleString()}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
 
-          {/* Tab content */}
-          {activeTab === 'table' && <DataTableTab sessionId={sessionId} describe={describe} />}
-          {activeTab === 'pivot' && <PivotTab sessionId={sessionId} describe={describe} />}
-          {activeTab === 'charts' && <ChartsTab sessionId={sessionId} describe={describe} />}
-          {activeTab === 'describe' && <DescribeTab sessionId={sessionId} describe={describe} />}
-        </>
-      ) : null}
+            {/* Tab content — scrollable */}
+            <div className="flex-1 overflow-y-auto p-4">
+              {activeTab === 'table' && <DataTableTab sessionId={sessionId} describe={describe} />}
+              {activeTab === 'pivot' && <PivotTab sessionId={sessionId} describe={describe} />}
+              {activeTab === 'charts' && <ChartsTab sessionId={sessionId} describe={describe} />}
+              {activeTab === 'describe' && <DescribeTab sessionId={sessionId} describe={describe} />}
+            </div>
+          </>
+        ) : null}
+      </div>
 
       {/* Save dialog */}
       {showSaveDialog && describe && (

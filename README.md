@@ -22,10 +22,10 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 
 ---
 
-<details open>
+<details open style="width: 100%">
 <summary><h2>Table of Contents</h2></summary>
 
-<table width="100%">
+<table style="width: 100%; table-layout: fixed;">
 <tr>
 <td width="33%" valign="top">
 

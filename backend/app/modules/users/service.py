@@ -146,7 +146,14 @@ class UserService:
 
     # ── Registration ───────────────────────────────────────────────────
 
-    async def register(self, data: UserCreate) -> User:
+    async def register(
+        self,
+        data: UserCreate,
+        *,
+        client_ip: str = "",
+        user_agent: str = "",
+        referrer: str = "",
+    ) -> User:
         """Register a new user.
 
         Raises HTTPException 409 if email already taken.
@@ -164,12 +171,30 @@ class UserService:
         user_count = await self.user_repo.count()
         role = "admin" if user_count == 0 else "editor"
 
+        # Build registration metadata from form fields + auto-collected data
+        reg_meta: dict[str, object] = {}
+        if data.company:
+            reg_meta["company"] = data.company
+        if data.job_title:
+            reg_meta["job_title"] = data.job_title
+        if data.how_found_us:
+            reg_meta["how_found_us"] = data.how_found_us
+        if client_ip:
+            reg_meta["registration_ip"] = client_ip
+        if user_agent:
+            reg_meta["registration_user_agent"] = user_agent
+        if referrer:
+            reg_meta["registration_referrer"] = referrer
+
+        metadata = {"registration": reg_meta} if reg_meta else {}
+
         user = User(
             email=data.email.lower(),
             hashed_password=hash_password(data.password),
             full_name=data.full_name,
             role=role,
             locale=data.locale,
+            metadata=metadata,
         )
         user = await self.user_repo.create(user)
 
