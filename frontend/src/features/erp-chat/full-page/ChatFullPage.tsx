@@ -34,6 +34,7 @@ export default function ChatFullPage() {
     suggestions,
     dataPanelEntries,
     activePanelIndex,
+    aiConfigured,
     sendMessage,
     clearChat,
     setActivePanelIndex,
@@ -100,6 +101,7 @@ export default function ChatFullPage() {
               isStreaming={isStreaming}
               suggestions={suggestions}
               onSend={sendMessage}
+              aiConfigured={aiConfigured}
             />
           </Panel>
 

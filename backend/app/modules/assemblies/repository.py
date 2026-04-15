@@ -6,7 +6,7 @@ No business logic — pure data access.
 
 import uuid
 
-from sqlalchemy import delete, func, select, update
+from sqlalchemy import String, delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import noload, selectinload
 
@@ -45,6 +45,7 @@ class AssemblyRepository:
         q: str | None = None,
         category: str | None = None,
         unit: str | None = None,
+        tag: str | None = None,
         project_id: uuid.UUID | None = None,
         is_template: bool | None = None,
     ) -> tuple[list[Assembly], int]:
@@ -56,6 +57,7 @@ class AssemblyRepository:
             q: Optional text search on code, name, and description.
             category: Filter by category (exact match).
             unit: Filter by unit (exact match).
+            tag: Filter by tag (stored in metadata.tags JSON array).
             project_id: Filter by project_id (null = global templates).
             is_template: Filter by template flag.
 
@@ -75,6 +77,14 @@ class AssemblyRepository:
 
         if unit:
             base = base.where(Assembly.unit == unit)
+
+        if tag:
+            # Filter by tag in metadata JSON — uses LIKE on the JSON string
+            # which works for both SQLite and PostgreSQL
+            tag_pattern = f"%{tag.strip().lower()}%"
+            base = base.where(
+                Assembly.metadata_.cast(String).ilike(tag_pattern)
+            )
 
         if project_id is not None:
             base = base.where(Assembly.project_id == project_id)

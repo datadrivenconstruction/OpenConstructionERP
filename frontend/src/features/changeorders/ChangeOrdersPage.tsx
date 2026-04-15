@@ -965,7 +965,7 @@ export function ChangeOrdersPage() {
   // Detail view
   if (selectedOrderId) {
     return (
-      <div className="mx-auto max-w-content">
+      <div className="w-full">
         <DetailView orderId={selectedOrderId} onBack={() => setSelectedOrderId(null)} />
       </div>
     );
@@ -974,7 +974,7 @@ export function ChangeOrdersPage() {
   const currency = project?.currency || summary?.currency || 'EUR';
 
   return (
-    <div className="mx-auto max-w-content animate-fade-in">
+    <div className="w-full animate-fade-in">
       <Breadcrumb items={[
         { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
         { label: t('nav.change_orders', { defaultValue: 'Change Orders' }) },

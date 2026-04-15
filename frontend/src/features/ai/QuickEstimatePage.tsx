@@ -1965,18 +1965,6 @@ export function QuickEstimatePage() {
 
   return (
     <div className="w-full space-y-6 animate-fade-in">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-xs text-content-tertiary">
-        <a href="/" className="hover:text-content-primary transition-colors">{t('nav.dashboard', { defaultValue: 'Dashboard' })}</a>
-        <span className="text-content-quaternary">/</span>
-        <span className="text-content-primary font-medium">
-          {isCadRoute
-            ? t('nav.cad_takeoff', { defaultValue: 'CAD/BIM Takeoff' })
-            : t('nav.ai_estimate', { defaultValue: 'AI Estimate' })
-          }
-        </span>
-      </nav>
-
       {/* Header */}
       <div className="animate-card-in" style={{ animationDelay: '0ms' }}>
         <div className="flex items-center gap-3">

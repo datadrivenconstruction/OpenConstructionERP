@@ -92,6 +92,9 @@ const jobFiles = new Map<string, { file: File; geometryFile?: File | null }>();
 /** Stage-progression timers, keyed by job ID. */
 const stageTimers = new Map<string, ReturnType<typeof setInterval>>();
 
+/** Secondary interval handles for the phase-tick timers. */
+const activeIntervalTimers = new Map<string, ReturnType<typeof setInterval>>();
+
 /* ── Store ─────────────────────────────────────────────────────────────── */
 
 export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
@@ -106,24 +109,76 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
     });
   }
 
-  /** Internal helper: advance through simulated stages on a timer. */
+  /** Internal helper: advance through simulated stages on a timer.
+   *
+   *  Progress phases:
+   *    0-30%  : Upload phase (fast, ~3s)
+   *   30-60%  : Conversion phase (slower, steady increments, ~8s)
+   *   60-90%  : Element extraction (medium speed, ~6s)
+   *   90-95%  : Finalization (quick, ~2s)
+   *
+   *  The bar advances smoothly with small increments that slow down
+   *  near each phase boundary — mimicking real I/O behaviour. */
   function startStageTimer(jobId: string) {
-    const stages: Array<{ status: BIMUploadStatus; stage: string; progress: number }> = [
-      { status: 'uploading', stage: 'Sending file...', progress: 10 },
-      { status: 'converting', stage: 'Converting...', progress: 30 },
-      { status: 'converting', stage: 'Parsing elements...', progress: 50 },
-      { status: 'converting', stage: 'Indexing...', progress: 65 },
-      { status: 'converting', stage: 'Linking geometry...', progress: 80 },
+    const phases: Array<{
+      status: BIMUploadStatus;
+      stage: string;
+      targetPct: number;
+      /** ms between ticks */
+      interval: number;
+      /** pct added per tick (capped at targetPct) */
+      step: number;
+    }> = [
+      { status: 'uploading',  stage: 'Uploading...',           targetPct: 30, interval: 200, step: 1.8 },
+      { status: 'converting', stage: 'Converting...',          targetPct: 50, interval: 400, step: 0.8 },
+      { status: 'converting', stage: 'Extracting elements...', targetPct: 75, interval: 300, step: 1.0 },
+      { status: 'converting', stage: 'Indexing...',            targetPct: 88, interval: 250, step: 1.2 },
+      { status: 'converting', stage: 'Finalizing...',          targetPct: 95, interval: 200, step: 1.5 },
     ];
-    let idx = 0;
-    const timer = setInterval(() => {
-      idx += 1;
-      if (idx < stages.length) {
-        const s = stages[idx]!;
-        patchJob(jobId, { status: s.status, stage: s.stage, progress: s.progress });
+
+    let phaseIdx = 0;
+    let currentPct = 5;
+
+    const tick = () => {
+      if (phaseIdx >= phases.length) return;
+      const phase = phases[phaseIdx]!;
+
+      // Slow down exponentially as we approach the phase boundary
+      const remaining = phase.targetPct - currentPct;
+      const increment = Math.max(0.15, Math.min(phase.step, remaining * 0.12));
+      currentPct = Math.min(phase.targetPct, currentPct + increment);
+
+      patchJob(jobId, {
+        status: phase.status,
+        stage: phase.stage,
+        progress: Math.round(currentPct),
+      });
+
+      if (currentPct >= phase.targetPct - 0.2) {
+        phaseIdx += 1;
       }
-    }, 1500);
-    stageTimers.set(jobId, timer);
+    };
+
+    // Use a dynamic interval: each phase can have its own tick rate
+    let activeInterval: ReturnType<typeof setInterval> | null = null;
+    let lastPhaseIdx = -1;
+
+    const masterTimer = setInterval(() => {
+      if (phaseIdx >= phases.length) return;
+      if (phaseIdx !== lastPhaseIdx) {
+        lastPhaseIdx = phaseIdx;
+        if (activeInterval) clearInterval(activeInterval);
+        activeInterval = setInterval(tick, phases[phaseIdx]!.interval);
+      }
+    }, 100);
+
+    // Start the first phase immediately
+    tick();
+    activeInterval = setInterval(tick, phases[0]!.interval);
+
+    // Store both timer handles so clearStageTimer can kill them.
+    stageTimers.set(jobId, masterTimer);
+    activeIntervalTimers.set(jobId, activeInterval!);
   }
 
   function clearStageTimer(jobId: string) {
@@ -131,6 +186,11 @@ export const useBIMUploadStore = create<BIMUploadState>((set, get) => {
     if (timer) {
       clearInterval(timer);
       stageTimers.delete(jobId);
+    }
+    const activeTimer = activeIntervalTimers.get(jobId);
+    if (activeTimer) {
+      clearInterval(activeTimer);
+      activeIntervalTimers.delete(jobId);
     }
   }
 

@@ -108,7 +108,7 @@ export function ProjectIntelligencePage() {
   const [role, setRole] = useState<string>('estimator');
   const [expandedGap, setExpandedGap] = useState<string | null>(null);
   const [showAllGaps, setShowAllGaps] = useState(false);
-  const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
+  const [selectedDomain, setSelectedDomain] = useState<string | null>('boq');
 
   // Fetch summary data
   const fetchData = useCallback(
