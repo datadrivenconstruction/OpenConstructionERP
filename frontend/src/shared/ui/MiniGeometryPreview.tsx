@@ -225,18 +225,53 @@ export function MiniGeometryPreview({
         // Traverse: show meshes matching any known ID (db uuid, stable_id, mesh_ref)
         const visibleBox = new THREE.Box3();
         let hasVisibleMesh = false;
+        let totalMeshes = 0;
+        let matchedMeshes = 0;
+
+        // Build a lowercase version of matchSet for case-insensitive matching
+        const matchSetLower = new Set<string>();
+        for (const id of matchSet) matchSetLower.add(id.toLowerCase());
+
+        console.log('[MiniGeoPreview] matchSet:', [...matchSet]);
 
         group.traverse((child) => {
           if (child instanceof THREE.Mesh) {
-            const isTarget = matchSet.has(child.name);
+            totalMeshes++;
+            // Try matching by name, id, or userData
+            const candidateNames = [
+              child.name,
+              String(child.id),
+              child.userData?.name,
+              child.userData?.elementId,
+              child.userData?.stableId,
+            ].filter(Boolean).map(String);
+
+            // Exact match first
+            let isTarget = candidateNames.some(
+              (n) => matchSet.has(n) || matchSetLower.has(n.toLowerCase()),
+            );
+
+            // Substring match: GLB nodes often use compound names like
+            // "Chair-5-180572-mesh" where the ElementId is a segment.
+            // Split node name by common delimiters and check each part.
+            if (!isTarget && child.name) {
+              const nameParts = child.name.split(/[-_]/);
+              isTarget = nameParts.some(
+                (part) => part.length >= 3 && (matchSet.has(part) || matchSetLower.has(part.toLowerCase())),
+              );
+            }
+
             child.visible = isTarget;
             if (isTarget) {
+              matchedMeshes++;
               child.geometry.computeBoundingBox();
               visibleBox.expandByObject(child);
               hasVisibleMesh = true;
             }
           }
         });
+
+        console.log(`[MiniGeoPreview] ${matchedMeshes}/${totalMeshes} meshes matched`);
 
         // Hide parent groups that have no visible children
         group.traverse((obj) => {

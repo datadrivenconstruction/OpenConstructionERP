@@ -547,7 +547,7 @@ export function BOQListPage() {
   }
 
   return (
-    <div className="max-w-content mx-auto animate-fade-in">
+    <div className="w-full animate-fade-in">
       <Breadcrumb items={[{ label: t('nav.dashboard', 'Dashboard'), to: '/' }, { label: t('nav.boq', 'Bill of Quantities') }]} className="mb-4" />
       {/* Header */}
       <div className="mb-6 flex items-start justify-between">

@@ -332,7 +332,7 @@ export function TemplatesPage() {
   /* ── Render ──────────────────────────────────────────────────────── */
 
   return (
-    <div className="max-w-content mx-auto animate-fade-in pb-12">
+    <div className="w-full animate-fade-in pb-12">
       {/* ── Page header ──────────────────────────────────────────────── */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-content-primary">

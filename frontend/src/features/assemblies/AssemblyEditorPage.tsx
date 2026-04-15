@@ -88,7 +88,7 @@ export function AssemblyEditorPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-content mx-auto py-8 flex flex-col items-center gap-3 text-content-secondary animate-fade-in">
+      <div className="w-full py-8 flex flex-col items-center gap-3 text-content-secondary animate-fade-in">
         <Loader2 size={24} className="animate-spin text-oe-blue" />
         {t('assemblies.loading', { defaultValue: 'Loading assembly...' })}
       </div>
@@ -97,7 +97,7 @@ export function AssemblyEditorPage() {
 
   if (!assembly) {
     return (
-      <div className="max-w-content mx-auto py-16 text-center">
+      <div className="w-full py-16 text-center">
         <p className="text-content-secondary">{t('assemblies.not_found', { defaultValue: 'Assembly not found' })}</p>
       </div>
     );
@@ -108,7 +108,7 @@ export function AssemblyEditorPage() {
   const adjustedTotal = computedTotal * assembly.bid_factor;
 
   return (
-    <div className="max-w-content mx-auto animate-fade-in">
+    <div className="w-full animate-fade-in">
       {/* Breadcrumb */}
       <Breadcrumb
         className="mb-4"

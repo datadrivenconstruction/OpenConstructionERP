@@ -334,7 +334,7 @@ export function AdvisorPage() {
   const canSend = input.trim().length > 0 && !loading;
 
   return (
-    <div className="max-w-content mx-auto animate-fade-in flex flex-col" style={{ height: 'calc(100vh - 80px)' }}>
+    <div className="w-full animate-fade-in flex flex-col" style={{ height: 'calc(100vh - 80px)' }}>
       <Breadcrumb
         items={[
           { label: t('nav.dashboard', 'Dashboard'), to: '/' },

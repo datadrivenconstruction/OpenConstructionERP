@@ -642,7 +642,7 @@ export function DocumentsPage() {
 
   if (!projectId) {
     return (
-      <div className="max-w-content mx-auto animate-fade-in">
+      <div className="w-full animate-fade-in">
         <Breadcrumb items={[{ label: t('nav.dashboard', 'Dashboard'), to: '/' }, { label: t('nav.documents', 'Documents') }]} className="mb-4" />
         <EmptyState
           icon={<FolderOpen size={28} strokeWidth={1.5} />}
@@ -655,7 +655,7 @@ export function DocumentsPage() {
 
   return (
     <div
-      className="max-w-content mx-auto animate-fade-in"
+      className="w-full animate-fade-in"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}

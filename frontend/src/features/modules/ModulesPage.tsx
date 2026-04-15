@@ -174,7 +174,7 @@ export function ModulesPage() {
   const [activeTab, setActiveTab] = useState<TabKey>('profiles');
 
   return (
-    <div className="max-w-content mx-auto animate-fade-in">
+    <div className="w-full animate-fade-in">
       <Breadcrumb
         items={[
           { label: t('nav.dashboard', 'Dashboard'), to: '/' },

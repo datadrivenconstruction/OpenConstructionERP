@@ -1656,55 +1656,39 @@ export function DashboardPage() {
   const lastBoqId = lastBoq?.id ?? null;
 
   return (
-    <div className="max-w-content mx-auto space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in pt-4">
       {/* Hero — logo + gradient animated heading */}
       <div
-        className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-card-in"
+        className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between animate-card-in"
         style={{ animationDelay: '0ms' }}
       >
         <div>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight gradient-text">
-              {t('dashboard.welcome')}
-            </h1>
-            <p
-              className="mt-1.5 text-base text-content-secondary animate-stagger-in"
-              style={{ animationDelay: '100ms' }}
-            >
-              {t('dashboard.subtitle')}
-            </p>
-            <div className="flex items-center gap-3 mt-2 animate-stagger-in" style={{ animationDelay: '120ms' }}>
-              <a href="https://datadrivenconstruction.io" target="_blank" rel="noopener noreferrer" className="shrink-0">
-                <img
-                  src="https://datadrivenconstruction.io/wp-content/uploads/2023/07/DataDrivenConstruction-1-1.png.webp"
-                  alt="DataDrivenConstruction"
-                  className="h-5 w-auto opacity-70 hover:opacity-100 transition-opacity"
-                />
-              </a>
-              <span className="text-xs font-medium text-content-tertiary">
-                {t('dashboard.open_source_erp', { defaultValue: 'Erste Open-Source Bau-ERP' })}
-              </span>
-            </div>
-          </div>
-          {/* Open-source banner */}
+          <h1 className="text-3xl font-bold tracking-tight gradient-text">
+            {t('dashboard.welcome')}
+          </h1>
           <a
-            href="https://github.com/datadrivenconstruction/OpenConstructionERP"
+            href="https://datadrivenconstruction.io/?utm_source=erp"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-3 flex items-center gap-3 rounded-xl bg-gradient-to-r from-oe-blue/8 via-violet-500/8 to-emerald-500/8 border border-oe-blue/15 py-2.5 px-4 hover:shadow-md hover:border-oe-blue/30 transition-all animate-stagger-in"
-            style={{ animationDelay: '150ms' }}
+            className="flex items-center gap-3 mt-2.5 animate-stagger-in group/ddc"
+            style={{ animationDelay: '100ms' }}
           >
-            <span className="relative flex h-2.5 w-2.5 shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
-            </span>
-            <span className="text-sm font-bold bg-gradient-to-r from-oe-blue via-violet-600 to-emerald-600 bg-clip-text text-transparent">
-              {t('dashboard.open_source_badge', { defaultValue: 'The #1 open-source construction ERP' })}
-            </span>
-            <ExternalLink size={13} className="text-oe-blue opacity-50 shrink-0" />
+            <img
+              src="https://datadrivenconstruction.io/wp-content/uploads/2023/07/DataDrivenConstruction-1-1.png.webp"
+              alt="DataDrivenConstruction"
+              className="h-[34px] w-auto opacity-75 group-hover/ddc:opacity-100 transition-opacity shrink-0"
+            />
+            <div className="flex flex-col leading-tight">
+              <span className="text-xs font-semibold text-content-secondary">
+                {t('dashboard.subtitle')}
+              </span>
+              <span className="text-[11px] text-content-tertiary">
+                {t('dashboard.subtitle_2', { defaultValue: 'Smart resource planning for your construction projects' })}
+              </span>
+            </div>
           </a>
         </div>
-        <div className="flex items-center gap-2 animate-stagger-in" style={{ animationDelay: '200ms' }}>
+        <div className="flex items-center gap-2 animate-stagger-in" style={{ animationDelay: '150ms' }}>
           {lastBoqId && (
             <Button
               variant="secondary"
@@ -1727,6 +1711,23 @@ export function DashboardPage() {
           </Button>
         </div>
       </div>
+      {/* Open-source badge */}
+      <a
+        href="https://github.com/datadrivenconstruction/OpenConstructionERP"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-oe-blue/8 via-violet-500/8 to-emerald-500/8 border border-oe-blue/15 py-1.5 px-3 hover:shadow-md hover:border-oe-blue/30 transition-all animate-stagger-in"
+        style={{ animationDelay: '200ms' }}
+      >
+        <span className="relative flex h-2.5 w-2.5 shrink-0">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+        </span>
+        <span className="text-sm font-bold bg-gradient-to-r from-oe-blue via-violet-600 to-emerald-600 bg-clip-text text-transparent">
+          {t('dashboard.open_source_erp', { defaultValue: 'Erste Open-Source Bau-ERP' })}
+        </span>
+        <ExternalLink size={12} className="text-oe-blue opacity-50 shrink-0" />
+      </a>
 
       {/* Welcome banner — shown once on first launch, dismissable */}
       {/* Welcome modal — first launch only */}
@@ -1777,7 +1778,7 @@ export function DashboardPage() {
                 </a>
 
                 <a
-                  href="https://datadrivenconstruction.io/contact-support/"
+                  href="https://datadrivenconstruction.io/contact-support/?utm_source=erp"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 rounded-xl border border-oe-blue/20 dark:border-blue-800/40 bg-oe-blue/[0.03] dark:bg-blue-900/10 px-4 py-3 hover:shadow-md transition-all group"

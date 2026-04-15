@@ -122,6 +122,21 @@ class UserCreate(BaseModel):
     locale: str = Field(
         default="en", max_length=10, description="Preferred locale code (e.g. en, de, fr)"
     )
+    company: str = Field(
+        default="",
+        max_length=255,
+        description="Company or organisation name (optional)",
+    )
+    job_title: str = Field(
+        default="",
+        max_length=255,
+        description="Job title / role in the company (optional)",
+    )
+    how_found_us: str = Field(
+        default="",
+        max_length=100,
+        description="How the user discovered the platform (optional)",
+    )
 
     @field_validator("password")
     @classmethod
@@ -132,6 +147,16 @@ class UserCreate(BaseModel):
     @classmethod
     def _sanitize_full_name(cls, v: str) -> str:
         return _sanitize_name(v)
+
+    @field_validator("company")
+    @classmethod
+    def _sanitize_company(cls, v: str) -> str:
+        return _sanitize_name(v) if v else ""
+
+    @field_validator("job_title")
+    @classmethod
+    def _sanitize_job_title(cls, v: str) -> str:
+        return _sanitize_name(v) if v else ""
 
 
 class UserUpdate(BaseModel):
