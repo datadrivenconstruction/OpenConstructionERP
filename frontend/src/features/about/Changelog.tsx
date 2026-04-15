@@ -14,6 +14,21 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.6.0',
+    date: '2026-04-15',
+    changes: [
+      'BIM Linked Geometry Preview: click the BIM link badge on any BOQ position to open an interactive 3D viewer (OrbitControls — rotate, zoom, pan) showing only the linked elements. Backdrop blur overlay for focus',
+      'BIM Quantity Picker: new POST /elements/by-ids/ endpoint fetches specific elements without hitting the 2000-element list limit. Matching by DB UUID, stable_id (Revit UniqueId), and mesh_ref. String-typed properties parsed as numbers',
+      'BIM source tracking: when a quantity is picked from a BIM element, the parameter name (e.g. "Area", "Volume") is shown below the unit cell in the BOQ grid. Quantity values from BIM highlighted in emerald',
+      'DWG Takeoff polyline measurements: click any polyline to see area, perimeter, and individual segment lengths rendered directly on the drawing canvas. Properties panel shows full measurement table',
+      'DWG viewport fix: fit-to-bounds now uses CSS-pixel dimensions (not device pixels), re-fits on resize. Added "Fit" button',
+      'BOQ section collapse: fixed fullWidthCellRenderer dispatch so clicking section headers properly collapses/expands',
+      'Smart quantity formatting: small values like 0.000018 shown with full precision instead of truncating to 0.00',
+      'Dashboard: DataDrivenConstruction logo with "Erste Open-Source Bau-ERP" branding',
+      'AI Chat: compact icon-only button, narrower panel offset below toolbar',
+    ],
+  },
+  {
     version: '1.5.0',
     date: '2026-04-13',
     changes: [
