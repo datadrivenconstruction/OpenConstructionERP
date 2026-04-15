@@ -317,7 +317,6 @@ export function BimLinkCellRenderer(params: ICellRendererParams) {
   const popoverRef = useRef<HTMLDivElement>(null);
 
   const handleOpen = useCallback(() => {
-    console.log('[BimLink] Opening preview', { bimLinkIds, modelId: ctx?.bimModelId });
     if (btnRef.current) {
       setAnchorRect(btnRef.current.getBoundingClientRect());
     }

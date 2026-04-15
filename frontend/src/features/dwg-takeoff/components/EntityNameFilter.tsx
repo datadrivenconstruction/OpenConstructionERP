@@ -28,11 +28,6 @@ function entityDisplayName(e: DxfEntity): string {
   return e.type;
 }
 
-export interface EntityNameGroup {
-  name: string;
-  count: number;
-}
-
 interface Props {
   entities: DxfEntity[];
   visibleNames: Set<string>;
