@@ -25,13 +25,18 @@ import {
   CreditCard,
   MapPin,
   User,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
-import { Button, Card, Badge, EmptyState, Breadcrumb, CountryFlag } from '@/shared/ui';
+import { Button, Card, Badge, EmptyState, Breadcrumb, CountryFlag, ConfirmDialog } from '@/shared/ui';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useCreateShortcut } from '@/shared/hooks/useCreateShortcut';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   fetchContacts,
   createContact,
+  updateContact,
+  deleteContact,
   importContactsFile,
   exportContacts,
   downloadContactsTemplate,
@@ -145,13 +150,17 @@ function AddContactModal({
   onClose,
   onSubmit,
   isPending,
+  initialData,
+  isEdit,
 }: {
   onClose: () => void;
   onSubmit: (data: ContactFormData) => void;
   isPending: boolean;
+  initialData?: ContactFormData | null;
+  isEdit?: boolean;
 }) {
   const { t } = useTranslation();
-  const [form, setForm] = useState<ContactFormData>(EMPTY_FORM);
+  const [form, setForm] = useState<ContactFormData>(initialData || EMPTY_FORM);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const set = <K extends keyof ContactFormData>(key: K, value: ContactFormData[K]) => {
@@ -189,11 +198,13 @@ function AddContactModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[85vh] flex flex-col" role="dialog" aria-label={t('contacts.add_contact', { defaultValue: 'Add Contact' })}>
+      <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[85vh] flex flex-col" role="dialog" aria-label={isEdit ? t('contacts.edit_contact', { defaultValue: 'Edit Contact' }) : t('contacts.add_contact', { defaultValue: 'Add Contact' })}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light sticky top-0 z-10 bg-surface-elevated rounded-t-xl">
           <h2 className="text-lg font-semibold text-content-primary">
-            {t('contacts.add_contact', { defaultValue: 'Add Contact' })}
+            {isEdit
+              ? t('contacts.edit_contact', { defaultValue: 'Edit Contact' })
+              : t('contacts.add_contact', { defaultValue: 'Add Contact' })}
           </h2>
           <button
             onClick={onClose}
@@ -480,7 +491,9 @@ function AddContactModal({
               <Plus size={16} className="mr-1.5 shrink-0" />
             )}
             <span>
-              {t('contacts.create_contact', { defaultValue: 'Create Contact' })}
+              {isEdit
+                ? t('contacts.save_contact', { defaultValue: 'Save Changes' })
+                : t('contacts.create_contact', { defaultValue: 'Create Contact' })}
             </span>
           </Button>
         </div>
@@ -673,7 +686,15 @@ function ImportContactsModal({
 
 /* ── Contact Card ──────────────────────────────────────────────────────── */
 
-const ContactCard = React.memo(function ContactCard({ contact }: { contact: Contact }) {
+const ContactCard = React.memo(function ContactCard({
+  contact,
+  onEdit,
+  onDelete,
+}: {
+  contact: Contact;
+  onEdit: (contact: Contact) => void;
+  onDelete: (id: string) => void;
+}) {
   const { t } = useTranslation();
   const prequal = PREQUAL_CONFIG[contact.prequalification_status as PrequalificationStatus] ?? PREQUAL_CONFIG.pending;
   const PrequalIcon = prequal.icon;
@@ -681,10 +702,16 @@ const ContactCard = React.memo(function ContactCard({ contact }: { contact: Cont
   const personName = [contact.first_name, contact.last_name].filter(Boolean).join(' ');
 
   return (
-    <Card className="p-4 animate-card-in hover:shadow-md transition-shadow">
-      {/* Top: company + type badge */}
+    <Card className="p-4 animate-card-in hover:shadow-md transition-shadow group">
+      {/* Top: company + type badge + actions */}
       <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-2.5 min-w-0">
+        <div
+          className="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer"
+          onClick={() => onEdit(contact)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onEdit(contact); }}
+        >
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue font-bold text-sm shrink-0">
             {displayName.charAt(0).toUpperCase()}
           </div>
@@ -697,11 +724,33 @@ const ContactCard = React.memo(function ContactCard({ contact }: { contact: Cont
             )}
           </div>
         </div>
-        <Badge variant={TYPE_BADGE_VARIANT[contact.contact_type] ?? 'neutral'} size="sm">
-          {t(`contacts.type_${contact.contact_type}`, {
-            defaultValue: contact.contact_type.charAt(0).toUpperCase() + contact.contact_type.slice(1),
-          })}
-        </Badge>
+        <div className="flex items-center gap-1 shrink-0">
+          <Badge variant={TYPE_BADGE_VARIANT[contact.contact_type] ?? 'neutral'} size="sm">
+            {t(`contacts.type_${contact.contact_type}`, {
+              defaultValue: contact.contact_type.charAt(0).toUpperCase() + contact.contact_type.slice(1),
+            })}
+          </Badge>
+          <div className="flex items-center gap-0 opacity-0 group-hover:opacity-100 transition-opacity ml-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onEdit(contact)}
+              className="!p-1 text-content-quaternary hover:text-oe-blue h-auto"
+              title={t('common.edit', { defaultValue: 'Edit' })}
+            >
+              <Pencil size={12} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onDelete(contact.id)}
+              className="!p-1 text-content-quaternary hover:text-red-500 h-auto"
+              title={t('common.delete', { defaultValue: 'Delete' })}
+            >
+              <Trash2 size={12} />
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Contact details */}
@@ -751,6 +800,7 @@ export function ContactsPage() {
   // State
   const [showAddModal, setShowAddModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [editingContact, setEditingContact] = useState<Contact | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<ContactType | ''>('');
   const [countryFilter, setCountryFilter] = useState('');
@@ -836,6 +886,84 @@ export function ContactsPage() {
       }),
   });
 
+  // Edit mutation
+  const editMut = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<CreateContactPayload> }) =>
+      updateContact(id, data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['contacts'] });
+      setShowAddModal(false);
+      setEditingContact(null);
+      addToast({
+        type: 'success',
+        title: t('contacts.updated', { defaultValue: 'Contact updated successfully' }),
+      });
+    },
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('contacts.update_failed', { defaultValue: 'Failed to update contact' }),
+        message: e.message,
+      }),
+  });
+
+  // Delete mutation
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => deleteContact(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['contacts'] });
+      addToast({
+        type: 'success',
+        title: t('contacts.deleted', { defaultValue: 'Contact deleted' }),
+      });
+    },
+    onError: (e: Error) =>
+      addToast({
+        type: 'error',
+        title: t('contacts.delete_failed', { defaultValue: 'Failed to delete contact' }),
+        message: e.message,
+      }),
+  });
+
+  const { confirm, ...confirmProps } = useConfirm();
+
+  const formDataFromContact = useCallback((c: Contact): ContactFormData => ({
+    company_name: c.company_name || '',
+    legal_name: c.legal_name || '',
+    vat_number: c.vat_number || '',
+    first_name: c.first_name || '',
+    last_name: c.last_name || '',
+    contact_type: c.contact_type,
+    email: c.primary_email || '',
+    phone: c.primary_phone || '',
+    website: c.website || '',
+    country: c.country_code || '',
+    address: c.address && typeof c.address === 'object' && 'text' in c.address
+      ? String(c.address.text)
+      : '',
+    payment_terms: c.payment_terms_days || '30',
+    prequalification_status: (c.prequalification_status as PrequalificationStatus) || 'pending',
+    notes: c.notes || '',
+  }), []);
+
+  const handleEditContact = useCallback((contact: Contact) => {
+    setEditingContact(contact);
+    setShowAddModal(true);
+  }, []);
+
+  const handleDeleteContact = useCallback(
+    async (id: string) => {
+      const ok = await confirm({
+        title: t('contacts.confirm_delete_title', { defaultValue: 'Delete contact?' }),
+        message: t('contacts.confirm_delete_msg', { defaultValue: 'This contact will be permanently deleted.' }),
+        confirmLabel: t('common.delete', { defaultValue: 'Delete' }),
+        variant: 'danger',
+      });
+      if (ok) deleteMut.mutate(id);
+    },
+    [deleteMut, confirm, t],
+  );
+
   const handleCreateSubmit = useCallback(
     (formData: ContactFormData) => {
       createMut.mutate({
@@ -856,6 +984,32 @@ export function ContactsPage() {
       });
     },
     [createMut],
+  );
+
+  const handleEditSubmit = useCallback(
+    (formData: ContactFormData) => {
+      if (!editingContact) return;
+      editMut.mutate({
+        id: editingContact.id,
+        data: {
+          contact_type: formData.contact_type,
+          first_name: formData.first_name || undefined,
+          last_name: formData.last_name || undefined,
+          company_name: formData.company_name || undefined,
+          legal_name: formData.legal_name || undefined,
+          vat_number: formData.vat_number || undefined,
+          primary_email: formData.email || undefined,
+          primary_phone: formData.phone || undefined,
+          website: formData.website || undefined,
+          country_code: formData.country || undefined,
+          address: formData.address ? { text: formData.address } : undefined,
+          payment_terms_days: formData.payment_terms || undefined,
+          prequalification_status: formData.prequalification_status || undefined,
+          notes: formData.notes || undefined,
+        },
+      });
+    },
+    [editMut, editingContact],
   );
 
   return (
@@ -1031,19 +1185,26 @@ export function ContactsPage() {
             </p>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((contact) => (
-                <ContactCard key={contact.id} contact={contact} />
+                <ContactCard
+                  key={contact.id}
+                  contact={contact}
+                  onEdit={handleEditContact}
+                  onDelete={handleDeleteContact}
+                />
               ))}
             </div>
           </>
         )}
       </div>
 
-      {/* Add Modal */}
+      {/* Add / Edit Modal */}
       {showAddModal && (
         <AddContactModal
-          onClose={() => setShowAddModal(false)}
-          onSubmit={handleCreateSubmit}
-          isPending={createMut.isPending}
+          onClose={() => { setShowAddModal(false); setEditingContact(null); }}
+          onSubmit={editingContact ? handleEditSubmit : handleCreateSubmit}
+          isPending={editingContact ? editMut.isPending : createMut.isPending}
+          initialData={editingContact ? formDataFromContact(editingContact) : null}
+          isEdit={!!editingContact}
         />
       )}
 
@@ -1056,6 +1217,9 @@ export function ContactsPage() {
           }}
         />
       )}
+
+      {/* Confirm Dialog (for delete) */}
+      <ConfirmDialog {...confirmProps} />
     </div>
   );
 }

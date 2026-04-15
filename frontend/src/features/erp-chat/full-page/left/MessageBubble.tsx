@@ -8,6 +8,93 @@ function formatTime(d: Date): string {
   return `${h}:${m}`;
 }
 
+/**
+ * Lightweight markdown-to-HTML renderer.
+ *
+ * Handles bold, italic, inline code, code blocks, bullet/numbered lists,
+ * headings, horizontal rules, and line breaks without pulling in a full
+ * markdown library.
+ */
+function renderMarkdown(text: string): string {
+  let html = text;
+
+  // Fenced code blocks: ```...```
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_m, _lang, code) => {
+    const escaped = code
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .trimEnd();
+    return `<pre style="background:var(--chat-surface-3,rgba(0,0,0,.06));padding:10px 12px;border-radius:8px;overflow-x:auto;font-size:13px;line-height:1.5;font-family:var(--chat-font-mono,monospace);margin:6px 0"><code>${escaped}</code></pre>`;
+  });
+
+  // Inline code: `code`
+  html = html.replace(/`([^`\n]+)`/g, (_m, code) => {
+    const escaped = code
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    return `<code style="background:var(--chat-surface-3,rgba(0,0,0,.06));padding:1px 5px;border-radius:4px;font-size:0.9em;font-family:var(--chat-font-mono,monospace)">${escaped}</code>`;
+  });
+
+  // Bold: **text**
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+  // Italic: *text*  (but not inside words with asterisks)
+  html = html.replace(/(?<!\w)\*([^*\n]+?)\*(?!\w)/g, '<em>$1</em>');
+
+  // Headings: ### h3, ## h2, # h1
+  html = html.replace(
+    /^### (.+)$/gm,
+    '<div style="font-size:1em;font-weight:700;margin:8px 0 4px">$1</div>',
+  );
+  html = html.replace(
+    /^## (.+)$/gm,
+    '<div style="font-size:1.1em;font-weight:700;margin:10px 0 4px">$1</div>',
+  );
+  html = html.replace(
+    /^# (.+)$/gm,
+    '<div style="font-size:1.2em;font-weight:700;margin:12px 0 4px">$1</div>',
+  );
+
+  // Horizontal rule: --- or ***
+  html = html.replace(
+    /^(?:---|\*\*\*)$/gm,
+    '<hr style="border:none;border-top:1px solid var(--chat-text-tertiary,#ccc);margin:10px 0"/>',
+  );
+
+  // Bullet lists: lines starting with "- " or "* "
+  html = html.replace(
+    /^(?:[*-] .+(?:\n|$))+/gm,
+    (block) => {
+      const items = block
+        .trim()
+        .split('\n')
+        .map((line) => `<li style="margin:2px 0">${line.replace(/^[*-] /, '')}</li>`)
+        .join('');
+      return `<ul style="margin:4px 0;padding-left:20px;list-style:disc">${items}</ul>`;
+    },
+  );
+
+  // Numbered lists: lines starting with "1. ", "2. ", etc.
+  html = html.replace(
+    /^(?:\d+\. .+(?:\n|$))+/gm,
+    (block) => {
+      const items = block
+        .trim()
+        .split('\n')
+        .map((line) => `<li style="margin:2px 0">${line.replace(/^\d+\. /, '')}</li>`)
+        .join('');
+      return `<ol style="margin:4px 0;padding-left:20px;list-style:decimal">${items}</ol>`;
+    },
+  );
+
+  // Line breaks (preserve newlines that aren't already handled)
+  html = html.replace(/\n/g, '<br/>');
+
+  return html;
+}
+
 interface MessageBubbleProps {
   message: ChatMessage;
   isStreaming?: boolean;
@@ -102,7 +189,7 @@ export default function MessageBubble({ message, isStreaming }: MessageBubblePro
           </div>
         )}
 
-        {/* Text content */}
+        {/* Text content — rendered as lightweight markdown */}
         {(content || isStreaming) && (
           <div
             style={{
@@ -111,10 +198,11 @@ export default function MessageBubble({ message, isStreaming }: MessageBubblePro
               lineHeight: 1.6,
               fontFamily: 'var(--chat-font-body)',
               wordBreak: 'break-word',
-              whiteSpace: 'pre-wrap',
             }}
           >
-            {content}
+            {content ? (
+              <span dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }} />
+            ) : null}
             {isStreaming && <StreamingCursor />}
           </div>
         )}

@@ -1940,71 +1940,73 @@ export function CadDataExplorerPage() {
       DGN: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
     };
 
-    const FEATURE_CARDS: { icon: React.ElementType; title: string; desc: string; color: string; iconBg: string }[] = [
-      { icon: Table2, title: t('explorer.feat_table', { defaultValue: 'Data Table' }), desc: t('explorer.feat_table_desc', { defaultValue: 'Browse all elements with sorting, filtering, and column selection. Export to CSV or Excel.' }), color: 'text-blue-600 dark:text-blue-400', iconBg: 'bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20' },
-      { icon: Layers, title: t('explorer.feat_pivot', { defaultValue: 'Pivot Analysis' }), desc: t('explorer.feat_pivot_desc', { defaultValue: 'Group elements by storey, discipline, or type. Aggregate volumes, areas, and counts.' }), color: 'text-purple-600 dark:text-purple-400', iconBg: 'bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/30 dark:to-purple-800/20' },
-      { icon: BarChart3, title: t('explorer.feat_charts', { defaultValue: 'Charts' }), desc: t('explorer.feat_charts_desc', { defaultValue: 'Visualize quantity distributions with bar charts and pie charts.' }), color: 'text-emerald-600 dark:text-emerald-400', iconBg: 'bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-900/30 dark:to-emerald-800/20' },
-      { icon: TrendingUp, title: t('explorer.feat_stats', { defaultValue: 'Statistics' }), desc: t('explorer.feat_stats_desc', { defaultValue: 'Descriptive statistics for every numeric column -- min, max, mean, std dev.' }), color: 'text-orange-600 dark:text-orange-400', iconBg: 'bg-gradient-to-br from-orange-100 to-orange-50 dark:from-orange-900/30 dark:to-orange-800/20' },
+    const FEATURE_CARDS: { icon: React.ElementType; title: string; desc: string; color: string; border: string; ic: string }[] = [
+      { icon: Table2, title: t('explorer.feat_table', { defaultValue: 'Data Table' }), desc: t('explorer.feat_table_desc', { defaultValue: 'Browse all elements with sorting, filtering, and column selection. Export to CSV or Excel.' }), color: 'bg-blue-50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-800', border: 'border-border-light/50', ic: 'text-blue-500' },
+      { icon: Layers, title: t('explorer.feat_pivot', { defaultValue: 'Pivot Analysis' }), desc: t('explorer.feat_pivot_desc', { defaultValue: 'Group elements by storey, discipline, or type. Aggregate volumes, areas, and counts.' }), color: 'bg-purple-50 dark:bg-purple-950/20 border-purple-100 dark:border-purple-800', border: 'border-border-light/50', ic: 'text-purple-500' },
+      { icon: BarChart3, title: t('explorer.feat_charts', { defaultValue: 'Charts' }), desc: t('explorer.feat_charts_desc', { defaultValue: 'Visualize quantity distributions with bar charts and pie charts.' }), color: 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-800', border: 'border-border-light/50', ic: 'text-emerald-500' },
+      { icon: TrendingUp, title: t('explorer.feat_stats', { defaultValue: 'Statistics' }), desc: t('explorer.feat_stats_desc', { defaultValue: 'Descriptive statistics for every numeric column -- min, max, mean, std dev.' }), color: 'bg-orange-50 dark:bg-orange-950/20 border-orange-100 dark:border-orange-800', border: 'border-border-light/50', ic: 'text-orange-500' },
     ];
 
     return (
-      <div className="w-full px-4 py-4 space-y-8 animate-fade-in">
-        <Breadcrumb items={[
-          { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
-          { label: t('explorer.title', { defaultValue: 'CAD-BIM Explorer' }) },
-        ]} />
-
-        {/* Hero section */}
-        <div className="relative text-center pt-10 pb-6 overflow-hidden">
-          {/* Gradient background decoration */}
-          <div className="absolute inset-0 -z-10 overflow-hidden rounded-3xl">
-            <div className="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-oe-blue/5 blur-3xl" />
-            <div className="absolute -bottom-16 -right-16 w-64 h-64 rounded-full bg-purple-500/5 blur-3xl" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-48 rounded-full bg-emerald-500/5 blur-3xl" />
-          </div>
-
-          <DataExplorerEmptyAnimation />
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-content-primary mb-3 tracking-tight">
-            {t('explorer.hero_title', { defaultValue: 'CAD/BIM Data Explorer' })}
-          </h1>
-          <p className="text-base text-content-secondary max-w-2xl mx-auto leading-relaxed">
-            {t('explorer.hero_subtitle', { defaultValue: 'Analyze building element data in a powerful spreadsheet interface. Filter, pivot, chart, and export quantities from your IFC and Revit models.' })}
-          </p>
+      <div className="flex flex-col -mx-4 sm:-mx-7 -mt-6 -mb-6 border-s border-border-light animate-fade-in" style={{ height: 'calc(100vh - 56px)' }}>
+        <div className="px-6 pt-4 pb-3 border-b border-border-light">
+          <Breadcrumb items={[
+            { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
+            { label: t('explorer.title', { defaultValue: 'CAD-BIM Explorer' }) },
+          ]} />
         </div>
+        <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-blue-50/50 dark:from-gray-900 dark:via-gray-900 dark:to-blue-950/20 overflow-y-auto">
+          <div className="w-full max-w-6xl px-6 py-10">
+            {/* Hero title */}
+            <div className="text-center mb-10">
+              <h1 className="text-2xl font-bold text-content-primary tracking-tight">
+                {t('explorer.hero_title', { defaultValue: 'CAD/BIM Data Explorer' })}
+              </h1>
+              <p className="text-sm text-content-secondary mt-2 max-w-lg mx-auto">
+                {t('explorer.hero_subtitle', { defaultValue: 'Analyze building element data in a powerful spreadsheet interface. Filter, pivot, chart, and export quantities from your IFC and Revit models.' })}
+              </p>
+            </div>
 
-        {/* Feature cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {FEATURE_CARDS.map(({ icon: Icon, title, desc, color, iconBg }) => (
-            <Card key={title} className="p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group border-border-light">
-              <div className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ${iconBg} mb-4 group-hover:scale-105 transition-transform`}>
-                <Icon size={22} className={color} />
+            {/* 3-column layout: Upload | Features | Animation */}
+            <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr_0.8fr] gap-8 items-start mb-10">
+
+              {/* LEFT -- Upload card */}
+              <div>
+                <div className="rounded-2xl bg-surface-primary border border-border-light shadow-lg shadow-black/5 dark:shadow-black/20 p-6">
+                  <UploadConvertZone onSessionReady={handleSessionReady} />
+                  <p className="text-[10px] text-content-quaternary mt-3 text-center">
+                    {t('explorer.upload_hint_formats', { defaultValue: 'Supported formats:' })}{' '}
+                    <span className="font-semibold text-content-tertiary">IFC, RVT, DWG, DGN, DXF, RFA</span>
+                    {' | '}
+                    {t('explorer.upload_hint_size', { defaultValue: 'Max file size: 100 MB' })}
+                  </p>
+                </div>
               </div>
-              <h3 className="text-sm font-bold text-content-primary mb-1.5">{title}</h3>
-              <p className="text-xs text-content-tertiary leading-relaxed">{desc}</p>
-            </Card>
-          ))}
-        </div>
 
-        {/* Upload zone */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <div className="h-px flex-1 bg-border-light" />
-            <h2 className="text-xs font-bold text-content-secondary uppercase tracking-widest px-3">
-              {t('explorer.upload_heading', { defaultValue: 'Upload CAD/BIM File' })}
-            </h2>
-            <div className="h-px flex-1 bg-border-light" />
-          </div>
-          <UploadConvertZone onSessionReady={handleSessionReady} />
-          <div className="flex items-center justify-center gap-2 text-2xs text-content-quaternary">
-            <span>{t('explorer.upload_hint_formats', { defaultValue: 'Supported formats:' })}</span>
-            <span className="font-semibold text-content-tertiary">IFC, RVT, DWG, DGN, DXF, RFA</span>
-            <span className="mx-1">|</span>
-            <span>{t('explorer.upload_hint_size', { defaultValue: 'Max file size: 100 MB' })}</span>
-          </div>
-        </div>
+              {/* CENTER -- Feature explanation cards */}
+              <div className="space-y-3">
+                <h2 className="text-xs font-bold text-content-secondary uppercase tracking-widest mb-2">
+                  {t('explorer.what_you_get', { defaultValue: 'What you get' })}
+                </h2>
+                {FEATURE_CARDS.map((f, i) => (
+                  <div key={i} className={`flex items-start gap-3 rounded-xl p-3.5 bg-surface-primary/60 dark:bg-surface-primary/40 border ${f.border} hover:border-border-light transition-colors`}>
+                    <div className={`w-9 h-9 rounded-lg ${f.color} border flex items-center justify-center shrink-0`}><f.icon size={16} className={f.ic} /></div>
+                    <div className="min-w-0">
+                      <h3 className="text-xs font-semibold text-content-primary leading-tight">{f.title}</h3>
+                      <p className="text-[11px] text-content-quaternary leading-snug mt-0.5">{f.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
 
-        {/* Recent sessions — card grid */}
-        {recentSessions.length > 0 && (
+              {/* RIGHT -- CSS animation preview */}
+              <div className="flex items-center justify-center">
+                <DataExplorerEmptyAnimation />
+              </div>
+            </div>
+
+            {/* Recent sessions -- card grid */}
+            {recentSessions.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold text-content-primary flex items-center gap-2">
@@ -2103,8 +2105,10 @@ export function CadDataExplorerPage() {
           </div>
         )}
 
-        {/* Converter status */}
-        <ConverterStatus />
+            {/* Converter status */}
+            <ConverterStatus />
+          </div>
+        </div>
       </div>
     );
   }

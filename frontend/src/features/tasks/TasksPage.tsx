@@ -443,6 +443,7 @@ const TaskCard = React.memo(function TaskCard({
   onDelete,
   onStatusChange,
   customCategories,
+  onDragStart,
 }: {
   task: Task;
   onComplete: (id: string) => void;
@@ -450,6 +451,7 @@ const TaskCard = React.memo(function TaskCard({
   onDelete: (id: string) => void;
   onStatusChange: (id: string, status: TaskStatus) => void;
   customCategories: CustomCategory[];
+  onDragStart?: (e: React.DragEvent, taskId: string) => void;
 }) {
   const { t } = useTranslation();
 
@@ -467,8 +469,10 @@ const TaskCard = React.memo(function TaskCard({
   return (
     <Card
       data-task-id={task.id}
+      draggable
+      onDragStart={(e: React.DragEvent) => onDragStart?.(e, task.id)}
       className={clsx(
-        'px-2.5 py-2 mb-1.5 hover:shadow-md transition-shadow group',
+        'px-2.5 py-2 mb-1.5 hover:shadow-md transition-shadow group cursor-grab active:cursor-grabbing',
         isOverdue && 'bg-red-50/40 dark:bg-red-950/15',
       )}
     >
@@ -628,6 +632,10 @@ export function TasksPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<TaskType | ''>('');
   const [myTasksOnly, setMyTasksOnly] = useState(false);
+
+  // Drag-and-drop between columns
+  const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
+  const [dropTargetStatus, setDropTargetStatus] = useState<TaskStatus | null>(null);
 
   // Custom categories
   const [customCategories, setCustomCategories] = useState<CustomCategory[]>(loadCustomCategories);
@@ -928,6 +936,56 @@ export function TasksPage() {
     },
     [statusMut, handleComplete],
   );
+
+  // Drag-and-drop handlers
+  const handleCardDragStart = useCallback(
+    (e: React.DragEvent, taskId: string) => {
+      setDraggedTaskId(taskId);
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', taskId);
+      if (e.currentTarget instanceof HTMLElement) {
+        requestAnimationFrame(() => {
+          (e.currentTarget as HTMLElement).style.opacity = '0.4';
+        });
+      }
+    },
+    [],
+  );
+
+  const handleColumnDragOver = useCallback(
+    (e: React.DragEvent, status: TaskStatus) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      setDropTargetStatus(status);
+    },
+    [],
+  );
+
+  const handleColumnDragLeave = useCallback(() => {
+    setDropTargetStatus(null);
+  }, []);
+
+  const handleColumnDrop = useCallback(
+    (e: React.DragEvent, targetStatus: TaskStatus) => {
+      e.preventDefault();
+      const taskId = e.dataTransfer.getData('text/plain');
+      setDraggedTaskId(null);
+      setDropTargetStatus(null);
+      if (!taskId) return;
+      const task = tasks.find((tsk) => tsk.id === taskId);
+      if (!task || task.status === targetStatus) return;
+      handleStatusChange(taskId, targetStatus);
+    },
+    [tasks, handleStatusChange],
+  );
+
+  const handleDragEnd = useCallback(() => {
+    setDraggedTaskId(null);
+    setDropTargetStatus(null);
+    document.querySelectorAll('[draggable="true"]').forEach((el) => {
+      (el as HTMLElement).style.opacity = '';
+    });
+  }, []);
 
   const handleImportFile = async () => {
     if (!importFile || !projectId) return;
@@ -1301,8 +1359,16 @@ export function TasksPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
             {STATUSES.map((status) => {
               const colItems = grouped.get(status) ?? [];
+              const isDropTarget = draggedTaskId != null && dropTargetStatus === status;
               return (
-                <div key={status} className="flex flex-col">
+                <div
+                  key={status}
+                  className="flex flex-col"
+                  onDragOver={(e) => handleColumnDragOver(e, status)}
+                  onDragLeave={handleColumnDragLeave}
+                  onDrop={(e) => handleColumnDrop(e, status)}
+                  onDragEnd={handleDragEnd}
+                >
                   {/* Column header */}
                   <div
                     className={clsx(
@@ -1323,11 +1389,21 @@ export function TasksPage() {
                     </span>
                   </div>
 
-                  {/* Column items */}
-                  <div className="flex-1 min-h-[60px]">
+                  {/* Column items — drop zone */}
+                  <div
+                    className={clsx(
+                      'flex-1 min-h-[60px] rounded-lg transition-all duration-150',
+                      isDropTarget && 'bg-oe-blue/5 ring-2 ring-oe-blue/30 ring-dashed',
+                    )}
+                  >
                     {colItems.length === 0 ? (
-                      <div className="flex items-center justify-center py-6 text-[10px] text-content-quaternary">
-                        {t('tasks.column_empty', { defaultValue: 'No tasks' })}
+                      <div className={clsx(
+                        'flex items-center justify-center py-6 text-[10px]',
+                        isDropTarget ? 'text-oe-blue font-medium' : 'text-content-quaternary',
+                      )}>
+                        {isDropTarget
+                          ? t('tasks.drop_here', { defaultValue: 'Drop here' })
+                          : t('tasks.column_empty', { defaultValue: 'No tasks' })}
                       </div>
                     ) : (
                       colItems.map((task) => (
@@ -1339,6 +1415,7 @@ export function TasksPage() {
                           onDelete={handleDeleteTask}
                           onStatusChange={handleStatusChange}
                           customCategories={customCategories}
+                          onDragStart={handleCardDragStart}
                         />
                       ))
                     )}
