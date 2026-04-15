@@ -48,7 +48,7 @@ export function zoomToFit(
   extents: Extents,
   canvasWidth: number,
   canvasHeight: number,
-  padding = 40,
+  padding = 16,
 ): ViewportState {
   const dw = extents.maxX - extents.minX || 1;
   const dh = extents.maxY - extents.minY || 1;

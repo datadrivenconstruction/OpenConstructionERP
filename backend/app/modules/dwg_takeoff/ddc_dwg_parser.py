@@ -2,6 +2,7 @@
 
 DDC DwgExporter produces an Excel file with AutoCAD database records.
 Geometry entities (AcDbLine, AcDbPolyline+AcDbVertex, AcDbArc, AcDbCircle,
+AcDbEllipse, AcDbSpline, AcDbHatch, AcDbText, AcDbMText,
 AcDbBlockReference) have coordinate fields that we extract and convert
 into the same JSON format used by the ezdxf-based DXF parser, so the
 frontend DxfViewer can render them identically.
@@ -10,6 +11,7 @@ Coordinate formats in DDC output:
   - Lines: "295.144, 812.512, 0" (comma-separated)
   - Vertices: "[0.5 0.5]" or "[0.5 0.5 0.0]" (space-separated in brackets)
   - Arcs/Circles: same as lines for Center
+  - Scientific: "1.22868e+06, 801718, 0"
 """
 
 import logging
@@ -82,10 +84,28 @@ def _parse_angle(s: str | None) -> float:
     """Parse angle in radians from string."""
     if not s:
         return 0.0
+    s_str = str(s).strip()
+    # Handle "197.678d" (degrees) format
+    if s_str.endswith("d"):
+        try:
+            import math
+            return float(s_str[:-1]) * math.pi / 180.0
+        except (ValueError, TypeError):
+            return 0.0
     try:
-        return float(str(s).strip())
+        return float(s_str)
     except (ValueError, TypeError):
         return 0.0
+
+
+def _safe_float(val: Any) -> float | None:
+    """Safely convert to float, returning None on failure."""
+    if val is None:
+        return None
+    try:
+        return float(val)
+    except (ValueError, TypeError):
+        return None
 
 
 def parse_ddc_dwg_excel(excel_path: str | Path) -> dict[str, Any]:
@@ -180,6 +200,7 @@ def parse_ddc_dwg_excel(excel_path: str | Path) -> dict[str, Any]:
 
     # ── Pass 4: build entities ─────────────────────────────────────────
     entities: list[dict[str, Any]] = []
+    layout_set: set[str] = set()
     min_x = min_y = float("inf")
     max_x = max_y = float("-inf")
 
@@ -194,11 +215,14 @@ def parse_ddc_dwg_excel(excel_path: str | Path) -> dict[str, Any]:
         desc = str(get(row, "Description") or "")
         layer = str(get(row, "Layer") or "0")
         ci = get(row, "Color Index")
+        block_id = str(get(row, "BlockId") or "*Model_Space")
         # Resolve color: entity CI, or layer color
         if ci is not None and str(ci) != "256":
             color = _aci_to_hex(ci)
         else:
             color = layer_colors.get(layer, "#cccccc")
+
+        entity_count_before = len(entities)
 
         if desc == "<AcDbLine>":
             sp = _parse_coord(get(row, "StartPoint") or get(row, "Start Point"))
@@ -298,16 +322,211 @@ def parse_ddc_dwg_excel(excel_path: str | Path) -> dict[str, Any]:
                 if layer in layers_map:
                     layers_map[layer]["entity_count"] += 1
 
+        elif desc == "<AcDbEllipse>":
+            center = _parse_coord(get(row, "Center"))
+            major_r = _safe_float(get(row, "Major Radius") or get(row, "MajorRadius"))
+            minor_r = _safe_float(get(row, "Minor Radius") or get(row, "MinorRadius"))
+            ratio = _safe_float(get(row, "Radius Ratio") or get(row, "RadiusRatio"))
+            major_axis = _parse_coord(get(row, "Major Axis") or get(row, "MajorAxis"))
+            sa = _parse_angle(get(row, "StartAngle"))
+            ea = _parse_angle(get(row, "EndAngle"))
+            if center and (major_r or (major_axis and ratio)):
+                if not major_r and major_axis:
+                    import math as _math
+                    major_r = _math.sqrt(major_axis[0] ** 2 + major_axis[1] ** 2)
+                if not minor_r and major_r and ratio:
+                    minor_r = major_r * ratio
+                rotation = 0.0
+                if major_axis:
+                    import math as _math
+                    rotation = _math.atan2(major_axis[1], major_axis[0])
+                entities.append({
+                    "entity_type": "ELLIPSE",
+                    "layer": layer,
+                    "color": color,
+                    "geometry_data": {
+                        "center": {"x": center[0], "y": center[1]},
+                        "major_radius": major_r or 1.0,
+                        "minor_radius": minor_r or 1.0,
+                        "rotation": rotation,
+                        "start_angle": sa,
+                        "end_angle": ea,
+                    },
+                })
+                r = major_r or 1.0
+                expand(center[0] - r, center[1] - r)
+                expand(center[0] + r, center[1] + r)
+                if layer in layers_map:
+                    layers_map[layer]["entity_count"] += 1
+
+        elif desc == "<AcDbSpline>":
+            closed = str(get(row, "Closed") or "").lower() == "true"
+            min_ext = _parse_coord(get(row, "Min Extents"))
+            max_ext = _parse_coord(get(row, "Max Extents"))
+            sp = _parse_coord(get(row, "StartPoint") or get(row, "Start Point"))
+            ep = _parse_coord(get(row, "EndPoint") or get(row, "End Point"))
+
+            if closed and min_ext and max_ext:
+                # Closed spline — approximate as ellipse from bounding box
+                import math as _math
+                cx = (min_ext[0] + max_ext[0]) / 2
+                cy = (min_ext[1] + max_ext[1]) / 2
+                rx = (max_ext[0] - min_ext[0]) / 2
+                ry = (max_ext[1] - min_ext[1]) / 2
+                if rx > 0 and ry > 0:
+                    entities.append({
+                        "entity_type": "ELLIPSE",
+                        "layer": layer,
+                        "color": color,
+                        "geometry_data": {
+                            "center": {"x": cx, "y": cy},
+                            "major_radius": max(rx, ry),
+                            "minor_radius": min(rx, ry),
+                            "rotation": 0.0 if rx >= ry else _math.pi / 2,
+                            "start_angle": 0.0,
+                            "end_angle": _math.pi * 2,
+                        },
+                    })
+                    expand(min_ext[0], min_ext[1])
+                    expand(max_ext[0], max_ext[1])
+                    if layer in layers_map:
+                        layers_map[layer]["entity_count"] += 1
+            elif sp and ep and sp != ep:
+                # Open spline — draw chord from start to end
+                entities.append({
+                    "entity_type": "LINE",
+                    "layer": layer,
+                    "color": color,
+                    "geometry_data": {
+                        "start": {"x": sp[0], "y": sp[1]},
+                        "end": {"x": ep[0], "y": ep[1]},
+                    },
+                })
+                expand(sp[0], sp[1])
+                expand(ep[0], ep[1])
+                if layer in layers_map:
+                    layers_map[layer]["entity_count"] += 1
+
+        elif desc == "<AcDbHatch>":
+            # Extract hatch boundary from Min/Max Extents as a rectangle
+            min_ext = _parse_coord(get(row, "Min Extents"))
+            max_ext = _parse_coord(get(row, "Max Extents"))
+            pattern = str(get(row, "Pattern Name") or get(row, "PatternName") or "SOLID")
+            is_solid = str(get(row, "Solid Fill") or get(row, "IsSolidFill") or "").lower() == "true"
+            if min_ext and max_ext:
+                points = [
+                    {"x": min_ext[0], "y": min_ext[1]},
+                    {"x": max_ext[0], "y": min_ext[1]},
+                    {"x": max_ext[0], "y": max_ext[1]},
+                    {"x": min_ext[0], "y": max_ext[1]},
+                ]
+                entities.append({
+                    "entity_type": "HATCH",
+                    "layer": layer,
+                    "color": color,
+                    "geometry_data": {
+                        "points": points,
+                        "closed": True,
+                        "pattern_name": pattern,
+                        "is_solid": is_solid,
+                    },
+                })
+                expand(min_ext[0], min_ext[1])
+                expand(max_ext[0], max_ext[1])
+                if layer in layers_map:
+                    layers_map[layer]["entity_count"] += 1
+
+        elif desc == "<AcDbText>":
+            pos = _parse_coord(
+                get(row, "Position") or get(row, "Text Position")
+            )
+            text = str(get(row, "Text String") or get(row, "TextString") or "")
+            height = _safe_float(get(row, "Height") or get(row, "TextHeight")) or 2.5
+            rotation = _safe_float(get(row, "Rotation")) or 0.0
+            if pos and text:
+                entities.append({
+                    "entity_type": "TEXT",
+                    "layer": layer,
+                    "color": color,
+                    "geometry_data": {
+                        "insert": {"x": pos[0], "y": pos[1]},
+                        "text": text,
+                        "height": height,
+                        "rotation": rotation,
+                    },
+                })
+                expand(pos[0], pos[1])
+                if layer in layers_map:
+                    layers_map[layer]["entity_count"] += 1
+
+        elif desc == "<AcDbMText>":
+            loc = _parse_coord(get(row, "Location"))
+            text = str(get(row, "Text") or get(row, "Contents") or "")
+            # Strip MText formatting codes
+            text = re.sub(r"\\[A-Za-z][^;]*;", "", text)
+            text = re.sub(r"[{}]", "", text).strip()
+            height = _safe_float(
+                get(row, "TextHeight") or get(row, "ActualHeight") or get(row, "Actual Height")
+            ) or 2.5
+            rotation = _safe_float(get(row, "Rotation")) or 0.0
+            if loc and text:
+                entities.append({
+                    "entity_type": "MTEXT",
+                    "layer": layer,
+                    "color": color,
+                    "geometry_data": {
+                        "insert": {"x": loc[0], "y": loc[1]},
+                        "text": text,
+                        "height": height,
+                        "rotation": rotation,
+                    },
+                })
+                expand(loc[0], loc[1])
+                if layer in layers_map:
+                    layers_map[layer]["entity_count"] += 1
+
         elif desc == "<AcDbBlockReference>":
             pos = _parse_coord(get(row, "Position"))
+            block_name = str(get(row, "BlockTableRecord") or get(row, "Name") or "block")
+            rotation = _safe_float(get(row, "Rotation")) or 0.0
+            scale_str = get(row, "ScaleFactors") or get(row, "Scale Factors")
+            x_scale = y_scale = 1.0
+            if scale_str:
+                parts = str(scale_str).replace("[", "").replace("]", "").split(",")
+                if len(parts) >= 2:
+                    x_scale = _safe_float(parts[0].strip()) or 1.0
+                    y_scale = _safe_float(parts[1].strip()) or 1.0
             if pos:
                 entities.append({
                     "entity_type": "INSERT",
                     "layer": layer,
                     "color": color,
                     "geometry_data": {
-                        "insertion_point": {"x": pos[0], "y": pos[1]},
-                        "block_name": str(get(row, "Name") or "block"),
+                        "insert": {"x": pos[0], "y": pos[1]},
+                        "block_name": block_name,
+                        "x_scale": x_scale,
+                        "y_scale": y_scale,
+                        "rotation": rotation,
+                    },
+                })
+                expand(pos[0], pos[1])
+                if layer in layers_map:
+                    layers_map[layer]["entity_count"] += 1
+
+        elif desc == "<AcDbAttributeDefinition>":
+            pos = _parse_coord(get(row, "Position"))
+            text = str(get(row, "TextString") or get(row, "Text String") or "")
+            height = _safe_float(get(row, "TextHeight") or get(row, "Height")) or 2.5
+            if pos and text:
+                entities.append({
+                    "entity_type": "TEXT",
+                    "layer": layer,
+                    "color": color,
+                    "geometry_data": {
+                        "insert": {"x": pos[0], "y": pos[1]},
+                        "text": text,
+                        "height": height,
+                        "rotation": 0.0,
                     },
                 })
                 expand(pos[0], pos[1])
@@ -332,6 +551,11 @@ def parse_ddc_dwg_excel(excel_path: str | Path) -> dict[str, Any]:
                 if layer in layers_map:
                     layers_map[layer]["entity_count"] += 1
 
+        # Tag newly added entities with their layout (BlockId)
+        for ent in entities[entity_count_before:]:
+            ent["layout"] = block_id
+            layout_set.add(block_id)
+
     # Fallback extents
     if min_x == float("inf"):
         min_x = min_y = 0.0
@@ -342,6 +566,12 @@ def parse_ddc_dwg_excel(excel_path: str | Path) -> dict[str, Any]:
         "DDC DWG parsed: %d entities, %d layers, extents %.1f,%.1f → %.1f,%.1f",
         len(entities), len(layers), min_x, min_y, max_x, max_y,
     )
+
+    # Sort layouts: *Model_Space first, then alphabetical
+    sorted_layouts = sorted(layout_set)
+    if "*Model_Space" in sorted_layouts:
+        sorted_layouts.remove("*Model_Space")
+        sorted_layouts.insert(0, "*Model_Space")
 
     return {
         "layers": layers,
@@ -354,6 +584,7 @@ def parse_ddc_dwg_excel(excel_path: str | Path) -> dict[str, Any]:
         },
         "units": "unitless",
         "entity_count": len(entities),
+        "layouts": sorted_layouts,
     }
 
 

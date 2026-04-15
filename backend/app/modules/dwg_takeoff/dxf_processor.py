@@ -85,8 +85,8 @@ def _serialize_entity(entity: Any, layer_colors: dict[str, str] | None = None) -
         result["geometry_data"] = {
             "center": {"x": dxf.center.x, "y": dxf.center.y},
             "radius": dxf.radius,
-            "start_angle": dxf.start_angle,
-            "end_angle": dxf.end_angle,
+            "start_angle": math.radians(dxf.start_angle),
+            "end_angle": math.radians(dxf.end_angle),
         }
     elif entity_type in ("LWPOLYLINE", "POLYLINE"):
         try:
@@ -175,8 +175,6 @@ def parse_dxf(file_path: str) -> dict[str, Any]:
     except Exception as exc:
         raise ValueError(f"Failed to parse DXF file: {exc}") from exc
 
-    msp = doc.modelspace()
-
     # Extract layers
     layers: list[dict[str, Any]] = []
     for layer in doc.layers:
@@ -193,20 +191,25 @@ def parse_dxf(file_path: str) -> dict[str, Any]:
     # Build layer name set for counting
     layer_counts: dict[str, int] = {}
 
-    # Extract entities
+    # Extract entities from ALL layouts (Model, Layout1, Layout2, etc.)
     entities: list[dict[str, Any]] = []
+    layout_names: list[str] = []
     skipped_count = 0
     total_count = 0
-    for entity in msp:
-        total_count += 1
-        try:
-            serialized = _serialize_entity(entity, layer_color_map)
-            entities.append(serialized)
-            layer_name = serialized.get("layer", "0")
-            layer_counts[layer_name] = layer_counts.get(layer_name, 0) + 1
-        except Exception:
-            skipped_count += 1
-            logger.debug("Skipping unprocessable entity: %s", entity.dxftype())
+    for layout in doc.layouts:
+        layout_name = layout.name
+        layout_names.append(layout_name)
+        for entity in layout:
+            total_count += 1
+            try:
+                serialized = _serialize_entity(entity, layer_color_map)
+                serialized["layout"] = layout_name
+                entities.append(serialized)
+                layer_name = serialized.get("layer", "0")
+                layer_counts[layer_name] = layer_counts.get(layer_name, 0) + 1
+            except Exception:
+                skipped_count += 1
+                logger.debug("Skipping unprocessable entity: %s", entity.dxftype())
 
     if total_count > 0 and skipped_count / total_count > 0.10:
         logger.warning(
@@ -265,6 +268,9 @@ def parse_dxf(file_path: str) -> dict[str, Any]:
     insunits = doc.header.get("$INSUNITS", 0)
     units = units_map.get(insunits, "unitless")
 
+    # Deduplicate and sort layout names, ensure "Model" comes first
+    unique_layouts = list(dict.fromkeys(layout_names))
+
     return {
         "layers": layers,
         "entities": entities,
@@ -272,6 +278,7 @@ def parse_dxf(file_path: str) -> dict[str, Any]:
         "units": units,
         "entity_count": len(entities),
         "skipped_count": skipped_count,
+        "layouts": unique_layouts,
     }
 
 

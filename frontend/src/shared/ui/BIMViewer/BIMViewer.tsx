@@ -37,6 +37,9 @@ import {
   PanelTop,
   X,
   EyeOff as EyeOffIcon,
+  Ruler,
+  Tag,
+  Settings,
 } from 'lucide-react';
 import { SceneManager } from './SceneManager';
 import { ElementManager } from './ElementManager';
@@ -104,6 +107,8 @@ export interface BIMViewerProps {
     | 'validation'
     | 'boq_coverage'
     | 'document_coverage';
+  /** Show bounding box placeholders alongside geometry. Off by default. */
+  showBoundingBoxes?: boolean;
   /** Element IDs to isolate (hide everything else). Empty = show all. */
   isolatedIds?: string[] | null;
   /** Element IDs to highlight in orange WITHOUT hiding the rest of the
@@ -117,9 +122,10 @@ export interface BIMViewerProps {
    * the viewport (e.g. DDC RVT exports with numeric node names).
    */
   onGeometryLoaded?: (meshMatchRatio: number) => void;
-  /** User clicked "Add to BOQ" on the selected element — parent opens the
-   *  AddToBOQModal pre-filled with this element. */
-  onAddToBOQ?: (element: BIMElementData) => void;
+  /** User clicked "Add to BOQ" — parent opens the AddToBOQModal pre-filled
+   *  with the selected element(s).  When multiple elements are selected the
+   *  array contains all of them so the modal can do a bulk link. */
+  onAddToBOQ?: (elements: BIMElementData[]) => void;
   /** User clicked "Unlink" on a specific link in the properties panel. */
   onUnlinkBOQ?: (linkId: string) => void;
   /** User clicked a linked document in the properties panel — parent
@@ -218,6 +224,7 @@ export function BIMViewer({
   isLoading = false,
   error = null,
   geometryUrl = null,
+  showBoundingBoxes = false,
   filterPredicate = null,
   colorByMode = 'default',
   isolatedIds = null,
@@ -366,6 +373,17 @@ export function BIMViewer({
         } else {
           setSelectionSummary('');
         }
+        // Update properties panel — show first selected element
+        if (ids.length > 0) {
+          const first = elementMgr.getElementData(ids[0]!);
+          setSelectedElement(first ?? null);
+        } else {
+          setSelectedElement(null);
+        }
+        // Flag so the parent's selectedElementIds change doesn't reset our multi-select
+        internalSelectionRef.current = true;
+        // Notify parent with the last clicked element
+        onElementSelect?.(ids.length > 0 ? ids[ids.length - 1]! : null);
         // Close context menu on selection change
         setContextMenu(null);
       },
@@ -460,10 +478,25 @@ export function BIMViewer({
   // loading. Skipping them keeps the first zoomToFit clean.
   useEffect(() => {
     if (!elementMgrRef.current || !elements) return;
-    const skipPlaceholders = !!geometryUrl;
-    elementMgrRef.current.loadElements(elements, { skipPlaceholders });
+    // Bounding box placeholders only when user explicitly toggles them on.
+    // Real 3D geometry comes from DAE/GLB — no boxes by default.
+    // Only reload elements if the element count actually changed (new model).
+    // Data updates (link changes, validation) don't require full element reload
+    // — just update the elementDataMap in-place.
+    const prevCount = elementMgrRef.current.getElementCount();
+    if (elements.length !== prevCount) {
+      elementMgrRef.current.loadElements(elements, { skipPlaceholders: !showBoundingBoxes });
+    } else {
+      // Update element data in-place without recreating meshes
+      elementMgrRef.current.updateElementData(elements);
+    }
     setElementCount(elements.length);
-  }, [elements, geometryUrl]);
+    // Refresh selected element with latest data (e.g. new BOQ links)
+    if (selectedElement && elementMgrRef.current) {
+      const fresh = elementMgrRef.current.getElementData(selectedElement.id);
+      if (fresh) setSelectedElement(fresh);
+    }
+  }, [elements, showBoundingBoxes]);
 
   // Load DAE geometry when URL is available (after elements are loaded)
   const onGeometryLoadedRef = useRef(onGeometryLoaded);
@@ -507,19 +540,17 @@ export function BIMViewer({
             requestAnimationFrame(fit);
           });
         })
-        .catch(() => {
-          // Geometry load failed — re-load elements WITH placeholder
-          // boxes so the viewport is not left completely empty. The
-          // initial loadElements call used skipPlaceholders=true
-          // because we expected geometry to arrive; now we undo that.
+        .catch((err) => {
+          // Geometry load failed — no fallback boxes, just clear progress.
+          // eslint-disable-next-line no-console
+          console.warn('[BIM] Geometry load failed:', err);
           setGeometryProgress(null);
-          if (elementMgrRef.current && elements?.length) {
-            elementMgrRef.current.loadElements(elements, { skipPlaceholders: false });
-            sceneRef.current?.zoomToFit();
-          }
         });
     }
-  }, [geometryUrl, elements]);
+  // Re-run when geometryUrl changes OR when elements first arrive (guard above).
+  // Using elements.length as dep avoids re-triggering on data-only updates.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [geometryUrl, elements?.length]);
 
   // Apply filter predicate whenever it changes. Predicates from BIMFilterPanel
   // are rebuilt on every filter state change, so this effect fires fast but
@@ -619,21 +650,23 @@ export function BIMViewer({
     }
   }, [colorByMode, elements]);
 
-  // Sync selection from parent — highlight the mesh AND auto-zoom the
-  // camera so the element is centered in the viewport.  This drives the
-  // "click row in filter panel -> fly to that element" interaction.
+  // Sync selection from parent — ONLY when the parent explicitly changes
+  // selection (e.g. clicking a row in the filter panel). Skip when the
+  // selection originated from the viewer's own SelectionManager (Ctrl+Click)
+  // to avoid resetting multi-select back to a single element.
+  const internalSelectionRef = useRef(false);
   useEffect(() => {
     if (!selectionMgrRef.current || !selectedElementIds) return;
+    // Skip if this change was triggered by our own onSelectionChange callback
+    if (internalSelectionRef.current) {
+      internalSelectionRef.current = false;
+      return;
+    }
     selectionMgrRef.current.setSelection(selectedElementIds);
 
-    // Update the properties panel for the first selected element
     if (selectedElementIds.length > 0 && elementMgrRef.current) {
       const data = elementMgrRef.current.getElementData(selectedElementIds[0]!);
       setSelectedElement(data ?? null);
-
-      // NOTE: Auto-zoom on click removed — users found it disorienting.
-      // Use the "Focus" toolbar button (F key) or context menu → "Zoom to"
-      // for intentional zoom-to-selection.
     }
   }, [selectedElementIds]);
 
@@ -749,9 +782,14 @@ export function BIMViewer({
   }, [contextMenu]);
 
   const handleCtxAddToBOQ = useCallback(() => {
-    if (!contextMenu) return;
-    const el = contextMenu.element ?? contextMenu.selectedElements[0];
-    if (el && onAddToBOQ) onAddToBOQ(el);
+    if (!contextMenu || !onAddToBOQ) return;
+    // Prefer all selected elements (bulk); fall back to the single right-clicked element.
+    const bulk = contextMenu.selectedElements;
+    if (bulk && bulk.length > 0) {
+      onAddToBOQ(bulk);
+    } else if (contextMenu.element) {
+      onAddToBOQ([contextMenu.element]);
+    }
   }, [contextMenu, onAddToBOQ]);
 
   const handleCtxLinkDocument = useCallback(() => {
@@ -1063,7 +1101,7 @@ export function BIMViewer({
       {/* Toolbar overlay — organised by function group with dividers.
           Grouping follows the professional 6-group taxonomy from the research
           brief: Camera | Selection | Visibility | (contextual tools follow). */}
-      <div className="absolute top-3 start-3 flex items-center gap-1 z-20 rounded-lg bg-surface-primary/90 backdrop-blur border border-border-light shadow-sm p-1">
+      <div className="absolute top-3 start-3 flex items-center gap-1 z-20 rounded-lg bg-surface-primary border border-border-light shadow-sm p-1">
         {/* Camera views — each has a unique icon */}
         <ToolbarButton
           icon={Home}
@@ -1138,7 +1176,7 @@ export function BIMViewer({
           are selected.  Gives quick access to BOQ/Hide/Isolate/Clear without
           right-clicking. */}
       {selectionCount > 0 && (
-        <div className="absolute bottom-3 start-1/2 -translate-x-1/2 z-30 flex items-center gap-2 rounded-lg bg-surface-primary/95 backdrop-blur border border-oe-blue/40 shadow-lg px-3 py-1.5">
+        <div className="absolute bottom-3 start-1/2 -translate-x-1/2 z-30 flex items-center gap-2 rounded-lg bg-surface-primary border border-oe-blue/40 shadow-md px-3 py-1.5">
           <span className="text-xs font-semibold text-content-primary whitespace-nowrap">
             {selectionCount === 1
               ? t('bim.sel_one', {
@@ -1159,8 +1197,8 @@ export function BIMViewer({
             <button
               type="button"
               onClick={() => {
-                const el = selectionMgrRef.current?.getSelectedElements()?.[0];
-                if (el) onAddToBOQ(el);
+                const selected = selectionMgrRef.current?.getSelectedElements() ?? [];
+                if (selected.length > 0) onAddToBOQ(selected);
               }}
               className="px-2 py-0.5 rounded text-[11px] font-medium text-white bg-oe-blue hover:bg-oe-blue-dark transition-colors"
             >
@@ -1198,7 +1236,7 @@ export function BIMViewer({
       {(hiddenIds.size > 0 || isIsolated) && (
         <div className="absolute bottom-3 end-3 z-20 flex items-center gap-1.5">
           {hiddenIds.size > 0 && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium bg-surface-primary/90 backdrop-blur border border-border-light shadow-sm text-content-secondary">
+            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium bg-surface-primary border border-border-light shadow-sm text-content-secondary">
               <EyeOffIcon size={11} />
               {t('bim.hidden_count', {
                 defaultValue: '{{count}} hidden',
@@ -1215,7 +1253,7 @@ export function BIMViewer({
           <button
             type="button"
             onClick={handleShowAll}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium bg-surface-primary/90 backdrop-blur border border-border-light shadow-sm text-content-secondary hover:bg-surface-secondary transition-colors"
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium bg-surface-primary border border-border-light shadow-sm text-content-secondary hover:bg-surface-secondary transition-colors"
           >
             <Eye size={11} />
             {t('bim.show_all', { defaultValue: 'Show all' })}
@@ -1231,7 +1269,7 @@ export function BIMViewer({
         <div className="absolute top-3 end-3 z-20 flex items-center gap-1.5 flex-wrap justify-end max-w-[calc(100%-280px)]">
           {/* Total elements pill — not clickable, just informational */}
           <span
-            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-surface-primary/90 backdrop-blur text-content-secondary border border-border-light shadow-sm"
+            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-surface-primary text-content-secondary border border-border-light shadow-sm"
             title={t('bim.element_count_title', {
               defaultValue: '{{count}} elements loaded in this model',
               count: elementCount,
@@ -1394,7 +1432,7 @@ export function BIMViewer({
           individual element is selected.  Gives the user a quick overview
           of the model breakdown by category and storey. */}
       {!selectedElement && modelSummary && elementCount > 0 && (
-        <div className="absolute top-12 end-3 w-72 bg-surface-primary/95 backdrop-blur border border-border-light rounded-lg shadow-lg z-20 max-h-[calc(100%-6rem)] overflow-y-auto">
+        <div className="absolute top-12 end-3 w-72 bg-surface-primary/95 backdrop-blur-sm border border-border-light rounded-lg shadow-lg z-20 max-h-[calc(100%-6rem)] overflow-y-auto">
           <div className="px-4 py-3 border-b border-border-light">
             <div className="flex items-center gap-2">
               <LayoutGrid size={16} className="text-oe-blue shrink-0" />
@@ -1515,38 +1553,73 @@ export function BIMViewer({
 
       {/* Properties panel (when element selected) — tabbed layout */}
       {selectedElement && (
-        <div className="absolute top-12 end-3 w-72 bg-surface-primary/95 backdrop-blur border border-border-light rounded-lg shadow-lg z-20 max-h-[calc(100%-6rem)] flex flex-col">
-          <div className="flex items-center justify-between p-3 border-b border-border-light shrink-0">
-            <h3 className="text-sm font-semibold text-content-primary truncate">
-              {selectedElement.name || selectedElement.element_type || selectedElement.id}
-            </h3>
+        <div className="absolute top-12 end-3 w-72 bg-surface-primary/95 backdrop-blur-sm border border-border-light rounded-lg shadow-lg z-20 max-h-[calc(100%-6rem)] flex flex-col">
+          <div className="p-3 border-b border-border-light shrink-0">
+            <div className="flex items-center justify-between mb-0.5">
+              <h3 className="text-sm font-semibold text-content-primary truncate">
+                {(selectedElement.properties as Record<string, unknown>)?.type_name as string
+                  || selectedElement.name
+                  || selectedElement.element_type
+                  || selectedElement.id}
+              </h3>
+              <button
+                onClick={handleCloseProperties}
+                className="flex h-6 w-6 items-center justify-center rounded text-content-tertiary hover:bg-surface-secondary transition-colors"
+                aria-label={t('common.close', { defaultValue: 'Close' })}
+              >
+                <span className="text-xs font-bold">&times;</span>
+              </button>
+            </div>
+            {/* Category subtitle */}
+            {selectedElement.element_type && (
+              <p className="text-[10px] text-content-tertiary mb-0.5">{selectedElement.element_type}</p>
+            )}
+            {/* Element ID(s) — clickable to copy */}
             <button
-              onClick={handleCloseProperties}
-              className="flex h-6 w-6 items-center justify-center rounded text-content-tertiary hover:bg-surface-secondary transition-colors"
-              aria-label={t('common.close', { defaultValue: 'Close' })}
+              type="button"
+              onClick={() => {
+                const ids = (selectedElementIds && selectedElementIds.length > 1)
+                  ? selectedElementIds.map((eid) => {
+                      const el = elementMgrRef.current?.getElementData(eid);
+                      return el?.mesh_ref || el?.stable_id || eid;
+                    }).join(', ')
+                  : selectedElement.mesh_ref || selectedElement.stable_id || selectedElement.id;
+                navigator.clipboard.writeText(ids);
+              }}
+              className="flex items-center gap-1 text-[10px] text-content-tertiary hover:text-oe-blue transition-colors group"
+              title={t('bim.copy_id', { defaultValue: 'Click to copy ID' })}
             >
-              <span className="text-xs font-bold">&times;</span>
+              <span className="font-mono truncate max-w-[220px]">
+                {(selectedElementIds && selectedElementIds.length > 1)
+                  ? selectedElementIds.map((eid) => {
+                      const el = elementMgrRef.current?.getElementData(eid);
+                      return el?.mesh_ref || eid.slice(0, 8);
+                    }).join(', ')
+                  : `ID: ${selectedElement.mesh_ref || selectedElement.stable_id || selectedElement.id}`}
+              </span>
+              <svg className="w-3 h-3 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
             </button>
           </div>
 
           {/* Tab bar */}
           <div className="flex border-b border-border-light shrink-0">
             {([
-              ['key', 'Key'] as const,
-              ['all', 'All'] as const,
-              ['links', 'Links'] as const,
-              ['validation', 'Check'] as const,
+              ['key', t('bim.tab_properties', { defaultValue: 'Properties' })] as const,
+              ['links', t('bim.tab_links', { defaultValue: 'Links' })] as const,
+              ['validation', t('bim.tab_check', { defaultValue: 'Check' })] as const,
             ]).map(([id, label]) => (
               <button
                 key={id}
                 type="button"
                 onClick={() => {
                   setPropsTab(id);
-                  if (id === 'all' && parquetProps === null && !parquetExpanded) {
+                  if (id === 'key' && parquetProps === null && !parquetExpanded) {
                     handleFetchAllProperties();
                   }
                 }}
-                className={`flex-1 py-1.5 text-[10px] font-semibold transition-colors border-b-2 ${
+                className={`flex-1 py-2 text-xs font-semibold transition-colors border-b-2 ${
                   propsTab === id
                     ? 'border-oe-blue text-oe-blue'
                     : 'border-transparent text-content-tertiary hover:text-content-secondary'
@@ -1554,21 +1627,49 @@ export function BIMViewer({
               >
                 {label}
                 {id === 'links' && (selectedElement.boq_links?.length ?? 0) > 0 && (
-                  <span className="ml-0.5 text-[9px] text-oe-blue">
+                  <span className="ml-1 text-[10px] text-oe-blue">
                     {selectedElement.boq_links!.length}
                   </span>
                 )}
                 {id === 'validation' && selectedElement.validation_status === 'error' && (
-                  <span className="ml-0.5 text-[9px] text-rose-500">!</span>
+                  <span className="ml-1 text-[10px] text-rose-500">!</span>
                 )}
               </button>
             ))}
           </div>
 
           <div className="overflow-y-auto p-3 space-y-3">
-            {/* ── Tab: Key Properties ─────────────────────────────────── */}
+            {/* ── Tab: Properties (merged Key + All) ──────────────────── */}
             {propsTab === 'key' && (
               <>
+                {/* Copy all properties button */}
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const lines: string[] = [];
+                      lines.push(`Type: ${selectedElement.element_type || ''}`);
+                      lines.push(`Name: ${selectedElement.name || ''}`);
+                      if (selectedElement.discipline) lines.push(`Discipline: ${selectedElement.discipline}`);
+                      if (selectedElement.storey) lines.push(`Storey: ${selectedElement.storey}`);
+                      if (selectedElement.mesh_ref) lines.push(`ID: ${selectedElement.mesh_ref}`);
+                      for (const [k, v] of Object.entries(elementQuantities)) {
+                        lines.push(`${k}: ${v}`);
+                      }
+                      for (const [k, v] of Object.entries(elementProperties)) {
+                        lines.push(`${k}: ${v}`);
+                      }
+                      navigator.clipboard.writeText(lines.join('\n'));
+                    }}
+                    className="text-[10px] text-content-tertiary hover:text-oe-blue transition-colors flex items-center gap-1"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    {t('bim.copy_all', { defaultValue: 'Copy all' })}
+                  </button>
+                </div>
+
                 {/* Element info */}
                 <div className="space-y-1">
                   <InfoRow
@@ -1593,61 +1694,50 @@ export function BIMViewer({
                   )}
                 </div>
 
-                {/* Classification */}
-                {selectedElement.classification && Object.keys(selectedElement.classification).length > 0 && (
-                  <div>
-                    <h4 className="text-xs font-semibold text-content-primary mb-1">
-                      {t('bim.classification', { defaultValue: 'Classification' })}
-                    </h4>
-                    <PropertiesTable properties={selectedElement.classification} />
-                  </div>
-                )}
-
                 {/* Quantities */}
                 {Object.keys(elementQuantities).length > 0 && (
                   <div>
-                    <h4 className="text-xs font-semibold text-content-primary mb-1">
+                    <h4 className="text-sm font-semibold text-content-primary mb-1.5 flex items-center gap-1.5">
+                      <Ruler size={13} className="text-oe-blue" />
                       {t('bim.quantities', { defaultValue: 'Quantities' })}
                     </h4>
                     <QuantitiesTable quantities={elementQuantities} />
                   </div>
                 )}
 
-                {/* Inline properties — limited set of key ones */}
-                {Object.keys(elementProperties).length > 0 && (
+                {/* Classification */}
+                {selectedElement.classification && Object.keys(selectedElement.classification).length > 0 && (
                   <div>
-                    <h4 className="text-xs font-semibold text-content-primary mb-1">
-                      {t('bim.properties', { defaultValue: 'Properties' })}
+                    <h4 className="text-sm font-semibold text-content-primary mb-1.5 flex items-center gap-1.5">
+                      <Tag size={13} className="text-violet-500" />
+                      {t('bim.classification', { defaultValue: 'Classification' })}
                     </h4>
-                    <PropertiesTable properties={elementProperties} />
+                    <PropertiesTable properties={selectedElement.classification} />
                   </div>
                 )}
-              </>
-            )}
 
-            {/* ── Tab: All Properties ──────────────────────────────── */}
-            {propsTab === 'all' && (
-              <>
-                {parquetLoading && (
-                  <div className="flex items-center gap-2 text-xs text-content-tertiary">
-                    <Loader2 size={12} className="animate-spin text-oe-blue" />
-                    {t('bim.loading_properties', { defaultValue: 'Loading properties...' })}
-                  </div>
-                )}
-                {parquetProps && Object.keys(parquetProps).length > 0 && (
-                  <PropertiesTable properties={parquetProps} />
-                )}
-                {parquetProps && Object.keys(parquetProps).length === 0 && (
-                  <p className="text-[10px] text-content-tertiary italic">
-                    {t('bim.no_parquet_data', {
-                      defaultValue: 'No Parquet data available for this element',
-                    })}
-                  </p>
-                )}
-                {/* Also show inline properties as fallback */}
-                {!parquetProps && !parquetLoading && Object.keys(elementProperties).length > 0 && (
-                  <PropertiesTable properties={elementProperties} />
-                )}
+                {/* Properties (inline + parquet merged) */}
+                <div>
+                  <h4 className="text-sm font-semibold text-content-primary mb-1.5 flex items-center gap-1.5">
+                    <Settings size={13} className="text-content-tertiary" />
+                    {t('bim.all_properties', { defaultValue: 'All properties' })}
+                  </h4>
+                  {parquetLoading && (
+                    <div className="flex items-center gap-2 text-xs text-content-tertiary py-2">
+                      <Loader2 size={12} className="animate-spin text-oe-blue" />
+                      {t('bim.loading_properties', { defaultValue: 'Loading...' })}
+                    </div>
+                  )}
+                  {parquetProps && Object.keys(parquetProps).length > 0 ? (
+                    <PropertiesTable properties={parquetProps} />
+                  ) : !parquetLoading && Object.keys(elementProperties).length > 0 ? (
+                    <PropertiesTable properties={elementProperties} />
+                  ) : !parquetLoading ? (
+                    <p className="text-[10px] text-content-tertiary italic py-1">
+                      {t('bim.no_extra_props', { defaultValue: 'No additional properties' })}
+                    </p>
+                  ) : null}
+                </div>
               </>
             )}
 
@@ -1746,7 +1836,7 @@ export function BIMViewer({
                 {onAddToBOQ && (
                   <button
                     type="button"
-                    onClick={() => onAddToBOQ(selectedElement)}
+                    onClick={() => onAddToBOQ([selectedElement])}
                     className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-oe-blue text-white hover:bg-oe-blue-dark"
                     title={t('bim.link_add_title', { defaultValue: 'Add this element to a BOQ position' })}
                   >

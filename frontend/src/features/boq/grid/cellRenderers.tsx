@@ -1,5 +1,4 @@
-import { useState, useCallback, useRef, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useCallback, useRef, useMemo, useEffect, forwardRef } from 'react';
 import type { ICellRendererParams } from 'ag-grid-community';
 import {
   ChevronDown,
@@ -13,9 +12,15 @@ import {
   MoreHorizontal,
   Boxes,
   Cuboid,
+  Ruler,
 } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { useQuery } from '@tanstack/react-query';
 import { RESOURCE_TYPE_BADGE, fmtWithCurrency } from '../boqHelpers';
 import { countComments } from '../CommentDrawer';
+import { BIMQuantityPicker } from './BIMQuantityPicker';
+import { MiniGeometryPreview } from '@/shared/ui/MiniGeometryPreview';
+import { fetchBIMElementsByIds } from '@/features/bim/api';
 
 /* ── Validation Status Dot ────────────────────────────────────────── */
 
@@ -162,6 +167,12 @@ export interface ResourceGridContext {
 
 export type FullGridContext = ActionsContext & ResourceGridContext & SectionGroupContext & {
   onApplyAnomalySuggestion?: (positionId: string, suggestedRate: number) => void;
+  /** First ready BIM model ID for the current project (used for mini 3D previews). */
+  bimModelId?: string | null;
+  /** Update a BOQ position — used by QuantityCellRenderer to apply BIM quantities. */
+  onUpdatePosition?: (id: string, data: Record<string, unknown>, oldData: Record<string, unknown>) => void;
+  /** Highlight linked BIM elements in the 3D viewer (triggered from ordinal badge). */
+  onHighlightBIMElements?: (elementIds: string[]) => void;
 };
 
 /* ── Actions Cell Renderer ────────────────────────────────────────── */
@@ -225,82 +236,278 @@ export function ActionsCellRenderer(params: ICellRendererParams) {
   );
 }
 
-/* ── Ordinal + Validation Dot + Resource Chevron Renderer ─────────── */
+/* ── Expand / Collapse Resources Cell Renderer (own non-editable column) */
+
+export function ExpandCellRenderer(params: ICellRendererParams) {
+  const { data, context } = params;
+  const ctx = context as FullGridContext | undefined;
+
+  if (!data || data._isSection || data._isFooter || data._isResource || data._isAddResource) return null;
+
+  const hasResources = Array.isArray(data.metadata?.resources) && data.metadata.resources.length > 0;
+  if (!hasResources) return null;
+
+  const isExpanded = ctx?.expandedPositions?.has(data.id) ?? false;
+
+  return (
+    <div className="flex items-center justify-center h-full w-full">
+      <button
+        onClick={() => ctx?.onToggleResources?.(data.id)}
+        className="h-6 w-6 flex items-center justify-center rounded
+                   text-content-tertiary hover:text-oe-blue hover:bg-oe-blue/10
+                   transition-colors cursor-pointer"
+        title={isExpanded ? 'Collapse resources' : 'Expand resources'}
+      >
+        {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+      </button>
+    </div>
+  );
+}
+
+/* ── Ordinal + Validation Dot ─────────────────────────────────────── */
 
 export function OrdinalCellRenderer(params: ICellRendererParams) {
-  const { data, value, context } = params;
+  const { data, value } = params;
   if (!data || data._isSection || data._isFooter) return <span>{value}</span>;
 
   const status = data.validation_status ?? 'pending';
   const dotColor = VALIDATION_DOT_STYLES[status] ?? VALIDATION_DOT_STYLES.pending;
 
-  const ctx = context as ResourceGridContext | undefined;
-  const hasResources = Array.isArray(data.metadata?.resources) && data.metadata.resources.length > 0;
-  const isExpanded = ctx?.expandedPositions?.has(data.id) ?? false;
-  const navigate = useNavigate();
-
-  // BIM link count — shown as a small blue pill when the position is
-  // linked to one or more BIM elements.  Click navigates to the BIM
-  // viewer with the first linked element preselected (deep link).
-  const bimLinks: unknown = data.cad_element_ids;
-  const bimLinkIds: string[] = Array.isArray(bimLinks)
-    ? bimLinks.filter((x): x is string => typeof x === 'string' && x.length > 0)
-    : [];
-  const bimLinkCount = bimLinkIds.length;
-  const firstBimElementId = bimLinkIds[0] ?? null;
-
   return (
     <div className="flex items-center gap-1 overflow-hidden">
-      {hasResources ? (
-        <button
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={(e) => {
-            e.stopPropagation();
-            ctx?.onToggleResources?.(data.id);
-          }}
-          className="shrink-0 h-4 w-4 flex items-center justify-center rounded text-content-tertiary hover:text-content-primary transition-colors"
-          aria-label={isExpanded ? 'Collapse resources' : 'Expand resources'}
-          aria-expanded={isExpanded}
-        >
-          {isExpanded ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
-        </button>
-      ) : (
-        <span className="shrink-0 w-4" />
-      )}
       <span className="text-xs font-mono truncate min-w-0">{value}</span>
       <span
         className={`inline-block h-2 w-2 shrink-0 rounded-full ${dotColor}`}
         title={status}
       />
-      {bimLinkCount > 0 && (
-        <button
-          type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={(e) => {
-            e.stopPropagation();
-            // Navigate to the BIM viewer and isolate the linked elements.
-            // When a single element is linked we also set ?element= so the
-            // detail panel opens.  For multiple elements we use ?isolate=
-            // so the 3D view hides everything except the linked set.
-            if (bimLinkCount === 1 && firstBimElementId) {
-              navigate(`/bim?element=${encodeURIComponent(firstBimElementId)}&isolate=${encodeURIComponent(firstBimElementId)}`);
-            } else if (bimLinkIds.length > 1) {
-              navigate(`/bim?isolate=${bimLinkIds.map((id) => encodeURIComponent(id)).join(',')}`);
-            } else {
-              navigate('/bim');
-            }
-          }}
-          className="shrink-0 inline-flex items-center gap-0.5 min-w-[16px] h-[14px] px-1 rounded-full bg-oe-blue/10 text-oe-blue text-[10px] font-semibold leading-none hover:bg-oe-blue/20 hover:scale-110 transition-all cursor-pointer"
-          title={`Open ${bimLinkCount} linked BIM element${bimLinkCount === 1 ? '' : 's'} in 3D viewer`}
-          aria-label={`View linked BIM elements in 3D`}
-        >
-          <Cuboid size={9} className="shrink-0" />
-          {bimLinkCount}
-        </button>
-      )}
     </div>
   );
 }
+
+/* ── BIM Link Badge + Mini 3D Preview (own column) ───────────────── */
+
+export function BimLinkCellRenderer(params: ICellRendererParams) {
+  const { data, context } = params;
+  const ctx = context as FullGridContext | undefined;
+
+  if (!data || data._isFooter || data._isResource || data._isAddResource || data._isSection) {
+    return null;
+  }
+
+  const bimLinks: unknown = data.cad_element_ids;
+  const bimLinkIds: string[] = Array.isArray(bimLinks)
+    ? bimLinks.filter((x): x is string => typeof x === 'string' && x.length > 0)
+    : [];
+  const bimLinkCount = bimLinkIds.length;
+  const hasBimLink = bimLinkCount > 0 && !!ctx?.bimModelId;
+
+  const [showPreview, setShowPreview] = useState(false);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  const handleOpen = useCallback(() => {
+    console.log('[BimLink] Opening preview', { bimLinkIds, modelId: ctx?.bimModelId });
+    if (btnRef.current) {
+      setAnchorRect(btnRef.current.getBoundingClientRect());
+    }
+    setShowPreview(true);
+    ctx?.onHighlightBIMElements?.(bimLinkIds);
+  }, [bimLinkIds, ctx]);
+
+  if (!hasBimLink) return null;
+
+  const popoverStyle = anchorRect
+    ? {
+        position: 'fixed' as const,
+        left: Math.min(anchorRect.right + 8, window.innerWidth - 400),
+        top: Math.max(8, Math.min(anchorRect.top - 40, window.innerHeight - 500)),
+        zIndex: 9999,
+      }
+    : undefined;
+
+  return (
+    <div className="flex items-center justify-center h-full w-full">
+      <button
+        ref={btnRef}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleOpen();
+        }}
+        onMouseDown={(e) => e.stopPropagation()}
+        className="h-6 px-1.5 inline-flex items-center gap-0.5 rounded
+                   bg-oe-blue/10 text-oe-blue text-[10px] font-semibold
+                   hover:bg-oe-blue/25 transition-colors cursor-pointer"
+        title={`${bimLinkCount} BIM element${bimLinkCount > 1 ? 's' : ''} linked — click to preview`}
+      >
+        <Cuboid size={11} />
+        {bimLinkCount}
+      </button>
+      {showPreview && anchorRect && ctx?.bimModelId &&
+        createPortal(
+          <>
+            {/* Backdrop blur overlay */}
+            <div
+              className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[9998] animate-fade-in"
+              onClick={() => setShowPreview(false)}
+            />
+            <BimLinkPopover
+              ref={popoverRef}
+              modelId={ctx.bimModelId}
+              elementIds={bimLinkIds}
+              style={popoverStyle!}
+              onClose={() => setShowPreview(false)}
+            />
+          </>,
+          document.body,
+        )}
+    </div>
+  );
+}
+
+/* ── BIM Link Popover — 3D preview + element info + navigate ─────── */
+
+const BimLinkPopover = forwardRef<
+  HTMLDivElement,
+  {
+    modelId: string;
+    elementIds: string[];
+    style: React.CSSProperties;
+    onClose: () => void;
+  }
+>(function BimLinkPopover({ modelId, elementIds, style, onClose }, ref) {
+  const innerRef = useRef<HTMLDivElement>(null);
+  const combinedRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      (innerRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+      if (typeof ref === 'function') ref(node);
+      else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
+    },
+    [ref],
+  );
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (innerRef.current && !innerRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [onClose]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  const [glbOk, setGlbOk] = useState(true);
+  const { data, isLoading } = useQuery({
+    queryKey: ['bim-link-preview', modelId, ...elementIds],
+    queryFn: () => fetchBIMElementsByIds(modelId, elementIds),
+    enabled: elementIds.length > 0,
+    staleTime: 5 * 60_000,
+  });
+  const elements = data?.items ?? [];
+
+  return (
+    <div
+      ref={combinedRef}
+      className="rounded-xl shadow-2xl border border-border-light dark:border-border-dark
+                 bg-white dark:bg-surface-elevated overflow-hidden w-[380px]"
+      style={style}
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-2 border-b border-border-light dark:border-border-dark bg-surface-secondary/30">
+        <div className="flex items-center gap-2">
+          <Cuboid size={14} className="text-oe-blue" />
+          <span className="text-xs font-semibold text-content-primary">
+            Linked Geometry
+          </span>
+          <span className="text-[10px] text-content-tertiary tabular-nums">
+            ({elementIds.length} element{elementIds.length !== 1 ? 's' : ''})
+          </span>
+        </div>
+        <button
+          onClick={onClose}
+          className="h-6 w-6 flex items-center justify-center rounded text-content-tertiary
+                     hover:text-content-primary hover:bg-surface-tertiary transition-colors"
+        >
+          <X size={14} />
+        </button>
+      </div>
+
+      {/* 3D Preview — large */}
+      {glbOk && (
+        <MiniGeometryPreview
+          modelId={modelId}
+          elementIds={elementIds}
+          width={380}
+          height={240}
+          className="bg-gray-50 dark:bg-gray-900 border-b border-border-light dark:border-border-dark"
+          onError={() => setGlbOk(false)}
+        />
+      )}
+
+      {/* Element info cards */}
+      <div className="max-h-[200px] overflow-y-auto">
+        {isLoading && (
+          <div className="flex items-center justify-center py-6 text-content-tertiary text-xs">
+            Loading element data...
+          </div>
+        )}
+        {!isLoading && elements.map((el) => (
+          <div key={el.id} className="px-4 py-2.5 border-b border-border-light/50 dark:border-border-dark/50 last:border-b-0">
+            <div className="flex items-center gap-2">
+              <Cuboid size={12} className="text-oe-blue/60 shrink-0" />
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-medium text-content-primary truncate">
+                  {el.name || el.element_type}
+                </div>
+                <div className="text-[10px] text-content-tertiary font-mono">{el.element_type}</div>
+              </div>
+            </div>
+            {el.quantities && Object.keys(el.quantities).length > 0 && (
+              <div className="mt-1.5 ml-5 grid grid-cols-2 gap-x-3 gap-y-0.5">
+                {Object.entries(el.quantities).map(([k, v]) => (
+                  <div key={k} className="flex items-baseline justify-between gap-1">
+                    <span className="text-[10px] text-content-secondary truncate">{k}</span>
+                    <span className="text-[10px] font-mono text-content-primary tabular-nums shrink-0">
+                      {typeof v === 'number' ? v.toFixed(2) : String(v)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Footer — navigate to BIM viewer */}
+      <div className="px-4 py-2.5 border-t border-border-light dark:border-border-dark bg-surface-secondary/20">
+        <a
+          href={`/bim?model=${encodeURIComponent(modelId)}&highlight=${encodeURIComponent(elementIds.join(','))}`}
+          className="flex items-center justify-center gap-2 w-full h-8 rounded-lg
+                     bg-oe-blue/10 hover:bg-oe-blue/20 text-oe-blue text-xs font-medium
+                     transition-colors"
+          onClick={(e) => {
+            e.preventDefault();
+            onClose();
+            window.location.href = `/bim?model=${encodeURIComponent(modelId)}&highlight=${encodeURIComponent(elementIds.join(','))}`;
+          }}
+        >
+          <Boxes size={14} />
+          Open in BIM Viewer
+        </a>
+      </div>
+    </div>
+  );
+});
 
 /* ── Inline Number Input ──────────────────────────────────────────── */
 
@@ -545,6 +752,11 @@ export function ResourceFullWidthRenderer(params: ICellRendererParams) {
 
   if (!ctx) return null;
 
+  // Section row — delegate to SectionFullWidthRenderer
+  if (data?._isSection) {
+    return <SectionFullWidthRenderer {...params} />;
+  }
+
   // Resource sub-row
   if (data?._isResource) {
     return <EditableResourceRow data={data} ctx={ctx} colWidths={colWidths} />;
@@ -608,4 +820,147 @@ export function ResourceFullWidthRenderer(params: ICellRendererParams) {
 
   // Fallback: delegate to section renderer
   return <SectionFullWidthRenderer {...params} />;
+}
+
+/* ── Quantity Cell — clean number, BIM-sourced shown with subtle bg ─ */
+
+export function QuantityCellRenderer(params: ICellRendererParams) {
+  const { data, value, context } = params;
+  if (!data || data._isSection || data._isFooter) {
+    return <span className="text-right text-xs tabular-nums">{value != null ? value : ''}</span>;
+  }
+
+  const ctx = context as FullGridContext | undefined;
+  // Smart formatting: >=0.01 → 2 decimals; <0.01 → show all significant digits
+  let formatted = '';
+  if (value != null) {
+    const num = typeof value === 'number' ? value : parseFloat(String(value));
+    if (!isNaN(num)) {
+      const absVal = Math.abs(num);
+      // For very small values, find how many decimals are needed to show first significant digit
+      let maxFrac = 2;
+      if (absVal > 0 && absVal < 0.01) {
+        // e.g. 0.000018 → need 6 decimals; 0.0018 → need 4
+        maxFrac = Math.max(6, Math.ceil(-Math.log10(absVal)) + 2);
+      } else if (absVal > 0 && absVal < 1) {
+        maxFrac = 4;
+      }
+      const f = ctx?.fmt ?? new Intl.NumberFormat('en', { minimumFractionDigits: 2, maximumFractionDigits: maxFrac });
+      formatted = f.format(num);
+    }
+  }
+
+  const meta = (data.metadata ?? {}) as Record<string, unknown>;
+  const hasBimSource = !!meta.bim_qty_source;
+
+  return (
+    <span
+      className={`block text-right text-xs tabular-nums w-full h-full leading-[32px] ${
+        hasBimSource
+          ? 'font-semibold text-emerald-700 dark:text-emerald-400'
+          : ''
+      }`}
+      title={hasBimSource ? String(meta.bim_qty_source) : undefined}
+    >
+      {formatted}
+    </span>
+  );
+}
+
+/* ── Unit Cell — shows unit + BIM param name if sourced from model ── */
+
+export function UnitCellRenderer(params: ICellRendererParams) {
+  const { data, value } = params;
+  if (!data || data._isSection || data._isFooter) {
+    return <span className="text-center text-2xs font-mono uppercase">{value ?? ''}</span>;
+  }
+
+  const meta = (data.metadata ?? {}) as Record<string, unknown>;
+  const bimSource = meta.bim_qty_source as string | undefined;
+
+  if (!bimSource) {
+    return <span className="text-center text-2xs font-mono uppercase w-full block">{value ?? ''}</span>;
+  }
+
+  // Extract short param name: "BIM: Wall / Area" -> "Area"
+  const parts = bimSource.split('/');
+  const paramName = (parts[parts.length - 1] ?? bimSource).trim();
+
+  return (
+    <div className="flex flex-col items-center justify-center h-full w-full gap-0">
+      <span className="text-2xs font-mono uppercase leading-tight">{value ?? ''}</span>
+      <span
+        className="text-[7px] leading-none font-medium text-emerald-600 dark:text-emerald-400 truncate max-w-full"
+        title={bimSource}
+      >
+        {paramName}
+      </span>
+    </div>
+  );
+}
+
+/**
+ * BIM Quantity Picker cell renderer — placed in a narrow column before Qty.
+ * Shows a ruler icon when the position is linked to BIM elements.
+ * Clicking opens a portal popover with available BIM quantities.
+ */
+export function BimQtyPickerCellRenderer(params: ICellRendererParams) {
+  const { data, context } = params;
+  const ctx = context as FullGridContext | undefined;
+
+  if (!data || data._isFooter || data._isResource || data._isAddResource || data._isSection) {
+    return null;
+  }
+
+  const cadElementIds: string[] = Array.isArray(data.cad_element_ids)
+    ? data.cad_element_ids.filter((x: unknown): x is string => typeof x === 'string' && (x as string).length > 0)
+    : [];
+  const hasBimLink = cadElementIds.length > 0 && !!ctx?.bimModelId;
+
+  const [showPicker, setShowPicker] = useState(false);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
+
+  const handleOpen = useCallback(() => {
+    if (btnRef.current) {
+      setAnchorRect(btnRef.current.getBoundingClientRect());
+    }
+    setShowPicker(true);
+  }, []);
+
+  if (!hasBimLink) return null;
+
+  return (
+    <div className="flex items-center justify-center h-full w-full">
+      <button
+        ref={btnRef}
+        onClick={handleOpen}
+        className="h-6 w-6 flex items-center justify-center rounded
+                   text-emerald-600/60 hover:text-emerald-600 hover:bg-emerald-50
+                   dark:hover:bg-emerald-950/30 transition-colors cursor-pointer"
+        title="Pick quantity from BIM"
+      >
+        <Ruler size={13} />
+      </button>
+      {showPicker && ctx?.bimModelId && anchorRect && (
+        <BIMQuantityPicker
+          positionId={data.id}
+          cadElementIds={cadElementIds}
+          bimModelId={ctx.bimModelId}
+          currentQuantity={data.quantity ?? 0}
+          currentUnit={data.unit ?? ''}
+          anchorRect={anchorRect}
+          onSelectQuantity={(val, source) => {
+            ctx?.onUpdatePosition?.(
+              data.id,
+              { quantity: val, metadata: { ...((data.metadata ?? {}) as Record<string, unknown>), bim_qty_source: source } },
+              { quantity: data.quantity },
+            );
+            setShowPicker(false);
+          }}
+          onClose={() => setShowPicker(false)}
+        />
+      )}
+    </div>
+  );
 }

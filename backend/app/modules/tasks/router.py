@@ -736,7 +736,7 @@ async def complete_task(
     return _to_response(task)
 
 
-@router.patch("/{task_id}/bim-links", response_model=TaskResponse)
+@router.patch("/{task_id}/bim-links/", response_model=TaskResponse)
 async def update_task_bim_links(
     task_id: uuid.UUID,
     body: TaskBimLinkRequest,

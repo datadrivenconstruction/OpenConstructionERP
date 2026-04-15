@@ -398,14 +398,17 @@ export function BOQToolbar({
 
           {/* AI Chat — generate positions */}
           <div className="relative group/chat">
-            <Button
-              variant={aiChatOpen ? 'primary' : 'ghost'}
-              size="sm"
-              icon={<Sparkles size={15} className={aiChatOpen ? '' : 'text-violet-600 dark:text-violet-400'} />}
+            <button
               onClick={onToggleAiChat}
+              className={`h-7 w-7 flex items-center justify-center rounded-md transition-colors ${
+                aiChatOpen
+                  ? 'bg-violet-600 text-white'
+                  : 'text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/30'
+              }`}
+              title={t('boq.ai_assistant_short', { defaultValue: 'AI Generate' })}
             >
-              <span className="hidden xl:inline">{t('boq.ai_assistant_short', { defaultValue: 'Generate' })}</span>
-            </Button>
+              <Sparkles size={14} />
+            </button>
             <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-52 rounded-lg bg-gray-900 text-white text-2xs p-2.5 shadow-lg opacity-0 invisible group-hover/chat:opacity-100 group-hover/chat:visible transition-all z-50 pointer-events-none">
               <p className="font-semibold mb-1">{t('boq.ai_chat_tip_title', { defaultValue: 'AI Position Generator' })}</p>
               <p className="text-gray-300">{t('boq.ai_assistant_tooltip', { defaultValue: 'Describe what you need in plain text — AI creates BOQ positions with realistic pricing.' })}</p>

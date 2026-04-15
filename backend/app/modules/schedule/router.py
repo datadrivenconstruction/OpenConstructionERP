@@ -500,7 +500,7 @@ async def update_activity_progress(
 
 
 @router.patch(
-    "/activities/{activity_id}/bim-links",
+    "/activities/{activity_id}/bim-links/",
     response_model=ActivityResponse,
     summary="Replace BIM element links on an activity",
     dependencies=[Depends(RequirePermission("schedule.update"))],

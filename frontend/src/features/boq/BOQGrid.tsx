@@ -61,9 +61,14 @@ import {
 } from './grid/cellEditors';
 import {
   ActionsCellRenderer,
+  ExpandCellRenderer,
   OrdinalCellRenderer,
+  BimLinkCellRenderer,
+  QuantityCellRenderer,
+  UnitCellRenderer,
   SectionFullWidthRenderer,
   ResourceFullWidthRenderer,
+  BimQtyPickerCellRenderer,
   type ContextMenuTarget,
   type FullGridContext,
 } from './grid/cellRenderers';
@@ -97,7 +102,7 @@ function saveColumnWidths(widths: Record<string, number>): void {
 /* ── Clipboard: fields that cannot be pasted into ─────────────────── */
 
 /** Columns that are computed or read-only — paste is suppressed for these. */
-const PASTE_PROTECTED_FIELDS = new Set(['total', '_actions', '_drag', '_checkbox']);
+const PASTE_PROTECTED_FIELDS = new Set(['total', '_actions', '_drag', '_checkbox', '_expand', '_bim_link', '_bim_qty']);
 
 /** Numeric column fields — pasted text must be parsed to a number. */
 const NUMERIC_FIELDS = new Set(['quantity', 'unit_rate']);
@@ -242,6 +247,10 @@ export interface BOQGridProps {
   onSaveAsAssembly?: (positionId: string) => void;
   /** Custom column definitions from BOQ metadata */
   customColumns?: import('./grid/columnDefs').CustomColumnDef[];
+  /** First ready BIM model ID for the project (used for mini 3D preview in ordinal badge). */
+  bimModelId?: string | null;
+  /** Highlight linked BIM elements in the 3D viewer (triggered from ordinal badge click). */
+  onHighlightBIMElements?: (elementIds: string[]) => void;
 }
 
 /** Imperative handle exposed by BOQGrid for external control (e.g. clearing selection). */
@@ -284,6 +293,8 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   onApplyAnomalySuggestion,
   onSaveAsAssembly,
   customColumns,
+  bimModelId,
+  onHighlightBIMElements,
 }, ref) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -385,7 +396,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     // Force AG Grid to refresh ordinal cells so chevron state updates
     setTimeout(() => {
       gridApiRef.current?.stopEditing();
-      gridApiRef.current?.refreshCells({ columns: ['ordinal'], force: true });
+      gridApiRef.current?.refreshCells({ columns: ['ordinal', '_expand'], force: true });
     }, 0);
   }, []);
 
@@ -436,12 +447,16 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       onShowContextMenu: showContextMenu,
       anomalyMap,
       onApplyAnomalySuggestion,
+      bimModelId,
+      onUpdatePosition,
+      onHighlightBIMElements,
     }) as FullGridContext,
     [currencySymbol, currencyCode, locale, fmt, t, collapsedSections, onToggleSection, onAddPosition,
      expandedPositions, toggleResources, onRemoveResource, onUpdateResource,
      onSaveResourceToCatalog, onOpenCostDbForPosition, onOpenCatalogForPosition,
      onDeletePosition, onSaveToDatabase, onAddComment,
-     onDuplicatePosition, showContextMenu, anomalyMap, onApplyAnomalySuggestion],
+     onDuplicatePosition, showContextMenu, anomalyMap, onApplyAnomalySuggestion, bimModelId,
+     onUpdatePosition, onHighlightBIMElements],
   );
 
   /* ── Column defs (standard + custom) ─────────────────────────────── */
@@ -616,17 +631,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   /* ── Cancel accidental ordinal edits from chevron clicks ─────── */
   const onCellEditingStarted = useCallback(
     (event: CellEditingStartedEvent) => {
-      // If editing started on the ordinal column for a row with resources,
-      // it was likely triggered by clicking the expand/collapse chevron.
-      // Cancel the edit immediately to prevent data corruption.
-      if (
-        event.colDef.field === 'ordinal' &&
-        Array.isArray(event.data?.metadata?.resources) &&
-        event.data.metadata.resources.length > 0
-      ) {
-        event.api.stopEditing(true); // true = cancel (don't save)
-        return;
-      }
+      // Ordinal column is editable:false — editing triggered via onCellDoubleClicked.
 
       // ── Layer-1 collaboration lock ──────────────────────────────
       // Acquire a soft lock on the row (not the cell) the first
@@ -865,6 +870,11 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       formulaCellEditor: FormulaCellEditor,
       autocompleteCellEditor: AutocompleteCellEditor,
       actionsCellRenderer: ActionsCellRenderer,
+      expandCellRenderer: ExpandCellRenderer,
+      bimLinkCellRenderer: BimLinkCellRenderer,
+      quantityCellRenderer: QuantityCellRenderer,
+      unitCellRenderer: UnitCellRenderer,
+      bimQtyPickerCellRenderer: BimQtyPickerCellRenderer,
       sectionFullWidthRenderer: SectionFullWidthRenderer,
       resourceFullWidthRenderer: ResourceFullWidthRenderer,
     }),
@@ -884,7 +894,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   );
 
   /* ── Tab navigation: skip non-editable cells (Drag, Total, Actions) */
-  const NON_EDITABLE_FIELDS = useMemo(() => new Set(['_drag', '_checkbox', 'total', '_actions']), []);
+  const NON_EDITABLE_FIELDS = useMemo(() => new Set(['_drag', '_checkbox', 'total', '_actions', '_expand', '_bim_link', '_bim_qty']), []);
 
   const tabToNextCell = useCallback(
     (params: TabToNextCellParams): CellPosition | boolean => {
@@ -1163,7 +1173,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     // Auto-expand the position's resources
     setExpandedPositions((prev) => new Set(prev).add(positionId));
     setTimeout(() => {
-      gridApiRef.current?.refreshCells({ columns: ['ordinal'], force: true });
+      gridApiRef.current?.refreshCells({ columns: ['ordinal', '_expand'], force: true });
     }, 0);
   }, [manualResourceDialog, onAddManualResource]);
 
@@ -1202,6 +1212,20 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
           isFullWidthRow={isFullWidthRow}
           fullWidthCellRenderer="resourceFullWidthRenderer"
           pinnedBottomRowData={pinnedBottomRowData}
+          onCellClicked={(event) => {
+            const field = event.colDef.field;
+            const data = event.data;
+            if (!data || data._isSection || data._isFooter) return;
+
+            // Click on unit_rate/total cell with resources → expand resources
+            if ((field === 'unit_rate' || field === 'total')) {
+              const meta = (data.metadata ?? {}) as Record<string, unknown>;
+              const res = meta.resources;
+              if (Array.isArray(res) && res.length > 0) {
+                toggleResources(data.id as string);
+              }
+            }
+          }}
           onCellEditingStarted={onCellEditingStarted}
           onCellEditingStopped={onCellEditingStopped}
           onCellValueChanged={onCellValueChanged}

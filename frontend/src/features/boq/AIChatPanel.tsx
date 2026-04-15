@@ -203,7 +203,7 @@ export function AIChatPanel({
 
   return (
     <div
-      className={`fixed right-0 top-0 z-50 h-full w-[360px] bg-surface-elevated border-l border-border-light shadow-xl flex flex-col transition-transform duration-300 ease-in-out ${
+      className={`fixed right-0 top-12 z-40 h-[calc(100%-3rem)] w-[320px] bg-surface-elevated border-l border-border-light shadow-xl flex flex-col transition-transform duration-300 ease-in-out ${
         isOpen ? 'translate-x-0' : 'translate-x-full'
       }`}
     >
@@ -217,9 +217,10 @@ export function AIChatPanel({
         </div>
         <button
           onClick={onClose}
-          className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors"
+          className="flex h-7 w-7 items-center justify-center rounded-md text-content-tertiary hover:text-red-600 dark:hover:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+          aria-label="Close"
         >
-          <X size={16} />
+          <X size={18} />
         </button>
       </div>
 

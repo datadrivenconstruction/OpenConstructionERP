@@ -1543,6 +1543,7 @@ export function DashboardPage() {
 
   // Show welcome/support modal (after onboarding is done, first dashboard visit)
   const [showWelcome, setShowWelcome] = useState(() => !localStorage.getItem('oe_welcome_dismissed'));
+  const [showAllActivity, setShowAllActivity] = useState(false);
   const dismissWelcome = useCallback(() => {
     setShowWelcome(false);
     localStorage.setItem('oe_welcome_dismissed', '1');
@@ -1656,21 +1657,35 @@ export function DashboardPage() {
 
   return (
     <div className="max-w-content mx-auto space-y-6 animate-fade-in">
-      {/* Hero — gradient animated heading */}
+      {/* Hero — logo + gradient animated heading */}
       <div
         className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-card-in"
         style={{ animationDelay: '0ms' }}
       >
         <div>
-          <h1 className="text-3xl font-bold tracking-tight gradient-text">
-            {t('dashboard.welcome')}
-          </h1>
-          <p
-            className="mt-2 text-base text-content-secondary animate-stagger-in"
-            style={{ animationDelay: '100ms' }}
-          >
-            {t('dashboard.subtitle')}
-          </p>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight gradient-text">
+              {t('dashboard.welcome')}
+            </h1>
+            <p
+              className="mt-1.5 text-base text-content-secondary animate-stagger-in"
+              style={{ animationDelay: '100ms' }}
+            >
+              {t('dashboard.subtitle')}
+            </p>
+            <div className="flex items-center gap-3 mt-2 animate-stagger-in" style={{ animationDelay: '120ms' }}>
+              <a href="https://datadrivenconstruction.io" target="_blank" rel="noopener noreferrer" className="shrink-0">
+                <img
+                  src="https://datadrivenconstruction.io/wp-content/uploads/2023/07/DataDrivenConstruction-1-1.png.webp"
+                  alt="DataDrivenConstruction"
+                  className="h-5 w-auto opacity-70 hover:opacity-100 transition-opacity"
+                />
+              </a>
+              <span className="text-xs font-medium text-content-tertiary">
+                {t('dashboard.open_source_erp', { defaultValue: 'Erste Open-Source Bau-ERP' })}
+              </span>
+            </div>
+          </div>
           {/* Open-source banner */}
           <a
             href="https://github.com/datadrivenconstruction/OpenConstructionERP"
@@ -1962,54 +1977,32 @@ export function DashboardPage() {
       {/* Project Summary Cards with KPI metrics */}
       <ProjectMetricCards cards={projectCards} loading={cardsLoading} />
 
-      <div className={`grid grid-cols-1 gap-6 ${(!projectCards || projectCards.length === 0) ? 'lg:grid-cols-3' : 'lg:grid-cols-2'}`}>
-        {/* Recent Projects — fallback list shown when no project cards data */}
-        {(!projectCards || projectCards.length === 0) && (
-        <div className="lg:col-span-2 animate-card-in" style={{ animationDelay: '150ms' }}>
-          <Card padding="none">
-            <div className="p-6 pb-0">
-              <CardHeader
-                title={t('dashboard.recent_projects')}
-                action={
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    icon={<ArrowRight size={14} />}
-                    iconPosition="right"
-                    onClick={() => navigate('/projects')}
-                  >
-                    {t('projects.title')}
-                  </Button>
-                }
-              />
-            </div>
-            <CardContent className="!mt-0">
-              <ProjectsList projects={projects} />
-            </CardContent>
-          </Card>
-        </div>
-        )}
-
-        {/* System Status + Activity */}
-        <div className="space-y-6 animate-card-in" style={{ animationDelay: '300ms' }}>
-          <Card>
-            <CardHeader title={t('dashboard.system_status')} />
-            <CardContent>
-              <SystemStatus />
-            </CardContent>
-          </Card>
-
-          {/* Activity Feed (cross-module) */}
-          {projects && projects.length > 0 && (
-            <Card>
-              <CardHeader title={t('dashboard.activity', { defaultValue: 'Recent Activity' })} />
-              <CardContent>
-                <CrossModuleActivityFeed limit={10} />
-              </CardContent>
-            </Card>
-          )}
-        </div>
+      {/* Recent Projects — fallback list shown when no project cards data */}
+      {(!projectCards || projectCards.length === 0) && (
+      <div className="animate-card-in" style={{ animationDelay: '150ms' }}>
+        <Card padding="none">
+          <div className="p-6 pb-0">
+            <CardHeader
+              title={t('dashboard.recent_projects')}
+              action={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={<ArrowRight size={14} />}
+                  iconPosition="right"
+                  onClick={() => navigate('/projects')}
+                >
+                  {t('projects.title')}
+                </Button>
+              }
+            />
+          </div>
+          <CardContent className="!mt-0">
+            <ProjectsList projects={projects} />
+          </CardContent>
+        </Card>
       </div>
+      )}
 
       {/* Analytics Section */}
       {projects && projects.length > 0 && (
@@ -2023,6 +2016,46 @@ export function DashboardPage() {
           <AnalyticsSection projects={projects} />
         </div>
       )}
+
+      {/* Activity Feed (left) + System Status (right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Activity Feed — left column */}
+        {projects && projects.length > 0 && (
+          <div className="lg:col-span-2 animate-card-in" style={{ animationDelay: '500ms' }}>
+            <Card className="h-full">
+              <CardHeader
+                title={t('dashboard.activity', { defaultValue: 'Recent Activity' })}
+                action={
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={<ArrowRight size={14} />}
+                    iconPosition="right"
+                    onClick={() => setShowAllActivity((prev) => !prev)}
+                  >
+                    {showAllActivity
+                      ? t('common.show_less', { defaultValue: 'Show less' })
+                      : t('common.show_more', { defaultValue: 'Show more' })}
+                  </Button>
+                }
+              />
+              <CardContent>
+                <CrossModuleActivityFeed limit={showAllActivity ? 25 : 6} />
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* System Status — right column */}
+        <div className={`${projects && projects.length > 0 ? 'lg:col-start-3' : ''} animate-card-in`} style={{ animationDelay: '550ms' }}>
+          <Card className="h-full">
+            <CardHeader title={t('dashboard.system_status')} />
+            <CardContent>
+              <SystemStatus />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

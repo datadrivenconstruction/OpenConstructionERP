@@ -1,0 +1,38 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:5173",
+      "localStorage": [
+        {
+          "name": "oe_onboarding_completed",
+          "value": "true"
+        },
+        {
+          "name": "i18nextLng",
+          "value": "en"
+        },
+        {
+          "name": "oe_view_mode",
+          "value": "advanced"
+        },
+        {
+          "name": "oe_user_email",
+          "value": "demo@openestimator.io"
+        },
+        {
+          "name": "oe_sidebar_collapsed",
+          "value": "{\"overview\":false,\"estimation\":false,\"takeoff\":false,\"ai\":false,\"planning\":true,\"finance\":true,\"communication\":true,\"documentation\":true,\"quality\":true,\"regional\":true}"
+        },
+        {
+          "name": "oe_loaded_databases",
+          "value": "[\"USA_USD\"]"
+        },
+        {
+          "name": "oe_enabled_modules",
+          "value": "{\"templates\":true,\"assemblies\":true,\"validation\":true,\"schedule\":true,\"5d\":true,\"tendering\":true,\"reports\":true,\"sustainability\":true,\"cost-benchmark\":true,\"pdf-takeoff\":true,\"collaboration\":true,\"risk-analysis\":false,\"gaeb-exchange\":false,\"uk-nrm-exchange\":false,\"us-masterformat-exchange\":false,\"fr-dpgf-exchange\":false,\"uae-boq-exchange\":false,\"au-boq-exchange\":false,\"ca-boq-exchange\":false,\"nordic-ns3420-exchange\":false,\"cz-boq-exchange\":false,\"de-din276-exchange\":false,\"cn-boq-exchange\":false,\"in-boq-exchange\":false,\"br-sinapi-exchange\":false,\"es-pbc-exchange\":false,\"ru-gesn-exchange\":false,\"tr-birimfiyat-exchange\":false,\"jp-sekisan-exchange\":false,\"it-computo-exchange\":false,\"nl-stabu-exchange\":false,\"pl-knr-exchange\":false,\"kr-boq-exchange\":false,\"ddc-ifc-converter\":false,\"ddc-rvt-converter\":false,\"catalog\":true,\"takeoff\":true,\"bim\":true,\"data-explorer\":true,\"advisor\":true,\"project-intelligence\":true,\"tasks\":true,\"finance\":true,\"procurement\":true,\"changeorders\":true,\"meetings\":true,\"rfi\":true,\"submittals\":true,\"transmittals\":true,\"correspondence\":true,\"documents\":true,\"cde\":true,\"photos\":true,\"markups\":true,\"inspections\":true,\"ncr\":true,\"safety\":true,\"punchlist\":true,\"risks\":true,\"field-reports\":true,\"requirements\":true,\"reporting\":true,\"analytics\":true}"
+        }
+      ]
+    }
+  ]
+}

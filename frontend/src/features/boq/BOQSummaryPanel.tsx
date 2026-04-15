@@ -322,10 +322,10 @@ export function QuickAddFAB({
   ];
 
   return (
-    <div ref={fabRef} className="fixed bottom-8 right-8 z-40 print:hidden">
+    <div ref={fabRef} className="fixed bottom-4 right-4 z-30 print:hidden">
       {/* FAB menu */}
       {open && (
-        <div className="absolute bottom-16 right-0 w-72 rounded-xl border border-border-light bg-surface-elevated shadow-lg overflow-hidden animate-fade-in">
+        <div className="absolute bottom-12 right-0 w-72 rounded-xl border border-border-light bg-surface-elevated shadow-lg overflow-hidden animate-fade-in">
           <div className="px-4 py-3 border-b border-border-light">
             <p className="text-xs font-semibold text-content-primary">
               {t('boq.quick_add', { defaultValue: 'Quick Add' })}
@@ -357,13 +357,13 @@ export function QuickAddFAB({
       {/* FAB button */}
       <button
         onClick={() => setOpen((prev) => !prev)}
-        className={`flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all duration-200 ease-out transform-gpu ${
+        className={`flex h-9 w-9 items-center justify-center rounded-full shadow-md transition-all duration-200 ease-out transform-gpu ${
           open
             ? 'bg-content-primary text-content-inverse rotate-45 scale-95'
-            : 'bg-oe-blue text-content-inverse hover:bg-oe-blue-hover hover:scale-105 hover:shadow-xl active:scale-95'
+            : 'bg-oe-blue text-content-inverse hover:bg-oe-blue-hover hover:scale-105 hover:shadow-lg active:scale-95'
         }`}
       >
-        <Plus size={22} strokeWidth={2.5} />
+        <Plus size={18} strokeWidth={2.5} />
       </button>
     </div>
   );

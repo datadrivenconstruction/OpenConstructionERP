@@ -583,7 +583,7 @@ async def export_field_reports(
     from openpyxl import Workbook
     from openpyxl.styles import Font
 
-    reports, _ = await service.list_reports(project_id, offset=0, limit=50000)
+    reports, _ = await service.list_reports(project_id, offset=0, limit=2000)
 
     wb = Workbook()
     ws = wb.active
