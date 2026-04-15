@@ -972,6 +972,9 @@ function ScheduleDetail({
   const [showAddActivity, setShowAddActivity] = useState(false);
   const [showGenerateBOQ, setShowGenerateBOQ] = useState(false);
   const [selectedBOQId, setSelectedBOQId] = useState('');
+  const [generateStartDate, setGenerateStartDate] = useState(
+    () => schedule.start_date?.slice(0, 10) || new Date().toISOString().slice(0, 10),
+  );
   const [activityFilter, setActivityFilter] = useState('all');
   const [activityForm, setActivityForm] = useState<CreateActivityForm>({
     name: '',
@@ -1046,9 +1049,16 @@ function ScheduleDetail({
   });
 
   const generateFromBOQ = useMutation({
-    mutationFn: (boqId: string) => scheduleApi.generateFromBOQ(schedule.id, boqId),
+    mutationFn: async (boqId: string) => {
+      // Update the schedule start_date before generating so activities use the chosen date
+      if (generateStartDate) {
+        await scheduleApi.updateSchedule(schedule.id, { start_date: generateStartDate });
+      }
+      return scheduleApi.generateFromBOQ(schedule.id, boqId);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gantt', schedule.id] });
+      queryClient.invalidateQueries({ queryKey: ['schedules'] });
       setShowGenerateBOQ(false);
       setSelectedBOQId('');
       // Reset CPM/risk results since activities changed
@@ -1599,6 +1609,23 @@ function ScheduleDetail({
               'Select a BOQ to auto-generate schedule activities. One activity will be created per BOQ section with cost-proportional durations.',
             )}
           </p>
+
+          {/* Start date picker */}
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
+              {t('schedule.project_start_date', 'Project Start Date')}
+            </label>
+            <input
+              type="date"
+              value={generateStartDate}
+              onChange={(e) => setGenerateStartDate(e.target.value)}
+              className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+            />
+            <p className="mt-1 text-xs text-content-tertiary">
+              {t('schedule.start_date_hint', 'All activities will be scheduled relative to this date.')}
+            </p>
+          </div>
+
           {!boqs || boqs.length === 0 ? (
             <p className="text-sm text-content-tertiary">
               {t('schedule.no_boqs_available', 'No BOQs available for this project.')}
@@ -1639,7 +1666,7 @@ function ScheduleDetail({
             </Button>
             <Button
               variant="primary"
-              disabled={!selectedBOQId}
+              disabled={!selectedBOQId || !generateStartDate}
               loading={generateFromBOQ.isPending}
               onClick={() => {
                 if (selectedBOQId) {

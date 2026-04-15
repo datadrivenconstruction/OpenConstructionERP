@@ -23,7 +23,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 
-import { Button, Card, Badge, Input, Skeleton, Breadcrumb } from '@/shared/ui';
+import { Button, Card, Badge, Input, Skeleton } from '@/shared/ui';
 import { apiGet, apiPost } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
@@ -1046,14 +1046,6 @@ export function TakeoffPage() {
 
   return (
     <div className="w-full animate-fade-in">
-      <Breadcrumb
-        items={[
-          { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },
-          { label: t('takeoff.title', { defaultValue: 'Quantity Takeoff' }) },
-        ]}
-        className="mb-4"
-      />
-
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3">

@@ -12,7 +12,7 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   active: { bg: 'rgba(63, 185, 80, 0.15)', text: 'var(--chat-tool-done)' },
   planning: { bg: 'rgba(56, 139, 253, 0.15)', text: 'var(--chat-tool-running)' },
   completed: { bg: 'rgba(139, 148, 158, 0.15)', text: 'var(--chat-text-secondary)' },
-  on_hold: { bg: 'rgba(240, 136, 62, 0.15)', text: 'var(--chat-accent)' },
+  on_hold: { bg: 'rgba(0, 113, 227, 0.12)', text: 'var(--chat-accent)' },
   cancelled: { bg: 'rgba(248, 81, 73, 0.15)', text: 'var(--chat-tool-error)' },
 };
 

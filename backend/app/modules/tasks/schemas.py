@@ -25,7 +25,9 @@ class TaskCreate(BaseModel):
     project_id: UUID
     task_type: str = Field(
         ...,
-        pattern=r"^(task|topic|information|decision|personal)$",
+        min_length=1,
+        max_length=50,
+        description="Built-in types: task, topic, information, decision, personal. Custom category strings are also accepted.",
     )
     title: str = Field(..., min_length=1, max_length=500)
     description: str | None = Field(default=None, max_length=5000)
@@ -63,7 +65,9 @@ class TaskUpdate(BaseModel):
 
     task_type: str | None = Field(
         default=None,
-        pattern=r"^(task|topic|information|decision|personal)$",
+        min_length=1,
+        max_length=50,
+        description="Built-in types: task, topic, information, decision, personal. Custom category strings are also accepted.",
     )
     title: str | None = Field(default=None, min_length=1, max_length=500)
     description: str | None = Field(default=None, max_length=5000)

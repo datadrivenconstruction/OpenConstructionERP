@@ -23,6 +23,7 @@ import {
   Settings,
 } from 'lucide-react';
 import clsx from 'clsx';
+import { renderTaggedText } from './renderTaggedText';
 
 interface AIAdvisorPanelProps {
   projectId: string;
@@ -219,7 +220,7 @@ export function AIAdvisorPanel({ projectId, role }: AIAdvisorPanelProps) {
                 className="text-sm text-content-secondary leading-relaxed whitespace-pre-wrap"
                 aria-live="polite"
               >
-                {recommendation}
+                {renderTaggedText(recommendation)}
               </div>
             )}
             {!loadingRec && !recError && !recommendation && (
@@ -252,7 +253,7 @@ export function AIAdvisorPanel({ projectId, role }: AIAdvisorPanelProps) {
                     : 'bg-surface-tertiary text-content-secondary mr-8'
                 )}
               >
-                <p className="whitespace-pre-wrap">{msg.text}</p>
+                <p className="whitespace-pre-wrap">{renderTaggedText(msg.text)}</p>
               </div>
             ))}
             {chatLoading && (

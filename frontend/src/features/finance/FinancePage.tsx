@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { normalizeListResponse } from '@/shared/lib/apiHelpers';
 import {
@@ -20,6 +20,11 @@ import {
   Camera,
   ChevronDown,
   Lightbulb,
+  TrendingUp,
+  ExternalLink,
+  DollarSign,
+  Receipt,
+  PiggyBank,
 } from 'lucide-react';
 import clsx from 'clsx';
 import {
@@ -201,6 +206,138 @@ async function importBudgetsFile(
 const inputCls =
   'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 
+/* ── Finance Summary Cards ────────────────────────────────────────────── */
+
+function FinanceSummaryCards({ projectId }: { projectId: string }) {
+  const { t } = useTranslation();
+
+  const { data: budgets } = useQuery({
+    queryKey: ['finance-budgets', projectId],
+    queryFn: () =>
+      apiGet<BudgetLine[]>(`/v1/finance/budgets?project_id=${projectId}`),
+    select: (d): BudgetLine[] => normalizeListResponse(d),
+  });
+
+  const { data: invoicesPayable } = useQuery({
+    queryKey: ['finance-invoices', projectId, 'payable'],
+    queryFn: () =>
+      apiGet<Invoice[]>(`/v1/finance/?project_id=${projectId}&direction=payable`),
+    select: (d): Invoice[] => normalizeListResponse(d),
+  });
+
+  const { data: invoicesReceivable } = useQuery({
+    queryKey: ['finance-invoices', projectId, 'receivable'],
+    queryFn: () =>
+      apiGet<Invoice[]>(`/v1/finance/?project_id=${projectId}&direction=receivable`),
+    select: (d): Invoice[] => normalizeListResponse(d),
+  });
+
+  const totalBudget = useMemo(
+    () => budgets?.reduce((s, b) => s + b.original_budget, 0) ?? 0,
+    [budgets],
+  );
+  const totalActual = useMemo(
+    () => budgets?.reduce((s, b) => s + b.actual, 0) ?? 0,
+    [budgets],
+  );
+  const totalInvoiced = useMemo(
+    () => (invoicesPayable ?? []).reduce((s, inv) => s + inv.amount, 0),
+    [invoicesPayable],
+  );
+  const totalReceivable = useMemo(
+    () => (invoicesReceivable ?? []).reduce((s, inv) => s + inv.amount, 0),
+    [invoicesReceivable],
+  );
+  const remaining = totalBudget - totalActual;
+  const currency = budgets?.[0]?.currency || invoicesPayable?.[0]?.currency || 'EUR';
+
+  if (!budgets?.length && !invoicesPayable?.length && !invoicesReceivable?.length) return null;
+
+  const cards = [
+    {
+      label: t('finance.summary_total_budget', { defaultValue: 'Total Budget' }),
+      value: totalBudget,
+      icon: <Wallet size={18} />,
+      color: 'bg-oe-blue/10 text-oe-blue',
+      accent: 'bg-oe-blue',
+    },
+    {
+      label: t('finance.summary_total_invoiced', { defaultValue: 'Total Invoiced (Payable)' }),
+      value: totalInvoiced,
+      icon: <Receipt size={18} />,
+      color: 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400',
+      accent: 'bg-amber-500',
+    },
+    {
+      label: t('finance.summary_receivable', { defaultValue: 'Receivable' }),
+      value: totalReceivable,
+      icon: <PiggyBank size={18} />,
+      color: 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-green-400',
+      accent: 'bg-green-500',
+    },
+    {
+      label: t('finance.summary_remaining', { defaultValue: 'Remaining Budget' }),
+      value: remaining,
+      icon: <DollarSign size={18} />,
+      color: remaining >= 0
+        ? 'bg-green-50 text-green-600 dark:bg-green-950/40 dark:text-green-400'
+        : 'bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400',
+      accent: remaining >= 0 ? 'bg-green-500' : 'bg-red-500',
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {cards.map((card) => (
+        <Card key={card.label} padding="none" className="relative overflow-hidden">
+          <div className={`absolute top-0 left-0 right-0 h-1 ${card.accent}`} />
+          <div className="p-4 pt-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-2xs font-medium uppercase tracking-wider text-content-tertiary">
+                {card.label}
+              </span>
+              <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${card.color}`}>
+                {card.icon}
+              </div>
+            </div>
+            <div className="text-xl font-bold tabular-nums text-content-primary">
+              <MoneyDisplay amount={card.value} currency={currency} />
+            </div>
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+/* ── Module Links ────────────────────────────────────────────────────── */
+
+function FinanceModuleLinks({ projectId: _projectId }: { projectId: string }) {
+  void _projectId;
+  const { t } = useTranslation();
+
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <Link
+        to="/boq"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-oe-blue transition-colors"
+      >
+        <ExternalLink size={12} />
+        {t('finance.link_to_boq', { defaultValue: 'BOQ Estimate' })}
+      </Link>
+      <Link
+        to="/5d"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-secondary hover:bg-surface-secondary hover:text-oe-blue transition-colors"
+      >
+        <TrendingUp size={12} />
+        {t('finance.link_to_5d', { defaultValue: '5D Cost Model' })}
+      </Link>
+    </div>
+  );
+}
+
+/* ── Main Page ────────────────────────────────────────────────────────── */
+
 export function FinancePage() {
   const { t } = useTranslation();
   const { projectId: routeProjectId } = useParams<{ projectId?: string }>();
@@ -246,23 +383,33 @@ export function FinancePage() {
         className="mb-4"
       />
 
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-content-primary">
-          {t('finance.title', { defaultValue: 'Finance' })}
-        </h1>
-        <p className="mt-1 text-sm text-content-secondary">
-          {t('finance.subtitle', {
-            defaultValue:
-              'Budgets, invoices, payments, and earned value management',
-          })}
-        </p>
+      {/* Header + Module Links */}
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-content-primary">
+            {t('finance.title', { defaultValue: 'Finance' })}
+          </h1>
+          <p className="mt-1 text-sm text-content-secondary">
+            {t('finance.subtitle', {
+              defaultValue:
+                'Budgets, invoices, payments, and earned value management',
+            })}
+          </p>
+        </div>
+        {projectId && <FinanceModuleLinks projectId={projectId} />}
       </div>
 
       {/* No-project warning */}
       {!projectId && (
         <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
           {t('common.select_project_hint', { defaultValue: 'Select a project from the header to get started.' })}
+        </div>
+      )}
+
+      {/* Summary Cards */}
+      {projectId && (
+        <div className="mb-6">
+          <FinanceSummaryCards projectId={projectId} />
         </div>
       )}
 
@@ -632,12 +779,21 @@ function BudgetsTab({ projectId }: { projectId: string }) {
 
   return (
     <>
-    {/* Explanatory text */}
-    <p className="text-sm text-content-secondary mb-4">
-      {t('finance.budgets_explanation', {
-        defaultValue: 'Project budget tracks original vs actual costs by WBS category. Variance is highlighted green when under budget, red when over.',
-      })}
-    </p>
+    {/* Explanatory text + module link */}
+    <div className="flex items-start justify-between gap-3 mb-4">
+      <p className="text-sm text-content-secondary">
+        {t('finance.budgets_explanation', {
+          defaultValue: 'Project budget tracks original vs actual costs by WBS category. Variance is highlighted green when under budget, red when over.',
+        })}
+      </p>
+      <Link
+        to="/5d"
+        className="shrink-0 inline-flex items-center gap-1.5 rounded-lg bg-oe-blue-subtle/30 px-3 py-1.5 text-xs font-medium text-oe-blue hover:bg-oe-blue-subtle/50 transition-colors"
+      >
+        <TrendingUp size={12} />
+        {t('finance.view_5d_model', { defaultValue: 'Open 5D Cost Model' })}
+      </Link>
+    </div>
 
     <Card padding="none">
       {/* Search + actions */}
@@ -1263,13 +1419,24 @@ function InvoicesTab({ projectId }: { projectId: string }) {
                       <td className="px-4 py-3 text-content-secondary">
                         <div>{inv.counterparty_name}</div>
                         {inv.line_items && inv.line_items.length > 0 && inv.line_items.some((li) => li.cost_category || li.wbs_id) && (
-                          <div className="text-2xs text-content-tertiary mt-0.5">
-                            {t('finance.budget_line', { defaultValue: 'Budget' })}:{' '}
-                            {inv.line_items
-                              .filter((li) => li.cost_category || li.wbs_id)
-                              .slice(0, 2)
-                              .map((li) => li.cost_category || li.wbs_id)
-                              .join(', ')}
+                          <div className="flex items-center gap-1 text-2xs text-content-tertiary mt-0.5">
+                            <span>
+                              {t('finance.budget_line', { defaultValue: 'Budget' })}:{' '}
+                              {inv.line_items
+                                .filter((li) => li.cost_category || li.wbs_id)
+                                .slice(0, 2)
+                                .map((li) => li.cost_category || li.wbs_id)
+                                .join(', ')}
+                            </span>
+                            <Link
+                              to="/boq"
+                              className="inline-flex items-center gap-0.5 text-oe-blue hover:underline"
+                              title={t('finance.view_in_boq', { defaultValue: 'View in BOQ' })}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <ExternalLink size={10} />
+                              <span>BOQ</span>
+                            </Link>
                           </div>
                         )}
                         {inv.description && (!inv.line_items || !inv.line_items.some((li) => li.cost_category || li.wbs_id)) && (

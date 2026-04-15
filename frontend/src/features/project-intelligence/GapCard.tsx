@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Zap,
 } from 'lucide-react';
+import { renderTaggedText } from './renderTaggedText';
 
 interface CriticalGap {
   id: string;
@@ -102,11 +103,11 @@ export function GapCard({ gap, isExpanded, onToggle, onAction, actionLabel }: Ga
             </span>
           </div>
           <p className="text-xs font-medium text-content-primary leading-snug">
-            {gap.title}
+            {renderTaggedText(gap.title)}
           </p>
           {!isExpanded && (
             <p className="text-2xs text-content-tertiary mt-0.5 truncate">
-              {gap.impact}
+              {renderTaggedText(gap.impact)}
             </p>
           )}
         </div>
@@ -122,9 +123,9 @@ export function GapCard({ gap, isExpanded, onToggle, onAction, actionLabel }: Ga
       {/* Expanded content */}
       {isExpanded && (
         <div className="px-3 pb-3 pt-0 space-y-2">
-          <p className="text-xs text-content-secondary">{gap.description}</p>
+          <p className="text-xs text-content-secondary">{renderTaggedText(gap.description)}</p>
           <p className="text-xs text-content-tertiary">
-            <strong className="text-content-secondary">Impact:</strong> {gap.impact}
+            <strong className="text-content-secondary">Impact:</strong> {renderTaggedText(gap.impact)}
           </p>
           {gap.affected_count != null && gap.affected_count > 0 && (
             <p className="text-xs text-content-tertiary">

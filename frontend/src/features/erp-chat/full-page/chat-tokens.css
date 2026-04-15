@@ -4,16 +4,17 @@
  * The chat feature historically used its own "keynote" palette (dark
  * GitHub-like colors + amber accent). To make /chat feel like a native
  * part of the app, these tokens are now aliased onto the global OpenEstimate
- * design system tokens (`--oe-*` in `src/index.css`).
+ * design system tokens (`--oe-*` in `src/index.css`). The accent color
+ * has been updated from amber to oe-blue for consistency.
  *
  * Because the site-wide theme toggler sets `.dark` on `html`, the `--oe-*`
  * tokens already resolve to the correct palette — we just re-export them
  * under the `--chat-*` names so existing chat components don't need to be
  * rewritten.
  *
- * Amber (`--chat-accent`) is intentionally kept as the single "AI brand"
- * accent for streaming cursors, live dots, and highlighted tokens. It is
- * NOT used as primary background anywhere.
+ * The accent (`--chat-accent`) is mapped to `--oe-blue` so that streaming
+ * cursors, live dots, tool labels, and highlighted tokens use the same
+ * blue as the rest of the application.
  */
 
 [data-chat-theme='light'],
@@ -39,9 +40,9 @@
   --chat-text-secondary: var(--oe-text-secondary);
   --chat-text-tertiary: var(--oe-text-tertiary);
 
-  /* Accent — kept amber for "AI brand" moments only
-     (streaming cursor, live dot, highlighted run states). */
-  --chat-accent: #f0883e;
+  /* Accent — aligned with the app-wide oe-blue for visual consistency.
+     Used for streaming cursor, send button, highlighted tool names. */
+  --chat-accent: var(--oe-blue);
 
   /* Tool states — use semantic tokens so they flip with theme */
   --chat-tool-running: var(--oe-info);

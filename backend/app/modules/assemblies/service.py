@@ -33,6 +33,7 @@ from app.modules.assemblies.repository import AssemblyRepository, ComponentRepos
 from app.modules.assemblies.schemas import (
     ApplyToBOQRequest,
     AssemblyCreate,
+    AssemblyExport,
     AssemblyUpdate,
     AssemblyWithComponents,
     CloneAssemblyRequest,
@@ -162,6 +163,7 @@ class AssemblyService:
         q: str | None = None,
         category: str | None = None,
         unit: str | None = None,
+        tag: str | None = None,
         project_id: uuid.UUID | None = None,
         is_template: bool | None = None,
         offset: int = 0,
@@ -172,6 +174,7 @@ class AssemblyService:
             q=q,
             category=category,
             unit=unit,
+            tag=tag,
             project_id=project_id,
             is_template=is_template,
             offset=offset,
@@ -450,6 +453,8 @@ class AssemblyService:
             )
 
         computed_total = _str_to_float(assembly.total_rate)
+        metadata = assembly.metadata_ or {}
+        tags: list[str] = metadata.get("tags", []) if isinstance(metadata, dict) else []
 
         return AssemblyWithComponents(
             id=assembly.id,
@@ -467,7 +472,8 @@ class AssemblyService:
             project_id=assembly.project_id,
             owner_id=assembly.owner_id,
             is_active=assembly.is_active,
-            metadata_=assembly.metadata_,
+            tags=tags,
+            metadata_=metadata,
             created_at=assembly.created_at,
             updated_at=assembly.updated_at,
             components=component_responses,
@@ -723,3 +729,244 @@ class AssemblyService:
             "most_used": most_used,
             "by_category": by_category,
         }
+
+    # ── Reorder ──────────────────────────────────────────────────────────
+
+    async def reorder_components(
+        self, assembly_id: uuid.UUID, component_ids: list[uuid.UUID],
+    ) -> None:
+        """Reorder components within an assembly.
+
+        Updates the sort_order of each component to match its position in
+        the provided list of component IDs.
+
+        Args:
+            assembly_id: Parent assembly identifier.
+            component_ids: Ordered list of component IDs.
+
+        Raises:
+            HTTPException 404 if assembly not found.
+            HTTPException 400 if component IDs don't match assembly.
+        """
+        await self.get_assembly(assembly_id)
+        components = await self.component_repo.list_for_assembly(assembly_id)
+        existing_ids = {str(c.id) for c in components}
+        request_ids = {str(cid) for cid in component_ids}
+
+        if existing_ids != request_ids:
+            raise HTTPException(
+                status_code=400,
+                detail="Component IDs do not match the assembly's components",
+            )
+
+        for idx, cid in enumerate(component_ids):
+            await self.component_repo.update_fields(cid, sort_order=idx)
+
+        logger.info(
+            "Reordered %d components in assembly %s", len(component_ids), assembly_id,
+        )
+
+    # ── Export / Import ──────────────────────────────────────────────────
+
+    async def export_assembly(self, assembly_id: uuid.UUID) -> dict:
+        """Export an assembly with all components as a shareable JSON dict.
+
+        Args:
+            assembly_id: Target assembly identifier.
+
+        Returns:
+            dict matching the AssemblyExport schema.
+
+        Raises:
+            HTTPException 404 if assembly not found.
+        """
+        assembly = await self.get_assembly(assembly_id)
+        components = await self.component_repo.list_for_assembly(assembly_id)
+
+        metadata = assembly.metadata_ or {}
+        tags: list[str] = metadata.get("tags", []) if isinstance(metadata, dict) else []
+
+        export_components = []
+        for comp in components:
+            export_components.append({
+                "description": comp.description,
+                "factor": _str_to_float(comp.factor),
+                "quantity": _str_to_float(comp.quantity),
+                "unit": comp.unit,
+                "unit_cost": _str_to_float(comp.unit_cost),
+                "sort_order": comp.sort_order,
+            })
+
+        return {
+            "code": assembly.code,
+            "name": assembly.name,
+            "description": assembly.description,
+            "unit": assembly.unit,
+            "category": assembly.category,
+            "classification": assembly.classification or {},
+            "currency": assembly.currency,
+            "bid_factor": _str_to_float(assembly.bid_factor),
+            "regional_factors": assembly.regional_factors or {},
+            "tags": tags,
+            "components": export_components,
+        }
+
+    async def import_assembly(
+        self, data: AssemblyExport, owner_id: str | None = None,
+    ) -> Assembly:
+        """Import an assembly from an exported JSON payload.
+
+        Creates a new assembly with all components. If the code already
+        exists, appends a numeric suffix to make it unique.
+
+        Args:
+            data: Assembly export payload with components.
+            owner_id: ID of the user importing the assembly.
+
+        Returns:
+            The newly created Assembly.
+        """
+        # Ensure unique code
+        code = data.code
+        existing = await self.assembly_repo.get_by_code(code)
+        suffix = 1
+        while existing is not None:
+            code = f"{data.code}-{suffix}"
+            existing = await self.assembly_repo.get_by_code(code)
+            suffix += 1
+
+        metadata: dict = {}
+        if data.tags:
+            metadata["tags"] = data.tags
+        metadata["imported"] = True
+
+        assembly = Assembly(
+            code=code,
+            name=data.name,
+            description=data.description,
+            unit=data.unit,
+            category=data.category,
+            classification=data.classification,
+            total_rate="0",
+            currency=data.currency,
+            bid_factor=str(data.bid_factor),
+            regional_factors=data.regional_factors,
+            is_template=True,
+            owner_id=uuid.UUID(owner_id) if owner_id else None,
+            metadata_=metadata,
+        )
+        assembly = await self.assembly_repo.create(assembly)
+
+        # Create components
+        components_to_create = []
+        for idx, comp_data in enumerate(data.components):
+            desc = comp_data.get("description", "")
+            factor = str(comp_data.get("factor", 1.0))
+            quantity = str(comp_data.get("quantity", 1.0))
+            unit_cost = str(comp_data.get("unit_cost", 0.0))
+            total = _compute_component_total(
+                float(factor), float(quantity), float(unit_cost),
+            )
+            components_to_create.append(
+                Component(
+                    assembly_id=assembly.id,
+                    description=desc,
+                    factor=factor,
+                    quantity=quantity,
+                    unit=comp_data.get("unit", data.unit),
+                    unit_cost=unit_cost,
+                    total=total,
+                    sort_order=comp_data.get("sort_order", idx),
+                    metadata_={},
+                )
+            )
+
+        if components_to_create:
+            await self.component_repo.bulk_create(components_to_create)
+
+        # Recalculate total
+        await self._recalculate_total(assembly.id)
+
+        await _safe_publish(
+            "assemblies.assembly.imported",
+            {"assembly_id": str(assembly.id), "code": code},
+            source_module="oe_assemblies",
+        )
+
+        logger.info("Assembly imported: %s (%s)", code, data.name)
+        return assembly
+
+    # ── Tags ─────────────────────────────────────────────────────────────
+
+    async def update_tags(
+        self, assembly_id: uuid.UUID, tags: list[str],
+    ) -> Assembly:
+        """Update tags on an assembly.
+
+        Tags are stored in the metadata_ JSON field under the 'tags' key.
+
+        Args:
+            assembly_id: Target assembly identifier.
+            tags: List of tag strings.
+
+        Returns:
+            Updated Assembly.
+
+        Raises:
+            HTTPException 404 if assembly not found.
+        """
+        assembly = await self.get_assembly(assembly_id)
+        metadata = dict(assembly.metadata_) if assembly.metadata_ else {}
+        # Deduplicate and clean tags
+        clean_tags = list(dict.fromkeys(t.strip().lower() for t in tags if t.strip()))
+        metadata["tags"] = clean_tags
+        await self.assembly_repo.update_fields(assembly_id, metadata_=metadata)
+
+        await _safe_publish(
+            "assemblies.assembly.tags_updated",
+            {"assembly_id": str(assembly_id), "tags": clean_tags},
+            source_module="oe_assemblies",
+        )
+
+        return await self.get_assembly(assembly_id)
+
+    # ── Usage counts ─────────────────────────────────────────────────────
+
+    async def get_usage_counts(
+        self, assembly_ids: list[uuid.UUID],
+    ) -> dict[str, int]:
+        """Get BOQ position usage counts for a list of assemblies.
+
+        Checks BOQ position metadata for assembly_id references and also
+        checks positions with source='assembly'.
+
+        Args:
+            assembly_ids: List of assembly UUIDs to check.
+
+        Returns:
+            Dict mapping assembly_id (str) to usage count.
+        """
+        if not assembly_ids:
+            return {}
+
+        usage: dict[str, int] = {str(aid): 0 for aid in assembly_ids}
+
+        try:
+            from sqlalchemy import select as sa_select, cast, String as SAString
+
+            from app.modules.boq.models import BOQPosition
+
+            # Search positions with source='assembly' and metadata containing assembly_id
+            stmt = sa_select(BOQPosition).where(BOQPosition.source == "assembly")
+            result = await self.session.execute(stmt)
+            positions = result.scalars().all()
+
+            for pos in positions:
+                meta = getattr(pos, "metadata_", None) or {}
+                ref_id = meta.get("assembly_id", "")
+                if ref_id in usage:
+                    usage[ref_id] += 1
+        except Exception:
+            logger.debug("Could not compute usage counts from BOQ positions")
+
+        return usage

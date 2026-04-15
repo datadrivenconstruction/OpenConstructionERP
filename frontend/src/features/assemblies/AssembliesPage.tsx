@@ -6,6 +6,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Search, Plus, Layers, ChevronDown, ChevronLeft, ChevronRight, MoreHorizontal,
   Copy, Trash2, Download, ExternalLink, FileSpreadsheet, X, Sparkles, Loader2,
+  Upload, Tag, Eye, Share2,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, InfoHint, SkeletonGrid } from '@/shared/ui';
 import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
@@ -104,7 +105,8 @@ export function AssembliesPage() {
   const [offset, setOffset] = useState(0);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [showAiGenerate, setShowAiGenerate] = useState(false);
-  // Templates removed
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [tagFilter, setTagFilter] = useState('');
 
   // Debounce search query (300ms)
   useEffect(() => {
@@ -127,11 +129,12 @@ export function AssembliesPage() {
   const params: Record<string, string> = {};
   if (debouncedQuery) params.q = debouncedQuery;
   if (category) params.category = category;
+  if (tagFilter) params.tag = tagFilter;
   params.limit = String(PAGE_SIZE);
   params.offset = String(offset);
 
   const { data, isLoading, isFetching } = useQuery({
-    queryKey: ['assemblies', debouncedQuery, category, offset],
+    queryKey: ['assemblies', debouncedQuery, category, tagFilter, offset],
     queryFn: () => assembliesApi.list(params),
     placeholderData: (prev) => prev,
   });
@@ -236,6 +239,14 @@ export function AssembliesPage() {
           <Button
             variant="secondary"
             size="sm"
+            icon={<Upload size={14} />}
+            onClick={() => setShowImportModal(true)}
+          >
+            {t('assemblies.import', { defaultValue: 'Import' })}
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
             icon={<Sparkles size={14} />}
             onClick={() => setShowAiGenerate(true)}
             className="border-violet-300/40 text-violet-600 hover:bg-violet-50 dark:border-violet-700/30 dark:text-violet-400 dark:hover:bg-violet-950/30"
@@ -306,6 +317,20 @@ export function AssembliesPage() {
               <ChevronDown size={14} />
             </div>
           </div>
+
+          {/* Tag filter */}
+          <div className="relative">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-content-tertiary">
+              <Tag size={14} />
+            </div>
+            <input
+              type="text"
+              value={tagFilter}
+              onChange={(e) => { setTagFilter(e.target.value); setOffset(0); }}
+              placeholder={t('assemblies.filter_by_tag', { defaultValue: 'Filter by tag...' })}
+              className="h-10 w-full rounded-lg border border-border bg-surface-primary pl-9 pr-3 text-sm text-content-primary placeholder:text-content-tertiary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary sm:w-40"
+            />
+          </div>
         </div>
       </Card>
 
@@ -361,6 +386,17 @@ export function AssembliesPage() {
                     addToast({ type: 'success', title: t('toasts.assembly_deleted', { defaultValue: 'Assembly deleted' }) });
                   } catch {
                     addToast({ type: 'error', title: t('toasts.delete_failed', { defaultValue: 'Delete failed' }) });
+                  }
+                }}
+                onExport={async () => {
+                  try {
+                    const exported = await assembliesApi.exportAssembly(assembly.id);
+                    const json = JSON.stringify(exported, null, 2);
+                    const blob = new Blob([json], { type: 'application/json' });
+                    triggerDownload(blob, `${assembly.code}.json`);
+                    addToast({ type: 'success', title: t('assemblies.exported_json', { defaultValue: 'JSON exported' }) });
+                  } catch {
+                    addToast({ type: 'error', title: t('common.export_failed', { defaultValue: 'Export failed' }) });
                   }
                 }}
               />
@@ -452,6 +488,17 @@ export function AssembliesPage() {
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
       />
+
+      {/* Import Modal */}
+      {showImportModal && (
+        <ImportAssemblyModal
+          onClose={() => setShowImportModal(false)}
+          onImported={() => {
+            setShowImportModal(false);
+            queryClient.invalidateQueries({ queryKey: ['assemblies'] });
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -757,16 +804,19 @@ function AssemblyCard({
   onClick,
   onDuplicate,
   onDelete,
+  onExport,
 }: {
   assembly: Assembly;
   fmt: (n: number) => string;
   onClick: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
+  onExport: () => void;
 }) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const badgeVariant = CATEGORY_COLORS[assembly.category] ?? 'neutral';
 
   return (
@@ -800,22 +850,40 @@ function AssemblyCard({
         </div>
       )}
 
+      {/* Quick preview overlay */}
+      {previewOpen && (
+        <QuickPreview
+          assemblyId={assembly.id}
+          assemblyName={assembly.name}
+          onClose={() => setPreviewOpen(false)}
+        />
+      )}
+
       <div className="p-5">
         {/* Top row: code + menu */}
         <div className="flex items-start justify-between mb-1.5">
           <p className="text-xs font-mono text-content-tertiary">{assembly.code}</p>
-          <button
-            onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}
-            className="opacity-0 group-hover:opacity-100 flex h-6 w-6 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-all"
-          >
-            <MoreHorizontal size={14} />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={(e) => { e.stopPropagation(); setPreviewOpen(true); }}
+              className="opacity-0 group-hover:opacity-100 flex h-6 w-6 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-all"
+              title={t('assemblies.quick_preview', { defaultValue: 'Quick preview' })}
+            >
+              <Eye size={14} />
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}
+              className="opacity-0 group-hover:opacity-100 flex h-6 w-6 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-all"
+            >
+              <MoreHorizontal size={14} />
+            </button>
+          </div>
         </div>
 
         {/* Context menu */}
         {menuOpen && (
           <div
-            className="absolute top-10 right-4 z-20 w-40 rounded-lg border border-border bg-surface-elevated shadow-lg overflow-hidden"
+            className="absolute top-10 right-4 z-20 w-44 rounded-lg border border-border bg-surface-elevated shadow-lg overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -829,6 +897,12 @@ function AssemblyCard({
               className="flex w-full items-center gap-2 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
             >
               <Copy size={14} /> {t('assemblies.duplicate', { defaultValue: 'Duplicate & Edit' })}
+            </button>
+            <button
+              onClick={() => { setMenuOpen(false); onExport(); }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
+            >
+              <Share2 size={14} /> {t('assemblies.export_json', { defaultValue: 'Export as JSON' })}
             </button>
             <button
               onClick={() => {
@@ -855,10 +929,20 @@ function AssemblyCard({
           {assembly.name}
         </h3>
 
-        {/* Component count */}
-        <span className="mt-1 text-2xs text-content-tertiary">
-          {assembly.component_count ?? 0} {t('assemblies.components', { defaultValue: 'components' })}
-        </span>
+        {/* Component count + usage count */}
+        <div className="mt-1 flex items-center gap-2 text-2xs text-content-tertiary">
+          <span>
+            {assembly.component_count ?? 0} {t('assemblies.components', { defaultValue: 'components' })}
+          </span>
+          {(assembly.usage_count ?? 0) > 0 && (
+            <>
+              <span className="text-content-quaternary">|</span>
+              <span className="text-oe-blue">
+                {assembly.usage_count} {t('assemblies.times_used', { defaultValue: 'used in BOQ' })}
+              </span>
+            </>
+          )}
+        </div>
 
         {/* Rate */}
         <p className="mt-3 text-lg font-bold tabular-nums" style={{ color: assembly.total_rate > 0 ? undefined : 'var(--color-content-tertiary)' }}>
@@ -873,8 +957,8 @@ function AssemblyCard({
           )}
         </p>
 
-        {/* Tags */}
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+        {/* Category + currency badges */}
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
           {assembly.category && (
             <Badge variant={badgeVariant} size="sm">
               {assembly.category}
@@ -888,8 +972,228 @@ function AssemblyCard({
               BF {assembly.bid_factor}
             </Badge>
           )}
+          {/* Tags */}
+          {(assembly.tags ?? []).map((tag) => (
+            <Badge key={tag} variant="neutral" size="sm" className="bg-violet-50 text-violet-700 dark:bg-violet-900/20 dark:text-violet-400 border-violet-200/50">
+              {tag}
+            </Badge>
+          ))}
         </div>
       </div>
     </Card>
+  );
+}
+
+/* -- Quick Preview -------------------------------------------------------- */
+
+function QuickPreview({
+  assemblyId,
+  assemblyName,
+  onClose,
+}: {
+  assemblyId: string;
+  assemblyName: string;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['assembly-preview', assemblyId],
+    queryFn: () => assembliesApi.get(assemblyId),
+    staleTime: 60_000,
+  });
+
+  const fmt = (n: number) =>
+    new Intl.NumberFormat(getIntlLocale(), {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(n);
+
+  const components = data?.components ?? [];
+  const preview = components.slice(0, 5);
+  const remaining = components.length - preview.length;
+
+  return (
+    <div
+      className="absolute inset-0 z-30 flex flex-col rounded-xl bg-white/98 dark:bg-gray-900/98 backdrop-blur-sm p-4 animate-fade-in overflow-hidden"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-xs font-semibold text-content-primary truncate flex-1 mr-2">
+          {assemblyName}
+        </p>
+        <button
+          onClick={onClose}
+          className="flex h-5 w-5 items-center justify-center rounded text-content-tertiary hover:text-content-primary transition-colors shrink-0"
+        >
+          <X size={12} />
+        </button>
+      </div>
+
+      {isLoading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 size={16} className="animate-spin text-content-tertiary" />
+        </div>
+      ) : preview.length === 0 ? (
+        <p className="text-2xs text-content-tertiary text-center flex-1 flex items-center justify-center">
+          {t('assemblies.no_components_hint', { defaultValue: 'No components yet' })}
+        </p>
+      ) : (
+        <div className="flex-1 overflow-hidden">
+          <div className="space-y-1">
+            {preview.map((comp) => (
+              <div key={comp.id} className="flex items-center justify-between gap-2 text-2xs">
+                <span className="text-content-primary truncate flex-1">{comp.description}</span>
+                <span className="text-content-secondary tabular-nums shrink-0">{fmt(comp.total)}</span>
+              </div>
+            ))}
+          </div>
+          {remaining > 0 && (
+            <p className="mt-1.5 text-2xs text-content-quaternary">
+              +{remaining} {t('assemblies.more_components', { defaultValue: 'more' })}...
+            </p>
+          )}
+          {data && (
+            <div className="mt-2 pt-2 border-t border-border-light flex items-center justify-between text-xs">
+              <span className="font-medium text-content-secondary">
+                {t('assemblies.total_rate', { defaultValue: 'Total Rate' })}
+              </span>
+              <span className="font-bold text-content-primary tabular-nums">
+                {fmt(data.total_rate)} / {data.unit}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* -- Import Assembly Modal ------------------------------------------------ */
+
+function ImportAssemblyModal({
+  onClose,
+  onImported,
+}: {
+  onClose: () => void;
+  onImported: () => void;
+}) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+  const [jsonText, setJsonText] = useState('');
+  const [importing, setImporting] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setJsonText(ev.target?.result as string || '');
+      setError('');
+    };
+    reader.readAsText(file);
+  }, []);
+
+  const handleImport = async () => {
+    setError('');
+    setImporting(true);
+    try {
+      const parsed = JSON.parse(jsonText);
+      if (!parsed.code || !parsed.name || !parsed.unit) {
+        setError(t('assemblies.import_invalid', { defaultValue: 'Invalid JSON: must contain code, name, and unit fields' }));
+        setImporting(false);
+        return;
+      }
+      await assembliesApi.importAssembly(parsed);
+      addToast({ type: 'success', title: t('assemblies.import_success', { defaultValue: 'Assembly imported' }) });
+      onImported();
+    } catch (err) {
+      if (err instanceof SyntaxError) {
+        setError(t('assemblies.import_json_error', { defaultValue: 'Invalid JSON format' }));
+      } else {
+        setError((err as Error).message || t('assemblies.import_failed', { defaultValue: 'Import failed' }));
+      }
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fade-in" onClick={onClose}>
+      <div
+        className="bg-surface-elevated rounded-2xl border border-border shadow-2xl w-full max-w-lg mx-4 flex flex-col overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-oe-blue-subtle text-oe-blue">
+              <Upload size={18} />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-content-primary">
+                {t('assemblies.import_title', { defaultValue: 'Import Assembly' })}
+              </h2>
+              <p className="text-xs text-content-tertiary">
+                {t('assemblies.import_desc', { defaultValue: 'Paste JSON or upload an exported assembly file' })}
+              </p>
+            </div>
+          </div>
+          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors">
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 py-4 space-y-3">
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-content-primary mb-1.5">
+              <Upload size={14} />
+              {t('assemblies.upload_file', { defaultValue: 'Upload JSON file' })}
+            </label>
+            <input
+              type="file"
+              accept=".json"
+              onChange={handleFileSelect}
+              className="w-full text-sm text-content-secondary file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-border-light file:bg-surface-secondary file:text-sm file:font-medium file:text-content-primary file:cursor-pointer hover:file:bg-surface-tertiary"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-content-primary mb-1.5">
+              {t('assemblies.or_paste_json', { defaultValue: 'Or paste JSON' })}
+            </label>
+            <textarea
+              value={jsonText}
+              onChange={(e) => { setJsonText(e.target.value); setError(''); }}
+              rows={8}
+              placeholder='{"code": "ASM-001", "name": "...", "unit": "m2", "components": [...]}'
+              className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-xs font-mono text-content-primary placeholder:text-content-quaternary focus:outline-none focus:ring-2 focus:ring-oe-blue-light/50 focus:border-oe-blue-light resize-none"
+            />
+          </div>
+          {error && (
+            <div className="rounded-lg bg-semantic-error-bg px-3 py-2 text-sm text-semantic-error">
+              {error}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border-light">
+          <Button variant="secondary" onClick={onClose}>
+            {t('common.cancel', { defaultValue: 'Cancel' })}
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleImport}
+            disabled={!jsonText.trim()}
+            loading={importing}
+            icon={<Upload size={15} />}
+          >
+            {t('assemblies.import_btn', { defaultValue: 'Import' })}
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }

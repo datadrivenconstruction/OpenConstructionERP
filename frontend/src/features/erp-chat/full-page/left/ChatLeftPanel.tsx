@@ -7,9 +7,10 @@ interface ChatLeftPanelProps {
   isStreaming: boolean;
   suggestions: string[];
   onSend: (text: string) => void;
+  aiConfigured: boolean | null;
 }
 
-export default function ChatLeftPanel({ messages, isStreaming, suggestions, onSend }: ChatLeftPanelProps) {
+export default function ChatLeftPanel({ messages, isStreaming, suggestions, onSend, aiConfigured }: ChatLeftPanelProps) {
   return (
     <div
       style={{
@@ -20,7 +21,7 @@ export default function ChatLeftPanel({ messages, isStreaming, suggestions, onSe
         fontFamily: 'var(--chat-font-body)',
       }}
     >
-      <MessageThread messages={messages} isStreaming={isStreaming} />
+      <MessageThread messages={messages} isStreaming={isStreaming} aiConfigured={aiConfigured} />
       <InputBar onSend={onSend} isStreaming={isStreaming} suggestions={suggestions} />
     </div>
   );
