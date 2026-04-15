@@ -1974,25 +1974,6 @@ export function SchedulePage() {
           { label: selectedProject.name },
         ]} className="mb-4" />
 
-        {/* Project switcher */}
-        {projects && projects.length > 1 && (
-          <div className="mb-4 flex items-center gap-2">
-            <span className="text-xs text-content-tertiary">{t('schedule.project', { defaultValue: 'Project:' })}</span>
-            <select
-              value={selectedProject.id}
-              onChange={(e) => {
-                const p = projects.find((pr) => pr.id === e.target.value);
-                if (p) setActiveProject(p.id, p.name);
-              }}
-              className="h-8 rounded-lg border border-border bg-surface-primary px-2 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30"
-            >
-              {projects.map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
-          </div>
-        )}
-
         <ProjectSchedules
           project={selectedProject}
           onBack={() => useProjectContextStore.getState().clearProject()}

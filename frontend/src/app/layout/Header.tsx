@@ -506,6 +506,7 @@ function ProjectSwitcher() {
         )}
       >
         <FolderOpen size={13} className="shrink-0" />
+        <span className="text-content-quaternary shrink-0">{t('common.project', { defaultValue: 'Projekt' })}:</span>
         <span className="truncate">
           {activeProjectName || t('schedule.select_project', { defaultValue: 'Select Project' })}
         </span>
