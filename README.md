@@ -9,7 +9,7 @@ Professional BOQ, 4D/5D planning, AI-powered estimation, CAD/BIM takeoff — all
 [Demo](https://openconstructionerp.com) · [Documentation](https://openconstructionerp.com/docs) · [Discussions](https://t.me/datadrivenconstruction) · [Report Bug](https://github.com/datadrivenconstruction/OpenConstructionERP/issues)
 
 ![License](https://img.shields.io/badge/license-AGPL--3.0-blue)
-![Version](https://img.shields.io/badge/version-1.5.0-green)
+![Version](https://img.shields.io/badge/version-1.6.0-green)
 ![Languages](https://img.shields.io/badge/languages-21-orange)
 ![Cost Items](https://img.shields.io/badge/cost_items-55%2C000%2B-red)
 ![Standards](https://img.shields.io/badge/standards-20-blueviolet)
@@ -241,6 +241,9 @@ Extract quantities from any source — drawings, models, text, or photos:
 
 - **CAD/BIM takeoff** — Upload Revit (.rvt), IFC, AutoCAD (.dwg), or MicroStation (.dgn) files. DDC converters extract elements with volumes, areas, and lengths automatically
 - **Interactive QTO** — Choose how to group extracted data: by Category, Type, Level, Family. Format-specific presets for Revit and IFC
+- **Linked geometry preview** — Click the BIM link badge on any BOQ position to see a 3D preview of linked elements with interactive rotate/zoom/pan controls
+- **BIM Quantity Picker** — Select quantities (area, volume, length) directly from linked BIM elements and apply them to BOQ positions. The source parameter name is shown next to the unit
+- **DWG polyline measurement** — Click any polyline in the DWG viewer to instantly see area, perimeter, and individual segment lengths with on-canvas labels
 - **PDF measurement** — Open construction drawings directly in the browser. Measure distances, areas, and count elements with calibrated scale
 - **AI estimation** — Describe your project in plain text, upload a building photo, or paste a PDF — AI generates a complete BOQ with quantities and market rates
 - **AI Cost Advisor** — Ask questions about pricing, materials, or estimation methodology. AI answers using your cost database as context
@@ -486,6 +489,6 @@ For commercial licensing without AGPL obligations, contact [info@datadrivenconst
 
 [Website](https://datadrivenconstruction.io) · [YouTube](https://www.youtube.com/@datadrivenconstruction) · [GitHub](https://github.com/datadrivenconstruction) · [Telegram](https://t.me/datadrivenconstruction)
 
-<sub>OpenConstructionERP v1.4.8 · AGPL-3.0 · Python 3.12+ · Node 20+</sub>
+<sub>OpenConstructionERP v1.6.0 · AGPL-3.0 · Python 3.12+ · Node 20+</sub>
 
 </div>
