@@ -30,7 +30,6 @@ import {
   Brain,
 } from 'lucide-react';
 import { Button } from '@/shared/ui';
-import type { QualityBreakdown } from './boqHelpers';
 
 export interface BOQToolbarProps {
   t: (key: string, options?: Record<string, string | number>) => string;
@@ -81,7 +80,6 @@ export interface BOQToolbarProps {
   isRenumbering?: boolean;
   // Quality
   hasPositions: boolean;
-  qualityBreakdown: QualityBreakdown;
   qualityScoreRing: React.ReactNode;
 }
 
