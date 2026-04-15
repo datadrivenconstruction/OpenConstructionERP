@@ -2358,7 +2358,6 @@ export function BOQEditorPage() {
           onRenumber={handleRenumber}
           isRenumbering={renumberMutation.isPending}
           hasPositions={hasPositions}
-          qualityBreakdown={qualityBreakdown}
           qualityScoreRing={<QualityScoreRing score={qualityBreakdown.score} breakdown={qualityBreakdown} t={t} />}
         />
       </div>

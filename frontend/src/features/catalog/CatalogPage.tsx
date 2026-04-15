@@ -1860,6 +1860,20 @@ export function CatalogPage() {
 
 /* ── Price Adjust Modal ──────────────────────────────────────────────── */
 
+// Published construction cost indices (BKI, BCIS, ENR, Eurostat) — stable data, kept outside component
+const PRICE_INDICES: Record<string, { label: string; rates: Record<string, number> }> = {
+  DE: { label: 'Germany (BKI)', rates: { '2020': 3.2, '2021': 5.1, '2022': 14.6, '2023': 7.8, '2024': 4.2, '2025': 3.5, '2026': 3.0 } },
+  AT: { label: 'Austria', rates: { '2020': 2.8, '2021': 4.9, '2022': 12.3, '2023': 6.5, '2024': 3.8, '2025': 3.2, '2026': 2.8 } },
+  CH: { label: 'Switzerland', rates: { '2020': 1.5, '2021': 2.8, '2022': 6.2, '2023': 3.4, '2024': 2.5, '2025': 2.0, '2026': 1.8 } },
+  UK: { label: 'UK (BCIS)', rates: { '2020': 2.0, '2021': 8.5, '2022': 10.2, '2023': 4.8, '2024': 3.5, '2025': 3.0, '2026': 2.8 } },
+  US: { label: 'USA (ENR)', rates: { '2020': 1.2, '2021': 6.3, '2022': 11.5, '2023': 3.2, '2024': 2.8, '2025': 2.5, '2026': 2.3 } },
+  FR: { label: 'France', rates: { '2020': 2.3, '2021': 5.5, '2022': 9.8, '2023': 5.6, '2024': 3.6, '2025': 2.8, '2026': 2.5 } },
+  EU: { label: 'EU Average', rates: { '2020': 2.5, '2021': 5.8, '2022': 11.0, '2023': 6.0, '2024': 3.5, '2025': 3.0, '2026': 2.5 } },
+  AE: { label: 'UAE / Gulf', rates: { '2020': 1.8, '2021': 3.5, '2022': 7.2, '2023': 4.0, '2024': 3.0, '2025': 2.5, '2026': 2.2 } },
+  RU: { label: 'Russia', rates: { '2020': 4.5, '2021': 8.2, '2022': 18.5, '2023': 9.0, '2024': 6.0, '2025': 5.0, '2026': 4.5 } },
+  IN: { label: 'India', rates: { '2020': 3.0, '2021': 5.0, '2022': 8.5, '2023': 5.5, '2024': 4.5, '2025': 4.0, '2026': 3.5 } },
+};
+
 function PriceAdjustModal({
   stats,
   regionStats,
@@ -1883,29 +1897,15 @@ function PriceAdjustModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
 
-  // Published construction cost indices (BKI, BCIS, ENR, Eurostat)
   const [useIndex, setUseIndex] = useState(false);
   const [indexRegion, setIndexRegion] = useState('DE');
   const [baseYear, setBaseYear] = useState(2024);
   const [targetYear, setTargetYear] = useState(2026);
 
-  const INDICES: Record<string, { label: string; rates: Record<string, number> }> = {
-    DE: { label: 'Germany (BKI)', rates: { '2020': 3.2, '2021': 5.1, '2022': 14.6, '2023': 7.8, '2024': 4.2, '2025': 3.5, '2026': 3.0 } },
-    AT: { label: 'Austria', rates: { '2020': 2.8, '2021': 4.9, '2022': 12.3, '2023': 6.5, '2024': 3.8, '2025': 3.2, '2026': 2.8 } },
-    CH: { label: 'Switzerland', rates: { '2020': 1.5, '2021': 2.8, '2022': 6.2, '2023': 3.4, '2024': 2.5, '2025': 2.0, '2026': 1.8 } },
-    UK: { label: 'UK (BCIS)', rates: { '2020': 2.0, '2021': 8.5, '2022': 10.2, '2023': 4.8, '2024': 3.5, '2025': 3.0, '2026': 2.8 } },
-    US: { label: 'USA (ENR)', rates: { '2020': 1.2, '2021': 6.3, '2022': 11.5, '2023': 3.2, '2024': 2.8, '2025': 2.5, '2026': 2.3 } },
-    FR: { label: 'France', rates: { '2020': 2.3, '2021': 5.5, '2022': 9.8, '2023': 5.6, '2024': 3.6, '2025': 2.8, '2026': 2.5 } },
-    EU: { label: 'EU Average', rates: { '2020': 2.5, '2021': 5.8, '2022': 11.0, '2023': 6.0, '2024': 3.5, '2025': 3.0, '2026': 2.5 } },
-    AE: { label: 'UAE / Gulf', rates: { '2020': 1.8, '2021': 3.5, '2022': 7.2, '2023': 4.0, '2024': 3.0, '2025': 2.5, '2026': 2.2 } },
-    RU: { label: 'Russia', rates: { '2020': 4.5, '2021': 8.2, '2022': 18.5, '2023': 9.0, '2024': 6.0, '2025': 5.0, '2026': 4.5 } },
-    IN: { label: 'India', rates: { '2020': 3.0, '2021': 5.0, '2022': 8.5, '2023': 5.5, '2024': 4.5, '2025': 4.0, '2026': 3.5 } },
-  };
-
   // Auto-compute factor from published index
   useEffect(() => {
     if (!useIndex || baseYear >= targetYear) return;
-    const indexData = INDICES[indexRegion];
+    const indexData = PRICE_INDICES[indexRegion];
     if (!indexData) return;
     let f = 1;
     for (let y = baseYear; y < targetYear; y++) {
@@ -2029,7 +2029,7 @@ function PriceAdjustModal({
                 <div>
                   <label className="text-2xs text-content-tertiary mb-1 block">{t('catalog.index_country', { defaultValue: 'Country / Source' })}</label>
                   <select value={indexRegion} onChange={(e) => setIndexRegion(e.target.value)} className="h-8 w-full rounded-md border border-border bg-surface-primary px-2 text-xs focus:outline-none focus:ring-2 focus:ring-oe-blue/30">
-                    {Object.entries(INDICES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+                    {Object.entries(PRICE_INDICES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
                   </select>
                 </div>
                 <div>
@@ -2048,7 +2048,7 @@ function PriceAdjustModal({
               {baseYear < targetYear && (
                 <div className="flex flex-wrap gap-1.5">
                   {(() => {
-                    const idx = INDICES[indexRegion];
+                    const idx = PRICE_INDICES[indexRegion];
                     const items = [];
                     for (let y = baseYear; y < targetYear; y++) {
                       const rate = idx?.rates[String(y)] ?? idx?.rates[String(Math.min(y, 2026))] ?? 3.0;

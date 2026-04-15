@@ -238,7 +238,11 @@ export function BIMProcessingProgress({
   }, [stage, errorMessage, elementCount, t]);
 
   return (
-    <div className="w-[440px] max-w-full rounded-2xl border border-border-light bg-surface-primary shadow-2xl overflow-hidden pointer-events-auto">
+    <div
+      role="status"
+      aria-label={headerCopy.title}
+      className="w-[440px] max-w-full rounded-2xl border border-border-light bg-surface-primary shadow-2xl overflow-hidden pointer-events-auto"
+    >
       {/* Header */}
       <div className="flex items-start gap-3 px-5 pt-5 pb-4 border-b border-border-light">
         <div
@@ -278,6 +282,7 @@ export function BIMProcessingProgress({
         {(isDone || isError) && onClose && (
           <button
             onClick={onClose}
+            aria-label={t('common.close', { defaultValue: 'Close' })}
             className="shrink-0 text-[11px] text-content-tertiary hover:text-content-primary hover:underline"
           >
             {t('common.close', { defaultValue: 'Close' })}
@@ -303,7 +308,13 @@ export function BIMProcessingProgress({
               {Math.round(visualPct)}%
             </span>
           </div>
-          <div className="h-1.5 w-full rounded-full bg-surface-tertiary overflow-hidden">
+          <div
+            className="h-1.5 w-full rounded-full bg-surface-tertiary overflow-hidden"
+            role="progressbar"
+            aria-valuenow={Math.round(visualPct)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
             <div
               className={clsx(
                 'h-full rounded-full',

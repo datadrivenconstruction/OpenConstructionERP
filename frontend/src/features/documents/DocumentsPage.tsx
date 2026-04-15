@@ -68,6 +68,13 @@ function isPreviewable(mime: string): 'pdf' | 'image' | null {
   return null;
 }
 
+/** Returns true when a document card should be clickable (previewable OR DWG/DXF navigable). */
+function isCardClickable(doc: DocItem): boolean {
+  if (isPreviewable(doc.mime_type)) return true;
+  const lower = doc.name.toLowerCase();
+  return lower.endsWith('.dwg') || lower.endsWith('.dxf');
+}
+
 function useDebounce<T>(value: T, delayMs: number): T {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {
@@ -674,20 +681,7 @@ export function DocumentsPage() {
         ...(activeProjectName ? [{ label: activeProjectName }] : []),
       ]} className="mb-4" />
 
-      {/* ── No project warning ────────────────────────────────────────── */}
-      {!projectId && (
-        <div className="mb-4 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 px-4 py-3">
-          <Upload size={18} className="text-amber-600 shrink-0" />
-          <div>
-            <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
-              {t('documents.no_project_selected', { defaultValue: 'No project selected' })}
-            </p>
-            <p className="text-xs text-amber-600 dark:text-amber-400">
-              {t('documents.select_project_hint', { defaultValue: 'Select a project from the header to upload and view documents.' })}
-            </p>
-          </div>
-        </div>
-      )}
+      {/* No-project warning removed: the early return above already handles !projectId */}
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-5">
@@ -921,6 +915,7 @@ export function DocumentsPage() {
             const isDeleting = deleteMutation.isPending && deleteMutation.variables === doc.id;
             const isConfirming = confirmDeleteId === doc.id;
             const previewKind = isPreviewable(doc.mime_type);
+            const clickable = isCardClickable(doc);
 
             return (
               <Card
@@ -930,18 +925,18 @@ export function DocumentsPage() {
                 className={`group ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}
               >
                 <div
-                  className={`flex items-start gap-3 px-4 py-3 ${previewKind ? 'cursor-pointer' : 'cursor-default'}`}
+                  className={`flex items-start gap-3 px-4 py-3 ${clickable ? 'cursor-pointer' : 'cursor-default'}`}
                   onClick={() => handleCardClick(doc)}
-                  role={previewKind ? 'button' : undefined}
-                  tabIndex={previewKind ? 0 : undefined}
+                  role={clickable ? 'button' : undefined}
+                  tabIndex={clickable ? 0 : undefined}
                   onKeyDown={(e) => {
-                    if (previewKind && (e.key === 'Enter' || e.key === ' ')) {
+                    if (clickable && (e.key === 'Enter' || e.key === ' ')) {
                       e.preventDefault();
                       handleCardClick(doc);
                     }
                   }}
                   aria-label={
-                    previewKind
+                    clickable
                       ? t('documents.click_to_preview', { defaultValue: 'Click to preview {{name}}', name: doc.name })
                       : undefined
                   }

@@ -136,7 +136,7 @@ export function AssemblyEditorPage() {
   const handleAddTag = useCallback(() => {
     const tag = tagInput.trim().toLowerCase();
     if (!tag || !assembly) return;
-    const currentTags: string[] = (assembly as { tags?: string[] }).tags ?? [];
+    const currentTags: string[] = assembly.tags ?? [];
     if (currentTags.includes(tag)) {
       setTagInput('');
       return;
@@ -147,7 +147,7 @@ export function AssemblyEditorPage() {
 
   const handleRemoveTag = useCallback((tag: string) => {
     if (!assembly) return;
-    const currentTags: string[] = (assembly as { tags?: string[] }).tags ?? [];
+    const currentTags: string[] = assembly.tags ?? [];
     tagsMutation.mutate(currentTags.filter((t) => t !== tag));
   }, [assembly, tagsMutation]);
 
@@ -269,7 +269,7 @@ export function AssemblyEditorPage() {
         <Card className="mb-4">
           <div className="flex items-center gap-2 flex-wrap">
             <Tag size={14} className="text-violet-500 shrink-0" />
-            {((assembly as { tags?: string[] }).tags ?? []).map((tag) => (
+            {(assembly.tags ?? []).map((tag) => (
               <Badge
                 key={tag}
                 variant="neutral"
@@ -505,7 +505,7 @@ function CostDbSearchForAssembly({
         });
       }
     },
-    [assemblyId, addToast],
+    [assemblyId, addToast, t],
   );
 
   const fmt = (n: number) =>

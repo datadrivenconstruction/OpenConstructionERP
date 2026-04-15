@@ -225,18 +225,13 @@ export function MiniGeometryPreview({
         // Traverse: show meshes matching any known ID (db uuid, stable_id, mesh_ref)
         const visibleBox = new THREE.Box3();
         let hasVisibleMesh = false;
-        let totalMeshes = 0;
-        let matchedMeshes = 0;
 
         // Build a lowercase version of matchSet for case-insensitive matching
         const matchSetLower = new Set<string>();
         for (const id of matchSet) matchSetLower.add(id.toLowerCase());
 
-        console.log('[MiniGeoPreview] matchSet:', [...matchSet]);
-
         group.traverse((child) => {
           if (child instanceof THREE.Mesh) {
-            totalMeshes++;
             // Try matching by name, id, or userData
             const candidateNames = [
               child.name,
@@ -263,20 +258,10 @@ export function MiniGeometryPreview({
 
             child.visible = isTarget;
             if (isTarget) {
-              matchedMeshes++;
               child.geometry.computeBoundingBox();
               visibleBox.expandByObject(child);
               hasVisibleMesh = true;
             }
-          }
-        });
-
-        console.log(`[MiniGeoPreview] ${matchedMeshes}/${totalMeshes} meshes matched`);
-
-        // Hide parent groups that have no visible children
-        group.traverse((obj) => {
-          if (!(obj instanceof THREE.Mesh) && obj.children.length > 0) {
-            // Keep groups visible so child meshes render
           }
         });
 
