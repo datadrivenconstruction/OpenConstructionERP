@@ -1038,15 +1038,22 @@ export function QuantityCellRenderer(params: ICellRendererParams) {
 
   const meta = (data.metadata ?? {}) as Record<string, unknown>;
   const hasBimSource = !!meta.bim_qty_source;
+  const hasPdfSource = !!meta.pdf_measurement_source;
+
+  let colorClass = '';
+  let titleText: string | undefined;
+  if (hasPdfSource) {
+    colorClass = 'font-semibold text-rose-700 dark:text-rose-400';
+    titleText = String(meta.pdf_measurement_source);
+  } else if (hasBimSource) {
+    colorClass = 'font-semibold text-emerald-700 dark:text-emerald-400';
+    titleText = String(meta.bim_qty_source);
+  }
 
   return (
     <span
-      className={`block text-right text-xs tabular-nums w-full h-full leading-[32px] ${
-        hasBimSource
-          ? 'font-semibold text-emerald-700 dark:text-emerald-400'
-          : ''
-      }`}
-      title={hasBimSource ? String(meta.bim_qty_source) : undefined}
+      className={`block text-right text-xs tabular-nums w-full h-full leading-[32px] ${colorClass}`}
+      title={titleText}
     >
       {formatted}
     </span>
@@ -1063,14 +1070,34 @@ export function UnitCellRenderer(params: ICellRendererParams) {
 
   const meta = (data.metadata ?? {}) as Record<string, unknown>;
   const bimSource = meta.bim_qty_source as string | undefined;
+  const pdfSource = meta.pdf_measurement_source as string | undefined;
 
-  if (!bimSource) {
+  // No source indicator needed
+  if (!bimSource && !pdfSource) {
     return <span className="text-center text-2xs font-mono uppercase w-full block">{value ?? ''}</span>;
   }
 
+  if (pdfSource) {
+    // Extract short label: "Takeoff: Area on Page 3" -> "Page 3"
+    const parts = pdfSource.split(' on ');
+    const shortLabel = (parts[parts.length - 1] ?? pdfSource).trim();
+    return (
+      <div className="flex flex-col items-center justify-center h-full w-full gap-0">
+        <span className="text-2xs font-mono uppercase leading-tight">{value ?? ''}</span>
+        <span
+          className="text-[7px] leading-none font-medium text-rose-600 dark:text-rose-400 truncate max-w-full"
+          title={pdfSource}
+        >
+          {shortLabel}
+        </span>
+      </div>
+    );
+  }
+
+  // BIM source (existing behavior)
   // Extract short param name: "BIM: Wall / Area" -> "Area"
-  const parts = bimSource.split('/');
-  const paramName = (parts[parts.length - 1] ?? bimSource).trim();
+  const parts = (bimSource ?? '').split('/');
+  const paramName = (parts[parts.length - 1] ?? bimSource ?? '').trim();
 
   return (
     <div className="flex flex-col items-center justify-center h-full w-full gap-0">

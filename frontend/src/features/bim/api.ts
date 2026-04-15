@@ -285,6 +285,10 @@ export interface BOQElementLinkBrief {
   boq_position_id: string;
   boq_position_ordinal: string | null;
   boq_position_description: string | null;
+  boq_position_quantity: number | null;
+  boq_position_unit: string | null;
+  boq_position_unit_rate: number | null;
+  boq_position_total: number | null;
   link_type: 'manual' | 'auto' | 'rule_based';
   confidence: string | null;
 }

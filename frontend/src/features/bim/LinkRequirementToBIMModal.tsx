@@ -237,7 +237,7 @@ export default function LinkRequirementToBIMModal({
               {sets.length === 0
                 ? t('bim.no_req_sets', {
                     defaultValue:
-                      'No requirement sets in this project yet — create one in /requirements first',
+                      'No requirement sets in this project yet — create one in BIM Rules first',
                   })
                 : requirements.length === 0
                   ? t('bim.no_requirements', {

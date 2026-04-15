@@ -3,13 +3,13 @@
  * renderer, toggle layers, and create measurement annotations.
  *
  * Layout:
- *  - Left panel: drawing list + upload
+ *  - Top toolbar: annotation tool palette
  *  - Center: DXF canvas viewer (or empty state)
  *  - Right panel: layers, annotations, selected entity properties
- *  - Top toolbar: annotation tool palette
+ *  - Bottom filmstrip: drawing list + upload (like BIM page)
  */
 
-import { useState, useMemo, useCallback, useRef } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
   calculateArea,
   calculatePerimeter,
@@ -18,6 +18,7 @@ import {
 } from './lib/measurement';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   Upload,
@@ -30,10 +31,12 @@ import {
   Info,
   Plus,
   X,
+  ChevronUp,
 } from 'lucide-react';
 import { Button, Badge, EmptyState, Breadcrumb, ConfirmDialog } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useToastStore } from '@/stores/useToastStore';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import {
   fetchDrawings,
@@ -45,10 +48,11 @@ import {
   deleteAnnotation,
 } from './api';
 import type { DxfEntity, DxfLayer, DwgAnnotation, CreateAnnotationPayload } from './api';
-import { DxfViewer } from './components/DxfViewer';
+import { DxfViewer, type EntitySelectEvent } from './components/DxfViewer';
 import { ToolPalette, type DwgTool } from './components/ToolPalette';
 import { LayerPanel } from './components/LayerPanel';
 import { EntityNameFilter, entityDisplayName } from './components/EntityNameFilter';
+import { boqApi, type Position } from '@/features/boq/api';
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
@@ -80,6 +84,10 @@ export function DwgTakeoffPage() {
   const addToast = useToastStore((s) => s.addToast);
   const projectId = useProjectContextStore((s) => s.activeProjectId) ?? '';
 
+  // Deep-link support: ?drawingId=xxx opens a specific drawing
+  const [searchParams, setSearchParams] = useSearchParams();
+  const deepLinkDrawingId = searchParams.get('drawingId');
+
   // State
   const [selectedDrawingId, setSelectedDrawingId] = useState<string | null>(null);
   const [activeTool, setActiveTool] = useState<DwgTool>('select');
@@ -96,6 +104,9 @@ export function DwgTakeoffPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const { confirm: confirmAnnotDelete, ...annotDeleteConfirmProps } = useConfirm();
+  const [filmstripExpanded, setFilmstripExpanded] = useState(true);
+  /** Screen position for floating entity info popup. */
+  const [entityPopup, setEntityPopup] = useState<{ x: number; y: number } | null>(null);
 
   // Queries
   const { data: drawings = [], isLoading: loadingDrawings } = useQuery({
@@ -115,6 +126,20 @@ export function DwgTakeoffPage() {
     queryFn: () => fetchAnnotations(selectedDrawingId!),
     enabled: !!selectedDrawingId,
   });
+
+  // Deep-link: auto-select drawing when ?drawingId= is in URL
+  useEffect(() => {
+    if (!deepLinkDrawingId || drawings.length === 0) return;
+    const target = drawings.find((d) => d.id === deepLinkDrawingId);
+    if (target && selectedDrawingId !== deepLinkDrawingId) {
+      handleSelectDrawing(deepLinkDrawingId);
+      // Clean up the URL param
+      const next = new URLSearchParams(searchParams);
+      next.delete('drawingId');
+      setSearchParams(next, { replace: true });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deepLinkDrawingId, drawings]);
 
   // Layout support
   const [selectedLayout, setSelectedLayout] = useState<string | null>(null);
@@ -183,6 +208,26 @@ export function DwgTakeoffPage() {
       setUploadFile(null);
       setUploadName('');
       setSelectedDrawingId(drawing.id);
+
+      // Auto-save to Documents module as well (fire-and-forget)
+      if (uploadFile && projectId) {
+        const file = uploadFile;
+        const token = useAuthStore.getState().accessToken;
+        const formData = new FormData();
+        formData.append('file', file);
+        const headers: Record<string, string> = { 'X-DDC-Client': 'OE/1.0' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        fetch(
+          `/api/v1/documents/upload?project_id=${projectId}&category=drawing`,
+          { method: 'POST', headers, body: formData },
+        )
+          .then(() => {
+            queryClient.invalidateQueries({ queryKey: ['documents'] });
+          })
+          .catch(() => {
+            // Silently ignore — the drawing was already saved in the DWG module
+          });
+      }
     },
     onError: () => {
       addToast({ type: 'error', title: t('dwg_takeoff.upload_error', 'Upload failed') });
@@ -292,11 +337,17 @@ export function DwgTakeoffPage() {
     [selectedDrawingId, activeColor, createAnnotationMutation],
   );
 
-  const handleSelectEntity = useCallback((id: string | null) => {
+  const handleSelectEntity = useCallback((id: string | null, event?: EntitySelectEvent) => {
     setSelectedEntityId(id);
     if (id) {
       // Auto-switch to properties tab when an entity is selected
       setRightTab('properties');
+      // Show floating popup at click position
+      if (event) {
+        setEntityPopup({ x: event.screenX, y: event.screenY });
+      }
+    } else {
+      setEntityPopup(null);
     }
   }, []);
 
@@ -307,6 +358,7 @@ export function DwgTakeoffPage() {
     setSelectedEntityId(null);
     setSelectedAnnotationId(null);
     setSelectedLayout(null);
+    setEntityPopup(null);
   }, []);
 
   // Selected entity details
@@ -339,133 +391,6 @@ export function DwgTakeoffPage() {
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* ── Left Panel: Drawing List ──────────────────────────────── */}
-        <div className="flex w-60 flex-shrink-0 flex-col border-r border-border bg-surface">
-          <div className="flex items-center justify-between border-b border-border px-3 py-2">
-            <h3 className="text-sm font-semibold text-foreground">
-              {t('dwg_takeoff.drawings', 'Drawings')}
-            </h3>
-            <Button size="sm" variant="ghost" onClick={() => setShowUpload(true)}>
-              <Plus size={14} />
-            </Button>
-          </div>
-
-          {/* Upload form */}
-          {showUpload && (
-            <div className="border-b border-border p-3 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-foreground">
-                  {t('dwg_takeoff.upload_drawing', 'Upload drawing')}
-                </span>
-                <button onClick={() => setShowUpload(false)}>
-                  <X size={14} className="text-muted-foreground" />
-                </button>
-              </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".dwg,.dxf"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) {
-                    setUploadFile(f);
-                    if (!uploadName) setUploadName(f.name.replace(/\.[^.]+$/, ''));
-                  }
-                }}
-              />
-              <Button
-                size="sm"
-                variant="secondary"
-                className="w-full justify-center"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <FileUp size={14} className="mr-1" />
-                {uploadFile ? uploadFile.name : t('dwg_takeoff.choose_file', 'Choose file')}
-              </Button>
-              <input
-                type="text"
-                value={uploadName}
-                onChange={(e) => setUploadName(e.target.value)}
-                placeholder={t('dwg_takeoff.drawing_name', 'Drawing name')}
-                className="w-full rounded-md border border-border bg-surface-secondary px-2 py-1 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-oe-blue"
-              />
-              <select
-                value={uploadDiscipline}
-                onChange={(e) => setUploadDiscipline(e.target.value)}
-                className="w-full rounded-md border border-border bg-surface-secondary px-2 py-1 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-oe-blue"
-              >
-                <option value="architectural">{t('dwg_takeoff.discipline_arch', 'Architectural')}</option>
-                <option value="structural">{t('dwg_takeoff.discipline_struct', 'Structural')}</option>
-                <option value="mep">{t('dwg_takeoff.discipline_mep', 'MEP')}</option>
-                <option value="civil">{t('dwg_takeoff.discipline_civil', 'Civil')}</option>
-                <option value="other">{t('dwg_takeoff.discipline_other', 'Other')}</option>
-              </select>
-              <Button
-                size="sm"
-                variant="primary"
-                className="w-full justify-center"
-                disabled={!uploadFile || uploadMutation.isPending}
-                onClick={() => uploadMutation.mutate()}
-              >
-                {uploadMutation.isPending ? (
-                  <Loader2 size={14} className="mr-1 animate-spin" />
-                ) : (
-                  <Upload size={14} className="mr-1" />
-                )}
-                {t('dwg_takeoff.upload', 'Upload')}
-              </Button>
-            </div>
-          )}
-
-          {/* Drawing list */}
-          <div className="flex-1 overflow-y-auto">
-            {loadingDrawings && (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 size={20} className="animate-spin text-muted-foreground" />
-              </div>
-            )}
-            {!loadingDrawings && drawings.length === 0 && (
-              <div className="px-3 py-8 text-center text-xs text-muted-foreground">
-                {t('dwg_takeoff.no_drawings', 'No drawings uploaded yet')}
-              </div>
-            )}
-            {drawings.map((d) => (
-              <button
-                key={d.id}
-                onClick={() => handleSelectDrawing(d.id)}
-                className={clsx(
-                  'flex w-full items-center gap-2 border-b border-border px-3 py-2 text-left text-xs transition-colors',
-                  selectedDrawingId === d.id
-                    ? 'bg-oe-blue/10 text-oe-blue'
-                    : 'text-foreground hover:bg-surface-secondary',
-                )}
-              >
-                <FileText size={14} className="flex-shrink-0" />
-                <div className="flex-1 truncate">
-                  <div className="truncate font-medium">{d.name}</div>
-                  <div className="text-muted-foreground">
-                    {d.discipline} &middot;{' '}
-                    {selectedDrawingId === d.id && entities.length > 0
-                      ? entities.length
-                      : d.entity_count || '—'}{' '}
-                    {t('dwg_takeoff.entities', 'entities')}
-                  </div>
-                </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setConfirmDeleteId(d.id);
-                  }}
-                  className="text-muted-foreground hover:text-red-500 transition-colors"
-                >
-                  <Trash2 size={13} />
-                </button>
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* ── Center: DXF Viewer ──────────────────────────────────── */}
         <div className="flex flex-1 flex-col min-h-0 min-w-0">
           {!selectedDrawingId ? (
@@ -509,20 +434,48 @@ export function DwgTakeoffPage() {
                 ))}
               </div>
             )}
-            <DxfViewer
-              entities={viewerEntities}
-              annotations={annotations}
-              visibleLayers={visibleLayers}
-              activeTool={activeTool}
-              activeColor={activeColor}
-              selectedEntityId={selectedEntityId}
-              selectedAnnotationId={selectedAnnotationId}
-              onSelectEntity={handleSelectEntity}
-              onSelectAnnotation={setSelectedAnnotationId}
-              onAnnotationCreated={handleAnnotationCreated}
-            />
+            <div className="relative flex-1 min-h-0">
+              <DxfViewer
+                entities={viewerEntities}
+                annotations={annotations}
+                visibleLayers={visibleLayers}
+                activeTool={activeTool}
+                activeColor={activeColor}
+                selectedEntityId={selectedEntityId}
+                selectedAnnotationId={selectedAnnotationId}
+                onSelectEntity={handleSelectEntity}
+                onSelectAnnotation={setSelectedAnnotationId}
+                onAnnotationCreated={handleAnnotationCreated}
+              />
+              {/* Floating entity info popup */}
+              {selectedEntity && entityPopup && activeTool === 'select' && (
+                <EntityInfoPopup
+                  entity={selectedEntity}
+                  screenX={entityPopup.x}
+                  screenY={entityPopup.y}
+                  projectId={projectId}
+                  onClose={() => setEntityPopup(null)}
+                  onLinkBOQ={() => {
+                    setEntityPopup(null);
+                  }}
+                />
+              )}
+            </div>
             </>
           )}
+
+          {/* ── Bottom Filmstrip: Drawing List ────────────────────── */}
+          <DrawingFilmstrip
+            drawings={drawings}
+            isLoading={loadingDrawings}
+            activeDrawingId={selectedDrawingId}
+            entities={entities}
+            expanded={filmstripExpanded}
+            onToggleExpanded={() => setFilmstripExpanded((v) => !v)}
+            onSelectDrawing={handleSelectDrawing}
+            onDeleteDrawing={(id) => setConfirmDeleteId(id)}
+            onUpload={() => setShowUpload(true)}
+          />
         </div>
 
         {/* ── Right Panel: Layers / Annotations / Properties ───── */}
@@ -736,6 +689,82 @@ export function DwgTakeoffPage() {
         )}
       </div>
 
+      {/* Upload form modal overlay */}
+      {showUpload && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          onClick={() => setShowUpload(false)}
+        >
+          <div
+            className="w-80 rounded-xl border border-white/15 bg-[#1e1e38]/95 shadow-2xl backdrop-blur-md p-4 space-y-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-white/90">
+                {t('dwg_takeoff.upload_drawing', 'Upload drawing')}
+              </span>
+              <button onClick={() => setShowUpload(false)}>
+                <X size={16} className="text-white/40 hover:text-white/80 transition-colors" />
+              </button>
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".dwg,.dxf"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) {
+                  setUploadFile(f);
+                  if (!uploadName) setUploadName(f.name.replace(/\.[^.]+$/, ''));
+                }
+              }}
+            />
+            <Button
+              size="sm"
+              variant="secondary"
+              className="w-full justify-center"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <FileUp size={14} className="mr-1" />
+              {uploadFile ? uploadFile.name : t('dwg_takeoff.choose_file', 'Choose file')}
+            </Button>
+            <input
+              type="text"
+              value={uploadName}
+              onChange={(e) => setUploadName(e.target.value)}
+              placeholder={t('dwg_takeoff.drawing_name', 'Drawing name')}
+              className="w-full rounded-md border border-white/15 bg-white/5 px-2.5 py-1.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            />
+            <select
+              value={uploadDiscipline}
+              onChange={(e) => setUploadDiscipline(e.target.value)}
+              className="w-full rounded-md border border-white/15 bg-white/5 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            >
+              <option value="architectural">{t('dwg_takeoff.discipline_arch', 'Architectural')}</option>
+              <option value="structural">{t('dwg_takeoff.discipline_struct', 'Structural')}</option>
+              <option value="mep">{t('dwg_takeoff.discipline_mep', 'MEP')}</option>
+              <option value="civil">{t('dwg_takeoff.discipline_civil', 'Civil')}</option>
+              <option value="other">{t('dwg_takeoff.discipline_other', 'Other')}</option>
+            </select>
+            <Button
+              size="sm"
+              variant="primary"
+              className="w-full justify-center"
+              disabled={!uploadFile || uploadMutation.isPending}
+              onClick={() => uploadMutation.mutate()}
+            >
+              {uploadMutation.isPending ? (
+                <Loader2 size={14} className="mr-1 animate-spin" />
+              ) : (
+                <Upload size={14} className="mr-1" />
+              )}
+              {t('dwg_takeoff.upload', 'Upload')}
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Delete drawing confirmation */}
       {confirmDeleteId && (
         <ConfirmDialog
@@ -755,6 +784,490 @@ export function DwgTakeoffPage() {
 
       {/* Delete annotation confirmation */}
       <ConfirmDialog {...annotDeleteConfirmProps} />
+    </div>
+  );
+}
+
+/* ── Floating Entity Info Popup ──────────────────────────────────────── */
+
+interface EntityInfoPopupProps {
+  entity: DxfEntity;
+  screenX: number;
+  screenY: number;
+  projectId: string;
+  onClose: () => void;
+  onLinkBOQ: () => void;
+}
+
+function EntityInfoPopup({ entity, screenX, screenY, projectId, onClose }: EntityInfoPopupProps) {
+  const { t } = useTranslation();
+  const popupRef = useRef<HTMLDivElement>(null);
+  const [showBoqPicker, setShowBoqPicker] = useState(false);
+
+  // Dismiss on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  // Dismiss when clicking outside the popup
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    };
+    // Delay to avoid catching the click that opened the popup
+    const timer = setTimeout(() => {
+      document.addEventListener('mousedown', handler);
+    }, 100);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('mousedown', handler);
+    };
+  }, [onClose]);
+
+  // Compute measurements
+  const isPolyline = entity.type === 'LWPOLYLINE' && entity.vertices && entity.vertices.length >= 2;
+  const closed = !!entity.closed;
+  const verts = entity.vertices ?? [];
+  const perimeter = isPolyline ? calculatePerimeter(verts, closed) : 0;
+  const area = isPolyline && closed ? calculateArea(verts) : 0;
+  const segCount = isPolyline ? getSegmentLengths(verts, closed).length : 0;
+  const isCircle = entity.type === 'CIRCLE' && entity.radius != null;
+  const circleArea = isCircle ? Math.PI * (entity.radius! ** 2) : 0;
+  const circleCircumference = isCircle ? 2 * Math.PI * entity.radius! : 0;
+
+  // Copy measurements to clipboard
+  const handleCopyMeasurements = useCallback(() => {
+    const lines: string[] = [];
+    lines.push(`Type: ${entity.type}`);
+    lines.push(`Layer: ${entity.layer}`);
+    if (isPolyline) {
+      lines.push(`Perimeter: ${formatMeasurement(perimeter, 'm')}`);
+      if (closed && area > 0) lines.push(`Area: ${formatMeasurement(area, 'm\u00B2')}`);
+      lines.push(`Segments: ${segCount}`);
+      lines.push(`Vertices: ${verts.length}`);
+    }
+    if (isCircle) {
+      lines.push(`Radius: ${formatMeasurement(entity.radius!, 'm')}`);
+      lines.push(`Circumference: ${formatMeasurement(circleCircumference, 'm')}`);
+      lines.push(`Area: ${formatMeasurement(circleArea, 'm\u00B2')}`);
+    }
+    navigator.clipboard.writeText(lines.join('\n')).catch(() => {});
+  }, [entity, isPolyline, isCircle, perimeter, area, segCount, verts.length, circleCircumference, circleArea, closed]);
+
+  // Position popup near click point (offset right and down), clamp to viewport
+  const popupW = 260;
+  const popupH = 300;
+  const parentEl = popupRef.current?.parentElement;
+  const maxW = parentEl?.clientWidth ?? 800;
+  const maxH = parentEl?.clientHeight ?? 600;
+  let left = screenX + 16;
+  let top = screenY + 16;
+  if (left + popupW > maxW) left = screenX - popupW - 8;
+  if (top + popupH > maxH) top = Math.max(8, maxH - popupH - 8);
+  if (left < 8) left = 8;
+  if (top < 8) top = 8;
+
+  return (
+    <div
+      ref={popupRef}
+      className="absolute z-40 animate-in fade-in slide-in-from-top-1 duration-150"
+      style={{ left, top, width: popupW }}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
+      <div className="rounded-xl border border-white/15 bg-[#1e1e38]/95 shadow-2xl backdrop-blur-md overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between px-3 py-2 border-b border-white/10">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="h-2 w-2 rounded-full bg-oe-blue flex-shrink-0" />
+            <span className="text-xs font-semibold text-white/90 truncate">
+              {entity.type}
+            </span>
+            <span className="text-[10px] text-white/40 truncate">{entity.layer}</span>
+          </div>
+          <button
+            onClick={onClose}
+            className="flex h-5 w-5 items-center justify-center rounded-md
+                       text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors"
+          >
+            <X size={12} />
+          </button>
+        </div>
+
+        {/* Properties grid */}
+        <div className="px-3 py-2 space-y-1.5 text-[11px]">
+          <div className="flex justify-between">
+            <span className="text-white/40">{t('dwg_takeoff.prop_type', 'Type')}</span>
+            <span className="font-mono text-white/80">{entity.type}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-white/40">{t('dwg_takeoff.prop_layer', 'Layer')}</span>
+            <span className="font-mono text-white/80">{entity.layer}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-white/40">{t('dwg_takeoff.prop_color', 'Color')}</span>
+            <div className="flex items-center gap-1.5">
+              <span
+                className="h-2.5 w-2.5 rounded-full border border-white/20"
+                style={{ backgroundColor: typeof entity.color === 'string' ? entity.color : `hsl(${(entity.color * 30) % 360}, 70%, 55%)` }}
+              />
+              <span className="font-mono text-white/80">{String(entity.color)}</span>
+            </div>
+          </div>
+          {entity.block_name && (
+            <div className="flex justify-between">
+              <span className="text-white/40">{t('dwg_takeoff.prop_block', 'Block')}</span>
+              <span className="font-mono text-white/80">{entity.block_name}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Measurements section */}
+        {(isPolyline || isCircle) && (
+          <div className="px-3 py-2 border-t border-white/10 space-y-1.5">
+            <div className="text-[10px] font-semibold text-white/50 uppercase tracking-wider">
+              {t('dwg_takeoff.measurements', 'Measurements')}
+            </div>
+            {isPolyline && (
+              <>
+                <div className="flex items-center justify-between rounded-md bg-emerald-950/30 px-2 py-1 border border-emerald-800/40">
+                  <span className="text-[11px] text-emerald-400 font-medium">
+                    {t('dwg_takeoff.perimeter', 'Perimeter')}
+                  </span>
+                  <span className="font-mono font-bold text-[11px] text-emerald-300">
+                    {formatMeasurement(perimeter, 'm')}
+                  </span>
+                </div>
+                {closed && area > 0 && (
+                  <div className="flex items-center justify-between rounded-md bg-blue-950/30 px-2 py-1 border border-blue-800/40">
+                    <span className="text-[11px] text-blue-400 font-medium">
+                      {t('dwg_takeoff.area', 'Area')}
+                    </span>
+                    <span className="font-mono font-bold text-[11px] text-blue-300">
+                      {formatMeasurement(area, 'm\u00B2')}
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between text-[11px]">
+                  <span className="text-white/40">{t('dwg_takeoff.segments', 'Segments')}</span>
+                  <span className="font-mono text-white/80">{segCount}</span>
+                </div>
+                <div className="flex justify-between text-[11px]">
+                  <span className="text-white/40">{t('dwg_takeoff.closed', 'Closed')}</span>
+                  <span className="font-mono text-white/80">
+                    {closed ? t('common.yes', 'Yes') : t('common.no', 'No')}
+                  </span>
+                </div>
+              </>
+            )}
+            {isCircle && (
+              <>
+                <div className="flex justify-between text-[11px]">
+                  <span className="text-white/40">{t('dwg_takeoff.prop_radius', 'Radius')}</span>
+                  <span className="font-mono text-white/80">
+                    {formatMeasurement(entity.radius!, 'm')}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between rounded-md bg-emerald-950/30 px-2 py-1 border border-emerald-800/40">
+                  <span className="text-[11px] text-emerald-400 font-medium">
+                    {t('dwg_takeoff.circumference', 'Circumference')}
+                  </span>
+                  <span className="font-mono font-bold text-[11px] text-emerald-300">
+                    {formatMeasurement(circleCircumference, 'm')}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between rounded-md bg-blue-950/30 px-2 py-1 border border-blue-800/40">
+                  <span className="text-[11px] text-blue-400 font-medium">
+                    {t('dwg_takeoff.area', 'Area')}
+                  </span>
+                  <span className="font-mono font-bold text-[11px] text-blue-300">
+                    {formatMeasurement(circleArea, 'm\u00B2')}
+                  </span>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Action buttons */}
+        <div className="px-3 py-2 border-t border-white/10 flex flex-wrap gap-1.5">
+          <button
+            onClick={handleCopyMeasurements}
+            className="flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5
+                       px-2 py-1.5 text-[11px] font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
+            {t('dwg_takeoff.copy_measurements', 'Copy')}
+          </button>
+          <button
+            onClick={() => setShowBoqPicker((v) => !v)}
+            className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-oe-blue/20 border border-oe-blue/30
+                       px-2 py-1.5 text-[11px] font-medium text-oe-blue hover:bg-oe-blue/30 transition-colors"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+            </svg>
+            {t('dwg_takeoff.link_to_boq', 'Link to BOQ')}
+          </button>
+        </div>
+
+        {/* Inline BOQ position picker */}
+        {showBoqPicker && (
+          <BOQPositionPicker
+            projectId={projectId}
+            onClose={() => setShowBoqPicker(false)}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── BOQ Position Picker (inline in entity popup) ───────────────────── */
+
+function BOQPositionPicker({ projectId, onClose }: { projectId: string; onClose: () => void }) {
+  const { t } = useTranslation();
+  const [search, setSearch] = useState('');
+  const addToast = useToastStore((s) => s.addToast);
+
+  const { data: boqs = [], isLoading } = useQuery({
+    queryKey: ['boqs', projectId],
+    queryFn: () => boqApi.list(projectId),
+    enabled: !!projectId,
+  });
+
+  // Load positions for all BOQs
+  const { data: allPositions = [] } = useQuery({
+    queryKey: ['boq-positions-for-picker', projectId, boqs.map((b) => b.id).join(',')],
+    queryFn: async () => {
+      const results: (Position & { boq_name: string })[] = [];
+      for (const boq of boqs) {
+        try {
+          const full = await boqApi.get(boq.id);
+          for (const pos of full.positions) {
+            results.push({ ...pos, boq_name: boq.name });
+          }
+        } catch {
+          // skip
+        }
+      }
+      return results;
+    },
+    enabled: boqs.length > 0,
+  });
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return allPositions.slice(0, 20);
+    const q = search.toLowerCase();
+    return allPositions
+      .filter(
+        (p) =>
+          p.description.toLowerCase().includes(q) ||
+          p.ordinal.toLowerCase().includes(q) ||
+          p.boq_name.toLowerCase().includes(q),
+      )
+      .slice(0, 20);
+  }, [allPositions, search]);
+
+  const handleSelect = useCallback(
+    (pos: Position & { boq_name: string }) => {
+      addToast({
+        type: 'info',
+        title: t('dwg_takeoff.boq_link_info', 'BOQ link'),
+        message: t('dwg_takeoff.boq_link_info_desc', 'Position "{{desc}}" selected. Use annotations to formally link measurements.', {
+          desc: pos.description.slice(0, 40),
+        }),
+      });
+      onClose();
+    },
+    [addToast, t, onClose],
+  );
+
+  return (
+    <div className="border-t border-white/10 px-3 py-2 space-y-2 max-h-52 overflow-y-auto">
+      <div className="text-[10px] font-semibold text-white/50 uppercase tracking-wider">
+        {t('dwg_takeoff.select_boq_position', 'Select BOQ position')}
+      </div>
+      <input
+        type="text"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder={t('dwg_takeoff.search_positions', 'Search positions...')}
+        className="w-full rounded-md border border-white/15 bg-white/5 px-2 py-1 text-[11px] text-white
+                   placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-oe-blue/50"
+        autoFocus
+      />
+      {isLoading ? (
+        <div className="flex items-center justify-center py-3">
+          <Loader2 size={14} className="animate-spin text-white/30" />
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="text-[11px] text-white/30 text-center py-2">
+          {t('dwg_takeoff.no_positions_found', 'No positions found')}
+        </div>
+      ) : (
+        <div className="space-y-0.5">
+          {filtered.map((pos) => (
+            <button
+              key={pos.id}
+              onClick={() => handleSelect(pos)}
+              className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left
+                         hover:bg-white/10 transition-colors group"
+            >
+              <span className="font-mono text-[10px] text-white/40 shrink-0 w-14 truncate">
+                {pos.ordinal}
+              </span>
+              <div className="flex-1 min-w-0">
+                <div className="text-[11px] text-white/80 truncate">{pos.description}</div>
+                <div className="text-[10px] text-white/30 truncate">{pos.boq_name}</div>
+              </div>
+              <span className="text-[10px] text-white/30 shrink-0">
+                {pos.quantity} {pos.unit}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Bottom Drawing Filmstrip ────────────────────────────────────────── */
+
+interface DrawingFilmstripProps {
+  drawings: { id: string; name: string; discipline: string; entity_count: number }[];
+  isLoading: boolean;
+  activeDrawingId: string | null;
+  entities: DxfEntity[];
+  expanded: boolean;
+  onToggleExpanded: () => void;
+  onSelectDrawing: (id: string) => void;
+  onDeleteDrawing: (id: string) => void;
+  onUpload: () => void;
+}
+
+function DrawingFilmstrip({
+  drawings,
+  isLoading,
+  activeDrawingId,
+  entities,
+  expanded,
+  onToggleExpanded,
+  onSelectDrawing,
+  onDeleteDrawing,
+  onUpload,
+}: DrawingFilmstripProps) {
+  const { t } = useTranslation();
+
+  return (
+    <div className="shrink-0 border-t border-white/10 bg-[#1a1a2e]/90 backdrop-blur-sm">
+      {/* Header -- always visible */}
+      <button
+        type="button"
+        onClick={onToggleExpanded}
+        className="flex items-center w-full px-4 py-1.5 cursor-pointer group hover:bg-white/5 transition-colors"
+      >
+        <div className="flex flex-col items-center gap-[2px] mr-3 opacity-50 group-hover:opacity-80 transition-opacity">
+          <div className="w-4 h-[2px] rounded-full bg-white/40" />
+          <div className="w-4 h-[2px] rounded-full bg-white/40" />
+        </div>
+        <Layers size={14} className="text-white/50 mr-2 shrink-0" />
+        <span className="text-xs font-semibold text-white/80">
+          {t('dwg_takeoff.drawings', 'Drawings')}
+        </span>
+        <span className="text-[11px] text-white/40 ml-1.5">({drawings.length})</span>
+        <ChevronUp
+          size={14}
+          className={clsx(
+            'ml-auto text-white/40 transition-transform duration-200',
+            expanded ? '' : 'rotate-180',
+          )}
+        />
+      </button>
+
+      {/* Collapsible drawing cards */}
+      <div
+        className="overflow-hidden transition-all duration-300 ease-in-out"
+        style={{ maxHeight: expanded ? '100px' : '0px', opacity: expanded ? 1 : 0 }}
+      >
+        <div className="flex items-center gap-2 px-4 pb-2 overflow-x-auto">
+          {isLoading ? (
+            <Loader2 size={14} className="animate-spin text-white/30" />
+          ) : drawings.length > 0 ? (
+            drawings.map((d) => (
+              <button
+                key={d.id}
+                onClick={() => onSelectDrawing(d.id)}
+                className={clsx(
+                  'group relative shrink-0 w-44 text-start rounded-lg border-2 transition-all duration-200 overflow-hidden',
+                  activeDrawingId === d.id
+                    ? 'border-oe-blue bg-oe-blue/10 shadow-lg shadow-oe-blue/10'
+                    : 'border-transparent bg-white/5 hover:bg-white/10 hover:border-white/15',
+                )}
+              >
+                <div className="px-2.5 py-2">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <FileText size={12} className={clsx(
+                      'shrink-0',
+                      activeDrawingId === d.id ? 'text-oe-blue' : 'text-white/40',
+                    )} />
+                    <span className={clsx(
+                      'text-[11px] font-semibold truncate',
+                      activeDrawingId === d.id ? 'text-oe-blue' : 'text-white/80',
+                    )}>
+                      {d.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px] text-white/40">
+                    <span className="capitalize">{d.discipline}</span>
+                    <span>&middot;</span>
+                    <span>
+                      {activeDrawingId === d.id && entities.length > 0
+                        ? entities.length
+                        : d.entity_count || '--'}{' '}
+                      {t('dwg_takeoff.entities', 'entities')}
+                    </span>
+                  </div>
+                </div>
+                {/* Delete button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteDrawing(d.id);
+                  }}
+                  className="absolute top-1 right-1 h-5 w-5 rounded flex items-center justify-center
+                             text-white/0 group-hover:text-white/40 hover:!text-red-400 hover:bg-red-500/10
+                             transition-all"
+                >
+                  <Trash2 size={11} />
+                </button>
+              </button>
+            ))
+          ) : (
+            <span className="text-[11px] text-white/30">
+              {t('dwg_takeoff.no_drawings', 'No drawings uploaded yet')}
+            </span>
+          )}
+          {/* Upload button */}
+          <button
+            onClick={onUpload}
+            className="flex items-center justify-center shrink-0 w-14 h-14 rounded-lg border-2 border-dashed
+                       border-white/15 hover:border-oe-blue/50 hover:bg-oe-blue/5 transition-all group"
+            title={t('dwg_takeoff.upload_drawing', 'Upload drawing')}
+          >
+            <Plus size={18} className="text-white/30 group-hover:text-oe-blue transition-colors" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

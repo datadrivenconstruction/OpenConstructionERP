@@ -794,7 +794,7 @@ export function QuantitiesPage() {
     converters.find((c) => c.id === installing)?.name ?? installing ?? '';
 
   return (
-    <div className="mx-auto max-w-content space-y-8 animate-fade-in">
+    <div className="w-full space-y-8 animate-fade-in">
       <Breadcrumb items={[{ label: t('nav.dashboard', 'Dashboard'), to: '/' }, { label: t('nav.quantities', 'Quantity Takeoff') }]} className="mb-4" />
       {/* Header */}
       <div>

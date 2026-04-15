@@ -134,7 +134,7 @@ const navGroups: NavGroup[] = [
       { labelKey: 'schedule.title', to: '/schedule', icon: CalendarDays, moduleKey: 'schedule' },
       { labelKey: 'tasks.title', to: '/tasks', icon: ClipboardList },
       { labelKey: 'nav.5d_cost_model', to: '/5d', icon: TrendingUp, moduleKey: '5d', advancedOnly: true },
-      { labelKey: 'nav.requirements', to: '/requirements', icon: ClipboardCheck, advancedOnly: true },
+      // Requirements merged into /bim/rules — sidebar entry removed
       { labelKey: 'nav.risk_register', to: '/risks', icon: ShieldAlert, advancedOnly: true },
     ],
   },

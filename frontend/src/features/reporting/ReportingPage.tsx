@@ -287,7 +287,7 @@ export function ReportingPage() {
   /* ── Render ─────────────────────────────────────────────────────────────── */
 
   return (
-    <div className="mx-auto max-w-content space-y-6 animate-fade-in">
+    <div className="w-full space-y-6 animate-fade-in">
       <Breadcrumb
         items={[
           { label: t('nav.dashboard', { defaultValue: 'Dashboard' }), to: '/' },

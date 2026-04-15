@@ -21,6 +21,7 @@ import {
   Box,
   Link2,
   ArrowRight,
+  Layers,
 } from 'lucide-react';
 
 import { Button, Card, Badge, Input, Skeleton } from '@/shared/ui';
@@ -685,6 +686,116 @@ function QuickMeasurementForm({
   );
 }
 
+/* ── Document Filmstrip ─────────────────────────────────────────────── */
+
+/** Bottom panel showing uploaded takeoff PDFs — styled like BIM model filmstrip. */
+function TakeoffDocFilmstrip({
+  documents,
+  activeDocId,
+  onSelectDoc,
+  onDeleteDoc,
+  onUploadNew,
+}: {
+  documents: UploadedDocument[];
+  activeDocId: string | null;
+  onSelectDoc: (id: string) => void;
+  onDeleteDoc: (id: string) => void;
+  onUploadNew: () => void;
+}) {
+  const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(true);
+
+  // Auto-collapse after 5 seconds (like BIM filmstrip)
+  useEffect(() => {
+    const timer = setTimeout(() => setExpanded(false), 5000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (documents.length === 0) return null;
+
+  return (
+    <div className="shrink-0 bg-surface-primary border-t border-border-light mt-6">
+      {/* Header — always visible */}
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="flex items-center w-full px-4 py-2 cursor-pointer group hover:bg-surface-secondary/30 transition-colors"
+      >
+        {/* Drag handle */}
+        <div className="flex flex-col items-center gap-[3px] mr-3 opacity-50 group-hover:opacity-80 transition-opacity">
+          <div className="w-5 h-[2px] rounded-full bg-content-tertiary" />
+          <div className="w-5 h-[2px] rounded-full bg-content-tertiary" />
+          <div className="w-5 h-[2px] rounded-full bg-content-tertiary" />
+        </div>
+        <Layers size={16} className="text-content-secondary mr-2 shrink-0" />
+        <span className="text-xs font-semibold text-content-primary">
+          {t('takeoff.documents_panel', 'Documents')}
+        </span>
+        <span className="text-[11px] text-content-tertiary ml-1.5">({documents.length})</span>
+        <svg
+          className={`ml-auto w-4 h-4 text-content-tertiary transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+        </svg>
+      </button>
+
+      {/* Collapsible document cards */}
+      <div
+        className="overflow-hidden transition-all duration-300 ease-in-out"
+        style={{ maxHeight: expanded ? '120px' : '0px', opacity: expanded ? 1 : 0 }}
+      >
+        <div className="flex items-center gap-3 px-4 pb-2 overflow-x-auto">
+          {documents.map((doc) => (
+            <button
+              key={doc.id}
+              type="button"
+              onClick={() => onSelectDoc(doc.id)}
+              className={clsx(
+                'relative flex flex-col items-center justify-center shrink-0 w-28 h-16 rounded-xl border-2 transition-all group/card',
+                doc.id === activeDocId
+                  ? 'border-oe-blue bg-oe-blue-subtle/30 shadow-sm'
+                  : 'border-border-light hover:border-oe-blue/40 hover:bg-surface-secondary/50',
+              )}
+            >
+              <FileText
+                size={18}
+                className={clsx(
+                  doc.id === activeDocId ? 'text-oe-blue' : 'text-content-tertiary',
+                )}
+              />
+              <span className="text-[9px] font-medium text-content-primary truncate max-w-[96px] mt-1">
+                {doc.filename}
+              </span>
+              <span className="text-[8px] text-content-tertiary">
+                {doc.pages > 0 ? `${doc.pages}p` : ''} {formatFileSize(doc.size_bytes)}
+              </span>
+              {/* Delete button on hover */}
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onDeleteDoc(doc.id); }}
+                className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-semantic-error text-white flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity"
+                title={t('common.delete', 'Delete')}
+              >
+                <X size={8} />
+              </button>
+            </button>
+          ))}
+          {/* Upload new doc button */}
+          <button
+            type="button"
+            onClick={onUploadNew}
+            className="flex items-center justify-center shrink-0 w-16 h-16 rounded-xl border-2 border-dashed border-border-medium hover:border-oe-blue/50 hover:bg-oe-blue/5 transition-all group"
+            title={t('takeoff.upload_pdf', 'Upload PDF')}
+          >
+            <Plus size={20} className="text-content-quaternary group-hover:text-oe-blue transition-colors" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Main Page ─────────────────────────────────────────────────────────── */
 
 type TakeoffTab = 'documents' | 'measurements';
@@ -713,8 +824,38 @@ export function TakeoffPage() {
   const selectedProjectId = activeProjectId ?? '';
   const [selectedBoqId, setSelectedBoqId] = useState('');
   const [documents, setDocuments] = useState<UploadedDocument[]>([]);
+  const [activeDocId, setActiveDocId] = useState<string | null>(null);
   const [addToBOQSuccess, setAddToBOQSuccess] = useState<string | null>(null);
   const [uploadErrorToast, setUploadErrorToast] = useState<string | null>(null);
+  const filmstripUploadRef = useRef<HTMLInputElement>(null);
+
+  /* ── Handle ?doc= deep link from Documents page ─────────────────── */
+
+  useEffect(() => {
+    const docId = searchParams.get('doc');
+    const docName = searchParams.get('name');
+    if (docId) {
+      // Create a placeholder document entry for the deep-linked document
+      setDocuments((prev) => {
+        if (prev.some((d) => d.id === docId)) return prev;
+        return [
+          ...prev,
+          {
+            id: docId,
+            filename: docName ? decodeURIComponent(docName) : 'Document',
+            pages: 0,
+            size_bytes: 0,
+            uploaded_at: new Date().toISOString(),
+            analysis: null,
+            analyzing: false,
+            extractingTables: false,
+          },
+        ];
+      });
+      setActiveDocId(docId);
+      setActiveTab('documents');
+    }
+  }, [searchParams]);
 
   /* ── Queries ────────────────────────────────────────────────────────── */
 
@@ -866,6 +1007,27 @@ export function TakeoffPage() {
     setSelectedBoqId(boqId);
   }, []);
 
+  /** Also create a Document record in the Documents module for cross-referencing. */
+  const createDocumentRecord = useCallback(
+    async (file: File) => {
+      if (!selectedProjectId) return;
+      try {
+        const token = useAuthStore.getState().accessToken;
+        const formData = new FormData();
+        formData.append('file', file);
+        const headers: HeadersInit = { 'X-DDC-Client': 'OE/1.0' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        await fetch(
+          `/api/v1/documents/upload?project_id=${selectedProjectId}&category=drawing`,
+          { method: 'POST', headers, body: formData },
+        );
+      } catch {
+        // Non-critical: the takeoff upload already succeeded
+      }
+    },
+    [selectedProjectId],
+  );
+
   const handleFilesSelected = useCallback(
     (files: File[]) => {
       // Clear any previous upload error toast so stale errors don't linger on retry
@@ -903,6 +1065,9 @@ export function TakeoffPage() {
                   : d,
               ),
             );
+            setActiveDocId(data.id);
+            // Also save to Documents module (fire-and-forget)
+            createDocumentRecord(file);
           },
           onError: (err) => {
             // Keep the entry visible with error state instead of removing it
@@ -917,11 +1082,12 @@ export function TakeoffPage() {
         });
       }
     },
-    [uploadMutation],
+    [uploadMutation, createDocumentRecord],
   );
 
   const handleRemoveDocument = useCallback((docId: string) => {
     setDocuments((prev) => prev.filter((d) => d.id !== docId));
+    setActiveDocId((prev) => (prev === docId ? null : prev));
   }, []);
 
   const handleAnalyze = useCallback(
@@ -1271,6 +1437,32 @@ export function TakeoffPage() {
               </p>
             )}
           </Card>
+
+          {/* Bottom document filmstrip panel */}
+          <TakeoffDocFilmstrip
+            documents={documents}
+            activeDocId={activeDocId}
+            onSelectDoc={(id) => setActiveDocId(id)}
+            onDeleteDoc={handleRemoveDocument}
+            onUploadNew={() => filmstripUploadRef.current?.click()}
+          />
+          {/* Hidden file input for filmstrip "+" button */}
+          <input
+            ref={filmstripUploadRef}
+            type="file"
+            accept="application/pdf,.pdf,image/*,.jpg,.jpeg,.png,.tiff"
+            multiple
+            className="hidden"
+            onChange={(e) => {
+              const files = Array.from(e.target.files || []).filter(
+                (f) =>
+                  (f.type === 'application/pdf' || f.type.startsWith('image/')) &&
+                  f.size <= MAX_FILE_SIZE_BYTES,
+              );
+              if (files.length > 0) handleFilesSelected(files);
+              if (filmstripUploadRef.current) filmstripUploadRef.current.value = '';
+            }}
+          />
         </>
       ) : (
         <Suspense

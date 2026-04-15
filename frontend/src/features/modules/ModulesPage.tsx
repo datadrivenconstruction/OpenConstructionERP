@@ -21,6 +21,7 @@ import {
   Settings,
   AlertTriangle,
   Trash2,
+  RefreshCw,
   Info,
   Calculator,
   ClipboardList,
@@ -708,8 +709,19 @@ function DataPackagesTab() {
         const demoId = mod.id.replace('demo-', '');
         setInstallingId(mod.id);
         try {
-          const result = await apiPost<{ project_id: string; project_name: string }>(`/demo/install/${demoId}`);
-          addToast({ type: 'success', title: t('marketplace.demo_installed', { defaultValue: 'Demo installed' }), message: t('marketplace.demo_installed_message', { defaultValue: '{{name}} created with full BOQ, schedule, budget, and tendering.', name: result.project_name }) });
+          const result = await apiPost<{ project_id: string; project_name: string; already_installed?: boolean }>(`/demo/install/${demoId}`);
+          if (result.already_installed) {
+            addToast({
+              type: 'info',
+              title: t('marketplace.demo_already_installed', { defaultValue: 'Already installed' }),
+              message: t('marketplace.demo_already_installed_message', {
+                defaultValue: '{{name}} is already installed. Opening existing project.',
+                name: result.project_name,
+              }),
+            });
+          } else {
+            addToast({ type: 'success', title: t('marketplace.demo_installed', { defaultValue: 'Demo installed' }), message: t('marketplace.demo_installed_message', { defaultValue: '{{name}} created with full BOQ, schedule, budget, and tendering.', name: result.project_name }) });
+          }
           queryClient.invalidateQueries({ queryKey: ['demo-status'] });
           queryClient.invalidateQueries({ queryKey: ['marketplace'] });
           queryClient.invalidateQueries({ queryKey: ['projects'] });
@@ -750,6 +762,40 @@ function DataPackagesTab() {
       addToast({
         type: 'error',
         title: t('marketplace.uninstall_failed', { defaultValue: 'Uninstall failed' }),
+        message: err instanceof Error ? err.message : t('common.unknown_error', { defaultValue: 'Unknown error' }),
+      });
+    } finally {
+      setInstallingId(null);
+    }
+  }
+
+  async function handleReinstallDemo(demoId: string): Promise<void> {
+    const confirmed = await confirm({
+      title: t('marketplace.reinstall_demo_confirm_title', { defaultValue: 'Reinstall demo?' }),
+      message: t('marketplace.reinstall_demo_confirm', {
+        defaultValue: 'This will delete the existing demo project and create a fresh copy. All changes you made to the demo will be lost.',
+      }),
+    });
+    if (!confirmed) return;
+    setInstallingId(`demo-${demoId}`);
+    try {
+      const result = await apiPost<{ project_id: string; project_name: string }>(`/demo/install/${demoId}?force=true`);
+      addToast({
+        type: 'success',
+        title: t('marketplace.demo_reinstalled', { defaultValue: 'Demo reinstalled' }),
+        message: t('marketplace.demo_reinstalled_message', {
+          defaultValue: '{{name}} has been recreated with fresh data.',
+          name: result.project_name,
+        }),
+      });
+      queryClient.invalidateQueries({ queryKey: ['demo-status'] });
+      queryClient.invalidateQueries({ queryKey: ['marketplace'] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      navigate(`/projects/${result.project_id}`);
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: t('marketplace.reinstall_failed', { defaultValue: 'Reinstall failed' }),
         message: err instanceof Error ? err.message : t('common.unknown_error', { defaultValue: 'Unknown error' }),
       });
     } finally {
@@ -921,6 +967,11 @@ function DataPackagesTab() {
                   onUninstallDemo={
                     mod.category === 'demo_project'
                       ? () => void handleUninstallDemo(mod.id.replace('demo-', ''))
+                      : undefined
+                  }
+                  onReinstallDemo={
+                    mod.category === 'demo_project'
+                      ? () => void handleReinstallDemo(mod.id.replace('demo-', ''))
                       : undefined
                   }
                 />
@@ -1260,9 +1311,10 @@ interface MarketplaceCardProps {
   onInstall: () => void;
   isDemoInstalled?: boolean;
   onUninstallDemo?: () => void;
+  onReinstallDemo?: () => void;
 }
 
-function MarketplaceCard({ module: mod, index, isInstalling, onInstall, isDemoInstalled, onUninstallDemo }: MarketplaceCardProps) {
+function MarketplaceCard({ module: mod, index, isInstalling, onInstall, isDemoInstalled, onUninstallDemo, onReinstallDemo }: MarketplaceCardProps) {
   const { t } = useTranslation();
   const Icon = getModuleIcon(mod.icon);
   const isLanguage = mod.category === 'language';
@@ -1350,8 +1402,20 @@ function MarketplaceCard({ module: mod, index, isInstalling, onInstall, isDemoIn
                 {t('marketplace.indexed', { defaultValue: 'Indexed' })}
               </Button>
             ) : (mod.installed || isDemoInstalled) && mod.category === 'demo_project' ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="success" size="sm"><Check size={10} className="mr-0.5" />{t('marketplace.installed', { defaultValue: 'Installed' })}</Badge>
+                {onReinstallDemo && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={isInstalling ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+                    onClick={onReinstallDemo}
+                    disabled={isInstalling}
+                    className="text-content-secondary hover:text-content-primary hover:bg-surface-secondary"
+                  >
+                    {t('marketplace.reinstall', { defaultValue: 'Reinstall' })}
+                  </Button>
+                )}
                 {onUninstallDemo && (
                   <Button
                     variant="ghost"

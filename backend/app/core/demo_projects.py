@@ -1938,7 +1938,10 @@ DEMO_CATALOG: list[dict] = [
     {
         "demo_id": "medical-us",
         "name": "Downtown Medical Center",
-        "description": "200-bed hospital with ED, surgical suites, diagnostic imaging. 5-story steel frame. MasterFormat classification with full MEP systems.",
+        "description": (
+            "200-bed hospital with ED, surgical suites, diagnostic imaging."
+            " 5-story steel frame. MasterFormat classification with full MEP systems."
+        ),
         "country": "US",
         "currency": "USD",
         "budget": "$25M",
@@ -6030,7 +6033,10 @@ async def _seed_module_data(
         "office-london": [
             {
                 "title": "Curtain wall water ingress — Level 5 transom",
-                "description": "Water staining at transom-mullion junction Level 5, south elevation (per INS-003 mock-up failure).",
+                "description": (
+                    "Water staining at transom-mullion junction Level 5,"
+                    " south elevation (per INS-003 mock-up failure)."
+                ),
                 "priority": "high",
                 "status": "open",
                 "category": "envelope",
@@ -6160,7 +6166,10 @@ async def _seed_module_data(
             },
             {
                 "title": "Dock leveller hydraulic leak — Dock 5",
-                "description": "Hydraulic fluid leak on dock leveller 5. Leveller operational but needs seal replacement.",
+                "description": (
+                    "Hydraulic fluid leak on dock leveller 5."
+                    " Leveller operational but needs seal replacement."
+                ),
                 "priority": "low",
                 "status": "resolved",
                 "category": "mechanical",
@@ -6719,16 +6728,57 @@ async def _seed_module_data(
     return results
 
 
-async def install_demo_project(session: AsyncSession, demo_id: str) -> dict:
+async def install_demo_project(
+    session: AsyncSession,
+    demo_id: str,
+    *,
+    force_reinstall: bool = False,
+) -> dict:
     """Install a demo project with full BOQ, Schedule, Budget, and Tendering data.
 
     Returns a dict with ``project_id``, ``project_name``, and summary stats.
+    When the demo is already installed and ``force_reinstall`` is False, returns
+    the existing project info with ``already_installed=True`` instead of creating
+    a duplicate.
+
     Raises ``ValueError`` if ``demo_id`` is not in the registry.
     """
     template = DEMO_TEMPLATES.get(demo_id)
     if template is None:
         valid = ", ".join(sorted(DEMO_TEMPLATES.keys()))
         raise ValueError(f"Unknown demo_id '{demo_id}'. Valid options: {valid}")
+
+    # ── 0. Duplicate check ────────────────────────────────────────────
+    existing_rows = (await session.execute(select(Project))).scalars().all()
+    existing_demo = [
+        p
+        for p in existing_rows
+        if isinstance(p.metadata_, dict) and p.metadata_.get("demo_id") == demo_id
+    ]
+
+    if existing_demo and not force_reinstall:
+        proj = existing_demo[0]
+        logger.info(
+            "Demo '%s' already installed as project %s — skipping duplicate creation",
+            demo_id,
+            proj.id,
+        )
+        return {
+            "project_id": str(proj.id),
+            "project_name": proj.name,
+            "already_installed": True,
+        }
+
+    # If force_reinstall, remove old demo projects for this demo_id first
+    if existing_demo and force_reinstall:
+        for old_proj in existing_demo:
+            logger.info(
+                "Force reinstall: deleting old demo project %s (%s)",
+                old_proj.id,
+                old_proj.name,
+            )
+            await session.delete(old_proj)
+        await session.flush()
 
     owner_id = await _get_or_create_owner(session)
 
