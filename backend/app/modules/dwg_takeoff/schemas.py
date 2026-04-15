@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 # ── Drawing schemas ────────────────────────────────────────────────────
@@ -60,7 +60,7 @@ class DwgDrawingVersionResponse(BaseModel):
     id: UUID
     drawing_id: UUID
     version_number: int = 1
-    layers: dict[str, Any] = Field(default_factory=dict)
+    layers: list[dict[str, Any]] = Field(default_factory=list)
     entities_key: str | None = None
     entity_count: int = 0
     extents: dict[str, Any] = Field(default_factory=dict)
@@ -69,6 +69,16 @@ class DwgDrawingVersionResponse(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+
+    @field_validator("layers", mode="before")
+    @classmethod
+    def _normalize_layers(cls, v: Any) -> list[dict[str, Any]]:
+        """Accept both list and legacy dict-keyed-by-name formats."""
+        if isinstance(v, dict):
+            return list(v.values()) if v else []
+        if isinstance(v, list):
+            return v
+        return []
 
 
 # ── Layer schemas ──────────────────────────────────────────────────────

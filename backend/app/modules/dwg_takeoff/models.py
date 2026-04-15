@@ -64,8 +64,8 @@ class DwgDrawingVersion(Base):
         index=True,
     )
     version_number: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
-    layers: Mapped[dict] = mapped_column(  # type: ignore[assignment]
-        JSON, nullable=False, default=dict, server_default="{}"
+    layers: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON, nullable=False, default=list, server_default="[]"
     )
     entities_key: Mapped[str | None] = mapped_column(String(500), nullable=True)
     entity_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

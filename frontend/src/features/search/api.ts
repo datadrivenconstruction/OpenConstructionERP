@@ -74,7 +74,7 @@ export interface UnifiedSearchParams {
   finalLimit?: number;
 }
 
-const SEARCH_BASE = '/api/v1/search';
+const SEARCH_BASE = '/v1/search';
 
 function buildQuery(params: Record<string, string | number | null | undefined>): string {
   const parts: string[] = [];

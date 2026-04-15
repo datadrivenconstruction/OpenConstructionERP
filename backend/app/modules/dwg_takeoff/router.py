@@ -125,7 +125,7 @@ def _annotation_to_response(item: object) -> DwgAnnotationResponse:
 _MAX_UPLOAD_BYTES = 50 * 1024 * 1024  # 50 MB
 
 
-@router.post("/drawings/upload", response_model=DwgDrawingResponse, status_code=201)
+@router.post("/drawings/upload/", response_model=DwgDrawingResponse, status_code=201)
 async def upload_drawing(
     file: UploadFile,
     project_id: uuid.UUID = Query(...),
@@ -208,6 +208,7 @@ async def list_drawings(
 async def get_drawing(
     drawing_id: uuid.UUID,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("dwg_takeoff.read")),
     service: DwgTakeoffService = Depends(_get_service),
 ) -> DwgDrawingResponse:
     """Get a single drawing with its latest version."""
@@ -230,11 +231,12 @@ async def delete_drawing(
 # ── Entities & Thumbnail ────────────────────────────────────────────────────
 
 
-@router.get("/drawings/{drawing_id}/entities")
+@router.get("/drawings/{drawing_id}/entities/")
 async def get_entities(
     drawing_id: uuid.UUID,
     layers: str | None = Query(default=None, description="Comma-separated visible layer names"),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("dwg_takeoff.read")),
     service: DwgTakeoffService = Depends(_get_service),
 ) -> list[dict]:
     """Get parsed entities for a drawing, optionally filtered by visible layers."""
@@ -244,10 +246,11 @@ async def get_entities(
     return await service.get_entities(drawing_id, visible_layers=visible_layers)
 
 
-@router.get("/drawings/{drawing_id}/thumbnail")
+@router.get("/drawings/{drawing_id}/thumbnail/")
 async def get_thumbnail(
     drawing_id: uuid.UUID,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("dwg_takeoff.read")),
     service: DwgTakeoffService = Depends(_get_service),
 ) -> Response:
     """Get SVG thumbnail for a drawing."""
@@ -268,6 +271,7 @@ async def update_layer_visibility(
     drawing_id: uuid.UUID,
     data: DwgLayerVisibilityUpdate,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("dwg_takeoff.read")),
     service: DwgTakeoffService = Depends(_get_service),
 ) -> DwgDrawingVersionResponse:
     """Toggle layer visibility in the latest drawing version."""
@@ -345,7 +349,7 @@ async def delete_annotation(
 # ── BOQ Link ────────────────────────────────────────────────────────────────
 
 
-@router.post("/annotations/{annotation_id}/link-boq", response_model=DwgAnnotationResponse)
+@router.post("/annotations/{annotation_id}/link-boq/", response_model=DwgAnnotationResponse)
 async def link_to_boq(
     annotation_id: uuid.UUID,
     data: BoqLinkRequest,

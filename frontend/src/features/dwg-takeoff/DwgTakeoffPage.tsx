@@ -10,6 +10,12 @@
  */
 
 import { useState, useMemo, useCallback, useRef } from 'react';
+import {
+  calculateArea,
+  calculatePerimeter,
+  getSegmentLengths,
+  formatMeasurement,
+} from './lib/measurement';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
@@ -46,7 +52,7 @@ import { LayerPanel } from './components/LayerPanel';
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
 function extractLayers(entities: DxfEntity[]): DxfLayer[] {
-  const map = new Map<string, { color: number; count: number }>();
+  const map = new Map<string, { color: string | number; count: number }>();
   for (const e of entities) {
     const existing = map.get(e.layer);
     if (existing) {
@@ -108,12 +114,45 @@ export function DwgTakeoffPage() {
     enabled: !!selectedDrawingId,
   });
 
-  // Computed layers
-  const layers = useMemo(() => extractLayers(entities), [entities]);
+  // Layout support
+  const [selectedLayout, setSelectedLayout] = useState<string | null>(null);
 
-  // Initialize visible layers when entities load
+  // Unique layout names from entities
+  const layouts = useMemo(() => {
+    const set = new Set<string>();
+    for (const e of entities) {
+      if (e.layout) set.add(e.layout);
+    }
+    if (set.size === 0) return [];
+    // Sort: "Model" / "*Model_Space" first, then alphabetical
+    return Array.from(set).sort((a, b) => {
+      const aIsModel = a === 'Model' || a === '*Model_Space';
+      const bIsModel = b === 'Model' || b === '*Model_Space';
+      if (aIsModel && !bIsModel) return -1;
+      if (!aIsModel && bIsModel) return 1;
+      return a.localeCompare(b);
+    });
+  }, [entities]);
+
+  // Auto-select first layout when entities load
   useMemo(() => {
-    if (layers.length > 0 && visibleLayers.size === 0) {
+    if (layouts.length > 0 && selectedLayout === null) {
+      setSelectedLayout(layouts[0] ?? null);
+    }
+  }, [layouts]);
+
+  // Filter entities by selected layout
+  const filteredEntities = useMemo(() => {
+    if (!selectedLayout || layouts.length === 0) return entities;
+    return entities.filter((e) => e.layout === selectedLayout);
+  }, [entities, selectedLayout, layouts]);
+
+  // Computed layers (from filtered entities)
+  const layers = useMemo(() => extractLayers(filteredEntities), [filteredEntities]);
+
+  // Initialize visible layers when entities/layout change
+  useMemo(() => {
+    if (layers.length > 0) {
       setVisibleLayers(new Set(layers.map((l) => l.name)));
     }
   }, [layers]);
@@ -207,6 +246,7 @@ export function DwgTakeoffPage() {
     setVisibleLayers(new Set());
     setSelectedEntityId(null);
     setSelectedAnnotationId(null);
+    setSelectedLayout(null);
   }, []);
 
   // Selected entity details
@@ -223,7 +263,7 @@ export function DwgTakeoffPage() {
   /* ── Render ──────────────────────────────────────────────────────── */
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col -mx-2 sm:-mx-3 -my-4" style={{ height: 'calc(100vh - 3.5rem)' }}>
       <div className="flex items-center justify-between border-b border-border px-4 py-2">
         <Breadcrumb items={breadcrumbs} />
         <div className="flex items-center gap-2">
@@ -367,7 +407,7 @@ export function DwgTakeoffPage() {
         </div>
 
         {/* ── Center: DXF Viewer ──────────────────────────────────── */}
-        <div className="flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col min-h-0 min-w-0">
           {!selectedDrawingId ? (
             <div className="flex flex-1 items-center justify-center">
               <EmptyState
@@ -390,8 +430,27 @@ export function DwgTakeoffPage() {
               <Loader2 size={32} className="animate-spin text-muted-foreground" />
             </div>
           ) : (
+            <>
+            {layouts.length > 1 && (
+              <div className="flex items-center gap-0.5 border-b border-border bg-surface px-2 py-1 overflow-x-auto flex-shrink-0">
+                {layouts.map((layout) => (
+                  <button
+                    key={layout}
+                    onClick={() => setSelectedLayout(layout)}
+                    className={clsx(
+                      'px-3 py-1 text-xs font-medium rounded transition-colors whitespace-nowrap',
+                      selectedLayout === layout
+                        ? 'bg-oe-blue/15 text-oe-blue'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-surface-secondary',
+                    )}
+                  >
+                    {layout}
+                  </button>
+                ))}
+              </div>
+            )}
             <DxfViewer
-              entities={entities}
+              entities={filteredEntities}
               annotations={annotations}
               visibleLayers={visibleLayers}
               activeTool={activeTool}
@@ -402,12 +461,13 @@ export function DwgTakeoffPage() {
               onSelectAnnotation={setSelectedAnnotationId}
               onAnnotationCreated={handleAnnotationCreated}
             />
+            </>
           )}
         </div>
 
         {/* ── Right Panel: Layers / Annotations / Properties ───── */}
         {selectedDrawingId && (
-          <div className="flex w-64 flex-shrink-0 flex-col border-l border-border bg-surface">
+          <div className="flex w-64 flex-shrink-0 flex-col border-l border-white/10 bg-[#1a1a2e]/90 backdrop-blur-sm text-white/90">
             {/* Tab bar */}
             <div className="flex border-b border-border">
               {(
@@ -529,6 +589,68 @@ export function DwgTakeoffPage() {
                       {selectedEntity.block_name && (
                         <PropertyRow label={t('dwg_takeoff.prop_block', 'Block')} value={selectedEntity.block_name} />
                       )}
+
+                      {/* ── Polyline measurements ──────────────── */}
+                      {selectedEntity.type === 'LWPOLYLINE' && selectedEntity.vertices && selectedEntity.vertices.length >= 2 && (() => {
+                        const verts = selectedEntity.vertices!;
+                        const closed = !!selectedEntity.closed;
+                        const segLengths = getSegmentLengths(verts, closed);
+                        const perimeter = calculatePerimeter(verts, closed);
+                        const area = closed ? calculateArea(verts) : 0;
+                        return (
+                          <div className="mt-3 space-y-2">
+                            <div className="font-semibold text-xs text-foreground border-b border-border pb-1">
+                              {t('dwg_takeoff.measurements', 'Measurements')}
+                            </div>
+                            <div className="flex items-center justify-between rounded-md bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1.5 border border-emerald-200 dark:border-emerald-800/40">
+                              <span className="text-emerald-700 dark:text-emerald-400 font-medium">
+                                {t('dwg_takeoff.perimeter', 'Perimeter')}
+                              </span>
+                              <span className="font-mono font-bold text-emerald-800 dark:text-emerald-300">
+                                {formatMeasurement(perimeter, 'm')}
+                              </span>
+                            </div>
+                            {closed && area > 0 && (
+                              <div className="flex items-center justify-between rounded-md bg-blue-50 dark:bg-blue-950/30 px-2.5 py-1.5 border border-blue-200 dark:border-blue-800/40">
+                                <span className="text-blue-700 dark:text-blue-400 font-medium">
+                                  {t('dwg_takeoff.area', 'Area')}
+                                </span>
+                                <span className="font-mono font-bold text-blue-800 dark:text-blue-300">
+                                  {formatMeasurement(area, 'm²')}
+                                </span>
+                              </div>
+                            )}
+                            <PropertyRow
+                              label={t('dwg_takeoff.vertices', 'Vertices')}
+                              value={String(verts.length)}
+                            />
+                            <PropertyRow
+                              label={t('dwg_takeoff.closed', 'Closed')}
+                              value={closed ? 'Yes' : 'No'}
+                            />
+                            <div className="mt-2">
+                              <div className="font-medium text-[10px] text-muted-foreground uppercase tracking-wider mb-1">
+                                {t('dwg_takeoff.segments', 'Segments')}
+                              </div>
+                              <div className="space-y-0.5 max-h-40 overflow-y-auto">
+                                {segLengths.map((len, i) => (
+                                  <div
+                                    key={i}
+                                    className="flex items-center justify-between rounded px-2 py-1 bg-muted/30 hover:bg-muted/60 transition-colors"
+                                  >
+                                    <span className="text-muted-foreground font-mono text-[10px]">
+                                      {i + 1}
+                                    </span>
+                                    <span className="font-mono font-medium text-[11px]">
+                                      {formatMeasurement(len, 'm')}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   ) : (
                     <p className="text-xs text-muted-foreground py-4 text-center">

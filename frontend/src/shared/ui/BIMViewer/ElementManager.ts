@@ -97,6 +97,8 @@ export interface BIMValidationSummary {
 
 export interface BIMElementData {
   id: string;
+  /** Revit UniqueId / IFC GlobalId — stable across re-uploads. */
+  stable_id?: string;
   name: string;
   element_type: string;
   discipline: string;
@@ -144,6 +146,10 @@ export interface BIMModelData {
   element_count?: number;
   /** Storey/level count extracted during processing */
   storey_count?: number;
+  /** Project this model belongs to */
+  project_id?: string;
+  /** Last updated ISO date */
+  updated_at?: string;
 }
 
 /* ── Discipline Colors ─────────────────────────────────────────────────── */
@@ -283,9 +289,8 @@ export class ElementManager {
     this.sceneManager = sceneManager;
     this.elementGroup = new THREE.Group();
     this.elementGroup.name = 'bim_elements';
-    // No rotation needed: placeholder boxes use the same coordinate
-    // system as the loaded COLLADA/GLB, and ColladaLoader handles the
-    // Z_UP → Y_UP conversion via the <up_axis> tag automatically.
+    // Placeholder boxes have Z_UP→Y_UP conversion baked into
+    // createBoxMesh() (Y↔Z swap), so no group rotation needed.
     this.sceneManager.scene.add(this.elementGroup);
   }
 
@@ -309,9 +314,9 @@ export class ElementManager {
     for (const el of elements) {
       this.elementDataMap.set(el.id, el);
 
-      // Only create box placeholders when DAE geometry is not loaded
-      // AND the caller didn't explicitly opt out.
-      if (!skipPlaceholders && !this.geometryLoaded && el.bounding_box) {
+      // Create box placeholders when the caller opts in (showBoundingBoxes).
+      // Normally skipped when real DAE/GLB geometry is loaded.
+      if (!skipPlaceholders && el.bounding_box) {
         const mesh = this.createBoxMesh(el);
         this.meshMap.set(el.id, mesh);
         this.elementGroup.add(mesh);
@@ -323,6 +328,28 @@ export class ElementManager {
     // — BIMViewer schedules its own zoomToFit chain at that point.
     if (this.meshMap.size > 0 || (this.daeGroup && this.daeGroup.children.length > 0)) {
       this.sceneManager.zoomToFit();
+    }
+  }
+
+  /** Return the number of elements currently loaded. */
+  getElementCount(): number {
+    return this.elementDataMap.size;
+  }
+
+  /**
+   * Update element data in-place without recreating meshes or reloading geometry.
+   * Used when element properties change (link updates, validation) but the
+   * element set itself hasn't changed.
+   */
+  updateElementData(elements: BIMElementData[]): void {
+    for (const el of elements) {
+      this.elementDataMap.set(el.id, el);
+      // Also update userData on matched meshes so filters see fresh data
+      const mesh = this.meshMap.get(el.id);
+      if (mesh) {
+        const ud = mesh.userData as Record<string, unknown>;
+        ud.elementData = el;
+      }
     }
   }
 
@@ -343,6 +370,9 @@ export class ElementManager {
     // Probe the Content-Type to decide which loader to use.
     // We make a HEAD request first -- cheap, avoids downloading the
     // full blob twice if we guess wrong.
+    // Auto-detect format via Content-Type header. GLB preferred (2x smaller,
+    // faster parsing). Node names are patched into the GLB by the backend
+    // so mesh-to-element matching works with both formats.
     try {
       const resp = await fetch(geometryUrl, { method: 'HEAD' });
       if (resp.ok) {
@@ -350,18 +380,14 @@ export class ElementManager {
         if (ct.includes('gltf-binary') || ct.includes('gltf+json')) {
           return this.loadGLBGeometry(geometryUrl, onProgress);
         }
-        // Content-Type indicates DAE/COLLADA — use ColladaLoader
-        return this.loadDAEGeometry(geometryUrl, onProgress);
+        if (ct.includes('collada') || ct.includes('xml') || ct.includes('dae')) {
+          return this.loadDAEGeometry(geometryUrl, onProgress);
+        }
       }
-      // HEAD returned non-200 (e.g. 405 Method Not Allowed) — can't
-      // trust the content-type header.  Default to GLTFLoader (GLB is
-      // the preferred format since v1.4.2) with automatic DAE fallback.
     } catch {
-      // HEAD failed (CORS, network) -- fall through to GLB-first path
+      // HEAD failed — fall through to GLB-first path
     }
-    // When HEAD is unavailable, try GLTFLoader first (GLB is preferred
-    // and 8.8x faster). GLTFLoader's error callback already falls back
-    // to ColladaLoader for legacy DAE files.
+    // Default: try GLB first (smaller + faster), DAE fallback in error handler
     return this.loadGLBGeometry(geometryUrl, onProgress);
   }
 
@@ -465,16 +491,18 @@ export class ElementManager {
     this.daeGroup = new THREE.Group();
     this.daeGroup.name = 'bim_dae_geometry';
 
-    // Auto-detect if the loaded scene uses Z_UP (CAD/BIM convention) by
-    // measuring the bounding box: if the Z extent is much taller than Y,
-    // the scene is Z_UP and needs a -90° X rotation to bring it upright
-    // in Three.js's Y_UP coordinate system.
+    // DDC converters (RVT/IFC/DWG/DGN) ALWAYS output Z_UP geometry.
+    // trimesh does NOT convert Z_UP→Y_UP when generating GLB.
+    // Always apply -90° X rotation to bring the model upright in
+    // Three.js Y_UP coordinate system.
     const box = new THREE.Box3().setFromObject(scene);
     const size = box.getSize(new THREE.Vector3());
-    const isZUp = size.z > size.y * 1.5 && size.z > 1;
-    if (isZUp) {
-      scene.rotation.x = -Math.PI / 2;
-    }
+    // eslint-disable-next-line no-console
+    console.log(
+      `[BIM orientation] bbox: X=${size.x.toFixed(1)} Y=${size.y.toFixed(1)} Z=${size.z.toFixed(1)} → rotating Z_UP→Y_UP`,
+    );
+    scene.rotation.x = -Math.PI / 2;
+    scene.updateMatrixWorld(true);
 
     // Build lookups: by stable_id / mesh_ref / element name.
     // mesh_ref is the Revit ElementId string (e.g. "105545") that matches
@@ -518,11 +546,23 @@ export class ElementManager {
     //   5. parent.name         via nameToElement
     //   6. Extract numeric ID from parent.name pattern "Type-N-suffix" (Light-1-235371-point)
     //      — this catches DDC light/node IDs embedded in composite names.
+    let _debugLogCount = 0;
     scene.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         const nodeName = child.name || '';
         const parentName = child.parent?.name || '';
         const grandparentName = child.parent?.parent?.name || '';
+
+        // Debug: log first 5 mesh names for diagnostics
+        if (_debugLogCount < 5) {
+          // eslint-disable-next-line no-console
+          console.log(
+            `[BIM match debug] mesh.name="${nodeName}" parent="${parentName}" grandparent="${grandparentName}" ` +
+            `inMap=${stableIdToElement.has(nodeName) || stableIdToElement.has(parentName)}`,
+          );
+          _debugLogCount++;
+        }
+
         let element =
           stableIdToElement.get(nodeName) ||
           stableIdToElement.get(parentName) ||
@@ -549,8 +589,12 @@ export class ElementManager {
 
         child.castShadow = false;
         child.receiveShadow = false;
+        child.frustumCulled = true;
         child.matrixAutoUpdate = false;
         child.updateMatrix();
+        // Pre-compute bounding sphere so Three.js frustum culling works
+        // correctly even with matrixAutoUpdate = false.
+        child.geometry.computeBoundingSphere();
 
         const originalMaterial = child.material;
 
@@ -602,10 +646,35 @@ export class ElementManager {
     );
 
     if (unmatchedMeshes.length > 0 && unmatchedElements.length > 0) {
-      const pairs = Math.min(unmatchedMeshes.length, unmatchedElements.length);
+      // Sort meshes by vertical position (Y in Three.js Y_UP = height)
+      // so that meshes near the ground pair with ground-floor elements.
+      const meshWithY = unmatchedMeshes.map((m) => {
+        const pos = new THREE.Vector3();
+        m.getWorldPosition(pos);
+        return { mesh: m, y: pos.y };
+      });
+      meshWithY.sort((a, b) => a.y - b.y);
+
+      // Sort elements: those WITH storey FIRST (grouped by storey name,
+      // alphabetical approximates floor order for typical naming:
+      // "00 - Ground", "01 - Entry Level", "02 - Floor"), then elements
+      // WITHOUT storey LAST. This ensures storey-bearing elements get
+      // the most spatially relevant meshes, while unassigned elements
+      // consume whatever remains.
+      const sortedElements = [...unmatchedElements].sort((a, b) => {
+        const sa = a.storey || '';
+        const sb = b.storey || '';
+        // Elements with storey come before those without
+        if (sa && !sb) return -1;
+        if (!sa && sb) return 1;
+        if (sa !== sb) return sa.localeCompare(sb);
+        return (a.element_type || '').localeCompare(b.element_type || '');
+      });
+
+      const pairs = Math.min(meshWithY.length, sortedElements.length);
       for (let i = 0; i < pairs; i++) {
-        const mesh = unmatchedMeshes[i]!;
-        const el = unmatchedElements[i]!;
+        const mesh = meshWithY[i]!.mesh;
+        const el = sortedElements[i]!;
         mesh.userData = {
           ...(mesh.userData as object),
           elementId: el.id,
@@ -618,7 +687,7 @@ export class ElementManager {
       // eslint-disable-next-line no-console
       console.info(
         `[BIM] positional fallback: paired ${pairs} meshes with element data ` +
-        `(node names were generic, real mesh_ref matching unavailable)`,
+        `(sorted by Y-position ↔ storey for better filter accuracy)`,
       );
     }
 
@@ -820,9 +889,12 @@ export class ElementManager {
 
   private createBoxMesh(element: BIMElementData): THREE.Mesh {
     const bb = element.bounding_box!;
+    // DDC converters (Revit/IFC) output Z_UP coordinates (Z = height).
+    // Three.js uses Y_UP (Y = height).  Swap Y ↔ Z so the model stands
+    // upright instead of being perpendicular to the ground plane.
     const width = Math.abs(bb.max_x - bb.min_x) || 0.1;
-    const height = Math.abs(bb.max_y - bb.min_y) || 0.1;
-    const depth = Math.abs(bb.max_z - bb.min_z) || 0.1;
+    const height = Math.abs(bb.max_z - bb.min_z) || 0.1; // Z → Y (height)
+    const depth = Math.abs(bb.max_y - bb.min_y) || 0.1;  // Y → Z (depth)
 
     const geometry = new THREE.BoxGeometry(width, height, depth);
     // Color by element category (type) for immediate visual distinction,
@@ -833,8 +905,8 @@ export class ElementManager {
     const mesh = new THREE.Mesh(geometry, material);
     mesh.position.set(
       (bb.min_x + bb.max_x) / 2,
-      (bb.min_y + bb.max_y) / 2,
-      (bb.min_z + bb.max_z) / 2,
+      (bb.min_z + bb.max_z) / 2,  // Z → Y (height)
+      (bb.min_y + bb.max_y) / 2,  // Y → Z (depth)
     );
     mesh.castShadow = true;
     mesh.receiveShadow = true;
@@ -1028,6 +1100,7 @@ export class ElementManager {
    */
   applyFilter(predicate: (el: BIMElementData) => boolean): number {
     let visibleCount = 0;
+    let noDataCount = 0;
 
     // Build a set of element IDs that pass the filter
     const visibleIds = new Set<string>();
@@ -1035,11 +1108,19 @@ export class ElementManager {
       const el = this.elementDataMap.get(elementId);
       const elFromUserData = this.meshMap.get(elementId);
       const effectiveEl = el || (elFromUserData?.userData as { elementData?: BIMElementData })?.elementData;
-      if (effectiveEl && predicate(effectiveEl)) {
+      if (!effectiveEl) {
+        noDataCount++;
+        continue;
+      }
+      if (predicate(effectiveEl)) {
         visibleIds.add(elementId);
         visibleCount++;
       }
     }
+    // eslint-disable-next-line no-console
+    console.info(
+      `[BIM filter] meshMap=${this.meshMap.size} visible=${visibleCount} hidden=${this.meshMap.size - visibleCount - noDataCount} noData=${noDataCount}`,
+    );
 
     // Apply visibility to meshMap entries (placeholder boxes + matched DAE)
     for (const [elementId, mesh] of this.meshMap) {
@@ -1120,36 +1201,29 @@ export class ElementManager {
    * Passing an empty array clears the highlight and restores original colours.
    */
   highlight(elementIds: string[]): void {
+    // Dispose previous colorBy/highlight materials before applying new ones
+    this.disposeCreatedMaterials();
+
     const highlightColor = new THREE.Color(0xff9500); // orange
     const keep = new Set(elementIds);
     for (const [id, mesh] of this.meshMap) {
-      const ud = mesh.userData as {
-        customMaterial?: boolean;
-        originalMaterial?: THREE.Material | THREE.Material[];
-      };
       if (keep.has(id)) {
+        const ud = mesh.userData as {
+          customMaterial?: boolean;
+          originalMaterial?: THREE.Material | THREE.Material[];
+        };
         // Clone material so we can recolour independently of the base.
-        if (!ud.customMaterial) {
-          const base = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
-          if (base && 'clone' in base) {
-            mesh.material = (base as THREE.Material & { clone(): THREE.Material }).clone();
-            ud.customMaterial = true;
-          }
+        const base = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
+        if (base && 'clone' in base) {
+          const cloned = (base as THREE.Material & { clone(): THREE.Material }).clone();
+          mesh.material = cloned;
+          this.createdMaterials.add(cloned);
+          ud.customMaterial = true;
         }
         const mat = mesh.material as THREE.MeshStandardMaterial | THREE.MeshPhongMaterial;
         if (mat && 'color' in mat && mat.color) {
           mat.color.copy(highlightColor);
         }
-      } else if (ud.customMaterial) {
-        // Restore original material on meshes that were previously highlighted.
-        const old = mesh.material;
-        if (old && 'dispose' in old) {
-          (old as THREE.Material & { dispose(): void }).dispose();
-        }
-        if (ud.originalMaterial) {
-          mesh.material = ud.originalMaterial;
-        }
-        ud.customMaterial = false;
       }
     }
     this.sceneManager.requestRender();
@@ -1186,6 +1260,32 @@ export class ElementManager {
   }
 
   /**
+   * Dispose all cloned materials from previous colorBy* calls.
+   * Must be called at the start of every colorBy method to prevent
+   * leaking one WebGL program per element per mode switch.
+   */
+  private disposeCreatedMaterials(): void {
+    for (const mat of this.createdMaterials) {
+      mat.dispose();
+    }
+    this.createdMaterials.clear();
+    // Reset customMaterial flag on all meshes so the next colorBy pass
+    // knows it needs to clone again from the original material.
+    for (const [, mesh] of this.meshMap) {
+      const ud = mesh.userData as {
+        customMaterial?: boolean;
+        originalMaterial?: THREE.Material | THREE.Material[];
+      };
+      if (ud.customMaterial) {
+        if (ud.originalMaterial) {
+          mesh.material = ud.originalMaterial;
+        }
+        ud.customMaterial = false;
+      }
+    }
+  }
+
+  /**
    * Re-color every mesh using a direct (element → Color | null) function.
    * Returning null leaves the mesh at its original colour.  This is the
    * fixed-palette path used by the "color by validation" / "color by BOQ
@@ -1194,6 +1294,9 @@ export class ElementManager {
    * the existing `colorBy()` produces.
    */
   colorByDirect(colorFn: (el: BIMElementData) => THREE.Color | null): void {
+    // Dispose all previously created materials to prevent memory leaks
+    // when switching between colorBy modes.
+    this.disposeCreatedMaterials();
     for (const [elementId, mesh] of this.meshMap) {
       const el = this.elementDataMap.get(elementId);
       if (!el) continue;
@@ -1257,6 +1360,10 @@ export class ElementManager {
       colorMap.set(keyList[i]!, color);
     }
 
+    // Dispose all previously created materials to prevent memory leaks
+    // when switching between colorBy modes.
+    this.disposeCreatedMaterials();
+
     // Apply per-mesh material clone (so we can color independently)
     for (const [elementId, mesh] of this.meshMap) {
       const el = this.elementDataMap.get(elementId);
@@ -1286,39 +1393,20 @@ export class ElementManager {
 
   /** Reset mesh colors back to their discipline-based material. */
   resetColors(): void {
+    // Dispose all cloned materials and restore originals in one pass.
+    this.disposeCreatedMaterials();
+    // For meshes that had no originalMaterial cached, fall back to the
+    // flat discipline material so they stay visible.
     for (const [elementId, mesh] of this.meshMap) {
       const el = this.elementDataMap.get(elementId);
       if (!el) continue;
       const ud = mesh.userData as {
-        customMaterial?: boolean;
         originalMaterial?: THREE.Material | THREE.Material[];
       };
-      if (ud.customMaterial) {
-        // Dispose the cloned material we created in colorBy()...
-        const old = mesh.material;
-        if (old instanceof THREE.Material) {
-          this.createdMaterials.delete(old);
-          old.dispose();
-        }
-        // ...and restore the COLLADA original if we cached one
-        // (loadDAEGeometry stashes it on userData), otherwise fall
-        // back to our flat discipline material so the mesh stays visible.
-        if (ud.originalMaterial) {
-          mesh.material = ud.originalMaterial;
-        } else {
-          mesh.material = this.getMaterial(el.discipline || 'other');
-        }
-        ud.customMaterial = false;
+      if (!ud.originalMaterial) {
+        mesh.material = this.getMaterial(el.discipline || 'other');
       }
     }
-    // Drain any orphaned clones that the per-mesh loop didn't see — e.g.
-    // materials whose mesh was removed from `meshMap` between recolor and
-    // reset.  Without this the set would grow unbounded across mode
-    // toggles.
-    for (const mat of this.createdMaterials) {
-      mat.dispose();
-    }
-    this.createdMaterials.clear();
     this.sceneManager.requestRender();
   }
 

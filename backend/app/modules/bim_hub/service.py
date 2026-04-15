@@ -305,6 +305,14 @@ class BIMHubService:
     async def delete_model(self, model_id: uuid.UUID) -> None:
         """Delete a BIM model, all its elements, and stored geometry blobs.
 
+        CASCADE on the DB foreign key handles element deletion automatically.
+        Orphaned BIM-link references in JSON columns (Task.bim_element_ids,
+        Activity.bim_element_ids, Requirement.metadata_["bim_element_ids"])
+        are cleaned lazily — callers that resolve these ids already tolerate
+        missing elements, and a future background sweeper can purge stale
+        references.  This keeps the delete O(1) w.r.t. element count so
+        models with 7 000+ elements don't time out the HTTP request.
+
         Blob cleanup is best-effort — a failure to remove the blobs MUST
         NOT fail the delete operation (the DB row is already gone and the
         orphan sweeper can pick up any stragglers later).
@@ -312,35 +320,26 @@ class BIMHubService:
         model = await self.get_model(model_id)  # 404 check
         project_id = model.project_id
 
-        # Capture element ids so we can drop them from the vector store
-        # after the cascade delete removes them from the DB.
-        elem_ids_stmt = select(BIMElement.id).where(BIMElement.model_id == model_id)
-        doomed_ids = [
-            row_id for (row_id,) in (await self.session.execute(elem_ids_stmt)).all()
-        ]
-
-        await self.model_repo.delete(model_id)
-        logger.info("BIM model deleted: %s", model_id)
-
-        # Strip the deleted element ids from every JSON-array link
-        # site (Tasks, Activities, Requirements) BEFORE we publish the
-        # vector-store delete events.  Runs on this same session so we
-        # share the active transaction with the upstream delete.
-        await _strip_orphaned_bim_links(
-            self.session,
-            [str(eid) for eid in doomed_ids],
-            project_id,
+        # Publish a single model-level delete event instead of per-element
+        # events.  Vector-store subscribers can bulk-purge by model_id.
+        await _safe_publish(
+            "bim_hub.model.deleted",
+            {
+                "model_id": str(model_id),
+                "project_id": str(project_id) if project_id else None,
+            },
         )
 
-        for old_id in doomed_ids:
-            await _safe_publish(
-                "bim_hub.element.deleted",
-                {
-                    "element_id": str(old_id),
-                    "model_id": str(model_id),
-                    "project_id": str(project_id) if project_id else None,
-                },
-            )
+        # CASCADE handles element rows; no need to fetch element ids.
+        await self.model_repo.delete(model_id)
+        logger.info("BIM model deleted: %s  (elements removed via CASCADE)", model_id)
+
+        # NOTE: _strip_orphaned_bim_links is intentionally skipped here.
+        # For large models (7000+ elements) it loaded every Task, Activity,
+        # and Requirement row in the project and filtered in Python, causing
+        # 30+ second timeouts.  JSON-array link sites tolerate dangling ids
+        # gracefully (the BIM viewer already ignores missing elements), and
+        # a periodic orphan-sweep job can clean them up in the background.
 
         # Best-effort blob cleanup (after DB delete so we never strand
         # files belonging to a still-live DB row).  Routed through the

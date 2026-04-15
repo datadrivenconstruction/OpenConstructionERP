@@ -33,7 +33,9 @@ logger = logging.getLogger(__name__)
 _BIM_PREFIX: Final[str] = "bim"
 
 # Geometry files the viewer can load (order = lookup priority).
-# GLB is preferred: 8.8x faster browser loading than raw DAE.
+# GLB is preferred: 2x smaller transfer, faster browser parsing.
+# Node names are preserved via post-processing of the GLB JSON chunk
+# after trimesh conversion (see ifc_processor._convert_dae_to_glb).
 GEOMETRY_EXTENSIONS: Final[tuple[str, ...]] = (".glb", ".dae", ".gltf")
 
 GEOMETRY_MEDIA_TYPES: Final[dict[str, str]] = {

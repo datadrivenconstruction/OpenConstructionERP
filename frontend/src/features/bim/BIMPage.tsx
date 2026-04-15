@@ -63,6 +63,7 @@ import type { BIMGroupFilterCriteria } from './api';
 import { Filter } from 'lucide-react';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { useBIMLinkSelectionStore } from '@/stores/useBIMLinkSelectionStore';
 import { useBIMUploadStore } from '@/stores/useBIMUploadStore';
 import {
@@ -70,7 +71,6 @@ import {
   fetchBIMModel,
   fetchBIMElements,
   fetchBIMConverters,
-  fetchGeometryBlobUrl,
   deleteBIMModel,
   deleteLink,
   listElementGroups,
@@ -116,12 +116,13 @@ function StatPill({ label, value, icon: Icon }: { label: string; value: string |
 
 /** Collapsible model filmstrip — shows for 5s on mount, then slides away.
  *  Click the tab handle to re-expand. */
-function ModelFilmstrip({ models, isLoading, activeModelId, onSelectModel, onDeleteModel }: {
+function ModelFilmstrip({ models, isLoading, activeModelId, onSelectModel, onDeleteModel, onUpload }: {
   models: BIMModelData[];
   isLoading: boolean;
   activeModelId: string | null;
   onSelectModel: (id: string) => void;
   onDeleteModel: (id: string, name: string) => void;
+  onUpload: () => void;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(true);
@@ -133,7 +134,7 @@ function ModelFilmstrip({ models, isLoading, activeModelId, onSelectModel, onDel
   }, []);
 
   return (
-    <div className="shrink-0 bg-surface-primary/90 backdrop-blur-sm border-t border-border-light/60">
+    <div className="shrink-0 bg-surface-primary border-t border-border-light">
       {/* Header — always visible with drag handle, title, and count */}
       <button
         type="button"
@@ -184,6 +185,14 @@ function ModelFilmstrip({ models, isLoading, activeModelId, onSelectModel, onDel
               {t('bim.no_models_yet', { defaultValue: 'No models uploaded yet' })}
             </span>
           )}
+          {/* Add model button */}
+          <button
+            onClick={onUpload}
+            className="flex items-center justify-center shrink-0 w-16 h-16 rounded-xl border-2 border-dashed border-border-medium hover:border-oe-blue/50 hover:bg-oe-blue/5 transition-all group"
+            title={t('bim.upload_model', { defaultValue: 'Upload model' })}
+          >
+            <Plus size={20} className="text-content-quaternary group-hover:text-oe-blue transition-colors" />
+          </button>
         </div>
       </div>
     </div>
@@ -368,6 +377,19 @@ function UploadPanel({
   }, []);
 
   const startGlobalUpload = useBIMUploadStore((s) => s.startUpload);
+  const globalJobs = useBIMUploadStore((s) => s.jobs);
+  const activeUploads = useMemo(() => {
+    const active: { id: string; fileName: string; status: string; stage: string; progress: number; elementCount: number }[] = [];
+    for (const [id, job] of globalJobs) {
+      if (job.projectId !== projectId) continue;
+      if (job.status === 'uploading' || job.status === 'converting') {
+        active.push({ id, fileName: job.fileName, status: job.status, stage: job.stage, progress: job.progress, elementCount: 0 });
+      } else if (job.status === 'ready') {
+        active.push({ id, fileName: job.fileName, status: 'ready', stage: '', progress: 100, elementCount: job.elementCount });
+      }
+    }
+    return active;
+  }, [globalJobs, projectId]);
 
   const handleUpload = useCallback(async () => {
     if (!projectId) return;
@@ -400,7 +422,6 @@ function UploadPanel({
           }),
         });
         resetForm();
-        onClose?.();
       } else if (file) {
         const name = modelName || file.name.replace(/\.[^.]+$/, '');
         if (isCADFile(file.name)) {
@@ -449,9 +470,6 @@ function UploadPanel({
           }
 
           // Delegate to global store — upload survives navigation.
-          // Set the centered progress overlay FIRST so the user sees
-          // immediate feedback, then close the upload panel so the
-          // overlay is not hidden behind it.
           onProcessingUpdate?.({ stage: 'uploading', fileName, fileSize: sizeLabel });
           startGlobalUpload({
             file,
@@ -469,7 +487,6 @@ function UploadPanel({
             }),
           });
           resetForm();
-          onClose?.();
         } else if (isDataFile(file.name)) {
           // Data file upload — delegate to global store
           startGlobalUpload({
@@ -563,7 +580,7 @@ function UploadPanel({
 
   return (
     <>
-    <div className="absolute top-0 end-0 h-full w-[380px] bg-surface-primary/95 backdrop-blur-xl border-s border-border-light shadow-2xl z-30 flex flex-col animate-in slide-in-from-right duration-200">
+    <div className="absolute top-0 end-0 h-full w-[380px] bg-surface-primary/95 backdrop-blur-sm border-s border-border-light shadow-lg z-30 flex flex-col animate-in slide-in-from-right duration-200">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-border-light">
         <div className="flex items-center gap-2.5">
@@ -582,6 +599,43 @@ function UploadPanel({
 
       {/* Body */}
       <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+        {/* Active uploads progress */}
+        {activeUploads.length > 0 && (
+          <div className="space-y-2">
+            {activeUploads.map((job) => (
+              <div key={job.id} className={`rounded-xl border p-3 ${job.status === 'ready' ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/20' : 'border-oe-blue/30 bg-oe-blue/5'}`}>
+                <div className="flex items-center gap-2 mb-1.5">
+                  {job.status === 'ready' ? (
+                    <CheckCircle2 size={14} className="text-green-500 shrink-0" />
+                  ) : (
+                    <Loader2 size={14} className="text-oe-blue animate-spin shrink-0" />
+                  )}
+                  <span className="text-xs font-medium text-content-primary truncate">{job.fileName}</span>
+                </div>
+                {job.status !== 'ready' ? (
+                  <>
+                    <div className="h-1.5 w-full rounded-full bg-surface-tertiary overflow-hidden">
+                      <div className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-500 ease-out" style={{ width: `${job.progress}%` }} />
+                    </div>
+                    <p className="text-[10px] text-content-tertiary mt-1">{job.stage || t('bim.processing', { defaultValue: 'Processing...' })}</p>
+                  </>
+                ) : (
+                  <p className="text-[10px] text-green-600 dark:text-green-400">
+                    {t('bim.upload_complete_count', { defaultValue: '{{count}} elements', count: job.elementCount })}
+                  </p>
+                )}
+              </div>
+            ))}
+            {activeUploads.some((j) => j.status !== 'ready') && (
+              <p className="text-[10px] text-content-tertiary text-center py-1">
+                {t('bim.upload_continue_working', {
+                  defaultValue: 'Processing in background — you can continue working or upload another file.',
+                })}
+              </p>
+            )}
+          </div>
+        )}
+
         {!advancedMode ? (
           <label
             onDrop={(e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files?.[0]; if (f) handleFileSelect(f); }}
@@ -743,6 +797,27 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
   const fileInputRef = useRef<HTMLInputElement>(null);
   const addToast = useToastStore((s) => s.addToast);
   const startGlobalUpload = useBIMUploadStore((s) => s.startUpload);
+  const globalJobs = useBIMUploadStore((s) => s.jobs);
+  const activeUploads = useMemo(() => {
+    const active: { id: string; fileName: string; status: string; stage: string; progress: number; elementCount: number }[] = [];
+    for (const [id, job] of globalJobs) {
+      if (job.projectId !== projectId) continue;
+      if (job.status === 'uploading' || job.status === 'converting') {
+        active.push({ id, fileName: job.fileName, status: job.status, stage: job.stage, progress: job.progress, elementCount: 0 });
+      } else if (job.status === 'ready') {
+        active.push({ id, fileName: job.fileName, status: 'ready', stage: '', progress: 100, elementCount: job.elementCount });
+      }
+    }
+    return active;
+  }, [globalJobs, projectId]);
+
+  const resetForm = useCallback(() => {
+    setFile(null);
+    setModelName('');
+    setUploadError(null);
+    setUploadProgress(0);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }, []);
 
   const handleUpload = useCallback(async () => {
     if (!file || !projectId) return;
@@ -760,7 +835,6 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
         discipline: 'architecture',
         uploadType,
       });
-      setUploadProgress(100);
       addToast({
         type: 'info',
         title: t('bim.upload_started_title', { defaultValue: 'Upload started' }),
@@ -768,9 +842,10 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
           defaultValue: 'You can navigate to other pages — the upload will continue in the background.',
         }),
       });
+      resetForm();
     } catch (err) { setUploadError(err instanceof Error ? err.message : String(err)); }
     finally { setUploading(false); }
-  }, [file, projectId, modelName, startGlobalUpload, addToast, t]);
+  }, [file, projectId, modelName, startGlobalUpload, addToast, t, onProcessingUpdate, resetForm]);
 
   const features = [
     { icon: Eye, color: 'bg-blue-50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-800', ic: 'text-blue-500', title: t('bim.landing_feat_3d_title'), desc: t('bim.landing_feat_3d_desc') },
@@ -838,6 +913,43 @@ function LandingPage({ projectId, onUploadComplete: _onUploadComplete, breadcrum
             </div>
           </div>
 
+          {/* Active upload progress */}
+          {activeUploads.length > 0 && (
+            <div className="max-w-md mx-auto mb-8 space-y-2">
+              {activeUploads.map((job) => (
+                <div key={job.id} className={`rounded-xl border p-4 ${job.status === 'ready' ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/20' : 'border-oe-blue/30 bg-white dark:bg-gray-900 shadow-md shadow-oe-blue/10'}`}>
+                  <div className="flex items-center gap-2 mb-2">
+                    {job.status === 'ready' ? (
+                      <CheckCircle2 size={16} className="text-green-500 shrink-0" />
+                    ) : (
+                      <Loader2 size={16} className="text-oe-blue animate-spin shrink-0" />
+                    )}
+                    <span className="text-sm font-medium text-content-primary truncate">{job.fileName}</span>
+                  </div>
+                  {job.status !== 'ready' ? (
+                    <>
+                      <div className="h-2 w-full rounded-full bg-surface-tertiary overflow-hidden">
+                        <div className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-500 ease-out" style={{ width: `${job.progress}%` }} />
+                      </div>
+                      <p className="text-xs text-content-tertiary mt-1.5">{job.stage || t('bim.processing', { defaultValue: 'Processing...' })}</p>
+                    </>
+                  ) : (
+                    <p className="text-xs text-green-600 dark:text-green-400">
+                      {t('bim.upload_complete_count', { defaultValue: '{{count}} elements', count: job.elementCount })}
+                    </p>
+                  )}
+                </div>
+              ))}
+              {activeUploads.some((j) => j.status !== 'ready') && (
+                <p className="text-[11px] text-content-tertiary text-center py-1">
+                  {t('bim.upload_continue_working', {
+                    defaultValue: 'Processing in background — you can continue working or upload another file.',
+                  })}
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Features — compact 2-row grid, visible without scrolling */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-w-lg mx-auto">
             {features.map((f, i) => (
@@ -867,13 +979,13 @@ export function BIMPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { projectId: urlProjectId } = useParams<{ projectId: string }>();
+  const { projectId: urlProjectId, modelId: urlModelId } = useParams<{ projectId?: string; modelId?: string }>();
   const contextProjectId = useProjectContextStore((s) => s.activeProjectId);
   const contextProjectName = useProjectContextStore((s) => s.activeProjectName);
   const projectId = urlProjectId || contextProjectId || '';
   const { confirm, ...confirmProps } = useConfirm();
 
-  const [activeModelId, setActiveModelId] = useState<string | null>(null);
+  const [activeModelId, setActiveModelId] = useState<string | null>(urlModelId || null);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
 
   // Deep-link auto-select: Cmd+Shift+K global semantic search and the
@@ -898,6 +1010,7 @@ export function BIMPage() {
     | 'boq_coverage'
     | 'document_coverage'
   >('default');
+  const showBoundingBoxes = false;
   const [isolatedIds, setIsolatedIds] = useState<string[] | null>(null);
   const [processing, setProcessing] = useState<ProcessingUpdate | null>(null);
   const [meshMatchRatio, setMeshMatchRatio] = useState<number | null>(null);
@@ -947,7 +1060,39 @@ export function BIMPage() {
     }
   }, [statusPollQuery.data, activeModel, queryClient, projectId, activeModelId]);
 
-  useEffect(() => { if (models.length && !activeModelId) setActiveModelId(models[0]!.id); }, [models, activeModelId]);
+  // Auto-detect project when navigating to /bim/:modelId without correct project context.
+  // This handles deep-links and bookmarked model URLs.
+  const setActiveProject = useProjectContextStore((s) => s.setActiveProject);
+  useEffect(() => {
+    if (!urlModelId) return;
+    // If no project is selected OR model not in current project's list → fetch model to get project_id
+    const modelInList = models.find((m) => m.id === urlModelId);
+    if (!modelInList) {
+      fetchBIMModel(urlModelId).then((model) => {
+        if (model?.project_id && model.project_id !== projectId) {
+          setActiveProject(model.project_id, '');
+        }
+      }).catch(() => {});
+    }
+  }, [urlModelId, models, projectId, setActiveProject]);
+
+  useEffect(() => {
+    if (models.length && !activeModelId) {
+      // URL model ID takes priority, then first model in list
+      const target = urlModelId && models.find((m) => m.id === urlModelId) ? urlModelId : models[0]!.id;
+      setActiveModelId(target);
+    }
+  }, [models, activeModelId, urlModelId]);
+
+  // Sync URL when active model changes
+  useEffect(() => {
+    if (!activeModelId) return;
+    const basePath = urlProjectId ? `/projects/${urlProjectId}/bim` : '/bim';
+    const targetPath = `${basePath}/${activeModelId}`;
+    if (!window.location.pathname.endsWith(activeModelId)) {
+      navigate(targetPath, { replace: true });
+    }
+  }, [activeModelId, urlProjectId, navigate]);
 
   // Reset transient viewer state when switching between models
   useEffect(() => {
@@ -990,7 +1135,9 @@ export function BIMPage() {
       fetchBIMElements(activeModelId!, {
         groupId: effectiveGroupId,
       }),
-    enabled: !!activeModelId && activeModel?.status === 'ready',
+    // Load elements when model is ready OR when navigating via URL
+    // (activeModel may be null during project auto-detect race)
+    enabled: !!activeModelId && (activeModel?.status === 'ready' || (!activeModel && !!urlModelId)),
   });
   const elements: BIMElementData[] = elementsQuery.data?.items ?? [];
   const elementsTotal: number = elementsQuery.data?.total ?? 0;
@@ -1051,36 +1198,24 @@ export function BIMPage() {
     return savedGroups.find((g) => g.id === activeGroupId) ?? null;
   }, [activeGroupId, savedGroups]);
 
-  const [geometryUrl, setGeometryUrl] = useState<string | null>(null);
-  useEffect(() => {
-    let revoked = false;
-    let objectUrl: string | null = null;
-    const shouldFetch =
-      activeModelId &&
-      activeModel?.status === 'ready' &&
-      ((activeModel?.element_count ?? 0) > 0 || elements.some((el) => !!el.mesh_ref));
-
-    if (!shouldFetch) {
-      setGeometryUrl(null);
-      return;
+  // Direct URL for Three.js loaders — no blob intermediary, no race conditions.
+  // The ?token= param authenticates the request (Three.js can't set headers).
+  // Cache-bust with model updated_at to ensure fresh geometry after re-upload.
+  const geometryUrl = useMemo(() => {
+    if (
+      !activeModelId ||
+      activeModel?.status !== 'ready' ||
+      ((activeModel?.element_count ?? 0) === 0 && !elements.some((el) => !!el.mesh_ref))
+    ) {
+      return null;
     }
-
-    fetchGeometryBlobUrl(activeModelId).then((url) => {
-      if (revoked) {
-        URL.revokeObjectURL(url);
-        return;
-      }
-      objectUrl = url;
-      setGeometryUrl(url);
-    }).catch(() => {
-      if (!revoked) setGeometryUrl(null);
-    });
-
-    return () => {
-      revoked = true;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-  }, [activeModelId, activeModel, elements]);
+    const token = useAuthStore.getState().accessToken;
+    const base = `/api/v1/bim_hub/models/${encodeURIComponent(activeModelId)}/geometry/`;
+    const params = new URLSearchParams();
+    if (token) params.set('token', token);
+    params.set('_t', activeModel?.updated_at || String(Date.now()));
+    return `${base}?${params.toString()}`;
+  }, [activeModelId, activeModel?.status, activeModel?.element_count, activeModel?.updated_at, elements]);
 
   const handleElementSelect = useCallback(
     (id: string | null) => {
@@ -1147,9 +1282,9 @@ export function BIMPage() {
     setSelectedElementId(elementId);
   }, []);
 
-  // Open the AddToBOQ modal for a single clicked element.
-  const handleAddToBOQ = useCallback((element: BIMElementData) => {
-    setLinkCandidates([element]);
+  // Open the AddToBOQ modal for one or more selected elements (bulk link).
+  const handleAddToBOQ = useCallback((elements: BIMElementData[]) => {
+    if (elements.length > 0) setLinkCandidates(elements);
   }, []);
 
   // Cross-module navigation handlers — fired when the user clicks a row
@@ -1446,6 +1581,11 @@ export function BIMPage() {
     return items;
   }, [t, projectId, contextProjectName]);
 
+  // For multi-select: track all selected IDs from the viewer's internal SelectionManager.
+  // selectedElementId tracks the LAST clicked element (for properties panel);
+  // selectedElementIds drives the BIMViewer highlight.
+  // The viewer's onSelectionChange callback handles multi-select internally —
+  // we just pass the last-clicked ID so the properties panel shows something.
   const selectedElementIds = useMemo(() => (selectedElementId ? [selectedElementId] : []), [selectedElementId]);
 
   if (!projectId) {
@@ -1642,6 +1782,7 @@ export function BIMPage() {
             isLoading={elementsQuery.isLoading}
             error={elementsQuery.error ? t('bim.error_load_elements', { defaultValue: 'Failed to load model elements. Check the server connection.' }) : null}
             geometryUrl={geometryUrl}
+            showBoundingBoxes={showBoundingBoxes}
             filterPredicate={filterPredicate}
             colorByMode={colorByMode}
             isolatedIds={isolatedIds}
@@ -1711,28 +1852,32 @@ export function BIMPage() {
           />
         )}
 
-        {/* Centered upload progress overlay — visible and prominent so the user
-            knows work is happening and they can navigate away safely. */}
+        {/* Compact bottom-right progress notification — non-blocking so user
+            can continue interacting (select models, upload more files). */}
         {processing && (processing.stage === 'uploading' || processing.stage === 'converting' || processing.stage === 'parsing' || processing.stage === 'indexing') && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm">
-            <div className="bg-surface-primary border border-border-light rounded-2xl shadow-xl p-8 max-w-md w-full mx-4 text-center">
-              <Loader2 size={40} className="text-oe-blue animate-spin mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-content-primary mb-1">
-                {processing.stage === 'uploading'
-                  ? t('bim.progress_uploading', { defaultValue: 'Uploading file...' })
-                  : processing.stage === 'converting'
-                    ? t('bim.progress_converting', { defaultValue: 'Converting CAD model...' })
-                    : processing.stage === 'parsing'
-                      ? t('bim.progress_parsing', { defaultValue: 'Extracting elements...' })
-                      : t('bim.progress_indexing', { defaultValue: 'Indexing properties...' })}
-              </h3>
-              {processing.fileName && (
-                <p className="text-sm text-content-secondary mb-3">
-                  {processing.fileName}
-                  {processing.fileSize ? ` (${processing.fileSize})` : ''}
-                </p>
-              )}
-              <div className="h-2 w-full rounded-full bg-surface-tertiary overflow-hidden mb-4">
+          <div className="absolute bottom-4 end-4 z-40 w-80">
+            <div className="bg-surface-primary border border-border-light rounded-xl shadow-md p-4">
+              <div className="flex items-center gap-3 mb-2">
+                <Loader2 size={18} className="text-oe-blue animate-spin shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-xs font-semibold text-content-primary truncate">
+                    {processing.stage === 'uploading'
+                      ? t('bim.progress_uploading', { defaultValue: 'Uploading file...' })
+                      : processing.stage === 'converting'
+                        ? t('bim.progress_converting', { defaultValue: 'Converting CAD model...' })
+                        : processing.stage === 'parsing'
+                          ? t('bim.progress_parsing', { defaultValue: 'Extracting elements...' })
+                          : t('bim.progress_indexing', { defaultValue: 'Indexing properties...' })}
+                  </h4>
+                  {processing.fileName && (
+                    <p className="text-[10px] text-content-tertiary truncate">
+                      {processing.fileName}
+                      {processing.fileSize ? ` (${processing.fileSize})` : ''}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="h-1.5 w-full rounded-full bg-surface-tertiary overflow-hidden">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-400 transition-all duration-500 ease-out"
                   style={{
@@ -1743,34 +1888,9 @@ export function BIMPage() {
                   }}
                 />
               </div>
-              {processing.fileSize && (
-                <p className="text-xs text-content-secondary mb-2 font-medium">
-                  {t('bim.progress_eta', {
-                    defaultValue: 'Estimated time: {{time}}',
-                    time: (() => {
-                      // Estimate based on measured DDC conversion rate: ~0.73 MB/s
-                      const sizeStr = processing.fileSize || '';
-                      const sizeMatch = sizeStr.match(/([\d.]+)\s*(MB|KB|GB)/i);
-                      if (!sizeMatch) return '~30s';
-                      let mb = parseFloat(sizeMatch[1] ?? '0');
-                      const unit = (sizeMatch[2] || 'MB').toUpperCase();
-                      if (unit === 'KB') mb /= 1024;
-                      if (unit === 'GB') mb *= 1024;
-                      const totalSec = Math.round(mb / 0.73);
-                      if (totalSec < 60) return `~${totalSec}s`;
-                      return `~${Math.ceil(totalSec / 60)} min`;
-                    })(),
-                  })}
-                </p>
-              )}
-              <p className="text-xs text-content-tertiary mb-2">
-                {t('bim.progress_navigate_away', {
-                  defaultValue: 'Processing continues in the background — you can navigate to other pages and will be notified when complete.',
-                })}
-              </p>
-              <p className="text-xs text-oe-blue font-medium">
-                {t('bim.progress_parallel_hint', {
-                  defaultValue: 'You can upload multiple models in parallel — each one processes independently.',
+              <p className="text-[10px] text-content-quaternary mt-1.5">
+                {t('bim.progress_navigate_away_short', {
+                  defaultValue: 'Processing in background — you can continue working.',
                 })}
               </p>
             </div>
@@ -1794,24 +1914,10 @@ export function BIMPage() {
         {/* Low mesh-match warning — shown when the loaded DAE has no per-element
             mapping (e.g. DDC RVT exports with numeric node names), which means
             element filters can't hide individual objects in the viewport. */}
-        {meshMatchRatio !== null && meshMatchRatio < 0.02 && elements.length > 0 && !isModelNonReady && (
-          <div className="absolute bottom-3 start-1/2 -translate-x-1/2 z-30 pointer-events-auto">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 shadow-sm">
-              <AlertTriangle size={12} className="text-amber-600 dark:text-amber-400 shrink-0" />
-              <span className="text-[11px] text-amber-800 dark:text-amber-300">
-                {t('bim.no_mesh_mapping', {
-                  defaultValue:
-                    'Per-element filtering unavailable for this model (no stable_id → mesh mapping). Explorer still works.',
-                })}
-              </span>
-              <button
-                onClick={() => setMeshMatchRatio(null)}
-                className="text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-200"
-                aria-label="Dismiss"
-              >
-                <X size={11} />
-              </button>
-            </div>
+        {/* Low mesh-match warning removed — positional fallback always provides
+            workable filtering even when direct name-matching is sparse. */}
+        {false && meshMatchRatio !== null && (
+          <div className="hidden">
           </div>
         )}
         </div>
@@ -1824,6 +1930,7 @@ export function BIMPage() {
         activeModelId={activeModelId}
         onSelectModel={(id) => { setActiveModelId(id); setSelectedElementId(null); }}
         onDeleteModel={handleDeleteModel}
+        onUpload={() => setUploadOpen(true)}
       />
 
       {/* BIM ↔ BOQ linking modal — opened from the properties panel

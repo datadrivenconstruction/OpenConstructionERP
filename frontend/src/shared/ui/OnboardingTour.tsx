@@ -274,7 +274,8 @@ export function OnboardingTour({
 
   return (
     <>
-      {/* Fullscreen overlay with spotlight cutout */}
+      {/* Fullscreen overlay with spotlight cutout — pointer-events-none
+          so the tour does NOT block interaction with the underlying app. */}
       <div
         data-testid="onboarding-overlay"
         className="fixed inset-0 z-[9000] pointer-events-none"
@@ -283,15 +284,17 @@ export function OnboardingTour({
         {spotlight && (
           <div
             data-testid="onboarding-spotlight"
+            className="pointer-events-none"
             style={{
               position: 'fixed',
               top: spotlight.top,
               left: spotlight.left,
               width: spotlight.width,
               height: spotlight.height,
-              boxShadow: `0 0 0 ${SHADOW_SPREAD}px rgba(0, 0, 0, 0.55)`,
+              boxShadow: `0 0 0 ${SHADOW_SPREAD}px rgba(0, 0, 0, 0.25)`,
               borderRadius: 8,
               zIndex: 9001,
+              pointerEvents: 'none',
             }}
           />
         )}
@@ -313,10 +316,12 @@ export function OnboardingTour({
         }}
         className={clsx(
           'rounded-2xl border border-border-light',
-          'bg-surface-elevated shadow-2xl',
+          'bg-surface-elevated shadow-lg',
           'p-5 pointer-events-auto',
           'animate-scale-in',
+          // Position in bottom-right corner to avoid blocking main content
         )}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header row */}
         <div className="flex items-start justify-between gap-3 mb-3">
