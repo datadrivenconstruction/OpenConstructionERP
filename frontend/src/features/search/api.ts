@@ -195,7 +195,7 @@ export function hitToHref(hit: UnifiedSearchHit): string {
     case 'oe_bim_elements':
       return `/bim?element=${encodeURIComponent(hit.id)}`;
     case 'oe_requirements':
-      return `/requirements?id=${encodeURIComponent(hit.id)}`;
+      return `/bim/rules?id=${encodeURIComponent(hit.id)}`;
     case 'oe_validation':
       return `/validation?id=${encodeURIComponent(hit.id)}`;
     case 'oe_chat': {

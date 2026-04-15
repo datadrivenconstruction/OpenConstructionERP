@@ -75,9 +75,10 @@ const DocumentsPage = lazy(() =>
 const PhotoGalleryPage = lazy(() =>
   import('@/features/documents/PhotoGalleryPage').then((m) => ({ default: m.PhotoGalleryPage }))
 );
-const RequirementsPage = lazy(() =>
-  import('@/features/requirements/RequirementsPage').then((m) => ({ default: m.RequirementsPage }))
-);
+// RequirementsPage merged into /bim/rules — route removed, redirect added
+// const RequirementsPage = lazy(() =>
+//   import('@/features/requirements/RequirementsPage').then((m) => ({ default: m.RequirementsPage }))
+// );
 const MarkupsPage = lazy(() =>
   import('@/features/markups/MarkupsPage').then((m) => ({ default: m.MarkupsPage }))
 );
@@ -360,7 +361,8 @@ export default function App() {
 
         <Route path="/risks" element={<P title="Risk Register"><RiskRegisterPage /></P>} />
 
-        <Route path="/requirements" element={<P title="Requirements & Quality Gates"><RequirementsPage /></P>} />
+        {/* Requirements merged into BIM Rules page */}
+        <Route path="/requirements" element={<Navigate to="/bim/rules" replace />} />
 
         <Route path="/markups" element={<P title="Markups"><MarkupsPage /></P>} />
         <Route path="/punchlist" element={<P title="Punch List"><PunchListPage /></P>} />

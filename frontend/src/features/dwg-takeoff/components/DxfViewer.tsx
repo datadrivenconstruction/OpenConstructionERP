@@ -42,6 +42,14 @@ const TEXT_PIN_COLORS = [
 
 const FONT_SIZES = [10, 12, 14, 16, 18, 20, 24, 28, 32];
 
+/** Emitted when a user selects an entity, includes screen coords for floating UI. */
+export interface EntitySelectEvent {
+  entityId: string | null;
+  /** Screen-space coordinates relative to the viewer container for floating UI. */
+  screenX: number;
+  screenY: number;
+}
+
 interface Props {
   entities: DxfEntity[];
   annotations: DwgAnnotation[];
@@ -50,7 +58,7 @@ interface Props {
   activeColor: string;
   selectedEntityId: string | null;
   selectedAnnotationId: string | null;
-  onSelectEntity: (id: string | null) => void;
+  onSelectEntity: (id: string | null, event?: EntitySelectEvent) => void;
   onSelectAnnotation: (id: string | null) => void;
   onAnnotationCreated: (ann: {
     type: DwgAnnotation['type'];
@@ -125,6 +133,7 @@ export function DxfViewer({
   const isPanningRef = useRef(false);
   const lastMouseRef = useRef({ x: 0, y: 0 });
   const drawPointsRef = useRef<{ x: number; y: number }[]>([]);
+  const mousePosRef = useRef<{ x: number; y: number } | null>(null);
   const activeToolRef = useRef(activeTool);
   activeToolRef.current = activeTool;
   const activeColorRef = useRef(activeColor);
@@ -301,6 +310,82 @@ export function DxfViewer({
           ctx.arc(sp.x, sp.y, 3, 0, Math.PI * 2);
           ctx.fill();
         }
+
+        // ── Rubber band preview line from last placed point to cursor ──
+        const mouseWorld = mousePosRef.current;
+        if (mouseWorld) {
+          const lastPt = pts[pts.length - 1]!;
+          const firstPt = pts[0]!;
+          const lastScreen = worldToScreen(lastPt.x, lastPt.y, vp);
+          const mouseScreen = worldToScreen(mouseWorld.x, mouseWorld.y, vp);
+          const firstScreen = worldToScreen(firstPt.x, firstPt.y, vp);
+
+          // Parse active color to apply 60% opacity
+          ctx.save();
+          ctx.globalAlpha = 0.6;
+          ctx.strokeStyle = curColor;
+          ctx.lineWidth = 2;
+          ctx.setLineDash([4, 3]);
+
+          if (curTool === 'rectangle' && pts.length === 1) {
+            // Rectangle preview: dashed rect from first point to mouse
+            const rx = Math.min(firstScreen.x, mouseScreen.x);
+            const ry = Math.min(firstScreen.y, mouseScreen.y);
+            const rw = Math.abs(mouseScreen.x - firstScreen.x);
+            const rh = Math.abs(mouseScreen.y - firstScreen.y);
+            ctx.beginPath();
+            ctx.rect(rx, ry, rw, rh);
+            ctx.stroke();
+          } else if (curTool === 'area') {
+            // Area tool: line from last point to mouse + closing line from mouse to first point
+            ctx.beginPath();
+            ctx.moveTo(lastScreen.x, lastScreen.y);
+            ctx.lineTo(mouseScreen.x, mouseScreen.y);
+            ctx.stroke();
+            // Closing line (lighter)
+            ctx.globalAlpha = 0.35;
+            ctx.beginPath();
+            ctx.moveTo(mouseScreen.x, mouseScreen.y);
+            ctx.lineTo(firstScreen.x, firstScreen.y);
+            ctx.stroke();
+            ctx.globalAlpha = 0.6;
+          } else {
+            // Distance, arrow, and other tools: single line from last point to mouse
+            ctx.beginPath();
+            ctx.moveTo(lastScreen.x, lastScreen.y);
+            ctx.lineTo(mouseScreen.x, mouseScreen.y);
+            ctx.stroke();
+          }
+
+          ctx.setLineDash([]);
+          ctx.globalAlpha = 1.0;
+
+          // ── Live measurement label near the midpoint of the rubber band ──
+          const dist = calculateDistance(lastPt, mouseWorld);
+          const label = formatMeasurement(dist, 'm');
+          const midX = (lastScreen.x + mouseScreen.x) / 2;
+          const midY = (lastScreen.y + mouseScreen.y) / 2;
+
+          const labelFontSize = 11;
+          ctx.font = `600 ${labelFontSize}px ui-monospace, monospace`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+
+          const textWidth = ctx.measureText(label).width;
+          const pillW = textWidth + 12;
+          const pillH = labelFontSize + 8;
+
+          // Dark semi-transparent background pill
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+          roundRect(ctx, midX - pillW / 2, midY - pillH / 2 - 12, pillW, pillH, pillH / 2);
+          ctx.fill();
+
+          // White text
+          ctx.fillStyle = '#ffffff';
+          ctx.fillText(label, midX, midY - 12);
+
+          ctx.restore();
+        }
       }
 
       rafRef.current = requestAnimationFrame(draw);
@@ -392,7 +477,7 @@ export function DxfViewer({
             closest = ent.id;
           }
         }
-        onSelectEntity(closest);
+        onSelectEntity(closest, closest ? { entityId: closest, screenX: sx, screenY: sy } : undefined);
         onSelectAnnotation(null);
         return;
       }
@@ -431,19 +516,32 @@ export function DxfViewer({
     [activeTool, entities, visibleLayers, onSelectEntity, onSelectAnnotation, onAnnotationCreated],
   );
 
-  // Mouse move (pan)
+  // Mouse move (pan + rubber band tracking)
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (isPanningRef.current) {
       const dx = e.clientX - lastMouseRef.current.x;
       const dy = e.clientY - lastMouseRef.current.y;
       vpRef.current = applyPan(vpRef.current, dx, dy);
       lastMouseRef.current = { x: e.clientX, y: e.clientY };
+    } else {
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (rect) {
+        const sx = e.clientX - rect.left;
+        const sy = e.clientY - rect.top;
+        mousePosRef.current = screenToWorld(sx, sy, vpRef.current);
+      }
     }
   }, []);
 
   // Mouse up
   const handleMouseUp = useCallback(() => {
     isPanningRef.current = false;
+  }, []);
+
+  // Mouse leave — clear rubber band cursor and stop panning
+  const handleMouseLeave = useCallback(() => {
+    isPanningRef.current = false;
+    mousePosRef.current = null;
   }, []);
 
   // Double-click to finish area polygon
@@ -499,7 +597,7 @@ export function DxfViewer({
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
         onDoubleClick={handleDoubleClick}
         className="h-full w-full"
       />

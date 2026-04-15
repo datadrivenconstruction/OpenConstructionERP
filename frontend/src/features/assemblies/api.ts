@@ -27,6 +27,7 @@ export interface Assembly {
   regional_factors: Record<string, string>;
   is_template: boolean;
   project_id: string | null;
+  owner_id: string | null;
   is_active: boolean;
   component_count: number;
   usage_count: number;

@@ -37,10 +37,13 @@ import {
   Square,
   Highlighter,
   Loader2,
+  Link2,
+  X,
 } from 'lucide-react';
 import { useToastStore } from '../../stores/useToastStore';
 import { useProjectContextStore } from '../../stores/useProjectContextStore';
-import { boqApi, type CreatePositionData } from '../../features/boq/api';
+import { boqApi, type CreatePositionData, type Position } from '../../features/boq/api';
+import { takeoffApi } from '../../features/takeoff/api';
 import { apiGet } from '../../shared/lib/api';
 import { useMeasurementPersistence } from './useMeasurementPersistence';
 import {
@@ -230,6 +233,12 @@ export default function TakeoffViewerModule() {
   const [selectedBoqId, setSelectedBoqId] = useState('');
   const [isExporting, setIsExporting] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+
+  // Link measurement to BOQ state
+  const [linkingMeasurementId, setLinkingMeasurementId] = useState<string | null>(null);
+  const [linkBoqPositions, setLinkBoqPositions] = useState<Position[]>([]);
+  const [linkBoqsLoading, setLinkBoqsLoading] = useState(false);
+  const [linkingInProgress, setLinkingInProgress] = useState(false);
 
   // Document persistence + server sync
   const [fileName, setFileName] = useState<string | null>(null);
@@ -1453,6 +1462,78 @@ export default function TakeoffViewerModule() {
     clearPersisted();
   }, [clearPersisted]);
 
+  /* ── Link measurement to BOQ ─────────────────────────────────────── */
+
+  /** Open the BOQ position picker for a measurement */
+  const handleOpenLinkToBoq = useCallback(async (measurementId: string) => {
+    if (!selectedBoqId && !selectedProjectId) {
+      addToast({
+        type: 'warning',
+        title: t('takeoff.link_boq_no_project', { defaultValue: 'Select project & BOQ first' }),
+        message: t('takeoff.link_boq_no_project_desc', { defaultValue: 'Use "Export to BOQ" to select a project and BOQ, then link measurements.' }),
+      });
+      return;
+    }
+    setLinkingMeasurementId(measurementId);
+    if (selectedBoqId) {
+      setLinkBoqsLoading(true);
+      try {
+        const boqData = await apiGet<{ positions: Position[] }>(`/v1/boq/boqs/${selectedBoqId}`);
+        setLinkBoqPositions(boqData.positions || []);
+      } catch {
+        setLinkBoqPositions([]);
+      } finally {
+        setLinkBoqsLoading(false);
+      }
+    }
+  }, [selectedBoqId, selectedProjectId, addToast, t]);
+
+  /** Link a measurement to a specific BOQ position, updating quantity + metadata */
+  const handleLinkToPosition = useCallback(async (measurementId: string, position: Position) => {
+    const measurement = measurements.find((m) => m.id === measurementId);
+    if (!measurement) return;
+    setLinkingInProgress(true);
+    try {
+      // Update BOQ position quantity + metadata with pdf_measurement_source
+      const sourceLabel = `Takeoff: ${measurement.type} on Page ${measurement.page}`;
+      const unitMap: Record<string, string> = { m: 'm', 'm\u00B2': 'm2', 'm\u00B3': 'm3', pcs: 'pcs' };
+      const newQty = Math.round(measurement.value * 100) / 100;
+      const existingMeta = (position.metadata ?? {}) as Record<string, unknown>;
+      await boqApi.updatePosition(position.id, {
+        quantity: newQty,
+        unit: unitMap[measurement.unit] ?? measurement.unit,
+        metadata: { ...existingMeta, pdf_measurement_source: sourceLabel },
+      });
+      // Also link measurement on the server if it has a real UUID
+      if (measurementId && !measurementId.startsWith('temp-')) {
+        try {
+          await takeoffApi.linkToBoq(measurementId, position.id);
+        } catch {
+          // Non-critical: takeoff measurement may be local-only
+        }
+      }
+      addToast({
+        type: 'success',
+        title: t('takeoff.linked_to_boq', { defaultValue: 'Linked to BOQ' }),
+        message: t('takeoff.linked_to_boq_desc', {
+          defaultValue: '{{value}} {{unit}} applied to "{{desc}}"',
+          value: newQty,
+          unit: measurement.unit,
+          desc: position.description?.slice(0, 40) || position.ordinal,
+        }),
+      });
+      setLinkingMeasurementId(null);
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: t('takeoff.link_failed', { defaultValue: 'Link failed' }),
+        message: err instanceof Error ? err.message : '',
+      });
+    } finally {
+      setLinkingInProgress(false);
+    }
+  }, [measurements, addToast, t]);
+
   /* ── Undo ────────────────────────────────────────────────────────── */
 
   const handleUndo = useCallback(() => {
@@ -1972,14 +2053,73 @@ export default function TakeoffViewerModule() {
                                   )}
                                   <p className="text-2xs text-content-tertiary capitalize">{m.type}: {m.label}</p>
                                 </div>
-                                <button
-                                  onClick={() => deleteMeasurement(m.id)}
-                                  className="opacity-0 group-hover/item:opacity-100 text-content-tertiary hover:text-semantic-error transition-all shrink-0"
-                                  aria-label={t('takeoff_viewer.delete_measurement', { defaultValue: 'Delete measurement' })}
-                                >
-                                  <Trash2 size={12} />
-                                </button>
+                                <div className="flex items-center gap-0.5 shrink-0">
+                                  {/* Link to BOQ button */}
+                                  <button
+                                    onClick={() => handleOpenLinkToBoq(m.id)}
+                                    className="opacity-0 group-hover/item:opacity-100 text-content-tertiary hover:text-rose-700 dark:hover:text-rose-400 transition-all p-0.5 rounded"
+                                    aria-label={t('takeoff_viewer.link_to_boq', { defaultValue: 'Link to BOQ' })}
+                                    title={t('takeoff_viewer.link_to_boq', { defaultValue: 'Link to BOQ' })}
+                                  >
+                                    <Link2 size={12} />
+                                  </button>
+                                  <button
+                                    onClick={() => deleteMeasurement(m.id)}
+                                    className="opacity-0 group-hover/item:opacity-100 text-content-tertiary hover:text-semantic-error transition-all shrink-0"
+                                    aria-label={t('takeoff_viewer.delete_measurement', { defaultValue: 'Delete measurement' })}
+                                  >
+                                    <Trash2 size={12} />
+                                  </button>
+                                </div>
                               </div>
+                              {/* Link to BOQ position picker dropdown */}
+                              {linkingMeasurementId === m.id && (
+                                <div className="mt-1.5 rounded-lg border border-rose-200 dark:border-rose-800/40 bg-rose-50/50 dark:bg-rose-950/20 p-2 animate-fade-in">
+                                  <div className="flex items-center justify-between mb-1.5">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-rose-700 dark:text-rose-400">
+                                      {t('takeoff_viewer.link_to_boq_title', { defaultValue: 'Link to BOQ position' })}
+                                    </span>
+                                    <button
+                                      onClick={() => setLinkingMeasurementId(null)}
+                                      className="text-content-tertiary hover:text-content-primary transition-colors"
+                                    >
+                                      <X size={10} />
+                                    </button>
+                                  </div>
+                                  {linkBoqsLoading ? (
+                                    <div className="flex items-center gap-1.5 py-2">
+                                      <Loader2 size={12} className="animate-spin text-rose-600" />
+                                      <span className="text-[10px] text-content-tertiary">
+                                        {t('common.loading', { defaultValue: 'Loading...' })}
+                                      </span>
+                                    </div>
+                                  ) : !selectedBoqId ? (
+                                    <p className="text-[10px] text-content-tertiary py-1">
+                                      {t('takeoff.link_boq_select_first', { defaultValue: 'Select a BOQ via "Export to BOQ" first.' })}
+                                    </p>
+                                  ) : linkBoqPositions.length === 0 ? (
+                                    <p className="text-[10px] text-content-tertiary py-1">
+                                      {t('takeoff.link_boq_no_positions', { defaultValue: 'No positions in this BOQ.' })}
+                                    </p>
+                                  ) : (
+                                    <div className="max-h-32 overflow-y-auto space-y-0.5">
+                                      {linkBoqPositions.filter((p) => !p.parent_id || p.quantity != null).map((pos) => (
+                                        <button
+                                          key={pos.id}
+                                          type="button"
+                                          onClick={() => handleLinkToPosition(m.id, pos)}
+                                          disabled={linkingInProgress}
+                                          className="w-full text-left px-2 py-1 rounded text-[10px] hover:bg-rose-100 dark:hover:bg-rose-900/30 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                                        >
+                                          <span className="font-mono text-rose-600 dark:text-rose-400 shrink-0">{pos.ordinal}</span>
+                                          <span className="text-content-primary truncate flex-1">{pos.description}</span>
+                                          {linkingInProgress && <Loader2 size={10} className="animate-spin text-rose-500 shrink-0" />}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           ))}
                         </div>

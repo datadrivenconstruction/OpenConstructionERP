@@ -1432,6 +1432,7 @@ function WhatIfPanel({
   void _currentBAC;
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
   const [isExpanded, setIsExpanded] = useState(false);
   const [materialPct, setMaterialPct] = useState(0);
   const [laborPct, setLaborPct] = useState(0);
@@ -1456,7 +1457,11 @@ function WhatIfPanel({
       queryClient.invalidateQueries({ queryKey: ['costmodel'] });
     },
     onError: (err: Error) => {
-      console.error('What-if scenario failed:', err.message);
+      addToast({
+        type: 'error',
+        title: t('costmodel.whatif_failed', { defaultValue: 'What-if scenario failed' }),
+        message: err.message,
+      });
     },
   });
 

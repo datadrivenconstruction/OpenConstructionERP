@@ -1202,6 +1202,249 @@ function CreateBOQFromPivotModal({ open, onClose, groups, groupByColumns, aggCol
   );
 }
 
+/* ── Data Explorer Empty State Animation ────────────────────────────── */
+
+function DataExplorerEmptyAnimation() {
+  return (
+    <div className="mx-auto mb-6 relative" style={{ width: 260, height: 150, opacity: 0.6 }}>
+      <style>{`
+        /* Bar chart columns grow upward */
+        @keyframes explorerBarGrow0 {
+          0%, 5% { transform: scaleY(0); opacity: 0; }
+          15%, 52% { transform: scaleY(1); opacity: 1; }
+          65%, 100% { transform: scaleY(1); opacity: 0.2; }
+        }
+        @keyframes explorerBarGrow1 {
+          0%, 9% { transform: scaleY(0); opacity: 0; }
+          20%, 52% { transform: scaleY(1); opacity: 1; }
+          65%, 100% { transform: scaleY(1); opacity: 0.2; }
+        }
+        @keyframes explorerBarGrow2 {
+          0%, 13% { transform: scaleY(0); opacity: 0; }
+          25%, 52% { transform: scaleY(1); opacity: 1; }
+          65%, 100% { transform: scaleY(1); opacity: 0.2; }
+        }
+        @keyframes explorerBarGrow3 {
+          0%, 17% { transform: scaleY(0); opacity: 0; }
+          30%, 52% { transform: scaleY(1); opacity: 1; }
+          65%, 100% { transform: scaleY(1); opacity: 0.2; }
+        }
+        @keyframes explorerBarGrow4 {
+          0%, 21% { transform: scaleY(0); opacity: 0; }
+          35%, 52% { transform: scaleY(1); opacity: 1; }
+          65%, 100% { transform: scaleY(1); opacity: 0.2; }
+        }
+        /* Pie chart segments rotate into view */
+        @keyframes explorerPieSegA {
+          0%, 6% { opacity: 0; transform: rotate(-90deg) scale(0.5); }
+          20%, 52% { opacity: 1; transform: rotate(0deg) scale(1); }
+          65%, 100% { opacity: 0.2; transform: rotate(0deg) scale(1); }
+        }
+        @keyframes explorerPieSegB {
+          0%, 12% { opacity: 0; transform: rotate(90deg) scale(0.5); }
+          26%, 52% { opacity: 1; transform: rotate(0deg) scale(1); }
+          65%, 100% { opacity: 0.2; transform: rotate(0deg) scale(1); }
+        }
+        @keyframes explorerPieSegC {
+          0%, 18% { opacity: 0; transform: rotate(-120deg) scale(0.5); }
+          32%, 52% { opacity: 1; transform: rotate(0deg) scale(1); }
+          65%, 100% { opacity: 0.2; transform: rotate(0deg) scale(1); }
+        }
+        /* Data table rows slide in one by one */
+        @keyframes explorerRowSlide {
+          0%, 30% { transform: translateX(16px); opacity: 0; }
+          42%, 55% { transform: translateX(0); opacity: 0.85; }
+          68%, 100% { transform: translateX(0); opacity: 0.15; }
+        }
+        /* Dashboard cards fade and scale in */
+        @keyframes explorerCardIn {
+          0%, 45% { transform: scale(0.85) translateY(8px); opacity: 0; }
+          56%, 65% { transform: scale(1) translateY(0); opacity: 0.9; }
+          78%, 100% { transform: scale(1) translateY(0); opacity: 0.15; }
+        }
+        /* Subtle overall float */
+        @keyframes explorerFloat {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-2px); }
+        }
+        /* Axis line fade */
+        @keyframes explorerAxisIn {
+          0%, 3% { opacity: 0; transform: scaleX(0); }
+          12%, 55% { opacity: 0.5; transform: scaleX(1); }
+          68%, 100% { opacity: 0.1; transform: scaleX(1); }
+        }
+        @keyframes explorerAxisYIn {
+          0%, 3% { opacity: 0; transform: scaleY(0); }
+          12%, 55% { opacity: 0.5; transform: scaleY(1); }
+          68%, 100% { opacity: 0.1; transform: scaleY(1); }
+        }
+      `}</style>
+
+      <div style={{ animation: 'explorerFloat 7s ease-in-out infinite' }}>
+        {/* ── Bar Chart (left section) ── */}
+        <div style={{ position: 'absolute', left: 0, top: 10, width: 100, height: 120 }}>
+          {/* Y axis */}
+          <div style={{
+            position: 'absolute', left: 0, top: 0, width: 2, height: 100,
+            background: 'linear-gradient(180deg, rgba(99,102,241,0.3), rgba(16,185,129,0.3))',
+            borderRadius: 1,
+            transformOrigin: 'top center',
+            animation: 'explorerAxisYIn 9s ease-out infinite',
+          }} />
+          {/* X axis */}
+          <div style={{
+            position: 'absolute', left: 0, top: 100, width: 95, height: 2,
+            background: 'linear-gradient(90deg, rgba(99,102,241,0.3), rgba(16,185,129,0.3))',
+            borderRadius: 1,
+            transformOrigin: 'left center',
+            animation: 'explorerAxisIn 9s ease-out infinite',
+          }} />
+          {/* Bar columns */}
+          {[
+            { h: 60, color: 'linear-gradient(180deg, var(--oe-blue), #6366f1)', idx: 0 },
+            { h: 82, color: 'linear-gradient(180deg, #6366f1, #8b5cf6)', idx: 1 },
+            { h: 45, color: 'linear-gradient(180deg, #10b981, #059669)', idx: 2 },
+            { h: 72, color: 'linear-gradient(180deg, var(--oe-blue), #3b82f6)', idx: 3 },
+            { h: 55, color: 'linear-gradient(180deg, #10b981, #34d399)', idx: 4 },
+          ].map((bar, i) => (
+            <div key={i} style={{
+              position: 'absolute',
+              left: 8 + i * 18,
+              bottom: 20,
+              width: 12,
+              height: bar.h,
+              borderRadius: '3px 3px 0 0',
+              background: bar.color,
+              transformOrigin: 'bottom center',
+              animation: `explorerBarGrow${bar.idx} 9s ease-out infinite`,
+              boxShadow: '0 -2px 6px rgba(99,102,241,0.08)',
+            }} />
+          ))}
+          {/* Bar chart label placeholder */}
+          <div style={{
+            position: 'absolute', left: 8, top: 106, width: 82, height: 4,
+            borderRadius: 2,
+            background: 'rgba(99,102,241,0.1)',
+            animation: 'explorerAxisIn 9s ease-out infinite',
+          }} />
+        </div>
+
+        {/* ── Pie Chart (center-top section) ── */}
+        <div style={{ position: 'absolute', left: 110, top: 6, width: 52, height: 52 }}>
+          {/* Pie segment A — large slice (top-right) */}
+          <div style={{
+            position: 'absolute', left: 0, top: 0, width: 52, height: 52,
+            borderRadius: '50%',
+            background: `conic-gradient(
+              var(--oe-blue) 0deg 140deg,
+              transparent 140deg 360deg
+            )`,
+            transformOrigin: 'center center',
+            animation: 'explorerPieSegA 9s ease-out infinite',
+          }} />
+          {/* Pie segment B — medium slice */}
+          <div style={{
+            position: 'absolute', left: 0, top: 0, width: 52, height: 52,
+            borderRadius: '50%',
+            background: `conic-gradient(
+              transparent 0deg 140deg,
+              #10b981 140deg 250deg,
+              transparent 250deg 360deg
+            )`,
+            transformOrigin: 'center center',
+            animation: 'explorerPieSegB 9s ease-out infinite',
+          }} />
+          {/* Pie segment C — small slice */}
+          <div style={{
+            position: 'absolute', left: 0, top: 0, width: 52, height: 52,
+            borderRadius: '50%',
+            background: `conic-gradient(
+              transparent 0deg 250deg,
+              #8b5cf6 250deg 330deg,
+              transparent 330deg 360deg
+            )`,
+            transformOrigin: 'center center',
+            animation: 'explorerPieSegC 9s ease-out infinite',
+          }} />
+          {/* Remaining slice (static, appears last) */}
+          <div style={{
+            position: 'absolute', left: 0, top: 0, width: 52, height: 52,
+            borderRadius: '50%',
+            background: `conic-gradient(
+              transparent 0deg 330deg,
+              rgba(99,102,241,0.25) 330deg 360deg
+            )`,
+            transformOrigin: 'center center',
+            animation: 'explorerPieSegC 9s ease-out infinite',
+            animationDelay: '0.2s',
+          }} />
+          {/* Center hole (donut) */}
+          <div style={{
+            position: 'absolute', left: 14, top: 14, width: 24, height: 24,
+            borderRadius: '50%',
+            background: 'var(--surface-primary, #ffffff)',
+            boxShadow: 'inset 0 0 8px rgba(0,0,0,0.03)',
+          }} />
+        </div>
+
+        {/* ── Data Table Rows (right section) ── */}
+        <div style={{ position: 'absolute', right: 0, top: 8, width: 80, height: 110 }}>
+          {/* Table header */}
+          <div style={{
+            display: 'flex', gap: 2, marginBottom: 4,
+            animation: 'explorerRowSlide 9s ease-out infinite',
+          }}>
+            <div style={{ flex: 2, height: 9, borderRadius: '4px 0 0 0', background: 'linear-gradient(90deg, var(--oe-blue), #6366f1)' }} />
+            <div style={{ flex: 1, height: 9, borderRadius: '0 4px 0 0', background: 'linear-gradient(90deg, #6366f1, #8b5cf6)' }} />
+          </div>
+          {/* Table data rows */}
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <div key={i} style={{
+              display: 'flex', gap: 2, marginBottom: 3,
+              animation: 'explorerRowSlide 9s ease-out infinite',
+              animationDelay: `${0.1 + i * 0.08}s`,
+            }}>
+              <div style={{
+                flex: 2, height: 7, borderRadius: 2,
+                background: i % 2 === 0
+                  ? 'rgba(99,102,241,0.12)'
+                  : 'rgba(16,185,129,0.12)',
+              }} />
+              <div style={{
+                flex: 1, height: 7, borderRadius: 2,
+                background: 'rgba(139,92,246,0.1)',
+              }} />
+            </div>
+          ))}
+        </div>
+
+        {/* ── Dashboard Mini Cards (bottom center) ── */}
+        <div style={{ position: 'absolute', left: 106, bottom: 2, display: 'flex', gap: 6 }}>
+          {[
+            { w: 46, bg: 'linear-gradient(135deg, rgba(59,130,246,0.1), rgba(99,102,241,0.05))', border: 'rgba(59,130,246,0.15)' },
+            { w: 46, bg: 'linear-gradient(135deg, rgba(16,185,129,0.1), rgba(5,150,105,0.05))', border: 'rgba(16,185,129,0.15)' },
+            { w: 46, bg: 'linear-gradient(135deg, rgba(139,92,246,0.1), rgba(99,102,241,0.05))', border: 'rgba(139,92,246,0.15)' },
+          ].map((card, i) => (
+            <div key={i} style={{
+              width: card.w, height: 36, borderRadius: 6,
+              background: card.bg,
+              border: `1px solid ${card.border}`,
+              animation: 'explorerCardIn 9s ease-out infinite',
+              animationDelay: `${i * 0.15}s`,
+              display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
+              justifyContent: 'center', padding: '0 6px', gap: 3,
+            }}>
+              {/* Mini stat line */}
+              <div style={{ width: '60%', height: 4, borderRadius: 2, background: i === 0 ? 'rgba(59,130,246,0.25)' : i === 1 ? 'rgba(16,185,129,0.25)' : 'rgba(139,92,246,0.25)' }} />
+              <div style={{ width: '40%', height: 3, borderRadius: 2, background: 'rgba(99,102,241,0.1)' }} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ConverterStatus() {
   const { t } = useTranslation();
   const { data } = useQuery({
@@ -1720,9 +1963,7 @@ export function CadDataExplorerPage() {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-48 rounded-full bg-emerald-500/5 blur-3xl" />
           </div>
 
-          <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-oe-blue to-blue-600 shadow-lg shadow-oe-blue/20 mb-6">
-            <Database size={36} className="text-white" />
-          </div>
+          <DataExplorerEmptyAnimation />
           <h1 className="text-3xl sm:text-4xl font-extrabold text-content-primary mb-3 tracking-tight">
             {t('explorer.hero_title', { defaultValue: 'CAD/BIM Data Explorer' })}
           </h1>

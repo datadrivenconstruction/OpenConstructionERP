@@ -17,17 +17,6 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
-
-_logger_ev = __import__("logging").getLogger(__name__ + ".events")
-
-
-async def _safe_publish(name: str, data: dict, source_module: str = "") -> None:
-    try:
-        await event_bus.publish(name, data, source_module=source_module)
-    except Exception:
-        _logger_ev.debug("Event publish skipped: %s", name)
-
-
 from app.modules.assemblies.models import Assembly, Component
 from app.modules.assemblies.repository import AssemblyRepository, ComponentRepository
 from app.modules.assemblies.schemas import (
@@ -41,6 +30,15 @@ from app.modules.assemblies.schemas import (
     ComponentResponse,
     ComponentUpdate,
 )
+
+_logger_ev = logging.getLogger(__name__ + ".events")
+
+
+async def _safe_publish(name: str, data: dict, source_module: str = "") -> None:
+    try:
+        await event_bus.publish(name, data, source_module=source_module)
+    except Exception:
+        _logger_ev.debug("Event publish skipped: %s", name)
 
 logger = logging.getLogger(__name__)
 
@@ -952,7 +950,7 @@ class AssemblyService:
         usage: dict[str, int] = {str(aid): 0 for aid in assembly_ids}
 
         try:
-            from sqlalchemy import select as sa_select, cast, String as SAString
+            from sqlalchemy import select as sa_select
 
             from app.modules.boq.models import BOQPosition
 

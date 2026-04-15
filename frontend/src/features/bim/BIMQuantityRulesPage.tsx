@@ -38,6 +38,9 @@ import {
   BookOpen,
   Sparkles,
   ChevronRight,
+  ClipboardCheck,
+  Shield,
+  Search,
 } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -57,6 +60,28 @@ import {
   type QuantityMapTarget,
 } from './api';
 import { boqApi, type BOQ, type Position } from '@/features/boq/api';
+import {
+  type BIMFormat,
+  getCategoriesForFormat,
+  getFilterParamsForFormat,
+  getPropertyNamesForFormat,
+  CONSTRAINT_TYPES,
+  CONSTRAINT_TYPE_LABELS,
+  type ConstraintType,
+} from './bimConstants';
+import {
+  fetchRequirementSets,
+  fetchRequirementSetDetail,
+  createRequirementSet,
+  deleteRequirementSet,
+  addRequirement,
+  updateRequirement,
+  deleteRequirement,
+  type Requirement,
+  type RequirementSet,
+  type AddRequirementPayload,
+  type UpdateRequirementPayload,
+} from '@/features/requirements/api';
 
 /* ── Form state types ─────────────────────────────────────────────────── */
 
@@ -925,6 +950,870 @@ function StatCard({ label, value }: { label: string; value: number }) {
   );
 }
 
+/* ── Tabs ─────────────────────────────────────────────────────────────── */
+
+type RulesTab = 'quantity_rules' | 'requirements';
+
+/* ── Requirements Rule Editor (three-column) ─────────────────────────── */
+
+interface RequirementRuleForm {
+  format: BIMFormat;
+  /** Column 1: main filter parameter + value */
+  filter_param: string;
+  filter_value: string;
+  /** Column 2: parameter to check */
+  check_param: string;
+  /** Column 3: constraint type + value/pattern */
+  constraint_type: ConstraintType;
+  constraint_value: string;
+  /** Extra fields */
+  category: string;
+  priority: string;
+  source_ref: string;
+  notes: string;
+}
+
+function blankRequirementForm(): RequirementRuleForm {
+  return {
+    format: 'revit',
+    filter_param: 'Category',
+    filter_value: '',
+    check_param: '',
+    constraint_type: 'min',
+    constraint_value: '',
+    category: 'structural',
+    priority: 'must',
+    source_ref: '',
+    notes: '',
+  };
+}
+
+const REQ_CATEGORIES = [
+  'structural', 'fire_safety', 'thermal', 'acoustic',
+  'waterproofing', 'electrical', 'mechanical', 'architectural',
+] as const;
+
+const REQ_PRIORITIES = ['must', 'should', 'may'] as const;
+
+interface RequirementRuleEditorProps {
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (form: RequirementRuleForm) => void;
+  submitting: boolean;
+  initial?: RequirementRuleForm;
+  mode: 'create' | 'edit' | 'from_model';
+  /** When mode='from_model', model-derived parameter names and values. */
+  modelParams?: { params: string[]; values: Record<string, string[]> };
+}
+
+function RequirementRuleEditor({
+  open,
+  onClose,
+  onSubmit,
+  submitting,
+  initial,
+  mode,
+  modelParams,
+}: RequirementRuleEditorProps) {
+  const { t } = useTranslation();
+  const [form, setForm] = useState<RequirementRuleForm>(initial || blankRequirementForm());
+
+  useEffect(() => {
+    if (open) setForm(initial || blankRequirementForm());
+  }, [open, initial]);
+
+  const categories = useMemo(() => getCategoriesForFormat(form.format), [form.format]);
+  const filterParams = useMemo(() => getFilterParamsForFormat(form.format), [form.format]);
+  const propertyNames = useMemo(() => {
+    if (mode === 'from_model' && modelParams?.params) {
+      return modelParams.params;
+    }
+    return [...getPropertyNamesForFormat(form.format)];
+  }, [form.format, mode, modelParams]);
+
+  const filterValues = useMemo(() => {
+    if (mode === 'from_model' && modelParams?.values?.[form.filter_param]) {
+      return modelParams.values[form.filter_param]!;
+    }
+    // For manual mode, use the category list for the Category parameter
+    if (form.filter_param === 'Category' || form.filter_param === 'category') {
+      return [...categories];
+    }
+    return [];
+  }, [form.filter_param, mode, modelParams, categories]);
+
+  const [paramSearch, setParamSearch] = useState('');
+  const filteredPropertyNames = useMemo(() => {
+    const q = paramSearch.trim().toLowerCase();
+    if (!q) return propertyNames.slice(0, 50);
+    return propertyNames.filter((p) => p.toLowerCase().includes(q)).slice(0, 50);
+  }, [propertyNames, paramSearch]);
+
+  const set = useCallback(
+    <K extends keyof RequirementRuleForm>(key: K, value: RequirementRuleForm[K]) => {
+      setForm((prev) => ({ ...prev, [key]: value }));
+    },
+    [],
+  );
+
+  const handleSubmit = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault();
+      if (!form.filter_value.trim() || !form.check_param.trim() || !form.constraint_value.trim()) {
+        return;
+      }
+      onSubmit(form);
+    },
+    [form, onSubmit],
+  );
+
+  if (!open) return null;
+
+  const title =
+    mode === 'edit'
+      ? t('bim_rules.req_edit', { defaultValue: 'Edit Requirement Rule' })
+      : mode === 'from_model'
+        ? t('bim_rules.req_from_model', { defaultValue: 'Create from BIM Model' })
+        : t('bim_rules.req_new', { defaultValue: 'New Requirement Rule' });
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-border-light bg-surface-primary shadow-2xl"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-border-light px-5 py-4">
+          <div className="flex items-center gap-2">
+            <Shield size={18} className="text-oe-blue" />
+            <h2 className="text-base font-semibold text-content-primary">{title}</h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg p-1 text-content-secondary hover:bg-surface-secondary"
+            aria-label={t('common.close', { defaultValue: 'Close' })}
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+          <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4">
+            {/* Format selection */}
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-content-secondary">
+                {t('bim_rules.req_format', { defaultValue: 'BIM Format' })}
+              </label>
+              <div className="flex gap-3">
+                {(['revit', 'ifc'] as BIMFormat[]).map((fmt) => (
+                  <label
+                    key={fmt}
+                    className={clsx(
+                      'flex items-center gap-2 rounded-lg border px-4 py-2 text-xs font-medium cursor-pointer transition-all',
+                      form.format === fmt
+                        ? 'border-oe-blue bg-oe-blue/5 text-oe-blue'
+                        : 'border-border-light text-content-secondary hover:border-content-tertiary',
+                    )}
+                  >
+                    <input
+                      type="radio"
+                      name="bim-format"
+                      value={fmt}
+                      checked={form.format === fmt}
+                      onChange={() => {
+                        set('format', fmt);
+                        set('filter_param', getFilterParamsForFormat(fmt)[0] ?? '');
+                        set('filter_value', '');
+                        set('check_param', '');
+                      }}
+                      className="sr-only"
+                    />
+                    {fmt === 'revit' ? 'Revit' : 'IFC'}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Three-column rule editor */}
+            <div className="rounded-lg border border-border-light bg-surface-secondary/30 p-4">
+              <p className="mb-3 text-xs font-semibold text-content-secondary uppercase tracking-wide">
+                {t('bim_rules.req_rule_definition', { defaultValue: 'Rule Definition' })}
+              </p>
+              <div className="grid grid-cols-3 gap-4">
+                {/* Column 1: Filter */}
+                <div className="space-y-2">
+                  <p className="text-[11px] font-semibold text-content-tertiary">
+                    {t('bim_rules.req_col1', { defaultValue: '1. Filter elements by' })}
+                  </p>
+                  <select
+                    value={form.filter_param}
+                    onChange={(e) => {
+                      set('filter_param', e.target.value);
+                      set('filter_value', '');
+                    }}
+                    className="w-full rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+                  >
+                    {filterParams.map((p) => (
+                      <option key={p} value={p}>
+                        {p}
+                      </option>
+                    ))}
+                  </select>
+                  {filterValues.length > 0 ? (
+                    <select
+                      value={form.filter_value}
+                      onChange={(e) => set('filter_value', e.target.value)}
+                      className="w-full rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+                    >
+                      <option value="">
+                        {t('bim_rules.req_select_value', { defaultValue: 'Select...' })}
+                      </option>
+                      {filterValues.map((v) => (
+                        <option key={v} value={v}>
+                          {v}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={form.filter_value}
+                      onChange={(e) => set('filter_value', e.target.value)}
+                      placeholder={t('bim_rules.req_filter_value', {
+                        defaultValue: 'e.g. Walls, IfcWall',
+                      })}
+                      className="w-full rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+                    />
+                  )}
+                </div>
+
+                {/* Column 2: Parameter to check */}
+                <div className="space-y-2">
+                  <p className="text-[11px] font-semibold text-content-tertiary">
+                    {t('bim_rules.req_col2', { defaultValue: '2. Parameter to check' })}
+                  </p>
+                  <div className="relative">
+                    <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-content-tertiary" />
+                    <input
+                      type="text"
+                      value={paramSearch}
+                      onChange={(e) => setParamSearch(e.target.value)}
+                      placeholder={t('bim_rules.req_search_param', { defaultValue: 'Search parameter...' })}
+                      className="w-full rounded-lg border border-border-light bg-surface-primary pl-7 pr-2 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+                    />
+                  </div>
+                  <select
+                    value={form.check_param}
+                    onChange={(e) => set('check_param', e.target.value)}
+                    size={5}
+                    className="w-full rounded-lg border border-border-light bg-surface-primary px-2 py-1 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+                  >
+                    {filteredPropertyNames.map((p) => (
+                      <option key={p} value={p}>
+                        {p}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    value={form.check_param}
+                    onChange={(e) => set('check_param', e.target.value)}
+                    placeholder={t('bim_rules.req_custom_param', {
+                      defaultValue: 'Or type custom...',
+                    })}
+                    className="w-full rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 font-mono text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+                  />
+                </div>
+
+                {/* Column 3: Constraint */}
+                <div className="space-y-2">
+                  <p className="text-[11px] font-semibold text-content-tertiary">
+                    {t('bim_rules.req_col3', { defaultValue: '3. Constraint / boundary' })}
+                  </p>
+                  <select
+                    value={form.constraint_type}
+                    onChange={(e) => set('constraint_type', e.target.value as ConstraintType)}
+                    className="w-full rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none"
+                  >
+                    {CONSTRAINT_TYPES.map((ct) => (
+                      <option key={ct} value={ct}>
+                        {CONSTRAINT_TYPE_LABELS[ct]}
+                      </option>
+                    ))}
+                  </select>
+                  {form.constraint_type !== 'exists' && form.constraint_type !== 'not_exists' && (
+                    <input
+                      type="text"
+                      value={form.constraint_value}
+                      onChange={(e) => set('constraint_value', e.target.value)}
+                      placeholder={
+                        form.constraint_type === 'regex'
+                          ? '^F[0-9]+$'
+                          : form.constraint_type === 'range'
+                            ? '200..400'
+                            : 'Value'
+                      }
+                      className={clsx(
+                        'w-full rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-xs text-content-primary focus:border-oe-blue focus:outline-none',
+                        form.constraint_type === 'regex' && 'font-mono',
+                      )}
+                    />
+                  )}
+                  {form.constraint_type === 'regex' && form.constraint_value && (() => {
+                    try {
+                      new RegExp(form.constraint_value);
+                      return (
+                        <p className="text-[10px] text-green-600">
+                          {t('bim_rules.regex_valid', { defaultValue: 'Valid pattern' })}
+                        </p>
+                      );
+                    } catch {
+                      return (
+                        <p className="text-[10px] text-red-500">
+                          {t('bim_rules.regex_invalid', { defaultValue: 'Invalid pattern' })}
+                        </p>
+                      );
+                    }
+                  })()}
+                </div>
+              </div>
+            </div>
+
+            {/* Category + Priority */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-content-secondary">
+                  {t('bim_rules.req_category', { defaultValue: 'Category' })}
+                </label>
+                <select
+                  value={form.category}
+                  onChange={(e) => set('category', e.target.value)}
+                  className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none"
+                >
+                  {REQ_CATEGORIES.map((c) => (
+                    <option key={c} value={c}>
+                      {t(`requirements.cat_${c}`, { defaultValue: c.replace(/_/g, ' ') })}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-content-secondary">
+                  {t('bim_rules.req_priority', { defaultValue: 'Priority' })}
+                </label>
+                <div className="flex gap-2">
+                  {REQ_PRIORITIES.map((p) => {
+                    const color =
+                      p === 'must'
+                        ? 'border-red-400/50 bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                        : p === 'should'
+                          ? 'border-amber-400/50 bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400'
+                          : 'border-oe-blue/50 bg-oe-blue/5 text-oe-blue';
+                    return (
+                      <label
+                        key={p}
+                        className={clsx(
+                          'flex-1 cursor-pointer rounded-lg border px-3 py-1.5 text-center text-xs font-medium transition-all',
+                          form.priority === p
+                            ? color
+                            : 'border-border-light text-content-secondary hover:border-content-tertiary',
+                        )}
+                      >
+                        <input
+                          type="radio"
+                          name="req-priority"
+                          value={p}
+                          checked={form.priority === p}
+                          onChange={() => set('priority', p)}
+                          className="sr-only"
+                        />
+                        {p.charAt(0).toUpperCase() + p.slice(1)}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Source + Notes */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-content-secondary">
+                  {t('bim_rules.req_source_ref', { defaultValue: 'Source Reference' })}
+                </label>
+                <input
+                  type="text"
+                  value={form.source_ref}
+                  onChange={(e) => set('source_ref', e.target.value)}
+                  placeholder={t('bim_rules.req_source_placeholder', {
+                    defaultValue: 'e.g. Drawing A-101, DIN 4102',
+                  })}
+                  className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-content-secondary">
+                  {t('bim_rules.req_notes', { defaultValue: 'Notes' })}
+                </label>
+                <input
+                  type="text"
+                  value={form.notes}
+                  onChange={(e) => set('notes', e.target.value)}
+                  className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary focus:border-oe-blue focus:outline-none"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="flex items-center justify-end gap-2 border-t border-border-light bg-surface-secondary px-5 py-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-xs font-medium text-content-secondary hover:bg-surface-tertiary"
+            >
+              {t('common.cancel', { defaultValue: 'Cancel' })}
+            </button>
+            <button
+              type="submit"
+              disabled={
+                submitting ||
+                !form.filter_value.trim() ||
+                !form.check_param.trim() ||
+                (!form.constraint_value.trim() &&
+                  form.constraint_type !== 'exists' &&
+                  form.constraint_type !== 'not_exists')
+              }
+              className="flex items-center gap-1.5 rounded-lg bg-oe-blue px-4 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-oe-blue-dark disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {submitting && <Loader2 size={12} className="animate-spin" />}
+              {t('common.save', { defaultValue: 'Save' })}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+/* ── Requirements Tab Content ────────────────────────────────────────── */
+
+function RequirementsTabContent({
+  projectId,
+  elements,
+}: {
+  projectId: string | null;
+  elements?: Array<{ element_type?: string; properties?: Record<string, unknown> }>;
+}) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
+
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editorMode, setEditorMode] = useState<'create' | 'edit' | 'from_model'>('create');
+  const [editorInitial, setEditorInitial] = useState<RequirementRuleForm | undefined>();
+  const [editingReqId, setEditingReqId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeSetId, setActiveSetId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
+  // Fetch requirement sets for project
+  const { data: sets = [], isLoading: setsLoading } = useQuery({
+    queryKey: ['requirement-sets', projectId],
+    queryFn: () => (projectId ? fetchRequirementSets(projectId) : Promise.resolve([] as RequirementSet[])),
+    enabled: !!projectId,
+  });
+
+  const currentSetId = activeSetId || sets[0]?.id || '';
+
+  const { data: detail, isLoading: detailLoading } = useQuery({
+    queryKey: ['requirement-set-detail', currentSetId],
+    queryFn: () => fetchRequirementSetDetail(currentSetId),
+    enabled: !!currentSetId,
+  });
+
+  const requirements = detail?.requirements ?? [];
+
+  const filteredReqs = useMemo(() => {
+    if (!searchQuery.trim()) return requirements;
+    const q = searchQuery.toLowerCase();
+    return requirements.filter(
+      (r) =>
+        r.entity.toLowerCase().includes(q) ||
+        r.attribute.toLowerCase().includes(q) ||
+        r.constraint_value.toLowerCase().includes(q),
+    );
+  }, [requirements, searchQuery]);
+
+  const invalidateAll = useCallback(() => {
+    qc.invalidateQueries({ queryKey: ['requirement-sets'] });
+    qc.invalidateQueries({ queryKey: ['requirement-set-detail'] });
+  }, [qc]);
+
+  // Model-derived parameter names for "from model" mode
+  const modelParams = useMemo(() => {
+    if (!elements || elements.length === 0) return undefined;
+    const paramSet = new Set<string>();
+    const valueMap: Record<string, Set<string>> = {};
+    for (const el of elements) {
+      if (el.element_type) {
+        if (!valueMap['Category']) valueMap['Category'] = new Set();
+        valueMap['Category']!.add(el.element_type);
+      }
+      if (el.properties) {
+        for (const [k, v] of Object.entries(el.properties)) {
+          paramSet.add(k);
+          if (typeof v === 'string' || typeof v === 'number') {
+            if (!valueMap[k]) valueMap[k] = new Set();
+            valueMap[k]!.add(String(v));
+          }
+        }
+      }
+    }
+    return {
+      params: Array.from(paramSet).sort(),
+      values: Object.fromEntries(
+        Object.entries(valueMap).map(([k, s]) => [k, Array.from(s).sort()]),
+      ),
+    };
+  }, [elements]);
+
+  // Create set mutation
+  const createSetMut = useMutation({
+    mutationFn: (name: string) =>
+      createRequirementSet({
+        project_id: projectId!,
+        name,
+        description: 'Created from BIM Rules page',
+      }),
+    onSuccess: () => {
+      invalidateAll();
+      addToast({ type: 'success', title: t('bim_rules.req_set_created', { defaultValue: 'Requirement set created' }) });
+    },
+    onError: (e: Error) => addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: e.message }),
+  });
+
+  // Add requirement mutation
+  const addMut = useMutation({
+    mutationFn: (data: AddRequirementPayload) => addRequirement(currentSetId, data),
+    onSuccess: () => {
+      invalidateAll();
+      setEditorOpen(false);
+      addToast({ type: 'success', title: t('bim_rules.req_added', { defaultValue: 'Requirement rule added' }) });
+    },
+    onError: (e: Error) => addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: e.message }),
+  });
+
+  // Update requirement mutation
+  const editMut = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateRequirementPayload }) =>
+      updateRequirement(currentSetId, id, data),
+    onSuccess: () => {
+      invalidateAll();
+      setEditorOpen(false);
+      setEditingReqId(null);
+      addToast({ type: 'success', title: t('bim_rules.req_updated', { defaultValue: 'Requirement rule updated' }) });
+    },
+    onError: (e: Error) => addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: e.message }),
+  });
+
+  // Delete requirement mutation
+  const delMut = useMutation({
+    mutationFn: (reqId: string) => deleteRequirement(currentSetId, reqId),
+    onSuccess: () => {
+      invalidateAll();
+      setConfirmDeleteId(null);
+      addToast({ type: 'success', title: t('bim_rules.req_deleted', { defaultValue: 'Requirement rule deleted' }) });
+    },
+    onError: (e: Error) => addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: e.message }),
+  });
+
+  // Delete set mutation
+  const delSetMut = useMutation({
+    mutationFn: (setId: string) => deleteRequirementSet(setId),
+    onSuccess: () => {
+      invalidateAll();
+      setActiveSetId(null);
+    },
+    onError: (e: Error) => addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: e.message }),
+  });
+
+  const handleSubmit = useCallback(
+    (form: RequirementRuleForm) => {
+      const payload: AddRequirementPayload = {
+        entity: form.filter_value,
+        attribute: form.check_param,
+        constraint_type: form.constraint_type,
+        constraint_value:
+          form.constraint_type === 'exists' || form.constraint_type === 'not_exists'
+            ? '*'
+            : form.constraint_value,
+        unit: '',
+        category: form.category,
+        priority: form.priority,
+        source_ref: form.source_ref,
+        notes: `[${form.format.toUpperCase()}] ${form.filter_param}=${form.filter_value} | ${form.notes}`,
+      };
+      if (editorMode === 'edit' && editingReqId) {
+        editMut.mutate({ id: editingReqId, data: payload });
+      } else {
+        addMut.mutate(payload);
+      }
+    },
+    [editorMode, editingReqId, addMut, editMut],
+  );
+
+  const openCreate = useCallback(() => {
+    setEditorMode('create');
+    setEditingReqId(null);
+    setEditorInitial(undefined);
+    setEditorOpen(true);
+  }, []);
+
+  const openFromModel = useCallback(() => {
+    setEditorMode('from_model');
+    setEditingReqId(null);
+    setEditorInitial(undefined);
+    setEditorOpen(true);
+  }, []);
+
+  const openEdit = useCallback((req: Requirement) => {
+    setEditorMode('edit');
+    setEditingReqId(req.id);
+    // Attempt to parse the notes for format info
+    const notesMatch = req.notes?.match(/^\[(\w+)\]\s*([\w\s]+)=(.*?)\s*\|/);
+    const format: BIMFormat =
+      notesMatch?.[1]?.toLowerCase() === 'ifc' ? 'ifc' : 'revit';
+    const filterParam = notesMatch?.[2]?.trim() || 'Category';
+    setEditorInitial({
+      format,
+      filter_param: filterParam,
+      filter_value: req.entity,
+      check_param: req.attribute,
+      constraint_type: (CONSTRAINT_TYPES as readonly string[]).includes(req.constraint_type)
+        ? (req.constraint_type as ConstraintType)
+        : 'equals',
+      constraint_value: req.constraint_value,
+      category: req.category,
+      priority: req.priority,
+      source_ref: req.source_ref,
+      notes: notesMatch ? req.notes.replace(notesMatch[0], '').trim() : req.notes,
+    });
+    setEditorOpen(true);
+  }, []);
+
+  const isLoading = setsLoading || detailLoading;
+
+  const priorityColor = (p: string) => {
+    if (p === 'must') return 'error' as const;
+    if (p === 'should') return 'warning' as const;
+    return 'blue' as const;
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Toolbar */}
+      <div className="flex flex-wrap items-center gap-2">
+        {sets.length > 0 && (
+          <select
+            value={currentSetId}
+            onChange={(e) => setActiveSetId(e.target.value)}
+            className="rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-[11px] text-content-primary focus:border-oe-blue focus:outline-none"
+          >
+            {sets.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+        )}
+        {!currentSetId && projectId && (
+          <button
+            type="button"
+            onClick={() => createSetMut.mutate('BIM Requirements')}
+            disabled={createSetMut.isPending}
+            className="flex items-center gap-1 text-[11px] text-oe-blue font-medium hover:underline"
+          >
+            <Plus size={12} />
+            {t('bim_rules.req_new_set', { defaultValue: 'Create requirement set' })}
+          </button>
+        )}
+
+        <div className="relative flex-1 min-w-[200px]">
+          <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-content-tertiary" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t('bim_rules.req_search', { defaultValue: 'Search entity, attribute, value...' })}
+            className="w-full rounded-lg border border-border-light bg-surface-primary pl-8 pr-3 py-1.5 text-[11px] text-content-primary focus:border-oe-blue focus:outline-none"
+          />
+        </div>
+
+        <div className="ml-auto flex items-center gap-2">
+          {elements && elements.length > 0 && (
+            <button
+              type="button"
+              onClick={openFromModel}
+              className="flex items-center gap-1.5 rounded-lg border border-oe-blue/40 bg-oe-blue/5 px-3 py-1.5 text-[11px] font-medium text-oe-blue hover:bg-oe-blue/10"
+            >
+              <Sparkles size={12} />
+              {t('bim_rules.req_from_model_btn', { defaultValue: 'From BIM Model' })}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={openCreate}
+            disabled={!currentSetId}
+            className="flex items-center gap-1.5 rounded-lg bg-oe-blue px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm hover:bg-oe-blue-dark disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <Plus size={13} />
+            {t('bim_rules.req_new_rule', { defaultValue: 'New Rule' })}
+          </button>
+        </div>
+      </div>
+
+      {/* Content */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12 text-sm text-content-secondary">
+          <Loader2 size={18} className="mr-2 animate-spin" />
+          {t('common.loading', { defaultValue: 'Loading...' })}
+        </div>
+      ) : !currentSetId || filteredReqs.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border-light bg-surface-secondary/30 px-6 py-12 text-center">
+          <Shield size={28} className="mx-auto mb-2 text-content-tertiary" />
+          <p className="text-sm font-medium text-content-secondary">
+            {!currentSetId
+              ? t('bim_rules.req_no_set', { defaultValue: 'Create a requirement set to start adding rules.' })
+              : t('bim_rules.req_empty', { defaultValue: 'No requirement rules yet. Create your first rule.' })}
+          </p>
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-xl border border-border-light bg-surface-primary shadow-sm">
+          <table className="w-full text-left text-xs">
+            <thead className="border-b border-border-light bg-surface-secondary text-content-secondary">
+              <tr>
+                <th className="px-3 py-2 font-medium">
+                  {t('bim_rules.req_th_entity', { defaultValue: 'Entity (Filter)' })}
+                </th>
+                <th className="px-3 py-2 font-medium">
+                  {t('bim_rules.req_th_attribute', { defaultValue: 'Parameter' })}
+                </th>
+                <th className="px-3 py-2 font-medium">
+                  {t('bim_rules.req_th_constraint', { defaultValue: 'Constraint' })}
+                </th>
+                <th className="px-3 py-2 font-medium">
+                  {t('bim_rules.req_th_category', { defaultValue: 'Category' })}
+                </th>
+                <th className="px-3 py-2 font-medium">
+                  {t('bim_rules.req_th_priority', { defaultValue: 'Priority' })}
+                </th>
+                <th className="px-3 py-2 text-right font-medium">
+                  {t('bim_rules.col_actions', { defaultValue: 'Actions' })}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredReqs.map((req) => (
+                <tr
+                  key={req.id}
+                  className="border-t border-border-light text-content-primary hover:bg-surface-secondary"
+                >
+                  <td className="px-3 py-2 font-medium">{req.entity}</td>
+                  <td className="px-3 py-2 font-mono text-[11px] text-content-tertiary">
+                    {req.attribute}
+                  </td>
+                  <td className="px-3 py-2">
+                    <Badge variant="neutral" size="sm">
+                      {req.constraint_type}
+                    </Badge>
+                    <span className="ml-1 font-mono text-[11px]">
+                      {req.constraint_value}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2 text-[11px]">
+                    {t(`requirements.cat_${req.category}`, {
+                      defaultValue: req.category.replace(/_/g, ' '),
+                    })}
+                  </td>
+                  <td className="px-3 py-2">
+                    <Badge variant={priorityColor(req.priority)} size="sm">
+                      {req.priority}
+                    </Badge>
+                  </td>
+                  <td className="px-3 py-2">
+                    <div className="flex items-center justify-end gap-1">
+                      <button
+                        type="button"
+                        onClick={() => openEdit(req)}
+                        className="rounded p-1 text-content-secondary hover:bg-surface-tertiary hover:text-oe-blue"
+                        title={t('common.edit', { defaultValue: 'Edit' })}
+                      >
+                        <Pencil size={13} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDeleteId(req.id)}
+                        className="rounded p-1 text-content-secondary hover:bg-red-50 hover:text-red-600"
+                        title={t('common.delete', { defaultValue: 'Delete' })}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="border-t border-border-light bg-surface-secondary/30 px-3 py-2 text-[10px] text-content-tertiary flex items-center justify-between">
+            <span>
+              {filteredReqs.length} {t('bim_rules.req_rules_label', { defaultValue: 'requirement rules' })}
+            </span>
+            {currentSetId && (
+              <button
+                type="button"
+                onClick={() => delSetMut.mutate(currentSetId)}
+                className="text-content-quaternary hover:text-red-600"
+                title={t('bim_rules.req_delete_set', { defaultValue: 'Delete set' })}
+              >
+                <Trash2 size={12} />
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Editor modal */}
+      <RequirementRuleEditor
+        open={editorOpen}
+        onClose={() => { setEditorOpen(false); setEditingReqId(null); }}
+        onSubmit={handleSubmit}
+        submitting={addMut.isPending || editMut.isPending}
+        initial={editorInitial}
+        mode={editorMode}
+        modelParams={modelParams}
+      />
+
+      {/* Delete confirm */}
+      <ConfirmDialog
+        open={confirmDeleteId !== null}
+        onConfirm={() => {
+          if (confirmDeleteId) delMut.mutate(confirmDeleteId);
+        }}
+        onCancel={() => setConfirmDeleteId(null)}
+        title={t('bim_rules.req_confirm_delete', { defaultValue: 'Delete requirement rule?' })}
+        message={t('bim_rules.req_confirm_delete_msg', {
+          defaultValue: 'This requirement rule will be permanently removed.',
+        })}
+        loading={delMut.isPending}
+      />
+    </div>
+  );
+}
+
 /* ── Main page ────────────────────────────────────────────────────────── */
 
 export function BIMQuantityRulesPage() {
@@ -996,6 +1885,7 @@ export function BIMQuantityRulesPage() {
   /* ── State ─────────────────────────────────────────────────────────── */
 
   const [modelId, setModelId] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<RulesTab>('quantity_rules');
 
   useEffect(() => {
     const items = modelsQuery.data?.items ?? [];
@@ -1220,12 +2110,12 @@ export function BIMQuantityRulesPage() {
             </div>
             <div>
               <h1 className="text-lg font-semibold text-content-primary">
-                {t('bim_rules.page_title', { defaultValue: 'BIM Quantity Rules' })}
+                {t('bim_rules.page_title_combined', { defaultValue: 'BIM Rules & Requirements' })}
               </h1>
               <p className="text-xs text-content-secondary">
-                {t('bim_rules.page_subtitle', {
+                {t('bim_rules.page_subtitle_combined', {
                   defaultValue:
-                    'Define element-matching patterns and bulk-link them to BOQ positions.',
+                    'Quantity mapping rules and BIM requirement checks for your project.',
                 })}
                 {activeProjectName && (
                   <>
@@ -1238,18 +2128,51 @@ export function BIMQuantityRulesPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={openCreate}
-              className="flex items-center gap-1.5 rounded-lg bg-oe-blue px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm hover:bg-oe-blue-dark"
-            >
-              <Plus size={13} />
-              {t('bim_rules.new_rule', { defaultValue: 'New rule' })}
-            </button>
+            {activeTab === 'quantity_rules' && (
+              <button
+                type="button"
+                onClick={openCreate}
+                className="flex items-center gap-1.5 rounded-lg bg-oe-blue px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm hover:bg-oe-blue-dark"
+              >
+                <Plus size={13} />
+                {t('bim_rules.new_rule', { defaultValue: 'New rule' })}
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Toolbar */}
+        {/* Tabs */}
+        <div className="mt-4 flex border-b border-border-light -mb-px">
+          <button
+            type="button"
+            onClick={() => setActiveTab('quantity_rules')}
+            className={clsx(
+              'px-4 py-2 text-xs font-medium border-b-2 transition-colors flex items-center gap-1.5',
+              activeTab === 'quantity_rules'
+                ? 'border-oe-blue text-oe-blue'
+                : 'border-transparent text-content-tertiary hover:text-content-secondary hover:border-border-light',
+            )}
+          >
+            <SlidersHorizontal size={13} />
+            {t('bim_rules.tab_quantity_rules', { defaultValue: 'Quantity Rules' })}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('requirements')}
+            className={clsx(
+              'px-4 py-2 text-xs font-medium border-b-2 transition-colors flex items-center gap-1.5',
+              activeTab === 'requirements'
+                ? 'border-oe-blue text-oe-blue'
+                : 'border-transparent text-content-tertiary hover:text-content-secondary hover:border-border-light',
+            )}
+          >
+            <ClipboardCheck size={13} />
+            {t('bim_rules.tab_requirements', { defaultValue: 'Requirements' })}
+          </button>
+        </div>
+
+        {/* Toolbar (quantity rules tab only) */}
+        {activeTab === 'quantity_rules' && (
         <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-border-light bg-surface-secondary px-3 py-2">
           <div className="flex items-center gap-2">
             <Boxes size={14} className="text-content-tertiary" />
@@ -1306,11 +2229,14 @@ export function BIMQuantityRulesPage() {
             </button>
           </div>
         </div>
+        )}
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-auto p-6">
-        {rulesQuery.isLoading ? (
+        {activeTab === 'requirements' ? (
+          <RequirementsTabContent projectId={activeProjectId} />
+        ) : rulesQuery.isLoading ? (
           <div className="flex items-center justify-center py-16 text-sm text-content-secondary">
             <Loader2 size={18} className="mr-2 animate-spin" />
             {t('bim_rules.loading', { defaultValue: 'Loading rules…' })}

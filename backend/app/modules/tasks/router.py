@@ -73,6 +73,12 @@ def _compute_is_overdue(item: object) -> bool:
 
 def _to_response(item: object) -> TaskResponse:
     checklist = item.checklist or []  # type: ignore[attr-defined]
+    responsible_id = str(item.responsible_id) if item.responsible_id else None  # type: ignore[attr-defined]
+    # Derive completed_at from updated_at when status is "completed" (the model
+    # doesn't have a dedicated column, so we approximate).
+    completed_at: str | None = None
+    if getattr(item, "status", "") == "completed" and getattr(item, "updated_at", None):
+        completed_at = item.updated_at.isoformat()  # type: ignore[attr-defined]
     return TaskResponse(
         id=item.id,  # type: ignore[attr-defined]
         project_id=item.project_id,  # type: ignore[attr-defined]
@@ -81,7 +87,7 @@ def _to_response(item: object) -> TaskResponse:
         description=item.description,  # type: ignore[attr-defined]
         checklist=checklist,
         checklist_progress=_compute_checklist_progress(checklist),
-        responsible_id=str(item.responsible_id) if item.responsible_id else None,  # type: ignore[attr-defined]
+        responsible_id=responsible_id,
         persons_involved=item.persons_involved or [],  # type: ignore[attr-defined]
         due_date=item.due_date,  # type: ignore[attr-defined]
         milestone_id=item.milestone_id,  # type: ignore[attr-defined]
@@ -91,12 +97,15 @@ def _to_response(item: object) -> TaskResponse:
         result=item.result,  # type: ignore[attr-defined]
         is_private=item.is_private,  # type: ignore[attr-defined]
         created_by=item.created_by,  # type: ignore[attr-defined]
+        assigned_to=responsible_id,
+        assigned_to_name=None,  # Resolved by caller when user lookup is available
         bim_element_ids=[
             str(x) for x in (getattr(item, "bim_element_ids", None) or [])
         ],
         metadata=getattr(item, "metadata_", {}),
         created_at=item.created_at,  # type: ignore[attr-defined]
         updated_at=item.updated_at,  # type: ignore[attr-defined]
+        completed_at=completed_at,
         is_overdue=_compute_is_overdue(item),
     )
 
