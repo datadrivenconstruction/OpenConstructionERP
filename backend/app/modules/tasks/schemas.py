@@ -42,7 +42,8 @@ class TaskCreate(BaseModel):
     meeting_id: str | None = Field(default=None, max_length=36)
     status: str = Field(
         default="draft",
-        pattern=r"^(draft|open|in_progress|completed)$",
+        min_length=1,
+        max_length=50,
     )
     priority: str = Field(
         default="normal",
@@ -85,7 +86,8 @@ class TaskUpdate(BaseModel):
     meeting_id: str | None = Field(default=None, max_length=36)
     status: str | None = Field(
         default=None,
-        pattern=r"^(draft|open|in_progress|completed)$",
+        min_length=1,
+        max_length=50,
     )
     priority: str | None = Field(
         default=None,
