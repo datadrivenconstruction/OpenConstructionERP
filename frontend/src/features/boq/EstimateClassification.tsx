@@ -46,7 +46,7 @@ const CLASS_STYLES: Record<number, ClassStyle> = {
   },
   1: {
     bg: 'bg-semantic-success-bg',
-    text: 'text-[#15803d]',
+    text: 'text-semantic-success',
     border: 'border-semantic-success/30',
     ring: 'ring-semantic-success/20',
     barColor: 'bg-semantic-success',

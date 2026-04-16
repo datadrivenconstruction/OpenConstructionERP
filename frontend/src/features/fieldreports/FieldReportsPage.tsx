@@ -99,9 +99,9 @@ const STATUS_BADGE_VARIANT: Record<ReportStatus, 'neutral' | 'blue' | 'success'>
 };
 
 const STATUS_DOT_COLOR: Record<ReportStatus, string> = {
-  draft: 'bg-gray-400',
-  submitted: 'bg-blue-500',
-  approved: 'bg-green-500',
+  draft: 'bg-content-tertiary',
+  submitted: 'bg-semantic-info',
+  approved: 'bg-semantic-success',
 };
 
 /* ── Helper: format date for display ───────────────────────────────────── */
@@ -399,6 +399,8 @@ export function FieldReportsPage() {
           <div className="flex rounded-lg border border-border-light bg-surface-primary p-0.5">
             <button
               onClick={() => setView('calendar')}
+              aria-label={t('fieldreports.calendar_view', { defaultValue: 'Calendar' })}
+              aria-pressed={view === 'calendar'}
               className={clsx(
                 'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
                 view === 'calendar'
@@ -411,6 +413,8 @@ export function FieldReportsPage() {
             </button>
             <button
               onClick={() => setView('list')}
+              aria-label={t('fieldreports.list_view', { defaultValue: 'List' })}
+              aria-pressed={view === 'list'}
               className={clsx(
                 'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
                 view === 'list'
@@ -522,8 +526,18 @@ export function FieldReportsPage() {
               ))}
             </div>
 
+            {/* Calendar loading state */}
+            {isCalendarLoading && (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 size={24} className="animate-spin text-oe-blue" />
+                <span className="ml-2 text-sm text-content-tertiary">
+                  {t('common.loading', { defaultValue: 'Loading...' })}
+                </span>
+              </div>
+            )}
+
             {/* Calendar grid */}
-            <div className="grid grid-cols-7 gap-px rounded-lg border border-border-light bg-border-light overflow-hidden">
+            {!isCalendarLoading && <div className="grid grid-cols-7 gap-px rounded-lg border border-border-light bg-border-light overflow-hidden">
               {calendarDays.map((cell, idx) => (
                 <div
                   key={cell.day !== null ? `day-${cell.day}` : `empty-${idx}`}
@@ -561,7 +575,7 @@ export function FieldReportsPage() {
                           <span
                             key={r.id}
                             className={clsx('h-2 w-2 rounded-full', STATUS_DOT_COLOR[r.status])}
-                            title={`${r.report_type} — ${r.status}`}
+                            title={`${t(`fieldreports.type_${r.report_type}`, { defaultValue: r.report_type })} — ${t(`fieldreports.status_${r.status}`, { defaultValue: r.status })}`}
                           />
                         ))}
                       </div>
@@ -569,20 +583,20 @@ export function FieldReportsPage() {
                   )}
                 </div>
               ))}
-            </div>
+            </div>}
 
             {/* Legend */}
             <div className="mt-3 flex items-center gap-4 text-xs text-content-tertiary">
               <span className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-gray-400" />
+                <span className="h-2 w-2 rounded-full bg-content-tertiary" />
                 {t('fieldreports.status_draft', { defaultValue: 'Draft' })}
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-blue-500" />
+                <span className="h-2 w-2 rounded-full bg-semantic-info" />
                 {t('fieldreports.status_submitted', { defaultValue: 'Submitted' })}
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-green-500" />
+                <span className="h-2 w-2 rounded-full bg-semantic-success" />
                 {t('fieldreports.status_approved', { defaultValue: 'Approved' })}
               </span>
             </div>
@@ -598,6 +612,7 @@ export function FieldReportsPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as ReportStatus | '')}
+              aria-label={t('fieldreports.filter_status', { defaultValue: 'Filter by status' })}
               className="rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-sm text-content-primary"
             >
               <option value="">{t('fieldreports.all_statuses', { defaultValue: 'All Statuses' })}</option>
@@ -608,6 +623,7 @@ export function FieldReportsPage() {
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value as ReportType | '')}
+              aria-label={t('fieldreports.filter_type', { defaultValue: 'Filter by type' })}
               className="rounded-lg border border-border-light bg-surface-primary px-3 py-1.5 text-sm text-content-primary"
             >
               <option value="">{t('fieldreports.all_types', { defaultValue: 'All Types' })}</option>
@@ -727,8 +743,9 @@ export function FieldReportsPage() {
                             {report.status === 'draft' && (
                               <button
                                 onClick={() => submitMut.mutate(report.id)}
-                                className="rounded p-1.5 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20"
+                                className="rounded p-1.5 text-semantic-info hover:bg-semantic-info-bg"
                                 title={t('fieldreports.submit', { defaultValue: 'Submit' })}
+                                aria-label={t('fieldreports.submit', { defaultValue: 'Submit' })}
                               >
                                 <Send size={15} />
                               </button>
@@ -736,8 +753,9 @@ export function FieldReportsPage() {
                             {report.status === 'submitted' && (
                               <button
                                 onClick={() => approveMut.mutate(report.id)}
-                                className="rounded p-1.5 text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20"
+                                className="rounded p-1.5 text-semantic-success hover:bg-semantic-success-bg"
                                 title={t('fieldreports.approve', { defaultValue: 'Approve' })}
+                                aria-label={t('fieldreports.approve', { defaultValue: 'Approve' })}
                               >
                                 <CheckCircle2 size={15} />
                               </button>
@@ -748,14 +766,16 @@ export function FieldReportsPage() {
                               rel="noopener noreferrer"
                               className="rounded p-1.5 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
                               title={t('fieldreports.export_pdf', { defaultValue: 'Export PDF' })}
+                              aria-label={t('fieldreports.export_pdf', { defaultValue: 'Export PDF' })}
                             >
                               <Download size={15} />
                             </a>
                             {report.status !== 'approved' && (
                               <button
                                 onClick={() => handleDelete(report.id)}
-                                className="rounded p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                className="rounded p-1.5 text-semantic-error hover:bg-semantic-error-bg"
                                 title={t('common.delete', { defaultValue: 'Delete' })}
+                                aria-label={t('common.delete', { defaultValue: 'Delete' })}
                               >
                                 <Trash2 size={15} />
                               </button>
@@ -847,7 +867,7 @@ function ImportFieldReportsModal({
       setResult(res);
       onSuccess(res);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Import failed');
+      setError(err instanceof Error ? err.message : t('fieldreports.import_failed_generic', { defaultValue: 'Import failed' }));
     } finally {
       setIsPending(false);
     }
@@ -855,7 +875,7 @@ function ImportFieldReportsModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-lg bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('fieldreports.import_reports', { defaultValue: 'Import Field Reports' })}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <h2 className="text-lg font-semibold text-content-primary">
@@ -863,6 +883,7 @@ function ImportFieldReportsModal({
           </h2>
           <button
             onClick={onClose}
+            aria-label={t('common.close', { defaultValue: 'Close' })}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
           >
             <X size={18} />
@@ -1145,7 +1166,7 @@ function ReportModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 pt-12 backdrop-blur-sm">
-      <div className="w-full max-w-2xl rounded-2xl border border-border-light bg-surface-primary shadow-2xl animate-fade-in">
+      <div className="w-full max-w-2xl rounded-2xl border border-border-light bg-surface-primary shadow-2xl animate-fade-in" role="dialog" aria-label={isEdit ? t('fieldreports.edit_report', { defaultValue: 'Edit Field Report' }) : t('fieldreports.new_report', { defaultValue: 'New Field Report' })}>
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border-light px-6 py-4">
           <h2 className="text-lg font-semibold text-content-primary">
@@ -1159,7 +1180,7 @@ function ReportModal({
                 {t(`fieldreports.status_${report.status}`, { defaultValue: report.status })}
               </Badge>
             )}
-            <button onClick={onClose} className="rounded-lg p-2 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors">
+            <button onClick={onClose} aria-label={t('common.close', { defaultValue: 'Close' })} className="rounded-lg p-2 text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors">
               <X size={20} />
             </button>
           </div>
@@ -1310,8 +1331,9 @@ function ReportModal({
                   </div>
                   <button
                     onClick={() => handleRemoveWorkforce(idx)}
-                    className="rounded p-1 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    className="rounded p-1 text-semantic-error/60 hover:text-semantic-error hover:bg-semantic-error-bg"
                     title={t('common.remove', { defaultValue: 'Remove' })}
+                    aria-label={t('common.remove', { defaultValue: 'Remove' })}
                   >
                     <X size={16} />
                   </button>

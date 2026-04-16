@@ -362,7 +362,6 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
           ))}
         </ul>
 
-
         {/* Update notification */}
         <UpdateNotification />
 

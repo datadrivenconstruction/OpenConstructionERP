@@ -87,7 +87,7 @@ function getStatusColor(status: BenchmarkStatus): {
   switch (status) {
     case 'within':
       return {
-        text: 'text-[#15803d]',
+        text: 'text-semantic-success',
         bg: 'bg-semantic-success-bg',
         indicator: 'bg-green-500',
         bar: 'bg-green-500',

@@ -521,8 +521,8 @@ function InstallProgressPanel({
         {result && (
           <div className="mt-3 grid grid-cols-2 gap-2">
             <div className="rounded-lg bg-semantic-success-bg/50 px-3 py-2 text-center">
-              <div className="text-sm font-bold text-[#15803d]">{converterName}</div>
-              <div className="text-2xs text-[#15803d]/70">
+              <div className="text-sm font-bold text-semantic-success">{converterName}</div>
+              <div className="text-2xs text-semantic-success/70">
                 {t('quantities.result_installed', { defaultValue: 'installed' })}
               </div>
             </div>

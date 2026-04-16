@@ -91,6 +91,8 @@ export type { ViewInBIMButtonProps } from './ViewInBIMButton';
 export { MiniGeometryPreview } from './MiniGeometryPreview';
 export type { MiniGeometryPreviewProps } from './MiniGeometryPreview';
 
+export { ContactSearchInput } from './ContactSearchInput';
+
 export { ElementInfoPopover } from './ElementInfoPopover';
 export type {
   ElementInfoPopoverProps,

@@ -186,7 +186,7 @@ export function ProjectIntelligencePage() {
         </div>
 
         {/* How it works — step by step */}
-        <div className="bg-surface-secondary rounded-xl border border-border-light p-6 mb-6">
+        <div className="bg-white dark:bg-gray-800/60 rounded-xl border border-border-light shadow-sm p-6 mb-6">
           <h3 className="text-sm font-semibold text-content-primary mb-4">
             {t('project_intelligence.how_it_works', { defaultValue: 'How it works' })}
           </h3>
@@ -233,7 +233,7 @@ export function ProjectIntelligencePage() {
         </div>
 
         {/* Domains overview */}
-        <div className="bg-surface-secondary rounded-xl border border-border-light p-6 mb-6">
+        <div className="bg-white dark:bg-gray-800/60 rounded-xl border border-border-light shadow-sm p-6 mb-6">
           <h3 className="text-sm font-semibold text-content-primary mb-1">
             {t('project_intelligence.domains_title', { defaultValue: '9 analysis domains' })}
           </h3>
@@ -415,7 +415,7 @@ export function ProjectIntelligencePage() {
           {/* Left column — Score + Gaps + Achievements */}
           <div className="lg:col-span-4 space-y-5">
             {/* Completeness Score section */}
-            <div className="bg-surface-secondary rounded-xl border border-border-light p-5">
+            <div className="bg-white dark:bg-gray-800/60 rounded-xl border border-border-light shadow-sm p-5">
               <div className="mb-4">
                 <h3 className="text-sm font-semibold text-content-primary">
                   {t('project_intelligence.completeness_score', {
@@ -463,7 +463,7 @@ export function ProjectIntelligencePage() {
 
             {/* Critical gaps section */}
             {score.critical_gaps.length > 0 && (
-              <div className="bg-surface-secondary rounded-xl border border-border-light p-5">
+              <div className="bg-white dark:bg-gray-800/60 rounded-xl border border-border-light shadow-sm p-5">
                 <div className="mb-3">
                   <h3 className="text-sm font-semibold text-content-primary flex items-center gap-2">
                     <AlertTriangle size={15} className="text-red-400" />
@@ -514,7 +514,7 @@ export function ProjectIntelligencePage() {
 
             {/* No gaps — all clear */}
             {score.critical_gaps.length === 0 && (
-              <div className="bg-surface-secondary rounded-xl border border-border-light p-5 text-center">
+              <div className="bg-white dark:bg-gray-800/60 rounded-xl border border-border-light shadow-sm p-5 text-center">
                 <CheckCircle2 size={24} className="mx-auto text-green-400 mb-2" />
                 <p className="text-sm font-medium text-content-primary">
                   {t('project_intelligence.no_gaps_title', {
@@ -532,7 +532,7 @@ export function ProjectIntelligencePage() {
 
             {/* Achievements section */}
             {score.achievements.length > 0 && (
-              <div className="bg-surface-secondary rounded-xl border border-border-light p-5">
+              <div className="bg-white dark:bg-gray-800/60 rounded-xl border border-border-light shadow-sm p-5">
                 <div className="mb-3">
                   <h3 className="text-sm font-semibold text-content-primary flex items-center gap-2">
                     <CheckCircle2 size={15} className="text-green-400" />

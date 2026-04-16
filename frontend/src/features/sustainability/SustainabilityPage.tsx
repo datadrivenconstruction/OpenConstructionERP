@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Card, CardHeader, CardContent, Button, EmptyState, Skeleton } from '@/shared/ui';
 import { apiGet } from '@/shared/lib/api';
+import { useToastStore } from '@/stores/useToastStore';
 import {
   fetchSustainability,
   enrichCO2,
@@ -52,13 +53,13 @@ function ratingColor(rating: string): string {
   }
 }
 
-function complianceStyle(level: string) {
+function complianceStyle(level: string, t: (key: string, opts?: Record<string, unknown>) => string) {
   switch (level) {
-    case 'excellent': return { bg: 'bg-emerald-50 dark:bg-emerald-950/30', text: 'text-emerald-700 dark:text-emerald-400', Icon: CheckCircle2, label: 'Excellent' };
-    case 'good': return { bg: 'bg-green-50 dark:bg-green-950/30', text: 'text-green-700 dark:text-green-400', Icon: CheckCircle2, label: 'Good' };
-    case 'acceptable': return { bg: 'bg-amber-50 dark:bg-amber-950/30', text: 'text-amber-700 dark:text-amber-400', Icon: AlertTriangle, label: 'Acceptable' };
-    case 'non-compliant': return { bg: 'bg-red-50 dark:bg-red-950/30', text: 'text-red-700 dark:text-red-400', Icon: XCircle, label: 'Non-Compliant' };
-    default: return { bg: 'bg-gray-50 dark:bg-gray-950/30', text: 'text-gray-500', Icon: Info, label: 'N/A' };
+    case 'excellent': return { bg: 'bg-emerald-50 dark:bg-emerald-950/30', text: 'text-emerald-700 dark:text-emerald-400', Icon: CheckCircle2, label: t('sustainability.compliance_excellent', { defaultValue: 'Excellent' }) };
+    case 'good': return { bg: 'bg-green-50 dark:bg-green-950/30', text: 'text-green-700 dark:text-green-400', Icon: CheckCircle2, label: t('sustainability.compliance_good', { defaultValue: 'Good' }) };
+    case 'acceptable': return { bg: 'bg-amber-50 dark:bg-amber-950/30', text: 'text-amber-700 dark:text-amber-400', Icon: AlertTriangle, label: t('sustainability.compliance_acceptable', { defaultValue: 'Acceptable' }) };
+    case 'non-compliant': return { bg: 'bg-red-50 dark:bg-red-950/30', text: 'text-red-700 dark:text-red-400', Icon: XCircle, label: t('sustainability.compliance_non_compliant', { defaultValue: 'Non-Compliant' }) };
+    default: return { bg: 'bg-gray-50 dark:bg-gray-950/30', text: 'text-gray-500', Icon: Info, label: t('sustainability.compliance_na', { defaultValue: 'N/A' }) };
   }
 }
 
@@ -125,14 +126,16 @@ function EPDSelect({
   onSelect: (epdId: string) => void;
   disabled?: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <select
       value={currentId || ''}
       onChange={(e) => { if (e.target.value) onSelect(e.target.value); }}
       disabled={disabled}
+      aria-label={t('sustainability.epd_material_select', { defaultValue: 'Select EPD material' })}
       className="w-full max-w-[220px] rounded border border-border-light bg-surface-primary px-1.5 py-1 text-xs text-content-primary outline-none focus:border-oe-blue transition-colors truncate"
     >
-      <option value="">-- none --</option>
+      <option value="">{t('sustainability.epd_none', { defaultValue: '-- none --' })}</option>
       {materials.map((m) => (
         <option key={m.id} value={m.id}>
           {m.name} ({m.gwp} kg/{m.unit})
@@ -147,6 +150,7 @@ function EPDSelect({
 export function SustainabilityPage() {
   const { t } = useTranslation();
   const qc = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
   const [selectedProjectId, setSelectedProjectId] = useState('');
   const [selectedBoqId, setSelectedBoqId] = useState('');
   const [areaM2, setAreaM2] = useState(2000);
@@ -185,10 +189,10 @@ export function SustainabilityPage() {
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ['sustainability'] });
       refetch();
-      alert(`CO2 enriched: ${res.enriched} positions (${res.skipped} skipped)`);
+      addToast({ type: 'success', title: t('sustainability.enrich_success', { defaultValue: 'CO2 enriched: {{enriched}} positions ({{skipped}} skipped)', enriched: res.enriched, skipped: res.skipped }) });
     },
     onError: (err: Error) => {
-      alert(`CO2 enrichment failed: ${err.message}`);
+      addToast({ type: 'error', title: t('sustainability.enrich_failed', { defaultValue: 'CO2 enrichment failed' }), message: err.message });
     },
   });
 
@@ -200,7 +204,7 @@ export function SustainabilityPage() {
       refetch();
     },
     onError: (err: Error) => {
-      console.error('Failed to assign CO2 data:', err.message);
+      addToast({ type: 'error', title: t('sustainability.assign_failed', { defaultValue: 'Failed to assign CO2 data' }), message: err.message });
     },
   });
 
@@ -211,7 +215,7 @@ export function SustainabilityPage() {
   }
 
   const data: SustainabilityData | undefined = calculated ? sustainability : undefined;
-  const cpr = data?.eu_cpr_compliance ? complianceStyle(data.eu_cpr_compliance) : null;
+  const cpr = data?.eu_cpr_compliance ? complianceStyle(data.eu_cpr_compliance, t) : null;
 
   // Positions to display (limit to 20 unless expanded)
   const visiblePositions: PositionCO2Detail[] = useMemo(() => {
@@ -221,17 +225,17 @@ export function SustainabilityPage() {
   }, [data, showAllPositions]);
 
   const dataQualityLabel = data?.data_quality === 'enriched'
-    ? 'Enriched (stored)'
+    ? t('sustainability.quality_enriched', { defaultValue: 'Enriched (stored)' })
     : data?.data_quality === 'mixed'
-    ? 'Mixed (stored + auto)'
-    : 'Estimated (auto-detected)';
+    ? t('sustainability.quality_mixed', { defaultValue: 'Mixed (stored + auto)' })
+    : t('sustainability.quality_estimated', { defaultValue: 'Estimated (auto-detected)' });
 
   return (
     <div className="w-full animate-fade-in">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#16a34a]/10 text-[#16a34a]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
             <Leaf size={20} strokeWidth={1.75} />
           </div>
           <div>
@@ -250,10 +254,11 @@ export function SustainabilityPage() {
         <CardContent>
           <div className="flex flex-wrap items-end gap-4">
             <div className="flex-1 min-w-[200px]">
-              <label className="block text-xs font-medium uppercase tracking-wider text-content-tertiary mb-1.5">
+              <label htmlFor="sust-project-select" className="block text-xs font-medium uppercase tracking-wider text-content-tertiary mb-1.5">
                 {t('sustainability.project', 'Project')}
               </label>
               <select
+                id="sust-project-select"
                 value={selectedProjectId}
                 onChange={(e) => { setSelectedProjectId(e.target.value); setSelectedBoqId(''); setCalculated(false); }}
                 disabled={projectsLoading}
@@ -264,10 +269,11 @@ export function SustainabilityPage() {
               </select>
             </div>
             <div className="flex-1 min-w-[200px]">
-              <label className="block text-xs font-medium uppercase tracking-wider text-content-tertiary mb-1.5">
+              <label htmlFor="sust-boq-select" className="block text-xs font-medium uppercase tracking-wider text-content-tertiary mb-1.5">
                 {t('sustainability.boq', 'BOQ')}
               </label>
               <select
+                id="sust-boq-select"
                 value={selectedBoqId}
                 onChange={(e) => { setSelectedBoqId(e.target.value); setCalculated(false); }}
                 disabled={!selectedProjectId || boqsLoading}
@@ -278,10 +284,11 @@ export function SustainabilityPage() {
               </select>
             </div>
             <div className="min-w-[140px]">
-              <label className="block text-xs font-medium uppercase tracking-wider text-content-tertiary mb-1.5">
+              <label htmlFor="sust-gfa-input" className="block text-xs font-medium uppercase tracking-wider text-content-tertiary mb-1.5">
                 {t('sustainability.area', 'GFA (m2)')}
               </label>
               <input
+                id="sust-gfa-input"
                 type="number" value={areaM2} onChange={(e) => setAreaM2(Number(e.target.value) || 0)}
                 min={0} step={100}
                 className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary outline-none focus:border-oe-blue focus:ring-1 focus:ring-oe-blue transition-colors tabular-nums"
@@ -346,7 +353,7 @@ export function SustainabilityPage() {
             <Card padding="none">
               <div className="p-5">
                 <div className="text-xs font-medium uppercase tracking-wider text-content-tertiary mb-2">
-                  EU CPR 2024/3110
+                  {t('sustainability.eu_cpr_title', { defaultValue: 'EU CPR 2024/3110' })}
                 </div>
                 {cpr ? (
                   <div className={`rounded-lg p-4 ${cpr.bg}`}>
@@ -357,7 +364,7 @@ export function SustainabilityPage() {
                     <div className="text-sm text-content-secondary">
                       {data.eu_cpr_gwp_per_m2_year?.toFixed(2)} kg CO2e/m2/yr
                     </div>
-                    <div className="text-xs text-content-tertiary mt-1">50-year RSP</div>
+                    <div className="text-xs text-content-tertiary mt-1">{t('sustainability.rsp_label', { defaultValue: '50-year RSP' })}</div>
                   </div>
                 ) : (
                   <p className="text-sm text-content-secondary">
@@ -375,16 +382,16 @@ export function SustainabilityPage() {
                 </div>
                 <div className="text-lg font-semibold text-content-primary mb-1">{dataQualityLabel}</div>
                 <div className="text-sm text-content-secondary mb-3">
-                  {data.positions_matched} / {data.positions_analyzed} positions with CO2 data
+                  {t('sustainability.positions_with_data', { defaultValue: '{{matched}} / {{total}} positions with CO2 data', matched: data.positions_matched, total: data.positions_analyzed })}
                 </div>
                 {data.positions_analyzed > 0 && (
                   <div className="w-full h-2 rounded-full bg-border-light overflow-hidden">
-                    <div className="h-full rounded-full bg-[#16a34a] transition-all"
+                    <div className="h-full rounded-full bg-semantic-success transition-all"
                       style={{ width: `${(data.positions_matched / data.positions_analyzed) * 100}%` }} />
                   </div>
                 )}
                 <div className="text-xs text-content-tertiary mt-2">
-                  Sources: OKOBAUDAT, ICE v3.0, EU Level(s)
+                  {t('sustainability.sources', { defaultValue: 'Sources: OKOBAUDAT, ICE v3.0, EU Level(s)' })}
                 </div>
               </div>
             </Card>
@@ -403,10 +410,10 @@ export function SustainabilityPage() {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b border-border-light">
-                          <th className="py-2 pr-4 text-left text-xs font-medium uppercase tracking-wider text-content-tertiary">Category</th>
-                          <th className="py-2 px-4 text-right text-xs font-medium uppercase tracking-wider text-content-tertiary">Positions</th>
+                          <th className="py-2 pr-4 text-left text-xs font-medium uppercase tracking-wider text-content-tertiary">{t('sustainability.col_category', { defaultValue: 'Category' })}</th>
+                          <th className="py-2 px-4 text-right text-xs font-medium uppercase tracking-wider text-content-tertiary">{t('sustainability.col_positions', { defaultValue: 'Positions' })}</th>
                           <th className="py-2 px-4 text-right text-xs font-medium uppercase tracking-wider text-content-tertiary">%</th>
-                          <th className="py-2 pl-4 text-right text-xs font-medium uppercase tracking-wider text-content-tertiary">CO2 (t)</th>
+                          <th className="py-2 pl-4 text-right text-xs font-medium uppercase tracking-wider text-content-tertiary">{t('sustainability.col_co2', { defaultValue: 'CO2 (t)' })}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border-light">
@@ -443,12 +450,12 @@ export function SustainabilityPage() {
                     <thead>
                       <tr className="border-b border-border-light">
                         <th className="py-2 pr-3 text-left text-xs font-medium uppercase tracking-wider text-content-tertiary w-[60px]">#</th>
-                        <th className="py-2 px-3 text-left text-xs font-medium uppercase tracking-wider text-content-tertiary">Description</th>
-                        <th className="py-2 px-3 text-right text-xs font-medium uppercase tracking-wider text-content-tertiary w-[80px]">Qty</th>
-                        <th className="py-2 px-3 text-center text-xs font-medium uppercase tracking-wider text-content-tertiary w-[50px]">Unit</th>
-                        <th className="py-2 px-3 text-left text-xs font-medium uppercase tracking-wider text-content-tertiary w-[220px]">EPD Material</th>
-                        <th className="py-2 px-3 text-right text-xs font-medium uppercase tracking-wider text-content-tertiary w-[90px]">GWP/unit</th>
-                        <th className="py-2 pl-3 text-right text-xs font-medium uppercase tracking-wider text-content-tertiary w-[100px]">GWP Total</th>
+                        <th className="py-2 px-3 text-left text-xs font-medium uppercase tracking-wider text-content-tertiary">{t('sustainability.col_description', { defaultValue: 'Description' })}</th>
+                        <th className="py-2 px-3 text-right text-xs font-medium uppercase tracking-wider text-content-tertiary w-[80px]">{t('sustainability.col_qty', { defaultValue: 'Qty' })}</th>
+                        <th className="py-2 px-3 text-center text-xs font-medium uppercase tracking-wider text-content-tertiary w-[50px]">{t('sustainability.col_unit', { defaultValue: 'Unit' })}</th>
+                        <th className="py-2 px-3 text-left text-xs font-medium uppercase tracking-wider text-content-tertiary w-[220px]">{t('sustainability.col_epd_material', { defaultValue: 'EPD Material' })}</th>
+                        <th className="py-2 px-3 text-right text-xs font-medium uppercase tracking-wider text-content-tertiary w-[90px]">{t('sustainability.col_gwp_unit', { defaultValue: 'GWP/unit' })}</th>
+                        <th className="py-2 pl-3 text-right text-xs font-medium uppercase tracking-wider text-content-tertiary w-[100px]">{t('sustainability.col_gwp_total', { defaultValue: 'GWP Total' })}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border-light">
@@ -485,6 +492,7 @@ export function SustainabilityPage() {
                   <div className="mt-3 text-center">
                     <button
                       onClick={() => setShowAllPositions(!showAllPositions)}
+                      aria-expanded={showAllPositions}
                       className="inline-flex items-center gap-1 text-sm text-oe-blue hover:underline"
                     >
                       {showAllPositions ? <ChevronUp size={14} /> : <ChevronDown size={14} />}

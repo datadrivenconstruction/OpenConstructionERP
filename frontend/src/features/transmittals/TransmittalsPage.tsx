@@ -153,8 +153,8 @@ function CreateTransmittalModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('transmittals.new_transmittal', { defaultValue: 'New Transmittal' })}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in" role="dialog" aria-modal="true" aria-label={t('transmittals.new_transmittal', { defaultValue: 'New Transmittal' })}>
+      <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
           <h2 className="text-lg font-semibold text-content-primary">
@@ -173,11 +173,12 @@ function CreateTransmittalModal({
         <div className="px-6 py-4 space-y-4">
           {/* Subject */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="tr-subject" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('transmittals.field_subject', { defaultValue: 'Subject' })}{' '}
               <span className="text-semantic-error">*</span>
             </label>
             <input
+              id="tr-subject"
               value={form.subject}
               onChange={(e) => {
                 set('subject', e.target.value);
@@ -203,11 +204,12 @@ function CreateTransmittalModal({
           {/* Two-column: Purpose + Response Due */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="tr-purpose" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('transmittals.field_purpose', { defaultValue: 'Purpose' })}
               </label>
               <div className="relative">
                 <select
+                  id="tr-purpose"
                   value={form.purpose}
                   onChange={(e) => set('purpose', e.target.value as TransmittalPurpose)}
                   className={inputCls + ' appearance-none pr-9'}
@@ -223,14 +225,15 @@ function CreateTransmittalModal({
                 </div>
               </div>
               <p className="mt-1 text-2xs text-content-tertiary">
-                {PURPOSE_DESCRIPTIONS[form.purpose]}
+                {t(`transmittals.purpose_desc_${form.purpose}`, { defaultValue: PURPOSE_DESCRIPTIONS[form.purpose] })}
               </p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="tr-response-due" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('transmittals.field_response_due', { defaultValue: 'Response Due' })}
               </label>
               <input
+                id="tr-response-due"
                 type="date"
                 value={form.response_due}
                 onChange={(e) => set('response_due', e.target.value)}
@@ -241,10 +244,11 @@ function CreateTransmittalModal({
 
           {/* Recipients */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="tr-recipients" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('transmittals.field_recipients', { defaultValue: 'Recipients' })}
             </label>
             <input
+              id="tr-recipients"
               value={form.recipients}
               onChange={(e) => set('recipients', e.target.value)}
               placeholder={t('transmittals.recipients_placeholder', {
@@ -256,10 +260,11 @@ function CreateTransmittalModal({
 
           {/* Items */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="tr-items" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('transmittals.field_items', { defaultValue: 'Document Items' })}
             </label>
             <input
+              id="tr-items"
               value={form.items}
               onChange={(e) => set('items', e.target.value)}
               placeholder={t('transmittals.items_placeholder', {
@@ -271,10 +276,11 @@ function CreateTransmittalModal({
 
           {/* Cover Note */}
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="tr-cover-note" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('transmittals.field_cover_note', { defaultValue: 'Cover Note' })}
             </label>
             <textarea
+              id="tr-cover-note"
               value={form.cover_note}
               onChange={(e) => set('cover_note', e.target.value)}
               rows={3}
@@ -335,7 +341,12 @@ const TransmittalRow = React.memo(function TransmittalRow({
           'flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-surface-secondary/50 transition-colors',
           expanded && 'bg-surface-secondary/30',
         )}
+        role="button"
+        tabIndex={0}
+        aria-expanded={expanded}
+        aria-label={t('transmittals.toggle_row', { defaultValue: 'Toggle details for {{num}}', num: transmittal.transmittal_number })}
         onClick={() => setExpanded((prev) => !prev)}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded((prev) => !prev); } }}
       >
         <ChevronRight
           size={14}
@@ -491,7 +502,7 @@ const TransmittalRow = React.memo(function TransmittalRow({
                     )}
                     {item.revision && (
                       <Badge variant="blue" size="sm" className="shrink-0">
-                        Rev {item.revision}
+                        {t('transmittals.revision_prefix', { defaultValue: 'Rev {{rev}}', rev: item.revision })}
                       </Badge>
                     )}
                   </div>
@@ -688,14 +699,14 @@ export function TransmittalsPage() {
         <span className="text-content-tertiary">
           {t('transmittals.flow_label', { defaultValue: 'Document flow:' })}
         </span>
-        <button onClick={() => navigate('/documents')} className="hover:text-oe-blue transition-colors">
+        <button onClick={() => navigate('/documents')} className="hover:text-oe-blue transition-colors" aria-label={t('transmittals.flow_upload', { defaultValue: 'Upload' })}>
           {t('transmittals.flow_upload', { defaultValue: 'Upload' })}
         </button>
-        <span>&#8594;</span>
-        <button onClick={() => navigate('/cde')} className="hover:text-oe-blue transition-colors">
+        <span aria-hidden="true">&#8594;</span>
+        <button onClick={() => navigate('/cde')} className="hover:text-oe-blue transition-colors" aria-label={t('transmittals.flow_organize', { defaultValue: 'Organize (CDE)' })}>
           {t('transmittals.flow_organize', { defaultValue: 'Organize (CDE)' })}
         </button>
-        <span>&#8594;</span>
+        <span aria-hidden="true">&#8594;</span>
         <span className="text-oe-blue font-medium">
           {t('transmittals.flow_distribute', { defaultValue: 'Distribute' })}
         </span>
@@ -717,6 +728,7 @@ export function TransmittalsPage() {
                   useProjectContextStore.getState().setActiveProject(p.id, p.name);
                 }
               }}
+              aria-label={t('transmittals.select_project', { defaultValue: 'Project...' })}
               className={inputCls + ' !h-8 !text-xs max-w-[180px]'}
             >
               <option value="" disabled>
@@ -841,6 +853,7 @@ export function TransmittalsPage() {
             placeholder={t('transmittals.search_placeholder', {
               defaultValue: 'Search transmittals...',
             })}
+            aria-label={t('transmittals.search_placeholder', { defaultValue: 'Search transmittals...' })}
             className={inputCls + ' pl-9'}
           />
         </div>
@@ -850,6 +863,7 @@ export function TransmittalsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as TransmittalStatus | '')}
+            aria-label={t('transmittals.filter_all', { defaultValue: 'All Statuses' })}
             className="h-10 appearance-none rounded-lg border border-border bg-surface-primary pl-3 pr-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-44"
           >
             <option value="">

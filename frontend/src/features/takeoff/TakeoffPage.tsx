@@ -6,6 +6,7 @@ import clsx from 'clsx';
 import {
   FileSearch,
   Upload,
+  FileUp,
   FileText,
   Sparkles,
   Table2,
@@ -227,53 +228,66 @@ function DropZone({
   );
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={handleClick}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') handleClick();
-      }}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-      className={clsx(
-        'relative flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-6 py-10',
-        'transition-all duration-normal ease-oe cursor-pointer',
-        disabled && 'opacity-40 pointer-events-none',
-        isDragOver
-          ? 'border-oe-blue bg-oe-blue-subtle scale-[1.01]'
-          : 'border-border-light bg-surface-secondary/50 hover:border-oe-blue/40 hover:bg-surface-secondary',
-      )}
-    >
+    <div className="rounded-2xl bg-surface-primary border border-border-light shadow-lg shadow-black/5 dark:shadow-black/20 p-6">
       <div
+        role="button"
+        tabIndex={0}
+        onClick={handleClick}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') handleClick();
+        }}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
         className={clsx(
-          'flex h-12 w-12 items-center justify-center rounded-xl transition-colors duration-fast',
-          isDragOver ? 'bg-oe-blue/10 text-oe-blue' : 'bg-surface-secondary text-content-tertiary',
+          'relative flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-6 py-10',
+          'transition-all duration-normal ease-oe cursor-pointer min-h-[200px]',
+          disabled && 'opacity-40 pointer-events-none',
+          isDragOver
+            ? 'border-oe-blue bg-oe-blue/5 scale-[1.01]'
+            : 'border-border-medium hover:border-oe-blue hover:bg-blue-50/50 dark:hover:bg-blue-950/20',
         )}
       >
-        <Upload size={24} strokeWidth={1.5} />
-      </div>
-      <div className="text-center">
-        <p className="text-sm font-medium text-content-primary">
+        <div
+          className={clsx(
+            'flex h-14 w-14 items-center justify-center rounded-xl border transition-colors duration-fast',
+            isDragOver
+              ? 'bg-oe-blue/10 border-oe-blue/30 text-oe-blue'
+              : 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 border-blue-200/50 dark:border-blue-800/30 text-oe-blue',
+          )}
+        >
+          <FileUp size={26} strokeWidth={1.5} />
+        </div>
+        <p className="text-sm font-semibold text-content-primary">
           {t('takeoff.drop_file_here', 'Drop your PDF or image here')}
         </p>
-        <p className="mt-1 text-xs text-content-tertiary">
+        <p className="text-[11px] text-content-quaternary">
           {t('takeoff.file_limit', 'PDF, JPG, PNG up to {{size}}MB').replace(
             '{{size}}',
             String(MAX_FILE_SIZE_MB),
           )}
         </p>
+        <div className="flex items-center gap-2 mt-1">
+          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/30">.pdf</span>
+          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/30">.jpg</span>
+          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-secondary text-content-quaternary border border-border-light">.png</span>
+          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-secondary text-content-quaternary border border-border-light">.tiff</span>
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/pdf,.pdf,image/*,.jpg,.jpeg,.png,.tiff"
+          multiple
+          onChange={handleFileChange}
+          className="hidden"
+          aria-label={t('takeoff.upload_pdf', 'Upload PDF')}
+        />
       </div>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="application/pdf,.pdf,image/*,.jpg,.jpeg,.png,.tiff"
-        multiple
-        onChange={handleFileChange}
-        className="hidden"
-        aria-label={t('takeoff.upload_pdf', 'Upload PDF')}
-      />
+      <p className="text-[11px] text-content-tertiary mt-3">
+        {t('takeoff.formats_detailed', {
+          defaultValue: 'PDF construction drawings \u00B7 JPG / PNG photos \u00B7 TIFF scans. AI will extract walls, slabs, doors, and other elements with quantities.',
+        })}
+      </p>
     </div>
   );
 }
@@ -1348,7 +1362,7 @@ export function TakeoffPage() {
           {addToBOQSuccess && (
             <div className="mb-4 flex items-center gap-3 rounded-xl bg-semantic-success-bg px-5 py-3 animate-fade-in">
               <CheckCircle2 size={18} className="shrink-0 text-semantic-success" />
-              <p className="text-sm font-medium text-[#15803d]">{addToBOQSuccess}</p>
+              <p className="text-sm font-medium text-semantic-success">{addToBOQSuccess}</p>
             </div>
           )}
 

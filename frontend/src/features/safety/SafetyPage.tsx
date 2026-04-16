@@ -266,12 +266,12 @@ async function downloadExcelExport(url: string, fallbackFilename: string): Promi
 
   const response = await fetch(`/api${url}`, { method: 'GET', headers });
   if (!response.ok) {
-    let detail = 'Export failed';
+    let detail = fallbackFilename;
     try {
       const body = await response.json();
-      detail = body.detail || detail;
+      detail = body.detail || 'export_failed';
     } catch {
-      // ignore parse error
+      detail = 'export_failed';
     }
     throw new Error(detail);
   }
@@ -465,10 +465,12 @@ export function SafetyPage() {
       {projectId ? (
         <>
           {/* Tab Bar */}
-          <div className="flex items-center gap-1 mb-6 border-b border-border-light">
+          <div className="flex items-center gap-1 mb-6 border-b border-border-light" role="tablist">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
+                role="tab"
+                aria-selected={activeTab === tab.key}
                 onClick={() => setActiveTab(tab.key)}
                 className={`
                   flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-all
@@ -661,6 +663,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
             placeholder={t('safety.search_incidents', {
               defaultValue: 'Search incidents...',
             })}
+            aria-label={t('safety.search_incidents', { defaultValue: 'Search incidents...' })}
             className="h-10 w-full rounded-lg border border-border bg-surface-primary pl-10 pr-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
           />
         </div>
@@ -821,7 +824,7 @@ function IncidentsTab({ projectId }: { projectId: string }) {
     {/* New Incident Modal */}
     {showCreate && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-        <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('safety.new_incident', { defaultValue: 'New Incident' })}>
+        <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-label={t('safety.new_incident', { defaultValue: 'New Incident' })}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
             <h2 className="text-lg font-semibold text-content-primary">
               {t('safety.new_incident', { defaultValue: 'New Incident' })}
@@ -885,10 +888,11 @@ function IncidentsTab({ projectId }: { projectId: string }) {
 
             {/* Date */}
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="incident-date" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('safety.date', { defaultValue: 'Date' })} <span className="text-semantic-error">*</span>
               </label>
               <input
+                id="incident-date"
                 ref={incidentDateRef}
                 type="date"
                 value={incidentForm.incident_date}
@@ -903,10 +907,11 @@ function IncidentsTab({ projectId }: { projectId: string }) {
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="incident-description" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('tasks.field_description', { defaultValue: 'Description' })} <span className="text-semantic-error">*</span>
               </label>
               <textarea
+                id="incident-description"
                 value={incidentForm.description}
                 onChange={(e) => {
                   setIncidentForm((f) => ({ ...f, description: e.target.value }));
@@ -921,10 +926,11 @@ function IncidentsTab({ projectId }: { projectId: string }) {
 
             {/* Location */}
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="incident-location" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('safety.location', { defaultValue: 'Location' })}
               </label>
               <input
+                id="incident-location"
                 value={incidentForm.location}
                 onChange={(e) => setIncidentForm((f) => ({ ...f, location: e.target.value }))}
                 className={inputCls}
@@ -979,10 +985,11 @@ function IncidentsTab({ projectId }: { projectId: string }) {
             {/* Days Lost - only show if treatment is Medical or Hospital */}
             {(incidentForm.treatment_type === 'medical' || incidentForm.treatment_type === 'hospital') && (
               <div className="animate-fade-in">
-                <label className="block text-sm font-medium text-content-primary mb-1.5">
+                <label htmlFor="incident-days-lost" className="block text-sm font-medium text-content-primary mb-1.5">
                   {t('safety.days_lost', { defaultValue: 'Days Lost' })}
                 </label>
                 <input
+                  id="incident-days-lost"
                   type="number"
                   min="0"
                   value={incidentForm.days_lost || ''}
@@ -1157,6 +1164,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
             placeholder={t('safety.search_observations', {
               defaultValue: 'Search observations...',
             })}
+            aria-label={t('safety.search_observations', { defaultValue: 'Search observations...' })}
             className="h-10 w-full rounded-lg border border-border bg-surface-primary pl-10 pr-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
           />
         </div>
@@ -1321,7 +1329,7 @@ function ObservationsTab({ projectId }: { projectId: string }) {
     {/* New Observation Modal */}
     {showCreate && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-        <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-label={t('safety.new_observation', { defaultValue: 'New Observation' })}>
+        <div className="w-full max-w-2xl bg-surface-elevated rounded-xl shadow-xl border border-border animate-card-in mx-4 max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-label={t('safety.new_observation', { defaultValue: 'New Observation' })}>
           <div className="flex items-center justify-between px-6 py-4 border-b border-border-light">
             <h2 className="text-lg font-semibold text-content-primary">
               {t('safety.new_observation', { defaultValue: 'New Observation' })}
@@ -1376,10 +1384,11 @@ function ObservationsTab({ projectId }: { projectId: string }) {
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="obs-description" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('tasks.field_description', { defaultValue: 'Description' })} <span className="text-semantic-error">*</span>
               </label>
               <textarea
+                id="obs-description"
                 value={obsForm.description}
                 onChange={(e) => {
                   setObsForm((f) => ({ ...f, description: e.target.value }));
@@ -1394,10 +1403,11 @@ function ObservationsTab({ projectId }: { projectId: string }) {
 
             {/* Location */}
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="obs-location" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('safety.location', { defaultValue: 'Location' })}
               </label>
               <input
+                id="obs-location"
                 value={obsForm.location}
                 onChange={(e) => setObsForm((f) => ({ ...f, location: e.target.value }))}
                 className={inputCls}

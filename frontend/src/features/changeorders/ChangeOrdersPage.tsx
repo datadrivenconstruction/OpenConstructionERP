@@ -188,8 +188,11 @@ function CreateDialog({
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose} role="presentation">
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('changeorders.new', { defaultValue: 'New Change Order' })}
         className="w-full max-w-lg rounded-xl bg-surface-primary p-6 shadow-xl border border-border"
         onClick={(e) => e.stopPropagation()}
       >
@@ -197,17 +200,22 @@ function CreateDialog({
           <h2 className="text-lg font-semibold text-content-primary">
             {t('changeorders.new', { defaultValue: 'New Change Order' })}
           </h2>
-          <button onClick={onClose} className="text-content-tertiary hover:text-content-primary">
+          <button
+            onClick={onClose}
+            aria-label={t('common.close', { defaultValue: 'Close' })}
+            className="text-content-tertiary hover:text-content-primary"
+          >
             <X size={18} />
           </button>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="co-title" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('common.title', { defaultValue: 'Title' })} *
             </label>
             <input
+              id="co-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={t('changeorders.title_placeholder', { defaultValue: 'e.g. Additional foundation work' })}
@@ -216,10 +224,11 @@ function CreateDialog({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="co-description" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('common.description', { defaultValue: 'Description' })}
             </label>
             <textarea
+              id="co-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
@@ -229,10 +238,11 @@ function CreateDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="co-reason" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('changeorders.reason', { defaultValue: 'Reason' })}
               </label>
               <select
+                id="co-reason"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
@@ -245,10 +255,11 @@ function CreateDialog({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="co-schedule-days" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('changeorders.schedule_days', { defaultValue: 'Schedule Impact (days)' })}
               </label>
               <input
+                id="co-schedule-days"
                 type="number"
                 min={0}
                 value={scheduleDays}
@@ -328,8 +339,11 @@ function AddItemDialog({
   const costDelta = (newQty * newRate) - (origQty * origRate);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose} role="presentation">
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('changeorders.add_item', { defaultValue: 'Add Item' })}
         className="w-full max-w-lg rounded-xl bg-surface-primary p-6 shadow-xl border border-border"
         onClick={(e) => e.stopPropagation()}
       >
@@ -337,17 +351,22 @@ function AddItemDialog({
           <h2 className="text-lg font-semibold text-content-primary">
             {t('changeorders.add_item', { defaultValue: 'Add Item' })}
           </h2>
-          <button onClick={onClose} className="text-content-tertiary hover:text-content-primary">
+          <button
+            onClick={onClose}
+            aria-label={t('common.close', { defaultValue: 'Close' })}
+            className="text-content-tertiary hover:text-content-primary"
+          >
             <X size={18} />
           </button>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="item-description" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('common.description', { defaultValue: 'Description' })} *
             </label>
             <input
+              id="item-description"
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
               className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
@@ -356,10 +375,11 @@ function AddItemDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="item-change-type" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('changeorders.change_type', { defaultValue: 'Change Type' })}
               </label>
               <select
+                id="item-change-type"
                 value={changeType}
                 onChange={(e) => setChangeType(e.target.value)}
                 className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
@@ -370,10 +390,11 @@ function AddItemDialog({
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="item-unit" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('common.unit', { defaultValue: 'Unit' })}
               </label>
               <input
+                id="item-unit"
                 value={unit}
                 onChange={(e) => setUnit(e.target.value)}
                 placeholder={t('changeorders.unit_placeholder', { defaultValue: 'm2, m3, pcs...' })}
@@ -384,10 +405,11 @@ function AddItemDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="item-orig-qty" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('changeorders.orig_qty', { defaultValue: 'Original Qty' })}
               </label>
               <input
+                id="item-orig-qty"
                 type="number"
                 min={0}
                 step="any"
@@ -397,10 +419,11 @@ function AddItemDialog({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="item-new-qty" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('changeorders.new_qty', { defaultValue: 'New Qty' })}
               </label>
               <input
+                id="item-new-qty"
                 type="number"
                 min={0}
                 step="any"
@@ -413,10 +436,11 @@ function AddItemDialog({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="item-orig-rate" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('changeorders.orig_rate', { defaultValue: 'Original Rate' })}
               </label>
               <input
+                id="item-orig-rate"
                 type="number"
                 min={0}
                 step="any"
@@ -426,10 +450,11 @@ function AddItemDialog({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-primary mb-1.5">
+              <label htmlFor="item-new-rate" className="block text-sm font-medium text-content-primary mb-1.5">
                 {t('changeorders.new_rate', { defaultValue: 'New Rate' })}
               </label>
               <input
+                id="item-new-rate"
                 type="number"
                 min={0}
                 step="any"
@@ -600,6 +625,7 @@ function DetailView({
       <div>
         <button
           onClick={onBack}
+          aria-label={t('changeorders.back_to_list', { defaultValue: 'Back to change orders list' })}
           className="inline-flex items-center gap-1.5 text-sm text-content-secondary hover:text-content-primary mb-3"
         >
           <ArrowLeft size={14} />
@@ -623,7 +649,11 @@ function DetailView({
       {/* Header */}
       <div className="mb-6">
         <nav className="flex items-center gap-1.5 text-sm mb-4" aria-label="Breadcrumb">
-          <button onClick={onBack} className="text-content-secondary hover:text-oe-blue transition-colors">
+          <button
+            onClick={onBack}
+            aria-label={t('changeorders.back_to_list', { defaultValue: 'Back to change orders list' })}
+            className="text-content-secondary hover:text-oe-blue transition-colors"
+          >
             {t('nav.change_orders', { defaultValue: 'Change Orders' })}
           </button>
           <ChevronRight size={12} className="text-content-tertiary" />
@@ -800,7 +830,7 @@ function DetailView({
       ) : (
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm" aria-label={t('changeorders.items_table_aria', { defaultValue: 'Change order line items' })}>
               <thead>
                 <tr className="border-b border-border bg-surface-secondary/50">
                   <th className="px-4 py-3 text-left font-medium text-content-secondary">
@@ -853,6 +883,10 @@ function DetailView({
                           }}
                           className="text-content-tertiary hover:text-semantic-error transition-colors"
                           title={t('common.delete', { defaultValue: 'Delete' })}
+                          aria-label={t('changeorders.delete_item_aria', {
+                            defaultValue: 'Delete item: {{desc}}',
+                            desc: item.description,
+                          })}
                         >
                           <Trash2 size={14} />
                         </button>
@@ -992,10 +1026,11 @@ export function ChangeOrdersPage() {
         </div>
         <div className="flex items-end gap-3">
           <div>
-            <label className="block text-sm font-medium text-content-primary mb-1.5">
+            <label htmlFor="co-project-select" className="block text-sm font-medium text-content-primary mb-1.5">
               {t('common.project', { defaultValue: 'Project' })}
             </label>
             <select
+              id="co-project-select"
               value={projectId}
               onChange={(e) => {
                 const id = e.target.value;
@@ -1154,7 +1189,7 @@ export function ChangeOrdersPage() {
         ) : (
           <Card className="overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm" aria-label={t('changeorders.table_aria', { defaultValue: 'Change orders list' })}>
                 <thead>
                   <tr className="border-b border-border bg-surface-secondary/50">
                     <th className="px-4 py-3 text-left font-medium text-content-secondary">
@@ -1221,6 +1256,10 @@ export function ChangeOrdersPage() {
                               }}
                               className="text-content-tertiary hover:text-semantic-error transition-colors p-1"
                               title={t('common.delete', { defaultValue: 'Delete' })}
+                              aria-label={t('changeorders.delete_order_aria', {
+                                defaultValue: 'Delete change order {{code}}',
+                                code: order.code,
+                              })}
                             >
                               <Trash2 size={14} />
                             </button>

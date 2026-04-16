@@ -18,7 +18,6 @@ import {
   Layers,
   ListPlus,
   Database,
-  BookTemplate,
   CheckCircle2,
   Hash,
   DollarSign,
@@ -268,13 +267,13 @@ export function QuickAddFAB({
   onAddPosition,
   onAddSection,
   onImportFromCosts,
-  onUseTemplate,
+  sidePanelOpen,
   t,
 }: {
   onAddPosition: () => void;
   onAddSection: () => void;
   onImportFromCosts: () => void;
-  onUseTemplate: () => void;
+  sidePanelOpen?: boolean;
   t: (key: string, options?: Record<string, string>) => string;
 }) {
   const [open, setOpen] = useState(false);
@@ -312,17 +311,10 @@ export function QuickAddFAB({
       description: t('boq.quick_import_costs_desc', { defaultValue: 'Browse and select items from the cost database' }),
       onClick: onImportFromCosts,
     },
-    {
-      id: 'template',
-      icon: <BookTemplate size={16} />,
-      label: t('boq.quick_use_template', { defaultValue: 'Use Template' }),
-      description: t('boq.quick_use_template_desc', { defaultValue: 'Start from a pre-built estimate template' }),
-      onClick: onUseTemplate,
-    },
   ];
 
   return (
-    <div ref={fabRef} className="fixed bottom-4 right-4 z-30 print:hidden">
+    <div ref={fabRef} className={`fixed bottom-4 z-30 print:hidden transition-[right] duration-300 ${sidePanelOpen ? 'right-[340px]' : 'right-4'}`}>
       {/* FAB menu */}
       {open && (
         <div className="absolute bottom-12 right-0 w-72 rounded-xl border border-border-light bg-surface-elevated shadow-lg overflow-hidden animate-fade-in">

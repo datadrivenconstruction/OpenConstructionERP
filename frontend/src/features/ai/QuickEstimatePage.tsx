@@ -2061,14 +2061,14 @@ export function QuickEstimatePage() {
             <div className="h-2.5 w-2.5 rounded-full bg-semantic-success animate-pulse" />
           </div>
           <div className="flex-1 flex items-center gap-3">
-            <span className="text-sm font-medium text-[#15803d]">
+            <span className="text-sm font-medium text-semantic-success">
               {t('ai.connected', { defaultValue: 'AI Connected' })}
             </span>
-            <span className="text-xs text-[#15803d]/70">
+            <span className="text-xs text-semantic-success/70">
               {aiSettings.preferred_model || 'Claude'}
             </span>
           </div>
-          <div className="flex items-center gap-2 text-2xs text-[#15803d]/60">
+          <div className="flex items-center gap-2 text-2xs text-semantic-success/60">
             <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-semantic-success" /> Text</span>
             <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-semantic-success" /> Photo</span>
             <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-semantic-success" /> PDF</span>
@@ -2342,15 +2342,15 @@ export function QuickEstimatePage() {
                   <div className={clsx(
                     'mb-4 rounded-xl border p-4 flex items-center justify-between',
                     (convertersData.installed_count ?? 0) > 0
-                      ? 'border-[#15803d]/30 bg-[#15803d]/5'
+                      ? 'border-semantic-success/30 bg-semantic-success/5'
                       : 'border-amber-500/30 bg-amber-50 dark:bg-amber-900/10'
                   )}>
                     <div className="flex items-center gap-3">
                       <div className={clsx(
                         'flex h-10 w-10 items-center justify-center rounded-xl',
-                        (convertersData.installed_count ?? 0) > 0 ? 'bg-[#15803d]/10' : 'bg-amber-100 dark:bg-amber-900/20'
+                        (convertersData.installed_count ?? 0) > 0 ? 'bg-semantic-success/10' : 'bg-amber-100 dark:bg-amber-900/20'
                       )}>
-                        <HardDrive size={20} className={(convertersData.installed_count ?? 0) > 0 ? 'text-[#15803d]' : 'text-amber-600'} />
+                        <HardDrive size={20} className={(convertersData.installed_count ?? 0) > 0 ? 'text-semantic-success' : 'text-amber-600'} />
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-content-primary">
