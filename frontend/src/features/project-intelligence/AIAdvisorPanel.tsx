@@ -74,8 +74,8 @@ export function AIAdvisorPanel({ projectId, role }: AIAdvisorPanelProps) {
       const text = data.text || '';
       setRecommendation(text);
       setAiConfigured(!looksLikeFallback(text));
-    } catch (err: any) {
-      setRecError(err.message || 'Failed to load recommendations');
+    } catch (err: unknown) {
+      setRecError(err instanceof Error ? err.message : 'Failed to load recommendations');
     } finally {
       setLoadingRec(false);
     }

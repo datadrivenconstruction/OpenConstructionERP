@@ -272,7 +272,11 @@ class ProjectService:
         project = await self.get_project(project_id, include_archived=True)
         if project.status == "archived":
             return  # Already archived — silently succeed
-        owner_id = str(project.owner_id)  # Save before expire_all()
+        # Snapshot fields before update_fields() — that calls session.expire_all(),
+        # after which any attribute access on `project` would trigger lazy IO and
+        # crash with greenlet_spawn / MissingGreenlet under the async session.
+        owner_id = str(project.owner_id)
+        project_name = project.name
 
         # Cascade-delete child records that belong to this project.
         # These models all have project_id FK with ondelete=CASCADE, but
@@ -347,7 +351,7 @@ class ProjectService:
             action="delete",
             entity_type="project",
             entity_id=str(project_id),
-            details={"name": project.name},
+            details={"name": project_name},
         )
 
         logger.info("Project archived: %s", project_id)

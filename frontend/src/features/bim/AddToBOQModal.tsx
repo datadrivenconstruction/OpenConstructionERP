@@ -20,9 +20,37 @@ import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { X, Search, Plus, CheckCircle2, Loader2, Link2, Sparkles } from 'lucide-react';
 import { apiGet, apiPost } from '@/shared/lib/api';
 import { boqApi, type BOQ, type BOQWithPositions, type Position } from '@/features/boq/api';
-import { createLink } from './api';
+import { createLink, ensureBIMElement } from './api';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
 import { useToastStore } from '@/stores/useToastStore';
+
+/** Matches a canonical 36-char UUID (8-4-4-4-12, hex + dashes). Anything else
+ *  — notably our client-side `_unmatched_N` stubs and Revit numeric ids —
+ *  must be resolved to a real BIMElement UUID via `ensureBIMElement` before
+ *  it can travel through the UUID-typed link endpoint. */
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Turn any element into a DB BIMElement UUID. UUIDs pass through; stubs
+ *  hit the backend lazy-create endpoint keyed by mesh_ref (or stable_id). */
+async function resolveElementUUID(
+  modelId: string,
+  el: BIMElementData,
+): Promise<string> {
+  if (UUID_RE.test(el.id)) return el.id;
+  const ref = {
+    meshRef: el.mesh_ref ?? null,
+    stableId: el.stable_id ?? null,
+  };
+  if (!ref.meshRef && !ref.stableId) {
+    throw new Error(
+      'This mesh has no Revit ElementId — cannot link it to BOQ. ' +
+        'Re-upload the model so the viewer can attach a stable reference.',
+    );
+  }
+  const { id } = await ensureBIMElement(modelId, ref);
+  return id;
+}
 
 /** Backend response shape for POST /api/v1/costs/suggest-for-element/. */
 interface CostSuggestion {
@@ -38,6 +66,10 @@ interface CostSuggestion {
 
 interface AddToBOQModalProps {
   projectId: string;
+  /** Active BIM model — required so stubs (`_unmatched_N` ids) can be
+   *  resolved to real BIMElement UUIDs via the ensure-element endpoint
+   *  before the link is created. */
+  modelId: string;
   /** Either a single element (click flow) or many (bulk filter flow). */
   elements: BIMElementData[];
   onClose: () => void;
@@ -102,6 +134,7 @@ function mergeClassification(elements: BIMElementData[]): Record<string, string>
 
 export default function AddToBOQModal({
   projectId,
+  modelId,
   elements,
   onClose,
   onLinked,
@@ -235,9 +268,10 @@ export default function AddToBOQModal({
       let createdCount = 0;
       for (const el of elements) {
         try {
+          const resolvedId = await resolveElementUUID(modelId, el);
           await createLink({
             boq_position_id: positionId,
-            bim_element_id: el.id,
+            bim_element_id: resolvedId,
             link_type: 'manual',
             confidence: 'high',
           });
@@ -294,9 +328,10 @@ export default function AddToBOQModal({
       let linkCount = 0;
       for (const el of elements) {
         try {
+          const resolvedId = await resolveElementUUID(modelId, el);
           await createLink({
             boq_position_id: newPos.id,
-            bim_element_id: el.id,
+            bim_element_id: resolvedId,
             link_type: 'manual',
             confidence: 'high',
           });

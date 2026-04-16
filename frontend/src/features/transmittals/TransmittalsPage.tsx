@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
@@ -557,14 +557,17 @@ export function TransmittalsPage() {
   );
 
   // Clear URL params after opening modal
+  const hasCleanedParams = useRef(false);
   useEffect(() => {
+    if (hasCleanedParams.current) return;
+    hasCleanedParams.current = true;
     if (autoCreate) {
       const next = new URLSearchParams(searchParams);
       next.delete('create');
       next.delete('doc_ids');
       setSearchParams(next, { replace: true });
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [autoCreate, searchParams, setSearchParams]);
 
   // Data
   const { data: projects = [] } = useQuery({

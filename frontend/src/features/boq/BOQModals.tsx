@@ -369,7 +369,7 @@ export function CostDatabaseSearchModal({
       }
       onAdded();
     } catch (err) {
-      console.error('Failed to add positions from cost DB:', err);
+      if (import.meta.env.DEV) console.error('Failed to add positions from cost DB:', err);
       addToast({
         type: 'error',
         title: t('boq.add_failed', { defaultValue: 'Failed to add positions' }),

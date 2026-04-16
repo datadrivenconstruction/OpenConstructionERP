@@ -2359,7 +2359,7 @@ export function QuickEstimatePage() {
                             : t('ai.converters_none', { defaultValue: 'No converters installed — install below to enable CAD/BIM import' })}
                         </p>
                         <p className="text-xs text-content-tertiary mt-0.5">
-                          {(convertersData.converters ?? []).filter((c: any) => c.installed).map((c: any) => c.name).join(', ') || t('ai.converters_hint', { defaultValue: 'Scroll down to install DDC converters for RVT, IFC, DWG, DGN' })}
+                          {(convertersData.converters ?? []).filter((c: ConverterFull) => c.installed).map((c: ConverterFull) => c.name).join(', ') || t('ai.converters_hint', { defaultValue: 'Scroll down to install DDC converters for RVT, IFC, DWG, DGN' })}
                         </p>
                       </div>
                     </div>

@@ -220,6 +220,7 @@ export interface BOQGridProps {
   onFormulaApplied: (positionId: string, formula: string, result: number) => void;
   onReorderSections?: (fromId: string, toId: string) => void;
   onReorderPositions?: (reorderedIds: string[]) => void;
+  onDeleteSection?: (sectionId: string) => void;
   collapsedSections: Set<string>;
   onToggleSection: (sectionId: string) => void;
   highlightPositionId?: string;
@@ -271,6 +272,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   onFormulaApplied: _onFormulaApplied,
   onReorderSections,
   onReorderPositions,
+  onDeleteSection,
   collapsedSections,
   onToggleSection,
   highlightPositionId,
@@ -450,13 +452,15 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       bimModelId,
       onUpdatePosition,
       onHighlightBIMElements,
+      onDeleteSection: onDeleteSection ?? (() => {}),
+      onReorderSections: onReorderSections ?? (() => {}),
     }) as FullGridContext,
     [currencySymbol, currencyCode, locale, fmt, t, collapsedSections, onToggleSection, onAddPosition,
      expandedPositions, toggleResources, onRemoveResource, onUpdateResource,
      onSaveResourceToCatalog, onOpenCostDbForPosition, onOpenCatalogForPosition,
      onDeletePosition, onSaveToDatabase, onAddComment,
      onDuplicatePosition, showContextMenu, anomalyMap, onApplyAnomalySuggestion, bimModelId,
-     onUpdatePosition, onHighlightBIMElements],
+     onUpdatePosition, onHighlightBIMElements, onDeleteSection, onReorderSections],
   );
 
   /* ── Column defs (standard + custom) ─────────────────────────────── */
@@ -607,6 +611,14 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       const qty = Number(params.data?.quantity ?? 0);
       if ((!rate || rate === 0) && qty > 0) {
         classes.push('oe-unpriced-row');
+      }
+
+      // Validation status left-border accent for quick scanning
+      const validationStatus = params.data?.validation_status as string | undefined;
+      if (validationStatus === 'errors') {
+        classes.push('boq-row-error');
+      } else if (validationStatus === 'warnings') {
+        classes.push('boq-row-warning');
       }
     }
     return classes.join(' ');

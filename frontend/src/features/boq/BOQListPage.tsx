@@ -345,6 +345,11 @@ export function BOQListPage() {
   });
   const [page, setPage] = useState(1);
 
+  // Sync project filter when user switches active project in the header
+  useEffect(() => {
+    if (activeProjectId) setProjectFilter(activeProjectId);
+  }, [activeProjectId]);
+
   // Persist filters to localStorage
   useEffect(() => {
     try {
@@ -410,7 +415,7 @@ export function BOQListPage() {
             classificationStandard: p.classification_standard,
           } as BOQWithProject));
         } catch (err) {
-          console.error(`Failed to fetch BOQs for project ${p.id}:`, err);
+          if (import.meta.env.DEV) console.error(`Failed to fetch BOQs for project ${p.id}:`, err);
           return [] as BOQWithProject[];
         }
       });

@@ -824,6 +824,140 @@ class BIMHubService:
             )
         return element
 
+    async def ensure_element(
+        self,
+        model_id: uuid.UUID,
+        *,
+        stable_id: str | None = None,
+        mesh_ref: str | None = None,
+    ) -> BIMElement:
+        """Resolve a BIMElement by stable_id or mesh_ref, lazy-creating
+        a DB row from Parquet when the element isn't already persisted.
+
+        Rationale: the DDC "standard" Excel extract sometimes filters out
+        entire categories (tapered roofs, planting, sketch lines, detail
+        components). Those elements still have full property rows in the
+        Parquet dataframe and their meshes exist in the GLB scene — so
+        the user can CLICK them in the 3D viewer — but they have no
+        ``oe_bim_element`` row. When the user tries to link one to a BOQ
+        position the request fails because ``BOQElementLink.bim_element_id``
+        needs a real UUID FK. This method creates that row on demand so
+        linking works uniformly for every visible mesh.
+
+        Lookup order: stable_id → mesh_ref. Returns an existing row when
+        one already matches. Raises 404 if the reference can't be matched
+        to either a DB row or a Parquet row.
+        """
+        if not stable_id and not mesh_ref:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Either stable_id or mesh_ref is required",
+            )
+
+        model = await self.get_model(model_id)
+
+        stmt = select(BIMElement).where(BIMElement.model_id == model_id)
+        if stable_id:
+            existing = (
+                await self.session.execute(stmt.where(BIMElement.stable_id == stable_id))
+            ).scalar_one_or_none()
+            if existing is not None:
+                return existing
+        if mesh_ref:
+            existing = (
+                await self.session.execute(stmt.where(BIMElement.mesh_ref == mesh_ref))
+            ).scalar_one_or_none()
+            if existing is not None:
+                return existing
+            # mesh_ref often equals stable_id (the Revit ElementId) for DDC exports
+            existing = (
+                await self.session.execute(stmt.where(BIMElement.stable_id == mesh_ref))
+            ).scalar_one_or_none()
+            if existing is not None:
+                return existing
+
+        # Not in DB — try to lazy-create from Parquet.
+        from app.modules.bim_hub.dataframe_store import query_parquet
+
+        ref = mesh_ref or stable_id
+        if not ref:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "BIM element not found")
+
+        import asyncio
+
+        try:
+            rows = await asyncio.to_thread(
+                query_parquet,
+                str(model.project_id),
+                str(model_id),
+                columns=None,
+                filters=[{"column": "id", "op": "=", "value": str(ref)}],
+                limit=1,
+            )
+        except ValueError:
+            rows = []
+
+        if not rows:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"BIM element '{ref}' not found in model",
+            )
+
+        row = rows[0]
+        # Split the Parquet row into canonical quantity / property buckets so
+        # downstream unit-sync logic (_sync_boq_quantity_from_links) can find
+        # Area/Volume/Length values. The row layout varies by Revit category
+        # so we match case-insensitively on common keys.
+        qty_key_map = {
+            "area": "area_m2",
+            "volume": "volume_m3",
+            "length": "length_m",
+            "width": "width_m",
+            "height": "height_m",
+            "perimeter": "perimeter_m",
+            "weight": "weight_kg",
+        }
+        quantities: dict[str, Any] = {}
+        properties: dict[str, Any] = {}
+        for raw_key, raw_val in row.items():
+            if raw_val is None or raw_val == "":
+                continue
+            lower = str(raw_key).strip().lower()
+            target = None
+            for needle, canonical in qty_key_map.items():
+                if needle == lower or lower.endswith(f" {needle}") or lower.endswith(f"_{needle}"):
+                    target = canonical
+                    break
+            if target is not None:
+                try:
+                    quantities[target] = float(raw_val)
+                except (TypeError, ValueError):
+                    properties[str(raw_key)] = raw_val
+            else:
+                properties[str(raw_key)] = raw_val
+
+        element = BIMElement(
+            model_id=model_id,
+            stable_id=str(ref),
+            mesh_ref=str(ref),
+            element_type=str(row.get("category") or row.get("Category") or "Unknown"),
+            name=str(row.get("name") or row.get("Name") or row.get("Type") or f"Element {ref}"),
+            storey=str(row.get("level") or row.get("Level") or "") or None,
+            discipline=str(row.get("discipline") or row.get("Discipline") or "") or None,
+            properties=properties,
+            quantities=quantities,
+            metadata_={"source": "parquet_lazy_create"},
+        )
+        element = await self.element_repo.create(element)
+        await self.session.flush()
+        logger.info(
+            "Lazy-created BIMElement id=%s model=%s ref=%s (source=parquet)",
+            element.id,
+            model_id,
+            ref,
+        )
+        return element
+
     async def bulk_import_elements(
         self,
         model_id: uuid.UUID,

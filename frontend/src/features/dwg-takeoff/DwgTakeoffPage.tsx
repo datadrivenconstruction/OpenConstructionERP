@@ -33,8 +33,9 @@ import {
   Plus,
   X,
   ChevronUp,
+  ShieldCheck,
 } from 'lucide-react';
-import { Button, Badge, EmptyState, Breadcrumb, ConfirmDialog, ElementInfoPopover, type DWGElementPayload } from '@/shared/ui';
+import { Badge, Breadcrumb, ConfirmDialog, ElementInfoPopover, type DWGElementPayload } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -54,6 +55,49 @@ import { ToolPalette, type DwgTool } from './components/ToolPalette';
 import { LayerPanel } from './components/LayerPanel';
 import { EntityNameFilter, entityDisplayName } from './components/EntityNameFilter';
 // boqApi / Position import removed — BOQ picker now handled via ElementInfoPopover callback
+
+/* ── GridBackground ──────────────────────────────────────────────────── */
+
+/**
+ * AutoCAD-style drafting grid background.
+ *
+ * Renders two overlaid grids (minor 24px, major 120px — classic 1:5 ratio)
+ * plus a radial vignette that darkens the corners so content in the middle
+ * reads as the focal point. Meant to sit absolutely behind landing / empty
+ * state content of the DWG Takeoff page. Pointer-events disabled so it
+ * never interferes with the upload card or buttons on top.
+ *
+ * Dark mode uses faint white lines on the dark canvas; light mode uses
+ * faint black lines. Opacities are intentionally low — the grid should
+ * whisper, not shout.
+ */
+function GridBackground({ className = '' }: { className?: string }) {
+  return (
+    <div className={clsx('absolute inset-0 pointer-events-none overflow-hidden', className)}>
+      {/* Grid lines — minor (24px) + major (120px), 1:5 AutoCAD-style ratio */}
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage: `
+            linear-gradient(to right, var(--oe-dwg-grid-major) 1px, transparent 1px),
+            linear-gradient(to bottom, var(--oe-dwg-grid-major) 1px, transparent 1px),
+            linear-gradient(to right, var(--oe-dwg-grid-minor) 1px, transparent 1px),
+            linear-gradient(to bottom, var(--oe-dwg-grid-minor) 1px, transparent 1px)
+          `,
+          backgroundSize: '120px 120px, 120px 120px, 24px 24px, 24px 24px',
+        }}
+      />
+      {/* Vignette — darker at corners, transparent in the middle */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(ellipse at center, transparent 0%, transparent 45%, var(--oe-dwg-vignette) 100%)',
+        }}
+      />
+    </div>
+  );
+}
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
@@ -534,21 +578,108 @@ export function DwgTakeoffPage() {
         {/* ── Center: DXF Viewer ──────────────────────────────────── */}
         <div className="flex flex-1 flex-col min-h-0 min-w-0">
           {!selectedDrawingId ? (
-            <div className="flex flex-1 items-center justify-center">
-              <EmptyState
-                icon={<Layers size={40} className="text-muted-foreground" />}
-                title={t('dwg_takeoff.empty_title', 'No drawing selected')}
-                description={t(
-                  'dwg_takeoff.empty_desc',
-                  'Upload a DWG/DXF file or select a drawing from the list to start takeoff.',
-                )}
-                action={
-                  <Button variant="primary" onClick={() => setShowUpload(true)}>
-                    <Upload size={14} className="mr-1" />
-                    {t('dwg_takeoff.upload_drawing', 'Upload drawing')}
-                  </Button>
-                }
+            <div
+              className="oe-dwg-canvas relative flex flex-1 overflow-hidden overflow-y-auto"
+              style={{ background: '#1a1d23' }}
+            >
+              {/* AutoCAD-style drafting grid + vignette */}
+              <GridBackground className="z-0" />
+              {/* Subtle blue center glow retains the "laser-focused drawing" feel */}
+              <div
+                className="absolute inset-0 pointer-events-none z-0"
+                style={{
+                  background:
+                    'radial-gradient(ellipse 60% 50% at 50% 40%, rgba(59,130,246,0.06) 0%, transparent 70%)',
+                }}
               />
+              {/* Crosshair at center (AutoCAD UCS marker) */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-20 z-0">
+                <div className="w-px h-8 bg-blue-400 absolute left-1/2 -translate-x-1/2 -top-4" />
+                <div className="h-px w-8 bg-blue-400 absolute top-1/2 -translate-y-1/2 -left-4" />
+              </div>
+
+              <div className="relative z-10 max-w-7xl mx-auto pt-20 pb-4 w-full">
+                <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-8 items-stretch">
+                  {/* LEFT · Upload card (gets the larger half) */}
+                  <div className="flex flex-col">
+                    <div className="rounded-2xl bg-[#22252b]/90 backdrop-blur-sm border border-[#333842] shadow-2xl shadow-black/30 p-3 flex flex-col h-full">
+                      <label
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          const f = e.dataTransfer.files?.[0];
+                          if (f) { setUploadFile(f); setUploadName(f.name.replace(/\.[^.]+$/, '')); setShowUpload(true); }
+                        }}
+                        onDragOver={(e) => e.preventDefault()}
+                        className="group/drop flex flex-col items-center justify-center gap-7 rounded-xl p-20 text-center cursor-pointer transition-all flex-1 border-2 border-dashed border-[#444c5a] bg-[#1a1d23]/60 hover:border-blue-500/50 hover:bg-blue-500/5 hover:shadow-[0_0_30px_rgba(59,130,246,0.1)]"
+                        onClick={() => setShowUpload(true)}
+                      >
+                        <div className="w-20 h-20 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center group-hover/drop:scale-110 group-hover/drop:shadow-[0_0_20px_rgba(59,130,246,0.2)] transition-all">
+                          <Upload size={36} className="text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="text-base font-semibold text-gray-200">{t('dwg_takeoff.drop_here', { defaultValue: 'Drop your drawing here' })}</p>
+                          <p className="text-sm text-gray-500 mt-1.5">{t('dwg_takeoff.drop_hint', { defaultValue: 'or click to browse files' })}</p>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-orange-500/10 text-orange-400 border border-orange-500/20 font-semibold">.dwg</span>
+                          <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-orange-500/10 text-orange-400 border border-orange-500/20 font-semibold">.dxf</span>
+                        </div>
+                        <p className="text-[11px] text-gray-600 leading-relaxed mt-1 text-center">
+                          AutoCAD 2000–2025 &middot; DXF R12–R2025
+                        </p>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* RIGHT · Hero text + feature cards + local-processing badge */}
+                  <div className="flex flex-col justify-center gap-4">
+                    <div>
+                      <h1 className="text-2xl font-bold text-gray-100 tracking-tight leading-tight">
+                        {t('dwg_takeoff.hero_title', { defaultValue: 'DWG Takeoff' })}
+                      </h1>
+                      <p className="text-base text-gray-400 mt-3 leading-relaxed">
+                        {t('dwg_takeoff.hero_subtitle', { defaultValue: 'Open DWG/DXF drawings, measure areas and lengths, annotate directly on the drawing, and link measurements to your BOQ positions.' })}
+                      </p>
+                      <p className="text-xs text-gray-600 mt-3 leading-relaxed">
+                        AutoCAD DWG 2000–2025 &middot; DXF R12–R2025
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 mt-2">
+                      {[
+                        { icon: Layers, title: t('dwg_takeoff.feat_layers', { defaultValue: 'Layer Control' }), desc: t('dwg_takeoff.feat_layers_desc', { defaultValue: 'Toggle layers on/off, filter by entity type' }) },
+                        { icon: FileUp, title: t('dwg_takeoff.feat_measure', { defaultValue: 'Measurements' }), desc: t('dwg_takeoff.feat_measure_desc', { defaultValue: 'Area, length, perimeter · link to BOQ' }) },
+                      ].map((f, i) => (
+                        <div key={i} className="flex items-start gap-3 rounded-xl p-4 bg-[#22252b]/80 backdrop-blur-sm border border-[#333842] hover:border-blue-500/30 hover:shadow-[0_0_15px_rgba(59,130,246,0.06)] transition-all">
+                          <div className="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center shrink-0"><f.icon size={15} className="text-orange-400" /></div>
+                          <div className="min-w-0">
+                            <h3 className="text-xs font-semibold text-gray-200 leading-tight">{f.title}</h3>
+                            <p className="text-[11px] text-gray-500 leading-snug mt-1">{f.desc}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Local processing badge — sits under the feature cards */}
+                    <div className="mt-3 flex items-center justify-start">
+                      <div className="inline-flex flex-wrap items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                        <ShieldCheck size={14} className="text-emerald-400 shrink-0" />
+                        <span className="text-xs text-emerald-300/90 font-medium">
+                          {t('common.local_processing', { defaultValue: '100% Local Processing · Your files never leave your computer' })}
+                        </span>
+                        <span className="text-[10px] text-emerald-500/30">|</span>
+                        <a
+                          href="https://github.com/datadrivenconstruction/cad2data-Revit-IFC-DWG-DGN-pipeline-with-conversion-validation-qto"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[10px] text-emerald-400/70 hover:text-emerald-300 hover:underline whitespace-nowrap"
+                        >
+                          {t('common.powered_by_cad2data', { defaultValue: 'Powered by DDC cad2data' })}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           ) : loadingEntities ? (
             <div className="flex flex-1 items-center justify-center">

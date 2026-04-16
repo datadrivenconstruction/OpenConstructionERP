@@ -95,7 +95,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
 
       {/* Right */}
       <div className="flex items-center gap-1.5">
-        {/* GitHub */}
+        {/* GitHub repo */}
         <a
           href="https://github.com/datadrivenconstruction/OpenConstructionERP"
           target="_blank"
@@ -107,10 +107,42 @@ export function Header({ title, onMenuClick }: HeaderProps) {
             'transition-all duration-fast ease-oe',
             'hover:bg-surface-secondary hover:text-content-secondary',
           )}
-          title="GitHub"
+          title="GitHub repository"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
           <span className="hidden lg:inline">GitHub</span>
+        </a>
+
+        {/* Report an issue */}
+        <a
+          href="https://github.com/datadrivenconstruction/OpenConstructionERP/issues"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={clsx(
+            'hidden sm:flex h-8 items-center gap-1.5 rounded-lg px-2.5',
+            'text-xs font-medium',
+            'text-content-tertiary border border-border-light',
+            'transition-all duration-fast ease-oe',
+            'hover:bg-amber-500/10 hover:text-amber-700 dark:hover:text-amber-400 hover:border-amber-500/40',
+          )}
+          title={t('header.report_issue', { defaultValue: 'Report an issue on GitHub' })}
+          aria-label={t('header.report_issue', { defaultValue: 'Report an issue on GitHub' })}
+        >
+          {/* bug icon */}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <path d="m8 2 1.88 1.88" />
+            <path d="M14.12 3.88 16 2" />
+            <path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1" />
+            <path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6" />
+            <path d="M12 20v-9" />
+            <path d="M6.53 9C4.6 8.8 3 7.1 3 5" />
+            <path d="M6 13H2" />
+            <path d="M3 21c0-2.1 1.7-3.9 3.8-4" />
+            <path d="M20.97 5c0 2.1-1.6 3.8-3.5 4" />
+            <path d="M22 13h-4" />
+            <path d="M17.2 17c2.1.1 3.8 1.9 3.8 4" />
+          </svg>
+          <span className="hidden lg:inline">{t('header.issues', { defaultValue: 'Issues' })}</span>
         </a>
 
         {/* Search — opens CommandPalette */}
@@ -451,11 +483,16 @@ function ProjectSwitcher() {
   const ref = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
-  const { data: projects } = useQuery({
+  // Pre-fetch so the dropdown renders an instant list when the user opens
+  // it (no race between open → fetch → render that used to flash
+  // "No projects yet" for half a second).
+  const { data: projects, isLoading, isError, refetch } = useQuery({
     queryKey: ['projects-switcher'],
     queryFn: () => apiGet<Array<{ id: string; name: string }>>('/v1/projects/?limit=100'),
     staleTime: 60_000,
-    enabled: open,
+    // Enabled as soon as the component mounts — the Header is always on
+    // screen after login, so the list is warm by the time the user clicks.
+    enabled: true,
   });
 
   const MAX_VISIBLE = 20;
@@ -535,7 +572,26 @@ function ProjectSwitcher() {
             </div>
           </div>
           <div className="max-h-64 overflow-y-auto py-1">
-            {visibleProjects.length === 0 && (
+            {isLoading && (
+              <div className="flex items-center gap-2 px-4 py-4 text-sm text-content-tertiary">
+                <span className="inline-block w-3 h-3 border-2 border-oe-blue border-t-transparent rounded-full animate-spin" />
+                {t('common.loading', { defaultValue: 'Loading…' })}
+              </div>
+            )}
+            {!isLoading && isError && (
+              <div className="px-4 py-4 text-sm text-content-tertiary text-center">
+                <p className="text-red-500 mb-2">
+                  {t('common.load_failed', { defaultValue: 'Could not load projects' })}
+                </p>
+                <button
+                  onClick={() => refetch()}
+                  className="text-xs text-oe-blue hover:underline"
+                >
+                  {t('common.retry', { defaultValue: 'Retry' })}
+                </button>
+              </div>
+            )}
+            {!isLoading && !isError && visibleProjects.length === 0 && (
               <p className="px-4 py-4 text-sm text-content-tertiary text-center">
                 {searchQuery
                   ? t('common.no_results', { defaultValue: 'No projects found' })

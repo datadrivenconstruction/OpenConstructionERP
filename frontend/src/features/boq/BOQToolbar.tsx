@@ -28,6 +28,9 @@ import {
   SearchCheck,
   Check,
   Brain,
+  Settings,
+  ChevronDown,
+  Keyboard,
 } from 'lucide-react';
 import { Button } from '@/shared/ui';
 
@@ -81,6 +84,8 @@ export interface BOQToolbarProps {
   // Quality
   hasPositions: boolean;
   qualityScoreRing: React.ReactNode;
+  // Keyboard shortcuts overlay
+  onShowShortcuts?: () => void;
 }
 
 export function BOQToolbar({
@@ -122,15 +127,23 @@ export function BOQToolbar({
   isRenumbering,
   hasPositions,
   qualityScoreRing,
+  onShowShortcuts,
 }: BOQToolbarProps) {
   /* ── Export dropdown state ─────────────────────────────────────────── */
   const [showExportMenu, setShowExportMenu] = useState(false);
   const exportRef = useRef<HTMLDivElement>(null);
 
+  /* ── Grid Settings dropdown state ────────────────────────────────── */
+  const [gridSettingsOpen, setGridSettingsOpen] = useState(false);
+  const gridSettingsRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (exportRef.current && !exportRef.current.contains(e.target as Node)) {
         setShowExportMenu(false);
+      }
+      if (gridSettingsRef.current && !gridSettingsRef.current.contains(e.target as Node)) {
+        setGridSettingsOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -143,7 +156,7 @@ export function BOQToolbar({
   };
 
   return (
-    <div className="sticky top-0 z-20 bg-surface-primary flex flex-wrap items-center gap-x-2 gap-y-2 px-1 py-2 border-b border-border-light mb-3">
+    <div className="sticky top-0 z-20 bg-surface-primary flex flex-wrap items-center gap-x-1.5 gap-y-2 px-1 py-2 border-b border-border-light mb-3">
       {/* ── Row-group: Quality + Undo/Redo ─────────────────────────────── */}
       <div className="flex items-center gap-1.5">
         {hasPositions && qualityScoreRing}
@@ -167,7 +180,6 @@ export function BOQToolbar({
           size="sm"
           icon={<Database size={15} />}
           onClick={onOpenCostDb}
-          className="border-oe-blue/30 text-oe-blue hover:bg-oe-blue/10"
           title={t('boq.add_from_database')}
         >
           {t('boq.add_from_database')}
@@ -177,7 +189,6 @@ export function BOQToolbar({
           size="sm"
           icon={<Layers size={15} />}
           onClick={onOpenAssembly}
-          className="border-purple-300/30 text-purple-600 hover:bg-purple-50"
           title={t('boq.from_assembly', { defaultValue: 'From Assembly' })}
         >
           {t('boq.from_assembly', { defaultValue: 'From Assembly' })}
@@ -193,9 +204,14 @@ export function BOQToolbar({
         </Button>
         <input ref={importInputRef as React.RefObject<HTMLInputElement>} type="file" accept=".xlsx,.csv,.pdf,.jpg,.jpeg,.png,.tiff,.rvt,.ifc,.dwg,.dgn" className="hidden" onChange={onImportInputChange} aria-label={t('common.import', { defaultValue: 'Import' })} />
         {onPasteFromExcel && (
-          <Button variant="ghost" size="sm" icon={<ClipboardPaste size={15} />} onClick={onPasteFromExcel} title={t('boq.paste_from_excel', { defaultValue: 'Paste from Excel' })}>
-            <span className="hidden xl:inline">{t('boq.paste_from_excel', { defaultValue: 'Paste' })}</span>
-          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={<ClipboardPaste size={15} />}
+            onClick={onPasteFromExcel}
+            title={t('boq.paste_from_excel', { defaultValue: 'Paste from Excel' })}
+            aria-label={t('boq.paste_from_excel', { defaultValue: 'Paste from Excel' })}
+          />
         )}
         <div ref={exportRef} className="relative">
           <Button variant="ghost" size="sm" icon={<Download size={15} />} onClick={() => setShowExportMenu((prev) => !prev)} aria-expanded={showExportMenu} aria-haspopup="true">
@@ -222,41 +238,61 @@ export function BOQToolbar({
             </div>
           )}
         </div>
-        {onManageColumns && (
-          <Button
-            variant="ghost"
-            size="sm"
-            icon={<Columns3 size={15} />}
-            onClick={onManageColumns}
-            title={t('boq.manage_columns', { defaultValue: 'Manage custom columns' })}
-          >
-            <span className="hidden xl:inline">
-              {t('boq.columns', { defaultValue: 'Columns' })}
-            </span>
-            {customColumnCount != null && customColumnCount > 0 && (
-              <span className="ml-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-oe-blue/15 px-1 text-2xs font-semibold text-oe-blue tabular-nums">
-                {customColumnCount}
+        {/* ── Grid Settings dropdown (Columns + Renumber) ─────────────── */}
+        {(onManageColumns || onRenumber) && (
+          <div ref={gridSettingsRef} className="relative">
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={<Settings size={15} />}
+              onClick={() => setGridSettingsOpen((prev) => !prev)}
+              aria-expanded={gridSettingsOpen}
+              aria-haspopup="true"
+              title={t('boq.grid_settings', { defaultValue: 'Grid Settings' })}
+            >
+              <span className="hidden xl:inline">
+                {t('boq.grid_settings', { defaultValue: 'Grid Settings' })}
               </span>
+              {customColumnCount != null && customColumnCount > 0 && (
+                <span className="ml-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-surface-tertiary px-1 text-2xs font-semibold text-content-secondary tabular-nums">
+                  {customColumnCount}
+                </span>
+              )}
+              <ChevronDown size={12} className={`transition-transform ${gridSettingsOpen ? 'rotate-180' : ''}`} />
+            </Button>
+            {gridSettingsOpen && (
+              <div role="menu" className="absolute left-0 top-full mt-1 z-50 w-52 rounded-lg border border-border-light bg-surface-elevated shadow-md animate-fade-in">
+                {onManageColumns && (
+                  <button
+                    role="menuitem"
+                    onClick={() => { setGridSettingsOpen(false); onManageColumns(); }}
+                    className="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors rounded-t-lg"
+                  >
+                    <Columns3 size={15} className="text-content-tertiary" />
+                    {t('boq.manage_columns', { defaultValue: 'Manage Columns' })}
+                    {customColumnCount != null && customColumnCount > 0 && (
+                      <span className="ml-auto inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-surface-tertiary px-1 text-2xs font-semibold text-content-secondary tabular-nums">
+                        {customColumnCount}
+                      </span>
+                    )}
+                  </button>
+                )}
+                {onRenumber && (
+                  <button
+                    role="menuitem"
+                    onClick={() => { setGridSettingsOpen(false); onRenumber(); }}
+                    disabled={isRenumbering}
+                    className={`flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors ${!onManageColumns ? 'rounded-t-lg' : ''} rounded-b-lg ${isRenumbering ? 'opacity-40 pointer-events-none' : ''}`}
+                  >
+                    <ListOrdered size={15} className={`text-content-tertiary ${isRenumbering ? 'animate-pulse' : ''}`} />
+                    {isRenumbering
+                      ? t('boq.renumbering', { defaultValue: 'Renumbering...' })
+                      : t('boq.renumber', { defaultValue: 'Renumber Positions' })}
+                  </button>
+                )}
+              </div>
             )}
-          </Button>
-        )}
-        {onRenumber && (
-          <Button
-            variant="ghost"
-            size="sm"
-            icon={<ListOrdered size={15} className={isRenumbering ? 'animate-pulse text-oe-blue' : ''} />}
-            onClick={onRenumber}
-            disabled={isRenumbering}
-            title={t('boq.renumber_tip', {
-              defaultValue: 'Renumber all positions using a gap-of-10 scheme (01.10, 01.20, …) so future inserts don\'t require renumbering everything.',
-            })}
-          >
-            <span className="hidden xl:inline">
-              {isRenumbering
-                ? t('boq.renumbering', { defaultValue: 'Renumbering…' })
-                : t('boq.renumber', { defaultValue: 'Renumber' })}
-            </span>
-          </Button>
+          </div>
         )}
       </div>
 
@@ -429,6 +465,20 @@ export function BOQToolbar({
             </div>
           </div>
         </div>
+
+        {/* ── Keyboard Shortcuts Button ────────────────────────────────── */}
+        {onShowShortcuts && (
+          <>
+            <div className="w-px h-6 bg-border-light hidden sm:block" />
+            <button
+              onClick={onShowShortcuts}
+              title={t('boq.show_shortcuts', { defaultValue: 'Keyboard Shortcuts (F1)' })}
+              className="flex h-7 w-7 items-center justify-center rounded-md text-content-quaternary hover:text-content-secondary hover:bg-surface-secondary transition-colors"
+            >
+              <Keyboard size={14} />
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

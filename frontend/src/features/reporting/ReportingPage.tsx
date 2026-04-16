@@ -196,6 +196,25 @@ export function ReportingPage() {
 
   const selectedProjectId = activeProjectId ?? '';
 
+  const loadProjectStats = useCallback(async (pid: string) => {
+    const results = await Promise.allSettled([
+      apiGet<FinanceDashboard>(`/v1/finance/dashboard/?project_id=${pid}`).then(setFinanceDash),
+      apiGet<SafetyStats>(`/v1/safety/stats/?project_id=${pid}`).then(setSafetyStats),
+      apiGet<TaskStats>(`/v1/tasks/stats/?project_id=${pid}`).then(setTaskStats),
+      apiGet<RFIStats>(`/v1/rfi/stats/?project_id=${pid}`).then(setRfiStats),
+      apiGet<ScheduleStats>(`/v1/schedule/stats/?project_id=${pid}`).then(setScheduleStats),
+      apiGet<ProcurementStats>(`/v1/procurement/stats/?project_id=${pid}`).then(setProcurementStats),
+    ]);
+
+    // Clear data for rejected promises to avoid stale state
+    if (results[0].status === 'rejected') setFinanceDash(null);
+    if (results[1].status === 'rejected') setSafetyStats(null);
+    if (results[2].status === 'rejected') setTaskStats(null);
+    if (results[3].status === 'rejected') setRfiStats(null);
+    if (results[4].status === 'rejected') setScheduleStats(null);
+    if (results[5].status === 'rejected') setProcurementStats(null);
+  }, []);
+
   // Load everything
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -229,26 +248,7 @@ export function ReportingPage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedProjectId]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const loadProjectStats = useCallback(async (pid: string) => {
-    const results = await Promise.allSettled([
-      apiGet<FinanceDashboard>(`/v1/finance/dashboard/?project_id=${pid}`).then(setFinanceDash),
-      apiGet<SafetyStats>(`/v1/safety/stats/?project_id=${pid}`).then(setSafetyStats),
-      apiGet<TaskStats>(`/v1/tasks/stats/?project_id=${pid}`).then(setTaskStats),
-      apiGet<RFIStats>(`/v1/rfi/stats/?project_id=${pid}`).then(setRfiStats),
-      apiGet<ScheduleStats>(`/v1/schedule/stats/?project_id=${pid}`).then(setScheduleStats),
-      apiGet<ProcurementStats>(`/v1/procurement/stats/?project_id=${pid}`).then(setProcurementStats),
-    ]);
-
-    // Clear data for rejected promises to avoid stale state
-    if (results[0].status === 'rejected') setFinanceDash(null);
-    if (results[1].status === 'rejected') setSafetyStats(null);
-    if (results[2].status === 'rejected') setTaskStats(null);
-    if (results[3].status === 'rejected') setRfiStats(null);
-    if (results[4].status === 'rejected') setScheduleStats(null);
-    if (results[5].status === 'rejected') setProcurementStats(null);
-  }, []);
+  }, [selectedProjectId, loadProjectStats]);
 
   useEffect(() => {
     loadData();
@@ -682,15 +682,16 @@ function EstimatorDashboard({
   const { t } = useTranslation();
   const [boqs, setBoqs] = useState<Array<{ id: string; name: string; status: string; grand_total: number; currency: string; position_count: number }>>([]);
   const [loadingBoqs, setLoadingBoqs] = useState(false);
+  const projectId = project?.id;
 
   useEffect(() => {
-    if (!project) return;
+    if (!projectId) return;
     let cancelled = false;
     setLoadingBoqs(true);
     (async () => {
       try {
         const data = await apiGet<Array<{ id: string; name: string; status: string; grand_total: number; currency: string; position_count: number }>>(
-          `/v1/boq/boqs/?project_id=${project.id}`,
+          `/v1/boq/boqs/?project_id=${projectId}`,
         );
         if (!cancelled) setBoqs(data);
       } catch {
@@ -700,7 +701,7 @@ function EstimatorDashboard({
       }
     })();
     return () => { cancelled = true; };
-  }, [project?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [projectId]);
 
   if (!project) {
     return <EmptyState message={t('reporting.select_project_prompt_estimator', { defaultValue: 'Select a project to view Estimator dashboard' })} />;

@@ -14,6 +14,24 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.7.2',
+    date: '2026-04-16',
+    changes: [
+      'BIM Viewer: top-left toolbar (camera + visibility) shifts right when filter panel is open',
+      'BIM Model Summary: reactive to active scope — all / filtered / selection with live "shown of total" count',
+      'BIM Viewer: skeleton loading bars replace "Unmatched" flash when clicking elements',
+      'BIM ↔ BOQ linking: fixed UUID validation error for stub elements — backend lazy-creates missing BIMElement rows from Parquet',
+      'BOQ Linked Geometry popover: new 3-column layout (preview / properties / Apply to BOQ) so Apply never scrolls off-screen',
+      'BOQ Linked Geometry: aggregation semantics — Σ for area/volume/length (summed), = for thickness/width/material (distinct values listed)',
+      'BOQ Linked Geometry: Parquet fallback fills "No numeric" gap for tapered roofs and other DDC-filtered categories',
+      'Cleanup: removed orphaned BIMProcessingProgress component, deduplicated upload indicators',
+      'DWG Takeoff: AutoCAD-style grid background with scoped CSS variables + vignette',
+      'Documents: unified dropzone + card grid matching BIM pattern',
+      'Header: GitHub Issues button added next to repo link; ProjectSwitcher shows loading/error states properly',
+      'CAD Data Explorer: removed duplicate top bar, trust-line restyled',
+    ],
+  },
+  {
     version: '1.7.1',
     date: '2026-04-16',
     changes: [
